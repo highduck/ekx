@@ -6,8 +6,8 @@ class EKX_Conan(ConanFile):
     version = "0.0.1"
     license = "ISC"
     author = "eliasku deadbabe@gmail.com"
-    url = "https://gitlab.com/eliasku/ek-common"
-    description = "base platform library"
+    url = "https://gitlab.com/eliasku/ekx"
+    description = "some kind of simple game engine in c++"
     settings = "os", "compiler", "arch", "build_type"
     # options = {"editor": [True, False]}
     # default_options = {"editor": True}
@@ -110,12 +110,32 @@ class EKX_Conan(ConanFile):
             self.output.warn("No CMake install target")
 
     def package_info(self):
-        # self.deps = {"ek-core": [], "ek": ["ek-core"], "scenex": ["ek-core", "ecxx"], "ecxx": []}
-        # self.cpp_info.ekx.libs = ["ek-core", "ek", "scenex", "ecxx"]
-        # self.cpp_info.ekx.srcdirs = ["core/src", "ek/src", "scenex/src", "ecxx/src"]
-        # self.cpp_info.ekxe.libs = ["ek-core", "ek", "scenex", "ecxx", "ek-flash", "ek-editor"]
-        # self.cpp_info.ekxe.srcdirs = ["core/src", "ek/src", "scenex/src", "ecxx/src", "flash/src", "editor/src"]
-        self.cpp_info.libs = ["ek-core", "ek", "scenex", "ecxx", "ek-flash", "ek-editor"]
-        # self.cpp_info.srcdirs = ["core/src", "ek/src", "scenex/src", "ecxx/src", "flash/src", "editor/src"]
-        # self.cpp_info.libdirs = ["core/src", "ek", "scenex/src/scenex", "ecxx/src", "flash/src", "editor/src"]
-        self.cpp_info.includedirs = []
+        self.cpp_info.libs = ["ek-core", "ek", "scenex", "ek-flash", "ek-editor"]
+        self.cpp_info.includedirs = ["include"]
+
+        if self.settings.os == "Linux":
+            self.cpp_info.libs.extend(['GL', 'pthread'])
+
+        # elif self.settings.os == "Android":
+        #     self.cpp_info.libs = ["-Wl,--whole-archive", "ek", "-Wl,--no-whole-archive"]
+
+        elif self.settings.os == "Macos":
+            self.cpp_info.exelinkflags.append("-framework Cocoa")
+            self.cpp_info.exelinkflags.append("-framework OpenGL")
+            self.cpp_info.exelinkflags.append("-framework CoreVideo")
+            self.cpp_info.exelinkflags.append("-framework AudioToolbox")
+            self.cpp_info.exelinkflags.append("-framework OpenAL")
+            self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
+
+        elif self.settings.os == "iOS":
+            self.cpp_info.cxxflags.append("-fno-aligned-allocation")
+            self.cpp_info.exelinkflags.append("-framework UIKit")
+            self.cpp_info.exelinkflags.append("-framework OpenGLES")
+            self.cpp_info.exelinkflags.append("-framework QuartzCore")
+            self.cpp_info.exelinkflags.append("-framework AudioToolbox")
+            self.cpp_info.exelinkflags.append("-framework Foundation")
+            self.cpp_info.exelinkflags.append("-framework OpenAL")
+            self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
+
+        if(True): # EDITOR
+            self.cpp_info.defines.append("EK_EDITOR")

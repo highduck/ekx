@@ -31,7 +31,6 @@ basic_application::basic_application()
     ek::assert_created_once<basic_application>();
 
     asset_manager_ = new asset_manager_t{};
-    asset_manager_->base_path = ek::path_t{"assets"};
 
     ecxx::set_world(&w);
 

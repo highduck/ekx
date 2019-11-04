@@ -31,8 +31,8 @@ public:
 
     void set_scale_factor(float scale);
 
-    ek::path_t base_path{"../assets"};
-    ek::path_t export_path{"../export"};
+    ek::path_t base_path{"assets"};
+    ek::path_t export_path{"assets"};
     std::vector<asset_object_t*> assets;
     std::vector<asset_type_resolver_t*> resolvers;
     float scale_factor = 2.0f;

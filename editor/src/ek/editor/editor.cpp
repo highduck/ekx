@@ -16,6 +16,10 @@ namespace ek {
 
 editor_context_t::editor_context_t(scenex::basic_application& app)
         : app_{&app} {
+
+    assets.base_path = path_t{"../assets"};
+    assets.export_path = path_t{"assets"};
+
     assets.add_resolver(new scenex::editor_asset_resolver_t<texture_asset_t>("texture"));
     assets.add_resolver(new scenex::editor_asset_resolver_t<program_asset_t>("program"));
     assets.add_resolver(new scenex::editor_asset_resolver_t<freetype_asset_t>("freetype"));
