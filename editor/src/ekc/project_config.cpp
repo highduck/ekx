@@ -45,12 +45,8 @@ void parse_project_config(project_config_t& out_config, const char* path) {
     parse_config_html_section(out_config.html, node.child("html"));
 
     auto assets_node = node.child("assets");
-    out_config.assets.builtin = assets_node.attribute("builtin").as_bool(false);
     out_config.assets.input = ek::path_t{assets_node.attribute("input").as_string("")};
     out_config.assets.output = ek::path_t{assets_node.attribute("output").as_string("")};
-    if (out_config.assets.builtin) {
-        out_config.assets.input = out_config.path_ekc / "resources";
-    }
     parse_asset_list(out_config.assets, assets_node);
 
     auto android_node = node.child("android");
@@ -80,7 +76,8 @@ void parse_project_config(project_config_t& out_config, const char* path) {
         {
             const auto keystore_node = android_node.child("keystore");
             if (!keystore_node.empty()) {
-                out_config.android.keystore.store_keystore = ek::path_t{keystore_node.child("store_keystore").text().as_string()};
+                out_config.android.keystore.store_keystore = ek::path_t{
+                        keystore_node.child("store_keystore").text().as_string()};
                 out_config.android.keystore.store_password = keystore_node.child("store_password").text().as_string();
                 out_config.android.keystore.key_alias = keystore_node.child("key_alias").text().as_string();
                 out_config.android.keystore.key_password = keystore_node.child("key_password").text().as_string();
@@ -99,8 +96,6 @@ void parse_project_config(project_config_t& out_config, const char* path) {
 
 void create_project_config(project_config_t& out_config) {
     init_project_config_defaults(out_config);
-    auto builtin_config_path = out_config.path_ekc / "resources" / "ek.xml";
-    parse_project_config(out_config, builtin_config_path.c_str());
     parse_project_config(out_config, "ek.xml");
 }
 

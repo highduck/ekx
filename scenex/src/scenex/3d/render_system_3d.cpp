@@ -3,6 +3,7 @@
 #include <ek/math/matrix_inverse.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include <ek/locator.hpp>
+#include <ek/timer.hpp>
 #include <draw2d/drawer.hpp>
 #include <platform/Window.h>
 #include <scenex/components/node_t.h>
@@ -317,7 +318,7 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
 
     static float fc_ = 1.0;
     fc_ += 1.0f;
-    float time = resolve<timer_t>().read_seconds();
+    float time = resolve<ek::timer_t>().read_seconds();
     program3d->set_uniform(program_uniforms::frame_time, float4{
             time,
             math::fract(time),

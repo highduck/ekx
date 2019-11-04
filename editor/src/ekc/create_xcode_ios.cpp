@@ -74,7 +74,7 @@ void create_xcode_ios(const project_config_t& config) {
         assert(!is_dir(dest_path));
     }
 
-    copy_tree(config.path_ekc / ("templates/template-" + platform_target), dest_path);
+    copy_tree(config.path_ekx / ("editor/templates/template-" + platform_target), dest_path);
 
     path_t base_path{"../.."};
     working_dir_t::with(dest_path, [&]() {
@@ -99,7 +99,7 @@ void create_xcode_ios(const project_config_t& config) {
         mod_plist(config, "src/Info.plist");
 
         /// PRE MOD PROJECT
-        execute("python3 xcode-project-ios.py " + platform_proj_name + " " + config.ios.application_id);
+        execute("python3 xcode-project-ios.py " + platform_proj_name + ' ' + config.ios.application_id + ' ' + config.path_ekx.str());
 
         EK_INFO << "Prepare PodFile";
         replace_in_file(path_t{"Podfile"}, {
@@ -110,7 +110,7 @@ void create_xcode_ios(const project_config_t& config) {
         execute("pod install");
 
         /// POST MOD PROJECT
-        execute("python3 xcode-project-ios-post.py " + platform_proj_name + " " + config.ios.application_id);
+        execute("python3 xcode-project-ios-post.py " + platform_proj_name + ' ' + config.ios.application_id);
     });
 
 }

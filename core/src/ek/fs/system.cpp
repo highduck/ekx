@@ -2,17 +2,27 @@
 
 #include <ek/logger.hpp>
 #include <ek/serialize/streams.hpp>
+#include <ek/utility/strings.hpp>
+
 #include <cstdio>
 #include <fstream>
 #include <array>
 #include <vector>
 
+#if defined(__ANDROID__)
+
+#define EK_DISABLE_SYSTEM_FS
+
+#endif
+
+#ifndef EK_DISABLE_SYSTEM_FS
 #include <ftw.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <fnmatch.h>
+#endif
 
 #if defined(__APPLE__)
 
@@ -56,8 +66,12 @@ void save(const std::string& text, const path_t& path) {
 /** check path for system FS **/
 
 bool is_dir(const char* path) {
+#ifndef EK_DISABLE_SYSTEM_FS
     struct stat sb{};
     return stat(path, &sb) == 0 && S_ISDIR(sb.st_mode);
+#else
+    return false;
+#endif
 }
 
 bool is_dir(const path_t& path) {
@@ -69,8 +83,12 @@ bool is_dir(const std::string& path) {
 }
 
 bool is_file(const char* path) {
+#ifndef EK_DISABLE_SYSTEM_FS
     struct stat sb{};
     return stat(path, &sb) == 0 && S_ISREG(sb.st_mode);
+#else
+    return false;
+#endif
 }
 
 bool is_file(const std::string& path) {
@@ -91,6 +109,8 @@ std::string get_executable_path() {
         return {};
     }
     return path;
+#elif defined(__ANDROID__)
+    return "";
 #elif defined(__linux__)
     char path[path_max_size];
     const auto length = readlink("/proc/self/exe", path, path_max_size);
@@ -99,6 +119,7 @@ std::string get_executable_path() {
 }
 
 int execute(const std::string& cmd) {
+#ifndef EK_DISABLE_SYSTEM_FS
 //    return system(cmd.c_str());
     std::array<char, 128> buffer{};
 //    std::string result;
@@ -119,6 +140,9 @@ int execute(const std::string& cmd) {
     }
 
     return pclose(pipe);
+#else
+    return -1;
+#endif
 }
 
 
@@ -133,6 +157,7 @@ void copy_file(const path_t& src, const path_t& dest) {
     stream_dest << stream_src.rdbuf();
 }
 
+#ifndef EK_DISABLE_SYSTEM_FS
 bool is_dir_entry_real(const struct dirent* e) {
     // empty
     if (!e || e->d_name[0] == 0) {
@@ -150,12 +175,14 @@ bool is_dir_entry_real(const struct dirent* e) {
     }
     return true;
 }
+#endif
 
 void copy_tree(const ek::path_t& src, const ek::path_t& dest) {
     if (!is_dir(src)) {
         EK_WARN << "IS NOT DIR: " << src.str();
         return;
     }
+#ifndef EK_DISABLE_SYSTEM_FS
 
     DIR* dir = opendir(src.c_str());
     if (dir) {
@@ -173,7 +200,7 @@ void copy_tree(const ek::path_t& src, const ek::path_t& dest) {
                 } else if ((e->d_type & DT_REG) != 0) {
                     const auto c_src = src / e->d_name;
                     const auto c_dst = dest / e->d_name;
-                    EK_INFO("COPY FILE: %s -> %s", c_src.c_str(), c_dst.c_str());
+                    EK_TRACE("COPY FILE: %s -> %s", c_src.c_str(), c_dst.c_str());
                     if (is_file(c_src)) {
                         copy_file(c_src, c_dst);
                     } else {
@@ -188,9 +215,11 @@ void copy_tree(const ek::path_t& src, const ek::path_t& dest) {
             copy_tree(src / nested_dir, dest / nested_dir);
         }
     }
+#endif
 }
 
 bool make_dir(const char* path) {
+#ifndef EK_DISABLE_SYSTEM_FS
     int err = 0;
 #if defined(_WIN32)
     err = _mkdir(path); // can be used on Windows
@@ -199,9 +228,11 @@ bool make_dir(const char* path) {
     err = mkdir(path, mode); // can be used on non-Windows
 #endif
     return err == 0;
+#endif
 }
 
 bool make_dirs(const path_t& path) {
+#ifndef EK_DISABLE_SYSTEM_FS
     if (is_dir(path)) {
         return true;
     }
@@ -220,6 +251,7 @@ bool make_dirs(const path_t& path) {
             }
         }
     }
+#endif
     return true;
 }
 
@@ -232,6 +264,7 @@ std::string read_text(const path_t& path) {
     };
 }
 
+#ifndef EK_DISABLE_SYSTEM_FS
 static int remove_dir_rec_cb(const char* path, const struct stat*, int, struct FTW*) {
     auto ret = remove(path);
     if (ret != 0) {
@@ -239,11 +272,14 @@ static int remove_dir_rec_cb(const char* path, const struct stat*, int, struct F
     }
     return ret;
 }
+#endif
 
 bool remove_dir_rec(const char* path) {
+#ifndef EK_DISABLE_SYSTEM_FS
     if (is_dir(path)) {
         return nftw(path, remove_dir_rec_cb, 20, FTW_DEPTH) == 0;
     }
+#endif
     return false;
 }
 
@@ -258,7 +294,7 @@ void replace_in_file(const path_t& path, const std::unordered_map<std::string, s
 void search_files(const std::string& pattern, const path_t& path, std::vector<path_t>& out) {
     using std::vector;
     using std::string;
-
+#ifndef EK_DISABLE_SYSTEM_FS
     const char* path_dir = path.empty() ? "." : path.c_str();
     DIR* dir = opendir(path_dir);
     if (dir) {
@@ -281,6 +317,7 @@ void search_files(const std::string& pattern, const path_t& path, std::vector<pa
             search_files(pattern, path / nested_dir, out);
         }
     }
+#endif
 }
 
 std::vector<path_t> search_files(const std::string& pattern, const path_t& path) {
@@ -288,12 +325,14 @@ std::vector<path_t> search_files(const std::string& pattern, const path_t& path)
     using std::string;
 
     vector<path_t> res;
+#ifndef EK_DISABLE_SYSTEM_FS
     const char* path_dir = path.empty() ? "." : path.c_str();
     if (!is_dir(path_dir)) {
         EK_WARN << "IS NOT DIR: " << path_dir;
         return res;
     }
     search_files(pattern, path, res);
+#endif
     return res;
 }
 

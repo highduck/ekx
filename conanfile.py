@@ -29,7 +29,7 @@ class EKX_Conan(ConanFile):
 
     requires = [
         # FLASH tooling
-        "pugixml/1.9@bincrafters/stable",  # upgrade to 1.10
+        "pugixml/1.10@bincrafters/stable",  # upgrade to 1.10
         "cairo/1.17.2@bincrafters/stable",
 
         # EDITOR tooling

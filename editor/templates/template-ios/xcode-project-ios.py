@@ -1,18 +1,25 @@
 import sys
+import os
 
 # PBXPROJ: https://github.com/kronenthaler/mod-pbxproj/wiki
 from pbxproj import XcodeProject, PBXGenericObject
 from pbxproj.pbxextensions import FileOptions
 
-print('Number of arguments:', len(sys.argv), 'arguments.')
-print('Argument List:', str(sys.argv))
+print('Number of arguments: ' + str(len(sys.argv)) + ' arguments')
+print('Argument List: ')
+for arg in sys.argv:
+    print(' * ' + arg)
 
 proj_ios_name = sys.argv[1]
 application_id = sys.argv[2]
+sdk_root = sys.argv[3]
 
+print('EKX ROOT: ( ' + sdk_root + " )")
 
 def disable_arc(project, file_path):
-    for file in project.get_files_by_path(file_path):
+    rel_path = os.path.relpath(file_path, ".")
+    print('Try Disable ARC for ' + rel_path)
+    for file in project.get_files_by_path(rel_path):
         for build_file in project.get_build_files_for_file(file.get_id()):
             print("Disable ARC for: %s (%s)" % (file.name, build_file.get_id()))
             build_file.add_compiler_flags('-fno-objc-arc')
@@ -28,7 +35,8 @@ sys_caps["com.apple.GameCenter.iOS"] = PBXGenericObject()
 sys_caps["com.apple.GameCenter.iOS"]["enabled"] = 1
 sys_caps["com.apple.InAppPurchase"] = PBXGenericObject()
 sys_caps["com.apple.InAppPurchase"]["enabled"] = 1
-project.objects[project.rootObject].attributes.TargetAttributes[project_target.get_id()][u'SystemCapabilities'] = sys_caps
+project.objects[project.rootObject].attributes.TargetAttributes[project_target.get_id()][
+    'SystemCapabilities'] = sys_caps
 
 # project.set_flags("DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
 
@@ -38,33 +46,29 @@ project.set_flags("PRODUCT_BUNDLE_IDENTIFIER", application_id)
 project.set_flags("IPHONEOS_DEPLOYMENT_TARGET", "12.0")
 
 project.add_folder('../../src', parent=project.add_group("src"), excludes=excludes)
-project.add_folder('../../../ecxx/src', parent=project.add_group("ecxx"), excludes=excludes)
-project.add_folder('../../../ek-common/src', parent=project.add_group("ek-common"), excludes=excludes)
+project.add_folder(sdk_root + '/ecxx/src', parent=project.add_group("ecxx"), excludes=excludes)
+project.add_folder(sdk_root + '/core/src', parent=project.add_group("ek-core"), excludes=excludes)
 platforms_group = project.add_group("ek-platforms")
-project.add_folder('../../../ek/platforms/apple', parent=platforms_group, excludes=excludes)
-project.add_folder('../../../ek/platforms/ios', parent=platforms_group, excludes=excludes)
-project.add_folder('../../../ek/src', parent=project.add_group("ek"), excludes=excludes)
-project.add_folder('../../../scenex/src', parent=project.add_group("scenex"), excludes=excludes)
+project.add_folder(sdk_root + '/ek/platforms/apple', parent=platforms_group, excludes=excludes)
+project.add_folder(sdk_root + '/ek/platforms/ios', parent=platforms_group, excludes=excludes)
+project.add_folder(sdk_root + '/ek/src', parent=project.add_group("ek"), excludes=excludes)
+project.add_folder(sdk_root + '/scenex/src', parent=project.add_group("scenex"), excludes=excludes)
 
-dependencies_group = project.add_group("dependencies")
-project.add_file("../../deps/lodepng/lodepng.h", parent=dependencies_group)
-project.add_file("../../deps/lodepng/lodepng.cpp", parent=dependencies_group)
-
-disable_arc(project, '../../../ek/platforms/ios/ek/audiomini/SimpleAudioEngine_objc.mm')
-disable_arc(project, '../../../ek/platforms/ios/ek/audiomini/CocosDenshion.mm')
-disable_arc(project, '../../../ek/platforms/ios/ek/audiomini/CDOpenALSupport.mm')
-disable_arc(project, '../../../ek/platforms/ios/ek/audiomini/CDAudioManager.mm')
-disable_arc(project, '../../../ek/platforms/ios/EAGLView.mm')
+disable_arc(project, sdk_root + '/ek/platforms/ios/ek/audiomini/SimpleAudioEngine_objc.mm')
+disable_arc(project, sdk_root + '/ek/platforms/ios/ek/audiomini/CocosDenshion.mm')
+disable_arc(project, sdk_root + '/ek/platforms/ios/ek/audiomini/CDOpenALSupport.mm')
+disable_arc(project, sdk_root + '/ek/platforms/ios/ek/audiomini/CDAudioManager.mm')
+disable_arc(project, sdk_root + '/ek/platforms/ios/EAGLView.mm')
 
 project.add_header_search_paths([
     "$(inherited)",
     "../../src",
-    "../../../ecxx/src",
-    "../../../ek-common/src",
-    "../../../ek/platforms",
-    "../../../ek/src",
-    "../../../scenex/src",
-    "../../deps/lodepng"
+    sdk_root + "/ecxx/src",
+    sdk_root + "/core/src",
+    sdk_root + "/ek/platforms/apple",
+    sdk_root + "/ek/platforms/ios",
+    sdk_root + "/ek/src",
+    sdk_root + "/scenex/src"
 ])
 
 # self.cpp_info.cxxflags.append("-fno-aligned-allocation")

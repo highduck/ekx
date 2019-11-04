@@ -120,25 +120,20 @@ void mod_cmake_lists(const project_config_t& config) {
     path_t cmake_path{"app/CMakeLists.txt"};
     vector<path_t> search_list{
             path_t{"../../src"},
-            path_t{"../../deps/lodepng"},
-            config.path_ekc / "../ecxx/src",
-            config.path_ekc / "../ek-common/src",
-            config.path_ekc / "../ek/platforms",
-            config.path_ekc / "../ek/src",
-            config.path_ekc / "../scenex/src"
+            config.path_ekx / "ecxx/src",
+            config.path_ekx / "core/src",
+            config.path_ekx / "ek/platforms/android",
+            config.path_ekx / "ek/src",
+            config.path_ekx / "scenex/src"
     };
 
     vector<path_t> src_files;
     append(src_files, collect_source_files(path_t{"../../src"}));
-    append(src_files, collect_source_files(config.path_ekc / "../ecxx/src"));
-    append(src_files, collect_source_files(config.path_ekc / "../ek-common/src"));
-    append(src_files, collect_source_files(config.path_ekc / "../ek/src"));
-    append(src_files, collect_source_files(config.path_ekc / "../ek/platforms/android"));
-    append(src_files, collect_source_files(config.path_ekc / "../scenex/src"));
-    append(src_files, {
-            path_t{"../../deps/lodepng/lodepng.h"},
-            path_t{"../../deps/lodepng/lodepng.cpp"}
-    });
+    append(src_files, collect_source_files(config.path_ekx / "ecxx/src"));
+    append(src_files, collect_source_files(config.path_ekx / "core/src"));
+    append(src_files, collect_source_files(config.path_ekx / "ek/src"));
+    append(src_files, collect_source_files(config.path_ekx / "ek/platforms/android"));
+    append(src_files, collect_source_files(config.path_ekx / "scenex/src"));
 
     for (auto& it : search_list) {
         if (!it.empty() && it.str()[0] != '/') {
@@ -173,9 +168,9 @@ void create_android_project(const project_config_t& config) {
         assert(!is_dir(dest_path));
     }
 
-    copy_tree(config.path_ekc / ("templates/template-" + platform_target), dest_path);
+    copy_tree(config.path_ekx / ("editor/templates/template-" + platform_target), dest_path);
     const path_t base_path{"../.."};
-    const path_t ek_path = config.path_ekc / "../ek";
+    const path_t ek_path = config.path_ekx / "ek";
 
     working_dir_t::with(dest_path, [&]() {
 

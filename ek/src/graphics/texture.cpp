@@ -116,6 +116,7 @@ void texture_t::reset(uint32_t width, uint32_t height, texture_type type) {
             texture_format = GL_DEPTH_COMPONENT;
 #if (EK_WEB || EK_ANDROID || EK_IOS)
             internal_format = GL_DEPTH_COMPONENT16;
+            internal_format = GL_DEPTH_COMPONENT;
             pixel_type = GL_UNSIGNED_SHORT;
 #else
             internal_format = GL_DEPTH_COMPONENT24;
@@ -137,10 +138,11 @@ void texture_t::upload_cubemap(const std::array<image_t*, 6>& images) {
     for (int i = 0; i < 6; ++i) {
         auto& image = *(images[i]);
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                     0, GL_RGB,
+                     0, GL_RGBA,
                      image.width(), image.height(),
                      0, GL_RGBA,
                      GL_UNSIGNED_BYTE, image.data());
+        gl_check_error();
     }
     end_texture_setup(gl_texture_target_);
 }

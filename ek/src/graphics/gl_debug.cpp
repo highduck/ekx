@@ -6,6 +6,8 @@
 
 namespace ek {
 
+//#define EK_NO_GL_CHECKS
+
 #ifdef NDEBUG
 static bool gl_debugging_enabled_ = false;
 #else

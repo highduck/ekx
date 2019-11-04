@@ -11,8 +11,6 @@ using namespace ek;
 void build_web(const project_config_t& project) {
     using ek::path_join;
 
-    auto& sdk_path = project.path_ekc;
-
     execute("mkdir cmake-build-wasm-release");
 
     working_dir_t::with("cmake-build-wasm-release", [&]() {
@@ -20,7 +18,7 @@ void build_web(const project_config_t& project) {
                 project.path_emsdk_toolchain.str());
         execute("make " + project.cmake_target + " -j9");
 
-        auto tpl_dir = sdk_path / "templates" / "web";
+        auto tpl_dir = project.path_ekx / "editor/templates/web";
         auto output_dir = project.path / project.build_dir;
         template_vars_t tpl_context;
         fill_template_vars(project, tpl_context);

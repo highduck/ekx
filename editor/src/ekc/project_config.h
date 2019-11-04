@@ -28,7 +28,6 @@ struct asset_entry_config_t {
 };
 
 struct assets_config_t {
-    bool builtin;
     ek::path_t input;
     ek::path_t output;
     std::vector<asset_entry_config_t> list;
@@ -64,7 +63,7 @@ struct ios_config_t {
 };
 
 struct project_config_t {
-    ek::path_t path_ekc;
+    ek::path_t path_ekx;
     ek::path_t path_emsdk_toolchain;
     ek::path_t path;
 
