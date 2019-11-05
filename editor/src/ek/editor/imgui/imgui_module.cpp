@@ -5,7 +5,7 @@
 #include <graphics/texture.hpp>
 #include <graphics/buffer_object.hpp>
 #include <draw2d/batcher.hpp>
-#include <platform/Window.h>
+#include <platform/window.hpp>
 #include <platform/static_resources.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include <graphics/gl_debug.hpp>
@@ -54,12 +54,12 @@ void reset_keys() {
     }
 }
 
-void imgui_module_t::onKeyEvent(const KeyEvent& event) {
+void imgui_module_t::onKeyEvent(const key_event_t& event) {
     auto& io = ImGui::GetIO();
     int key = static_cast<int>(event.code);
 
     if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown)) {
-        io.KeysDown[key] = (event.type == KeyEvent::Type::Down);
+        io.KeysDown[key] = (event.type == key_event_type::down);
     }
     if ((io.KeyShift && !event.shift) || (io.KeyCtrl && !event.ctrl)
         || (io.KeyAlt && !event.alt) || (io.KeySuper && !event.super)) {
@@ -70,8 +70,8 @@ void imgui_module_t::onKeyEvent(const KeyEvent& event) {
     io.KeyAlt = event.alt;
     io.KeySuper = event.super;
 
-    if (event.type == KeyEvent::Type::Down
-        && event.code == KeyEvent::Code::A
+    if (event.type == key_event_type::down
+        && event.code == key_code::A
         && event.ctrl && event.shift) {
         enabled_ = !enabled_;
     }
@@ -82,37 +82,37 @@ void imgui_module_t::on_text_event(const text_event_t& event) {
     //return true;
 }
 
-void imgui_module_t::onMouseEvent(const MouseEvent& event) {
+void imgui_module_t::onMouseEvent(const mouse_event_t& event) {
     if (!enabled_) {
         return;
     }
     auto& io = ImGui::GetIO();
-    if (event.type == MouseEvent::Type::Down || event.type == MouseEvent::Type::Up) {
+    if (event.type == mouse_event_type::down || event.type == mouse_event_type::up) {
         int button = 0;
-        if (event.button == MouseEvent::Button::Right) {
+        if (event.button == mouse_button::right) {
             button = 1;
-        } else if (event.button == MouseEvent::Button::Other) {
+        } else if (event.button == mouse_button::other) {
             button = 2;
         }
-        io.MouseDown[button] = (event.type == MouseEvent::Type::Down);
-    } else if (event.type == MouseEvent::Type::Scroll) {
-        if (fabsf(event.scrollX) > 0.0) {
-            io.MouseWheelH += event.scrollX * 0.1f;
+        io.MouseDown[button] = (event.type == mouse_event_type::down);
+    } else if (event.type == mouse_event_type::scroll) {
+        if (fabsf(event.scroll_x) > 0.0f) {
+            io.MouseWheelH += event.scroll_x * 0.1f;
         }
-        if (fabsf(event.scrollY) > 0.0) {
-            io.MouseWheel += event.scrollY * 0.1f;
+        if (fabsf(event.scroll_y) > 0.0f) {
+            io.MouseWheel += event.scroll_y * 0.1f;
         }
-    } else if (event.type == MouseEvent::Type::Move) {
-        io.MousePos.x = event.x / gWindow.scaleFactor;
-        io.MousePos.y = event.y / gWindow.scaleFactor;
+    } else if (event.type == mouse_event_type::move) {
+        io.MousePos.x = event.x / g_window.device_pixel_ratio;
+        io.MousePos.y = event.y / g_window.device_pixel_ratio;
     }
 }
 
-void imgui_module_t::onTouchEvent(const TouchEvent&) {
+void imgui_module_t::onTouchEvent(const touch_event_t&) {
 
 }
 
-void imgui_module_t::onAppEvent(const AppEvent&) {
+void imgui_module_t::onAppEvent(const app_event_t&) {
 
 }
 
@@ -340,7 +340,7 @@ void imgui_module_t::update_mouse_state() {
 //    // Set OS mouse position if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
 //    if (io.WantSetMousePos) {
 //        // TODO: force set mouse position
-//        //gWindow.->mouse.position((int)io.MousePos.x, (int)io.MousePos.y);
+//        //g_window.->mouse.position((int)io.MousePos.x, (int)io.MousePos.y);
 //    } else {
 //        io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
 //    }
@@ -386,11 +386,11 @@ void imgui_module_t::update_mouse_cursor() {
     }
 
     ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-    MouseCursor cursor = MouseCursor::Auto;
-    bool cursorVisible = true;
+    auto cursor = mouse_cursor_t::parent;
+    bool cursor_visible = true;
     if (io.MouseDrawCursor || imgui_cursor == ImGuiMouseCursor_None) {
         // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-        cursorVisible = false;
+        cursor_visible = false;
     } else {
         // Show OS mouse cursor
         switch (imgui_cursor) {
@@ -401,20 +401,20 @@ void imgui_module_t::update_mouse_cursor() {
             case ImGuiMouseCursor_ResizeEW:
             case ImGuiMouseCursor_ResizeNESW:
             case ImGuiMouseCursor_ResizeNWSE:
-                cursor = MouseCursor::Auto;
+                cursor = mouse_cursor_t::arrow;
                 break;
             case ImGuiMouseCursor_Hand:
-                cursor = MouseCursor::Button;
+                cursor = mouse_cursor_t::button;
                 break;
             default:
                 break;
         }
-        gWindow.setCursor(cursor);
-        cursorVisible = true;
+        g_window.set_cursor(cursor);
+        cursor_visible = true;
     }
 
     // TODO: cursor visible
-    //gWindow.hideCursor()->mouse.show(cursorVisible);
+    //g_window.hideCursor()->mouse.show(cursorVisible);
 }
 
 imgui_module_t::imgui_module_t() {
@@ -478,10 +478,10 @@ imgui_module_t::~imgui_module_t() {
 }
 
 void imgui_module_t::begin_frame(float dt) {
-    auto w = static_cast<float>(gWindow.windowSize.width);
-    auto h = static_cast<float>(gWindow.windowSize.height);
-    auto fb_w = static_cast<float>(gWindow.backBufferSize.width);
-    auto fb_h = static_cast<float>(gWindow.backBufferSize.height);
+    auto w = static_cast<float>(g_window.window_size.width);
+    auto h = static_cast<float>(g_window.window_size.height);
+    auto fb_w = static_cast<float>(g_window.back_buffer_size.width);
+    auto fb_h = static_cast<float>(g_window.back_buffer_size.height);
 
     ImGui::GetIO().DisplaySize = ImVec2(w, h);
     ImGui::GetIO().DisplayFramebufferScale = ImVec2(w > 0 ? (fb_w / w) : 0, h > 0 ? (fb_h / h) : 0);
@@ -513,27 +513,27 @@ void imgui_module_t::setup() {
 
 
     // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
-    io.KeyMap[ImGuiKey_Tab] = static_cast<int>(KeyEvent::Code::Tab);
-    io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(KeyEvent::Code::ArrowLeft);
-    io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(KeyEvent::Code::ArrowRight);
-    io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(KeyEvent::Code::ArrowUp);
-    io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(KeyEvent::Code::ArrowDown);
-    io.KeyMap[ImGuiKey_PageUp] = static_cast<int>(KeyEvent::Code::PageUp);
-    io.KeyMap[ImGuiKey_PageDown] = static_cast<int>(KeyEvent::Code::PageDown);
-    io.KeyMap[ImGuiKey_Home] = static_cast<int>(KeyEvent::Code::Home);
-    io.KeyMap[ImGuiKey_End] = static_cast<int>(KeyEvent::Code::End);
-    io.KeyMap[ImGuiKey_Insert] = static_cast<int>(KeyEvent::Code::Insert);
-    io.KeyMap[ImGuiKey_Delete] = static_cast<int>(KeyEvent::Code::Delete);
-    io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(KeyEvent::Code::Backspace);
-    io.KeyMap[ImGuiKey_Space] = static_cast<int>(KeyEvent::Code::Space);
-    io.KeyMap[ImGuiKey_Enter] = static_cast<int>(KeyEvent::Code::Enter);
-    io.KeyMap[ImGuiKey_Escape] = static_cast<int>(KeyEvent::Code::Escape);
-    io.KeyMap[ImGuiKey_A] = static_cast<int>(KeyEvent::Code::A);
-    io.KeyMap[ImGuiKey_C] = static_cast<int>(KeyEvent::Code::C);
-    io.KeyMap[ImGuiKey_V] = static_cast<int>(KeyEvent::Code::V);
-    io.KeyMap[ImGuiKey_X] = static_cast<int>(KeyEvent::Code::X);
-    io.KeyMap[ImGuiKey_Y] = static_cast<int>(KeyEvent::Code::Y);
-    io.KeyMap[ImGuiKey_Z] = static_cast<int>(KeyEvent::Code::Z);
+    io.KeyMap[ImGuiKey_Tab] = static_cast<int>(key_code::Tab);
+    io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(key_code::ArrowLeft);
+    io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(key_code::ArrowRight);
+    io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(key_code::ArrowUp);
+    io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(key_code::ArrowDown);
+    io.KeyMap[ImGuiKey_PageUp] = static_cast<int>(key_code::PageUp);
+    io.KeyMap[ImGuiKey_PageDown] = static_cast<int>(key_code::PageDown);
+    io.KeyMap[ImGuiKey_Home] = static_cast<int>(key_code::Home);
+    io.KeyMap[ImGuiKey_End] = static_cast<int>(key_code::End);
+    io.KeyMap[ImGuiKey_Insert] = static_cast<int>(key_code::Insert);
+    io.KeyMap[ImGuiKey_Delete] = static_cast<int>(key_code::Delete);
+    io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(key_code::Backspace);
+    io.KeyMap[ImGuiKey_Space] = static_cast<int>(key_code::Space);
+    io.KeyMap[ImGuiKey_Enter] = static_cast<int>(key_code::Enter);
+    io.KeyMap[ImGuiKey_Escape] = static_cast<int>(key_code::Escape);
+    io.KeyMap[ImGuiKey_A] = static_cast<int>(key_code::A);
+    io.KeyMap[ImGuiKey_C] = static_cast<int>(key_code::C);
+    io.KeyMap[ImGuiKey_V] = static_cast<int>(key_code::V);
+    io.KeyMap[ImGuiKey_X] = static_cast<int>(key_code::X);
+    io.KeyMap[ImGuiKey_Y] = static_cast<int>(key_code::Y);
+    io.KeyMap[ImGuiKey_Z] = static_cast<int>(key_code::Z);
 
     io.ClipboardUserData = this;
     io.SetClipboardTextFn = imgui_clipboard_set;
@@ -549,7 +549,7 @@ void imgui_module_t::setup() {
 }
 
 void imgui_module_t::on_frame_completed() {
-    Listener::on_frame_completed();
+    application_listener_t::on_frame_completed();
 
     auto& io = ImGui::GetIO();
     if (io.KeySuper || io.KeyCtrl) {

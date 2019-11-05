@@ -1,7 +1,6 @@
 #include "asset_manager.hpp"
 #include "asset_object.hpp"
 
-#include <ek/fs/system.hpp>
 #include <ek/logger.hpp>
 #include <ek/fs/path.hpp>
 

@@ -4,7 +4,7 @@
 #include <graphics/program.hpp>
 #include <ek/locator.hpp>
 #include <draw2d/drawer.hpp>
-#include <platform/Window.h>
+#include <platform/window.hpp>
 #include <ek/logger.hpp>
 #include <ek/timer.hpp>
 #include <ek/audiomini/AudioMini.h>
@@ -17,18 +17,18 @@ base_app_t::base_app_t() {
 
 base_app_t::~base_app_t() = default;
 
-void base_app_t::onKeyEvent(const KeyEvent&) {
+void base_app_t::onKeyEvent(const key_event_t&) {
 }
 
-void base_app_t::onMouseEvent(const MouseEvent&) {
+void base_app_t::onMouseEvent(const mouse_event_t&) {
 }
 
-void base_app_t::onTouchEvent(const TouchEvent&) {
+void base_app_t::onTouchEvent(const touch_event_t&) {
 }
 
-void base_app_t::onAppEvent(const AppEvent& event) {
-    if (event.type == AppEvent::Type::Resize) {
-        EK_DEBUG << "w: " << gWindow.backBufferSize.width << " h: " << gWindow.backBufferSize.height;
+void base_app_t::onAppEvent(const app_event_t& event) {
+    if (event.type == app_event_type::resize) {
+        EK_DEBUG << "w: " << g_window.back_buffer_size.width << " h: " << g_window.back_buffer_size.height;
     }
 }
 
@@ -53,7 +53,7 @@ void base_app_t::onDrawFrame() {
         graphics.clear(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     }
 
-    auto back_buffer_size = gWindow.backBufferSize;
+    auto back_buffer_size = g_window.back_buffer_size;
     drawer.begin(0, 0, back_buffer_size.width, back_buffer_size.height);
     drawer.set_blend_mode(blend_mode::premultiplied);
 
@@ -74,7 +74,7 @@ void base_app_t::initialize() {
     service_locator_instance<drawer_t>::init();
     service_locator_instance<AudioMini>::init();
 
-    scale_factor = gWindow.scaleFactor;
+    scale_factor = g_window.device_pixel_ratio;
 }
 
 void base_app_t::preload() {

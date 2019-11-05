@@ -45,7 +45,7 @@ inline void glGenVertexArrays(GLsizei n, GLuint *arrays) {glGenVertexArraysOES(n
 
 // Add some Desktop OpenGL features to OpenGL ES2
 
-#if EK_ANDROID || EK_IOS
+#if EK_ANDROID || EK_IOS || EK_WEB
 
 #define OPEN_GL_ES
 #define glClearDepth glClearDepthf

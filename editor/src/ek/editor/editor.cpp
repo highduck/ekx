@@ -27,7 +27,7 @@ editor_context_t::editor_context_t(scenex::basic_application& app)
     assets.add_resolver(new scenex::editor_asset_resolver_t<model_asset_t>("model"));
     assets.add_resolver(new scenex::editor_asset_resolver_t<audio_asset_t>("audio"));
 
-    ek::gApp.listen(&imgui);
+    ek::g_app.listen(&imgui);
     app.hook_on_preload.add([this]() {
         assets.set_scale_factor(app_->scale_factor);
         scan_assets_folder(assets);

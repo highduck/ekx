@@ -8,17 +8,13 @@
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 
-#include "platform/Window.h"
-#include "platform/Application.h"
+#include <platform/application.hpp>
 
-using TouchEvent = ek::TouchEvent;
-using MouseEvent = ek::MouseEvent;
-using AppEvent = ek::AppEvent;
-using MouseCursor = ek::MouseCursor;
+using namespace ek;
 
 @interface EAGLView () {
     EAGLContext* _context;
-    NSInteger _animationFrameInterval;
+    NSInteger _framesPerSecond;
     CADisplayLink* _displayLink;
 
     // The OpenGL names for the framebuffer and renderbuffer used to render to this view
@@ -65,6 +61,8 @@ using MouseCursor = ek::MouseCursor;
         NSLog(@"failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
         return nil;
     }
+    
+    g_window.primary_frame_buffer = _defaultFBOName;
 
     return self;
 }
@@ -85,12 +83,12 @@ using MouseCursor = ek::MouseCursor;
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backingWidth, backingHeight);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 
-    ek::gWindow.backBufferSize = {
+    g_window.back_buffer_size = {
         static_cast<uint32_t>(backingWidth),
         static_cast<uint32_t>(backingHeight)
     };
     
-    ek::gWindow.sizeChanged = true;
+    g_window.size_changed = true;
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
@@ -134,7 +132,7 @@ using MouseCursor = ek::MouseCursor;
         [self createRenderer:(id <EAGLDrawable>) self.layer];
 
         _animating = FALSE;
-        _animationFrameInterval = 1;
+        _framesPerSecond = 60;
         _displayLink = nil;
     }
 
@@ -145,7 +143,7 @@ using MouseCursor = ek::MouseCursor;
     [EAGLContext setCurrentContext:_context];
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBOName);
 
-    ek::gApp.dispatchDrawFrame();
+    g_app.dispatch_draw_frame();
 
     glBindRenderbuffer(GL_RENDERBUFFER, _colorRenderbuffer);
     [_context presentRenderbuffer:GL_RENDERBUFFER];
@@ -157,19 +155,19 @@ using MouseCursor = ek::MouseCursor;
     [self drawView:nil];
 }
 
-- (NSInteger)animationFrameInterval {
-    return _animationFrameInterval;
+- (NSInteger)framesPerSecond {
+    return _framesPerSecond;
 }
 
-- (void)setAnimationFrameInterval:(NSInteger)frameInterval {
+- (void)setFramesPerSecond:(NSInteger)framesPerSecond {
     // Frame interval defines how many display frames must pass between each time the
     // display link fires. The display link will only fire 30 times a second when the
     // frame internal is two on a display that refreshes 60 times a second. The default
     // frame interval setting of one will fire 60 times a second when the display refreshes
     // at 60 times a second. A frame interval setting of less than one results in undefined
     // behavior.
-    if (frameInterval >= 1) {
-        _animationFrameInterval = frameInterval;
+    if (framesPerSecond >= 1) {
+        _framesPerSecond = framesPerSecond;
 
         if (_animating) {
             [self stopAnimation];
@@ -185,7 +183,7 @@ using MouseCursor = ek::MouseCursor;
 
         // Set it to our _animationFrameInterval
         //_displayLink.preferredFramesPerSecond = _animationFrameInterval;
-        _displayLink.frameInterval = _animationFrameInterval;
+        _displayLink.preferredFramesPerSecond = _framesPerSecond;
 
         // Have the display link run on the default runn loop (and the main thread)
         [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
@@ -228,7 +226,7 @@ using MouseCursor = ek::MouseCursor;
         CGPoint location = [touch locationInView:self];
         float x = (float) (location.x * scaleFactor);
         float y = (float) (location.y * scaleFactor);
-        ek::gApp.dispatch({TouchEvent::Type::Begin, (uint64_t) touch, x, y});
+        g_app.dispatch({touch_event_type::begin, (uint64_t) touch, x, y});
     }
 }
 
@@ -239,7 +237,7 @@ using MouseCursor = ek::MouseCursor;
         CGPoint location = [touch locationInView:self];
         float x = (float) (location.x * scaleFactor);
         float y = (float) (location.y * scaleFactor);
-        ek::gApp.dispatch({TouchEvent::Type::Move, (uint64_t) touch, x, y});
+        g_app.dispatch({touch_event_type::move, (uint64_t) touch, x, y});
     }
 }
 
@@ -250,7 +248,7 @@ using MouseCursor = ek::MouseCursor;
         CGPoint location = [touch locationInView:self];
         float x = (float) (location.x * scaleFactor);
         float y = (float) (location.y * scaleFactor);
-        ek::gApp.dispatch({TouchEvent::Type::End, (uint64_t) touch, x, y});
+        g_app.dispatch({touch_event_type::end, (uint64_t) touch, x, y});
     }
 }
 
@@ -261,7 +259,7 @@ using MouseCursor = ek::MouseCursor;
         CGPoint location = [touch locationInView:self];
         float x = (float) (location.x * scaleFactor);
         float y = (float) (location.y * scaleFactor);
-        ek::gApp.dispatch({TouchEvent::Type::End, (uint64_t) touch, x, y});
+        g_app.dispatch({touch_event_type::end, (uint64_t) touch, x, y});
     }
 }
 

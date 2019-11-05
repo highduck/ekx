@@ -1,0 +1,13 @@
+include(default)
+[settings]
+os=Emscripten
+arch=wasm
+compiler=clang
+compiler.version=6.0
+compiler.libcxx=libc++
+build_type=Release
+[options]
+ekx:editor=False
+[build_requires]
+emsdk_installer/1.38.22@bincrafters/stable
+[env]

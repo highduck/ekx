@@ -120,7 +120,7 @@ void update_buttons(float dt) {
 
         if (!btn.initialized) {
             btn.initialized = true;
-            interactive.cursor = interactive_t::cursor_t::Button;
+            interactive.cursor = interactive_t::mouse_cursor_t::button;
             initialize_base_transform(btn, transform);
             initialize_events(e);
         }

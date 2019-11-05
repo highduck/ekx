@@ -1,7 +1,7 @@
 #pragma once
 
 #include <graphics/gl_def.hpp>
-#include <platform/Application.h>
+#include <platform/application.hpp>
 #include <ek/math/vec.hpp>
 #include <string>
 
@@ -18,19 +18,19 @@ class buffer_object_t;
 
 namespace scenex {
 
-class imgui_module_t : public ek::Application::Listener {
+class imgui_module_t : public ek::application_listener_t {
 public:
     imgui_module_t();
 
     ~imgui_module_t() final;
 
-    void onKeyEvent(const ek::KeyEvent& event) override;
+    void onKeyEvent(const ek::key_event_t& event) override;
 
-    void onMouseEvent(const ek::MouseEvent& event) override;
+    void onMouseEvent(const ek::mouse_event_t& event) override;
 
-    void onTouchEvent(const ek::TouchEvent& event) override;
+    void onTouchEvent(const ek::touch_event_t& event) override;
 
-    void onAppEvent(const ek::AppEvent& event) override;
+    void onAppEvent(const ek::app_event_t& event) override;
 
     void onDrawFrame() override;
 

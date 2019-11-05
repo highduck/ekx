@@ -4,6 +4,10 @@
 #include <sstream>
 #include <ek/utility/source_location.hpp>
 
+#ifndef __printflike
+#define __printflike(fmtarg, firstvararg)
+#endif
+
 namespace ek::logger {
 
 enum class verbosity_t : uint8_t {

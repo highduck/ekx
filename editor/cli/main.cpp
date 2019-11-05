@@ -1,7 +1,7 @@
 #include <ekc/project_config.h>
 
-#include <ek/fs/working_dir.hpp>
-#include <ek/fs/system.hpp>
+#include <ek/system/working_dir.hpp>
+#include <ek/system/system.hpp>
 #include <ek/logger.hpp>
 #include <platform/boot.h>
 #include <ekc/ekc.hpp>

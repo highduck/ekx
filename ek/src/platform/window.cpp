@@ -1,6 +1,4 @@
-#include <utility>
-
-#include "window_creation_config.h"
+#include "window.hpp"
 
 namespace ek {
 
@@ -20,5 +18,7 @@ window_creation_config_t::window_creation_config_t() noexcept
           fullscreen{false} {
 
 }
+
+window_t g_window{};
 
 }

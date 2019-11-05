@@ -1,8 +1,7 @@
+#include <platform/application.hpp>
+#include <platform/static_resources.hpp>
+#include <platform/Sharing.h>
 #include <ek/logger.hpp>
-#include "platform/Application.h"
-#include "platform/Window.h"
-#include "platform/static_resources.hpp"
-#include "platform/Sharing.h"
 
 #include <emscripten.h>
 #include <emscripten/html5.h>
@@ -13,10 +12,10 @@
 using namespace ek;
 
 void loop() {
-    gApp.dispatchDrawFrame();
+    g_app.dispatch_draw_frame();
 }
 
-EMSCRIPTEN_WEBGL_CONTEXT_HANDLE webGLContext;
+EMSCRIPTEN_WEBGL_CONTEXT_HANDLE webgl_context;
 
 const char* DIV_ID = "gamecontainer";
 const char* CANVAS_ID = "gameview";
@@ -29,14 +28,14 @@ void init_webgl_context() {
     attrs.stencil = false;
     attrs.antialias = false;
 
-    webGLContext = emscripten_webgl_create_context(CANVAS_ID, &attrs);
+    webgl_context = emscripten_webgl_create_context(CANVAS_ID, &attrs);
 
-    if (!webGLContext) {
+    if (!webgl_context) {
         assert(false && "Failed to create WebGL context");
         return;
     }
 
-    EMSCRIPTEN_RESULT result = emscripten_webgl_make_context_current(webGLContext);
+    EMSCRIPTEN_RESULT result = emscripten_webgl_make_context_current(webgl_context);
     if (result != EMSCRIPTEN_RESULT_SUCCESS) {
         assert(false && "Failed to make WebGL context current");
         return;
@@ -44,17 +43,17 @@ void init_webgl_context() {
 }
 
 static EM_BOOL em_mouse_callback(int type, const EmscriptenMouseEvent* mouse_event, void*) {
-    MouseEvent event{};
+    mouse_event_t event{};
 
     switch (mouse_event->button) {
         case 0:
-            event.button = MouseEvent::Button::Left;
+            event.button = mouse_button::left;
             break;
         case 1:
-            event.button = MouseEvent::Button::Other;
+            event.button = mouse_button::other;
             break;
         case 2:
-            event.button = MouseEvent::Button::Right;
+            event.button = mouse_button::right;
             break;
         default:
 //            return false;
@@ -63,66 +62,67 @@ static EM_BOOL em_mouse_callback(int type, const EmscriptenMouseEvent* mouse_eve
 
     switch (type) {
         case EMSCRIPTEN_EVENT_MOUSEDOWN:
-            event.type = MouseEvent::Type::Down;
+            event.type = mouse_event_type::down;
             break;
         case EMSCRIPTEN_EVENT_MOUSEUP:
-            event.type = MouseEvent::Type::Up;
+            event.type = mouse_event_type::up;
             break;
         case EMSCRIPTEN_EVENT_MOUSEMOVE:
-            event.type = MouseEvent::Type::Move;
+            event.type = mouse_event_type::move;
             break;
         default:
             // return false;
             break;
     }
 
-    event.x = static_cast<float>(mouse_event->targetX * gWindow.scaleFactor);
-    event.y = static_cast<float>(mouse_event->targetY * gWindow.scaleFactor);
-    gApp.dispatch(event);
+    const auto dpr = g_window.device_pixel_ratio;
+    event.x = static_cast<float>(mouse_event->targetX * dpr);
+    event.y = static_cast<float>(mouse_event->targetY * dpr);
+    g_app.dispatch(event);
 
     return true;
 }
 
 /****** KEYBOARD ****/
-static std::unordered_map<std::string, KeyEvent::Code> scancode_table = {
-        {"ArrowLeft", KeyEvent::Code::ArrowLeft},
-        {"ArrowRight", KeyEvent::Code::ArrowRight},
-        {"ArrowDown", KeyEvent::Code::ArrowDown},
-        {"ArrowUp", KeyEvent::Code::ArrowUp},
-        {"Escape", KeyEvent::Code::Escape},
-        {"Backspace", KeyEvent::Code::Backspace},
-        {"Space", KeyEvent::Code::Space},
-        {"Enter", KeyEvent::Code::Enter},
-        {"A", KeyEvent::Code::A},
-        {"C", KeyEvent::Code::C},
-        {"V", KeyEvent::Code::V},
-        {"X", KeyEvent::Code::X},
-        {"Y", KeyEvent::Code::Y},
-        {"Z", KeyEvent::Code::Z},
-        {"W", KeyEvent::Code::W},
-        {"S", KeyEvent::Code::S},
-        {"D", KeyEvent::Code::D}
+static std::unordered_map<std::string, key_code> scancode_table = {
+        {"ArrowLeft",  key_code::ArrowLeft},
+        {"ArrowRight", key_code::ArrowRight},
+        {"ArrowDown",  key_code::ArrowDown},
+        {"ArrowUp",    key_code::ArrowUp},
+        {"Escape",     key_code::Escape},
+        {"Backspace",  key_code::Backspace},
+        {"Space",      key_code::Space},
+        {"Enter",      key_code::Enter},
+        {"A",          key_code::A},
+        {"C",          key_code::C},
+        {"V",          key_code::V},
+        {"X",          key_code::X},
+        {"Y",          key_code::Y},
+        {"Z",          key_code::Z},
+        {"W",          key_code::W},
+        {"S",          key_code::S},
+        {"D",          key_code::D}
 };
 
-static KeyEvent::Code convertKeyCode(const EM_UTF8 keyCode[EM_HTML5_SHORT_STRING_LEN_BYTES]) {
+static key_code convertKeyCode(const EM_UTF8 keyCode[EM_HTML5_SHORT_STRING_LEN_BYTES]) {
     auto i = scancode_table.find(keyCode);
 
     if (i != scancode_table.end())
         return i->second;
     else
-        return KeyEvent::Code::Unknown;
+        return key_code::Unknown;
 }
 
 static EM_BOOL web_onKeyboardEvent(int type, const EmscriptenKeyboardEvent* event, void*) {
     switch (type) {
         case EMSCRIPTEN_EVENT_KEYPRESS:
-            gApp.dispatch({KeyEvent::Type::Press, convertKeyCode(event->code)});
+            g_app.dispatch({key_event_type::press, convertKeyCode(event->code)});
             return true;
         case EMSCRIPTEN_EVENT_KEYDOWN:
-            gApp.dispatch({KeyEvent::Type::Down, convertKeyCode(event->code)});
+            g_app.dispatch({key_event_type::down, convertKeyCode(event->code)});
             return true;
         case EMSCRIPTEN_EVENT_KEYUP:
-            gApp.dispatch({KeyEvent::Type::Up, convertKeyCode(event->code)});
+            g_app.dispatch({key_event_type::up, convertKeyCode(event->code)});
             return true;
     }
 
@@ -131,11 +131,11 @@ static EM_BOOL web_onKeyboardEvent(int type, const EmscriptenKeyboardEvent* even
 
 static EM_BOOL em_wheel_callback(int type, const EmscriptenWheelEvent* event, void*) {
     if (type == EMSCRIPTEN_EVENT_WHEEL) {
-        float x = event->mouse.targetX * gWindow.scaleFactor;
-        float y = event->mouse.targetY * gWindow.scaleFactor;
+        float x = event->mouse.targetX * g_window.device_pixel_ratio;
+        float y = event->mouse.targetY * g_window.device_pixel_ratio;
         auto sx = static_cast<float>(event->deltaX);
         auto sy = static_cast<float>(event->deltaY);
-        gApp.dispatch({MouseEvent::Type::Scroll, MouseEvent::Button::Other, x, y, sx, sy});
+        g_app.dispatch({mouse_event_type::scroll, mouse_button::other, x, y, sx, sy});
 
         //    return true;
     }
@@ -150,22 +150,23 @@ static EM_BOOL handleTouchEvent(int type, const EmscriptenTouchEvent* event, voi
         const EmscriptenTouchPoint& touch = event->touches[i];
 
         if (touch.isChanged) {
-            auto x = static_cast<float>(touch.targetX * gWindow.scaleFactor);
-            auto y = static_cast<float>(touch.targetY * gWindow.scaleFactor);
+            const auto dpr = g_window.device_pixel_ratio;
+            auto x = static_cast<float>(touch.targetX * dpr);
+            auto y = static_cast<float>(touch.targetY * dpr);
             // zero for unknown
             auto id = static_cast<uint64_t>(touch.identifier + 1);
             switch (type) {
                 case EMSCRIPTEN_EVENT_TOUCHSTART:
-                    gApp.dispatch({TouchEvent::Type::Begin, id, x, y});
+                    g_app.dispatch({touch_event_type::begin, id, x, y});
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHMOVE:
-                    gApp.dispatch({TouchEvent::Type::Move, id, x, y});
+                    g_app.dispatch({touch_event_type::move, id, x, y});
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHEND:
-                    gApp.dispatch({TouchEvent::Type::End, id, x, y});
+                    g_app.dispatch({touch_event_type::end, id, x, y});
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHCANCEL:
-                    gApp.dispatch({TouchEvent::Type::End, id, x, y});
+                    g_app.dispatch({touch_event_type::end, id, x, y});
                     break;
                 default:
                     break;
@@ -176,7 +177,7 @@ static EM_BOOL handleTouchEvent(int type, const EmscriptenTouchEvent* event, voi
     return true;
 }
 
-void subscribeInput() {
+void subscribe_input() {
     emscripten_set_mousedown_callback(CANVAS_ID, nullptr, false, em_mouse_callback);
     emscripten_set_mouseup_callback(CANVAS_ID, nullptr, false, em_mouse_callback);
     emscripten_set_mousemove_callback(CANVAS_ID, nullptr, false, em_mouse_callback);
@@ -194,19 +195,19 @@ void subscribeInput() {
 }
 
 void handleResize() {
-    float scaleFactor = emscripten_get_device_pixel_ratio();
+    const auto dpr = emscripten_get_device_pixel_ratio();
 
     double css_w, css_h;
     emscripten_get_element_css_size(DIV_ID, &css_w, &css_h);
 
     // TODO: configurable min aspect (70/100)
     // TODO: landscape and different modes, native letterbox
-    float aspect = gWindow.creation_config.width / gWindow.creation_config.height;
+    const float aspect = g_window.creation_config.width / g_window.creation_config.height;
     int w = css_w;
     int h = css_h;
     int offset_x = 0;
     int offset_y = 0;
-    if (gWindow.creation_config.landscape) {
+    if (g_window.creation_config.landscape) {
         h = std::min(h, static_cast<int>(w / aspect));
         offset_y = (css_h - h) / 2;
     } else {
@@ -217,21 +218,21 @@ void handleResize() {
     css_w = w;
     css_h = h;
 
-    gWindow.scaleFactor = scaleFactor;
+    g_window.device_pixel_ratio = dpr;
 
-    gWindow.windowSize = {
+    g_window.window_size = {
             static_cast<uint32_t>(css_w),
             static_cast<uint32_t>(css_h)
     };
 
-    gWindow.backBufferSize = {
-            static_cast<uint32_t>(css_w * scaleFactor),
-            static_cast<uint32_t>(css_h * scaleFactor)
+    g_window.back_buffer_size = {
+            static_cast<uint32_t>(css_w * dpr),
+            static_cast<uint32_t>(css_h * dpr)
     };
 
     emscripten_set_canvas_element_size(CANVAS_ID,
-                                       static_cast<int>(gWindow.backBufferSize.width),
-                                       static_cast<int>(gWindow.backBufferSize.height));
+                                       static_cast<int>(g_window.back_buffer_size.width),
+                                       static_cast<int>(g_window.back_buffer_size.height));
 
     emscripten_set_element_css_size(CANVAS_ID, css_w, css_h);
 
@@ -264,11 +265,11 @@ namespace ek {
 
 void start_application() {
     init_canvas();
-    subscribeInput();
+    subscribe_input();
     init_webgl_context();
 
-    gApp.init();
-    gApp.start();
+    g_app.init();
+    g_app.start();
 
     emscripten_set_main_loop(&loop, 0, 1);
 
@@ -276,43 +277,47 @@ void start_application() {
     //emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, 1); // no-vsync?
 }
 
-void Window::updateMouseCursor() {
-    const char* cursorName = "default";
-    switch (mCursor) {
-        case Window::Cursor::Button:
-            cursorName = "pointer";
+void window_t::update_mouse_cursor() {
+    const char* cursor_name = "default";
+    switch (cursor_) {
+        case mouse_cursor_t::button:
+            cursor_name = "pointer";
             break;
-        case Window::Cursor::Help:
-            cursorName = "help";
+        case mouse_cursor_t::help:
+            cursor_name = "help";
+            break;
+        case mouse_cursor_t::parent:
+            cursor_name = "auto";
+            break;
+        case mouse_cursor_t::arrow:
+            cursor_name = "default";
             break;
         default:
-            cursorName = "default";
             break;
     }
 
-    emscripten_set_canvas_cursor(cursorName);
+    emscripten_set_canvas_cursor(cursor_name);
 }
 
-void Application::exit(int) {
+void application_t::exit(int) {
     EM_ASM({window.close()}, 0);
 }
 
 }
 
-
 // SHARING
 namespace ek {
+
 void sharing_navigate(const char* url) {
     EM_ASM({window.open(UTF8ToString($0), "_blank")}, url);
 }
 
 void sharing_rate_us(const char* appId) {
-    (void)appId;
+    (void) appId;
 }
 
 void sharing_send_message(const char* text) {
-    (void)text;
+    (void) text;
 }
-
 
 }

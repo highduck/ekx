@@ -1,3 +1,4 @@
+#include <platform/window.hpp>
 #include "render_target.hpp"
 
 #include "graphics.hpp"
@@ -22,7 +23,7 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
     // create render buffer and bind 16-bit depth buffer
     glBindRenderbuffer(GL_RENDERBUFFER, render_buffer_handle_);
     GLenum render_buffer_format = 0;
-    switch(type) {
+    switch (type) {
         case texture_type::depth16:
         case texture_type::depth24:
             render_buffer_format = GL_DEPTH_COMPONENT16;
@@ -33,7 +34,7 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
     }
     glRenderbufferStorage(GL_RENDERBUFFER, render_buffer_format, width, height);
     gl_check_error();
- //////
+    //////
 
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer_handle_);
     gl_check_error();
@@ -108,7 +109,7 @@ void render_target_t::set() {
 }
 
 void render_target_t::unset() {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0u);
+    glBindFramebuffer(GL_FRAMEBUFFER, g_window.primary_frame_buffer);
     gl_check_error();
 }
 

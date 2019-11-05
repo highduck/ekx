@@ -1,8 +1,8 @@
 #include "project_config.h"
 #include "template_vars.h"
 
-#include <ek/fs/system.hpp>
-#include <ek/fs/working_dir.hpp>
+#include <ek/system/system.hpp>
+#include <ek/system/working_dir.hpp>
 
 namespace ekc {
 
@@ -13,10 +13,14 @@ void build_web(const project_config_t& project) {
 
     execute("mkdir cmake-build-wasm-release");
 
+
+    execute("conan install -b missing -if cmake-build-wasm-release -pr " + (project.path_ekx / "wasm-release").str() + " .");
+
     working_dir_t::with("cmake-build-wasm-release", [&]() {
+        execute("source /Users/ilyak/dev/emsdk/emsdk_env.sh");
         execute("cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=" +
                 project.path_emsdk_toolchain.str());
-        execute("make " + project.cmake_target + " -j9");
+        execute("make " + project.cmake_target + " -j12");
 
         auto tpl_dir = project.path_ekx / "editor/templates/web";
         auto output_dir = project.path / project.build_dir;

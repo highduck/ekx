@@ -1,23 +1,23 @@
 #include <platform/Ads.h>
-#include <platform/Application.h>
+#include <platform/application.hpp>
 #include <ek/timer.hpp>
 #include <ek/logger.hpp>
 
 namespace ek {
 
-class ads_fake_timer : public Application::Listener {
+class ads_fake_timer : public application_listener_t {
 public:
     ~ads_fake_timer() override = default;
 
-    void onKeyEvent(const KeyEvent&) override {}
+    void onKeyEvent(const key_event_t&) override {}
 
     void on_text_event(const text_event_t&) override {}
 
-    void onMouseEvent(const MouseEvent&) override {}
+    void onMouseEvent(const mouse_event_t&) override {}
 
-    void onTouchEvent(const TouchEvent&) override {}
+    void onTouchEvent(const touch_event_t&) override {}
 
-    void onAppEvent(const AppEvent&) override {}
+    void onAppEvent(const app_event_t&) override {}
 
     void onDrawFrame() override {
         if (fn_ && time_ > 0.0f && timer_.read_seconds() >= time_) {
@@ -54,7 +54,7 @@ static ads_fake_timer* fake_timer = nullptr;
 void ads_play_reward_video() {
     if (!fake_timer) {
         fake_timer = new ads_fake_timer();
-        gApp.listen(fake_timer);
+        g_app.listen(fake_timer);
     }
 
     if (ads_registered_callbacks) {

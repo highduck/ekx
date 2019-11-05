@@ -1,12 +1,9 @@
 #include "flash_doc_exporter.h"
 
 #include <ek/flash/doc/flash_file.h>
-#include <ek/utility/strings.hpp>
-#include <ek/fs/system.hpp>
-#include <ek/spritepack/export_atlas.hpp>
-#include <ek/serialize/serialize.hpp>
 #include <ek/flash/rasterizer/render_to_sprite.h>
 #include <ek/flash/rasterizer/dom_scanner.h>
+#include <ek/utility/strings.hpp>
 #include <ek/logger.hpp>
 
 namespace ek::flash {
@@ -109,7 +106,8 @@ void add_rotation(scenex::movie_layer_data& layer, const std::vector<frame_t>& f
             }
 
             // additional rotations specified?
-            additionalRotation += f1.motionTweenRotateTimes * static_cast<float>(math::pi2) * direction;
+            additionalRotation += static_cast<float>(f1.motionTweenRotateTimes)
+                                  * static_cast<float>(math::pi2) * direction;
         }
 
         nextKf.skew = nextKf.skew + float2{additionalRotation, additionalRotation};
@@ -180,23 +178,11 @@ void flash_doc_exporter::build_library() {
     }
 }
 
-void flash_doc_exporter::export_library(const std::string& output_path) const {
+scenex::sg_file flash_doc_exporter::export_library() const {
     scenex::sg_file sg;
     sg.library = library.node;
     sg.linkages = linkages;
-
-    output_memory_stream out{100};
-    IO io{out};
-    io(sg);
-    save(out, output_path + ".sg");
-}
-
-void flash_doc_exporter::export_atlas(const std::string& output_path) const {
-    // TODO:
-    spritepack::atlas_t atlas;
-    atlas.name = output_path;
-    build_sprites(atlas);
-    spritepack::export_atlas(atlas);
+    return sg;
 }
 
 void flash_doc_exporter::process_symbol_instance(const element_t& el, export_item_t* parent) {

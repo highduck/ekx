@@ -2,7 +2,7 @@
 #include "process_market_assets.hpp"
 
 #include <ek/flash/doc/flash_archive.h>
-#include <ek/fs/system.hpp>
+#include <ek/system/system.hpp>
 #include <ek/logger.hpp>
 #include <ek/fs/path.hpp>
 

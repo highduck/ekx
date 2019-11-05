@@ -7,6 +7,8 @@
 #include <scenex/scene_system.h>
 #include <scenex/2d/font.hpp>
 
+using namespace ek;
+
 namespace scenex {
 
 template<typename T>
@@ -38,7 +40,7 @@ bool dispatch_interactive_event(ecs::entity e, const event_data& data) {
 void interactive_manager::update() {
     targets_.clear();
     //pointer_global_space = float2::zero;
-    auto cursor = cursor_t::Auto;
+    auto cursor = mouse_cursor_t::parent;
     bool changed = false;
     if (mouse_active_) {
         pointer_global_space = primary_mouse_;
@@ -73,11 +75,11 @@ void interactive_manager::update() {
 
     last_targets_ = targets_;
 
-    ek::gWindow.setCursor(cursor);
+    ek::g_window.set_cursor(cursor);
 }
 
 void interactive_manager::handle_mouse_event(const interactive_manager::mouse_event_t& ev) {
-    if (ev.type == mouse_event_t::Type::Down) {
+    if (ev.type == mouse_event_type::down) {
         primary_mouse_ = {ev.x, ev.y};
         pointer_down = true;
         for (auto target : last_targets_) {
@@ -85,7 +87,7 @@ void interactive_manager::handle_mouse_event(const interactive_manager::mouse_ev
                 ecs::get<interactive_t>(target).set_pointer_down();
             }
         }
-    } else if (ev.type == mouse_event_t::Type::Up) {
+    } else if (ev.type == mouse_event_type::up) {
         primary_mouse_ = {ev.x, ev.y};
         pointer_down = false;
         for (auto target : last_targets_) {
@@ -93,11 +95,11 @@ void interactive_manager::handle_mouse_event(const interactive_manager::mouse_ev
                 ecs::get<interactive_t>(target).set_pointer_up();
             }
         }
-    } else if (ev.type == mouse_event_t::Type::Move) {
+    } else if (ev.type == mouse_event_type::move) {
         primary_mouse_ = {ev.x, ev.y};
         mouse_active_ = true;
         update();
-    } else if (ev.type == mouse_event_t::Type::Exit) {
+    } else if (ev.type == mouse_event_type::exit) {
         mouse_active_ = false;
         pointer_down = false;
         update();
@@ -105,7 +107,7 @@ void interactive_manager::handle_mouse_event(const interactive_manager::mouse_ev
 }
 
 void interactive_manager::handle_touch_event(const touch_event_t& ev) {
-    if (ev.type == touch_event_t::Type::Begin) {
+    if (ev.type == touch_event_type::begin) {
         if (primary_touch_id_ == 0) {
             primary_touch_id_ = ev.id;
             primary_touch_ = {ev.x, ev.y};
@@ -121,7 +123,7 @@ void interactive_manager::handle_touch_event(const touch_event_t& ev) {
     }
 
     if (primary_touch_id_ == ev.id) {
-        if (ev.type == touch_event_t::Type::End) {
+        if (ev.type == touch_event_type::end) {
             primary_touch_id_ = 0;
             primary_touch_ = float2::zero;
             pointer_down = false;
@@ -159,7 +161,7 @@ void interactive_manager::set_debug_hit(ecs::entity hit) {
     }
 }
 
-interactive_manager::cursor_t interactive_manager::search_interactive_targets(
+interactive_manager::mouse_cursor_t interactive_manager::search_interactive_targets(
         ecs::entity node,
         std::vector<ecs::entity>& out_entities) {
 
@@ -168,7 +170,7 @@ interactive_manager::cursor_t interactive_manager::search_interactive_targets(
         target = drag_entity_;
     }
 
-    auto cursor = cursor_t::Auto;
+    auto cursor = mouse_cursor_t::parent;
 
     if (debug_hit_enabled) {
         set_debug_hit(target);
@@ -177,7 +179,7 @@ interactive_manager::cursor_t interactive_manager::search_interactive_targets(
     while (target) {
         if (ecs::has<interactive_t>(target)) {
             auto& data = ecs::get<interactive_t>(target);
-            if (cursor == cursor_t::Auto) {
+            if (cursor == mouse_cursor_t::parent) {
                 cursor = data.cursor;
             }
             out_entities.push_back(target);

@@ -5,6 +5,7 @@ project(ekx LANGUAGES CXX)
 option(BUILD_TESTS "Build unit tests" OFF)
 option(BUILD_COVERAGE "Build coverage check" OFF)
 option(BUILD_BENCHMARKS "Build benchmarks projects" OFF)
+option(BUILD_EDITOR "Build editor projects" ON)
 
 message(INFO "[${PROJECT_NAME}] loading `${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake`")
 include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
@@ -30,8 +31,13 @@ add_subdirectory(ecxx)
 add_subdirectory(core)
 add_subdirectory(ek)
 add_subdirectory(scenex)
-add_subdirectory(flash)
-add_subdirectory(editor)
+
+message("CONAN_COMPILE_DEFINITIONS_EKX: ${CONAN_COMPILE_DEFINITIONS_EKX}")
+
+if (BUILD_EDITOR)
+    add_subdirectory(flash)
+    add_subdirectory(editor)
+endif ()
 
 #add_library(ekx INTERFACE)
 #target_link_libraries(ekx INTERFACE scenex)

@@ -2,13 +2,13 @@
 
 #include <vector>
 #include <ek/signals.hpp>
-#include <platform/Window.h>
+#include <platform/window.hpp>
 
 namespace scenex {
 
 struct interactive_t {
 
-    using cursor_t = ek::MouseCursor;
+    using mouse_cursor_t = ek::mouse_cursor_t;
     using signal_t = ek::signal_t<>;
 
     // events
@@ -18,7 +18,7 @@ struct interactive_t {
     signal_t on_up;
     signal_t on_clicked;
 
-    cursor_t cursor{cursor_t::Auto};
+    mouse_cursor_t cursor{mouse_cursor_t::parent};
 
     //bool enabled = true;
     bool bubble = false;

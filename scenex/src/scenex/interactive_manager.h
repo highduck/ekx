@@ -3,18 +3,18 @@
 #include <scenex/config/ecs.h>
 #include <scenex/config.h>
 
-#include <platform/Window.h>
-#include <platform/Application.h>
+#include <platform/window.hpp>
+#include <platform/application.hpp>
 
 namespace scenex {
 
 class interactive_manager {
 public:
-    using app_event_t = ek::AppEvent;
-    using cursor_t = ek::MouseCursor;
-    using mouse_event_t = ek::MouseEvent;
-    using touch_event_t = ek::TouchEvent;
-    using key_event_t = ek::KeyEvent;
+    using app_event_t = ek::app_event_t;
+    using mouse_cursor_t = ek::mouse_cursor_t;
+    using mouse_event_t = ek::mouse_event_t;
+    using touch_event_t = ek::touch_event_t;
+    using key_event_t = ek::key_event_t;
 
     bool debug_hit_enabled = false;
     float2 pointer_global_space = float2::zero;
@@ -33,7 +33,7 @@ public:
 
     void update();
 
-    cursor_t search_interactive_targets(ecs::entity node, std::vector<ecs::entity>& out_entities);
+    mouse_cursor_t search_interactive_targets(ecs::entity node, std::vector<ecs::entity>& out_entities);
 
     void send_back_button();
 

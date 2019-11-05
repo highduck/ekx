@@ -228,6 +228,8 @@ bool make_dir(const char* path) {
     err = mkdir(path, mode); // can be used on non-Windows
 #endif
     return err == 0;
+#else
+    return false;
 #endif
 }
 

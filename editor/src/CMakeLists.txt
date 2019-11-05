@@ -67,6 +67,10 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/assets/texture_asset.hpp
         ek/editor/assets/model_asset.cpp
         ek/editor/assets/model_asset.hpp
+        ek/system/system.cpp
+        ek/system/system.hpp
+        ek/system/working_dir.cpp
+        ek/system/working_dir.hpp
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

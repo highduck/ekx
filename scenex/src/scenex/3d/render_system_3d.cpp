@@ -5,12 +5,11 @@
 #include <ek/locator.hpp>
 #include <ek/timer.hpp>
 #include <draw2d/drawer.hpp>
-#include <platform/Window.h>
+#include <platform/window.hpp>
 #include <scenex/components/node_t.h>
 #include <ek/math/matrix_transform.hpp>
 #include <ek/math/matrix_transpose.hpp>
 #include <graphics/render_target.hpp>
-#include <ek/timer.hpp>
 #include <graphics/gl_debug.hpp>
 #include "camera_3d.hpp"
 #include "static_mesh.hpp"
@@ -275,8 +274,8 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     mat4f model{};
     mat4f view = inverse(camera_transform.world);
 
-    const auto width = gWindow.backBufferSize.width;
-    const auto height = gWindow.backBufferSize.height;
+    const auto width = g_window.back_buffer_size.width;
+    const auto height = g_window.back_buffer_size.height;
     mat4f proj{};
     const auto aspect = (float) width / height;
     if (camera_data.orthogonal) {
@@ -327,8 +326,8 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     });
 
     const float2 res{
-            static_cast<float>(gWindow.backBufferSize.width),
-            static_cast<float>(gWindow.backBufferSize.height)
+            static_cast<float>(g_window.back_buffer_size.width),
+            static_cast<float>(g_window.back_buffer_size.height)
     };
 
     program3d->set_uniform(program_uniforms::frame_resolution, float4{

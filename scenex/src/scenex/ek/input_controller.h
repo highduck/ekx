@@ -1,6 +1,6 @@
 #pragma once
 
-#include <platform/Application.h>
+#include <platform/application.hpp>
 #include <scenex/interactive_manager.h>
 #include <vector>
 
@@ -24,33 +24,37 @@ struct touch_state_t {
     }
 };
 
-class input_controller : public ek::Application::Listener {
+class input_controller : public ek::application_listener_t {
 public:
 
     explicit input_controller(interactive_manager& interactions);
 
     ~input_controller() override;
 
-    void onKeyEvent(const ek::KeyEvent& event) override;
+    void onKeyEvent(const ek::key_event_t& event) override;
 
-    void onMouseEvent(const ek::MouseEvent& event) override;
+    void onMouseEvent(const ek::mouse_event_t& event) override;
 
-    void onTouchEvent(const ek::TouchEvent& event) override;
+    void onTouchEvent(const ek::touch_event_t& event) override;
 
-    void onAppEvent(const ek::AppEvent& event) override;
+    void onAppEvent(const ek::app_event_t& event) override;
 
     void onDrawFrame() override {};
 
     void on_frame_completed() override;
 
-    bool is_key(ek::KeyEvent::Code code) const;
+    [[nodiscard]]
+    bool is_key(ek::key_code code) const;
 
-    bool is_key_down(ek::KeyEvent::Code code) const;
+    [[nodiscard]]
+    bool is_key_down(ek::key_code code) const;
 
-    bool is_key_up(ek::KeyEvent::Code code) const;
+    [[nodiscard]]
+    bool is_key_up(ek::key_code code) const;
 
     void reset_keyboard();
 
+    [[nodiscard]]
     const std::vector<touch_state_t>& touches() const {
         return touches_;
     }
@@ -75,10 +79,10 @@ private:
 
     interactive_manager& interactions_;
     std::string keyboard_text_;
-    int keyboard_modifiers_;
+    int keyboard_modifiers_{};
     bool reset_keys_ = false;
 
-    constexpr static size_t keys_count = static_cast<size_t>(ek::KeyEvent::Code::MaxCount);
+    constexpr static size_t keys_count = static_cast<size_t>(ek::key_code::MaxCount);
     using keys_array = std::array<key_state_t, keys_count>;
     keys_array keys_;
 

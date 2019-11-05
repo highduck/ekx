@@ -1,9 +1,8 @@
 #include "generate_project_common.hpp"
 #include "project_config.h"
 
-#include <ek/utility/strings.hpp>
-#include <ek/fs/system.hpp>
-#include <ek/fs/working_dir.hpp>
+#include <ek/system/system.hpp>
+#include <ek/system/working_dir.hpp>
 #include <plist/plist.hpp>
 
 #include <string>

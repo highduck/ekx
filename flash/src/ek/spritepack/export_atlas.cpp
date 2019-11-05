@@ -8,7 +8,6 @@
 #include <ek/logger.hpp>
 #include <ek/math/serialize_math.hpp>
 #include <ek/fs/path.hpp>
-#include <ek/fs/system.hpp>
 
 #include <thread>
 
@@ -26,6 +25,16 @@ inline std::string get_atlas_suffix(float scale, int page_index = 0) {
     return suffix;
 }
 
+void save_stream(const output_memory_stream& stream, const path_t& path) {
+    auto h = fopen(path.c_str(), "wb");
+    if (h) {
+        fwrite(stream.data(), 1, stream.size(), h);
+        fclose(h);
+    } else {
+        EK_WARN << "fopen error: " << path;
+    }
+}
+
 void save_atlas_resolution(atlas_resolution_t& resolution, const std::string& name) {
     int page_index = 0;
     for (auto& page : resolution.pages) {
@@ -38,7 +47,7 @@ void save_atlas_resolution(atlas_resolution_t& resolution, const std::string& na
     output_memory_stream os{100};
     IO io{os};
     io(const_cast<atlas_resolution_t&>(resolution));
-    save(os, path_t{name + get_atlas_suffix(resolution.resolution_scale) + ".atlas"});
+    save_stream(os, path_t{name + get_atlas_suffix(resolution.resolution_scale) + ".atlas"});
 }
 
 static void export_atlas_thread(const std::string& name,

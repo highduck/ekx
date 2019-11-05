@@ -42,11 +42,12 @@ Edit Mode:
 - `pugixml`
 - `cairo`
 - `freetype2`
-- `stb_image_write`
+- `stb_image_write` (included)
 - `fmt`
 - `kainjow-mustache`
 - `json_for_modern_cpp`
 - `mod-pbxproj` python library
+- `miniz` and `zip_file.cpp` (patched)
 
 ## Installation
 
@@ -55,8 +56,6 @@ pip3 install --upgrade conan
 conan remote add -f eliasku https://api.bintray.com/conan/eliasku/public-conan
 conan install -if cmake-build-debug -pr clion-debug -b missing .
 ```
-
-
 
 add tooling root to environment
 ```
@@ -67,3 +66,18 @@ add lines:
 ```
 source ~/highduck/ekx/env.sh
 ```
+
+
+## TODO
+
+- Windows support
+- Audio
+- Repack Atlases by Tag
+
+
+# Development
+
+ReleaseWasm
+`-DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/Users/ilyak/dev/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake`
+
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/Users/ilyak/dev/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake

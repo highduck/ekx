@@ -1,50 +1,46 @@
 #include <jni.h>
-#include <platform/Application.h>
-#include <platform/Window.h>
+#include <platform/application.hpp>
 #include <platform/ek_android.h>
 #include <platform/boot.h>
 
+using namespace ek;
+
 extern "C" JNIEXPORT void JNICALL
 Java_ekapp_EKPlatform_handle_1enter_1frame(JNIEnv *env, jclass type) {
-    ek::gApp.dispatchDrawFrame();
+    g_app.dispatch_draw_frame();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_ekapp_EKPlatform_handle_1resume(JNIEnv *env, jclass type) {
-
-    ek::gApp.dispatch({ek::AppEvent::Type::Resumed});
-
+    g_app.dispatch({app_event_type::resumed});
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_ekapp_EKPlatform_handle_1pause(JNIEnv *env, jclass type) {
-
-    ek::gApp.dispatch({ek::AppEvent::Type::Paused});
-
+    g_app.dispatch({app_event_type::paused});
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_ekapp_EKPlatform_handle_1touch_1event(JNIEnv *env, jclass type_, jint type, jint id, jfloat x,
-                                           jfloat y) {
+Java_ekapp_EKPlatform_handle_1touch_1event(JNIEnv *env, jclass type_, jint type, jint id,
+                                           jfloat x, jfloat y) {
 
-    ek::gApp.dispatch({(ek::TouchEvent::Type) type, (uint64_t) (id + 1), x, y});
-
+    g_app.dispatch({(touch_event_type) type, (uint64_t) (id + 1), x, y});
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_ekapp_EKPlatform_handle_1resize(JNIEnv *env, jclass type, jint width, jint height,
-                                     jfloat scaleFactor) {
+                                     jfloat scale_factor) {
 
-    ek::gWindow.scaleFactor = scaleFactor;
-    ek::gWindow.windowSize = {
+    g_window.device_pixel_ratio = scale_factor;
+    g_window.window_size = {
             static_cast<uint32_t>(width),
             static_cast<uint32_t>(height)
     };
-    ek::gWindow.backBufferSize = {
+    g_window.back_buffer_size = {
             static_cast<uint32_t>(width),
             static_cast<uint32_t>(height)
     };
-    ek::gWindow.sizeChanged = true;
+    g_window.size_changed = true;
 
 }
 
@@ -57,16 +53,16 @@ Java_ekapp_EKPlatform_on_1startup(JNIEnv *env, jclass type) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_ekapp_EKPlatform_on_1ready(JNIEnv *env, jclass type) {
-    ek::gApp.start();
+    g_app.start();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_ekapp_EKPlatform_handle_1back_1button(JNIEnv *env, jclass type) {
-    ek::gApp.dispatch({ek::AppEvent::Type::BackButton});
+    g_app.dispatch({app_event_type::back_button});
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_ekapp_EKPlatform_set_1assets_1manager(JNIEnv *env, jclass type, jobject assets) {
 
-    ek::android::set_asset_manager(assets);
+    android::set_asset_manager(assets);
 }

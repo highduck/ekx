@@ -1,8 +1,8 @@
 #include "project_config.h"
 
-#include <ek/fs/working_dir.hpp>
+#include <ek/system/working_dir.hpp>
+#include <ek/system/system.hpp>
 #include <ek/logger.hpp>
-#include <ek/fs/system.hpp>
 
 #include <cstdlib>
 
@@ -24,7 +24,13 @@ void init_project_config_defaults(project_config_t& dest) {
 
 
     dest.path_emsdk_toolchain = ek::path_t{
-            "/Users/ilyak/dev/emsdk/emscripten/1.38.29/cmake/Modules/Platform/Emscripten.cmake"};
+            "/Users/ilyak/dev/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"};
+
+    if (!ek::is_file(dest.path_emsdk_toolchain)) {
+        EK_WARN << "Emscripten SDK toolchain is not found: " << dest.path_ekx;
+        EK_WARN << "Web Target is not available";
+    }
+    
     dest.path = ek::path_t{ek::current_working_directory()};
 }
 

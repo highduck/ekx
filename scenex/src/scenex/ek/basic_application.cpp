@@ -22,11 +22,11 @@ namespace scenex {
 using ecs::world;
 using ecs::entity;
 using ek::service_locator_instance;
-using ek::gWindow;
+using ek::g_window;
 using ek::resolve;
 
 basic_application::basic_application()
-        : base_resolution{gWindow.creation_config.width, gWindow.creation_config.height} {
+        : base_resolution{g_window.creation_config.width, g_window.creation_config.height} {
 
     ek::assert_created_once<basic_application>();
 
@@ -50,7 +50,7 @@ void basic_application::initialize() {
 
     //// basic scene
     root = create_node_2d("root");
-    const auto screen_size = gWindow.backBufferSize;
+    const auto screen_size = g_window.back_buffer_size;
     ecs::get<scenex::transform_2d>(root).rect.set(0.0f, 0.0f, screen_size.width, screen_size.height);
 
     auto& im = service_locator_instance<interactive_manager>::init();

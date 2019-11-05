@@ -1,8 +1,8 @@
 #import "AppDelegate.h"
 
 #include <ek/logger.hpp>
-#include "platform/Application.h"
-#include "platform/Window.h"
+#include "platform/application.hpp"
+#include "platform/window.hpp"
 
 @implementation AppDelegate
 
@@ -65,7 +65,7 @@
 }
 
 - (void)createWindow {
-    auto& config = ek::gWindow.creation_config;
+    auto& config = ek::g_window.creation_config;
     NSRect frame = NSMakeRect(100, 100, config.width, config.height);
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable |
                                   NSWindowStyleMaskMiniaturizable;
@@ -93,23 +93,23 @@
     NSRect frame = [NSWindow contentRectForFrameRect:nsWindow.frame
                                            styleMask:nsWindow.styleMask];
     EK_DEBUG << "changed window_size (via windowDidResize)";
-    ek::gWindow.windowSize = {
+    ek::g_window.window_size = {
             static_cast<uint32_t>(frame.size.width),
             static_cast<uint32_t>(frame.size.height)
     };
-    ek::gWindow.sizeChanged = true;
+    ek::g_window.size_changed = true;
 }
 
 - (void)windowDidChangeBackingProperties:(__unused NSNotification*)notification {
-    EK_DEBUG << "changed scaleFactor (via windowDidChangeBackingProperties)";
-    ek::gWindow.scaleFactor = static_cast<float>(nsWindow.backingScaleFactor);
-    ek::gWindow.sizeChanged = true;
+    EK_DEBUG << "`windowDidChangeBackingProperties` changed device_pixel_ratio to " << nsWindow.backingScaleFactor;
+    ek::g_window.device_pixel_ratio = static_cast<float>(nsWindow.backingScaleFactor);
+    ek::g_window.size_changed = true;
 }
 
 - (void)applicationWillFinishLaunching:(__unused NSNotification*)notification {
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
-    ek::gApp.init();
+    ek::g_app.init();
 
     [self setupMenuBar];
     [self createView];
@@ -118,7 +118,7 @@
 
 - (void)applicationDidFinishLaunching:(__unused NSNotification*)notification {
     [NSApp activateIgnoringOtherApps:YES];
-    ek::gApp.start();
+    ek::g_app.start();
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(__unused NSApplication*)theApplication {
@@ -126,15 +126,15 @@
 }
 
 - (void)applicationWillTerminate:(__unused NSNotification*)notification {
-    ek::gApp.dispatch({ek::AppEvent::Type::Close});
+    ek::g_app.dispatch({ek::app_event_type::close});
 }
 
 - (void)applicationWillResignActive:(__unused NSNotification*)notification {
-    ek::gApp.dispatch({ek::AppEvent::Type::Paused});
+    ek::g_app.dispatch({ek::app_event_type::paused});
 }
 
 - (void)applicationDidBecomeActive:(__unused NSNotification*)notification {
-    ek::gApp.dispatch({ek::AppEvent::Type::Resumed});
+    ek::g_app.dispatch({ek::app_event_type::resumed});
 }
 
 @end

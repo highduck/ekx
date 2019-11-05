@@ -4,7 +4,7 @@
 
 #include <ek/locator.hpp>
 #include <baseapp/base_app.hpp>
-#include <platform/Application.h>
+#include <platform/application.hpp>
 #include <signal.h>
 #include <ek/signals.hpp>
 #include <ek/timer.hpp>
@@ -47,7 +47,7 @@ void run_app() {
     auto& app = ek::service_locator_instance<basic_application>::init<T>();
     app.initialize();
     app.preload();
-    ek::gApp.listen(&app);
+    ek::g_app.listen(&app);
 }
 
 }

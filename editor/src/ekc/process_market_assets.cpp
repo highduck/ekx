@@ -7,8 +7,8 @@
 #include <fmt/core.h>
 
 #include <ek/flash/rasterizer/render_to_sprite.h>
-#include <ek/fs/working_dir.hpp>
-#include <ek/fs/system.hpp>
+#include <ek/system/working_dir.hpp>
+#include <ek/system/system.hpp>
 #include <ek/utility/strings.hpp>
 #include <xfl/flash_doc_exporter.h>
 

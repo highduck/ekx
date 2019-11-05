@@ -1,7 +1,7 @@
 #include <platform/ek_android.h>
 
-#include <platform/Application.h>
-#include <platform/Window.h>
+#include <platform/application.hpp>
+#include <platform/window.hpp>
 #include <platform/static_resources.hpp>
 
 #include <android/log.h>
@@ -138,7 +138,7 @@ namespace ek {
     }
 
     void start_application() {
-        gApp.init();
+        g_app.init();
 
         auto *env = android_jni_get_env();
         auto class_ref = env->FindClass("ekapp/EKActivity");
@@ -147,18 +147,18 @@ namespace ek {
         env->DeleteLocalRef(class_ref);
     }
 
-    Window::NativeViewContext Window::viewContext() const {
+    native_window_context_t window_t::view_context() const {
         return android::get_activity();
     }
 
-    void Application::exit(int code) {
+    void application_t::exit(int code) {
         auto *env = android_jni_get_env();
         auto class_ref = env->FindClass("ekapp/EKActivity");
         auto method = env->GetStaticMethodID(class_ref, "app_exit", "(I)V");
         env->CallStaticIntMethod(class_ref, method);
     }
 
-    void Window::updateMouseCursor() {}
+    void window_t::update_mouse_cursor() {}
 
     std::string get_device_lang() {
         auto *env = android_jni_get_env();

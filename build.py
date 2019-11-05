@@ -35,4 +35,5 @@ def create_local(target_path, ref, build_profile="default", arch=None):
 
 init()
 
-create_local(".", "ekx/0.0.1@eliasku/testing")
+#create_local(".", "ekx/0.0.1@eliasku/testing")
+create_local_b(".", "ekx/0.0.1@eliasku/testing", "Release", "wasm-release")

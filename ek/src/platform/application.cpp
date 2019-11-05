@@ -1,32 +1,30 @@
-#include <utility>
-
-#include "Application.h"
-
-#include "Window.h"
+#include "application.hpp"
 #include "analytics.hpp"
 #include "crash_reporter.hpp"
 
+#include <utility>
+
 namespace ek {
 
-Application gApp{};
+application_t g_app{};
 
 void setup_application_window(window_creation_config_t config) {
-    gWindow.creation_config = std::move(config);
+    g_window.creation_config = std::move(config);
 }
 
-Application::Listener::~Listener() = default;
+application_listener_t::~application_listener_t() = default;
 
-void Application::init() {
+void application_t::init() {
     analytics::init(); // analytics before crash reporter on ios
     init_crash_reporter();
 }
 
-void Application::start() {
+void application_t::start() {
     ek_main();
 }
 
-void Application::handle_event(const any_event_t& event) {
-    for (auto* listener : mListeners) {
+void application_t::handle_event(const any_event_t& event) {
+    for (auto* listener : listeners_) {
         switch (event.kind) {
             case event_kind::App:
                 listener->onAppEvent(event.data.app);
@@ -47,21 +45,21 @@ void Application::handle_event(const any_event_t& event) {
     }
 }
 
-void Application::dispatchDrawFrame() {
-    if (gWindow.sizeChanged) {
-        gWindow.sizeChanged = false;
-        handle_event(any_event_t{AppEvent{AppEvent::Type::Resize}});
+void application_t::dispatch_draw_frame() {
+    if (g_window.size_changed) {
+        g_window.size_changed = false;
+        handle_event(any_event_t{app_event_t{app_event_type::resize}});
     }
     for (const auto& event : event_queue_) {
         handle_event(event);
     }
     event_queue_.clear();
 
-    for (auto* listener : mListeners) {
+    for (auto* listener : listeners_) {
         listener->onDrawFrame();
     }
 
-    for (auto* listener : mListeners) {
+    for (auto* listener : listeners_) {
         listener->on_frame_completed();
     }
 }

@@ -1,16 +1,13 @@
 #include "OpenGLView.h"
 
-#include "platform/Application.h"
-#include "platform/Window.h"
 #include "osx_input.h"
+
+#include <platform/application.hpp>
 
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl3.h>
 
-using TouchEvent = ek::TouchEvent;
-using KeyEvent = ek::KeyEvent;
-using MouseEvent = ek::MouseEvent;
-using MouseCursor = ek::MouseCursor;
+using namespace ek;
 
 @interface NSCursor (HelpCursor)
 + (NSCursor*)_helpCursor;
@@ -32,8 +29,8 @@ using MouseCursor = ek::MouseCursor;
 //    return [CALayer layer];
 //}
 
-- (CVReturn)getFrameForTime: (const CVTimeStamp*)outputTime {
-    (void)outputTime;
+- (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime {
+    (void) outputTime;
     // There is no autorelease pool when this method is called
     // because it will be called from a background thread.
     // It's important to create one or app can leak objects.
@@ -50,12 +47,12 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
                                       CVOptionFlags flagsIn,
                                       CVOptionFlags* flagsOut,
                                       void* displayLinkContext) {
-    (void)displayLink; // unused
-    (void)now; // unused
-    (void)flagsIn; // unused
-    (void)flagsOut; // unused
+    (void) displayLink; // unused
+    (void) now; // unused
+    (void) flagsIn; // unused
+    (void) flagsOut; // unused
 
-    CVReturn result = [(__bridge OpenGLView*)displayLinkContext getFrameForTime: outputTime];
+    CVReturn result = [(__bridge OpenGLView*) displayLinkContext getFrameForTime:outputTime];
     return result;
 }
 
@@ -70,7 +67,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
 
     // Set the renderer output callback function
-    CVDisplayLinkSetOutputCallback(displayLink, &MyDisplayLinkCallback, (__bridge void*)self);
+    CVDisplayLinkSetOutputCallback(displayLink, &MyDisplayLinkCallback, (__bridge void*) self);
 
     // Set the display link for the current renderer
     CGLContextObj cglContext = [[self openGLContext] CGLContextObj];
@@ -81,13 +78,13 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     CVDisplayLinkStart(displayLink);
 
     // Register to be notified when the window closes so we can stop the displaylink
-    [[NSNotificationCenter defaultCenter] addObserver: self
-                                             selector: @selector(windowWillClose:)
-                                                 name: NSWindowWillCloseNotification
-                                               object: [self window]];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(windowWillClose:)
+                                                 name:NSWindowWillCloseNotification
+                                               object:[self window]];
 }
 
-- (void)windowWillClose: (__unused NSNotification*)notification {
+- (void)windowWillClose:(__unused NSNotification*)notification {
 // Stop the display link when the window is closing because default
 // OpenGL render buffers will be destroyed.  If display link continues to
 // fire without renderbuffers, OpenGL draw calls will set errors.
@@ -106,7 +103,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     // Synchronize buffer swaps with vertical refresh rate
     GLint swapInt = 1;
     //GLint swapInt = 0;
-    [[self openGLContext] setValues: &swapInt forParameter: NSOpenGLCPSwapInterval];
+    [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
 
     [self handleResize];
 
@@ -139,13 +136,13 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
 }
 
 - (void)handleResize {
-    auto& window = const_cast<ek::Window&>(ek::gWindow);
+    auto& window = const_cast<window_t&>(g_window);
 
-    window.scaleFactor = static_cast<float>(self.window.backingScaleFactor);
+    window.device_pixel_ratio = static_cast<float>(self.window.backingScaleFactor);
 
     // Get the view size in Points
     NSRect viewRectPoints = [self bounds];
-    window.windowSize = {
+    window.window_size = {
             static_cast<uint32_t>(viewRectPoints.size.width),
             static_cast<uint32_t>(viewRectPoints.size.height)
     };
@@ -162,13 +159,13 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     // viewRectPixels will be larger than viewRectPoints for retina displays.
     // viewRectPixels will be the same as viewRectPoints for non-retina displays
 
-    NSRect viewRectPixels = [self convertRectToBacking: [self bounds]];
-    window.backBufferSize = {
+    NSRect viewRectPixels = [self convertRectToBacking:[self bounds]];
+    window.back_buffer_size = {
             static_cast<uint32_t>(viewRectPixels.size.width),
             static_cast<uint32_t>(viewRectPixels.size.height)
     };
 
-    window.sizeChanged = true;
+    window.size_changed = true;
 }
 
 // Called whenever graphics state updated (such as window resize)
@@ -184,7 +181,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
 }
 
 // Called during resize operations
-- (void)drawRect: (__unused NSRect)theRect {
+- (void)drawRect:(__unused NSRect)theRect {
     // Avoid flickering during resize by drawing
     [self drawView];
 }
@@ -199,7 +196,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     CGLLockContext([[self openGLContext] CGLContextObj]);
 
     [[self openGLContext] makeCurrentContext];
-    ek::gApp.dispatchDrawFrame();
+    g_app.dispatch_draw_frame();
 
     CGLFlushDrawable([[self openGLContext] CGLContextObj]);
     CGLUnlockContext([[self openGLContext] CGLContextObj]);
@@ -218,20 +215,21 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     [super resetCursorRects];
     NSCursor* cursor = nil;
 
-    switch (ek::gWindow.cursor()) {
-        case MouseCursor::Button :
+    switch (g_window.cursor()) {
+        case mouse_cursor_t::button:
             cursor = NSCursor.pointingHandCursor;
             break;
-        case MouseCursor::Help :
+        case mouse_cursor_t::help:
             cursor = NSCursor._helpCursor;
             break;
-        default:
+        case mouse_cursor_t::arrow:
+        case mouse_cursor_t::parent:
             cursor = NSCursor.arrowCursor;
             break;
     }
 
     if (cursor) {
-        [self addCursorRect: [self bounds] cursor: cursor];
+        [self addCursorRect:[self bounds] cursor:cursor];
         [cursor set];
     }
 }
@@ -242,9 +240,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
     return YES;
 }
 
-- (void)handleMouse: (NSEvent*)event {
-    NSPoint location = [self convertPoint: event.locationInWindow fromView: nil];
-    MouseEvent ev{};
+- (void)handleMouse:(NSEvent*)event {
+    NSPoint location = [self convertPoint:event.locationInWindow fromView:nil];
+    mouse_event_t ev{};
     auto scale = self.window.backingScaleFactor;
     ev.x = static_cast<float>(location.x * scale);
     ev.y = static_cast<float>(location.y * scale);
@@ -253,17 +251,17 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
         case NSEventTypeLeftMouseDown:
         case NSEventTypeLeftMouseDragged:
         case NSEventTypeLeftMouseUp:
-            ev.button = MouseEvent::Button::Left;
+            ev.button = mouse_button::left;
             break;
         case NSEventTypeRightMouseDown:
         case NSEventTypeRightMouseDragged:
         case NSEventTypeRightMouseUp:
-            ev.button = MouseEvent::Button::Right;
+            ev.button = mouse_button::right;
             break;
         case NSEventTypeOtherMouseDown:
         case NSEventTypeOtherMouseDragged:
         case NSEventTypeOtherMouseUp:
-            ev.button = MouseEvent::Button::Other;
+            ev.button = mouse_button::other;
             break;
         default:
             break;
@@ -273,106 +271,106 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
         case NSEventTypeLeftMouseDown:
         case NSEventTypeRightMouseDown:
         case NSEventTypeOtherMouseDown:
-            ev.type = MouseEvent::Type::Down;
+            ev.type = mouse_event_type::down;
             break;
         case NSEventTypeLeftMouseUp:
         case NSEventTypeRightMouseUp:
         case NSEventTypeOtherMouseUp:
-            ev.type = MouseEvent::Type::Up;
+            ev.type = mouse_event_type::up;
             break;
         case NSEventTypeLeftMouseDragged:
         case NSEventTypeRightMouseDragged:
         case NSEventTypeOtherMouseDragged:
         case NSEventTypeMouseMoved:
-            ev.type = MouseEvent::Type::Move;
+            ev.type = mouse_event_type::move;
             break;
         case NSEventTypeMouseEntered:
-            ev.type = MouseEvent::Type::Enter;
+            ev.type = mouse_event_type::enter;
             break;
         case NSEventTypeMouseExited:
-            ev.type = MouseEvent::Type::Exit;
+            ev.type = mouse_event_type::exit;
             break;
         case NSEventTypeScrollWheel:
-            ev.type = MouseEvent::Type::Scroll;
-            ek::osx_handle_mouse_wheel_scroll(event, ev);
+            ev.type = mouse_event_type::scroll;
+            osx_handle_mouse_wheel_scroll(event, ev);
             break;
         default:
             break;
     }
-    ek::gApp.dispatch(ev);
+    g_app.dispatch(ev);
 }
 
-- (void)mouseDown: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)mouseDown:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)mouseUp: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)mouseUp:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)rightMouseDown: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)rightMouseDown:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)rightMouseUp: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)rightMouseUp:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)otherMouseDown: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)otherMouseDown:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)otherMouseUp: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)otherMouseUp:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)mouseMoved: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)mouseMoved:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)mouseDragged: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)mouseDragged:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)rightMouseDragged: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)rightMouseDragged:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)otherMouseDragged: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)otherMouseDragged:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)mouseEntered: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)mouseEntered:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)mouseExited: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)mouseExited:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
-- (void)scrollWheel: (NSEvent*)event {
-    [self handleMouse: event];
+- (void)scrollWheel:(NSEvent*)event {
+    [self handleMouse:event];
 }
 
 /**** HANDLE TOUCH *****/
 
-void handleTouch(TouchEvent::Type eventType, float scaleFactor, NSTouch* touch) {
+void handleTouch(touch_event_type event_type, float scale_factor, NSTouch* touch) {
     CGPoint location = touch.normalizedPosition;
-    TouchEvent ev{
-            eventType,
+    touch_event_t ev{
+            event_type,
             uint64_t([touch identity]) + 1u,
 //            static_cast<uint64_t>(touch.identity) + 1u,
-            static_cast<float>(scaleFactor * location.x),
-            static_cast<float>(scaleFactor * location.y)
+            static_cast<float>(scale_factor * location.x),
+            static_cast<float>(scale_factor * location.y)
     };
-    ek::gApp.dispatch(ev);
+    g_app.dispatch(ev);
 }
 //
 //- (void)touchesBeganWithEvent: (NSEvent*)event {
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseBegan inView: self];
 //    auto sc = (float)self.window.backingScaleFactor;
 //    for (NSTouch* touch in touches) {
-//        handleTouch(TouchEvent::Type::Begin, sc, touch);
+//        handleTouch(touch_event_type::begin, sc, touch);
 //    }
 //}
 //
@@ -380,7 +378,7 @@ void handleTouch(TouchEvent::Type eventType, float scaleFactor, NSTouch* touch) 
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseMoved inView: self];
 //    auto sc = (float)self.window.backingScaleFactor;
 //    for (NSTouch* touch in touches) {
-//        handleTouch(TouchEvent::Type::Move, sc, touch);
+//        handleTouch(touch_event_type::move, sc, touch);
 //    }
 //}
 //
@@ -388,7 +386,7 @@ void handleTouch(TouchEvent::Type eventType, float scaleFactor, NSTouch* touch) 
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseEnded inView: self];
 //    auto sc = (float)self.window.backingScaleFactor;
 //    for (NSTouch* touch in touches) {
-//        handleTouch(TouchEvent::Type::End, sc, touch);
+//        handleTouch(touch_event_type::end, sc, touch);
 //    }
 //}
 //
@@ -396,48 +394,48 @@ void handleTouch(TouchEvent::Type eventType, float scaleFactor, NSTouch* touch) 
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseCancelled inView: self];
 //    auto sc = (float)self.window.backingScaleFactor;
 //    for (NSTouch* touch in touches) {
-//        handleTouch(TouchEvent::Type::End, sc, touch);
+//        handleTouch(touch_event_type::end, sc, touch);
 //    }
 //}
 
 /***** BLOCK GESTURES ****/
-- (void)swipeWithEvent: (__unused NSEvent*)event {}
+- (void)swipeWithEvent:(__unused NSEvent*)event {}
 
-- (void)rotateWithEvent: (__unused NSEvent*)event {}
+- (void)rotateWithEvent:(__unused NSEvent*)event {}
 
-- (void)magnifyWithEvent: (__unused NSEvent*)event {}
+- (void)magnifyWithEvent:(__unused NSEvent*)event {}
 
 
-- (void)keyDown: (NSEvent*)event {
-    auto key_code = ek::convert_key_code(event.keyCode);
+- (void)keyDown:(NSEvent*)event {
+    auto key_code = convert_key_code(event.keyCode);
     if (!event.ARepeat) {
-        KeyEvent key{KeyEvent::Type::Down, key_code};
+        key_event_t key{key_event_type::down, key_code};
         setup_modifiers(event.modifierFlags, key);
-        ek::gApp.dispatch(key);
+        g_app.dispatch(key);
     }
-    if (ek::is_text_event(event)) {
-        ek::gApp.dispatch(ek::text_event_t{event.characters.UTF8String});
+    if (is_text_event(event)) {
+        g_app.dispatch(text_event_t{event.characters.UTF8String});
     }
 }
 
-- (void)keyUp: (NSEvent*)event {
-    auto key_code = ek::convert_key_code(event.keyCode);
+- (void)keyUp:(NSEvent*)event {
+    auto key_code = convert_key_code(event.keyCode);
     if (!event.ARepeat) {
-        KeyEvent key{KeyEvent::Type::Up, key_code};
+        key_event_t key{key_event_type::up, key_code};
         setup_modifiers(event.modifierFlags, key);
-        ek::gApp.dispatch(key);
+        g_app.dispatch(key);
     }
 }
 
-- (void)flagsChanged: (NSEvent*)event {
-    NSUInteger mask = ek::convert_key_code_to_modifier_mask(event.keyCode);
+- (void)flagsChanged:(NSEvent*)event {
+    NSUInteger mask = convert_key_code_to_modifier_mask(event.keyCode);
     if (mask) {
-        KeyEvent key{(event.modifierFlags & mask)
-                     ? KeyEvent::Type::Down
-                     : KeyEvent::Type::Up,
-                     ek::convert_key_code(event.keyCode)};
+        key_event_t key{(event.modifierFlags & mask)
+                        ? key_event_type::down
+                        : key_event_type::up,
+                        convert_key_code(event.keyCode)};
         setup_modifiers(event.modifierFlags, key);
-        ek::gApp.dispatch(key);
+        g_app.dispatch(key);
     }
 }
 

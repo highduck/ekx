@@ -1,6 +1,6 @@
 #include "main_flow.h"
 
-#include <platform/Window.h>
+#include <platform/window.hpp>
 #include <ek/locator.hpp>
 
 #include <scenex/components/transform_2d.h>
@@ -34,7 +34,7 @@ void smoothly_advance_time(entity root, float dt) {
 }
 
 void scene_pre_update(entity root, float dt) {
-    const auto screen_size = gWindow.backBufferSize;
+    const auto screen_size = g_window.back_buffer_size;
     ecs::get<transform_2d>(root).rect = rect_f{
             0.0f,
             0.0f,

@@ -1,6 +1,6 @@
 #include "canvas_system.h"
 
-#include <platform/Window.h>
+#include <platform/window.hpp>
 #include <scenex/components/canvas.h>
 #include <scenex/components/node_t.h>
 #include <scenex/components/transform_2d.h>
@@ -8,7 +8,7 @@
 namespace scenex {
 
 inline ek::float2 get_screen_size() {
-    auto size = ek::gWindow.backBufferSize;
+    auto size = ek::g_window.back_buffer_size;
     return {
             static_cast<float>(size.width),
             static_cast<float>(size.height)
@@ -16,7 +16,6 @@ inline ek::float2 get_screen_size() {
 }
 
 void on_scale_factor_changed() {
-    // Sprite.setScale(scaleFactor);
 }
 
 void on_rect_changed() {

@@ -1,8 +1,8 @@
 #include "generate_project_common.hpp"
 #include "project_config.h"
 
-#include <ek/fs/working_dir.hpp>
-#include <ek/fs/system.hpp>
+#include <ek/system/working_dir.hpp>
+#include <ek/system/system.hpp>
 #include <ek/utility/strings.hpp>
 #include <ek/logger.hpp>
 
@@ -17,6 +17,10 @@ using std::vector;
 using namespace ek;
 
 namespace ekc {
+
+void open_android_project(path_t path) {
+    execute("open -a /Applications/Android\\ Studio.app \"" + path.str() + "\"");
+}
 
 void copy_google_services_config_android() {
     path_t config_file{"google-services.json"};
@@ -205,6 +209,8 @@ void create_android_project(const project_config_t& config) {
         copy_google_services_config_android();
         copy_keystore(config.android.keystore.store_keystore);
     });
+
+    open_android_project(dest_path);
 }
 
 }

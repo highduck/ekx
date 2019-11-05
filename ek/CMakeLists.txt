@@ -11,10 +11,10 @@ add_library(ek STATIC
         src/platform/ek_android.h
         src/platform/GameServices.h
         src/platform/Sharing.h
-        src/platform/Window.cpp
-        src/platform/Window.h
-        src/platform/Application.cpp
-        src/platform/Application.h
+        src/platform/window.cpp
+        src/platform/window.hpp
+        src/platform/application.cpp
+        src/platform/application.hpp
 
         src/draw2d/batcher.cpp
         src/draw2d/batcher.hpp
@@ -52,8 +52,6 @@ add_library(ek STATIC
 
         src/ek/audiomini/AudioMini.h
 
-        src/platform/window_creation_config.cpp
-        src/platform/window_creation_config.h
         src/platform/boot.cpp
         src/platform/boot.h
 
@@ -116,7 +114,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     target_sources(ek PRIVATE
             src/platform/static_resources.cpp
 
-            platforms/web/WebImpl.cpp
+            platforms/web/web_app_impl.cpp
             platforms/web/ek/audiomini/AudioMini.cpp
 
             platforms/null/Ads.cpp
@@ -129,7 +127,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 
     target_link_options(ek
             PUBLIC
-            --js-library ${PROJECT_SOURCE_DIR}/platforms/web/ek/audiomini/audio_mini.js
+            --js-library ${PROJECT_SOURCE_DIR}/../editor/templates/web/audio_mini.js
             )
     #elseif ($ENV{CONAN_CMAKE_SYSTEM_NAME} MATCHES iOS)
 elseif (${CONAN_SETTINGS_OS} MATCHES "iOS")

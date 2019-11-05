@@ -41,9 +41,7 @@ public:
 
     void render(const export_item_t& item, spritepack::atlas_t& to_atlas) const;
 
-    void export_atlas(const std::string& output_path) const;
-
-    void export_library(const std::string& output_path) const;
+    [[nodiscard]] scenex::sg_file export_library() const;
 
 };
 }

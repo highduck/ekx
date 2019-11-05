@@ -85,10 +85,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/imaging/decoder.hpp
 
         ek/utility/source_location.hpp
-        ek/fs/system.cpp
-        ek/fs/system.hpp
-        ek/fs/working_dir.cpp
-        ek/fs/working_dir.hpp
 
         # THIRD-PARTY
         stb/stb_image.h

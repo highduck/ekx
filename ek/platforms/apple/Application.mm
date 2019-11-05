@@ -1,10 +1,10 @@
-#include "platform/Application.h"
+#include "platform/application.hpp"
 
 #import <CoreFoundation/CoreFoundation.h>
 
 namespace ek {
 
-void Application::exit(int code) {
+void application_t::exit(int code) {
     ::exit(code);
 }
 

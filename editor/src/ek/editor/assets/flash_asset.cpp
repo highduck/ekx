@@ -13,8 +13,8 @@
 #include <ek/flash/doc/flash_archive.h>
 #include <ek/editor/gui/editor_widgets.hpp>
 #include <ek/editor/assets/editor_temp_atlas.hpp>
-#include <ek/fs/working_dir.hpp>
-#include <ek/fs/system.hpp>
+#include <ek/system/working_dir.hpp>
+#include <ek/system/system.hpp>
 #include <memory>
 
 using scenex::asset_object_t;
@@ -123,7 +123,11 @@ void flash_asset_t::export_() {
     make_dirs(path_t{project_->export_path});
     working_dir_t::with(project_->export_path, [&] {
         spritepack::export_atlas(temp_atlas);
-        fe.export_library(name_);
+        auto sg_data = fe.export_library();
+        output_memory_stream out{100};
+        IO io{out};
+        io(sg_data);
+        ek::save(out, name_ + ".sg");
     });
 }
 
