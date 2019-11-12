@@ -27,7 +27,6 @@
 #if defined(__APPLE__)
 
 #include <mach-o/dyld.h>
-#include <ek/utility/strings.hpp>
 
 #endif
 

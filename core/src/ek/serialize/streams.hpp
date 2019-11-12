@@ -63,7 +63,8 @@ public:
     }
 
     uint32_t seek(const int32_t offset) {
-        assert(offset + static_cast<int32_t>(pos_) >= 0 && offset + static_cast<int32_t>(pos_) <= size_);
+        assert(static_cast<int32_t>(pos_) + offset >= 0);
+        assert(static_cast<int32_t>(pos_) + offset <= static_cast<int32_t>(size_));
         return pos_ += offset;
     }
 

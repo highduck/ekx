@@ -24,7 +24,7 @@ void init_webgl_context() {
     EmscriptenWebGLContextAttributes attrs;
     emscripten_webgl_init_context_attributes(&attrs);
     attrs.alpha = false;
-    attrs.depth = false;
+    attrs.depth = true;
     attrs.stencil = false;
     attrs.antialias = false;
 

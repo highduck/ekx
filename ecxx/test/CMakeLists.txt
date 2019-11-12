@@ -19,7 +19,7 @@ add_executable(${PROJECT_NAME}
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PUBLIC -fno-exceptions)
-target_link_libraries(${PROJECT_NAME} ecxx CONAN_PKG::gtest)
+target_link_libraries(${PROJECT_NAME} ecxx gtest gtest_main)
 
 enable_testing()
 add_test(NAME ${PROJECT_NAME}

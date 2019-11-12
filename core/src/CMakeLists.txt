@@ -91,6 +91,8 @@ add_library(${PROJECT_NAME} STATIC
         stb/stb_image.cpp
         )
 
+set_source_files_properties(stb/stb_image.cpp PROPERTIES COMPILE_FLAGS -Wno-cast-align)
+
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)

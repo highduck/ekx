@@ -15,7 +15,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 #target_compile_definitions(${PROJECT_NAME} PUBLIC EK_NO_MAIN)
 #target_link_libraries(${PROJECT_NAME} ek CONAN_PKG::gtest)
 
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::gtest CONAN_PKG::pugixml)
+target_link_libraries(${PROJECT_NAME} gtest gtest_main pugixml)
 target_include_directories(${PROJECT_NAME} PUBLIC ../src)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

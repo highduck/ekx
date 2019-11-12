@@ -32,13 +32,14 @@ std::unique_ptr<flash::basic_entry> load_flash_archive(const path_t& path) {
             if (is_dir(dir)) {
                 return std::make_unique<xfl_entry>(dir);
             } else {
-                EK_WARN("Import Flash: loading %s XFL file, but %s is not a dir", path.c_str(), dir.c_str());
+                EK_ERROR("Import Flash: loading %s XFL file, but %s is not a dir", path.c_str(), dir.c_str());
             }
         } else if (ext == "fla") {
             return std::make_unique<fla_entry>(path);
         }
-    } else {
-        EK_ERROR << "Import Flash: file not found: " << path;
+        else {
+            EK_ERROR << "Import Flash: file is not xfl or fla: " << path;
+        }
     }
 
     // dir/FILE.fla
@@ -48,8 +49,12 @@ std::unique_ptr<flash::basic_entry> load_flash_archive(const path_t& path) {
     } else if (is_dir(path)) {
         if (is_file(path / path.basename() + ".xfl")) {
             return std::make_unique<xfl_entry>(path);
+        } else {
+            EK_WARN << "Import Flash: given dir doesn't contain .xfl file: " << path;
         }
     }
+
+    EK_ERROR << "Import Flash: file not found: " << path;
 
     return nullptr;
 }

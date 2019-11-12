@@ -16,7 +16,7 @@ add_executable(${PROJECT_NAME}
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PRIVATE -fno-exceptions)
 
-target_link_libraries(${PROJECT_NAME} CONAN_PKG::gtest ek-core)
+target_link_libraries(${PROJECT_NAME} gtest gtest_main ek-core)
 
 add_test(NAME ${PROJECT_NAME}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}

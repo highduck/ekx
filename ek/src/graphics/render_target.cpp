@@ -16,25 +16,27 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
     glGenFramebuffers(1, &frame_buffer_handle_);
     gl_check_error();
 
-    /** render buffers **/
-    glGenRenderbuffers(1, &render_buffer_handle_);
-    gl_check_error();
+    if (type != texture_type::color32) {
+        /** render buffers **/
+        glGenRenderbuffers(1, &render_buffer_handle_);
+        gl_check_error();
 
-    // create render buffer and bind 16-bit depth buffer
-    glBindRenderbuffer(GL_RENDERBUFFER, render_buffer_handle_);
-    GLenum render_buffer_format = 0;
-    switch (type) {
-        case texture_type::depth16:
-        case texture_type::depth24:
-            render_buffer_format = GL_DEPTH_COMPONENT16;
-            break;
-        case texture_type::color32:
-            render_buffer_format = GL_RGBA8;
-            break;
+        // create render buffer and bind 16-bit depth buffer
+        glBindRenderbuffer(GL_RENDERBUFFER, render_buffer_handle_);
+        GLenum render_buffer_format = 0;
+        switch (type) {
+            case texture_type::depth16:
+            case texture_type::depth24:
+                render_buffer_format = GL_DEPTH_COMPONENT16;
+                break;
+            case texture_type::color32:
+                render_buffer_format = GL_RGBA8;
+                break;
+        }
+        glRenderbufferStorage(GL_RENDERBUFFER, render_buffer_format, width, height);
+        gl_check_error();
+        //////
     }
-    glRenderbufferStorage(GL_RENDERBUFFER, render_buffer_format, width, height);
-    gl_check_error();
-    //////
 
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer_handle_);
     gl_check_error();
@@ -44,11 +46,12 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
         attachment = GL_DEPTH_ATTACHMENT;
     }
 
-    // attach render buffer as depth buffer
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, render_buffer_handle_);
-    gl_check_error();
-
-    /////
+    if (render_buffer_handle_ != 0) {
+        // attach render buffer as depth buffer
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, render_buffer_handle_);
+        gl_check_error();
+        /////
+    }
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture_->handle_, 0);
     gl_check_error();
@@ -92,13 +95,18 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
         }
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0u);
+    glBindFramebuffer(GL_FRAMEBUFFER, g_window.primary_frame_buffer);
     gl_check_error();
 }
 
 render_target_t::~render_target_t() {
     glDeleteFramebuffers(1, &frame_buffer_handle_);
     gl_check_error();
+
+    if (render_buffer_handle_ != 0) {
+        glDeleteRenderbuffers(1, &render_buffer_handle_);
+        gl_check_error();
+    }
 
     delete texture_;
 }

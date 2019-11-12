@@ -12,7 +12,7 @@
 #include <ek/editor/gui/editor_widgets.hpp>
 #include <scenex/data/texture_data.hpp>
 #include <scenex/data/model_data.hpp>
-#include <scenex/3d/obj_loader.hpp>
+#include <ek/editor/obj/obj_loader.hpp>
 #include <platform/static_resources.hpp>
 
 using scenex::asset_object_t;
@@ -41,7 +41,7 @@ void model_asset_t::load() {
     } else {
         asset_t<scenex::static_mesh_t>{name_}.reset(
                 new scenex::static_mesh_t(
-                        scenex::load_obj(buffer)
+                        load_obj(buffer)
                 )
         );
     }
@@ -62,7 +62,7 @@ void model_asset_t::gui() {
 void model_asset_t::export_() {
     auto output_path = project_->export_path / name_;
     scenex::model_data_t data{
-            scenex::load_obj(get_resource_content(get_relative_path(path_).c_str()))
+            load_obj(get_resource_content(get_relative_path(path_).c_str()))
     };
 
     make_dirs(output_path.dir());

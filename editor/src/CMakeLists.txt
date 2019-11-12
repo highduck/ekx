@@ -30,8 +30,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/editor/imgui/imgui_module.hpp
         ek/editor/imgui/imgui_module.cpp
-        ek/editor/imgui/imgui_stdlib.h
-        ek/editor/imgui/imgui_stdlib.cpp
         ek/editor/imgui/imgui.cpp
         ek/editor/imgui/imgui.hpp
 
@@ -39,6 +37,8 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/editor.hpp
         ek/editor/assets/program_asset.cpp
         ek/editor/assets/program_asset.hpp
+        ek/editor/obj/obj_loader.cpp
+        ek/editor/obj/obj_loader.hpp
 
         plist/plist.hpp
         plist/plist.cpp
@@ -71,6 +71,9 @@ add_library(${PROJECT_NAME} STATIC
         ek/system/system.hpp
         ek/system/working_dir.cpp
         ek/system/working_dir.hpp
+        ek/system/file_watcher.cpp
+        ek/system/file_watcher.hpp
+
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -103,10 +106,10 @@ else ()
 endif ()
 
 target_link_libraries(${PROJECT_NAME}
-        CONAN_PKG::kainjow-mustache
-        CONAN_PKG::jsonformoderncpp
-        CONAN_PKG::fmt
-        CONAN_PKG::imgui
+        mustache
+        nlohmann-json
+        fmt
+        imgui
         ek-flash
         )
 

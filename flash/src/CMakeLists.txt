@@ -1,19 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
 add_library(${PROJECT_NAME}
-
-        # extra deps
-        miniz/zip_file.hpp
-        miniz/miniz.c
-        miniz/miniz.h
-        miniz/miniz_common.h
-        miniz/miniz_tdef.c
-        miniz/miniz_tdef.h
-        miniz/miniz_tinfl.c
-        miniz/miniz_tinfl.h
-        miniz/miniz_zip.c
-        miniz/miniz_zip.h
-
         # flash document
         ek/flash/doc/parsing/parsing.h
         ek/flash/doc/flash_archive.cpp
@@ -91,9 +78,6 @@ add_library(${PROJECT_NAME}
         xfl/export_item.cpp
         xfl/export_item.h
 
-        stb/stb_image_write.h
-        stb/stb_image_write.cpp
-
         )
 
 target_compile_options(${PROJECT_NAME} PRIVATE
@@ -118,10 +102,12 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
         -DPUGIXML_NO_XPATH)
 
 target_link_libraries(${PROJECT_NAME}
-        CONAN_PKG::cairo
-        CONAN_PKG::freetype
-        CONAN_PKG::pugixml
+        pugixml
+        freetype2
+        cairo
         scenex
+        miniz
+        stb-image-write
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)

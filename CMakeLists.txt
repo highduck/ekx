@@ -1,30 +1,34 @@
 cmake_minimum_required(VERSION 3.12)
-
 project(ekx LANGUAGES CXX)
 
-option(BUILD_TESTS "Build unit tests" OFF)
-option(BUILD_COVERAGE "Build coverage check" OFF)
-option(BUILD_BENCHMARKS "Build benchmarks projects" OFF)
-option(BUILD_EDITOR "Build editor projects" ON)
-
-message(INFO "[${PROJECT_NAME}] loading `${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake`")
-include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS NO_OUTPUT_DIRS)
-message(INFO "[${PROJECT_NAME}] =>> CONAN_LIBS = ${CONAN_LIBS}")
+set(EKX_BUILD_TESTS OFF CACHE BOOL "Build EKX unit tests" FORCE)
+mark_as_advanced(EKX_BUILD_TESTS)
 
 #if ($ENV{CLION_IDE})
-#    set(BUILD_TESTS 1)
-#    set(BUILD_BENCHMARKS 1)
+#    set(EKX_BUILD_TESTS ON)
 #endif ()
 
-if (BUILD_TESTS AND BUILD_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+option(EKX_BUILD_COVERAGE "Build EKX coverage check" OFF)
+option(EKX_BUILD_BENCHMARKS "Build EKX benchmarks projects" OFF)
+option(EKX_BUILD_EDITOR "Build EKX editor projects" ON)
+
+if (EMSCRIPTEN)
+    set(EKX_BUILD_TESTS OFF)
+    set(EKX_BUILD_COVERAGE OFF)
+    set(EKX_BUILD_BENCHMARKS OFF)
+    set(EKX_BUILD_EDITOR OFF)
+endif ()
+
+add_subdirectory(external)
+
+if (EKX_BUILD_TESTS)
+    enable_testing()
+endif ()
+
+if (EKX_BUILD_TESTS AND BUILD_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fno-inline -fprofile-arcs -ftest-coverage -fno-omit-frame-pointer -fno-optimize-sibling-calls")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
     add_definitions(-DNDEBUG) # ignore assertation coverage
-endif ()
-
-if (BUILD_TESTS)
-    enable_testing()
 endif ()
 
 add_subdirectory(ecxx)
@@ -32,12 +36,11 @@ add_subdirectory(core)
 add_subdirectory(ek)
 add_subdirectory(scenex)
 
-message("CONAN_COMPILE_DEFINITIONS_EKX: ${CONAN_COMPILE_DEFINITIONS_EKX}")
+add_library(ekx INTERFACE)
+target_link_libraries(ekx INTERFACE scenex ecxx ek ek-core)
 
-if (BUILD_EDITOR)
+if (EKX_BUILD_EDITOR)
     add_subdirectory(flash)
     add_subdirectory(editor)
+    target_link_libraries(ekx INTERFACE ek-flash ek-editor)
 endif ()
-
-#add_library(ekx INTERFACE)
-#target_link_libraries(ekx INTERFACE scenex)

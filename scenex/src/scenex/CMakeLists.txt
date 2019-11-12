@@ -93,8 +93,6 @@ add_library(${PROJECT_NAME} STATIC
         3d/light_3d.hpp
         3d/material_3d.cpp
         3d/material_3d.hpp
-        3d/obj_loader.cpp
-        3d/obj_loader.hpp
 
         local_storage_var_t.hpp
 
@@ -152,9 +150,9 @@ else ()
             target_compile_options(${PROJECT_NAME} PRIVATE
                     -flto)
             # https://github.com/llvm-mirror/llvm/blob/master/cmake/modules/AddLLVM.cmake
-            target_link_options(${PROJECT_NAME} PUBLIC
-                    -Wl,-dead_strip
-                    -Wl,-dead_strip_dylibs)
+#            target_link_options(${PROJECT_NAME} PUBLIC
+#                    -Wl,-dead_strip
+#                    -Wl,-dead_strip_dylibs)
         endif ()
     endif ()
 endif ()

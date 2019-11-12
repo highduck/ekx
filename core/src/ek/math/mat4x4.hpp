@@ -221,9 +221,9 @@ template<typename T>
 vec_t<T, 3>
 operator*(const matrix_t<4, 4, T>& m, const vec_t<T, 3>& v) {
     const float w = v.x * m.m30 + v.y * m.m31 + v.z * m.m32 + m.m33;
-    return vec_t<T, 3>(v.x * m.m00 + v.y * m.m01 + v.z * m.m02 + m.m03,
-                       v.x * m.m10 + v.y * m.m11 + v.z * m.m12 + m.m13,
-                       v.x * m.m20 + v.y * m.m21 + v.z * m.m22 + m.m23);
+    return vec_t<T, 3>(v.x * m.m00 + v.y * m.m01 + v.z * m.m02 + w * m.m03,
+                       v.x * m.m10 + v.y * m.m11 + v.z * m.m12 + w * m.m13,
+                       v.x * m.m20 + v.y * m.m21 + v.z * m.m22 + w * m.m23);
 }
 
 //! Pre-multiply.

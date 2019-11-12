@@ -134,7 +134,8 @@ elseif (${CONAN_SETTINGS_OS} MATCHES "iOS")
 
     message("Platform: IOS")
 
-    target_include_directories(${PROJECT_NAME} PUBLIC ios)
+    target_include_directories(${PROJECT_NAME} PUBLIC platforms/apple)
+    target_include_directories(${PROJECT_NAME} PUBLIC platforms/ios)
     target_compile_options(${PROJECT_NAME} PUBLIC -fno-aligned-allocation)
 
     target_sources(${PROJECT_NAME} PRIVATE
@@ -152,18 +153,19 @@ elseif (${CONAN_SETTINGS_OS} MATCHES "iOS")
             platforms/ios/iosPlatform.mm
             platforms/ios/Sharing.mm
             platforms/ios/GameServices.mm
-            platforms/apple/Application.mm
 
-            platforms/ios/ek/audiomini/AudioMini.mm
-            platforms/ios/ek/audiomini/CDAudioManager.h
-            platforms/ios/ek/audiomini/CDAudioManager.mm
-            platforms/ios/ek/audiomini/CDConfig.h
-            platforms/ios/ek/audiomini/CDOpenALSupport.h
-            platforms/ios/ek/audiomini/CDOpenALSupport.mm
-            platforms/ios/ek/audiomini/CocosDenshion.h
-            platforms/ios/ek/audiomini/CocosDenshion.mm
-            platforms/ios/ek/audiomini/SimpleAudioEngine_objc.h
-            platforms/ios/ek/audiomini/SimpleAudioEngine_objc.mm
+            platforms/apple/application.mm
+
+            platforms/apple/ek/audiomini/audio_mini.mm
+            platforms/mac/ek/audiomini/CDAudioManager.h
+            platforms/mac/ek/audiomini/CDAudioManager.mm
+            platforms/mac/ek/audiomini/CDConfig.h
+            platforms/mac/ek/audiomini/CDOpenALSupport.h
+            platforms/mac/ek/audiomini/CDOpenALSupport.mm
+            platforms/mac/ek/audiomini/CocosDenshion.h
+            platforms/mac/ek/audiomini/CocosDenshion.mm
+            platforms/mac/ek/audiomini/SimpleAudioEngine_objc.h
+            platforms/mac/ek/audiomini/SimpleAudioEngine_objc.mm
             )
 
     target_link_libraries(${PROJECT_NAME}
@@ -176,14 +178,14 @@ elseif (${CONAN_SETTINGS_OS} MATCHES "iOS")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message("Platform: MAC")
+    target_include_directories(${PROJECT_NAME} PUBLIC platforms/apple)
+    target_include_directories(${PROJECT_NAME} PUBLIC platforms/mac)
     target_sources(ek PRIVATE
 
             src/platform/user_preferences.mm
             src/platform/static_resources.cpp
             src/platform/static_resources.mm
             src/platform/analytics.mm
-
-            platforms/apple/Application.mm
 
             platforms/null/Ads.cpp
             platforms/null/GameServices.cpp
@@ -198,7 +200,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             platforms/mac/osx_input.mm
             platforms/mac/osx_input.h
 
-            platforms/mac/ek/audiomini/AudioMini.cpp
+            platforms/apple/application.mm
+
+            platforms/apple/ek/audiomini/audio_mini.mm
             platforms/mac/ek/audiomini/CDAudioManager.h
             platforms/mac/ek/audiomini/CDAudioManager.mm
             platforms/mac/ek/audiomini/CDConfig.h
@@ -208,8 +212,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             platforms/mac/ek/audiomini/CDXMacOSXSupport.mm
             platforms/mac/ek/audiomini/CocosDenshion.h
             platforms/mac/ek/audiomini/CocosDenshion.mm
-            platforms/mac/ek/audiomini/SimpleAudioEngine.h
-            platforms/mac/ek/audiomini/SimpleAudioEngine.mm
             platforms/mac/ek/audiomini/SimpleAudioEngine_objc.h
             platforms/mac/ek/audiomini/SimpleAudioEngine_objc.mm
             )
@@ -284,6 +286,6 @@ else ()
 
 endif ()
 
-if (BUILD_TESTS)
+if (EKX_BUILD_TESTS)
     add_subdirectory(test)
 endif ()

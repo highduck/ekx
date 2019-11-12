@@ -34,8 +34,10 @@ var AudioMiniLib = {
     audio_mini_play_sound: function (name, vol, pan) {
         name = UTF8ToString(name);
         var sound = AudioMini.table[name];
-        var id = sound.play();
-        sound.volume(vol, id);
+        if (sound) {
+            var id = sound.play();
+            sound.volume(vol, id);
+        }
     },
 
     audio_mini_play_music__deps: ['$AudioMini'],

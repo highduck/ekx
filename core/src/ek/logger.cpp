@@ -8,7 +8,7 @@
 
 #else
 
-#include <iostream>
+#include <cstdio>
 
 #endif
 
@@ -65,30 +65,30 @@ void write(verbosity_t verbosity, source_location_t location, const char* messag
 
 #else
 
+    const char* prefix = nullptr;
     switch (verbosity) {
         case verbosity_t::info:
-            std::cout << BLUE "[i] ";
+            prefix = BLUE "[i] ";
             break;
         case verbosity_t::warning:
-            std::cout << BOLDYELLOW "[WARNING] ";
+            prefix = BOLDYELLOW "[WARNING] ";
             break;
         case verbosity_t::error:
-            std::cout << BOLDRED "[ERROR] ";
+            prefix = BOLDRED "[ERROR] ";
             break;
         case verbosity_t::debug:
-            std::cout << CYAN "[d] ";
+            prefix = CYAN "[d] ";
             break;
         case verbosity_t::trace:
-            std::cout << WHITE "[t] ";
+            prefix = WHITE "[t] ";
             break;
         default:
             return;
     }
 
-    std::cout << message << RESET << std::endl;
-
+    printf("%s%s" RESET "\n", prefix, message);
     if (location.file) {
-        std::cout << '\t' << location << std::endl;
+        printf("\t%s:%d\n", location.file, location.line);
     }
 #endif
 }

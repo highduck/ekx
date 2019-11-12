@@ -98,7 +98,8 @@ void create_xcode_ios(const project_config_t& config) {
         mod_plist(config, "src/Info.plist");
 
         /// PRE MOD PROJECT
-        execute("python3 xcode-project-ios.py " + platform_proj_name + ' ' + config.ios.application_id + ' ' + config.path_ekx.str());
+        execute("python3 xcode-project-ios.py " + platform_proj_name + ' ' + config.ios.application_id + ' ' +
+                config.path_ekx.str());
 
         EK_INFO << "Prepare PodFile";
         replace_in_file(path_t{"Podfile"}, {
@@ -111,6 +112,14 @@ void create_xcode_ios(const project_config_t& config) {
         /// POST MOD PROJECT
         execute("python3 xcode-project-ios-post.py " + platform_proj_name + ' ' + config.ios.application_id);
     });
+
+    auto workspace_path = (dest_path / (platform_proj_name + ".xcworkspace"));
+    execute("open " + dest_path.str());
+//    execute("open " + workspace_path.str());
+    execute("xcodebuild"
+            " -workspace " + workspace_path.str() +
+            " -scheme " + platform_proj_name +
+            " -configuration Release");
 
 }
 

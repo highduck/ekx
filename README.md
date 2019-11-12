@@ -34,20 +34,49 @@
 
 ## Dependencies
 
-Production Mode:
+### Output Mode Dependencies
+
+Game output dependencies are required to be source packed in.
+
+Platform requirements are Frameworks or Libraries are resolved later when you build final version.
+ TODO: examples   
+
+#### Built-in
 - `stb_image` (included)
 
-Edit Mode:
+### Edit Mode Dependencies
+
+#### System packages
+
+```
+brew install pkg-config
+brew install cairo
+```
+
+- pkg-config
+- Cairo
+- Freetype2
+
+#### Built-in
+- `miniz` and `zip_file.cpp` (patched)
+- `stb_image_write` (included)
+
+#### External packages
 - `imgui` !
 - `pugixml`
-- `cairo`
-- `freetype2`
-- `stb_image_write` (included)
 - `fmt`
 - `kainjow-mustache`
 - `json_for_modern_cpp`
-- `mod-pbxproj` python library
-- `miniz` and `zip_file.cpp` (patched)
+
+#### Python dependencies
+- `mod-pbxproj` for XCode project patching
+
+### Development requirements
+
+- cmake >= 3.12
+- modern c++17 compiler
+- python3
+- emsdk
 
 ## Installation
 
@@ -77,7 +106,28 @@ source ~/highduck/ekx/env.sh
 
 # Development
 
-ReleaseWasm
-`-DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/Users/ilyak/dev/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake`
+CLion:
+1. Create Debug-Emscripten
+2. Set the path to CMake Emscripten Toolchain
 
-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/Users/ilyak/dev/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
+`-DCMAKE_TOOLCHAIN_FILE=/Users/PATH_TO_emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake`
+
+3. Set Env from:
+    For example you have output of running `emsdk_env.sh`:
+```sh
+PATH += /Users/ilyak/dev/emsdk
+PATH += /Users/ilyak/dev/emsdk/upstream/emscripten
+PATH += /Users/ilyak/dev/emsdk/node/12.9.1_64bit/bin
+
+EMSDK = /Users/ilyak/dev/emsdk
+EM_CONFIG = /Users/ilyak/.emscripten
+EMSDK_NODE = /Users/ilyak/dev/emsdk/node/12.9.1_64bit/bin/node
+```
+So add the PATH and EM variables:
+
+```
+PATH = /Users/ilyak/dev/emsdk;/Users/ilyak/dev/emsdk/upstream/emscripten;/Users/ilyak/dev/emsdk/node/12.9.1_64bit/bin;$PATH
+EMSDK = /Users/ilyak/dev/emsdk
+EM_CONFIG = /Users/ilyak/.emscripten
+EMSDK_NODE = /Users/ilyak/dev/emsdk/node/12.9.1_64bit/bin/node
+```
