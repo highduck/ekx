@@ -1,11 +1,14 @@
 {
   "name": "ekx-cli",
   "version": "0.0.1",
-  "bin": "src/index.js",
+  "bin": {
+    "ekx": "src/index.js"
+  },
   "dependencies": {
     "glob": "^7.1.6",
     "mustache": "^3.1.0",
     "plist": "^3.0.1",
+    "xcode": "^2.0.0",
     "xmldoc": "^1.1.2"
   }
 }

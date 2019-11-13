@@ -177,49 +177,38 @@ function mod_strings(ctx) {
     write_text(res_strings_path, doc.toString());
 }
 
-function collect_source_files(search_path, out_list = []) {
-    search_files("**/*.h", search_path, out_list);
-    search_files("**/*.hpp", search_path, out_list);
-    search_files("**/*.cpp", search_path, out_list);
+function collect_source_files(search_path, extensions, out_list = []) {
+    for (const ext of extensions) {
+        search_files("**/*." + ext, search_path, out_list);
+    }
     return out_list;
 }
 
 function mod_cmake_lists(ctx) {
-    const cmake_path = "app/CMakeLists.txt";
-    const search_list = [
-        "../../src",
-        path.join(ctx.path.EKX_ROOT, "ecxx/src"),
-        path.join(ctx.path.EKX_ROOT, "core/src"),
-        path.join(ctx.path.EKX_ROOT, "ek/platforms/android"),
-        path.join(ctx.path.EKX_ROOT, "ek/src"),
-        path.join(ctx.path.EKX_ROOT, "scenex/src")
-    ];
-
+    const cmake_path = "CMakeLists.txt";
     const src_files = [];
-    collect_source_files("../../src", src_files);
-    collect_source_files(path.join(ctx.path.EKX_ROOT, "ecxx/src"), src_files);
-    collect_source_files(path.join(ctx.path.EKX_ROOT, "core/src"), src_files);
-    collect_source_files(path.join(ctx.path.EKX_ROOT, "ek/src"), src_files);
-    collect_source_files(path.join(ctx.path.EKX_ROOT, "ek/platforms/android"), src_files);
-    collect_source_files(path.join(ctx.path.EKX_ROOT, "scenex/src"), src_files);
+    const ext_list = ["hpp", "h", "cpp", "c"];
 
-    for (let i = 0; i < search_list.length; ++i) {
-        const p = search_list[i];
-        if (p.length > 0 && p[0] !== '/') {
-            search_list[i] = path.join("..", p);
-        }
+    function core_path(p) {
+        return path.relative(".", path.join(ctx.path.EKX_ROOT, p));
     }
 
-    for (let i = 0; i < src_files.length; ++i) {
-        const p = src_files[i];
-        if (p.length > 0 && p[0] !== '/') {
-            src_files[i] = path.join("..", p);
-        }
+    const source_dir_list = [
+        "../../src",
+        core_path("ecxx/src"),
+        core_path("core/src"),
+        core_path("ek/platforms/android"),
+        core_path("ek/src"),
+        core_path("scenex/src")
+    ];
+
+    for (const source_dir of source_dir_list) {
+        collect_source_files(source_dir, ext_list, src_files);
     }
 
     replace_in_file(cmake_path, {
         "#-SOURCES-#": src_files.join("\n\t\t"),
-        "#-SEARCH_ROOTS-#": search_list.join("\n\t\t")
+        "#-SEARCH_ROOTS-#": source_dir_list.join("\n\t\t")
     });
 }
 
@@ -309,6 +298,145 @@ function mod_plist(ctx, filepath) {
     write_text(filepath, plist.build(dict));
 }
 
+// function xcode_disable_arc(xc, filepath) {
+//     const rel_path = path.relative(filepath, ".");
+//     print('Try Disable ARC for ' + rel_path);
+//     for (file in project.get_files_by_path(rel_path)) {
+//         for (build_file in project.get_build_files_for_file(file.get_id())) {
+//             print("Disable ARC for: %s (%s)" % (file.name, build_file.get_id()));
+//             build_file.add_compiler_flags('-fno-objc-arc');
+//         }
+//     }
+// }
+//
+// function xcode_patch(ctx, proj_ios_name) {
+//     const xcode = EK.require("xcode");
+//
+//     const application_id = ctx.ios.application_id;
+//     const sdk_root = ctx.path.EKX_ROOT;
+//
+//     const xc_path = `${proj_ios_name}.xcodeproj/project.pbxproj`;
+//     const xc = xcode.project(xc_path).parseSync();
+//
+//     const project_target = xc.pbxTargetByName("template-ios");
+//     xc.addTargetAttribute("SystemCapabilities", {
+//         "com.apple.GameCenter.iOS": {
+//             enabled: 1
+//         }
+//     }, project_target);
+//     xc.addTargetAttribute("SystemCapabilities", {
+//         "com.apple.InAppPurchase": {
+//             enabled: 1
+//         }
+//     }, project_target);
+//     // project_target.name = proj_ios_name;
+//     // project_target.productName = proj_ios_name;
+//     // project_target.productReference_comment = proj_ios_name + ".app";
+//     // sys_caps = PBXGenericObject()
+//     // sys_caps["com.apple.GameCenter.iOS"] = PBXGenericObject()
+//     // sys_caps["com.apple.GameCenter.iOS"]["enabled"] = 1
+//     // sys_caps["com.apple.InAppPurchase"] = PBXGenericObject()
+//     // sys_caps["com.apple.InAppPurchase"]["enabled"] = 1
+//     // project.objects[project.rootObject].attributes.TargetAttributes[project_target.get_id()][
+//     //     'SystemCapabilities'] = sys_caps
+//
+//     //# project.set_flags("DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
+//
+//     xc.updateProductName(proj_ios_name);
+//     //const project_targe2t = xc.pbxTargetByName(proj_ios_name);
+//     //console.debug(project_targe2t);
+//     // project_target.name = proj_ios_name
+//     // project_target.productName = proj_ios_name
+//     xc.updateBuildProperty("PRODUCT_BUNDLE_IDENTIFIER", application_id);
+//     xc.updateBuildProperty("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
+//     // project.set_flags("PRODUCT_BUNDLE_IDENTIFIER", application_id)
+//     // project.set_flags("IPHONEOS_DEPLOYMENT_TARGET", "12.0")
+//
+//     const src_files = [];
+//     collect_source_files("../../src", src_files);
+//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "ecxx/src"), src_files);
+//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "core/src"), src_files);
+//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "ek/src"), src_files);
+//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "ek/platforms/apple"), src_files);
+//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "ek/platforms/ios"), src_files);
+//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "scenex/src"), src_files);
+//
+//     xc.addPbxGroup(src_files, "game_src");
+//     // addPbxGroup = function(filePathsArray, name, path, sourceTree);
+//     // for (const src of src_files) {
+//     //     if (src.endsWith(".hpp") || src.endsWith(".h")) {
+//     //         xc.addHeaderFile(src, {}, "game_src");
+//     //     } else {
+//     //         xc.addSourceFile(src, {}, "game_src");
+//     //     }
+//     // }
+//     // project.add_folder('../../src', parent = project.add_group("src"), excludes = excludes)
+//     // project.add_folder(sdk_root + '/ecxx/src', parent = project.add_group("ecxx"), excludes = excludes)
+//     // project.add_folder(sdk_root + '/core/src', parent = project.add_group("ek-core"), excludes = excludes)
+//     // platforms_group = project.add_group("ek-platforms")
+//     // project.add_folder(sdk_root + '/ek/platforms/apple', parent = platforms_group, excludes = excludes)
+//     // project.add_folder(sdk_root + '/ek/platforms/ios', parent = platforms_group, excludes = excludes)
+//     // project.add_folder(sdk_root + '/ek/src', parent = project.add_group("ek"), excludes = excludes)
+//     // project.add_folder(sdk_root + '/scenex/src', parent = project.add_group("scenex"), excludes = excludes)
+//     //
+//     // disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/SimpleAudioEngine_objc.mm')
+//     // disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/CocosDenshion.mm')
+//     // disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/CDOpenALSupport.mm')
+//     // disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/CDAudioManager.mm')
+//     // disable_arc(project, sdk_root + '/ek/platforms/ios/EAGLView.mm')
+//     //
+//
+//     for (const search_path of [
+//         "../../src",
+//         sdk_root + "/ecxx/src",
+//         sdk_root + "/core/src",
+//         sdk_root + "/ek/platforms/apple",
+//         sdk_root + "/ek/platforms/ios",
+//         sdk_root + "/ek/src",
+//         sdk_root + "/scenex/src"
+//     ]) {
+//         xc.addToHeaderSearchPaths(search_path);
+//     }
+//
+//     //
+//     // //# self.cpp_info.cxxflags.append("-fno-aligned-allocation")
+//     const flags_frameworks = [
+//         // "$(inherited)",
+//         "-framework", "UIKit",
+//         "-framework", "OpenGLES",
+//         "-framework", "QuartzCore",
+//         "-framework", "AudioToolbox",
+//         "-framework", "Foundation",
+//         "-framework", "OpenAL"
+//     ];
+//     //
+//     // //# file_options = FileOptions(weak = True)
+//     // file_options = FileOptions(weak = False, embed_framework = False);
+//     // xc.addFramework("System/Library/Frameworks/GameKit.framework");
+//     // xc.addFramework("System/Library/Frameworks/StoreKit.framework");
+//     // project.add_file('System/Library/Frameworks/GameKit.framework', tree = 'SDKROOT', force = False, file_options = file_options);
+//     // project.add_file('System/Library/Frameworks/StoreKit.framework', tree = 'SDKROOT', force = False, file_options = file_options);
+//     //
+//
+//     for (const flag of flags_frameworks) {
+//         xc.addToOtherLinkerFlags(flag);
+//         //     xc.addToOtherLinkerFlags(flags_frameworks.join(" "));
+//     }
+//
+//     // project.add_other_ldflags(" ".join(frameworks));
+//     // project.add_library_search_paths("$(inherited)");
+//     //
+//     // project.add_other_cflags([
+//     //     "$(inherited)",
+//     //     "-DGLES_SILENCE_DEPRECATION"
+//     // ]);
+//
+//     xc.addFile("assets");//, force = True);
+//     xc.addFile("../../GoogleService-Info.plist");
+//
+//     fs.writeFileSync(xc_path, xc.writeSync());
+// }
+
 function export_ios(ctx) {
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;
@@ -347,6 +475,7 @@ function export_ios(ctx) {
         mod_plist(ctx, "src/Info.plist");
 
         /// PRE MOD PROJECT
+        //xcode_patch(ctx, platform_proj_name);
         execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id, ctx.path.EKX_ROOT]);
 
         console.info("Prepare PodFile");
@@ -357,7 +486,7 @@ function export_ios(ctx) {
         console.info("Install Pods");
         execute("pod", ["install"]);
 
-        /// POST MOD PROJECT
+        // POST MOD PROJECT
         execute("python3", ["xcode-project-ios-post.py",
             platform_proj_name, ctx.ios.application_id]);
     }
@@ -365,14 +494,35 @@ function export_ios(ctx) {
 
     const workspace_path = path.join(dest_path, platform_proj_name + ".xcworkspace");
     // execute("open", [dest_path]);
-//    execute("open " + workspace_path.str());
-    execute("xcodebuild", [
-        "-workspace", workspace_path,
-        "-scheme", platform_proj_name,
-        "-configuration", "Release"
-    ]);
+    execute("open", [workspace_path]);
+    // execute("xcodebuild", [
+    //     "-workspace", workspace_path,
+    //     "-scheme", platform_proj_name,
+    //     "-configuration", "Release"
+    // ]);
 }
 
+/*** HTML ***/
+function export_web(ctx) {
+    function tpl(from, to) {
+        const tpl_text = fs.readFileSync(path.join(__dirname, from), "utf8");
+        fs.writeFileSync(path.join(ctx.path.OUTPUT, to), Mustache.render(tpl_text, ctx), "utf8");
+    }
+
+    function file(from, to) {
+        fs.copyFileSync(
+            path.join(__dirname, from),
+            path.join(ctx.path.OUTPUT, to)
+        );
+    }
+
+    tpl("templates/web/index.html.mustache", "index.html");
+    tpl("templates/web/manifest.json.mustache", "manifest.webmanifest");
+    tpl("templates/web/sw.js.mustache", "sw.js");
+    file("templates/web/howler.core.min.js", "howler.core.min.js");
+    file("templates/web/pwacompat.min.js", "pwacompat.min.js");
+    file("platforms/web/audiomini.js", "audiomini.js");
+}
 
 class File {
     constructor(ctx) {
@@ -383,60 +533,15 @@ class File {
         console.log("=== EK PROJECT ===");
         console.log("Current Target:", ctx.current_target);
 
-        function tpl(from, to) {
-            const tpl_text = fs.readFileSync(path.join(__dirname, from), "utf8");
-            fs.writeFileSync(path.join(ctx.path.OUTPUT, to), Mustache.render(tpl_text, ctx), "utf8");
-        }
-
-        function file(from, to) {
-            fs.copyFileSync(
-                path.join(__dirname, from),
-                path.join(ctx.path.OUTPUT, to)
-            );
-        }
-
-        console.log("Loading EK platforms project");
-        if (ctx.current_target === "web") {
+        const exporters = {
+            web: export_web,
+            android: export_android,
+            ios: export_ios
+        };
+        const exporter = exporters[ctx.current_target];
+        if (exporter) {
             ctx.build_steps.push(() => {
-                tpl("templates/web/index.html.mustache", "index.html");
-                tpl("templates/web/manifest.json.mustache", "manifest.webmanifest");
-                tpl("templates/web/sw.js.mustache", "sw.js");
-                file("templates/web/howler.core.min.js", "howler.core.min.js");
-                file("templates/web/pwacompat.min.js", "pwacompat.min.js");
-                file("platforms/web/audiomini.js", "audiomini.js");
-            });
-
-            // if (!project.html.deploy_dir.empty()) {
-            //     copy_file(output_dir / "pwacompat.min.js",
-            //         project.html.deploy_dir / "pwacompat.min.js");
-            //
-            //     copy_file(output_dir / "howler.core.min.js",
-            //         project.html.deploy_dir / "howler.core.min.js");
-            //
-            //     copy_file(output_dir / "manifest.webmanifest",
-            //         project.html.deploy_dir / "manifest.webmanifest");
-            //     copy_file(output_dir / "sw.js", project.html.deploy_dir / "sw.js");
-            //     copy_file(output_dir / "index.html", project.html.deploy_dir / "index.html");
-            //     copy_file(output_dir / (project.binary_name + ".wasm"),
-            //         project.html.deploy_dir / (project.binary_name + ".wasm"));
-            //     copy_file(output_dir / (project.binary_name + ".js"),
-            //         project.html.deploy_dir / (project.binary_name + ".js"));
-            //     copy_file(output_dir / (project.binary_name + ".data"),
-            //         project.html.deploy_dir / (project.binary_name + ".data"));
-            //
-            //     // TODO: icons / assets
-            // }
-        }
-
-        if (ctx.current_target === "android") {
-            ctx.build_steps.push(() => {
-                export_android(ctx);
-            });
-        }
-
-        if (ctx.current_target === "ios") {
-            ctx.build_steps.push(() => {
-                export_ios(ctx);
+                exporter(ctx);
             });
         }
     }

@@ -64,7 +64,6 @@ brew install cairo
 #### External packages
 - `imgui` !
 - `pugixml`
-
 - `fmt`
 - `json_for_modern_cpp`
 
