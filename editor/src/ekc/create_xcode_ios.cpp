@@ -1,5 +1,5 @@
 #include "generate_project_common.hpp"
-#include "project_config.h"
+#include "project_config.hpp"
 
 #include <ek/system/system.hpp>
 #include <ek/system/working_dir.hpp>
@@ -73,7 +73,7 @@ void create_xcode_ios(const project_config_t& config) {
         assert(!is_dir(dest_path));
     }
 
-    copy_tree(config.path_ekx / ("editor/templates/template-" + platform_target), dest_path);
+    copy_tree(config.path.ekx / ("ek/templates/template-" + platform_target), dest_path);
 
     path_t base_path{"../.."};
     working_dir_t::with(dest_path, [&]() {
@@ -99,7 +99,7 @@ void create_xcode_ios(const project_config_t& config) {
 
         /// PRE MOD PROJECT
         execute("python3 xcode-project-ios.py " + platform_proj_name + ' ' + config.ios.application_id + ' ' +
-                config.path_ekx.str());
+                config.path.ekx.c_str());
 
         EK_INFO << "Prepare PodFile";
         replace_in_file(path_t{"Podfile"}, {

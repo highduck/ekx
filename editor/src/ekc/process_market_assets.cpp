@@ -52,7 +52,7 @@ void store_hi_res_icon(const flash_file& doc, const element_t& symbol, int size)
 
 json create_ios_icons_template() {
     const auto path = path_t{getenv("EKX_ROOT")}
-                      / "editor/templates/template-ios/src/Assets.xcassets/AppIcon.appiconset/Contents.json";
+                      / "ek/templates/template-ios/src/Assets.xcassets/AppIcon.appiconset/Contents.json";
     json res;
     ifstream is(path.c_str());
     is >> res;

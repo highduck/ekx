@@ -27,8 +27,6 @@
 ALvoid  alBufferDataStaticProc(const ALint bid, ALenum format, ALvoid* data, ALsizei size, ALsizei freq);
 ALvoid  alcMacOSXMixerOutputRateProc(const ALdouble value);
 
-
-typedef ALvoid    AL_APIENTRY    (*alBufferDataStaticProcPtr) (const ALint bid, ALenum format, ALvoid* data, ALsizei size, ALsizei freq);
 ALvoid  alBufferDataStaticProc(const ALint bid, ALenum format, ALvoid* data, ALsizei size, ALsizei freq)
 {
     static    alBufferDataStaticProcPtr    proc = NULL;

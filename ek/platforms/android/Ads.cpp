@@ -1,5 +1,5 @@
 #include <platform/Ads.h>
-#include <platform/ek_android.h>
+#include "ek/android.hpp"
 
 namespace ek {
 

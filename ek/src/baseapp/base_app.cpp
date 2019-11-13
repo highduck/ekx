@@ -7,7 +7,7 @@
 #include <platform/window.hpp>
 #include <ek/logger.hpp>
 #include <ek/timer.hpp>
-#include <ek/audiomini/AudioMini.h>
+#include <ek/audiomini.hpp>
 
 namespace ek {
 

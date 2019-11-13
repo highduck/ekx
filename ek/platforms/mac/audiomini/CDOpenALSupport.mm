@@ -46,7 +46,7 @@
 #import "CDOpenALSupport.h"
 #import "CocosDenshion.h"
 #import <AudioToolbox/AudioToolbox.h>
-#import <AudioToolbox/ExtendedAudioFile.h>
+#import <AudioToolbox/AudioToolbox.h>
 
 //Taken from oalTouch MyOpenALSupport 1.1
 void* CDloadWaveAudioData(CFURLRef inFileURL, ALsizei *outDataSize, ALenum *outDataFormat, ALsizei*    outSampleRate)

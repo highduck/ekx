@@ -3,7 +3,7 @@
 
 #if EK_ANDROID
 
-#include <platform/ek_android.h>
+#include <ek/android.hpp>
 
 namespace ek::analytics {
 

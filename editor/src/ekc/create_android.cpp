@@ -1,5 +1,5 @@
 #include "generate_project_common.hpp"
-#include "project_config.h"
+#include "project_config.hpp"
 
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
@@ -124,20 +124,20 @@ void mod_cmake_lists(const project_config_t& config) {
     path_t cmake_path{"app/CMakeLists.txt"};
     vector<path_t> search_list{
             path_t{"../../src"},
-            config.path_ekx / "ecxx/src",
-            config.path_ekx / "core/src",
-            config.path_ekx / "ek/platforms/android",
-            config.path_ekx / "ek/src",
-            config.path_ekx / "scenex/src"
+            config.path.ekx / "ecxx/src",
+            config.path.ekx / "core/src",
+            config.path.ekx / "ek/platforms/android",
+            config.path.ekx / "ek/src",
+            config.path.ekx / "scenex/src"
     };
 
     vector<path_t> src_files;
     append(src_files, collect_source_files(path_t{"../../src"}));
-    append(src_files, collect_source_files(config.path_ekx / "ecxx/src"));
-    append(src_files, collect_source_files(config.path_ekx / "core/src"));
-    append(src_files, collect_source_files(config.path_ekx / "ek/src"));
-    append(src_files, collect_source_files(config.path_ekx / "ek/platforms/android"));
-    append(src_files, collect_source_files(config.path_ekx / "scenex/src"));
+    append(src_files, collect_source_files(config.path.ekx / "ecxx/src"));
+    append(src_files, collect_source_files(config.path.ekx / "core/src"));
+    append(src_files, collect_source_files(config.path.ekx / "ek/src"));
+    append(src_files, collect_source_files(config.path.ekx / "ek/platforms/android"));
+    append(src_files, collect_source_files(config.path.ekx / "scenex/src"));
 
     for (auto& it : search_list) {
         if (!it.empty() && it.str()[0] != '/') {
@@ -172,9 +172,9 @@ void create_android_project(const project_config_t& config) {
         assert(!is_dir(dest_path));
     }
 
-    copy_tree(config.path_ekx / ("editor/templates/template-" + platform_target), dest_path);
+    copy_tree(config.path.ekx / ("ek/templates/template-" + platform_target), dest_path);
     const path_t base_path{"../.."};
-    const path_t ek_path = config.path_ekx / "ek";
+    const path_t ek_path = config.path.ekx / "ek";
 
     working_dir_t::with(dest_path, [&]() {
 

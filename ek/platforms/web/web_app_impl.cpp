@@ -1,6 +1,6 @@
 #include <platform/application.hpp>
 #include <platform/static_resources.hpp>
-#include <platform/Sharing.h>
+#include <platform/sharing.hpp>
 #include <ek/logger.hpp>
 
 #include <emscripten.h>

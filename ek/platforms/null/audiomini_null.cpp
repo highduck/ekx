@@ -1,4 +1,4 @@
-#include <ek/audiomini/AudioMini.h>
+#include <ek/audiomini.hpp>
 
 namespace ek {
 

@@ -49,8 +49,7 @@ add_library(${PROJECT_NAME} STATIC
         ekc/process_assets.cpp
         ekc/build_web.cpp
         ekc/project_config.cpp
-        ekc/project_config.h
-        ekc/project_config_detect.cpp
+        ekc/project_config.hpp
         ekc/project_config_templating.cpp
         ekc/template_vars.cpp
         ekc/template_vars.h

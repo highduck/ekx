@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <ek/locator.hpp>
 #include <platform/GameServices.h>
-#include <platform/Sharing.h>
+#include <platform/sharing.hpp>
 #include <platform/Ads.h>
 
 namespace ek {

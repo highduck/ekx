@@ -2,7 +2,7 @@
 
 #include <string>
 #include <scenex/local_storage_var_t.hpp>
-#include <ek/audiomini/AudioMini.h>
+#include <ek/audiomini.hpp>
 #include <scenex/config.h>
 
 namespace scenex {

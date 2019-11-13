@@ -1,5 +1,5 @@
-#include <ek/audiomini/AudioMini.h>
-#include <platform/ek_android.h>
+#include <ek/audiomini.hpp>
+#include <ek/android.hpp>
 
 namespace ek {
 
@@ -60,7 +60,7 @@ void AudioMini::vibrate(int duration_millis) {
     auto* env = android::get_jni_env();
     auto clazz = env->FindClass("ekapp/EKAudio");
     auto method = env->GetStaticMethodID(clazz, "vibrate", "(J)V");
-    env->CallStaticVoidMethod(clazz, method, (jlong)duration_millis);
+    env->CallStaticVoidMethod(clazz, method, (jlong) duration_millis);
 }
 
 }

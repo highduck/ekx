@@ -1,4 +1,4 @@
-#include "project_config.h"
+#include "project_config.hpp"
 #include "process_market_assets.hpp"
 
 #include <ek/flash/doc/flash_archive.h>

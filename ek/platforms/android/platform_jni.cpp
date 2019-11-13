@@ -1,6 +1,6 @@
 #include <jni.h>
 #include <platform/application.hpp>
-#include <platform/ek_android.h>
+#include "ek/android.hpp"
 #include <platform/boot.h>
 
 using namespace ek;

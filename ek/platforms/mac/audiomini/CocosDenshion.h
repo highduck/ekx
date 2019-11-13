@@ -67,8 +67,8 @@ Requirements:
  
 */ 
 
-#import <OpenAL/al.h>
-#import <OpenAL/alc.h>
+#import <OpenAL/OpenAL.h>
+#import <OpenAL/OpenAL.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <Foundation/Foundation.h>
 #import "CDConfig.h"

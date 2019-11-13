@@ -1,9 +1,94 @@
-#include "project_config.h"
+#include "project_config.hpp"
 
 #include <pugixml.hpp>
 #include <ek/fs/path.hpp>
+#include <ek/system/system.hpp>
+#include <ek/logger.hpp>
+#include <ek/system/working_dir.hpp>
+#include <ek/utility/strings.hpp>
+
+using ek::path_t;
 
 namespace ekc {
+
+void init_project_path(project_path_t& path) {
+    const auto* ekx_root = std::getenv("EKX_ROOT");
+    if (!ekx_root) {
+        EK_ERROR << "Please define EKX_ROOT environment variable. Abort.";
+        abort();
+    }
+
+    path.ekx = path_t{ekx_root};
+
+    if (!ek::is_dir(path.ekx)) {
+        EK_ERROR << "EKX_ROOT is not a directory: " << path.ekx;
+        abort();
+    }
+
+    path.emsdk = path_t{"/Users/ilyak/dev/emsdk"};
+    if (!ek::is_dir(path.emsdk)) {
+        EK_WARN << "Emscripten SDK dir is not found: " << path.ekx;
+        EK_WARN << "Web Target is not available";
+        path.emsdk_toolchain = path.emsdk /
+                               "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake";
+        if (!ek::is_file(path.emsdk_toolchain)) {
+            EK_WARN << "Emscripten SDK toolchain is not found: " << path.ekx;
+            EK_WARN << "Web Target is not available";
+        }
+    }
+
+    path.current_project = path.project = path_t{ek::current_working_directory()};
+}
+
+bool check_current_target(pugi::xml_node node, const project_config_t& config) {
+    return config.current_target == node.attribute("target").as_string(config.current_target.c_str());
+}
+
+void include_project(const std::string& module_name, project_config_t& config);
+
+path_t process_path(const project_config_t& config, const std::string& str) {
+    auto res = ek::replace(str, "${EKX}", config.path.ekx.str());
+    res = ek::replace(res, "${CURRENT_PROJECT_DIR}", (config.path.current_project).str());
+    res = ek::replace(res, "${PROJECT_DIR}", (config.path.project).str());
+    res = ek::replace(res, "${OUTPUT}", (config.path.project / config.build_dir).str());
+    return path_t{res};
+}
+
+void populate_config(pugi::xml_node root, project_config_t& config) {
+    using ek::path_t;
+    using ek::is_file;
+
+    for (auto& module_ref : root.children("module")) {
+        if (check_current_target(module_ref, config)) {
+            include_project(module_ref.attribute("name").as_string(), config);
+        }
+    }
+
+    for (auto template_node : root.children("template")) {
+        if (check_current_target(template_node, config)) {
+            module_template_t tpl{};
+            tpl.source = process_path(config, template_node.attribute("from").as_string());
+            tpl.dest = process_path(config, template_node.attribute("to").as_string());
+            config.templates.push_back(tpl);
+        }
+    }
+}
+
+void include_project(const std::string& module_name, project_config_t& config) {
+    EK_DEBUG << "include project: " << module_name;
+    if (!module_name.empty()) {
+        path_t old_path = config.path.current_project;
+        config.path.current_project = config.path.ekx / module_name;
+        path_t module_path = config.path.ekx / module_name / "ek.xml";
+        pugi::xml_document doc;
+        if (doc.load_file(module_path.c_str())) {
+            populate_config(doc.child("project"), config);
+        } else {
+            EK_WARN << "Error read XML: " << module_path;
+        }
+        config.path.current_project = old_path;
+    }
+}
 
 void parse_config_html_section(html_config_t& html, const pugi::xml_node& node) {
     html.google_analytics_property_id = node.attribute("google_analytics_property_id").as_string("");
@@ -92,10 +177,13 @@ void parse_project_config(project_config_t& out_config, const char* path) {
             out_config.ios.application_id = application_node.attribute("id").as_string();
         }
     }
+
+    include_project("ek", out_config);
+    populate_config(node, out_config);
 }
 
 void create_project_config(project_config_t& out_config) {
-    init_project_config_defaults(out_config);
+    init_project_path(out_config.path);
     parse_project_config(out_config, "ek.xml");
 }
 

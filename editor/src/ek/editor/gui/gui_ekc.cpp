@@ -1,4 +1,4 @@
-#include <ekc/project_config.h>
+#include <ekc/project_config.hpp>
 #include <ekc/ekc.hpp>
 
 #include <ek/editor/imgui/imgui.hpp>

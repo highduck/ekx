@@ -17,6 +17,16 @@ class xml_node;
 
 namespace ekc {
 
+struct project_path_t {
+    ek::path_t ekx;
+    ek::path_t emsdk;
+    ek::path_t emsdk_toolchain;
+    ek::path_t project;
+    ek::path_t current_project;
+};
+
+void init_project_path(project_path_t& path);
+
 struct template_vars_t;
 
 struct asset_entry_config_t {
@@ -62,10 +72,16 @@ struct ios_config_t {
     std::string application_id;
 };
 
+struct module_template_t {
+    ek::path_t source;
+    ek::path_t dest;
+    std::string type{"tpl"};
+};
+
 struct project_config_t {
-    ek::path_t path_ekx;
-    ek::path_t path_emsdk_toolchain;
-    ek::path_t path;
+    project_path_t path;
+
+    std::string current_target;
 
     std::string binary_name;
     std::string cmake_target;
@@ -87,9 +103,9 @@ struct project_config_t {
 
     html_config_t html;
     assets_config_t assets;
-};
 
-void init_project_config_defaults(project_config_t& dest);
+    std::vector<module_template_t> templates;
+};
 
 void create_project_config(project_config_t& dest);
 

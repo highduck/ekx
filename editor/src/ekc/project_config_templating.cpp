@@ -1,4 +1,4 @@
-#include "project_config.h"
+#include "project_config.hpp"
 #include "template_vars.h"
 
 namespace ekc {

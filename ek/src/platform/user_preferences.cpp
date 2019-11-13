@@ -1,7 +1,7 @@
 #include "user_preferences.hpp"
 
-#include <cassert>
 #include <ek/utility/base64.hpp>
+#include <cassert>
 
 #if defined(__EMSCRIPTEN__)
 
@@ -9,7 +9,7 @@
 
 #elif defined(__ANDROID__)
 
-#include <platform/ek_android.h>
+#include <ek/android.hpp>
 
 #endif
 

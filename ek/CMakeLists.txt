@@ -8,9 +8,8 @@ add_library(ek STATIC
 
         src/platform/Ads.h
         src/platform/crash_reporter.hpp
-        src/platform/ek_android.h
         src/platform/GameServices.h
-        src/platform/Sharing.h
+        src/platform/sharing.hpp
         src/platform/window.cpp
         src/platform/window.hpp
         src/platform/application.cpp
@@ -50,7 +49,7 @@ add_library(ek STATIC
         src/platform/user_preferences.cpp
         src/platform/static_resources.hpp
 
-        src/ek/audiomini/AudioMini.h
+        src/ek/audiomini.hpp
 
         src/platform/boot.cpp
         src/platform/boot.h
@@ -115,7 +114,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
             src/platform/static_resources.cpp
 
             platforms/web/web_app_impl.cpp
-            platforms/web/ek/audiomini/AudioMini.cpp
+            platforms/web/audiomini_web.cpp
 
             platforms/null/Ads.cpp
             platforms/null/GameServices.cpp
@@ -127,7 +126,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 
     target_link_options(ek
             PUBLIC
-            --js-library ${PROJECT_SOURCE_DIR}/../editor/templates/web/audio_mini.js
+            --js-library ${PROJECT_SOURCE_DIR}/platforms/web/audiomini.js
             )
     #elseif ($ENV{CONAN_CMAKE_SYSTEM_NAME} MATCHES iOS)
 elseif (${CONAN_SETTINGS_OS} MATCHES "iOS")
@@ -151,21 +150,21 @@ elseif (${CONAN_SETTINGS_OS} MATCHES "iOS")
             platforms/ios/EAGLView.h
             platforms/ios/EAGLView.mm
             platforms/ios/iosPlatform.mm
-            platforms/ios/Sharing.mm
+            platforms/ios/sharing.mm
             platforms/ios/GameServices.mm
 
             platforms/apple/application.mm
 
-            platforms/apple/ek/audiomini/audio_mini.mm
-            platforms/mac/ek/audiomini/CDAudioManager.h
-            platforms/mac/ek/audiomini/CDAudioManager.mm
-            platforms/mac/ek/audiomini/CDConfig.h
-            platforms/mac/ek/audiomini/CDOpenALSupport.h
-            platforms/mac/ek/audiomini/CDOpenALSupport.mm
-            platforms/mac/ek/audiomini/CocosDenshion.h
-            platforms/mac/ek/audiomini/CocosDenshion.mm
-            platforms/mac/ek/audiomini/SimpleAudioEngine_objc.h
-            platforms/mac/ek/audiomini/SimpleAudioEngine_objc.mm
+            platforms/apple/audiomini_apple.mm
+            platforms/mac/audiomini/CDAudioManager.h
+            platforms/mac/audiomini/CDAudioManager.mm
+            platforms/mac/audiomini/CDConfig.h
+            platforms/mac/audiomini/CDOpenALSupport.h
+            platforms/mac/audiomini/CDOpenALSupport.mm
+            platforms/mac/audiomini/CocosDenshion.h
+            platforms/mac/audiomini/CocosDenshion.mm
+            platforms/mac/audiomini/SimpleAudioEngine_objc.h
+            platforms/mac/audiomini/SimpleAudioEngine_objc.mm
             )
 
     target_link_libraries(${PROJECT_NAME}
@@ -196,24 +195,24 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             platforms/mac/AppDelegate.mm
             platforms/mac/AppDelegate.h
             platforms/mac/macPlatform.mm
-            platforms/mac/Sharing.cpp
+            platforms/mac/sharing.cpp
             platforms/mac/osx_input.mm
             platforms/mac/osx_input.h
 
             platforms/apple/application.mm
 
-            platforms/apple/ek/audiomini/audio_mini.mm
-            platforms/mac/ek/audiomini/CDAudioManager.h
-            platforms/mac/ek/audiomini/CDAudioManager.mm
-            platforms/mac/ek/audiomini/CDConfig.h
-            platforms/mac/ek/audiomini/CDOpenALSupport.h
-            platforms/mac/ek/audiomini/CDOpenALSupport.mm
-            platforms/mac/ek/audiomini/CDXMacOSXSupport.h
-            platforms/mac/ek/audiomini/CDXMacOSXSupport.mm
-            platforms/mac/ek/audiomini/CocosDenshion.h
-            platforms/mac/ek/audiomini/CocosDenshion.mm
-            platforms/mac/ek/audiomini/SimpleAudioEngine_objc.h
-            platforms/mac/ek/audiomini/SimpleAudioEngine_objc.mm
+            platforms/apple/audiomini_apple.mm
+            platforms/mac/audiomini/CDAudioManager.h
+            platforms/mac/audiomini/CDAudioManager.mm
+            platforms/mac/audiomini/CDConfig.h
+            platforms/mac/audiomini/CDOpenALSupport.h
+            platforms/mac/audiomini/CDOpenALSupport.mm
+            platforms/mac/audiomini/CDXMacOSXSupport.h
+            platforms/mac/audiomini/CDXMacOSXSupport.mm
+            platforms/mac/audiomini/CocosDenshion.h
+            platforms/mac/audiomini/CocosDenshion.mm
+            platforms/mac/audiomini/SimpleAudioEngine_objc.h
+            platforms/mac/audiomini/SimpleAudioEngine_objc.mm
             )
 
     target_link_libraries(ek
@@ -229,13 +228,14 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
     target_sources(ek PRIVATE
 
             src/platform/static_resources.cpp
+            platforms/android/ek/android.hpp
 
             platforms/android/android_main.cpp
-            platforms/android/Sharing.cpp
+            platforms/android/sharing.cpp
             platforms/android/GameServices.cpp
             platforms/android/Ads.cpp
             platforms/android/platform_jni.cpp
-            platforms/android/ek/audiomini/AudioMini.cpp
+            platforms/android/audiomini_android.cpp
             )
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -260,10 +260,10 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_sources(ek PRIVATE
             src/platform/static_resources.cpp
 
-            platforms/null/ek/audiomini/AudioMini.cpp
+            platforms/null/audiomini_null.cpp
             platforms/null/Ads.cpp
             platforms/null/GameServices.cpp
-            platforms/null/Sharing.cpp
+            platforms/null/sharing.cpp
             )
 
     find_package(OpenGL)

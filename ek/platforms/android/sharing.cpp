@@ -1,5 +1,5 @@
-#include <platform/Sharing.h>
-#include <platform/ek_android.h>
+#include <platform/sharing.hpp>
+#include "ek/android.hpp"
 
 namespace ek {
 

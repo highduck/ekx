@@ -5,7 +5,7 @@
 #include <ek/logger.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/system/system.hpp>
-#include <ek/audiomini/AudioMini.h>
+#include <ek/audiomini.hpp>
 #include <ek/locator.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/editor/gui/editor_widgets.hpp>

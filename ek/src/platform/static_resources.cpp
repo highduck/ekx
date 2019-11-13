@@ -1,9 +1,13 @@
 #include "static_resources.hpp"
 
 #include <cassert>
+#include <cstdio>
+#include <cstring>
 
 #if defined(__ANDROID__)
-#include <platform/ek_android.h>
+
+#include <ek/android.hpp>
+
 #endif
 
 namespace ek {

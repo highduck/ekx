@@ -1,6 +1,6 @@
-#include <ek/audiomini/AudioMini.h>
+#include <ek/audiomini.hpp>
 
-#import <ek/audiomini/SimpleAudioEngine_objc.h>
+#import <audiomini/SimpleAudioEngine_objc.h>
 
 namespace ek {
 

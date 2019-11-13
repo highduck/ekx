@@ -3,7 +3,7 @@
 #include <ek/fs/path.hpp>
 #include <scenex/2d/atlas.hpp>
 #include <ek/locator.hpp>
-#include <ek/audiomini/AudioMini.h>
+#include <ek/audiomini.hpp>
 #include <scenex/data/sg_data.h>
 #include <scenex/data/sg_factory.h>
 #include <scenex/2d/font.hpp>

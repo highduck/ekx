@@ -1,5 +1,5 @@
 #include <platform/GameServices.h>
-#include <platform/ek_android.h>
+#include "ek/android.hpp"
 
 namespace ek {
     void game_services_init() {
