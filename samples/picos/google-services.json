@@ -1,0 +1,65 @@
+{
+  "project_info": {
+    "project_number": "233407531247",
+    "firebase_url": "https://odd-color-sense.firebaseio.com",
+    "project_id": "odd-color-sense",
+    "storage_bucket": "odd-color-sense.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:233407531247:android:c526410354429c57",
+        "android_client_info": {
+          "package_name": "com.eliasku.odd_color_sense_vision_test_challenge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "233407531247-gkl60n71hfmn9fknoe73jiejj3elht0d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eliasku.odd_color_sense_vision_test_challenge",
+            "certificate_hash": "e1ae50ed97a2de6d74ece2e0b3aa8a2778f778a0"
+          }
+        },
+        {
+          "client_id": "233407531247-kpsm60e97ndi02uae0l2lkqp8g2t2a90.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.eliasku.odd_color_sense_vision_test_challenge",
+            "certificate_hash": "cb5365813a76b842b7d937b910694b96968f5d69"
+          }
+        },
+        {
+          "client_id": "233407531247-bb01g6h9ksht0nguniq1eam9qspml403.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlzVOGx3fCmJ5HVM0wUsSPilhcIIi6erA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "233407531247-bb01g6h9ksht0nguniq1eam9qspml403.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "233407531247-vajo7ncaflf6cfq1fle0nm3eg4ta1gfu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.eliasku.oddcolorsensevisiontestchallenge",
+                "app_store_id": "1435111697"
+              }
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-3931267664278058~3023709586"
+    }
+  ],
+  "configuration_version": "1"
+}

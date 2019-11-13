@@ -40,11 +40,8 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/obj/obj_loader.cpp
         ek/editor/obj/obj_loader.hpp
 
-        ekc/project_config.cpp
-        ekc/project_config.hpp
-        ekc/process_asset_flash.cpp
-        ekc/process_market_assets.hpp
-        ekc/process_market_assets.cpp
+        ek/editor/marketing/export_marketing.hpp
+        ek/editor/marketing/export_marketing.cpp
         ek/editor/gui/gui_ekc.cpp
         ek/editor/assets/texture_asset.cpp
         ek/editor/assets/texture_asset.hpp

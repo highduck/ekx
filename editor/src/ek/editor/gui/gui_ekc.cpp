@@ -1,57 +1,33 @@
-#include <ekc/project_config.hpp>
-
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/system/system.hpp>
 #include <ek/system/working_dir.hpp>
 
 #include <ek/logger.hpp>
-#include <ekc/process_market_assets.hpp>
-
-using namespace ekc;
+#include <ek/editor/marketing/export_marketing.hpp>
 
 namespace ek {
-
-project_config_t* project_config_ = nullptr;
 
 void gui_ekc() {
     ImGui::Begin("EKC");
 
-    if (!project_config_ || ImGui::Button("Reload Config")) {
-        delete project_config_;
-        project_config_ = new project_config_t;
-
-        working_dir_t::with("..", []() {
-            create_project_config(*project_config_);
-        });
-
+    if (ImGui::Button("Reload Config")) {
         EK_INFO << "exe: " << get_executable_path();
         EK_INFO << "cwd: " << current_working_directory();
     }
 
-    if (project_config_) {
-        if (ImGui::Button("Export Web")) {
-            EK_WARN << "Not supported yet. Use <ekx/cli> tools";
-//            working_dir_t::with("..", []() {
-//                build_web(*project_config_);
-//            });
-        }
-        if (ImGui::Button("Export Android")) {
-            EK_WARN << "Not supported yet. Use <ekx/cli> tools";
-//            working_dir_t::with("..", []() {
-//                create_android_project(*project_config_);
-//            });
-        }
-        if (ImGui::Button("Export iOS")) {
-            EK_WARN << "Not supported yet. Use <ekx/cli> tools";
-//            working_dir_t::with("..", []() {
-//                create_xcode_ios(*project_config_);
-//            });
-        }
-        if (ImGui::Button("Export Marketing")) {
-            working_dir_t::with("..", []() {
-                process_market_asset(*project_config_);
-            });
-        }
+    if (ImGui::Button("Export Web")) {
+        EK_WARN << "Not supported yet. Use <ekx/cli> tools";
+    }
+    if (ImGui::Button("Export Android")) {
+        EK_WARN << "Not supported yet. Use <ekx/cli> tools";
+    }
+    if (ImGui::Button("Export iOS")) {
+        EK_WARN << "Not supported yet. Use <ekx/cli> tools";
+    }
+    if (ImGui::Button("Export Marketing")) {
+        working_dir_t::with("..", []() {
+            process_market_asset(marketing_asset_t{});
+        });
     }
 
     ImGui::End();

@@ -44,3 +44,7 @@ if (EKX_BUILD_EDITOR)
     add_subdirectory(editor)
     target_link_libraries(ekx INTERFACE ek-flash ek-editor)
 endif ()
+
+# Samples
+
+add_subdirectory(samples/picos)

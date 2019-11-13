@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<asset name="tests" type="flash" path="tests">
+	<atlas name="tests">
+		<resolution scale="1" max_width="2048" max_height="2048" />
+		<resolution scale="2" max_width="2048" max_height="2048" />
+		<resolution scale="3" max_width="2048" max_height="2048" />
+		<resolution scale="4" max_width="2048" max_height="2048" />
+	</atlas>
+</asset>

@@ -1,4 +1,12 @@
-#include "process_market_assets.hpp"
+#include "export_marketing.hpp"
+
+#include <ek/logger.hpp>
+#include <ek/flash/rasterizer/render_to_sprite.h>
+#include <ek/flash/doc/flash_archive.h>
+#include <ek/system/working_dir.hpp>
+#include <ek/system/system.hpp>
+#include <ek/utility/strings.hpp>
+#include <xfl/flash_doc_exporter.h>
 
 #include <cairo.h>
 #include <nlohmann/json.hpp>
@@ -6,20 +14,33 @@
 #include <fstream>
 #include <fmt/core.h>
 
-#include <ek/flash/rasterizer/render_to_sprite.h>
-#include <ek/system/working_dir.hpp>
-#include <ek/system/system.hpp>
-#include <ek/utility/strings.hpp>
-#include <xfl/flash_doc_exporter.h>
-
 using json = nlohmann::json;
 
 using namespace ek::flash;
 using namespace ek::spritepack;
 using namespace std;
-using namespace ek;
 
-namespace ekc {
+namespace ek {
+
+static std::unique_ptr<basic_entry> load_flash_archive(const path_t& dir, const std::string& file) {
+    const auto src = dir / file;
+
+    // dir/FILE/FILE.xfl
+    const auto xfl_file = src / file + ".xfl";
+    if (is_dir(src) && is_file(xfl_file)) {
+        EK_DEBUG << "XFL detected: " << xfl_file;
+        return std::make_unique<xfl_entry>(src);
+    }
+
+    // dir/FILE.fla
+    const auto fla_file = src + ".fla";
+    if (is_file(fla_file)) {
+        EK_DEBUG << "FLA detected: " << fla_file;
+        return std::make_unique<fla_entry>(fla_file);
+    }
+
+    return nullptr;
+}
 
 void destroy_sprite_data(sprite_t& spr) {
     //if (!spr.preserve_pixels) {
@@ -183,6 +204,19 @@ void process_flash_archive_market(const ek::flash::flash_file& file) {
                 destroy_sprite_data(spr);
             });
         }
+    }
+}
+
+void process_market_asset(const marketing_asset_t& marketing) {
+    using namespace ek::flash;
+    using ek::path_join;
+
+    auto arch = load_flash_archive(marketing.input, marketing.name);
+    if (arch) {
+        flash_file ff{std::move(arch)};
+        process_flash_archive_market(ff);
+    } else {
+        EK_ERROR << "process_market_asset " << marketing.input << ' ' << marketing.name;
     }
 }
 
