@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="ek">
+    <template target="web"
+              from="${CURRENT_PROJECT_DIR}/templates/web/index.html.mustache"
+              to="${OUTPUT}/index.html"/>
+    <template target="web"
+              from="${CURRENT_PROJECT_DIR}/templates/web/manifest.json.mustache"
+              to="${OUTPUT}/manifest.webmanifest"/>
+    <template target="web"
+              from="${CURRENT_PROJECT_DIR}/templates/web/sw.js.mustache"
+              to="${OUTPUT}/sw.js"/>
+
+    <template target="web" type="file"
+              from="${CURRENT_PROJECT_DIR}/platforms/web/audiomini.js"
+              to="${OUTPUT}/audiomini.js"/>
+    <template target="web" type="file"
+              from="${CURRENT_PROJECT_DIR}/templates/web/howler.core.min.js"
+              to="${OUTPUT}/howler.core.min.js"/>
+    <template target="web" type="file"
+              from="${CURRENT_PROJECT_DIR}/templates/web/pwacompat.min.js"
+              to="${OUTPUT}/pwacompat.min.js"/>
+    <module name="core"/>
+</project>
