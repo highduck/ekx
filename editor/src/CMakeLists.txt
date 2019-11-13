@@ -40,28 +40,12 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/obj/obj_loader.cpp
         ek/editor/obj/obj_loader.hpp
 
-        plist/plist.hpp
-        plist/plist.cpp
-        plist/date.cpp
-        plist/date.hpp
-        plist/base64.hpp
-
-        ekc/process_assets.cpp
-        ekc/build_web.cpp
         ekc/project_config.cpp
         ekc/project_config.hpp
-        ekc/project_config_templating.cpp
-        ekc/template_vars.cpp
-        ekc/template_vars.h
         ekc/process_asset_flash.cpp
         ekc/process_market_assets.hpp
         ekc/process_market_assets.cpp
-        ekc/create_android.cpp
-        ekc/create_xcode_ios.cpp
-        ekc/generate_project_common.cpp
-        ekc/generate_project_common.hpp
         ek/editor/gui/gui_ekc.cpp
-        ekc/ekc.hpp
         ek/editor/assets/texture_asset.cpp
         ek/editor/assets/texture_asset.hpp
         ek/editor/assets/model_asset.cpp
@@ -105,7 +89,6 @@ else ()
 endif ()
 
 target_link_libraries(${PROJECT_NAME}
-        mustache
         nlohmann-json
         fmt
         imgui

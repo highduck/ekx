@@ -1,11 +1,11 @@
 #include <ekc/project_config.hpp>
-#include <ekc/ekc.hpp>
 
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/system/system.hpp>
 #include <ek/system/working_dir.hpp>
 
 #include <ek/logger.hpp>
+#include <ekc/process_market_assets.hpp>
 
 using namespace ekc;
 
@@ -30,23 +30,26 @@ void gui_ekc() {
 
     if (project_config_) {
         if (ImGui::Button("Export Web")) {
-            working_dir_t::with("..", []() {
-                build_web(*project_config_);
-            });
+            EK_WARN << "Not supported yet. Use <ekx/cli> tools";
+//            working_dir_t::with("..", []() {
+//                build_web(*project_config_);
+//            });
         }
         if (ImGui::Button("Export Android")) {
-            working_dir_t::with("..", []() {
-                create_android_project(*project_config_);
-            });
+            EK_WARN << "Not supported yet. Use <ekx/cli> tools";
+//            working_dir_t::with("..", []() {
+//                create_android_project(*project_config_);
+//            });
         }
         if (ImGui::Button("Export iOS")) {
-            working_dir_t::with("..", []() {
-                create_xcode_ios(*project_config_);
-            });
+            EK_WARN << "Not supported yet. Use <ekx/cli> tools";
+//            working_dir_t::with("..", []() {
+//                create_xcode_ios(*project_config_);
+//            });
         }
         if (ImGui::Button("Export Marketing")) {
             working_dir_t::with("..", []() {
-                process_assets(*project_config_);
+                process_market_asset(*project_config_);
             });
         }
     }

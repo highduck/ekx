@@ -64,19 +64,20 @@ brew install cairo
 #### External packages
 - `imgui` !
 - `pugixml`
+
 - `fmt`
-- `kainjow-mustache`
 - `json_for_modern_cpp`
 
-#### Python dependencies
-- `mod-pbxproj` for XCode project patching
+#### Tooling dependencies
+- [will be removed] `mod-pbxproj` for XCode project patching
 
 ### Development requirements
 
 - cmake >= 3.12
 - modern c++17 compiler
-- python3
-- emsdk
+- NodeJS (ver >=12), NPM
+- EMSDK
+- [could be removed] python3
 
 ## Installation
 

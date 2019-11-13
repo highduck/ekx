@@ -4,7 +4,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 add_subdirectory(miniz)
 add_subdirectory(pugixml)
-add_subdirectory(mustache)
 add_subdirectory(nlohmann-json)
 add_subdirectory(fmt)
 add_subdirectory(imgui)
