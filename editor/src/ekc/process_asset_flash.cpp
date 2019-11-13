@@ -41,17 +41,16 @@ static std::unique_ptr<basic_entry> load_flash_archive(const path_t& dir, const 
     return nullptr;
 }
 
-void process_market_asset(const asset_entry_config_t& asset, const std::string& output) {
+void process_market_asset(const project_config_t& config) {
     using namespace ek::flash;
     using ek::path_join;
 
-    auto arch = load_flash_archive(asset.input, asset.name);
+    auto arch = load_flash_archive(config.marketing.input, config.marketing.name);
     if (arch) {
-        auto dest_path = path_join(output, asset.name);
         flash_file ff{std::move(arch)};
         process_flash_archive_market(ff);
     } else {
-        EK_ERROR << "process_market_asset " << asset.name << ' ' << asset.input;
+        EK_ERROR << "process_market_asset " << config.marketing.input << ' ' << config.marketing.name;
     }
 }
 
