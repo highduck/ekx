@@ -30,15 +30,11 @@ using namespace scenex;
 using namespace ek;
 
 PikoApp::PikoApp()
-        : basic_application()
-#ifdef EK_EDITOR
-, editor_{*this}
-#endif
-{
+        : base_app_type() {
 }
 
 void PikoApp::initialize() {
-    basic_application::initialize();
+    base_app_type::initialize();
 }
 
 static ecs::entity main_camera{};
@@ -111,8 +107,59 @@ void create_coordinate_system_gizmo() {
 }
 
 void PikoApp::preload() {
-    basic_application::preload();
+    base_app_type::preload();
 
+    clear_color_enabled = true;
+}
+
+void PikoApp::update_frame(float dt) {
+    base_app_type::update_frame(dt);
+
+    scene_pre_update(root, dt);
+
+    update_camera_arc_ball(dt);
+
+    piko::update(game);
+    //update_game_title_start(w);
+    scene_post_update(root, dt);
+}
+
+void PikoApp::render_frame() {
+//    base_app_type::render_frame();
+
+    const float dt = get_delta_time(root);
+
+    for (auto e : ecs::view<test_rotation_comp>()) {
+        auto& tr = ecs::get<transform_3d>(e);
+        tr.rotation.x += dt;
+        if (tr.rotation.x > math::pi2) {
+            tr.rotation.x -= math::pi2;
+        }
+        tr.rotation.y += dt * 2;
+        if (tr.rotation.y > math::pi2) {
+            tr.rotation.y -= math::pi2;
+        }
+    }
+
+    if (main_scene_3d) {
+        auto light = find(main_scene_3d, "light");
+        if (light) {
+            static float lt = 0.0f;
+            lt += dt;
+            ecs::get<transform_3d>(light).position = {
+                    50.0f * cos(lt),
+                    50.0f * sin(lt),
+                    15.0f
+            };
+        }
+
+        render_3d_scene(main_scene_3d, main_camera);
+    }
+
+    draw_node(root);
+}
+
+void PikoApp::start_game() {
     auto light_material = new material_3d;
     light_material->emission = float3::one;
     asset_t<material_3d>{"light_material"}.reset(light_material);
@@ -131,26 +178,6 @@ void PikoApp::preload() {
     create_test_material("test3", 0xFFFFFF00_argb, 0.3f);
     create_test_material("ground", 0xFF77FF77_argb, 0.01f);
 
-#ifndef EK_EDITOR
-    auto* asset_pack = asset_manager_->add_from_type("pack", "pack_meta");
-    if (asset_pack) {
-        asset_pack->load();
-    }
-#endif
-    clear_color_enabled = true;
-
-//    std::array<image_t*, 6> skybox{};
-//    skybox[0] = load_image("assets/skybox/right.jpg"); //  +X
-//    skybox[1] = load_image("assets/skybox/left.jpg"); //   -X
-//    skybox[2] = load_image("assets/skybox/top.jpg"); //  +Y
-//    skybox[3] = load_image("assets/skybox/bottom.jpg"); //   -Y
-//    skybox[4] = load_image("assets/skybox/front.jpg"); //    +Z
-//    skybox[5] = load_image("assets/skybox/back.jpg"); // -Z
-//    auto* t = new texture_t(true);
-//    t->upload_cubemap(skybox);
-//    asset_t<texture_t>{"skybox"}.reset(t);
-
-//    load_particles();
     piko::init(game);
 //    setup_game(w, game);
 
@@ -220,51 +247,6 @@ void PikoApp::preload() {
     }
 
     append(game, sg_create("tests", "test"));
-}
-
-void PikoApp::update_frame(float dt) {
-    basic_application::update_frame(dt);
-
-    scene_pre_update(root, dt);
-
-    update_camera_arc_ball(dt);
-
-    piko::update(game);
-    //update_game_title_start(w);
-    scene_post_update(root, dt);
-}
-
-void PikoApp::render_frame() {
-//    basic_application::render_frame();
-
-    const float dt = get_delta_time(root);
-
-    for (auto e : ecs::view<test_rotation_comp>()) {
-        auto& tr = ecs::get<transform_3d>(e);
-        tr.rotation.x += dt;
-        if (tr.rotation.x > math::pi2) {
-            tr.rotation.x -= math::pi2;
-        }
-        tr.rotation.y += dt * 2;
-        if (tr.rotation.y > math::pi2) {
-            tr.rotation.y -= math::pi2;
-        }
-    }
-
-    auto light = find(main_scene_3d, "light");
-    if (light) {
-        static float lt = 0.0f;
-        lt += dt;
-        ecs::get<transform_3d>(light).position = {
-                50.0f * cos(lt),
-                50.0f * sin(lt),
-                15.0f
-        };
-    }
-
-    render_3d_scene(main_scene_3d, main_camera);
-
-    draw_node(root);
 }
 
 PikoApp::~PikoApp() = default;

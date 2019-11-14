@@ -1,14 +1,14 @@
 #pragma once
 
-#include <scenex/ek/basic_application.h>
-
 #ifdef EK_EDITOR
-
-#include <ek/editor/editor.hpp>
-
+#include <ek/editor/editor_app.hpp>
+using base_app_type = ek::editor_app_t;
+#else
+#include <scenex/ek/basic_application.h>
+using base_app_type = scenex::basic_application;
 #endif
 
-class PikoApp : public scenex::basic_application {
+class PikoApp : public base_app_type {
 public:
     PikoApp();
 
@@ -23,7 +23,5 @@ protected:
 
     void render_frame() override;
 
-#ifdef EK_EDITOR
-    ek::editor_context_t editor_;
-#endif
+    void start_game() override;
 };
