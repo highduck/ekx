@@ -521,7 +521,8 @@ function export_web(ctx) {
     tpl("templates/web/sw.js.mustache", "sw.js");
     file("templates/web/howler.core.min.js", "howler.core.min.js");
     file("templates/web/pwacompat.min.js", "pwacompat.min.js");
-    file("platforms/web/audiomini.js", "audiomini.js");
+
+    copyFolderRecursiveSync("generated/pwa/icons", path.join(ctx.path.OUTPUT, "icons"));
 }
 
 class File {

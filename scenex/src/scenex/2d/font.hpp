@@ -1,9 +1,10 @@
 #pragma once
 
+#include <scenex/config.h>
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
 #include <ek/math/box.hpp>
-#include <scenex/config.h>
+#include <ek/array_buffer.hpp>
 #include <ek/utility/common_macro.hpp>
 #include <ek/serialize/serialize.hpp>
 
@@ -76,6 +77,6 @@ public:
                                    float line_spacing = 0.0f) const;
 };
 
-font_t* load_font(const std::string& path);
+font_t* load_font(const ek::array_buffer& buffer);
 
 }

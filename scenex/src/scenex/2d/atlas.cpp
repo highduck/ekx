@@ -2,15 +2,14 @@
 #include "sprite.hpp"
 
 #include <ek/logger.hpp>
-#include <platform/static_resources.hpp>
-
 #include <ek/assets.hpp>
+#include <ek/math/serialize_math.hpp>
+#include <ek/fs/path.hpp>
+#include <ek/imaging/decoder.hpp>
+#include <platform/static_resources.hpp>
 #include <graphics/texture.hpp>
 
 #include <vector>
-#include <ek/math/serialize_math.hpp>
-#include <ek/fs/path.hpp>
-#include <utils/image_loader.hpp>
 
 using namespace ek;
 
@@ -98,10 +97,11 @@ atlas_t::~atlas_t() {
     }
 }
 
-void load_atlas_meta(const path_t& base_path, atlas_t* atlas, unsigned, const void* data,
-                     uint32_t size) {
-    // TODO: multiple pages
-    input_memory_stream input{data, size};
+void load_atlas_meta(const path_t& base_path, atlas_t* atlas, const array_buffer& buffer) {
+    EK_DEBUG << "Decoding Atlas META";
+    EK_DEBUG << "Atlas Base Path: " << base_path;
+
+    input_memory_stream input{buffer.data(), buffer.size()};
     IO io{input};
 
     // header
@@ -131,32 +131,41 @@ void load_atlas_meta(const path_t& base_path, atlas_t* atlas, unsigned, const vo
             texture_asset.reset(nullptr);
         }
 
-        EK_DEBUG << "Load atlas page " << page_image_path;
-        auto* image = load_image(base_path / page.image_path);
-        if (image) {
-            texture_asset.reset(new texture_t);
-            texture_asset->upload(*image);
-            delete image;
-        } else {
-            EK_DEBUG << "Image not found";
-        }
-
+        EK_DEBUG << "Load atlas page " << (base_path / page_image_path);
+//        get_resource_content_async((base_path / page_image_path).c_str(), [page_image_path](auto image_buffer) {
+//            if (image_buffer.empty()) {
+//                EK_DEBUG << "Image not found";
+//            } else {
+//                auto* image = decode_image_data(image_buffer);
+//                if (image) {
+//                    asset_t<texture_t> texture_asset{page_image_path};
+//                    texture_asset.reset(new texture_t);
+//                    texture_asset->upload(*image);
+//                    delete image;
+//                }
+//            }
+//        });
+        texture_asset.reset(new texture_t);
+        texture_asset->reset(1, 1);
+        load_texture_async((base_path / page_image_path).c_str(), texture_asset.get_mutable());
     }
 }
 
-atlas_t* load_atlas(const char* path, float scale_factor) {
+void load_atlas(const char* path, float scale_factor, std::function<void(atlas_t*)> callback) {
     const path_t uid{path};
+    const path_t base_path = uid.dir();
     const path_t file_meta = uid + get_scale_suffix(scale_factor) + ".atlas";
-    auto* result = new atlas_t();
 
-    auto buffer = get_resource_content(file_meta.c_str());
-    if (buffer.empty()) {
-        EK_DEBUG << "ATLAS META resource not found: " << file_meta;
-    } else {
-        load_atlas_meta(uid.dir(), result, 0u, buffer.data(), static_cast<uint32_t>(buffer.size()));
-    }
-
-    return result;
+    get_resource_content_async(file_meta.c_str(), [callback, file_meta, base_path](auto buffer) {
+        atlas_t* atlas = nullptr;
+        if (buffer.empty()) {
+            EK_DEBUG << "ATLAS META resource not found: " << file_meta;
+        } else {
+            atlas = new atlas_t;
+            load_atlas_meta(base_path, atlas, buffer);
+        }
+        callback(atlas);
+    });
 }
 
 }

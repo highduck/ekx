@@ -3,9 +3,6 @@ module.exports = class File {
         const shortname = "picos";
         const shortver = "2";
 
-        console.log(project.path.EKX_ROOT);
-        project.include_project(project.path.EKX_ROOT + "/ek");
-
         project.name = shortname;
         project.title = shortname;
         project.desc = shortname;

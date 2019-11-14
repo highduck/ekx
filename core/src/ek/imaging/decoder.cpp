@@ -1,10 +1,12 @@
 #include "decoder.hpp"
 
 #include "image.hpp"
-#include "drawing.hpp"
-#include <ek/fs/path.hpp>
 #include <ek/logger.hpp>
+
+#ifndef __EMSCRIPTEN__
+#include "drawing.hpp"
 #include <stb/stb_image.h>
+#endif
 
 namespace ek {
 
@@ -14,6 +16,7 @@ image_t* decode_image_data(const array_buffer& buffer) {
 
     image_t* result = nullptr;
 
+#ifndef __EMSCRIPTEN__
     int w = 0;
     int h = 0;
     int channels = 0;
@@ -30,6 +33,9 @@ image_t* decode_image_data(const array_buffer& buffer) {
     } else {
         EK_ERROR << "image decoding error: " << stbi_failure_reason();
     }
+#else
+    EK_ERROR << "Manual image decoding is not efficient for Web and disabled";
+#endif
     return result;
 }
 

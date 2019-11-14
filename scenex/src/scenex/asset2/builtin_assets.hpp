@@ -17,7 +17,5 @@ public:
     asset_object_t* create_for_type(const std::string& type, const std::string& path) const override;
 };
 
-void load_asset_pack(asset_manager_t& assets);
-
 }
 

@@ -63,16 +63,17 @@ void asset_manager_t::add_resolver(asset_type_resolver_t* resolver) {
     resolvers.push_back(resolver);
 }
 
-void asset_manager_t::add_from_type(const std::string& type, const std::string& path) {
+asset_object_t* asset_manager_t::add_from_type(const std::string& type, const std::string& path) {
     for (const auto* resolver : resolvers) {
         asset_object_t* asset = resolver->create_for_type(type, path);
         if (asset) {
             asset->project_ = this;
             assets.push_back(asset);
-            return;
+            return asset;
         }
     }
     EK_ERROR << "Can't resolve asset for file: " << path;
+    return nullptr;
 }
 
 void asset_manager_t::add_file(const std::string& path) {
@@ -85,6 +86,15 @@ void asset_manager_t::add_file(const std::string& path) {
         }
     }
     EK_ERROR << "Can't resolve asset for file " << path;
+}
+
+bool asset_manager_t::is_assets_ready() const {
+    for (auto* asset : assets) {
+        if (!asset->ready_) {
+            return false;
+        }
+    }
+    return true;
 }
 
 }

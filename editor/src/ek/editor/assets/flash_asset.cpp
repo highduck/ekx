@@ -127,6 +127,7 @@ void flash_asset_t::export_() {
 
     make_dirs(path_t{project_->export_path});
     working_dir_t::with(project_->export_path, [&] {
+        EK_DEBUG << "Export Flash asset: " << current_working_directory();
         spritepack::export_atlas(temp_atlas);
         auto sg_data = fe.export_library();
         output_memory_stream out{100};

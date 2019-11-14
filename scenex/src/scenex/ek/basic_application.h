@@ -5,9 +5,7 @@
 #include <ek/locator.hpp>
 #include <baseapp/base_app.hpp>
 #include <platform/application.hpp>
-#include <signal.h>
 #include <ek/signals.hpp>
-#include <ek/timer.hpp>
 #include "app_utils.hpp"
 
 namespace scenex {

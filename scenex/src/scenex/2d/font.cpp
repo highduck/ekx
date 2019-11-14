@@ -201,12 +201,9 @@ rect_f font_t::estimate_text_draw_zone(const std::string& text, float size, int 
     return bounds_builder.rect();
 }
 
-font_t* load_font(const std::string& path) {
-    auto buffer = get_resource_content(path);
+font_t* load_font(const array_buffer& buffer) {
     font_t* font = nullptr;
-    if (buffer.empty()) {
-        EK_ERROR << "FONT resource not found: " << path;
-    } else {
+    if (!buffer.empty()) {
         input_memory_stream input{buffer.data(), buffer.size()};
 
         IO io{input};
@@ -217,4 +214,5 @@ font_t* load_font(const std::string& path) {
     }
     return font;
 }
+
 }

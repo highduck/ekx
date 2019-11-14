@@ -18,11 +18,19 @@ audio_asset_t::audio_asset_t(std::string path)
         : path_{std::move(path)} {
 }
 
+bool check_filters(const ek::path_t& path, const std::vector<std::string>& filters) {
+    for (const auto& filter : filters) {
+        if (path.str().rfind(filter) != std::string::npos) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void audio_asset_t::load() {
     pugi::xml_document xml;
 
     std::vector<std::string> music_filters;
-
 
     const auto full_path = project_->base_path / path_;
     if (xml.load_file(full_path.c_str())) {
@@ -38,14 +46,12 @@ void audio_asset_t::load() {
     auto& audio = resolve<AudioMini>();
     auto files = search_files("*.mp3", project_->base_path);
     for (auto& file : files) {
-        for (const auto& filter : music_filters) {
-            if (file.str().rfind(filter) != std::string::npos) {
-                music_list_.push_back(file.str());
-                audio.create_music(file.c_str());
-            } else {
-                sound_list_.push_back(file.str());
-                audio.create_sound(file.c_str());
-            }
+        if (check_filters(file, music_filters)) {
+            music_list_.push_back(file.str());
+            audio.create_music(file.c_str());
+        } else {
+            sound_list_.push_back(file.str());
+            audio.create_sound(file.c_str());
         }
     }
 }

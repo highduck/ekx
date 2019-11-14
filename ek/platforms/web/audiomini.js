@@ -1,5 +1,4 @@
-var AudioMiniLib = {
-
+mergeInto(LibraryManager.library, {
     $AudioMini: {
         table: {},
         music: null,
@@ -58,7 +57,4 @@ var AudioMiniLib = {
             AudioMini.music.volume(vol, AudioMini.music_id);
         }
     }
-};
-
-autoAddDeps(AudioMiniLib, '$AudioMini');
-mergeInto(LibraryManager.library, AudioMiniLib);
+});

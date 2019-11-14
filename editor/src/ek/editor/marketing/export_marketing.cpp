@@ -63,10 +63,10 @@ void save_sprite_png(const sprite_t& spr, const path_t& path) {
     cairo_surface_destroy(surf);
 }
 
-void store_hi_res_icon(const flash_file& doc, const element_t& symbol, int size) {
+void store_hi_res_icon(const flash_file& doc, const element_t& symbol, int size, const std::string& prefix = "icon_") {
     renderer_options_t opts{float(size) / 64.0f, size, size, true, true};
     auto spr = render(doc, symbol, opts);
-    path_t icon_path{fmt::format("icon_{}.png", size)};
+    path_t icon_path{prefix + std::to_string(size) + ".png"};
     save_sprite_png(spr, icon_path);
     destroy_sprite_data(spr);
 }
@@ -143,14 +143,17 @@ void process_flash_archive_market(const ek::flash::flash_file& file) {
     const string marketing_leaderboards_folder = "generated/marketing/leaderboards";
     const string android_res_folder = "generated/android/res";
     const string ios_res_folder = "generated/ios";
+    const string pwa_icons_folder = "generated/pwa/icons";
 
     make_dirs(marketing_folder);
     make_dirs(marketing_achievements_folder);
     make_dirs(marketing_leaderboards_folder);
     make_dirs(android_res_folder);
     make_dirs(ios_res_folder);
+    make_dirs(pwa_icons_folder);
     for (const auto& item: exporter.doc.library) {
         if (item.item.linkageClassName == "icon") {
+
             working_dir_t::with(marketing_folder, [&]() {
                 for (auto size : {16, 32, 256, 512, 1024}) {
                     store_hi_res_icon(doc, item, size);
@@ -163,6 +166,13 @@ void process_flash_archive_market(const ek::flash::flash_file& file) {
             working_dir_t::with(android_res_folder, [&]() {
                 render_android_icons(doc, item, "ic_launcher.png");
             });
+
+            working_dir_t::with(pwa_icons_folder, [&]() {
+                for (auto size : {36, 48, 72, 96, 144, 192, 256, 512}) {
+                    store_hi_res_icon(doc, item, size, "icon");
+                }
+            });
+
         } else if (item.item.linkageClassName == "icon_round") {
             working_dir_t::with(android_res_folder, [&]() {
                 render_android_icons(doc, item, "ic_launcher_round.png");

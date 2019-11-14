@@ -11,6 +11,7 @@
 #include <graphics/gl_debug.hpp>
 #include <scenex/ek/input_controller.h>
 #include <ek/locator.hpp>
+#include <ek/fs/path.hpp>
 
 using namespace ek;
 
@@ -448,7 +449,12 @@ imgui_module_t::imgui_module_t() {
 //    IM_ASSERT(font != NULL);
     float scale_factor = 2.0f;
     ImFont* font = nullptr;
-    auto data = get_resource_content("assets/Cousine-Regular.ttf");
+    path_t font_path{"Cousine-Regular.ttf"};
+    const char* sdk_root = std::getenv("EKX_ROOT");
+    if (sdk_root) {
+        font_path = path_t{sdk_root} / "editor/resources" / font_path;
+    }
+    auto data = get_content(font_path.c_str());
     if (!data.empty()) {
         font = io.Fonts->AddFontFromMemoryTTF(data.data(), data.size(), 16.0f * scale_factor);
     }

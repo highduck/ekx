@@ -26,6 +26,18 @@ void write(verbosity_t verbosity, source_location_t location, const char* messag
 
 void set_log_filter(verbosity_t filter = verbosity_t::all);
 
+class null_log_stream_t {
+public:
+    inline explicit null_log_stream_t(verbosity_t, source_location_t) noexcept {}
+
+    inline void operator()(const char*, ...) noexcept {}
+
+    template<typename T>
+    inline null_log_stream_t& operator<<(const T&) noexcept { return *this; }
+
+    inline null_log_stream_t& operator<<(std::ostream& (*)(std::ostream&)) noexcept { return *this; }
+};
+
 class log_stream_t {
 public:
     explicit log_stream_t(verbosity_t verbosity, source_location_t loc = {}) noexcept;
@@ -52,8 +64,18 @@ private:
     std::ostringstream ss_;
 };
 
+#ifdef NDEBUG
+
+#define EK_TRACE ::ek::logger::null_log_stream_t{::ek::logger::verbosity_t::trace,   EK_CURRENT_LOCATION}
+#define EK_DEBUG ::ek::logger::null_log_stream_t{::ek::logger::verbosity_t::debug,   EK_CURRENT_LOCATION}
+
+#else
+
 #define EK_TRACE ::ek::logger::log_stream_t{::ek::logger::verbosity_t::trace,   EK_CURRENT_LOCATION}
 #define EK_DEBUG ::ek::logger::log_stream_t{::ek::logger::verbosity_t::debug,   EK_CURRENT_LOCATION}
+
+#endif
+
 #define EK_INFO  ::ek::logger::log_stream_t{::ek::logger::verbosity_t::info,    EK_CURRENT_LOCATION}
 #define EK_WARN  ::ek::logger::log_stream_t{::ek::logger::verbosity_t::warning, EK_CURRENT_LOCATION}
 #define EK_ERROR ::ek::logger::log_stream_t{::ek::logger::verbosity_t::error,   EK_CURRENT_LOCATION}

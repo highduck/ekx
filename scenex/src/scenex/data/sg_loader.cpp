@@ -9,18 +9,18 @@ using namespace ek;
 
 namespace scenex {
 
-sg_file* sg_load(const std::string& path) {
+sg_file* sg_load(const array_buffer& buffer) {
     sg_file* sg = nullptr;
 
-    auto buffer = get_resource_content(path);
-    if (buffer.empty()) {
-        EK_ERROR << "SCENE resource not found: " << path;
-    } else {
+    if (!buffer.empty()) {
         input_memory_stream input{buffer.data(), buffer.size()};
         IO io{input};
 
         sg = new sg_file;
         io(*sg);
+    }
+    else {
+        EK_ERROR << "SCENE LOAD: empty buffer";
     }
 
     return sg;

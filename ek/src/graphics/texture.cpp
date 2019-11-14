@@ -1,9 +1,6 @@
 #include "texture.hpp"
-
 #include "gl_debug.hpp"
-
 #include <ek/imaging/image.hpp>
-
 #include <cassert>
 
 namespace ek {
@@ -119,8 +116,8 @@ void texture_t::reset(uint32_t width, uint32_t height, texture_type type) {
             internal_format = GL_DEPTH_COMPONENT;
             pixel_type = GL_UNSIGNED_SHORT;
 #else
-            internal_format = GL_DEPTH_COMPONENT24;
-            pixel_type = GL_UNSIGNED_INT;
+        internal_format = GL_DEPTH_COMPONENT24;
+        pixel_type = GL_UNSIGNED_INT;
 #endif
             break;
         default:
@@ -146,4 +143,5 @@ void texture_t::upload_cubemap(const std::array<image_t*, 6>& images) {
     }
     end_texture_setup(gl_texture_target_);
 }
+
 }

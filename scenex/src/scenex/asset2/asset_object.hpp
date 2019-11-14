@@ -27,6 +27,7 @@ public:
 
 protected:
     asset_manager_t* project_ = nullptr;
+    bool ready_ = false;
 };
 
 class asset_type_resolver_t {

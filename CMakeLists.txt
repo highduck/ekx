@@ -12,7 +12,7 @@ option(EKX_BUILD_COVERAGE "Build EKX coverage check" OFF)
 option(EKX_BUILD_BENCHMARKS "Build EKX benchmarks projects" OFF)
 option(EKX_BUILD_EDITOR "Build EKX editor projects" ON)
 
-if (EMSCRIPTEN)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     set(EKX_BUILD_TESTS OFF)
     set(EKX_BUILD_COVERAGE OFF)
     set(EKX_BUILD_BENCHMARKS OFF)

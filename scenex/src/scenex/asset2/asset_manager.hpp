@@ -19,7 +19,7 @@ public:
 
     void add_file(const std::string& path);
 
-    void add_from_type(const std::string& type, const std::string& path);
+    asset_object_t* add_from_type(const std::string& type, const std::string& path);
 
     void add_resolver(asset_type_resolver_t* resolver);
 
@@ -30,6 +30,8 @@ public:
     void clear();
 
     void set_scale_factor(float scale);
+
+    bool is_assets_ready() const;
 
     ek::path_t base_path{"assets"};
     ek::path_t export_path{"assets"};

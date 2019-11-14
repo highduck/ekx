@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <functional>
 
 namespace scenex {
 
@@ -21,7 +22,8 @@ public:
     std::vector<ek::asset_t<ek::texture_t>> pages;
 };
 
-atlas_t* load_atlas(const char* path, float scale_factor);
+//atlas_t* load_atlas(const char* path, float scale_factor);
+void load_atlas(const char* path, float scale_factor, std::function<void(atlas_t*)> callback);
 
 }
 

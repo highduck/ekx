@@ -76,8 +76,8 @@ static EM_BOOL em_mouse_callback(int type, const EmscriptenMouseEvent* mouse_eve
     }
 
     const auto dpr = g_window.device_pixel_ratio;
-    event.x = static_cast<float>(mouse_event->targetX * dpr);
-    event.y = static_cast<float>(mouse_event->targetY * dpr);
+    event.x = dpr * static_cast<float>(mouse_event->targetX);
+    event.y = dpr * static_cast<float>(mouse_event->targetY);
     g_app.dispatch(event);
 
     return true;
@@ -131,10 +131,10 @@ static EM_BOOL web_onKeyboardEvent(int type, const EmscriptenKeyboardEvent* even
 
 static EM_BOOL em_wheel_callback(int type, const EmscriptenWheelEvent* event, void*) {
     if (type == EMSCRIPTEN_EVENT_WHEEL) {
-        float x = event->mouse.targetX * g_window.device_pixel_ratio;
-        float y = event->mouse.targetY * g_window.device_pixel_ratio;
-        auto sx = static_cast<float>(event->deltaX);
-        auto sy = static_cast<float>(event->deltaY);
+        const auto x = static_cast<float>(event->mouse.targetX) * g_window.device_pixel_ratio;
+        const auto y = static_cast<float>(event->mouse.targetY) * g_window.device_pixel_ratio;
+        const auto sx = static_cast<float>(event->deltaX);
+        const auto sy = static_cast<float>(event->deltaY);
         g_app.dispatch({mouse_event_type::scroll, mouse_button::other, x, y, sx, sy});
 
         //    return true;
@@ -151,10 +151,10 @@ static EM_BOOL handleTouchEvent(int type, const EmscriptenTouchEvent* event, voi
 
         if (touch.isChanged) {
             const auto dpr = g_window.device_pixel_ratio;
-            auto x = static_cast<float>(touch.targetX * dpr);
-            auto y = static_cast<float>(touch.targetY * dpr);
+            const auto x = dpr * static_cast<float>(touch.targetX);
+            const auto y = dpr * static_cast<float>(touch.targetY);
             // zero for unknown
-            auto id = static_cast<uint64_t>(touch.identifier + 1);
+            auto id = static_cast<uint64_t>(touch.identifier) + 1;
             switch (type) {
                 case EMSCRIPTEN_EVENT_TOUCHSTART:
                     g_app.dispatch({touch_event_type::begin, id, x, y});
@@ -236,8 +236,10 @@ void handleResize() {
 
     emscripten_set_element_css_size(CANVAS_ID, css_w, css_h);
 
-    EM_ASM({document.getElementById("gameview").style["transform"] =
-                    "translateX(" + $0 + "px) translateY(" + $1 + "px)";}, offset_x, offset_y);
+    EM_ASM({
+               document.getElementById("gameview").style["transform"] =
+                       "translateX(" + $0 + "px) translateY(" + $1 + "px)";
+           }, offset_x, offset_y);
 }
 
 static EM_BOOL onEmscriptenResize(int type, const EmscriptenUiEvent*, void*) {
@@ -254,12 +256,12 @@ void init_canvas() {
     handleResize();
 }
 
-EM_JS(void, emscripten_set_canvas_cursor,(const char* type),
+EM_JS(void, emscripten_set_canvas_cursor, (const char* type),
 
-{
-document.getElementById("gameview").style["cursor"] =
-UTF8ToString(type);
-});
+      {
+          document.getElementById("gameview").style["cursor"] =
+                  UTF8ToString(type);
+      });
 
 namespace ek {
 
@@ -300,7 +302,7 @@ void window_t::update_mouse_cursor() {
 }
 
 void application_t::exit(int) {
-    EM_ASM({window.close()}, 0);
+    EM_ASM({ window.close() }, 0);
 }
 
 }
@@ -309,7 +311,7 @@ void application_t::exit(int) {
 namespace ek {
 
 void sharing_navigate(const char* url) {
-    EM_ASM({window.open(UTF8ToString($0), "_blank")}, url);
+    EM_ASM({ window.open(UTF8ToString($0), "_blank") }, url);
 }
 
 void sharing_rate_us(const char* appId) {

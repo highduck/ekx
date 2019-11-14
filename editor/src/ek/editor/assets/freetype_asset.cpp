@@ -86,7 +86,8 @@ void freetype_asset_t::export_() {
                                            font_decl_,
                                            filters_decl_,
                                            atlas);
-    working_dir_t::with(project_->export_path, [&]() {
+    working_dir_t::with(project_->export_path, [&] {
+        EK_DEBUG << "Export Freetype asset: " << current_working_directory();
         ek::output_memory_stream out{100};
         IO io{out};
         io(font_data);

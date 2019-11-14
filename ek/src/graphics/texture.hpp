@@ -52,4 +52,6 @@ private:
     bool is_cube_map_;
 };
 
+void load_texture_async(const char* path, texture_t* to_texture);
+
 }

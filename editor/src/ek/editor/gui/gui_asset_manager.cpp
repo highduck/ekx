@@ -22,6 +22,7 @@ void gui_asset_project(scenex::asset_manager_t& project) {
         scan_assets_folder(project);
     }
     if (ImGui::Button("Export All")) {
+        make_dirs(project.export_path);
         output_memory_stream out{100};
         for (auto* asset : project.assets) {
             asset->export_();

@@ -35,6 +35,7 @@ add_library(ek STATIC
         src/graphics/render_target.hpp
         src/graphics/render_target.cpp
         src/graphics/texture.cpp
+        src/graphics/texture_load.cpp
         src/graphics/texture.hpp
         src/graphics/vertex_decl.cpp
         src/graphics/vertex_decl.hpp
@@ -135,7 +136,7 @@ elseif (${CONAN_SETTINGS_OS} MATCHES "iOS")
 
     target_include_directories(${PROJECT_NAME} PUBLIC platforms/apple)
     target_include_directories(${PROJECT_NAME} PUBLIC platforms/ios)
-    target_compile_options(${PROJECT_NAME} PUBLIC -fno-aligned-allocation)
+    #target_compile_options(${PROJECT_NAME} PUBLIC -fno-aligned-allocation)
 
     target_sources(${PROJECT_NAME} PRIVATE
             src/platform/user_preferences.mm

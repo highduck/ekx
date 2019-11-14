@@ -13,11 +13,8 @@
 #include <scenex/utility/scene_management.h>
 #include <scenex/3d/light_3d.hpp>
 #include <ek/math/rand.hpp>
-#include "../../../ekx/editor/src/ek/editor/obj/obj_loader.hpp"
-#include <platform/static_resources.hpp>
 #include <scenex/data/sg_factory.h>
 #include <scenex/asset2/asset_manager.hpp>
-#include <utils/image_loader.hpp>
 #include <scenex/asset2/builtin_assets.hpp>
 
 namespace ek {
@@ -35,7 +32,7 @@ using namespace ek;
 PikoApp::PikoApp()
         : basic_application()
 #ifdef EK_EDITOR
-        , editor_{*this}
+, editor_{*this}
 #endif
 {
 }
@@ -135,8 +132,10 @@ void PikoApp::preload() {
     create_test_material("ground", 0xFF77FF77_argb, 0.01f);
 
 #ifndef EK_EDITOR
-    scenex::load_asset_pack(*asset_manager_);
-    asset_manager_->load_all();
+    auto* asset_pack = asset_manager_->add_from_type("pack", "pack_meta");
+    if (asset_pack) {
+        asset_pack->load();
+    }
 #endif
     clear_color_enabled = true;
 
