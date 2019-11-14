@@ -7,12 +7,12 @@
 #include <ek/system/system.hpp>
 #include <ek/utility/strings.hpp>
 #include <xfl/flash_doc_exporter.h>
+#include <ek/spritepack/save_image_png.hpp>
 
-#include <cairo.h>
 #include <nlohmann/json.hpp>
+#include <fmt/core.h>
 #include <iomanip>
 #include <fstream>
-#include <fmt/core.h>
 
 using json = nlohmann::json;
 
@@ -52,15 +52,7 @@ void destroy_sprite_data(sprite_t& spr) {
 }
 
 void save_sprite_png(const sprite_t& spr, const path_t& path) {
-    auto* surf = cairo_image_surface_create_for_data(
-            spr.image->data(),
-            CAIRO_FORMAT_ARGB32,
-            spr.source.width,
-            spr.source.height,
-            spr.source.width * 4
-    );
-    cairo_surface_write_to_png(surf, path.c_str());
-    cairo_surface_destroy(surf);
+    save_image_png_stb(*spr.image, path.str());
 }
 
 void store_hi_res_icon(const flash_file& doc, const element_t& symbol, int size, const std::string& prefix = "icon_") {
