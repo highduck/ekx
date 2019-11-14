@@ -40,6 +40,7 @@ add_library(ekx INTERFACE)
 target_link_libraries(ekx INTERFACE scenex ecxx ek ek-core)
 
 if (EKX_BUILD_EDITOR)
+    add_compile_definitions(EK_EDITOR)
     add_subdirectory(flash)
     add_subdirectory(editor)
     target_link_libraries(ekx INTERFACE ek-flash ek-editor)

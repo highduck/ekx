@@ -66,7 +66,7 @@ public:
 //    }
 //
 //    static void drawBounds(EventData ev) {
-//        auto* font = asset_t<Font>::content("mini");
+//        auto* font = asset_t<font_t>::content("mini");
 //        if (!font) return;
 //
 //        auto* node = ev.source;

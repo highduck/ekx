@@ -38,6 +38,12 @@ protected:
     void render_frame() override;
 
     void on_frame_end() override;
+
+    virtual void preload_root_assets_pack();
+
+    virtual void start_game();
+
+    bool started_ = false;
 };
 
 template<typename T>

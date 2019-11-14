@@ -25,7 +25,7 @@ std::vector<atlas_page_t> pack(std::vector<sprite_t> sprites, const int2 max_siz
     std::vector<atlas_page_t> pages;
 
 //    timer timer{};
-//    LOG_DEBUG("Packing %lu sprites...", sprites.size());
+//    EK_DEBUG("Packing %lu sprites...", sprites.size());
 
     bool need_to_pack = true;
     while (need_to_pack) {

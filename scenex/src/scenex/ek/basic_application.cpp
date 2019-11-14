@@ -27,7 +27,6 @@ using ek::resolve;
 
 basic_application::basic_application()
         : base_resolution{g_window.creation_config.width, g_window.creation_config.height} {
-
     ek::assert_created_once<basic_application>();
 
     asset_manager_ = new asset_manager_t{};
@@ -83,12 +82,18 @@ void basic_application::preload() {
 //    asset_manager_->add_from_type("font", "mini");
 //    asset_manager_->add_from_type("atlas", "mini");
 //    asset_manager_->add_from_type("program", "2d");
+    preload_root_assets_pack();
 }
 
 void basic_application::onDrawFrame() {
     scale_factor = ecs::get<scenex::canvas_t>(game).scale;
     asset_manager_->set_scale_factor(scale_factor);
     base_app_t::onDrawFrame();
+
+    if (!started_ && asset_manager_->is_assets_ready()) {
+        start_game();
+        started_ = true;
+    }
 }
 
 void basic_application::update_frame(float dt) {
@@ -107,6 +112,17 @@ void basic_application::on_frame_end() {
     stats_.update();
     stats_.draw();
 #endif
+}
+
+void basic_application::preload_root_assets_pack() {
+    auto* asset_pack = asset_manager_->add_from_type("pack", "pack_meta");
+    if (asset_pack) {
+        asset_pack->load();
+    }
+}
+
+void basic_application::start_game() {
+
 }
 
 }
