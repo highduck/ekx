@@ -5,6 +5,10 @@
 #include <vector>
 #include <cmath>
 
+#if defined(_WIN32)
+#define strcasecmp stricmp
+#endif
+
 namespace ek {
 
 bool ends_with(const std::string& str, char end);

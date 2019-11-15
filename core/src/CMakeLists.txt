@@ -91,18 +91,21 @@ add_library(${PROJECT_NAME} STATIC
         stb/stb_image.cpp
         )
 
-set_source_files_properties(stb/stb_image.cpp PROPERTIES COMPILE_FLAGS -Wno-cast-align)
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 
+if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
+set_source_files_properties(stb/stb_image.cpp PROPERTIES COMPILE_FLAGS -Wno-cast-align)
+
 set(EK_COMPILE_WARNINGS
         -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type
         -Woverloaded-virtual -Wcast-align -Wno-deprecated-declarations -Wstrict-aliasing)
 
 set(EK_COMPILER_LTO "-flto")
+endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(EK_COMPILE_WARNINGS ${EK_COMPILE_WARNINGS}

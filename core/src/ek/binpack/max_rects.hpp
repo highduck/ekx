@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <numeric>
 #include <limits>
+#include <algorithm>
 
 namespace ek::binpack {
 
@@ -31,7 +32,7 @@ struct rect_size_t {
     dim_t width;
     dim_t height;
 
-    [[nodiscard]] inline area_t area() __restrict__ const {
+    [[nodiscard]] inline area_t area() const {
         return width * height;
     }
 };
@@ -42,36 +43,36 @@ struct rect_t {
     dim_t width;
     dim_t height;
 
-    [[nodiscard]] inline bool empty() __restrict__ const {
+    [[nodiscard]] inline bool empty() const {
         return !width || !height;
     }
 
-    [[nodiscard]] inline area_t area() __restrict__ const {
+    [[nodiscard]] inline area_t area() const {
         return width * height;
     }
 
-    [[nodiscard]] inline dim_t right() __restrict__ const {
+    [[nodiscard]] inline dim_t right() const {
         return x + width;
     }
 
-    [[nodiscard]] inline dim_t bottom() __restrict__ const {
+    [[nodiscard]] inline dim_t bottom() const {
         return y + height;
     }
 
-    [[nodiscard]] inline rect_size_t size() __restrict__ const {
+    [[nodiscard]] inline rect_size_t size() const {
         return {width, height};
     }
 };
 
 // precondition if 2 rectangles possible to be intersected
-inline bool test_separated_axis(const rect_t& __restrict__ a, const rect_t& __restrict__ b) {
+inline bool test_separated_axis(const rect_t& a, const rect_t& b) {
     return a.x < b.right() &&
            a.right() > b.x &&
            a.y < b.bottom() &&
            a.bottom() > b.y;
 }
 
-inline bool contains(const rect_t& __restrict__ a, const rect_t& __restrict__ b) {
+inline bool contains(const rect_t& a, const rect_t& b) {
     return a.x <= b.x &&
            a.y <= b.y &&
            a.right() >= b.right() &&
@@ -92,7 +93,7 @@ struct placement_t {
     rect_t rect{};
 };
 
-#pragma pack(0)
+#pragma pack(1)
 
 inline rect_size_t next_size_power_of_two(rect_size_t size) {
     return {static_cast<dim_t>(size.height << 1u), size.width};
@@ -432,9 +433,9 @@ struct packer_state_t {
 // input sizes
 // output: rects & indices to original
 template<typename Method, bool AllowFlip>
-static bool try_pack(max_rects_t& __restrict__ max_rects,
-                     rect_list& __restrict__ rects,
-                     flags_list& __restrict__ flags_list) {
+static bool try_pack(max_rects_t& max_rects,
+                     rect_list& rects,
+                     flags_list& flags_list) {
 
     max_rects.reset();
     std::fill(flags_list.begin(), flags_list.end(), flags_t::empty);

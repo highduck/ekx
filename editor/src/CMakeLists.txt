@@ -64,11 +64,15 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 target_compile_definitions(${PROJECT_NAME} PUBLIC EK_EDITOR)
+
+if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
 target_compile_options(${PROJECT_NAME} PUBLIC
         -Wno-gnu-anonymous-struct
         -Wno-nested-anon-types
         #        -fno-exceptions
         )
+endif()
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_options(${PROJECT_NAME} PRIVATE -g)
 
