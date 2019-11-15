@@ -1,8 +1,5 @@
-#include <ek/spritepack/sprite_packing.hpp>
-#include <scenex/asset2/asset_object.hpp>
-#include <scenex/asset2/asset_manager.hpp>
-#include <ek/fs/path.hpp>
 #include "editor_temp_atlas.hpp"
+#include <ek/spritepack/sprite_packing.hpp>
 
 namespace ek {
 
@@ -44,14 +41,6 @@ scenex::atlas_t* load_temp_atlas(spritepack::atlas_t& temp_atlas) {
     asset_t<scenex::atlas_t>{atlas_name}.reset(atlas);
 
     return atlas;
-}
-
-bool check_xml_meta_asset(const std::string& type, const path_t& path) {
-    pugi::xml_document doc{};
-    if (doc.load_file(path.c_str())) {
-        return doc.first_child().attribute("type").as_string() == type;
-    }
-    return false;
 }
 
 }

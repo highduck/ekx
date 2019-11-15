@@ -16,6 +16,23 @@ function execute(cmd, args) {
     return child.status;
 }
 
+function ekc_export_market(ctx, target_type, output) {
+    execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "market", ctx.market_asset, target_type, output]);
+}
+
+function ekc_export_assets(ctx) {
+    let assets_input = "assets";
+    let assets_output = "build/assets";
+    execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "assets", assets_input, assets_output]);
+}
+
+function ekc_export_assets_lazy(ctx) {
+    let assets_output = "build/assets";
+    if(!is_dir(assets_output)) {
+        ekc_export_assets(ctx);
+    }
+}
+
 function open_android_project(android_project_path) {
     execute("open", ["-a", "/Applications/Android Studio.app", android_project_path]);
 }
@@ -213,6 +230,10 @@ function mod_cmake_lists(ctx) {
 }
 
 function export_android(ctx) {
+
+    ekc_export_assets_lazy(ctx);
+    ekc_export_market(ctx, "android", "generated/android/res");
+
     const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;
     const dest_dir = "projects";
@@ -438,6 +459,9 @@ function mod_plist(ctx, filepath) {
 // }
 
 function export_ios(ctx) {
+    ekc_export_assets_lazy(ctx);
+    ekc_export_market(ctx, "ios", "generated/ios");
+
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;
     const dest_dir = "projects";
@@ -516,17 +540,20 @@ function export_web(ctx) {
         );
     }
 
+    ekc_export_assets_lazy(ctx);
+    ekc_export_market(ctx, "web", "build/icons");
+
     tpl("templates/web/index.html.mustache", "index.html");
     tpl("templates/web/manifest.json.mustache", "manifest.webmanifest");
     tpl("templates/web/sw.js.mustache", "sw.js");
     file("templates/web/howler.core.min.js", "howler.core.min.js");
     file("templates/web/pwacompat.min.js", "pwacompat.min.js");
-
-    copyFolderRecursiveSync("generated/pwa/icons", path.join(ctx.path.OUTPUT, "icons"));
 }
 
 class File {
     constructor(ctx) {
+        ctx.market_asset = "assets/res";
+
         ctx.android = {};
         ctx.ios = {};
         ctx.html = {};
@@ -537,7 +564,13 @@ class File {
         const exporters = {
             web: export_web,
             android: export_android,
-            ios: export_ios
+            ios: export_ios,
+            market: () => {
+                ekc_export_market(ctx, "gen", "generated");
+            },
+            assets: () => {
+                ekc_export_assets(ctx);
+            }
         };
         const exporter = exporters[ctx.current_target];
         if (exporter) {

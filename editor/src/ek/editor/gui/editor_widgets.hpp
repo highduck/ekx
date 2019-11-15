@@ -30,6 +30,4 @@ void gui_asset_object_controls(scenex::asset_object_t* asset);
 
 void gui_asset_project(scenex::asset_manager_t& project);
 
-void scan_assets_folder(scenex::asset_manager_t& project);
-
 }

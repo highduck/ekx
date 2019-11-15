@@ -23,7 +23,7 @@ freetype_asset_t::freetype_asset_t(std::string path)
         : path_{std::move(path)} {
 }
 
-void freetype_asset_t::load() {
+void freetype_asset_t::read_decl() {
     pugi::xml_document xml;
     const auto full_path = project_->base_path / path_;
     if (xml.load_file(full_path.c_str())) {
@@ -45,6 +45,10 @@ void freetype_asset_t::load() {
     } else {
         EK_ERROR << "Error parse xml: " << full_path;
     }
+}
+
+void freetype_asset_t::load() {
+    read_decl();
 
     auto temp_atlas = prepare_temp_atlas(name_, project_->scale_factor);
     auto font_data = font_lib::export_font(project_->base_path / face_path_,
@@ -80,6 +84,8 @@ void freetype_asset_t::gui() {
 }
 
 void freetype_asset_t::export_() {
+    read_decl();
+
     spritepack::atlas_t atlas{atlas_decl_};
     auto font_data = font_lib::export_font(project_->base_path / face_path_,
                                            name_,

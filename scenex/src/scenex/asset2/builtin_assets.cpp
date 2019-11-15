@@ -1,25 +1,24 @@
 #include "builtin_assets.hpp"
 #include "asset_manager.hpp"
 #include <ek/fs/path.hpp>
-#include <scenex/2d/atlas.hpp>
 #include <ek/locator.hpp>
+#include <ek/logger.hpp>
 #include <ek/audiomini.hpp>
-#include <scenex/data/sg_data.h>
-#include <scenex/data/sg_factory.h>
-#include <scenex/2d/font.hpp>
+#include <platform/static_resources.hpp>
 #include <graphics/program.hpp>
 #include <graphics/texture.hpp>
-#include <ek/imaging/image.hpp>
-#include <utility>
 #include <graphics/vertex_decl.hpp>
+#include <scenex/data/sg_data.h>
+#include <scenex/data/sg_factory.h>
+#include <scenex/2d/atlas.hpp>
+#include <scenex/2d/font.hpp>
 #include <scenex/data/program_data.hpp>
-#include <platform/static_resources.hpp>
-#include <ek/logger.hpp>
 #include <scenex/data/texture_data.hpp>
-#include <utils/image_loader.hpp>
 #include <scenex/3d/static_mesh.hpp>
 #include <scenex/data/model_data.hpp>
 #include <ek/serialize/serialize.hpp>
+
+#include <utility>
 
 namespace scenex {
 
@@ -227,23 +226,16 @@ public:
             ek::texture_t* texture = nullptr;
             if (data.texture_type == "cubemap") {
                 texture = new ek::texture_t(true);
-                std::array<ek::image_t*, 6> images{};
-                for (size_t i = 0; i < 6; ++i) {
-                    images[i] = ek::load_image(project_->base_path / data.images[i]);
+                texture->reset(1, 1);
+                std::vector<std::string> path_list = data.images;
+                for (auto& p : path_list) {
+                    p = (project_->base_path / p).str();
                 }
-                texture->upload_cubemap(images);
-                for (auto* img : images) {
-                    delete img;
-                }
+                load_texture_cube_lazy(path_list, texture);
             } else if (data.texture_type == "2d") {
-                auto* img = ek::load_image(project_->base_path / data.images[0]);
-                if (img) {
-                    texture = new ek::texture_t();
-                    texture->upload(*img);
-                    delete img;
-                } else {
-                    ready_ = false;
-                }
+                texture = new ek::texture_t();
+                texture->reset(1, 1);
+                load_texture_lazy((project_->base_path / data.images[0]).c_str(), texture);
             } else {
                 EK_ERROR << "unknown Texture Type " << data.texture_type;
                 ready_ = false;

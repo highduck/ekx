@@ -7,9 +7,14 @@
 
 namespace ek {
 
+struct marketing_export_command_t {
+    std::string target;
+    ek::path_t output;
+};
+
 struct marketing_asset_t {
-    std::string name{"res"};
-    ek::path_t input{"assets"};
+    ek::path_t input{"assets/res"};
+    std::vector<marketing_export_command_t> commands;
 };
 
 void process_market_asset(const marketing_asset_t& config);

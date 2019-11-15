@@ -6,9 +6,13 @@
 
 namespace ek {
 
-//#define EK_NO_GL_CHECKS
+#if defined(__EMSCRIPTEN__)
 
-#ifdef NDEBUG
+#define EK_NO_GL_CHECKS
+
+#endif
+
+#if defined(NDEBUG)
 static bool gl_debugging_enabled_ = false;
 #else
 static bool gl_debugging_enabled_ = true;

@@ -18,6 +18,15 @@ const element_t* flash_file::find(const std::string& name, element_type type) co
     return nullptr;
 }
 
+const element_t* flash_file::find_linkage(const std::string& linkage) const {
+    for (const auto& s: library) {
+        if (s.item.linkageClassName == linkage) {
+            return &s;
+        }
+    }
+    return nullptr;
+}
+
 xml_document* load_xml(const basic_entry& root, const path_t& path) {
     return root.open(path)->xml();
 }

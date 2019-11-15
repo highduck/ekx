@@ -124,7 +124,14 @@ void texture_t::reset(uint32_t width, uint32_t height, texture_type type) {
             break;
     }
 
-    glTexImage2D(gl_texture_target_, 0, internal_format, width, height, 0, texture_format, pixel_type, nullptr);
+    if (is_cube_map_) {
+        for (int i = 0; i < 6; ++i) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internal_format, width, height, 0, texture_format,
+                         pixel_type, nullptr);
+        }
+    } else {
+        glTexImage2D(gl_texture_target_, 0, internal_format, width, height, 0, texture_format, pixel_type, nullptr);
+    }
     gl_check_error();
 
     end_texture_setup(gl_texture_target_);

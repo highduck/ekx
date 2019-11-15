@@ -39,10 +39,20 @@ working_dir_t::~working_dir_t() {
 }
 
 void working_dir_t::push(const std::string& new_path) {
-    st_.emplace_back(new_path);
     assert(is_dir(new_path));
-    ::chdir(new_path.c_str());
+
+    char resolved_path[PATH_MAX];
+    realpath(new_path.c_str(), resolved_path);
+
+    assert(is_dir(resolved_path));
+
+    st_.emplace_back(resolved_path);
+    ::chdir(resolved_path);
 //    EK_DEBUG << "   PUSH working dir: " << new_path;
+}
+
+void working_dir_t::push(const path_t& new_path) {
+    push(new_path.str());
 }
 
 std::string working_dir_t::pop() {

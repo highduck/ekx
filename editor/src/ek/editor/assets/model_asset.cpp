@@ -23,7 +23,7 @@ model_asset_t::model_asset_t(std::string path)
         : path_{std::move(path)} {
 }
 
-void model_asset_t::load() {
+void model_asset_t::read_decl() {
     pugi::xml_document xml;
 
     const auto full_path = project_->base_path / path_;
@@ -34,10 +34,14 @@ void model_asset_t::load() {
     } else {
         EK_ERROR << "Error parse xml " << full_path;
     }
+}
+
+void model_asset_t::load() {
+    read_decl();
 
     auto buffer = get_resource_content(get_relative_path(path_).c_str());
     if (buffer.empty()) {
-        EK_ERROR << "Not found or empty " << full_path;
+        EK_ERROR << "Not found or empty " << (project_->base_path / path_);
     } else {
         asset_t<scenex::static_mesh_t>{name_}.reset(
                 new scenex::static_mesh_t(
@@ -60,6 +64,8 @@ void model_asset_t::gui() {
 }
 
 void model_asset_t::export_() {
+    read_decl();
+    
     auto output_path = project_->export_path / name_;
     scenex::model_data_t data{
             load_obj(get_resource_content(get_relative_path(path_).c_str()))

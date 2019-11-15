@@ -36,8 +36,7 @@ std::unique_ptr<flash::basic_entry> load_flash_archive(const path_t& path) {
             }
         } else if (ext == "fla") {
             return std::make_unique<fla_entry>(path);
-        }
-        else {
+        } else {
             EK_ERROR << "Import Flash: file is not xfl or fla: " << path;
         }
     }
@@ -64,7 +63,7 @@ flash_asset_t::flash_asset_t(std::string path)
         : path_{std::move(path)} {
 }
 
-void flash_asset_t::load() {
+void flash_asset_t::read_decl() {
     pugi::xml_document xml;
     const auto full_path = (project_->base_path / path_);
     if (xml.load_file(full_path.c_str())) {
@@ -80,6 +79,10 @@ void flash_asset_t::load() {
     } else {
         EK_ERROR << "Error parse xml " << full_path;
     }
+}
+
+void flash_asset_t::load() {
+    read_decl();
 
     flash::flash_file ff{load_flash_archive(project_->base_path / flash_path_)};
     flash::flash_doc_exporter fe{ff};
@@ -118,6 +121,8 @@ void flash_asset_t::gui() {
 }
 
 void flash_asset_t::export_() {
+    read_decl();
+
     flash::flash_file ff{load_flash_archive(project_->base_path / flash_path_)};
     flash::flash_doc_exporter fe{ff};
     fe.build_library();
@@ -159,5 +164,6 @@ void flash_asset_t::export_meta(output_memory_stream& output) {
     io(atlas_type, name_);
     io(scene_type, name_);
 }
+
 
 }

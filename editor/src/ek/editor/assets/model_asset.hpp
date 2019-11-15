@@ -13,6 +13,8 @@ class model_asset_t : public scenex::asset_object_t {
 public:
     explicit model_asset_t(std::string path);
 
+    void read_decl();
+
     void load() override;
 
     void unload() override;

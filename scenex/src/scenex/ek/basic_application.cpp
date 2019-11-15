@@ -108,7 +108,7 @@ void basic_application::render_frame() {
 void basic_application::on_frame_end() {
     base_app_t::on_frame_end();
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) && !defined(__EMSCRIPTEN__)
     stats_.update();
     stats_.draw();
 #endif

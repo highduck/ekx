@@ -20,11 +20,12 @@ public:
     ~working_dir_t();
 
     void push(const std::string& new_path);
+    void push(const path_t& new_path);
 
     std::string pop();
 
-    template<typename Func>
-    inline void in(const std::string& new_path, Func fn) {
+    template<typename Path, typename Func>
+    inline void in(const Path& new_path, Func fn) {
         push(new_path);
         fn();
         pop();

@@ -11,6 +11,7 @@
 #include <ek/editor/assets/program_asset.hpp>
 #include <ek/editor/assets/texture_asset.hpp>
 #include <ek/editor/assets/model_asset.hpp>
+#include <ek/editor/assets/editor_assets.hpp>
 
 namespace ek {
 

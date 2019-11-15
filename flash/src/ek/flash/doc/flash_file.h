@@ -13,7 +13,8 @@ public:
 
     explicit flash_file(std::unique_ptr<basic_entry> root);
 
-    const element_t* find(const std::string& name, element_type type) const;
+    [[nodiscard]] const element_t* find(const std::string& name, element_type type) const;
+    [[nodiscard]] const element_t* find_linkage(const std::string& linkage) const;
 
 public:
     document_info info;

@@ -52,6 +52,7 @@ private:
     bool is_cube_map_;
 };
 
-void load_texture_async(const char* path, texture_t* to_texture);
+void load_texture_lazy(const char* path, texture_t* to_texture);
+void load_texture_cube_lazy(const std::vector<std::string>& path_list, texture_t* to_texture);
 
 }

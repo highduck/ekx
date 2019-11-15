@@ -126,6 +126,7 @@ void PikoApp::update_frame(float dt) {
 
 void PikoApp::render_frame() {
 //    base_app_type::render_frame();
+    if(!started_) return;
 
     const float dt = get_delta_time(root);
 

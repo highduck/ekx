@@ -27,10 +27,12 @@ bool check_filters(const ek::path_t& path, const std::vector<std::string>& filte
     return false;
 }
 
-void audio_asset_t::load() {
+void audio_asset_t::read_decl() {
     pugi::xml_document xml;
 
     std::vector<std::string> music_filters;
+    music_list_.clear();
+    sound_list_.clear();
 
     const auto full_path = project_->base_path / path_;
     if (xml.load_file(full_path.c_str())) {
@@ -43,27 +45,36 @@ void audio_asset_t::load() {
         EK_ERROR << "Error parse xml: " << full_path;
     }
 
-    auto& audio = resolve<AudioMini>();
     auto files = search_files("*.mp3", project_->base_path);
     for (auto& file : files) {
         if (check_filters(file, music_filters)) {
             music_list_.push_back(file.str());
-            audio.create_music(file.c_str());
         } else {
             sound_list_.push_back(file.str());
-            audio.create_sound(file.c_str());
         }
     }
 }
 
-void audio_asset_t::unload() {
+void audio_asset_t::load() {
+    read_decl();
+
     auto& audio = resolve<AudioMini>();
-    for (const auto& music : music_list_) {
+    for (auto& m: music_list_) {
+        audio.create_music(m.c_str());
+    }
+    for (auto& m: sound_list_) {
+        audio.create_sound(m.c_str());
+    }
+}
+
+void audio_asset_t::unload() {
+//    auto& audio = resolve<AudioMini>();
+//    for (const auto& music : music_list_) {
 //        audio.destroy_music(music.c_str());
-    }
-    for (const auto& sound : sound_list_) {
+//    }
+//    for (const auto& sound : sound_list_) {
 //        audio.destroy_sound(sound.c_str());
-    }
+//    }
     sound_list_.clear();
     music_list_.clear();
 }
@@ -99,6 +110,8 @@ void audio_asset_t::gui() {
 }
 
 void audio_asset_t::export_() {
+    read_decl();
+
     path_t output_path = path_t{project_->export_path} / name_;
     make_dirs(output_path);
     for (const auto& audio_file_path : sound_list_) {

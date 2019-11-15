@@ -22,7 +22,7 @@ program_asset_t::program_asset_t(std::string path)
         : path_{std::move(path)} {
 }
 
-void program_asset_t::load() {
+void program_asset_t::read_decl() {
     pugi::xml_document xml;
 
     const auto full_path = project_->base_path / path_;
@@ -35,6 +35,10 @@ void program_asset_t::load() {
     } else {
         EK_ERROR << "Error parse xml: " << full_path;
     }
+}
+
+void program_asset_t::load() {
+    read_decl();
 
     auto* pr = new program_t(vert_.c_str(), frag_.c_str());
     if (vertex_decl_ == "2d") {
@@ -58,6 +62,8 @@ void program_asset_t::gui() {
 }
 
 void program_asset_t::export_() {
+    read_decl();
+    
     auto output_path = path_t{project_->export_path} / name_;
     scenex::program_data_t pr{};
     pr.fragment_shader = frag_;

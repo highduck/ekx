@@ -23,9 +23,9 @@ texture_asset_t::texture_asset_t(std::string path)
         : path_{std::move(path)} {
 }
 
-void texture_asset_t::load() {
+void texture_asset_t::read_decl() {
     pugi::xml_document xml;
-
+    images_.clear();
     const auto full_path = project_->base_path / path_;
     if (xml.load_file(full_path.c_str())) {
         auto node = xml.first_child();
@@ -37,6 +37,10 @@ void texture_asset_t::load() {
     } else {
         EK_ERROR << "error parse xml " << full_path;
     }
+}
+
+void texture_asset_t::load() {
+    read_decl();
 
     texture_t* texture = nullptr;
 
@@ -96,6 +100,8 @@ void texture_asset_t::gui() {
 }
 
 void texture_asset_t::export_() {
+    read_decl();
+    
     auto output_path = project_->export_path / name_;
     scenex::texture_data_t data{};
     data.texture_type = texture_type_;

@@ -54,7 +54,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/system/file_watcher.cpp
         ek/system/file_watcher.hpp
 
-        ek/editor/editor_app.cpp ek/editor/editor_app.hpp)
+        ek/editor/editor_app.cpp ek/editor/editor_app.hpp ek/editor/assets/editor_assets.cpp ek/editor/assets/editor_assets.hpp)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17

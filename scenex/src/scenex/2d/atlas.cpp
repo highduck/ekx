@@ -147,7 +147,7 @@ void load_atlas_meta(const path_t& base_path, atlas_t* atlas, const array_buffer
 //        });
         texture_asset.reset(new texture_t);
         texture_asset->reset(1, 1);
-        load_texture_async((base_path / page_image_path).c_str(), texture_asset.get_mutable());
+        load_texture_lazy((base_path / page_image_path).c_str(), texture_asset.get_mutable());
     }
 }
 
