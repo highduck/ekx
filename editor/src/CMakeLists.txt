@@ -30,7 +30,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/editor/imgui/imgui_module.hpp
         ek/editor/imgui/imgui_module.cpp
-        ek/editor/imgui/imgui.cpp
         ek/editor/imgui/imgui.hpp
 
         ek/editor/editor.cpp

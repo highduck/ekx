@@ -14,7 +14,7 @@ public:
 
 private:
     scenex::asset_manager_t assets;
-    scenex::imgui_module_t imgui;
+    imgui_module_t gui_;
 
     signal_t<>::token t1;
     signal_t<float>::token t2;

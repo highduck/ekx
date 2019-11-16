@@ -11,6 +11,15 @@ struct vertex_decl_t {
     bool normals;
 };
 
+struct vertex_minimal_2d {
+
+    float2 position;
+    float2 uv;
+    premultiplied_abgr32_t cm;
+
+    static vertex_decl_t decl;
+};
+
 struct vertex_2d {
 
     float2 position;

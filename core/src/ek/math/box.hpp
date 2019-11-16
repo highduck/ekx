@@ -10,7 +10,7 @@ template<typename T, unsigned N>
 struct box_t final {
     vec_t <T, N> position;
     vec_t <T, N> size;
-    static_assert(sizeof(vec_t<T, N>) == sizeof(T) * N, "struct has extra padding");
+    static_assert(sizeof(vec_t < T, N >) == sizeof(T) * N, "struct has extra padding");
 };
 
 template<typename T>
@@ -20,7 +20,7 @@ struct box_t<T, 2> {
     using vec_type = vec_t<T, 2>;
 
     static constexpr unsigned dim = 2; // N
-    static_assert(sizeof(vec_t<T, dim>) == sizeof(T) * dim, "struct has extra padding");
+    static_assert(sizeof(vec_t < T, dim >) == sizeof(T) * dim, "struct has extra padding");
 
     static constexpr unsigned corners_count = 4; // 2 ^ N
 
@@ -182,8 +182,17 @@ struct box_t<T, 2> {
         };
     }
 
-     static const self_type zero_one;
-     static const self_type zero;
+    inline box_t<T, 2> operator*(const vec_t<T, 2>& scale) const {
+        return box_t<T, 2>{
+                x * scale.x,
+                y * scale.y,
+                width * scale.x,
+                height * scale.y
+        };
+    }
+
+    static const self_type zero_one;
+    static const self_type zero;
 };
 
 template<typename T>
