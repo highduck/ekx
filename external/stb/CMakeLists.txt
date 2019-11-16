@@ -1,0 +1,9 @@
+cmake_minimum_required(VERSION 3.12)
+
+project(stb-image-write LANGUAGES CXX)
+add_library(${PROJECT_NAME} STATIC
+        stb_image_write.h
+        stb_image_write.cpp
+        )
+
+target_include_directories(${PROJECT_NAME} PUBLIC .)

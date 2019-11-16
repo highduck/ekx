@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <title>{{title}}</title>
+    <link rel="icon" type="image/png" href="icons/icon192.png" sizes="192x192"/>
+    <link rel="manifest" href="manifest.webmanifest">
+
+    {{#html.google_analytics_property_id}}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{{html.google_analytics_property_id}}}"></script>
+    <script>
+    window.dataLayer=window.dataLayer||[];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js',new Date());
+    gtag('config','{{{html.google_analytics_property_id}}}');
+    var errorHandlerPrev = window.onerror;
+    window.onerror = function logError(msg, url, line, col, err) {
+        var desc = msg;
+        if (typeof err !== 'undefined' && typeof err.message !== 'undefined') {
+            desc = err.message;
+        }
+        desc += ' @ ' + url + ':' + line + ':' + col;
+        gtag('event', 'exception', {
+            'description': desc,
+            'fatal': false
+        });
+        if (typeof errorHandlerPrev === 'function') {
+            return errorHandlerPrev(msg, url, line, col, err);
+        }
+        return false;
+    };
+    </script>
+    {{/html.google_analytics_property_id}}
+
+    <script async src="pwacompat.min.js"></script>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="Description" content="{{desc}}">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{desc}}">
+    <meta property="og:image" content="{{html.image_url}}">
+    <meta property="og:url" content="{{html.url}}">
+
+    <script src="howler.core.min.js"></script>
+
+    <style>
+        body, html {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color:{{{html.background_color}}};
+        }
+    </style>
+</head>
+<body onload="init()">
+
+<figure style="overflow:visible;color:{{{html.text_color}}};font-size: x-large;" id="spinner">
+    <div style="margin-top:1.5em; line-height:300%; text-align: center;">
+        <h1>{{title}}</h1>
+        <img src="icons/icon192.png" width=192 height=192 style="display:block;margin-left: auto;margin-right: auto;">
+        <div id="status"></div>
+        <noscript>JavaScript is disabled. Please enable JavaScript to use this application.</noscript>
+    </div>
+</figure>
+
+<div id="gamecontainer" style="width:100%;height:100%;">
+    <canvas id="gameview" oncontextmenu="event.preventDefault()" width="200" height="600">
+
+    </canvas>
+</div>
+<script>
+    var Module = {};
+
+    function init() {
+        var spinner = document.getElementById('spinner');
+        var game = document.getElementById('gameview');
+        var status = document.getElementById('status');
+
+        spinner.style.display = 'block';
+        game.style.display = 'none';
+        status.innerHTML = "Downloading...";
+
+        Module = {
+            preRun: [],
+            postRun: [],
+            print: void 0,
+            printErr: function (e) {
+            },
+            canvas: function () {
+                var e = document.getElementById("gameview");
+                return e.addEventListener("webglcontextlost", function (e) {
+                    alert("WebGL context lost. You will need to reload the page.");
+                    e.preventDefault();
+                }, !1);
+            }(),
+            setStatus: function (e) {
+                status.textContent = e;
+                if (e === "" && game.style.display !== 'block') {
+                    spinner.style.display = 'none';
+                    game.style.display = 'block';
+                }
+            },
+            monitorRunDependencies: function (e) {
+                // console.info(e);
+            }
+        };
+
+        window.onerror = function (e) {
+            status.innerHTML = e;
+            spinner.style.display = 'block';
+            game.style.display = 'none';
+        };
+
+        var script = document.createElement("script");
+        script.async = true;
+        script.src = "{{binary_name}}.js?v={{{build_number}}}";
+        document.getElementsByTagName("head")[0].append(script);
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('{{pwa_url}}/sw.js?v={{{build_number}}}', {
+            scope: '{{pwa_url}}/'
+        }).then(function (registration) {
+            console.log('Service Worker Registered');
+        }).catch(function (e) {
+            console.log('Service Worker Error: ' + e);
+        });
+        navigator.serviceWorker.ready.then(function (registration) {
+            console.log('Service Worker Ready');
+        });
+    }
+</script>
+</body>
+</html>

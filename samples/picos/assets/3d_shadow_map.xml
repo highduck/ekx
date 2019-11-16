@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<asset type="program" name="3d_shadow_map" vertex_layout="3d">
+    <vertex path="3d_shadow_map.vert.glsl" />
+    <fragment path="3d_shadow_map.frag.glsl"/>
+</asset>

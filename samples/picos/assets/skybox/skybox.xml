@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<asset name="skybox" type="texture"
+       texture_type="cubemap">
+    <image path="right.jpg"/>
+    <image path="left.jpg"/>
+    <image path="top.jpg"/>
+    <image path="bottom.jpg"/>
+    <image path="front.jpg"/>
+    <image path="back.jpg"/>
+</asset>

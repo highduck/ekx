@@ -1,0 +1,100 @@
+cmake_minimum_required(VERSION 3.12)
+
+add_library(${PROJECT_NAME} STATIC
+
+        ek/editor/assets/flash_asset.cpp
+        ek/editor/assets/flash_asset.hpp
+        ek/editor/assets/audio_asset.cpp
+        ek/editor/assets/audio_asset.hpp
+        ek/editor/assets/freetype_asset.cpp
+        ek/editor/assets/freetype_asset.hpp
+        ek/editor/assets/editor_temp_atlas.cpp
+        ek/editor/assets/editor_temp_atlas.hpp
+
+        ek/editor/gui/gui_atlas.cpp
+        ek/editor/gui/gui_sg_file.cpp
+        ek/editor/gui/editor_widgets.hpp
+        ek/editor/gui/gui_font.cpp
+        ek/editor/gui/gui_asset_object_controls.cpp
+        ek/editor/gui/gui_asset_manager.cpp
+        ek/editor/gui/editor_assets.cpp
+        ek/editor/gui/editor_assets.hpp
+        ek/editor/gui/screen_recorder.cpp
+        ek/editor/gui/screen_recorder.hpp
+        ek/editor/gui/gui_window_stats.cpp
+        ek/editor/gui/gui_window_stats.h
+        ek/editor/gui/gui_window_tree.cpp
+        ek/editor/gui/gui_window_tree.h
+        ek/editor/gui/gui_dev_mode.cpp
+        ek/editor/gui/gui_dev_mode.h
+
+        ek/editor/imgui/imgui_module.hpp
+        ek/editor/imgui/imgui_module.cpp
+        ek/editor/imgui/imgui.cpp
+        ek/editor/imgui/imgui.hpp
+
+        ek/editor/editor.cpp
+        ek/editor/editor.hpp
+        ek/editor/assets/program_asset.cpp
+        ek/editor/assets/program_asset.hpp
+        ek/editor/obj/obj_loader.cpp
+        ek/editor/obj/obj_loader.hpp
+
+        ek/editor/marketing/export_marketing.hpp
+        ek/editor/marketing/export_marketing.cpp
+        ek/editor/gui/gui_ekc.cpp
+        ek/editor/assets/texture_asset.cpp
+        ek/editor/assets/texture_asset.hpp
+        ek/editor/assets/model_asset.cpp
+        ek/editor/assets/model_asset.hpp
+        ek/system/system.cpp
+        ek/system/system.hpp
+        ek/system/working_dir.cpp
+        ek/system/working_dir.hpp
+        ek/system/file_watcher.cpp
+        ek/system/file_watcher.hpp
+
+        ek/editor/editor_app.cpp ek/editor/editor_app.hpp ek/editor/assets/editor_assets.cpp ek/editor/assets/editor_assets.hpp)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO
+        )
+
+target_include_directories(${PROJECT_NAME} PUBLIC .)
+target_compile_definitions(${PROJECT_NAME} PUBLIC EK_EDITOR)
+
+if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
+target_compile_options(${PROJECT_NAME} PUBLIC
+        -Wno-gnu-anonymous-struct
+        -Wno-nested-anon-types
+        #        -fno-exceptions
+        )
+endif()
+
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    target_compile_options(${PROJECT_NAME} PRIVATE -g)
+
+else ()
+    #set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+
+    target_compile_options(${PROJECT_NAME} PRIVATE -flto -Os)
+
+    # https://github.com/llvm-mirror/llvm/blob/master/cmake/modules/AddLLVM.cmake
+    #    target_link_options(${PROJECT_NAME}
+    #                        PRIVATE
+    #                        -Wl,-dead_strip
+    #                        -Wl,-dead_strip_dylibs
+    #                        )
+endif ()
+
+target_link_libraries(${PROJECT_NAME}
+        nlohmann-json
+        fmt
+        imgui
+        ek-flash
+        )
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../build")
