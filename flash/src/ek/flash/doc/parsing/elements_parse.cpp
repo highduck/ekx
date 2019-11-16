@@ -1,9 +1,9 @@
 #include "elements_parse.h"
 
-#include "basic_types.h"
 #include "filters.h"
 #include "edges.h"
 #include "graphics_parse.h"
+#include "basic_types.h"
 #include "parse_blend_mode.h"
 
 #include <ek/flash/doc/element_types.h>
@@ -15,14 +15,24 @@
 namespace ek::flash {
 
 layer_type& operator<<(layer_type& r, const char* str) {
-    if (equals(str, "guide")) return r = layer_type::Guide;
-    return r = layer_type::Normal;
+    if (equals(str, "guide")) return r = layer_type::guide;
+    return r = layer_type::normal;
 }
 
 tween_type& operator<<(tween_type& r, const char* str) {
     if (equals(str, "motion")) return r = tween_type::motion;
     // TODO:
     return r = tween_type::none;
+}
+
+tween_target& operator<<(tween_target& r, const char* str) {
+    if (equals(str, "all")) return r = tween_target::all;
+    if (equals(str, "position")) return r = tween_target::position;
+    if (equals(str, "rotation")) return r = tween_target::rotation;
+    if (equals(str, "scale")) return r = tween_target::scale;
+    if (equals(str, "color")) return r = tween_target::color;
+    if (equals(str, "filters")) return r = tween_target::filters;
+    return r = tween_target::all;
 }
 
 rotation_direction& operator<<(rotation_direction& r, const char* str) {
@@ -84,7 +94,7 @@ float2 read_alignment(const xml_node& node) {
 text_attributes_t& operator<<(text_attributes_t& r, const xml_node& node) {
     r.alignment = read_alignment(node);
     r.alias_text = node.attribute("aliasText").as_bool();
-    r.size = node.attribute("size").as_int(12);
+    r.size = node.attribute("size").as_float(12.0f);
     r.line_height = node.attribute("lineHeight").as_float(r.size);
     r.line_spacing = node.attribute("lineSpacing").as_float(0.0f);
     r.bitmap_size = node.attribute("bitmapSize").as_int(static_cast<uint32_t>(r.size * 20u));
@@ -195,13 +205,37 @@ frame_t& operator<<(frame_t& r, const xml_node& node) {
     r.motionTweenRotate << node.attribute("motionTweenRotate").value();
     r.motionTweenRotateTimes = node.attribute("motionTweenRotateTimes").as_int(0);
 
-    r.hasCustomEase = node.attribute("motionTweenOrientToPath").as_bool(false);
+    r.hasCustomEase = node.attribute("hasCustomEase").as_bool(false);
 
     r.keyMode = node.attribute("keyMode").as_int(0);
     r.acceleration = node.attribute("acceleration").as_int(0);
 
     for (const auto& item : node.child("elements").children()) {
         r.elements.push_back(parse_xml_node<element_t>(item));
+    }
+
+    for (const auto& item : node.child("tweens").children()) {
+        tween_target target;
+        target << item.attribute("target").as_string();
+        tween_object_t* tween_ptr = nullptr;
+        for (auto& t : r.tweens) {
+            if (t.target == target) {
+                tween_ptr = &t;
+                break;
+            }
+        }
+        if (!tween_ptr) {
+            tween_ptr = &r.tweens.emplace_back();
+        }
+
+        if (strcmp(item.name(), "CustomEase") == 0) {
+            for (const auto& point_node : item.children("Point")) {
+                tween_ptr->custom_ease.push_back(read_point(point_node));
+            }
+        } else if (strcmp(item.name(), "Ease") == 0) {
+            tween_ptr->custom_ease.clear();
+            tween_ptr->intensity = item.attribute("intensity").as_int(0);
+        }
     }
     return r;
 }

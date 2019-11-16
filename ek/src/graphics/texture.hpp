@@ -33,8 +33,6 @@ public:
 
     void upload_pixels(uint32_t width, uint32_t height, const uint32_t* pixels_rgba32);
 
-    void upload_pixels(uint32_t width, uint32_t height, const uint8_t* pixels_a8);
-
     void bind(int unit) const;
 
     [[nodiscard]] inline uint32_t handle() const {

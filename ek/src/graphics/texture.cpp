@@ -40,7 +40,7 @@ void end_texture_setup(GLenum target_type) {
     glTexParameteri(target_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(target_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(target_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-#ifndef OPEN_GL_ES
+#ifndef EK_GLES
     if (target_type == GL_TEXTURE_CUBE_MAP) {
         glTexParameteri(target_type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     }
@@ -83,15 +83,6 @@ void texture_t::bind(int unit) const {
     } else if (gl_texture_target_ == GL_TEXTURE_2D) {
         prev_texture_2d_binding_ = handle_;
     }
-}
-
-void texture_t::upload_pixels(uint32_t width, uint32_t height, const uint8_t* pixels_a8) {
-    begin_texture_setup(handle_, gl_texture_target_);
-
-    glTexImage2D(gl_texture_target_, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, pixels_a8);
-    gl_check_error();
-
-    end_texture_setup(gl_texture_target_);
 }
 
 void texture_t::reset(uint32_t width, uint32_t height, texture_type type) {

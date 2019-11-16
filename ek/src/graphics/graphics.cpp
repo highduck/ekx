@@ -10,14 +10,20 @@
 namespace ek {
 
 graphics_t::graphics_t() {
-
     assert_created_once<graphics_t>();
 
+    gl_skip_errors();
+
     glDepthMask(GL_FALSE);
+    gl_check_error();
     glEnable(GL_BLEND);
+    gl_check_error();
     glDisable(GL_DEPTH_TEST);
+    gl_check_error();
     glDisable(GL_STENCIL_TEST);
+    gl_check_error();
     glDisable(GL_DITHER);
+    gl_check_error();
     glDisable(GL_CULL_FACE);
     gl_check_error();
 

@@ -23,10 +23,10 @@ constexpr flags_t operator&(flags_t lhs, flags_t rhs) {
     return static_cast<flags_t>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
 }
 
-#pragma pack (1)
-
 using dim_t = uint16_t;
 using area_t = uint32_t;
+
+#pragma pack(push, 1)
 
 struct rect_size_t {
     dim_t width;
@@ -64,6 +64,8 @@ struct rect_t {
     }
 };
 
+#pragma pack(pop)
+
 // precondition if 2 rectangles possible to be intersected
 inline bool test_separated_axis(const rect_t& a, const rect_t& b) {
     return a.x < b.right() &&
@@ -87,13 +89,16 @@ using score_t = area_t;
 constexpr score_t dim_limit{0x8000u};
 constexpr score_t max_score = std::numeric_limits<score_t>::max();
 
+#pragma pack(push, 1)
+
 struct placement_t {
     score_t score1{max_score};
     score_t score2{max_score};
     rect_t rect{};
 };
 
-#pragma pack(1)
+#pragma pack(pop)
+
 
 inline rect_size_t next_size_power_of_two(rect_size_t size) {
     return {static_cast<dim_t>(size.height << 1u), size.width};

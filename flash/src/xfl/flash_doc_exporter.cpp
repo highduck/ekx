@@ -263,89 +263,104 @@ void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t*
     assert(el.libraryItemName.empty());
     item->node.scaleGrid = el.scaleGrid;
 
-    const auto timelineFramesTotal = el.timeline.getTotalFrames();
-    const bool isStatic = timelineFramesTotal == 1
-                          && (el.symbolType == symbol_type::graphic
-                              || !el.scaleGrid.empty()
-                              || el.item.linkageBaseClass == "flash.display.Sprite");
+    const auto timeline_frames_total = el.timeline.getTotalFrames();
+    const bool is_static = timeline_frames_total == 1
+                           && (el.symbolType == symbol_type::graphic
+                               || !el.scaleGrid.empty()
+                               || el.item.linkageBaseClass == "flash.display.Sprite");
 
     if (el.symbolType == symbol_type::button) {
         EK_TRACE << "== Button symbol ==";
     }
 
-    if (isStatic) {
+    if (is_static) {
         item->shapes++;
     }
 
-    if (timelineFramesTotal > 1) {
+    if (timeline_frames_total > 1) {
         item->node.movie.emplace();
-        item->node.movie->frames = timelineFramesTotal;
+        item->node.movie->frames = timeline_frames_total;
     }
 
-    int layerKey = 1;
+    int layer_key = 1;
     const auto& layers = el.timeline.layers;
     for (auto it = layers.crbegin(); it != layers.crend(); ++it) {
-        scenex::movie_layer_data layerData{};
-        layerData.key = layerKey;
-        int animationKey = 1;
-        for (const auto& frameData : it->frames) {
+        scenex::movie_layer_data layer_data{};
+        layer_data.key = layer_key;
+        int animation_key = 1;
+        for (const auto& frame_data : it->frames) {
 
             if (is_hit_rect(it->name)) {
-                item->node.hitRect = estimate_bounds(doc, frameData.elements);
+                item->node.hitRect = estimate_bounds(doc, frame_data.elements);
             } else if (is_clip_rect(it->name)) {
-                item->node.clipRect = estimate_bounds(doc, frameData.elements);
+                item->node.clipRect = estimate_bounds(doc, frame_data.elements);
             }
 
-            item->node.script = frameData.script;
+            item->node.script = frame_data.script;
             if (!item->node.script.empty()) {
                 EK_TRACE << "== SCRIPT: " << item->node.script;
             }
 
             switch (it->layerType) {
-                case layer_type::Normal:
-                    if (!frameData.elements.empty() && !isStatic) {
-                        for (auto& frameElement: frameData.elements) {
-                            process_element(frameElement, item);
+                case layer_type::normal:
+                    if (!frame_data.elements.empty() && !is_static) {
+                        for (auto& frame_element: frame_data.elements) {
+                            process_element(frame_element, item);
                         }
                         if (item->node.movie
                             // if we don't have added children there is nothing to animate
                             && !item->children.empty()) {
 
                             scenex::movie_frame_data ef;
-                            ef.index = frameData.index;
-                            ef.duration = frameData.duration;
-                            ef.ease = frameData.acceleration;
-                            ef.key = animationKey;
+                            ef.index = frame_data.index;
+                            ef.duration = frame_data.duration;
+                            ef.key = animation_key;
+                            if (frame_data.tweenType == tween_type::none) {
+                                ef.motion_type = 0;
+                            } else {
+                                ef.motion_type = 1;
+                                for (auto& fd : frame_data.tweens) {
+                                    auto& g = ef.tweens.emplace_back();
+                                    g.attribute = static_cast<uint8_t>(fd.target);
+                                    g.ease = static_cast<float>(fd.intensity) / 100.0f;
+                                    g.curve = fd.custom_ease;
+                                }
+                                if (ef.tweens.empty()) {
+                                    auto& g = ef.tweens.emplace_back();
+                                    g.attribute = 0;
+                                    g.ease = static_cast<float>(frame_data.acceleration) / 100.0f;
+                                }
+                            }
 
-                            const auto m = frameData.elements[0].matrix;
-                            const auto c = frameData.elements[0].color;
-                            const auto p = frameData.elements[0].transformationPoint;
+                            const auto m = frame_data.elements[0].matrix;
+                            const auto c = frame_data.elements[0].color;
+                            const auto p = frame_data.elements[0].transformationPoint;
                             ef.pivot = p;
                             ef.position = m.transform(p);
                             ef.scale = m.scale();
                             ef.skew = m.skew();
                             ef.color = c;
 
-                            layerData.frames.push_back(ef);
+                            layer_data.frames.push_back(ef);
 
                             auto* child = item->children[static_cast<int>(item->children.size()) - 1];
-                            child->node.animationKey = animationKey;
-                            child->node.layerKey = layerKey;
+                            child->node.animationKey = animation_key;
+                            child->node.layerKey = layer_key;
                         }
                     }
                     break;
                 default:
                     break;
             }
-            ++animationKey;
+            ++animation_key;
         }
-        const auto keyframeCount = layerData.frames.size();
-        if (keyframeCount > 1) {
-            normalize_rotation(layerData);
-            add_rotation(layerData, it->frames);
+        const auto keyframe_count = layer_data.frames.size();
+        if (keyframe_count > 1) {
+            normalize_rotation(layer_data);
+            add_rotation(layer_data, it->frames);
         }
-        item->node.movie->layers.push_back(layerData);
-        ++layerKey;
+        item->node.movie->layers.push_back(layer_data);
+        ++layer_key;
     }
 
     item->append_to(parent);

@@ -1,8 +1,8 @@
-#include <platform/window.hpp>
 #include "render_target.hpp"
-
 #include "graphics.hpp"
 #include "gl_debug.hpp"
+
+#include <platform/window.hpp>
 
 namespace ek {
 
@@ -65,30 +65,30 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
     GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (framebuffer_status != GL_FRAMEBUFFER_COMPLETE) {
         switch (framebuffer_status) {
-            case GL_FRAMEBUFFER_UNDEFINED:
-                assert(false);
-                break;
+//            case GL_FRAMEBUFFER_UNDEFINED_EXT:
+//                assert(false);
+//                break;
             case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
                 assert(false);
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
                 assert(false);
                 break;
-            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                assert(false);
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-                assert(false);
-                break;
+//            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+//                assert(false);
+//                break;
+//            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+//                assert(false);
+//                break;
             case GL_FRAMEBUFFER_UNSUPPORTED:
                 assert(false);
                 break;
-            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-                assert(false);
-                break;
-            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-                assert(false);
-                break;
+//            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+//                assert(false);
+//                break;
+//            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+//                assert(false);
+//                break;
             default:
                 assert(false);
                 break;

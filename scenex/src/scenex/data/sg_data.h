@@ -48,10 +48,25 @@ struct dynamic_text_data {
     }
 };
 
+// TODO: it should be optimized with easing table store :)
+struct easing_data_t {
+    uint8_t attribute = 0;
+    float ease = 0.0f;
+    std::vector<float2> curve;
+
+    template<typename S>
+    void serialize(ek::IO<S>& io) {
+        io(attribute, ease, curve);
+    }
+};
+
 struct movie_frame_data {
     int index = 0;
     int duration = 0;
-    int ease = 0;
+    int motion_type = 0;
+
+    std::vector<easing_data_t> tweens;
+
     int key = 0;
     float2 position;
     float2 scale;
@@ -61,7 +76,7 @@ struct movie_frame_data {
 
     template<typename S>
     void serialize(ek::IO<S>& io) {
-        io(index, duration, ease, key, position, scale, skew, pivot, color);
+        io(index, duration, motion_type, key, position, scale, skew, pivot, color);
     }
 };
 

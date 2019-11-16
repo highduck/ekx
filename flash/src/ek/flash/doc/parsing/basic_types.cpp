@@ -47,9 +47,12 @@ rect_f read_scale_grid(const xml_node& node) {
     });
 }
 
+float2 read_point(const xml_node& node) {
+    return {node.attribute("x").as_float(), node.attribute("y").as_float()};
+}
+
 float2 read_transformation_point(const xml_node& node) {
-    const auto& p = node.child("transformationPoint").child("Point");
-    return {p.attribute("x").as_float(), p.attribute("y").as_float()};
+    return read_point(node.child("transformationPoint").child("Point"));
 }
 
 matrix_2d& operator<<(matrix_2d& r, const xml_node& node) {

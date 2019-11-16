@@ -69,15 +69,15 @@ set_target_properties(ek PROPERTIES
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO)
 
-if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
-set(EK_COMPILE_WARNINGS
-        -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type -Woverloaded-virtual -Wcast-align
-        -Wno-deprecated-declarations
-        -DGL_SILENCE_DEPRECATION
-        -Wstrict-aliasing)
+if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
+    set(EK_COMPILE_WARNINGS
+            -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type -Woverloaded-virtual -Wcast-align
+            -Wno-deprecated-declarations
+            -DGL_SILENCE_DEPRECATION
+            -Wstrict-aliasing)
 
-set(EK_COMPILER_LTO "-flto")
-endif()
+    set(EK_COMPILER_LTO "-flto")
+endif ()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(EK_COMPILE_WARNINGS ${EK_COMPILE_WARNINGS}

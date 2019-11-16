@@ -56,7 +56,7 @@ void dom_scanner::scan_symbol_item(const element_t& element) {
     const auto& end = layers.rend();
     for (auto it = layers.rbegin(); it != end; ++it) {
         const auto& layer = *it;
-        if (layer.layerType == layer_type::Normal) {
+        if (layer.layerType == layer_type::normal) {
             if (!layer.frames.empty()) {
                 for (const auto& el : layer.frames[0].elements) {
                     scan(el);

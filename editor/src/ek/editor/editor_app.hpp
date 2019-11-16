@@ -11,12 +11,12 @@ public:
 
     ~editor_app_t() override;
 
-//    void initialize() override;
+    void initialize() override;
 //
 //    void preload() override;
 
 protected:
-    ek::editor_context_t editor_;
+    std::unique_ptr<editor_context_t> editor_;
 
     void preload_root_assets_pack() override;
 };

@@ -1,74 +1,105 @@
 #pragma once
 
-#include <ek/config/detect_platform.hpp>
+#if defined(__APPLE__)
 
-#if EK_MAC
+#include <TargetConditionals.h>
+
+#endif
+
+#if TARGET_OS_MAC
 
 #include <OpenGL/OpenGL.h>
-#include <OpenGL/gl3.h>
-#include <OpenGL/gl3ext.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
 
-#elif EK_IOS
+#elif TARGET_OS_IOS
 
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
 
-#elif EK_ANDROID
+#define EK_GLES2
+
+#elif defined(__EMSCRIPTEN__) || defined(__ANDROID__)
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#elif EK_WEB
-
-#define GL_GLEXT_PROTOTYPES
-
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
-enum : GLenum {
-    GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL = 37441
-};
-
-inline void glBindVertexArray(GLuint array) {glBindVertexArrayOES(array);}
-inline void glDeleteVertexArrays(GLsizei n, const GLuint *arrays) {glDeleteVertexArraysOES(n, arrays);}
-inline void glGenVertexArrays(GLsizei n, GLuint *arrays) {glGenVertexArraysOES(n, arrays);}
-
-#elif EK_LINUX
-
-#define GL_GLEXT_PROTOTYPES
-//#include <GL/glcorearb.h>
-//#include <GL/glx.h>
-#include <GL/gl.h>
-#include <GL/glext.h>
+#define EK_GLES2
 
 #endif
 
+//#if EK_LINUX
+//
+//#define GL_GLEXT_PROTOTYPES
+////#include <GL/glcorearb.h>
+////#include <GL/glx.h>
+//#include <GL/gl.h>
+//#include <GL/glext.h>
+//
+//#endif
+
+#if defined(EK_GLES2)
 // Add some Desktop OpenGL features to OpenGL ES2
 
-#if EK_ANDROID || EK_IOS || EK_WEB
-
-#define OPEN_GL_ES
 #define glClearDepth glClearDepthf
 #define glDepthRange glDepthRangef
 #define glReadBuffer
 #define glDrawBuffer
-#define GL_FRAMEBUFFER_UNDEFINED 0x8219
-#define GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER 0x8CDB
-#define GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER 0x8CDC
-#define GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE 0x8D56
-#define GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS 0x8DA8
 
 #endif
 
-#ifndef GL_R8
-#define GL_R8 (GL_R8_EXT)
-#endif
-#ifndef GL_RED
-#define GL_RED (GL_RED_EXT)
-#endif
+//#ifndef GL_R8
+//#define GL_R8 (GL_R8_EXT)
+//#endif
+//#ifndef GL_RED
+//#define GL_RED (GL_RED_EXT)
+//#endif
 #ifndef GL_RGBA8
 #define GL_RGBA8 (GL_RGBA8_OES)
 #endif
-#ifndef GL_RGBA32F
-#define GL_RGBA32F (GL_RGBA32F_EXT)
+//#ifndef GL_RGBA32F
+//#define GL_RGBA32F (GL_RGBA32F_EXT)
+//#endif
+
+#if GL_EXT_framebuffer_object
+// GL_EXT_framebuffer_object
+
+#undef glGenFramebuffers
+#undef glGenRenderbuffers
+#undef GL_FRAMEBUFFER
+#undef GL_RENDERBUFFER
+#undef glBindRenderbuffer
+#undef glBindFramebuffer
+#undef glRenderbufferStorage
+#undef GL_DEPTH_ATTACHMENT
+#undef GL_COLOR_ATTACHMENT0
+#undef GL_FRAMEBUFFER_COMPLETE
+#undef glFramebufferTexture2D
+#undef glCheckFramebufferStatus
+#undef glFramebufferRenderbuffer
+#undef GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT
+#undef GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT
+#undef GL_FRAMEBUFFER_UNSUPPORTED
+#undef glDeleteFramebuffers
+#undef glDeleteRenderbuffers
+
+#define glGenFramebuffers           glGenFramebuffersEXT
+#define glGenRenderbuffers          glGenRenderbuffersEXT
+#define GL_FRAMEBUFFER              GL_FRAMEBUFFER_EXT
+#define GL_RENDERBUFFER             GL_RENDERBUFFER_EXT
+#define glBindRenderbuffer          glBindRenderbufferEXT
+#define glBindFramebuffer          glBindFramebufferEXT
+#define glRenderbufferStorage       glRenderbufferStorageEXT
+#define GL_DEPTH_ATTACHMENT       GL_DEPTH_ATTACHMENT_EXT
+#define GL_COLOR_ATTACHMENT0       GL_COLOR_ATTACHMENT0_EXT
+#define GL_FRAMEBUFFER_COMPLETE       GL_FRAMEBUFFER_COMPLETE_EXT
+#define glFramebufferTexture2D       glFramebufferTexture2DEXT
+#define glCheckFramebufferStatus       glCheckFramebufferStatusEXT
+#define glFramebufferRenderbuffer       glFramebufferRenderbufferEXT
+#define GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT       GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT
+#define GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT       GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT
+#define GL_FRAMEBUFFER_UNSUPPORTED       GL_FRAMEBUFFER_UNSUPPORTED_EXT
+#define glDeleteFramebuffers       glDeleteFramebuffersEXT
+#define glDeleteRenderbuffers       glDeleteRenderbuffersEXT
+
 #endif

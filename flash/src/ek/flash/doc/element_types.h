@@ -18,6 +18,21 @@ namespace ek::flash {
 
 struct element_t;
 
+enum class tween_target : uint8_t {
+    all = 0,
+    position = 1,
+    rotation = 2,
+    scale = 3,
+    color = 4,
+    filters = 5
+};
+
+struct tween_object_t {
+    tween_target target = tween_target::all;
+    int intensity; // <Ease intensity="-100...100" />
+    std::vector<float2> custom_ease;
+};
+
 struct frame_t {
     int index = 0;
     int duration = 1;
@@ -30,8 +45,10 @@ struct frame_t {
     int motionTweenRotateTimes = 0;
 
     const char* name; // label
-    int acceleration; // ease 0...100
+    int acceleration; // ease -100...100
+
     bool hasCustomEase;
+    std::vector<tween_object_t> tweens;
 
     std::string script;
     std::vector<element_t> elements;
@@ -39,13 +56,13 @@ struct frame_t {
 };
 
 enum class layer_type {
-    Normal,
-    Guide
+    normal,
+    guide
 };
 
 struct layer_t {
     std::string name;
-    layer_type layerType = layer_type::Normal;
+    layer_type layerType = layer_type::normal;
     float4 color;
 
     bool autoNamed = false;

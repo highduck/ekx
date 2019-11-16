@@ -25,6 +25,8 @@ rect_f read_rect_bounds(const xml_node& node, const std::array<const char*, 4>& 
 
 rect_f read_scale_grid(const xml_node& node);
 
+float2 read_point(const xml_node& node);
+
 float2 read_transformation_point(const xml_node& node);
 
 matrix_2d& operator<<(matrix_2d& r, const xml_node& node);
