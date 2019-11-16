@@ -182,9 +182,15 @@ struct box_t<T, 2> {
         };
     }
 
-    inline static const self_type zero_one{0, 0, 1, 1};
-    inline static const self_type zero{0, 0, 0, 0};
+     static const self_type zero_one;
+     static const self_type zero;
 };
+
+template<typename T>
+inline const box_t<T, 2> box_t<T, 2>::zero_one{0, 0, 1, 1};
+
+template<typename T>
+inline const box_t<T, 2> box_t<T, 2>::zero{0, 0, 0, 0};
 
 template<typename T>
 using rect_t = box_t<T, 2>;

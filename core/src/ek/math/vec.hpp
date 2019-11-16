@@ -23,8 +23,8 @@ struct vec_t<T, 2> {
     constexpr static unsigned dim = 2;
     using self_type = vec_t<T, 2>;
 
-    inline static const self_type zero{0, 0};
-    inline static const self_type one{1, 1};
+     static const self_type zero;
+     static const self_type one;
 
 #include <ek/math/internal/compiler_unsafe_begin.h>
 
@@ -90,6 +90,12 @@ struct vec_t<T, 2> {
     }
 };
 
+    template<typename T>
+    inline const vec_t<T, 2> vec_t<T, 2>::zero{0, 0};
+
+    template<typename T>
+    inline const vec_t<T, 2>vec_t<T, 2>:: one{1, 1};
+
 template<typename T>
 inline vec_t<T, 2> perpendicular(const vec_t<T, 2>& direction) {
     return {-direction.y, direction.x};
@@ -101,8 +107,8 @@ struct vec_t<T, 3> {
     constexpr static unsigned dim = 3;
     using self_type = vec_t<T, 3>;
 
-    inline static const self_type zero{0, 0, 0};
-    inline static const self_type one{1, 1, 1};
+    static const self_type zero;
+    static const self_type one;
 
 #include <ek/math/internal/compiler_unsafe_begin.h>
 
@@ -203,12 +209,18 @@ struct vec_t<T, 3> {
 };
 
 template<typename T>
+inline const vec_t<T, 3> vec_t<T,3>::zero{0, 0, 0};
+
+template<typename T>
+inline const vec_t<T,3> vec_t<T,3>::one{1, 1, 1};
+
+template<typename T>
 struct vec_t<T, 4> {
     constexpr static unsigned dim = 4;
     using self_type = vec_t<T, 4>;
 
-    inline static const self_type zero{0, 0, 0, 0};
-    inline static const self_type one{1, 1, 1, 1};
+     static const self_type zero;
+     static const self_type one;
 
 #include <ek/math/internal/compiler_unsafe_begin.h>
 
@@ -311,6 +323,11 @@ struct vec_t<T, 4> {
                w != v.w;
     }
 };
+
+template<typename T>
+    inline const vec_t<T, 4> vec_t<T, 4>::zero{0, 0, 0, 0};
+    template<typename T>
+    inline const vec_t<T, 4> vec_t<T, 4>::one{1, 1, 1, 1};
 
 template<typename T, unsigned N>
 inline static vec_t<T, N> operator*(T scalar, const vec_t<T, N>& v) {
