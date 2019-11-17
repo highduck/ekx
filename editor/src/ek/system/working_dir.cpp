@@ -39,12 +39,16 @@ working_dir_t::~working_dir_t() {
 }
 
 void working_dir_t::push(const std::string& new_path) {
-    assert(is_dir(new_path));
+    if (!is_dir(new_path)) {
+        EK_ERROR << "[working-dir] cannot change cwd to non-existed directory: " << new_path;
+    }
 
     char resolved_path[PATH_MAX];
     realpath(new_path.c_str(), resolved_path);
 
-    assert(is_dir(resolved_path));
+    if (!is_dir(resolved_path)) {
+        EK_ERROR << "[working-dir] resolved path is not directory: " << resolved_path;
+    }
 
     st_.emplace_back(resolved_path);
     ::chdir(resolved_path);
