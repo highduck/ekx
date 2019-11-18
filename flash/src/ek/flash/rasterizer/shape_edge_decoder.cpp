@@ -1,3 +1,4 @@
+#include <ek/logger.hpp>
 #include "shape_edge_decoder.h"
 
 namespace ek::flash {
@@ -25,14 +26,17 @@ void shape_decoder::decode(const element_t& el) {
 
     std::vector<render_command> edges;
     std::vector<shape_edge> fills;
+    std::vector<shape_edge> back_fills;
 
     for (const auto& edge: el.edges) {
-        bool lineStarted = false;
+        bool line_started = false;
         const auto& edgeCommands = edge.commands;
         const auto& values = edge.values;
         if (edgeCommands.empty()) {
             continue;
         }
+
+        back_fills.clear();
 
         bool is_new_line_style = edge.stroke_style != current_line;
         current_fill_0 = edge.fill_style_0;
@@ -59,10 +63,10 @@ void shape_decoder::decode(const element_t& el) {
                 auto p = matrix.transform(v1, v2);
 
                 //if (px != penX || py != penY) {
-                if (current_line > 0 && !(lineStarted && equals(pen, p))) {
+                if (current_line > 0 && !(line_started && equals(pen, p))) {
                     extend(p, radius);
                     edges.emplace_back(render_op::move_to, p);
-                    lineStarted = true;
+                    line_started = true;
                 }
                 //}
 
@@ -114,6 +118,7 @@ void shape_decoder::decode(const element_t& el) {
                 pen = p;
             }
         }
+        fills.insert(fills.end(), back_fills.begin(), back_fills.end());
     }
     flush_commands(edges, fills);
 }
@@ -150,34 +155,34 @@ void shape_decoder::read_line_styles(const element_t& el) {
 void shape_decoder::flush_commands(const std::vector<render_command>& edges, std::vector<shape_edge>& fills) {
     auto left = static_cast<int>(fills.size());
 //        bool init = false;
-    int currentFill = 0;
+    int current_fill = 0;
     while (left > 0) {
         auto first = fills[0];
-        auto foundFill = false;
-        if (currentFill > 0) {
+        auto found_fill = false;
+        if (current_fill > 0) {
             for (int i = 0; i < left; ++i) {
-                if (fills[i].fill_style_idx == currentFill) {
+                if (fills[i].fill_style_idx == current_fill) {
                     first = fills[i];
                     fills.erase(fills.begin() + i);
                     --left;
-                    foundFill = true;
+                    found_fill = true;
                     break;
                 }
             }
         }
-        if (!foundFill) {
+        if (!found_fill) {
             fills[0] = fills[--left];
         }
         if (first.fill_style_idx >= static_cast<int>(fill_styles_.size())) {
-            //throw ("Invalid fill style");
+            EK_WARN("Fill Style %d not found", first.fill_style_idx);
             continue;
         }
 
 //          if (!init) {
 //              init = true;
-        if (currentFill != first.fill_style_idx) {
+        if (current_fill != first.fill_style_idx) {
             commands_.push_back(fill_styles_[first.fill_style_idx]);
-            currentFill = first.fill_style_idx;
+            current_fill = first.fill_style_idx;
         }
 //          }
         const float2& m = first.p0;

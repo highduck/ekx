@@ -28,9 +28,6 @@ void cairo_renderer::execute(const render_command& cmd) {
             open();
             stroke_flag_ = true;
             stroke_style_ = cmd.stroke;
-            if (stroke_style_) {
-                set_solid_stroke(ctx_, stroke_style_->solid);
-            }
         }
             break;
         case Op::line_style_reset:
@@ -86,6 +83,7 @@ void cairo_renderer::fill() {
         cairo_set_source(ctx_, pattern);
     }
 
+    cairo_set_fill_rule(ctx_, CAIRO_FILL_RULE_EVEN_ODD);
     cairo_fill_preserve(ctx_);
 
     if (pattern) {
@@ -95,25 +93,31 @@ void cairo_renderer::fill() {
 
 void cairo_renderer::close() {
     if (open_flag_) {
-        //cairo_close_path(ctx_);
+        cairo_close_path(ctx_);
 
         if (fill_flag_) {
-            cairo_set_fill_rule(ctx_, CAIRO_FILL_RULE_EVEN_ODD);
             // set fill style color
             fill();
         }
 
         if (stroke_flag_ && stroke_style_) {
             const auto& solid = stroke_style_->solid;
+            set_solid_stroke(ctx_, stroke_style_->solid);
             float4 c = transform_.color.transform(solid.fill);
             cairo_set_source_rgba(ctx_,
                                   c.x,
                                   c.y,
                                   c.z,
                                   c.w);
-
-            cairo_stroke(ctx_);
+            cairo_stroke_preserve(ctx_);
         }
+//        else if (fill_flag_) {
+//            static solid_stroke hairline{};
+//            hairline.fill = transform_.color.transform(fill_style_->entries[0].color);
+//            hairline.weight = 0.15f;
+//            set_solid_stroke(ctx_, hairline);
+//            cairo_stroke(ctx_);
+//        }
 
         stroke_flag_ = false;
         fill_flag_ = false;
@@ -127,33 +131,33 @@ void cairo_renderer::draw_bitmap(const bitmap_t* bitmap) {
     const int sw = bitmap->width;
     const int sh = bitmap->height;
 
-    auto sourceSurface = cairo_image_surface_create_for_data(bitmap->data->data(),
-                                                             CAIRO_FORMAT_ARGB32,
-                                                             sw,
-                                                             sh,
-                                                             sw * 4);
-    auto sourcePattern = cairo_pattern_create_for_surface(sourceSurface);
+    auto source_surface = cairo_image_surface_create_for_data(bitmap->data->data(),
+                                                              CAIRO_FORMAT_ARGB32,
+                                                              sw,
+                                                              sh,
+                                                              sw * 4);
+    auto source_pattern = cairo_pattern_create_for_surface(source_surface);
 
     cairo_save(ctx_);
 
-    cairo_matrix_t transformMatrix;
-    transformMatrix.xx = transform_.matrix.a;
-    transformMatrix.yx = transform_.matrix.b;
-    transformMatrix.xy = transform_.matrix.c;
-    transformMatrix.yy = transform_.matrix.d;
-    transformMatrix.x0 = transform_.matrix.tx;
-    transformMatrix.y0 = transform_.matrix.ty;
-    cairo_transform(ctx_, &transformMatrix);
+    cairo_matrix_t transform_matrix;
+    transform_matrix.xx = transform_.matrix.a;
+    transform_matrix.yx = transform_.matrix.b;
+    transform_matrix.xy = transform_.matrix.c;
+    transform_matrix.yy = transform_.matrix.d;
+    transform_matrix.x0 = transform_.matrix.tx;
+    transform_matrix.y0 = transform_.matrix.ty;
+    cairo_transform(ctx_, &transform_matrix);
 
-    cairo_set_source(ctx_, sourcePattern);
+    cairo_set_source(ctx_, source_pattern);
 
     cairo_rectangle(ctx_, sx, sy, sw, sh);
     cairo_fill(ctx_);
 
     cairo_restore(ctx_);
 
-    cairo_pattern_destroy(sourcePattern);
-    cairo_surface_destroy(sourceSurface);
+    cairo_pattern_destroy(source_pattern);
+    cairo_surface_destroy(source_surface);
 }
 
 }

@@ -170,4 +170,26 @@ cairo_pattern_t* create_fill_pattern(const fill_style& fill, const transform_mod
 }
 
 
+void blit_downsample(cairo_t* ctx, cairo_surface_t* source, int w, int h, double upscale) {
+    auto* pattern = cairo_pattern_create_for_surface(source);
+    cairo_pattern_set_filter(pattern, CAIRO_FILTER_BEST);
+    cairo_save(ctx);
+    cairo_identity_matrix(ctx);
+    const double downscale = 1.0 / upscale;
+    cairo_scale(ctx, downscale, downscale);
+    cairo_set_source(ctx, pattern);
+//    cairo_set_source_surface(ctx, source, 0, 0);
+    cairo_rectangle(ctx, 0, 0, w, h);
+    cairo_fill(ctx);
+    cairo_restore(ctx);
+    cairo_pattern_destroy(pattern);
+}
+
+void clear(cairo_t* ctx) {
+    cairo_save(ctx);
+    cairo_set_operator(ctx, CAIRO_OPERATOR_CLEAR);
+    cairo_paint(ctx);
+    cairo_restore(ctx);
+}
+
 }

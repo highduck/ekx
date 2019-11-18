@@ -4,6 +4,7 @@
 
 typedef struct _cairo cairo_t;
 typedef struct _cairo_pattern cairo_pattern_t;
+typedef struct _cairo_surface cairo_surface_t;
 
 namespace ek::flash {
 

@@ -5,8 +5,13 @@
 
 typedef struct _cairo cairo_t;
 typedef struct _cairo_pattern cairo_pattern_t;
+typedef struct _cairo_surface cairo_surface_t;
 
 namespace ek::flash {
+
+void clear(cairo_t* ctx);
+
+void blit_downsample(cairo_t* ctx, cairo_surface_t* source, int w, int h, double upscale);
 
 void set_solid_stroke(cairo_t* ctx, const solid_stroke& solid);
 

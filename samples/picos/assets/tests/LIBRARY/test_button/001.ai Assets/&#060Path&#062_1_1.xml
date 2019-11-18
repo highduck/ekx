@@ -1,0 +1,28 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test_button/001.ai Assets/&amp;#060Path&amp;#062_1_1" itemID="51198251-000002d8" lastModified="1360626257">
+  <timeline>
+    <DOMTimeline name="&amp;#060Path&amp;#062_1_1">
+      <layers>
+        <DOMLayer name="Layer_1" color="#4FFF4F" current="true" isSelected="true">
+          <frames>
+            <DOMFrame index="0" keyMode="9728">
+              <elements>
+                <DOMShape selected="true" isDrawingObject="true">
+                  <fills>
+                    <FillStyle index="1">
+                      <SolidColor color="#F8E28D"/>
+                    </FillStyle>
+                  </fills>
+                  <edges>
+                    <Edge fillStyle0="1" edges="!7 305[30 357 104 346!104 346[170 336 252 282!252 282[332 229 379 164!379 164[432 93 418 42!418 42[405 -9 329 2!329 2[260 11 174 64!174 64[87 118 38 182!38 182[-16 253 7 305"/>
+                    <Edge cubics="!7 305(;72,452 457,185 418,42q7 305Q30 357q104 346Q170 336q252 282Q332 229q379 164Q432 93q418 42);"/>
+                    <Edge cubics="!418 42(;380,-102 -58,158 7,305q418 42Q405 -9q329 2Q260 11q174 64Q87 118q38 182Q-16 253q7 305)7,305;"/>
+                  </edges>
+                </DOMShape>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>

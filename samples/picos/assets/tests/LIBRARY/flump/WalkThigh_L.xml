@@ -1,0 +1,96 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="flump/WalkThigh_L" itemID="50fe22e7-00000365" lastModified="1554964231" lastUniqueIdentifier="7">
+  <timeline>
+    <DOMTimeline name="WalkThigh_L" currentFrame="25">
+      <layers>
+        <DOMLayer name="Thigh_L" color="#4FFF4F" locked="true" current="true" isSelected="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="5" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/Thigh_L" centerPoint3DX="-9.9" centerPoint3DY="-94.45">
+                  <matrix>
+                    <Matrix a="0.622802734375" b="0.7823486328125" c="-0.7823486328125" d="0.622802734375" tx="-10.2" ty="-94.45"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="5" duration="14" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/Thigh_L" centerPoint3DX="-63.1" centerPoint3DY="-73.6">
+                  <matrix>
+                    <Matrix a="0.237777709960938" b="1.06581115722656" c="-0.972991943359375" d="0.234771728515625" tx="-63.2" ty="-73.85"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="19" duration="5" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/Thigh_L" centerPoint3DX="28.05" centerPoint3DY="-77.9">
+                  <matrix>
+                    <Matrix a="0.759002685546875" b="0.785140991210938" c="-0.707504272460938" d="0.7080078125" tx="27.7" ty="-77.75"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="24" duration="5" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/Thigh_L" centerPoint3DX="12.9" centerPoint3DY="-95.8">
+                  <matrix>
+                    <Matrix a="1.07716369628906" b="0.17578125" c="-0.143890380859375" d="0.99005126953125" tx="12.75" ty="-95.45"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="29" duration="5" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/Thigh_L" centerPoint3DX="11.7" centerPoint3DY="-89.45">
+                  <matrix>
+                    <Matrix a="1.05616760253906" b="-0.27740478515625" c="0.27093505859375" d="0.963531494140625" tx="12.25" ty="-89"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="34" duration="5" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/Thigh_L" centerPoint3DX="5.3" centerPoint3DY="-105.8">
+                  <matrix>
+                    <Matrix a="1.03459167480469" b="0.15069580078125" c="-0.135498046875" d="0.990753173828125" tx="5.55" ty="-105.05"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/Thigh_L" centerPoint3DX="-9.9" centerPoint3DY="-94.45">
+                  <matrix>
+                    <Matrix a="0.622802734375" b="0.7823486328125" c="-0.7823486328125" d="0.622802734375" tx="-10.2" ty="-94.45"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>

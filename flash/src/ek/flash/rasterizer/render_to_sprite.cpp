@@ -2,6 +2,7 @@
 
 #include "dom_scanner.h"
 #include "cairo_renderer.h"
+#include "cairo_utility.h"
 #include <ek/flash/doc/flash_file.h>
 #include <cairo.h>
 #include <cstring>
@@ -16,10 +17,11 @@ sprite_t render(const rect_f& bounds,
                 const renderer_options_t& options,
                 const std::string& name) {
 
-    const int width = options.width;
-    const int height = options.height;
-    const float scale = options.scale;
-    const bool fixed = width > 0 && height > 0;
+    // x4 super-sampling
+    const double upscale = 4.0;
+
+    const double scale = options.scale;
+    const bool fixed = options.width > 0 && options.height > 0;
 
     auto rc = bounds;
     if (!options.trim) {
@@ -30,41 +32,70 @@ sprite_t render(const rect_f& bounds,
     }
 
     image_t* img = nullptr;
-    const auto w = static_cast<int>(fixed ? width : ceil(rc.width * scale));
-    const auto h = static_cast<int>(fixed ? height : ceil(rc.height * scale));
+    const auto w = static_cast<int>(fixed ? options.width : ceil(rc.width * scale));
+    const auto h = static_cast<int>(fixed ? options.height : ceil(rc.height * scale));
     const int stride = w * 4;
 
     if (w > 0 && h > 0) {
         img = new image_t(w, h);
 
-        auto surf = cairo_image_surface_create_for_data(img->data(), CAIRO_FORMAT_ARGB32, w, h, stride);
+        auto surf = cairo_image_surface_create_for_data(img->data(),
+                                                        CAIRO_FORMAT_ARGB32,
+                                                        w, h, stride);
         auto cr = cairo_create(surf);
         cairo_set_antialias(cr, CAIRO_ANTIALIAS_BEST);
         cairo_set_source_surface(cr, surf, 0, 0);
 
-        cairo_save(cr);
+        const int2 up_scaled_size{static_cast<int>(w * upscale),
+                                  static_cast<int>(h * upscale)};
+
+        auto sub_surf = cairo_surface_create_similar(surf,
+                                                     CAIRO_CONTENT_COLOR_ALPHA,
+                                                     up_scaled_size.x,
+                                                     up_scaled_size.y);
+        auto sub_cr = cairo_create(sub_surf);
+        cairo_set_antialias(sub_cr, CAIRO_ANTIALIAS_NONE);
+
         {
+            cairo_renderer renderer{cr};
+            cairo_renderer sub_renderer{sub_cr};
+
             cairo_scale(cr, scale, scale);
+            cairo_scale(sub_cr, scale * upscale, scale * upscale);
 
             if (!fixed) {
                 cairo_translate(cr, -rc.x, -rc.y);
+                cairo_translate(sub_cr, -rc.x, -rc.y);
             }
 
-            cairo_renderer renderer{cr};
             for (const auto& batch : batches) {
                 renderer.set_transform(batch.transform);
                 if (batch.bitmap) {
                     renderer.draw_bitmap(batch.bitmap);
                     cairo_surface_flush(surf);
                 }
+
+//                for (const auto& cmd : batch.commands) {
+//                    renderer.execute(cmd);
+//                }
+
+                clear(sub_cr);
+                sub_renderer.set_transform(batch.transform);
                 for (const auto& cmd : batch.commands) {
-                    renderer.execute(cmd);
+                    sub_renderer.execute(cmd);
                 }
+                cairo_surface_flush(sub_surf);
+
+                blit_downsample(cr, sub_surf, up_scaled_size.x, up_scaled_size.y, upscale);
+                cairo_surface_flush(surf);
             }
         }
-        cairo_restore(cr);
+
         cairo_destroy(cr);
         cairo_surface_destroy(surf);
+
+        cairo_destroy(sub_cr);
+        cairo_surface_destroy(sub_surf);
 
         // convert ARGB to ABGR
         convert_image_bgra_to_rgba(*img, *img);

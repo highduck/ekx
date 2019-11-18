@@ -85,7 +85,7 @@ void asset_manager_t::add_file(const std::string& path) {
             return;
         }
     }
-    EK_ERROR << "Can't resolve asset for file " << path;
+    EK_WARN << "Can't resolve asset for file " << path;
 }
 
 bool asset_manager_t::is_assets_ready() const {

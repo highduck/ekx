@@ -1,0 +1,188 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test_movies/easing" itemID="5c8be9ef-000000d8" lastModified="1554725929" lastUniqueIdentifier="6">
+  <timeline>
+    <DOMTimeline name="easing">
+      <layers>
+        <DOMLayer name="easeIn" color="#4FFF4F" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="59" tweenType="motion" motionTweenSnap="true" keyMode="22017" acceleration="100">
+              <tweens>
+                <Ease target="all" intensity="100"/>
+              </tweens>
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="49" centerPoint3DY="41.35">
+                  <matrix>
+                    <Matrix tx="50" ty="44.35"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="59" keyMode="9728">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="299" centerPoint3DY="41.35">
+                  <matrix>
+                    <Matrix tx="300" ty="44.35"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="easeIn2" color="#9933CC" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="59" tweenType="motion" motionTweenSnap="true" keyMode="22017" acceleration="60">
+              <tweens>
+                <Ease target="all" intensity="60"/>
+              </tweens>
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="49" centerPoint3DY="112.35">
+                  <matrix>
+                    <Matrix tx="50" ty="115.35"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="59" keyMode="9728">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="299" centerPoint3DY="112.35">
+                  <matrix>
+                    <Matrix tx="300" ty="115.35"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="linear" color="#FF800A" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="59" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="49" centerPoint3DY="186.3">
+                  <matrix>
+                    <Matrix tx="50" ty="189.3"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="59" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="299" centerPoint3DY="186.3">
+                  <matrix>
+                    <Matrix tx="300" ty="189.3"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="easeOut2" color="#9933CC" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="59" tweenType="motion" motionTweenSnap="true" keyMode="22017" acceleration="-60">
+              <tweens>
+                <Ease target="all" intensity="-60"/>
+              </tweens>
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="49" centerPoint3DY="263">
+                  <matrix>
+                    <Matrix tx="50" ty="266"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="59" keyMode="9728">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="299" centerPoint3DY="263">
+                  <matrix>
+                    <Matrix tx="300" ty="266"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="easeOut copy" color="#FF800A" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="59" tweenType="motion" motionTweenSnap="true" keyMode="22017" acceleration="-100">
+              <tweens>
+                <Ease target="all" intensity="-100"/>
+              </tweens>
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="49" centerPoint3DY="340">
+                  <matrix>
+                    <Matrix tx="50" ty="343"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="59" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="299" centerPoint3DY="340">
+                  <matrix>
+                    <Matrix tx="300" ty="343"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="snap" color="#FF800A" current="true" isSelected="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="59" keyMode="9728">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" selected="true" centerPoint3DX="49" centerPoint3DY="420">
+                  <matrix>
+                    <Matrix tx="50" ty="423"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="59" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/red" centerPoint3DX="299" centerPoint3DY="420">
+                  <matrix>
+                    <Matrix tx="300" ty="423"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1" y="-3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>
