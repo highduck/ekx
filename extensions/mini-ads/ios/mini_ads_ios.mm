@@ -1,6 +1,7 @@
-#include <platform/Ads.h>
+#include <ek/mini_ads.hpp>
 
-#include "AppDelegate.h"
+#include <AppDelegate.h>
+
 #import <StoreKit/StoreKit.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
@@ -18,7 +19,7 @@ using ::ek::AdsEventType;
 // fwd
 
 namespace ek {
-    void __post_application_event(AdsEventType type);
+void __post_application_event(AdsEventType type);
 }
 void remove_ads_purchase_aknowledged();
 
@@ -83,7 +84,7 @@ bool Store_adsRemoved = false;
         if(transaction.transactionState == SKPaymentTransactionStateRestored){
             //called when the user successfully restores a purchase
             NSLog(@"Transaction state -> Restored");
-            
+
             //if you have more than one in-app purchase product,
             //you restore the correct product for the identifier.
             //For example, you could use
@@ -107,22 +108,22 @@ bool Store_adsRemoved = false;
 
             case SKPaymentTransactionStatePurchased:
                 if ([transaction.payment.productIdentifier
-                     isEqualToString:_GAD_remove_ads_sku]) {
+                        isEqualToString:_GAD_remove_ads_sku]) {
                     remove_ads_purchase_aknowledged();
                     justInfoMessage(@"Purchase is completed succesfully! Enjoy playing with no ads", @"Cool!");
                 }
                 [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
                 break;
-                
+
             case SKPaymentTransactionStateRestored:
                 if ([transaction.payment.productIdentifier
-                     isEqualToString:_GAD_remove_ads_sku]) {
+                        isEqualToString:_GAD_remove_ads_sku]) {
                     remove_ads_purchase_aknowledged();
                     justInfoMessage(@"Your Purchase is restored succesfully! Enjoy playing with no ads", @"Cool!");
                 }
                 [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
                 break;
-                
+
             case SKPaymentTransactionStateFailed:
                 justInfoMessage(@"Purchase transaction has been failed", @"Continue");
                 [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
@@ -144,7 +145,7 @@ bool Store_adsRemoved = false;
 - (void)productsRequest:(nonnull SKProductsRequest *)request didReceiveResponse:(nonnull SKProductsResponse *)response {
     SKProduct *validProduct = nil;
     NSUInteger count = [response.products count];
-    
+
     if (count > 0) {
         Store_validProducts = [response.products copy];
         validProduct = [response.products objectAtIndex:0];
@@ -157,7 +158,7 @@ bool Store_adsRemoved = false;
         //justInfoMessage(@"Currently Purchases are not available", @"Cancel");
         NSLog(@"Currently Purchases are not available");
     }
-    
+
     //[activityIndicatorView stopAnimating];
     //purchaseButton.hidden = NO;
 }
@@ -202,7 +203,7 @@ void remove_ads_purchase_aknowledged() {
 }
 
 void Store_fetchAvailableProducts() {
-    
+
     NSSet *productIdentifiers = [NSSet
             setWithObjects:_GAD_remove_ads_sku,nil];
     SKProductsRequest* productsRequest = [[SKProductsRequest alloc]
@@ -284,168 +285,168 @@ RewardVideoAdDelegate* reward_video_ad_delegate;
 
 namespace ek {
 
-    // TODO: signals to core module
-    static std::function<void(AdsEventType type)> ads_registered_callbacks;
-    void __post_application_event(AdsEventType type) {
-        if(ads_registered_callbacks) {
-            ads_registered_callbacks(type);
-        }
+// TODO: signals to core module
+static std::function<void(AdsEventType type)> ads_registered_callbacks;
+void __post_application_event(AdsEventType type) {
+if(ads_registered_callbacks) {
+ads_registered_callbacks(type);
+}
+}
+
+/// interfaces
+
+void ads_listen(const std::function<void(AdsEventType type)>& callback) {
+ads_registered_callbacks = callback;
+}
+
+void init_billing(const char*) {
+
+}
+
+void ads_reset_purchase() {
+    [[NSUserDefaults standardUserDefaults] setInteger:3109 forKey:@"noads"];
+    [[NSUserDefaults standardUserDefaults] setInteger:19888 forKey:@"_bm9hZHM="];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+void ads_init(const ads_config_t& config) {
+    // settings
+    _GAD_app = [NSString stringWithUTF8String:config.app_id.c_str()];
+    _GAD_banner = [NSString stringWithUTF8String:config.banner.c_str()];
+    _GAD_video = [NSString stringWithUTF8String:config.video.c_str()];
+    _GAD_inters = [NSString stringWithUTF8String:config.inters.c_str()];
+    _GAD_remove_ads_sku = [NSString stringWithUTF8String:config.remove_ads_sku.c_str()];
+
+    init_payment_queue_observer();
+
+    if(!reward_video_ad_delegate) {
+        reward_video_ad_delegate = [RewardVideoAdDelegate new];
     }
-    
-    /// interfaces
+    [GADRewardBasedVideoAd sharedInstance].delegate = reward_video_ad_delegate;
+    Store_fetchAvailableProducts();
 
-    void ads_listen(const std::function<void(AdsEventType type)>& callback) {
-        ads_registered_callbacks = callback;
-    }
-
-    void init_billing(const char*) {
-
-    }
-
-    void ads_reset_purchase() {
-        [[NSUserDefaults standardUserDefaults] setInteger:3109 forKey:@"noads"];
-        [[NSUserDefaults standardUserDefaults] setInteger:19888 forKey:@"_bm9hZHM="];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    }
-
-    void ads_init(const ads_config_t& config) {
-        // settings
-        _GAD_app = [NSString stringWithUTF8String:config.app_id.c_str()];
-        _GAD_banner = [NSString stringWithUTF8String:config.banner.c_str()];
-        _GAD_video = [NSString stringWithUTF8String:config.video.c_str()];
-        _GAD_inters = [NSString stringWithUTF8String:config.inters.c_str()];
-        _GAD_remove_ads_sku = [NSString stringWithUTF8String:config.remove_ads_sku.c_str()];
-
-        init_payment_queue_observer();
-        
-        if(!reward_video_ad_delegate) {
-            reward_video_ad_delegate = [RewardVideoAdDelegate new];
-        }
-        [GADRewardBasedVideoAd sharedInstance].delegate = reward_video_ad_delegate;
-        Store_fetchAvailableProducts();
-
-        if ([[NSUserDefaults standardUserDefaults] integerForKey:@"noads"] == 310 &&
-            [[NSUserDefaults standardUserDefaults] integerForKey:@"_bm9hZHM="] == 1988) {
-            ads_remove();
-        }
-
-        [GADMobileAds configureWithApplicationID:_GAD_app];
-
-        if (!Store_adsRemoved) {
-            // banner
-            // In this case, we instantiate the banner with desired ad size.
-            _bannerView = [[GADBannerView alloc] initWithAdSize:kGADAdSizeBanner];
-            addBannerViewToView(_bannerView);
-            _bannerView.hidden = YES;
-
-            // interstitial
-            _interstitial = [[GADInterstitial alloc] initWithAdUnitID:_GAD_inters];
-            [_interstitial loadRequest:createAdRequest()];
-        }
-
-        // video
-        __reload_video_ad();
+    if ([[NSUserDefaults standardUserDefaults] integerForKey:@"noads"] == 310 &&
+        [[NSUserDefaults standardUserDefaults] integerForKey:@"_bm9hZHM="] == 1988) {
+        ads_remove();
     }
 
-    void ads_set_banner(int flags) {
-        if(_bannerView != nil && _GAD_banner != nil && _GAD_banner.length > 0) {
-            if(flags != 0) {
-                [_bannerView loadRequest:createAdRequest()];
-                _bannerView.hidden = NO;
-            }
-            else {
-                _bannerView.hidden = YES;
-            }
-        }
+    [GADMobileAds configureWithApplicationID:_GAD_app];
+
+    if (!Store_adsRemoved) {
+        // banner
+        // In this case, we instantiate the banner with desired ad size.
+        _bannerView = [[GADBannerView alloc] initWithAdSize:kGADAdSizeBanner];
+        addBannerViewToView(_bannerView);
+        _bannerView.hidden = YES;
+
+        // interstitial
+        _interstitial = [[GADInterstitial alloc] initWithAdUnitID:_GAD_inters];
+        [_interstitial loadRequest:createAdRequest()];
     }
 
-    void ads_play_reward_video() {
-        UIViewController* root_view_controller = appDelegate.window.rootViewController;
-        if ([[GADRewardBasedVideoAd sharedInstance] isReady]) {
-            [[GADRewardBasedVideoAd sharedInstance] presentFromRootViewController:root_view_controller];
+    // video
+    __reload_video_ad();
+}
+
+void ads_set_banner(int flags) {
+    if(_bannerView != nil && _GAD_banner != nil && _GAD_banner.length > 0) {
+        if(flags != 0) {
+            [_bannerView loadRequest:createAdRequest()];
+            _bannerView.hidden = NO;
         }
         else {
-            __reload_video_ad();
-            __post_application_event(AdsEventType::ADS_VIDEO_LOADING);
+            _bannerView.hidden = YES;
         }
     }
+}
 
-    void ads_show_interstitial() {
-        if (_GAD_inters == nil) {
-            NSLog(@"[Interstitial] Ads removed");
-            return;
-        }
-    
-        if(_interstitial != nil && _interstitial.isReady) {
-            UIViewController* root_view_controller = appDelegate.window.rootViewController;
-            [_interstitial presentFromRootViewController:root_view_controller];
-            // load next
-            _interstitial = [[GADInterstitial alloc] initWithAdUnitID:_GAD_inters];
-            [_interstitial loadRequest:[GADRequest request]];
-        } else {
-            NSLog(@"Ad wasn't ready");
-        }
+void ads_play_reward_video() {
+    UIViewController* root_view_controller = appDelegate.window.rootViewController;
+    if ([[GADRewardBasedVideoAd sharedInstance] isReady]) {
+        [[GADRewardBasedVideoAd sharedInstance] presentFromRootViewController:root_view_controller];
+    }
+    else {
+        __reload_video_ad();
+        __post_application_event(AdsEventType::ADS_VIDEO_LOADING);
+    }
+}
+
+void ads_show_interstitial() {
+    if (_GAD_inters == nil) {
+        NSLog(@"[Interstitial] Ads removed");
+        return;
     }
 
-    void ads_purchase_remove() {
-        if (![SKPaymentQueue canMakePayments]) {
-            justInfoMessage(@"Purchases are disabled in your device", @"Cancel");
-            return;
-        }
+    if(_interstitial != nil && _interstitial.isReady) {
+        UIViewController* root_view_controller = appDelegate.window.rootViewController;
+        [_interstitial presentFromRootViewController:root_view_controller];
+        // load next
+        _interstitial = [[GADInterstitial alloc] initWithAdUnitID:_GAD_inters];
+        [_interstitial loadRequest:[GADRequest request]];
+    } else {
+        NSLog(@"Ad wasn't ready");
+    }
+}
 
-        UIAlertController * alert = [UIAlertController
-                alertControllerWithTitle:@"Remove Ads"
-                                 message:@"Remove banner and interstitial ads from the game"
+void ads_purchase_remove() {
+    if (![SKPaymentQueue canMakePayments]) {
+        justInfoMessage(@"Purchases are disabled in your device", @"Cancel");
+        return;
+    }
+
+    UIAlertController * alert = [UIAlertController
+            alertControllerWithTitle:@"Remove Ads"
+                             message:@"Remove banner and interstitial ads from the game"
 //                                 preferredStyle:UIAlertControllerStyleActionSheet];
-                          preferredStyle:UIAlertControllerStyleAlert];
+                      preferredStyle:UIAlertControllerStyleAlert];
 
-        SKProduct* product = nil;
-        NSString* localized_price = @"";
-        NSString* buyText = @"Buy";
+    SKProduct* product = nil;
+    NSString* localized_price = @"";
+    NSString* buyText = @"Buy";
 
-        if(Store_validProducts != nil) {
-            product = [Store_validProducts objectAtIndex:0];
-            NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
-            [numberFormatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
-            [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-            [numberFormatter setLocale:product.priceLocale];
-            localized_price = [numberFormatter stringFromNumber:product.price];
-            buyText = [NSString stringWithFormat:@"Buy %@", localized_price];
-        }
+    if(Store_validProducts != nil) {
+        product = [Store_validProducts objectAtIndex:0];
+        NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
+        [numberFormatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
+        [numberFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+        [numberFormatter setLocale:product.priceLocale];
+        localized_price = [numberFormatter stringFromNumber:product.price];
+        buyText = [NSString stringWithFormat:@"Buy %@", localized_price];
+    }
 
-        UIAlertAction* purchaseButton = [UIAlertAction
-                actionWithTitle:buyText
-                          style:UIAlertActionStyleDefault
-                        handler:^(UIAlertAction * action) {
-                            if(product != nil) {
-                                SKPayment *payment = [SKPayment paymentWithProduct:product];
-                                init_payment_queue_observer();
-                                [[SKPaymentQueue defaultQueue] addPayment:payment];
-                            }
-                            else {
-                                justInfoMessage(@"Sorry! Purchase is not available right now. Try Again later", @"Cancel");
-                            }
-                            //Handle your yes please button action here
-                        }];
-
-        UIAlertAction* restoreButton = [UIAlertAction
-                actionWithTitle:@"Restore"
-                          style:UIAlertActionStyleDefault
-                        handler:^(UIAlertAction * action) {
+    UIAlertAction* purchaseButton = [UIAlertAction
+            actionWithTitle:buyText
+                      style:UIAlertActionStyleDefault
+                    handler:^(UIAlertAction * action) {
+                        if(product != nil) {
+                            SKPayment *payment = [SKPayment paymentWithProduct:product];
                             init_payment_queue_observer();
-                            [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
-                        }];
+                            [[SKPaymentQueue defaultQueue] addPayment:payment];
+                        }
+                        else {
+                            justInfoMessage(@"Sorry! Purchase is not available right now. Try Again later", @"Cancel");
+                        }
+                        //Handle your yes please button action here
+                    }];
 
-        UIAlertAction* cancelButton = [UIAlertAction
-                actionWithTitle:@"Cancel"
-                          style:UIAlertActionStyleCancel
-                        handler:^(UIAlertAction * action) {
+    UIAlertAction* restoreButton = [UIAlertAction
+            actionWithTitle:@"Restore"
+                      style:UIAlertActionStyleDefault
+                    handler:^(UIAlertAction * action) {
+                        init_payment_queue_observer();
+                        [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
+                    }];
 
-                        }];
+    UIAlertAction* cancelButton = [UIAlertAction
+            actionWithTitle:@"Cancel"
+                      style:UIAlertActionStyleCancel
+                    handler:^(UIAlertAction * action) {
 
-        [alert addAction:purchaseButton];
-        [alert addAction:restoreButton];
-        [alert addAction:cancelButton];
+                    }];
+
+    [alert addAction:purchaseButton];
+    [alert addAction:restoreButton];
+    [alert addAction:cancelButton];
 
 //    if(alert.popoverPresentationController != nil) {
 //        alert.popoverPresentationController.sourceView = _rootViewController.view;
@@ -457,8 +458,8 @@ namespace ek {
 //                                                                    0.0f, 0.0f);
 //    }
 
-        UIViewController* root_view_controller = appDelegate.window.rootViewController;
-        [root_view_controller presentViewController:alert animated:YES completion:nil];
+    UIViewController* root_view_controller = appDelegate.window.rootViewController;
+    [root_view_controller presentViewController:alert animated:YES completion:nil];
 //
 //    if(Store_validProducts != nil) {
 //
@@ -468,5 +469,5 @@ namespace ek {
 //         // REMOVE ME!!!
 ////        ads_remove();
 //    }
-    }
+}
 }

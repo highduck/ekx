@@ -65,7 +65,9 @@ public class EKActivity extends Activity {
         EKPlatform.set_assets_manager(activity.getAssets());
         activity.glView = new EKSurfaceView(activity);
         activity.mainLayout.addView(activity.glView);
-        RemoveAds.register(activity);
+
+        EkExtensionManager.instance.onApplicationStart();
+        //RemoveAds.register(activity);
     }
 
     @Override
@@ -97,7 +99,7 @@ public class EKActivity extends Activity {
         super.onWindowFocusChanged(hasFocus);
 
         _hasFocus = hasFocus;
-        if(hasFocus) {
+        if (hasFocus) {
             hideSystemUI();
         }
         resumeIfHasFocus();
@@ -106,16 +108,16 @@ public class EKActivity extends Activity {
     protected void hideSystemUI() {
         if (Build.VERSION.SDK_INT >= 19) {
             View decorView = getWindow().getDecorView();
-                decorView.setSystemUiVisibility(
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        // Set the content to appear under the system bars so that the
-                        // content doesn't resize when the system bars hide and show.
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        // Hide the nav bar and status bar
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            // Set the content to appear under the system bars so that the
+                            // content doesn't resize when the system bars hide and show.
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            // Hide the nav bar and status bar
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
         }
     }
 
@@ -135,7 +137,9 @@ public class EKActivity extends Activity {
     protected void onResume() {
         Log.d(TAG, "Activity onResume");
         super.onResume();
-        Ads.resume();
+
+        EkExtensionManager.instance.onApplicationResume(_hasFocus);
+        //Ads.resume();
         resumeIfHasFocus();
     }
 
@@ -146,14 +150,17 @@ public class EKActivity extends Activity {
         if (GameServices.onActivityResult(requestCode, resultCode, intent)) {
             return;
         }
-        RemoveAds.instance.onActivityResult(requestCode, resultCode, intent);
+
+        //RemoveAds.instance.onActivityResult(requestCode, resultCode, intent);
+        EkExtensionManager.instance.onActivityResult(requestCode, resultCode, intent);
     }
 
     @Override
     protected void onPause() {
         Log.d(TAG, "Activity onPause");
         glView.onPause();
-        Ads.pause();
+        //Ads.pause();
+        EkExtensionManager.instance.onApplicationPause();
         super.onPause();
     }
 

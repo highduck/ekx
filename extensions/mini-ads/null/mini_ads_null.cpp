@@ -88,7 +88,7 @@ void ads_play_reward_video() {
 void ads_show_interstitial() {}
 
 void ads_listen(const std::function<void(AdsEventType type)>& callback) {
-    ads_registered_callbacks = callback;
+ads_registered_callbacks = callback;
 }
 
 void ads_purchase_remove() {}

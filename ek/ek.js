@@ -17,18 +17,20 @@ function execute(cmd, args) {
 }
 
 function ekc_export_market(ctx, target_type, output) {
+    make_dirs(output);
     execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "market", ctx.market_asset, target_type, output]);
 }
 
 function ekc_export_assets(ctx) {
     let assets_input = "assets";
     let assets_output = "build/assets";
+    make_dirs(assets_output);
     execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "assets", assets_input, assets_output]);
 }
 
 function ekc_export_assets_lazy(ctx) {
     let assets_output = "build/assets";
-    if(!is_dir(assets_output)) {
+    if (!is_dir(assets_output)) {
         ekc_export_assets(ctx);
     }
 }
@@ -67,7 +69,9 @@ function replace_in_file(filepath, dict) {
 
 function make_dirs(p) {
     // todo: improve (relax node version < 11)
-    fs.mkdirSync(p, {recursive: true});
+    if (!is_dir(p)) {
+        fs.mkdirSync(p, {recursive: true});
+    }
 }
 
 function search_files(pattern, search_path, out_files_list) {
@@ -80,9 +84,7 @@ function search_files(pattern, search_path, out_files_list) {
 }
 
 function copyFolderRecursiveSync(source, target) {
-    if (!fs.existsSync(target)) {
-        fs.mkdirSync(target);
-    }
+    make_dirs(target);
 
     //copy
     if (fs.lstatSync(source).isDirectory()) {
@@ -158,7 +160,8 @@ function mod_android_manifest(ctx) {
 
     replace_in_file("app/src/main/AndroidManifest.xml", {
         "com.eliasku.template_android": ctx.android.package_id,
-        'screenOrientation="sensorPortrait"': `screenOrientation="${orientation}"`
+        'screenOrientation="sensorPortrait"': `screenOrientation="${orientation}"`,
+        "<!-- TEMPLATE ROOT -->": ctx.build.android.hack_manifest.join("\n")
     });
 }
 
@@ -232,7 +235,9 @@ function mod_cmake_lists(ctx) {
 function export_android(ctx) {
 
     ekc_export_assets_lazy(ctx);
-    ekc_export_market(ctx, "android", "generated/android/res");
+    if (!is_dir("generated/android/res")) {
+        ekc_export_market(ctx, "android", "generated/android/res");
+    }
 
     const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;
@@ -243,6 +248,8 @@ function export_android(ctx) {
         console.info("Remove old project", dest_path);
         deleteFolderRecursive(dest_path);
         console.assert(!is_dir(dest_path));
+    } else {
+
     }
 
     copyFolderRecursiveSync(path.join(ctx.path.EKX_ROOT, "ek/templates/template-" + platform_target), dest_path);
@@ -252,16 +259,22 @@ function export_android(ctx) {
     const cwd = process.cwd();
     process.chdir(dest_path);
     {
+        const java_src_roots = [];
+        for (let java_src_root of ctx.build.android.java_src) {
+            java_src_roots.push(`'${java_src_root}'`);
+        }
         const source_sets = [
-            `main.java.srcDirs += '${path.join(ek_path, "platforms/android/java")}'`,
+            `main.java.srcDirs += [${java_src_roots.join(", ")}]`,
             `main.assets.srcDirs += 'src/main/assets'`
         ];
+
 
         replace_in_file("app/build.gradle", {
             'com.eliasku.template_android': ctx.android.application_id,
             'versionCode 1 // AUTO': `versionCode ${ctx.version_code} // AUTO`,
             'versionName "1.0" // AUTO': `versionName "${ctx.version_name}" // AUTO`,
             '// TEMPLATE_SOURCE_SETS': source_sets.join("\n\t\t"),
+            '// TEMPLATE_DEPENDENCIES': ctx.build.android.dependencies.join("\n\t"),
             'KEY_ALIAS': ctx.android.keystore.key_alias,
             'KEY_PASSWORD': ctx.android.keystore.key_password,
             'store.keystore': ctx.android.keystore.store_keystore,
@@ -553,13 +566,23 @@ function export_web(ctx) {
 class File {
     constructor(ctx) {
         ctx.market_asset = "assets/res";
-
-        ctx.android = {};
+        ctx.build = {
+            android: {
+                java_src: [
+                    path.join(__dirname, "platforms/android/java")
+                ],
+                dependencies: [],
+                hack_manifest: []
+            }
+        };
         ctx.ios = {};
         ctx.html = {};
 
+        console.debug(ctx.android);
+
         console.log("=== EK PROJECT ===");
         console.log("Current Target:", ctx.current_target);
+        console.log("Module Path:", __dirname);
 
         const exporters = {
             web: export_web,

@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined(__EMSCRIPTEN__)
+#define EK_WEBGL
+#endif
+
 #if defined(__APPLE__)
 
 #include <TargetConditionals.h>
