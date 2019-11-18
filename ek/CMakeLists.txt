@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.12)
 project(ek LANGUAGES CXX)
 
-add_library(ek STATIC
+add_library(${PROJECT_NAME} STATIC
 
         src/platform/analytics.hpp
         src/platform/analytics.cpp
 
-        src/platform/Ads.h
         src/platform/crash_reporter.hpp
         src/platform/GameServices.h
         src/platform/sharing.hpp
@@ -59,11 +58,11 @@ add_library(ek STATIC
         src/utils/image_loader.hpp
         )
 
-target_include_directories(ek PUBLIC src)
-target_link_libraries(ek ek-core)
+target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_link_libraries(${PROJECT_NAME} ek-core)
 
-target_compile_options(ek PUBLIC -std=c++17)
-set_target_properties(ek PROPERTIES
+target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
+set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
@@ -90,7 +89,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif ()
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(ek
+    target_compile_options(${PROJECT_NAME}
             PRIVATE
             -fno-exceptions
             -fstrict-aliasing
@@ -98,7 +97,7 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
             ${EK_COMPILE_WARNINGS}
             )
 else ()
-    target_compile_options(ek PRIVATE
+    target_compile_options(${PROJECT_NAME} PRIVATE
             -Os -fno-exceptions
             -fstrict-aliasing
             ${EK_COMPILE_WARNINGS})
@@ -106,28 +105,27 @@ else ()
             ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
     else ()
-        set_target_properties(ek PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-        target_compile_options(ek PRIVATE ${EK_COMPILER_LTO})
+        set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+        target_compile_options(${PROJECT_NAME} PRIVATE ${EK_COMPILER_LTO})
     endif ()
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     message("Platform: WASM")
-    target_sources(ek PRIVATE
+    target_sources(${PROJECT_NAME} PRIVATE
             src/platform/static_resources.cpp
 
             platforms/web/web_app_impl.cpp
             platforms/web/audiomini_web.cpp
 
-            platforms/null/Ads.cpp
             platforms/null/GameServices.cpp
             )
 
-    target_compile_options(ek
+    target_compile_options(${PROJECT_NAME}
             PUBLIC
             -Wno-dollar-in-identifier-extension)
 
-    target_link_options(ek
+    target_link_options(${PROJECT_NAME}
             PUBLIC
             --js-library ${PROJECT_SOURCE_DIR}/platforms/web/audiomini.js
             )
@@ -182,14 +180,13 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message("Platform: MAC")
     target_include_directories(${PROJECT_NAME} PUBLIC platforms/apple)
     target_include_directories(${PROJECT_NAME} PUBLIC platforms/mac)
-    target_sources(ek PRIVATE
+    target_sources(${PROJECT_NAME} PRIVATE
 
             src/platform/user_preferences.mm
             src/platform/static_resources.cpp
             src/platform/static_resources.mm
             src/platform/analytics.mm
 
-            platforms/null/Ads.cpp
             platforms/null/GameServices.cpp
 
             platforms/mac/main.mm
@@ -218,7 +215,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             platforms/mac/audiomini/SimpleAudioEngine_objc.mm
             )
 
-    target_link_libraries(ek
+    target_link_libraries(${PROJECT_NAME}
             "-framework Cocoa"
             "-framework OpenGL"
             "-framework CoreVideo"
@@ -228,7 +225,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
     message("Platform: ANDROID")
-    target_sources(ek PRIVATE
+    target_sources(${PROJECT_NAME} PRIVATE
 
             src/platform/static_resources.cpp
             platforms/android/ek/android.hpp
@@ -236,7 +233,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
             platforms/android/android_main.cpp
             platforms/android/sharing.cpp
             platforms/android/GameServices.cpp
-            platforms/android/Ads.cpp
             platforms/android/platform_jni.cpp
             platforms/android/audiomini_android.cpp
             )
@@ -245,7 +241,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     message("Platform: WIN")
     #    target_sources(ek PRIVATE
     #                   platforms/null/ek/audiomini/AudioMini.cpp
-    #                   platforms/null/Ads.cpp
     #                   platforms/null/GameServices.cpp
     #                   platforms/null/Sharing.cpp
     #                   )
@@ -264,7 +259,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
             src/platform/static_resources.cpp
 
             platforms/null/audiomini_null.cpp
-            platforms/null/Ads.cpp
             platforms/null/GameServices.cpp
             platforms/null/sharing.cpp
             )
@@ -282,7 +276,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     message(INFO "OPENGL_INCLUDE_DIR => ${OPENGL_INCLUDE_DIR}")
     message(INFO "OPENGL_EGL_INCLUDE_DIRS => ${OPENGL_EGL_INCLUDE_DIRS}")
 
-    target_link_libraries(ek ${OPENGL_LIBRARIES} pthread)
+    target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} pthread)
 
 else ()
     error("Platform: UNKNOWN")

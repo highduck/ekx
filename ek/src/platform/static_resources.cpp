@@ -59,11 +59,17 @@ bool save_content(const char* path, const array_buffer& buffer) {
 array_buffer get_resource_content(const char* path) {
     auto* asset = AAssetManager_open(::ek::android::get_asset_manager(), path,
                                      AASSET_MODE_STREAMING);
-    const void* asset_buffer = AAsset_getBuffer(asset);
-    auto asset_size = static_cast<size_t>(AAsset_getLength(asset));
-    array_buffer buffer{asset_size};
-    memcpy(buffer.data(), asset_buffer, asset_size);
-    AAsset_close(asset);
+    array_buffer buffer{};
+    if(asset) {
+        const void *asset_buffer = AAsset_getBuffer(asset);
+        auto asset_size = static_cast<size_t>(AAsset_getLength(asset));
+        buffer = array_buffer{asset_size};
+        memcpy(buffer.data(), asset_buffer, asset_size);
+        AAsset_close(asset);
+    }
+    else {
+        EK_ERROR("Asset file not found: %s", path);
+    }
     return buffer;
 }
 

@@ -35,7 +35,7 @@ basic_application::basic_application()
 
     ek::game_services_init();
     // set callbacks before ads initialization (TODO)
-    ek::BasicGameUtility::init();
+    //ek::BasicGameUtility::init();
 }
 
 basic_application::~basic_application() {

@@ -29,7 +29,7 @@ static GLuint prev_texture_2d_binding_ = 0u;
 void begin_texture_setup(GLuint texture_id, GLenum target_type) {
     glBindTexture(target_type, texture_id);
     gl_check_error();
-#ifdef WEBGL
+#ifdef EK_WEBGL
     // TODO: const / restore state
     // glPixelStorei(UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0);
 #endif
@@ -40,7 +40,7 @@ void end_texture_setup(GLenum target_type) {
     glTexParameteri(target_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(target_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(target_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-#ifndef EK_GLES
+#ifndef EK_GLES2
     if (target_type == GL_TEXTURE_CUBE_MAP) {
         glTexParameteri(target_type, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     }
@@ -102,13 +102,13 @@ void texture_t::reset(uint32_t width, uint32_t height, texture_type type) {
             break;
         case texture_type::depth24:
             texture_format = GL_DEPTH_COMPONENT;
-#if (EK_WEB || EK_ANDROID || EK_IOS)
+#ifdef EK_GLES2
             internal_format = GL_DEPTH_COMPONENT16;
             internal_format = GL_DEPTH_COMPONENT;
             pixel_type = GL_UNSIGNED_SHORT;
 #else
-        internal_format = GL_DEPTH_COMPONENT24;
-        pixel_type = GL_UNSIGNED_INT;
+            internal_format = GL_DEPTH_COMPONENT24;
+            pixel_type = GL_UNSIGNED_INT;
 #endif
             break;
         default:
