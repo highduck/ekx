@@ -9,6 +9,10 @@ namespace scenex {
 
 class drawable_2d {
 public:
+    explicit drawable_2d(uint8_t type_id) :
+            type_id_{type_id} {
+    }
+
     virtual ~drawable_2d();
 
     virtual void draw() = 0;
@@ -17,7 +21,13 @@ public:
 
     virtual rect_f get_bounds() const = 0;
 
-private:
+    [[nodiscard]] uint8_t get_type_id() const {
+        return type_id_;
+    }
+
+protected:
+
+    uint8_t type_id_ = 0;
 };
 
 struct scissors_2d {
@@ -42,6 +52,7 @@ struct display_2d {
 
 class drawable_quad : public drawable_2d {
 public:
+    inline static const uint8_t type_id = 1;
 
     rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
     argb32_t colors[4]{};
@@ -49,7 +60,9 @@ public:
 //    static CQuad* vGradient(rect_f const& rc, argb32_t top, argb32_t bottom);
 //    static CQuad* colored(const rect_f& rc, argb32_t color);
 
-    drawable_quad() = default;
+    drawable_quad()
+            : drawable_2d{type_id} {
+    }
 
     void draw() override;
 
@@ -65,6 +78,8 @@ public:
 
 class drawable_sprite : public drawable_2d {
 public:
+    inline static const uint8_t type_id = 2;
+
     std::string src;
     bool hit_pixels = true;
 
@@ -87,6 +102,7 @@ public:
 
 class drawable_text : public drawable_2d {
 public:
+    inline static const uint8_t type_id = 3;
 
     std::string text;
     text_format_t format;
@@ -105,6 +121,7 @@ public:
 
 class drawable_arc : public drawable_2d {
 public:
+    inline static const uint8_t type_id = 4;
 
     float angle = 0.0f;
     float radius = 10.0f;
@@ -114,7 +131,10 @@ public:
     argb32_t color_outer = argb32_t::one;
     std::string sprite;
 
-    drawable_arc() = default;
+    drawable_arc() :
+            drawable_2d{type_id} {
+
+    }
 
     void draw() override;
 
