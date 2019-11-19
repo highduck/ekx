@@ -24,6 +24,14 @@ using namespace ek;
 }
 @end
 
+void clear_buffers() {
+    glDepthMask(true);
+    glClearDepthf(1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDepthMask(false);
+}
+
 @implementation EAGLView
 
 // Create an ES 2.0 context
@@ -63,6 +71,8 @@ using namespace ek;
     }
     
     g_window.primary_frame_buffer = _defaultFBOName;
+    
+    clear_buffers();
 
     return self;
 }
@@ -95,6 +105,8 @@ using namespace ek;
         return NO;
     }
 
+    clear_buffers();
+    
     return YES;
 }
 
@@ -142,7 +154,7 @@ using namespace ek;
 - (void)drawView:(id)sender {
     [EAGLContext setCurrentContext:_context];
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBOName);
-
+    
     g_app.dispatch_draw_frame();
 
     glBindRenderbuffer(GL_RENDERBUFFER, _colorRenderbuffer);

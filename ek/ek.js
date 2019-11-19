@@ -3,29 +3,21 @@ const fs = require("fs");
 const glob = EK.require("glob");
 const Mustache = EK.require("mustache");
 
-const {spawnSync} = require('child_process');
-
 function replace_all(str, search, replacement) {
     return str.split(search).join(replacement);
 }
 
-function execute(cmd, args) {
-    console.debug(">> " + [cmd].concat(args).join(" "));
-    const child = spawnSync(cmd, args);
-    console.log("exit code", child.status);
-    return child.status;
-}
-
 function ekc_export_market(ctx, target_type, output) {
     make_dirs(output);
-    execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "market", ctx.market_asset, target_type, output]);
+    EK.execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "market", ctx.market_asset, target_type, output]);
 }
 
 function ekc_export_assets(ctx) {
     let assets_input = "assets";
     let assets_output = "build/assets";
     make_dirs(assets_output);
-    execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "assets", assets_input, assets_output]);
+    EK.execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "assets", assets_input, assets_output]);
+    EK.optimize_png_glob("build/assets/*.png");
 }
 
 function ekc_export_assets_lazy(ctx) {
@@ -36,7 +28,7 @@ function ekc_export_assets_lazy(ctx) {
 }
 
 function open_android_project(android_project_path) {
-    execute("open", ["-a", "/Applications/Android Studio.app", android_project_path]);
+    EK.execute("open", ["-a", "/Applications/Android Studio.app", android_project_path]);
 }
 
 function read_text(src) {
@@ -237,6 +229,7 @@ function export_android(ctx) {
     ekc_export_assets_lazy(ctx);
     if (!is_dir("generated/android/res")) {
         ekc_export_market(ctx, "android", "generated/android/res");
+        EK.optimize_png_glob("generated/android/res/**/*.png");
     }
 
     const platform_target = ctx.current_target; // "android"
@@ -328,7 +321,8 @@ function mod_plist(ctx, filepath) {
         ];
     }
 
-    dict["GADIsAdManagerApp"] = true;
+    // TODO: check for mini-ads
+    // dict["GADIsAdManagerApp"] = true;
     write_text(filepath, plist.build(dict));
 }
 
@@ -473,7 +467,10 @@ function mod_plist(ctx, filepath) {
 
 function export_ios(ctx) {
     ekc_export_assets_lazy(ctx);
-    ekc_export_market(ctx, "ios", "generated/ios");
+    if (!is_dir("generated/ios")) {
+        ekc_export_market(ctx, "ios", "generated/ios");
+        EK.optimize_png_glob("generated/ios/**/*.png");
+    }
 
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;
@@ -510,28 +507,30 @@ function export_ios(ctx) {
             path.join(dest_launch_logo_path, "iphone_120.png"));
 
         mod_plist(ctx, "src/Info.plist");
+        fs.writeFileSync("ek-ios-build.json", JSON.stringify(ctx.build.ios));
 
         /// PRE MOD PROJECT
         //xcode_patch(ctx, platform_proj_name);
-        execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id, ctx.path.EKX_ROOT]);
+        EK.execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id, ctx.path.EKX_ROOT]);
 
         console.info("Prepare PodFile");
         replace_in_file("Podfile", {
-            "template-ios": platform_proj_name
+            "template-ios": platform_proj_name,
+            "# TEMPLATE DEPENDENCIES": ctx.build.ios.dependencies.join("\n  ")
         });
 
         console.info("Install Pods");
-        execute("pod", ["install"]);
+        EK.execute("pod", ["install"]);
 
         // POST MOD PROJECT
-        execute("python3", ["xcode-project-ios-post.py",
+        EK.execute("python3", ["xcode-project-ios-post.py",
             platform_proj_name, ctx.ios.application_id]);
     }
     process.chdir(cwd);
 
     const workspace_path = path.join(dest_path, platform_proj_name + ".xcworkspace");
     // execute("open", [dest_path]);
-    execute("open", [workspace_path]);
+    EK.execute("open", [workspace_path]);
     // execute("xcodebuild", [
     //     "-workspace", workspace_path,
     //     "-scheme", platform_proj_name,
@@ -573,12 +572,14 @@ class File {
                 ],
                 dependencies: [],
                 hack_manifest: []
+            },
+            ios: {
+                billing: false,
+                dependencies: []
             }
         };
         ctx.ios = {};
         ctx.html = {};
-
-        console.debug(ctx.android);
 
         console.log("=== EK PROJECT ===");
         console.log("Current Target:", ctx.current_target);

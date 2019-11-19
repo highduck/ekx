@@ -19,8 +19,8 @@ void update_layout(ecs::entity e) {
     if ((l.fill_x || l.fill_y) && ecs::has<display_2d>(e)) {
         auto& drawable = ecs::get<display_2d>(e).drawable;
         if (drawable) {
-            auto* quad = dynamic_cast<drawable_quad*>(drawable.get());
-            if (quad) {
+            if (drawable->get_type_id() == drawable_quad::type_id) {
+                auto* quad = static_cast<drawable_quad*>(drawable.get());
                 if (l.fill_x) {
                     quad->rect.x = top_rect.x;
                     quad->rect.width = top_rect.width;
@@ -29,19 +29,17 @@ void update_layout(ecs::entity e) {
                     quad->rect.y = top_rect.y;
                     quad->rect.height = top_rect.height;
                 }
-            } else {
-                auto* sprite = dynamic_cast<drawable_sprite*>(drawable.get());
-                if (sprite) {
-                    auto bounds = sprite->get_bounds();
-                    if (!bounds.empty()) {
-                        if (l.fill_x) {
-                            transform.matrix.tx = top_rect.x + l.fill_extra.x;
-                            transform.scale.x = (top_rect.width + l.fill_extra.width) / bounds.width;
-                        }
-                        if (l.fill_y) {
-                            transform.matrix.ty = top_rect.y + l.fill_extra.y;
-                            transform.scale.y = (top_rect.height + l.fill_extra.height) / bounds.height;
-                        }
+            } else if (drawable->get_type_id() == drawable_sprite::type_id) {
+                auto* sprite = static_cast<drawable_sprite*>(drawable.get());
+                auto bounds = sprite->get_bounds();
+                if (!bounds.empty()) {
+                    if (l.fill_x) {
+                        transform.matrix.tx = top_rect.x + l.fill_extra.x;
+                        transform.scale.x = (top_rect.width + l.fill_extra.width) / bounds.width;
+                    }
+                    if (l.fill_y) {
+                        transform.matrix.ty = top_rect.y + l.fill_extra.y;
+                        transform.scale.y = (top_rect.height + l.fill_extra.height) / bounds.height;
                     }
                 }
             }

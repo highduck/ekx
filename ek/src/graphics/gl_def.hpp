@@ -10,7 +10,7 @@
 
 #endif
 
-#if TARGET_OS_MAC
+#if TARGET_OS_OSX
 
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>

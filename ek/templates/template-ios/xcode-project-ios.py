@@ -1,9 +1,15 @@
-import sys
+import json
 import os
+import sys
 
 # PBXPROJ: https://github.com/kronenthaler/mod-pbxproj/wiki
 from pbxproj import XcodeProject, PBXGenericObject
 from pbxproj.pbxextensions import FileOptions
+
+config_file = open("ek-ios-build.json", "r")
+ios_build_config = json.loads(config_file.read())
+print('billing: ', ios_build_config["billing"])
+print('dependencies: ', ios_build_config["dependencies"])
 
 print('Number of arguments: ' + str(len(sys.argv)) + ' arguments')
 print('Argument List: ')
@@ -15,6 +21,7 @@ application_id = sys.argv[2]
 sdk_root = sys.argv[3]
 
 print('EKX ROOT: ( ' + sdk_root + " )")
+
 
 def disable_arc(project, file_path):
     rel_path = os.path.relpath(file_path, ".")
@@ -31,10 +38,13 @@ project = XcodeProject.load(f"{proj_ios_name}.xcodeproj/project.pbxproj")
 project_target = project.get_target_by_name("template-ios")
 
 sys_caps = PBXGenericObject()
-sys_caps["com.apple.GameCenter.iOS"] = PBXGenericObject()
-sys_caps["com.apple.GameCenter.iOS"]["enabled"] = 1
-sys_caps["com.apple.InAppPurchase"] = PBXGenericObject()
-sys_caps["com.apple.InAppPurchase"]["enabled"] = 1
+sys_caps["com.apple.GameCenter"] = PBXGenericObject()
+sys_caps["com.apple.GameCenter"]["enabled"] = 1
+if ios_build_config["billing"]:
+    sys_caps["com.apple.InAppPurchase"] = PBXGenericObject()
+    sys_caps["com.apple.InAppPurchase"]["enabled"] = 1
+    # sys_caps["com.apple.InAppPurchase"]["enabled"] = 1 if ios_build_config["billing"] else 0
+
 project.objects[project.rootObject].attributes.TargetAttributes[project_target.get_id()][
     'SystemCapabilities'] = sys_caps
 
@@ -77,17 +87,22 @@ frameworks = [
     "-framework UIKit",
     "-framework OpenGLES",
     "-framework QuartzCore",
-    "-framework AudioToolbox",
     "-framework Foundation",
-    "-framework OpenAL"
+    # mini-audio
+    "-framework OpenAL",
+    "-framework AudioToolbox",
+    "-framework AVFoundation",
 ]
 
 # file_options = FileOptions(weak=True)
 file_options = FileOptions(weak=False, embed_framework=False)
 project.add_file('System/Library/Frameworks/GameKit.framework', tree='SDKROOT', force=False, file_options=file_options)
-project.add_file('System/Library/Frameworks/StoreKit.framework', tree='SDKROOT', force=False, file_options=file_options)
+if ios_build_config["billing"]:
+    project.add_file('System/Library/Frameworks/StoreKit.framework', tree='SDKROOT', force=False,
+                     file_options=file_options)
 
 project.add_other_ldflags(" ".join(frameworks))
+project.add_other_ldflags("-Os -flto -fno-exceptions -fno-rtti")
 project.add_library_search_paths("$(inherited)")
 
 project.add_other_cflags([
