@@ -1,41 +1,27 @@
 #include "texture_asset.hpp"
 
-#include <ek/fs/path.hpp>
-#include <scenex/asset2/asset_manager.hpp>
-#include <ek/system/system.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/logger.hpp>
 #include <ek/assets.hpp>
 #include <graphics/program.hpp>
 #include <graphics/vertex_decl.hpp>
 
-#include <pugixml.hpp>
-#include <ek/editor/gui/editor_widgets.hpp>
 #include <graphics/texture.hpp>
 #include <utils/image_loader.hpp>
 #include <scenex/data/texture_data.hpp>
-
-using scenex::asset_object_t;
+#include <ek/system/system.hpp>
 
 namespace ek {
 
 texture_asset_t::texture_asset_t(std::string path)
-        : path_{std::move(path)} {
+        : editor_asset_t{std::move(path), "texture"} {
 }
 
-void texture_asset_t::read_decl() {
-    pugi::xml_document xml;
+void texture_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
     images_.clear();
-    const auto full_path = project_->base_path / path_;
-    if (xml.load_file(full_path.c_str())) {
-        auto node = xml.first_child();
-        name_ = node.attribute("name").as_string();
-        texture_type_ = node.attribute("texture_type").as_string("2d");
-        for (auto image_node : node.children("image")) {
-            images_.emplace_back(image_node.attribute("path").as_string());
-        }
-    } else {
-        EK_ERROR << "error parse xml " << full_path;
+    texture_type_ = node.attribute("texture_type").as_string("2d");
+    for (auto image_node : node.children("image")) {
+        images_.emplace_back(image_node.attribute("path").as_string());
     }
 }
 
@@ -88,20 +74,15 @@ void texture_asset_t::unload() {
 }
 
 void texture_asset_t::gui() {
-    if (ImGui::TreeNode(this, "%s (Texture Asset)", path_.c_str())) {
-        ImGui::LabelText("Name", "%s", name_.c_str());
-        ImGui::LabelText("Texture Type", "%s", texture_type_.c_str());
-        gui_asset_object_controls(this);
-        for (const auto& image_path : images_) {
-            ImGui::LabelText("Image", "%s", image_path.c_str());
-        }
-        ImGui::TreePop();
+    ImGui::LabelText("Texture Type", "%s", texture_type_.c_str());
+    for (const auto& image_path : images_) {
+        ImGui::LabelText("Image", "%s", image_path.c_str());
     }
 }
 
 void texture_asset_t::export_() {
     read_decl();
-    
+
     auto output_path = project_->export_path / name_;
     scenex::texture_data_t data{};
     data.texture_type = texture_type_;
@@ -127,10 +108,6 @@ void texture_asset_t::export_meta(output_memory_stream& output) {
     IO io{output};
     std::string type_name{"texture"};
     io(type_name, name_);
-}
-
-path_t texture_asset_t::get_relative_path(const path_t& path) const {
-    return (project_->base_path / path_).dir() / path;
 }
 
 }

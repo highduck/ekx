@@ -88,6 +88,7 @@ void basic_application::preload() {
 void basic_application::onDrawFrame() {
     scale_factor = ecs::get<scenex::canvas_t>(game).scale;
     asset_manager_->set_scale_factor(scale_factor);
+
     base_app_t::onDrawFrame();
 
     if (!started_ && asset_manager_->is_assets_ready()) {

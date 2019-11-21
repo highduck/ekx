@@ -1,7 +1,6 @@
 #include "freetype_asset.hpp"
 
 #include <ek/editor/gui/editor_widgets.hpp>
-#include <scenex/asset2/asset_manager.hpp>
 #include <ek/editor/assets/editor_temp_atlas.hpp>
 #include <ek/logger.hpp>
 #include <ek/system/working_dir.hpp>
@@ -15,43 +14,31 @@
 #include <utility>
 #include <memory>
 
-using scenex::asset_object_t;
-
 namespace ek {
 
 freetype_asset_t::freetype_asset_t(std::string path)
-        : path_{std::move(path)} {
+        : editor_asset_t{std::move(path), "freetype"} {
 }
 
-void freetype_asset_t::read_decl() {
-    pugi::xml_document xml;
-    const auto full_path = project_->base_path / path_;
-    if (xml.load_file(full_path.c_str())) {
-        auto node = xml.first_child();
-        name_ = node.attribute("name").as_string();
-        face_path_ = node.attribute("path").as_string();
-
-        atlas_decl_ = {};
-        from_xml(node.child("atlas"), atlas_decl_);
-        if (atlas_decl_.name.empty()) {
-            atlas_decl_.name = name_;
-        }
-
-        font_decl_ = {};
-        from_xml(node.child("font"), font_decl_);
-
-        filters_decl_ = {};
-        from_xml(node.child("filters"), filters_decl_);
-    } else {
-        EK_ERROR << "Error parse xml: " << full_path;
+void freetype_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
+    atlas_decl_ = {};
+    from_xml(node.child("atlas"), atlas_decl_);
+    if (atlas_decl_.name.empty()) {
+        atlas_decl_.name = name_;
     }
+
+    font_decl_ = {};
+    from_xml(node.child("font"), font_decl_);
+
+    filters_decl_ = {};
+    from_xml(node.child("filters"), filters_decl_);
 }
 
 void freetype_asset_t::load() {
     read_decl();
 
     auto temp_atlas = prepare_temp_atlas(name_, project_->scale_factor);
-    auto font_data = font_lib::export_font(project_->base_path / face_path_,
+    auto font_data = font_lib::export_font(project_->base_path / resource_path_,
                                            name_,
                                            font_decl_,
                                            filters_decl_,
@@ -68,26 +55,18 @@ void freetype_asset_t::unload() {
 }
 
 void freetype_asset_t::gui() {
-    if (ImGui::TreeNode(this, "%s (FreeType)", path_.c_str())) {
-        ImGui::LabelText("Name", "%s", name_.c_str());
-        ImGui::LabelText("Face Path", "%s", face_path_.c_str());
-        gui_asset_object_controls(this);
+    asset_t<scenex::atlas_t> atlas{name_};
+    gui_atlas_view(atlas.get());
 
-        asset_t<scenex::atlas_t> atlas{name_};
-        gui_atlas_view(atlas.get());
-
-        asset_t<scenex::font_t> font{name_};
-        gui_font_view(font.get());
-
-        ImGui::TreePop();
-    }
+    asset_t<scenex::font_t> font{name_};
+    gui_font_view(font.get());
 }
 
 void freetype_asset_t::export_() {
     read_decl();
 
     spritepack::atlas_t atlas{atlas_decl_};
-    auto font_data = font_lib::export_font(project_->base_path / face_path_,
+    auto font_data = font_lib::export_font(project_->base_path / resource_path_,
                                            name_,
                                            font_decl_,
                                            filters_decl_,

@@ -153,7 +153,8 @@ function mod_android_manifest(ctx) {
     replace_in_file("app/src/main/AndroidManifest.xml", {
         "com.eliasku.template_android": ctx.android.package_id,
         'screenOrientation="sensorPortrait"': `screenOrientation="${orientation}"`,
-        "<!-- TEMPLATE ROOT -->": ctx.build.android.hack_manifest.join("\n")
+        "<!-- TEMPLATE ROOT -->": ctx.build.android.add_manifest.join("\n"),
+        "<!-- TEMPLATE APPLICATION -->": ctx.build.android.add_manifest_application.join("\n")
     });
 }
 
@@ -253,12 +254,16 @@ function export_android(ctx) {
     process.chdir(dest_path);
     {
         const java_src_roots = [];
-        for (let java_src_root of ctx.build.android.java_src) {
-            java_src_roots.push(`'${java_src_root}'`);
+        for (let p of ctx.build.android.java_src) {
+            java_src_roots.push(`'${p}'`);
+        }
+        const java_asset_roots = [];
+        for (let p of ctx.build.android.java_asset) {
+            java_asset_roots.push(`'${p}'`);
         }
         const source_sets = [
             `main.java.srcDirs += [${java_src_roots.join(", ")}]`,
-            `main.assets.srcDirs += 'src/main/assets'`
+            `main.assets.srcDirs += [${java_asset_roots.join(", ")}]`
         ];
 
 
@@ -553,7 +558,10 @@ function export_web(ctx) {
     }
 
     ekc_export_assets_lazy(ctx);
-    ekc_export_market(ctx, "web", "build/icons");
+    if (!is_dir("build/icons")) {
+        ekc_export_market(ctx, "web", "build/icons");
+        EK.optimize_png_glob("build/icons/*.png");
+    }
 
     tpl("templates/web/index.html.mustache", "index.html");
     tpl("templates/web/manifest.json.mustache", "manifest.webmanifest");
@@ -570,12 +578,21 @@ class File {
                 java_src: [
                     path.join(__dirname, "platforms/android/java")
                 ],
+                java_asset: [
+                    "src/main/assets"
+                ],
                 dependencies: [],
-                hack_manifest: []
+                add_manifest: [],
+                add_manifest_application: [],
+                source_dirs: [],
             },
             ios: {
                 billing: false,
-                dependencies: []
+                dependencies: [
+                    "pod 'Firebase/Analytics'",
+                    "pod 'Fabric'",
+                    "pod 'Crashlytics'"
+                ]
             }
         };
         ctx.ios = {};

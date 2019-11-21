@@ -1,4 +1,5 @@
 #include <ek/audiomini.hpp>
+#include <ek/logger.hpp>
 
 extern "C" {
 
@@ -17,6 +18,7 @@ AudioMini::AudioMini() = default;
 AudioMini::~AudioMini() = default;
 
 void AudioMini::create_sound(const char* name) {
+    EK_DEBUG("Load sound: %s", name);
     audio_mini_create_sound(name);
 }
 

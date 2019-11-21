@@ -1,4 +1,4 @@
-#include <platform/Ads.h>
+#include <ek/mini_ads.hpp>
 #include <platform/application.hpp>
 #include <ek/timer.hpp>
 #include <ek/logger.hpp>

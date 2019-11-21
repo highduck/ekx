@@ -1,6 +1,5 @@
 #include "program_asset.hpp"
 
-#include <ek/fs/path.hpp>
 #include <scenex/asset2/asset_manager.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/system/system.hpp>
@@ -14,27 +13,16 @@
 #include <ek/editor/gui/editor_widgets.hpp>
 #include <scenex/data/program_data.hpp>
 
-using scenex::asset_object_t;
-
 namespace ek {
 
 program_asset_t::program_asset_t(std::string path)
-        : path_{std::move(path)} {
+        : editor_asset_t{std::move(path), "program"} {
 }
 
-void program_asset_t::read_decl() {
-    pugi::xml_document xml;
-
-    const auto full_path = project_->base_path / path_;
-    if (xml.load_file(full_path.c_str())) {
-        auto node = xml.first_child();
-        name_ = node.attribute("name").as_string();
-        frag_ = read_text(project_->base_path / node.child("fragment").attribute("path").as_string());
-        vert_ = read_text(project_->base_path / node.child("vertex").attribute("path").as_string());
-        vertex_decl_ = node.attribute("vertex_layout").as_string("2d");
-    } else {
-        EK_ERROR << "Error parse xml: " << full_path;
-    }
+void program_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
+    frag_ = read_text(project_->base_path / node.child("fragment").attribute("path").as_string());
+    vert_ = read_text(project_->base_path / node.child("vertex").attribute("path").as_string());
+    vertex_decl_ = node.attribute("vertex_layout").as_string("2d");
 }
 
 void program_asset_t::load() {
@@ -54,16 +42,14 @@ void program_asset_t::unload() {
 }
 
 void program_asset_t::gui() {
-    if (ImGui::TreeNode(this, "%s (Shader Program)", path_.c_str())) {
-        ImGui::LabelText("Name", "%s", name_.c_str());
-        gui_asset_object_controls(this);
-        ImGui::TreePop();
-    }
+    ImGui::LabelText("VS", "%s", vert_.c_str());
+    ImGui::LabelText("FS", "%s", frag_.c_str());
+    ImGui::LabelText("Layout", "%s", vertex_decl_.c_str());
 }
 
 void program_asset_t::export_() {
     read_decl();
-    
+
     auto output_path = path_t{project_->export_path} / name_;
     scenex::program_data_t pr{};
     pr.fragment_shader = frag_;

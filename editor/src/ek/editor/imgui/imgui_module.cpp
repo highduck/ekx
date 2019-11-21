@@ -6,12 +6,12 @@
 #include <graphics/buffer_object.hpp>
 #include <draw2d/batcher.hpp>
 #include <platform/window.hpp>
-#include <platform/static_resources.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include <graphics/gl_debug.hpp>
 #include <scenex/ek/input_controller.h>
 #include <ek/locator.hpp>
 #include <ek/fs/path.hpp>
+#include <ek/system/system.hpp>
 
 namespace ek {
 
@@ -308,7 +308,7 @@ imgui_module_t::imgui_module_t() {
     if (sdk_root) {
         font_path = path_t{sdk_root} / "editor/resources" / font_path;
     }
-    auto data = get_content(font_path.c_str());
+    auto data = read_file(font_path);
     if (!data.empty()) {
         font = io.Fonts->AddFontFromMemoryTTF(data.data(), data.size(), 16.0f * scale_factor);
     }

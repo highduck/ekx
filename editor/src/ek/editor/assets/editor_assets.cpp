@@ -1,4 +1,5 @@
 #include "editor_assets.hpp"
+#include "editor_asset.hpp"
 
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
@@ -11,31 +12,34 @@ namespace ek {
 void export_all_assets(scenex::asset_manager_t& project) {
     make_dirs(project.export_path);
     output_memory_stream out{100};
-    for (auto* asset : project.assets) {
-        asset->export_();
-        asset->export_meta(out);
+    for (auto* base_asset : project.assets) {
+        auto* asset = dynamic_cast<editor_asset_t*>(base_asset);
+        if(asset) {
+            asset->export_();
+            asset->export_meta(out);
+        }
     }
     std::string empty_string{};
     IO io{out};
     io(empty_string, empty_string);
     ::ek::save(out, project.export_path / "pack_meta");
 }
-
-std::string erase_sub_str(const std::string& str, const std::string& to_erase) {
-    std::string result{str};
-    auto pos = result.find(to_erase);
-    if (pos != std::string::npos) {
-        // If found then erase it from string
-        result.erase(pos, to_erase.length());
-    }
-    return result;
-}
+//
+//std::string erase_sub_str(const std::string& str, const std::string& to_erase) {
+//    std::string result{str};
+//    auto pos = result.find(to_erase);
+//    if (pos != std::string::npos) {
+//        // If found then erase it from string
+//        result.erase(pos, to_erase.length());
+//    }
+//    return result;
+//}
 
 void scan_assets_folder(scenex::asset_manager_t& project, bool load) {
     project.clear();
     std::vector<path_t> files{};
     working_dir_t::with(project.base_path, [&files, &project]() {
-        files = search_files("*.xml", path_t{""});
+        files = search_files("*.asset.xml", path_t{""});
     });
     for (auto& path : files) {
         project.add_file(path.str());
