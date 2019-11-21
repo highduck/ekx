@@ -56,7 +56,7 @@ std::unique_ptr<flash::basic_entry> load_flash_archive(const path_t& path) {
 }
 
 
-flash_asset_t::flash_asset_t(std::string path)
+flash_asset_t::flash_asset_t(path_t path)
         : editor_asset_t{std::move(path), "flash"} {
 }
 
@@ -71,11 +71,11 @@ void flash_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
 void flash_asset_t::load() {
     read_decl();
 
-    flash::flash_file ff{load_flash_archive(project_->base_path / resource_path_)};
+    flash::flash_file ff{load_flash_archive(project->base_path / resource_path_)};
     flash::flash_doc_exporter fe{ff};
     fe.build_library();
 
-    auto temp_atlas = prepare_temp_atlas(name_, project_->scale_factor);
+    auto temp_atlas = prepare_temp_atlas(name_, project->scale_factor);
     fe.build_sprites(temp_atlas);
     load_temp_atlas(temp_atlas);
 
@@ -98,18 +98,18 @@ void flash_asset_t::gui() {
     gui_sg_file_view(library.get());
 }
 
-void flash_asset_t::export_() {
+void flash_asset_t::build(assets_build_struct_t& data) {
     read_decl();
 
-    flash::flash_file ff{load_flash_archive(project_->base_path / resource_path_)};
+    flash::flash_file ff{load_flash_archive(project->base_path / resource_path_)};
     flash::flash_doc_exporter fe{ff};
     fe.build_library();
 
     spritepack::atlas_t temp_atlas{atlas_decl_};
     fe.build_sprites(temp_atlas);
 
-    make_dirs(path_t{project_->export_path});
-    working_dir_t::with(project_->export_path, [&] {
+    make_dirs(data.output);
+    working_dir_t::with(data.output, [&] {
         EK_DEBUG << "Export Flash asset: " << current_working_directory();
         spritepack::export_atlas(temp_atlas);
         auto sg_data = fe.export_library();
@@ -118,30 +118,24 @@ void flash_asset_t::export_() {
         io(sg_data);
         ek::save(out, name_ + ".sg");
     });
+
+    data.meta("atlas", name_);
+    data.meta("scene", name_);
 }
 
 void flash_asset_t::save() {
     pugi::xml_document xml;
-    //if (xml.load_file(path_join(project_->base_path, path_).c_str())) {
+    //if (xml.load_file(path_join(project->base_path, path_).c_str())) {
     auto node = xml.append_child("asset");
     node.append_attribute("name").set_value(name_.c_str());
     node.append_attribute("type").set_value("flash");
     node.append_attribute("path").set_value(resource_path_.c_str());
     to_xml(node.append_child("atlas"), atlas_decl_);
 
-    const auto full_path = project_->base_path / path_;
+    const auto full_path = project->base_path / declaration_path_;
     if (!xml.save_file(full_path.c_str())) {
         EK_ERROR << "Error write xml file " << full_path;
     }
 }
-
-void flash_asset_t::export_meta(output_memory_stream& output) {
-    IO io{output};
-    std::string atlas_type{"atlas"};
-    std::string scene_type{"scene"};
-    io(atlas_type, name_);
-    io(scene_type, name_);
-}
-
 
 }

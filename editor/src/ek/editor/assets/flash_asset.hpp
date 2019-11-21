@@ -9,7 +9,9 @@ namespace ek {
 
 class flash_asset_t : public editor_asset_t {
 public:
-    explicit flash_asset_t(std::string path);
+    inline static const char* type_name = "flash";
+
+    explicit flash_asset_t(path_t path);
 
     void read_decl_from_xml(const pugi::xml_node& node) override;
 
@@ -19,11 +21,9 @@ public:
 
     void gui() override;
 
-    void export_() override;
+    void build(assets_build_struct_t& data) override;
 
     void save() override;
-
-    void export_meta(output_memory_stream& output) override;
 private:
     atlas_decl_t atlas_decl_;
 };

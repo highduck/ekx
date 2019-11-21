@@ -78,9 +78,12 @@ box_t<float, 3> get_shadow_map_box(const mat4f& camera_projection, const mat4f& 
 }
 
 void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view) {
+    asset_t<program_t> program3d{"3d_shadow_map"};
+    if (!program3d) {
+        return;
+    }
     auto& drawer = resolve<drawer_t>();
     drawer.save_program();
-    asset_t<program_t> program3d{"3d_shadow_map"};
     drawer.batcher.states.set_program(program3d.get());
 
     glCullFace(GL_FRONT);
@@ -126,9 +129,13 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
     resolve<graphics_t>().viewport();
 }
 
-void begin_3d() {
-    auto& drawer = resolve<drawer_t>();
+bool begin_3d() {
     asset_t<program_t> program3d{"3d"};
+    if (!program3d) {
+        return false;
+    }
+
+    auto& drawer = resolve<drawer_t>();
     drawer.save_projection_matrix();
     drawer.save_program();
     drawer.save_texture();
@@ -144,6 +151,8 @@ void begin_3d() {
     glDepthRange(0.0f, 1.0f);
 
     gl_check_error();
+
+    return true;
 }
 
 void end_3d() {
@@ -252,7 +261,9 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
 
     invalidate_matrix_3d();
 
-    begin_3d();
+    if (!begin_3d()) {
+        return;
+    }
 
     float3 point_light_pos{0, 15, 0};
     light_3d point_light{};

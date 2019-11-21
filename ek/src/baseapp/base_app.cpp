@@ -28,7 +28,7 @@ void base_app_t::onTouchEvent(const touch_event_t&) {
 
 void base_app_t::onAppEvent(const app_event_t& event) {
     if (event.type == app_event_type::resize) {
-        EK_DEBUG << "w: " << g_window.back_buffer_size.width << " h: " << g_window.back_buffer_size.height;
+        EK_TRACE("size: %d x %d", g_window.back_buffer_size.width, g_window.back_buffer_size.height);
     }
 }
 

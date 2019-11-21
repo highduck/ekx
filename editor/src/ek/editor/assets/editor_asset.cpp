@@ -1,7 +1,15 @@
 #include "editor_asset.hpp"
+#include <ek/serialize/serialize.hpp>
 #include <ek/logger.hpp>
 
 namespace ek {
+
+void assets_build_struct_t::meta(std::string type, std::string path) {
+    if (pack_meta_stream) {
+        IO io{*pack_meta_stream};
+        io(type, path);
+    }
+}
 
 std::string get_default_name(const path_t& p) {
     std::string name = p.basename().str();
@@ -13,17 +21,17 @@ std::string get_default_name(const path_t& p) {
     return name;
 }
 
-editor_asset_t::editor_asset_t(std::string path, std::string type_name)
-        : path_{std::move(path)},
+editor_asset_t::editor_asset_t(path_t path, std::string type_name)
+        : declaration_path_{std::move(path)},
           type_name_{std::move(type_name)} {
 }
 
 void editor_asset_t::read_decl() {
     pugi::xml_document xml;
-    const auto full_path = project_->base_path / path_;
+    const auto full_path = project->base_path / declaration_path_;
     if (xml.load_file(full_path.c_str())) {
         auto node = xml.first_child();
-        auto default_name = get_default_name(path_);
+        auto default_name = get_default_name(declaration_path_);
         name_ = node.attribute("name").as_string(default_name.c_str());
         resource_path_ = path_t{node.attribute("path").as_string(default_name.c_str())};
         read_decl_from_xml(node);
@@ -38,20 +46,11 @@ void editor_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
 void editor_asset_t::gui() {
 }
 
-void editor_asset_t::export_() {
-}
-
 void editor_asset_t::save() {
 }
 
-void editor_asset_t::export_meta(output_memory_stream& output) {
-//    IO io{output};
-//    std::string type_name{"texture"};
-//    io(type_name, name_);
-}
-
 path_t editor_asset_t::get_relative_path(const path_t& path) const {
-    return (project_->base_path / path_).dir() / path;
+    return (project->base_path / declaration_path_).dir() / path;
 }
 
 }

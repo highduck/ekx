@@ -3,7 +3,7 @@
 
 namespace ek {
 
-particles_asset_t::particles_asset_t(std::string path)
+particles_asset_t::particles_asset_t(path_t path)
         : editor_asset_t{std::move(path), "particles"} {
 }
 
@@ -25,10 +25,10 @@ void particles_asset_t::gui() {
 
 }
 
-void particles_asset_t::export_() {
+void particles_asset_t::build(assets_build_struct_t& data) {
     read_decl();
 
-//    auto output_path = project_->export_path / name_;
+//    auto output_path = project->export_path / name_;
 //
 //    make_dirs(output_path.dir());
 //
@@ -36,16 +36,12 @@ void particles_asset_t::export_() {
 //    IO io{out};
 //    io(decl_);
 //    ::ek::save(out, output_path + ".particles");
+
+    data.meta("particles", name_);
 }
 
 void particles_asset_t::save() {
     // TODO:
-}
-
-void particles_asset_t::export_meta(output_memory_stream& output) {
-    IO io{output};
-    std::string type_name{"particles"};
-    io(type_name, name_);
 }
 
 }

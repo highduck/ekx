@@ -13,7 +13,7 @@
 #include <ek/editor/assets/texture_asset.hpp>
 #include <ek/editor/assets/model_asset.hpp>
 
-#include <ek/editor/assets/editor_assets.hpp>
+#include <ek/editor/assets/editor_project.hpp>
 
 namespace ek {
 
@@ -53,19 +53,10 @@ void main() {
                                                       });
                     process_market_asset(marketing_data);
                 } else if (what == "assets") {
-                    asset_manager_t assets{};
-
-                    assets.base_path = path_t{args[3]};
-                    assets.export_path = path_t{args[4]};
-
-                    assets.add_resolver(new editor_asset_resolver_t<texture_asset_t>("texture"));
-                    assets.add_resolver(new editor_asset_resolver_t<program_asset_t>("program"));
-                    assets.add_resolver(new editor_asset_resolver_t<freetype_asset_t>("freetype"));
-                    assets.add_resolver(new editor_asset_resolver_t<flash_asset_t>("flash"));
-                    assets.add_resolver(new editor_asset_resolver_t<model_asset_t>("model"));
-                    assets.add_resolver(new editor_asset_resolver_t<audio_asset_t>("audio"));
-                    scan_assets_folder(assets, false);
-                    export_all_assets(assets);
+                    editor_project_t project{};
+                    project.base_path = path_t{args[3]};
+                    project.populate();
+                    project.build(path_t{args[4]});
                 }
             }
         }

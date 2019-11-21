@@ -2,17 +2,15 @@
 
 #include <scenex/3d/static_mesh.hpp>
 #include <ek/system/system.hpp>
-#include <ek/editor/imgui/imgui.hpp>
 #include <ek/logger.hpp>
 #include <ek/assets.hpp>
 #include <graphics/vertex_decl.hpp>
-#include <ek/editor/gui/editor_widgets.hpp>
 #include <scenex/data/model_data.hpp>
 #include <ek/editor/obj/obj_loader.hpp>
 
 namespace ek {
 
-model_asset_t::model_asset_t(std::string path)
+model_asset_t::model_asset_t(path_t path)
         : editor_asset_t{std::move(path), "model"} {
 }
 
@@ -25,7 +23,7 @@ void model_asset_t::load() {
 
     auto buffer = read_file(get_relative_path(resource_path_));
     if (buffer.empty()) {
-        EK_ERROR << "Not found or empty " << (project_->base_path / path_);
+        EK_ERROR("Not found or empty %s", (project->base_path / declaration_path_).c_str());
     } else {
         asset_t<scenex::static_mesh_t>{name_}.reset(
                 new scenex::static_mesh_t(
@@ -40,17 +38,12 @@ void model_asset_t::unload() {
 }
 
 void model_asset_t::gui() {
-    if (ImGui::TreeNode(this, "%s (Texture Asset)", path_.c_str())) {
-        ImGui::LabelText("Name", "%s", name_.c_str());
-        gui_asset_object_controls(this);
-        ImGui::TreePop();
-    }
 }
 
-void model_asset_t::export_() {
+void model_asset_t::build(assets_build_struct_t& build_data) {
     read_decl();
-    
-    auto output_path = project_->export_path / name_;
+
+    const auto output_path = build_data.output / name_;
     scenex::model_data_t data{
             load_obj(read_file(get_relative_path(resource_path_)))
     };
@@ -61,16 +54,12 @@ void model_asset_t::export_() {
     IO io{out};
     io(data);
     ::ek::save(out, output_path + ".model");
+
+    build_data.meta(type_name_, name_);
 }
 
 void model_asset_t::save() {
     // TODO:
-}
-
-void model_asset_t::export_meta(output_memory_stream& output) {
-    IO io{output};
-    std::string type_name{"model"};
-    io(type_name, name_);
 }
 
 }
