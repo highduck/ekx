@@ -34,7 +34,6 @@ public:
     bool is_assets_ready() const;
 
     ek::path_t base_path{"assets"};
-    ek::path_t export_path{"assets"};
     std::vector<asset_object_t*> assets;
     std::vector<asset_type_resolver_t*> resolvers;
     float scale_factor = 2.0f;

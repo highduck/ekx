@@ -13,7 +13,7 @@
 
 namespace ek {
 
-texture_asset_t::texture_asset_t(std::string path)
+texture_asset_t::texture_asset_t(path_t path)
         : editor_asset_t{std::move(path), "texture"} {
 }
 
@@ -80,10 +80,10 @@ void texture_asset_t::gui() {
     }
 }
 
-void texture_asset_t::export_() {
+void texture_asset_t::build(assets_build_struct_t& build_data) {
     read_decl();
 
-    auto output_path = project_->export_path / name_;
+    const auto output_path = build_data.output / name_;
     scenex::texture_data_t data{};
     data.texture_type = texture_type_;
     data.images = images_;
@@ -91,23 +91,19 @@ void texture_asset_t::export_() {
     make_dirs(output_path.dir());
 
     for (const auto& image_path : images_) {
-        copy_file(get_relative_path(path_t{image_path}), project_->export_path / image_path);
+        copy_file(get_relative_path(path_t{image_path}), build_data.output / image_path);
     }
 
     output_memory_stream out{100};
     IO io{out};
     io(data);
     ::ek::save(out, output_path + ".texture");
+
+    build_data.meta(type_name_, name_);
 }
 
 void texture_asset_t::save() {
     // TODO:
-}
-
-void texture_asset_t::export_meta(output_memory_stream& output) {
-    IO io{output};
-    std::string type_name{"texture"};
-    io(type_name, name_);
 }
 
 }

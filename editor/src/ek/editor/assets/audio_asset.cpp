@@ -7,7 +7,7 @@
 
 namespace ek {
 
-audio_asset_t::audio_asset_t(std::string path)
+audio_asset_t::audio_asset_t(path_t path)
         : editor_asset_t{std::move(path), "audio"} {
 }
 
@@ -29,7 +29,7 @@ void audio_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
         music_filters.emplace_back(music_node.attribute("filter").as_string());
     }
 
-    auto files = search_files("*.mp3", project_->base_path);
+    auto files = search_files("*.mp3", project->base_path);
     for (auto& file : files) {
         if (check_filters(file, music_filters)) {
             music_list_.push_back(file.str());
@@ -87,50 +87,38 @@ void audio_asset_t::gui() {
     }
 }
 
-void audio_asset_t::export_() {
+void audio_asset_t::build(assets_build_struct_t& data) {
     read_decl();
 
-    path_t output_path = path_t{project_->export_path} / name_;
+    const path_t output_path = data.output / name_;
+
     make_dirs(output_path);
-    for (const auto& audio_file_path : sound_list_) {
-        copy_file(path_t{audio_file_path}, output_path / path_name(audio_file_path));
+    for (const auto& audio : sound_list_) {
+        path_t path = path_t{name_} / path_name(audio);
+        copy_file(path_t{audio}, data.output / path);
+        data.meta("sound", path.str());
     }
-    for (const auto& audio_file_path : music_list_) {
-        copy_file(path_t{audio_file_path}, output_path / path_name(audio_file_path));
+    for (const auto& audio : music_list_) {
+        path_t path = path_t{name_} / path_name(audio);
+        copy_file(path_t{audio}, data.output / path);
+        data.meta("music", path.str());
     }
 }
 
 void audio_asset_t::save() {
     // TODO:
 //    pugi::xml_document xml;
-//    //if (xml.load_file(path_join(project_->base_path, path_).c_str())) {
+//    //if (xml.load_file(path_join(project->base_path, path_).c_str())) {
 //    auto node = xml.append_child("asset");
 //    node.append_attribute("name").set_value(name_.c_str());
 //    node.append_attribute("type").set_value("flash");
 //    node.append_attribute("path").set_value(flash_path_.c_str());
 //    to_xml(node.append_child("atlas"), atlas_decl_);
 //
-//    const auto full_path = path_join(project_->base_path, path_);
+//    const auto full_path = path_join(project->base_path, path_);
 //    if (!xml.save_file(full_path.c_str())) {
 //        log(log_level::error, "Error write xml file %s", full_path.c_str());
 //    }
-}
-
-void audio_asset_t::export_meta(output_memory_stream& output) {
-    IO io{output};
-
-    std::string sound_type{"sound"};
-    std::string music_type{"music"};
-
-    for (auto& audio : sound_list_) {
-        std::string path = (path_t{name_} / path_name(audio)).str();
-        io(sound_type, path);
-    }
-
-    for (auto& audio : music_list_) {
-        std::string path = (path_t{name_} / path_name(audio)).str();
-        io(music_type, path);
-    }
 }
 
 }

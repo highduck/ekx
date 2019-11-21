@@ -45,7 +45,7 @@ basic_application::~basic_application() {
 void basic_application::initialize() {
     base_app_t::initialize();
 
-    preload_builtin(assets_path);
+    create_builtin();
 
     //// basic scene
     root = create_node_2d("root");

@@ -80,6 +80,7 @@ public:
         return path_.empty();
     }
 
+
 private:
     std::string path_;
 };
