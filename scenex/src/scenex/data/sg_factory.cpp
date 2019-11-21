@@ -9,6 +9,7 @@
 #include <scenex/components/button_t.h>
 #include <scenex/components/interactive_t.h>
 #include <scenex/components/node_filters.h>
+#include <ek/logger.hpp>
 
 namespace scenex {
 
@@ -140,7 +141,11 @@ ecs::entity sg_create(const std::string& library, const std::string& name) {
         const sg_node_data* data = file->get(name);
         if (data) {
             result = create_and_merge(*file, file, data);
+        } else {
+            EK_WARN("SG Object %s not found in library %s", name.c_str(), library.c_str());
         }
+    } else {
+        EK_WARN("SG not found: %s", library.c_str());
     }
     return result;
 }

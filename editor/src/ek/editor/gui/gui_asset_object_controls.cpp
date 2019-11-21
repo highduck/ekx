@@ -1,11 +1,9 @@
-#include <scenex/asset2/asset_object.hpp>
+#include <ek/editor/assets/editor_asset.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-
-using scenex::asset_object_t;
 
 namespace ek {
 
-void gui_asset_object_controls(asset_object_t* asset) {
+void gui_asset_object_controls(editor_asset_t* asset) {
     if (asset) {
         ImGui::PushID(asset);
         ImGui::BeginGroup();

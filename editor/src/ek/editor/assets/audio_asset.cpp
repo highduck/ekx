@@ -1,21 +1,14 @@
 #include "audio_asset.hpp"
-#include <pugixml.hpp>
-#include <scenex/asset2/asset_manager.hpp>
-#include <ek/fs/path.hpp>
-#include <ek/logger.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/system/system.hpp>
 #include <ek/audiomini.hpp>
 #include <ek/locator.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/editor/gui/editor_widgets.hpp>
-
-using scenex::asset_object_t;
 
 namespace ek {
 
 audio_asset_t::audio_asset_t(std::string path)
-        : path_{std::move(path)} {
+        : editor_asset_t{std::move(path), "audio"} {
 }
 
 bool check_filters(const ek::path_t& path, const std::vector<std::string>& filters) {
@@ -27,22 +20,13 @@ bool check_filters(const ek::path_t& path, const std::vector<std::string>& filte
     return false;
 }
 
-void audio_asset_t::read_decl() {
-    pugi::xml_document xml;
-
+void audio_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
     std::vector<std::string> music_filters;
     music_list_.clear();
     sound_list_.clear();
 
-    const auto full_path = project_->base_path / path_;
-    if (xml.load_file(full_path.c_str())) {
-        auto node = xml.first_child();
-        name_ = node.attribute("name").as_string();
-        for (auto music_node : node.children("music")) {
-            music_filters.emplace_back(music_node.attribute("filter").as_string());
-        }
-    } else {
-        EK_ERROR << "Error parse xml: " << full_path;
+    for (auto music_node : node.children("music")) {
+        music_filters.emplace_back(music_node.attribute("filter").as_string());
     }
 
     auto files = search_files("*.mp3", project_->base_path);
@@ -81,31 +65,25 @@ void audio_asset_t::unload() {
 
 void audio_asset_t::gui() {
     auto& audio = resolve<AudioMini>();
-    if (ImGui::TreeNode(this, "%s (MiniAudio)", path_.c_str())) {
-        ImGui::LabelText("Name", "%s", name_.c_str());
 
-        gui_asset_object_controls(this);
-
-        for (const auto& music : music_list_) {
-            ImGui::PushID(music.c_str());
-            ImGui::LabelText("Music", "%s", music.c_str());
-            if (ImGui::Button("Play Music")) {
-                audio.play_music(music.c_str(), 1.0f);
-            }
-            if (ImGui::Button("Stop Music")) {
-                audio.play_music(music.c_str(), 0.0f);
-            }
-            ImGui::PopID();
+    for (const auto& music : music_list_) {
+        ImGui::PushID(music.c_str());
+        ImGui::LabelText("Music", "%s", music.c_str());
+        if (ImGui::Button("Play Music")) {
+            audio.play_music(music.c_str(), 1.0f);
         }
-        for (const auto& sound : sound_list_) {
-            ImGui::PushID(sound.c_str());
-            ImGui::LabelText("Sound", "%s", sound.c_str());
-            if (ImGui::Button("Play Sound")) {
-                audio.play_sound(sound.c_str(), 1.0f, 0.0f);
-            }
-            ImGui::PopID();
+        if (ImGui::Button("Stop Music")) {
+            audio.play_music(music.c_str(), 0.0f);
         }
-        ImGui::TreePop();
+        ImGui::PopID();
+    }
+    for (const auto& sound : sound_list_) {
+        ImGui::PushID(sound.c_str());
+        ImGui::LabelText("Sound", "%s", sound.c_str());
+        if (ImGui::Button("Play Sound")) {
+            audio.play_sound(sound.c_str(), 1.0f, 0.0f);
+        }
+        ImGui::PopID();
     }
 }
 
@@ -144,12 +122,14 @@ void audio_asset_t::export_meta(output_memory_stream& output) {
     std::string sound_type{"sound"};
     std::string music_type{"music"};
 
-    for (auto& sound : sound_list_) {
-        io(sound_type, sound);
+    for (auto& audio : sound_list_) {
+        std::string path = (path_t{name_} / path_name(audio)).str();
+        io(sound_type, path);
     }
 
-    for (auto& music : music_list_) {
-        io(music_type, music);
+    for (auto& audio : music_list_) {
+        std::string path = (path_t{name_} / path_name(audio)).str();
+        io(music_type, path);
     }
 }
 

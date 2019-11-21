@@ -3,6 +3,7 @@
 #include <ek/fs/path.hpp>
 #include <string>
 #include <unordered_map>
+#include <ek/array_buffer.hpp>
 
 namespace ek {
 
@@ -16,6 +17,7 @@ void save(const output_memory_stream& stream, const char* path);
 
 void save(const std::string& text, const path_t& path);
 
+array_buffer read_file(const path_t& path);
 
 bool is_dir(const char* path);
 

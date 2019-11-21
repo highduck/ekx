@@ -1,16 +1,15 @@
 #pragma once
 
-#include <scenex/asset2/asset_object.hpp>
-#include <string>
+#include "editor_asset.hpp"
 #include <vector>
 
 namespace ek {
 
-class program_asset_t : public scenex::asset_object_t {
+class program_asset_t : public editor_asset_t {
 public:
     explicit program_asset_t(std::string path);
 
-    void read_decl();
+    void read_decl_from_xml(const pugi::xml_node& node) override;
 
     void load() override;
 
@@ -25,9 +24,6 @@ public:
     void export_meta(ek::output_memory_stream& output) override;
 
 private:
-    std::string path_;
-    std::string name_;
-
     std::string frag_;
     std::string vert_;
     std::string vertex_decl_;

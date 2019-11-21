@@ -1,6 +1,5 @@
 #include "flash_asset.hpp"
 
-#include <scenex/asset2/asset_manager.hpp>
 #include <ek/logger.hpp>
 #include <utility>
 #include <ek/editor/imgui/imgui.hpp>
@@ -11,13 +10,11 @@
 #include <scenex/data/sg_data.h>
 #include <xfl/flash_doc_exporter.h>
 #include <ek/flash/doc/flash_archive.h>
-#include <ek/editor/gui/editor_widgets.hpp>
 #include <ek/editor/assets/editor_temp_atlas.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
+#include <ek/editor/gui/editor_widgets.hpp>
 #include <memory>
-
-using scenex::asset_object_t;
 
 namespace ek {
 
@@ -60,31 +57,21 @@ std::unique_ptr<flash::basic_entry> load_flash_archive(const path_t& path) {
 
 
 flash_asset_t::flash_asset_t(std::string path)
-        : path_{std::move(path)} {
+        : editor_asset_t{std::move(path), "flash"} {
 }
 
-void flash_asset_t::read_decl() {
-    pugi::xml_document xml;
-    const auto full_path = (project_->base_path / path_);
-    if (xml.load_file(full_path.c_str())) {
-        auto node = xml.first_child();
-        name_ = node.attribute("name").as_string();
-        flash_path_ = node.attribute("path").as_string();
-
-        atlas_decl_ = {};
-        from_xml(node.child("atlas"), atlas_decl_);
-        if (atlas_decl_.name.empty()) {
-            atlas_decl_.name = name_;
-        }
-    } else {
-        EK_ERROR << "Error parse xml " << full_path;
+void flash_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
+    atlas_decl_ = {};
+    from_xml(node.child("atlas"), atlas_decl_);
+    if (atlas_decl_.name.empty()) {
+        atlas_decl_.name = name_;
     }
 }
 
 void flash_asset_t::load() {
     read_decl();
 
-    flash::flash_file ff{load_flash_archive(project_->base_path / flash_path_)};
+    flash::flash_file ff{load_flash_archive(project_->base_path / resource_path_)};
     flash::flash_doc_exporter fe{ff};
     fe.build_library();
 
@@ -104,26 +91,17 @@ void flash_asset_t::unload() {
 }
 
 void flash_asset_t::gui() {
-    if (ImGui::TreeNode(this, "%s (Flash)", path_.c_str())) {
-        ImGui::LabelText("Name", "%s", name_.c_str());
-        ImGui::LabelText("Flash File", "%s", flash_path_.c_str());
+    asset_t<scenex::atlas_t> atlas{name_};
+    gui_atlas_view(atlas.get());
 
-        gui_asset_object_controls(this);
-
-        asset_t<scenex::atlas_t> atlas{name_};
-        gui_atlas_view(atlas.get());
-
-        asset_t<scenex::sg_file> library{name_};
-        gui_sg_file_view(library.get());
-
-        ImGui::TreePop();
-    }
+    asset_t<scenex::sg_file> library{name_};
+    gui_sg_file_view(library.get());
 }
 
 void flash_asset_t::export_() {
     read_decl();
 
-    flash::flash_file ff{load_flash_archive(project_->base_path / flash_path_)};
+    flash::flash_file ff{load_flash_archive(project_->base_path / resource_path_)};
     flash::flash_doc_exporter fe{ff};
     fe.build_library();
 
@@ -148,7 +126,7 @@ void flash_asset_t::save() {
     auto node = xml.append_child("asset");
     node.append_attribute("name").set_value(name_.c_str());
     node.append_attribute("type").set_value("flash");
-    node.append_attribute("path").set_value(flash_path_.c_str());
+    node.append_attribute("path").set_value(resource_path_.c_str());
     to_xml(node.append_child("atlas"), atlas_decl_);
 
     const auto full_path = project_->base_path / path_;

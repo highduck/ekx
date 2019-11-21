@@ -38,12 +38,11 @@ void base_app_t::onDrawFrame() {
     drawer.batcher.stats.reset();
 
     const float dt = std::min(frame_timer.update(), 0.3f);
-
     // fixed for GIF recorder
     //dt = 1.0f / 60.0f;
 
-    update_frame(dt);
     hook_on_update(dt);
+    update_frame(dt);
 
     graphics.begin();
     graphics.viewport();

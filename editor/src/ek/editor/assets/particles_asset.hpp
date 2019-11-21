@@ -1,14 +1,15 @@
 #pragma once
 
 #include "editor_asset.hpp"
-#include <vector>
-#include <ek/fs/path.hpp>
+#include <scenex/particles/particle_decl.h>
 
 namespace ek {
 
-class texture_asset_t : public editor_asset_t {
+// TODO:
+
+class particles_asset_t : public editor_asset_t {
 public:
-    explicit texture_asset_t(std::string path);
+    explicit particles_asset_t(std::string path);
 
     void read_decl_from_xml(const pugi::xml_node& node) override;
 
@@ -25,8 +26,9 @@ public:
     void export_meta(ek::output_memory_stream& output) override;
 
 private:
-    std::string texture_type_;
-    std::vector<std::string> images_;
+    scenex::particle_decl decl_;
 };
 
+
 }
+
