@@ -92,7 +92,7 @@
 - (void)windowDidResize:(__unused NSNotification*)notification {
     NSRect frame = [NSWindow contentRectForFrameRect:nsWindow.frame
                                            styleMask:nsWindow.styleMask];
-    EK_DEBUG << "changed window_size (via windowDidResize)";
+    EK_TRACE << "changed window_size (via windowDidResize)";
     ek::g_window.window_size = {
             static_cast<uint32_t>(frame.size.width),
             static_cast<uint32_t>(frame.size.height)
@@ -101,7 +101,7 @@
 }
 
 - (void)windowDidChangeBackingProperties:(__unused NSNotification*)notification {
-    EK_DEBUG << "`windowDidChangeBackingProperties` changed device_pixel_ratio to " << nsWindow.backingScaleFactor;
+    EK_TRACE << "`windowDidChangeBackingProperties` changed device_pixel_ratio to " << nsWindow.backingScaleFactor;
     ek::g_window.device_pixel_ratio = static_cast<float>(nsWindow.backingScaleFactor);
     ek::g_window.size_changed = true;
 }

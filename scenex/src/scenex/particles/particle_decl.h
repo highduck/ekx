@@ -113,8 +113,7 @@ public:
     }
 };
 
-class particle_decl {
-public:
+struct particle_decl {
     ek::asset_t<sprite_t> sprite;
     ek::asset_t<font_t> font;
     int font_size = 0;
@@ -143,7 +142,6 @@ public:
     float angle_base = 0.0f;
 
     std::function<argb32_t(particle&)> color_func;
-
 };
 
 class emitter_data {

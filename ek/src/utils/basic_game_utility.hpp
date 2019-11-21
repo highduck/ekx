@@ -21,7 +21,6 @@ private:
 
 class BasicGameUtility {
 public:
-    static void init();
 
     static void navigate(const std::string& url, bool blank);
 
@@ -31,18 +30,7 @@ public:
 
     static void updateAchievement(const std::string& code, int count);
 
-    static bool isAdsRemoved();
-
-    static signal_t<> onAdsRemoved;
-    static signal_t<> onAdsRewarded;
-
-    static void adsOnGameOver();
-
     static int unlockSite();
-
-    static void adsShowVideo(const std::function<void(bool)>& callback);
-
-    static void removeAds();
 
     static void shareScore(const std::string& text);
 

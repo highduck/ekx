@@ -3,7 +3,6 @@
 #include <ek/math/packed_color.hpp>
 
 #include <vector>
-#include <platform/static_resources.hpp>
 #include <ek/array_buffer.hpp>
 #include <sstream>
 

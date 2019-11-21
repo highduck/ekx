@@ -1,47 +1,29 @@
 #include "model_asset.hpp"
 
-#include <ek/fs/path.hpp>
-#include <scenex/asset2/asset_manager.hpp>
+#include <scenex/3d/static_mesh.hpp>
 #include <ek/system/system.hpp>
-#include <ek/editor/imgui/imgui.hpp>
 #include <ek/logger.hpp>
 #include <ek/assets.hpp>
 #include <graphics/vertex_decl.hpp>
-
-#include <pugixml.hpp>
-#include <ek/editor/gui/editor_widgets.hpp>
-#include <scenex/data/texture_data.hpp>
 #include <scenex/data/model_data.hpp>
 #include <ek/editor/obj/obj_loader.hpp>
-#include <platform/static_resources.hpp>
-
-using scenex::asset_object_t;
 
 namespace ek {
 
-model_asset_t::model_asset_t(std::string path)
-        : path_{std::move(path)} {
+model_asset_t::model_asset_t(path_t path)
+        : editor_asset_t{std::move(path), "model"} {
 }
 
-void model_asset_t::read_decl() {
-    pugi::xml_document xml;
+void model_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
 
-    const auto full_path = project_->base_path / path_;
-    if (xml.load_file(full_path.c_str())) {
-        auto node = xml.first_child();
-        name_ = node.attribute("name").as_string();
-        path_ = path_t{node.attribute("path").as_string()};
-    } else {
-        EK_ERROR << "Error parse xml " << full_path;
-    }
 }
 
 void model_asset_t::load() {
     read_decl();
 
-    auto buffer = get_resource_content(get_relative_path(path_).c_str());
+    auto buffer = read_file(get_relative_path(resource_path_));
     if (buffer.empty()) {
-        EK_ERROR << "Not found or empty " << (project_->base_path / path_);
+        EK_ERROR("Not found or empty %s", (project->base_path / declaration_path_).c_str());
     } else {
         asset_t<scenex::static_mesh_t>{name_}.reset(
                 new scenex::static_mesh_t(
@@ -56,19 +38,14 @@ void model_asset_t::unload() {
 }
 
 void model_asset_t::gui() {
-    if (ImGui::TreeNode(this, "%s (Texture Asset)", path_.c_str())) {
-        ImGui::LabelText("Name", "%s", name_.c_str());
-        gui_asset_object_controls(this);
-        ImGui::TreePop();
-    }
 }
 
-void model_asset_t::export_() {
+void model_asset_t::build(assets_build_struct_t& build_data) {
     read_decl();
-    
-    auto output_path = project_->export_path / name_;
+
+    const auto output_path = build_data.output / name_;
     scenex::model_data_t data{
-            load_obj(get_resource_content(get_relative_path(path_).c_str()))
+            load_obj(read_file(get_relative_path(resource_path_)))
     };
 
     make_dirs(output_path.dir());
@@ -77,20 +54,12 @@ void model_asset_t::export_() {
     IO io{out};
     io(data);
     ::ek::save(out, output_path + ".model");
+
+    build_data.meta(type_name_, name_);
 }
 
 void model_asset_t::save() {
     // TODO:
-}
-
-void model_asset_t::export_meta(output_memory_stream& output) {
-    IO io{output};
-    std::string type_name{"model"};
-    io(type_name, name_);
-}
-
-path_t model_asset_t::get_relative_path(const path_t& path) const {
-    return (project_->base_path / path_).dir() / path;
 }
 
 }

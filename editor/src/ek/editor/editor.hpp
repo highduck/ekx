@@ -3,6 +3,7 @@
 #include <scenex/ek/basic_application.h>
 #include <scenex/asset2/asset_manager.hpp>
 #include <ek/editor/imgui/imgui_module.hpp>
+#include <ek/editor/assets/editor_project.hpp>
 
 namespace ek {
 
@@ -12,8 +13,9 @@ public:
 
     ~editor_context_t();
 
+    editor_project_t project;
+
 private:
-    scenex::asset_manager_t assets;
     imgui_module_t gui_;
 
     signal_t<>::token t1;

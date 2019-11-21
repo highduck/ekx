@@ -28,7 +28,7 @@ void base_app_t::onTouchEvent(const touch_event_t&) {
 
 void base_app_t::onAppEvent(const app_event_t& event) {
     if (event.type == app_event_type::resize) {
-        EK_DEBUG << "w: " << g_window.back_buffer_size.width << " h: " << g_window.back_buffer_size.height;
+        EK_TRACE("size: %d x %d", g_window.back_buffer_size.width, g_window.back_buffer_size.height);
     }
 }
 
@@ -38,12 +38,11 @@ void base_app_t::onDrawFrame() {
     drawer.batcher.stats.reset();
 
     const float dt = std::min(frame_timer.update(), 0.3f);
-
     // fixed for GIF recorder
     //dt = 1.0f / 60.0f;
 
-    update_frame(dt);
     hook_on_update(dt);
+    update_frame(dt);
 
     graphics.begin();
     graphics.viewport();

@@ -16,12 +16,14 @@
 #endif
 
 #ifndef EK_DISABLE_SYSTEM_FS
+
 #include <ftw.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <fnmatch.h>
+
 #endif
 
 #if defined(__APPLE__)
@@ -157,6 +159,7 @@ void copy_file(const path_t& src, const path_t& dest) {
 }
 
 #ifndef EK_DISABLE_SYSTEM_FS
+
 bool is_dir_entry_real(const struct dirent* e) {
     // empty
     if (!e || e->d_name[0] == 0) {
@@ -174,6 +177,7 @@ bool is_dir_entry_real(const struct dirent* e) {
     }
     return true;
 }
+
 #endif
 
 void copy_tree(const ek::path_t& src, const ek::path_t& dest) {
@@ -266,6 +270,7 @@ std::string read_text(const path_t& path) {
 }
 
 #ifndef EK_DISABLE_SYSTEM_FS
+
 static int remove_dir_rec_cb(const char* path, const struct stat*, int, struct FTW*) {
     auto ret = remove(path);
     if (ret != 0) {
@@ -273,6 +278,7 @@ static int remove_dir_rec_cb(const char* path, const struct stat*, int, struct F
     }
     return ret;
 }
+
 #endif
 
 bool remove_dir_rec(const char* path) {
@@ -335,6 +341,27 @@ std::vector<path_t> search_files(const std::string& pattern, const path_t& path)
     search_files(pattern, path, res);
 #endif
     return res;
+}
+
+array_buffer read_file(const path_t& path) {
+    array_buffer buffer;
+    auto* stream = fopen(path.c_str(), "rb");
+    if (stream) {
+        fseek(stream, 0, SEEK_END);
+        buffer = array_buffer{
+                static_cast<size_t>(ftell(stream))
+        };
+        fseek(stream, 0, SEEK_SET);
+
+        fread(buffer.data(), buffer.size(), 1u, stream);
+
+        if (ferror(stream) != 0) {
+            buffer = array_buffer{};
+        }
+
+        fclose(stream);
+    }
+    return buffer;
 }
 
 }

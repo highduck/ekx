@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+const {spawnSync} = require('child_process');
+
 project = {};
 project.path = {};
 
@@ -19,6 +21,53 @@ EK = {
         } catch {
         }
         return require(`${project.path.EKX_ROOT}/cli/node_modules/${id}`);
+    },
+    execute: function (cmd, args) {
+        console.debug(">> " + [cmd].concat(args).join(" "));
+        console.debug("cwd", process.cwd());
+        const child = spawnSync(cmd, args, {
+                stdio: 'pipe',
+                encoding: 'utf-8',
+                cwd: process.cwd()
+            }
+        );
+        console.log("stderr", child.stderr.toString());
+        console.log("stdout", child.stdout.toString());
+        console.log("exit code", child.status);
+        if (child.error) {
+            console.error(child.error);
+        }
+
+        return child.status;
+    },
+    optimize_png: function (input, output = undefined) {
+        const pngquant = require('pngquant-bin');
+        if (!output) output = input;
+        const result = spawnSync(pngquant, [
+            "--strip",
+            "--force",
+            "-o", output,
+            input
+        ]);
+        if (result.status === 0) {
+            console.log('Image minified! ' + input);
+        } else {
+            console.warn(result.stderr.toString());
+            console.warn(result.status);
+        }
+    },
+    optimize_png_glob: function (input_pattern) {
+        const glob = require('glob');
+        const files = glob.sync(input_pattern);
+        for (const file of files) {
+            EK.optimize_png(file, file);
+        }
+    },
+    with_path: function (path, cb) {
+        const p = process.cwd();
+        process.chdir(path);
+        cb();
+        process.chdir(p);
     }
 };
 

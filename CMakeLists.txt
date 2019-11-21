@@ -36,6 +36,8 @@ add_subdirectory(core)
 add_subdirectory(ek)
 add_subdirectory(scenex)
 
+add_subdirectory(extensions/mini-ads)
+
 add_library(ekx INTERFACE)
 target_link_libraries(ekx INTERFACE scenex ecxx ek ek-core)
 

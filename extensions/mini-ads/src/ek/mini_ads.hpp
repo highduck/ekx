@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <string>
+#include <ek/signals.hpp>
 
 namespace ek {
 
@@ -37,5 +38,24 @@ void ads_listen(const std::function<void(AdsEventType type)>& callback);
 void ads_purchase_remove();
 
 void init_billing(const char* key);
+
+
+////
+namespace mini_ads {
+
+static signal_t<> onAdsRemoved{};
+static signal_t<> onAdsRewarded{};
+
+void init();
+
+bool isAdsRemoved();
+
+void adsOnGameOver();
+
+void adsShowVideo(const std::function<void(bool)>& callback);
+
+void removeAds();
+
+};
 
 }
