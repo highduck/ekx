@@ -7,7 +7,7 @@
 
 namespace scenex {
 
-void preload_builtin(const std::string& base_path);
+void create_builtin();
 
 class frame_stats_t {
 public:

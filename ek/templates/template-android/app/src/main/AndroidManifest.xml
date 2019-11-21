@@ -6,12 +6,10 @@
         android:glEsVersion="0x00020000"
         android:required="true" />
 
-    <meta-data android:name="ADMOB_ALLOW_LOCATION_FOR_ADS" android:value="true" />
-
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- TEMPLATE ROOT -->
 
     <application
         android:allowBackup="true"
@@ -33,11 +31,9 @@
             android:name="com.google.android.gms.games.APP_ID"
             android:value="@string/gs_app_id" />
         <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="@string/admob_app_id"/>
-        <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+        <!-- TEMPLATE APPLICATION -->
     </application>
 
 </manifest>

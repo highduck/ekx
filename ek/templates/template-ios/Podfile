@@ -2,9 +2,5 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '10.0'
 
 target 'template-ios' do
-  pod 'Firebase/Core'
-  pod 'Firebase/AdMob'
-  pod 'Firebase/Analytics'
-  pod 'Fabric'
-  pod 'Crashlytics'
+  # TEMPLATE DEPENDENCIES
 end

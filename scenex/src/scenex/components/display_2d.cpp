@@ -39,10 +39,14 @@ bool drawable_quad::hit_test(const float2& point) const {
 //    return vGradient(rc, color, color);
 //}
 
-drawable_sprite::drawable_sprite() = default;
+drawable_sprite::drawable_sprite()
+        : drawable_2d{type_id} {
+
+}
 
 drawable_sprite::drawable_sprite(std::string sprite_id, rect_f a_scale_grid)
-        : src{std::move(sprite_id)},
+        : drawable_2d{type_id},
+          src{std::move(sprite_id)},
           scale_grid{a_scale_grid} {
     scale_grid_mode = !scale_grid.empty();
 }
@@ -159,13 +163,15 @@ static rect_f text_bounds(const std::string& text, const text_format_t& format, 
 }
 
 drawable_text::drawable_text()
-        : text{},
+        : drawable_2d{type_id},
+            text{},
           format{"mini", 16.0f} {
 
 }
 
 drawable_text::drawable_text(std::string text, text_format_t format)
-        : text{std::move(text)},
+        : drawable_2d{type_id},
+        text{std::move(text)},
           format{std::move(format)} {
 }
 

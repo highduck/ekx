@@ -12,12 +12,13 @@ spritepack::atlas_t prepare_temp_atlas(const std::string& name, float scale) {
 }
 
 scenex::atlas_t* load_temp_atlas(spritepack::atlas_t& temp_atlas) {
+    const auto& atlas_name = temp_atlas.name;
+    asset_t<scenex::atlas_t>{atlas_name}.reset(nullptr);
+
     temp_atlas.resolutions[0].pages = spritepack::pack(temp_atlas.resolutions[0].sprites,
                                                        temp_atlas.resolutions[0].max_size);
 
-    const auto& atlas_name = temp_atlas.name;
     auto* atlas = new scenex::atlas_t;
-
     int page_index = 0;
     for (const auto& page : temp_atlas.resolutions[0].pages) {
         auto& texture_asset = atlas->pages.emplace_back(atlas_name + "_page_" + std::to_string(page_index++));

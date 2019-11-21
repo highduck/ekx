@@ -123,8 +123,8 @@
     }
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('{{pwa_url}}/sw.js?v={{{build_number}}}', {
-            scope: '{{pwa_url}}/'
+        navigator.serviceWorker.register('{{{pwa_url}}}/sw.js?v={{{build_number}}}', {
+            scope: '{{{pwa_url}}}/'
         }).then(function (registration) {
             console.log('Service Worker Registered');
         }).catch(function (e) {

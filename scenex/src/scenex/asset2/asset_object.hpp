@@ -17,14 +17,6 @@ public:
 
     virtual void unload() = 0;
 
-    virtual void gui() = 0;
-
-    virtual void save() = 0;
-
-    virtual void export_() = 0;
-
-    virtual void export_meta(ek::output_memory_stream& output) {}
-
 protected:
     asset_manager_t* project_ = nullptr;
     bool ready_ = false;

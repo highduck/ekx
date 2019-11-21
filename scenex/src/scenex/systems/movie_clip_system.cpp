@@ -26,6 +26,10 @@ void update_movie_clips() {
 void apply_frame(entity e, movie_t& mov) {
     auto* data = mov.get_movie_data();
     auto time = mov.time;
+    if (!data) {
+        // no data - exit early
+        return;
+    }
     for (const auto& layer : data->layers) {
         int keyframe_index = 0;
         int animation_key = 0;

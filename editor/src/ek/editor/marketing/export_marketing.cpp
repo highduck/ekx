@@ -32,8 +32,8 @@ void destroy_sprite_data(sprite_t& spr) {
     //}
 }
 
-void save_sprite_png(const sprite_t& spr, const path_t& path) {
-    save_image_png_stb(*spr.image, path.str());
+void save_sprite_png(const sprite_t& spr, const path_t& path, bool alpha = true) {
+    save_image_png_stb(*spr.image, path.str(), alpha);
 }
 
 void store_hi_res_icon(const flash_file& doc, const element_t& symbol, int size, const std::string& prefix = "icon_") {
@@ -69,7 +69,8 @@ void render_ios_icons(const flash_file& doc, const element_t& symbol) {
                                 sizei, sizei,
                                 true, true};
         auto spr = render(doc, symbol, opts);
-        save_sprite_png(spr, path / filename);
+        // disable alpha: AppStore require OPAQUE icons
+        save_sprite_png(spr, path / filename, false);
         destroy_sprite_data(spr);
 
         image["filename"] = filename;

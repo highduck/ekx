@@ -35,7 +35,7 @@ basic_application::basic_application()
 
     ek::game_services_init();
     // set callbacks before ads initialization (TODO)
-    ek::BasicGameUtility::init();
+    //ek::BasicGameUtility::init();
 }
 
 basic_application::~basic_application() {
@@ -45,7 +45,7 @@ basic_application::~basic_application() {
 void basic_application::initialize() {
     base_app_t::initialize();
 
-    preload_builtin(assets_path);
+    create_builtin();
 
     //// basic scene
     root = create_node_2d("root");
@@ -88,6 +88,7 @@ void basic_application::preload() {
 void basic_application::onDrawFrame() {
     scale_factor = ecs::get<scenex::canvas_t>(game).scale;
     asset_manager_->set_scale_factor(scale_factor);
+
     base_app_t::onDrawFrame();
 
     if (!started_ && asset_manager_->is_assets_ready()) {

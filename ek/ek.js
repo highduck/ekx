@@ -3,38 +3,32 @@ const fs = require("fs");
 const glob = EK.require("glob");
 const Mustache = EK.require("mustache");
 
-const {spawnSync} = require('child_process');
-
 function replace_all(str, search, replacement) {
     return str.split(search).join(replacement);
 }
 
-function execute(cmd, args) {
-    console.debug(">> " + [cmd].concat(args).join(" "));
-    const child = spawnSync(cmd, args);
-    console.log("exit code", child.status);
-    return child.status;
-}
-
 function ekc_export_market(ctx, target_type, output) {
-    execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "market", ctx.market_asset, target_type, output]);
+    make_dirs(output);
+    EK.execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "market", ctx.market_asset, target_type, output]);
 }
 
 function ekc_export_assets(ctx) {
     let assets_input = "assets";
     let assets_output = "build/assets";
-    execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "assets", assets_input, assets_output]);
+    make_dirs(assets_output);
+    EK.execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "assets", assets_input, assets_output]);
+    EK.optimize_png_glob("build/assets/*.png");
 }
 
 function ekc_export_assets_lazy(ctx) {
     let assets_output = "build/assets";
-    if(!is_dir(assets_output)) {
+    if (!is_dir(assets_output)) {
         ekc_export_assets(ctx);
     }
 }
 
 function open_android_project(android_project_path) {
-    execute("open", ["-a", "/Applications/Android Studio.app", android_project_path]);
+    EK.execute("open", ["-a", "/Applications/Android Studio.app", android_project_path]);
 }
 
 function read_text(src) {
@@ -67,7 +61,9 @@ function replace_in_file(filepath, dict) {
 
 function make_dirs(p) {
     // todo: improve (relax node version < 11)
-    fs.mkdirSync(p, {recursive: true});
+    if (!is_dir(p)) {
+        fs.mkdirSync(p, {recursive: true});
+    }
 }
 
 function search_files(pattern, search_path, out_files_list) {
@@ -80,9 +76,7 @@ function search_files(pattern, search_path, out_files_list) {
 }
 
 function copyFolderRecursiveSync(source, target) {
-    if (!fs.existsSync(target)) {
-        fs.mkdirSync(target);
-    }
+    make_dirs(target);
 
     //copy
     if (fs.lstatSync(source).isDirectory()) {
@@ -158,7 +152,9 @@ function mod_android_manifest(ctx) {
 
     replace_in_file("app/src/main/AndroidManifest.xml", {
         "com.eliasku.template_android": ctx.android.package_id,
-        'screenOrientation="sensorPortrait"': `screenOrientation="${orientation}"`
+        'screenOrientation="sensorPortrait"': `screenOrientation="${orientation}"`,
+        "<!-- TEMPLATE ROOT -->": ctx.build.android.add_manifest.join("\n"),
+        "<!-- TEMPLATE APPLICATION -->": ctx.build.android.add_manifest_application.join("\n")
     });
 }
 
@@ -232,7 +228,10 @@ function mod_cmake_lists(ctx) {
 function export_android(ctx) {
 
     ekc_export_assets_lazy(ctx);
-    ekc_export_market(ctx, "android", "generated/android/res");
+    if (!is_dir("generated/android/res")) {
+        ekc_export_market(ctx, "android", "generated/android/res");
+        EK.optimize_png_glob("generated/android/res/**/*.png");
+    }
 
     const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;
@@ -243,6 +242,8 @@ function export_android(ctx) {
         console.info("Remove old project", dest_path);
         deleteFolderRecursive(dest_path);
         console.assert(!is_dir(dest_path));
+    } else {
+
     }
 
     copyFolderRecursiveSync(path.join(ctx.path.EKX_ROOT, "ek/templates/template-" + platform_target), dest_path);
@@ -252,16 +253,26 @@ function export_android(ctx) {
     const cwd = process.cwd();
     process.chdir(dest_path);
     {
+        const java_src_roots = [];
+        for (let p of ctx.build.android.java_src) {
+            java_src_roots.push(`'${p}'`);
+        }
+        const java_asset_roots = [];
+        for (let p of ctx.build.android.java_asset) {
+            java_asset_roots.push(`'${p}'`);
+        }
         const source_sets = [
-            `main.java.srcDirs += '${path.join(ek_path, "platforms/android/java")}'`,
-            `main.assets.srcDirs += 'src/main/assets'`
+            `main.java.srcDirs += [${java_src_roots.join(", ")}]`,
+            `main.assets.srcDirs += [${java_asset_roots.join(", ")}]`
         ];
+
 
         replace_in_file("app/build.gradle", {
             'com.eliasku.template_android': ctx.android.application_id,
             'versionCode 1 // AUTO': `versionCode ${ctx.version_code} // AUTO`,
             'versionName "1.0" // AUTO': `versionName "${ctx.version_name}" // AUTO`,
             '// TEMPLATE_SOURCE_SETS': source_sets.join("\n\t\t"),
+            '// TEMPLATE_DEPENDENCIES': ctx.build.android.dependencies.join("\n\t"),
             'KEY_ALIAS': ctx.android.keystore.key_alias,
             'KEY_PASSWORD': ctx.android.keystore.key_password,
             'store.keystore': ctx.android.keystore.store_keystore,
@@ -315,7 +326,8 @@ function mod_plist(ctx, filepath) {
         ];
     }
 
-    dict["GADIsAdManagerApp"] = true;
+    // TODO: check for mini-ads
+    // dict["GADIsAdManagerApp"] = true;
     write_text(filepath, plist.build(dict));
 }
 
@@ -460,7 +472,10 @@ function mod_plist(ctx, filepath) {
 
 function export_ios(ctx) {
     ekc_export_assets_lazy(ctx);
-    ekc_export_market(ctx, "ios", "generated/ios");
+    if (!is_dir("generated/ios")) {
+        ekc_export_market(ctx, "ios", "generated/ios");
+        EK.optimize_png_glob("generated/ios/**/*.png");
+    }
 
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;
@@ -497,28 +512,30 @@ function export_ios(ctx) {
             path.join(dest_launch_logo_path, "iphone_120.png"));
 
         mod_plist(ctx, "src/Info.plist");
+        fs.writeFileSync("ek-ios-build.json", JSON.stringify(ctx.build.ios));
 
         /// PRE MOD PROJECT
         //xcode_patch(ctx, platform_proj_name);
-        execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id, ctx.path.EKX_ROOT]);
+        EK.execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id, ctx.path.EKX_ROOT]);
 
         console.info("Prepare PodFile");
         replace_in_file("Podfile", {
-            "template-ios": platform_proj_name
+            "template-ios": platform_proj_name,
+            "# TEMPLATE DEPENDENCIES": ctx.build.ios.dependencies.join("\n  ")
         });
 
         console.info("Install Pods");
-        execute("pod", ["install"]);
+        EK.execute("pod", ["install"]);
 
         // POST MOD PROJECT
-        execute("python3", ["xcode-project-ios-post.py",
+        EK.execute("python3", ["xcode-project-ios-post.py",
             platform_proj_name, ctx.ios.application_id]);
     }
     process.chdir(cwd);
 
     const workspace_path = path.join(dest_path, platform_proj_name + ".xcworkspace");
     // execute("open", [dest_path]);
-    execute("open", [workspace_path]);
+    EK.execute("open", [workspace_path]);
     // execute("xcodebuild", [
     //     "-workspace", workspace_path,
     //     "-scheme", platform_proj_name,
@@ -541,7 +558,10 @@ function export_web(ctx) {
     }
 
     ekc_export_assets_lazy(ctx);
-    ekc_export_market(ctx, "web", "build/icons");
+    if (!is_dir("build/icons")) {
+        ekc_export_market(ctx, "web", "build/icons");
+        EK.optimize_png_glob("build/icons/*.png");
+    }
 
     tpl("templates/web/index.html.mustache", "index.html");
     tpl("templates/web/manifest.json.mustache", "manifest.webmanifest");
@@ -553,13 +573,34 @@ function export_web(ctx) {
 class File {
     constructor(ctx) {
         ctx.market_asset = "assets/res";
-
-        ctx.android = {};
+        ctx.build = {
+            android: {
+                java_src: [
+                    path.join(__dirname, "platforms/android/java")
+                ],
+                java_asset: [
+                    "src/main/assets"
+                ],
+                dependencies: [],
+                add_manifest: [],
+                add_manifest_application: [],
+                source_dirs: [],
+            },
+            ios: {
+                billing: false,
+                dependencies: [
+                    "pod 'Firebase/Analytics'",
+                    "pod 'Fabric'",
+                    "pod 'Crashlytics'"
+                ]
+            }
+        };
         ctx.ios = {};
         ctx.html = {};
 
         console.log("=== EK PROJECT ===");
         console.log("Current Target:", ctx.current_target);
+        console.log("Module Path:", __dirname);
 
         const exporters = {
             web: export_web,

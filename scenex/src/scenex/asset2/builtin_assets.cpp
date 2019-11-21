@@ -45,12 +45,6 @@ public:
         }
     }
 
-    void gui() override {}
-
-    void save() override {}
-
-    void export_() override {}
-
     std::string path_;
 };
 

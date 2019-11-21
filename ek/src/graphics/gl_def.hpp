@@ -1,12 +1,16 @@
 #pragma once
 
+#if defined(__EMSCRIPTEN__)
+#define EK_WEBGL
+#endif
+
 #if defined(__APPLE__)
 
 #include <TargetConditionals.h>
 
 #endif
 
-#if TARGET_OS_MAC
+#if TARGET_OS_OSX
 
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
