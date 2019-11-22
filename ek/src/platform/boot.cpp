@@ -1,25 +1,27 @@
-#include "boot.h"
+#include "boot.hpp"
+
+#if defined(_WIN32) || defined(_WIN64)
+
+#define WIN32_LEAN_AND_MEAN
+
+#include <windows.h>
+
+#endif
 
 namespace ek {
 
-program_arguments_type program_arguments_;
+program_arguments_t program_arguments_{};
 
-void load_program_arguments(int argc, char* argv[]) {
-    for (int i = 0; i < argc; ++i) {
-        program_arguments_.emplace_back(argv[i]);
-    }
-}
-
-program_arguments_type& get_program_arguments() {
+const program_arguments_t& get_program_arguments() {
     return program_arguments_;
 }
 
-program_arguments_c_type get_program_c_arguments() {
-    program_arguments_c_type c_args;
-    for(const auto& arg : program_arguments_) {
-        c_args.emplace_back(arg.c_str());
+std::vector<std::string> program_arguments_t::to_vector() const {
+    std::vector<std::string> result;
+    for (int i = 0; i < argc; ++i) {
+        result.emplace_back(argv[i]);
     }
-    return c_args;
+    return result;
 }
 
 }
@@ -29,10 +31,22 @@ program_arguments_c_type get_program_c_arguments() {
  */
 #ifndef EK_NO_MAIN
 
-int EK_MAIN_ENTRY_POINT(int argc, char* argv[]) {
-    ek::load_program_arguments(argc, argv);
-    ek::main();
+#if defined(_WIN32) || defined(_WIN64)
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int nCmdShow) {
+    // TODO: argument parsing
+    ::ek::main();
     return 0;
 }
+
+#else
+
+int EK_MAIN_ENTRY_POINT(int argc, char* argv[]) {
+    ::ek::program_arguments_.assign(argc, argv);
+    ::ek::main();
+    return 0;
+}
+
+#endif
 
 #endif

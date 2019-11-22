@@ -31,15 +31,9 @@ public:
 
     ~input_controller() override;
 
-    void onKeyEvent(const ek::key_event_t& event) override;
+    void on_event(const ek::event_t& event) override;
 
-    void onMouseEvent(const ek::mouse_event_t& event) override;
-
-    void onTouchEvent(const ek::touch_event_t& event) override;
-
-    void onAppEvent(const ek::app_event_t& event) override;
-
-    void onDrawFrame() override {};
+    //void on_draw_frame() override {};
 
     void on_frame_completed() override;
 

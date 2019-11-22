@@ -1,7 +1,8 @@
-#include "render_system_3d.hpp"
+#include "camera_3d.hpp"
+#include "static_mesh.hpp"
+#include "transform_3d.hpp"
+#include "light_3d.hpp"
 
-#include <ek/math/matrix_inverse.hpp>
-#include <ek/math/matrix_camera.hpp>
 #include <ek/locator.hpp>
 #include <ek/timer.hpp>
 #include <draw2d/drawer.hpp>
@@ -9,14 +10,16 @@
 #include <scenex/components/node_t.h>
 #include <ek/math/matrix_transform.hpp>
 #include <ek/math/matrix_transpose.hpp>
+#include <ek/math/matrix_inverse.hpp>
+#include <ek/math/matrix_camera.hpp>
+
 #include <graphics/render_target.hpp>
 #include <graphics/gl_debug.hpp>
-#include "camera_3d.hpp"
-#include "static_mesh.hpp"
-#include "transform_3d.hpp"
-#include "light_3d.hpp"
 
 using namespace ek;
+//#undef near
+//#undef far
+
 
 namespace scenex {
 

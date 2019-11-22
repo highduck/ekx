@@ -4,6 +4,8 @@
 #include <ek/math/common.hpp>
 #include <string>
 
+#undef near
+#undef far
 namespace scenex {
 
 struct camera_3d {

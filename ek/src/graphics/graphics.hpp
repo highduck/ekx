@@ -20,15 +20,6 @@ public:
 
     ~graphics_t();
 
-    enum class api_type {
-        gl,
-        vulkan,
-        metal,
-        direct3d
-    };
-
-    api_type api() const;
-
     void begin();
 
     void clear(float r, float g, float b, float a);

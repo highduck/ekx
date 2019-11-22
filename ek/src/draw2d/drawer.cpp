@@ -529,7 +529,7 @@ void drawer_t::line(const float2& start, const float2& end) {
 
 void drawer_t::line_arc(float x, float y, float r, float angle_from, float angle_to, float line_width, int segments,
                         argb32_t color_inner, argb32_t color_outer) {
-    float pi2 = 2 * float(M_PI);
+    float pi2 = float(math::pi2);
     float da = pi2 / float(segments);
     float a0 = angle_from;
     prepare();

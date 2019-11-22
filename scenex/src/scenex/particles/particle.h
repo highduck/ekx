@@ -92,7 +92,7 @@ public:
     void update_current_values() {
         switch (scale_mode) {
             case particle_scale_mode::CosOut: {
-                float s = cosf(float(M_PI * 0.5f) * (1.0f - time / time_total));
+                float s = cosf(0.5f * float(ek::math::pi) * (1.0f - time / time_total));
                 scale = float2(s, s);
             }
                 break;
@@ -117,7 +117,7 @@ public:
                 color.af(ek::math::clamp(alpha * length(scale)));
                 break;
             case particle_alpha_mode::LifeSin:
-                color.af(alpha * sinf(float(M_PI) * time / time_total));
+                color.af(alpha * sinf(float(ek::math::pi) * time / time_total));
                 break;
             case particle_alpha_mode::DCBlink: {
                 float a = 0.25f;

@@ -1,11 +1,5 @@
-#include "OpenGLView.h"
-
-#include "osx_input.h"
-
-#include <platform/application.hpp>
-
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl3.h>
+#include "mac_opengl_view.h"
+#include "mac_input.h"
 
 using namespace ek;
 
@@ -13,7 +7,7 @@ using namespace ek;
 + (NSCursor*)_helpCursor;
 @end
 
-@implementation OpenGLView
+@implementation MacOpenGLView
 
 - (instancetype)init {
     [super init];
@@ -41,18 +35,13 @@ using namespace ek;
 }
 
 // This is the renderer output callback function
-static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
-                                      const CVTimeStamp* now,
+static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
+                                      const CVTimeStamp*,// now
                                       const CVTimeStamp* outputTime,
-                                      CVOptionFlags flagsIn,
-                                      CVOptionFlags* flagsOut,
+                                      CVOptionFlags, // flagsIn
+                                      CVOptionFlags*, // flagsOut
                                       void* displayLinkContext) {
-    (void) displayLink; // unused
-    (void) now; // unused
-    (void) flagsIn; // unused
-    (void) flagsOut; // unused
-
-    CVReturn result = [(__bridge OpenGLView*) displayLinkContext getFrameForTime:outputTime];
+    CVReturn result = [(__bridge MacOpenGLView*) displayLinkContext getFrameForTime:outputTime];
     return result;
 }
 
@@ -241,11 +230,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
 }
 
 - (void)handleMouse:(NSEvent*)event {
-    NSPoint location = [self convertPoint:event.locationInWindow fromView:nil];
-    mouse_event_t ev{};
-    auto scale = self.window.backingScaleFactor;
-    ev.x = static_cast<float>(location.x * scale);
-    ev.y = static_cast<float>(location.y * scale);
+    const NSPoint location = [self convertPoint:event.locationInWindow fromView:nil];
+    event_t ev{};
+    ev.set_position(location.x, location.y, self.window.backingScaleFactor);
 
     switch (event.type) {
         case NSEventTypeLeftMouseDown:
@@ -271,27 +258,27 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
         case NSEventTypeLeftMouseDown:
         case NSEventTypeRightMouseDown:
         case NSEventTypeOtherMouseDown:
-            ev.type = mouse_event_type::down;
+            ev.type = event_type::mouse_down;
             break;
         case NSEventTypeLeftMouseUp:
         case NSEventTypeRightMouseUp:
         case NSEventTypeOtherMouseUp:
-            ev.type = mouse_event_type::up;
+            ev.type = event_type::mouse_up;
             break;
         case NSEventTypeLeftMouseDragged:
         case NSEventTypeRightMouseDragged:
         case NSEventTypeOtherMouseDragged:
         case NSEventTypeMouseMoved:
-            ev.type = mouse_event_type::move;
+            ev.type = event_type::mouse_move;
             break;
         case NSEventTypeMouseEntered:
-            ev.type = mouse_event_type::enter;
+            ev.type = event_type::mouse_enter;
             break;
         case NSEventTypeMouseExited:
-            ev.type = mouse_event_type::exit;
+            ev.type = event_type::mouse_exit;
             break;
         case NSEventTypeScrollWheel:
-            ev.type = mouse_event_type::scroll;
+            ev.type = event_type::mouse_scroll;
             osx_handle_mouse_wheel_scroll(event, ev);
             break;
         default:
@@ -354,47 +341,39 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink,
 
 /**** HANDLE TOUCH *****/
 
-void handleTouch(touch_event_type event_type, float scale_factor, NSTouch* touch) {
-    CGPoint location = touch.normalizedPosition;
-    touch_event_t ev{
-            event_type,
-            uint64_t([touch identity]) + 1u,
-//            static_cast<uint64_t>(touch.identity) + 1u,
-            static_cast<float>(scale_factor * location.x),
-            static_cast<float>(scale_factor * location.y)
-    };
-    g_app.dispatch(ev);
-}
+//void handle_touch(event_type event_type, double scale_factor, NSTouch* touch) {
+//    const CGPoint location = touch.normalizedPosition;
+//    event_t ev{event_type};
+//    ev.id = uint64_t(touch.identity) + 1u;
+//    ev.set_position(location.x, location.y, scale_factor);
+//    g_app.dispatch(ev);
+//}
 //
 //- (void)touchesBeganWithEvent: (NSEvent*)event {
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseBegan inView: self];
-//    auto sc = (float)self.window.backingScaleFactor;
 //    for (NSTouch* touch in touches) {
-//        handleTouch(touch_event_type::begin, sc, touch);
+//        handle_touch(event_type::touch_begin, self.window.backingScaleFactor, touch);
 //    }
 //}
 //
 //- (void)touchesMovedWithEvent: (NSEvent*)event {
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseMoved inView: self];
-//    auto sc = (float)self.window.backingScaleFactor;
 //    for (NSTouch* touch in touches) {
-//        handleTouch(touch_event_type::move, sc, touch);
+//        handle_touch(event_type::touch_move, self.window.backingScaleFactor, touch);
 //    }
 //}
 //
 //- (void)touchesEndedWithEvent: (NSEvent*)event {
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseEnded inView: self];
-//    auto sc = (float)self.window.backingScaleFactor;
 //    for (NSTouch* touch in touches) {
-//        handleTouch(touch_event_type::end, sc, touch);
+//        handle_touch(event_type::touch_end, self.window.backingScaleFactor, touch);
 //    }
 //}
 //
 //- (void)touchesCancelledWithEvent: (NSEvent*)event {
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseCancelled inView: self];
-//    auto sc = (float)self.window.backingScaleFactor;
 //    for (NSTouch* touch in touches) {
-//        handleTouch(touch_event_type::end, sc, touch);
+//        handle_touch(event_type::touch_end, self.window.backingScaleFactor, touch);
 //    }
 //}
 
@@ -405,37 +384,37 @@ void handleTouch(touch_event_type event_type, float scale_factor, NSTouch* touch
 
 - (void)magnifyWithEvent:(__unused NSEvent*)event {}
 
+void handle_key(NSEvent* event, event_type type) {
+    event_t ev{type};
+    ev.code = convert_key_code(event.keyCode);
+    setup_modifiers(event.modifierFlags, ev);
+    g_app.dispatch(ev);
+}
 
 - (void)keyDown:(NSEvent*)event {
-    auto key_code = convert_key_code(event.keyCode);
     if (!event.ARepeat) {
-        key_event_t key{key_event_type::down, key_code};
-        setup_modifiers(event.modifierFlags, key);
-        g_app.dispatch(key);
+        handle_key(event, event_type::key_down);
     }
+
     if (is_text_event(event)) {
-        g_app.dispatch(text_event_t{event.characters.UTF8String});
+        event_t ev{event_type::text};
+        ev.characters = event.characters.UTF8String;
+        g_app.dispatch(ev);
     }
 }
 
 - (void)keyUp:(NSEvent*)event {
-    auto key_code = convert_key_code(event.keyCode);
     if (!event.ARepeat) {
-        key_event_t key{key_event_type::up, key_code};
-        setup_modifiers(event.modifierFlags, key);
-        g_app.dispatch(key);
+        handle_key(event, event_type::key_up);
     }
 }
 
 - (void)flagsChanged:(NSEvent*)event {
     NSUInteger mask = convert_key_code_to_modifier_mask(event.keyCode);
     if (mask) {
-        key_event_t key{(event.modifierFlags & mask)
-                        ? key_event_type::down
-                        : key_event_type::up,
-                        convert_key_code(event.keyCode)};
-        setup_modifiers(event.modifierFlags, key);
-        g_app.dispatch(key);
+        handle_key(event, (event.modifierFlags & mask)
+                          ? event_type::key_down
+                          : event_type::key_up);
     }
 }
 

@@ -1,4 +1,4 @@
-#include "osx_input.h"
+#include "mac_input.h"
 
 #import <Carbon/Carbon.h>
 #import <AppKit/AppKit.h>
@@ -7,26 +7,12 @@
 
 namespace ek {
 
-void osx_handle_mouse_wheel_scroll(const NSEvent* event, mouse_event_t& wheel) {
-    double dx = 0.0;
-    double dy = 0.0;
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6) {
-        dx = event.scrollingDeltaX;
-        dy = event.scrollingDeltaY;
-        if (event.hasPreciseScrollingDeltas) {
-            dx *= 0.1;
-            dy *= 0.1;
-        }
-    } else
-#endif /*MAC_OS_X_VERSION_MAX_ALLOWED*/
-    {
-        dx = event.deltaX;
-        dy = event.deltaY;
-    }
-    wheel.scroll_x = static_cast<float>(dx);
-    wheel.scroll_y = static_cast<float>(dy);
+void osx_handle_mouse_wheel_scroll(const NSEvent* event, event_t& to_event) {
+    to_event.set_mouse_scroll(
+            event.scrollingDeltaX,
+            event.scrollingDeltaY,
+            event.hasPreciseScrollingDeltas ? 0.1 : 1.0
+    );
 }
 
 /****** KEYBOARD ****/
@@ -67,11 +53,11 @@ key_code convert_key_code(uint16_t key_code) {
     return key_code::Unknown;
 }
 
-void setup_modifiers(NSUInteger flags, key_event_t& key) {
-    key.alt = (flags & NSEventModifierFlagOption) != 0;
-    key.shift = (flags & NSEventModifierFlagShift) != 0;
-    key.ctrl = (flags & NSEventModifierFlagControl) != 0;
-    key.super = (flags & NSEventModifierFlagCommand) != 0;
+void setup_modifiers(NSUInteger flags, event_t& to_event) {
+    to_event.alt = (flags & NSEventModifierFlagOption) != 0;
+    to_event.shift = (flags & NSEventModifierFlagShift) != 0;
+    to_event.ctrl = (flags & NSEventModifierFlagControl) != 0;
+    to_event.super = (flags & NSEventModifierFlagCommand) != 0;
 }
 
 bool is_special_character(unichar ch) {

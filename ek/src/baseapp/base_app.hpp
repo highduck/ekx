@@ -32,15 +32,9 @@ public:
 
     virtual void preload();
 
-    void onKeyEvent(const ek::key_event_t& event) override;
+    void on_event(const event_t& event) override;
 
-    void onMouseEvent(const ek::mouse_event_t& event) override;
-
-    void onTouchEvent(const ek::touch_event_t& event) override;
-
-    void onAppEvent(const ek::app_event_t& event) override;
-
-    void onDrawFrame() override;
+    void on_draw_frame() override;
 
 protected:
 

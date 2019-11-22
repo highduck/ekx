@@ -12,7 +12,21 @@ option(EKX_BUILD_COVERAGE "Build EKX coverage check" OFF)
 option(EKX_BUILD_BENCHMARKS "Build EKX benchmarks projects" OFF)
 option(EKX_BUILD_EDITOR "Build EKX editor projects" ON)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+# Windows is not ready for Edit-mode
+if (${CMAKE_SYSTEM_NAME} MATCHES Windows)
+    set(EKX_BUILD_EDITOR OFF)
+endif ()
+
+# Mobile platforms are not capable to use Edit-Mode features
+if ((${CMAKE_SYSTEM_NAME} MATCHES Emscripten) OR (${CMAKE_SYSTEM_NAME} MATCHES iOS) OR (${CMAKE_SYSTEM_NAME} MATCHES Android))
+    set(EKX_MOBILE ON)
+    set(EKX_DESKTOP OFF)
+else ()
+    set(EKX_MOBILE OFF)
+    set(EKX_DESKTOP ON)
+endif ()
+
+if (EKX_MOBILE)
     set(EKX_BUILD_TESTS OFF)
     set(EKX_BUILD_COVERAGE OFF)
     set(EKX_BUILD_BENCHMARKS OFF)

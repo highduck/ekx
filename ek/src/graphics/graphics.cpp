@@ -48,10 +48,6 @@ graphics_t::graphics_t() {
 
 graphics_t::~graphics_t() = default;
 
-graphics_t::api_type graphics_t::api() const {
-    return api_type::gl;
-}
-
 void graphics_t::begin() {
     gl_skip_errors();
 }

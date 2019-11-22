@@ -106,11 +106,26 @@ source ~/highduck/ekx/env.sh
 
 # Development
 
-CLion:
+It's very hard to fix platform-side code inside generated projects (XCode, Android Studio), so
+we able to switch platform inside your cmake-compatible IDE (like CLion).
+
 1. Create Debug-Emscripten
 2. Set the path to CMake Emscripten Toolchain
 
-`-DCMAKE_TOOLCHAIN_FILE=/Users/PATH_TO_emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake`
+```shell script
+# Emscripten
+-DCMAKE_TOOLCHAIN_FILE=/Users/PATH_TO_emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
+
+# iOS
+-DCMAKE_TOOLCHAIN_FILE=$EKX_ROOT/external/cmake/ios.toolchain.cmake
+
+# Android
+-DCMAKE_TOOLCHAIN_FILE=/Users/ilyak/Library/Android/sdk/ndk/20.0.5594570/build/cmake/android.toolchain.cmake -DANDROID_ABI=x86_64
+
+# Windows from MacOS
+brew install mingw-w64
+-DCMAKE_TOOLCHAIN_FILE=$EKX_ROOT/external/cmake/x86_64-w64-mingw32.cmake
+```
 
 3. Set Env from:
     For example you have output of running `emsdk_env.sh`:

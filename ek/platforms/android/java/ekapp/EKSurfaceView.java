@@ -54,9 +54,9 @@ public class EKSurfaceView extends GLSurfaceView {
     public boolean onTouchEvent(MotionEvent event) {
         if (event != null) {
 
-            final int TOUCH_BEGIN = 1;
-            final int TOUCH_MOVE = 2;
-            final int TOUCH_END = 3;
+            final int TOUCH_BEGIN = 0;
+            final int TOUCH_MOVE = 1;
+            final int TOUCH_END = 2;
 
             final int i = event.getActionIndex();
             final int act = event.getActionMasked();

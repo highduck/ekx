@@ -10,7 +10,7 @@
 #include <scenex/systems/canvas_system.h>
 #include <scenex/systems/main_flow.h>
 #include <scenex/utility/scene_management.h>
-#include <platform/GameServices.h>
+#include <platform/game_center.hpp>
 #include <utils/basic_game_utility.hpp>
 #include <ek/logger.hpp>
 #include <ek/utility/common_macro.hpp>
@@ -85,11 +85,11 @@ void basic_application::preload() {
     preload_root_assets_pack();
 }
 
-void basic_application::onDrawFrame() {
+void basic_application::on_draw_frame() {
     scale_factor = ecs::get<scenex::canvas_t>(game).scale;
     asset_manager_->set_scale_factor(scale_factor);
 
-    base_app_t::onDrawFrame();
+    base_app_t::on_draw_frame();
 
     if (!started_ && asset_manager_->is_assets_ready()) {
         start_game();

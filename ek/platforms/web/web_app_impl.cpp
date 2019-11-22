@@ -1,13 +1,10 @@
 #include <platform/application.hpp>
-#include <platform/static_resources.hpp>
-#include <platform/sharing.hpp>
 #include <ek/logger.hpp>
 
 #include <emscripten.h>
 #include <emscripten/html5.h>
 
 #include <unordered_map>
-#include <string>
 
 using namespace ek;
 
@@ -31,55 +28,51 @@ void init_webgl_context() {
     webgl_context = emscripten_webgl_create_context(CANVAS_ID, &attrs);
 
     if (!webgl_context) {
-        assert(false && "Failed to create WebGL context");
+        EK_ERROR << "Failed to create WebGL context";
         return;
     }
 
     EMSCRIPTEN_RESULT result = emscripten_webgl_make_context_current(webgl_context);
     if (result != EMSCRIPTEN_RESULT_SUCCESS) {
-        assert(false && "Failed to make WebGL context current");
+        EK_ERROR << "Failed to make WebGL context current";
         return;
     }
 }
 
-static EM_BOOL em_mouse_callback(int type, const EmscriptenMouseEvent* mouse_event, void*) {
-    mouse_event_t event{};
-
-    switch (mouse_event->button) {
+mouse_button convert_mouse_button(unsigned short btn) {
+    switch (btn) {
         case 0:
-            event.button = mouse_button::left;
-            break;
-        case 1:
-            event.button = mouse_button::other;
-            break;
+            return mouse_button::left;
         case 2:
-            event.button = mouse_button::right;
-            break;
+            return mouse_button::right;
         default:
-//            return false;
             break;
     }
+    return mouse_button::other;
+}
+
+static EM_BOOL em_mouse_callback(int type, const EmscriptenMouseEvent* mouse_event, void*) {
+    event_t event{};
+    event.button = convert_mouse_button(mouse_event->button);
 
     switch (type) {
         case EMSCRIPTEN_EVENT_MOUSEDOWN:
-            event.type = mouse_event_type::down;
+            event.type = event_type::mouse_down;
             break;
         case EMSCRIPTEN_EVENT_MOUSEUP:
-            event.type = mouse_event_type::up;
+            event.type = event_type::mouse_up;
             break;
         case EMSCRIPTEN_EVENT_MOUSEMOVE:
-            event.type = mouse_event_type::move;
+            event.type = event_type::mouse_move;
             break;
         default:
-            // return false;
-            break;
+            return false;
     }
 
-    const auto dpr = g_window.device_pixel_ratio;
-    event.x = dpr * static_cast<float>(mouse_event->targetX);
-    event.y = dpr * static_cast<float>(mouse_event->targetY);
+    event.set_position(static_cast<float>(mouse_event->targetX),
+                       static_cast<float>(mouse_event->targetY),
+                       g_window.device_pixel_ratio);
     g_app.dispatch(event);
-
     return true;
 }
 
@@ -104,26 +97,31 @@ static std::unordered_map<std::string, key_code> scancode_table = {
         {"D",          key_code::D}
 };
 
-static key_code convertKeyCode(const EM_UTF8 keyCode[EM_HTML5_SHORT_STRING_LEN_BYTES]) {
-    auto i = scancode_table.find(keyCode);
-
-    if (i != scancode_table.end())
-        return i->second;
-    else
-        return key_code::Unknown;
+static key_code convert_key_code(const EM_UTF8 key_code[EM_HTML5_SHORT_STRING_LEN_BYTES]) {
+    const auto i = scancode_table.find(key_code);
+    return i != scancode_table.end() ? i->second : key_code::Unknown;
 }
 
-static EM_BOOL web_onKeyboardEvent(int type, const EmscriptenKeyboardEvent* event, void*) {
+static EM_BOOL em_keyboard_callback(int type, const EmscriptenKeyboardEvent* event, void*) {
+    event_t ev{};
     switch (type) {
         case EMSCRIPTEN_EVENT_KEYPRESS:
-            g_app.dispatch({key_event_type::press, convertKeyCode(event->code)});
+            ev.type = event_type::key_press;
+            ev.code = convert_key_code(event->code);
+            g_app.dispatch(ev);
             return true;
         case EMSCRIPTEN_EVENT_KEYDOWN:
-            g_app.dispatch({key_event_type::down, convertKeyCode(event->code)});
+            ev.type = event_type::key_down;
+            ev.code = convert_key_code(event->code);
+            g_app.dispatch(ev);
             return true;
         case EMSCRIPTEN_EVENT_KEYUP:
-            g_app.dispatch({key_event_type::up, convertKeyCode(event->code)});
+            ev.type = event_type::key_up;
+            ev.code = convert_key_code(event->code);
+            g_app.dispatch(ev);
             return true;
+        default:
+            break;
     }
 
     return false;
@@ -131,42 +129,43 @@ static EM_BOOL web_onKeyboardEvent(int type, const EmscriptenKeyboardEvent* even
 
 static EM_BOOL em_wheel_callback(int type, const EmscriptenWheelEvent* event, void*) {
     if (type == EMSCRIPTEN_EVENT_WHEEL) {
-        const auto x = static_cast<float>(event->mouse.targetX) * g_window.device_pixel_ratio;
-        const auto y = static_cast<float>(event->mouse.targetY) * g_window.device_pixel_ratio;
-        const auto sx = static_cast<float>(event->deltaX);
-        const auto sy = static_cast<float>(event->deltaY);
-        g_app.dispatch({mouse_event_type::scroll, mouse_button::other, x, y, sx, sy});
-
-        //    return true;
+        event_t ev{event_type::mouse_scroll};
+        ev.set_position(static_cast<float>(event->mouse.targetX),
+                        static_cast<float>(event->mouse.targetY),
+                        g_window.device_pixel_ratio);
+        ev.set_mouse_scroll(event->deltaX, event->deltaY);
+        g_app.dispatch(ev);
     }
-
-//    return false;
     return true;
 }
 
 
-static EM_BOOL handleTouchEvent(int type, const EmscriptenTouchEvent* event, void*) {
+static EM_BOOL em_touch_callback(int type, const EmscriptenTouchEvent* event, void*) {
+    event_t ev;
+    const float dpr = g_window.device_pixel_ratio;
     for (int i = 0; i < event->numTouches; ++i) {
         const EmscriptenTouchPoint& touch = event->touches[i];
-
         if (touch.isChanged) {
-            const auto dpr = g_window.device_pixel_ratio;
-            const auto x = dpr * static_cast<float>(touch.targetX);
-            const auto y = dpr * static_cast<float>(touch.targetY);
-            // zero for unknown
-            auto id = static_cast<uint64_t>(touch.identifier) + 1;
+            ev.id = static_cast<uint64_t>(touch.identifier) + 1;
+            ev.set_position(static_cast<float>(touch.targetX),
+                            static_cast<float>(touch.targetY),
+                            dpr);
             switch (type) {
                 case EMSCRIPTEN_EVENT_TOUCHSTART:
-                    g_app.dispatch({touch_event_type::begin, id, x, y});
+                    ev.type = event_type::touch_begin;
+                    g_app.dispatch(ev);
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHMOVE:
-                    g_app.dispatch({touch_event_type::move, id, x, y});
+                    ev.type = event_type::touch_move;
+                    g_app.dispatch(ev);
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHEND:
-                    g_app.dispatch({touch_event_type::end, id, x, y});
+                    ev.type = event_type::touch_end;
+                    g_app.dispatch(ev);
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHCANCEL:
-                    g_app.dispatch({touch_event_type::end, id, x, y});
+                    ev.type = event_type::touch_end;
+                    g_app.dispatch(ev);
                     break;
                 default:
                     break;
@@ -182,16 +181,16 @@ void subscribe_input() {
     emscripten_set_mouseup_callback(CANVAS_ID, nullptr, false, em_mouse_callback);
     emscripten_set_mousemove_callback(CANVAS_ID, nullptr, false, em_mouse_callback);
     emscripten_set_wheel_callback(CANVAS_ID, nullptr, false, em_wheel_callback);
-//    emscripten_set_pointerlockchange_callback(nullptr, nullptr, true, emPointerLockChangeCallback);
+//    emscripten_set_pointerlockchange_callback(nullptr, nullptr, true, em_pointer_lock_change_callback);
 
-    emscripten_set_touchstart_callback(CANVAS_ID, nullptr, false, handleTouchEvent);
-    emscripten_set_touchend_callback(CANVAS_ID, nullptr, false, handleTouchEvent);
-    emscripten_set_touchmove_callback(CANVAS_ID, nullptr, false, handleTouchEvent);
-    emscripten_set_touchcancel_callback(CANVAS_ID, nullptr, false, handleTouchEvent);
+    emscripten_set_touchstart_callback(CANVAS_ID, nullptr, false, em_touch_callback);
+    emscripten_set_touchend_callback(CANVAS_ID, nullptr, false, em_touch_callback);
+    emscripten_set_touchmove_callback(CANVAS_ID, nullptr, false, em_touch_callback);
+    emscripten_set_touchcancel_callback(CANVAS_ID, nullptr, false, em_touch_callback);
 
-    emscripten_set_keypress_callback(nullptr, nullptr, true, web_onKeyboardEvent);
-    emscripten_set_keydown_callback(nullptr, nullptr, true, web_onKeyboardEvent);
-    emscripten_set_keyup_callback(nullptr, nullptr, true, web_onKeyboardEvent);
+    emscripten_set_keypress_callback(nullptr, nullptr, true, em_keyboard_callback);
+    emscripten_set_keydown_callback(nullptr, nullptr, true, em_keyboard_callback);
+    emscripten_set_keyup_callback(nullptr, nullptr, true, em_keyboard_callback);
 }
 
 void handleResize() {

@@ -1,16 +1,17 @@
-#import "AppDelegate.h"
+#import "ios_app_delegate.h"
 #import "EAGLView.h"
 
 #include <platform/application.hpp>
 
-AppDelegate* appDelegate;
+IOSAppDelegate* g_app_delegate;
 
-@implementation AppDelegate
+using namespace ek;
+
+@implementation IOSAppDelegate
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-    appDelegate = self;
-    
-    ek::g_app.init();
+    g_app_delegate = self;
+    g_app.init();
     
     [self.window makeKeyAndVisible];
 
@@ -19,7 +20,7 @@ AppDelegate* appDelegate;
     [self.window layoutIfNeeded];
 
     // Override point for customization after application launch.
-    ek::g_app.start();
+    g_app.start();
 
     return YES;
 }
@@ -30,7 +31,7 @@ AppDelegate* appDelegate;
 
     [(EAGLView*) self.window.rootViewController.view stopAnimation];
 
-    ek::g_app.dispatch({ek::app_event_type::paused});
+    g_app.dispatch({event_type::app_pause});
 }
 
 
@@ -47,7 +48,7 @@ AppDelegate* appDelegate;
 
     [(EAGLView*) self.window.rootViewController.view startAnimation];
 
-    ek::g_app.dispatch({ek::app_event_type::resumed});
+    g_app.dispatch({event_type::app_resume});
 }
 
 
@@ -60,7 +61,7 @@ AppDelegate* appDelegate;
 - (void)applicationWillTerminate:(UIApplication*)application {
     [(EAGLView*) self.window.rootViewController.view stopAnimation];
 
-    ek::g_app.dispatch({ek::app_event_type::close});
+    g_app.dispatch({event_type::app_close});
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 

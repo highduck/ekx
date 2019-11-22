@@ -10,6 +10,14 @@
 
 #endif
 
+#if defined(_WIN32) || defined(_WIN64)
+
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glext.h>
+
+#endif
+
 #if TARGET_OS_OSX
 
 #include <OpenGL/OpenGL.h>
