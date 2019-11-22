@@ -1,7 +1,7 @@
 #include "basic_game_utility.hpp"
 
 #include <ek/locator.hpp>
-#include <platform/GameServices.h>
+#include <platform/game_center.hpp>
 #include <platform/sharing.hpp>
 
 namespace ek {

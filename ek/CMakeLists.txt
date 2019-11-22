@@ -7,7 +7,7 @@ add_library(${PROJECT_NAME} STATIC
         src/platform/analytics.cpp
 
         src/platform/crash_reporter.hpp
-        src/platform/GameServices.h
+        src/platform/game_center.hpp
         src/platform/sharing.hpp
         src/platform/window.cpp
         src/platform/window.hpp
@@ -52,7 +52,7 @@ add_library(${PROJECT_NAME} STATIC
         src/ek/audiomini.hpp
 
         src/platform/boot.cpp
-        src/platform/boot.h
+        src/platform/boot.hpp
 
         src/utils/image_loader.cpp
         src/utils/image_loader.hpp
@@ -129,8 +129,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
             PUBLIC
             --js-library ${PROJECT_SOURCE_DIR}/platforms/web/audiomini.js
             )
-    #elseif ($ENV{CONAN_CMAKE_SYSTEM_NAME} MATCHES iOS)
-elseif (${CONAN_SETTINGS_OS} MATCHES "iOS")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES iOS)
 
     message("Platform: IOS")
 
@@ -144,15 +143,14 @@ elseif (${CONAN_SETTINGS_OS} MATCHES "iOS")
             src/platform/static_resources.mm
             src/platform/analytics.mm
 
-            platforms/ios/Ads.mm
-            platforms/ios/main.mm
-            platforms/ios/AppDelegate.h
-            platforms/ios/AppDelegate.mm
+            platforms/ios/ios_main.mm
+            platforms/ios/ios_app_delegate.h
+            platforms/ios/ios_app_delegate.mm
             platforms/ios/EAGLView.h
             platforms/ios/EAGLView.mm
-            platforms/ios/iosPlatform.mm
-            platforms/ios/sharing.mm
-            platforms/ios/GameServices.mm
+            platforms/ios/ios_platform.mm
+            platforms/ios/ios_sharing.mm
+            platforms/ios/ios_game_center.mm
 
             platforms/apple/application.mm
 
@@ -189,15 +187,15 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
             platforms/null/GameServices.cpp
 
-            platforms/mac/main.mm
-            platforms/mac/OpenGLView.mm
-            platforms/mac/OpenGLView.h
-            platforms/mac/AppDelegate.mm
-            platforms/mac/AppDelegate.h
-            platforms/mac/macPlatform.mm
-            platforms/mac/sharing.cpp
-            platforms/mac/osx_input.mm
-            platforms/mac/osx_input.h
+            platforms/mac/mac_main.mm
+            platforms/mac/mac_opengl_view.mm
+            platforms/mac/mac_opengl_view.h
+            platforms/mac/mac_app_delegate.mm
+            platforms/mac/mac_app_delegate.h
+            platforms/mac/mac_window.mm
+            platforms/mac/mac_sharing.cpp
+            platforms/mac/mac_input.mm
+            platforms/mac/mac_input.h
 
             platforms/apple/application.mm
 
@@ -232,25 +230,33 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
 
             platforms/android/android_main.cpp
             platforms/android/sharing.cpp
-            platforms/android/GameServices.cpp
+            platforms/android/android_game_center.cpp
             platforms/android/platform_jni.cpp
             platforms/android/audiomini_android.cpp
             )
 
+    target_include_directories(${PROJECT_NAME} PUBLIC platforms/android)
+
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     message("Platform: WIN")
-    #    target_sources(ek PRIVATE
-    #                   platforms/null/ek/audiomini/AudioMini.cpp
-    #                   platforms/null/GameServices.cpp
-    #                   platforms/null/Sharing.cpp
-    #                   )
-    #
-    #    target_compile_options(ek
-    #                           PUBLIC
-    #                           -Wno-dollar-in-identifier-extension)
-    #
-    #    find_package(OpenGL REQUIRED)
-    #    target_link_libraries(ek GL)
+    target_sources(${PROJECT_NAME} PRIVATE
+            platforms/null/audiomini_null.cpp
+            platforms/null/sharing.cpp
+            platforms/null/GameServices.cpp
+            )
+
+    target_compile_options(${PROJECT_NAME} PUBLIC
+            -Wno-dollar-in-identifier-extension)
+
+    find_package(OpenGL REQUIRED)
+    if (NOT OPENGL_FOUND)
+        message(ERROR "OPENGL not found!")
+    endif ()
+
+    target_include_directories(${PROJECT_NAME} PUBLIC ${OpenGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
+    target_link_directories(${PROJECT_NAME} PUBLIC ${OpenGL_LIBRARY_DIRS})
+    target_compile_definitions(${PROJECT_NAME} PUBLIC ${OpenGL_DEFINITIONS})
+    target_link_libraries(${PROJECT_NAME} -lwinmm -lglu32 ${OPENGL_LIBRARIES})
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     message("Platform: LINUX")

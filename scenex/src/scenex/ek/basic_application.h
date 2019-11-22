@@ -30,7 +30,7 @@ public:
 
     void preload() override;
 
-    void onDrawFrame() override;
+    void on_draw_frame() override;
 
 protected:
     void update_frame(float dt) override;

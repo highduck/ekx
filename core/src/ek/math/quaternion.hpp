@@ -59,10 +59,10 @@ struct quat_t {
     }
 
     explicit quat_t(const matrix_t<4, 4, T>& m) {
-        T four_x_squared_minus_1 = m(0, 0) - m(1, 1) - m(2, 2);
-        T four_y_squared_minus_1 = m(1, 1) - m(0, 0) - m(2, 2);
-        T four_z_squared_minus_1 = m(2, 2) - m(0, 0) - m(1, 1);
-        T four_w_squared_minus_1 = m(0, 0) + m(1, 1) + m(2, 2);
+        const T four_x_squared_minus_1 = m(0, 0) - m(1, 1) - m(2, 2);
+        const T four_y_squared_minus_1 = m(1, 1) - m(0, 0) - m(2, 2);
+        const T four_z_squared_minus_1 = m(2, 2) - m(0, 0) - m(1, 1);
+        const T four_w_squared_minus_1 = m(0, 0) + m(1, 1) + m(2, 2);
 
         int biggest_index = 0;
         T four_biggest_squared_minus_1 = four_w_squared_minus_1;
@@ -79,31 +79,41 @@ struct quat_t {
             biggest_index = 3;
         }
 
-        T biggest_val = sqrt(four_biggest_squared_minus_1 + static_cast<T>(1)) * static_cast<T>(0.5);
-        T mult = static_cast<T>(0.25) / biggest_val;
+        const T biggest_val = sqrt(four_biggest_squared_minus_1 + static_cast<T>(1)) * static_cast<T>(0.5);
+        const T mult = static_cast<T>(0.25) / biggest_val;
 
         switch (biggest_index) {
             case 0:
-                return quat_t<T>(biggest_val,
-                                 (m(1, 2) - m(2, 1)) * mult,
-                                 (m(2, 0) - m(0, 2)) * mult,
-                                 (m(0, 1) - m(1, 0)) * mult);
+                w = biggest_val;
+                x = (m(1, 2) - m(2, 1)) * mult;
+                y = (m(2, 0) - m(0, 2)) * mult;
+                z = (m(0, 1) - m(1, 0)) * mult;
+                break;
             case 1:
-                return quat_t<T>((m(1, 2) - m(2, 1)) * mult, biggest_val,
-                                 (m(0, 1) + m(1, 0)) * mult,
-                                 (m(2, 0) + m(0, 2)) * mult);
+                w = (m(1, 2) - m(2, 1)) * mult;
+                x = biggest_val;
+                y = (m(0, 1) + m(1, 0)) * mult;
+                z = (m(2, 0) + m(0, 2)) * mult;
+                break;
             case 2:
-                return quat_t<T>((m(2, 0) - m(0, 2)) * mult,
-                                 (m(0, 1) + m(1, 0)) * mult, biggest_val,
-                                 (m(1, 2) + m(2, 1)) * mult);
+                w = (m(2, 0) - m(0, 2)) * mult;
+                x = (m(0, 1) + m(1, 0)) * mult;
+                y = biggest_val;
+                z = (m(1, 2) + m(2, 1)) * mult;
+                break;
             case 3:
-                return quat_t<T>((m(0, 1) - m(1, 0)) * mult,
-                                 (m(2, 0) + m(0, 2)) * mult,
-                                 (m(1, 2) + m(2, 1)) * mult,
-                                 biggest_val);
+                w = (m(0, 1) - m(1, 0)) * mult;
+                x = (m(2, 0) + m(0, 2)) * mult;
+                y = (m(1, 2) + m(2, 1)) * mult;
+                z = biggest_val;
+                break;
             default: // Silence a -Wswitch-default warning in GCC. Should never actually get here. Assert is just for sanity.
                 assert(false);
-                return quat_t<T>(1.0f, 0.0f, 0.0f, 0.0f);
+                w = 1;
+                x = 0;
+                y = 0;
+                z = 0;
+                break;
         }
     }
 

@@ -58,69 +58,69 @@ void reset_keys() {
     }
 }
 
-void imgui_module_t::onKeyEvent(const key_event_t& event) {
-    auto& io = ImGui::GetIO();
-    int key = static_cast<int>(event.code);
-
-    if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown)) {
-        io.KeysDown[key] = (event.type == key_event_type::down);
-    }
-    if ((io.KeyShift && !event.shift) || (io.KeyCtrl && !event.ctrl)
-        || (io.KeyAlt && !event.alt) || (io.KeySuper && !event.super)) {
-        reset_keys();
-    }
-    io.KeyShift = event.shift;
-    io.KeyCtrl = event.ctrl;
-    io.KeyAlt = event.alt;
-    io.KeySuper = event.super;
-
-    if (event.type == key_event_type::down
+void imgui_module_t::on_event(const event_t& event) {
+    if (event.type == event_type::key_down
         && event.code == key_code::A
         && event.ctrl && event.shift) {
         enabled_ = !enabled_;
     }
-}
 
-void imgui_module_t::on_text_event(const text_event_t& event) {
-    ImGui::GetIO().AddInputCharactersUTF8(event.characters.c_str());
-    //return true;
-}
-
-void imgui_module_t::onMouseEvent(const mouse_event_t& event) {
     if (!enabled_) {
         return;
     }
+
     auto& io = ImGui::GetIO();
-    if (event.type == mouse_event_type::down || event.type == mouse_event_type::up) {
-        int button = 0;
-        if (event.button == mouse_button::right) {
-            button = 1;
-        } else if (event.button == mouse_button::other) {
-            button = 2;
+    switch (event.type) {
+        case event_type::key_up:
+        case event_type::key_down:
+        case event_type::key_press: {
+            int key = static_cast<int>(event.code);
+            if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown)) {
+                io.KeysDown[key] = (event.type == event_type::key_down);
+            }
+            if ((io.KeyShift && !event.shift) || (io.KeyCtrl && !event.ctrl)
+                || (io.KeyAlt && !event.alt) || (io.KeySuper && !event.super)) {
+                reset_keys();
+            }
+            io.KeyShift = event.shift;
+            io.KeyCtrl = event.ctrl;
+            io.KeyAlt = event.alt;
+            io.KeySuper = event.super;
         }
-        io.MouseDown[button] = (event.type == mouse_event_type::down);
-    } else if (event.type == mouse_event_type::scroll) {
-        if (fabsf(event.scroll_x) > 0.0f) {
-            io.MouseWheelH += event.scroll_x * 0.1f;
+            break;
+
+        case event_type::text:
+            io.AddInputCharactersUTF8(event.characters.c_str());
+            break;
+
+        case event_type::mouse_down:
+        case event_type::mouse_up: {
+            int button = 0;
+            if (event.button == mouse_button::right) {
+                button = 1;
+            } else if (event.button == mouse_button::other) {
+                button = 2;
+            }
+            io.MouseDown[button] = (event.type == event_type::mouse_down);
         }
-        if (fabsf(event.scroll_y) > 0.0f) {
-            io.MouseWheel += event.scroll_y * 0.1f;
-        }
-    } else if (event.type == mouse_event_type::move) {
-        io.MousePos.x = event.x / g_window.device_pixel_ratio;
-        io.MousePos.y = event.y / g_window.device_pixel_ratio;
+            break;
+        case event_type::mouse_scroll:
+            if (fabsf(event.scroll_x) > 0.0f) {
+                io.MouseWheelH += event.scroll_x * 0.1f;
+            }
+            if (fabsf(event.scroll_y) > 0.0f) {
+                io.MouseWheel += event.scroll_y * 0.1f;
+            }
+            break;
+
+        case event_type::mouse_move:
+            io.MousePos.x = event.x / g_window.device_pixel_ratio;
+            io.MousePos.y = event.y / g_window.device_pixel_ratio;
+            break;
+
+        default:
+            break;
     }
-}
-
-void imgui_module_t::onTouchEvent(const touch_event_t&) {
-
-}
-
-void imgui_module_t::onAppEvent(const app_event_t&) {
-
-}
-
-void imgui_module_t::onDrawFrame() {
 
 }
 

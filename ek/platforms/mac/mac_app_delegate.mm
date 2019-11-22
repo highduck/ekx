@@ -1,10 +1,12 @@
-#import "AppDelegate.h"
+#import "mac_app_delegate.h"
 
 #include <ek/logger.hpp>
 #include "platform/application.hpp"
 #include "platform/window.hpp"
 
-@implementation AppDelegate
+using namespace ek;
+
+@implementation MacAppDelegate
 
 - (void)setupMenuBar {
     id menubar = [[NSMenu new] autorelease];
@@ -22,15 +24,15 @@
 }
 
 - (void)dealloc {
-    [openGLView release];
-    [nsWindow release];
+    [gl_view release];
+    [window release];
     [super dealloc];
 }
 
 - (void)createView {
 /*** init gl view ***/
-    OpenGLView* view = [[OpenGLView alloc] init];
-    openGLView = view;
+    MacOpenGLView* view = [[MacOpenGLView alloc] init];
+    gl_view = view;
 
     NSOpenGLPixelFormatAttribute attrs[] = {
 //            NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
@@ -65,7 +67,7 @@
 }
 
 - (void)createWindow {
-    auto& config = ek::g_window.creation_config;
+    auto& config = g_window.creation_config;
     NSRect frame = NSMakeRect(100, 100, config.width, config.height);
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable |
                                   NSWindowStyleMaskMiniaturizable;
@@ -75,7 +77,7 @@
                       styleMask:styleMask
                         backing:NSBackingStoreBuffered
                           defer:NO];
-    nsWindow = wnd;
+    window = wnd;
 
     NSString* title = [NSString stringWithUTF8String:config.title.c_str()];
     [wnd setTitle:title];
@@ -84,32 +86,32 @@
 
     wnd.acceptsMouseMovedEvents = YES;
 
-    [wnd setContentView:openGLView];
-    [wnd makeFirstResponder:openGLView];
+    [wnd setContentView:gl_view];
+    [wnd makeFirstResponder:gl_view];
     [wnd makeKeyAndOrderFront:nil];
 }
 
 - (void)windowDidResize:(__unused NSNotification*)notification {
-    NSRect frame = [NSWindow contentRectForFrameRect:nsWindow.frame
-                                           styleMask:nsWindow.styleMask];
+    NSRect frame = [NSWindow contentRectForFrameRect:window.frame
+                                           styleMask:window.styleMask];
     EK_TRACE << "changed window_size (via windowDidResize)";
-    ek::g_window.window_size = {
+    g_window.window_size = {
             static_cast<uint32_t>(frame.size.width),
             static_cast<uint32_t>(frame.size.height)
     };
-    ek::g_window.size_changed = true;
+    g_window.size_changed = true;
 }
 
 - (void)windowDidChangeBackingProperties:(__unused NSNotification*)notification {
-    EK_TRACE << "`windowDidChangeBackingProperties` changed device_pixel_ratio to " << nsWindow.backingScaleFactor;
-    ek::g_window.device_pixel_ratio = static_cast<float>(nsWindow.backingScaleFactor);
-    ek::g_window.size_changed = true;
+    EK_TRACE("`windowDidChangeBackingProperties` changed device_pixel_ratio to %lf", window.backingScaleFactor);
+    g_window.device_pixel_ratio = static_cast<float>(window.backingScaleFactor);
+    g_window.size_changed = true;
 }
 
 - (void)applicationWillFinishLaunching:(__unused NSNotification*)notification {
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
-    ek::g_app.init();
+    g_app.init();
 
     [self setupMenuBar];
     [self createView];
@@ -118,7 +120,7 @@
 
 - (void)applicationDidFinishLaunching:(__unused NSNotification*)notification {
     [NSApp activateIgnoringOtherApps:YES];
-    ek::g_app.start();
+    g_app.start();
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(__unused NSApplication*)theApplication {
@@ -126,15 +128,15 @@
 }
 
 - (void)applicationWillTerminate:(__unused NSNotification*)notification {
-    ek::g_app.dispatch({ek::app_event_type::close});
+    g_app.dispatch({event_type::app_close});
 }
 
 - (void)applicationWillResignActive:(__unused NSNotification*)notification {
-    ek::g_app.dispatch({ek::app_event_type::paused});
+    g_app.dispatch({event_type::app_pause});
 }
 
 - (void)applicationDidBecomeActive:(__unused NSNotification*)notification {
-    ek::g_app.dispatch({ek::app_event_type::resumed});
+    g_app.dispatch({event_type::app_resume});
 }
 
 @end

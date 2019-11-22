@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 project(picos LANGUAGES CXX)
 
 add_executable(${PROJECT_NAME}
-        src/main.hpp
+        src/mac_main.hpp
         src/main.cpp
         src/piko/piko.h
         src/piko/examples.h

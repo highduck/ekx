@@ -53,7 +53,7 @@ void reverse_color_components(uint8_t* data, size_t size) {
     }
 }
 
-size_t uncompress(input_memory_stream& input, uint8_t* dest, size_t destSize) {
+size_t uncompress(input_memory_stream& input, uint8_t* dest, size_t dest_size) {
     auto chunkSize = input.read<uint16_t>();
     output_memory_stream buffer{chunkSize};
     while (chunkSize > 0u) {
@@ -62,8 +62,8 @@ size_t uncompress(input_memory_stream& input, uint8_t* dest, size_t destSize) {
         chunkSize = input.read<uint16_t>();
     }
 
-    size_t sz = destSize;
-    mz_uncompress(dest, &sz, static_cast<const uint8_t*>(buffer.data()), buffer.size());
+    size_t sz = dest_size;
+    mz_uncompress(dest, reinterpret_cast<mz_ulong*>(&sz), static_cast<const uint8_t*>(buffer.data()), buffer.size());
     return sz;
 }
 

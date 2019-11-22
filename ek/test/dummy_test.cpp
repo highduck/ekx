@@ -1,4 +1,4 @@
-#include <platform/boot.h>
+#include <platform/boot.hpp>
 #include <gtest/gtest.h>
 
 using namespace ek;

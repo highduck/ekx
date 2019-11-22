@@ -23,32 +23,19 @@ void application_t::start() {
     ek_main();
 }
 
-void application_t::handle_event(const any_event_t& event) {
+void application_t::handle_event(const event_t& event) {
     for (auto* listener : listeners_) {
-        switch (event.kind) {
-            case event_kind::App:
-                listener->onAppEvent(event.data.app);
-                break;
-            case event_kind::Key:
-                listener->onKeyEvent(event.data.key);
-                break;
-            case event_kind::Text:
-                listener->on_text_event(event.text);
-                break;
-            case event_kind::Mouse:
-                listener->onMouseEvent(event.data.mouse);
-                break;
-            case event_kind::Touch:
-                listener->onTouchEvent(event.data.touch);
-                break;
-        }
+        listener->on_event(event);
     }
 }
 
 void application_t::dispatch_draw_frame() {
     if (g_window.size_changed) {
         g_window.size_changed = false;
-        handle_event(any_event_t{app_event_t{app_event_type::resize}});
+        event_t ev{event_type::app_resize};
+        ev.x = g_window.back_buffer_size.width;
+        ev.y = g_window.back_buffer_size.height;
+        handle_event(ev);
     }
     for (const auto& event : event_queue_) {
         handle_event(event);
@@ -56,7 +43,7 @@ void application_t::dispatch_draw_frame() {
     event_queue_.clear();
 
     for (auto* listener : listeners_) {
-        listener->onDrawFrame();
+        listener->on_draw_frame();
     }
 
     for (auto* listener : listeners_) {

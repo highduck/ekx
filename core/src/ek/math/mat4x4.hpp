@@ -243,10 +243,10 @@ vec_t<T, 3> operator*(const vec_t<T, 3>& v, const matrix_t<4, 4, T>& m) {
 }
 
 template<typename T>
-matrix_t<3, 3, T>::matrix_t(const matrix_t<4, 4, T>& m) noexcept
-        :m00{m.m00}, m01{m.m01}, m02{m.m02},
-         m10{m.m10}, m11{m.m11}, m12{m.m12},
-         m20{m.m20}, m21{m.m21}, m22{m.m22} {
+matrix_t<3, 3, T>::matrix_t(const matrix_t<4, 4, T>& mat) noexcept
+        :m00{mat.m00}, m01{mat.m01}, m02{mat.m02},
+         m10{mat.m10}, m11{mat.m11}, m12{mat.m12},
+         m20{mat.m20}, m21{mat.m21}, m22{mat.m22} {
 
 }
 }

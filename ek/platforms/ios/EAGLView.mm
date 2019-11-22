@@ -79,23 +79,23 @@ void clear_buffers() {
 
 - (BOOL)resizeFromLayer:(CAEAGLLayer*)layer {
     // The pixel dimensions of the CAEAGLLayer
-    GLint backingWidth;
-    GLint backingHeight;
+    GLint backing_width;
+    GLint backing_height;
 
     // Allocate color buffer backing based on the current layer size
     glBindRenderbuffer(GL_RENDERBUFFER, _colorRenderbuffer);
     [_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth);
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backing_width);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backing_height);
 
     glGenRenderbuffers(1, &_depthRenderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backingWidth, backingHeight);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backing_width, backing_height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 
     g_window.back_buffer_size = {
-        static_cast<uint32_t>(backingWidth),
-        static_cast<uint32_t>(backingHeight)
+        static_cast<uint32_t>(backing_width),
+        static_cast<uint32_t>(backing_height)
     };
     
     g_window.size_changed = true;
@@ -231,48 +231,35 @@ void clear_buffers() {
     [super dealloc];
 }
 
+void handle_touches(event_type type, UIView* view, NSSet* touches, UIEvent* event) {
+    event_t ev{type};
+    const auto scale_factor = view.contentScaleFactor;
+    for (UITouch* touch in [touches allObjects]) {
+        const CGPoint location = [touch locationInView:view];
+        ev.id = (uint64_t)touch;
+        ev.set_position(location.x, location.y, scale_factor);
+        g_app.dispatch(ev);
+    }
+}
+
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesBegan:touches withEvent:event];
-    float scaleFactor = self.contentScaleFactor;
-    for (UITouch* touch in [touches allObjects]) {
-        CGPoint location = [touch locationInView:self];
-        float x = (float) (location.x * scaleFactor);
-        float y = (float) (location.y * scaleFactor);
-        g_app.dispatch({touch_event_type::begin, (uint64_t) touch, x, y});
-    }
+    handle_touches(event_type::touch_begin, self, touches, event);
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesMoved:touches withEvent:event];
-    float scaleFactor = self.contentScaleFactor;
-    for (UITouch* touch in [touches allObjects]) {
-        CGPoint location = [touch locationInView:self];
-        float x = (float) (location.x * scaleFactor);
-        float y = (float) (location.y * scaleFactor);
-        g_app.dispatch({touch_event_type::move, (uint64_t) touch, x, y});
-    }
+    handle_touches(event_type::touch_move, self, touches, event);
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesEnded:touches withEvent:event];
-    float scaleFactor = self.contentScaleFactor;
-    for (UITouch* touch in [touches allObjects]) {
-        CGPoint location = [touch locationInView:self];
-        float x = (float) (location.x * scaleFactor);
-        float y = (float) (location.y * scaleFactor);
-        g_app.dispatch({touch_event_type::end, (uint64_t) touch, x, y});
-    }
+    handle_touches(event_type::touch_end, self, touches, event);
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesCancelled:touches withEvent:event];
-    float scaleFactor = self.contentScaleFactor;
-    for (UITouch* touch in [touches allObjects]) {
-        CGPoint location = [touch locationInView:self];
-        float x = (float) (location.x * scaleFactor);
-        float y = (float) (location.y * scaleFactor);
-        g_app.dispatch({touch_event_type::end, (uint64_t) touch, x, y});
-    }
+    handle_touches(event_type::touch_end, self, touches, event);
 }
 
 @end

@@ -60,20 +60,19 @@ array_buffer get_resource_content(const char* path) {
     auto* asset = AAssetManager_open(::ek::android::get_asset_manager(), path,
                                      AASSET_MODE_STREAMING);
     array_buffer buffer{};
-    if(asset) {
-        const void *asset_buffer = AAsset_getBuffer(asset);
+    if (asset) {
+        const void* asset_buffer = AAsset_getBuffer(asset);
         auto asset_size = static_cast<size_t>(AAsset_getLength(asset));
         buffer = array_buffer{asset_size};
         memcpy(buffer.data(), asset_buffer, asset_size);
         AAsset_close(asset);
-    }
-    else {
+    } else {
         EK_ERROR("Asset file not found: %s", path);
     }
     return buffer;
 }
 
-#elif defined(__linux__) || defined(__EMSCRIPTEN__)
+#elif defined(__linux__) || defined(__EMSCRIPTEN__) || (defined(_WIN64) || defined(_WIN32))
 
 #define EK_STATIC_RESOURCES_SYS
 
@@ -123,8 +122,8 @@ void get_resource_content_async(const char* path, std::function<void(array_buffe
 
 #else
 
-void get_resource_content_async(const char* path, std::function<void(array_buffer)> callback) {
-    callback(get_resource_content(path));
+void get_resource_content_async(const char* path, std::function<void(array_buffer)> cb) {
+    cb(get_resource_content(path));
 }
 
 #endif

@@ -1,4 +1,4 @@
-#include <platform/boot.h>
+#include <platform/boot.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
 #include <ek/logger.hpp>

@@ -17,22 +17,13 @@ base_app_t::base_app_t() {
 
 base_app_t::~base_app_t() = default;
 
-void base_app_t::onKeyEvent(const key_event_t&) {
-}
-
-void base_app_t::onMouseEvent(const mouse_event_t&) {
-}
-
-void base_app_t::onTouchEvent(const touch_event_t&) {
-}
-
-void base_app_t::onAppEvent(const app_event_t& event) {
-    if (event.type == app_event_type::resize) {
+void base_app_t::on_event(const event_t& event) {
+    if (event.type == event_type::app_resize) {
         EK_TRACE("size: %d x %d", g_window.back_buffer_size.width, g_window.back_buffer_size.height);
     }
 }
 
-void base_app_t::onDrawFrame() {
+void base_app_t::on_draw_frame() {
     auto& graphics = resolve<graphics_t>();
     auto& drawer = resolve<drawer_t>();
     drawer.batcher.stats.reset();

@@ -78,8 +78,9 @@ void interactive_manager::update() {
     ek::g_window.set_cursor(cursor);
 }
 
-void interactive_manager::handle_mouse_event(const interactive_manager::mouse_event_t& ev) {
-    if (ev.type == mouse_event_type::down) {
+void interactive_manager::handle_mouse_event(const ek::event_t& ev) {
+
+    if (ev.type == event_type::mouse_down) {
         primary_mouse_ = {ev.x, ev.y};
         pointer_down = true;
         for (auto target : last_targets_) {
@@ -87,7 +88,7 @@ void interactive_manager::handle_mouse_event(const interactive_manager::mouse_ev
                 ecs::get<interactive_t>(target).set_pointer_down();
             }
         }
-    } else if (ev.type == mouse_event_type::up) {
+    } else if (ev.type == event_type::mouse_up) {
         primary_mouse_ = {ev.x, ev.y};
         pointer_down = false;
         for (auto target : last_targets_) {
@@ -95,19 +96,19 @@ void interactive_manager::handle_mouse_event(const interactive_manager::mouse_ev
                 ecs::get<interactive_t>(target).set_pointer_up();
             }
         }
-    } else if (ev.type == mouse_event_type::move) {
+    } else if (ev.type == event_type::mouse_move) {
         primary_mouse_ = {ev.x, ev.y};
         mouse_active_ = true;
         update();
-    } else if (ev.type == mouse_event_type::exit) {
+    } else if (ev.type == event_type::mouse_exit) {
         mouse_active_ = false;
         pointer_down = false;
         update();
     }
 }
 
-void interactive_manager::handle_touch_event(const touch_event_t& ev) {
-    if (ev.type == touch_event_type::begin) {
+void interactive_manager::handle_touch_event(const ek::event_t& ev) {
+    if (ev.type == event_type::touch_begin) {
         if (primary_touch_id_ == 0) {
             primary_touch_id_ = ev.id;
             primary_touch_ = {ev.x, ev.y};
@@ -123,7 +124,7 @@ void interactive_manager::handle_touch_event(const touch_event_t& ev) {
     }
 
     if (primary_touch_id_ == ev.id) {
-        if (ev.type == touch_event_type::end) {
+        if (ev.type == event_type::touch_end) {
             primary_touch_id_ = 0;
             primary_touch_ = float2::zero;
             pointer_down = false;
@@ -161,7 +162,7 @@ void interactive_manager::set_debug_hit(ecs::entity hit) {
     }
 }
 
-interactive_manager::mouse_cursor_t interactive_manager::search_interactive_targets(
+ek::mouse_cursor_t interactive_manager::search_interactive_targets(
         ecs::entity node,
         std::vector<ecs::entity>& out_entities) {
 

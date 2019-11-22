@@ -1,4 +1,4 @@
-#include "main.hpp"
+#include "mac_main.hpp"
 #include "camera_arcball.hpp"
 
 #include <scenex/systems/main_flow.h>

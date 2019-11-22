@@ -1,6 +1,6 @@
 #import <Firebase/Firebase.h>
 
-#include "AppDelegate.h"
+#include "ios_app_delegate.h"
 #include <string>
 
 namespace ek {
@@ -46,7 +46,7 @@ void sharing_send_message(const char* text) {
     NSArray* sharedObjects = @[ns_text];
     UIActivityViewController* activityViewController = [[UIActivityViewController alloc] initWithActivityItems:sharedObjects applicationActivities:nil];
 
-    UIViewController* root_view_controller = appDelegate.window.rootViewController;
+    UIViewController* root_view_controller = g_app_delegate.window.rootViewController;
     activityViewController.popoverPresentationController.sourceView = root_view_controller.view;
     [root_view_controller presentViewController:activityViewController animated:YES completion:nil];
 

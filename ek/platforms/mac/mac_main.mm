@@ -1,6 +1,6 @@
-#import "AppDelegate.h"
+#import "mac_app_delegate.h"
 
-AppDelegate* gAppDelegate = nullptr;
+MacAppDelegate* g_app_delegate = nullptr;
 
 namespace ek {
 
@@ -9,8 +9,8 @@ void start_application() {
     [NSAutoreleasePool new];
 #endif
     auto* app = NSApplication.sharedApplication;
-    gAppDelegate = [[AppDelegate alloc] init];
-    [app setDelegate: gAppDelegate];
+    g_app_delegate = [[MacAppDelegate alloc] init];
+    [app setDelegate:g_app_delegate];
     [app run];
 }
 

@@ -8,60 +8,35 @@
 
 namespace ek {
 
-enum class app_event_type : uint8_t {
-    paused,
-    resumed,
-    resize,
-    back_button,
-    close
-};
+enum class event_type : uint8_t {
+    app_pause,
+    app_resume,
+    app_resize,
+    app_back_button,
+    app_close,
 
-struct app_event_t {
-    app_event_type type;
-};
+    touch_begin,
+    touch_move,
+    touch_end,
 
-enum class touch_event_type : uint8_t {
-    none,
-    begin,
-    move,
-    end
-};
+    mouse_move,
+    mouse_down,
+    mouse_up,
+    mouse_enter,
+    mouse_exit,
+    mouse_scroll,
 
-struct touch_event_t {
-    touch_event_type type;
-    uint64_t id;
-    float x;
-    float y;
-};
+    key_down,
+    key_up,
+    key_press,
 
-enum class mouse_event_type {
-    move,
-    down,
-    up,
-    enter,
-    exit,
-    scroll
+    text
 };
 
 enum class mouse_button {
     left,
     right,
     other
-};
-
-struct mouse_event_t {
-    mouse_event_type type;
-    mouse_button button;
-    float x;
-    float y;
-    float scroll_x;
-    float scroll_y;
-};
-
-enum class key_event_type {
-    down,
-    up,
-    press
 };
 
 enum class key_code {
@@ -100,66 +75,36 @@ enum class key_code {
     MaxCount
 };
 
-struct key_event_t {
-    key_event_type type;
-    key_code code;
+
+struct event_t {
+    event_type type;
+    // touch_id, or mouse_button
+    uint64_t id = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+    float scroll_x = 0.0f;
+    float scroll_y = 0.0f;
+    mouse_button button = mouse_button::other;
+
+    key_code code = key_code::Unknown;
     bool super = false; // cmd/win/..
     bool shift = false;
     bool ctrl = false;
     bool alt = false;
-};
 
-struct text_event_t {
-    std::string characters;
-};
+    // TODO: view to internal storage
+    std::string characters{};
 
-enum class event_kind {
-    App,
-    Key,
-    Mouse,
-    Touch,
-    Text
-};
-
-struct any_event_t {
-    event_kind kind;
-    union data_t {
-        app_event_t app;
-        mouse_event_t mouse;
-        touch_event_t touch;
-        key_event_t key;
-    } data;
-
-    text_event_t text;
-
-    explicit any_event_t(const text_event_t& event) noexcept
-            : kind{event_kind::Text},
-              data{} {
-        text = event;
+    template<typename T>
+    void set_mouse_scroll(T x_, T y_, T multiplier_ = 1) {
+        scroll_x = static_cast<float>(x_ * multiplier_);
+        scroll_y = static_cast<float>(y_ * multiplier_);
     }
 
-    explicit any_event_t(const key_event_t& event) noexcept
-            : kind{event_kind::Key},
-              data{} {
-        data.key = event;
-    }
-
-    explicit any_event_t(const app_event_t& event) noexcept
-            : kind{event_kind::App},
-              data{} {
-        data.app = event;
-    }
-
-    explicit any_event_t(const mouse_event_t& event) noexcept
-            : kind{event_kind::Mouse},
-              data{} {
-        data.mouse = event;
-    }
-
-    explicit any_event_t(const touch_event_t& event) noexcept
-            : kind{event_kind::Touch},
-              data{} {
-        data.touch = event;
+    template<typename T>
+    void set_position(T x_, T y_, T multiplier_ = 1) {
+        x = static_cast<float>(x_ * multiplier_);
+        y = static_cast<float>(y_ * multiplier_);
     }
 };
 
@@ -168,17 +113,9 @@ public:
 
     virtual ~application_listener_t();
 
-    virtual void onKeyEvent(const key_event_t& event) = 0;
+    virtual void on_event(const event_t&) {}
 
-    virtual void on_text_event(const text_event_t&) {}
-
-    virtual void onMouseEvent(const mouse_event_t& event) = 0;
-
-    virtual void onTouchEvent(const touch_event_t& event) = 0;
-
-    virtual void onAppEvent(const app_event_t& event) = 0;
-
-    virtual void onDrawFrame() = 0;
+    virtual void on_draw_frame() {}
 
     virtual void on_frame_completed() {}
 };
@@ -196,38 +133,22 @@ public:
         listeners_.push_back(listener);
     }
 
-    void dispatch(const text_event_t& event) {
-        event_queue_.emplace_back(event);
-    }
-
-    void dispatch(const key_event_t& event) {
-        event_queue_.emplace_back(event);
-    }
-
-    void dispatch(const mouse_event_t& event) {
-        event_queue_.emplace_back(event);
-    }
-
-    void dispatch(const touch_event_t& event) {
-        event_queue_.emplace_back(event);
-    }
-
-    void dispatch(const app_event_t& event) {
-        if (event.type == app_event_type::paused) {
-            handle_event(any_event_t{event});
+    void dispatch(const event_t& event) {
+        if (event.type == event_type::app_pause) {
+            handle_event(event);
         } else {
             event_queue_.emplace_back(event);
         }
     }
 
-    void handle_event(const any_event_t& event);
+    void handle_event(const event_t& event);
 
     void dispatch_draw_frame();
 
 private:
     std::vector<application_listener_t*> listeners_;
 
-    std::vector<any_event_t> event_queue_;
+    std::vector<event_t> event_queue_;
 };
 
 extern application_t g_app;
