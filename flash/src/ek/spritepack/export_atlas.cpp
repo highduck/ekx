@@ -4,10 +4,10 @@
 #include "save_image_png.hpp"
 
 #include <ek/binpack/max_rects.hpp>
-#include <ek/timer.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/timer.hpp>
+#include <ek/util/logger.hpp>
 #include <ek/math/serialize_math.hpp>
-#include <ek/fs/path.hpp>
+#include <ek/util/path.hpp>
 
 #include <thread>
 

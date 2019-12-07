@@ -9,7 +9,7 @@
 #include <ek/math/mat3x2.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/color_transform.hpp>
-#include <ek/assets.hpp>
+#include <ek/util/assets.hpp>
 
 namespace scenex {
 
@@ -76,7 +76,7 @@ struct movie_frame_data {
 
     template<typename S>
     void serialize(ek::IO<S>& io) {
-        io(index, duration, motion_type, key, position, scale, skew, pivot, color);
+        io(index, duration, motion_type, key, position, scale, skew, pivot, color, tweens);
     }
 };
 

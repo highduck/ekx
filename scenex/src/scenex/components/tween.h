@@ -1,7 +1,7 @@
 #pragma once
 
 #include <scenex/config/ecs.h>
-#include <ek/signals.hpp>
+#include <ek/util/signals.hpp>
 
 namespace scenex {
 

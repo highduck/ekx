@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <ek/signals.hpp>
+#include <ek/util/signals.hpp>
 #include <platform/window.hpp>
 
 namespace scenex {

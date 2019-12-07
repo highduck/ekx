@@ -9,8 +9,8 @@
 #include <ek/math/matrix_camera.hpp>
 #include <graphics/gl_debug.hpp>
 #include <scenex/ek/input_controller.h>
-#include <ek/locator.hpp>
-#include <ek/fs/path.hpp>
+#include <ek/util/locator.hpp>
+#include <ek/util/path.hpp>
 #include <ek/system/system.hpp>
 
 namespace ek {

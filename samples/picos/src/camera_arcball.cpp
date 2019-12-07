@@ -4,10 +4,10 @@
 #include <scenex/3d/camera_3d.hpp>
 #include <scenex/3d/transform_3d.hpp>
 #include <scenex/interactive_manager.h>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <scenex/ek/input_controller.h>
 #include <scenex/systems/game_time.h>
-#include <ek/timer.hpp>
+#include <ek/util/timer.hpp>
 
 using namespace scenex;
 

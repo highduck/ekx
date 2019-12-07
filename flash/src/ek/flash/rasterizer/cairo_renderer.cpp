@@ -131,11 +131,9 @@ void cairo_renderer::draw_bitmap(const bitmap_t* bitmap) {
     const int sw = bitmap->width;
     const int sh = bitmap->height;
 
-    auto source_surface = cairo_image_surface_create_for_data(bitmap->data->data(),
-                                                              CAIRO_FORMAT_ARGB32,
-                                                              sw,
-                                                              sh,
-                                                              sw * 4);
+    auto source_surface = cairo_image_surface_create_for_data(
+            const_cast<uint8_t*>(bitmap->data.data()),
+            CAIRO_FORMAT_ARGB32, sw, sh, sw * 4);
     auto source_pattern = cairo_pattern_create_for_surface(source_surface);
 
     cairo_save(ctx_);

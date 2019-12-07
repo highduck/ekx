@@ -1,7 +1,7 @@
 #include "mouse_follow_script.h"
 
 #include <draw2d/drawer.hpp>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <scenex/utility/scene_management.h>
 #include <scenex/interactive_manager.h>
 

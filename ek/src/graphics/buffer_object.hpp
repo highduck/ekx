@@ -2,7 +2,7 @@
 
 #include "gl_def.hpp"
 #include <cstdint>
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/common_macro.hpp>
 
 namespace ek {
 

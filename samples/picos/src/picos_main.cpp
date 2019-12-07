@@ -1,4 +1,4 @@
-#include "mac_main.hpp"
+#include "picos_main.hpp"
 #include "camera_arcball.hpp"
 
 #include <scenex/systems/main_flow.h>
@@ -14,7 +14,6 @@
 #include <scenex/3d/light_3d.hpp>
 #include <ek/math/rand.hpp>
 #include <scenex/data/sg_factory.h>
-#include <scenex/asset2/asset_manager.hpp>
 #include <scenex/asset2/builtin_assets.hpp>
 
 namespace ek {

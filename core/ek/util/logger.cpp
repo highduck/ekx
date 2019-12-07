@@ -92,19 +92,6 @@ void write(verbosity_t verbosity, source_location_t location, const char* messag
     }
 #endif
 }
-//
-//void print(verbosity_t verbosity, source_location_t location, const char* format, ...) noexcept {
-//    if ((log_filter_mask_ & static_cast<uint32_t>(verbosity)) == 0) {
-//        return;
-//    }
-//
-//    va_list args;
-//    va_start(args, format);
-//    char buf[256];
-//    vsnprintf(buf, sizeof(buf), format, args);
-//    write(verbosity, location, buf);
-//    va_end(args);
-//}
 
 log_stream_t::log_stream_t(verbosity_t verbosity, source_location_t location) noexcept
         : verbosity_{verbosity},

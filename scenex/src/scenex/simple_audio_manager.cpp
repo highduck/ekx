@@ -1,6 +1,6 @@
 #include "simple_audio_manager.h"
 
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 
 namespace scenex {
 

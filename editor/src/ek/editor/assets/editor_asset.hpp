@@ -2,7 +2,7 @@
 
 #include <scenex/asset2/asset_manager.hpp>
 #include <scenex/asset2/asset_object.hpp>
-#include <ek/fs/path.hpp>
+#include <ek/util/path.hpp>
 #include <pugixml.hpp>
 #include "editor_project.hpp"
 

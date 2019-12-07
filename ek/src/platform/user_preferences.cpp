@@ -1,6 +1,6 @@
 #include "user_preferences.hpp"
 
-#include <ek/utility/base64.hpp>
+#include <ek/util/base64.hpp>
 #include <cassert>
 
 #if defined(__EMSCRIPTEN__)
@@ -15,13 +15,13 @@
 
 namespace ek {
 
-void set_user_data(const std::string& key, const array_buffer& buffer) {
+void set_user_data(const std::string& key, const std::vector<uint8_t>& buffer) {
     assert(!key.empty());
-    set_user_string(key, base64_encode(buffer));
+    set_user_string(key, ek::base64::encode(buffer));
 }
 
-array_buffer get_user_data(const std::string& key) {
-    return base64_decode(get_user_string(key));
+std::vector<uint8_t> get_user_data(const std::string& key) {
+    return ek::base64::decode(get_user_string(key));
 }
 
 #if defined(__EMSCRIPTEN__)

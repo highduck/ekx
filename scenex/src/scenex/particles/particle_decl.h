@@ -1,7 +1,7 @@
 #pragma once
 
 #include <scenex/config.h>
-#include <ek/assets.hpp>
+#include <ek/util/assets.hpp>
 #include <scenex/2d/sprite.hpp>
 #include <scenex/2d/font.hpp>
 #include <ek/math/rand.hpp>

@@ -4,7 +4,7 @@
 #include <scenex/particles/particle_emitter.h>
 #include <scenex/components/transform_2d.h>
 #include <scenex/particles/particle_layer.h>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <draw2d/drawer.hpp>
 #include <scenex/systems/game_time.h>
 

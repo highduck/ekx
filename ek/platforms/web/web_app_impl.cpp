@@ -1,5 +1,5 @@
 #include <platform/application.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 #include <emscripten.h>
 #include <emscripten/html5.h>

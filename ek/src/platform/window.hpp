@@ -18,7 +18,6 @@ struct window_creation_config_t {
     window_creation_config_t(std::string title, float width, float height) noexcept;
 };
 
-
 enum class mouse_cursor_t : uint8_t {
     parent = 0,
     arrow,
@@ -31,13 +30,13 @@ typedef void* native_window_context_t;
 class window_t final {
 public:
 
-    struct Size final {
+    struct dimensions_t final {
         uint32_t width = 1;
         uint32_t height = 1;
     };
 
-    Size window_size{};
-    Size back_buffer_size{};
+    dimensions_t window_size{};
+    dimensions_t back_buffer_size{};
     float device_pixel_ratio = 1.0f;
 
     // iOS has manually created FBO for primary surface

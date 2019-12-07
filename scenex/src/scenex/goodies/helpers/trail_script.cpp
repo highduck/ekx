@@ -3,7 +3,7 @@
 #include <scenex/utility/scene_management.h>
 #include <draw2d/drawer.hpp>
 #include <ek/math/easing.hpp>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 
 namespace scenex {
 

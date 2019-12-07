@@ -1,10 +1,10 @@
 #include "atlas.hpp"
 #include "sprite.hpp"
 
-#include <ek/logger.hpp>
-#include <ek/assets.hpp>
+#include <ek/util/logger.hpp>
+#include <ek/util/assets.hpp>
 #include <ek/math/serialize_math.hpp>
-#include <ek/fs/path.hpp>
+#include <ek/util/path.hpp>
 #include <ek/imaging/decoder.hpp>
 #include <platform/static_resources.hpp>
 #include <graphics/texture.hpp>
@@ -97,7 +97,7 @@ atlas_t::~atlas_t() {
     }
 }
 
-void load_atlas_meta(const path_t& base_path, atlas_t* atlas, const array_buffer& buffer) {
+void load_atlas_meta(const path_t& base_path, atlas_t* atlas, const std::vector<uint8_t>& buffer) {
     EK_DEBUG << "Decoding Atlas META";
     EK_DEBUG << "Atlas Base Path: " << base_path;
 

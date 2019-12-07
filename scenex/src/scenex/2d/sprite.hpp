@@ -1,8 +1,8 @@
 #pragma once
 
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/common_macro.hpp>
 #include <ek/math/box.hpp>
-#include <ek/assets.hpp>
+#include <ek/util/assets.hpp>
 #include <scenex/config.h>
 
 namespace ek {

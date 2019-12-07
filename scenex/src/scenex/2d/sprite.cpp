@@ -1,6 +1,6 @@
 #include "sprite.hpp"
 
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <draw2d/drawer.hpp>
 
 using namespace ek;

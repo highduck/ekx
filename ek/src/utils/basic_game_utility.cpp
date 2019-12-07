@@ -1,6 +1,6 @@
 #include "basic_game_utility.hpp"
 
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <platform/game_center.hpp>
 #include <platform/sharing.hpp>
 

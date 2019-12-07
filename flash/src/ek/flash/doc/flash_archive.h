@@ -3,7 +3,7 @@
 #include <utility>
 #include <string>
 #include <unordered_map>
-#include <ek/fs/path.hpp>
+#include <ek/util/path.hpp>
 
 namespace miniz_cpp {
 class zip_file;

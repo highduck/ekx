@@ -1,7 +1,8 @@
 #pragma once
 
 #include <string>
-#include <ek/array_buffer.hpp>
+#include <vector>
+#include <cstdint>
 
 namespace ek {
 
@@ -13,9 +14,9 @@ void set_user_string(const std::string& key, const std::string& str);
 
 std::string get_user_string(const std::string& key, const std::string& default_value = "");
 
-void set_user_data(const std::string& key, const array_buffer& buffer);
+void set_user_data(const std::string& key, const std::vector<uint8_t>& buffer);
 
-array_buffer get_user_data(const std::string& key);
+std::vector<uint8_t> get_user_data(const std::string& key);
 
 }
 

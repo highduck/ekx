@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ek/utility/static_history_buffer.hpp>
-#include <ek/timer.hpp>
+#include <ek/util/static_history_buffer.hpp>
+#include <ek/util/timer.hpp>
 
 #include <string>
 

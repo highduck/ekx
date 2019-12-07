@@ -1,11 +1,11 @@
 #include "font.hpp"
 
 #include "sprite.hpp"
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <platform/static_resources.hpp>
 #include <draw2d/drawer.hpp>
 #include <ek/math/bounds_builder.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 using namespace ek;
 
@@ -201,7 +201,7 @@ rect_f font_t::estimate_text_draw_zone(const std::string& text, float size, int 
     return bounds_builder.rect();
 }
 
-font_t* load_font(const array_buffer& buffer) {
+font_t* load_font(const std::vector<uint8_t>& buffer) {
     font_t* font = nullptr;
     if (!buffer.empty()) {
         input_memory_stream input{buffer.data(), buffer.size()};

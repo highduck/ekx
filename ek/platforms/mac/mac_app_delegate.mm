@@ -1,6 +1,6 @@
 #import "mac_app_delegate.h"
 
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include "platform/application.hpp"
 #include "platform/window.hpp"
 

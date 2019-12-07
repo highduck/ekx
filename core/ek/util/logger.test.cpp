@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <ek/logger.hpp>
-#include <ek/fs/path.hpp>
+#include <ek/util/logger.hpp>
+#include <ek/util/path.hpp>
 
 using namespace ek;
 

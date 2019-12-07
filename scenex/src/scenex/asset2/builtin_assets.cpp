@@ -1,8 +1,8 @@
 #include "builtin_assets.hpp"
 #include "asset_manager.hpp"
-#include <ek/fs/path.hpp>
-#include <ek/locator.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/path.hpp>
+#include <ek/util/locator.hpp>
+#include <ek/util/logger.hpp>
 #include <ek/audiomini.hpp>
 #include <platform/static_resources.hpp>
 #include <graphics/program.hpp>

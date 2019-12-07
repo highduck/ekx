@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/common_macro.hpp>
 #include <cstdint>
 
 namespace ek {

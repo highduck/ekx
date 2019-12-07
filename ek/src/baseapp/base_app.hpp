@@ -2,8 +2,8 @@
 
 #include <platform/application.hpp>
 #include <ek/math/vec.hpp>
-#include <ek/signals.hpp>
-#include <ek/timer.hpp>
+#include <ek/util/signals.hpp>
+#include <ek/util/timer.hpp>
 
 namespace ek {
 

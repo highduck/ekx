@@ -4,7 +4,7 @@
 #include <ek/flash/doc/graphic_types.h>
 
 #include <pugixml.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek::flash {
 

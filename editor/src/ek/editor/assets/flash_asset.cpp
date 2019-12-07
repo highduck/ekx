@@ -1,6 +1,6 @@
 #include "flash_asset.hpp"
 
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include <utility>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/flash/doc/flash_file.h>

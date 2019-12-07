@@ -2,7 +2,7 @@
 #include <ek/serialize/serialize.hpp>
 #include <ek/system/system.hpp>
 #include <ek/audiomini.hpp>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 
 namespace ek {

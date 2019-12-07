@@ -1,8 +1,8 @@
 #pragma once
 
 #include <ek/math/packed_color.hpp>
-#include <ek/timer.hpp>
-#include <ek/locator.hpp>
+#include <ek/util/timer.hpp>
+#include <ek/util/locator.hpp>
 #include <algorithm>
 
 namespace ek::piko {

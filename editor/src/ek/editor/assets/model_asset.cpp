@@ -2,8 +2,8 @@
 
 #include <scenex/3d/static_mesh.hpp>
 #include <ek/system/system.hpp>
-#include <ek/logger.hpp>
-#include <ek/assets.hpp>
+#include <ek/util/logger.hpp>
+#include <ek/util/assets.hpp>
 #include <graphics/vertex_decl.hpp>
 #include <scenex/data/model_data.hpp>
 #include <ek/editor/obj/obj_loader.hpp>

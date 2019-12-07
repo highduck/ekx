@@ -2,7 +2,7 @@
 
 #include <functional>
 #include <string>
-#include <ek/signals.hpp>
+#include <ek/util/signals.hpp>
 
 namespace ek {
 

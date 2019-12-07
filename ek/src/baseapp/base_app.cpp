@@ -1,12 +1,11 @@
 #include "base_app.hpp"
 
-#include <ek/assets.hpp>
+#include <ek/util/assets.hpp>
 #include <graphics/program.hpp>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <draw2d/drawer.hpp>
 #include <platform/window.hpp>
-#include <ek/logger.hpp>
-#include <ek/timer.hpp>
+#include <ek/util/logger.hpp>
 #include <ek/audiomini.hpp>
 
 namespace ek {
@@ -28,7 +27,7 @@ void base_app_t::on_draw_frame() {
     auto& drawer = resolve<drawer_t>();
     drawer.batcher.stats.reset();
 
-    const float dt = std::min(frame_timer.update(), 0.3f);
+    const double dt = std::min(frame_timer.update(), 0.3);
     // fixed for GIF recorder
     //dt = 1.0f / 60.0f;
 

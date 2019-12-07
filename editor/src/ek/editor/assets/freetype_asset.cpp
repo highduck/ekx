@@ -2,7 +2,7 @@
 
 #include <ek/editor/gui/editor_widgets.hpp>
 #include <ek/editor/assets/editor_temp_atlas.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/spritepack/export_atlas.hpp>
 #include <ek/editor/imgui/imgui.hpp>

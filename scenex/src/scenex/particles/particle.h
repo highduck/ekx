@@ -3,7 +3,7 @@
 #include "particle_decl.h"
 
 #include <scenex/config.h>
-#include <ek/assets.hpp>
+#include <ek/util/assets.hpp>
 #include <scenex/2d/sprite.hpp>
 #include <scenex/2d/font.hpp>
 #include <draw2d/drawer.hpp>

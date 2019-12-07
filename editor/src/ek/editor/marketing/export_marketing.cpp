@@ -7,8 +7,8 @@
 #include <ek/editor/assets/flash_asset.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
-#include <ek/utility/strings.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/strings.hpp>
+#include <ek/util/logger.hpp>
 
 #include <nlohmann/json.hpp>
 #include <fmt/core.h>

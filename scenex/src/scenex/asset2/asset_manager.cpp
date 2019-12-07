@@ -1,8 +1,8 @@
 #include "asset_manager.hpp"
 #include "asset_object.hpp"
 
-#include <ek/logger.hpp>
-#include <ek/fs/path.hpp>
+#include <ek/util/logger.hpp>
+#include <ek/util/path.hpp>
 
 using namespace ek;
 

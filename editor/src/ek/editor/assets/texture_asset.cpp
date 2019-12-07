@@ -1,8 +1,8 @@
 #include "texture_asset.hpp"
 
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/logger.hpp>
-#include <ek/assets.hpp>
+#include <ek/util/logger.hpp>
+#include <ek/util/assets.hpp>
 #include <graphics/program.hpp>
 #include <graphics/vertex_decl.hpp>
 

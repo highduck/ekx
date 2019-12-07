@@ -1,5 +1,5 @@
 #include <ek/audiomini.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 extern "C" {
 

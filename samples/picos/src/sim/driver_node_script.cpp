@@ -1,7 +1,7 @@
 #include "driver_node_script.h"
 #include "motion_system.h"
 
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <scenex/interactive_manager.h>
 #include <scenex/components/transform_2d.h>
 #include <scenex/components/node_t.h>

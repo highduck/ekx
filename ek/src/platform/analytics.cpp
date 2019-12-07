@@ -1,5 +1,5 @@
 #include <platform/analytics.hpp>
-#include <ek/config/detect_platform.hpp>
+#include <ek/util/detect_platform.hpp>
 
 #if EK_ANDROID
 

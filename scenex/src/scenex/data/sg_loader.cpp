@@ -3,13 +3,13 @@
 #include <ek/serialize/streams.hpp>
 #include <scenex/2d/atlas.hpp>
 #include <platform/static_resources.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 using namespace ek;
 
 namespace scenex {
 
-sg_file* sg_load(const array_buffer& buffer) {
+sg_file* sg_load(const std::vector<uint8_t>& buffer) {
     sg_file* sg = nullptr;
 
     if (!buffer.empty()) {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <ek/fs/path.hpp>
+#include <ek/util/path.hpp>
 #include <unordered_map>
 
 namespace ek {

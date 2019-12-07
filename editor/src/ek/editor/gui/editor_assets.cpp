@@ -1,7 +1,7 @@
 #include "editor_assets.hpp"
 
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/assets.hpp>
+#include <ek/util/assets.hpp>
 #include <graphics/program.hpp>
 #include <scenex/3d/material_3d.hpp>
 #include <scenex/3d/static_mesh.hpp>

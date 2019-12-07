@@ -4,6 +4,8 @@ project(ekx LANGUAGES CXX)
 set(EKX_BUILD_TESTS OFF CACHE BOOL "Build EKX unit tests" FORCE)
 mark_as_advanced(EKX_BUILD_TESTS)
 
+set(EKX_BUILD_TESTS ON)
+
 #if ($ENV{CLION_IDE})
 #    set(EKX_BUILD_TESTS ON)
 #endif ()

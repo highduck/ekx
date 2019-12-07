@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <sstream>
-#include <ek/utility/source_location.hpp>
+#include <ek/util/source_location.hpp>
 
 #ifndef __printflike
 #define __printflike(fmtarg, firstvararg)

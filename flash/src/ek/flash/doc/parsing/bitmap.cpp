@@ -4,7 +4,7 @@
 #include <ek/flash/doc/bitmap.h>
 
 #include <ek/serialize/serialize.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
 
@@ -85,9 +85,9 @@ bitmap_t* load_bitmap(const basic_entry& entry) {
         bitmap.height = desc.height;
         bitmap.bpp = desc.stride / bitmap.width;
         bitmap.alpha = desc.alpha != 0;
-        bitmap.data = std::make_unique<array_buffer>(bitmap.width * bitmap.height * bitmap.bpp);
-        const auto bm_size = bitmap.data->size();
-        auto* bm_data = bitmap.data->data();
+        bitmap.data.resize(bitmap.width * bitmap.height * bitmap.bpp);
+        const auto bm_size = bitmap.data.size();
+        auto* bm_data = bitmap.data.data();
         if (desc.compressed != 0) {
             auto written = uncompress(input, bm_data, bm_size);
             assert(written == bm_size);

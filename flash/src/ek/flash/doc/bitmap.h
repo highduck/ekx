@@ -1,9 +1,8 @@
 #pragma once
 
-#include <string>
-#include <memory>
-#include <ek/array_buffer.hpp>
-#include <ek/fs/path.hpp>
+#include <vector>
+#include <cstdint>
+#include <ek/util/path.hpp>
 
 namespace ek::flash {
 
@@ -13,7 +12,7 @@ struct bitmap_t {
     int height = 0;
     int bpp = 4;
     bool alpha = true;
-    std::unique_ptr<array_buffer> data;
+    std::vector<uint8_t> data;
 };
 
 }

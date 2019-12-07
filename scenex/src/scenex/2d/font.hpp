@@ -4,8 +4,7 @@
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
 #include <ek/math/box.hpp>
-#include <ek/array_buffer.hpp>
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/common_macro.hpp>
 #include <ek/serialize/serialize.hpp>
 
 #include <unordered_map>
@@ -77,6 +76,6 @@ public:
                                    float line_spacing = 0.0f) const;
 };
 
-font_t* load_font(const ek::array_buffer& buffer);
+font_t* load_font(const std::vector<uint8_t>& buffer);
 
 }

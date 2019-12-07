@@ -10,7 +10,7 @@
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
 #include <ek/serialize/serialize.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include <functional>
 
 namespace ek {

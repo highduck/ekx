@@ -1,7 +1,7 @@
 #include "program.hpp"
 #include "vertex_decl.hpp"
 #include "gl_debug.hpp"
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include <platform/static_resources.hpp>
 
 namespace ek {
