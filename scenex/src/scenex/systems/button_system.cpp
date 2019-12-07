@@ -7,7 +7,7 @@
 #include <scenex/systems/movie_clip_system.h>
 #include <scenex/components/name_t.h>
 #include <scenex/simple_audio_manager.h>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <platform/analytics.hpp>
 #include <scenex/components/event_handler.h>
 

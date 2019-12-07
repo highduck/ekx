@@ -4,7 +4,7 @@
 #include <scenex/components/event_handler.h>
 #include <scenex/data/sg_data.h>
 #include <scenex/components/script_t.h>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 
 namespace scenex {
 

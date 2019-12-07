@@ -1,8 +1,8 @@
 #include "graphics.hpp"
 
 #include <platform/window.hpp>
-#include <ek/logger.hpp>
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/logger.hpp>
+#include <ek/util/common_macro.hpp>
 #include "gl_def.hpp"
 #include "blend_mode.hpp"
 #include "gl_debug.hpp"

@@ -9,7 +9,7 @@
 #include <scenex/components/button_t.h>
 #include <scenex/components/interactive_t.h>
 #include <scenex/components/node_filters.h>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 namespace scenex {
 

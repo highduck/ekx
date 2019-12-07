@@ -2,7 +2,7 @@
 
 #include "basic_types.h"
 #include <ek/flash/doc/blend_mode.h>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek::flash {
 

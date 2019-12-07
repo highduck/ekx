@@ -11,7 +11,7 @@ window_creation_config_t::window_creation_config_t(std::string title_, float wid
 }
 
 window_creation_config_t::window_creation_config_t() noexcept
-        : title{"ek application"},
+        : title{},
           width{960.0f},
           height{720.0f},
           landscape{true},

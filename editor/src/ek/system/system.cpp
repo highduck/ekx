@@ -1,8 +1,8 @@
 #include "system.hpp"
 
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include <ek/serialize/streams.hpp>
-#include <ek/utility/strings.hpp>
+#include <ek/util/strings.hpp>
 
 #include <cstdio>
 #include <fstream>
@@ -343,20 +343,19 @@ std::vector<path_t> search_files(const std::string& pattern, const path_t& path)
     return res;
 }
 
-array_buffer read_file(const path_t& path) {
-    array_buffer buffer;
+std::vector<uint8_t> read_file(const path_t& path) {
+    std::vector<uint8_t> buffer;
     auto* stream = fopen(path.c_str(), "rb");
     if (stream) {
         fseek(stream, 0, SEEK_END);
-        buffer = array_buffer{
-                static_cast<size_t>(ftell(stream))
-        };
+        buffer.resize(static_cast<size_t>(ftell(stream)));
         fseek(stream, 0, SEEK_SET);
 
         fread(buffer.data(), buffer.size(), 1u, stream);
 
         if (ferror(stream) != 0) {
-            buffer = array_buffer{};
+            buffer.resize(0);
+            buffer.shrink_to_fit();
         }
 
         fclose(stream);

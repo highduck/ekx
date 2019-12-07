@@ -1,7 +1,7 @@
 #include "app_utils.hpp"
 #include "basic_application.h"
 
-#include <ek/assets.hpp>
+#include <ek/util/assets.hpp>
 
 #include <graphics/vertex_decl.hpp>
 #include <graphics/texture.hpp>
@@ -9,7 +9,7 @@
 #include <scenex/2d/atlas.hpp>
 #include <scenex/2d/font.hpp>
 
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <draw2d/drawer.hpp>
 #include <ek/imaging/drawing.hpp>
 

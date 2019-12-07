@@ -1,7 +1,7 @@
 #include <ek/mini_ads.hpp>
 #include <platform/application.hpp>
-#include <ek/timer.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/timer.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek {
 
@@ -9,17 +9,9 @@ class ads_fake_timer : public application_listener_t {
 public:
     ~ads_fake_timer() override = default;
 
-    void onKeyEvent(const key_event_t&) override {}
+    void on_event(const event_t&) override {}
 
-    void on_text_event(const text_event_t&) override {}
-
-    void onMouseEvent(const mouse_event_t&) override {}
-
-    void onTouchEvent(const touch_event_t&) override {}
-
-    void onAppEvent(const app_event_t&) override {}
-
-    void onDrawFrame() override {
+    void on_draw_frame() override {
         if (fn_ && time_ > 0.0f && timer_.read_seconds() >= time_) {
             time_ = 0.0f;
             fn_();
@@ -88,7 +80,7 @@ void ads_play_reward_video() {
 void ads_show_interstitial() {}
 
 void ads_listen(const std::function<void(AdsEventType type)>& callback) {
-ads_registered_callbacks = callback;
+    ads_registered_callbacks = callback;
 }
 
 void ads_purchase_remove() {}

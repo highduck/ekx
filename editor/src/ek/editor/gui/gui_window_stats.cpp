@@ -3,7 +3,7 @@
 #include <scenex/ek/basic_application.h>
 #include <baseapp/base_app.hpp>
 #include <draw2d/drawer.hpp>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 
 namespace scenex {

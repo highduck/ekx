@@ -12,8 +12,8 @@
 #include <scenex/utility/scene_management.h>
 #include <platform/game_center.hpp>
 #include <utils/basic_game_utility.hpp>
-#include <ek/logger.hpp>
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/logger.hpp>
+#include <ek/util/common_macro.hpp>
 #include <scenex/asset2/asset_manager.hpp>
 #include <scenex/asset2/builtin_assets.hpp>
 

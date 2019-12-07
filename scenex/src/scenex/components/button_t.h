@@ -2,7 +2,7 @@
 
 #include <string>
 #include <ek/math/easing.hpp>
-#include <ek/signals.hpp>
+#include <ek/util/signals.hpp>
 #include <scenex/config.h>
 
 namespace scenex {

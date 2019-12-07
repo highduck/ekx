@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/common_macro.hpp>
 #include "gl_def.hpp"
 #include "texture.hpp"
 

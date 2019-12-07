@@ -1,5 +1,10 @@
 #include "strings.hpp"
 
+// helper for ignore_case comparison
+#if defined(_WIN32) || defined(_WIN64)
+#define strcasecmp stricmp
+#endif
+
 namespace ek {
 
 bool ends_with(const std::string& str, const char end) {
@@ -80,6 +85,10 @@ std::string format_time_mm_ss(int seconds) {
     result += ':';
     append_itoa_fixed_pad_2(secs, result);
     return result;
+}
+
+bool equals_ignore_case(const std::string& a, const char* b) {
+    return b && strcasecmp(a.c_str(), b) == 0;
 }
 
 }

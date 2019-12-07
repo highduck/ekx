@@ -1,4 +1,4 @@
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include "dump.h"
 
 #include "flash_file.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <unordered_map>
-#include <ek/signals.hpp>
+#include <ek/util/signals.hpp>
 #include <scenex/config/ecs.h>
 #include <string>
 #include <any>

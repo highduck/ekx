@@ -1,4 +1,4 @@
-#include <ek/utility/strings.hpp>
+#include <ek/util/strings.hpp>
 #include <gtest/gtest.h>
 
 using std::vector;

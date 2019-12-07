@@ -2,10 +2,10 @@
 
 #include <scenex/config/ecs.h>
 
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <baseapp/base_app.hpp>
 #include <platform/application.hpp>
-#include <ek/signals.hpp>
+#include <ek/util/signals.hpp>
 #include "app_utils.hpp"
 
 namespace scenex {

@@ -1,7 +1,7 @@
 #include "main_flow.h"
 
 #include <platform/window.hpp>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 
 #include <scenex/components/transform_2d.h>
 #include <scenex/simple_audio_manager.h>

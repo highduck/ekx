@@ -1,4 +1,4 @@
-#include <ek/signals.hpp>
+#include <ek/util/signals.hpp>
 
 #include <gtest/gtest.h>
 

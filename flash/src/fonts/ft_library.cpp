@@ -1,6 +1,6 @@
 #include "ft_library.h"
 #include <cassert>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek::font_lib {
 

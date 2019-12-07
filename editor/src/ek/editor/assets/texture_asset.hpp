@@ -2,7 +2,7 @@
 
 #include "editor_asset.hpp"
 #include <vector>
-#include <ek/fs/path.hpp>
+#include <ek/util/path.hpp>
 
 namespace ek {
 

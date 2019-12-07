@@ -2,7 +2,7 @@
 
 #include <platform/user_preferences.hpp>
 #include <platform/application.hpp>
-#include <ek/signals.hpp>
+#include <ek/util/signals.hpp>
 #include <string>
 
 namespace scenex {

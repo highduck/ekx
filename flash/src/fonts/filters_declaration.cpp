@@ -1,4 +1,4 @@
-#include <ek/utility/strings.hpp>
+#include <ek/util/strings.hpp>
 #include "filters_declaration.hpp"
 
 namespace ek {

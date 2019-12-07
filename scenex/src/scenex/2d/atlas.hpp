@@ -1,8 +1,8 @@
 #pragma once
 
 #include "sprite.hpp"
-#include <ek/utility/common_macro.hpp>
-#include <ek/assets.hpp>
+#include <ek/util/common_macro.hpp>
+#include <ek/util/assets.hpp>
 #include <cstdint>
 #include <string>
 #include <vector>

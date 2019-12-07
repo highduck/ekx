@@ -1,7 +1,7 @@
 #include "gl_debug.hpp"
 
 #include "gl_def.hpp"
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include <cstdlib>
 
 namespace ek {

@@ -1,9 +1,9 @@
 #include "display_2d.h"
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <draw2d/drawer.hpp>
 #include <scenex/2d/sprite.hpp>
 #include <scenex/2d/font.hpp>
-#include <ek/assets.hpp>
+#include <ek/util/assets.hpp>
 
 using namespace ek;
 

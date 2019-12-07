@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/common_macro.hpp>
 
 
 using namespace ek;

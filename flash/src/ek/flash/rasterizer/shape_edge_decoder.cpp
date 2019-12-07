@@ -1,4 +1,4 @@
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include "shape_edge_decoder.h"
 
 namespace ek::flash {

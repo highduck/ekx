@@ -3,8 +3,8 @@
 #include "transform_3d.hpp"
 #include "light_3d.hpp"
 
-#include <ek/locator.hpp>
-#include <ek/timer.hpp>
+#include <ek/util/locator.hpp>
+#include <ek/util/timer.hpp>
 #include <draw2d/drawer.hpp>
 #include <platform/window.hpp>
 #include <scenex/components/node_t.h>

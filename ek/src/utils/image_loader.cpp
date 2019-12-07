@@ -1,7 +1,7 @@
 #include <ek/imaging/image.hpp>
 #include <ek/imaging/decoder.hpp>
-#include <ek/fs/path.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/path.hpp>
+#include <ek/util/logger.hpp>
 #include <platform/static_resources.hpp>
 
 namespace ek {

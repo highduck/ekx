@@ -3,7 +3,6 @@
 #include <ek/math/packed_color.hpp>
 
 #include <vector>
-#include <ek/array_buffer.hpp>
 #include <sstream>
 
 using std::istream;
@@ -81,7 +80,7 @@ struct obj_model_t {
     }
 };
 
-mesh_data_t load_obj(const ek::array_buffer& buffer) {
+mesh_data_t load_obj(const std::vector<uint8_t>& buffer) {
 
     obj_model_t obj_model{};
     {

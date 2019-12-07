@@ -1,7 +1,7 @@
 #pragma once
 
 #include <scenex/data/sg_data.h>
-#include <ek/assets.hpp>
+#include <ek/util/assets.hpp>
 #include <optional>
 
 namespace scenex {

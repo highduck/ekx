@@ -2,11 +2,11 @@
 
 #include <vector>
 #include "batcher.hpp"
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/common_macro.hpp>
 #include <ek/math/mat3x2.hpp>
 #include <graphics/program.hpp>
 #include <graphics/texture.hpp>
-#include <ek/assets.hpp>
+#include <ek/util/assets.hpp>
 #include <ek/math/circle.hpp>
 
 namespace ek {

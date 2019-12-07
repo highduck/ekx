@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstring>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 #if defined(__EMSCRIPTEN__)
 
@@ -20,21 +20,20 @@
 
 namespace ek {
 
-array_buffer get_content(const char* path) {
+std::vector<uint8_t> get_content(const char* path) {
     assert(path);
-    array_buffer buffer;
+    std::vector<uint8_t> buffer;
     auto* stream = fopen(path, "rb");
     if (stream) {
         fseek(stream, 0, SEEK_END);
-        buffer = array_buffer{
-                static_cast<size_t>(ftell(stream))
-        };
+        buffer.resize(static_cast<size_t>(ftell(stream)));
         fseek(stream, 0, SEEK_SET);
 
         fread(buffer.data(), buffer.size(), 1u, stream);
 
         if (ferror(stream) != 0) {
-            buffer = array_buffer{};
+            buffer.resize(0);
+            buffer.shrink_to_fit();
         }
 
         fclose(stream);
@@ -42,7 +41,7 @@ array_buffer get_content(const char* path) {
     return buffer;
 }
 
-bool save_content(const char* path, const array_buffer& buffer) {
+bool save_content(const char* path, const std::vector<uint8_t>& buffer) {
     assert(path);
     auto* stream = fopen(path, "wb");
     if (stream) {
@@ -109,10 +108,11 @@ void get_resource_content_async(const char* path, std::function<void(array_buffe
         EK_DEBUG("Finished downloading %llu bytes from URL %s.\n", fetch->numBytes, fetch->url);
         const auto user_callback_id = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(fetch->userData));
         const auto& user_callback = fetch_callbacks_[user_callback_id];
-        array_buffer buffer{
-                reinterpret_cast<const uint8_t*>(fetch->data),
-                static_cast<size_t>(fetch->numBytes)
-        };
+        array_buffer buffer;
+        buffer.assign(fetch->data, fetch->data + fetch->numBytes);
+//                static_cast<size_t>(fetch->numBytes),
+//                reinterpret_cast<const uint8_t*>(fetch->data)
+//        };
         emscripten_fetch_close(fetch);
         user_callback(std::move(buffer));
         fetch_callbacks_.erase(user_callback_id);
@@ -122,7 +122,7 @@ void get_resource_content_async(const char* path, std::function<void(array_buffe
 
 #else
 
-void get_resource_content_async(const char* path, std::function<void(array_buffer)> cb) {
+void get_resource_content_async(const char* path, std::function<void(std::vector<uint8_t>)> cb) {
     cb(get_resource_content(path));
 }
 

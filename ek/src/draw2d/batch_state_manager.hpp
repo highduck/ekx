@@ -1,7 +1,7 @@
 #pragma once
 
 #include <graphics/blend_mode.hpp>
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/common_macro.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/mat4x4.hpp>
 #include <functional>

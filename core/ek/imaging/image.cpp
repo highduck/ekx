@@ -1,6 +1,6 @@
 #include "image.hpp"
 
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include <algorithm>
 
 namespace ek {

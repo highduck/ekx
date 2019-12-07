@@ -1,4 +1,4 @@
-#include <ek/bit_vector.hpp>
+#include <ek/util/bit_vector.hpp>
 #include <gtest/gtest.h>
 
 using namespace ek;

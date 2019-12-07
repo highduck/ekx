@@ -1,7 +1,7 @@
 #include "drawer.hpp"
 
-#include <ek/locator.hpp>
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/locator.hpp>
+#include <ek/util/common_macro.hpp>
 #include <graphics/gl_def.hpp>
 #include <ek/math/matrix_camera.hpp>
 

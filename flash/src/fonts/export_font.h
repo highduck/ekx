@@ -7,7 +7,7 @@
 #include <ek/spritepack/sprite_data.hpp>
 #include <ek/flash/rasterizer/software_filters.h>
 #include <ek/spritepack/atlas_declaration.hpp>
-#include <ek/fs/path.hpp>
+#include <ek/util/path.hpp>
 #include "ft_library.h"
 #include "font_declaration.hpp"
 #include "filters_declaration.hpp"

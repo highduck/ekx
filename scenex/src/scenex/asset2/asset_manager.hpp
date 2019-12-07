@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include <ek/fs/path.hpp>
+#include <ek/util/path.hpp>
 
 namespace scenex {
 

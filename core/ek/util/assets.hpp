@@ -2,7 +2,7 @@
 
 #include <string>
 #include <unordered_map>
-#include <ek/utility/common_macro.hpp>
+#include <ek/util/common_macro.hpp>
 
 namespace ek {
 

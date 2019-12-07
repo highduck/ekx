@@ -1,6 +1,6 @@
 #include "batch_state_manager.hpp"
 
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <graphics/program.hpp>
 #include <graphics/texture.hpp>
 

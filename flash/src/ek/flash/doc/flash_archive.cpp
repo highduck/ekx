@@ -3,7 +3,7 @@
 #include <pugixml.hpp>
 #include <miniz/zip_file.hpp>
 #include <fstream>
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek::flash {
 

@@ -1,8 +1,8 @@
 #include <platform/boot.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
-#include <ek/logger.hpp>
-#include <ek/utility/strings.hpp>
+#include <ek/util/logger.hpp>
+#include <ek/util/strings.hpp>
 
 #include <ek/editor/marketing/export_marketing.hpp>
 
@@ -29,11 +29,11 @@ void main() {
     using namespace std;
     using namespace scenex;
 
-    EK_INFO << "== EKC utility ==";
+    EK_INFO << "== EKC util ==";
     EK_INFO << "Executable path: " << get_executable_path();
     EK_INFO << "Working dir: " << current_working_directory();
     EK_INFO << "Arguments: ";
-    auto args = get_program_arguments();
+    auto args = get_program_arguments().to_vector();
     EK_INFO << join(args, " ");
 
     if (args.size() <= 1) {
@@ -55,7 +55,7 @@ void main() {
                 } else if (what == "assets") {
                     editor_project_t project{};
                     project.base_path = path_t{args[3]};
-                    project.populate();
+                    project.populate(false);
                     project.build(path_t{args[4]});
                 }
             }

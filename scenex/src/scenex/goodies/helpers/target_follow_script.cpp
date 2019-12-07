@@ -2,7 +2,7 @@
 
 #include <scenex/config/ecs.h>
 #include <scenex/utility/scene_management.h>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <draw2d/drawer.hpp>
 
 using namespace ek;

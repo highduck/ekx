@@ -155,15 +155,15 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES iOS)
             platforms/apple/application.mm
 
             platforms/apple/audiomini_apple.mm
-            platforms/mac/audiomini/CDAudioManager.h
-            platforms/mac/audiomini/CDAudioManager.mm
-            platforms/mac/audiomini/CDConfig.h
-            platforms/mac/audiomini/CDOpenALSupport.h
-            platforms/mac/audiomini/CDOpenALSupport.mm
-            platforms/mac/audiomini/CocosDenshion.h
-            platforms/mac/audiomini/CocosDenshion.mm
-            platforms/mac/audiomini/SimpleAudioEngine_objc.h
-            platforms/mac/audiomini/SimpleAudioEngine_objc.mm
+            platforms/ios/audiomini/CDAudioManager.h
+            platforms/ios/audiomini/CDAudioManager.mm
+            platforms/ios/audiomini/CDConfig.h
+            platforms/ios/audiomini/CDOpenALSupport.h
+            platforms/ios/audiomini/CDOpenALSupport.mm
+            platforms/ios/audiomini/CocosDenshion.h
+            platforms/ios/audiomini/CocosDenshion.mm
+            platforms/ios/audiomini/SimpleAudioEngine_objc.h
+            platforms/ios/audiomini/SimpleAudioEngine_objc.mm
             )
 
     target_link_libraries(${PROJECT_NAME}

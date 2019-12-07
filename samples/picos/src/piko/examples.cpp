@@ -1,7 +1,7 @@
 #include "examples.h"
 #include "piko.h"
 #include <draw2d/drawer.hpp>
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <ek/math/rand.hpp>
 #include <scenex/systems/game_time.h>
 #include <ek/math/matrix_camera.hpp>

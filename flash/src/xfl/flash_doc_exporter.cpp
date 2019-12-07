@@ -3,8 +3,8 @@
 #include <ek/flash/doc/flash_file.h>
 #include <ek/flash/rasterizer/render_to_sprite.h>
 #include <ek/flash/rasterizer/dom_scanner.h>
-#include <ek/utility/strings.hpp>
-#include <ek/logger.hpp>
+#include <ek/util/strings.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek::flash {
 
@@ -14,15 +14,12 @@ inline float sign(float a) {
     return a > 0.0f ? 1.0f : (a < 0.0f ? -1.0f : 0.0f);
 }
 
-static const char* kHitRectTag = "hitrect";
-static const char* kClipRectTag = "cliprect";
-
 bool is_hit_rect(const string& str) {
-    return cstr::equals_ignore_case(str, kHitRectTag);
+    return equals_ignore_case(str, "hitrect");
 }
 
 bool is_clip_rect(const string& str) {
-    return cstr::equals_ignore_case(str, kClipRectTag);
+    return equals_ignore_case(str, "cliprect");
 }
 
 void process_transform(const element_t& el, export_item_t& item) {

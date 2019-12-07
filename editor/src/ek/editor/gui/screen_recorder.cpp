@@ -1,7 +1,7 @@
 #include "screen_recorder.hpp"
 
 #include "../../../../../external/stb/stb_image_write.h"
-#include <ek/locator.hpp>
+#include <ek/util/locator.hpp>
 #include <ek/math/box.hpp>
 #include <graphics/graphics.hpp>
 #include <sys/stat.h>

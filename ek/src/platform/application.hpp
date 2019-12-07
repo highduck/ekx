@@ -1,7 +1,6 @@
 #pragma once
 
 #include <platform/window.hpp>
-#include <platform/user_preferences.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -75,8 +74,7 @@ enum class key_code {
     MaxCount
 };
 
-
-struct event_t {
+struct event_t final {
     event_type type;
     // touch_id, or mouse_button
     uint64_t id = 0;
