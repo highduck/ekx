@@ -18,8 +18,7 @@
 
 namespace ek {
 void main() {
-    setup_application_window({"Piko",
-                              {1024, 768}});
+    g_app.window_config = {"Piko", {1024, 768}};
     start_application();
 }
 }

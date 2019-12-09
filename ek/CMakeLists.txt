@@ -122,9 +122,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 
     target_link_options(${PROJECT_NAME}
             PUBLIC
-            --js-library ${PROJECT_SOURCE_DIR}/platforms/web/audiomini.js
+            --js-library ${PROJECT_SOURCE_DIR}/platforms/web/web.js
             )
-elseif (${CMAKE_SYSTEM_NAME} MATCHES iOS)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
 
     message("Platform: IOS")
 
@@ -145,7 +145,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES iOS)
             platforms/ios/ios_sharing.mm
             platforms/ios/ios_game_center.mm
 
-            platforms/apple/application.mm
+            platforms/apple/apple_common.mm
 
             platforms/apple/audiomini_apple.mm
             platforms/ios/audiomini/CDAudioManager.h
@@ -198,12 +198,11 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             platforms/mac/mac_opengl_view.h
             platforms/mac/mac_app_delegate.mm
             platforms/mac/mac_app_delegate.h
-            platforms/mac/mac_window.mm
             platforms/mac/mac_sharing.cpp
             platforms/mac/mac_input.mm
             platforms/mac/mac_input.h
 
-            platforms/apple/application.mm
+            platforms/apple/apple_common.mm
 
             platforms/apple/audiomini_apple.mm
             platforms/mac/audiomini/CDAudioManager.h

@@ -5,7 +5,10 @@
 
 namespace ek {
 
-void osx_handle_mouse_wheel_scroll(const NSEvent* event, event_t& to_event);
+void macos_init_common();
+void set_view_mouse_cursor(NSView* view);
+
+void handle_mouse_event(NSView* view, NSEvent* event);
 bool is_text_event(const NSEvent* event);
 bool is_special_character(unichar ch);
 void setup_modifiers(NSUInteger flags, event_t& to_event);

@@ -135,7 +135,7 @@ AAssetManager* get_asset_manager() {
 }
 
 void start_application() {
-    g_app.init();
+    dispatch_init();
 
     auto* env = android_jni_get_env();
     auto class_ref = env->FindClass("ekapp/EKActivity");

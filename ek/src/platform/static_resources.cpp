@@ -75,7 +75,7 @@ array_buffer get_resource_content(const char* path) {
 
 #define EK_STATIC_RESOURCES_SYS
 
-array_buffer get_resource_content(const char* path) {
+std::vector<uint8_t> get_resource_content(const char* path) {
     return get_content(path);
 }
 
@@ -84,9 +84,9 @@ array_buffer get_resource_content(const char* path) {
 #if defined(__EMSCRIPTEN__)
 
 static uint32_t next_callback_id_ = 0;
-static std::unordered_map<uint32_t, std::function<void(array_buffer)>> fetch_callbacks_{};
+static std::unordered_map<uint32_t, std::function<void(std::vector<uint8_t>)>> fetch_callbacks_{};
 
-void get_resource_content_async(const char* path, std::function<void(array_buffer)> callback) {
+void get_resource_content_async(const char* path, std::function<void(std::vector<uint8_t>)> callback) {
 
     const auto callback_id = next_callback_id_++;
     fetch_callbacks_[callback_id] = std::move(callback);
@@ -101,18 +101,14 @@ void get_resource_content_async(const char* path, std::function<void(array_buffe
         const auto user_callback_id = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(fetch->userData));
         const auto& user_callback = fetch_callbacks_[user_callback_id];
         emscripten_fetch_close(fetch);
-        user_callback(array_buffer{});
+        user_callback({});
         fetch_callbacks_.erase(user_callback_id);
     };
     attr.onsuccess = [](emscripten_fetch_t* fetch) {
         EK_DEBUG("Finished downloading %llu bytes from URL %s.\n", fetch->numBytes, fetch->url);
         const auto user_callback_id = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(fetch->userData));
         const auto& user_callback = fetch_callbacks_[user_callback_id];
-        array_buffer buffer;
-        buffer.assign(fetch->data, fetch->data + fetch->numBytes);
-//                static_cast<size_t>(fetch->numBytes),
-//                reinterpret_cast<const uint8_t*>(fetch->data)
-//        };
+        std::vector<uint8_t> buffer{fetch->data, fetch->data + fetch->numBytes};
         emscripten_fetch_close(fetch);
         user_callback(std::move(buffer));
         fetch_callbacks_.erase(user_callback_id);
