@@ -50,17 +50,23 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
             -s WASM=1
             -s WASM_ASYNC_COMPILATION=1
             -s DISABLE_EXCEPTION_CATCHING=1
-            -s NO_EXIT_RUNTIME=1
             -s ALLOW_MEMORY_GROWTH=1
             -s FILESYSTEM=0
             )
+
+    # defaults:
+    # -s DISABLE_EXCEPTION_CATCHING=1
+    # -s WASM_OBJECT_FILES=0
+    # -s ASSERTIONS=1
+    # TODO: strange runtime DOM exception error with Release, "-s STRICT=1"
+
     if (CMAKE_BUILD_TYPE MATCHES Debug)
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
-                "-s FETCH=1 -s WASM=1 -s WASM_ASYNC_COMPILATION=1 -s DISABLE_EXCEPTION_CATCHING=1 -s NO_EXIT_RUNTIME=1 -s ALLOW_MEMORY_GROWTH=1 -s FILESYSTEM=0 -s ASSERTIONS=1"
+                "-s ENVIRONMENT=web -s FETCH=1 -s ALLOW_MEMORY_GROWTH=1 -s FILESYSTEM=0"
                 )
     else ()
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
-                "-s FETCH=1 -s WASM=1 -s WASM_ASYNC_COMPILATION=1 -s DISABLE_EXCEPTION_CATCHING=1 -s NO_EXIT_RUNTIME=1 -s ALLOW_MEMORY_GROWTH=1 -s FILESYSTEM=0 -s WASM_OBJECT_FILES=0 -s ASSERTIONS=0 --closure 1"
+                "-s ENVIRONMENT=web -s FETCH=1 -s ALLOW_MEMORY_GROWTH=1 -s FILESYSTEM=0 -s ASSERTIONS=0 --closure 1"
                 )
         target_link_options(${PROJECT_NAME} PUBLIC
                 --llvm-lto 1

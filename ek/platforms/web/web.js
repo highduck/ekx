@@ -12,7 +12,7 @@ mergeInto(LibraryManager.library, {
         ];
         cursor = cursor | 0;
         if (cursor >= 0 && cursor < map.length) {
-            gameview = document.getElementById("gameview");
+            var gameview = document.getElementById("gameview");
             if (gameview) {
                 gameview.style.cursor = map[cursor];
             }
