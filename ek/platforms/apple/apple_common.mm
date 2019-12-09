@@ -1,6 +1,5 @@
-#include <TargetConditionals.h>
-//#import <CoreFoundation/CoreFoundation.h>
 #include <ek/app/app.hpp>
+#include <TargetConditionals.h>
 
 #if TARGET_OS_IOS || TARGET_OS_TV
 
@@ -9,6 +8,8 @@
 #else
 
 #import <mac_app_delegate.h>
+#include "apple_common.h"
+
 
 #endif
 
@@ -35,10 +36,6 @@ void start_application() {
 #endif
 }
 
-void application_t::exit(int code) {
-    ::exit(code);
-}
-
 std::string get_device_lang() {
     std::string result;
     CFLocaleRef locale = CFLocaleCopyCurrent();
@@ -53,4 +50,15 @@ std::string get_device_lang() {
     return result;
 }
 
+namespace apple {
+
+void handle_exit_request() {
+    if (g_app.require_exit) {
+        g_app.require_exit = false;
+        ::exit(g_app.exit_code);
+    }
+}
+
+
+}
 }

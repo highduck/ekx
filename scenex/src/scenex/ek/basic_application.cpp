@@ -25,8 +25,8 @@ using ek::g_app;
 using ek::resolve;
 
 basic_application::basic_application()
-        : base_resolution{static_cast<float>(g_app.creation_config.size.x),
-                          static_cast<float>(g_app.creation_config.size.y)} {
+        : base_resolution{static_cast<float>(g_app.window_config.size.x),
+                          static_cast<float>(g_app.window_config.size.y)} {
 
     ek::assert_created_once<basic_application>();
 

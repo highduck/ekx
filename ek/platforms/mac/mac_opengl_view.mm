@@ -1,18 +1,10 @@
 #include "mac_opengl_view.h"
 #include "mac_input.h"
+#include <apple_common.h>
 
 using namespace ek;
 
-@interface NSCursor (HelpCursor)
-+ (NSCursor*)_helpCursor;
-@end
-
 @implementation MacOpenGLView
-
-- (instancetype)init {
-    self = [super init];
-    return self;
-}
 
 //- (BOOL)wantsLayer {
 //    return YES;
@@ -69,15 +61,18 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(windowWillClose:)
                                                  name:NSWindowWillCloseNotification
-                                               object:[self window]];
+                                               object:self.window];
 }
 
 - (void)windowWillClose:(__unused NSNotification*)notification {
-// Stop the display link when the window is closing because default
-// OpenGL render buffers will be destroyed.  If display link continues to
-// fire without renderbuffers, OpenGL draw calls will set errors.
-
-    CVDisplayLinkStop(displayLink);
+    // tricky check we are closing owner window
+    // it could be FullscreenToolbar window when you exit MacOS default Maximized mode
+    if (notification.object == self.window) {
+        // Stop the display link when the window is closing because default
+        // OpenGL render buffers will be destroyed.  If display link continues to
+        // fire without renderbuffers, OpenGL draw calls will set errors.
+        CVDisplayLinkStop(displayLink);
+    }
 }
 
 - (void)initGL {
@@ -90,15 +85,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
 
     // Synchronize buffer swaps with vertical refresh rate
     GLint swapInt = 1;
-    //GLint swapInt = 0;
-    [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
+    [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLContextParameterSwapInterval];
 
     [self handleResize];
-
-    // Init our renderer.  Use 0 for the defaultFBO which is appropriate for
-    // OSX (but not iOS since iOS apps must create their own FBO)
-
-    //_renderer = [[OpenGLRenderer alloc] initWithDefaultFBO:0];
 }
 
 - (void)reshape {
@@ -114,9 +103,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
     //[[self openGLContext] update];
 
     [self handleResize];
-    [[self openGLContext] update];
+    [self.openGLContext update];
 //    CGLFlushDrawable([[self openGLContext] CGLContextObj]);//
-    CGLUnlockContext([[self openGLContext] CGLContextObj]);
+    CGLUnlockContext([self.openGLContext CGLContextObj]);
 }
 
 - (BOOL)acceptsFirstResponder {
@@ -124,27 +113,22 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
 }
 
 - (void)handleResize {
-    g_app.content_scale = self.window.backingScaleFactor;
+    const auto scale = self.window.backingScaleFactor;
+    const auto window_size = self.bounds.size;
+    const auto drawable_size = [self convertRectToBacking:self.bounds].size;
 
-    // Get the view size in Points
-    NSRect viewRectPoints = [self bounds];
-    g_app.window_size = {viewRectPoints.size.width, viewRectPoints.size.height};
-
-    // Rendering at retina resolutions will reduce aliasing, but at the potential
-    // cost of framerate and battery life due to the GPU needing to render more
-    // pixels.
-
-    // Any calculations the renderer does which use pixel dimentions, must be
-    // in "retina" space.  [NSView convertRectToBacking] converts point sizes
-    // to pixel sizes.  Thus the renderer gets the size in pixels, not points,
-    // so that it can set it's viewport and perform and other pixel based
-    // calculations appropriately.
-    // viewRectPixels will be larger than viewRectPoints for retina displays.
-    // viewRectPixels will be the same as viewRectPoints for non-retina displays
-
-    NSRect viewRectPixels = [self convertRectToBacking:[self bounds]];
-    g_app.drawable_size = {viewRectPixels.size.width, viewRectPixels.size.height};
-    g_app.size_changed = true;
+    if (g_app.content_scale != scale ||
+        g_app.window_size.x != window_size.width ||
+        g_app.window_size.y != window_size.height ||
+        g_app.drawable_size.x != drawable_size.width ||
+        g_app.drawable_size.y != drawable_size.height) {
+        g_app.content_scale = scale;
+        g_app.window_size.x = window_size.width;
+        g_app.window_size.y = window_size.height;
+        g_app.drawable_size.x = drawable_size.width;
+        g_app.drawable_size.y = drawable_size.height;
+        g_app.size_changed = true;
+    }
 }
 
 // Called whenever graphics state updated (such as window resize)
@@ -179,6 +163,15 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
 
     CGLFlushDrawable([[self openGLContext] CGLContextObj]);
     CGLUnlockContext([[self openGLContext] CGLContextObj]);
+
+    if (g_app.cursor_dirty) {
+        g_app.cursor_dirty = false;
+        [self.window performSelectorOnMainThread:@selector(invalidateCursorRectsForView:)
+                                      withObject:self
+                                   waitUntilDone:NO];
+    }
+
+    apple::handle_exit_request();
 }
 
 - (void)dealloc {
@@ -191,25 +184,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
 
 - (void)resetCursorRects {
     [super resetCursorRects];
-    NSCursor* cursor = nil;
-
-    switch (g_app.cursor()) {
-        case mouse_cursor::button:
-            cursor = NSCursor.pointingHandCursor;
-            break;
-        case mouse_cursor::help:
-            cursor = NSCursor._helpCursor;
-            break;
-        case mouse_cursor::arrow:
-        case mouse_cursor::parent:
-            cursor = NSCursor.arrowCursor;
-            break;
-    }
-
-    if (cursor) {
-        [self addCursorRect:[self bounds] cursor:cursor];
-        [cursor set];
-    }
+    set_view_mouse_cursor(self);
 }
 
 /**** HANDLING MOUSE ****/
@@ -218,114 +193,56 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
     return YES;
 }
 
-- (void)handleMouse:(NSEvent*)event {
-    const NSPoint location = [self convertPoint:event.locationInWindow fromView:nil];
-    event_t ev{};
-    ev.set_position(location.x, location.y, self.window.backingScaleFactor);
-
-    switch (event.type) {
-        case NSEventTypeLeftMouseDown:
-        case NSEventTypeLeftMouseDragged:
-        case NSEventTypeLeftMouseUp:
-            ev.button = mouse_button::left;
-            break;
-        case NSEventTypeRightMouseDown:
-        case NSEventTypeRightMouseDragged:
-        case NSEventTypeRightMouseUp:
-            ev.button = mouse_button::right;
-            break;
-        case NSEventTypeOtherMouseDown:
-        case NSEventTypeOtherMouseDragged:
-        case NSEventTypeOtherMouseUp:
-            ev.button = mouse_button::other;
-            break;
-        default:
-            break;
-    }
-
-    switch (event.type) {
-        case NSEventTypeLeftMouseDown:
-        case NSEventTypeRightMouseDown:
-        case NSEventTypeOtherMouseDown:
-            ev.type = event_type::mouse_down;
-            break;
-        case NSEventTypeLeftMouseUp:
-        case NSEventTypeRightMouseUp:
-        case NSEventTypeOtherMouseUp:
-            ev.type = event_type::mouse_up;
-            break;
-        case NSEventTypeLeftMouseDragged:
-        case NSEventTypeRightMouseDragged:
-        case NSEventTypeOtherMouseDragged:
-        case NSEventTypeMouseMoved:
-            ev.type = event_type::mouse_move;
-            break;
-        case NSEventTypeMouseEntered:
-            ev.type = event_type::mouse_enter;
-            break;
-        case NSEventTypeMouseExited:
-            ev.type = event_type::mouse_exit;
-            break;
-        case NSEventTypeScrollWheel:
-            ev.type = event_type::mouse_scroll;
-            osx_handle_mouse_wheel_scroll(event, ev);
-            break;
-        default:
-            break;
-    }
-    g_app.dispatch(ev);
-}
-
 - (void)mouseDown:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)mouseUp:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)rightMouseDown:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)rightMouseUp:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)otherMouseDown:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)otherMouseUp:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)mouseMoved:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)mouseDragged:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)rightMouseDragged:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)otherMouseDragged:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)mouseEntered:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)mouseExited:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 - (void)scrollWheel:(NSEvent*)event {
-    [self handleMouse:event];
+    handle_mouse_event(self, event);
 }
 
 /**** HANDLE TOUCH *****/

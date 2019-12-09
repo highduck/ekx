@@ -263,7 +263,7 @@ void update_mouse_cursor() {
             default:
                 break;
         }
-        g_app.set_cursor(cursor);
+        g_app.cursor = cursor;
         cursor_visible = true;
     }
 

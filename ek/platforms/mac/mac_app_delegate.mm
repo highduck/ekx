@@ -1,35 +1,36 @@
 #import "mac_app_delegate.h"
+#import "mac_input.h"
 
 #include <ek/util/logger.hpp>
 #include <ek/app/app.hpp>
 
 using namespace ek;
 
-MacAppDelegate* g_app_delegate = nullptr;
-
 @implementation MacAppDelegate
 
 - (void)setupMenuBar {
     id menubar = [NSMenu new];
-    id appMenuItem = [NSMenuItem new];
-    [menubar addItem:appMenuItem];
-    [_application setMainMenu:menubar];
+    id menu_item = [NSMenuItem new];
+    [menubar addItem:menu_item];
 
-    id appMenu = [NSMenu new];
-    id quitMenuItem = [[NSMenuItem alloc] initWithTitle:@"Quit"
-                                                 action:@selector(terminate:)
-                                          keyEquivalent:@"q"];
-    [appMenu addItem:quitMenuItem];
-    [appMenuItem setSubmenu:appMenu];
+    // quit button
+    id menu = [NSMenu new];
+    id quit_menu_item = [[NSMenuItem alloc] initWithTitle:@"Quit"
+                                                   action:@selector(terminate:)
+                                            keyEquivalent:@"q"];
+    [menu addItem:quit_menu_item];
+    [menu_item setSubmenu:menu];
+
+    // set current app menu
+    [_application setMainMenu:menubar];
 }
 
 - (void)createView {
-/*** init gl view ***/
-    _view = [[MacOpenGLView alloc] init];
+    _view = [MacOpenGLView new];
     g_app.view_context_ = (__bridge void*) _view;
 
     NSOpenGLPixelFormatAttribute attrs[] = {
-//            NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
+            //NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
             NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersionLegacy,
             NSOpenGLPFAColorSize, 24,
             NSOpenGLPFAAlphaSize, 8,
@@ -61,9 +62,11 @@ MacAppDelegate* g_app_delegate = nullptr;
 }
 
 - (void)createWindow {
-    auto& config = g_app.creation_config;
+    auto& config = g_app.window_config;
     NSRect frame = NSMakeRect(100.0, 100.0, config.size.x, config.size.y);
-    NSWindowStyleMask styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable |
+    NSWindowStyleMask styleMask = NSWindowStyleMaskTitled |
+                                  NSWindowStyleMaskClosable |
+                                  NSWindowStyleMaskResizable |
                                   NSWindowStyleMaskMiniaturizable;
     NSRect rect = [NSWindow contentRectForFrameRect:frame styleMask:styleMask];
     _window = [[NSWindow alloc]
@@ -72,11 +75,9 @@ MacAppDelegate* g_app_delegate = nullptr;
                         backing:NSBackingStoreBuffered
                           defer:NO];
 
-    NSString* title = [NSString stringWithUTF8String:config.title.c_str()];
-    [_window setTitle:title];
+    [_window setTitle:[NSString stringWithUTF8String:config.title.c_str()]];
 
     _window.delegate = self;
-
     _window.acceptsMouseMovedEvents = YES;
 
     [_window setContentView:_view];
@@ -85,25 +86,36 @@ MacAppDelegate* g_app_delegate = nullptr;
 }
 
 - (void)windowDidResize:(__unused NSNotification*)notification {
-    NSRect frame = [NSWindow contentRectForFrameRect:_window.frame
-                                           styleMask:_window.styleMask];
-    EK_TRACE << "changed window_size (via windowDidResize)";
-    g_app.window_size = {frame.size.width, frame.size.height};
-    g_app.size_changed = true;
+    NSSize size = [NSWindow contentRectForFrameRect:_window.frame
+                                          styleMask:_window.styleMask].size;
+    EK_TRACE("[macOS GL] windowDidResize: %lf, %lf", size.width, size.height);
+
+    if (size.width != g_app.window_size.x || size.height != g_app.window_size.y) {
+        g_app.window_size = {size.width, size.height};
+        g_app.size_changed = true;
+        EK_TRACE("[macOS GL] windowDidResize APPLIED");
+    }
 }
 
 - (void)windowDidChangeBackingProperties:(__unused NSNotification*)notification {
-    EK_TRACE("`windowDidChangeBackingProperties` changed device_pixel_ratio to %lf", _window.backingScaleFactor);
-    g_app.content_scale = _window.backingScaleFactor;
-    g_app.size_changed = true;
+    EK_TRACE("[macOS GL] windowDidChangeBackingProperties: %lf", self.window.backingScaleFactor);
+    const double scale = _window.backingScaleFactor;
+    if (g_app.content_scale != scale) {
+        EK_TRACE("[macOS GL] windowDidChangeBackingProperties APPLIED");
+        g_app.content_scale = scale;
+        g_app.size_changed = true;
+    }
 }
 
 - (void)applicationWillFinishLaunching:(__unused NSNotification*)notification {
+    EK_TRACE("[macOS GL] applicationWillFinishLaunching");
+
     _application = NSApplication.sharedApplication;
     [_application setActivationPolicy:NSApplicationActivationPolicyRegular];
 
-    g_app.init();
+    dispatch_init();
 
+    macos_init_common();
     [self setupMenuBar];
     [self createView];
     [self createWindow];
@@ -111,7 +123,7 @@ MacAppDelegate* g_app_delegate = nullptr;
 
 - (void)applicationDidFinishLaunching:(__unused NSNotification*)notification {
     [_application activateIgnoringOtherApps:YES];
-    g_app.start();
+    dispatch_device_ready();
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(__unused NSApplication*)theApplication {

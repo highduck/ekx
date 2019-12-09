@@ -47,7 +47,7 @@ EK_JNI(Java_ekapp_EKPlatform_on_1startup)(JNIEnv*, jclass) {
 }
 
 EK_JNI(Java_ekapp_EKPlatform_on_1ready)(JNIEnv*, jclass) {
-    g_app.start();
+    dispatch_device_ready();
 }
 
 EK_JNI(Java_ekapp_EKPlatform_handle_1back_1button)(JNIEnv*, jclass) {

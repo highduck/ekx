@@ -86,9 +86,9 @@ enum class mouse_button {
 };
 
 enum class key_code {
-    Unknown = -1,
+    unknown = 0,
 
-    ArrowUp = 0,
+    ArrowUp,
     ArrowDown,
     ArrowLeft,
     ArrowRight,
@@ -129,7 +129,7 @@ struct event_t final {
     app::vec2 scroll{0.0, 0.0};
     mouse_button button = mouse_button::other;
 
-    key_code code = key_code::Unknown;
+    key_code code = key_code::unknown;
     bool super = false; // cmd/win/..
     bool shift = false;
     bool ctrl = false;
@@ -165,14 +165,31 @@ public:
 
 class application_t final {
 public:
-
     app::arguments args;
+    app::vec2 window_size{};
+    app::vec2 drawable_size{};
+    double content_scale{1.0};
 
-    void exit(int code);
+    // iOS has manually created FBO for primary surface
+    // so it will be set up there
+    uint32_t primary_frame_buffer = 0;
 
-    void init();
+    bool size_changed = false;
 
-    void start();
+    app::window_config window_config;
+
+    void* view_context_ = nullptr;
+
+    bool require_exit = false;
+    int exit_code = 0;
+
+    std::string lang;
+
+    mouse_cursor cursor = mouse_cursor::parent;
+    bool cursor_dirty = false;
+
+    std::vector<application_listener_t*> listeners_;
+    std::vector<event_t> event_queue_;
 
     void listen(application_listener_t* listener) {
         listeners_.push_back(listener);
@@ -189,46 +206,13 @@ public:
     void handle_event(const event_t& event);
 
     void dispatch_draw_frame();
-
-    app::vec2 window_size{};
-    app::vec2 drawable_size{};
-    double content_scale{1.0};
-
-    // iOS has manually created FBO for primary surface
-    // so it will be set up there
-    uint32_t primary_frame_buffer = 0;
-
-    [[nodiscard]]
-    mouse_cursor cursor() const {
-        return cursor_;
-    }
-
-    void set_cursor(mouse_cursor cursor) {
-        cursor_ = cursor;
-        update_mouse_cursor();
-    }
-
-    bool size_changed = false;
-
-    app::window_config creation_config;
-
-    void* view_context_ = nullptr;
-
-private:
-    std::vector<application_listener_t*> listeners_;
-
-    std::vector<event_t> event_queue_;
-
-    void update_mouse_cursor();
-
-    mouse_cursor cursor_ = mouse_cursor::parent;
 };
 
 extern application_t g_app;
 
-std::string get_device_lang();
+void dispatch_init();
 
-void setup_application_window(app::window_config config);
+void dispatch_device_ready();
 
 void start_application();
 

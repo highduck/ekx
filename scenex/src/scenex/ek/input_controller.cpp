@@ -77,7 +77,7 @@ void input_controller::on_event(const event_t& event) {
             if (event.type == event_type::key_down && event.code == key_code::Escape) {
                 interactions_.send_back_button();
             }
-            if (event.code != key_code::Unknown) {
+            if (event.code != key_code::unknown) {
                 auto& key = keys_[static_cast<size_t>(event.code)];
                 if (event.type == event_type::key_down) {
                     key.down = !key.state;
@@ -103,21 +103,21 @@ void input_controller::on_event(const event_t& event) {
 }
 
 bool input_controller::is_key(key_code code) const {
-    if (code != key_code::Unknown) {
+    if (code != key_code::unknown) {
         return keys_[static_cast<size_t>(code)].state;
     }
     return false;
 }
 
 bool input_controller::is_key_down(key_code code) const {
-    if (code != key_code::Unknown) {
+    if (code != key_code::unknown) {
         return keys_[static_cast<size_t>(code)].down;
     }
     return false;
 }
 
 bool input_controller::is_key_up(key_code code) const {
-    if (code != key_code::Unknown) {
+    if (code != key_code::unknown) {
         return keys_[static_cast<size_t>(code)].up;
     }
     return false;

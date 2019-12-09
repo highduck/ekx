@@ -9,6 +9,7 @@
 #import <OpenGLES/ES2/glext.h>
 
 #include <ek/app/app.hpp>
+#include <apple_common.h>
 
 using namespace ek;
 
@@ -69,9 +70,9 @@ void clear_buffers() {
         NSLog(@"failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
         return nil;
     }
-    
+
     g_app.primary_frame_buffer = _defaultFBOName;
-    
+
     clear_buffers();
 
     return self;
@@ -94,10 +95,10 @@ void clear_buffers() {
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 
     g_app.drawable_size = {
-        static_cast<double>(backing_width),
-        static_cast<double>(backing_height)
+            static_cast<double>(backing_width),
+            static_cast<double>(backing_height)
     };
-    
+
     g_app.size_changed = true;
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -106,7 +107,7 @@ void clear_buffers() {
     }
 
     clear_buffers();
-    
+
     return YES;
 }
 
@@ -121,7 +122,7 @@ void clear_buffers() {
     if ((self = [super initWithCoder:coder])) {
         self.userInteractionEnabled = YES;
         self.multipleTouchEnabled = YES;
-    
+
         // Get the layer
         CAEAGLLayer* eaglLayer = (CAEAGLLayer*) self.layer;
 
@@ -132,7 +133,7 @@ void clear_buffers() {
                 kEAGLDrawablePropertyRetainedBacking,
                 kEAGLColorFormatRGBA8,
                 kEAGLDrawablePropertyColorFormat,
-                        nil];
+                nil];
 
 
         _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
@@ -154,12 +155,13 @@ void clear_buffers() {
 - (void)drawView:(id)sender {
     [EAGLContext setCurrentContext:_context];
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBOName);
-    
+
     g_app.dispatch_draw_frame();
 
     glBindRenderbuffer(GL_RENDERBUFFER, _colorRenderbuffer);
     [_context presentRenderbuffer:GL_RENDERBUFFER];
 
+    apple::handle_exit_request();
 }
 
 - (void)layoutSubviews {
@@ -235,7 +237,7 @@ void handle_touches(event_type type, UIView* view, NSSet* touches, UIEvent* even
     const auto scale_factor = view.contentScaleFactor;
     for (UITouch* touch in [touches allObjects]) {
         const CGPoint location = [touch locationInView:view];
-        ev.id = (uint64_t)touch;
+        ev.id = (uint64_t) touch;
         ev.set_position(location.x, location.y, scale_factor);
         g_app.dispatch(ev);
     }

@@ -7,18 +7,14 @@ namespace ek {
 
 application_t g_app{};
 
-void setup_application_window(app::window_config config) {
-    g_app.creation_config = std::move(config);
-}
-
 application_listener_t::~application_listener_t() = default;
 
-void application_t::init() {
+void dispatch_init() {
     analytics::init(); // analytics before crash reporter on ios
     init_crash_reporter();
 }
 
-void application_t::start() {
+void dispatch_device_ready() {
     ek_main();
 }
 

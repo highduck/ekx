@@ -75,7 +75,7 @@ void interactive_manager::update() {
 
     last_targets_ = targets_;
 
-    ek::g_app.set_cursor(cursor);
+    ek::g_app.cursor = cursor;
 }
 
 void interactive_manager::handle_mouse_event(const ek::event_t& ev) {

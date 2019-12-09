@@ -11,7 +11,7 @@ using namespace ek;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
     g_app_delegate = self;
-    g_app.init();
+    dispatch_init();
     
     [self.window makeKeyAndVisible];
 
@@ -21,7 +21,7 @@ using namespace ek;
     [self.window layoutIfNeeded];
 
     // Override point for customization after application launch.
-    g_app.start();
+    dispatch_device_ready();
 
     return YES;
 }
