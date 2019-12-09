@@ -1,12 +1,6 @@
-#import "EAGLView.h"
-
-#import <QuartzCore/QuartzCore.h>
-
-#import <OpenGLES/EAGL.h>
-#import <OpenGLES/EAGLDrawable.h>
+#import "ios_eagl_view.h"
 
 #import <OpenGLES/ES2/gl.h>
-#import <OpenGLES/ES2/glext.h>
 
 #include <ek/app/app.hpp>
 #include <apple_common.h>
@@ -26,11 +20,11 @@ using namespace ek;
 @end
 
 void clear_buffers() {
-    glDepthMask(true);
+    glDepthMask(GL_TRUE);
     glClearDepthf(1.0f);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDepthMask(false);
+    glDepthMask(GL_FALSE);
 }
 
 @implementation EAGLView
@@ -117,36 +111,58 @@ void clear_buffers() {
     return [CAEAGLLayer class];
 }
 
+- (bool)setupView {
+    self.userInteractionEnabled = YES;
+    self.multipleTouchEnabled = YES;
+
+    // Get the layer
+    CAEAGLLayer* glLayer = (CAEAGLLayer*) self.layer;
+
+    glLayer.opaque = TRUE;
+    glLayer.contentsScale = UIScreen.mainScreen.nativeScale;
+    // kEAGLColorFormatSRGBA8: nice place to initialize sRGBA surface, but it's very depends on 2D/3D style
+    // and require to be rendered from higher precision buffers of even Floating-point buffers, so currently
+    // just leaved classic RGBA8
+    glLayer.drawableProperties = @{
+            kEAGLDrawablePropertyRetainedBacking: @NO,
+            kEAGLDrawablePropertyColorFormat: kEAGLColorFormatRGBA8
+    };
+
+    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+
+    if (!_context || ![EAGLContext setCurrentContext:_context]) {
+        return false;
+    }
+
+    [self createRenderer:(id <EAGLDrawable>) self.layer];
+
+    _animating = FALSE;
+    _framesPerSecond = 60;
+    _displayLink = nil;
+
+    return true;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame {
+    if ((self = [super initWithFrame:frame])) {
+        if ([self setupView]) {
+            return self;
+        } else {
+            return nil;
+        }
+    }
+
+    return self;
+}
+
 // The GL view is stored in the storyboard file. When it's unarchived it's sent -initWithCoder:
 - (instancetype)initWithCoder:(NSCoder*)coder {
     if ((self = [super initWithCoder:coder])) {
-        self.userInteractionEnabled = YES;
-        self.multipleTouchEnabled = YES;
-
-        // Get the layer
-        CAEAGLLayer* eaglLayer = (CAEAGLLayer*) self.layer;
-
-        eaglLayer.contentsScale = UIScreen.mainScreen.nativeScale;
-        eaglLayer.opaque = TRUE;
-        eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
-                [NSNumber numberWithBool:FALSE],
-                kEAGLDrawablePropertyRetainedBacking,
-                kEAGLColorFormatRGBA8,
-                kEAGLDrawablePropertyColorFormat,
-                nil];
-
-
-        _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-
-        if (!_context || ![EAGLContext setCurrentContext:_context]) {
+        if ([self setupView]) {
+            return self;
+        } else {
             return nil;
         }
-
-        [self createRenderer:(id <EAGLDrawable>) self.layer];
-
-        _animating = FALSE;
-        _framesPerSecond = 60;
-        _displayLink = nil;
     }
 
     return self;

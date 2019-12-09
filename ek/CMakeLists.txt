@@ -139,9 +139,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
 
             platforms/ios/ios_app_delegate.h
             platforms/ios/ios_app_delegate.mm
-            platforms/ios/EAGLView.h
-            platforms/ios/EAGLView.mm
-            platforms/ios/ios_platform.mm
+            platforms/ios/ios_eagl_view.h
+            platforms/ios/ios_eagl_view.mm
             platforms/ios/ios_sharing.mm
             platforms/ios/ios_game_center.mm
 

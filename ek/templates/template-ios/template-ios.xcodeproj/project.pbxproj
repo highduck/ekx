@@ -7,14 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A952FC6622FD9B4100546C9A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A952FC6422FD9B4100546C9A /* Main.storyboard */; };
 		A952FC6822FD9B4200546C9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A952FC6722FD9B4200546C9A /* Assets.xcassets */; };
 		A952FC6B22FD9B4200546C9A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A952FC6922FD9B4200546C9A /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A952FC5B22FD9B4100546C9A /* template-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "template-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A952FC6522FD9B4100546C9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A952FC6722FD9B4200546C9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A952FC6A22FD9B4200546C9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A952FC6C22FD9B4200546C9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -50,7 +48,6 @@
 		A952FC5D22FD9B4100546C9A /* src */ = {
 			isa = PBXGroup;
 			children = (
-				A952FC6422FD9B4100546C9A /* Main.storyboard */,
 				A952FC6722FD9B4200546C9A /* Assets.xcassets */,
 				A952FC6922FD9B4200546C9A /* LaunchScreen.storyboard */,
 				A952FC6C22FD9B4200546C9A /* Info.plist */,
@@ -117,7 +114,6 @@
 			files = (
 				A952FC6B22FD9B4200546C9A /* LaunchScreen.storyboard in Resources */,
 				A952FC6822FD9B4200546C9A /* Assets.xcassets in Resources */,
-				A952FC6622FD9B4100546C9A /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,14 +130,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		A952FC6422FD9B4100546C9A /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A952FC6522FD9B4100546C9A /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		A952FC6922FD9B4200546C9A /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -247,12 +235,12 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-                    "NDEBUG",
-                    "$(inherited)",
-                );
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					NDEBUG,
+					"$(inherited)",
+				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
