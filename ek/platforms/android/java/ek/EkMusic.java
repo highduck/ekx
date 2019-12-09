@@ -1,4 +1,4 @@
-package ekapp;
+package ek;
 
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioFormat;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 
-public class EKMusic {
+public class EkMusic {
     private static final String LOG_TAG = "hl";
     private static final int TIMEOUT_US = 0;
 
@@ -27,7 +27,7 @@ public class EKMusic {
     public boolean playing = true;
     public Thread thread;
 
-    EKMusic(AssetFileDescriptor fd) {
+    EkMusic(AssetFileDescriptor fd) {
         extractor = new MediaExtractor();
         try {
             extractor.setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getDeclaredLength());

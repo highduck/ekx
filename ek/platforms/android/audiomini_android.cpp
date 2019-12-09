@@ -13,7 +13,7 @@ void AudioMini::create_sound(const char* name) {
     }
     auto* env = android::get_jni_env();
     auto j_name = env->NewStringUTF(name);
-    auto clazz = env->FindClass("ekapp/EKAudio");
+    auto clazz = env->FindClass("ek/EkAudio");
     auto method = env->GetStaticMethodID(clazz, "createSound", "(Ljava/lang/String;)V");
     env->CallStaticVoidMethod(clazz, method, j_name);
 }
@@ -24,7 +24,7 @@ void AudioMini::create_music(const char* name) {
     }
     auto* env = android::get_jni_env();
     auto j_name = env->NewStringUTF(name);
-    auto clazz = env->FindClass("ekapp/EKAudio");
+    auto clazz = env->FindClass("ek/EkAudio");
     auto method = env->GetStaticMethodID(clazz, "createMusic", "(Ljava/lang/String;)V");
     env->CallStaticVoidMethod(clazz, method, j_name);
 }
@@ -36,7 +36,7 @@ void AudioMini::play_sound(const char* name, float vol, float pan) {
 
     auto* env = android::get_jni_env();
     auto j_name = env->NewStringUTF(name);
-    auto clazz = env->FindClass("ekapp/EKAudio");
+    auto clazz = env->FindClass("ek/EkAudio");
     auto method = env->GetStaticMethodID(clazz, "playSound", "(Ljava/lang/String;FF)V");
     env->CallStaticVoidMethod(clazz, method, j_name, vol, pan);
 }
@@ -48,7 +48,7 @@ void AudioMini::play_music(const char* name, float vol) {
 
     auto* env = android::get_jni_env();
     auto j_name = env->NewStringUTF(name);
-    auto clazz = env->FindClass("ekapp/EKAudio");
+    auto clazz = env->FindClass("ek/EkAudio");
     auto method = env->GetStaticMethodID(clazz, "playMusic", "(Ljava/lang/String;F)V");
     env->CallStaticVoidMethod(clazz, method, j_name, vol);
 }
@@ -58,7 +58,7 @@ void AudioMini::vibrate(int duration_millis) {
         return;
     }
     auto* env = android::get_jni_env();
-    auto clazz = env->FindClass("ekapp/EKAudio");
+    auto clazz = env->FindClass("ek/EkAudio");
     auto method = env->GetStaticMethodID(clazz, "vibrate", "(J)V");
     env->CallStaticVoidMethod(clazz, method, (jlong) duration_millis);
 }

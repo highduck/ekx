@@ -1,4 +1,4 @@
-package ekapp;
+package ek;
 
 import android.content.Intent;
 

@@ -1,4 +1,4 @@
-package ekapp;
+package ek;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,7 +17,7 @@ public class AppUtils {
     }
 
     static public boolean isTestLab() {
-        final Activity activity = EKActivity.getActivity();
+        final Activity activity = EkActivity.getActivity();
         String testLabSetting = Settings.System.getString(activity.getContentResolver(), "firebase.test.lab");
         return "true".equals(testLabSetting);
     }
@@ -26,7 +26,7 @@ public class AppUtils {
         if (!isDebugBuild()) {
             return;
         }
-        final Activity activity = EKActivity.getActivity();
+        final Activity activity = EkActivity.getActivity();
         new AlertDialog.Builder(activity)
                 .setMessage(message)
                 .setNeutralButton(android.R.string.ok, null)

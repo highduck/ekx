@@ -1,4 +1,4 @@
-package ekapp;
+package ek;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,7 +13,7 @@ public class Preferences {
 
     private static SharedPreferences getSharedPreferences() {
         if (_prefs == null) {
-            _prefs = EKActivity.getActivity().getSharedPreferences(ID, Context.MODE_PRIVATE);
+            _prefs = EkActivity.getActivity().getSharedPreferences(ID, Context.MODE_PRIVATE);
         }
         return _prefs;
     }

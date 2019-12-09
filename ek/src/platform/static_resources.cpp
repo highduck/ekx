@@ -55,15 +55,13 @@ bool save_content(const char* path, const std::vector<uint8_t>& buffer) {
 
 #if defined(__ANDROID__)
 
-array_buffer get_resource_content(const char* path) {
+std::vector<uint8_t> get_resource_content(const char* path) {
     auto* asset = AAssetManager_open(::ek::android::get_asset_manager(), path,
                                      AASSET_MODE_STREAMING);
-    array_buffer buffer{};
+    std::vector<uint8_t> buffer{};
     if (asset) {
-        const void* asset_buffer = AAsset_getBuffer(asset);
-        auto asset_size = static_cast<size_t>(AAsset_getLength(asset));
-        buffer = array_buffer{asset_size};
-        memcpy(buffer.data(), asset_buffer, asset_size);
+        auto data = static_cast<const uint8_t*>(AAsset_getBuffer(asset));
+        buffer.assign(data, data + AAsset_getLength(asset));
         AAsset_close(asset);
     } else {
         EK_ERROR("Asset file not found: %s", path);

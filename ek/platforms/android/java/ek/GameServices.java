@@ -1,4 +1,4 @@
-package ekapp;
+package ek;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -49,8 +49,8 @@ public class GameServices {
     @Keep
     public static void init() {
         Log.d(TAG, "register");
-        _activity = EKActivity.getInstance();
-        _layout = EKActivity.getInstance().mainLayout;
+        _activity = EkActivity.getInstance();
+        _layout = EkActivity.getInstance().mainLayout;
         _googleSignInClient = GoogleSignIn.getClient(_activity,
                 new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
                         // OAuth 2.0 API client id
@@ -114,7 +114,7 @@ public class GameServices {
 
     @Keep
     public static void leader_board_submit(final String leaderboard_id, final int score) {
-        EKActivity.runMainThread(
+        EkActivity.runMainThread(
                 new Runnable() {
                     @Override
                     public void run() {

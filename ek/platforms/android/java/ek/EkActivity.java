@@ -1,4 +1,4 @@
-package ekapp;
+package ek;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -16,15 +16,11 @@ import android.widget.RelativeLayout;
 import java.util.Locale;
 
 @SuppressLint("Registered")
-public class EKActivity extends Activity {
+public class EkActivity extends Activity {
 
-    final static String TAG = "ek:java";
+    final static String TAG = "ek";
 
-    static {
-        System.loadLibrary("native-lib");
-    }
-
-    private static EKActivity instance;
+    private static EkActivity instance;
 
     @Keep
     public static Activity getActivity() {
@@ -37,11 +33,11 @@ public class EKActivity extends Activity {
     }
 
     @Keep
-    public static EKActivity getInstance() {
+    public static EkActivity getInstance() {
         return instance;
     }
 
-    public EKSurfaceView glView;
+    public EkSurfaceView glView;
     public RelativeLayout mainLayout;
     private boolean _hasFocus = false;
 
@@ -55,15 +51,15 @@ public class EKActivity extends Activity {
         mainLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         setContentView(mainLayout);
 
-        EKPlatform.on_startup();
+        EkPlatform.sendEvent(EkPlatform.CALL_START);
     }
 
     @Keep
     public static void start_application() {
-        EKActivity activity = EKActivity.getInstance();
-        EKAudio.register(activity);
-        EKPlatform.set_assets_manager(activity.getAssets());
-        activity.glView = new EKSurfaceView(activity);
+        EkActivity activity = EkActivity.getInstance();
+        EkAudio.register(activity);
+        EkPlatform.initAssets(activity.getAssets());
+        activity.glView = new EkSurfaceView(activity);
         activity.mainLayout.addView(activity.glView);
 
         EkExtensionManager.instance.onApplicationStart();
@@ -88,7 +84,7 @@ public class EKActivity extends Activity {
         runGLThread(new Runnable() {
             @Override
             public void run() {
-                EKPlatform.handle_back_button();
+                EkPlatform.sendEvent(EkPlatform.BACK_BUTTON);
             }
         });
     }
