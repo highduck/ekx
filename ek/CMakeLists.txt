@@ -124,6 +124,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
             PUBLIC
             --js-library ${PROJECT_SOURCE_DIR}/platforms/web/web.js
             )
+
+    target_link_libraries(${PROJECT_NAME} GLESv2)
+
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
 
     message("Platform: IOS")
@@ -198,8 +201,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             platforms/mac/mac_app_delegate.mm
             platforms/mac/mac_app_delegate.h
             platforms/mac/mac_sharing.cpp
-            platforms/mac/mac_input.mm
-            platforms/mac/mac_input.h
+            platforms/mac/mac_utils.mm
+            platforms/mac/mac_utils.h
 
             platforms/apple/apple_common.mm
 

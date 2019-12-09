@@ -1,8 +1,7 @@
 #import "mac_app_delegate.h"
-#import "mac_input.h"
+#import "mac_utils.h"
 
 #include <ek/util/logger.hpp>
-#include <ek/app/app.hpp>
 
 using namespace ek;
 
@@ -113,9 +112,10 @@ using namespace ek;
     _application = NSApplication.sharedApplication;
     [_application setActivationPolicy:NSApplicationActivationPolicyRegular];
 
+    macos_init_common();
+
     dispatch_init();
 
-    macos_init_common();
     [self setupMenuBar];
     [self createView];
     [self createWindow];
