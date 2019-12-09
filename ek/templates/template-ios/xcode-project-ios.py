@@ -68,7 +68,6 @@ disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/SimpleAudioEngine_o
 disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/CocosDenshion.mm')
 disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/CDOpenALSupport.mm')
 disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/CDAudioManager.mm')
-disable_arc(project, sdk_root + '/ek/platforms/ios/EAGLView.mm')
 
 project.add_header_search_paths([
     "$(inherited)",

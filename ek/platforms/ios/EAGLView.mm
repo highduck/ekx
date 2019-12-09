@@ -93,9 +93,9 @@ void clear_buffers() {
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backing_width, backing_height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 
-    g_app.back_buffer_size = {
-        static_cast<uint32_t>(backing_width),
-        static_cast<uint32_t>(backing_height)
+    g_app.drawable_size = {
+        static_cast<double>(backing_width),
+        static_cast<double>(backing_height)
     };
     
     g_app.size_changed = true;
@@ -225,10 +225,9 @@ void clear_buffers() {
     }
 
     // tear down context
-    if ([EAGLContext currentContext] == _context)
+    if (EAGLContext.currentContext == _context) {
         [EAGLContext setCurrentContext:nil];
-    
-    [super dealloc];
+    }
 }
 
 void handle_touches(event_type type, UIView* view, NSSet* touches, UIEvent* event) {

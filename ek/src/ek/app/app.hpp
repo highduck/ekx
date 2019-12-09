@@ -29,6 +29,22 @@ struct window_config {
     }
 };
 
+struct arguments {
+    int argc = 0;
+    char** argv = nullptr;
+
+    [[nodiscard]]
+    std::vector<std::string> to_vector() const {
+        using namespace std;
+        vector<string> result{};
+        result.reserve(argc);
+        for (int i = 0; i < argc; ++i) {
+            result.emplace_back(argv[i]);
+        }
+        return result;
+    }
+};
+
 }
 
 enum class mouse_cursor : uint8_t {
@@ -150,6 +166,8 @@ public:
 class application_t final {
 public:
 
+    app::arguments args;
+
     void exit(int code);
 
     void init();
@@ -213,6 +231,12 @@ std::string get_device_lang();
 void setup_application_window(app::window_config config);
 
 void start_application();
+
+#ifndef EK_NO_MAIN
+
+void main();
+
+#endif
 
 }
 
