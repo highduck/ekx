@@ -1,5 +1,4 @@
 #import "ios_app_delegate.h"
-#import "EAGLView.h"
 
 #include <ek/app/app.hpp>
 
@@ -11,14 +10,25 @@ using namespace ek;
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
     g_app_delegate = self;
-    dispatch_init();
-    
-    [self.window makeKeyAndVisible];
 
-    g_app.view_context_ = (__bridge void*)self.window.rootViewController.view;
-    [(EAGLView*) self.window.rootViewController.view startAnimation];
-    
-    [self.window layoutIfNeeded];
+    // maybe if you have got this => disable new iOS 13.0 Scene Manifest behavior in Info.plist
+    //assert(self.window != nil);
+
+    if (!self.window) {
+        self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];
+        self.window.rootViewController = [UIViewController new];
+    }
+
+    dispatch_init();
+
+    _view = [[EAGLView alloc] initWithFrame:UIScreen.mainScreen.bounds];
+    self.window.rootViewController.view = _view;
+
+    g_app.view_context_ = (__bridge void*) _view;
+
+    [_window makeKeyAndVisible];
+    [_view startAnimation];
+    [_window layoutIfNeeded];
 
     // Override point for customization after application launch.
     dispatch_device_ready();
@@ -30,7 +40,7 @@ using namespace ek;
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
 
-    [(EAGLView*) self.window.rootViewController.view stopAnimation];
+    [_view stopAnimation];
 
     g_app.dispatch({event_type::app_pause});
 }
@@ -40,14 +50,14 @@ using namespace ek;
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
 
-    [(EAGLView*) self.window.rootViewController.view stopAnimation];
+    [_view stopAnimation];
 }
 
 
 - (void)applicationWillEnterForeground:(UIApplication*)application {
     // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
 
-    [(EAGLView*) self.window.rootViewController.view startAnimation];
+    [_view startAnimation];
 
     g_app.dispatch({event_type::app_resume});
 }
@@ -56,11 +66,11 @@ using namespace ek;
 - (void)applicationDidBecomeActive:(UIApplication*)application {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 
-    [(EAGLView*) self.window.rootViewController.view startAnimation];
+    [_view startAnimation];
 }
 
 - (void)applicationWillTerminate:(UIApplication*)application {
-    [(EAGLView*) self.window.rootViewController.view stopAnimation];
+    [_view stopAnimation];
 
     g_app.dispatch({event_type::app_close});
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
