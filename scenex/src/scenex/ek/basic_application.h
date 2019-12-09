@@ -4,7 +4,7 @@
 
 #include <ek/util/locator.hpp>
 #include <baseapp/base_app.hpp>
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 #include <ek/util/signals.hpp>
 #include "app_utils.hpp"
 

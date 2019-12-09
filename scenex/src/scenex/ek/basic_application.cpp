@@ -11,7 +11,6 @@
 #include <scenex/systems/main_flow.h>
 #include <scenex/utility/scene_management.h>
 #include <platform/game_center.hpp>
-#include <utils/basic_game_utility.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/common_macro.hpp>
 #include <scenex/asset2/asset_manager.hpp>
@@ -22,11 +21,13 @@ namespace scenex {
 using ecs::world;
 using ecs::entity;
 using ek::service_locator_instance;
-using ek::g_window;
+using ek::g_app;
 using ek::resolve;
 
 basic_application::basic_application()
-        : base_resolution{g_window.creation_config.width, g_window.creation_config.height} {
+        : base_resolution{static_cast<float>(g_app.creation_config.size.x),
+                          static_cast<float>(g_app.creation_config.size.y)} {
+
     ek::assert_created_once<basic_application>();
 
     asset_manager_ = new asset_manager_t{};
@@ -49,8 +50,8 @@ void basic_application::initialize() {
 
     //// basic scene
     root = create_node_2d("root");
-    const auto screen_size = g_window.back_buffer_size;
-    ecs::get<scenex::transform_2d>(root).rect.set(0.0f, 0.0f, screen_size.width, screen_size.height);
+    const auto screen_size = g_app.drawable_size;
+    ecs::get<scenex::transform_2d>(root).rect.set(0.0f, 0.0f, screen_size.x, screen_size.y);
 
     auto& im = service_locator_instance<interactive_manager>::init();
     //auto& input =

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <platform/user_preferences.hpp>
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 #include <ek/util/signals.hpp>
 #include <string>
 

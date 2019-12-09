@@ -6,7 +6,7 @@
 #include <ek/util/locator.hpp>
 #include <ek/util/timer.hpp>
 #include <draw2d/drawer.hpp>
-#include <platform/window.hpp>
+#include <ek/app/app.hpp>
 #include <scenex/components/node_t.h>
 #include <ek/math/matrix_transform.hpp>
 #include <ek/math/matrix_transpose.hpp>
@@ -288,8 +288,8 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     mat4f model{};
     mat4f view = inverse(camera_transform.world);
 
-    const auto width = g_window.back_buffer_size.width;
-    const auto height = g_window.back_buffer_size.height;
+    const float width = g_app.drawable_size.x;
+    const float height = g_app.drawable_size.y;
     mat4f proj{};
     const auto aspect = (float) width / height;
     if (camera_data.orthogonal) {
@@ -340,8 +340,8 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     });
 
     const float2 res{
-            static_cast<float>(g_window.back_buffer_size.width),
-            static_cast<float>(g_window.back_buffer_size.height)
+            static_cast<float>(g_app.drawable_size.x),
+            static_cast<float>(g_app.drawable_size.y)
     };
 
     program3d->set_uniform(program_uniforms::frame_resolution, float4{

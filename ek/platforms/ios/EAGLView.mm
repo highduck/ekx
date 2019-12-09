@@ -8,7 +8,7 @@
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 
 using namespace ek;
 
@@ -70,7 +70,7 @@ void clear_buffers() {
         return nil;
     }
     
-    g_window.primary_frame_buffer = _defaultFBOName;
+    g_app.primary_frame_buffer = _defaultFBOName;
     
     clear_buffers();
 
@@ -93,12 +93,12 @@ void clear_buffers() {
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backing_width, backing_height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 
-    g_window.back_buffer_size = {
+    g_app.back_buffer_size = {
         static_cast<uint32_t>(backing_width),
         static_cast<uint32_t>(backing_height)
     };
     
-    g_window.size_changed = true;
+    g_app.size_changed = true;
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));

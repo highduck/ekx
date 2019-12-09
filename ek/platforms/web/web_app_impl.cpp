@@ -1,4 +1,4 @@
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 #include <ek/util/logger.hpp>
 
 #include <emscripten.h>
@@ -230,8 +230,8 @@ void handleResize() {
     };
 
     emscripten_set_canvas_element_size(CANVAS_ID,
-                                       static_cast<int>(g_window.back_buffer_size.width),
-                                       static_cast<int>(g_window.back_buffer_size.height));
+                                       static_cast<int>(g_window.drawable_size.x),
+                                       static_cast<int>(g_window.drawable_size.y));
 
     emscripten_set_element_css_size(CANVAS_ID, css_w, css_h);
 

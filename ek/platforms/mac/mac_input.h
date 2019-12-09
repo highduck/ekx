@@ -1,7 +1,7 @@
 #pragma once
 
 #import <Cocoa/Cocoa.h>
-#import <platform/application.hpp>
+#import <ek/app/app.hpp>
 
 namespace ek {
 

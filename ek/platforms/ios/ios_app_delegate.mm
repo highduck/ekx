@@ -1,7 +1,7 @@
 #import "ios_app_delegate.h"
 #import "EAGLView.h"
 
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 
 IOSAppDelegate* g_app_delegate;
 
@@ -15,6 +15,7 @@ using namespace ek;
     
     [self.window makeKeyAndVisible];
 
+    g_app.view_context_ = (__bridge void*)self.window.rootViewController.view;
     [(EAGLView*) self.window.rootViewController.view startAnimation];
     
     [self.window layoutIfNeeded];

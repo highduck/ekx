@@ -19,8 +19,7 @@
 namespace ek {
 void main() {
     setup_application_window({"Piko",
-                              1024,
-                              768});
+                              {1024, 768}});
     start_application();
 }
 }
@@ -125,7 +124,7 @@ void PikoApp::update_frame(float dt) {
 
 void PikoApp::render_frame() {
 //    base_app_type::render_frame();
-    if(!started_) return;
+    if (!started_) return;
 
     const float dt = get_delta_time(root);
 

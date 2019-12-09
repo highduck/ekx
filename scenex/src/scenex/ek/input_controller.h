@@ -1,6 +1,6 @@
 #pragma once
 
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 #include <scenex/interactive_manager.h>
 #include <vector>
 

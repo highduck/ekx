@@ -1,8 +1,7 @@
 #import "mac_app_delegate.h"
 
 #include <ek/util/logger.hpp>
-#include "platform/application.hpp"
-#include "platform/window.hpp"
+#include <ek/app/app.hpp>
 
 using namespace ek;
 
@@ -33,6 +32,7 @@ using namespace ek;
 /*** init gl view ***/
     MacOpenGLView* view = [[MacOpenGLView alloc] init];
     gl_view = view;
+    g_app.view_context_ = view;
 
     NSOpenGLPixelFormatAttribute attrs[] = {
 //            NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
@@ -67,8 +67,8 @@ using namespace ek;
 }
 
 - (void)createWindow {
-    auto& config = g_window.creation_config;
-    NSRect frame = NSMakeRect(100, 100, config.width, config.height);
+    auto& config = g_app.creation_config;
+    NSRect frame = NSMakeRect(100.0, 100.0, config.size.x, config.size.y);
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable |
                                   NSWindowStyleMaskMiniaturizable;
     NSRect rect = [NSWindow contentRectForFrameRect:frame styleMask:styleMask];
@@ -95,17 +95,14 @@ using namespace ek;
     NSRect frame = [NSWindow contentRectForFrameRect:window.frame
                                            styleMask:window.styleMask];
     EK_TRACE << "changed window_size (via windowDidResize)";
-    g_window.window_size = {
-            static_cast<uint32_t>(frame.size.width),
-            static_cast<uint32_t>(frame.size.height)
-    };
-    g_window.size_changed = true;
+    g_app.window_size = {frame.size.width, frame.size.height};
+    g_app.size_changed = true;
 }
 
 - (void)windowDidChangeBackingProperties:(__unused NSNotification*)notification {
     EK_TRACE("`windowDidChangeBackingProperties` changed device_pixel_ratio to %lf", window.backingScaleFactor);
-    g_window.device_pixel_ratio = static_cast<float>(window.backingScaleFactor);
-    g_window.size_changed = true;
+    g_app.content_scale = window.backingScaleFactor;
+    g_app.size_changed = true;
 }
 
 - (void)applicationWillFinishLaunching:(__unused NSNotification*)notification {

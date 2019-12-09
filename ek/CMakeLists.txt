@@ -9,10 +9,8 @@ add_library(${PROJECT_NAME} STATIC
         src/platform/crash_reporter.hpp
         src/platform/game_center.hpp
         src/platform/sharing.hpp
-        src/platform/window.cpp
-        src/platform/window.hpp
-        src/platform/application.cpp
-        src/platform/application.hpp
+        src/ek/app/app.cpp
+        src/ek/app/app.hpp
 
         src/draw2d/batcher.cpp
         src/draw2d/batcher.hpp

@@ -1,17 +1,18 @@
 #include "canvas_system.h"
 
-#include <platform/window.hpp>
+#include <ek/app/app.hpp>
 #include <scenex/components/canvas.h>
 #include <scenex/components/node_t.h>
 #include <scenex/components/transform_2d.h>
 
+using namespace ek;
+
 namespace scenex {
 
-inline ek::float2 get_screen_size() {
-    auto size = ek::g_window.back_buffer_size;
+inline float2 get_screen_size() {
     return {
-            static_cast<float>(size.width),
-            static_cast<float>(size.height)
+            static_cast<float>(g_app.drawable_size.x),
+            static_cast<float>(g_app.drawable_size.y)
     };
 }
 

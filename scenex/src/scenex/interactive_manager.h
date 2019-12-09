@@ -3,8 +3,7 @@
 #include <scenex/config/ecs.h>
 #include <scenex/config.h>
 
-#include <platform/window.hpp>
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 
 namespace scenex {
 
@@ -27,7 +26,7 @@ public:
 
     void update();
 
-    ek::mouse_cursor_t search_interactive_targets(ecs::entity node, std::vector<ecs::entity>& out_entities);
+    ek::mouse_cursor search_interactive_targets(ecs::entity node, std::vector<ecs::entity>& out_entities);
 
     void send_back_button();
 

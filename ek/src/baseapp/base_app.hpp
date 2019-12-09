@@ -1,6 +1,6 @@
 #pragma once
 
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 #include <ek/math/vec.hpp>
 #include <ek/util/signals.hpp>
 #include <ek/util/timer.hpp>

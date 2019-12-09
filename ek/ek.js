@@ -209,7 +209,7 @@ function mod_cmake_lists(ctx) {
     const source_dir_list = [
         "../../src",
         core_path("ecxx/src"),
-        core_path("core/src"),
+        core_path("core"),
         core_path("ek/platforms/android"),
         core_path("ek/src"),
         core_path("scenex/src")
