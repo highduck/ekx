@@ -1,4 +1,4 @@
-package ekapp;
+package ek;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -11,7 +11,7 @@ public class Sharing {
 
     @Keep
     public static void navigate(final String url) {
-        final EKActivity activity = EKActivity.getInstance();
+        final EkActivity activity = EkActivity.getInstance();
         activity.runOnUiThread(
                 new Runnable() {
                     @Override
@@ -27,7 +27,7 @@ public class Sharing {
 
     @Keep
     public static void rate_us(final String appId) {
-        final EKActivity activity = EKActivity.getInstance();
+        final EkActivity activity = EkActivity.getInstance();
         activity.runOnUiThread(
                 new Runnable() {
                     @Override
@@ -47,7 +47,7 @@ public class Sharing {
 
     @Keep
     public static void send_message(final String text) {
-        final EKActivity activity = EKActivity.getInstance();
+        final EkActivity activity = EkActivity.getInstance();
         activity.runOnUiThread(
                 new Runnable() {
                     @Override

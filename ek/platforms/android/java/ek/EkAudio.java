@@ -1,4 +1,4 @@
-package ekapp;
+package ek;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,9 +17,9 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class EKAudio {
+public class EkAudio {
 
-    final private static String TAG = "EKAudio";
+    final private static String TAG = "EkAudio";
 
     private final static int MAX_SIMULTANEOUS_SOUNDS = 8;
 
@@ -28,7 +28,7 @@ public class EKAudio {
     private static Vibrator _vibrator;
 
     private static SoundPool _soundPool;
-    public static EKMusic _gameMusic;
+    public static EkMusic _gameMusic;
 
     private final static HashMap<String, Integer> _soundsMap = new HashMap<>();
 
@@ -85,7 +85,7 @@ public class EKAudio {
             try {
                 AssetFileDescriptor afd = _assets.openFd(name);
                 if (afd != null) {
-                    _gameMusic = new EKMusic(afd);
+                    _gameMusic = new EkMusic(afd);
                 }
             } catch (IOException e) {
 

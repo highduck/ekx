@@ -55,8 +55,8 @@ enum class mouse_cursor : uint8_t {
 };
 
 enum class event_type : uint8_t {
-    app_pause,
     app_resume,
+    app_pause,
     app_resize,
     app_back_button,
     app_close,
@@ -146,8 +146,8 @@ struct event_t final {
 
     template<typename T>
     void set_position(T x_, T y_, T multiplier_ = 1) {
-        pos.x = static_cast<float>(x_ * multiplier_);
-        pos.y = static_cast<float>(y_ * multiplier_);
+        pos.x = static_cast<double>(x_ * multiplier_);
+        pos.y = static_cast<double>(y_ * multiplier_);
     }
 };
 

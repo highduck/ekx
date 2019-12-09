@@ -35,7 +35,9 @@ namespace ek::logger {
 const char* log_tag_ = "EK";
 uint8_t log_filter_mask_ = static_cast<uint8_t>(verbosity_t::all);
 
-void write(verbosity_t verbosity, source_location_t location, const char* message) noexcept {
+void write(verbosity_t verbosity,
+           [[maybe_unused]] source_location_t location,
+           const char* message) noexcept {
     if ((log_filter_mask_ & static_cast<uint32_t>(verbosity)) == 0) {
         return;
     }

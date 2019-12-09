@@ -1,50 +1,52 @@
-package ekapp;
+package ek;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 import android.view.MotionEvent;
 
-public class EKSurfaceView extends GLSurfaceView {
+public class EkSurfaceView extends GLSurfaceView {
 
-    public final EKRenderer renderer;
+    final static String TAG = "ek";
 
-    public EKSurfaceView(Context context) {
+    public final EkRenderer renderer;
+
+    public EkSurfaceView(Context context) {
         super(context);
 
         setEGLContextClientVersion(2);
         setEGLConfigChooser(false);
         setPreserveEGLContextOnPause(true);
 
-        renderer = new EKRenderer(this);
+        renderer = new EkRenderer(this);
         setRenderer(renderer);
     }
 
     @Override
     public void onResume() {
-        Log.i("ek:java", "GLSurface onResume");
+        Log.i(TAG, "GLSurface onResume");
         super.onResume();
 
         this.setRenderMode(RENDERMODE_CONTINUOUSLY);
         this.queueEvent(new Runnable() {
             @Override
             public void run() {
-                EKPlatform.handle_resume();
-                EKSurfaceView.this.renderer.onResume();
+                EkPlatform.sendEvent(EkPlatform.RESUME);
+                EkSurfaceView.this.renderer.onResume();
             }
         });
-        EKAudio.onResume();
+        EkAudio.onResume();
     }
 
     @Override
     public void onPause() {
-        Log.i("ek:java", "GLSurface onPause");
-        EKAudio.onPause();
+        Log.i(TAG, "GLSurface onPause");
+        EkAudio.onPause();
         this.queueEvent(new Runnable() {
             @Override
             public void run() {
-                EKPlatform.handle_pause();
-                EKSurfaceView.this.renderer.onPause();
+                EkPlatform.sendEvent(EkPlatform.PAUSE);
+                EkSurfaceView.this.renderer.onPause();
             }
         });
         this.setRenderMode(RENDERMODE_WHEN_DIRTY);
@@ -54,10 +56,6 @@ public class EKSurfaceView extends GLSurfaceView {
     public boolean onTouchEvent(MotionEvent event) {
         if (event != null) {
 
-            final int TOUCH_BEGIN = 0;
-            final int TOUCH_MOVE = 1;
-            final int TOUCH_END = 2;
-
             final int i = event.getActionIndex();
             final int act = event.getActionMasked();
             final int id = event.getPointerId(i);
@@ -65,18 +63,18 @@ public class EKSurfaceView extends GLSurfaceView {
             final float y = event.getY(i);
 
             if (act == MotionEvent.ACTION_DOWN || act == MotionEvent.ACTION_POINTER_DOWN) {
-                handleTouchEvent(TOUCH_BEGIN, id, x, y);
+                handleTouchEvent(EkPlatform.TOUCH_BEGIN, id, x, y);
                 return true;
             } else if (act == MotionEvent.ACTION_MOVE) {
                 for (int j = 0; j < event.getPointerCount(); ++j) {
                     final int touchId = event.getPointerId(j);
                     final float touchX = event.getX(j);
                     final float touchY = event.getY(j);
-                    handleTouchEvent(TOUCH_MOVE, touchId, touchX, touchY);
+                    handleTouchEvent(EkPlatform.TOUCH_MOVE, touchId, touchX, touchY);
                 }
                 return true;
             } else if (act == MotionEvent.ACTION_UP || act == MotionEvent.ACTION_POINTER_UP || act == MotionEvent.ACTION_CANCEL) {
-                handleTouchEvent(TOUCH_END, id, x, y);
+                handleTouchEvent(EkPlatform.TOUCH_END, id, x, y);
                 return true;
             }
 
@@ -89,7 +87,7 @@ public class EKSurfaceView extends GLSurfaceView {
         queueEvent(new Runnable() {
             @Override
             public void run() {
-                EKPlatform.handle_touch_event(type, id, x, y);
+                EkPlatform.sendTouch(type, id, x, y);
             }
         });
     }

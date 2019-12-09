@@ -74,7 +74,7 @@ std::string get_user_string(const std::string& key, const std::string& default_v
 void set_user_preference(const std::string& key, int value) {
     auto* env = android::get_jni_env();
 
-    auto class_ref = env->FindClass("ekapp/Preferences");
+    auto class_ref = env->FindClass("ek/Preferences");
     auto key_ref = env->NewStringUTF(key.c_str());
 
     auto method = env->GetStaticMethodID(class_ref, "set_int", "(Ljava/lang/String;I)V");
@@ -87,7 +87,7 @@ void set_user_preference(const std::string& key, int value) {
 int get_user_preference(const std::string& key, int default_value) {
     auto* env = android::get_jni_env();
 
-    auto class_ref = env->FindClass("ekapp/Preferences");
+    auto class_ref = env->FindClass("ek/Preferences");
     auto key_ref = env->NewStringUTF(key.c_str());
 
     auto method = env->GetStaticMethodID(class_ref, "get_int", "(Ljava/lang/String;I)I");
@@ -101,7 +101,7 @@ int get_user_preference(const std::string& key, int default_value) {
 void set_user_string(const std::string& key, const std::string& str) {
     auto* env = android::get_jni_env();
 
-    auto class_ref = env->FindClass("ekapp/Preferences");
+    auto class_ref = env->FindClass("ek/Preferences");
     auto key_ref = env->NewStringUTF(key.c_str());
     auto val_ref = env->NewStringUTF(str.c_str());
 
@@ -116,7 +116,7 @@ void set_user_string(const std::string& key, const std::string& str) {
 std::string get_user_string(const std::string& key, const std::string& default_value) {
     auto* env = android::get_jni_env();
 
-    auto class_ref = env->FindClass("ekapp/Preferences");
+    auto class_ref = env->FindClass("ek/Preferences");
     auto key_ref = env->NewStringUTF(key.c_str());
     auto default_value_ref = env->NewStringUTF(default_value.c_str());
 

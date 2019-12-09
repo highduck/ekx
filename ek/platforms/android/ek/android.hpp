@@ -19,7 +19,14 @@ AAssetManager* get_asset_manager();
 
 }
 
-#define EK_JNI(x) extern "C" JNIEXPORT void JNICALL x
-#define EK_JNI_INT(x) extern "C" JNIEXPORT jint JNICALL x
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "ek", __VA_ARGS__))
+#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "ek", __VA_ARGS__))
+#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "ek", __VA_ARGS__))
+
+#define EK_JNI_VOID(x, ...) \
+    extern "C" JNIEXPORT void JNICALL Java_ek_EkPlatform_##x(JNIEnv *env, jclass cls, __VA_ARGS__)
+
+//#define EK_JNI_INT(x, ...) \
+//    extern "C" JNIEXPORT jint JNICALL Java_ek_EkPlatform_##x(JNIEnv *env, jclass cls, __VA_ARGS__)
 
 #endif
