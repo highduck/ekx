@@ -5,34 +5,28 @@
 
 using namespace ek;
 
+MacAppDelegate* g_app_delegate = nullptr;
+
 @implementation MacAppDelegate
 
 - (void)setupMenuBar {
-    id menubar = [[NSMenu new] autorelease];
-    id appMenuItem = [[NSMenuItem new] autorelease];
+    id menubar = [NSMenu new];
+    id appMenuItem = [NSMenuItem new];
     [menubar addItem:appMenuItem];
-    [NSApp setMainMenu:menubar];
+    [_application setMainMenu:menubar];
 
-    id appMenu = [[NSMenu new] autorelease];
-    id quitMenuItem = [[[NSMenuItem alloc] initWithTitle:@"Quit"
-                                                  action:@selector(terminate:)
-                                           keyEquivalent:@"q"]
-            autorelease];
+    id appMenu = [NSMenu new];
+    id quitMenuItem = [[NSMenuItem alloc] initWithTitle:@"Quit"
+                                                 action:@selector(terminate:)
+                                          keyEquivalent:@"q"];
     [appMenu addItem:quitMenuItem];
     [appMenuItem setSubmenu:appMenu];
 }
 
-- (void)dealloc {
-    [gl_view release];
-    [window release];
-    [super dealloc];
-}
-
 - (void)createView {
 /*** init gl view ***/
-    MacOpenGLView* view = [[MacOpenGLView alloc] init];
-    gl_view = view;
-    g_app.view_context_ = view;
+    _view = [[MacOpenGLView alloc] init];
+    g_app.view_context_ = (__bridge void*) _view;
 
     NSOpenGLPixelFormatAttribute attrs[] = {
 //            NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
@@ -58,12 +52,12 @@ using namespace ek;
     CGLEnable([context CGLContextObj], kCGLCECrashOnRemovedFunctions);
 #endif
 
-    view.allowedTouchTypes = NSTouchTypeMaskIndirect;
-    [view setWantsRestingTouches:YES];
+    _view.allowedTouchTypes = NSTouchTypeMaskIndirect;
+    [_view setWantsRestingTouches:YES];
 
-    [view setPixelFormat:pf];
-    [view setOpenGLContext:context];
-    [view setWantsBestResolutionOpenGLSurface:YES];
+    [_view setPixelFormat:pf];
+    [_view setOpenGLContext:context];
+    [_view setWantsBestResolutionOpenGLSurface:YES];
 }
 
 - (void)createWindow {
@@ -72,41 +66,41 @@ using namespace ek;
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable |
                                   NSWindowStyleMaskMiniaturizable;
     NSRect rect = [NSWindow contentRectForFrameRect:frame styleMask:styleMask];
-    NSWindow* wnd = [[NSWindow alloc]
+    _window = [[NSWindow alloc]
             initWithContentRect:rect
                       styleMask:styleMask
                         backing:NSBackingStoreBuffered
                           defer:NO];
-    window = wnd;
 
     NSString* title = [NSString stringWithUTF8String:config.title.c_str()];
-    [wnd setTitle:title];
+    [_window setTitle:title];
 
-    wnd.delegate = self;
+    _window.delegate = self;
 
-    wnd.acceptsMouseMovedEvents = YES;
+    _window.acceptsMouseMovedEvents = YES;
 
-    [wnd setContentView:gl_view];
-    [wnd makeFirstResponder:gl_view];
-    [wnd makeKeyAndOrderFront:nil];
+    [_window setContentView:_view];
+    [_window makeFirstResponder:_view];
+    [_window makeKeyAndOrderFront:nil];
 }
 
 - (void)windowDidResize:(__unused NSNotification*)notification {
-    NSRect frame = [NSWindow contentRectForFrameRect:window.frame
-                                           styleMask:window.styleMask];
+    NSRect frame = [NSWindow contentRectForFrameRect:_window.frame
+                                           styleMask:_window.styleMask];
     EK_TRACE << "changed window_size (via windowDidResize)";
     g_app.window_size = {frame.size.width, frame.size.height};
     g_app.size_changed = true;
 }
 
 - (void)windowDidChangeBackingProperties:(__unused NSNotification*)notification {
-    EK_TRACE("`windowDidChangeBackingProperties` changed device_pixel_ratio to %lf", window.backingScaleFactor);
-    g_app.content_scale = window.backingScaleFactor;
+    EK_TRACE("`windowDidChangeBackingProperties` changed device_pixel_ratio to %lf", _window.backingScaleFactor);
+    g_app.content_scale = _window.backingScaleFactor;
     g_app.size_changed = true;
 }
 
 - (void)applicationWillFinishLaunching:(__unused NSNotification*)notification {
-    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+    _application = NSApplication.sharedApplication;
+    [_application setActivationPolicy:NSApplicationActivationPolicyRegular];
 
     g_app.init();
 
@@ -116,7 +110,7 @@ using namespace ek;
 }
 
 - (void)applicationDidFinishLaunching:(__unused NSNotification*)notification {
-    [NSApp activateIgnoringOtherApps:YES];
+    [_application activateIgnoringOtherApps:YES];
     g_app.start();
 }
 

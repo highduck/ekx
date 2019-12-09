@@ -1,4 +1,4 @@
-#include <platform/boot.hpp>
+#include <ek/app/app.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/logger.hpp>
@@ -33,7 +33,7 @@ void main() {
     EK_INFO << "Executable path: " << get_executable_path();
     EK_INFO << "Working dir: " << current_working_directory();
     EK_INFO << "Arguments: ";
-    auto args = get_program_arguments().to_vector();
+    auto args = g_app.args.to_vector();
     EK_INFO << join(args, " ");
 
     if (args.size() <= 1) {

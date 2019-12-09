@@ -49,9 +49,6 @@ add_library(${PROJECT_NAME} STATIC
 
         src/ek/audiomini.hpp
 
-        src/platform/boot.cpp
-        src/platform/boot.hpp
-
         src/utils/image_loader.cpp
         src/utils/image_loader.hpp
         )
@@ -133,7 +130,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES iOS)
 
     target_include_directories(${PROJECT_NAME} PUBLIC platforms/apple)
     target_include_directories(${PROJECT_NAME} PUBLIC platforms/ios)
-    #target_compile_options(${PROJECT_NAME} PUBLIC -fno-aligned-allocation)
 
     target_sources(${PROJECT_NAME} PRIVATE
             src/platform/user_preferences.mm
@@ -141,7 +137,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES iOS)
             src/platform/static_resources.mm
             src/platform/analytics.mm
 
-            platforms/ios/ios_main.mm
             platforms/ios/ios_app_delegate.h
             platforms/ios/ios_app_delegate.mm
             platforms/ios/EAGLView.h
@@ -172,10 +167,24 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES iOS)
             "-framework Foundation"
             "-framework OpenAL")
 
+    #target_compile_options(${PROJECT_NAME} PUBLIC -fno-aligned-allocation)
+    target_compile_options(${PROJECT_NAME} PUBLIC -fobjc-arc)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC GLES_SILENCE_DEPRECATION)
+
+    set_source_files_properties(
+            platforms/ios/audiomini/CDAudioManager.mm
+            platforms/ios/audiomini/CDOpenALSupport.mm
+            platforms/ios/audiomini/CocosDenshion.mm
+            platforms/ios/audiomini/SimpleAudioEngine_objc.mm
+            PROPERTIES COMPILE_FLAGS -fno-objc-arc)
+
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message("Platform: MAC")
     target_include_directories(${PROJECT_NAME} PUBLIC platforms/apple)
     target_include_directories(${PROJECT_NAME} PUBLIC platforms/mac)
+    target_compile_options(${PROJECT_NAME} PUBLIC -fobjc-arc)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC GL_SILENCE_DEPRECATION)
+
     target_sources(${PROJECT_NAME} PRIVATE
 
             src/platform/user_preferences.mm
@@ -185,7 +194,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
             platforms/null/GameServices.cpp
 
-            platforms/mac/mac_main.mm
             platforms/mac/mac_opengl_view.mm
             platforms/mac/mac_opengl_view.h
             platforms/mac/mac_app_delegate.mm
@@ -218,6 +226,14 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             "-framework AudioToolbox"
             "-framework OpenAL"
             )
+
+    set_source_files_properties(
+            platforms/mac/audiomini/CDAudioManager.mm
+            platforms/mac/audiomini/CDOpenALSupport.mm
+            platforms/mac/audiomini/CDXMacOSXSupport.mm
+            platforms/mac/audiomini/CocosDenshion.mm
+            platforms/mac/audiomini/SimpleAudioEngine_objc.mm
+            PROPERTIES COMPILE_FLAGS -fno-objc-arc)
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
     message("Platform: ANDROID")

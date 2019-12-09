@@ -10,8 +10,7 @@ using namespace ek;
 @implementation MacOpenGLView
 
 - (instancetype)init {
-    [super init];
-
+    self = [super init];
     return self;
 }
 
@@ -188,7 +187,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
 // when it encounters something that has been release
     CVDisplayLinkStop(displayLink);
     CVDisplayLinkRelease(displayLink);
-    [super dealloc];
 }
 
 - (void)resetCursorRects {
