@@ -5,7 +5,7 @@
 #include <graphics/texture.hpp>
 #include <graphics/buffer_object.hpp>
 #include <draw2d/batcher.hpp>
-#include <platform/window.hpp>
+#include <ek/app/app.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include <graphics/gl_debug.hpp>
 #include <scenex/ek/input_controller.h>
@@ -105,17 +105,17 @@ void imgui_module_t::on_event(const event_t& event) {
         }
             break;
         case event_type::mouse_scroll:
-            if (fabsf(event.scroll_x) > 0.0f) {
-                io.MouseWheelH += event.scroll_x * 0.1f;
+            if (fabs(event.scroll.x) > 0.0) {
+                io.MouseWheelH += static_cast<float>(event.scroll.x * 0.1);
             }
-            if (fabsf(event.scroll_y) > 0.0f) {
-                io.MouseWheel += event.scroll_y * 0.1f;
+            if (fabs(event.scroll.y) > 0.0) {
+                io.MouseWheel += static_cast<float>(event.scroll.y * 0.1);
             }
             break;
 
         case event_type::mouse_move:
-            io.MousePos.x = event.x / g_window.device_pixel_ratio;
-            io.MousePos.y = event.y / g_window.device_pixel_ratio;
+            io.MousePos.x = static_cast<float>(event.pos.x / g_app.content_scale);
+            io.MousePos.y = static_cast<float>(event.pos.y / g_app.content_scale);
             break;
 
         default:
@@ -240,7 +240,7 @@ void update_mouse_cursor() {
     }
 
     ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-    auto cursor = mouse_cursor_t::parent;
+    auto cursor = mouse_cursor::parent;
     bool cursor_visible = true;
     if (io.MouseDrawCursor || imgui_cursor == ImGuiMouseCursor_None) {
         // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
@@ -255,15 +255,15 @@ void update_mouse_cursor() {
             case ImGuiMouseCursor_ResizeEW:
             case ImGuiMouseCursor_ResizeNESW:
             case ImGuiMouseCursor_ResizeNWSE:
-                cursor = mouse_cursor_t::arrow;
+                cursor = mouse_cursor::arrow;
                 break;
             case ImGuiMouseCursor_Hand:
-                cursor = mouse_cursor_t::button;
+                cursor = mouse_cursor::button;
                 break;
             default:
                 break;
         }
-        g_window.set_cursor(cursor);
+        g_app.set_cursor(cursor);
         cursor_visible = true;
     }
 
@@ -337,10 +337,10 @@ imgui_module_t::~imgui_module_t() {
 }
 
 void imgui_module_t::begin_frame(float dt) {
-    auto w = static_cast<float>(g_window.window_size.width);
-    auto h = static_cast<float>(g_window.window_size.height);
-    auto fb_w = static_cast<float>(g_window.back_buffer_size.width);
-    auto fb_h = static_cast<float>(g_window.back_buffer_size.height);
+    auto w = static_cast<float>(g_app.window_size.x);
+    auto h = static_cast<float>(g_app.window_size.y);
+    auto fb_w = static_cast<float>(g_app.drawable_size.x);
+    auto fb_h = static_cast<float>(g_app.drawable_size.y);
 
     ImGui::GetIO().DisplaySize = ImVec2(w, h);
     ImGui::GetIO().DisplayFramebufferScale = ImVec2(w > 0 ? (fb_w / w) : 0, h > 0 ? (fb_h / h) : 0);

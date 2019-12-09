@@ -1,5 +1,5 @@
 #include <ek/mini_ads.hpp>
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 #include <ek/util/timer.hpp>
 #include <ek/util/logger.hpp>
 

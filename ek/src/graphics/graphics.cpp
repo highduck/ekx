@@ -1,8 +1,8 @@
 #include "graphics.hpp"
 
-#include <platform/window.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/common_macro.hpp>
+#include <ek/app/app.hpp>
 #include "gl_def.hpp"
 #include "blend_mode.hpp"
 #include "gl_debug.hpp"
@@ -64,7 +64,7 @@ void graphics_t::viewport(int x, int y, int wight, int height) {
 }
 
 void graphics_t::viewport() {
-    glViewport(0, 0, g_window.back_buffer_size.width, g_window.back_buffer_size.height);
+    glViewport(0, 0, g_app.drawable_size.x, g_app.drawable_size.y);
     gl_check_error();
 }
 
@@ -78,7 +78,7 @@ void graphics_t::set_scissors(int x, int y, int width, int height) {
     glEnable(GL_SCISSOR_TEST);
     gl_check_error();
 
-    const int buffer_height = g_window.back_buffer_size.height;
+    const int buffer_height = static_cast<int>(g_app.drawable_size.y);
     glScissor(x, buffer_height - y - height, width, height);
     gl_check_error();
 }
@@ -89,7 +89,7 @@ void graphics_t::set_scissors() {
 }
 
 void graphics_t::get_pixels(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint8_t* out_buffer) {
-    const int buffer_height = g_window.back_buffer_size.height;
+    const int buffer_height = static_cast<int>(g_app.drawable_size.y);
 
     glReadPixels(x, buffer_height - y - height, width, height, GL_RGBA, GL_UNSIGNED_BYTE, out_buffer);
     gl_check_error();

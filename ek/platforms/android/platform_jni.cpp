@@ -1,4 +1,4 @@
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 #include <platform/boot.hpp>
 #include <ek/android.hpp>
 

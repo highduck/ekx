@@ -19,8 +19,8 @@ void emulate_mouse_as_touch(const event_t& event, touch_state_t& data) {
         data.active = false;
     }
 
-    data.position.x = event.x;
-    data.position.y = event.y;
+    data.position.x = event.pos.x;
+    data.position.y = event.pos.y;
     data.pressed = data.active;
     data.is_started_event = !active_prev && data.active;//e.type == "touchstart";
     data.is_ended_event = !data.active && active_prev;
@@ -37,8 +37,8 @@ void update_touch(const event_t& event, touch_state_t& data) {
     bool active_prev = data.active;
     data.active = event.type != event_type::touch_end;
 
-    data.position.x = event.x;
-    data.position.y = event.y;
+    data.position.x = event.pos.x;
+    data.position.y = event.pos.y;
     data.pressed = data.active;
     data.is_started_event = !active_prev && data.active;//e.type == "touchstart";
     data.is_ended_event = !data.active && active_prev;

@@ -1,4 +1,4 @@
-#include "platform/application.hpp"
+#include <ek/app/app.hpp>
 
 #import <CoreFoundation/CoreFoundation.h>
 

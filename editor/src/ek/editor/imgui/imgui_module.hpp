@@ -1,7 +1,7 @@
 #pragma once
 
 #include <graphics/gl_def.hpp>
-#include <platform/application.hpp>
+#include <ek/app/app.hpp>
 #include <ek/math/vec.hpp>
 #include <string>
 

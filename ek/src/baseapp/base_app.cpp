@@ -4,9 +4,9 @@
 #include <graphics/program.hpp>
 #include <ek/util/locator.hpp>
 #include <draw2d/drawer.hpp>
-#include <platform/window.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/audiomini.hpp>
+#include <ek/app/app.hpp>
 
 namespace ek {
 
@@ -18,7 +18,7 @@ base_app_t::~base_app_t() = default;
 
 void base_app_t::on_event(const event_t& event) {
     if (event.type == event_type::app_resize) {
-        EK_TRACE("size: %d x %d", g_window.back_buffer_size.width, g_window.back_buffer_size.height);
+        EK_TRACE("size: %lf x %lf", g_app.drawable_size.x, g_app.drawable_size.y);
     }
 }
 
@@ -42,8 +42,9 @@ void base_app_t::on_draw_frame() {
         graphics.clear(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     }
 
-    auto back_buffer_size = g_window.back_buffer_size;
-    drawer.begin(0, 0, back_buffer_size.width, back_buffer_size.height);
+    drawer.begin(0, 0,
+                 static_cast<int>(g_app.drawable_size.x),
+                 static_cast<int>(g_app.drawable_size.y));
     drawer.set_blend_mode(blend_mode::premultiplied);
 
     render_frame();
@@ -63,7 +64,7 @@ void base_app_t::initialize() {
     service_locator_instance<drawer_t>::init();
     service_locator_instance<AudioMini>::init();
 
-    scale_factor = g_window.device_pixel_ratio;
+    scale_factor = static_cast<float>(g_app.content_scale);
 }
 
 void base_app_t::preload() {

@@ -1,7 +1,7 @@
 #include "ek/android.hpp"
 
-#include <platform/application.hpp>
-#include <platform/window.hpp>
+#include <ek/app/app.hpp>
+#include <ek/app/app.hpp>
 
 #include <android/log.h>
 #include <android/asset_manager_jni.h>

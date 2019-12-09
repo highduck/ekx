@@ -2,13 +2,13 @@
 
 #include <vector>
 #include <ek/util/signals.hpp>
-#include <platform/window.hpp>
+#include <ek/app/app.hpp>
 
 namespace scenex {
 
 struct interactive_t {
 
-    using mouse_cursor_t = ek::mouse_cursor_t;
+    using mouse_cursor_t = ek::mouse_cursor;
     using signal_t = ek::signal_t<>;
 
     // events

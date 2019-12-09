@@ -1,8 +1,7 @@
+#include <ek/app/app.hpp>
 #include "render_target.hpp"
 #include "graphics.hpp"
 #include "gl_debug.hpp"
-
-#include <platform/window.hpp>
 
 namespace ek {
 
@@ -95,7 +94,7 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
         }
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, g_window.primary_frame_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, g_app.primary_frame_buffer);
     gl_check_error();
 }
 
@@ -117,7 +116,7 @@ void render_target_t::set() {
 }
 
 void render_target_t::unset() {
-    glBindFramebuffer(GL_FRAMEBUFFER, g_window.primary_frame_buffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, g_app.primary_frame_buffer);
     gl_check_error();
 }
 

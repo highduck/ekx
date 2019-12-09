@@ -40,7 +40,7 @@ bool dispatch_interactive_event(ecs::entity e, const event_data& data) {
 void interactive_manager::update() {
     targets_.clear();
     //pointer_global_space = float2::zero;
-    auto cursor = mouse_cursor_t::parent;
+    auto cursor = mouse_cursor::parent;
     bool changed = false;
     if (mouse_active_) {
         pointer_global_space = primary_mouse_;
@@ -75,13 +75,14 @@ void interactive_manager::update() {
 
     last_targets_ = targets_;
 
-    ek::g_window.set_cursor(cursor);
+    ek::g_app.set_cursor(cursor);
 }
 
 void interactive_manager::handle_mouse_event(const ek::event_t& ev) {
 
     if (ev.type == event_type::mouse_down) {
-        primary_mouse_ = {ev.x, ev.y};
+        primary_mouse_ = float2{static_cast<float>(ev.pos.x),
+                                static_cast<float>(ev.pos.y)};
         pointer_down = true;
         for (auto target : last_targets_) {
             if (ecs::valid(target)) {
@@ -89,7 +90,8 @@ void interactive_manager::handle_mouse_event(const ek::event_t& ev) {
             }
         }
     } else if (ev.type == event_type::mouse_up) {
-        primary_mouse_ = {ev.x, ev.y};
+        primary_mouse_ = float2{static_cast<float>(ev.pos.x),
+                                static_cast<float>(ev.pos.y)};;
         pointer_down = false;
         for (auto target : last_targets_) {
             if (ecs::valid(target)) {
@@ -97,7 +99,8 @@ void interactive_manager::handle_mouse_event(const ek::event_t& ev) {
             }
         }
     } else if (ev.type == event_type::mouse_move) {
-        primary_mouse_ = {ev.x, ev.y};
+        primary_mouse_ = float2{static_cast<float>(ev.pos.x),
+                                static_cast<float>(ev.pos.y)};;
         mouse_active_ = true;
         update();
     } else if (ev.type == event_type::mouse_exit) {
@@ -111,7 +114,8 @@ void interactive_manager::handle_touch_event(const ek::event_t& ev) {
     if (ev.type == event_type::touch_begin) {
         if (primary_touch_id_ == 0) {
             primary_touch_id_ = ev.id;
-            primary_touch_ = {ev.x, ev.y};
+            primary_touch_ = float2{static_cast<float>(ev.pos.x),
+                                    static_cast<float>(ev.pos.y)};;
             mouse_active_ = false;
             pointer_down = true;
             update();
@@ -134,7 +138,8 @@ void interactive_manager::handle_touch_event(const ek::event_t& ev) {
                 }
             }
         } else {
-            primary_touch_ = {ev.x, ev.y};
+            primary_touch_ = float2{static_cast<float>(ev.pos.x),
+                                    static_cast<float>(ev.pos.y)};;
         }
     }
 }
@@ -162,7 +167,7 @@ void interactive_manager::set_debug_hit(ecs::entity hit) {
     }
 }
 
-ek::mouse_cursor_t interactive_manager::search_interactive_targets(
+ek::mouse_cursor interactive_manager::search_interactive_targets(
         ecs::entity node,
         std::vector<ecs::entity>& out_entities) {
 
@@ -171,7 +176,7 @@ ek::mouse_cursor_t interactive_manager::search_interactive_targets(
         target = drag_entity_;
     }
 
-    auto cursor = mouse_cursor_t::parent;
+    auto cursor = mouse_cursor::parent;
 
     if (debug_hit_enabled) {
         set_debug_hit(target);
@@ -180,7 +185,7 @@ ek::mouse_cursor_t interactive_manager::search_interactive_targets(
     while (target) {
         if (ecs::has<interactive_t>(target)) {
             auto& data = ecs::get<interactive_t>(target);
-            if (cursor == mouse_cursor_t::parent) {
+            if (cursor == mouse_cursor::parent) {
                 cursor = data.cursor;
             }
             out_entities.push_back(target);

@@ -2,17 +2,17 @@
 
 #import <Carbon/Carbon.h>
 #import <AppKit/AppKit.h>
-#import <platform/application.hpp>
+#import <ek/app/app.hpp>
 #import <unordered_map>
 
 namespace ek {
 
 void osx_handle_mouse_wheel_scroll(const NSEvent* event, event_t& to_event) {
-    to_event.set_mouse_scroll(
-            event.scrollingDeltaX,
-            event.scrollingDeltaY,
-            event.hasPreciseScrollingDeltas ? 0.1 : 1.0
-    );
+    to_event.scroll = {event.scrollingDeltaX, event.scrollingDeltaY};
+    if (event.hasPreciseScrollingDeltas) {
+        to_event.scroll.x *= 0.1;
+        to_event.scroll.y *= 0.1;
+    }
 }
 
 /****** KEYBOARD ****/

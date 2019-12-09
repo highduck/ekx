@@ -64,6 +64,10 @@ if (EKX_BUILD_EDITOR)
     target_link_libraries(ekx INTERFACE ek-flash ek-editor)
 endif ()
 
+if (EKX_BUILD_TESTS)
+    add_subdirectory(core-test)
+endif()
+
 # Samples
 
 add_subdirectory(samples/picos)

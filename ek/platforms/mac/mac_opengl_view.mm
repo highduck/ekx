@@ -125,16 +125,11 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
 }
 
 - (void)handleResize {
-    auto& window = const_cast<window_t&>(g_window);
-
-    window.device_pixel_ratio = static_cast<float>(self.window.backingScaleFactor);
+    g_app.content_scale = self.window.backingScaleFactor;
 
     // Get the view size in Points
     NSRect viewRectPoints = [self bounds];
-    window.window_size = {
-            static_cast<uint32_t>(viewRectPoints.size.width),
-            static_cast<uint32_t>(viewRectPoints.size.height)
-    };
+    g_app.window_size = {viewRectPoints.size.width, viewRectPoints.size.height};
 
     // Rendering at retina resolutions will reduce aliasing, but at the potential
     // cost of framerate and battery life due to the GPU needing to render more
@@ -149,12 +144,8 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
     // viewRectPixels will be the same as viewRectPoints for non-retina displays
 
     NSRect viewRectPixels = [self convertRectToBacking:[self bounds]];
-    window.back_buffer_size = {
-            static_cast<uint32_t>(viewRectPixels.size.width),
-            static_cast<uint32_t>(viewRectPixels.size.height)
-    };
-
-    window.size_changed = true;
+    g_app.drawable_size = {viewRectPixels.size.width, viewRectPixels.size.height};
+    g_app.size_changed = true;
 }
 
 // Called whenever graphics state updated (such as window resize)
@@ -204,15 +195,15 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
     [super resetCursorRects];
     NSCursor* cursor = nil;
 
-    switch (g_window.cursor()) {
-        case mouse_cursor_t::button:
+    switch (g_app.cursor()) {
+        case mouse_cursor::button:
             cursor = NSCursor.pointingHandCursor;
             break;
-        case mouse_cursor_t::help:
+        case mouse_cursor::help:
             cursor = NSCursor._helpCursor;
             break;
-        case mouse_cursor_t::arrow:
-        case mouse_cursor_t::parent:
+        case mouse_cursor::arrow:
+        case mouse_cursor::parent:
             cursor = NSCursor.arrowCursor;
             break;
     }
