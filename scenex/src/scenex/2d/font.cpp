@@ -144,7 +144,9 @@ rect_f font_t::get_line_bounding_box(const std::string& text, float size, int be
     bounds_builder_2f bounds_builder;
     float x = 0.0f;
     float y = 0.0f;
-    if (end < 0) end = text.size();
+    if (end < 0) {
+        end = text.size();
+    }
     for (int i = begin; i < end; ++i) {
         int code = text[i];
         if (code == '\n' || code == '\r') {

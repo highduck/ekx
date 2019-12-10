@@ -5,7 +5,7 @@
 #include <ek/app/app.hpp>
 #include <apple_common.h>
 
-using namespace ek;
+using namespace ek::app;
 
 @interface EAGLView () {
     EAGLContext* _context;
@@ -172,12 +172,12 @@ void clear_buffers() {
     [EAGLContext setCurrentContext:_context];
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBOName);
 
-    g_app.dispatch_draw_frame();
+    dispatch_draw_frame();
 
     glBindRenderbuffer(GL_RENDERBUFFER, _colorRenderbuffer);
     [_context presentRenderbuffer:GL_RENDERBUFFER];
 
-    apple::handle_exit_request();
+    ek::apple::handle_exit_request();
 }
 
 - (void)layoutSubviews {
@@ -254,8 +254,8 @@ void handle_touches(event_type type, UIView* view, NSSet* touches, UIEvent* even
     for (UITouch* touch in [touches allObjects]) {
         const CGPoint location = [touch locationInView:view];
         ev.id = (uint64_t) touch;
-        ev.set_position(location.x, location.y, scale_factor);
-        g_app.dispatch(ev);
+        ev.pos = vec2{location.x, location.y} * scale_factor;
+        dispatch_event(ev);
     }
 }
 

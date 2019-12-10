@@ -4,7 +4,7 @@
 
 IOSAppDelegate* g_app_delegate;
 
-using namespace ek;
+using namespace ek::app;
 
 @implementation IOSAppDelegate
 
@@ -42,7 +42,7 @@ using namespace ek;
 
     [_view stopAnimation];
 
-    g_app.dispatch({event_type::app_pause});
+    dispatch_event({event_type::app_pause});
 }
 
 
@@ -59,7 +59,7 @@ using namespace ek;
 
     [_view startAnimation];
 
-    g_app.dispatch({event_type::app_resume});
+    dispatch_event({event_type::app_resume});
 }
 
 
@@ -72,7 +72,7 @@ using namespace ek;
 - (void)applicationWillTerminate:(UIApplication*)application {
     [_view stopAnimation];
 
-    g_app.dispatch({event_type::app_close});
+    dispatch_event({event_type::app_close});
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 

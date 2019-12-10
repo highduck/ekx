@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <string>
 
-using namespace ek;
+using namespace ek::app;
 
 struct android_context {
     // EK bridge class ref
@@ -160,10 +160,10 @@ namespace ek {
 
 void handle_enter_frame() {
 
-    g_app.dispatch_draw_frame();
+    dispatch_draw_frame();
 
     if (g_app.require_exit) {
-        android::exit_activity(g_app.exit_code);
+        ek::android::exit_activity(g_app.exit_code);
     }
 }
 
@@ -201,7 +201,7 @@ EK_JNI_VOID(sendEvent, jint type) {
             break;
         case call_start:
             ::ek::main();
-            g_app.lang = get_device_lang();
+            g_app.lang = ek::get_device_lang();
             break;
         case call_ready:
             dispatch_device_ready();
@@ -209,7 +209,7 @@ EK_JNI_VOID(sendEvent, jint type) {
         case event_nop:
             break;
         default:
-            g_app.dispatch({static_cast<event_type>(type)});
+            dispatch_event({static_cast<event_type>(type)});
             break;
     }
 }
@@ -220,8 +220,8 @@ EK_JNI_VOID(sendTouch, jint type, jint id, jfloat x, jfloat y) {
     uint8_t event_type_id = event_map_[type];
     event_t ev{static_cast<event_type>(event_type_id)};
     ev.id = static_cast<uint64_t>(id) + 1;
-    ev.set_position(x, y);
-    g_app.dispatch(ev);
+    ev.pos = vec2{x, y};
+    dispatch_event(ev);
 }
 
 EK_JNI_VOID(sendResize, jint width, jint height, jfloat scale) {
