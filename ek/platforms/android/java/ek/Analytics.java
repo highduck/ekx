@@ -1,9 +1,8 @@
-package ekapp;
+package ek;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Keep;
-import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -17,8 +16,8 @@ public class Analytics {
 
     @Keep
     public static void init() {
-        _activity = EKActivity.getInstance();
-        _analytics = FirebaseAnalytics.getInstance(EKActivity.getInstance());
+        _activity = EkActivity.getInstance();
+        _analytics = FirebaseAnalytics.getInstance(EkActivity.getInstance());
         _analytics.setAnalyticsCollectionEnabled(true);
         //_analytics.setMinimumSessionDuration(1000 * 4);
         _analytics.setSessionTimeoutDuration(1000 * 60 * 30);

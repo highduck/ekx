@@ -33,7 +33,7 @@ void main() {
     EK_INFO << "Executable path: " << get_executable_path();
     EK_INFO << "Working dir: " << current_working_directory();
     EK_INFO << "Arguments: ";
-    auto args = g_app.args.to_vector();
+    auto args = app::g_app.args.to_vector();
     EK_INFO << join(args, " ");
 
     if (args.size() <= 1) {
@@ -70,9 +70,5 @@ void main() {
     const string ios_res_folder = "generated/ios";
     const string pwa_icons_folder = "generated/pwa/icons";
 }
-
-}
-
-void ek_main() {
 
 }

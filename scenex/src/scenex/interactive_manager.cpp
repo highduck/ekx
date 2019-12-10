@@ -8,6 +8,7 @@
 #include <scenex/2d/font.hpp>
 
 using namespace ek;
+using namespace ek::app;
 
 namespace scenex {
 
@@ -40,7 +41,7 @@ bool dispatch_interactive_event(ecs::entity e, const event_data& data) {
 void interactive_manager::update() {
     targets_.clear();
     //pointer_global_space = float2::zero;
-    auto cursor = mouse_cursor::parent;
+    auto cursor = interactive_t::mouse_cursor::parent;
     bool changed = false;
     if (mouse_active_) {
         pointer_global_space = primary_mouse_;
@@ -75,10 +76,10 @@ void interactive_manager::update() {
 
     last_targets_ = targets_;
 
-    ek::g_app.cursor = cursor;
+    g_app.cursor = cursor;
 }
 
-void interactive_manager::handle_mouse_event(const ek::event_t& ev) {
+void interactive_manager::handle_mouse_event(const event_t& ev) {
 
     if (ev.type == event_type::mouse_down) {
         primary_mouse_ = float2{static_cast<float>(ev.pos.x),
@@ -110,7 +111,7 @@ void interactive_manager::handle_mouse_event(const ek::event_t& ev) {
     }
 }
 
-void interactive_manager::handle_touch_event(const ek::event_t& ev) {
+void interactive_manager::handle_touch_event(const event_t& ev) {
     if (ev.type == event_type::touch_begin) {
         if (primary_touch_id_ == 0) {
             primary_touch_id_ = ev.id;
@@ -167,7 +168,7 @@ void interactive_manager::set_debug_hit(ecs::entity hit) {
     }
 }
 
-ek::mouse_cursor interactive_manager::search_interactive_targets(
+mouse_cursor interactive_manager::search_interactive_targets(
         ecs::entity node,
         std::vector<ecs::entity>& out_entities) {
 

@@ -9,6 +9,7 @@ namespace scenex {
 
 class interactive_manager {
 public:
+
     bool debug_hit_enabled = false;
     float2 pointer_global_space = float2::zero;
     float2 pointer = float2::zero;
@@ -26,7 +27,7 @@ public:
 
     void update();
 
-    ek::mouse_cursor search_interactive_targets(ecs::entity node, std::vector<ecs::entity>& out_entities);
+    ek::app::mouse_cursor search_interactive_targets(ecs::entity node, std::vector<ecs::entity>& out_entities);
 
     void send_back_button();
 
@@ -34,9 +35,9 @@ public:
 
     void set_debug_hit(ecs::entity hit);
 
-    void handle_mouse_event(const ek::event_t& ev);
+    void handle_mouse_event(const ek::app::event_t& ev);
 
-    void handle_touch_event(const ek::event_t& ev);
+    void handle_touch_event(const ek::app::event_t& ev);
 //
 //    static void drawBorders(EventData ev) {
 //        auto* v = ev.source->display;

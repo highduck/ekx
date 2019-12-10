@@ -2,11 +2,12 @@
 
 namespace scenex {
 
-using namespace ek;
+using namespace ek::app;
 
 input_controller::input_controller(interactive_manager& interactions)
         : interactions_{interactions} {
-    g_app.listen(this);
+    g_app.on_event += [this](const auto& e) { on_event(e); };
+    g_app.on_frame_completed += [this] { on_frame_completed(); };
 }
 
 input_controller::~input_controller() = default;
@@ -124,8 +125,6 @@ bool input_controller::is_key_up(key_code code) const {
 }
 
 void input_controller::on_frame_completed() {
-    application_listener_t::on_frame_completed();
-
     // update keyboard state
     for (auto& key : keys_) {
         key.down = false;

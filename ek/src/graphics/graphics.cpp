@@ -9,6 +9,8 @@
 
 namespace ek {
 
+using app::g_app;
+
 graphics_t::graphics_t() {
     assert_created_once<graphics_t>();
 

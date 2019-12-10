@@ -7,7 +7,7 @@
 
 namespace ek {
 
-class base_app_t : public application_listener_t {
+class base_app_t {
 public:
 
     /**** assets ***/
@@ -26,15 +26,15 @@ public:
 
     base_app_t();
 
-    ~base_app_t() override;
+    virtual ~base_app_t();
 
     virtual void initialize();
 
     virtual void preload();
 
-    void on_event(const event_t& event) override;
+    void on_event(const app::event_t& event);
 
-    void on_draw_frame() override;
+    virtual void on_draw_frame();
 
 protected:
 

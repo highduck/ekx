@@ -15,6 +15,8 @@
 
 namespace ek {
 
+using namespace ek::app;
+
 const GLchar* vertex_shader =
         "#ifdef GL_ES\n"
         "precision highp float;\n"
@@ -412,8 +414,6 @@ void imgui_module_t::setup() {
 }
 
 void imgui_module_t::on_frame_completed() {
-    application_listener_t::on_frame_completed();
-
     auto& io = ImGui::GetIO();
     if (io.KeySuper || io.KeyCtrl) {
         reset_keys();

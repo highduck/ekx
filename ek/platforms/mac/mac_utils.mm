@@ -13,6 +13,8 @@
 
 namespace ek {
 
+using namespace ek::app;
+
 /****** KEYBOARD ****/
 key_code SCAN_CODE_TABLE[0xFF] = {};
 
@@ -142,7 +144,7 @@ void handle_mouse_wheel_scroll(const NSEvent* event, event_t& to_event) {
 void handle_mouse_event(NSView* view, NSEvent* event) {
     const auto location = [view convertPoint:event.locationInWindow fromView:nil];
     event_t ev{};
-    ev.set_position(location.x, location.y, view.window.backingScaleFactor);
+    ev.pos = vec2{location.x, location.y} * view.window.backingScaleFactor;
 
     switch (event.type) {
         case NSEventTypeLeftMouseDown:
@@ -194,7 +196,7 @@ void handle_mouse_event(NSView* view, NSEvent* event) {
         default:
             break;
     }
-    g_app.dispatch(ev);
+    dispatch_event(ev);
 }
 
 }

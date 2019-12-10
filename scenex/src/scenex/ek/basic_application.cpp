@@ -21,12 +21,12 @@ namespace scenex {
 using ecs::world;
 using ecs::entity;
 using ek::service_locator_instance;
-using ek::g_app;
+using ek::app::g_app;
 using ek::resolve;
 
 basic_application::basic_application()
-        : base_resolution{static_cast<float>(g_app.window_config.size.x),
-                          static_cast<float>(g_app.window_config.size.y)} {
+        : base_resolution{static_cast<float>(g_app.window_cfg.size.x),
+                          static_cast<float>(g_app.window_cfg.size.y)} {
 
     ek::assert_created_once<basic_application>();
 

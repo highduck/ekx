@@ -10,6 +10,7 @@
 #include <ek/util/timer.hpp>
 
 using namespace scenex;
+using namespace ek::app;
 
 namespace ek {
 

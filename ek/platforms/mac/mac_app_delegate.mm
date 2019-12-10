@@ -4,6 +4,7 @@
 #include <ek/util/logger.hpp>
 
 using namespace ek;
+using namespace ek::app;
 
 @implementation MacAppDelegate
 
@@ -61,7 +62,7 @@ using namespace ek;
 }
 
 - (void)createWindow {
-    auto& config = g_app.window_config;
+    auto& config = g_app.window_cfg;
     NSRect frame = NSMakeRect(100.0, 100.0, config.size.x, config.size.y);
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled |
                                   NSWindowStyleMaskClosable |
@@ -131,15 +132,15 @@ using namespace ek;
 }
 
 - (void)applicationWillTerminate:(__unused NSNotification*)notification {
-    g_app.dispatch({event_type::app_close});
+    dispatch_event({event_type::app_close});
 }
 
 - (void)applicationWillResignActive:(__unused NSNotification*)notification {
-    g_app.dispatch({event_type::app_pause});
+    dispatch_event({event_type::app_pause});
 }
 
 - (void)applicationDidBecomeActive:(__unused NSNotification*)notification {
-    g_app.dispatch({event_type::app_resume});
+    dispatch_event({event_type::app_resume});
 }
 
 @end

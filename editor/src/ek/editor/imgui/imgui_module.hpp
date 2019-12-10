@@ -15,15 +15,15 @@ class program_t;
 
 class buffer_object_t;
 
-class imgui_module_t : public application_listener_t {
+class imgui_module_t final {
 public:
     imgui_module_t();
 
-    ~imgui_module_t() final;
+    ~imgui_module_t();
 
-    void on_event(const event_t& event) override;
+    void on_event(const app::event_t& event);
 
-    void on_frame_completed() override;
+    void on_frame_completed();
 
     void begin_frame(float dt);
 

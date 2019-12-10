@@ -16,10 +16,11 @@
 #include <graphics/render_target.hpp>
 #include <graphics/gl_debug.hpp>
 
-using namespace ek;
 //#undef near
 //#undef far
 
+using namespace ek;
+using namespace ek::app;
 
 namespace scenex {
 

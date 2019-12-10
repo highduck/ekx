@@ -3,6 +3,7 @@
 #include <apple_common.h>
 
 using namespace ek;
+using namespace ek::app;
 
 @implementation MacOpenGLView
 
@@ -159,7 +160,7 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
     CGLLockContext([[self openGLContext] CGLContextObj]);
 
     [[self openGLContext] makeCurrentContext];
-    g_app.dispatch_draw_frame();
+    dispatch_draw_frame();
 
     CGLFlushDrawable([[self openGLContext] CGLContextObj]);
     CGLUnlockContext([[self openGLContext] CGLContextObj]);
@@ -294,7 +295,7 @@ void handle_key(NSEvent* event, event_type type) {
     event_t ev{type};
     ev.code = convert_key_code(event.keyCode);
     setup_modifiers(event.modifierFlags, ev);
-    g_app.dispatch(ev);
+    dispatch_event(ev);
 }
 
 - (void)keyDown:(NSEvent*)event {
@@ -305,7 +306,7 @@ void handle_key(NSEvent* event, event_type type) {
     if (is_text_event(event)) {
         event_t ev{event_type::text};
         ev.characters = event.characters.UTF8String;
-        g_app.dispatch(ev);
+        dispatch_event(ev);
     }
 }
 

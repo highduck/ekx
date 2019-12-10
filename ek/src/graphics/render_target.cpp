@@ -5,6 +5,8 @@
 
 namespace ek {
 
+using ek::app::g_app;
+
 render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type type) :
         width_{width},
         height_{height},

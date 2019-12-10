@@ -5,10 +5,14 @@
 
 namespace ek {
 
+using app::g_app;
+
 editor_context_t::editor_context_t(scenex::basic_application& app)
         : app_{&app} {
 
-    g_app.listen(&gui_);
+    g_app.on_frame_completed += [&] { gui_.on_frame_completed(); };
+    g_app.on_event += [&](auto e) { gui_.on_event(e); };
+
     app.hook_on_preload.add([this]() {
         project.update_scale_factor(app_->scale_factor);
         project.populate();

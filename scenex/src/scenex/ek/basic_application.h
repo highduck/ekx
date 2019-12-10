@@ -51,7 +51,8 @@ void run_app() {
     auto& app = ek::service_locator_instance<basic_application>::init<T>();
     app.initialize();
     app.preload();
-    ek::g_app.listen(&app);
+    ek::app::g_app.on_event += [&](const auto& e) { app.on_event(e); };
+    ek::app::g_app.on_frame_draw += [&] { app.on_draw_frame(); };
 }
 
 }

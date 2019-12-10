@@ -22,6 +22,7 @@ namespace scenex {
 
 using namespace ecs;
 using namespace ek;
+using namespace ek::app;
 
 void smoothly_advance_time(entity root, float dt) {
 //    static float steps[3] = {0.0f, 0.0f, 0.0f};

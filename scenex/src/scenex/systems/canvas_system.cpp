@@ -5,7 +5,7 @@
 #include <scenex/components/node_t.h>
 #include <scenex/components/transform_2d.h>
 
-using namespace ek;
+using ek::app::g_app;
 
 namespace scenex {
 
