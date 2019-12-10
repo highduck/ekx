@@ -10,6 +10,8 @@
 
 namespace ek {
 
+using namespace ek::app;
+
 base_app_t::base_app_t() {
     assert_created_once<base_app_t>();
 }

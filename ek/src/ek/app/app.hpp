@@ -4,32 +4,28 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include <ek/util/signals.hpp>
+#include <ek/math/vec.hpp>
 
 namespace ek {
 
 namespace app {
 
-struct vec2 {
-    double x, y;
+struct vec2 final {
+    double x = 0;
+    double y = 0;
 };
 
-struct window_config {
+inline vec2 operator*(vec2 v, double s) {
+    return {v.x * s, v.y * s};
+}
+
+struct window_config final {
     std::string title{"ek"};
     vec2 size{960, 720};
-    bool landscape = false;
-    bool fullscreen = false;
-
-    window_config() = default;
-
-    window_config(std::string title_, vec2 size_) noexcept
-            : title{std::move(title_)},
-              size{size_} {
-        landscape = size.x >= size.y;
-        fullscreen = true;
-    }
 };
 
-struct arguments {
+struct arguments final {
     int argc = 0;
     char** argv = nullptr;
 
@@ -45,7 +41,6 @@ struct arguments {
     }
 };
 
-}
 
 enum class mouse_cursor : uint8_t {
     parent = 0,
@@ -118,7 +113,7 @@ enum class key_code {
     S,
     D,
 
-    MaxCount
+    max_count
 };
 
 struct event_t final {
@@ -137,47 +132,20 @@ struct event_t final {
 
     // TODO: view to internal storage
     std::string characters{};
-
-    template<typename T>
-    void set_scroll(T x_, T y_, T multiplier_ = 1) {
-        scroll.x = static_cast<double>(x_ * multiplier_);
-        scroll.y = static_cast<double>(y_ * multiplier_);
-    }
-
-    template<typename T>
-    void set_position(T x_, T y_, T multiplier_ = 1) {
-        pos.x = static_cast<double>(x_ * multiplier_);
-        pos.y = static_cast<double>(y_ * multiplier_);
-    }
 };
 
-class application_listener_t {
-public:
+struct app_state final {
+    arguments args;
+    window_config window_cfg;
 
-    virtual ~application_listener_t();
-
-    virtual void on_event(const event_t&) {}
-
-    virtual void on_draw_frame() {}
-
-    virtual void on_frame_completed() {}
-};
-
-class application_t final {
-public:
-    app::arguments args;
-    app::vec2 window_size{};
-    app::vec2 drawable_size{};
-    double content_scale{1.0};
+    vec2 window_size{};
+    vec2 drawable_size{};
+    double content_scale = 1.0;
+    bool size_changed = false;
 
     // iOS has manually created FBO for primary surface
     // so it will be set up there
     uint32_t primary_frame_buffer = 0;
-
-    bool size_changed = false;
-
-    app::window_config window_config;
-
     void* view_context_ = nullptr;
 
     bool require_exit = false;
@@ -188,31 +156,25 @@ public:
     mouse_cursor cursor = mouse_cursor::parent;
     bool cursor_dirty = false;
 
-    std::vector<application_listener_t*> listeners_;
+    signal_t<> on_device_ready;
+    signal_t<const event_t&> on_event;
+    signal_t<> on_frame_draw;
+    signal_t<> on_frame_completed;
+
     std::vector<event_t> event_queue_;
-
-    void listen(application_listener_t* listener) {
-        listeners_.push_back(listener);
-    }
-
-    void dispatch(const event_t& event) {
-        if (event.type == event_type::app_pause) {
-            handle_event(event);
-        } else {
-            event_queue_.emplace_back(event);
-        }
-    }
-
-    void handle_event(const event_t& event);
-
-    void dispatch_draw_frame();
 };
 
-extern application_t g_app;
+extern app_state g_app;
+
+void dispatch_event(const event_t& event);
+
+void dispatch_draw_frame();
 
 void dispatch_init();
 
 void dispatch_device_ready();
+
+}
 
 void start_application();
 
@@ -223,5 +185,3 @@ void main();
 #endif
 
 }
-
-void ek_main();

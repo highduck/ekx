@@ -240,7 +240,7 @@ void gui_interactive(ecs::entity entity) {
         ImGui::Checkbox("pushed", &inter.pushed);
         ImGui::Checkbox("over", &inter.over);
         ImGui::Checkbox("bubble", &inter.bubble);
-        ImGui::LabelText("cursor", inter.cursor == interactive_t::mouse_cursor_t::button ? "button" : "?");
+        ImGui::LabelText("cursor", inter.cursor == interactive_t::mouse_cursor::button ? "button" : "?");
     }
 }
 

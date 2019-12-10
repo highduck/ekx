@@ -8,17 +8,17 @@ namespace scenex {
 
 struct interactive_t {
 
-    using mouse_cursor_t = ek::mouse_cursor;
-    using signal_t = ek::signal_t<>;
+    using mouse_cursor = ek::app::mouse_cursor;
+    using signal = ek::signal_t<>;
 
     // events
-    signal_t on_over;
-    signal_t on_out;
-    signal_t on_down;
-    signal_t on_up;
-    signal_t on_clicked;
+    signal on_over;
+    signal on_out;
+    signal on_down;
+    signal on_up;
+    signal on_clicked;
 
-    mouse_cursor_t cursor{mouse_cursor_t::parent};
+    mouse_cursor cursor{mouse_cursor::parent};
 
     //bool enabled = true;
     bool bubble = false;

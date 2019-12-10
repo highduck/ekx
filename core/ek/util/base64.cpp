@@ -41,8 +41,8 @@ size_t decode(uint8_t* out_buffer, const char* str, size_t chars_to_decode) {
         const auto i2 = decoder[*(in++)];
         const auto i3 = decoder[*(in++)];
         *(p++) = (i0 << 2u) | (i1 >> 4u);
-        *(p++) = (i1 << 4) | (i2 >> 2);
-        *(p++) = (i2 << 6) | i3;
+        *(p++) = (i1 << 4u) | (i2 >> 2u);
+        *(p++) = (i2 << 6u) | i3;
         chars_to_decode -= 4;
     }
     // Note: (chars_to_decode == 1) would be an error, so just ignore that case

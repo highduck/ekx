@@ -24,27 +24,25 @@ struct touch_state_t {
     }
 };
 
-class input_controller : public ek::application_listener_t {
+class input_controller final {
 public:
 
     explicit input_controller(interactive_manager& interactions);
 
-    ~input_controller() override;
+    ~input_controller();
 
-    void on_event(const ek::event_t& event) override;
+    void on_event(const ek::app::event_t& event);
 
-    //void on_draw_frame() override {};
-
-    void on_frame_completed() override;
+    void on_frame_completed();
 
     [[nodiscard]]
-    bool is_key(ek::key_code code) const;
+    bool is_key(ek::app::key_code code) const;
 
     [[nodiscard]]
-    bool is_key_down(ek::key_code code) const;
+    bool is_key_down(ek::app::key_code code) const;
 
     [[nodiscard]]
-    bool is_key_up(ek::key_code code) const;
+    bool is_key_up(ek::app::key_code code) const;
 
     void reset_keyboard();
 
@@ -76,7 +74,7 @@ private:
     int keyboard_modifiers_{};
     bool reset_keys_ = false;
 
-    constexpr static size_t keys_count = static_cast<size_t>(ek::key_code::MaxCount);
+    constexpr static size_t keys_count = static_cast<size_t>(ek::app::key_code::max_count);
     using keys_array = std::array<key_state_t, keys_count>;
     keys_array keys_;
 

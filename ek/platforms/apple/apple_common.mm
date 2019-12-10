@@ -10,11 +10,12 @@
 #import <mac_app_delegate.h>
 #include "apple_common.h"
 
-
 #endif
 
+using namespace ek::app;
+
 int main(int argc, char* argv[]) {
-    ::ek::g_app.args = {argc, argv};
+    g_app.args = {argc, argv};
     ::ek::main();
     return 0;
 }

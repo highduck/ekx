@@ -3,11 +3,9 @@
 #include <platform/analytics.hpp>
 #include <platform/crash_reporter.hpp>
 
-namespace ek {
+namespace ek::app {
 
-application_t g_app{};
-
-application_listener_t::~application_listener_t() = default;
+app_state g_app{};
 
 void dispatch_init() {
     analytics::init(); // analytics before crash reporter on ios
@@ -15,32 +13,32 @@ void dispatch_init() {
 }
 
 void dispatch_device_ready() {
-    ek_main();
+    g_app.on_device_ready();
 }
 
-void application_t::handle_event(const event_t& event) {
-    for (auto* listener : listeners_) {
-        listener->on_event(event);
+void process_event(const event_t& event) {
+    g_app.on_event(event);
+}
+
+void dispatch_event(const event_t& event) {
+    if (event.type == event_type::app_pause) {
+        process_event(event);
+    } else {
+        g_app.event_queue_.emplace_back(event);
     }
 }
 
-void application_t::dispatch_draw_frame() {
+void dispatch_draw_frame() {
     if (g_app.size_changed) {
         g_app.size_changed = false;
-        handle_event({event_type::app_resize});
+        process_event({event_type::app_resize});
     }
-    for (const auto& event : event_queue_) {
-        handle_event(event);
+    for (const auto& event : g_app.event_queue_) {
+        process_event(event);
     }
-    event_queue_.clear();
-
-    for (auto* listener : listeners_) {
-        listener->on_draw_frame();
-    }
-
-    for (auto* listener : listeners_) {
-        listener->on_frame_completed();
-    }
+    g_app.event_queue_.clear();
+    g_app.on_frame_draw();
+    g_app.on_frame_completed();
 }
 
 }

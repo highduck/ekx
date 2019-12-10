@@ -17,8 +17,12 @@
 #include <scenex/asset2/builtin_assets.hpp>
 
 namespace ek {
+
 void main() {
-    g_app.window_config = {"Piko", {1024, 768}};
+    app::g_app.window_cfg = {"Piko", {1024, 768}};
+    app::g_app.on_device_ready << [] {
+        scenex::run_app<PikoApp>();
+    };
     start_application();
 }
 }
@@ -248,7 +252,3 @@ void PikoApp::start_game() {
 }
 
 PikoApp::~PikoApp() = default;
-
-void ek_main() {
-    run_app<PikoApp>();
-}
