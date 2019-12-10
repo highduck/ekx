@@ -11,7 +11,7 @@ extern void web_set_mouse_cursor(int cur);
 extern void web_update_gameview_size(double width, double height, double dpr, double offsetX, double offsetY);
 }
 
-using namespace ek;
+using namespace ek::app;
 
 void update_mouse_cursor() {
     if (g_app.cursor_dirty) {
@@ -21,7 +21,7 @@ void update_mouse_cursor() {
 }
 
 void loop() {
-    g_app.dispatch_draw_frame();
+    dispatch_draw_frame();
     update_mouse_cursor();
     if (g_app.require_exit) {
         EM_ASM({ window.close() }, 0);
@@ -85,10 +85,11 @@ static EM_BOOL em_mouse_callback(int type, const EmscriptenMouseEvent* mouse_eve
             return EM_FALSE;
     }
 
-    event.set_position(static_cast<double>(mouse_event->targetX),
-                       static_cast<double>(mouse_event->targetY),
-                       g_app.content_scale);
-    g_app.dispatch(event);
+    event.pos = vec2{
+            static_cast<double>(mouse_event->targetX),
+            static_cast<double>(mouse_event->targetY)
+    } * g_app.content_scale;
+    dispatch_event(event);
     return EM_TRUE;
 }
 
@@ -124,17 +125,17 @@ static EM_BOOL em_keyboard_callback(int type, const EmscriptenKeyboardEvent* eve
         case EMSCRIPTEN_EVENT_KEYPRESS:
             ev.type = event_type::key_press;
             ev.code = convert_key_code(event->code);
-            g_app.dispatch(ev);
+            dispatch_event(ev);
             return EM_TRUE;
         case EMSCRIPTEN_EVENT_KEYDOWN:
             ev.type = event_type::key_down;
             ev.code = convert_key_code(event->code);
-            g_app.dispatch(ev);
+            dispatch_event(ev);
             return EM_TRUE;
         case EMSCRIPTEN_EVENT_KEYUP:
             ev.type = event_type::key_up;
             ev.code = convert_key_code(event->code);
-            g_app.dispatch(ev);
+            dispatch_event(ev);
             return EM_TRUE;
         default:
             break;
@@ -146,11 +147,12 @@ static EM_BOOL em_keyboard_callback(int type, const EmscriptenKeyboardEvent* eve
 static EM_BOOL em_wheel_callback(int type, const EmscriptenWheelEvent* event, void*) {
     if (type == EMSCRIPTEN_EVENT_WHEEL) {
         event_t ev{event_type::mouse_scroll};
-        ev.set_position(static_cast<double>(event->mouse.targetX),
-                        static_cast<double>(event->mouse.targetY),
-                        g_app.content_scale);
+        ev.pos = vec2{
+                static_cast<double>(event->mouse.targetX),
+                static_cast<double>(event->mouse.targetY)
+        } * g_app.content_scale;
         ev.scroll = {event->deltaX, event->deltaY};
-        g_app.dispatch(ev);
+        dispatch_event(ev);
     }
     return EM_TRUE;
 }
@@ -163,22 +165,23 @@ static EM_BOOL em_touch_callback(int type, const EmscriptenTouchEvent* event, vo
         const EmscriptenTouchPoint& touch = event->touches[i];
         if (touch.isChanged) {
             ev.id = static_cast<uint64_t>(touch.identifier) + 1;
-            ev.set_position(static_cast<double>(touch.targetX),
-                            static_cast<double>(touch.targetY),
-                            dpr);
+            ev.pos = vec2{
+                    static_cast<double>(touch.targetX),
+                    static_cast<double>(touch.targetY)
+            } * dpr;
             switch (type) {
                 case EMSCRIPTEN_EVENT_TOUCHSTART:
                     ev.type = event_type::touch_begin;
-                    g_app.dispatch(ev);
+                    dispatch_event(ev);
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHMOVE:
                     ev.type = event_type::touch_move;
-                    g_app.dispatch(ev);
+                    dispatch_event(ev);
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHEND:
                 case EMSCRIPTEN_EVENT_TOUCHCANCEL:
                     ev.type = event_type::touch_end;
-                    g_app.dispatch(ev);
+                    dispatch_event(ev);
                     break;
                 default:
                     break;
@@ -215,12 +218,12 @@ void handle_resize() {
 
     // TODO: configurable min aspect (70/100)
     // TODO: landscape and different modes, native letterbox
-    const double aspect = g_app.window_config.size.x / g_app.window_config.size.y;
+    const double aspect = g_app.window_cfg.size.x / g_app.window_cfg.size.y;
     double w = css_w;
     double h = css_h;
     double offset_x = 0;
     double offset_y = 0;
-    if (g_app.window_config.landscape) {
+    if (aspect > 1.0) {
         if (w / aspect < h) {
             h = w / aspect;
         }
@@ -285,7 +288,7 @@ void start_application() {
 }
 
 int main(int argc, char* argv[]) {
-    ::ek::g_app.args = {argc, argv};
+    g_app.args = {argc, argv};
     ::ek::main();
     return 0;
 }
@@ -297,12 +300,8 @@ void sharing_navigate(const char* url) {
     EM_ASM({ window.open(UTF8ToString($0), "_blank") }, url);
 }
 
-void sharing_rate_us(const char* appId) {
-    (void) appId;
-}
+void sharing_rate_us(const char*) {}
 
-void sharing_send_message(const char* text) {
-    (void) text;
-}
+void sharing_send_message(const char*) {}
 
 }
