@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/scenex/ek/basic_application.h>
+#include <ek/scenex/ek/basic_application.hpp>
 #include <ek/editor/editor.hpp>
 
 namespace ek {

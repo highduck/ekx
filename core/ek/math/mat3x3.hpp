@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include "vec.hpp"
-#include "matrix_fwd.hpp"
+#include "matrix_decl.hpp"
 
 namespace ek {
 

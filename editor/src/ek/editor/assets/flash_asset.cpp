@@ -3,13 +3,13 @@
 #include <ek/util/logger.hpp>
 #include <utility>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/flash/doc/flash_file.h>
+#include <ek/flash/doc/flash_file.hpp>
 #include <ek/spritepack/export_atlas.hpp>
 #include <ek/scenex/2d/atlas.hpp>
 #include <ek/scenex/2d/sprite.hpp>
-#include <ek/scenex/data/sg_data.h>
-#include <xfl/flash_doc_exporter.h>
-#include <ek/flash/doc/flash_archive.h>
+#include <ek/scenex/data/sg_data.hpp>
+#include <ek/xfl/flash_doc_exporter.hpp>
+#include <ek/flash/doc/flash_archive.hpp>
 #include <ek/editor/assets/editor_temp_atlas.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>

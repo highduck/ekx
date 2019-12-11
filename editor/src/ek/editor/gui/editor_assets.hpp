@@ -1,8 +1,8 @@
 #pragma once
 
-#include <ek/scenex/config/ecs.h>
+#include <ecxx/ecxx.hpp>
 
-namespace scenex {
+namespace ek {
 
 void do_editor_debug_runtime_assets();
 

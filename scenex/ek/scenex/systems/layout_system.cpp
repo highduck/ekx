@@ -1,10 +1,10 @@
-#include "layout_system.h"
+#include "layout_system.hpp"
 
-#include <ek/scenex/components/layout.h>
-#include <ek/scenex/components/transform_2d.h>
-#include <ek/scenex/components/node_t.h>
-#include <ek/scenex/components/display_2d.h>
-#include <ek/scenex/utility/scene_management.h>
+#include <ek/scenex/components/layout.hpp>
+#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/utility/scene_management.hpp>
 
 namespace ek {
 

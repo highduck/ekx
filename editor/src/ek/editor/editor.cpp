@@ -1,7 +1,7 @@
 #include "editor.hpp"
 
 #include <ek/editor/gui/editor_widgets.hpp>
-#include <ek/editor/gui/gui_dev_mode.h>
+#include <ek/editor/gui/gui_dev_mode.hpp>
 
 namespace ek {
 

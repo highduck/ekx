@@ -43,16 +43,15 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
             ${EK_COMPILE_WARNINGS}
             )
 else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE
-            -Os -fno-exceptions
-            -fstrict-aliasing
-            ${EK_COMPILE_WARNINGS})
     if (${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
             ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
+        target_compile_options(${PROJECT_NAME} PRIVATE
+                -Os -fno-exceptions
+                -fstrict-aliasing
+                ${EK_COMPILE_WARNINGS})
     else ()
-        set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-        target_compile_options(${PROJECT_NAME} PRIVATE ${EK_COMPILER_LTO})
+        target_compile_options(${PROJECT_NAME} PRIVATE
+                -Oz -flto -fno-exceptions -fno-rtti -fstrict-aliasing ${EK_COMPILE_WARNINGS})
     endif ()
 endif ()
 

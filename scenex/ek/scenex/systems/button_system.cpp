@@ -1,15 +1,15 @@
-#include "button_system.h"
-#include <ek/scenex/components/interactive_t.h>
+#include "button_system.hpp"
+#include <ek/scenex/components/interactive.hpp>
 #include <ek/math/common.hpp>
 #include <ek/math/rand.hpp>
-#include <ek/scenex/components/transform_2d.h>
-#include <ek/scenex/components/movie_t.h>
-#include <ek/scenex/systems/movie_clip_system.h>
-#include <ek/scenex/components/name_t.h>
-#include <ek/scenex/simple_audio_manager.h>
+#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/components/movie.hpp>
+#include <ek/scenex/systems/movie_clip_system.hpp>
+#include <ek/scenex/components/name.hpp>
+#include <ek/scenex/simple_audio_manager.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/ext/analytics/analytics.hpp>
-#include <ek/scenex/components/event_handler.h>
+#include <ek/scenex/components/event_handler.hpp>
 
 namespace ek {
 
@@ -45,7 +45,7 @@ void initialize_events(ecs::entity e) {
     auto& interactive = ecs::get_or_create<interactive_t>(e);
     interactive.on_over.add([e] {
         const auto& skin = get_skin(ecs::get<button_t>(e));
-        play_sound(skin.sfxOver);
+        play_sound(skin.sfx_over);
     });
     interactive.on_out.add([e] {
         auto& btn = ecs::get<button_t>(e);
@@ -53,16 +53,16 @@ void initialize_events(ecs::entity e) {
         if (ecs::get<interactive_t>(e).pushed) {
             start_post_tween(btn);
         }
-        play_sound(skin.sfxOut);
+        play_sound(skin.sfx_out);
     });
     interactive.on_down.add([e] {
         const auto& skin = get_skin(ecs::get<button_t>(e));
-        play_sound(skin.sfxDown);
+        play_sound(skin.sfx_down);
     });
     interactive.on_clicked.add([e] {
         auto& btn = ecs::get<button_t>(e);
         const auto& skin = get_skin(btn);
-        play_sound(skin.sfxClick);
+        play_sound(skin.sfx_click);
 
         start_post_tween(btn);
         btn.clicked.emit();
@@ -72,7 +72,7 @@ void initialize_events(ecs::entity e) {
         }
     });
 
-    ecs::get_or_create<event_handler_t>(e).on("backButton", [e](const event_data& ev) {
+    ecs::get_or_create<event_handler_t>(e).on("back_button", [e](const event_data& ev) {
         auto& btn = ecs::get<button_t>(e);
         handle_back_button(btn, ev);
     });
@@ -127,13 +127,13 @@ void update_buttons(float dt) {
 
         btn.over_time = math::reach_delta(btn.over_time,
                                           interactive.over ? 1.0f : 0.0f,
-                                          dt * skin.overSpeedForward,
-                                          -dt * skin.overSpeedBackward);
+                                          dt * skin.over_speed_forward,
+                                          -dt * skin.over_speed_backward);
 
         btn.push_time = math::reach_delta(btn.push_time,
                                           interactive.pushed ? 1.0f : 0.0f,
-                                          dt * skin.pressSpeedForward,
-                                          -dt * skin.pressSpeedBackward);
+                                          dt * skin.push_speed_forward,
+                                          -dt * skin.push_speed_backward);
 
         btn.post_time = math::reach(btn.post_time, 0.0f, 2.0f * dt);
 

@@ -1,6 +1,6 @@
-#include "node_filters.h"
+#include "node_filters.hpp"
 
-#include <ek/scenex/scene_system.h>
+#include <ek/scenex/scene_system.hpp>
 #include <ek/math/common.hpp>
 
 namespace ek {
@@ -13,7 +13,7 @@ bool process_node_filters(entity e) {
         auto& filters = ecs::get<node_filters_t>(e);
         if (filters.enabled && !filters.processing) {
             for (auto& data : filters.filters) {
-                if (data.type == filter_type::drop_shadow) {
+                if (data.type == sg_filter_type::drop_shadow) {
                     filters.processing = true;
                     auto& drawer = resolve<drawer_t>();
                     drawer.save_transform();
@@ -23,7 +23,7 @@ bool process_node_filters(entity e) {
                     draw_node(e);
                     drawer.restore_transform();
                     filters.processing = false;
-                } else if (data.type == filter_type::glow) {
+                } else if (data.type == sg_filter_type::glow) {
                     filters.processing = true;
                     auto& drawer = resolve<drawer_t>();
                     drawer.save_transform();

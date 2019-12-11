@@ -29,7 +29,7 @@ void audio_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
         music_filters.emplace_back(music_node.attribute("filter").as_string());
     }
 
-    auto files = search_files("*.mp3", project->base_path);
+    auto files = search_files("*.mp3", project->base_path / resource_path_);
     for (auto& file : files) {
         if (check_filters(file, music_filters)) {
             music_list_.push_back(file.str());

@@ -7,7 +7,7 @@
 #include <ek/util/timer.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app/app.hpp>
-#include <ek/scenex/components/node_t.h>
+#include <ek/scenex/components/node.hpp>
 #include <ek/math/matrix_transform.hpp>
 #include <ek/math/matrix_transpose.hpp>
 #include <ek/math/matrix_inverse.hpp>
@@ -15,7 +15,7 @@
 
 #include <ek/graphics/render_target.hpp>
 #include <ek/graphics/gl_debug.hpp>
-#include <ek/scenex/utility/scene_management.h>
+#include <ek/scenex/utility/scene_management.hpp>
 
 //#undef near
 //#undef far
@@ -46,7 +46,7 @@ void render_objects_to_shadow_map(const mat4f& proj, const mat4f& view) {
 static mat4f depth_projection_;
 static mat4f depth_view_;
 
-box_t<float, 3> get_shadow_map_box(const mat4f& camera_projection, const mat4f& camera_view, const mat4f& light_view) {
+box_t<3, float> get_shadow_map_box(const mat4f& camera_projection, const mat4f& camera_view, const mat4f& light_view) {
     const mat4f inv_proj_view = inverse(camera_projection * camera_view);
     float3 corners[8] = {
             float3{-1, -1, -1},
@@ -73,10 +73,7 @@ box_t<float, 3> get_shadow_map_box(const mat4f& camera_projection, const mat4f& 
         if (v.y > bb_max.y) bb_max.y = v.y;
         if (v.z > bb_max.z) bb_max.z = v.z;
     }
-    return box_t<float, 3>{
-            bb_min,
-            bb_max - bb_min
-    };
+    return {bb_min, bb_max - bb_min};
 }
 
 void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view) {

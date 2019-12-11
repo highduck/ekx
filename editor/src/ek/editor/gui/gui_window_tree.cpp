@@ -2,13 +2,13 @@
 #include "gui_window_stats.h"
 
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/components/node_t.h>
-#include <ek/scenex/components/name_t.h>
-#include <ek/scenex/components/display_2d.h>
-#include <ek/scenex/components/transform_2d.h>
-#include <ek/scenex/components/script_t.h>
-#include <ek/scenex/components/interactive_t.h>
-#include <ek/scenex/components/event_handler.h>
+#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/name.hpp>
+#include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/components/script.hpp>
+#include <ek/scenex/components/interactive.hpp>
+#include <ek/scenex/components/event_handler.hpp>
 #include <ek/scenex/3d/transform_3d.hpp>
 #include <ek/scenex/3d/camera_3d.hpp>
 #include <ek/math/common.hpp>

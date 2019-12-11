@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/scenex/config/ecs.h>
+#include <ecxx/ecxx.hpp>
 
 namespace ek {
 

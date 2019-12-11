@@ -1,9 +1,9 @@
-#include "canvas_system.h"
+#include "canvas_system.hpp"
 
 #include <ek/app/app.hpp>
-#include <ek/scenex/components/canvas.h>
-#include <ek/scenex/components/node_t.h>
-#include <ek/scenex/components/transform_2d.h>
+#include <ek/scenex/components/canvas.hpp>
+#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/transform_2d.hpp>
 
 using ek::app::g_app;
 

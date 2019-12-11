@@ -1,19 +1,19 @@
 #include "picos_main.hpp"
 #include "camera_arcball.hpp"
 
-#include <ek/scenex/systems/main_flow.h>
+#include <ek/scenex/systems/main_flow.hpp>
 #include <sim/driver_node_script.h>
-#include <ek/scenex/scene_system.h>
+#include <ek/scenex/scene_system.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/scenex/3d/camera_3d.hpp>
 #include <ek/scenex/3d/transform_3d.hpp>
-#include <ek/scenex/systems/game_time.h>
+#include <ek/scenex/systems/game_time.hpp>
 #include <ek/scenex/3d/render_system_3d.hpp>
-#include <ek/scenex/components/node_t.h>
-#include <ek/scenex/utility/scene_management.h>
+#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/3d/light_3d.hpp>
 #include <ek/math/rand.hpp>
-#include <ek/scenex/data/sg_factory.h>
+#include <ek/scenex/data/sg_factory.hpp>
 #include <ek/scenex/asset2/builtin_assets.hpp>
 
 namespace ek {

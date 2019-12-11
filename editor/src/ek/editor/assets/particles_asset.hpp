@@ -1,7 +1,7 @@
 #pragma once
 
 #include "editor_asset.hpp"
-#include <ek/scenex/particles/particle_decl.h>
+#include <ek/scenex/particles/particle_decl.hpp>
 
 namespace ek {
 

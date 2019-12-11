@@ -3,7 +3,7 @@
 #include <string>
 
 #include <ek/util/path.hpp>
-#include <ek/flash/doc/flash_file.h>
+#include <ek/flash/doc/flash_file.hpp>
 
 namespace ek {
 

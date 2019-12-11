@@ -1,10 +1,10 @@
-#include <ek/scenex/particles/particle_layer.h>
-#include <ek/scenex/particles/particle_system.h>
-#include <ek/scenex/components/transform_2d.h>
-#include <ek/scenex/components/display_2d.h>
-#include <ek/scenex/components/node_filters.h>
-#include "scene_system.h"
-#include <ek/scenex/data/sg_factory.h>
+#include <ek/scenex/particles/particle_layer.hpp>
+#include <ek/scenex/particles/particle_system.hpp>
+#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/components/node_filters.hpp>
+#include "scene_system.hpp"
+#include <ek/scenex/data/sg_factory.hpp>
 
 namespace ek {
 

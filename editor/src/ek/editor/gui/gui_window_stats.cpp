@@ -1,14 +1,14 @@
 #include "gui_window_stats.h"
 
-#include <ek/scenex/ek/basic_application.h>
+#include <ek/scenex/ek/basic_application.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 
-namespace scenex {
+namespace ek {
 
 void gui_draw_stats() {
-    auto& app = ek::resolve<basic_application>();
+    auto& app = resolve<basic_application>();
     auto& drawer = ek::resolve<ek::drawer_t>();
 
     drawer.batcher.flush();

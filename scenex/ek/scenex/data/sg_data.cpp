@@ -1,4 +1,4 @@
-#include "sg_data.h"
+#include "sg_data.hpp"
 
 #include <ek/serialize/streams.hpp>
 

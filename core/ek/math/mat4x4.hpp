@@ -209,35 +209,35 @@ inline matrix_t<4, 4, T> operator*(const matrix_t<4, 4, T>& l, const matrix_t<4,
 
 //! Post-multiply.
 template<typename T>
-vec_t<T, 4>
-operator*(const matrix_t<4, 4, T>& m, const vec_t<T, 4>& v) {
-    return vec_t<T, 4>(v.x * m.m00 + v.y * m.m01 + v.z * m.m02 + v.w * m.m03,
+vec_t<4, T>
+operator*(const matrix_t<4, 4, T>& m, const vec_t<4, T>& v) {
+    return vec_t<4, T>(v.x * m.m00 + v.y * m.m01 + v.z * m.m02 + v.w * m.m03,
                        v.x * m.m10 + v.y * m.m11 + v.z * m.m12 + v.w * m.m13,
                        v.x * m.m20 + v.y * m.m21 + v.z * m.m22 + v.w * m.m23,
                        v.x * m.m30 + v.y * m.m31 + v.z * m.m32 + v.w * m.m33);
 }
 
 template<typename T>
-vec_t<T, 3>
-operator*(const matrix_t<4, 4, T>& m, const vec_t<T, 3>& v) {
+vec_t<3, T>
+operator*(const matrix_t<4, 4, T>& m, const vec_t<3, T>& v) {
     const float w = v.x * m.m30 + v.y * m.m31 + v.z * m.m32 + m.m33;
-    return vec_t<T, 3>(v.x * m.m00 + v.y * m.m01 + v.z * m.m02 + w * m.m03,
+    return vec_t<3, T>(v.x * m.m00 + v.y * m.m01 + v.z * m.m02 + w * m.m03,
                        v.x * m.m10 + v.y * m.m11 + v.z * m.m12 + w * m.m13,
                        v.x * m.m20 + v.y * m.m21 + v.z * m.m22 + w * m.m23);
 }
 
 //! Pre-multiply.
 template<typename T>
-vec_t<T, 4> operator*(const vec_t<T, 4>& v, const matrix_t<4, 4, T>& m) {
-    return vec_t<T, 4>(v.x * m.m00 + v.y * m.m10 + v.z * m.m20 + v.w * m.m30,
+vec_t<4, T> operator*(const vec_t<4, T>& v, const matrix_t<4, 4, T>& m) {
+    return vec_t<4, T>(v.x * m.m00 + v.y * m.m10 + v.z * m.m20 + v.w * m.m30,
                        v.x * m.m01 + v.y * m.m11 + v.z * m.m21 + v.w * m.m31,
                        v.x * m.m02 + v.y * m.m12 + v.z * m.m22 + v.w * m.m32,
                        v.x * m.m03 + v.y * m.m13 + v.z * m.m23 + v.w * m.m33);
 }
 
 template<typename T>
-vec_t<T, 3> operator*(const vec_t<T, 3>& v, const matrix_t<4, 4, T>& m) {
-    return vec_t<T, 3>(v.x * m.m00 + v.y * m.m10 + v.z * m.m20 + m.m30,
+vec_t<3, T> operator*(const vec_t<3, T>& v, const matrix_t<4, 4, T>& m) {
+    return vec_t<3, T>(v.x * m.m00 + v.y * m.m10 + v.z * m.m20 + m.m30,
                        v.x * m.m01 + v.y * m.m11 + v.z * m.m21 + m.m31,
                        v.x * m.m02 + v.y * m.m12 + v.z * m.m22 + m.m32);
 }

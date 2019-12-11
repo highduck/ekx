@@ -11,10 +11,12 @@ add_library(${PROJECT_NAME} STATIC
         ek/math/common.hpp
         ek/math/serialize_math.hpp
 
-        ek/math/vec_fwd.hpp
-        ek/math/matrix_fwd.hpp
         ek/math/vec.hpp
+        ek/math/matrix_decl.hpp
+        ek/math/mat.hpp
+        ek/math/mat2x2.hpp
         ek/math/mat3x2.hpp
+        ek/math/mat3x3.hpp
         ek/math/mat4x4.hpp
         ek/math/matrix_inverse.hpp
         ek/math/matrix_camera.hpp
@@ -23,7 +25,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/math/quaternion.hpp
 
         ek/math/box.hpp
-        ek/math/rect.hpp
         ek/math/circle.hpp
         ek/math/bounds_builder.hpp
 
@@ -33,7 +34,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/math/transform.hpp
 
-        ek/math/easing.cpp
         ek/math/easing.hpp
 
         ek/math/collisions.hpp
@@ -113,13 +113,11 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_options(${PROJECT_NAME} PRIVATE
             -fno-exceptions -fstrict-aliasing -g ${EK_COMPILE_WARNINGS})
 else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE
-            -Os -fno-exceptions -fstrict-aliasing ${EK_COMPILE_WARNINGS})
     if (${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
             ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
     else ()
-        set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-        target_compile_options(${PROJECT_NAME} PRIVATE ${EK_COMPILER_LTO})
+        target_compile_options(${PROJECT_NAME} PRIVATE
+                -Oz -flto -fno-exceptions -fno-rtti -fstrict-aliasing ${EK_COMPILE_WARNINGS})
     endif ()
 endif ()

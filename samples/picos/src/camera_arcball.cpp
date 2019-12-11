@@ -3,9 +3,9 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/3d/camera_3d.hpp>
 #include <ek/scenex/3d/transform_3d.hpp>
-#include <ek/scenex/interactive_manager.h>
+#include <ek/scenex/interactive_manager.hpp>
 #include <ek/util/locator.hpp>
-#include <ek/scenex/ek/input_controller.h>
+#include <ek/scenex/ek/input_controller.hpp>
 
 //using namespace ek::app;
 

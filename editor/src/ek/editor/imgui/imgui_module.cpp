@@ -8,7 +8,7 @@
 #include <ek/app/app.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include <ek/graphics/gl_debug.hpp>
-#include <ek/scenex/ek/input_controller.h>
+#include <ek/scenex/ek/input_controller.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/util/path.hpp>
 #include <ek/system/system.hpp>

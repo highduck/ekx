@@ -1,4 +1,4 @@
-#include "sg_factory.h"
+#include "sg_factory.hpp"
 
 #include <ek/serialize/streams.hpp>
 #include <ek/scenex/2d/atlas.hpp>
