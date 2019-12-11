@@ -1,7 +1,6 @@
 #include "builtin_assets.hpp"
 #include "asset_manager.hpp"
 #include <ek/util/path.hpp>
-#include <ek/util/locator.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/audiomini.hpp>
 #include <ek/app/res.hpp>
@@ -16,7 +15,6 @@
 #include <ek/scenex/data/texture_data.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/scenex/data/model_data.hpp>
-#include <ek/serialize/serialize.hpp>
 
 #include <utility>
 
@@ -55,8 +53,7 @@ public:
     }
 
     void do_load() override {
-        auto& audio = resolve<AudioMini>();
-        audio.create_music((project_->base_path / path_).c_str());
+        audio_mini::create_music((project_->base_path / path_).c_str());
         ready_ = true;
     }
 
@@ -69,8 +66,7 @@ public:
     }
 
     void do_load() override {
-        auto& audio = resolve<AudioMini>();
-        audio.create_sound((project_->base_path / path_).c_str());
+        audio_mini::create_sound((project_->base_path / path_).c_str());
         ready_ = true;
     }
 };

@@ -46,7 +46,6 @@ basic_application::~basic_application() {
 void basic_application::initialize() {
     service_locator_instance<graphics_t>::init();
     service_locator_instance<drawer_t>::init();
-    service_locator_instance<AudioMini>::init();
 
     //scale_factor = static_cast<float>(g_app.content_scale);
 
@@ -58,9 +57,7 @@ void basic_application::initialize() {
     ecs::get<transform_2d>(root).rect.set(0.0f, 0.0f, screen_size.x, screen_size.y);
 
     auto& im = service_locator_instance<interactive_manager>::init();
-    //auto& input =
     service_locator_instance<input_controller>::init(im);
-    //auto& audio =
     service_locator_instance<simple_audio_manager>::init();
 
     im.set_entity(root);
