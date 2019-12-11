@@ -9,8 +9,6 @@ using std::istream;
 using std::string;
 using std::stringstream;
 
-using scenex::mesh_data_t;
-
 namespace ek {
 
 struct obj_model_t {

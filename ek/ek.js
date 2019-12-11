@@ -208,7 +208,6 @@ function mod_cmake_lists(ctx) {
 
     const source_dir_list = [
         "../../src",
-        core_path("ecxx/src"),
         core_path("core"),
         core_path("ek/platforms/android"),
         core_path("ek/src"),
@@ -387,7 +386,6 @@ function mod_plist(ctx, filepath) {
 //
 //     const src_files = [];
 //     collect_source_files("../../src", src_files);
-//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "ecxx/src"), src_files);
 //     // collect_source_files(path.join(ctx.path.EKX_ROOT, "core/src"), src_files);
 //     // collect_source_files(path.join(ctx.path.EKX_ROOT, "ek/src"), src_files);
 //     // collect_source_files(path.join(ctx.path.EKX_ROOT, "ek/platforms/apple"), src_files);
@@ -421,8 +419,7 @@ function mod_plist(ctx, filepath) {
 //
 //     for (const search_path of [
 //         "../../src",
-//         sdk_root + "/ecxx/src",
-//         sdk_root + "/core/src",
+//         sdk_root + "/core",
 //         sdk_root + "/ek/platforms/apple",
 //         sdk_root + "/ek/platforms/ios",
 //         sdk_root + "/ek/src",

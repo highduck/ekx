@@ -3,9 +3,7 @@
 #include <sim/components/attractor.h>
 #include <sim/components/position.h>
 #include <sim/components/motion.h>
-#include <scenex/components/transform_2d.h>
-
-using namespace scenex;
+#include <ek/scenex/components/transform_2d.h>
 
 namespace ek::piko {
 

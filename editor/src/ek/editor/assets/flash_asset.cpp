@@ -5,9 +5,9 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/flash/doc/flash_file.h>
 #include <ek/spritepack/export_atlas.hpp>
-#include <scenex/2d/atlas.hpp>
-#include <scenex/2d/sprite.hpp>
-#include <scenex/data/sg_data.h>
+#include <ek/scenex/2d/atlas.hpp>
+#include <ek/scenex/2d/sprite.hpp>
+#include <ek/scenex/data/sg_data.h>
 #include <xfl/flash_doc_exporter.h>
 #include <ek/flash/doc/flash_archive.h>
 #include <ek/editor/assets/editor_temp_atlas.hpp>
@@ -79,22 +79,22 @@ void flash_asset_t::load() {
     fe.build_sprites(temp_atlas);
     load_temp_atlas(temp_atlas);
 
-    auto* sg = new scenex::sg_file;
+    auto* sg = new sg_file;
     sg->library = fe.library.node;
     sg->linkages = fe.linkages;
-    asset_t<scenex::sg_file>{name_}.reset(sg);
+    asset_t<sg_file>{name_}.reset(sg);
 }
 
 void flash_asset_t::unload() {
-    asset_t<scenex::atlas_t>{name_}.reset(nullptr);
-    asset_t<scenex::sg_file>{name_}.reset(nullptr);
+    asset_t<atlas_t>{name_}.reset(nullptr);
+    asset_t<sg_file>{name_}.reset(nullptr);
 }
 
 void flash_asset_t::gui() {
-    asset_t<scenex::atlas_t> atlas{name_};
+    asset_t<atlas_t> atlas{name_};
     gui_atlas_view(atlas.get());
 
-    asset_t<scenex::sg_file> library{name_};
+    asset_t<sg_file> library{name_};
     gui_sg_file_view(library.get());
 }
 

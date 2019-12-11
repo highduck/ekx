@@ -1,9 +1,9 @@
 #include <ek/editor/imgui/imgui.hpp>
-#include <scenex/data/sg_data.h>
+#include <ek/scenex/data/sg_data.h>
 
 namespace ek {
 
-void gui_sg_file_view(const scenex::sg_file* library) {
+void gui_sg_file_view(const sg_file* library) {
     if (library) {
         if (ImGui::TreeNode(library, "SG Library")) {
             for (const auto&[id, symbol] : library->linkages) {

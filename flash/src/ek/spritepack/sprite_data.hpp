@@ -8,7 +8,7 @@
 #include <vector>
 #include <ek/imaging/image.hpp>
 #include <ek/math/serialize_math.hpp>
-#include <graphics/texture.hpp>
+#include <ek/graphics/texture.hpp>
 
 namespace ek::spritepack {
 

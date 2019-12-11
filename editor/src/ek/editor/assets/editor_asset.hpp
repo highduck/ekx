@@ -1,7 +1,7 @@
 #pragma once
 
-#include <scenex/asset2/asset_manager.hpp>
-#include <scenex/asset2/asset_object.hpp>
+#include <ek/scenex/asset2/asset_manager.hpp>
+#include <ek/scenex/asset2/asset_object.hpp>
 #include <ek/util/path.hpp>
 #include <pugixml.hpp>
 #include "editor_project.hpp"

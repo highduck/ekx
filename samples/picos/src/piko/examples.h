@@ -1,22 +1,22 @@
 #pragma once
 
-#include <scenex/components/script_t.h>
-#include <graphics/render_target.hpp>
+#include <ek/scenex/components/script_t.h>
+#include <ek/graphics/render_target.hpp>
 //#include <ek/editor/gui/screen_recorder.hpp>
 
 namespace ek::piko {
 
-class book : public scenex::script {
+class book : public script {
 public:
     void draw() override;
 };
 
-class dna : public scenex::script {
+class dna : public script {
 public:
     void draw() override;
 };
 
-class diamonds : public scenex::script {
+class diamonds : public script {
 public:
     diamonds();
 

@@ -27,7 +27,6 @@ namespace ek {
 // `ekc export market assets/res web generated/web`
 void main() {
     using namespace std;
-    using namespace scenex;
 
     EK_INFO << "== EKC util ==";
     EK_INFO << "Executable path: " << get_executable_path();

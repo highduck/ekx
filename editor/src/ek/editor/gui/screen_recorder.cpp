@@ -3,7 +3,7 @@
 #include "../../../../../external/stb/stb_image_write.h"
 #include <ek/util/locator.hpp>
 #include <ek/math/box.hpp>
-#include <graphics/graphics.hpp>
+#include <ek/graphics/graphics.hpp>
 #include <sys/stat.h>
 
 namespace ek {

@@ -56,7 +56,6 @@ project.set_flags("PRODUCT_BUNDLE_IDENTIFIER", application_id)
 project.set_flags("IPHONEOS_DEPLOYMENT_TARGET", "12.0")
 
 project.add_folder('../../src', parent=project.add_group("src"), excludes=excludes)
-project.add_folder(sdk_root + '/ecxx/src', parent=project.add_group("ecxx"), excludes=excludes)
 project.add_folder(sdk_root + '/core', parent=project.add_group("ek-core"), excludes=excludes)
 platforms_group = project.add_group("ek-platforms")
 project.add_folder(sdk_root + '/ek/platforms/apple', parent=platforms_group, excludes=excludes)
@@ -72,7 +71,6 @@ disable_arc(project, sdk_root + '/ek/platforms/ios/cocos-audio/CDAudioManager.mm
 project.add_header_search_paths([
     "$(inherited)",
     "../../src",
-    sdk_root + "/ecxx/src",
     sdk_root + "/core",
     sdk_root + "/ek/platforms/apple",
     sdk_root + "/ek/platforms/ios",
@@ -87,7 +85,7 @@ frameworks = [
     "-framework OpenGLES",
     "-framework QuartzCore",
     "-framework Foundation",
-    # mini-audio
+    # cocos-audio
     "-framework OpenAL",
     "-framework AudioToolbox",
     "-framework AVFoundation",

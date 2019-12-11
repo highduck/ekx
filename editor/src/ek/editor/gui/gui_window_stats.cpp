@@ -1,7 +1,7 @@
 #include "gui_window_stats.h"
 
-#include <scenex/ek/basic_application.h>
-#include <draw2d/drawer.hpp>
+#include <ek/scenex/ek/basic_application.h>
+#include <ek/draw2d/drawer.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 

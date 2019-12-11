@@ -2,7 +2,7 @@
 
 #include "export_item.h"
 #include <ek/spritepack/sprite_data.hpp>
-#include <scenex/data/sg_data.h>
+#include <ek/scenex/data/sg_data.h>
 #include <unordered_map>
 
 namespace ek::flash {
@@ -41,7 +41,9 @@ public:
 
     void render(const export_item_t& item, spritepack::atlas_t& to_atlas) const;
 
-    [[nodiscard]] scenex::sg_file export_library() const;
+    [[nodiscard]]
+    sg_file export_library() const;
 
 };
+
 }

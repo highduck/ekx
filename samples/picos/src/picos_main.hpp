@@ -1,11 +1,17 @@
 #pragma once
 
 #ifdef EK_EDITOR
+
 #include <ek/editor/editor_app.hpp>
-using base_app_type = ek::editor_app_t;
+
+using base_app_type = ::ek::editor_app_t;
+
 #else
-#include <scenex/ek/basic_application.h>
-using base_app_type = scenex::basic_application;
+
+#include <ek/scenex/ek/basic_application.h>
+
+using base_app_type = ::ek::basic_application;
+
 #endif
 
 class PikoApp : public base_app_type {

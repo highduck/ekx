@@ -33,27 +33,27 @@ void process_filters(const element_t& el, export_item_t& item) {
         float d = filter.distance;
         float2 offset{d * cosf(a), d * sinf(a)};
 
-        scenex::filter_data fd;
-        fd.type = scenex::filter_type::none;
+        filter_data fd;
+        fd.type = filter_type::none;
         fd.color = argb32_t{filter.color};
         fd.offset = offset;
         fd.blur = filter.blur;
         fd.quality = filter.quality;
 
         if (filter.type == filter_kind_t::drop_shadow) {
-            fd.type = scenex::filter_type::drop_shadow;
+            fd.type = filter_type::drop_shadow;
         } else if (filter.type == filter_kind_t::glow) {
-            fd.type = scenex::filter_type::glow;
+            fd.type = filter_type::glow;
         }
 
-        if (fd.type != scenex::filter_type::none) {
+        if (fd.type != filter_type::none) {
             item.node.filters.push_back(fd);
         }
     }
 }
 
 
-void normalize_rotation(scenex::movie_layer_data& layer) {
+void normalize_rotation(movie_layer_data& layer) {
     // normalize skews, so that we always skew the shortest distance between
     // two angles (we don't want to skew more than Math.PI)
     const int end = static_cast<int>(layer.frames.size()) - 1;
@@ -75,7 +75,7 @@ void normalize_rotation(scenex::movie_layer_data& layer) {
     }
 }
 
-void add_rotation(scenex::movie_layer_data& layer, const std::vector<frame_t>& frames) {
+void add_rotation(movie_layer_data& layer, const std::vector<frame_t>& frames) {
     float additionalRotation = 0.0f;
     const int end = static_cast<int>(layer.frames.size()) - 1;
     for (int i = 0; i < end; ++i) {
@@ -175,8 +175,8 @@ void flash_doc_exporter::build_library() {
     }
 }
 
-scenex::sg_file flash_doc_exporter::export_library() const {
-    scenex::sg_file sg;
+sg_file flash_doc_exporter::export_library() const {
+    sg_file sg;
     sg.library = library.node;
     sg.linkages = linkages;
     return sg;
@@ -282,7 +282,7 @@ void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t*
     int layer_key = 1;
     const auto& layers = el.timeline.layers;
     for (auto it = layers.crbegin(); it != layers.crend(); ++it) {
-        scenex::movie_layer_data layer_data{};
+        movie_layer_data layer_data{};
         layer_data.key = layer_key;
         int animation_key = 1;
         for (const auto& frame_data : it->frames) {
@@ -308,7 +308,7 @@ void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t*
                             // if we don't have added children there is nothing to animate
                             && !item->children.empty()) {
 
-                            scenex::movie_frame_data ef;
+                            movie_frame_data ef;
                             ef.index = frame_data.index;
                             ef.duration = frame_data.duration;
                             ef.key = animation_key;
