@@ -7,11 +7,22 @@
 #include <graphics/vertex_decl.hpp>
 
 #include <graphics/texture.hpp>
-#include <utils/image_loader.hpp>
 #include <scenex/data/texture_data.hpp>
 #include <ek/system/system.hpp>
+#include <ek/imaging/decoder.hpp>
 
 namespace ek {
+
+image_t* load_image(const path_t& path) {
+    image_t* image = nullptr;
+    auto buffer = read_file(path);
+    if (buffer.empty()) {
+        EK_WARN("IMAGE resource not found: %s", path.c_str());
+    } else {
+        image = decode_image_data(buffer);
+    }
+    return image;
+}
 
 texture_asset_t::texture_asset_t(path_t path)
         : editor_asset_t{std::move(path), "texture"} {

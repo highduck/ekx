@@ -1,6 +1,6 @@
 #include <ek/audiomini.hpp>
 
-#import <audiomini/SimpleAudioEngine_objc.h>
+#import <cocos-audio/SimpleAudioEngine_objc.h>
 
 namespace ek {
 
@@ -46,7 +46,7 @@ void AudioMini::vibrate(int duration_millis) {
 
 }
 
-//#include <ek/audiomini/AudioMini.h>
+//#include <ek/cocos-audio/AudioMini.h>
 //#include "SimpleAudioEngine.h"
 //
 //namespace ek {

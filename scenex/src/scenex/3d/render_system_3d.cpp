@@ -15,6 +15,7 @@
 
 #include <graphics/render_target.hpp>
 #include <graphics/gl_debug.hpp>
+#include <scenex/utility/scene_management.h>
 
 //#undef near
 //#undef far
@@ -260,6 +261,10 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     default_material_.set_base_color(0xFF00FF_rgb, 0.2f);
 
     // get view camera orientation
+    if (!camera_entity || !is_visible(camera_entity)) {
+        return;
+    }
+
     auto& camera_data = ecs::get<camera_3d>(camera_entity);
     auto& camera_transform = ecs::get<transform_3d>(camera_entity);
 
@@ -332,7 +337,7 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
 
     static float fc_ = 1.0;
     fc_ += 1.0f;
-    float time = resolve<ek::timer_t>().read_seconds();
+    auto time = static_cast<float>(ek::clock::now());
     program3d->set_uniform(program_uniforms::frame_time, float4{
             time,
             math::fract(time),

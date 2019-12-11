@@ -3,7 +3,6 @@
 #include <scenex/config/ecs.h>
 
 #include <ek/util/locator.hpp>
-#include <baseapp/base_app.hpp>
 #include <ek/app/app.hpp>
 #include <ek/util/signals.hpp>
 #include "app_utils.hpp"
@@ -12,8 +11,24 @@ namespace scenex {
 
 class asset_manager_t;
 
-class basic_application : public ek::base_app_t {
+class basic_application {
 public:
+    /**** assets ***/
+    std::string assets_path{"assets/"};
+
+    ek::framed_timer_t frame_timer{};
+
+    bool clear_color_enabled = false;
+    ek::float4 clear_color{0.3f, 0.3f, 0.3f, 1.0f};
+    float scale_factor = 1.0f;
+
+    ek::signal_t<> hook_on_preload{};
+    ek::signal_t<> hook_on_draw_frame{};
+    ek::signal_t<> hook_on_render_frame{};
+    ek::signal_t<float> hook_on_update{};
+
+    /////
+
     ecs::world w;
     ecs::entity root;
     ecs::entity game;
@@ -24,20 +39,22 @@ public:
 
     basic_application();
 
-    ~basic_application() override;
+    virtual ~basic_application();
 
-    void initialize() override;
+    virtual void initialize();
 
-    void preload() override;
+    virtual void preload();
 
-    void on_draw_frame() override;
+    void on_draw_frame();
 
 protected:
-    void update_frame(float dt) override;
+    //void on_event(const ek::app::event_t& event);
 
-    void render_frame() override;
+    virtual void update_frame(float dt);
 
-    void on_frame_end() override;
+    virtual void render_frame();
+
+    void on_frame_end();
 
     virtual void preload_root_assets_pack();
 
@@ -51,7 +68,7 @@ void run_app() {
     auto& app = ek::service_locator_instance<basic_application>::init<T>();
     app.initialize();
     app.preload();
-    ek::app::g_app.on_event += [&](const auto& e) { app.on_event(e); };
+//    ek::app::g_app.on_event += [&](const auto& e) { app.on_event(e); };
     ek::app::g_app.on_frame_draw += [&] { app.on_draw_frame(); };
 }
 

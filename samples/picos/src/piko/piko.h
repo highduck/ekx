@@ -39,7 +39,7 @@ inline static argb32_t colorf(float index) {
 }
 
 inline static float time() {
-    return resolve<timer_t>().read_seconds();
+    return static_cast<float>(ek::clock::now());
 }
 
 inline static float mid(float x, float y, float z = 0.0f) {

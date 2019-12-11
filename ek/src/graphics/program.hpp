@@ -85,12 +85,6 @@ public:
         return handle_;
     }
 
-    static program_t* load(const char* path_vs, const char* path_fs);
-
-    inline static program_t* load(const std::string& path_vs, const std::string& path_fs) {
-        return program_t::load(path_vs.c_str(), path_fs.c_str());
-    }
-
     GLint get_uniform(const std::string& name) const;
 
     void set_uniform(const std::string& name, const float3& v) const;

@@ -11,14 +11,7 @@ namespace ek {
 
 namespace app {
 
-struct vec2 final {
-    double x = 0;
-    double y = 0;
-};
-
-inline vec2 operator*(vec2 v, double s) {
-    return {v.x * s, v.y * s};
-}
+using vec2 = vec2_t<double>;
 
 struct window_config final {
     std::string title{"ek"};
@@ -30,17 +23,8 @@ struct arguments final {
     char** argv = nullptr;
 
     [[nodiscard]]
-    std::vector<std::string> to_vector() const {
-        using namespace std;
-        vector<string> result{};
-        result.reserve(argc);
-        for (int i = 0; i < argc; ++i) {
-            result.emplace_back(argv[i]);
-        }
-        return result;
-    }
+    std::vector<std::string> to_vector() const;
 };
-
 
 enum class mouse_cursor : uint8_t {
     parent = 0,
@@ -71,7 +55,9 @@ enum class event_type : uint8_t {
     key_up,
     key_press,
 
-    text
+    text,
+
+    max_count
 };
 
 enum class mouse_button {
@@ -162,6 +148,7 @@ struct app_state final {
     signal_t<> on_frame_completed;
 
     std::vector<event_t> event_queue_;
+    bool event_queue_locked = false;
 };
 
 extern app_state g_app;

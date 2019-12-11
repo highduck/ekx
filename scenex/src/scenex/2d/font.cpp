@@ -2,7 +2,7 @@
 
 #include "sprite.hpp"
 #include <ek/util/locator.hpp>
-#include <platform/static_resources.hpp>
+#include <ek/app/res.hpp>
 #include <draw2d/drawer.hpp>
 #include <ek/math/bounds_builder.hpp>
 #include <ek/util/logger.hpp>

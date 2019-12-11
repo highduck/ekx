@@ -2,7 +2,6 @@
 #include "vertex_decl.hpp"
 #include "gl_debug.hpp"
 #include <ek/util/logger.hpp>
-#include <platform/static_resources.hpp>
 
 namespace ek {
 
@@ -165,7 +164,7 @@ void program_t::bind_attributes() const {
 }
 
 void program_t::unbind_attributes() const {
-    GLuint loc = (GLuint) a_position;
+    auto loc = (GLuint) a_position;
     glDisableVertexAttribArray(loc);
     gl_check_error();
 
@@ -213,15 +212,6 @@ void program_t::use() const {
 //        current_program->bind_attributes();
 //        current_program->bind_image();
     }
-}
-
-program_t* program_t::load(const char* path_vs, const char* path_fs) {
-    const auto vs_buffer = get_resource_content(path_vs);
-    const auto fs_buffer = get_resource_content(path_fs);
-    std::string vs{reinterpret_cast<const char*>(vs_buffer.data()), vs_buffer.size()};
-    std::string fs{reinterpret_cast<const char*>(fs_buffer.data()), fs_buffer.size()};
-    auto result = new program_t(vs.c_str(), fs.c_str());
-    return result;
 }
 
 GLint program_t::get_uniform(const std::string& name) const {

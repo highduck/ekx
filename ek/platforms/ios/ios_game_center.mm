@@ -1,4 +1,4 @@
-#include <platform/game_center.hpp>
+#include <ek/ext/game_center/game_center.hpp>
 #include "ios_app_delegate.h"
 
 #import <GameKit/GameKit.h>

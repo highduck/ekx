@@ -64,10 +64,10 @@ project.add_folder(sdk_root + '/ek/platforms/ios', parent=platforms_group, exclu
 project.add_folder(sdk_root + '/ek/src', parent=project.add_group("ek"), excludes=excludes)
 project.add_folder(sdk_root + '/scenex/src', parent=project.add_group("scenex"), excludes=excludes)
 
-disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/SimpleAudioEngine_objc.mm')
-disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/CocosDenshion.mm')
-disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/CDOpenALSupport.mm')
-disable_arc(project, sdk_root + '/ek/platforms/ios/audiomini/CDAudioManager.mm')
+disable_arc(project, sdk_root + '/ek/platforms/ios/cocos-audio/SimpleAudioEngine_objc.mm')
+disable_arc(project, sdk_root + '/ek/platforms/ios/cocos-audio/CocosDenshion.mm')
+disable_arc(project, sdk_root + '/ek/platforms/ios/cocos-audio/CDOpenALSupport.mm')
+disable_arc(project, sdk_root + '/ek/platforms/ios/cocos-audio/CDAudioManager.mm')
 
 project.add_header_search_paths([
     "$(inherited)",

@@ -9,7 +9,7 @@
 
 #else
 
-#include <platform/static_resources.hpp>
+#include <ek/app/res.hpp>
 #include <ek/imaging/decoder.hpp>
 
 #endif
