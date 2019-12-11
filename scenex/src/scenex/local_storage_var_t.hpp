@@ -1,6 +1,6 @@
 #pragma once
 
-#include <platform/user_preferences.hpp>
+#include <ek/app/prefs.hpp>
 #include <ek/app/app.hpp>
 #include <ek/util/signals.hpp>
 #include <string>

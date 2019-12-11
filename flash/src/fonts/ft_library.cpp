@@ -7,12 +7,12 @@ namespace ek::font_lib {
 ft2_context::ft2_context() {
     auto err = FT_Init_FreeType(&lib_);
     assert(err == 0);
-    EK_TRACE << "FreeType2 wrapper created";
+    EK_TRACE("FreeType2 wrapper created");
 }
 
 ft2_context::~ft2_context() {
     FT_Done_FreeType(lib_);
-    EK_TRACE << "FreeType2 wrapper destroyed";
+    EK_TRACE("FreeType2 wrapper destroyed");
 }
 
 bool check(const std::vector<code_range_t>& ranges, uint32_t codepoint) {
@@ -25,12 +25,12 @@ bool check(const std::vector<code_range_t>& ranges, uint32_t codepoint) {
 ft2_face::ft2_face(const ft2_context& lib, const std::string& path) {
     int err = FT_New_Face(lib.handle(), path.c_str(), 0, &face_);
     assert(err == 0);
-    EK_TRACE << "FT2 Face NEW";
+    EK_TRACE("FT2 Face NEW");
 }
 
 ft2_face::~ft2_face() {
     FT_Done_Face(face_);
-    EK_TRACE << "FT2 Face DELETE";
+    EK_TRACE("FT2 Face DELETE");
 }
 
 bool ft2_face::get_glyph_metrics(FT_UInt glyph_index, int* out_bbox, int* out_advance) const {

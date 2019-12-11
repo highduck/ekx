@@ -4,7 +4,7 @@
 #include <ek/util/locator.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/audiomini.hpp>
-#include <platform/static_resources.hpp>
+#include <ek/app/res.hpp>
 #include <graphics/program.hpp>
 #include <graphics/texture.hpp>
 #include <graphics/vertex_decl.hpp>

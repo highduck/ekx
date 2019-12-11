@@ -2,7 +2,7 @@
 
 #include <ek/serialize/streams.hpp>
 #include <scenex/2d/atlas.hpp>
-#include <platform/static_resources.hpp>
+#include <ek/app/res.hpp>
 #include <ek/util/logger.hpp>
 
 using namespace ek;

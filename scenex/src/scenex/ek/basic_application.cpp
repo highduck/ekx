@@ -10,31 +10,32 @@
 #include <scenex/systems/canvas_system.h>
 #include <scenex/systems/main_flow.h>
 #include <scenex/utility/scene_management.h>
-#include <platform/game_center.hpp>
+#include <ek/ext/game_center/game_center.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/common_macro.hpp>
 #include <scenex/asset2/asset_manager.hpp>
 #include <scenex/asset2/builtin_assets.hpp>
+#include <graphics/graphics.hpp>
+#include <draw2d/drawer.hpp>
 
 namespace scenex {
 
 using ecs::world;
 using ecs::entity;
-using ek::service_locator_instance;
-using ek::app::g_app;
-using ek::resolve;
+using namespace ek;
+using namespace ek::app;
 
 basic_application::basic_application()
         : base_resolution{static_cast<float>(g_app.window_cfg.size.x),
                           static_cast<float>(g_app.window_cfg.size.y)} {
 
-    ek::assert_created_once<basic_application>();
+    assert_created_once<basic_application>();
 
     asset_manager_ = new asset_manager_t{};
 
     ecxx::set_world(&w);
 
-    ek::game_services_init();
+    game_services_init();
     // set callbacks before ads initialization (TODO)
     //ek::BasicGameUtility::init();
 }
@@ -44,7 +45,11 @@ basic_application::~basic_application() {
 }
 
 void basic_application::initialize() {
-    base_app_t::initialize();
+    service_locator_instance<graphics_t>::init();
+    service_locator_instance<drawer_t>::init();
+    service_locator_instance<AudioMini>::init();
+
+    //scale_factor = static_cast<float>(g_app.content_scale);
 
     create_builtin();
 
@@ -71,7 +76,6 @@ void basic_application::initialize() {
 }
 
 void basic_application::preload() {
-    base_app_t::preload();
     hook_on_preload();
 
     EK_DEBUG("Loading scale: %0.3f", scale_factor);
@@ -90,7 +94,41 @@ void basic_application::on_draw_frame() {
     scale_factor = ecs::get<scenex::canvas_t>(game).scale;
     asset_manager_->set_scale_factor(scale_factor);
 
-    base_app_t::on_draw_frame();
+    /** base app BEGIN **/
+    auto& graphics = resolve<graphics_t>();
+    auto& drawer = resolve<drawer_t>();
+    drawer.batcher.stats.reset();
+
+    const double dt = std::min(frame_timer.update(), 0.3);
+    // fixed for GIF recorder
+    //dt = 1.0f / 60.0f;
+
+    hook_on_update(static_cast<float>(dt));
+    update_frame(static_cast<float>(dt));
+
+    graphics.begin();
+    graphics.viewport();
+    //graphics.set_scissors();
+
+    if (clear_color_enabled) {
+        graphics.clear(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    }
+
+    drawer.begin(0, 0,
+                 static_cast<int>(g_app.drawable_size.x),
+                 static_cast<int>(g_app.drawable_size.y));
+    drawer.set_blend_mode(blend_mode::premultiplied);
+
+    render_frame();
+
+    hook_on_render_frame();
+
+    on_frame_end();
+
+    drawer.end();
+
+    hook_on_draw_frame();
+    /** base app END **/
 
     if (!started_ && asset_manager_->is_assets_ready()) {
         start_game();
@@ -99,17 +137,13 @@ void basic_application::on_draw_frame() {
 }
 
 void basic_application::update_frame(float dt) {
-    base_app_t::update_frame(dt);
 }
 
 void basic_application::render_frame() {
-    base_app_t::render_frame();
     scene_render(root);
 }
 
 void basic_application::on_frame_end() {
-    base_app_t::on_frame_end();
-
 #if !defined(NDEBUG) && !defined(__EMSCRIPTEN__)
     stats_.update();
     stats_.draw();
@@ -126,5 +160,8 @@ void basic_application::preload_root_assets_pack() {
 void basic_application::start_game() {
 
 }
+
+
+//void basic_application::on_event(const event_t& event) {}
 
 }

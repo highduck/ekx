@@ -8,7 +8,7 @@
 #include <scenex/components/name_t.h>
 #include <scenex/simple_audio_manager.h>
 #include <ek/util/locator.hpp>
-#include <platform/analytics.hpp>
+#include <ek/ext/analytics/analytics.hpp>
 #include <scenex/components/event_handler.h>
 
 using ek::operator ""_argb;
