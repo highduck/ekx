@@ -6,7 +6,9 @@ namespace ek::font_lib {
 
 ft2_context::ft2_context() {
     auto err = FT_Init_FreeType(&lib_);
-    assert(err == 0);
+    if (err != 0) {
+        EK_ERROR("FreeType2 init error: %d", err);
+    }
     EK_TRACE("FreeType2 wrapper created");
 }
 
@@ -24,7 +26,10 @@ bool check(const std::vector<code_range_t>& ranges, uint32_t codepoint) {
 
 ft2_face::ft2_face(const ft2_context& lib, const std::string& path) {
     int err = FT_New_Face(lib.handle(), path.c_str(), 0, &face_);
-    assert(err == 0);
+    if (err != 0) {
+        EK_ERROR("FT2 new face error: %d", err);
+    }
+
     EK_TRACE("FT2 Face NEW");
 }
 

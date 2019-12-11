@@ -90,7 +90,9 @@ bitmap_t* load_bitmap(const basic_entry& entry) {
         auto* bm_data = bitmap.data.data();
         if (desc.compressed != 0) {
             auto written = uncompress(input, bm_data, bm_size);
-            assert(written == bm_size);
+            if(written != bm_size) {
+                EK_ERROR << "bitmap decompress error";
+            }
         } else {
             input.read(bm_data, bm_size);
         }

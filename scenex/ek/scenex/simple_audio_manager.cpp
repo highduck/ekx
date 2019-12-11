@@ -5,8 +5,7 @@
 namespace ek {
 
 simple_audio_manager::simple_audio_manager()
-        : device{resolve<AudioMini>()},
-          base_path_{"assets/sfx/"} {
+        : base_path_{"assets/sfx/"} {
 
 }
 
@@ -14,20 +13,20 @@ simple_audio_manager::~simple_audio_manager() = default;
 
 void simple_audio_manager::play_music(const std::string& name) {
     if (name.empty() && !music_.empty()) {
-        device.play_music(resolve_path(music_).c_str(), 0.0);
+        audio_mini::play_music(resolve_path(music_).c_str(), 0.0);
     }
     music_ = name;
 }
 
 void simple_audio_manager::play_sound(const std::string& name) {
     if (sound.enabled() && !name.empty()) {
-        device.play_sound(resolve_path(name).c_str(), 1.0f, 0.0f);
+        audio_mini::play_sound(resolve_path(name).c_str(), 1.0f, 0.0f);
     }
 }
 
 void simple_audio_manager::play_sound(const std::string& name, float vol) {
     if (sound.enabled() && !name.empty()) {
-        device.play_sound(resolve_path(name).c_str(), vol, 0.0);
+        audio_mini::play_sound(resolve_path(name).c_str(), vol, 0.0);
     }
 }
 
@@ -38,13 +37,13 @@ void simple_audio_manager::play_sound(const std::string& name, const float2& pos
 
 void simple_audio_manager::vibrate(int length) {
     if (vibro.enabled() && length > 0) {
-        device.vibrate(length);
+        audio_mini::vibrate(length);
     }
 }
 
 void simple_audio_manager::update(float) {
     if (!music_.empty()) {
-        device.play_music(resolve_path(music_).c_str(), music.enabled() ? music_volume_ : 0.0f);
+        audio_mini::play_music(resolve_path(music_).c_str(), music.enabled() ? music_volume_ : 0.0f);
     }
 }
 

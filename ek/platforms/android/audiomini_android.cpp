@@ -1,13 +1,9 @@
 #include <ek/audiomini.hpp>
 #include <ek/android.hpp>
 
-namespace ek {
+namespace ek::audio_mini {
 
-AudioMini::AudioMini() = default;
-
-AudioMini::~AudioMini() = default;
-
-void AudioMini::create_sound(const char* name) {
+void create_sound(const char* name) {
     if (!name) {
         return;
     }
@@ -18,7 +14,7 @@ void AudioMini::create_sound(const char* name) {
     env->CallStaticVoidMethod(clazz, method, j_name);
 }
 
-void AudioMini::create_music(const char* name) {
+void create_music(const char* name) {
     if (!name) {
         return;
     }
@@ -29,7 +25,7 @@ void AudioMini::create_music(const char* name) {
     env->CallStaticVoidMethod(clazz, method, j_name);
 }
 
-void AudioMini::play_sound(const char* name, float vol, float pan) {
+void play_sound(const char* name, float vol, float pan) {
     if (!name) {
         return;
     }
@@ -41,7 +37,7 @@ void AudioMini::play_sound(const char* name, float vol, float pan) {
     env->CallStaticVoidMethod(clazz, method, j_name, vol, pan);
 }
 
-void AudioMini::play_music(const char* name, float vol) {
+void play_music(const char* name, float vol) {
     if (!name) {
         return;
     }
@@ -53,7 +49,7 @@ void AudioMini::play_music(const char* name, float vol) {
     env->CallStaticVoidMethod(clazz, method, j_name, vol);
 }
 
-void AudioMini::vibrate(int duration_millis) {
+void vibrate(int duration_millis) {
     if (duration_millis <= 0) {
         return;
     }

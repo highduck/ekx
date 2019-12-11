@@ -12,8 +12,6 @@ public:
     local_storage_var_t music{"music", 1};
     local_storage_var_t vibro{"vibro", 1};
 
-    AudioMini& device;
-
     simple_audio_manager();
 
     ~simple_audio_manager();

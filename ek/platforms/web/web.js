@@ -1,4 +1,29 @@
 mergeInto(LibraryManager.library, {
+    web_prefs_set_number: function (key, n) {
+        window.localStorage.setItem(UTF8ToString(key), n);
+    },
+    web_prefs_get_number: function (key, def) {
+        var item = window.localStorage.getItem(UTF8ToString(key));
+        if (item) {
+            var val = parseFloat(item);
+            if (val != null) {
+                return val;
+            }
+        }
+        return def;
+    },
+    web_prefs_set_string: function (key, str) {
+        window.localStorage.setItem(UTF8ToString(key), UTF8ToString(str));
+    },
+    web_prefs_get_string: function (key) {
+        var item = window.localStorage.getItem(UTF8ToString(key));
+        if (item != null) {
+            var lengthBytes = lengthBytesUTF8(item) + 1;
+            var stringOnWasmHeap = _malloc(lengthBytes);
+            return stringToUTF8(item, stringOnWasmHeap, lengthBytes);
+        }
+        return 0;
+    },
     web_set_mouse_cursor: function (cursor) {
         var PARENT = 0;
         var ARROW = 1;
