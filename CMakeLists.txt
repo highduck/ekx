@@ -1,18 +1,18 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 project(ekx LANGUAGES CXX)
 
 set(EKX_BUILD_TESTS OFF CACHE BOOL "Build EKX unit tests" FORCE)
 mark_as_advanced(EKX_BUILD_TESTS)
 
-set(EKX_BUILD_TESTS ON)
-
-#if ($ENV{CLION_IDE})
-#    set(EKX_BUILD_TESTS ON)
-#endif ()
-
 option(EKX_BUILD_COVERAGE "Build EKX coverage check" OFF)
 option(EKX_BUILD_BENCHMARKS "Build EKX benchmarks projects" OFF)
 option(EKX_BUILD_EDITOR "Build EKX editor projects" ON)
+
+#if ($ENV{CLION_IDE})
+set(EKX_BUILD_TESTS ON)
+set(EKX_BUILD_BENCHMARKS ON)
+#endif ()
+
 
 # Windows is not ready for Edit-mode
 if (${CMAKE_SYSTEM_NAME} MATCHES Windows)
@@ -47,7 +47,6 @@ if (EKX_BUILD_TESTS AND BUILD_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Cl
     add_definitions(-DNDEBUG) # ignore assertation coverage
 endif ()
 
-add_subdirectory(ecxx)
 add_subdirectory(core)
 add_subdirectory(ek)
 add_subdirectory(scenex)
@@ -55,7 +54,7 @@ add_subdirectory(scenex)
 add_subdirectory(extensions/mini-ads)
 
 add_library(ekx INTERFACE)
-target_link_libraries(ekx INTERFACE scenex ecxx ek ek-core)
+target_link_libraries(ekx INTERFACE scenex ek ek-core)
 
 if (EKX_BUILD_EDITOR)
     add_compile_definitions(EK_EDITOR)
@@ -65,8 +64,13 @@ if (EKX_BUILD_EDITOR)
 endif ()
 
 if (EKX_BUILD_TESTS)
-    add_subdirectory(core-test)
-endif()
+    add_subdirectory(tests/core-test)
+    add_subdirectory(tests/scenex-test)
+endif ()
+
+if (EKX_BUILD_BENCHMARKS)
+    add_subdirectory(tests/ecxx/benchmarks)
+endif ()
 
 # Samples
 

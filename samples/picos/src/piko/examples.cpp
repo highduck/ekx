@@ -1,9 +1,9 @@
 #include "examples.h"
 #include "piko.h"
-#include <draw2d/drawer.hpp>
+#include <ek/draw2d/drawer.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/math/rand.hpp>
-#include <scenex/systems/game_time.h>
+#include <ek/scenex/systems/game_time.h>
 #include <ek/math/matrix_camera.hpp>
 
 namespace ek::piko {
@@ -134,7 +134,7 @@ void dna::draw() {
 void diamonds::draw() {
     script::draw();
     auto& drawer = resolve<drawer_t>();
-    time += scenex::get_delta_time(entity_);
+    time += get_delta_time(entity_);
     float t = time;
     float w = rt.width();
     float h = rt.height();

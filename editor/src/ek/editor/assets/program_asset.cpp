@@ -1,17 +1,17 @@
 #include "program_asset.hpp"
 
-#include <scenex/asset2/asset_manager.hpp>
+#include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/system/system.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/assets.hpp>
-#include <graphics/program.hpp>
-#include <graphics/vertex_decl.hpp>
+#include <ek/graphics/program.hpp>
+#include <ek/graphics/vertex_decl.hpp>
 
 #include <pugixml.hpp>
 #include <ek/editor/gui/editor_widgets.hpp>
-#include <scenex/data/program_data.hpp>
+#include <ek/scenex/data/program_data.hpp>
 
 namespace ek {
 
@@ -51,7 +51,7 @@ void program_asset_t::build(assets_build_struct_t& data) {
     read_decl();
 
     const auto output_path = data.output / name_;
-    scenex::program_data_t pr{};
+    program_data_t pr{};
     pr.fragment_shader = frag_;
     pr.vertex_shader = vert_;
     pr.vertex_layout = vertex_decl_;

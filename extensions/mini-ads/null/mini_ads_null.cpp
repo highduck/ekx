@@ -5,13 +5,11 @@
 
 namespace ek {
 
-class ads_fake_timer : public application_listener_t {
+class ads_fake_timer final {
 public:
-    ~ads_fake_timer() override = default;
+    ~ads_fake_timer() = default;
 
-    void on_event(const event_t&) override {}
-
-    void on_draw_frame() override {
+    void on_draw_frame() {
         if (fn_ && time_ > 0.0f && timer_.read_seconds() >= time_) {
             time_ = 0.0f;
             fn_();
@@ -46,7 +44,11 @@ static ads_fake_timer* fake_timer = nullptr;
 void ads_play_reward_video() {
     if (!fake_timer) {
         fake_timer = new ads_fake_timer();
-        g_app.listen(fake_timer);
+        app::g_app.on_frame_draw += [] {
+            if (fake_timer) {
+                fake_timer->on_draw_frame();
+            }
+        };
     }
 
     if (ads_registered_callbacks) {

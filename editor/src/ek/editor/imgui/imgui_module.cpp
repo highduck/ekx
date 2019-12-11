@@ -1,14 +1,14 @@
 #include "imgui_module.hpp"
 
 #include <imgui.h>
-#include <graphics/program.hpp>
-#include <graphics/texture.hpp>
-#include <graphics/buffer_object.hpp>
-#include <draw2d/batcher.hpp>
+#include <ek/graphics/program.hpp>
+#include <ek/graphics/texture.hpp>
+#include <ek/graphics/buffer_object.hpp>
+#include <ek/draw2d/batcher.hpp>
 #include <ek/app/app.hpp>
 #include <ek/math/matrix_camera.hpp>
-#include <graphics/gl_debug.hpp>
-#include <scenex/ek/input_controller.h>
+#include <ek/graphics/gl_debug.hpp>
+#include <ek/scenex/ek/input_controller.h>
 #include <ek/util/locator.hpp>
 #include <ek/util/path.hpp>
 #include <ek/system/system.hpp>
@@ -419,7 +419,7 @@ void imgui_module_t::on_frame_completed() {
         reset_keys();
     }
 
-    auto* ic = try_resolve<scenex::input_controller>();
+    auto* ic = try_resolve<input_controller>();
     if (ic) {
         ic->hovered_by_editor_gui = ImGui::IsAnyWindowHovered() && enabled_;
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <scenex/data/sg_data.h>
+#include <ek/scenex/data/sg_data.h>
 
 namespace ek::flash {
 
@@ -8,8 +8,7 @@ struct element_t;
 
 struct export_item_t : private disable_copy_assign_t {
 
-    using node_data = scenex::sg_node_data;
-    node_data node;
+    sg_node_data node;
     float estimated_scale = 0.001f;
     float max_abs_scale = 100000.0f;
     const element_t* ref = nullptr;

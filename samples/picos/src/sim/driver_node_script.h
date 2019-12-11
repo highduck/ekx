@@ -1,6 +1,6 @@
 #pragma once
 
-#include <scenex/config/ecs.h>
+#include <ek/scenex/config/ecs.h>
 
 namespace ek::piko {
 

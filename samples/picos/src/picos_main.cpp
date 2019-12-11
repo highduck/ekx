@@ -1,33 +1,32 @@
 #include "picos_main.hpp"
 #include "camera_arcball.hpp"
 
-#include <scenex/systems/main_flow.h>
+#include <ek/scenex/systems/main_flow.h>
 #include <sim/driver_node_script.h>
-#include <scenex/scene_system.h>
-#include <scenex/3d/static_mesh.hpp>
-#include <scenex/3d/camera_3d.hpp>
-#include <scenex/3d/transform_3d.hpp>
-#include <scenex/systems/game_time.h>
-#include <scenex/3d/render_system_3d.hpp>
-#include <scenex/components/node_t.h>
-#include <scenex/utility/scene_management.h>
-#include <scenex/3d/light_3d.hpp>
+#include <ek/scenex/scene_system.h>
+#include <ek/scenex/3d/static_mesh.hpp>
+#include <ek/scenex/3d/camera_3d.hpp>
+#include <ek/scenex/3d/transform_3d.hpp>
+#include <ek/scenex/systems/game_time.h>
+#include <ek/scenex/3d/render_system_3d.hpp>
+#include <ek/scenex/components/node_t.h>
+#include <ek/scenex/utility/scene_management.h>
+#include <ek/scenex/3d/light_3d.hpp>
 #include <ek/math/rand.hpp>
-#include <scenex/data/sg_factory.h>
-#include <scenex/asset2/builtin_assets.hpp>
+#include <ek/scenex/data/sg_factory.h>
+#include <ek/scenex/asset2/builtin_assets.hpp>
 
 namespace ek {
 
 void main() {
     app::g_app.window_cfg = {"Piko", {1024, 768}};
     app::g_app.on_device_ready << [] {
-        scenex::run_app<PikoApp>();
+        run_app<PikoApp>();
     };
     start_application();
 }
 }
 
-using namespace scenex;
 using namespace ek;
 
 PikoApp::PikoApp()

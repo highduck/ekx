@@ -2,16 +2,14 @@
 
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/util/assets.hpp>
-#include <graphics/program.hpp>
-#include <scenex/3d/material_3d.hpp>
-#include <scenex/3d/static_mesh.hpp>
-#include <scenex/2d/atlas.hpp>
-#include <scenex/2d/font.hpp>
-#include <scenex/data/sg_data.h>
+#include <ek/graphics/program.hpp>
+#include <ek/scenex/3d/material_3d.hpp>
+#include <ek/scenex/3d/static_mesh.hpp>
+#include <ek/scenex/2d/atlas.hpp>
+#include <ek/scenex/2d/font.hpp>
+#include <ek/scenex/data/sg_data.h>
 
-using namespace ek;
-
-namespace scenex {
+namespace ek {
 
 template<typename T>
 void on_editor_debug_asset(const asset_t<T>& asset) {

@@ -1,11 +1,11 @@
 #include "model_asset.hpp"
 
-#include <scenex/3d/static_mesh.hpp>
+#include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/assets.hpp>
-#include <graphics/vertex_decl.hpp>
-#include <scenex/data/model_data.hpp>
+#include <ek/graphics/vertex_decl.hpp>
+#include <ek/scenex/data/model_data.hpp>
 #include <ek/editor/obj/obj_loader.hpp>
 
 namespace ek {
@@ -25,8 +25,8 @@ void model_asset_t::load() {
     if (buffer.empty()) {
         EK_ERROR("Not found or empty %s", (project->base_path / declaration_path_).c_str());
     } else {
-        asset_t<scenex::static_mesh_t>{name_}.reset(
-                new scenex::static_mesh_t(
+        asset_t<static_mesh_t>{name_}.reset(
+                new static_mesh_t(
                         load_obj(buffer)
                 )
         );
@@ -34,7 +34,7 @@ void model_asset_t::load() {
 }
 
 void model_asset_t::unload() {
-    asset_t<scenex::static_mesh_t>{name_}.reset(nullptr);
+    asset_t<static_mesh_t>{name_}.reset(nullptr);
 }
 
 void model_asset_t::gui() {
@@ -44,7 +44,7 @@ void model_asset_t::build(assets_build_struct_t& build_data) {
     read_decl();
 
     const auto output_path = build_data.output / name_;
-    scenex::model_data_t data{
+    model_data_t data{
             load_obj(read_file(get_relative_path(resource_path_)))
     };
 

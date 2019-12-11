@@ -4,7 +4,6 @@ namespace ek::font_lib {
 
 using spritepack::atlas_t;
 using spritepack::sprite_t;
-using scenex::font_glyph_t;
 
 static ft2_context ft2_context_{};
 
@@ -118,7 +117,7 @@ void glyph_build_sprites(ft2_face& face,
     }
 }
 
-scenex::font_data_t export_font(const path_t& path,
+font_data_t export_font(const path_t& path,
                                 const std::string& name,
                                 const font_decl_t& font_opts,
                                 const filters_decl_t& filters_opts,
@@ -178,7 +177,7 @@ scenex::font_data_t export_font(const path_t& path,
         }
     }
 
-    scenex::font_data_t result{};
+    font_data_t result{};
     result.units_per_em = face->units_per_EM;
     result.sizes = font_opts.sizes;
     for (auto& pair : mesh_by_glyph_id) {
