@@ -1,4 +1,4 @@
-#include "display_2d.h"
+#include "display_2d.hpp"
 #include <ek/util/locator.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/2d/sprite.hpp>

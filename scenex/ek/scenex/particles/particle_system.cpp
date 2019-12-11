@@ -1,12 +1,12 @@
-#include "particle_system.h"
+#include "particle_system.hpp"
 
-#include "particle_decl.h"
-#include <ek/scenex/particles/particle_emitter.h>
-#include <ek/scenex/components/transform_2d.h>
-#include <ek/scenex/particles/particle_layer.h>
+#include "particle_decl.hpp"
+#include <ek/scenex/particles/particle_emitter.hpp>
+#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/particles/particle_layer.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/scenex/systems/game_time.h>
+#include <ek/scenex/systems/game_time.hpp>
 
 namespace ek {
 

@@ -1,4 +1,4 @@
-#include "particle_decl.h"
+#include "particle_decl.hpp"
 
 namespace ek {
 

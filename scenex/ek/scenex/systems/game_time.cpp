@@ -1,6 +1,6 @@
-#include "game_time.h"
+#include "game_time.hpp"
 
-#include <ek/scenex/components/node_t.h>
+#include <ek/scenex/components/node.hpp>
 
 namespace ek {
 

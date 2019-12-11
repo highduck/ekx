@@ -1,5 +1,5 @@
 #include "app_utils.hpp"
-#include "basic_application.h"
+#include "basic_application.hpp"
 
 #include <ek/util/assets.hpp>
 

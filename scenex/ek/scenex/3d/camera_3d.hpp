@@ -2,6 +2,7 @@
 
 #include <ek/math/common.hpp>
 #include <string>
+#include <ek/math/vec.hpp>
 
 #undef near
 #undef far

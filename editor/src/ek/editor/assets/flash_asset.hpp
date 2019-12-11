@@ -2,7 +2,7 @@
 
 #include "editor_asset.hpp"
 #include <ek/spritepack/atlas_declaration.hpp>
-#include <ek/flash/doc/flash_archive.h>
+#include <ek/flash/doc/flash_archive.hpp>
 #include <memory>
 
 namespace ek {

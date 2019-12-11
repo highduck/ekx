@@ -26,7 +26,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/gui/gui_window_tree.cpp
         ek/editor/gui/gui_window_tree.h
         ek/editor/gui/gui_dev_mode.cpp
-        ek/editor/gui/gui_dev_mode.h
+        ek/editor/gui/gui_dev_mode.hpp
 
         ek/editor/imgui/imgui_module.hpp
         ek/editor/imgui/imgui_module.cpp

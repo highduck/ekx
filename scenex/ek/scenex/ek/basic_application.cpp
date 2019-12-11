@@ -1,15 +1,15 @@
-#include "basic_application.h"
+#include "basic_application.hpp"
 
-#include "input_controller.h"
+#include "input_controller.hpp"
 #include "app_utils.hpp"
 
-#include <ek/scenex/interactive_manager.h>
-#include <ek/scenex/simple_audio_manager.h>
-#include <ek/scenex/components/canvas.h>
-#include <ek/scenex/systems/layout_system.h>
-#include <ek/scenex/systems/canvas_system.h>
-#include <ek/scenex/systems/main_flow.h>
-#include <ek/scenex/utility/scene_management.h>
+#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/simple_audio_manager.hpp>
+#include <ek/scenex/components/canvas.hpp>
+#include <ek/scenex/systems/layout_system.hpp>
+#include <ek/scenex/systems/canvas_system.hpp>
+#include <ek/scenex/systems/main_flow.hpp>
+#include <ek/scenex/utility/scene_management.hpp>
 #include <ek/ext/game_center/game_center.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/common_macro.hpp>

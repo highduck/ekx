@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ek/math/vec.hpp>
+#include <ek/math/packed_color.hpp>
 
 namespace ek {
 

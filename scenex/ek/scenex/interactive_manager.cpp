@@ -1,10 +1,10 @@
-#include "interactive_manager.h"
+#include "interactive_manager.hpp"
 
 #include <stack>
 #include <ek/math/vec.hpp>
-#include <ek/scenex/components/interactive_t.h>
-#include <ek/scenex/utility/scene_management.h>
-#include <ek/scenex/scene_system.h>
+#include <ek/scenex/components/interactive.hpp>
+#include <ek/scenex/utility/scene_management.hpp>
+#include <ek/scenex/scene_system.hpp>
 #include <ek/scenex/2d/font.hpp>
 
 using namespace ek::app;
@@ -145,7 +145,7 @@ void interactive_manager::handle_touch_event(const event_t& ev) {
 }
 
 void interactive_manager::send_back_button() {
-    dispatch_interactive_event(entity_, {"backButton", entity_, "game"});
+    dispatch_interactive_event(entity_, {"back_button", entity_, "game"});
 }
 
 void interactive_manager::handle_system_pause() {

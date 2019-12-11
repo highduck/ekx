@@ -1,9 +1,9 @@
-#include "shake_system.h"
+#include "shake_system.hpp"
 
-#include <ek/scenex/components/transform_2d.h>
+#include <ek/scenex/components/transform_2d.hpp>
 #include <ek/math/vec.hpp>
 #include <ek/math/rand.hpp>
-#include <ek/scenex/systems/game_time.h>
+#include <ek/scenex/systems/game_time.hpp>
 
 namespace ek {
 

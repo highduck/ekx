@@ -9,7 +9,7 @@ namespace ek {
 template<typename T>
 struct color_transform_t {
 
-    using color_type = vec_t<T, 4>;
+    using color_type = vec_t<4, T>;
     color_type multiplier;
     color_type offset;
 

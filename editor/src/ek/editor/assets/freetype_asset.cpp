@@ -8,9 +8,9 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/scenex/2d/atlas.hpp>
 #include <ek/scenex/2d/sprite.hpp>
-#include <ek/scenex/data/sg_data.h>
+#include <ek/scenex/data/sg_data.hpp>
 #include <ek/system/system.hpp>
-#include <fonts/export_font.h>
+#include <ek/fonts/export_font.hpp>
 #include <utility>
 #include <memory>
 

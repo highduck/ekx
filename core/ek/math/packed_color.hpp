@@ -136,12 +136,12 @@ struct argb32_t final {
     }
 
     template<typename T>
-    explicit inline argb32_t(const vec_t<T, 4>& vector)
+    explicit inline argb32_t(const vec_t<4, T>& vector)
             :argb32_t(vector.x, vector.y, vector.z, vector.w) {
     }
 
     template<typename T>
-    explicit inline argb32_t(const vec_t<T, 3>& vector, float alpha = 1.0f)
+    explicit inline argb32_t(const vec_t<3, T>& vector, float alpha = 1.0f)
             :argb32_t(vector.x, vector.y, vector.z, alpha) {
     }
 
@@ -217,13 +217,13 @@ struct argb32_t final {
 //    }
 
     template<typename T>
-    explicit operator vec_t<T, 4>() {
-        return vec_t<T, 4>{T(r) / 255, T(g) / 255, T(b) / 255, T(a) / 255};
+    explicit operator vec_t<4, T>() {
+        return vec_t<4, T>{T(r) / 255, T(g) / 255, T(b) / 255, T(a) / 255};
     }
 
     template<typename T>
-    explicit operator vec_t<T, 3>() {
-        return vec_t<T, 3>{T(r) / 255, T(g) / 255, T(b) / 255};
+    explicit operator vec_t<3, T>() {
+        return vec_t<3, T>{T(r) / 255, T(g) / 255, T(b) / 255};
     }
 
     inline bool operator==(const argb32_t& v) const {

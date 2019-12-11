@@ -8,8 +8,8 @@
 #include <ek/graphics/program.hpp>
 #include <ek/graphics/texture.hpp>
 #include <ek/graphics/vertex_decl.hpp>
-#include <ek/scenex/data/sg_data.h>
-#include <ek/scenex/data/sg_factory.h>
+#include <ek/scenex/data/sg_data.hpp>
+#include <ek/scenex/data/sg_factory.hpp>
 #include <ek/scenex/2d/atlas.hpp>
 #include <ek/scenex/2d/font.hpp>
 #include <ek/scenex/data/program_data.hpp>

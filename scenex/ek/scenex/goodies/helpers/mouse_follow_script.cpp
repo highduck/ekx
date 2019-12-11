@@ -1,9 +1,9 @@
-#include "mouse_follow_script.h"
+#include "mouse_follow_script.hpp"
 
 #include <ek/draw2d/drawer.hpp>
 #include <ek/util/locator.hpp>
-#include <ek/scenex/utility/scene_management.h>
-#include <ek/scenex/interactive_manager.h>
+#include <ek/scenex/utility/scene_management.hpp>
+#include <ek/scenex/interactive_manager.hpp>
 
 namespace ek {
 

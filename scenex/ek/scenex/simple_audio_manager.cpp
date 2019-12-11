@@ -1,4 +1,4 @@
-#include "simple_audio_manager.h"
+#include "simple_audio_manager.hpp"
 
 #include <ek/util/locator.hpp>
 

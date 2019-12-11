@@ -1,7 +1,7 @@
-#include "movie_clip_system.h"
+#include "movie_clip_system.hpp"
 
-#include "game_time.h"
-#include <ek/scenex/components/transform_2d.h>
+#include "game_time.hpp"
+#include <ek/scenex/components/transform_2d.hpp>
 
 namespace ek {
 

@@ -1,6 +1,6 @@
-#include "trail_script.h"
+#include "trail_script.hpp"
 
-#include <ek/scenex/utility/scene_management.h>
+#include <ek/scenex/utility/scene_management.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/math/easing.hpp>
 #include <ek/util/locator.hpp>

@@ -1,9 +1,9 @@
 #include "export_marketing.hpp"
 
-#include <ek/flash/rasterizer/render_to_sprite.h>
-#include <ek/flash/doc/flash_archive.h>
+#include <ek/flash/rasterizer/render_to_sprite.hpp>
+#include <ek/flash/doc/flash_archive.hpp>
 #include <ek/spritepack/save_image_png.hpp>
-#include <xfl/flash_doc_exporter.h>
+#include <ek/xfl/flash_doc_exporter.hpp>
 #include <ek/editor/assets/flash_asset.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>

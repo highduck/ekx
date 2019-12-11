@@ -1,85 +1,77 @@
 cmake_minimum_required(VERSION 3.13)
 
 target_sources(${PROJECT_NAME} PRIVATE
-        components/node_t.h
-        components/transform_2d.cpp
-        components/transform_2d.h
-        config/ecs.h
-        config.h
-        scene_system.cpp
-        scene_system.h
-        components/script_t.cpp
-        components/script_t.h
-        components/display_2d.cpp
-        components/display_2d.h
-        components/name_t.h
-        data/sg_factory.cpp
-        data/sg_factory.h
-        components/movie_t.h
-        components/button_t.h
-        systems/movie_clip_system.cpp
-        systems/movie_clip_system.h
-        components/interactive_t.h
-        interactive_manager.cpp
-        interactive_manager.h
-        systems/button_system.cpp
-        systems/button_system.h
-        components/canvas.h
-        systems/canvas_system.cpp
-        systems/canvas_system.h
-
-        ek/input_controller.h
-        ek/input_controller.cpp
-        simple_audio_manager.cpp
-        simple_audio_manager.h
-        components/event_handler.h
-        components/layout.h
-        systems/layout_system.cpp
-        systems/layout_system.h
-        particles/particle_layer.h
-        particles/particle_emitter.h
-        particles/particle_system.cpp
-        particles/particle_system.h
-        components/tween.h
-        systems/tween_system.cpp
-        systems/tween_system.h
-
-        particles/particle.cpp
-        particles/particle.h
-        particles/particle_decl.cpp
-        particles/particle_decl.h
-
-        data/sg_data.cpp
-        data/sg_data.h
-        data/sg_loader.cpp
-
+        components/node.hpp
         components/node.cpp
         components/node_filters.cpp
-        components/node_filters.h
+        components/node_filters.hpp
+        components/transform_2d.cpp
+        components/transform_2d.hpp
+        components/script.cpp
+        components/script.hpp
+        components/display_2d.cpp
+        components/display_2d.hpp
+        components/name.hpp
+        components/movie.hpp
+        components/button.hpp
+        components/canvas.hpp
+        components/interactive.hpp
+        components/tween.hpp
+        components/event_handler.hpp
+        components/layout.hpp
 
-        utility/destroy_delay.h
+        systems/movie_clip_system.cpp
+        systems/movie_clip_system.hpp
+        systems/button_system.cpp
+        systems/button_system.hpp
+        systems/canvas_system.cpp
+        systems/canvas_system.hpp
+        systems/layout_system.cpp
+        systems/layout_system.hpp
+        systems/tween_system.cpp
+        systems/tween_system.hpp
+
+        ek/input_controller.hpp
+        ek/input_controller.cpp
+        simple_audio_manager.cpp
+        simple_audio_manager.hpp
+        scene_system.cpp
+        scene_system.hpp
+        interactive_manager.cpp
+        interactive_manager.hpp
+
+        particles/particle.cpp
+        particles/particle.hpp
+        particles/particle_decl.cpp
+        particles/particle_decl.hpp
+        particles/particle_layer.hpp
+        particles/particle_emitter.hpp
+        particles/particle_system.cpp
+        particles/particle_system.hpp
+
+        utility/destroy_delay.hpp
         utility/destroy_delay.cpp
-        utility/scene_management.h
+        utility/scene_management.hpp
 
-        goodies/shake_system.h
+        goodies/shake_system.hpp
         goodies/shake_system.cpp
 
-        systems/game_time.h
+        systems/game_time.hpp
         systems/game_time.cpp
         systems/main_flow.cpp
-        systems/main_flow.h
+        systems/main_flow.hpp
 
         ek/basic_application.cpp
-        ek/basic_application.h
+        ek/basic_application.hpp
         ek/app_utils.cpp
         ek/app_utils.hpp
 
         goodies/helpers/mouse_follow_script.cpp
-        goodies/helpers/mouse_follow_script.h
+        goodies/helpers/mouse_follow_script.hpp
         goodies/helpers/target_follow_script.cpp
-        goodies/helpers/target_follow_script.h
+        goodies/helpers/target_follow_script.hpp
         goodies/helpers/trail_script.cpp
-        goodies/helpers/trail_script.h
+        goodies/helpers/trail_script.hpp
 
         3d/transform_3d.cpp
         3d/transform_3d.hpp
@@ -113,4 +105,9 @@ target_sources(${PROJECT_NAME} PRIVATE
         data/program_data.hpp
         data/texture_data.hpp
         data/model_data.hpp
+        data/sg_data.cpp
+        data/sg_data.hpp
+        data/sg_loader.cpp
+        data/sg_factory.cpp
+        data/sg_factory.hpp
         )

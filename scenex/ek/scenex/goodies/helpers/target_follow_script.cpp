@@ -1,7 +1,7 @@
-#include "target_follow_script.h"
+#include "target_follow_script.hpp"
 
-#include <ek/scenex/config/ecs.h>
-#include <ek/scenex/utility/scene_management.h>
+#include <ecxx/ecxx.hpp>
+#include <ek/scenex/utility/scene_management.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/draw2d/drawer.hpp>
 

@@ -1,5 +1,5 @@
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/data/sg_data.h>
+#include <ek/scenex/data/sg_data.hpp>
 
 namespace ek {
 

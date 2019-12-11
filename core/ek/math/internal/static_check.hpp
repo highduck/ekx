@@ -1,15 +1,17 @@
 #pragma once
 
+#ifndef __JETBRAINS_IDE__
+
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
-#include <ek/math/matrix_fwd.hpp>
+#include <ek/math/matrix_decl.hpp>
 #include <ek/math/box.hpp>
 
 namespace ek::static_test {
 
 template<typename T, unsigned N>
 struct check_vec_no_padding {
-    static_assert(sizeof(vec_t<T, N>) == sizeof(T) * N, "vec_t has extra padding");
+    static_assert(sizeof(vec_t<N, T>) == sizeof(T) * N, "vec_t has extra padding");
 };
 
 using f2_ = check_vec_no_padding<float, 2>;
@@ -43,7 +45,7 @@ using md4x4_ = check_mat_no_padding<double, 4, 4>;
 
 template<typename T, unsigned N>
 struct check_box_no_padding {
-    static_assert(sizeof(box_t<T, N>) == sizeof(T) * N * 2, "box_t has extra padding");
+    static_assert(sizeof(box_t<N, T>) == sizeof(T) * N * 2, "box_t has extra padding");
 };
 
 using b2_f_ = check_box_no_padding<float, 2>;
@@ -60,3 +62,5 @@ using b2_i16_ = check_box_no_padding<int16_t, 2>;
 using b3_i16_ = check_box_no_padding<int16_t, 3>;
 
 }
+
+#endif

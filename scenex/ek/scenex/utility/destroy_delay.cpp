@@ -1,6 +1,6 @@
-#include "destroy_delay.h"
+#include "destroy_delay.hpp"
 
-#include <ek/scenex/components/node_t.h>
+#include <ek/scenex/components/node.hpp>
 
 namespace ek {
 

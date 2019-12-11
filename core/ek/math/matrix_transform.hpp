@@ -92,7 +92,7 @@ inline matrix_t<4, 4, T> rotation_transform(const quat_t <T>& q) {
 }
 
 template<typename T>
-matrix_t<4, 4, T> translate_transform(const vec_t<T, 3>& translation) {
+matrix_t<4, 4, T> translate_transform(const vec_t<3, T>& translation) {
     matrix_t<4, 4, T> m{};
     m(3, 0) = translation.x;
     m(3, 1) = translation.y;
@@ -101,7 +101,7 @@ matrix_t<4, 4, T> translate_transform(const vec_t<T, 3>& translation) {
 }
 
 template<typename T>
-matrix_t<4, 4, T> scale_transform(const vec_t<T, 3>& scale) {
+matrix_t<4, 4, T> scale_transform(const vec_t<3, T>& scale) {
     matrix_t<4, 4, T> m{};
     m(0, 0) = scale.x;
     m(1, 1) = scale.y;
@@ -110,8 +110,8 @@ matrix_t<4, 4, T> scale_transform(const vec_t<T, 3>& scale) {
 }
 
 template<typename T>
-vec_t<T, 3> extract_translation(const matrix_t<4, 4, T>& m) {
-    return vec_t<T, 3>{m(3, 0), m(3, 1), m(3, 2)};
+vec_t<3, T> extract_translation(const matrix_t<4, 4, T>& m) {
+    return vec_t<3, T>{m(3, 0), m(3, 1), m(3, 2)};
 }
 
 }

@@ -1,22 +1,22 @@
-#include "main_flow.h"
+#include "main_flow.hpp"
 
 #include <ek/app/app.hpp>
 #include <ek/util/locator.hpp>
 
-#include <ek/scenex/components/transform_2d.h>
-#include <ek/scenex/simple_audio_manager.h>
-#include <ek/scenex/particles/particle_system.h>
-#include <ek/scenex/goodies/shake_system.h>
-#include <ek/scenex/interactive_manager.h>
-#include <ek/scenex/utility/destroy_delay.h>
-#include <ek/scenex/scene_system.h>
+#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/simple_audio_manager.hpp>
+#include <ek/scenex/particles/particle_system.hpp>
+#include <ek/scenex/goodies/shake_system.hpp>
+#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/utility/destroy_delay.hpp>
+#include <ek/scenex/scene_system.hpp>
 
-#include "game_time.h"
-#include "layout_system.h"
-#include "tween_system.h"
-#include "canvas_system.h"
-#include "button_system.h"
-#include "movie_clip_system.h"
+#include "game_time.hpp"
+#include "layout_system.hpp"
+#include "tween_system.hpp"
+#include "canvas_system.hpp"
+#include "button_system.hpp"
+#include "movie_clip_system.hpp"
 
 namespace ek {
 

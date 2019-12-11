@@ -1,4 +1,4 @@
-#include "gui_dev_mode.h"
+#include "gui_dev_mode.hpp"
 #include "gui_window_tree.h"
 #include "gui_window_stats.h"
 #include "editor_assets.hpp"

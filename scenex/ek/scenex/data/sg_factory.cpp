@@ -1,14 +1,14 @@
-#include "sg_factory.h"
+#include "sg_factory.hpp"
 
 #include <ek/scenex/2d/sprite.hpp>
-#include <ek/scenex/components/node_t.h>
-#include <ek/scenex/components/transform_2d.h>
-#include <ek/scenex/components/display_2d.h>
-#include <ek/scenex/components/name_t.h>
-#include <ek/scenex/components/movie_t.h>
-#include <ek/scenex/components/button_t.h>
-#include <ek/scenex/components/interactive_t.h>
-#include <ek/scenex/components/node_filters.h>
+#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/components/name.hpp>
+#include <ek/scenex/components/movie.hpp>
+#include <ek/scenex/components/button.hpp>
+#include <ek/scenex/components/interactive.hpp>
+#include <ek/scenex/components/node_filters.hpp>
 #include <ek/util/logger.hpp>
 
 namespace ek {

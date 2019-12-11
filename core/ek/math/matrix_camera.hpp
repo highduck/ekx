@@ -69,10 +69,10 @@ mat4_t <T> ortho_2d(T x, T y, T width, T height, T z_near = -1, T z_far = 1) {
 
 // TODO:  look at view matrix calc
 template<typename T>
-matrix_t<4, 4, T> look_at_rh(const vec_t<T, 3>& eye, const vec_t<T, 3>& center, const vec_t<T, 3>& up) {
-    const vec_t<T, 3> f(normalize(center - eye));
-    const vec_t<T, 3> s(normalize(cross(f, up)));
-    const vec_t<T, 3> u(cross(s, f));
+matrix_t<4, 4, T> look_at_rh(const vec_t<3, T>& eye, const vec_t<3, T>& center, const vec_t<3, T>& up) {
+    const vec_t<3, T> f(normalize(center - eye));
+    const vec_t<3, T> s(normalize(cross(f, up)));
+    const vec_t<3, T> u(cross(s, f));
 
     matrix_t<4, 4, T> result(1);
     result(0, 0) = s.x;

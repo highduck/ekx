@@ -1,7 +1,7 @@
-#include "tween_system.h"
-#include "game_time.h"
+#include "tween_system.hpp"
+#include "game_time.hpp"
 
-#include <ek/scenex/components/tween.h>
+#include <ek/scenex/components/tween.hpp>
 #include <ek/math/common.hpp>
 
 namespace ek {

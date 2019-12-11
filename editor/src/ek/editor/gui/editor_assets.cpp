@@ -7,7 +7,7 @@
 #include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/scenex/2d/atlas.hpp>
 #include <ek/scenex/2d/font.hpp>
-#include <ek/scenex/data/sg_data.h>
+#include <ek/scenex/data/sg_data.hpp>
 
 namespace ek {
 

@@ -3,7 +3,7 @@
 #include <ek/draw2d/drawer.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/math/rand.hpp>
-#include <ek/scenex/systems/game_time.h>
+#include <ek/scenex/systems/game_time.hpp>
 #include <ek/math/matrix_camera.hpp>
 
 namespace ek::piko {
