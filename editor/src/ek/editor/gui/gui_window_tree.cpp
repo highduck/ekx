@@ -251,25 +251,21 @@ void gui_event_handler(ecs::entity entity) {
 
 void gui_display_2d(ecs::entity entity) {
     auto& comp = ecs::get<display_2d>(entity);
-    if (comp.drawable) {
-        auto* drawable = comp.drawable.get();
-        auto drawable_type = drawable->get_type_id();
-        if (drawable_type == drawable_sprite::type_id) {
-            auto* sprite = static_cast<drawable_sprite*>(drawable);
-            if (ImGui::CollapsingHeader("Display 2D - Sprite")) {
-                ImGui::LabelText("sprite", "%s", sprite->src.c_str());
-                ImGui::Checkbox("hit pixels", &sprite->hit_pixels);
-                ImGui::Checkbox("scale grid", &sprite->scale_grid_mode);
-            }
-        } else if (drawable_type == drawable_quad::type_id) {
-            if (ImGui::CollapsingHeader("Display 2D - Quad")) {}
-        } else if (drawable_type == drawable_text::type_id) {
-            if (ImGui::CollapsingHeader("Display 2D - Text")) {}
-        } else if (drawable_type == drawable_arc::type_id) {
-            if (ImGui::CollapsingHeader("Display 2D - Arc")) {}
+    if (comp.is<drawable_sprite>()) {
+        auto* sprite = comp.get<drawable_sprite>();
+        if (ImGui::CollapsingHeader("Display 2D - Sprite")) {
+            ImGui::LabelText("sprite", "%s", sprite->src.c_str());
+            ImGui::Checkbox("hit pixels", &sprite->hit_pixels);
+            ImGui::Checkbox("scale grid", &sprite->scale_grid_mode);
         }
+    } else if (comp.is<drawable_quad>()) {
+        if (ImGui::CollapsingHeader("Display 2D - Quad")) {}
+    } else if (comp.is<drawable_text>()) {
+        if (ImGui::CollapsingHeader("Display 2D - Text")) {}
+    } else if (comp.is<drawable_arc>()) {
+        if (ImGui::CollapsingHeader("Display 2D - Arc")) {}
     } else {
-        if (ImGui::CollapsingHeader("Display 2D - unknown")) {}
+        if (ImGui::CollapsingHeader("Display 2D - ???")) {}
     }
 }
 

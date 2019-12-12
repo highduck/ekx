@@ -61,8 +61,8 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     drawable_sprite* sprite = nullptr;
     if (ecs::has<display_2d>(entity)) {
         auto& display = ecs::get<display_2d>(entity);
-        if (display.drawable && display.drawable->get_type_id() == drawable_sprite::type_id) {
-            sprite = static_cast<drawable_sprite*>(display.drawable.get());
+        if (display.is<drawable_sprite>()) {
+            sprite = display.get<drawable_sprite>();
         }
     }
 

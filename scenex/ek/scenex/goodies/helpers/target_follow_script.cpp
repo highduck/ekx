@@ -8,8 +8,6 @@
 namespace ek {
 
 void target_follow_script::update(float dt) {
-    script::update(dt);
-
     ++counter;
     time_accum += dt;
     if (counter >= n) {

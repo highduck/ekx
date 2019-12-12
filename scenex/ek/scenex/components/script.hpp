@@ -1,15 +1,19 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
+#include <ek/util/type_index.hpp>
 
 namespace ek {
 
-class script {
+class script_cpp_base {
 public:
 
-    script() = default;
+    explicit script_cpp_base(uint32_t type_id)
+            : type_id_{type_id} {
 
-    virtual ~script();
+    }
+
+    virtual ~script_cpp_base();
 
     void link_to_entity(ecs::entity e) {
         entity_ = e;
@@ -25,6 +29,10 @@ public:
 
     virtual void gui_inspector() {}
 
+    uint32_t get_type_id() {
+        return type_id_;
+    }
+
     template<typename Component>
     inline Component& get() {
         return ecs::get<Component>(entity_);
@@ -39,10 +47,24 @@ public:
 
 protected:
     ecs::entity entity_;
+    uint32_t type_id_;
+};
+
+template<typename T>
+class script_cpp : public script_cpp_base {
+public:
+    script_cpp()
+            : script_cpp_base{type_index<T, script_cpp_base>::value} {
+
+    }
+
+    ~script_cpp() override = default;
 };
 
 struct script_holder {
-    std::vector<std::unique_ptr<script>> list;
+    std::vector<std::unique_ptr<script_cpp_base>> list;
 };
 
 }
+
+#define EK_DECL_SCRIPT_CPP(T) class T : public ::ek::script_cpp<T>

@@ -4,7 +4,7 @@
 
 namespace ek {
 
-class mouse_follow_script : public script {
+EK_DECL_SCRIPT_CPP(mouse_follow_script) {
 public:
     void update(float dt) override;
     void gui_gizmo() override;

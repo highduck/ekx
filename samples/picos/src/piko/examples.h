@@ -6,17 +6,17 @@
 
 namespace ek::piko {
 
-class book : public script {
+EK_DECL_SCRIPT_CPP(book) {
 public:
     void draw() override;
 };
 
-class dna : public script {
+EK_DECL_SCRIPT_CPP(dna) {
 public:
     void draw() override;
 };
 
-class diamonds : public script {
+EK_DECL_SCRIPT_CPP(diamonds) {
 public:
     diamonds();
 
