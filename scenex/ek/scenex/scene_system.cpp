@@ -2,6 +2,7 @@
 #include <ek/scenex/particles/particle_system.hpp>
 #include <ek/scenex/components/transform_2d.hpp>
 #include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/components/name.hpp>
 #include <ek/scenex/components/node_filters.hpp>
 #include "scene_system.hpp"
 #include <ek/scenex/data/sg_factory.hpp>

@@ -22,26 +22,19 @@ endif ()
 
 target_compile_options(${PROJECT_NAME} PRIVATE
         -fno-exceptions
+        -fno-rtti
         -fstrict-aliasing
         )
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_options(${PROJECT_NAME} PRIVATE -g)
 else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Os)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
     if (${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
             ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
     else ()
-        # RELEASE
-        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-            target_compile_options(${PROJECT_NAME} PRIVATE
-                    -Oz -flto -fno-exceptions -fno-rtti -fstrict-aliasing)
-            # https://github.com/llvm-mirror/llvm/blob/master/cmake/modules/AddLLVM.cmake
-            #            target_link_options(${PROJECT_NAME} PUBLIC
-            #                    -Wl,-dead_strip
-            #                    -Wl,-dead_strip_dylibs)
-        endif ()
+        target_compile_options(${PROJECT_NAME} PRIVATE -flto)
     endif ()
 endif ()
 

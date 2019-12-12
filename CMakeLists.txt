@@ -13,7 +13,6 @@ set(EKX_BUILD_TESTS ON)
 set(EKX_BUILD_BENCHMARKS ON)
 #endif ()
 
-
 # Windows is not ready for Edit-mode
 if (${CMAKE_SYSTEM_NAME} MATCHES Windows)
     set(EKX_BUILD_EDITOR OFF)
