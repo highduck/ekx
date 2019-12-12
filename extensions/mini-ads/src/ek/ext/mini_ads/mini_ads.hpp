@@ -6,13 +6,13 @@
 
 namespace ek {
 
-enum class AdsEventType {
-    ADS_VIDEO_REWARDED = 1,
-    ADS_VIDEO_REWARD_LOADED = 2,
-    ADS_VIDEO_REWARD_FAIL = 3,
-    ADS_VIDEO_LOADING = 4,
-    ADS_VIDEO_REWARD_CLOSED = 5,
-    ADS_REMOVED = 6
+enum class ads_event_type {
+    video_rewarded = 1,
+    video_loaded = 2,
+    video_failed = 3,
+    video_loading = 4,
+    video_closed = 5,
+    removed = 6
 };
 
 struct ads_config_t {
@@ -33,7 +33,7 @@ void ads_play_reward_video();
 
 void ads_show_interstitial();
 
-void ads_listen(const std::function<void(AdsEventType type)>& callback);
+void ads_listen(const std::function<void(ads_event_type type)>& callback);
 
 void ads_purchase_remove();
 
@@ -43,18 +43,20 @@ void init_billing(const char* key);
 ////
 namespace mini_ads {
 
-static signal_t<> onAdsRemoved{};
-static signal_t<> onAdsRewarded{};
+using show_video_callback = std::function<void(bool)>;
+
+static signal_t<> on_removed{};
+static signal_t<> on_video_rewarded{};
 
 void init();
 
-bool isAdsRemoved();
+bool is_ads_removed();
 
-void adsOnGameOver();
+void handle_game_over();
 
-void adsShowVideo(const std::function<void(bool)>& callback);
+void show_video(const show_video_callback& callback);
 
-void removeAds();
+void purchase_remove_ads();
 
 };
 

@@ -8,10 +8,10 @@ option(EKX_BUILD_COVERAGE "Build EKX coverage check" OFF)
 option(EKX_BUILD_BENCHMARKS "Build EKX benchmarks projects" OFF)
 option(EKX_BUILD_EDITOR "Build EKX editor projects" ON)
 
-#if ($ENV{CLION_IDE})
+if ($ENV{CLION_IDE})
 set(EKX_BUILD_TESTS ON)
-set(EKX_BUILD_BENCHMARKS ON)
-#endif ()
+#set(EKX_BUILD_BENCHMARKS ON)
+endif ()
 
 # Windows is not ready for Edit-mode
 if (${CMAKE_SYSTEM_NAME} MATCHES Windows)

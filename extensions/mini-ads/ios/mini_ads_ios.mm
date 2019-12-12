@@ -1,4 +1,4 @@
-#include <ek/mini_ads.hpp>
+#include <ek/ext/mini_ads/mini_ads.hpp>
 
 #include <AppDelegate.h>
 
@@ -14,12 +14,12 @@ NSString* _GAD_remove_ads_sku;
 GADBannerView* _bannerView;
 GADInterstitial* _interstitial;
 
-using ::ek::AdsEventType;
+using ::ek::ads_event_type;
 
 // fwd
 
 namespace ek {
-void __post_application_event(AdsEventType type);
+void __post_application_event(ads_event_type type);
 }
 void remove_ads_purchase_aknowledged();
 
