@@ -1,12 +1,12 @@
 #pragma once
 
-namespace ek {
+namespace ek::graphics::gl {
 
-void gl_set_debugging(bool enabled);
+void set_debugging(bool enabled);
 
-void gl_check_error();
+void check_error();
 
-void gl_skip_errors();
+void skip_errors();
 
 }
 

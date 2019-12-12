@@ -3,7 +3,7 @@
 #include <ek/math/packed_color.hpp>
 #include <ek/math/vec.hpp>
 
-namespace ek {
+namespace ek::graphics {
 
 struct vertex_decl_t {
     int size;

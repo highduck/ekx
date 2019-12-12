@@ -13,6 +13,9 @@
 
 namespace ek {
 
+using graphics::texture_t;
+using graphics::program_t;
+
 image_t* load_image(const path_t& path) {
     image_t* image = nullptr;
     auto buffer = read_file(path);

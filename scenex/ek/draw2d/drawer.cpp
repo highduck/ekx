@@ -7,10 +7,7 @@
 
 namespace ek {
 
-drawer_t::drawer_t()
-        : batcher{resolve<graphics_t>()},
-          default_program_{"2d"},
-          default_texture_{"empty"} {
+drawer_t::drawer_t() {
 
     assert_created_once<drawer_t>();
 
@@ -34,10 +31,9 @@ void drawer_t::begin(int x, int y, int width, int height) {
 
     batcher.states.set_program(default_program_.get());
 
-    batcher.states.set_transform(mat4f{});
-    batcher.states.set_projection(ortho_2d<float>(x, y, width, height));
+    batcher.states.set_mvp(ortho_2d<float>(x, y, width, height));
 
-    batcher.states.set_blend_mode(blend_mode::premultiplied);
+    batcher.states.set_blend_mode(graphics::blend_mode::premultiplied);
     batcher.states.set_texture(texture_);
 }
 
@@ -57,7 +53,7 @@ void drawer_t::end() {
     assert(program_stack_.empty());
     assert(texture_stack_.empty());
     assert(blend_mode_stack_.empty());
-    assert(projection_stack_.empty());
+    assert(mvp_stack_.empty());
     assert(tex_coords_stack_.empty());
     assert(canvas_stack_.empty());
 
@@ -67,7 +63,7 @@ void drawer_t::end() {
     program_stack_.clear();
     texture_stack_.clear();
     blend_mode_stack_.clear();
-    projection_stack_.clear();
+    mvp_stack_.clear();
     tex_coords_stack_.clear();
     canvas_stack_.clear();
 }
@@ -175,7 +171,7 @@ void drawer_t::fill_circle(const circle_f& circle, argb32_t inner_color, argb32_
 }
 
 void drawer_t::write_vertex(float x, float y, float u, float v, premultiplied_abgr32_t cm, abgr32_t co) {
-    auto* ptr = (vertex_2d*) vertex_memory_ptr_;
+    auto* ptr = static_cast<graphics::vertex_2d*>(vertex_memory_ptr_);
 
     // could be cached before draw2d
     const matrix_2d& m = matrix;
@@ -192,7 +188,7 @@ void drawer_t::write_vertex(float x, float y, float u, float v, premultiplied_ab
 }
 
 void drawer_t::write_raw_vertex(const float2& pos, const float2& tex_coord, premultiplied_abgr32_t cm, abgr32_t co) {
-    auto* ptr = (vertex_2d*) vertex_memory_ptr_;
+    auto* ptr = static_cast<graphics::vertex_2d*>(vertex_memory_ptr_);
     ptr->position = pos;
     ptr->uv = tex_coord;
     ptr->cm = cm;
@@ -383,13 +379,13 @@ drawer_t& drawer_t::restore_canvas_rect() {
 }
 
 drawer_t& drawer_t::save_projection_matrix() {
-    projection_stack_.push_back(batcher.states.get_projection());
+    mvp_stack_.push_back(batcher.states.mvp);
     return *this;
 }
 
 drawer_t& drawer_t::restore_projection_matrix() {
-    batcher.states.set_projection(projection_stack_.back());
-    projection_stack_.pop_back();
+    batcher.states.set_mvp(mvp_stack_.back());
+    mvp_stack_.pop_back();
     return *this;
 }
 
@@ -425,12 +421,12 @@ drawer_t& drawer_t::set_empty_texture() {
     return *this;
 }
 
-drawer_t& drawer_t::set_texture(const texture_t* texture) {
+drawer_t& drawer_t::set_texture(const graphics::texture_t* texture) {
     texture_ = texture;
     return *this;
 }
 
-drawer_t& drawer_t::set_texture_region(const texture_t* texture, const rect_f& region) {
+drawer_t& drawer_t::set_texture_region(const graphics::texture_t* texture, const rect_f& region) {
     texture_ = texture != nullptr ? texture : default_texture_.get();
     uv = region;
     return *this;
@@ -443,7 +439,7 @@ drawer_t& drawer_t::restore_texture() {
 }
 
 drawer_t& drawer_t::save_program() {
-    program_stack_.push_back(batcher.states.next().program);
+    program_stack_.push_back(batcher.states.next.program);
     return *this;
 }
 
@@ -454,7 +450,7 @@ drawer_t& drawer_t::restore_program() {
 }
 
 drawer_t& drawer_t::save_blend_mode() {
-    blend_mode_stack_.push_back(batcher.states.next().blend);
+    blend_mode_stack_.push_back(batcher.states.next.blend);
     return *this;
 }
 
@@ -464,7 +460,7 @@ drawer_t& drawer_t::restore_blend_mode() {
     return *this;
 }
 
-void drawer_t::set_blend_mode(blend_mode blend_mode) {
+void drawer_t::set_blend_mode(graphics::blend_mode blend_mode) {
     batcher.states.set_blend_mode(blend_mode);
 }
 
@@ -529,7 +525,7 @@ void drawer_t::line(const float2& start, const float2& end) {
 
 void drawer_t::line_arc(float x, float y, float r, float angle_from, float angle_to, float line_width, int segments,
                         argb32_t color_inner, argb32_t color_outer) {
-    float pi2 = float(math::pi2);
+    auto pi2 = static_cast<float>(math::pi2);
     float da = pi2 / float(segments);
     float a0 = angle_from;
     prepare();

@@ -8,7 +8,7 @@
 #include <vector>
 #include <ek/imaging/image.hpp>
 #include <ek/math/serialize_math.hpp>
-#include <ek/graphics/texture.hpp>
+#include <ek/graphics/graphics.hpp>
 
 namespace ek::spritepack {
 
@@ -68,7 +68,7 @@ struct atlas_page_t {
     std::vector<sprite_t> sprites;
     std::string image_path;
     image_t* image = nullptr;
-    texture_t* texture = nullptr;
+    graphics::texture_t* texture = nullptr;
 
     template<typename S>
     void serialize(IO<S>& io) {

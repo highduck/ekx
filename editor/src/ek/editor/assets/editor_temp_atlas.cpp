@@ -1,7 +1,10 @@
 #include "editor_temp_atlas.hpp"
 #include <ek/spritepack/sprite_packing.hpp>
+#include <ek/graphics/texture.hpp>
 
 namespace ek {
+
+using graphics::texture_t;
 
 spritepack::atlas_t prepare_temp_atlas(const std::string& name, float scale) {
     atlas_decl_t atlas_decl;

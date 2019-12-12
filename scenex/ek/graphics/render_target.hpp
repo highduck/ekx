@@ -4,7 +4,7 @@
 #include "gl_def.hpp"
 #include "texture.hpp"
 
-namespace ek {
+namespace ek::graphics {
 
 class render_target_t : private disable_copy_assign_t {
 public:

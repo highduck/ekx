@@ -141,18 +141,18 @@ void diamonds::draw() {
     drawer.batcher.flush();
 
     rt.set();
-    resolve<graphics_t>().viewport(0, 0, w, h);
+    graphics::viewport(0, 0, w, h);
 
     if (first_frame) {
         float4 clear_color{colorf(1)};
         first_frame = false;
-        resolve<graphics_t>().clear(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+        graphics::clear(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
     }
     drawer.save_projection_matrix();
     drawer.save_matrix();
     drawer.matrix = matrix_2d{};
     mat4f m = ortho_2d(0.0f, h, w, -h);
-    drawer.batcher.states.set_projection(m);
+    drawer.batcher.states.set_mvp(m);
 
     drawer.set_empty_texture();
 //    drawer.quad(0, 0, 128, 128, 0x0_rgb);
@@ -179,7 +179,7 @@ void diamonds::draw() {
     }
 
     drawer.batcher.flush();
-    resolve<graphics_t>().viewport();
+    graphics::viewport();
     drawer.restore_matrix();
     drawer.restore_projection_matrix();
     rt.unset();

@@ -3,7 +3,7 @@
 #include "graphics.hpp"
 #include "gl_debug.hpp"
 
-namespace ek {
+namespace ek::graphics {
 
 using ek::app::g_app;
 
@@ -15,12 +15,12 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
     texture_->reset(width, height, type);
 
     glGenFramebuffers(1, &frame_buffer_handle_);
-    gl_check_error();
+    gl::check_error();
 
     if (type != texture_type::color32) {
         /** render buffers **/
         glGenRenderbuffers(1, &render_buffer_handle_);
-        gl_check_error();
+        gl::check_error();
 
         // create render buffer and bind 16-bit depth buffer
         glBindRenderbuffer(GL_RENDERBUFFER, render_buffer_handle_);
@@ -35,12 +35,12 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
                 break;
         }
         glRenderbufferStorage(GL_RENDERBUFFER, render_buffer_format, width, height);
-        gl_check_error();
+        gl::check_error();
         //////
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer_handle_);
-    gl_check_error();
+    gl::check_error();
 
     GLenum attachment = GL_COLOR_ATTACHMENT0;
     if (type == texture_type::depth16 || type == texture_type::depth24) {
@@ -50,17 +50,17 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
     if (render_buffer_handle_ != 0) {
         // attach render buffer as depth buffer
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, render_buffer_handle_);
-        gl_check_error();
+        gl::check_error();
         /////
     }
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture_->handle_, 0);
-    gl_check_error();
+    gl::check_error();
 
     if (type == texture_type::depth16 || type == texture_type::depth24) {
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
-        gl_check_error();
+        gl::check_error();
     }
 
     GLenum framebuffer_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -97,16 +97,16 @@ render_target_t::render_target_t(uint32_t width, uint32_t height, texture_type t
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, g_app.primary_frame_buffer);
-    gl_check_error();
+    gl::check_error();
 }
 
 render_target_t::~render_target_t() {
     glDeleteFramebuffers(1, &frame_buffer_handle_);
-    gl_check_error();
+    gl::check_error();
 
     if (render_buffer_handle_ != 0) {
         glDeleteRenderbuffers(1, &render_buffer_handle_);
-        gl_check_error();
+        gl::check_error();
     }
 
     delete texture_;
@@ -114,12 +114,12 @@ render_target_t::~render_target_t() {
 
 void render_target_t::set() {
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer_handle_);
-    gl_check_error();
+    gl::check_error();
 }
 
 void render_target_t::unset() {
     glBindFramebuffer(GL_FRAMEBUFFER, g_app.primary_frame_buffer);
-    gl_check_error();
+    gl::check_error();
 }
 
 void render_target_t::clear() {
@@ -129,13 +129,13 @@ void render_target_t::clear() {
         case texture_type::color32:
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT);
-            gl_check_error();
+            gl::check_error();
             break;
         case texture_type::depth16:
         case texture_type::depth24:
             glClearDepth(1.0f);
             glClear(GL_DEPTH_BUFFER_BIT);
-            gl_check_error();
+            gl::check_error();
             break;
     }
 

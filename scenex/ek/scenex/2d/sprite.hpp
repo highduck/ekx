@@ -6,11 +6,13 @@
 
 namespace ek {
 
+namespace graphics {
 class texture_t;
+}
 
 class sprite_t : private disable_copy_assign_t {
 public:
-    asset_t<texture_t> texture;
+    asset_t<graphics::texture_t> texture;
     rect_f rect{0, 0, 1, 1};
     rect_f tex{0, 0, 1, 1};
     bool rotated = false;

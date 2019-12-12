@@ -17,7 +17,7 @@ public:
     template<typename T>
     using stack_type = std::vector<T>;
 
-    batcher_t batcher;
+    batcher_t batcher{};
 
     matrix_2d matrix;
     rect_f uv{0.0f, 0.0f, 1.0f, 1.0f};
@@ -165,9 +165,9 @@ public:
 
     drawer_t& set_empty_texture();
 
-    drawer_t& set_texture(const texture_t* texture);
+    drawer_t& set_texture(const graphics::texture_t* texture);
 
-    drawer_t& set_texture_region(const texture_t* texture = nullptr, const rect_f& region = rect_f::zero_one);
+    drawer_t& set_texture_region(const graphics::texture_t* texture = nullptr, const rect_f& region = rect_f::zero_one);
 
     drawer_t& restore_texture();
 
@@ -179,27 +179,27 @@ public:
 
     drawer_t& restore_blend_mode();
 
-    void set_blend_mode(blend_mode blend_mode);
+    void set_blend_mode(graphics::blend_mode blend_mode);
 
     inline const rect_f& canvas_rect() const {
         return canvas_rect_;
     }
 
 private:
-    asset_t<program_t> default_program_;
-    asset_t<texture_t> default_texture_;
+    asset_t<graphics::program_t> default_program_{"2d"};
+    asset_t<graphics::texture_t> default_texture_{"empty"};
 
     rect_f canvas_rect_{};
-    const texture_t* texture_{};
+    const graphics::texture_t* texture_{};
 
     stack_type<matrix_2d> matrix_stack_;
     stack_type<argb32_t> multipliers_;
     stack_type<argb32_t> offsets_;
     stack_type<rect_f> scissor_stack_;
-    stack_type<const program_t*> program_stack_;
-    stack_type<const texture_t*> texture_stack_;
-    stack_type<blend_mode> blend_mode_stack_;
-    stack_type<mat4f> projection_stack_;
+    stack_type<const graphics::program_t*> program_stack_;
+    stack_type<const graphics::texture_t*> texture_stack_;
+    stack_type<graphics::blend_mode> blend_mode_stack_;
+    stack_type<mat4f> mvp_stack_;
     stack_type<rect_f> tex_coords_stack_;
     stack_type<rect_f> canvas_stack_;
 

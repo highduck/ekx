@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include <ek/graphics/program.hpp>
 #include <ek/graphics/texture.hpp>
-#include <ek/graphics/buffer_object.hpp>
+#include <ek/graphics/buffer.hpp>
 #include <ek/draw2d/batcher.hpp>
 #include <ek/app/app.hpp>
 #include <ek/math/matrix_camera.hpp>
@@ -16,6 +16,7 @@
 namespace ek {
 
 using namespace ek::app;
+using namespace ek::graphics;
 
 const GLchar* vertex_shader =
         "#ifdef GL_ES\n"
@@ -141,23 +142,23 @@ void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
 
     // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, polygon fill
     glEnable(GL_BLEND);
-    gl_check_error();
+    gl::check_error();
     glBlendEquation(GL_FUNC_ADD);
-    gl_check_error();
+    gl::check_error();
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    gl_check_error();
+    gl::check_error();
     glDisable(GL_CULL_FACE);
-    gl_check_error();
+    gl::check_error();
     glDisable(GL_DEPTH_TEST);
-    gl_check_error();
+    gl::check_error();
     glEnable(GL_SCISSOR_TEST);
-    gl_check_error();
+    gl::check_error();
 
     glViewport(static_cast<GLint>(framebuffer_rect.x),
                static_cast<GLint>(framebuffer_rect.y),
                static_cast<GLsizei>(framebuffer_rect.width),
                static_cast<GLsizei>(framebuffer_rect.height));
-    gl_check_error();
+    gl::check_error();
 
     auto mvp = ortho_2d(viewport_rect.x, viewport_rect.y, viewport_rect.width, viewport_rect.height);
     program_->use();
@@ -167,7 +168,7 @@ void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
     GLint batch_prev_texture = 0;
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
-    gl_check_error();
+    gl::check_error();
 
     ImVec2 pos = draw_data->DisplayPos;
     for (int n = 0; n < draw_data->CmdListsCount; n++) {
@@ -198,7 +199,7 @@ void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
                               static_cast<GLint>(framebuffer_rect.bottom() - clip_rect.w),
                               static_cast<GLsizei>(clip_rect.z - clip_rect.x),
                               static_cast<GLsizei>(clip_rect.w - clip_rect.y));
-                    gl_check_error();
+                    gl::check_error();
 
                     const GLint texture_id = (GLuint) (intptr_t) pcmd->TextureId;
                     if (batch_prev_texture != texture_id) {
@@ -206,18 +207,18 @@ void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
                         // Bind texture
                         glActiveTexture(GL_TEXTURE0);
                         glBindTexture(GL_TEXTURE_2D, (GLuint) texture_id);
-                        gl_check_error();
+                        gl::check_error();
                     }
                     //Draw
                     glDrawElements(GL_TRIANGLES, (GLsizei) pcmd->ElemCount, GL_UNSIGNED_SHORT, idx_buffer_offset);
-                    gl_check_error();
+                    gl::check_error();
                 }
             }
             idx_buffer_offset += pcmd->ElemCount;
         }
     }
     glDisable(GL_SCISSOR_TEST);
-    gl_check_error();
+    gl::check_error();
 }
 
 void imgui_module_t::init_fonts() {
@@ -275,8 +276,8 @@ void update_mouse_cursor() {
 
 imgui_module_t::imgui_module_t() {
 
-    vertex_buffer_ = new buffer_object_t{buffer_type::vertex_buffer, buffer_usage::dynamic_buffer};
-    index_buffer_ = new buffer_object_t{buffer_type::index_buffer, buffer_usage::dynamic_buffer};
+    vertex_buffer_ = new buffer_t{buffer_type::vertex_buffer, buffer_usage::dynamic_buffer};
+    index_buffer_ = new buffer_t{buffer_type::index_buffer, buffer_usage::dynamic_buffer};
     texture_ = new texture_t{};
     program_ = new program_t{vertex_shader, fragment_shader};
     program_->vertex = &vertex_minimal_2d::decl;

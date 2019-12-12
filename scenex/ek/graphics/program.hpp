@@ -4,12 +4,11 @@
 #include <ek/math/vec.hpp>
 #include <ek/math/mat4x4.hpp>
 #include <ek/graphics/gl_def.hpp>
+#include <ek/util/common_macro.hpp>
 #include <string>
 #include <unordered_map>
 
-namespace ek {
-
-struct vertex_decl_t;
+namespace ek::graphics {
 
 namespace program_attributes {
 static std::string position = "aPosition";

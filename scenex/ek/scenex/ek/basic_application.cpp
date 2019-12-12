@@ -44,7 +44,6 @@ basic_application::~basic_application() {
 }
 
 void basic_application::initialize() {
-    service_locator_instance<graphics_t>::init();
     service_locator_instance<drawer_t>::init();
 
     //scale_factor = static_cast<float>(g_app.content_scale);
@@ -90,9 +89,8 @@ void basic_application::on_draw_frame() {
     asset_manager_->set_scale_factor(scale_factor);
 
     /** base app BEGIN **/
-    auto& graphics = resolve<graphics_t>();
     auto& drawer = resolve<drawer_t>();
-    drawer.batcher.stats.reset();
+    drawer.batcher.stats = {};
 
     const double dt = std::min(frame_timer.update(), 0.3);
     // fixed for GIF recorder
@@ -101,18 +99,18 @@ void basic_application::on_draw_frame() {
     hook_on_update(static_cast<float>(dt));
     update_frame(static_cast<float>(dt));
 
-    graphics.begin();
-    graphics.viewport();
+    graphics::begin();
+    graphics::viewport();
     //graphics.set_scissors();
 
     if (clear_color_enabled) {
-        graphics.clear(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        graphics::clear(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     }
 
     drawer.begin(0, 0,
                  static_cast<int>(g_app.drawable_size.x),
                  static_cast<int>(g_app.drawable_size.y));
-    drawer.set_blend_mode(blend_mode::premultiplied);
+    drawer.set_blend_mode(graphics::blend_mode::premultiplied);
 
     render_frame();
 

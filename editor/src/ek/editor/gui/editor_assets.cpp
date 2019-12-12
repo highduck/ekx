@@ -64,7 +64,7 @@ void do_editor_debug_runtime_asset_list(const std::string& type_name) {
 void do_editor_debug_runtime_assets() {
     ImGui::Begin("Debug Assets");
 
-    do_editor_debug_runtime_asset_list<program_t>("Program");
+    do_editor_debug_runtime_asset_list<graphics::program_t>("Program");
     do_editor_debug_runtime_asset_list<material_3d>("Material");
     do_editor_debug_runtime_asset_list<static_mesh_t>("Mesh");
     do_editor_debug_runtime_asset_list<atlas_t>("Atlas");

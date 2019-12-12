@@ -20,6 +20,11 @@
 
 namespace ek {
 
+using graphics::texture_t;
+using graphics::program_t;
+using graphics::vertex_2d;
+using graphics::vertex_3d;
+
 class builtin_asset_t : public asset_object_t {
 public:
     explicit builtin_asset_t(std::string path)

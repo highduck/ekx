@@ -15,6 +15,10 @@
 
 namespace ek {
 
+using graphics::program_t;
+using graphics::vertex_3d;
+using graphics::vertex_2d;
+
 program_asset_t::program_asset_t(path_t path)
         : editor_asset_t{std::move(path), "program"} {
 }

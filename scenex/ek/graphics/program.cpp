@@ -3,7 +3,7 @@
 #include "gl_debug.hpp"
 #include <ek/util/logger.hpp>
 
-namespace ek {
+namespace ek::graphics {
 
 using namespace program_uniforms;
 using namespace program_attributes;
@@ -108,7 +108,7 @@ program_t::program_t(const char* vs_code, const char* fs_code) {
 program_t::~program_t() {
     if (handle_ != 0) {
         glDeleteProgram(handle_);
-        gl_check_error();
+        gl::check_error();
         handle_ = 0;
     }
 }
@@ -123,7 +123,7 @@ void program_t::bind_attributes() const {
         loc = (GLuint) a_position;
         glEnableVertexAttribArray(loc);
         glVertexAttribPointer(loc, pos_comps, GL_FLOAT, GL_FALSE, stride, (void*) off);
-        gl_check_error();
+        gl::check_error();
     }
     off += sizeof(float) * pos_comps;
 
@@ -132,7 +132,7 @@ void program_t::bind_attributes() const {
             loc = (GLuint) a_normal;
             glEnableVertexAttribArray(loc);
             glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, stride, (void*) off);
-            gl_check_error();
+            gl::check_error();
         }
         off += sizeof(float) * 3;
     }
@@ -141,7 +141,7 @@ void program_t::bind_attributes() const {
         loc = (GLuint) a_texcoord;
         glEnableVertexAttribArray(loc);
         glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, stride, (void*) off);
-        gl_check_error();
+        gl::check_error();
     }
     off += sizeof(float) * 2;
 
@@ -149,7 +149,7 @@ void program_t::bind_attributes() const {
         loc = (GLuint) a_color_multiplier;
         glEnableVertexAttribArray(loc);
         glVertexAttribPointer(loc, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, (void*) off);
-        gl_check_error();
+        gl::check_error();
     }
     off += sizeof(uint32_t);
 
@@ -157,7 +157,7 @@ void program_t::bind_attributes() const {
         loc = (GLuint) a_color_offset;
         glEnableVertexAttribArray(loc);
         glVertexAttribPointer(loc, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, (void*) off);
-        gl_check_error();
+        gl::check_error();
     }
 //    off += sizeof(uint32_t);
 
@@ -166,30 +166,30 @@ void program_t::bind_attributes() const {
 void program_t::unbind_attributes() const {
     auto loc = (GLuint) a_position;
     glDisableVertexAttribArray(loc);
-    gl_check_error();
+    gl::check_error();
 
     if (a_normal >= 0) {
         loc = (GLuint) a_normal;
         glDisableVertexAttribArray(loc);
-        gl_check_error();
+        gl::check_error();
     }
 
     if (a_texcoord >= 0) {
         loc = (GLuint) a_texcoord;
         glDisableVertexAttribArray(loc);
-        gl_check_error();
+        gl::check_error();
     }
 
     if (a_color_multiplier >= 0) {
         loc = (GLuint) a_color_multiplier;
         glDisableVertexAttribArray(loc);
-        gl_check_error();
+        gl::check_error();
     }
 
     if (a_color_offset >= 0) {
         loc = (GLuint) a_color_offset;
         glDisableVertexAttribArray(loc);
-        gl_check_error();
+        gl::check_error();
     }
 }
 
@@ -205,7 +205,7 @@ void program_t::use() const {
     }
 
     glUseProgram(handle_);
-    gl_check_error();
+    gl::check_error();
 
     current_program = this;
     if (current_program) {
@@ -230,7 +230,7 @@ void program_t::set_uniform(const std::string& name, const float2& v) const {
     GLint uniform = get_uniform(name);
     if (uniform >= 0) {
         glUniform2fv(uniform, 1, v.data_);
-        gl_check_error();
+        gl::check_error();
     }
 }
 
@@ -238,7 +238,7 @@ void program_t::set_uniform(const std::string& name, const float3& v) const {
     GLint uniform = get_uniform(name);
     if (uniform >= 0) {
         glUniform3fv(uniform, 1, v.data_);
-        gl_check_error();
+        gl::check_error();
     }
 }
 
@@ -246,7 +246,7 @@ void program_t::set_uniform(const std::string& name, const float4& v) const {
     GLint uniform = get_uniform(name);
     if (uniform >= 0) {
         glUniform4fv(uniform, 1, v.data_);
-        gl_check_error();
+        gl::check_error();
     }
 }
 
@@ -254,7 +254,7 @@ void program_t::set_uniform(const std::string& name, const mat4f& v) const {
     GLint uniform = get_uniform(name);
     if (uniform >= 0) {
         glUniformMatrix4fv(uniform, 1, GL_FALSE, v.m);
-        gl_check_error();
+        gl::check_error();
     }
 }
 
@@ -262,7 +262,7 @@ void program_t::set_uniform(const std::string& name, const mat3f& v) const {
     GLint uniform = get_uniform(name);
     if (uniform >= 0) {
         glUniformMatrix3fv(uniform, 1, GL_FALSE, v.m);
-        gl_check_error();
+        gl::check_error();
     }
 }
 
@@ -270,7 +270,7 @@ void program_t::set_uniform(const std::string& name, float v) const {
     GLint uniform = get_uniform(name);
     if (uniform >= 0) {
         glUniform1f(uniform, v);
-        gl_check_error();
+        gl::check_error();
     }
 }
 
@@ -278,7 +278,7 @@ void program_t::set_uniform(const std::string& name, int v) const {
     GLint uniform = get_uniform(name);
     if (uniform >= 0) {
         glUniform1i(uniform, v);
-        gl_check_error();
+        gl::check_error();
     }
 }
 
