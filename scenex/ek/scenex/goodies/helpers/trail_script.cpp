@@ -8,7 +8,6 @@
 namespace ek {
 
 void trail_script::draw() {
-    script::draw();
 //
 //    if (true) {
 //        auto& drawer = resolve<Drawer>();
@@ -64,8 +63,6 @@ void trail_script::draw() {
 }
 
 void trail_script::update(float dt) {
-    script::update(dt);
-
     update_trail(dt);
 }
 

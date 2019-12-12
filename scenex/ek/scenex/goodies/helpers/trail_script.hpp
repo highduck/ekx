@@ -21,7 +21,7 @@ struct trail_node {
     }
 };
 
-class trail_script : public script {
+EK_DECL_SCRIPT_CPP(trail_script) {
 public:
 
     float2 offset;

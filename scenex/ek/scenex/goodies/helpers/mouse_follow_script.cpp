@@ -8,7 +8,7 @@
 namespace ek {
 
 void mouse_follow_script::update(float dt) {
-    script::update(dt);
+    script_cpp::update(dt);
 
     auto& im = resolve<interactive_manager>();
     const auto screen_space_position = im.pointer_global_space;

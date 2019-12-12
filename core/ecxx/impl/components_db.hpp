@@ -25,6 +25,7 @@ public:
         const auto cid = type<Component>();
         if (cid < pools_.size()) {
         } else {
+            //printf("resize pool because %d %s\n", cid, std::string{details::type_name<Component>()}.c_str());
             pools_.resize(cid + 1u);
         }
 

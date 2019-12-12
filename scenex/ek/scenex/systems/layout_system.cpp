@@ -17,30 +17,28 @@ void update_layout(ecs::entity e) {
     const auto& l = ecs::get<layout_t>(e);
     auto& transform = ecs::get<transform_2d>(e);
     if ((l.fill_x || l.fill_y) && ecs::has<display_2d>(e)) {
-        auto& drawable = ecs::get<display_2d>(e).drawable;
-        if (drawable) {
-            if (drawable->get_type_id() == drawable_quad::type_id) {
-                auto* quad = static_cast<drawable_quad*>(drawable.get());
+        auto& display = ecs::get<display_2d>(e);
+        if (display.is<drawable_quad>()) {
+            auto* quad = display.get<drawable_quad>();
+            if (l.fill_x) {
+                quad->rect.x = top_rect.x;
+                quad->rect.width = top_rect.width;
+            }
+            if (l.fill_y) {
+                quad->rect.y = top_rect.y;
+                quad->rect.height = top_rect.height;
+            }
+        } else if (display.is<drawable_sprite>()) {
+            auto* sprite = display.get<drawable_sprite>();
+            auto bounds = sprite->get_bounds();
+            if (!bounds.empty()) {
                 if (l.fill_x) {
-                    quad->rect.x = top_rect.x;
-                    quad->rect.width = top_rect.width;
+                    transform.matrix.tx = top_rect.x + l.fill_extra.x;
+                    transform.scale.x = (top_rect.width + l.fill_extra.width) / bounds.width;
                 }
                 if (l.fill_y) {
-                    quad->rect.y = top_rect.y;
-                    quad->rect.height = top_rect.height;
-                }
-            } else if (drawable->get_type_id() == drawable_sprite::type_id) {
-                auto* sprite = static_cast<drawable_sprite*>(drawable.get());
-                auto bounds = sprite->get_bounds();
-                if (!bounds.empty()) {
-                    if (l.fill_x) {
-                        transform.matrix.tx = top_rect.x + l.fill_extra.x;
-                        transform.scale.x = (top_rect.width + l.fill_extra.width) / bounds.width;
-                    }
-                    if (l.fill_y) {
-                        transform.matrix.ty = top_rect.y + l.fill_extra.y;
-                        transform.scale.y = (top_rect.height + l.fill_extra.height) / bounds.height;
-                    }
+                    transform.matrix.ty = top_rect.y + l.fill_extra.y;
+                    transform.scale.y = (top_rect.height + l.fill_extra.height) / bounds.height;
                 }
             }
         }

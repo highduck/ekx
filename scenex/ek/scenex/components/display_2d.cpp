@@ -7,7 +7,7 @@
 
 namespace ek {
 
-drawable_2d::~drawable_2d() = default;
+drawable_2d_base::~drawable_2d_base() = default;
 
 void drawable_quad::draw() {
     auto& drawer = resolve<drawer_t>();
@@ -37,14 +37,10 @@ bool drawable_quad::hit_test(const float2& point) const {
 //    return vGradient(rc, color, color);
 //}
 
-drawable_sprite::drawable_sprite()
-        : drawable_2d{type_id} {
-
-}
+drawable_sprite::drawable_sprite() = default;
 
 drawable_sprite::drawable_sprite(std::string sprite_id, rect_f a_scale_grid)
-        : drawable_2d{type_id},
-          src{std::move(sprite_id)},
+        : src{std::move(sprite_id)},
           scale_grid{a_scale_grid} {
     scale_grid_mode = !scale_grid.empty();
 }
@@ -159,15 +155,13 @@ static rect_f text_bounds(const std::string& text, const text_format_t& format, 
 }
 
 drawable_text::drawable_text()
-        : drawable_2d{type_id},
-            text{},
+        : text{},
           format{"mini", 16.0f} {
 
 }
 
 drawable_text::drawable_text(std::string text, text_format_t format)
-        : drawable_2d{type_id},
-        text{std::move(text)},
+        : text{std::move(text)},
           format{std::move(format)} {
 }
 

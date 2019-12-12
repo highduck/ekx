@@ -132,7 +132,6 @@ void dna::draw() {
 //flip()goto _
 
 void diamonds::draw() {
-    script::draw();
     auto& drawer = resolve<drawer_t>();
     time += get_delta_time(entity_);
     float t = time;

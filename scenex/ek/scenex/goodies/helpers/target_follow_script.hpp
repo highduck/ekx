@@ -6,7 +6,7 @@
 
 namespace ek {
 
-class target_follow_script : public script {
+EK_DECL_SCRIPT_CPP(target_follow_script) {
 public:
 
     enum class integration_mode {
@@ -32,7 +32,9 @@ public:
     integration_mode integration = integration_mode::Exp;
 
     void update(float dt) override;
+
     void gui_gizmo() override;
+
     void gui_inspector() override;
 };
 

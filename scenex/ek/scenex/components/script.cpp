@@ -4,9 +4,9 @@
 
 namespace ek {
 
-script::~script() = default;
+script_cpp_base::~script_cpp_base() = default;
 
-ecs::entity script::find_child(const std::string& name) const {
+ecs::entity script_cpp_base::find_child(const std::string& name) const {
     return find(entity_, name);
 }
 

@@ -92,20 +92,16 @@ inline S& assign_script(ecs::entity e) {
     return *static_cast<S*>(script.get());
 }
 
-/*** DEPRECATED ***/
 template<typename S>
-[[deprecated]]
 inline S& get_script(ecs::entity e) {
+    const auto interest_type_id = type_index<S, script_cpp_base>::value;
+    auto& h = ecs::get<script_holder>(e);
+    for (auto& script : h.list) {
+        if (script && script->get_type_id() == interest_type_id) {
+            return static_cast<S&>(*script);
+        }
+    }
     abort();
-//    S* c = nullptr;
-//    auto& h = ecs::get<script_holder>(e);
-//    for (auto& script : h.list) {
-//        c = dynamic_cast<S*>(script.get());
-//        if (c != nullptr) {
-//            break;
-//        }
-//    }
-//    return *c;
 }
 
 inline float2 global_to_local(ecs::entity e, const float2& position) {
