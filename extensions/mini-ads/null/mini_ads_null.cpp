@@ -1,4 +1,4 @@
-#include <ek/mini_ads.hpp>
+#include <ek/ext/mini_ads/mini_ads.hpp>
 #include <ek/app/app.hpp>
 #include <ek/util/timer.hpp>
 #include <ek/util/logger.hpp>
@@ -30,7 +30,7 @@ private:
 };
 
 // TODO: signals to core module
-static std::function<void(AdsEventType type)> ads_registered_callbacks;
+static std::function<void(ads_event_type type)> ads_registered_callbacks;
 
 void ads_init(const ads_config_t&) {}
 
@@ -56,15 +56,15 @@ void ads_play_reward_video() {
             fake_timer->start([] {
                 loaded_ = true;
                 EK_INFO << "ADS_VIDEO_LOADING";
-                ads_registered_callbacks(AdsEventType::ADS_VIDEO_LOADING);
+                ads_registered_callbacks(ads_event_type::video_loading);
                 EK_INFO << "ADS_VIDEO_REWARD_LOADED";
-                ads_registered_callbacks(AdsEventType::ADS_VIDEO_REWARD_LOADED);
+                ads_registered_callbacks(ads_event_type::video_loaded);
             }, 5.0f);
         } else {
             fake_timer->start([] {
                 loaded_ = false;
                 EK_INFO << "ADS VIDEO REWARDED";
-                ads_registered_callbacks(AdsEventType::ADS_VIDEO_REWARDED);
+                ads_registered_callbacks(ads_event_type::video_rewarded);
             }, 5.0f);
 
             //ads_registered_callbacks(AdsEventType::ADS_VIDEO_REWARDED);
@@ -81,7 +81,7 @@ void ads_play_reward_video() {
 
 void ads_show_interstitial() {}
 
-void ads_listen(const std::function<void(AdsEventType type)>& callback) {
+void ads_listen(const std::function<void(ads_event_type type)>& callback) {
     ads_registered_callbacks = callback;
 }
 

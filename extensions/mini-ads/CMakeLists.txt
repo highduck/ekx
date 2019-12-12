@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 project(mini-ads LANGUAGES CXX)
 
 add_library(${PROJECT_NAME} STATIC
-        src/ek/mini_ads.hpp
-        src/ek/mini_ads.cpp
+        src/ek/ext/mini_ads/mini_ads.hpp
+        src/ek/ext/mini_ads/mini_ads.cpp
         null/mini_ads_null.cpp
         )
 

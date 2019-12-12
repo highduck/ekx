@@ -1,4 +1,4 @@
-#include <ek/mini_ads.hpp>
+#include <ek/ext/mini_ads/mini_ads.hpp>
 #include <ek/android.hpp>
 
 namespace ek {
