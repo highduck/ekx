@@ -208,7 +208,7 @@ void gui_light_3d(ecs::entity entity) {
         ImGui::ColorEdit3("Ambient", light.ambient.data_);
         ImGui::ColorEdit3("Diffuse", light.diffuse.data_);
         ImGui::ColorEdit3("Specular", light.specular.data_);
-        
+
         ImGui::DragFloat("Radius", &light.radius, 1.0f, 0.0f, 0.0f, "%.1f");
         ImGui::DragFloat("Falloff", &light.falloff, 0.1f, 0.0f, 0.0f, "%.1f");
     }
@@ -253,31 +253,24 @@ void gui_display_2d(ecs::entity entity) {
     auto& comp = ecs::get<display_2d>(entity);
     if (comp.drawable) {
         auto* drawable = comp.drawable.get();
-        auto* sprite = dynamic_cast<drawable_sprite*>(drawable);
-        if (sprite) {
+        auto drawable_type = drawable->get_type_id();
+        if (drawable_type == drawable_sprite::type_id) {
+            auto* sprite = static_cast<drawable_sprite*>(drawable);
             if (ImGui::CollapsingHeader("Display 2D - Sprite")) {
                 ImGui::LabelText("sprite", "%s", sprite->src.c_str());
                 ImGui::Checkbox("hit pixels", &sprite->hit_pixels);
                 ImGui::Checkbox("scale grid", &sprite->scale_grid_mode);
             }
-        }
-        auto* quad = dynamic_cast<drawable_quad*>(drawable);
-        if (quad) {
+        } else if (drawable_type == drawable_quad::type_id) {
             if (ImGui::CollapsingHeader("Display 2D - Quad")) {}
-        }
-        auto* text = dynamic_cast<drawable_text*>(drawable);
-        if (text) {
+        } else if (drawable_type == drawable_text::type_id) {
             if (ImGui::CollapsingHeader("Display 2D - Text")) {}
-        }
-
-        auto* arc = dynamic_cast<drawable_arc*>(drawable);
-        if (arc) {
+        } else if (drawable_type == drawable_arc::type_id) {
             if (ImGui::CollapsingHeader("Display 2D - Arc")) {}
         }
     } else {
-        if (ImGui::CollapsingHeader("Display 2D - NULL")) {}
+        if (ImGui::CollapsingHeader("Display 2D - unknown")) {}
     }
-
 }
 
 void gui_inspector(ecs::entity e) {

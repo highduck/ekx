@@ -109,15 +109,21 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(EK_COMPILER_LTO "")
 endif ()
 
+target_compile_options(${PROJECT_NAME} PRIVATE
+        -fno-exceptions
+        -fno-rtti
+        -fstrict-aliasing
+        ${EK_COMPILE_WARNINGS}
+        )
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(${PROJECT_NAME} PRIVATE
-            -fno-exceptions -fstrict-aliasing -g ${EK_COMPILE_WARNINGS})
+    target_compile_options(${PROJECT_NAME} PRIVATE -g)
 else ()
+    target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
     if (${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
             ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
     else ()
-        target_compile_options(${PROJECT_NAME} PRIVATE
-                -Oz -flto -fno-exceptions -fno-rtti -fstrict-aliasing ${EK_COMPILE_WARNINGS})
+        target_compile_options(${PROJECT_NAME} PRIVATE -flto)
     endif ()
 endif ()

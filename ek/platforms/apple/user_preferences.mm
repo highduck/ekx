@@ -2,6 +2,7 @@
 
 #if defined(__APPLE__)
 
+#import <ek/util/base64.hpp>
 #import <Foundation/Foundation.h>
 
 namespace ek {
@@ -48,6 +49,15 @@ std::string get_user_string(const std::string& key, const std::string& default_v
     }
 
     return default_value;
+}
+
+void set_user_data(const std::string& key, const std::vector<uint8_t>& buffer) {
+    assert(!key.empty());
+    set_user_string(key, base64::encode(buffer));
+}
+
+std::vector<uint8_t> get_user_data(const std::string& key) {
+    return base64::decode(get_user_string(key, ""));
 }
 
 }

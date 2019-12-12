@@ -52,6 +52,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         utility/destroy_delay.hpp
         utility/destroy_delay.cpp
         utility/scene_management.hpp
+        utility/basic_game_utility.hpp
+        utility/basic_game_utility.cpp
 
         goodies/shake_system.hpp
         goodies/shake_system.cpp

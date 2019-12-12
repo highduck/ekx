@@ -64,7 +64,7 @@ protected:
 };
 
 template<typename T>
-void run_app() {
+inline void run_app() {
     auto& app = service_locator_instance<basic_application>::init<T>();
     app.initialize();
     app.preload();

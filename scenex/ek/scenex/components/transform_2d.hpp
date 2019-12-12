@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <ek/math/mat3x2.hpp>
 #include <ek/math/vec.hpp>
 #include <ek/math/box.hpp>
