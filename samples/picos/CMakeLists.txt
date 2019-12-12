@@ -33,10 +33,12 @@ set_target_properties(${PROJECT_NAME}
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
+target_compile_options(${PROJECT_NAME} PRIVATE -fno-exceptions -fno-rtti)
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_options(${PROJECT_NAME} PRIVATE -g)
 else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Oz -flto -fno-exceptions -fno-rtti)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Oz -flto)
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")

@@ -22,6 +22,8 @@
 
 namespace ek {
 
+using namespace graphics;
+
 static material_3d default_material_{};
 static render_target_t* shadow_map_ = nullptr;
 
@@ -35,7 +37,7 @@ void render_objects_to_shadow_map(const mat4f& proj, const mat4f& view) {
             auto* mesh = asset_t<static_mesh_t>{filter.mesh}.get_or(filter.mesh_ptr);
             if (mesh) {
                 mat4f model{ecs::get<transform_3d>(e).world};
-                drawer.batcher.states.set_projection(proj * view * model);
+                drawer.batcher.states.set_mvp(proj * view * model);
                 drawer.batcher.temp_begin_mesh();
                 drawer.batcher.temp_draw_static_mesh(mesh->vb, mesh->ib, mesh->indices_count);
             }
@@ -86,14 +88,14 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
     drawer.batcher.states.set_program(program3d.get());
 
     glCullFace(GL_FRONT);
-    gl_check_error();
+    gl::check_error();
 
     const uint32_t shadow_map_width = 2048;
     const uint32_t shadow_map_height = 2048;
     if (shadow_map_ == nullptr) {
         shadow_map_ = new render_target_t(shadow_map_width, shadow_map_height, texture_type::depth24);
     }
-    resolve<graphics_t>().viewport(0, 0, shadow_map_width, shadow_map_height);
+    graphics::viewport(0, 0, shadow_map_width, shadow_map_height);
     shadow_map_->clear();
     shadow_map_->set();
 
@@ -125,7 +127,7 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
 
     shadow_map_->unset();
     drawer.restore_program();
-    resolve<graphics_t>().viewport();
+    graphics::viewport();
 }
 
 bool begin_3d() {
@@ -149,7 +151,7 @@ bool begin_3d() {
     glDepthFunc(GL_LEQUAL); // equal needs to correct pass skybox z = 1
     glDepthRange(0.0f, 1.0f);
 
-    gl_check_error();
+    gl::check_error();
 
     return true;
 }
@@ -158,7 +160,7 @@ void end_3d() {
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
-    gl_check_error();
+    gl::check_error();
 
     auto& drawer = resolve<drawer_t>();
     drawer.restore_program();
@@ -196,7 +198,7 @@ void render_3d_objects(const mat4f& proj, const mat4f& view) {
         auto* mesh = asset_t<static_mesh_t>{filter.mesh}.get_or(filter.mesh_ptr);
         if (mesh) {
             mat4f model{ecs::get<transform_3d>(e).world};
-            drawer.batcher.states.set_projection(proj * view * model);
+            drawer.batcher.states.set_mvp(proj * view * model);
             drawer.batcher.temp_begin_mesh();
             program3d->set_uniform(program_uniforms::model_matrix, model);
             program3d->set_uniform(program_uniforms::normal_matrix, transpose(inverse(mat3f{model})));
@@ -222,7 +224,7 @@ void render_3d_objects(const mat4f& proj, const mat4f& view) {
 
     glActiveTexture(GL_TEXTURE0 + (GLenum) 1);
     glBindTexture(GL_TEXTURE_2D, 0);
-    gl_check_error();
+    gl::check_error();
 }
 
 void clear_camera(const camera_3d& camera_data) {
@@ -234,17 +236,17 @@ void clear_camera(const camera_3d& camera_data) {
                 camera_data.clear_color.b,
                 camera_data.clear_color.a
         );
-        gl_check_error();
+        gl::check_error();
         clear_bits |= GL_COLOR_BUFFER_BIT;
     }
     if (camera_data.clear_depth_enabled) {
         glClearDepth(camera_data.clear_depth);
-        gl_check_error();
+        gl::check_error();
         clear_bits |= GL_DEPTH_BUFFER_BIT;
     }
     if (clear_bits != 0) {
         glClear(clear_bits);
-        gl_check_error();
+        gl::check_error();
     }
 }
 
@@ -310,7 +312,7 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     mat4f mvp = proj * view * model;
 
     auto& drawer = resolve<drawer_t>();
-    drawer.batcher.states.set_projection(mvp);
+    drawer.batcher.states.set_mvp(mvp);
 
     drawer.batcher.temp_begin_mesh();
 
@@ -381,7 +383,7 @@ void render_skybox(const std::string& id, const mat4f& view, const mat4f& projec
         view3.m32 = 0;
         drawer.batcher.temp_begin_mesh();
         program->set_uniform(program_uniforms::mvp, projection * view3 * model);
-        drawer.batcher.states.set_projection(projection * view3 * model);
+        drawer.batcher.states.set_mvp(projection * view3 * model);
 
         glDepthMask(GL_FALSE);
         glCullFace(GL_FRONT);

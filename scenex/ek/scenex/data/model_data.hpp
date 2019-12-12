@@ -7,14 +7,14 @@
 namespace ek {
 
 template<>
-struct declared_as_pod_type<vertex_3d> : public std::true_type {
+struct declared_as_pod_type<graphics::vertex_3d> : public std::true_type {
 };
 
 struct model_data_t {
     mesh_data_t mesh;
 
     template<typename S>
-    void serialize(IO<S>& io) {
+    void serialize(IO <S>& io) {
         io(mesh.vertices, mesh.indices);
     }
 };

@@ -22,7 +22,7 @@ public:
 
     void draw() override;
 
-    render_target_t rt;
+    graphics::render_target_t rt;
 //    screen_recorder recorder;
     float time = 0.0f;
     bool first_frame = true;

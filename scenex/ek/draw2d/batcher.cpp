@@ -1,15 +1,15 @@
 #include "batcher.hpp"
 
-#include <ek/graphics/buffer_object.hpp>
+#include <ek/graphics/buffer.hpp>
 #include <ek/graphics/program.hpp>
 #include <ek/graphics/gl_debug.hpp>
 
 namespace ek {
 
-batcher_t::batcher_t(graphics_t& graphics)
-        : graphics_{graphics} {
-    vertex_buffer_ = new buffer_object_t(buffer_type::vertex_buffer, buffer_usage::dynamic_buffer);
-    index_buffer_ = new buffer_object_t(buffer_type::index_buffer, buffer_usage::dynamic_buffer);
+batcher_t::batcher_t() {
+    using namespace ek::graphics;
+    vertex_buffer_ = new buffer_t(buffer_type::vertex_buffer, buffer_usage::dynamic_buffer);
+    index_buffer_ = new buffer_t(buffer_type::index_buffer, buffer_usage::dynamic_buffer);
     init_memory(sizeof(vertex_2d), max_vertices_limit, max_indices_limit);
 }
 
@@ -50,12 +50,12 @@ void batcher_t::draw() {
     vertex_buffer_->upload(vertex_memory_, next_vertex_pointer_);
     index_buffer_->upload(index_memory_, next_index_pointer_ << 1u);
 
-    states.current().program->bind_attributes();
-    states.current().program->bind_image();
+    states.curr.program->bind_attributes();
+    states.curr.program->bind_image();
 
-    graphics_.draw_triangles(indices_count_);
+    graphics::draw_triangles(indices_count_);
 
-    states.current().program->unbind_attributes();
+    states.curr.program->unbind_attributes();
 
 //        glBindVertexArray(0);
 //        glCheckError();
@@ -66,7 +66,6 @@ void batcher_t::draw() {
     stats.triangles += indices_count_ / 3;
     ++stats.draw_calls;
 
-
     // reset stream pointers
     next_index_pointer_ = 0;
     indices_count_ = 0;
@@ -75,7 +74,7 @@ void batcher_t::draw() {
 }
 
 void batcher_t::alloc_triangles(int vertex_count, int index_count) {
-    if (states.is_changed() || (vertices_count_ + vertex_count) > vertex_index_max_) {
+    if (states.changed || (vertices_count_ + vertex_count) > vertex_index_max_) {
         flush();
         states.invalidate();
     }
@@ -97,9 +96,7 @@ void batcher_t::flush() {
 }
 
 void batcher_t::temp_begin_mesh() {
-    if (states.is_changed()
-        || true
-            ) {
+    if (states.changed || true) {
         flush();
         states.invalidate();
     }
@@ -109,18 +106,20 @@ void batcher_t::temp_begin_mesh() {
     states.apply();
 }
 
-void batcher_t::temp_draw_static_mesh(const buffer_object_t& vb, const buffer_object_t& ib, int32_t indices_count) {
+void batcher_t::temp_draw_static_mesh(const graphics::buffer_t& vb,
+                                      const graphics::buffer_t& ib,
+                                      int32_t indices_count) {
     vb.bind();
     ib.bind();
 
-    states.current().program->bind_attributes();
-    states.current().program->bind_image();
+    states.curr.program->bind_attributes();
+    states.curr.program->bind_image();
 
     //program.enableVertexAttributes(vertices.vertexDeclaration);
     glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_SHORT, nullptr);
-    gl_check_error();
+    graphics::gl::check_error();
     //_program.disableVertexAttributes(vertices.vertexDeclaration);
-    states.current().program->unbind_attributes();
+    states.curr.program->unbind_attributes();
 }
 
 }

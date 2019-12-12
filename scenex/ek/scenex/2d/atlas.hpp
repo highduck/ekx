@@ -19,7 +19,7 @@ public:
     ~atlas_t();
 
     std::unordered_map<std::string, asset_t<sprite_t>> sprites;
-    std::vector<asset_t<texture_t>> pages;
+    std::vector<asset_t<graphics::texture_t>> pages;
 };
 
 using load_atlas_callback = std::function<void(atlas_t*)>;

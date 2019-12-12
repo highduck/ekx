@@ -14,7 +14,7 @@
 
 #endif
 
-namespace ek {
+namespace ek::graphics {
 
 #if defined(__EMSCRIPTEN__)
 

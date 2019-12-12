@@ -1,6 +1,6 @@
 #include "vertex_decl.hpp"
 
-namespace ek {
+namespace ek::graphics {
 
 vertex_decl_t vertex_minimal_2d::decl{sizeof(vertex_minimal_2d), 2, false};
 

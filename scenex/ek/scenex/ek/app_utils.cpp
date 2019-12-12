@@ -54,6 +54,7 @@ const char* program_2d_fs_ = "#ifdef GL_ES\n"
                              "}";
 
 void create_builtin() {
+    using namespace graphics;
     asset_t<texture_t> empty_texture{"empty"};
     empty_texture.reset(new texture_t);
     image_t image_t{4, 4};

@@ -1,123 +1,110 @@
 #include "batch_state_manager.hpp"
 
-#include <ek/util/locator.hpp>
 #include <ek/graphics/program.hpp>
 #include <ek/graphics/texture.hpp>
 
 namespace ek {
 
-void batch_state_manager::apply() {
-    auto& graphics = resolve<graphics_t>();
-    auto bl = current().blend;
-    if (bl != prev().blend) {
-        graphics.set_blend_mode(bl);
-        prev().blend = bl;
+void batch_state_context::apply() {
+    auto bl = curr.blend;
+    if (bl != prev.blend) {
+        graphics::set_blend_mode(bl);
+        prev.blend = bl;
     }
 
-    const bool is_program_changed = prev().program != current().program;
-    bool is_texture_changed = prev().texture != current().texture;
+    const bool is_program_changed = prev.program != curr.program;
+    bool is_texture_changed = prev.texture != curr.texture;
 
     if (is_program_changed) {
-        current().program->use();
-        prev().program = current().program;
+        curr.program->use();
+        prev.program = curr.program;
         is_texture_changed = true;
-        reset_matrix_ = true;
+        mvp_changed = true;
     }
 
     if (is_texture_changed) {
-        if (current().texture && current().program) {
-            current().texture->bind(current().program->u_image0_unit);
+        if (curr.texture && curr.program) {
+            curr.texture->bind(curr.program->u_image0_unit);
         }
-        prev().texture = current().texture;
+        prev.texture = curr.texture;
     }
 
-    if (reset_matrix_) {
-        current().program->set_uniform(program_uniforms::mvp, matrix_combined_);
-        reset_matrix_ = false;
+    if (mvp_changed) {
+        curr.program->set_uniform(graphics::program_uniforms::mvp, mvp);
+        mvp_changed = false;
     }
 
-    if (scissors_dirty_) {
-        if (scissors_enabled_) {
-            graphics.set_scissors(
-                    (int) scissors_.x,
-                    (int) scissors_.y,
-                    (int) scissors_.width,
-                    (int) scissors_.height
+    if (scissors_dirty) {
+        if (scissors_enabled) {
+            graphics::set_scissors(
+                    (int) scissors.x,
+                    (int) scissors.y,
+                    (int) scissors.width,
+                    (int) scissors.height
             );
         } else {
-            graphics.set_scissors();
+            graphics::set_scissors();
         }
-        scissors_dirty_ = false;
+        scissors_dirty = false;
     }
 }
 
-void batch_state_manager::disable_scissors() {
-    if (scissors_enabled_) {
-        changed_ = true;
-        scissors_dirty_ = true;
-        scissors_enabled_ = false;
+void batch_state_context::disable_scissors() {
+    if (scissors_enabled) {
+        changed = true;
+        scissors_dirty = true;
+        scissors_enabled = false;
     }
 }
 
-void batch_state_manager::set_scissors(const rect_f& rc) {
-    changed_ = true;
-    scissors_dirty_ = true;
-    scissors_ = rc;
-    scissors_enabled_ = true;
+void batch_state_context::set_scissors(const rect_f& rc) {
+    changed = true;
+    scissors_dirty = true;
+    scissors = rc;
+    scissors_enabled = true;
 }
 
-void batch_state_manager::set_blend_mode(blend_mode blendMode) {
-    if (current().blend != blendMode) {
-        changed_ = true;
+void batch_state_context::set_blend_mode(graphics::blend_mode blending) {
+    if (curr.blend != blending) {
+        changed = true;
     }
-    next().blend = blendMode;
+    next.blend = blending;
 }
 
-void batch_state_manager::set_texture(const texture_t* tex) {
-    if (current().texture != tex) {
-        changed_ = true;
+void batch_state_context::set_texture(const graphics::texture_t* tex) {
+    if (curr.texture != tex) {
+        changed = true;
     }
-    next().texture = tex;
+    next.texture = tex;
 }
 
-void batch_state_manager::set_program(const program_t* program) {
-    if (current().program != program) {
-        changed_ = true;
+void batch_state_context::set_program(const graphics::program_t* program) {
+    if (curr.program != program) {
+        changed = true;
     }
-    next().program = program;
+    next.program = program;
 }
 
-void batch_state_manager::set_projection(const mat4f& mat) {
-    matrix_projection_ = mat;
-    dirty_matrix_ = true;
-    changed_ = true;
+void batch_state_context::set_mvp(const mat4f& m) {
+    mvp = m;
+    mvp_changed = true;
+    changed = true;
 }
 
-void batch_state_manager::set_transform(const mat4f& mat) {
-    matrix_transform_ = mat;
-    dirty_matrix_ = true;
-    changed_ = true;
+void batch_state_context::clear() {
+    changed = true;
+    prev = {};
+    curr = {};
+    next = {};
+    scissors_enabled = false;
 }
 
-void batch_state_manager::clear() {
-    changed_ = true;
-    states_chain_[0] = {};
-    states_chain_[1] = {};
-    states_chain_[2] = {};
-    scissors_enabled_ = false;
-}
-
-void batch_state_manager::invalidate() {
-    if (!changed_) {
+void batch_state_context::invalidate() {
+    if (!changed) {
         return;
     }
-    states_chain_[1] = states_chain_[2];
-    if (dirty_matrix_) {
-        matrix_combined_ = matrix_projection_ * matrix_transform_;
-        dirty_matrix_ = false;
-        reset_matrix_ = true;
-    }
-    changed_ = false;
+    curr = next;
+    changed = false;
 }
 
 }

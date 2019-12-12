@@ -122,7 +122,7 @@ void load_atlas_meta(const path_t& base_path, atlas_t* atlas, const std::vector<
 
     for (auto& page : atlas_data.pages) {
         const auto& page_image_path = page.image_path;
-        asset_t<texture_t> texture_asset{page_image_path};
+        asset_t<graphics::texture_t> texture_asset{page_image_path};
         if (texture_asset) {
             EK_DEBUG << "Destroy old page texture " << page_image_path;
             texture_asset.reset(nullptr);
@@ -142,7 +142,7 @@ void load_atlas_meta(const path_t& base_path, atlas_t* atlas, const std::vector<
 //                }
 //            }
 //        });
-        texture_asset.reset(new texture_t);
+        texture_asset.reset(new graphics::texture_t);
         texture_asset->reset(1, 1);
         load_texture_lazy((base_path / page_image_path).c_str(), texture_asset.get_mutable());
     }

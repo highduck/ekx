@@ -5,14 +5,15 @@ iOS project Generator:
 
 Destroy singletons:
 - ek::drawer API
-- ek::graphics API
 
-- side-projects: rename "backButton" to "back_button". Create event-name string constant!
+
 - better names for box/rect, sphere/circle?
 - [prefs] change int to number as the most common case
++ side-projects: Create event-name string constant (for example "back_button")!
 
 ### done
 + ek::audio_mini::
++ ek::graphics::
 + remove Forward declarations from math (matrix, vec, box)
 + remove scenex/ecs/config
 + fix button_skin field namings

@@ -2,7 +2,7 @@
 
 #include "gl_def.hpp"
 
-namespace ek {
+namespace ek::graphics {
 
 enum class blend_factor : GLuint {
     zero = GL_ZERO,
@@ -15,12 +15,6 @@ enum class blend_factor : GLuint {
 struct blend_mode {
     blend_factor source;
     blend_factor dest;
-
-//    inline blend_mode(blend_factor src, blend_factor dst)
-//            : source{src},
-//              dest{dst} {
-//
-//    }
 
     bool operator==(const blend_mode& a) const {
         return (source == a.source && dest == a.dest);

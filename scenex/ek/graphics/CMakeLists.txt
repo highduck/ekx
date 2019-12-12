@@ -2,9 +2,9 @@ target_sources(${PROJECT_NAME} PRIVATE
         gl_def.hpp
         gl_debug.cpp
         gl_debug.hpp
-        blend_mode.hpp
-        buffer_object.cpp
-        buffer_object.hpp
+        blending.hpp
+        buffer.cpp
+        buffer.hpp
         graphics.cpp
         graphics.hpp
         program.cpp

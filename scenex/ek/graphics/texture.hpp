@@ -6,7 +6,7 @@
 
 #include <array>
 
-namespace ek {
+namespace ek::graphics {
 
 enum class texture_type {
     color32,

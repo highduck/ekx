@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/graphics/blend_mode.hpp>
+#include <ek/graphics/graphics.hpp>
 #include <ek/util/common_macro.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/mat4x4.hpp>
@@ -8,16 +8,12 @@
 
 namespace ek {
 
-class program_t;
-
-class texture_t;
-
-class batch_state_manager : private disable_copy_assign_t {
+struct batch_state_context : private disable_copy_assign_t {
 
     struct state_t {
-        blend_mode blend = blend_mode::nop;
-        const program_t* program = nullptr;
-        const texture_t* texture = nullptr;
+        graphics::blend_mode blend = graphics::blend_mode::nop;
+        const graphics::program_t* program = nullptr;
+        const graphics::texture_t* texture = nullptr;
 
         bool operator==(const state_t& a) const {
             return (blend == a.blend && program == a.program && texture == a.texture);
@@ -28,21 +24,18 @@ class batch_state_manager : private disable_copy_assign_t {
         }
     };
 
-public:
+    state_t prev;
+    state_t curr;
+    state_t next;
 
-    batch_state_manager() = default;
+    mat4f mvp{};
 
-    inline state_t& prev() {
-        return states_chain_[0];
-    }
+    rect_f scissors{};
+    bool scissors_enabled = false;
+    bool scissors_dirty = false;
 
-    inline state_t& current() {
-        return states_chain_[1];
-    }
-
-    inline state_t& next() {
-        return states_chain_[2];
-    }
+    bool mvp_changed = false;
+    bool changed = true;
 
     void apply();
 
@@ -50,49 +43,17 @@ public:
 
     void set_scissors(const rect_f& rc);
 
-    void set_blend_mode(blend_mode blendMode);
+    void set_blend_mode(graphics::blend_mode blending);
 
-    void set_texture(const texture_t* tex);
+    void set_texture(const graphics::texture_t* tex);
 
-    void set_program(const program_t* program);
+    void set_program(const graphics::program_t* program);
 
-    void set_projection(const mat4f& mat);
-
-    void set_transform(const mat4f& mat);
-
-    void transform(const mat4f& mat) {
-        set_transform(mat);
-    }
-
-    inline const mat4f& transform() const {
-        return matrix_transform_;
-    }
+    void set_mvp(const mat4f& m);
 
     void clear();
 
     void invalidate();
-
-    inline bool is_changed() const {
-        return changed_;
-    }
-
-    inline const mat4f& get_projection() const {
-        return matrix_projection_;
-    }
-
-private:
-    state_t states_chain_[3];
-
-    rect_f scissors_{};
-    bool scissors_enabled_ = false;
-    bool scissors_dirty_ = false;
-
-    mat4f matrix_projection_{};
-    mat4f matrix_transform_{};
-    mat4f matrix_combined_{};
-
-    bool reset_matrix_ = false;
-    bool dirty_matrix_ = false;
-    bool changed_ = true;
 };
+
 }
