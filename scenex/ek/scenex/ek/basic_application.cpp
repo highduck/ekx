@@ -30,6 +30,8 @@ basic_application::basic_application()
 
     assert_created_once<basic_application>();
 
+    graphics::init();
+
     asset_manager_ = new asset_manager_t{};
 
     ecxx::set_world(&w);
@@ -110,7 +112,6 @@ void basic_application::on_draw_frame() {
     drawer.begin(0, 0,
                  static_cast<int>(g_app.drawable_size.x),
                  static_cast<int>(g_app.drawable_size.y));
-    drawer.set_blend_mode(graphics::blend_mode::premultiplied);
 
     render_frame();
 

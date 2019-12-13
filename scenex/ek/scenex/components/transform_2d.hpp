@@ -15,10 +15,10 @@ struct transform_2d {
     float2 origin = float2::zero;
     rect_f rect = rect_f::zero;
 
-    matrix_2d* manualMatrix = nullptr;
+    matrix_2d* user_matrix = nullptr;
 
-    argb32_t colorMultiplier = argb32_t::one;
-    argb32_t colorOffset = argb32_t::zero;
+    argb32_t color_multiplier = argb32_t::one;
+    argb32_t color_offset = argb32_t::zero;
 
     void rotation(float value) {
         skew = {value, value};
@@ -34,19 +34,19 @@ struct transform_2d {
     }
 
     inline void set_alpha(float alpha) {
-        colorMultiplier.af(alpha);
+        color_multiplier.af(alpha);
     }
 
     [[nodiscard]] inline float get_alpha() const {
-        return colorMultiplier.af();
+        return color_multiplier.af();
     }
 
     inline void set_additive(float alpha) {
-        colorOffset.af(alpha);
+        color_offset.af(alpha);
     }
 
     [[nodiscard]] inline float get_additive() const {
-        return colorOffset.af();
+        return color_offset.af();
     }
 };
 

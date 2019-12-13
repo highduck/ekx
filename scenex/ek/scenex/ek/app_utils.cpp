@@ -81,8 +81,11 @@ void frame_stats_t::update() {
 void frame_stats_t::draw() {
 #ifndef NDEBUG
     auto& drawer = resolve<drawer_t>();
+    if(!drawer.state.program) {
+        return;
+    }
 
-    drawer.set_empty_texture();
+    drawer.state.set_empty_texture();
     const int samples = fps_history_.capacity();
     float x = 0.0f;
     for (int i = 0; i < samples; ++i) {

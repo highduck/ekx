@@ -22,8 +22,7 @@ static unsigned short nine_patch_indices[] = {
 bool sprite_t::select() const {
     if (texture) {
         auto& drawer = resolve<drawer_t>();
-        drawer.set_texture(texture.get());
-        drawer.set_texture_coords(tex.x, tex.y, tex.width, tex.height);
+        drawer.state.set_texture_region(texture.get(), tex);
         return true;
     }
     return false;
@@ -36,7 +35,7 @@ void sprite_t::draw() const {
 void sprite_t::draw(const rect_f& rc) const {
     auto& drawer = resolve<drawer_t>();
     if (texture) {
-        drawer.set_texture_region(texture.get(), tex);
+        drawer.state.set_texture_region(texture.get(), tex);
         if (rotated) {
             drawer.quad_rotated(rc.x, rc.y, rc.width, rc.height);
         } else {
@@ -51,7 +50,7 @@ void sprite_t::draw_grid(const rect_f& grid, const rect_f& target) const {
     }
 
     auto& drawer = resolve<drawer_t>();
-    drawer.set_texture_region(texture.get(), tex);
+    drawer.state.set_texture_region(texture.get(), tex);
 
     float x = rect.x;
     float y = rect.y;
@@ -110,7 +109,7 @@ void sprite_t::draw_grid(const rect_f& grid, const rect_f& target) const {
 }
 
 bool sprite_t::hit_test(const float2& position) const {
-    (void)position;
+    (void) position;
     if (texture) {
         return true;
     }

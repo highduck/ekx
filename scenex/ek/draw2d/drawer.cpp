@@ -5,47 +5,8 @@
 #include <ek/graphics/gl_def.hpp>
 #include <ek/math/matrix_camera.hpp>
 
-namespace ek {
-
-drawer_t::drawer_t() {
-
-    assert_created_once<drawer_t>();
-
-    glDepthMask(GL_FALSE);
-    glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_STENCIL_TEST);
-    glDisable(GL_DITHER);
-    glDisable(GL_CULL_FACE);
-}
-
-drawer_t::~drawer_t() = default;
-
-void drawer_t::begin(int x, int y, int width, int height) {
-    batcher.begin();
-
-    texture_ = default_texture_.get();
-
-//        batcher.states.backbuffer_height = height;
-    batcher.states.clear();
-
-    batcher.states.set_program(default_program_.get());
-
-    batcher.states.set_mvp(ortho_2d<float>(x, y, width, height));
-
-    batcher.states.set_blend_mode(graphics::blend_mode::premultiplied);
-    batcher.states.set_texture(texture_);
-}
-
-void drawer_t::end() {
-    batcher.states.apply();
-    batcher.flush();
-
-    glBindBuffer(GL_ARRAY_BUFFER, (GLuint) 0u);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u);
-    glBindTexture(GL_TEXTURE_2D, 0u);
-    glUseProgram(0u);
-
+namespace ek::draw2d {
+void drawing_state::finish() {
     // debug checks
     assert(scissor_stack_.empty());
     assert(matrix_stack_.empty());
@@ -68,14 +29,351 @@ void drawer_t::end() {
     canvas_stack_.clear();
 }
 
+
+/** Scissors **/
+
+void drawing_state::push_scissors(const rect_f& scissors_) {
+    size_t size = scissor_stack_.size();
+    rect_f clamped_rect = scissors_;
+    if (size > 0) {
+        // TODO: apply clamped scissors hierarchy (not clamped alternatives)
+        clamped_rect = clamp_bounds(clamped_rect, scissor_stack_.back());
+    }
+
+    scissor_stack_.push_back(clamped_rect);
+    scissors_enabled = true;
+    scissors = clamped_rect;
+    check_scissors = true;
+}
+
+void drawing_state::pop_scissors() {
+    scissor_stack_.pop_back();
+    scissors_enabled = !scissor_stack_.empty();
+    scissors = scissor_stack_.back();
+    check_scissors = true;
+}
+
+/** Matrix Transform **/
+
+drawing_state& drawing_state::save_matrix() {
+    matrix_stack_.push_back(matrix);
+    return *this;
+}
+
+drawing_state& drawing_state::save_transform() {
+    save_matrix();
+    save_color();
+    return *this;
+}
+
+drawing_state& drawing_state::restore_transform() {
+    restore_matrix();
+    restore_color();
+    return *this;
+}
+
+drawing_state& drawing_state::translate(float tx, float ty) {
+    matrix.translate(tx, ty);
+    return *this;
+}
+
+drawing_state& drawing_state::translate(const float2& v) {
+    matrix.translate(v);
+    return *this;
+}
+
+drawing_state& drawing_state::scale(float sx, float sy) {
+    matrix.scale(sx, sy);
+    return *this;
+}
+
+drawing_state& drawing_state::scale(const float2& v) {
+    matrix.scale(v);
+    return *this;
+}
+
+drawing_state& drawing_state::rotate(float radians) {
+    matrix.rotate(radians);
+    return *this;
+}
+
+drawing_state& drawing_state::concat_matrix(const matrix_2d& r) {
+    matrix = matrix * r;
+    return *this;
+}
+
+drawing_state& drawing_state::restore_matrix() {
+    matrix = matrix_stack_.back();
+    matrix_stack_.pop_back();
+    return *this;
+}
+
+/** Color Transform **/
+
+drawing_state& drawing_state::save_color() {
+    multipliers_.push_back(color_multiplier);
+    offsets_.push_back(color_offset);
+    return *this;
+}
+
+drawing_state& drawing_state::restore_color() {
+    color_multiplier = multipliers_.back();
+    color_offset = offsets_.back();
+    multipliers_.pop_back();
+    offsets_.pop_back();
+    return *this;
+}
+
+drawing_state& drawing_state::multiply_alpha(float alpha) {
+    auto a = (uint8_t) ((color_multiplier.a * ((int) (alpha * 255)) * 258u) >> 16u);
+    color_multiplier.a = a;
+    return *this;
+}
+
+drawing_state& drawing_state::multiply_color(argb32_t multiplier) {
+    color_multiplier = color_multiplier * multiplier;
+    return *this;
+}
+
+drawing_state& drawing_state::combine_color(argb32_t multiplier, argb32_t offset) {
+    if (offset.argb != 0) {
+
+        using details::clamp_255;
+        color_offset = argb32_t(
+                clamp_255[((color_offset.r * color_multiplier.r * 258u) >> 16u) + offset.r],
+                clamp_255[((color_offset.g * color_multiplier.g * 258u) >> 16u) + offset.g],
+                clamp_255[((color_offset.b * color_multiplier.b * 258u) >> 16u) + offset.b],
+                offset.a
+        );
+    }
+
+    if (multiplier.argb != 0xFFFFFFFF) {
+        color_multiplier = color_multiplier * multiplier;
+    }
+
+    return *this;
+}
+
+drawing_state& drawing_state::offset_color(argb32_t offset) {
+    argb32_t left_mult = color_multiplier;
+    argb32_t left_offset = color_offset;
+
+    using details::clamp_255;
+    color_offset = argb32_t(
+            clamp_255[((left_offset.r * left_mult.r * 258u) >> 16u) + offset.r],
+            clamp_255[((left_offset.g * left_mult.g * 258u) >> 16u) + offset.g],
+            clamp_255[((left_offset.b * left_mult.b * 258u) >> 16u) + offset.b],
+            offset.a
+    );
+    return *this;
+}
+
+/** STATES **/
+
+drawing_state& drawing_state::save_canvas_rect() {
+    canvas_stack_.push_back(canvas_rect);
+    return *this;
+}
+
+drawing_state& drawing_state::restore_canvas_rect() {
+    canvas_rect = canvas_stack_.back();
+    canvas_stack_.pop_back();
+    return *this;
+}
+
+drawing_state& drawing_state::save_mvp() {
+    mvp_stack_.push_back(mvp);
+    return *this;
+}
+
+drawing_state& drawing_state::set_mvp(const mat4f& m) {
+    mvp = m;
+    check_mvp = true;
+    return *this;
+}
+
+drawing_state& drawing_state::restore_mvp() {
+    mvp = mvp_stack_.back();
+    check_mvp = true;
+    mvp_stack_.pop_back();
+    return *this;
+}
+
+drawing_state& drawing_state::save_texture_coords() {
+    tex_coords_stack_.push_back(uv);
+    return *this;
+}
+
+drawing_state& drawing_state::set_texture_coords(float u0, float v0, float du, float dv) {
+    uv.set(u0, v0, du, dv);
+    return *this;
+}
+
+drawing_state& drawing_state::set_texture_coords(const rect_f& uv_rect) {
+    uv = uv_rect;
+    return *this;
+}
+
+drawing_state& drawing_state::restore_texture_coords() {
+    uv = tex_coords_stack_.back();
+    tex_coords_stack_.pop_back();
+    return *this;
+}
+
+drawing_state& drawing_state::save_texture() {
+    texture_stack_.push_back(texture);
+    return *this;
+}
+
+drawing_state& drawing_state::set_empty_texture() {
+    texture = default_texture.get();
+    check_texture = true;
+    set_texture_coords(0, 0, 1, 1);
+    return *this;
+}
+
+drawing_state& drawing_state::set_texture(const graphics::texture_t* texture_) {
+    texture = texture_;
+    check_texture = true;
+    return *this;
+}
+
+drawing_state& drawing_state::set_texture_region(const graphics::texture_t* texture_, const rect_f& region) {
+    texture = texture_ != nullptr ? texture_ : default_texture.get();
+    check_texture = true;
+    uv = region;
+    return *this;
+}
+
+drawing_state& drawing_state::restore_texture() {
+    texture = texture_stack_.back();
+    check_texture = true;
+    texture_stack_.pop_back();
+    return *this;
+}
+
+drawing_state& drawing_state::set_program(const graphics::program_t* program_) {
+    program = program_ ? program_ : default_program.get();
+    check_program = true;
+    return *this;
+}
+
+drawing_state& drawing_state::save_program() {
+    program_stack_.push_back(program);
+    return *this;
+}
+
+drawing_state& drawing_state::restore_program() {
+    program = program_stack_.back();
+    check_program = true;
+    program_stack_.pop_back();
+    return *this;
+}
+
+drawing_state& drawing_state::save_blend_mode() {
+    blend_mode_stack_.push_back(blending);
+    return *this;
+}
+
+drawing_state& drawing_state::restore_blend_mode() {
+    blending = blend_mode_stack_.back();
+    blend_mode_stack_.pop_back();
+    check_blending = true;
+    return *this;
+}
+
+void drawing_state::set_blend_mode(graphics::blend_mode blending_) {
+    blending = blending_;
+    check_blending = true;
+}
+
+}
+
+namespace ek {
+
+drawer_t::drawer_t() {
+
+    assert_created_once<drawer_t>();
+
+    glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_DITHER);
+    glDisable(GL_CULL_FACE);
+}
+
+drawer_t::~drawer_t() = default;
+
+void drawer_t::begin(int x, int y, int width, int height) {
+    batcher.begin();
+
+    state.texture = state.default_texture.get();
+    state.program = state.default_program.get();
+    state.blending = graphics::blend_mode::premultiplied;
+    state.mvp = ortho_2d<float>(x, y, width, height);
+    state.scissors_enabled = false;
+    state.check_program = false;
+    state.check_scissors = false;
+    state.check_blending = false;
+    state.check_mvp = false;
+    state.check_texture = false;
+
+    batcher.states.clear();
+    batcher.states.set_program(state.program);
+    batcher.states.set_mvp(state.mvp);
+    batcher.states.set_blend_mode(state.blending);
+    batcher.states.set_texture(state.texture);
+}
+
+
+void drawer_t::end() {
+    batcher.states.apply();
+    batcher.flush();
+
+    glBindBuffer(GL_ARRAY_BUFFER, (GLuint) 0u);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u);
+    glBindTexture(GL_TEXTURE_2D, 0u);
+    glUseProgram(0u);
+
+    state.finish();
+}
+
 void drawer_t::prepare() {
-    vertex_color_multiplier = color_multiplier.premultipliedABGR32(color_offset.a);
+    vertex_color_multiplier = state.color_multiplier.premultipliedABGR32(state.color_offset.a);
     // for offset: delete alpha, flip R vs B channels
-    vertex_color_offset = color_offset.bgr();
+    vertex_color_offset = state.color_offset.bgr();
+}
+
+void drawer_t::commit_states() {
+    if (state.check_blending) {
+        batcher.states.set_blend_mode(state.blending);
+        state.check_blending = false;
+    }
+    if (state.check_texture) {
+        batcher.states.set_texture(state.texture);
+        state.check_texture = false;
+    }
+    if (state.check_program) {
+        batcher.states.set_program(state.program);
+        state.check_program = false;
+    }
+    if (state.check_mvp) {
+        batcher.states.set_mvp(state.mvp);
+        state.check_mvp = false;
+    }
+    if (state.check_scissors) {
+        if (state.scissors_enabled) {
+            batcher.states.set_scissors(state.scissors);
+        } else {
+            batcher.states.disable_scissors();
+        }
+        state.check_scissors = false;
+    }
 }
 
 void drawer_t::triangles(int vertex_count, int index_count) {
-    batcher.states.set_texture(texture_);
+    commit_states();
     batcher.alloc_triangles(vertex_count, index_count);
     vertex_memory_ptr_ = batcher.vertex_memory_ptr();
     index_memory_ptr_ = batcher.index_memory_ptr();
@@ -174,7 +472,8 @@ void drawer_t::write_vertex(float x, float y, float u, float v, premultiplied_ab
     auto* ptr = static_cast<graphics::vertex_2d*>(vertex_memory_ptr_);
 
     // could be cached before draw2d
-    const matrix_2d& m = matrix;
+    const auto& m = state.matrix;
+    const auto& uv = state.uv;
 
     ptr->position.x = x * m.a + y * m.c + m.tx;
     ptr->position.y = x * m.b + y * m.d + m.ty;
@@ -220,248 +519,6 @@ void drawer_t::write_indices(const uint16_t* source,
         ++index_memory_ptr_;
         ++source;
     }
-}
-
-/** Scissors **/
-
-void drawer_t::begin_scissors(const rect_f& scissors) {
-    size_t size = scissor_stack_.size();
-    rect_f clamped_rect = scissors;
-    if (size > 0) {
-        // TODO: apply clamped scissors hierarchy (not clamped alternatives)
-        clamped_rect = clamp_bounds(clamped_rect, scissor_stack_.back());
-    }
-
-    batcher.flush();
-    scissor_stack_.push_back(clamped_rect);
-
-    // TODO: next scissors to avoid pre-flush
-    batcher.states.set_scissors(clamped_rect);
-}
-
-void drawer_t::end_scissors() {
-    batcher.flush();
-    scissor_stack_.pop_back();
-    // TODO: next scissors to avoid pre-flush
-    if (scissor_stack_.empty()) {
-        batcher.states.disable_scissors();
-    } else {
-        batcher.states.set_scissors(scissor_stack_.back());
-    }
-}
-
-/** Matrix Transform **/
-
-drawer_t& drawer_t::save_matrix() {
-    matrix_stack_.push_back(matrix);
-    return *this;
-}
-
-drawer_t& drawer_t::save_transform() {
-    save_matrix();
-    save_color();
-    return *this;
-}
-
-drawer_t& drawer_t::restore_transform() {
-    restore_matrix();
-    restore_color();
-    return *this;
-}
-
-drawer_t& drawer_t::translate(float tx, float ty) {
-    matrix.translate(tx, ty);
-    return *this;
-}
-
-drawer_t& drawer_t::translate(const float2& v) {
-    matrix.translate(v);
-    return *this;
-}
-
-drawer_t& drawer_t::scale(float sx, float sy) {
-    matrix.scale(sx, sy);
-    return *this;
-}
-
-drawer_t& drawer_t::scale(const float2& v) {
-    matrix.scale(v);
-    return *this;
-}
-
-drawer_t& drawer_t::rotate(float radians) {
-    matrix.rotate(radians);
-    return *this;
-}
-
-drawer_t& drawer_t::concat_matrix(const matrix_2d& r) {
-    matrix = matrix * r;
-    return *this;
-}
-
-drawer_t& drawer_t::restore_matrix() {
-    matrix = matrix_stack_.back();
-    matrix_stack_.pop_back();
-    return *this;
-}
-
-/** Color Transform **/
-
-drawer_t& drawer_t::save_color() {
-    multipliers_.push_back(color_multiplier);
-    offsets_.push_back(color_offset);
-    return *this;
-}
-
-drawer_t& drawer_t::restore_color() {
-    color_multiplier = multipliers_.back();
-    color_offset = offsets_.back();
-    multipliers_.pop_back();
-    offsets_.pop_back();
-    return *this;
-}
-
-drawer_t& drawer_t::multiply_alpha(float alpha) {
-    auto a = (uint8_t) ((color_multiplier.a * ((int) (alpha * 255)) * 258u) >> 16u);
-    color_multiplier.a = a;
-    return *this;
-}
-
-drawer_t& drawer_t::multiply_color(argb32_t multiplier) {
-    color_multiplier = color_multiplier * multiplier;
-    return *this;
-}
-
-drawer_t& drawer_t::combine_color(argb32_t multiplier, argb32_t offset) {
-    if (offset.argb != 0) {
-
-        using details::clamp_255;
-        color_offset = argb32_t(
-                clamp_255[((color_offset.r * color_multiplier.r * 258u) >> 16u) + offset.r],
-                clamp_255[((color_offset.g * color_multiplier.g * 258u) >> 16u) + offset.g],
-                clamp_255[((color_offset.b * color_multiplier.b * 258u) >> 16u) + offset.b],
-                offset.a
-        );
-    }
-
-    if (multiplier.argb != 0xFFFFFFFF) {
-        color_multiplier = color_multiplier * multiplier;
-    }
-
-    return *this;
-}
-
-drawer_t& drawer_t::offset_color(argb32_t offset) {
-    argb32_t left_mult = color_multiplier;
-    argb32_t left_offset = color_offset;
-
-    using details::clamp_255;
-    color_offset = argb32_t(
-            clamp_255[((left_offset.r * left_mult.r * 258u) >> 16u) + offset.r],
-            clamp_255[((left_offset.g * left_mult.g * 258u) >> 16u) + offset.g],
-            clamp_255[((left_offset.b * left_mult.b * 258u) >> 16u) + offset.b],
-            offset.a
-    );
-    return *this;
-}
-
-/** STATES **/
-
-drawer_t& drawer_t::save_canvas_rect() {
-    canvas_stack_.push_back(canvas_rect_);
-    return *this;
-}
-
-drawer_t& drawer_t::restore_canvas_rect() {
-    canvas_rect_ = canvas_stack_.back();
-    canvas_stack_.pop_back();
-    return *this;
-}
-
-drawer_t& drawer_t::save_projection_matrix() {
-    mvp_stack_.push_back(batcher.states.mvp);
-    return *this;
-}
-
-drawer_t& drawer_t::restore_projection_matrix() {
-    batcher.states.set_mvp(mvp_stack_.back());
-    mvp_stack_.pop_back();
-    return *this;
-}
-
-drawer_t& drawer_t::save_texture_coords() {
-    tex_coords_stack_.push_back(uv);
-    return *this;
-}
-
-drawer_t& drawer_t::set_texture_coords(float u0, float v0, float du, float dv) {
-    uv.set(u0, v0, du, dv);
-    return *this;
-}
-
-drawer_t& drawer_t::set_texture_coords(const rect_f& uv_rect) {
-    uv = uv_rect;
-    return *this;
-}
-
-drawer_t& drawer_t::restore_texture_coords() {
-    uv = tex_coords_stack_.back();
-    tex_coords_stack_.pop_back();
-    return *this;
-}
-
-drawer_t& drawer_t::save_texture() {
-    texture_stack_.push_back(texture_);
-    return *this;
-}
-
-drawer_t& drawer_t::set_empty_texture() {
-    texture_ = default_texture_.get();
-    set_texture_coords(0, 0, 1, 1);
-    return *this;
-}
-
-drawer_t& drawer_t::set_texture(const graphics::texture_t* texture) {
-    texture_ = texture;
-    return *this;
-}
-
-drawer_t& drawer_t::set_texture_region(const graphics::texture_t* texture, const rect_f& region) {
-    texture_ = texture != nullptr ? texture : default_texture_.get();
-    uv = region;
-    return *this;
-}
-
-drawer_t& drawer_t::restore_texture() {
-    texture_ = texture_stack_.back();
-    texture_stack_.pop_back();
-    return *this;
-}
-
-drawer_t& drawer_t::save_program() {
-    program_stack_.push_back(batcher.states.next.program);
-    return *this;
-}
-
-drawer_t& drawer_t::restore_program() {
-    batcher.states.set_program(program_stack_.back());
-    program_stack_.pop_back();
-    return *this;
-}
-
-drawer_t& drawer_t::save_blend_mode() {
-    blend_mode_stack_.push_back(batcher.states.next.blend);
-    return *this;
-}
-
-drawer_t& drawer_t::restore_blend_mode() {
-    batcher.states.set_blend_mode(blend_mode_stack_.back());
-    blend_mode_stack_.pop_back();
-    return *this;
-}
-
-void drawer_t::set_blend_mode(graphics::blend_mode blend_mode) {
-    batcher.states.set_blend_mode(blend_mode);
 }
 
 /////

@@ -26,8 +26,8 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     transform.matrix.ty = data->matrix.ty;
     transform.skew = data->matrix.skew();
     transform.scale = data->matrix.scale();
-    transform.colorMultiplier = argb32_t(data->color.multiplier);
-    transform.colorOffset = argb32_t(data->color.offset);
+    transform.color_multiplier = argb32_t(data->color.multiplier);
+    transform.color_offset = argb32_t(data->color.offset);
 
     auto& node_state = ecs::get<node_state_t>(entity);
     node_state.touchable = data->touchable;

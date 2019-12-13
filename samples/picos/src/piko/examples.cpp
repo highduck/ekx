@@ -11,12 +11,13 @@ namespace ek::piko {
 void book::draw() {
     auto& drawer = resolve<drawer_t>();
 
-    drawer.set_empty_texture();
+    drawer.state.set_empty_texture();
     drawer.quad(0, 0, 128, 128, 0x0_rgb);
 
-    drawer.save_transform();
-    drawer.scale(0.5f, 0.5f);
-    drawer.translate(64, 64 + 32);
+    drawer.state
+            .save_transform()
+            .scale(0.5f, 0.5f)
+            .translate(64, 64 + 32);
     for (int k = -1; k <= 1; k += 2) {
         for (int j = 8 - 8 * k; j >= 0 && j <= 16; j += k) {
             float x = 59.5f;
@@ -39,7 +40,7 @@ void book::draw() {
         }
     }
 
-    drawer.restore_transform();
+    drawer.state.restore_transform();
 }
 
 void dna::draw() {
@@ -73,7 +74,7 @@ void dna::draw() {
     goto _
      */
 
-    drawer.set_empty_texture();
+    drawer.state.set_empty_texture();
     drawer.quad(0, 0, 128, 128, 0x0_rgb);
 
     for (int i = 0; i <= 288; ++i) {
@@ -148,13 +149,12 @@ void diamonds::draw() {
         first_frame = false;
         graphics::clear(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
     }
-    drawer.save_projection_matrix();
-    drawer.save_matrix();
-    drawer.matrix = matrix_2d{};
-    mat4f m = ortho_2d(0.0f, h, w, -h);
-    drawer.batcher.states.set_mvp(m);
-
-    drawer.set_empty_texture();
+    drawer.state
+            .save_mvp()
+            .save_matrix();
+    drawer.state.matrix = matrix_2d{};
+    drawer.state.set_mvp(ortho_2d(0.0f, h, w, -h));
+    drawer.state.set_empty_texture();
 //    drawer.quad(0, 0, 128, 128, 0x0_rgb);
     float sc = w / 128.0f;
     float2 center{w * 0.5f, h * 0.5f};
@@ -180,10 +180,10 @@ void diamonds::draw() {
 
     drawer.batcher.flush();
     graphics::viewport();
-    drawer.restore_matrix();
-    drawer.restore_projection_matrix();
+    drawer.state.restore_matrix();
+    drawer.state.restore_mvp();
     rt.unset();
-    drawer.set_texture(rt.texture());
+    drawer.state.set_texture(rt.texture());
     drawer.quad(0.0f, 0.0f, w, h);
 
     drawer.batcher.flush();

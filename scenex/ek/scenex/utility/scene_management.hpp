@@ -21,11 +21,11 @@ inline void set_alpha(ecs::entity e, float alpha) {
 }
 
 inline void set_color_multiplier(ecs::entity e, argb32_t color_multiplier) {
-    ecs::get_or_create<transform_2d>(e).colorMultiplier = color_multiplier;
+    ecs::get_or_create<transform_2d>(e).color_multiplier = color_multiplier;
 }
 
 inline void set_color_offset(ecs::entity e, argb32_t color_offset) {
-    ecs::get_or_create<transform_2d>(e).colorOffset = color_offset;
+    ecs::get_or_create<transform_2d>(e).color_offset = color_offset;
 }
 
 inline void set_position(ecs::entity e, const float2& pos) {

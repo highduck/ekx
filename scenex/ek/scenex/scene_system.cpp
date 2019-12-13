@@ -60,7 +60,7 @@ void draw_node(entity e) {
     const auto& config = ecs::get_or_default<node_state_t>(e);
 
     auto& transform = ecs::get_or_default<transform_2d>(e);
-    if (!config.visible || transform.colorMultiplier.a <= 0 || (config.layer_mask & camera_layers) == 0) {
+    if (!config.visible || transform.color_multiplier.a <= 0 || (config.layer_mask & camera_layers) == 0) {
         return;
     }
 
@@ -68,7 +68,11 @@ void draw_node(entity e) {
 
     bool scissors = ecs::has<scissors_2d>(e);
     if (scissors) {
-        drawer.begin_scissors(ecs::get<scissors_2d>(e).world_rect(drawer.matrix));
+        drawer.state.push_scissors(
+                ecs::get<scissors_2d>(e).world_rect(
+                        drawer.state.matrix
+                )
+        );
     }
 //
 //    events.emit({PreDraw, this, nullptr});
@@ -97,7 +101,7 @@ void draw_node(entity e) {
     });
 
     if (scissors) {
-        drawer.end_scissors();
+        drawer.state.pop_scissors();
     }
 
     if (ecs::has<script_holder>(e)) {
