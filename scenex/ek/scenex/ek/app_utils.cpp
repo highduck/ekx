@@ -9,7 +9,6 @@
 #include <ek/scenex/2d/atlas.hpp>
 #include <ek/scenex/2d/font.hpp>
 
-#include <ek/util/locator.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/imaging/drawing.hpp>
 
@@ -69,28 +68,22 @@ void create_builtin() {
 
 void frame_stats_t::update() {
 #ifndef NDEBUG
-    auto& drawer = resolve<drawer_t>();
     auto& app = resolve<basic_application>();
     fps_meter_.update(app.frame_timer.delta_time());
     fps_history_.write(fps_meter_.frame_fps());
-    draw_calls_ = drawer.batcher.stats.draw_calls;
-    triangles_ = drawer.batcher.stats.triangles;
+    draw_calls_ = draw2d::get_stat_draw_calls();
+    triangles_ = draw2d::get_stat_triangles();
 #endif
 }
 
 void frame_stats_t::draw() {
 #ifndef NDEBUG
-    auto& drawer = resolve<drawer_t>();
-    if(!drawer.state.program) {
-        return;
-    }
-
-    drawer.state.set_empty_texture();
+    draw2d::state.set_empty_texture();
     const int samples = fps_history_.capacity();
     float x = 0.0f;
     for (int i = 0; i < samples; ++i) {
         float fps = fps_history_.at(i);
-        drawer.quad(x, 100 - fps, 2, fps, 0xFFFF00_rgb);
+        draw2d::quad(x, 100 - fps, 2, fps, 0xFFFF00_rgb);
         x += 3.0f;
     }
 

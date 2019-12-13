@@ -1,10 +1,11 @@
+#include "scene_system.hpp"
+
 #include <ek/scenex/particles/particle_layer.hpp>
 #include <ek/scenex/particles/particle_system.hpp>
 #include <ek/scenex/components/transform_2d.hpp>
 #include <ek/scenex/components/display_2d.hpp>
 #include <ek/scenex/components/name.hpp>
 #include <ek/scenex/components/node_filters.hpp>
-#include "scene_system.hpp"
 #include <ek/scenex/data/sg_factory.hpp>
 
 namespace ek {
@@ -56,7 +57,6 @@ void draw_node(entity e) {
         return;
     }
 
-    auto& drawer = resolve<drawer_t>();
     const auto& config = ecs::get_or_default<node_state_t>(e);
 
     auto& transform = ecs::get_or_default<transform_2d>(e);
@@ -68,9 +68,9 @@ void draw_node(entity e) {
 
     bool scissors = ecs::has<scissors_2d>(e);
     if (scissors) {
-        drawer.state.push_scissors(
+        draw2d::state.push_scissors(
                 ecs::get<scissors_2d>(e).world_rect(
-                        drawer.state.matrix
+                        draw2d::state.matrix
                 )
         );
     }
@@ -101,7 +101,7 @@ void draw_node(entity e) {
     });
 
     if (scissors) {
-        drawer.state.pop_scissors();
+        draw2d::state.pop_scissors();
     }
 
     if (ecs::has<script_holder>(e)) {

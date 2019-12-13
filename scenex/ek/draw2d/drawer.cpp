@@ -6,6 +6,10 @@
 #include <ek/math/matrix_camera.hpp>
 
 namespace ek::draw2d {
+
+batcher_t* batcher = nullptr;
+drawing_state state{};
+
 void drawing_state::finish() {
     // debug checks
     assert(scissor_stack_.empty());
@@ -287,26 +291,13 @@ void drawing_state::set_blend_mode(graphics::blend_mode blending_) {
     check_blending = true;
 }
 
-}
-
-namespace ek {
-
-drawer_t::drawer_t() {
-
-    assert_created_once<drawer_t>();
-
-    glDepthMask(GL_FALSE);
-    glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_STENCIL_TEST);
-    glDisable(GL_DITHER);
-    glDisable(GL_CULL_FACE);
-}
-
-drawer_t::~drawer_t() = default;
-
-void drawer_t::begin(int x, int y, int width, int height) {
-    batcher.begin();
+/*** drawings ***/
+void begin(int x, int y, int width, int height) {
+    if (!batcher) {
+        batcher = new batcher_t;
+    }
+    batcher->stats = {};
+    batcher->begin();
 
     state.texture = state.default_texture.get();
     state.program = state.default_program.get();
@@ -319,17 +310,17 @@ void drawer_t::begin(int x, int y, int width, int height) {
     state.check_mvp = false;
     state.check_texture = false;
 
-    batcher.states.clear();
-    batcher.states.set_program(state.program);
-    batcher.states.set_mvp(state.mvp);
-    batcher.states.set_blend_mode(state.blending);
-    batcher.states.set_texture(state.texture);
+    auto& batcher_states = batcher->states;
+    batcher_states.clear();
+    batcher_states.set_program(state.program);
+    batcher_states.set_mvp(state.mvp);
+    batcher_states.set_blend_mode(state.blending);
+    batcher_states.set_texture(state.texture);
 }
 
-
-void drawer_t::end() {
-    batcher.states.apply();
-    batcher.flush();
+void end() {
+    batcher->states.apply();
+    batcher->flush();
 
     glBindBuffer(GL_ARRAY_BUFFER, (GLuint) 0u);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u);
@@ -339,53 +330,88 @@ void drawer_t::end() {
     state.finish();
 }
 
-void drawer_t::prepare() {
-    vertex_color_multiplier = state.color_multiplier.premultipliedABGR32(state.color_offset.a);
-    // for offset: delete alpha, flip R vs B channels
-    vertex_color_offset = state.color_offset.bgr();
+void* vertex_memory_ptr_ = nullptr;
+uint16_t* index_memory_ptr_ = nullptr;
+
+void write_index(uint16_t index) {
+    *(index_memory_ptr_++) = batcher->get_vertex_index(index);
 }
 
-void drawer_t::commit_states() {
+void commit_state() {
     if (state.check_blending) {
-        batcher.states.set_blend_mode(state.blending);
+        batcher->states.set_blend_mode(state.blending);
         state.check_blending = false;
     }
     if (state.check_texture) {
-        batcher.states.set_texture(state.texture);
+        batcher->states.set_texture(state.texture);
         state.check_texture = false;
     }
     if (state.check_program) {
-        batcher.states.set_program(state.program);
+        batcher->states.set_program(state.program);
         state.check_program = false;
     }
     if (state.check_mvp) {
-        batcher.states.set_mvp(state.mvp);
+        batcher->states.set_mvp(state.mvp);
         state.check_mvp = false;
     }
     if (state.check_scissors) {
         if (state.scissors_enabled) {
-            batcher.states.set_scissors(state.scissors);
+            batcher->states.set_scissors(state.scissors);
         } else {
-            batcher.states.disable_scissors();
+            batcher->states.disable_scissors();
         }
         state.check_scissors = false;
     }
 }
 
-void drawer_t::triangles(int vertex_count, int index_count) {
-    commit_states();
-    batcher.alloc_triangles(vertex_count, index_count);
-    vertex_memory_ptr_ = batcher.vertex_memory_ptr();
-    index_memory_ptr_ = batcher.index_memory_ptr();
+uint32_t get_stat_draw_calls() {
+    return batcher ? batcher->stats.draw_calls : 0;
 }
 
-void drawer_t::quad(float x, float y, float w, float h) {
+uint32_t get_stat_triangles() {
+    return batcher ? batcher->stats.triangles : 0;
+}
+
+void invalidate_force() {
+    commit_state();
+    batcher->invalidate_force();
+}
+
+void draw_mesh(const graphics::buffer_t& vb, const graphics::buffer_t& ib, int32_t indices_count) {
+    batcher->draw_mesh(vb, ib, indices_count);
+}
+
+void flush_batcher() {
+    batcher->flush();
+}
+
+void prepare() {
+    state.vertex_color_multiplier = state.color_multiplier.premultiplied_abgr(state.color_offset.a);
+    // for offset: delete alpha, flip R vs B channels
+    state.vertex_color_offset = state.color_offset.bgr();
+}
+
+//    glDepthMask(GL_FALSE);
+//    glEnable(GL_BLEND);
+//    glDisable(GL_DEPTH_TEST);
+//    glDisable(GL_STENCIL_TEST);
+//    glDisable(GL_DITHER);
+//    glDisable(GL_CULL_FACE);
+
+void triangles(int vertex_count, int index_count) {
+    commit_state();
+    batcher->alloc_triangles(vertex_count, index_count);
+    vertex_memory_ptr_ = batcher->vertex_memory_ptr();
+    index_memory_ptr_ = batcher->index_memory_ptr();
+}
+
+void quad(float x, float y, float w, float h) {
     prepare();
 
     triangles(4, 6);
 
-    const auto cm = vertex_color_multiplier;
-    const auto co = vertex_color_offset;
+    const auto cm = state.vertex_color_multiplier;
+    const auto co = state.vertex_color_offset;
     write_vertex(x, y, 0, 0.0f, cm, co);
     write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
     write_vertex(x + w, y + h, 1.0f, 1.0f, cm, co);
@@ -394,13 +420,13 @@ void drawer_t::quad(float x, float y, float w, float h) {
     write_indices_quad();
 }
 
-void drawer_t::quad(float x, float y, float w, float h, argb32_t color) {
+void quad(float x, float y, float w, float h, argb32_t color) {
     prepare();
 
     triangles(4, 6);
 
-    const auto cm = calc_vertex_color_multiplier(color);
-    const auto co = vertex_color_offset;
+    const auto cm = state.calc_vertex_color_multiplier(color);
+    const auto co = state.vertex_color_offset;
     write_vertex(x, y, 0, 0.0f, cm, co);
     write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
     write_vertex(x + w, y + h, 1.0f, 1.0f, cm, co);
@@ -409,27 +435,27 @@ void drawer_t::quad(float x, float y, float w, float h, argb32_t color) {
     write_indices_quad();
 }
 
-void drawer_t::quad(float x, float y, float w, float h, argb32_t c1, argb32_t c2, argb32_t c3, argb32_t c4) {
+void quad(float x, float y, float w, float h, argb32_t c1, argb32_t c2, argb32_t c3, argb32_t c4) {
     prepare();
 
     triangles(4, 6);
 
-    const auto co = vertex_color_offset;
-    write_vertex(x, y, 0, 0.0f, calc_vertex_color_multiplier(c1), co);
-    write_vertex(x + w, y, 1.0f, 0.0f, calc_vertex_color_multiplier(c2), co);
-    write_vertex(x + w, y + h, 1.0f, 1.0f, calc_vertex_color_multiplier(c3), co);
-    write_vertex(x, y + h, 0.0f, 1.0f, calc_vertex_color_multiplier(c4), co);
+    const auto co = state.vertex_color_offset;
+    write_vertex(x, y, 0, 0.0f, state.calc_vertex_color_multiplier(c1), co);
+    write_vertex(x + w, y, 1.0f, 0.0f, state.calc_vertex_color_multiplier(c2), co);
+    write_vertex(x + w, y + h, 1.0f, 1.0f, state.calc_vertex_color_multiplier(c3), co);
+    write_vertex(x, y + h, 0.0f, 1.0f, state.calc_vertex_color_multiplier(c4), co);
 
     write_indices_quad();
 }
 
-void drawer_t::quad_rotated(float x, float y, float w, float h) {
+void quad_rotated(float x, float y, float w, float h) {
     prepare();
 
     triangles(4, 6);
 
-    const auto cm = vertex_color_multiplier;
-    const auto co = vertex_color_offset;
+    const auto cm = state.vertex_color_multiplier;
+    const auto co = state.vertex_color_offset;
     write_vertex(x, y, 0, 1, cm, co);
     write_vertex(x + w, y, 0, 0, cm, co);
     write_vertex(x + w, y + h, 1, 0, cm, co);
@@ -438,7 +464,7 @@ void drawer_t::quad_rotated(float x, float y, float w, float h) {
     write_indices_quad();
 }
 
-void drawer_t::fill_circle(const circle_f& circle, argb32_t inner_color, argb32_t outer_color, int segments) {
+void fill_circle(const circle_f& circle, argb32_t inner_color, argb32_t outer_color, int segments) {
     prepare();
     triangles(1 + segments, 3 * segments);
 
@@ -446,14 +472,14 @@ void drawer_t::fill_circle(const circle_f& circle, argb32_t inner_color, argb32_
     const float y = circle.center.y;
     const float r = circle.radius;
 
-    auto inner_cm = calc_vertex_color_multiplier(inner_color);
-    auto outer_cm = calc_vertex_color_multiplier(outer_color);
-    write_vertex(x, y, 0.0f, 0.0f, inner_cm, vertex_color_offset);
+    auto inner_cm = state.calc_vertex_color_multiplier(inner_color);
+    auto outer_cm = state.calc_vertex_color_multiplier(outer_color);
+    write_vertex(x, y, 0.0f, 0.0f, inner_cm, state.vertex_color_offset);
 
     const float da = math::pi2 / segments;
     float a = 0.0f;
     while (a < math::pi2) {
-        write_vertex(x + r * cosf(a), y + r * sinf(a), 1, 1, outer_cm, vertex_color_offset);
+        write_vertex(x + r * cosf(a), y + r * sinf(a), 1, 1, outer_cm, state.vertex_color_offset);
         a += da;
     }
 
@@ -468,7 +494,7 @@ void drawer_t::fill_circle(const circle_f& circle, argb32_t inner_color, argb32_
     write_index(1u);
 }
 
-void drawer_t::write_vertex(float x, float y, float u, float v, premultiplied_abgr32_t cm, abgr32_t co) {
+void write_vertex(float x, float y, float u, float v, premultiplied_abgr32_t cm, abgr32_t co) {
     auto* ptr = static_cast<graphics::vertex_2d*>(vertex_memory_ptr_);
 
     // could be cached before draw2d
@@ -486,7 +512,7 @@ void drawer_t::write_vertex(float x, float y, float u, float v, premultiplied_ab
     vertex_memory_ptr_ = (uint8_t*) ptr;
 }
 
-void drawer_t::write_raw_vertex(const float2& pos, const float2& tex_coord, premultiplied_abgr32_t cm, abgr32_t co) {
+void write_raw_vertex(const float2& pos, const float2& tex_coord, premultiplied_abgr32_t cm, abgr32_t co) {
     auto* ptr = static_cast<graphics::vertex_2d*>(vertex_memory_ptr_);
     ptr->position = pos;
     ptr->uv = tex_coord;
@@ -496,12 +522,12 @@ void drawer_t::write_raw_vertex(const float2& pos, const float2& tex_coord, prem
     vertex_memory_ptr_ = (uint8_t*) ptr;
 }
 
-void drawer_t::write_indices_quad(const uint16_t i0,
-                                  const uint16_t i1,
-                                  const uint16_t i2,
-                                  const uint16_t i3,
-                                  const uint16_t base_vertex) {
-    const uint16_t index = batcher.get_vertex_index(base_vertex);
+void write_indices_quad(const uint16_t i0,
+                        const uint16_t i1,
+                        const uint16_t i2,
+                        const uint16_t i3,
+                        const uint16_t base_vertex) {
+    const uint16_t index = batcher->get_vertex_index(base_vertex);
     *(index_memory_ptr_++) = index + i0;
     *(index_memory_ptr_++) = index + i1;
     *(index_memory_ptr_++) = index + i2;
@@ -510,10 +536,10 @@ void drawer_t::write_indices_quad(const uint16_t i0,
     *(index_memory_ptr_++) = index + i0;
 }
 
-void drawer_t::write_indices(const uint16_t* source,
-                             uint16_t count,
-                             uint16_t base_vertex) {
-    const uint16_t index = batcher.get_vertex_index(base_vertex);
+void write_indices(const uint16_t* source,
+                   uint16_t count,
+                   uint16_t base_vertex) {
+    const uint16_t index = batcher->get_vertex_index(base_vertex);
     for (int i = 0; i < count; ++i) {
         *index_memory_ptr_ = (*source) + index;
         ++index_memory_ptr_;
@@ -523,7 +549,7 @@ void drawer_t::write_indices(const uint16_t* source,
 
 /////
 
-void drawer_t::draw_indexed_triangles(
+void draw_indexed_triangles(
         const std::vector<float2>& positions, const std::vector<argb32_t>& colors,
         const std::vector<uint16_t>& indices, const float2& offset, const float2& scale) {
 
@@ -539,15 +565,15 @@ void drawer_t::draw_indexed_triangles(
                 local_position.y,
                 loc_uv.x,
                 loc_uv.y,
-                calc_vertex_color_multiplier(colors[i]),
-                vertex_color_offset
+                state.calc_vertex_color_multiplier(colors[i]),
+                state.vertex_color_offset
         );
     }
     write_indices(indices.data(), indices.size());
 }
 
-void drawer_t::line(const float2& start, const float2& end, argb32_t color1, argb32_t color2, float lineWidth1,
-                    float lineWidth2) {
+void line(const float2& start, const float2& end, argb32_t color1, argb32_t color2, float lineWidth1,
+          float lineWidth2) {
     float angle = atan2f(end.y - start.y, end.x - start.x);
     float sn = 0.5f * sinf(angle);
     float cs = 0.5f * cosf(angle);
@@ -559,9 +585,9 @@ void drawer_t::line(const float2& start, const float2& end, argb32_t color1, arg
     prepare();
     triangles(4, 6);
 
-    auto m1 = calc_vertex_color_multiplier(color1);
-    auto m2 = calc_vertex_color_multiplier(color2);
-    auto co = vertex_color_offset;
+    auto m1 = state.calc_vertex_color_multiplier(color1);
+    auto m2 = state.calc_vertex_color_multiplier(color2);
+    auto co = state.vertex_color_offset;
 
     write_vertex(start.x + t2sina1, start.y - t2cosa1, 0, 0, m1, co);
     write_vertex(end.x + t2sina2, end.y - t2cosa2, 1, 0, m2, co);
@@ -571,24 +597,29 @@ void drawer_t::line(const float2& start, const float2& end, argb32_t color1, arg
     write_indices_quad();
 }
 
-void drawer_t::line(const float2& start, const float2& end, argb32_t color = 0xFFFFFFFF_argb, float lineWidth = 1.0f) {
+void line(const float2& start,
+          const float2& end,
+          argb32_t color = 0xFFFFFFFF_argb,
+          float lineWidth = 1.0f) {
     line(start, end, color, color, lineWidth, lineWidth);
 }
 
-void drawer_t::line(const float2& start, const float2& end) {
+void line(const float2& start, const float2& end) {
     line(start, end, 0xFFFFFFFF_argb, 1.0f);
 }
 
 
-void drawer_t::line_arc(float x, float y, float r, float angle_from, float angle_to, float line_width, int segments,
-                        argb32_t color_inner, argb32_t color_outer) {
+void line_arc(float x, float y, float r,
+              float angle_from, float angle_to,
+              float line_width, int segments,
+              argb32_t color_inner, argb32_t color_outer) {
     auto pi2 = static_cast<float>(math::pi2);
     float da = pi2 / float(segments);
     float a0 = angle_from;
     prepare();
-    auto m1 = calc_vertex_color_multiplier(color_inner);
-    auto m2 = calc_vertex_color_multiplier(color_outer);
-    auto co = vertex_color_offset;
+    auto m1 = state.calc_vertex_color_multiplier(color_inner);
+    auto m2 = state.calc_vertex_color_multiplier(color_outer);
+    auto co = state.vertex_color_offset;
     auto hw = line_width / 2.0f;
     auto r0 = r - hw;
     auto r1 = r + hw;

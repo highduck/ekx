@@ -3,7 +3,6 @@
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/math/easing.hpp>
-#include <ek/util/locator.hpp>
 
 namespace ek {
 
@@ -35,25 +34,26 @@ void trail_script::draw() {
     const auto columns = static_cast<int>(nodes_.size());
     const auto quads = columns - 1;
     if (quads > 0) {
-        auto& drawer = resolve<drawer_t>();
-        drawer.state.set_empty_texture();
-        drawer.prepare();
-        drawer.triangles(columns * 2, quads * 6);
+        draw2d::state.set_empty_texture();
+        draw2d::prepare();
+        draw2d::triangles(columns * 2, quads * 6);
 
         int v = 0;
         int node_idx = 0;
 
         for (int i = 0; i < columns; ++i) {
             const auto e0 = nodes_[node_idx].energy;
-            const auto cm0 = drawer.calc_vertex_color_multiplier(argb32_t{1.0f, 1.0f, 1.0f, e0});
-            const auto co = drawer.vertex_color_offset;
+            const auto cm0 = draw2d::state.calc_vertex_color_multiplier(
+                    argb32_t{1.0f, 1.0f, 1.0f, e0}
+            );
+            const auto co = draw2d::state.vertex_color_offset;
             const auto v0 = vertex_list_[v];
             const auto v1 = vertex_list_[v + 1];
-            drawer.write_vertex(v0.x, v0.y, 0.0f, 0.0f, cm0, co);
-            drawer.write_vertex(v1.x, v1.y, 0.0f, 1.0f, cm0, co);
+            draw2d::write_vertex(v0.x, v0.y, 0.0f, 0.0f, cm0, co);
+            draw2d::write_vertex(v1.x, v1.y, 0.0f, 1.0f, cm0, co);
 
             if (i < quads) {
-                drawer.write_indices_quad(0, 2, 3, 1, v);
+                draw2d::write_indices_quad(0, 2, 3, 1, v);
             }
 
             v += 2;

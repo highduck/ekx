@@ -1,5 +1,4 @@
 #include "display_2d.hpp"
-#include <ek/util/locator.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/2d/sprite.hpp>
 #include <ek/scenex/2d/font.hpp>
@@ -10,9 +9,8 @@ namespace ek {
 drawable_2d_base::~drawable_2d_base() = default;
 
 void drawable_quad::draw() {
-    auto& drawer = resolve<drawer_t>();
-    drawer.state.set_empty_texture();
-    drawer.quad(rect.x, rect.y, rect.width, rect.height, colors[0], colors[1], colors[2], colors[3]);
+    draw2d::state.set_empty_texture();
+    draw2d::quad(rect.x, rect.y, rect.width, rect.height, colors[0], colors[1], colors[2], colors[3]);
 }
 
 rect_f drawable_quad::get_bounds() const {
@@ -46,12 +44,13 @@ drawable_sprite::drawable_sprite(std::string sprite_id, rect_f a_scale_grid)
 }
 
 void drawable_sprite::draw() {
-    auto& drawer = resolve<drawer_t>();
     asset_t<sprite_t> spr{src};
     if (spr) {
         if (scale_grid_mode) {
 //				scale.set(5, 5);
-            drawer.state.save_matrix().scale(1.0f / scale.x, 1.0f / scale.y);
+            draw2d::state
+                    .save_matrix()
+                    .scale(1.0f / scale.x, 1.0f / scale.y);
             // TODO: rotated
             rect_f target{manual_target};
             if (target.empty()) {
@@ -62,7 +61,7 @@ void drawable_sprite::draw() {
 //            drawer.set_empty_texture();
 //            drawer.quad(target.x, target.y, target.width, target.height, 0x77FF0000_argb);
 //            drawer.quad(scale_grid.x, scale_grid.y, scale_grid.width, scale_grid.height, 0x77FFFFFF_argb);
-            drawer.state.restore_matrix();
+            draw2d::state.restore_matrix();
         } else {
 //            drawer.set_empty_texture();
 //            drawer.quad(spr->rect, 0x77FFFFFF_argb);
@@ -187,12 +186,13 @@ void drawable_arc::draw() {
     asset_t<sprite_t> f{sprite};
     if (f && f->texture) {
         auto& tex = f->tex;
-        auto& drawer = resolve<drawer_t>();
-        drawer.state.set_texture(f->texture.get())
-                .set_texture_coords(tex.x + tex.width * 0.5f, tex.y, 0.0f, tex.height);
+        draw2d::state.set_texture_region(
+                f->texture.get(),
+                {tex.center_x(), tex.y, 0.0f, tex.height}
+        );
 
         float off = -math::pi * 0.5f;
-        drawer.line_arc(0, 0, radius, 0 + off, angle + off, line_width, segments, color_inner, color_outer);
+        draw2d::line_arc(0, 0, radius, 0 + off, angle + off, line_width, segments, color_inner, color_outer);
     }
 }
 

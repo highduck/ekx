@@ -3,7 +3,6 @@
 #include "transform_3d.hpp"
 #include "light_3d.hpp"
 
-#include <ek/util/locator.hpp>
 #include <ek/util/timer.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app/app.hpp>
@@ -28,7 +27,6 @@ static material_3d default_material_{};
 static render_target_t* shadow_map_ = nullptr;
 
 void render_objects_to_shadow_map(const mat4f& proj, const mat4f& view) {
-    auto& drawer = resolve<drawer_t>();
     asset_t<program_t> program3d{"3d_shadow_map"};
 
     for (auto e: ecs::view<mesh_renderer_component, transform_3d>()) {
@@ -37,9 +35,9 @@ void render_objects_to_shadow_map(const mat4f& proj, const mat4f& view) {
             auto* mesh = asset_t<static_mesh_t>{filter.mesh}.get_or(filter.mesh_ptr);
             if (mesh) {
                 mat4f model{ecs::get<transform_3d>(e).world};
-                drawer.batcher.states.set_mvp(proj * view * model);
-                drawer.batcher.temp_begin_mesh();
-                drawer.batcher.temp_draw_static_mesh(mesh->vb, mesh->ib, mesh->indices_count);
+                draw2d::state.set_mvp(proj * view * model);
+                draw2d::invalidate_force();
+                draw2d::draw_mesh(mesh->vb, mesh->ib, mesh->indices_count);
             }
         }
     }
@@ -83,8 +81,7 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
     if (!program3d) {
         return;
     }
-    auto& drawer = resolve<drawer_t>();
-    drawer.state.save_program()
+    draw2d::state.save_program()
             .set_program(program3d.get());
 
     glCullFace(GL_FRONT);
@@ -126,7 +123,7 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
     render_objects_to_shadow_map(depth_projection_, depth_view_);
 
     shadow_map_->unset();
-    drawer.state.restore_program();
+    draw2d::state.restore_program();
     graphics::viewport();
 }
 
@@ -136,14 +133,14 @@ bool begin_3d() {
         return false;
     }
 
-    auto& drawer = resolve<drawer_t>();
-    drawer.state
+    draw2d::state
             .save_program()
             .save_texture()
             .save_mvp()
             .set_empty_texture()
             .set_program(program3d.get());
-    drawer.commit_states();
+
+    draw2d::commit_state();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -164,10 +161,9 @@ void end_3d() {
     glDepthMask(GL_FALSE);
     gl::check_error();
 
-    auto& drawer = resolve<drawer_t>();
-    drawer.state.restore_program();
-    drawer.state.restore_texture();
-    drawer.state.restore_mvp();
+    draw2d::state.restore_program();
+    draw2d::state.restore_texture();
+    draw2d::state.restore_mvp();
 }
 
 void invalidate_matrix_3d() {
@@ -191,7 +187,6 @@ void invalidate_matrix_3d() {
 }
 
 void render_3d_objects(const mat4f& proj, const mat4f& view) {
-    auto& drawer = resolve<drawer_t>();
     asset_t<program_t> program3d{"3d"};
 
 //    mat4f pv = proj * view;
@@ -200,8 +195,9 @@ void render_3d_objects(const mat4f& proj, const mat4f& view) {
         auto* mesh = asset_t<static_mesh_t>{filter.mesh}.get_or(filter.mesh_ptr);
         if (mesh) {
             mat4f model{ecs::get<transform_3d>(e).world};
-            drawer.batcher.states.set_mvp(proj * view * model);
-            drawer.batcher.temp_begin_mesh();
+            draw2d::state.set_mvp(proj * view * model);
+            draw2d::invalidate_force();
+
             program3d->set_uniform(program_uniforms::model_matrix, model);
             program3d->set_uniform(program_uniforms::normal_matrix, transpose(inverse(mat3f{model})));
 
@@ -220,7 +216,7 @@ void render_3d_objects(const mat4f& proj, const mat4f& view) {
             program3d->set_uniform("u_material.emission", material.emission);
 
 //            program3d->set_uniform(program_uniforms::mvp, proj * view * model);
-            drawer.batcher.temp_draw_static_mesh(mesh->vb, mesh->ib, mesh->indices_count);
+            draw2d::draw_mesh(mesh->vb, mesh->ib, mesh->indices_count);
         }
     }
 
@@ -313,10 +309,8 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     clear_camera(camera_data);
     mat4f mvp = proj * view * model;
 
-    auto& drawer = resolve<drawer_t>();
-    drawer.batcher.states.set_mvp(mvp);
-
-    drawer.batcher.temp_begin_mesh();
+    draw2d::state.set_mvp(mvp);
+    draw2d::invalidate_force();
 
     asset_t<program_t> program3d{"3d"};
     program3d->set_uniform(program_uniforms::view_position, extract_translation(camera_transform.world));
@@ -380,25 +374,26 @@ void render_skybox(const std::string& id, const mat4f& view, const mat4f& projec
         view3.m32 = 0;
 
         const auto mvp = projection * view3 * model;
-        auto& drawer = resolve<drawer_t>();
-        drawer.state
+
+        draw2d::state
                 .save_texture()
                 .save_program()
                 .save_mvp()
                 .set_texture(texture.get())
                 .set_program(program.get())
                 .set_mvp(mvp);
-        drawer.commit_states();
-        drawer.batcher.temp_begin_mesh();
+        draw2d::commit_state();
+        draw2d::invalidate_force();
+
         program->set_uniform(program_uniforms::mvp, projection * view3 * model);
 
         glDepthMask(GL_FALSE);
         glCullFace(GL_FRONT);
-        drawer.batcher.temp_draw_static_mesh(mesh->vb, mesh->ib, mesh->indices_count);
+        draw2d::draw_mesh(mesh->vb, mesh->ib, mesh->indices_count);
         glDepthMask(GL_TRUE);
         glCullFace(GL_BACK);
 
-        drawer.state
+        draw2d::state
                 .restore_texture()
                 .restore_program()
                 .restore_mvp();

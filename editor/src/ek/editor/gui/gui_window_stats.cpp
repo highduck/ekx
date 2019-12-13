@@ -9,13 +9,13 @@ namespace ek {
 
 void gui_draw_stats() {
     auto& app = resolve<basic_application>();
-    auto& drawer = ek::resolve<ek::drawer_t>();
 
-    drawer.batcher.flush();
+    draw2d::flush_batcher();
+
     ImGui::Begin("stats");
     //ImGui::LabelText("fps", "%f", app.stats_.fps());
-    ImGui::LabelText("dc", "%u", drawer.batcher.stats.draw_calls);
-    ImGui::LabelText("tris", "%u", drawer.batcher.stats.triangles);
+    ImGui::LabelText("dc", "%u", draw2d::get_stat_draw_calls());
+    ImGui::LabelText("tris", "%u", draw2d::get_stat_triangles());
 
     ImGui::End();
 }

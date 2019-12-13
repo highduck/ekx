@@ -95,7 +95,7 @@ void batcher_t::flush() {
     }
 }
 
-void batcher_t::temp_begin_mesh() {
+void batcher_t::invalidate_force() {
     if (states.changed || true) {
         flush();
         states.invalidate();
@@ -106,9 +106,9 @@ void batcher_t::temp_begin_mesh() {
     states.apply();
 }
 
-void batcher_t::temp_draw_static_mesh(const graphics::buffer_t& vb,
-                                      const graphics::buffer_t& ib,
-                                      int32_t indices_count) {
+void batcher_t::draw_mesh(const graphics::buffer_t& vb,
+                          const graphics::buffer_t& ib,
+                          int32_t indices_count) {
     vb.bind();
     ib.bind();
 

@@ -153,7 +153,7 @@ struct argb32_t final {
         af(alpha);
     }
 
-    inline premultiplied_abgr32_t premultipliedABGR32(uint8_t additive) const {
+    inline premultiplied_abgr32_t premultiplied_abgr(uint8_t additive) const {
         return premultiplied_abgr32_t(static_cast<uint32_t>(
                                               ((a * (0xFFu - additive) * 258u) & 0x00FF0000u) << 8u |
                                               ((a * b * 258u) & 0x00FF0000u) |

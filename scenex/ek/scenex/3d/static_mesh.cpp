@@ -13,7 +13,7 @@ mesh_data_t create_cube(const float3& position, const float3& size, argb32_t col
 
     float3 n;
     const float u = 0.5f;
-    const auto color1 = color.premultipliedABGR32(0);
+    const auto color1 = color.premultiplied_abgr(0);
     const abgr32_t color2 = 0x0;
 
     // Top +Z
@@ -82,7 +82,7 @@ mesh_data_t create_plane(const float3& position, const float2& size, argb32_t co
 
     float3 n;
     const float u = 0.5f;
-    const auto color1 = color.premultipliedABGR32(0);
+    const auto color1 = color.premultiplied_abgr(0);
     const abgr32_t color2 = 0x0;
 
     n = {0, 0, 1};

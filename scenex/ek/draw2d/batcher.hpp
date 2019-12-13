@@ -30,9 +30,10 @@ public:
 
     void draw();
 
-    void temp_begin_mesh();
+    // force to set current state to device immediately
+    void invalidate_force();
 
-    void temp_draw_static_mesh(const graphics::buffer_t& vb, const graphics::buffer_t& ib, int32_t indices_count);
+    void draw_mesh(const graphics::buffer_t& vb, const graphics::buffer_t& ib, int32_t indices_count);
 
     void flush();
 
