@@ -6,21 +6,21 @@
 namespace ek {
 
 void begin_transform(const transform_2d& transform) {
-    if (transform.manualMatrix != nullptr) {
-        transform.matrix = *(transform.manualMatrix);
+    if (transform.user_matrix != nullptr) {
+        transform.matrix = *(transform.user_matrix);
     } else {
         transform.matrix.set(transform.scale, transform.skew);
     }
     auto& drawer = resolve<drawer_t>();
-    drawer.save_transform();
-    drawer.combine_color(transform.colorMultiplier, transform.colorOffset)
+    drawer.state.save_transform();
+    drawer.state.combine_color(transform.color_multiplier, transform.color_offset)
             .translate(transform.origin)
             .concat_matrix(transform.matrix)
             .translate(-transform.origin);
 }
 
 void end_transform() {
-    resolve<drawer_t>().restore_transform();
+    resolve<drawer_t>().state.restore_transform();
 }
 
 }

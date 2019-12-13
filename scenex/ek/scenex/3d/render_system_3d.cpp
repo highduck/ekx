@@ -84,8 +84,8 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
         return;
     }
     auto& drawer = resolve<drawer_t>();
-    drawer.save_program();
-    drawer.batcher.states.set_program(program3d.get());
+    drawer.state.save_program()
+            .set_program(program3d.get());
 
     glCullFace(GL_FRONT);
     gl::check_error();
@@ -126,7 +126,7 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
     render_objects_to_shadow_map(depth_projection_, depth_view_);
 
     shadow_map_->unset();
-    drawer.restore_program();
+    drawer.state.restore_program();
     graphics::viewport();
 }
 
@@ -137,11 +137,13 @@ bool begin_3d() {
     }
 
     auto& drawer = resolve<drawer_t>();
-    drawer.save_projection_matrix();
-    drawer.save_program();
-    drawer.save_texture();
-    drawer.set_empty_texture();
-    drawer.batcher.states.set_program(program3d.get());
+    drawer.state
+            .save_program()
+            .save_texture()
+            .save_mvp()
+            .set_empty_texture()
+            .set_program(program3d.get());
+    drawer.commit_states();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -163,9 +165,9 @@ void end_3d() {
     gl::check_error();
 
     auto& drawer = resolve<drawer_t>();
-    drawer.restore_program();
-    drawer.restore_texture();
-    drawer.restore_projection_matrix();
+    drawer.state.restore_program();
+    drawer.state.restore_texture();
+    drawer.state.restore_mvp();
 }
 
 void invalidate_matrix_3d() {
@@ -368,11 +370,6 @@ void render_skybox(const std::string& id, const mat4f& view, const mat4f& projec
     if (texture && program && mesh) {
         mat4f model{};
 
-        auto& drawer = resolve<drawer_t>();
-        drawer.save_texture();
-        drawer.save_program();
-        drawer.set_texture(texture.get());
-        drawer.batcher.states.set_program(program.get());
         mat4f view3 = view;
         view3.m03 = 0;
         view3.m13 = 0;
@@ -381,9 +378,19 @@ void render_skybox(const std::string& id, const mat4f& view, const mat4f& projec
         view3.m30 = 0;
         view3.m31 = 0;
         view3.m32 = 0;
+
+        const auto mvp = projection * view3 * model;
+        auto& drawer = resolve<drawer_t>();
+        drawer.state
+                .save_texture()
+                .save_program()
+                .save_mvp()
+                .set_texture(texture.get())
+                .set_program(program.get())
+                .set_mvp(mvp);
+        drawer.commit_states();
         drawer.batcher.temp_begin_mesh();
         program->set_uniform(program_uniforms::mvp, projection * view3 * model);
-        drawer.batcher.states.set_mvp(projection * view3 * model);
 
         glDepthMask(GL_FALSE);
         glCullFace(GL_FRONT);
@@ -391,8 +398,10 @@ void render_skybox(const std::string& id, const mat4f& view, const mat4f& projec
         glDepthMask(GL_TRUE);
         glCullFace(GL_BACK);
 
-        drawer.restore_texture();
-        drawer.restore_program();
+        drawer.state
+                .restore_texture()
+                .restore_program()
+                .restore_mvp();
     }
 }
 

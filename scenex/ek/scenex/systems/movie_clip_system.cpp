@@ -88,18 +88,18 @@ void apply_frame(entity e, movie_t& mov) {
                 position = lerp(k1.position, k2.position, x_position);
                 transform.skew = lerp(k1.skew, k2.skew, x_rotation);
                 transform.scale = lerp(k1.scale, k2.scale, x_scale);
-                transform.colorMultiplier = argb32_t{
+                transform.color_multiplier = argb32_t{
                         lerp(k1.color.multiplier, k2.color.multiplier, x_color)
                 };
-                transform.colorOffset = argb32_t{
+                transform.color_offset = argb32_t{
                         lerp(k1.color.offset, k2.color.offset, x_color)
                 };
             } else {
                 position = k1.position;
                 transform.skew = k1.skew;
                 transform.scale = k1.scale;
-                transform.colorMultiplier = argb32_t{k1.color.multiplier};
-                transform.colorOffset = argb32_t{k1.color.offset};
+                transform.color_multiplier = argb32_t{k1.color.multiplier};
+                transform.color_offset = argb32_t{k1.color.offset};
             }
             auto& m = transform.matrix;
             m.set(transform.scale, transform.skew);

@@ -9,7 +9,144 @@
 #include <ek/util/assets.hpp>
 #include <ek/math/circle.hpp>
 
+namespace ek::draw2d {
+
+struct drawing_state {
+
+    asset_t<graphics::program_t> default_program{"2d"};
+    asset_t<graphics::texture_t> default_texture{"empty"};
+
+    rect_f canvas_rect{};
+    const graphics::texture_t* texture{};
+    const graphics::program_t* program{};
+    matrix_2d matrix{};
+    mat4f mvp{};
+    rect_f scissors{};
+    bool scissors_enabled = false;
+    rect_f uv{0.0f, 0.0f, 1.0f, 1.0f};
+    argb32_t color_multiplier{0xFFFFFFFF};
+    argb32_t color_offset{0x0};
+    graphics::blend_mode blending = graphics::blend_mode::premultiplied;
+
+    std::vector<matrix_2d> matrix_stack_;
+    std::vector<argb32_t> multipliers_;
+    std::vector<argb32_t> offsets_;
+    std::vector<rect_f> scissor_stack_;
+    std::vector<const graphics::program_t*> program_stack_;
+    std::vector<const graphics::texture_t*> texture_stack_;
+    std::vector<graphics::blend_mode> blend_mode_stack_;
+    std::vector<mat4f> mvp_stack_;
+    std::vector<rect_f> tex_coords_stack_;
+    std::vector<rect_f> canvas_stack_;
+
+    // TODO: consumable states check to bit flags
+    bool check_scissors = false;
+    bool check_blending = false;
+    bool check_mvp = false;
+    bool check_program = false;
+    bool check_texture = false;
+
+    /** Scissors **/
+
+    void push_scissors(const rect_f& scissors);
+
+    void pop_scissors();
+
+    /** Matrix Transform **/
+
+    drawing_state& save_matrix();
+
+    drawing_state& save_transform();
+
+    drawing_state& restore_transform();
+
+    drawing_state& transform_pivot(float2 position, float rotation, float2 scale, float2 pivot) {
+        matrix.translate(position.x + pivot.x, position.y + pivot.y)
+                .scale(scale.x, scale.y)
+                .rotate(rotation)
+                .translate(-pivot.x, -pivot.y);
+        return *this;
+    }
+
+    drawing_state& translate(float tx, float ty);
+
+    drawing_state& translate(const float2& v);
+
+    drawing_state& scale(float sx, float sy);
+
+    drawing_state& scale(const float2& v);
+
+    drawing_state& rotate(float radians);
+
+    drawing_state& concat_matrix(const matrix_2d& r);
+
+    drawing_state& restore_matrix();
+
+    /** Color Transform **/
+
+    drawing_state& save_color();
+
+    drawing_state& restore_color();
+
+    drawing_state& multiply_alpha(float alpha);
+
+    drawing_state& multiply_color(argb32_t multiplier);
+
+    drawing_state& combine_color(argb32_t multiplier, argb32_t offset);
+
+    drawing_state& offset_color(argb32_t offset);
+
+    /** STATES **/
+
+    drawing_state& save_canvas_rect();
+
+    drawing_state& restore_canvas_rect();
+
+    drawing_state& set_mvp(const mat4f& m);
+
+    drawing_state& save_mvp();
+
+    drawing_state& restore_mvp();
+
+    drawing_state& save_texture_coords();
+
+    drawing_state& set_texture_coords(float u0, float v0, float du, float dv);
+
+    drawing_state& set_texture_coords(const rect_f& uv_rect);
+
+    drawing_state& restore_texture_coords();
+
+    drawing_state& save_texture();
+
+    drawing_state& set_empty_texture();
+
+    drawing_state& set_texture(const graphics::texture_t* texture);
+
+    drawing_state& set_texture_region(const graphics::texture_t* texture = nullptr,
+                                      const rect_f& region = rect_f::zero_one);
+
+    drawing_state& restore_texture();
+
+    drawing_state& set_program(const graphics::program_t* program_);
+
+    drawing_state& save_program();
+
+    drawing_state& restore_program();
+
+    drawing_state& save_blend_mode();
+
+    drawing_state& restore_blend_mode();
+
+    void set_blend_mode(graphics::blend_mode blend_mode);
+
+    // do extra checking and clear states stack
+    void finish();
+};
+
+}
+
 namespace ek {
+
 
 class drawer_t : private disable_copy_assign_t {
 public:
@@ -19,10 +156,7 @@ public:
 
     batcher_t batcher{};
 
-    matrix_2d matrix;
-    rect_f uv{0.0f, 0.0f, 1.0f, 1.0f};
-    argb32_t color_multiplier{0xFFFFFFFF};
-    argb32_t color_offset{0x0};
+    draw2d::drawing_state state{};
 
     premultiplied_abgr32_t vertex_color_multiplier{0xFFFFFFFF};
     abgr32_t vertex_color_offset{0x0};
@@ -89,119 +223,14 @@ public:
                   float line_width, int segments,
                   argb32_t color_inner, argb32_t color_outer);
 
-    /** Scissors **/
-
-    void begin_scissors(const rect_f& scissors);
-
-    void end_scissors();
-
-    /** Matrix Transform **/
-
-    drawer_t& save_matrix();
-
-    drawer_t& save_transform();
-
-    drawer_t& restore_transform();
-
-    drawer_t& transform_pivot(float2 position, float rotation, float2 scale, float2 pivot) {
-        matrix.translate(position.x + pivot.x, position.y + pivot.y)
-                .scale(scale.x, scale.y)
-                .rotate(rotation)
-                .translate(-pivot.x, -pivot.y);
-        return *this;
-    }
-
-    drawer_t& translate(float tx, float ty);
-
-    drawer_t& translate(const float2& v);
-
-    drawer_t& scale(float sx, float sy);
-
-    drawer_t& scale(const float2& v);
-
-    drawer_t& rotate(float radians);
-
-    drawer_t& concat_matrix(const matrix_2d& r);
-
-    drawer_t& restore_matrix();
-
-    /** Color Transform **/
-
-    drawer_t& save_color();
-
-    drawer_t& restore_color();
-
-    drawer_t& multiply_alpha(float alpha);
-
-    drawer_t& multiply_color(argb32_t multiplier);
-
-    drawer_t& combine_color(argb32_t multiplier, argb32_t offset);
-
-    drawer_t& offset_color(argb32_t offset);
-
     inline premultiplied_abgr32_t calc_vertex_color_multiplier(argb32_t multiplier) {
-        return (color_multiplier * multiplier).premultipliedABGR32(color_offset.a);
+        return (state.color_multiplier * multiplier).premultipliedABGR32(state.color_offset.a);
     }
 
-    /** STATES **/
-
-    drawer_t& save_canvas_rect();
-
-    drawer_t& restore_canvas_rect();
-
-    drawer_t& save_projection_matrix();
-
-    drawer_t& restore_projection_matrix();
-
-    drawer_t& save_texture_coords();
-
-    drawer_t& set_texture_coords(float u0, float v0, float du, float dv);
-
-    drawer_t& set_texture_coords(const rect_f& uv_rect);
-
-    drawer_t& restore_texture_coords();
-
-    drawer_t& save_texture();
-
-    drawer_t& set_empty_texture();
-
-    drawer_t& set_texture(const graphics::texture_t* texture);
-
-    drawer_t& set_texture_region(const graphics::texture_t* texture = nullptr, const rect_f& region = rect_f::zero_one);
-
-    drawer_t& restore_texture();
-
-    drawer_t& save_program();
-
-    drawer_t& restore_program();
-
-    drawer_t& save_blend_mode();
-
-    drawer_t& restore_blend_mode();
-
-    void set_blend_mode(graphics::blend_mode blend_mode);
-
-    inline const rect_f& canvas_rect() const {
-        return canvas_rect_;
-    }
+    void commit_states();
 
 private:
-    asset_t<graphics::program_t> default_program_{"2d"};
-    asset_t<graphics::texture_t> default_texture_{"empty"};
 
-    rect_f canvas_rect_{};
-    const graphics::texture_t* texture_{};
-
-    stack_type<matrix_2d> matrix_stack_;
-    stack_type<argb32_t> multipliers_;
-    stack_type<argb32_t> offsets_;
-    stack_type<rect_f> scissor_stack_;
-    stack_type<const graphics::program_t*> program_stack_;
-    stack_type<const graphics::texture_t*> texture_stack_;
-    stack_type<graphics::blend_mode> blend_mode_stack_;
-    stack_type<mat4f> mvp_stack_;
-    stack_type<rect_f> tex_coords_stack_;
-    stack_type<rect_f> canvas_stack_;
 
     void* vertex_memory_ptr_ = nullptr;
     uint16_t* index_memory_ptr_ = nullptr;

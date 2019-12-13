@@ -36,7 +36,8 @@ void font_t::draw(const std::string& text,
     float2 start = position;
 
     auto& drawer = resolve<drawer_t>();
-    drawer.save_color().multiply_color(color);
+    drawer.state.save_color()
+            .multiply_color(color);
     // var vertexColor = drawer.calcVertexColorMultiplier(color);
 
     int bitmap_size_index = static_cast<int>(bitmap_size_table.size()) - 1;
@@ -92,7 +93,7 @@ void font_t::draw(const std::string& text,
 
         current.x += sc * gdata->advance_width;
     }
-    drawer.restore_color();
+    drawer.state.restore_color();
 }
 
 float font_t::get_text_segment_width(const std::string& text, float size, int begin, int end) const {

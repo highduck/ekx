@@ -11,7 +11,7 @@ drawable_2d_base::~drawable_2d_base() = default;
 
 void drawable_quad::draw() {
     auto& drawer = resolve<drawer_t>();
-    drawer.set_empty_texture();
+    drawer.state.set_empty_texture();
     drawer.quad(rect.x, rect.y, rect.width, rect.height, colors[0], colors[1], colors[2], colors[3]);
 }
 
@@ -51,10 +51,7 @@ void drawable_sprite::draw() {
     if (spr) {
         if (scale_grid_mode) {
 //				scale.set(5, 5);
-            drawer.save_matrix();
-            float sx = scale.x;
-            float sy = scale.y;
-            drawer.scale(1 / sx, 1 / sy);
+            drawer.state.save_matrix().scale(1.0f / scale.x, 1.0f / scale.y);
             // TODO: rotated
             rect_f target{manual_target};
             if (target.empty()) {
@@ -65,7 +62,7 @@ void drawable_sprite::draw() {
 //            drawer.set_empty_texture();
 //            drawer.quad(target.x, target.y, target.width, target.height, 0x77FF0000_argb);
 //            drawer.quad(scale_grid.x, scale_grid.y, scale_grid.width, scale_grid.height, 0x77FFFFFF_argb);
-            drawer.restore_matrix();
+            drawer.state.restore_matrix();
         } else {
 //            drawer.set_empty_texture();
 //            drawer.quad(spr->rect, 0x77FFFFFF_argb);
@@ -189,11 +186,10 @@ rect_f scissors_2d::world_rect(const matrix_2d& world_matrix) const {
 void drawable_arc::draw() {
     asset_t<sprite_t> f{sprite};
     if (f && f->texture) {
-        auto& drawer = resolve<drawer_t>();
-        drawer.set_texture(f->texture.get());
-
         auto& tex = f->tex;
-        drawer.set_texture_coords(tex.x + tex.width * 0.5f, tex.y, 0.0f, tex.height);
+        auto& drawer = resolve<drawer_t>();
+        drawer.state.set_texture(f->texture.get())
+                .set_texture_coords(tex.x + tex.width * 0.5f, tex.y, 0.0f, tex.height);
 
         float off = -math::pi * 0.5f;
         drawer.line_arc(0, 0, radius, 0 + off, angle + off, line_width, segments, color_inner, color_outer);

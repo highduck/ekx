@@ -36,7 +36,7 @@ void trail_script::draw() {
     const auto quads = columns - 1;
     if (quads > 0) {
         auto& drawer = resolve<drawer_t>();
-        drawer.set_empty_texture();
+        drawer.state.set_empty_texture();
         drawer.prepare();
         drawer.triangles(columns * 2, quads * 6);
 

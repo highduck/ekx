@@ -151,14 +151,14 @@ void gui_transform_2d(ecs::entity entity) {
         ImGui::DragFloat2("Scale", transform.scale.data_, 0.1f, 0.0f, 0.0f, "%.2f", 0.1f);
         ImGui::DragFloat2("Skew", transform.skew.data_, 0.1f, 0.0f, 0.0f, "%.2f", 0.1f);
 
-        auto color = static_cast<float4>(transform.colorMultiplier);
+        auto color = static_cast<float4>(transform.color_multiplier);
         if (ImGui::ColorEdit4("Color Multiplier", color.data_)) {
-            transform.colorMultiplier = argb32_t{color};
+            transform.color_multiplier = argb32_t{color};
         }
 
-        color = static_cast<float4>(transform.colorOffset);
+        color = static_cast<float4>(transform.color_offset);
         if (ImGui::ColorEdit4("Color Offset", color.data_)) {
-            transform.colorOffset = argb32_t{color};
+            transform.color_offset = argb32_t{color};
         }
     }
 

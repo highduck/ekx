@@ -30,8 +30,8 @@ void handle_back_button(button_t& btn, const event_data& ev) {
 }
 
 void initialize_base_transform(button_t& btn, const transform_2d& transform) {
-    btn.base_color_multiplier = transform.colorMultiplier;
-    btn.base_color_offset = transform.colorOffset;
+    btn.base_color_multiplier = transform.color_multiplier;
+    btn.base_color_offset = transform.color_offset;
     btn.base_scale = transform.scale;
     btn.base_skew = transform.skew;
 }
@@ -89,10 +89,10 @@ void apply_skin(const button_skin& skin, const button_t& btn, transform_2d& tran
     float sy = 1.0f + 0.5f * sinf((1.0f - post) * pi) * cosf((1.0f - post) * pi * 5.0f) * post;
 
     auto color = lerp(0xFFFFFFFF_argb, 0xFF888888_argb, push);
-    transform.colorMultiplier = btn.base_color_multiplier * color;
+    transform.color_multiplier = btn.base_color_multiplier * color;
 
     const float h = 0.1f * over;
-    transform.colorOffset = btn.base_color_offset + argb32_t{h, h, h, 0.0f};
+    transform.color_offset = btn.base_color_offset + argb32_t{h, h, h, 0.0f};
     transform.scale = btn.base_scale * float2(sx, sy);
 }
 

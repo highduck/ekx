@@ -11,10 +11,10 @@ namespace ek {
 
 class particle {
 public:
-    asset_t<sprite_t> sprite;
+    asset_t <sprite_t> sprite;
     int draw_layer = 0;
     std::string text;
-    asset_t<font_t> font;
+    asset_t <font_t> font;
     int font_size = 0;
     float2 pivot = float2::zero;
 
@@ -146,7 +146,7 @@ public:
     }
 
     void draw_cycled(drawer_t& drawer) {
-        auto camera = drawer.canvas_rect();
+        auto camera = drawer.state.canvas_rect;
         float width = camera.width;
         auto box = translate(get_bounds().scale(scale), position);
         if (box.right() >= camera.x && box.x <= camera.right()) {
@@ -164,9 +164,9 @@ public:
         float vis_angle = angle_base + rotation + angle_velocity_factor * atan2f(velocity.y, velocity.x);
         float2 pos = position + float2(offset_x, 0.0f);
 
-        drawer.save_transform();
-        drawer.transform_pivot(pos, vis_angle, scale, pivot);
-        drawer.combine_color(color, offset);
+        drawer.state.save_transform()
+                .transform_pivot(pos, vis_angle, scale, pivot)
+                .combine_color(color, offset);
         {
             const auto size = static_cast<float>(font_size);
             if (sprite) {
@@ -177,7 +177,7 @@ public:
                            size);
             }
         }
-        drawer.restore_transform();
+        drawer.state.restore_transform();
     }
 };
 
