@@ -11,10 +11,10 @@ namespace ek {
 
 class particle {
 public:
-    asset_t <sprite_t> sprite;
+    asset_t<sprite_t> sprite;
     int draw_layer = 0;
     std::string text;
-    asset_t <font_t> font;
+    asset_t<font_t> font;
     int font_size = 0;
     float2 pivot = float2::zero;
 
@@ -53,7 +53,7 @@ public:
 
     rect_f bounds = rect_f::zero_one;
 
-    std::function<argb32_t(particle & )> color_functor;
+    std::function<argb32_t(particle&)> color_functor;
 
     void init() {
         update_current_values();
@@ -145,26 +145,27 @@ public:
         return bounds;
     }
 
-    void draw_cycled(drawer_t& drawer) {
-        auto camera = drawer.state.canvas_rect;
+    void draw_cycled() {
+        auto camera = draw2d::state.canvas_rect;
         float width = camera.width;
         auto box = translate(get_bounds().scale(scale), position);
         if (box.right() >= camera.x && box.x <= camera.right()) {
-            draw(drawer, 0);
+            draw(0);
         }
         if (box.right() > camera.right() && box.right() - width >= camera.x && box.x - width <= camera.right()) {
-            draw(drawer, -width);
+            draw(-width);
         }
         if (bounds.x < camera.x && box.right() + width >= camera.x && box.x + width <= camera.right()) {
-            draw(drawer, width);
+            draw(width);
         }
     }
 
-    void draw(drawer_t& drawer, float offset_x) {
+    void draw(float offset_x) {
         float vis_angle = angle_base + rotation + angle_velocity_factor * atan2f(velocity.y, velocity.x);
         float2 pos = position + float2(offset_x, 0.0f);
 
-        drawer.state.save_transform()
+        draw2d::state
+                .save_transform()
                 .transform_pivot(pos, vis_angle, scale, pivot)
                 .combine_color(color, offset);
         {
@@ -177,7 +178,7 @@ public:
                            size);
             }
         }
-        drawer.state.restore_transform();
+        draw2d::state.restore_transform();
     }
 };
 

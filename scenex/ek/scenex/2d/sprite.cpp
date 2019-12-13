@@ -1,6 +1,5 @@
 #include "sprite.hpp"
 
-#include <ek/util/locator.hpp>
 #include <ek/draw2d/drawer.hpp>
 
 namespace ek {
@@ -21,8 +20,7 @@ static unsigned short nine_patch_indices[] = {
 
 bool sprite_t::select() const {
     if (texture) {
-        auto& drawer = resolve<drawer_t>();
-        drawer.state.set_texture_region(texture.get(), tex);
+        draw2d::state.set_texture_region(texture.get(), tex);
         return true;
     }
     return false;
@@ -33,13 +31,12 @@ void sprite_t::draw() const {
 }
 
 void sprite_t::draw(const rect_f& rc) const {
-    auto& drawer = resolve<drawer_t>();
     if (texture) {
-        drawer.state.set_texture_region(texture.get(), tex);
+        draw2d::state.set_texture_region(texture.get(), tex);
         if (rotated) {
-            drawer.quad_rotated(rc.x, rc.y, rc.width, rc.height);
+            draw2d::quad_rotated(rc.x, rc.y, rc.width, rc.height);
         } else {
-            drawer.quad(rc.x, rc.y, rc.width, rc.height);
+            draw2d::quad(rc.x, rc.y, rc.width, rc.height);
         }
     }
 }
@@ -49,8 +46,7 @@ void sprite_t::draw_grid(const rect_f& grid, const rect_f& target) const {
         return;
     }
 
-    auto& drawer = resolve<drawer_t>();
-    drawer.state.set_texture_region(texture.get(), tex);
+    draw2d::state.set_texture_region(texture.get(), tex);
 
     float x = rect.x;
     float y = rect.y;
@@ -80,32 +76,32 @@ void sprite_t::draw_grid(const rect_f& grid, const rect_f& target) const {
     float v2 = 1 - (((y + height) - grid.bottom()) / height);
     float v3 = 1;
 
-    drawer.prepare();
-    drawer.triangles(4 * 4, 6 * 9);
-    auto cm = drawer.vertex_color_multiplier;
-    auto co = drawer.vertex_color_offset;
+    draw2d::prepare();
+    draw2d::triangles(4 * 4, 6 * 9);
+    auto cm = draw2d::state.vertex_color_multiplier;
+    auto co = draw2d::state.vertex_color_offset;
     /////
-    drawer.write_vertex(x0, y0, u0, v0, cm, co);
-    drawer.write_vertex(x1, y0, u1, v0, cm, co);
-    drawer.write_vertex(x2, y0, u2, v0, cm, co);
-    drawer.write_vertex(x3, y0, u3, v0, cm, co);
+    draw2d::write_vertex(x0, y0, u0, v0, cm, co);
+    draw2d::write_vertex(x1, y0, u1, v0, cm, co);
+    draw2d::write_vertex(x2, y0, u2, v0, cm, co);
+    draw2d::write_vertex(x3, y0, u3, v0, cm, co);
 
-    drawer.write_vertex(x0, y1, u0, v1, cm, co);
-    drawer.write_vertex(x1, y1, u1, v1, cm, co);
-    drawer.write_vertex(x2, y1, u2, v1, cm, co);
-    drawer.write_vertex(x3, y1, u3, v1, cm, co);
+    draw2d::write_vertex(x0, y1, u0, v1, cm, co);
+    draw2d::write_vertex(x1, y1, u1, v1, cm, co);
+    draw2d::write_vertex(x2, y1, u2, v1, cm, co);
+    draw2d::write_vertex(x3, y1, u3, v1, cm, co);
 
-    drawer.write_vertex(x0, y2, u0, v2, cm, co);
-    drawer.write_vertex(x1, y2, u1, v2, cm, co);
-    drawer.write_vertex(x2, y2, u2, v2, cm, co);
-    drawer.write_vertex(x3, y2, u3, v2, cm, co);
+    draw2d::write_vertex(x0, y2, u0, v2, cm, co);
+    draw2d::write_vertex(x1, y2, u1, v2, cm, co);
+    draw2d::write_vertex(x2, y2, u2, v2, cm, co);
+    draw2d::write_vertex(x3, y2, u3, v2, cm, co);
 
-    drawer.write_vertex(x0, y3, u0, v3, cm, co);
-    drawer.write_vertex(x1, y3, u1, v3, cm, co);
-    drawer.write_vertex(x2, y3, u2, v3, cm, co);
-    drawer.write_vertex(x3, y3, u3, v3, cm, co);
+    draw2d::write_vertex(x0, y3, u0, v3, cm, co);
+    draw2d::write_vertex(x1, y3, u1, v3, cm, co);
+    draw2d::write_vertex(x2, y3, u2, v3, cm, co);
+    draw2d::write_vertex(x3, y3, u3, v3, cm, co);
 
-    drawer.write_indices(nine_patch_indices, 9 * 6);
+    draw2d::write_indices(nine_patch_indices, 9 * 6);
 }
 
 bool sprite_t::hit_test(const float2& position) const {

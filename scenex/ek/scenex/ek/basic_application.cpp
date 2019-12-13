@@ -46,8 +46,6 @@ basic_application::~basic_application() {
 }
 
 void basic_application::initialize() {
-    service_locator_instance<drawer_t>::init();
-
     //scale_factor = static_cast<float>(g_app.content_scale);
 
     create_builtin();
@@ -91,8 +89,6 @@ void basic_application::on_draw_frame() {
     asset_manager_->set_scale_factor(scale_factor);
 
     /** base app BEGIN **/
-    auto& drawer = resolve<drawer_t>();
-    drawer.batcher.stats = {};
 
     const double dt = std::min(frame_timer.update(), 0.3);
     // fixed for GIF recorder
@@ -109,9 +105,9 @@ void basic_application::on_draw_frame() {
         graphics::clear(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     }
 
-    drawer.begin(0, 0,
-                 static_cast<int>(g_app.drawable_size.x),
-                 static_cast<int>(g_app.drawable_size.y));
+    draw2d::begin(0, 0,
+                  static_cast<int>(g_app.drawable_size.x),
+                  static_cast<int>(g_app.drawable_size.y));
 
     render_frame();
 
@@ -119,7 +115,7 @@ void basic_application::on_draw_frame() {
 
     on_frame_end();
 
-    drawer.end();
+    draw2d::end();
 
     hook_on_draw_frame();
     /** base app END **/

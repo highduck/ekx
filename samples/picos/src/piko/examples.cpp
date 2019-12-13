@@ -1,7 +1,6 @@
 #include "examples.h"
 #include "piko.h"
 #include <ek/draw2d/drawer.hpp>
-#include <ek/util/locator.hpp>
 #include <ek/math/rand.hpp>
 #include <ek/scenex/systems/game_time.hpp>
 #include <ek/math/matrix_camera.hpp>
@@ -9,12 +8,11 @@
 namespace ek::piko {
 
 void book::draw() {
-    auto& drawer = resolve<drawer_t>();
 
-    drawer.state.set_empty_texture();
-    drawer.quad(0, 0, 128, 128, 0x0_rgb);
+    draw2d::state.set_empty_texture();
+    draw2d::quad(0, 0, 128, 128, 0x0_rgb);
 
-    drawer.state
+    draw2d::state
             .save_transform()
             .scale(0.5f, 0.5f)
             .translate(64, 64 + 32);
@@ -31,7 +29,7 @@ void book::draw() {
                     c = 1;
                 }
                 if (sgn(x - 60.0f) == k) {
-                    drawer.line({x, y}, {x + 10, y - 41}, colorf(c), 2.0f);
+                    draw2d::line({x, y}, {x + 10, y - 41}, colorf(c), 2.0f);
                 }
                 x += cosu(w);
                 y += sinu(w);
@@ -40,11 +38,10 @@ void book::draw() {
         }
     }
 
-    drawer.state.restore_transform();
+    draw2d::state.restore_transform();
 }
 
 void dna::draw() {
-    auto& drawer = resolve<drawer_t>();
     float t = time();
 
     /*
@@ -74,8 +71,8 @@ void dna::draw() {
     goto _
      */
 
-    drawer.state.set_empty_texture();
-    drawer.quad(0, 0, 128, 128, 0x0_rgb);
+    draw2d::state.set_empty_texture();
+    draw2d::quad(0, 0, 128, 128, 0x0_rgb);
 
     for (int i = 0; i <= 288; ++i) {
         int x = i % 17;
@@ -87,7 +84,7 @@ void dna::draw() {
                 y * 8.0f,
                 5.0f + sinu(t + i * 0.618f) * 2.0f
         };
-        drawer.fill_circle(circ, color, color, 10);
+        draw2d::fill_circle(circ, color, color, 10);
     }
     for (float j = 5.0f; j >= 3.0f; j -= 0.5f) {
         for (int i = 0; i <= 150; ++i) {
@@ -106,7 +103,7 @@ void dna::draw() {
                             11 / z
                     };
                     float ci = 18.6f - z; // color index
-                    drawer.fill_circle(circ, colorf(ci) & 0x00FFFFFF, colorf(ci), 10);
+                    draw2d::fill_circle(circ, colorf(ci) & 0x00FFFFFF, colorf(ci), 10);
                 }
             }
         }
@@ -133,13 +130,12 @@ void dna::draw() {
 //flip()goto _
 
 void diamonds::draw() {
-    auto& drawer = resolve<drawer_t>();
     time += get_delta_time(entity_);
     float t = time;
     float w = rt.width();
     float h = rt.height();
 
-    drawer.batcher.flush();
+    draw2d::flush_batcher();
 
     rt.set();
     graphics::viewport(0, 0, w, h);
@@ -149,12 +145,12 @@ void diamonds::draw() {
         first_frame = false;
         graphics::clear(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
     }
-    drawer.state
+    draw2d::state
             .save_mvp()
             .save_matrix();
-    drawer.state.matrix = matrix_2d{};
-    drawer.state.set_mvp(ortho_2d(0.0f, h, w, -h));
-    drawer.state.set_empty_texture();
+    draw2d::state.matrix = matrix_2d{};
+    draw2d::state.set_mvp(ortho_2d(0.0f, h, w, -h));
+    draw2d::state.set_empty_texture();
 //    drawer.quad(0, 0, 128, 128, 0x0_rgb);
     float sc = w / 128.0f;
     float2 center{w * 0.5f, h * 0.5f};
@@ -162,7 +158,7 @@ void diamonds::draw() {
     auto c = colorf(1);
     c.af(0.3f);
     for (int i = 0; i < 80; ++i) {
-        drawer.line(float2{ek::random(0.0f, w), ek::random(0.0f, h)},
+        draw2d::line(float2{ek::random(0.0f, w), ek::random(0.0f, h)},
                     float2{ek::random(0.0f, w), ek::random(0.0f, h)},
                     c, sc * 4.0f);
     }
@@ -172,21 +168,21 @@ void diamonds::draw() {
         float2 p = center + sc * 42.0f * float2{cosu(a), sinu(a)};
         for (float j = -1.0f; j <= 1.0f; j += 0.02f) {
             int i = static_cast<int>(floorf(j + t * 3.0f));
-            drawer.line(p + float2{0.0f, sc * 20.0f}, p + float2{j * sc * 20, 0}, colorf(e[n + i % 3]), sc * 1.0f);
-            drawer.line(p + float2{j * sc * 20, 0}, p + float2{j * sc * 10, -sc * 10}, colorf(e[n + (i + 1) % 3]),
+            draw2d::line(p + float2{0.0f, sc * 20.0f}, p + float2{j * sc * 20, 0}, colorf(e[n + i % 3]), sc * 1.0f);
+            draw2d::line(p + float2{j * sc * 20, 0}, p + float2{j * sc * 10, -sc * 10}, colorf(e[n + (i + 1) % 3]),
                         sc * 1.0f);
         }
     }
 
-    drawer.batcher.flush();
+    draw2d::flush_batcher();
     graphics::viewport();
-    drawer.state.restore_matrix();
-    drawer.state.restore_mvp();
+    draw2d::state.restore_matrix();
+    draw2d::state.restore_mvp();
     rt.unset();
-    drawer.state.set_texture(rt.texture());
-    drawer.quad(0.0f, 0.0f, w, h);
+    draw2d::state.set_texture(rt.texture());
+    draw2d::quad(0.0f, 0.0f, w, h);
 
-    drawer.batcher.flush();
+    draw2d::flush_batcher();
 //    recorder.render();
 }
 
