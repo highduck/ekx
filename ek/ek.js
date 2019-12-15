@@ -3,6 +3,32 @@ const fs = require("fs");
 const glob = EK.require("glob");
 const Mustache = EK.require("mustache");
 
+function add_roots(to_roots, from_data) {
+    for (src_type of ["cpp", "java", "js"]) {
+        const from_data_src = from_data[src_type];
+        if (from_data_src) {
+            to_roots[src_type] = (to_roots[src_type] || []).concat(from_data_src);
+        }
+    }
+}
+
+function get_source_roots(ctx) {
+    const roots = {
+        "cpp": [],
+        "java": [],
+        "js": []
+    };
+    const target = ctx.current_target;
+    for (module_info of ctx.modules) {
+        console.log(module_info.name);
+        add_roots(roots, module_info);
+        if (module_info[target]) {
+            add_roots(roots, module_info[target]);
+        }
+    }
+    return roots;
+}
+
 function replace_all(str, search, replacement) {
     return str.split(search).join(replacement);
 }
@@ -208,10 +234,10 @@ function mod_cmake_lists(ctx) {
 
     const source_dir_list = [
         "../../src",
-        core_path("core"),
         core_path("ek/platforms/android"),
         core_path("ek/src"),
-        core_path("scenex/src")
+        core_path("core"),
+        core_path("scenex")
     ];
 
     for (const source_dir of source_dir_list) {
@@ -467,6 +493,28 @@ function mod_plist(ctx, filepath) {
 //     fs.writeFileSync(xc_path, xc.writeSync());
 // }
 
+function get_pods(data) {
+    let pods = [];
+    if (data.xcode && data.xcode.pods) {
+        pods = data.xcode.pods;
+    }
+    return pods;
+}
+
+function collect_pods(ctx) {
+    let pods = [];
+    for (data of ctx.modules) {
+        pods = pods.concat(get_pods(data));
+        if (data.ios) {
+            pods = pods.concat(get_pods(data.ios));
+        }
+        if (data.macos) {
+            pods = pods.concat(get_pods(data.macos));
+        }
+    }
+    return pods;
+}
+
 function export_ios(ctx) {
     ekc_export_assets_lazy(ctx);
     if (!is_dir("generated/ios")) {
@@ -509,16 +557,19 @@ function export_ios(ctx) {
             path.join(dest_launch_logo_path, "iphone_120.png"));
 
         mod_plist(ctx, "src/Info.plist");
-        fs.writeFileSync("ek-ios-build.json", JSON.stringify(ctx.build.ios));
+        fs.writeFileSync("ek-ios-build.json", JSON.stringify({
+            modules: ctx.modules
+        }));
 
         /// PRE MOD PROJECT
         //xcode_patch(ctx, platform_proj_name);
         EK.execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id, ctx.path.EKX_ROOT]);
 
         console.info("Prepare PodFile");
+        const pods = collect_pods(ctx).map((v) => "pod '" + v + "'").join("\n  ");
         replace_in_file("Podfile", {
             "template-ios": platform_proj_name,
-            "# TEMPLATE DEPENDENCIES": ctx.build.ios.dependencies.join("\n  ")
+            "# TEMPLATE DEPENDENCIES": pods
         });
 
         console.info("Install Pods");
@@ -570,6 +621,59 @@ function export_web(ctx) {
 class File {
     constructor(ctx) {
         ctx.market_asset = "assets/res";
+        ctx.modules = [
+            {
+                name: "app",
+                cpp: [path.join(__dirname, "src")],
+                android: {
+                    cpp: [path.join(__dirname, "platforms/android")],
+                    java: [path.join(__dirname, "platforms/android/java")]
+                },
+                macos: {
+                    cpp: [
+                        path.join(__dirname, "platforms/apple"),
+                        path.join(__dirname, "platforms/mac")
+                    ]
+                },
+                ios: {
+                    cpp: [
+                        path.join(__dirname, "platforms/apple"),
+                        path.join(__dirname, "platforms/ios")
+                    ],
+                    cpp_flags: {
+                        files: [
+                            path.join(__dirname, "platforms/ios/cocos-audio/SimpleAudioEngine_objc.mm"),
+                            path.join(__dirname, "platforms/ios/cocos-audio/CocosDenshion.mm"),
+                            path.join(__dirname, "platforms/ios/cocos-audio/CDOpenALSupport.mm"),
+                            path.join(__dirname, "platforms/ios/cocos-audio/CDAudioManager.mm"),
+                        ],
+                        flags: "-fno-objc-arc"
+                    },
+                    xcode: {
+                        capabilities: ["com.apple.GameCenter"],
+                        frameworks: [
+                            "UIKit", "OpenGLES", "QuartzCore", "Foundation",
+                            "OpenAL", "AudioToolbox", "AVFoundation",
+                            "GameKit"
+                        ],
+                        pods: [
+                            "Firebase/Analytics",
+                            "Fabric",
+                            "Crashlytics"
+                        ]
+                    }
+                },
+                web: {
+                    cpp: [path.join(__dirname, "platforms/web")]
+                },
+                windows: {
+                    cpp: [path.join(__dirname, "platforms/windows")]
+                },
+                linux: {
+                    cpp: [path.join(__dirname, "platforms/linux")]
+                }
+            }
+        ];
         ctx.build = {
             android: {
                 java_src: [
@@ -582,14 +686,6 @@ class File {
                 add_manifest: [],
                 add_manifest_application: [],
                 source_dirs: [],
-            },
-            ios: {
-                billing: false,
-                dependencies: [
-                    "pod 'Firebase/Analytics'",
-                    "pod 'Fabric'",
-                    "pod 'Crashlytics'"
-                ]
             }
         };
         ctx.ios = {};
@@ -614,6 +710,11 @@ class File {
         if (exporter) {
             ctx.build_steps.push(() => {
                 exporter(ctx);
+            });
+
+            ctx.build_steps.push(() => {
+                const roots = get_source_roots(ctx);
+                console.log(roots);
             });
         }
     }

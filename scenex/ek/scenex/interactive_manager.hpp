@@ -3,12 +3,19 @@
 #include <ecxx/ecxx.hpp>
 
 #include <ek/app/app.hpp>
+#include <string>
 
 namespace ek {
 
+namespace interactive_event {
+
+static constexpr auto back_button = "back_button";
+static constexpr auto system_pause = "system_pause";
+
+}
+
 class interactive_manager {
 public:
-
     bool debug_hit_enabled = false;
     float2 pointer_global_space = float2::zero;
     float2 pointer = float2::zero;
@@ -77,7 +84,8 @@ public:
 //        }
 //    }
 
-    [[nodiscard]] ecs::entity entity() const {
+    [[nodiscard]]
+    ecs::entity entity() const {
         return entity_;
     }
 

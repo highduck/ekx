@@ -99,7 +99,9 @@ for (const [k, v] of Object.entries(project.path)) {
     console.info(`${k}: ${v}`);
 }
 
-project.include_project(project.path.EKX_ROOT + "/ek");
+project.include_project(path.join(project.path.EKX_ROOT, "ek"));
+project.include_project(path.join(project.path.EKX_ROOT, "core"));
+project.include_project(path.join(project.path.EKX_ROOT, "scenex"));
 project.include_project(process.cwd());
 
 for (const build_step of project.build_steps) {
