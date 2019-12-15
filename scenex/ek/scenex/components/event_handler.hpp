@@ -12,6 +12,9 @@ template<typename T>
 class basic_event_handler {
 public:
 
+    using callback_type = std::function<void(const T&)>;
+    using event_type = std::string;
+
     template<typename S>
     using signal_type = signal_t<const S&>;
 
@@ -19,19 +22,15 @@ public:
         return map_[type];
     }
 
-    void on_event(const std::string& type, std::function<void(const T&)> listener) {
+    void on(const event_type& type, callback_type listener) {
         require_signal_for_event_type(type).add(listener);
     }
 
-    void on(const std::string& type, std::function<void(const T&)> listener) {
-        require_signal_for_event_type(type).add(listener);
-    }
-
-    void once(const std::string& type, std::function<void(const T&)> listener) {
+    void once(const event_type& type, callback_type listener) {
         require_signal_for_event_type(type).add_once(listener);
     }
 
-    void off(const std::string& type, std::function<void(const T&)> listener) {
+    void off(const event_type& type, callback_type listener) {
         auto it = map_.find(type);
         if (it != map_.end()) {
             it->second.remove(listener);
@@ -47,7 +46,7 @@ public:
     }
 
 private:
-    std::unordered_map<std::string, signal_type<T>> map_;
+    std::unordered_map<event_type, signal_type<T>> map_;
 };
 
 struct event_data {

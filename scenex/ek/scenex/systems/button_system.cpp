@@ -10,6 +10,7 @@
 #include <ek/util/locator.hpp>
 #include <ek/ext/analytics/analytics.hpp>
 #include <ek/scenex/components/event_handler.hpp>
+#include <ek/scenex/interactive_manager.hpp>
 
 namespace ek {
 
@@ -72,10 +73,11 @@ void initialize_events(ecs::entity e) {
         }
     });
 
-    ecs::get_or_create<event_handler_t>(e).on("back_button", [e](const event_data& ev) {
-        auto& btn = ecs::get<button_t>(e);
-        handle_back_button(btn, ev);
-    });
+    ecs::get_or_create<event_handler_t>(e)
+            .on(interactive_event::back_button, [e](const event_data& ev) {
+                auto& btn = ecs::get<button_t>(e);
+                handle_back_button(btn, ev);
+            });
 
 }
 
