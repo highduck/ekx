@@ -45,6 +45,10 @@ header_search_paths = ["$(inherited)"]
 caps = []
 
 def apply_module_settings(decl, group):
+    if "assets" in decl:
+        for src in decl["assets"]:
+            project.add_file("assets", parent=group, force=True)
+
     if "cpp" in decl:
         for src in decl["cpp"]:
             project.add_folder(src, parent=group, excludes=excludes)
@@ -90,7 +94,6 @@ project.add_other_cflags([
     "-DGLES_SILENCE_DEPRECATION"
 ])
 
-project.add_file("assets", force=True)
 project.add_file("../../GoogleService-Info.plist")
 
 project.save()

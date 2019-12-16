@@ -4,42 +4,6 @@
 
 namespace ek {
 
-void set_user_data(const std::string& key, const std::vector<uint8_t>& buffer) {
-    assert(!key.empty());
-    set_user_string(key, base64::encode(buffer));
-}
-
-std::vector<uint8_t> get_user_data(const std::string& key) {
-    return base64::decode(get_user_string(key));
-}
-
-void set_user_preference(const std::string& key, int value) {
-    auto* env = android::get_jni_env();
-
-    auto class_ref = env->FindClass("ek/Preferences");
-    auto key_ref = env->NewStringUTF(key.c_str());
-
-    auto method = env->GetStaticMethodID(class_ref, "set_int", "(Ljava/lang/String;I)V");
-    env->CallStaticVoidMethod(class_ref, method, key_ref, value);
-
-    env->DeleteLocalRef(class_ref);
-    env->DeleteLocalRef(key_ref);
-}
-
-int get_user_preference(const std::string& key, int default_value) {
-    auto* env = android::get_jni_env();
-
-    auto class_ref = env->FindClass("ek/Preferences");
-    auto key_ref = env->NewStringUTF(key.c_str());
-
-    auto method = env->GetStaticMethodID(class_ref, "get_int", "(Ljava/lang/String;I)I");
-    auto result = env->CallStaticIntMethod(class_ref, method, key_ref, default_value);
-
-    env->DeleteLocalRef(class_ref);
-    env->DeleteLocalRef(key_ref);
-    return result;
-}
-
 void set_user_string(const std::string& key, const std::string& str) {
     auto* env = android::get_jni_env();
 
@@ -77,6 +41,42 @@ std::string get_user_string(const std::string& key, const std::string& default_v
     env->DeleteLocalRef(default_value_ref);
 
     return result_str;
+}
+
+void set_user_data(const std::string& key, const std::vector<uint8_t>& buffer) {
+    assert(!key.empty());
+    set_user_string(key, base64::encode(buffer));
+}
+
+std::vector<uint8_t> get_user_data(const std::string& key) {
+    return base64::decode(get_user_string(key, ""));
+}
+
+void set_user_preference(const std::string& key, int value) {
+    auto* env = android::get_jni_env();
+
+    auto class_ref = env->FindClass("ek/Preferences");
+    auto key_ref = env->NewStringUTF(key.c_str());
+
+    auto method = env->GetStaticMethodID(class_ref, "set_int", "(Ljava/lang/String;I)V");
+    env->CallStaticVoidMethod(class_ref, method, key_ref, value);
+
+    env->DeleteLocalRef(class_ref);
+    env->DeleteLocalRef(key_ref);
+}
+
+int get_user_preference(const std::string& key, int default_value) {
+    auto* env = android::get_jni_env();
+
+    auto class_ref = env->FindClass("ek/Preferences");
+    auto key_ref = env->NewStringUTF(key.c_str());
+
+    auto method = env->GetStaticMethodID(class_ref, "get_int", "(Ljava/lang/String;I)I");
+    auto result = env->CallStaticIntMethod(class_ref, method, key_ref, default_value);
+
+    env->DeleteLocalRef(class_ref);
+    env->DeleteLocalRef(key_ref);
+    return result;
 }
 
 }

@@ -1,5 +1,11 @@
 module.exports = class File {
     constructor(project) {
+        project.modules.push({
+            name: "picos",
+            cpp: [path.join(__dirname, "src")],
+            assets: [path.join(__dirname, "export/contents")]
+        });
+
         const shortname = "picos";
         const shortver = "2";
 
@@ -14,7 +20,7 @@ module.exports = class File {
         project.build_number = shortver;
         project.orientation = "landscape";
         project.assets = {
-            output: "build/assets"
+            output: "export/contents/assets"
         };
 
         if (project.current_target === "web") {

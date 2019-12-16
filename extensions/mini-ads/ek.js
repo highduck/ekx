@@ -16,14 +16,16 @@ module.exports = class File {
                 xcode: {
                     capabilities: ["com.apple.InAppPurchase"],
                     frameworks: ["StoreKit"],
-                    pods: ["Firebase/AdMob"]
+                    pods: ["Firebase/AdMob"],
+                    plist: [
+                        {
+                            GADIsAdManagerApp: true,
+                            GADApplicationIdentifier: ctx.ios.admob_app_id
+                        }
+                    ]
                 }
             }
         });
-        
-        // ctx.build.android.java_src.push(
-        //     path.join(__dirname, "android/java")
-        // );
 
         ctx.build.android.dependencies.push(
             "implementation 'com.google.firebase:firebase-ads:18.3.0'",
@@ -38,11 +40,6 @@ module.exports = class File {
 
         ctx.build.android.add_manifest_application.push(`
         <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id"/>`);
-
-        // === IOS ===
-        // TODO: Info.plist GADApplicationIdentifier
-        // TODO: dict["GADIsAdManagerApp"] = true; was there???
-        ctx.build.ios.billing = true;
 
         if (ctx.current_target === "android") {
             if (!ctx.android.admob_app_id) {

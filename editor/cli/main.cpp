@@ -60,14 +60,6 @@ void main() {
             }
         }
     }
-
-
-    const string marketing_folder = "generated/marketing";
-    const string marketing_achievements_folder = "generated/marketing/achievements";
-    const string marketing_leaderboards_folder = "generated/marketing/leaderboards";
-    const string android_res_folder = "generated/android/res";
-    const string ios_res_folder = "generated/ios";
-    const string pwa_icons_folder = "generated/pwa/icons";
 }
 
 }
