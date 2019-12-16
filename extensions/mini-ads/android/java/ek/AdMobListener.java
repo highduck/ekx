@@ -1,4 +1,4 @@
-package ekapp;
+package ek;
 
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;

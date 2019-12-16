@@ -1,4 +1,4 @@
-package ekapp;
+package ek;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -11,7 +11,7 @@ import com.android.trivialdrivesample.util.Inventory;
 import com.android.trivialdrivesample.util.Purchase;
 
 @Keep
-public class RemoveAds {
+public class RemoveAds implements EkExtension {
 
     private static final String TAG = "RemoveAds";
 
@@ -31,13 +31,11 @@ public class RemoveAds {
 
     public static RemoveAds instance;
 
-    public static void register(Activity activity) {
-        instance = new RemoveAds(activity);
-    }
-
     @Keep
     public static void init(String key) {
+        instance = new RemoveAds(EkActivity.getInstance());
         instance.base64EncodedPublicKey = key;
+        EkExtensionManager.instance.extensions.add(instance);
     }
 
     public RemoveAds(Activity launcher) {
@@ -143,21 +141,37 @@ public class RemoveAds {
         });
     }
 
-    public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
-        if (mHelper == null)
-            return true;
+    @Override
+    public void onApplicationStart() {
+
+    }
+
+    @Override
+    public void onApplicationResume(boolean inFocus) {
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
+        //if (mHelper == null)
+        //  return true;
 
         // Pass on the activity result to the helper for handling
         if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
             // not handled, so handle it ourselves (here's where you'd
             // perform any handling of activity results not related to in-app
             // billing...
-            return false;
+            //return false;
         } else {
             Log.d(TAG, "onActivityResult handled by IABUtil.");
-            return true;
+            //return true;
         }
+    }
+
+    @Override
+    public void onApplicationPause() {
+
     }
 
     /**

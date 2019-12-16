@@ -63,7 +63,6 @@ public class EkActivity extends Activity {
         activity.mainLayout.addView(activity.glView);
 
         EkExtensionManager.instance.onApplicationStart();
-        //RemoveAds.register(activity);
     }
 
     @Override
@@ -135,7 +134,6 @@ public class EkActivity extends Activity {
         super.onResume();
 
         EkExtensionManager.instance.onApplicationResume(_hasFocus);
-        //Ads.resume();
         resumeIfHasFocus();
     }
 
@@ -147,7 +145,6 @@ public class EkActivity extends Activity {
             return;
         }
 
-        //RemoveAds.instance.onActivityResult(requestCode, resultCode, intent);
         EkExtensionManager.instance.onActivityResult(requestCode, resultCode, intent);
     }
 
@@ -155,7 +152,6 @@ public class EkActivity extends Activity {
     protected void onPause() {
         Log.d(TAG, "Activity onPause");
         glView.onPause();
-        //Ads.pause();
         EkExtensionManager.instance.onApplicationPause();
         super.onPause();
     }

@@ -1,6 +1,7 @@
-package ekapp;
+package ek;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Keep;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -15,7 +16,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 
 @Keep
-public class Ads {
+public class Ads implements EkExtension {
 
     final private static String TAG = "Ads";
 
@@ -28,7 +29,7 @@ public class Ads {
 
     private static ViewGroup _layout;
     private static Context _context;
-    private static EKActivity _activity;
+    private static EkActivity _activity;
 
     private static String _appId;
     private static String _bannerId;
@@ -41,6 +42,12 @@ public class Ads {
     private static InterstitialAd _interstitialAd;
     private static boolean _adsRemoved = false;
 
+    public static Ads extension;
+
+    public Ads() {
+
+    }
+
     private static AdRequest buildAdRequest() {
         return new AdRequest.Builder()
                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)        // All emulators
@@ -52,7 +59,7 @@ public class Ads {
     }
 
     @Keep
-    public static native void ads_event_callback(int event);
+    public static native void eventCallback(int event);
 
     @Keep
     public static void reset_purchase() {
@@ -62,8 +69,11 @@ public class Ads {
 
     @Keep
     public static void init(final String appId, final String banner, final String video, final String interstitial, final String remove_ads_sku) {
+        extension = new Ads();
+        EkExtensionManager.instance.extensions.add(extension);
+
         Log.d(TAG, "register");
-        _activity = EKActivity.getInstance();
+        _activity = EkActivity.getInstance();
         _context = _activity;
         _layout = _activity.mainLayout;
 
@@ -134,7 +144,7 @@ public class Ads {
 
     @Keep
     public static void show_interstitial() {
-        EKActivity.runMainThread(
+        EkActivity.runMainThread(
                 new Runnable() {
                     @Override
                     public void run() {
@@ -147,7 +157,7 @@ public class Ads {
 
     @Keep
     public static void play_reward_video() {
-        EKActivity.runMainThread(
+        EkActivity.runMainThread(
                 new Runnable() {
                     @Override
                     public void run() {
@@ -165,7 +175,7 @@ public class Ads {
 
     @Keep
     public static void set_banner(final int flags) {
-        EKActivity.runMainThread(
+        EkActivity.runMainThread(
                 new Runnable() {
                     @Override
                     public void run() {
@@ -190,30 +200,6 @@ public class Ads {
         RemoveAds.instance.purchaseRemoveAds();
     }
 
-    public static void pause() {
-        try {
-            if (_banner != null) {
-                _banner.pause();
-            }
-            if (_rewardedVideo != null) {
-                _rewardedVideo.pause(_context);
-            }
-        } catch (Exception ignored) {
-        }
-    }
-
-    public static void resume() {
-        try {
-            if (_banner != null) {
-                _banner.resume();
-            }
-            if (_rewardedVideo != null) {
-                _rewardedVideo.resume(_context);
-            }
-        } catch (Exception ignored) {
-        }
-    }
-
     public static void destroy() {
         try {
             if (_banner != null) {
@@ -229,10 +215,10 @@ public class Ads {
     }
 
     public static void postGLEvent(final int event) {
-        EKActivity.runGLThread(new Runnable() {
+        EkActivity.runGLThread(new Runnable() {
             @Override
             public void run() {
-                Ads.ads_event_callback(event);
+                Ads.eventCallback(event);
             }
         });
     }
@@ -261,5 +247,41 @@ public class Ads {
         }
 
         postGLEvent(ADS_REMOVED);
+    }
+
+    @Override
+    public void onApplicationStart() {
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+    }
+
+    @Override
+    public void onApplicationPause() {
+        try {
+            if (_banner != null) {
+                _banner.pause();
+            }
+            if (_rewardedVideo != null) {
+                _rewardedVideo.pause(_context);
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    @Override
+    public void onApplicationResume(boolean inFocus) {
+        try {
+            if (_banner != null) {
+                _banner.resume();
+            }
+            if (_rewardedVideo != null) {
+                _rewardedVideo.resume(_context);
+            }
+        } catch (Exception ignored) {
+        }
     }
 }

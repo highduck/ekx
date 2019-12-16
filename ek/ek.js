@@ -40,14 +40,14 @@ function ekc_export_market(ctx, target_type, output) {
 
 function ekc_export_assets(ctx) {
     let assets_input = "assets";
-    let assets_output = "build/assets";
+    let assets_output = ctx.assets.output;
     make_dirs(assets_output);
     EK.execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "assets", assets_input, assets_output]);
-    EK.optimize_png_glob("build/assets/*.png");
+    EK.optimize_png_glob(path.join(assets_output, "*.png"));
 }
 
 function ekc_export_assets_lazy(ctx) {
-    let assets_output = "build/assets";
+    let assets_output = ctx.assets.output;
     if (!is_dir(assets_output)) {
         ekc_export_assets(ctx);
     }
@@ -223,22 +223,36 @@ function collect_source_files(search_path, extensions, out_list = []) {
     return out_list;
 }
 
+// src_kind - "cpp", "java", "js", etc..
+function collect_src_roots(data, src_kind) {
+    let result = [];
+    if (data && data[src_kind]) {
+        result = result.concat(data[src_kind]);
+    }
+    return result;
+}
+
+// rel_to - optional, for example "." relative to current working directory
+function collect_src_roots_all(ctx, src_kind, extra_target, rel_to) {
+    let result = [];
+    for (data of ctx.modules) {
+        result = result.concat(collect_src_roots(data, src_kind));
+        if (extra_target) {
+            result = result.concat(collect_src_roots(data[extra_target], src_kind));
+        }
+    }
+    if (rel_to) {
+        result = result.map((p) => path.relative(rel_to, p));
+    }
+    return result;
+}
+
 function mod_cmake_lists(ctx) {
     const cmake_path = "CMakeLists.txt";
     const src_files = [];
     const ext_list = ["hpp", "h", "cpp", "c"];
 
-    function core_path(p) {
-        return path.relative(".", path.join(ctx.path.EKX_ROOT, p));
-    }
-
-    const source_dir_list = [
-        "../../src",
-        core_path("ek/platforms/android"),
-        core_path("ek/src"),
-        core_path("core"),
-        core_path("scenex")
-    ];
+    const source_dir_list = collect_src_roots_all(ctx, "cpp", "android", ".");
 
     for (const source_dir of source_dir_list) {
         collect_source_files(source_dir, ext_list, src_files);
@@ -253,14 +267,14 @@ function mod_cmake_lists(ctx) {
 function export_android(ctx) {
 
     ekc_export_assets_lazy(ctx);
-    if (!is_dir("generated/android/res")) {
-        ekc_export_market(ctx, "android", "generated/android/res");
-        EK.optimize_png_glob("generated/android/res/**/*.png");
+    if (!is_dir("export/android/res")) {
+        ekc_export_market(ctx, "android", "export/android/res");
+        EK.optimize_png_glob("export/android/res/**/*.png");
     }
 
     const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;
-    const dest_dir = "projects";
+    const dest_dir = "export";
     const dest_path = path.join(dest_dir, platform_proj_name);
 
     if (is_dir(dest_path)) {
@@ -273,24 +287,22 @@ function export_android(ctx) {
 
     copyFolderRecursiveSync(path.join(ctx.path.EKX_ROOT, "ek/templates/template-" + platform_target), dest_path);
     const base_path = "../..";
-    const ek_path = path.join(ctx.path.EKX_ROOT, "ek");
 
     const cwd = process.cwd();
     process.chdir(dest_path);
     {
-        const java_src_roots = [];
-        for (let p of ctx.build.android.java_src) {
-            java_src_roots.push(`'${p}'`);
-        }
-        const java_asset_roots = [];
-        for (let p of ctx.build.android.java_asset) {
-            java_asset_roots.push(`'${p}'`);
-        }
-        const source_sets = [
-            `main.java.srcDirs += [${java_src_roots.join(", ")}]`,
-            `main.assets.srcDirs += [${java_asset_roots.join(", ")}]`
-        ];
+        const java_roots =
+            collect_src_roots_all(ctx, "java", "android", "app")
+                .map((p) => `'${p}'`);
 
+        const assets_roots =
+            collect_src_roots_all(ctx, "assets", "android", "app")
+                .map((p) => `'${p}'`);
+
+        const source_sets = [
+            `main.java.srcDirs += [${java_roots.join(", ")}]`,
+            `main.assets.srcDirs += [${assets_roots.join(", ")}]`
+        ];
 
         replace_in_file("app/build.gradle", {
             'com.eliasku.template_android': ctx.android.application_id,
@@ -304,9 +316,7 @@ function export_android(ctx) {
             'STORE_PASSWORD': ctx.android.keystore.store_password
         });
 
-        make_dirs("app/src/main/assets");
-        copyFolderRecursiveSync(path.join(base_path, ctx.assets.output), "app/src/main/assets/assets");
-        copyFolderRecursiveSync(path.join(base_path, "generated/android/res"), "app/src/main/res");
+        copyFolderRecursiveSync(path.join(base_path, "export/android/res"), "app/src/main/res");
 
         mod_main_class(ctx.android.package_id);
         mod_android_manifest(ctx);
@@ -351,147 +361,14 @@ function mod_plist(ctx, filepath) {
         ];
     }
 
-    // TODO: check for mini-ads
-    // dict["GADIsAdManagerApp"] = true;
+    const extra_data = collect_xcode_props(ctx, "plist", "ios");
+    for (const extra of extra_data) {
+        for (const [k, v] of Object.entries(extra)) {
+            dict[k] = v;
+        }
+    }
     write_text(filepath, plist.build(dict));
 }
-
-// function xcode_disable_arc(xc, filepath) {
-//     const rel_path = path.relative(filepath, ".");
-//     print('Try Disable ARC for ' + rel_path);
-//     for (file in project.get_files_by_path(rel_path)) {
-//         for (build_file in project.get_build_files_for_file(file.get_id())) {
-//             print("Disable ARC for: %s (%s)" % (file.name, build_file.get_id()));
-//             build_file.add_compiler_flags('-fno-objc-arc');
-//         }
-//     }
-// }
-//
-// function xcode_patch(ctx, proj_ios_name) {
-//     const xcode = EK.require("xcode");
-//
-//     const application_id = ctx.ios.application_id;
-//     const sdk_root = ctx.path.EKX_ROOT;
-//
-//     const xc_path = `${proj_ios_name}.xcodeproj/project.pbxproj`;
-//     const xc = xcode.project(xc_path).parseSync();
-//
-//     const project_target = xc.pbxTargetByName("template-ios");
-//     xc.addTargetAttribute("SystemCapabilities", {
-//         "com.apple.GameCenter.iOS": {
-//             enabled: 1
-//         }
-//     }, project_target);
-//     xc.addTargetAttribute("SystemCapabilities", {
-//         "com.apple.InAppPurchase": {
-//             enabled: 1
-//         }
-//     }, project_target);
-//     // project_target.name = proj_ios_name;
-//     // project_target.productName = proj_ios_name;
-//     // project_target.productReference_comment = proj_ios_name + ".app";
-//     // sys_caps = PBXGenericObject()
-//     // sys_caps["com.apple.GameCenter.iOS"] = PBXGenericObject()
-//     // sys_caps["com.apple.GameCenter.iOS"]["enabled"] = 1
-//     // sys_caps["com.apple.InAppPurchase"] = PBXGenericObject()
-//     // sys_caps["com.apple.InAppPurchase"]["enabled"] = 1
-//     // project.objects[project.rootObject].attributes.TargetAttributes[project_target.get_id()][
-//     //     'SystemCapabilities'] = sys_caps
-//
-//     //# project.set_flags("DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
-//
-//     xc.updateProductName(proj_ios_name);
-//     //const project_targe2t = xc.pbxTargetByName(proj_ios_name);
-//     //console.debug(project_targe2t);
-//     // project_target.name = proj_ios_name
-//     // project_target.productName = proj_ios_name
-//     xc.updateBuildProperty("PRODUCT_BUNDLE_IDENTIFIER", application_id);
-//     xc.updateBuildProperty("IPHONEOS_DEPLOYMENT_TARGET", "12.0");
-//     // project.set_flags("PRODUCT_BUNDLE_IDENTIFIER", application_id)
-//     // project.set_flags("IPHONEOS_DEPLOYMENT_TARGET", "12.0")
-//
-//     const src_files = [];
-//     collect_source_files("../../src", src_files);
-//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "core/src"), src_files);
-//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "ek/src"), src_files);
-//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "ek/platforms/apple"), src_files);
-//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "ek/platforms/ios"), src_files);
-//     // collect_source_files(path.join(ctx.path.EKX_ROOT, "scenex/src"), src_files);
-//
-//     xc.addPbxGroup(src_files, "game_src");
-//     // addPbxGroup = function(filePathsArray, name, path, sourceTree);
-//     // for (const src of src_files) {
-//     //     if (src.endsWith(".hpp") || src.endsWith(".h")) {
-//     //         xc.addHeaderFile(src, {}, "game_src");
-//     //     } else {
-//     //         xc.addSourceFile(src, {}, "game_src");
-//     //     }
-//     // }
-//     // project.add_folder('../../src', parent = project.add_group("src"), excludes = excludes)
-//     // project.add_folder(sdk_root + '/ecxx/src', parent = project.add_group("ecxx"), excludes = excludes)
-//     // project.add_folder(sdk_root + '/core/src', parent = project.add_group("ek-core"), excludes = excludes)
-//     // platforms_group = project.add_group("ek-platforms")
-//     // project.add_folder(sdk_root + '/ek/platforms/apple', parent = platforms_group, excludes = excludes)
-//     // project.add_folder(sdk_root + '/ek/platforms/ios', parent = platforms_group, excludes = excludes)
-//     // project.add_folder(sdk_root + '/ek/src', parent = project.add_group("ek"), excludes = excludes)
-//     // project.add_folder(sdk_root + '/scenex/src', parent = project.add_group("scenex"), excludes = excludes)
-//     //
-//     // disable_arc(project, sdk_root + '/ek/platforms/ios/cocos-audio/SimpleAudioEngine_objc.mm')
-//     // disable_arc(project, sdk_root + '/ek/platforms/ios/cocos-audio/CocosDenshion.mm')
-//     // disable_arc(project, sdk_root + '/ek/platforms/ios/cocos-audio/CDOpenALSupport.mm')
-//     // disable_arc(project, sdk_root + '/ek/platforms/ios/cocos-audio/CDAudioManager.mm')
-//     // disable_arc(project, sdk_root + '/ek/platforms/ios/EAGLView.mm')
-//     //
-//
-//     for (const search_path of [
-//         "../../src",
-//         sdk_root + "/core",
-//         sdk_root + "/ek/platforms/apple",
-//         sdk_root + "/ek/platforms/ios",
-//         sdk_root + "/ek/src",
-//         sdk_root + "/scenex/src"
-//     ]) {
-//         xc.addToHeaderSearchPaths(search_path);
-//     }
-//
-//     //
-//     // //# self.cpp_info.cxxflags.append("-fno-aligned-allocation")
-//     const flags_frameworks = [
-//         // "$(inherited)",
-//         "-framework", "UIKit",
-//         "-framework", "OpenGLES",
-//         "-framework", "QuartzCore",
-//         "-framework", "AudioToolbox",
-//         "-framework", "Foundation",
-//         "-framework", "OpenAL"
-//     ];
-//     //
-//     // //# file_options = FileOptions(weak = True)
-//     // file_options = FileOptions(weak = False, embed_framework = False);
-//     // xc.addFramework("System/Library/Frameworks/GameKit.framework");
-//     // xc.addFramework("System/Library/Frameworks/StoreKit.framework");
-//     // project.add_file('System/Library/Frameworks/GameKit.framework', tree = 'SDKROOT', force = False, file_options = file_options);
-//     // project.add_file('System/Library/Frameworks/StoreKit.framework', tree = 'SDKROOT', force = False, file_options = file_options);
-//     //
-//
-//     for (const flag of flags_frameworks) {
-//         xc.addToOtherLinkerFlags(flag);
-//         //     xc.addToOtherLinkerFlags(flags_frameworks.join(" "));
-//     }
-//
-//     // project.add_other_ldflags(" ".join(frameworks));
-//     // project.add_library_search_paths("$(inherited)");
-//     //
-//     // project.add_other_cflags([
-//     //     "$(inherited)",
-//     //     "-DGLES_SILENCE_DEPRECATION"
-//     // ]);
-//
-//     xc.addFile("assets");//, force = True);
-//     xc.addFile("../../GoogleService-Info.plist");
-//
-//     fs.writeFileSync(xc_path, xc.writeSync());
-// }
 
 function get_pods(data) {
     let pods = [];
@@ -515,16 +392,29 @@ function collect_pods(ctx) {
     return pods;
 }
 
+function get_module_data_prop(data, kind, prop) {
+    return (data && data[kind] && data[kind][prop]) ? data[kind][prop] : [];
+}
+
+function collect_xcode_props(ctx, prop, target) {
+    let list = [];
+    for (data of ctx.modules) {
+        list = list.concat(get_module_data_prop(data, "xcode", prop));
+        list = list.concat(get_module_data_prop(data[target], "xcode", prop));
+    }
+    return list;
+}
+
 function export_ios(ctx) {
     ekc_export_assets_lazy(ctx);
-    if (!is_dir("generated/ios")) {
-        ekc_export_market(ctx, "ios", "generated/ios");
-        EK.optimize_png_glob("generated/ios/**/*.png");
+    if (!is_dir("export/ios")) {
+        ekc_export_market(ctx, "ios", "export/ios");
+        EK.optimize_png_glob("export/ios/**/*.png");
     }
 
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;
-    const dest_dir = "projects";
+    const dest_dir = "export";
     const dest_path = path.join(dest_dir, platform_proj_name);
 
     if (is_dir(dest_path)) {
@@ -543,10 +433,10 @@ function export_ios(ctx) {
         fs.renameSync("template-ios.xcodeproj", platform_proj_name + ".xcodeproj");
 
         copyFolderRecursiveSync(path.join(base_path, ctx.assets.output), "assets");
-        copyFolderRecursiveSync(path.join(base_path, "generated/ios/AppIcon.appiconset"),
+        copyFolderRecursiveSync(path.join(base_path, "export/ios/AppIcon.appiconset"),
             "src/Assets.xcassets/AppIcon.appiconset");
 
-        const src_launch_logo_path = path.join(base_path, "generated/ios/AppIcon.appiconset");
+        const src_launch_logo_path = path.join(base_path, "export/ios/AppIcon.appiconset");
         const dest_launch_logo_path = "src/Assets.xcassets/LaunchLogo.imageset";
         // launch logo
         copy_file(path.join(src_launch_logo_path, "iphone_40.png"),
@@ -566,7 +456,7 @@ function export_ios(ctx) {
         EK.execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id, ctx.path.EKX_ROOT]);
 
         console.info("Prepare PodFile");
-        const pods = collect_pods(ctx).map((v) => "pod '" + v + "'").join("\n  ");
+        const pods = collect_xcode_props(ctx, "pods", "ios").map((v) => `pod '${v}'`).join("\n  ");
         replace_in_file("Podfile", {
             "template-ios": platform_proj_name,
             "# TEMPLATE DEPENDENCIES": pods
@@ -593,22 +483,24 @@ function export_ios(ctx) {
 
 /*** HTML ***/
 function export_web(ctx) {
+    const output_dir = ctx.path.CURRENT_PROJECT_DIR + "/export/web";
+
     function tpl(from, to) {
         const tpl_text = fs.readFileSync(path.join(__dirname, from), "utf8");
-        fs.writeFileSync(path.join(ctx.path.OUTPUT, to), Mustache.render(tpl_text, ctx), "utf8");
+        fs.writeFileSync(path.join(output_dir, to), Mustache.render(tpl_text, ctx), "utf8");
     }
 
     function file(from, to) {
         fs.copyFileSync(
             path.join(__dirname, from),
-            path.join(ctx.path.OUTPUT, to)
+            path.join(output_dir, to)
         );
     }
 
     ekc_export_assets_lazy(ctx);
-    if (!is_dir("build/icons")) {
-        ekc_export_market(ctx, "web", "build/icons");
-        EK.optimize_png_glob("build/icons/*.png");
+    if (!is_dir(path.join(output_dir, "icons"))) {
+        ekc_export_market(ctx, "web", path.join(output_dir, "icons"));
+        EK.optimize_png_glob(path.join(output_dir, "icons/*.png"));
     }
 
     tpl("templates/web/index.html.mustache", "index.html");
@@ -616,6 +508,8 @@ function export_web(ctx) {
     tpl("templates/web/sw.js.mustache", "sw.js");
     file("templates/web/howler.core.min.js", "howler.core.min.js");
     file("templates/web/pwacompat.min.js", "pwacompat.min.js");
+
+    copyFolderRecursiveSync("export/contents/assets", "export/web/assets");
 }
 
 class File {
@@ -676,12 +570,6 @@ class File {
         ];
         ctx.build = {
             android: {
-                java_src: [
-                    path.join(__dirname, "platforms/android/java")
-                ],
-                java_asset: [
-                    "src/main/assets"
-                ],
                 dependencies: [],
                 add_manifest: [],
                 add_manifest_application: [],
@@ -700,7 +588,7 @@ class File {
             android: export_android,
             ios: export_ios,
             market: () => {
-                ekc_export_market(ctx, "gen", "generated");
+                ekc_export_market(ctx, "gen", "export/market");
             },
             assets: () => {
                 ekc_export_assets(ctx);
@@ -721,33 +609,3 @@ class File {
 }
 
 module.exports = File;
-
-//
-//  void init_project_path(project_path_t& path) {
-//     const auto* ekx_root = std::getenv("EKX_ROOT");
-//     if (!ekx_root) {
-//         EK_ERROR << "Please define EKX_ROOT environment variable. Abort.";
-//         abort();
-//     }
-//
-//     path.ekx = path_t{ekx_root};
-//
-//     if (!ek::is_dir(path.ekx)) {
-//         EK_ERROR << "EKX_ROOT is not a directory: " << path.ekx;
-//         abort();
-//     }
-//
-//     path.emsdk = path_t{"/Users/ilyak/dev/emsdk"};
-//     if (!ek::is_dir(path.emsdk)) {
-//         EK_WARN << "Emscripten SDK dir is not found: " << path.ekx;
-//         EK_WARN << "Web Target is not available";
-//         path.emsdk_toolchain = path.emsdk /
-//                                "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake";
-//         if (!ek::is_file(path.emsdk_toolchain)) {
-//             EK_WARN << "Emscripten SDK toolchain is not found: " << path.ekx;
-//             EK_WARN << "Web Target is not available";
-//         }
-//     }
-//
-//     path.current_project = path.project = path_t{ek::current_working_directory()};
-// }

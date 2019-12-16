@@ -1,7 +1,9 @@
 package ek;
 
 import android.content.res.AssetManager;
+import android.support.annotation.Keep;
 
+@Keep
 public class EkPlatform {
 
     static {
@@ -20,11 +22,15 @@ public class EkPlatform {
     static final int TOUCH_MOVE = 14;
     static final int TOUCH_END = 15;
 
+    @Keep
     public static native void sendEvent(int type);
 
+    @Keep
     public static native void sendTouch(int type, int id, float x, float y);
 
+    @Keep
     public static native void sendResize(int width, int height, float scaleFactor);
 
+    @Keep
     public static native void initAssets(AssetManager assets);
 }
