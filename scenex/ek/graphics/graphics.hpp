@@ -21,7 +21,7 @@ void begin();
 
 void clear(float r, float g, float b, float a);
 
-void viewport(int x, int y, int wight, int height);
+void viewport(int x, int y, int width, int height);
 
 void viewport();
 

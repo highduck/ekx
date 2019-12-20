@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(ek-core LANGUAGES CXX)
+project(ek-core)
 
 add_library(${PROJECT_NAME} STATIC
 
@@ -90,7 +90,7 @@ add_library(${PROJECT_NAME} STATIC
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
+#target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))

@@ -534,15 +534,6 @@ class File {
                         path.join(__dirname, "platforms/apple"),
                         path.join(__dirname, "platforms/ios")
                     ],
-                    cpp_flags: {
-                        files: [
-                            path.join(__dirname, "platforms/ios/cocos-audio/SimpleAudioEngine_objc.mm"),
-                            path.join(__dirname, "platforms/ios/cocos-audio/CocosDenshion.mm"),
-                            path.join(__dirname, "platforms/ios/cocos-audio/CDOpenALSupport.mm"),
-                            path.join(__dirname, "platforms/ios/cocos-audio/CDAudioManager.mm"),
-                        ],
-                        flags: "-fno-objc-arc"
-                    },
                     xcode: {
                         capabilities: ["com.apple.GameCenter"],
                         frameworks: [

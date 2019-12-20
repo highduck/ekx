@@ -2,7 +2,7 @@
 
 #include <string>
 #include <ek/scenex/local_storage_var_t.hpp>
-#include <ek/audiomini.hpp>
+#include <ek/audio/audio.hpp>
 
 namespace ek {
 

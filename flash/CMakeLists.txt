@@ -41,6 +41,7 @@ add_library(${PROJECT_NAME}
 
         ek/spritepack/sprite_data.hpp
         ek/spritepack/export_atlas.cpp
+        ek/spritepack/export_atlas_json.cpp
         ek/spritepack/export_atlas.hpp
         ek/spritepack/sprite_packing.cpp
         ek/spritepack/sprite_packing.hpp
@@ -95,6 +96,7 @@ target_link_libraries(${PROJECT_NAME}
         scenex
         miniz
         stb-image-write
+        nlohmann-json
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)

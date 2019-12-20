@@ -43,3 +43,6 @@ if (EKX_BUILD_TESTS)
         add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
     endif ()
 endif ()
+
+add_subdirectory(raudio)
+add_subdirectory(soloud)

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(nlohmann-json LANGUAGES CXX)
+project(nlohmann-json)
 
 add_library(${PROJECT_NAME} INTERFACE)
 

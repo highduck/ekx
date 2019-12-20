@@ -57,7 +57,6 @@ public class EkActivity extends Activity {
     @Keep
     public static void start_application() {
         EkActivity activity = EkActivity.getInstance();
-        EkAudio.register(activity);
         EkPlatform.initAssets(activity.getAssets());
         activity.glView = new EkSurfaceView(activity);
         activity.mainLayout.addView(activity.glView);

@@ -1,7 +1,5 @@
 message("Platform: iOS")
 
-add_subdirectory(cocos-audio)
-
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -15,7 +13,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         )
 
 target_link_libraries(${PROJECT_NAME}
-        cocos-audio-ios
         "-framework UIKit"
         "-framework OpenGLES"
         "-framework QuartzCore"

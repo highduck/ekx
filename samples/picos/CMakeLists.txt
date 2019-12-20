@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(picos LANGUAGES CXX)
+project(picos)
 
 add_executable(${PROJECT_NAME}
         src/picos_main.hpp

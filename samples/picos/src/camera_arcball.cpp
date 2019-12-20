@@ -5,9 +5,7 @@
 #include <ek/scenex/3d/transform_3d.hpp>
 #include <ek/scenex/interactive_manager.hpp>
 #include <ek/util/locator.hpp>
-#include <ek/scenex/ek/input_controller.hpp>
-
-//using namespace ek::app;
+#include <ek/scenex/app/input_controller.hpp>
 
 namespace ek {
 
@@ -45,7 +43,6 @@ void update_camera_arc_ball(float dt) {
 
         camera_transform.position += -r * delta.x + t * delta.y;
 
-
         auto dd = 0.0f;
         auto& input = resolve<input_controller>();
         if (input.is_key(app::key_code::W)) {
@@ -55,7 +52,6 @@ void update_camera_arc_ball(float dt) {
             dd += 10.0f * dt;
         }
         arc_ball.distance = std::max(arc_ball.distance + dd, 0.0f);
-
 
         dir = normalize(arc_ball.center - camera_transform.position);
         camera_transform.position = arc_ball.center - arc_ball.distance * dir;

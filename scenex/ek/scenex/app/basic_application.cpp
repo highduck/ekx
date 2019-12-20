@@ -31,6 +31,7 @@ basic_application::basic_application()
     assert_created_once<basic_application>();
 
     graphics::init();
+    audiomini::init();
 
     asset_manager_ = new asset_manager_t{};
 

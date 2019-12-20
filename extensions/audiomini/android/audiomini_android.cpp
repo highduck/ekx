@@ -1,7 +1,14 @@
-#include <ek/audiomini.hpp>
+#include <ek/ext/audiomini/audiomini.hpp>
 #include <ek/android.hpp>
 
-namespace ek::audio_mini {
+namespace ek::audiomini {
+
+void init() {
+    auto* env = android::get_jni_env();
+    auto clazz = env->FindClass("ek/EkAudio");
+    auto method = env->GetStaticMethodID(clazz, "init", "()V");
+    env->CallStaticVoidMethod(clazz, method);
+}
 
 void create_sound(const char* name) {
     if (!name) {

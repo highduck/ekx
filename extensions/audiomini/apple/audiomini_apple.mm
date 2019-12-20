@@ -1,8 +1,8 @@
-#include <ek/audiomini.hpp>
+#import <SimpleAudioEngine_objc.h>
 
-#import <cocos-audio/SimpleAudioEngine_objc.h>
+namespace ek::audiomini {
 
-namespace ek::audio_mini {
+void init() {}
 
 void create_sound(const char* name) {
     if (name == nullptr) return;

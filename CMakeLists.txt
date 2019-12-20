@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(ekx LANGUAGES CXX)
+project(ekx)
 
 set(EKX_BUILD_TESTS OFF CACHE BOOL "Build EKX unit tests" FORCE)
 mark_as_advanced(EKX_BUILD_TESTS)
@@ -48,9 +48,9 @@ endif ()
 
 add_subdirectory(core)
 add_subdirectory(ek)
-add_subdirectory(scenex)
-
+add_subdirectory(extensions/audiomini)
 add_subdirectory(extensions/mini-ads)
+add_subdirectory(scenex)
 
 add_library(ekx INTERFACE)
 target_link_libraries(ekx INTERFACE scenex ek ek-core)

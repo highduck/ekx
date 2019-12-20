@@ -2,7 +2,7 @@
 #include "asset_manager.hpp"
 #include <ek/util/path.hpp>
 #include <ek/util/logger.hpp>
-#include <ek/audiomini.hpp>
+#include <ek/audio/audio.hpp>
 #include <ek/app/res.hpp>
 #include <ek/graphics/program.hpp>
 #include <ek/graphics/texture.hpp>
@@ -58,7 +58,7 @@ public:
     }
 
     void do_load() override {
-        audio_mini::create_music((project_->base_path / path_).c_str());
+        audiomini::create_music((project_->base_path / path_).c_str());
         ready_ = true;
     }
 
@@ -71,7 +71,7 @@ public:
     }
 
     void do_load() override {
-        audio_mini::create_sound((project_->base_path / path_).c_str());
+        audiomini::create_sound((project_->base_path / path_).c_str());
         ready_ = true;
     }
 };

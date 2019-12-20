@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/scenex/ek/basic_application.hpp>
+#include <ek/scenex/app/basic_application.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/editor/imgui/imgui_module.hpp>
 #include <ek/editor/assets/editor_project.hpp>
