@@ -1,6 +1,4 @@
-#include <ek/audiomini.hpp>
-
-namespace ek::audio_mini {
+namespace ek::audiomini {
 
 void create_sound(const char* name) {}
 

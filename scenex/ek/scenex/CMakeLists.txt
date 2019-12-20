@@ -31,8 +31,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         systems/tween_system.cpp
         systems/tween_system.hpp
 
-        ek/input_controller.hpp
-        ek/input_controller.cpp
         simple_audio_manager.cpp
         simple_audio_manager.hpp
         scene_system.cpp
@@ -63,10 +61,12 @@ target_sources(${PROJECT_NAME} PRIVATE
         systems/main_flow.cpp
         systems/main_flow.hpp
 
-        ek/basic_application.cpp
-        ek/basic_application.hpp
-        ek/app_utils.cpp
-        ek/app_utils.hpp
+        app/basic_application.cpp
+        app/basic_application.hpp
+        app/app_utils.cpp
+        app/app_utils.hpp
+        app/input_controller.hpp
+        app/input_controller.cpp
 
         goodies/helpers/mouse_follow_script.cpp
         goodies/helpers/mouse_follow_script.hpp

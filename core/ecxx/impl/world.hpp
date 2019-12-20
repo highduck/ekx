@@ -99,7 +99,7 @@ public:
     inline void remove(entity e) {
         auto* pool = components_.try_get<Component>();
         assert(pool);
-        return pool->erase(e);
+        pool->erase(e);
     }
 
     template<typename Component>

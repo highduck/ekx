@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(fmt LANGUAGES C CXX)
+project(fmt)
 
 add_library(${PROJECT_NAME} STATIC
         include/fmt/chrono.h

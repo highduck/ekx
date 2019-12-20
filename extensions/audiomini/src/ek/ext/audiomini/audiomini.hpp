@@ -1,6 +1,8 @@
 #pragma once
 
-namespace ek::audio_mini {
+namespace ek::audiomini {
+
+void init();
 
 void create_sound(const char* name);
 

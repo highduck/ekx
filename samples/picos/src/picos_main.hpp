@@ -8,7 +8,7 @@ using base_app_type = ::ek::editor_app_t;
 
 #else
 
-#include <ek/scenex/ek/basic_application.hpp>
+#include <ek/scenex/app/basic_application.hpp>
 
 using base_app_type = ::ek::basic_application;
 

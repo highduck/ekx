@@ -1,7 +1,5 @@
 message("Platform: macOS")
 
-add_subdirectory(cocos-audio)
-
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 target_compile_definitions(${PROJECT_NAME} PUBLIC GL_SILENCE_DEPRECATION)
 
@@ -20,7 +18,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         )
 
 target_link_libraries(${PROJECT_NAME}
-        cocos-audio-mac
         "-framework Cocoa"
         "-framework OpenGL"
         "-framework CoreVideo"

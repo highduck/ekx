@@ -2,6 +2,7 @@ package ek;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.media.AudioAttributes;
@@ -17,25 +18,26 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class EkAudio {
+public class EkAudio implements EkExtension {
 
     final private static String TAG = "EkAudio";
 
     private final static int MAX_SIMULTANEOUS_SOUNDS = 8;
 
-    private static AssetManager _assets;
     private static AudioManager _audio;
     private static Vibrator _vibrator;
 
     private static SoundPool _soundPool;
     public static EkMusic _gameMusic;
 
+    private static EkAudio _listener;
+
     private final static HashMap<String, Integer> _soundsMap = new HashMap<>();
 
-    public static void register(Context context) {
+    public static void init() {
         Log.d(TAG, "register");
-        _assets = context.getAssets();
-        _audio = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        Activity activity = EkActivity.getActivity();
+        _audio = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AudioAttributes audioAttrib = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_GAME)
@@ -46,10 +48,11 @@ public class EkAudio {
             _soundPool = new SoundPool(MAX_SIMULTANEOUS_SOUNDS, AudioManager.STREAM_MUSIC, 0);
             // srcQuality: the sample-rate converter quality. Currently has no effect. Use 0 for the default.
         }
-        if (context instanceof Activity) {
-            ((Activity) context).setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        }
-        _vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        // listener
+        _listener = new EkAudio();
+        EkExtensionManager.instance.extensions.add(_listener);
     }
 
     @Keep
@@ -71,7 +74,7 @@ public class EkAudio {
     @Keep
     public static void createSound(String name) {
         try {
-            AssetFileDescriptor fd = _assets.openFd(name);
+            AssetFileDescriptor fd = EkActivity.getActivity().getAssets().openFd(name);
             final int id = _soundPool.load(fd, 1);
             _soundsMap.put(name, id);
         } catch (java.io.IOException e) {
@@ -83,7 +86,7 @@ public class EkAudio {
     public static void createMusic(String name) {
         if (_gameMusic == null) {
             try {
-                AssetFileDescriptor afd = _assets.openFd(name);
+                AssetFileDescriptor afd = EkActivity.getActivity().getAssets().openFd(name);
                 if (afd != null) {
                     _gameMusic = new EkMusic(afd);
                 }
@@ -93,20 +96,12 @@ public class EkAudio {
         }
     }
 
-    public static void onPause() {
-        if (_gameMusic != null && _gameMusic.audioTrack != null && _gameMusic.audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
-            _gameMusic.audioTrack.pause();
-        }
-    }
-
-    public static void onResume() {
-        if (_gameMusic != null && _gameMusic.audioTrack != null && _gameMusic.audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PAUSED) {
-            _gameMusic.audioTrack.play();
-        }
-    }
-
     @Keep
     public static void vibrate(long durationMillis) {
+        if (_vibrator == null) {
+            _vibrator = (Vibrator) EkActivity.getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        }
+
         if (_vibrator != null) {
             if (Build.VERSION.SDK_INT >= 26) {
                 _vibrator.vibrate(VibrationEffect.createOneShot(durationMillis, VibrationEffect.DEFAULT_AMPLITUDE));
@@ -132,5 +127,29 @@ public class EkAudio {
         }
 
         _vibrator = null;
+    }
+
+    @Override
+    public void onApplicationStart() {
+
+    }
+
+    @Override
+    public void onApplicationResume(boolean inFocus) {
+        if (_gameMusic != null && _gameMusic.audioTrack != null && _gameMusic.audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PAUSED) {
+            _gameMusic.audioTrack.play();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+    }
+
+    @Override
+    public void onApplicationPause() {
+        if (_gameMusic != null && _gameMusic.audioTrack != null && _gameMusic.audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
+            _gameMusic.audioTrack.pause();
+        }
     }
 }

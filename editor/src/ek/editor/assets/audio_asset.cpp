@@ -1,7 +1,7 @@
 #include "audio_asset.hpp"
 #include <ek/serialize/serialize.hpp>
 #include <ek/system/system.hpp>
-#include <ek/audiomini.hpp>
+#include <ek/audio/audio.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 
 namespace ek {
@@ -42,10 +42,10 @@ void audio_asset_t::load() {
     read_decl();
 
     for (auto& m: music_list_) {
-        audio_mini::create_music(m.c_str());
+        audiomini::create_music(m.c_str());
     }
     for (auto& m: sound_list_) {
-        audio_mini::create_sound(m.c_str());
+        audiomini::create_sound(m.c_str());
     }
 }
 
@@ -66,10 +66,10 @@ void audio_asset_t::gui() {
         ImGui::PushID(music.c_str());
         ImGui::LabelText("Music", "%s", music.c_str());
         if (ImGui::Button("Play Music")) {
-            audio_mini::play_music(music.c_str(), 1.0f);
+            audiomini::play_music(music.c_str(), 1.0f);
         }
         if (ImGui::Button("Stop Music")) {
-            audio_mini::play_music(music.c_str(), 0.0f);
+            audiomini::play_music(music.c_str(), 0.0f);
         }
         ImGui::PopID();
     }
@@ -77,7 +77,7 @@ void audio_asset_t::gui() {
         ImGui::PushID(sound.c_str());
         ImGui::LabelText("Sound", "%s", sound.c_str());
         if (ImGui::Button("Play Sound")) {
-            audio_mini::play_sound(sound.c_str(), 1.0f, 0.0f);
+            audiomini::play_sound(sound.c_str(), 1.0f, 0.0f);
         }
         ImGui::PopID();
     }

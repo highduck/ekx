@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(ek LANGUAGES CXX)
+project(ek)
 
 add_library(${PROJECT_NAME} STATIC "")
 
@@ -7,7 +7,7 @@ add_subdirectory(src)
 
 target_link_libraries(${PROJECT_NAME} ek-core)
 
-target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
+#target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17

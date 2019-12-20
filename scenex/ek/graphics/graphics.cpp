@@ -53,8 +53,8 @@ void clear(float r, float g, float b, float a) {
     gl::check_error();
 }
 
-void viewport(int x, int y, int wight, int height) {
-    glViewport(x, y, wight, height);
+void viewport(int x, int y, int width, int height) {
+    glViewport(x, y, width, height);
     gl::check_error();
 }
 
