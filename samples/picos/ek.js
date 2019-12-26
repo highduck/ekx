@@ -1,3 +1,5 @@
+const path = require("path");
+
 module.exports = class File {
     constructor(project) {
         project.modules.push({

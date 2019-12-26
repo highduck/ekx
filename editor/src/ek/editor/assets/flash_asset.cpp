@@ -15,6 +15,7 @@
 #include <ek/system/system.hpp>
 #include <ek/editor/gui/editor_widgets.hpp>
 #include <memory>
+#include <ek/editor/json/serialize.hpp>
 
 namespace ek {
 
@@ -117,6 +118,8 @@ void flash_asset_t::build(assets_build_struct_t& data) {
         IO io{out};
         io(sg_data);
         ek::save(out, name_ + ".sg");
+
+        ek::save(to_json_str(sg_data), path_t{name_ + ".ani.json"});
     });
 
     data.meta("atlas", name_);
