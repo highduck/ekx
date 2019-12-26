@@ -10,6 +10,8 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/assets/freetype_asset.hpp
         ek/editor/assets/editor_temp_atlas.cpp
         ek/editor/assets/editor_temp_atlas.hpp
+        ek/editor/json/serialize.cpp
+        ek/editor/json/serialize.hpp
 
         ek/editor/gui/gui_atlas.cpp
         ek/editor/gui/gui_sg_file.cpp
