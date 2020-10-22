@@ -3,15 +3,18 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/assets.hpp>
-#include <graphics/program.hpp>
-#include <graphics/vertex_decl.hpp>
+#include <ek/graphics/program.hpp>
+#include <ek/graphics/vertex_decl.hpp>
 
-#include <graphics/texture.hpp>
-#include <scenex/data/texture_data.hpp>
+#include <ek/graphics/texture.hpp>
+#include <ek/scenex/data/texture_data.hpp>
 #include <ek/system/system.hpp>
 #include <ek/imaging/decoder.hpp>
 
 namespace ek {
+
+using graphics::texture_t;
+using graphics::program_t;
 
 image_t* load_image(const path_t& path) {
     image_t* image = nullptr;
@@ -95,7 +98,7 @@ void texture_asset_t::build(assets_build_struct_t& build_data) {
     read_decl();
 
     const auto output_path = build_data.output / name_;
-    scenex::texture_data_t data{};
+    texture_data_t data{};
     data.texture_type = texture_type_;
     data.images = images_;
 

@@ -27,7 +27,6 @@ namespace ek {
 // `ekc export market assets/res web generated/web`
 void main() {
     using namespace std;
-    using namespace scenex;
 
     EK_INFO << "== EKC util ==";
     EK_INFO << "Executable path: " << get_executable_path();
@@ -61,14 +60,6 @@ void main() {
             }
         }
     }
-
-
-    const string marketing_folder = "generated/marketing";
-    const string marketing_achievements_folder = "generated/marketing/achievements";
-    const string marketing_leaderboards_folder = "generated/marketing/leaderboards";
-    const string android_res_folder = "generated/android/res";
-    const string ios_res_folder = "generated/ios";
-    const string pwa_icons_folder = "generated/pwa/icons";
 }
 
 }

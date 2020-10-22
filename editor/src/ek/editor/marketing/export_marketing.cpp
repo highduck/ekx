@@ -1,9 +1,9 @@
 #include "export_marketing.hpp"
 
-#include <ek/flash/rasterizer/render_to_sprite.h>
-#include <ek/flash/doc/flash_archive.h>
+#include <ek/flash/rasterizer/render_to_sprite.hpp>
+#include <ek/flash/doc/flash_archive.hpp>
 #include <ek/spritepack/save_image_png.hpp>
-#include <xfl/flash_doc_exporter.h>
+#include <ek/xfl/flash_doc_exporter.hpp>
 #include <ek/editor/assets/flash_asset.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
@@ -36,7 +36,7 @@ void save_sprite_png(const sprite_t& spr, const path_t& path, bool alpha = true)
     save_image_png_stb(*spr.image, path.str(), alpha);
 }
 
-void store_hi_res_icon(const flash_file& doc, const element_t& symbol, int size, const std::string& prefix = "icon_") {
+void store_hi_res_icon(const flash_doc& doc, const element_t& symbol, int size, const std::string& prefix = "icon_") {
     renderer_options_t opts{float(size) / 64.0f, size, size, true, true};
     auto spr = render(doc, symbol, opts);
     path_t icon_path{prefix + std::to_string(size) + ".png"};
@@ -53,7 +53,7 @@ json create_ios_icons_template() {
     return res;
 }
 
-void render_ios_icons(const flash_file& doc, const element_t& symbol) {
+void render_ios_icons(const flash_doc& doc, const element_t& symbol) {
     const path_t path{"AppIcon.appiconset"};
     make_dir(path);
     json ios_icon = create_ios_icons_template();
@@ -83,7 +83,7 @@ void render_ios_icons(const flash_file& doc, const element_t& symbol) {
     }
 }
 
-void render_android_icons(const flash_file& doc, const element_t& symbol, const string& name) {
+void render_android_icons(const flash_doc& doc, const element_t& symbol, const string& name) {
     map<string, int> resolution_map{
             {"ldpi",    36},
             {"mdpi",    48},
@@ -108,7 +108,7 @@ void render_android_icons(const flash_file& doc, const element_t& symbol, const 
     }
 }
 
-void process_flash_archive_market(const flash_file& file, const marketing_asset_t& marketing) {
+void process_flash_archive_market(const flash_doc& file, const marketing_asset_t& marketing) {
     flash_doc_exporter exporter{file};
     auto& doc = exporter.doc;
 
@@ -168,9 +168,6 @@ void process_flash_archive_market(const flash_file& file, const marketing_asset_
                 if (icon_item) {
                     render_android_icons(doc, *icon_item, "ic_launcher.png");
                 }
-                if (icon_round_item) {
-                    render_android_icons(doc, *icon_round_item, "ic_launcher_round.png");
-                }
             } else if (command_data.target == "ios") {
                 if (icon_item) {
                     render_ios_icons(doc, *icon_item);
@@ -189,14 +186,9 @@ void process_flash_archive_market(const flash_file& file, const marketing_asset_
 void process_market_asset(const marketing_asset_t& marketing) {
     using namespace ek::flash;
     using ek::path_join;
-
-    auto arch = load_flash_archive(marketing.input);
-    if (arch) {
-        flash_file ff{std::move(arch)};
-        process_flash_archive_market(ff, marketing);
-    } else {
-        EK_ERROR << "error process_market_asset " << marketing.input;
-    }
+    
+    flash_doc ff{marketing.input};
+    process_flash_archive_market(ff, marketing);
 }
 
 }

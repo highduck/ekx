@@ -1,16 +1,16 @@
-cmake_minimum_required(VERSION 3.12)
-project(mini-ads LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.13)
+project(mini-ads)
 
 add_library(${PROJECT_NAME} STATIC
-        src/ek/mini_ads.hpp
-        src/ek/mini_ads.cpp
+        src/ek/ext/mini_ads/mini_ads.hpp
+        src/ek/ext/mini_ads/mini_ads.cpp
         null/mini_ads_null.cpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_link_libraries(${PROJECT_NAME} ek)
 
-target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
+#target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17

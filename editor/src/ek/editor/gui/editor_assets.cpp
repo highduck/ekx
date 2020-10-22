@@ -2,16 +2,14 @@
 
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/util/assets.hpp>
-#include <graphics/program.hpp>
-#include <scenex/3d/material_3d.hpp>
-#include <scenex/3d/static_mesh.hpp>
-#include <scenex/2d/atlas.hpp>
-#include <scenex/2d/font.hpp>
-#include <scenex/data/sg_data.h>
+#include <ek/graphics/program.hpp>
+#include <ek/scenex/3d/material_3d.hpp>
+#include <ek/scenex/3d/static_mesh.hpp>
+#include <ek/scenex/2d/atlas.hpp>
+#include <ek/scenex/2d/font.hpp>
+#include <ek/scenex/data/sg_data.hpp>
 
-using namespace ek;
-
-namespace scenex {
+namespace ek {
 
 template<typename T>
 void on_editor_debug_asset(const asset_t<T>& asset) {
@@ -66,7 +64,7 @@ void do_editor_debug_runtime_asset_list(const std::string& type_name) {
 void do_editor_debug_runtime_assets() {
     ImGui::Begin("Debug Assets");
 
-    do_editor_debug_runtime_asset_list<program_t>("Program");
+    do_editor_debug_runtime_asset_list<graphics::program_t>("Program");
     do_editor_debug_runtime_asset_list<material_3d>("Material");
     do_editor_debug_runtime_asset_list<static_mesh_t>("Mesh");
     do_editor_debug_runtime_asset_list<atlas_t>("Atlas");

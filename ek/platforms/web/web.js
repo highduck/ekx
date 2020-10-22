@@ -1,4 +1,29 @@
 mergeInto(LibraryManager.library, {
+    web_prefs_set_number: function (key, n) {
+        window.localStorage.setItem(UTF8ToString(key), n);
+    },
+    web_prefs_get_number: function (key, def) {
+        var item = window.localStorage.getItem(UTF8ToString(key));
+        if (item) {
+            var val = parseFloat(item);
+            if (val != null) {
+                return val;
+            }
+        }
+        return def;
+    },
+    web_prefs_set_string: function (key, str) {
+        window.localStorage.setItem(UTF8ToString(key), UTF8ToString(str));
+    },
+    web_prefs_get_string: function (key) {
+        var item = window.localStorage.getItem(UTF8ToString(key));
+        if (item != null) {
+            var lengthBytes = lengthBytesUTF8(item) + 1;
+            var stringOnWasmHeap = _malloc(lengthBytes);
+            return stringToUTF8(item, stringOnWasmHeap, lengthBytes);
+        }
+        return 0;
+    },
     web_set_mouse_cursor: function (cursor) {
         var PARENT = 0;
         var ARROW = 1;
@@ -34,63 +59,63 @@ mergeInto(LibraryManager.library, {
         }
     },
 
-    // AUDIO - MINI
-    $AudioMini: {
-        table: {},
-        music: null,
-        music_id: null,
-        howl_create: function (name) {
-            var howl = window["Howl"];
-            return new howl({src: [name], html5: true});
-        }
-    },
-
-    audio_mini_vibrate: function (millis) {
-        if (navigator.vibrate) {
-            navigator.vibrate(millis);
-        }
-    },
-
-    audio_mini_create_sound__deps: ['$AudioMini'],
-    audio_mini_create_sound: function (name) {
-        name = UTF8ToString(name);
-        AudioMini.table[name] = AudioMini.howl_create(name);
-    },
-
-    audio_mini_create_music__deps: ['$AudioMini'],
-    audio_mini_create_music: function (name) {
-        name = UTF8ToString(name);
-        var sound = AudioMini.howl_create(name);
-        sound.loop(true);
-        AudioMini.table[name] = sound;
-    },
-
-    audio_mini_play_sound__deps: ['$AudioMini'],
-    audio_mini_play_sound: function (name, vol, pan) {
-        name = UTF8ToString(name);
-        var sound = AudioMini.table[name];
-        if (sound) {
-            var id = sound.play();
-            sound.volume(vol, id);
-        }
-    },
-
-    audio_mini_play_music__deps: ['$AudioMini'],
-    audio_mini_play_music: function (name, vol) {
-        name = UTF8ToString(name);
-        var next = name ? AudioMini.table[name] : null;
-        if (AudioMini.music !== next) {
-            if (AudioMini.music && AudioMini.music_id) {
-                AudioMini.music.stop(AudioMini.music_id);
-            }
-            AudioMini.music = next;
-            AudioMini.music_id = null;
-            if (next) {
-                AudioMini.music_id = next.play();
-            }
-        }
-        if (AudioMini.music && AudioMini.music_id) {
-            AudioMini.music.volume(vol, AudioMini.music_id);
-        }
-    }
+    // // AUDIO - MINI
+    // $AudioMini: {
+    //     table: {},
+    //     music: null,
+    //     music_id: null,
+    //     howl_create: function (name) {
+    //         var howl = window["Howl"];
+    //         return new howl({src: [name], html5: true});
+    //     }
+    // },
+    //
+    // audio_mini_vibrate: function (millis) {
+    //     if (navigator.vibrate) {
+    //         navigator.vibrate(millis);
+    //     }
+    // },
+    //
+    // audio_mini_create_sound__deps: ['$AudioMini'],
+    // audio_mini_create_sound: function (name) {
+    //     name = UTF8ToString(name);
+    //     AudioMini.table[name] = AudioMini.howl_create(name);
+    // },
+    //
+    // audio_mini_create_music__deps: ['$AudioMini'],
+    // audio_mini_create_music: function (name) {
+    //     name = UTF8ToString(name);
+    //     var sound = AudioMini.howl_create(name);
+    //     sound.loop(true);
+    //     AudioMini.table[name] = sound;
+    // },
+    //
+    // audio_mini_play_sound__deps: ['$AudioMini'],
+    // audio_mini_play_sound: function (name, vol, pan) {
+    //     name = UTF8ToString(name);
+    //     var sound = AudioMini.table[name];
+    //     if (sound) {
+    //         var id = sound.play();
+    //         sound.volume(vol, id);
+    //     }
+    // },
+    //
+    // audio_mini_play_music__deps: ['$AudioMini'],
+    // audio_mini_play_music: function (name, vol) {
+    //     name = UTF8ToString(name);
+    //     var next = name ? AudioMini.table[name] : null;
+    //     if (AudioMini.music !== next) {
+    //         if (AudioMini.music && AudioMini.music_id) {
+    //             AudioMini.music.stop(AudioMini.music_id);
+    //         }
+    //         AudioMini.music = next;
+    //         AudioMini.music_id = null;
+    //         if (next) {
+    //             AudioMini.music_id = next.play();
+    //         }
+    //     }
+    //     if (AudioMini.music && AudioMini.music_id) {
+    //         AudioMini.music.volume(vol, AudioMini.music_id);
+    //     }
+    // }
 });

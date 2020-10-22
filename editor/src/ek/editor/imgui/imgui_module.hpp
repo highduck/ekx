@@ -1,6 +1,6 @@
 #pragma once
 
-#include <graphics/gl_def.hpp>
+#include <ek/graphics/graphics.hpp>
 #include <ek/app/app.hpp>
 #include <ek/math/vec.hpp>
 #include <string>
@@ -8,12 +8,6 @@
 struct ImDrawData;
 
 namespace ek {
-
-class texture_t;
-
-class program_t;
-
-class buffer_object_t;
 
 class imgui_module_t final {
 public:
@@ -38,12 +32,12 @@ private:
     void render_frame_data(ImDrawData* draw_data);
 
 private:
-    ek::buffer_object_t* vertex_buffer_ = nullptr;
-    ek::buffer_object_t* index_buffer_ = nullptr;
-    ek::texture_t* texture_ = nullptr;
-    ek::program_t* program_ = nullptr;
-    bool enabled_ = false;
+    graphics::buffer_t* vertex_buffer_ = nullptr;
+    graphics::buffer_t* index_buffer_ = nullptr;
+    graphics::texture_t* texture_ = nullptr;
+    graphics::program_t* program_ = nullptr;
     std::string clipboard_text_{};
+    bool enabled_ = false;
 };
 
 }

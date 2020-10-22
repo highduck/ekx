@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 add_library(${PROJECT_NAME} STATIC
 
@@ -26,7 +26,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/gui/gui_window_tree.cpp
         ek/editor/gui/gui_window_tree.h
         ek/editor/gui/gui_dev_mode.cpp
-        ek/editor/gui/gui_dev_mode.h
+        ek/editor/gui/gui_dev_mode.hpp
 
         ek/editor/imgui/imgui_module.hpp
         ek/editor/imgui/imgui_module.cpp
@@ -71,6 +71,12 @@ target_compile_options(${PROJECT_NAME} PUBLIC
         #        -fno-exceptions
         )
 endif()
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+        -fno-exceptions
+        -fno-rtti
+        -fstrict-aliasing
+        )
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_options(${PROJECT_NAME} PRIVATE -g)

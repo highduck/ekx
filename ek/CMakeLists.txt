@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(ek LANGUAGES CXX)
+project(ek)
 
 add_library(${PROJECT_NAME} STATIC "")
 
@@ -7,7 +7,7 @@ add_subdirectory(src)
 
 target_link_libraries(${PROJECT_NAME} ek-core)
 
-target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
+#target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17
@@ -34,25 +34,23 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(EK_COMPILER_LTO "")
 endif ()
 
+#target_compile_definitions(${PROJECT_NAME} PUBLIC)
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+        -fno-exceptions
+        -fno-rtti
+        -fstrict-aliasing
+        ${EK_COMPILE_WARNINGS}
+        )
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(${PROJECT_NAME}
-            PRIVATE
-            -fno-exceptions
-            -fstrict-aliasing
-            -g
-            ${EK_COMPILE_WARNINGS}
-            )
+    target_compile_options(${PROJECT_NAME} PRIVATE -g)
 else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE
-            -Os -fno-exceptions
-            -fstrict-aliasing
-            ${EK_COMPILE_WARNINGS})
+    target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
     if (${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
             ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
     else ()
-        set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-        target_compile_options(${PROJECT_NAME} PRIVATE ${EK_COMPILER_LTO})
+        target_compile_options(${PROJECT_NAME} PRIVATE -flto)
     endif ()
 endif ()
 

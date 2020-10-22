@@ -1,6 +1,6 @@
-#include <ek/mini_ads.hpp>
+#include <ek/ext/mini_ads/mini_ads.hpp>
 
-#include <AppDelegate.h>
+#include <ios_app_delegate.h>
 
 #import <StoreKit/StoreKit.h>
 #import <GoogleMobileAds/GoogleMobileAds.h>
@@ -14,12 +14,12 @@ NSString* _GAD_remove_ads_sku;
 GADBannerView* _bannerView;
 GADInterstitial* _interstitial;
 
-using ::ek::AdsEventType;
+using ::ek::ads_event_type;
 
 // fwd
 
 namespace ek {
-void __post_application_event(AdsEventType type);
+void __post_application_event(ads_event_type type);
 }
 void remove_ads_purchase_aknowledged();
 
@@ -39,12 +39,12 @@ void justInfoMessage(NSString* title, NSString* buttonText) {
 
     [alert addAction:button];
 
-    [appDelegate.window.rootViewController presentViewController:alert animated:YES completion:nil];
+    [g_app_delegate.window.rootViewController presentViewController:alert animated:YES completion:nil];
 }
 
 /** AdMob **/
 void addBannerViewToView(GADBannerView* bannerView) {
-    UIViewController* root_view_controller = appDelegate.window.rootViewController;
+    UIViewController* root_view_controller = g_app_delegate.window.rootViewController;
     UIView* view = root_view_controller.view;
     bannerView.translatesAutoresizingMaskIntoConstraints = NO;
     bannerView.rootViewController = root_view_controller;
@@ -177,7 +177,7 @@ void init_payment_queue_observer() {
 
 void ads_onRemoveAds() {
     Store_adsRemoved = true;
-    __post_application_event(AdsEventType::ADS_REMOVED);
+    __post_application_event(ads_event_type::removed);
 }
 
 void ads_remove_save() {
@@ -242,13 +242,13 @@ void __reload_video_ad() {
     //    [NSString stringWithFormat:@"Reward received with currency %@ , amount %lf",
     //     reward.type,
     //     [reward.amount doubleValue]];
-    __post_application_event(AdsEventType::ADS_VIDEO_REWARDED);
+    __post_application_event(ads_event_type::video_rewarded);
     NSLog(@"rewardMessage");
 }
 
 - (void)rewardBasedVideoAdDidReceiveAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
     NSLog(@"Reward based video ad is received.");
-    __post_application_event(AdsEventType::ADS_VIDEO_REWARD_LOADED);
+    __post_application_event(ads_event_type::video_loaded);
 }
 
 - (void)rewardBasedVideoAdDidOpen:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
@@ -265,7 +265,7 @@ void __reload_video_ad() {
 
 - (void)rewardBasedVideoAdDidClose:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
     NSLog(@"Reward based video ad is closed.");
-    __post_application_event(AdsEventType::ADS_VIDEO_REWARD_CLOSED);
+    __post_application_event(ads_event_type::video_closed);
     __reload_video_ad();
 }
 
@@ -275,7 +275,7 @@ void __reload_video_ad() {
 
 - (void)rewardBasedVideoAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd
     didFailToLoadWithError:(NSError *)error {
-    __post_application_event(AdsEventType::ADS_VIDEO_REWARD_FAIL);
+    __post_application_event(ads_event_type::video_failed);
     NSLog(@"Reward based video ad failed to load.");
 }
 
@@ -285,18 +285,19 @@ RewardVideoAdDelegate* reward_video_ad_delegate;
 
 namespace ek {
 
+using ads_callback_func = std::function<void(ads_event_type type)>;
 // TODO: signals to core module
-static std::function<void(AdsEventType type)> ads_registered_callbacks;
-void __post_application_event(AdsEventType type) {
-if(ads_registered_callbacks) {
-ads_registered_callbacks(type);
-}
+static ads_callback_func ads_registered_callbacks;
+void __post_application_event(ads_event_type type) {
+    if(ads_registered_callbacks) {
+        ads_registered_callbacks(type);
+    }
 }
 
 /// interfaces
 
-void ads_listen(const std::function<void(AdsEventType type)>& callback) {
-ads_registered_callbacks = callback;
+void ads_listen(const ads_callback_func& callback) {
+    ads_registered_callbacks = callback;
 }
 
 void init_billing(const char*) {
@@ -361,13 +362,13 @@ void ads_set_banner(int flags) {
 }
 
 void ads_play_reward_video() {
-    UIViewController* root_view_controller = appDelegate.window.rootViewController;
+    UIViewController* root_view_controller = g_app_delegate.window.rootViewController;
     if ([[GADRewardBasedVideoAd sharedInstance] isReady]) {
         [[GADRewardBasedVideoAd sharedInstance] presentFromRootViewController:root_view_controller];
     }
     else {
         __reload_video_ad();
-        __post_application_event(AdsEventType::ADS_VIDEO_LOADING);
+        __post_application_event(ads_event_type::video_loading);
     }
 }
 
@@ -378,7 +379,7 @@ void ads_show_interstitial() {
     }
 
     if(_interstitial != nil && _interstitial.isReady) {
-        UIViewController* root_view_controller = appDelegate.window.rootViewController;
+        UIViewController* root_view_controller = g_app_delegate.window.rootViewController;
         [_interstitial presentFromRootViewController:root_view_controller];
         // load next
         _interstitial = [[GADInterstitial alloc] initWithAdUnitID:_GAD_inters];
@@ -458,7 +459,7 @@ void ads_purchase_remove() {
 //                                                                    0.0f, 0.0f);
 //    }
 
-    UIViewController* root_view_controller = appDelegate.window.rootViewController;
+    UIViewController* root_view_controller = g_app_delegate.window.rootViewController;
     [root_view_controller presentViewController:alert animated:YES completion:nil];
 //
 //    if(Store_validProducts != nil) {

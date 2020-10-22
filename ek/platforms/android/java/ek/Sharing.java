@@ -3,7 +3,8 @@ package ek;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Keep;
+
+import androidx.annotation.Keep;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 

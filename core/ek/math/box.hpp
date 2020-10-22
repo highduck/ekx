@@ -6,21 +6,22 @@
 
 namespace ek {
 
-template<typename T, unsigned N>
+template<unsigned N, typename T>
 struct box_t final {
-    vec_t <T, N> position;
-    vec_t <T, N> size;
-    static_assert(sizeof(vec_t < T, N >) == sizeof(T) * N, "struct has extra padding");
+    using vec_type = vec_t<N, T>;
+    vec_type position;
+    vec_type size;
+    static_assert(sizeof(vec_type) == sizeof(T) * N, "struct has extra padding");
 };
 
 template<typename T>
-struct box_t<T, 2> {
+struct box_t<2, T> {
 
-    using self_type = box_t<T, 2>;
-    using vec_type = vec_t<T, 2>;
+    using self_type = box_t<2, T>;
+    using vec_type = vec_t<2, T>;
 
     static constexpr unsigned dim = 2; // N
-    static_assert(sizeof(vec_t < T, dim >) == sizeof(T) * dim, "struct has extra padding");
+    static_assert(sizeof(vec_type) == sizeof(T) * dim, "struct has extra padding");
 
     static constexpr unsigned corners_count = 4; // 2 ^ N
 
@@ -37,7 +38,7 @@ struct box_t<T, 2> {
             T width;
             T height;
         };
-        vec_t<T, 4> xyzw;
+        vec_t<4, T> xyzw;
     };
 
 #include <ek/math/internal/compiler_unsafe_end.h>
@@ -153,8 +154,8 @@ struct box_t<T, 2> {
     }
 
     template<typename S>
-    inline box_t<S, 2> operator/(const vec_t<S, 2>& vec) const {
-        return box_t<S, 2>{
+    inline box_t<2, S> operator/(const vec_t<2, S>& vec) const {
+        return box_t<2, S>{
                 x / vec.x,
                 y / vec.y,
                 width / vec.x,
@@ -163,8 +164,8 @@ struct box_t<T, 2> {
     }
 
     template<typename S>
-    inline box_t<S, 2> operator/(S scalar) const {
-        return box_t<S, 2>{
+    inline box_t<2, S> operator/(S scalar) const {
+        return box_t<2, S>{
                 x / scalar,
                 y / scalar,
                 width / scalar,
@@ -173,8 +174,8 @@ struct box_t<T, 2> {
     }
 
     template<typename S>
-    inline box_t<S, 2> operator*(S scalar) const {
-        return box_t<S, 2>{
+    inline box_t<2, S> operator*(S scalar) const {
+        return box_t<2, S>{
                 x * scalar,
                 y * scalar,
                 width * scalar,
@@ -182,8 +183,8 @@ struct box_t<T, 2> {
         };
     }
 
-    inline box_t<T, 2> operator*(const vec_t<T, 2>& scale) const {
-        return box_t<T, 2>{
+    inline box_t<2, T> operator*(const vec_t<2, T>& scale) const {
+        return box_t<2, T>{
                 x * scale.x,
                 y * scale.y,
                 width * scale.x,
@@ -196,25 +197,25 @@ struct box_t<T, 2> {
 };
 
 template<typename T>
-inline const box_t<T, 2> box_t<T, 2>::zero_one{0, 0, 1, 1};
+inline const box_t<2, T> box_t<2, T>::zero_one{0, 0, 1, 1};
 
 template<typename T>
-inline const box_t<T, 2> box_t<T, 2>::zero{0, 0, 0, 0};
+inline const box_t<2, T> box_t<2, T>::zero{0, 0, 0, 0};
 
 template<typename T>
-using rect_t = box_t<T, 2>;
+using rect_t = box_t<2, T>;
 
 using rect_f = rect_t<float>;
 using rect_i = rect_t<int32_t>;
 using rect_u = rect_t<uint32_t>;
 
 template<typename T, unsigned N>
-inline box_t<T, N> translate(const box_t<T, N>& box, const vec_t <T, N>& offset) {
-    return box_t<T, N>{box.position + offset, box.size};
+inline box_t<N, T> translate(const box_t<N, T>& box, const vec_t <N, T>& offset) {
+    return box_t<N, T>{box.position + offset, box.size};
 }
 
 template<typename T>
-bool box_t<T, 2>::contains(float px, float py) const {
+bool box_t<2, T>::contains(float px, float py) const {
     // A little more complicated than usual due to proper handling of negative widths/heights
     px -= x;
     if (width >= 0) {
@@ -238,17 +239,17 @@ bool box_t<T, 2>::contains(float px, float py) const {
 }
 
 template<typename T>
-bool box_t<T, 2>::contains(const vec_t<T, 2>& point) const {
+bool box_t<2, T>::contains(const vec_t<2, T>& point) const {
     return contains(point.x, point.y);
 }
 
 template<typename T>
-bool box_t<T, 2>::overlaps(const box_t<T, 2>& other) const {
+bool box_t<2, T>::overlaps(const box_t<2, T>& other) const {
     return x <= other.right() && other.x <= right() && y <= other.bottom() && other.y <= bottom();
 }
 
 template<typename T>
-box_t<T, 2> box_t<T, 2>::scale(float sx, float sy) const {
+box_t<2, T> box_t<2, T>::scale(float sx, float sy) const {
     rect_f r{x * sx, y * sy, width * sx, height * sy};
     if (r.width < 0) {
         r.x += r.width;
@@ -262,39 +263,39 @@ box_t<T, 2> box_t<T, 2>::scale(float sx, float sy) const {
 }
 
 template<typename T, unsigned N>
-box_t<T, N> lerp(const box_t<T, N>& begin, const box_t<T, N>& end, T t) {
+box_t<N, T> lerp(const box_t<N, T>& begin, const box_t<N, T>& end, T t) {
     return {lerp(begin.position, end.position, t),
             lerp(begin.size, end.size, t)};
 }
 
 template<typename T, unsigned N>
-box_t<T, N> expand(const box_t<T, N>& box, const vec_t <T, N>& amount) {
-    return box_t<T, N>{box.position - amount, box.size + T{2} * amount};
+box_t<N, T> expand(const box_t<N, T>& box, const vec_t <N, T>& amount) {
+    return box_t<N, T>{box.position - amount, box.size + T{2} * amount};
 }
 
 template<typename T, unsigned N>
-box_t<T, N> expand(const box_t<T, N>& box, T scalar) {
-    return expand(box, scalar * vec_t<T, N>::one);
+box_t<N, T> expand(const box_t<N, T>& box, T scalar) {
+    return expand(box, scalar * vec_t<N, T>::one);
 }
 
 template<typename T, unsigned N>
-constexpr box_t<T, N> min_max_box(const vec_t <T, N>& min, const vec_t <T, N>& max) noexcept {
+constexpr box_t<N, T> min_max_box(const vec_t <N, T>& min, const vec_t <N, T>& max) noexcept {
     return {min, max - min};
 }
 
 template<typename T, unsigned N>
-constexpr box_t<T, N> points_box(const vec_t <T, N>& a, const vec_t <T, N>& b) noexcept {
+constexpr box_t<N, T> points_box(const vec_t <N, T>& a, const vec_t <N, T>& b) noexcept {
     return min_max_box(min_components(a, b), max_components(a, b));
 }
 
 template<typename T, unsigned N>
-box_t<T, N> clamp_bounds(const box_t<T, N>& a, const box_t<T, N>& b) {
+box_t<N, T> clamp_bounds(const box_t<N, T>& a, const box_t<N, T>& b) {
     return min_max_box(max_components(a.position, b.position),
                        min_components(a.right_bottom(), b.right_bottom()));
 }
 
 template<typename T, unsigned N>
-box_t<T, N> combine(const box_t<T, N>& a, const box_t<T, N>& b) {
+box_t<N, T> combine(const box_t<N, T>& a, const box_t<N, T>& b) {
     return min_max_box(min_components(a.position, b.position),
                        max_components(a.right_bottom(), b.right_bottom()));
 }

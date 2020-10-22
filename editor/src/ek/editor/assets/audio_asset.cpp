@@ -1,8 +1,7 @@
 #include "audio_asset.hpp"
 #include <ek/serialize/serialize.hpp>
 #include <ek/system/system.hpp>
-#include <ek/audiomini.hpp>
-#include <ek/util/locator.hpp>
+#include <ek/audio/audio.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 
 namespace ek {
@@ -29,7 +28,7 @@ void audio_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
         music_filters.emplace_back(music_node.attribute("filter").as_string());
     }
 
-    auto files = search_files("*.mp3", project->base_path);
+    auto files = search_files("*.mp3", project->base_path / resource_path_);
     for (auto& file : files) {
         if (check_filters(file, music_filters)) {
             music_list_.push_back(file.str());
@@ -42,12 +41,11 @@ void audio_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
 void audio_asset_t::load() {
     read_decl();
 
-    auto& audio = resolve<AudioMini>();
     for (auto& m: music_list_) {
-        audio.create_music(m.c_str());
+        audio::create_music(m.c_str());
     }
     for (auto& m: sound_list_) {
-        audio.create_sound(m.c_str());
+        audio::create_sound(m.c_str());
     }
 }
 
@@ -64,16 +62,14 @@ void audio_asset_t::unload() {
 }
 
 void audio_asset_t::gui() {
-    auto& audio = resolve<AudioMini>();
-
     for (const auto& music : music_list_) {
         ImGui::PushID(music.c_str());
         ImGui::LabelText("Music", "%s", music.c_str());
         if (ImGui::Button("Play Music")) {
-            audio.play_music(music.c_str(), 1.0f);
+            audio::play_music(music.c_str(), 1.0f);
         }
         if (ImGui::Button("Stop Music")) {
-            audio.play_music(music.c_str(), 0.0f);
+            audio::play_music(music.c_str(), 0.0f);
         }
         ImGui::PopID();
     }
@@ -81,7 +77,7 @@ void audio_asset_t::gui() {
         ImGui::PushID(sound.c_str());
         ImGui::LabelText("Sound", "%s", sound.c_str());
         if (ImGui::Button("Play Sound")) {
-            audio.play_sound(sound.c_str(), 1.0f, 0.0f);
+            audio::play_sound(sound.c_str(), 1.0f, 0.0f);
         }
         ImGui::PopID();
     }

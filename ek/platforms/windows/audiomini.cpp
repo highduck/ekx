@@ -1,19 +1,15 @@
 #include <ek/audiomini.hpp>
 
-namespace ek {
+namespace ek::audio_mini {
 
-AudioMini::AudioMini() = default;
+void create_sound(const char* name) {}
 
-AudioMini::~AudioMini() = default;
+void create_music(const char* name) {}
 
-void AudioMini::create_sound(const char* name) {}
+void play_sound(const char* name, float vol, float pan) {}
 
-void AudioMini::create_music(const char* name) {}
+void play_music(const char* name, float vol) {}
 
-void AudioMini::play_sound(const char* name, float vol, float pan) {}
-
-void AudioMini::play_music(const char* name, float vol) {}
-
-void AudioMini::vibrate(int duration_millis) {}
+void vibrate(int duration_millis) {}
 
 }

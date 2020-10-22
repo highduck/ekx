@@ -9,8 +9,6 @@ using std::istream;
 using std::string;
 using std::stringstream;
 
-using scenex::mesh_data_t;
-
 namespace ek {
 
 struct obj_model_t {
@@ -100,7 +98,7 @@ mesh_data_t load_obj(const std::vector<uint8_t>& buffer) {
     result.indices.resize(vertices);
     size_t ptr = 0;
     for (size_t i = 0; i < vertices; ++i) {
-        result.vertices[i] = ek::vertex_3d{
+        result.vertices[i] = graphics::vertex_3d{
                 obj_model.positions[obj_model.faces[ptr]],
                 obj_model.normals[obj_model.faces[ptr + 2]],
                 obj_model.uvs[obj_model.faces[ptr + 1]],

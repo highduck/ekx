@@ -3,13 +3,13 @@
 #include <ek/util/logger.hpp>
 #include <utility>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/flash/doc/flash_file.h>
+#include <ek/flash/doc/flash_doc.hpp>
 #include <ek/spritepack/export_atlas.hpp>
-#include <scenex/2d/atlas.hpp>
-#include <scenex/2d/sprite.hpp>
-#include <scenex/data/sg_data.h>
-#include <xfl/flash_doc_exporter.h>
-#include <ek/flash/doc/flash_archive.h>
+#include <ek/scenex/2d/atlas.hpp>
+#include <ek/scenex/2d/sprite.hpp>
+#include <ek/scenex/data/sg_data.hpp>
+#include <ek/xfl/flash_doc_exporter.hpp>
+#include <ek/flash/doc/flash_archive.hpp>
 #include <ek/editor/assets/editor_temp_atlas.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
@@ -17,44 +17,6 @@
 #include <memory>
 
 namespace ek {
-
-std::unique_ptr<flash::basic_entry> load_flash_archive(const path_t& path) {
-    using namespace ek::flash;
-
-    if (is_file(path)) {
-        const auto ext = path.ext();
-        // dir/FILE/FILE.xfl
-        if (ext == "xfl") {
-            auto dir = path.dir();
-            if (is_dir(dir)) {
-                return std::make_unique<xfl_entry>(dir);
-            } else {
-                EK_ERROR("Import Flash: loading %s XFL file, but %s is not a dir", path.c_str(), dir.c_str());
-            }
-        } else if (ext == "fla") {
-            return std::make_unique<fla_entry>(path);
-        } else {
-            EK_ERROR << "Import Flash: file is not xfl or fla: " << path;
-        }
-    }
-
-    // dir/FILE.fla
-    const auto fla_file = path + ".fla";
-    if (is_file(fla_file)) {
-        return std::make_unique<fla_entry>(fla_file);
-    } else if (is_dir(path)) {
-        if (is_file(path / path.basename() + ".xfl")) {
-            return std::make_unique<xfl_entry>(path);
-        } else {
-            EK_WARN << "Import Flash: given dir doesn't contain .xfl file: " << path;
-        }
-    }
-
-    EK_ERROR << "Import Flash: file not found: " << path;
-
-    return nullptr;
-}
-
 
 flash_asset_t::flash_asset_t(path_t path)
         : editor_asset_t{std::move(path), "flash"} {
@@ -71,7 +33,7 @@ void flash_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
 void flash_asset_t::load() {
     read_decl();
 
-    flash::flash_file ff{load_flash_archive(project->base_path / resource_path_)};
+    flash::flash_doc ff{project->base_path / resource_path_};
     flash::flash_doc_exporter fe{ff};
     fe.build_library();
 
@@ -79,29 +41,27 @@ void flash_asset_t::load() {
     fe.build_sprites(temp_atlas);
     load_temp_atlas(temp_atlas);
 
-    auto* sg = new scenex::sg_file;
-    sg->library = fe.library.node;
-    sg->linkages = fe.linkages;
-    asset_t<scenex::sg_file>{name_}.reset(sg);
+    sg_file sg = fe.export_library();
+    asset_t<sg_file>{name_}.reset(new sg_file{sg});
 }
 
 void flash_asset_t::unload() {
-    asset_t<scenex::atlas_t>{name_}.reset(nullptr);
-    asset_t<scenex::sg_file>{name_}.reset(nullptr);
+    asset_t<atlas_t>{name_}.reset(nullptr);
+    asset_t<sg_file>{name_}.reset(nullptr);
 }
 
 void flash_asset_t::gui() {
-    asset_t<scenex::atlas_t> atlas{name_};
+    asset_t<atlas_t> atlas{name_};
     gui_atlas_view(atlas.get());
 
-    asset_t<scenex::sg_file> library{name_};
+    asset_t<sg_file> library{name_};
     gui_sg_file_view(library.get());
 }
 
 void flash_asset_t::build(assets_build_struct_t& data) {
     read_decl();
 
-    flash::flash_file ff{load_flash_archive(project->base_path / resource_path_)};
+    flash::flash_doc ff{project->base_path / resource_path_};
     flash::flash_doc_exporter fe{ff};
     fe.build_library();
 

@@ -4,9 +4,14 @@
 
 namespace ek {
 
-editor_app_t::editor_app_t() = default;
+editor_app_t::editor_app_t()
+        : basic_application() {
 
-editor_app_t::~editor_app_t() = default;
+}
+
+editor_app_t::~editor_app_t() {
+    basic_application::~basic_application();
+};
 
 //void editor_app_t::initialize() {
 //    basic_application::initialize();

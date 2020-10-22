@@ -6,7 +6,7 @@ namespace ek {
 
 template<typename T>
 struct circle_t {
-    using vec_type = vec_t<T, 2>;
+    using vec_type = vec_t<2, T>;
 
     vec_type center;
     T radius;
