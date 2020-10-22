@@ -3,7 +3,7 @@
 #include "dom_scanner.hpp"
 #include "cairo_renderer.hpp"
 #include "cairo_utility.hpp"
-#include <ek/flash/doc/flash_file.hpp>
+#include <ek/flash/doc/flash_doc.hpp>
 #include <cairo.h>
 #include <cstring>
 #include <ek/imaging/drawing.hpp>
@@ -110,7 +110,7 @@ sprite_t render(const rect_f& bounds,
     return data;
 }
 
-sprite_t render(const flash_file& doc, const element_t& el, const renderer_options_t& options) {
+sprite_t render(const flash_doc& doc, const element_t& el, const renderer_options_t& options) {
     dom_scanner scanner{doc};
     scanner.scan(el);
     return render(

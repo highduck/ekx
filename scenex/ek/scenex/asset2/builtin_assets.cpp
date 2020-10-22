@@ -58,7 +58,7 @@ public:
     }
 
     void do_load() override {
-        audiomini::create_music((project_->base_path / path_).c_str());
+        audio::create_music((project_->base_path / path_).c_str());
         ready_ = true;
     }
 
@@ -71,7 +71,7 @@ public:
     }
 
     void do_load() override {
-        audiomini::create_sound((project_->base_path / path_).c_str());
+        audio::create_sound((project_->base_path / path_).c_str());
         ready_ = true;
     }
 };

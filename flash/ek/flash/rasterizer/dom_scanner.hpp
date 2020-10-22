@@ -7,7 +7,7 @@
 
 namespace ek::flash {
 
-class flash_file;
+class flash_doc;
 
 struct element_t;
 
@@ -16,7 +16,7 @@ public:
     std::string name;
     shape_renderer output{};
 
-    explicit dom_scanner(const flash_file& doc);
+    explicit dom_scanner(const flash_doc& doc);
 
     void reset();
 
@@ -35,7 +35,7 @@ public:
     void scan_bitmap_item(const element_t& element);
 
 private:
-    const flash_file& file_;
+    const flash_doc& file_;
 
     std::vector<transform_model> stack_;
 
@@ -44,6 +44,6 @@ private:
     void pop_transform();
 };
 
-rect_f estimate_bounds(const flash_file& doc, const std::vector<element_t>& elements);
+rect_f estimate_bounds(const flash_doc& doc, const std::vector<element_t>& elements);
 
 }

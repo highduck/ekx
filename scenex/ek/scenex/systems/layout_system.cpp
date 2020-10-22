@@ -4,17 +4,15 @@
 #include <ek/scenex/components/transform_2d.hpp>
 #include <ek/scenex/components/node.hpp>
 #include <ek/scenex/components/display_2d.hpp>
-#include <ek/scenex/utility/scene_management.hpp>
 
 namespace ek {
 
 void update_layout(ecs::entity e) {
-    auto top_rect = find_root_rect(e);
+    const auto& l = ecs::get<layout_t>(e);
+    auto top_rect = find_parent_layout_rect(e, l.doSafeInsets);
     if (top_rect.empty()) {
         return;
     }
-
-    const auto& l = ecs::get<layout_t>(e);
     auto& transform = ecs::get<transform_2d>(e);
     if ((l.fill_x || l.fill_y) && ecs::has<display_2d>(e)) {
         auto& display = ecs::get<display_2d>(e);
@@ -60,7 +58,7 @@ void update_layout() {
 }
 
 /**** wrapper ****/
-rect_f layout_wrapper::space{0.0f, 0.0f, 1.0f, 1.0f};
+rect_f layout_wrapper::designCanvasRect{0.0f, 0.0f, 1.0f, 1.0f};
 
 
 }

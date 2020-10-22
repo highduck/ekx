@@ -48,7 +48,7 @@ endif ()
 
 add_subdirectory(core)
 add_subdirectory(ek)
-add_subdirectory(extensions/audiomini)
+#add_subdirectory(extensions/audiomini)
 add_subdirectory(extensions/mini-ads)
 add_subdirectory(scenex)
 

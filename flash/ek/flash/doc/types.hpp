@@ -95,11 +95,12 @@ struct motion_object_t {
 
 enum class tween_type {
     none,
-    motion
+    classic,
+    motion_object
 };
 
 enum class rotation_direction {
-    none,
+    none = 0,
     ccw,
     cw
 };
@@ -200,6 +201,12 @@ struct tween_object_t {
 
 struct frame_t {
     int index = 0;
+
+    [[nodiscard]]
+    int endFrame() const {
+        return index + duration - 1;
+    }
+
     int duration = 1;
     tween_type tweenType = tween_type::none;
     int keyMode = 0;
@@ -209,7 +216,7 @@ struct frame_t {
     rotation_direction motionTweenRotate = rotation_direction::none;
     int motionTweenRotateTimes = 0;
 
-    const char* name; // label
+    std::string name; // label
     int acceleration; // ease -100...100
 
     bool hasCustomEase;
@@ -237,6 +244,7 @@ struct layer_t {
 
     std::vector<frame_t> frames;
 
+    [[nodiscard]]
     size_t duration() const {
         int total = 0;
         for (const auto& frame : frames) {
@@ -244,12 +252,22 @@ struct layer_t {
         }
         return total;
     }
+
+    [[nodiscard]]
+    size_t getElementsCount() const {
+        int i = 0;
+        for (auto& frame : frames) {
+            i += frame.elements.size();
+        }
+        return i;
+    }
 };
 
 struct timeline_t {
     std::string name;
     std::vector<layer_t> layers;
 
+    [[nodiscard]]
     size_t getTotalFrames() const {
         size_t res = 1u;
         for (const auto& layer : layers) {
@@ -257,11 +275,22 @@ struct timeline_t {
         }
         return res;
     }
+
+    [[nodiscard]]
+    size_t getElementsCount() const {
+        size_t i = 0;
+        for (auto& layer : layers) {
+            i += layer.getElementsCount();
+        }
+        return i;
+    }
 };
 
 enum class element_type {
     unknown,
     shape,
+    object_oval,
+    object_rectangle,
     group,
     dynamic_text,
     static_text,
@@ -270,13 +299,22 @@ enum class element_type {
     symbol_item,
     bitmap_item,
     font_item,
-    sound_item
+    sound_item,
+
+    scene_timeline
 };
 
 enum class symbol_type {
     normal,
     button,
     graphic
+};
+
+enum class loop_mode {
+    none = 0,
+    loop,
+    play_once,
+    single_frame
 };
 
 struct item_properties {
@@ -326,7 +364,10 @@ struct element_t {
     float centerPoint3DY;
     bool cacheAsBitmap;
     bool exportAsBitmap;
-    const char* loop;
+
+    loop_mode loop;
+    int firstFrame;
+
     bool silent = false;
     bool forceSimple = false;
     bool isVisible = true;
@@ -353,7 +394,7 @@ struct element_t {
     bool isJPEG;
     int quality;
 
-    std::unique_ptr<bitmap_t> bitmap = nullptr;
+    std::shared_ptr<bitmap_t> bitmap = nullptr;
 
     /// FONT ITEM
     std::string font;

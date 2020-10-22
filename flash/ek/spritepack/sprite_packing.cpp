@@ -1,5 +1,5 @@
 #include "sprite_packing.hpp"
-#include <ek/binpack/max_rects.hpp>
+#include <ek/math/max_rects.hpp>
 #include <ek/imaging/drawing.hpp>
 
 namespace ek::spritepack {

@@ -3,13 +3,13 @@ project(ek-core)
 
 add_library(${PROJECT_NAME} STATIC
 
-        ek/binpack/max_rects.hpp
-        ek/binpack/max_rects.cpp
-
         ek/math/internal/compiler_unsafe_begin.h
         ek/math/internal/compiler_unsafe_end.h
         ek/math/common.hpp
         ek/math/serialize_math.hpp
+
+        ek/math/max_rects.hpp
+        ek/math/max_rects.cpp
 
         ek/math/vec.hpp
         ek/math/matrix_decl.hpp

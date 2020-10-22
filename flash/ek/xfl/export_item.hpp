@@ -9,6 +9,7 @@ struct element_t;
 struct export_item_t : private disable_copy_assign_t {
 
     sg_node_data node;
+
     float estimated_scale = 0.001f;
     float max_abs_scale = 100000.0f;
     const element_t* ref = nullptr;
@@ -16,6 +17,15 @@ struct export_item_t : private disable_copy_assign_t {
     export_item_t* parent = nullptr;
     int usage = 0;
     int shapes = 0;
+
+    export_item_t* drawingLayerChild = nullptr;
+    element_t* drawingLayerElement = nullptr;
+    int animationSpan0 = 0;
+    int animationSpan1 = 0;
+    bool renderThis = false;
+
+    int fromLayer = 0;
+    movie_layer_data* linkedMovieLayer = nullptr;
 
     export_item_t() = default;
 

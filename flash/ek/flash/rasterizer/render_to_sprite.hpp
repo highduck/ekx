@@ -4,7 +4,7 @@
 
 namespace ek::flash {
 
-class flash_file;
+class flash_doc;
 
 struct element_t;
 
@@ -16,6 +16,6 @@ struct renderer_options_t {
     bool trim = false;
 };
 
-spritepack::sprite_t render(const flash_file& doc, const element_t& el, const renderer_options_t& options);
+spritepack::sprite_t render(const flash_doc& doc, const element_t& el, const renderer_options_t& options);
 
 }

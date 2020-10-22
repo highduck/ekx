@@ -8,7 +8,7 @@ namespace ek {
 
 void update_movie_clips();
 
-void goto_and_stop(ecs::entity e, int frame);
+void goto_and_stop(ecs::entity e, float frame);
 
 }
 

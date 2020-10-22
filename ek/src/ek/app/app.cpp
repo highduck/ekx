@@ -2,6 +2,7 @@
 
 #include <ek/ext/analytics/analytics.hpp>
 #include <mutex>
+#include <cassert>
 
 namespace ek::app {
 

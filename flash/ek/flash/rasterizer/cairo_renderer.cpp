@@ -2,7 +2,7 @@
 
 #include "render_command.hpp"
 #include "cairo_utility.hpp"
-#include <ek/flash/doc/flash_file.hpp>
+#include <ek/flash/doc/flash_doc.hpp>
 #include <cairo.h>
 
 namespace ek::flash {

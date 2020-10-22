@@ -1,6 +1,7 @@
 #include "flash_doc_exporter.hpp"
+#include "animation_utility.hpp"
 
-#include <ek/flash/doc/flash_file.hpp>
+#include <ek/flash/doc/flash_doc.hpp>
 #include <ek/flash/rasterizer/render_to_sprite.hpp>
 #include <ek/flash/rasterizer/dom_scanner.hpp>
 #include <ek/util/strings.hpp>
@@ -10,9 +11,6 @@ namespace ek::flash {
 
 using std::string;
 
-inline float sign(float a) {
-    return a > 0.0f ? 1.0f : (a < 0.0f ? -1.0f : 0.0f);
-}
 
 bool is_hit_rect(const string& str) {
     return equals_ignore_case(str, "hitrect");
@@ -22,9 +20,54 @@ bool is_clip_rect(const string& str) {
     return equals_ignore_case(str, "cliprect");
 }
 
+bool setupSpecialLayer(const flash_doc& doc, const layer_t& layer, export_item_t& toItem) {
+    if (is_hit_rect(layer.name)) {
+        toItem.node.hitRect = estimate_bounds(doc, layer.frames[0].elements);
+        return true;
+    } else if (is_clip_rect(layer.name)) {
+        toItem.node.clipRect = estimate_bounds(doc, layer.frames[0].elements);
+        return true;
+    }
+    return false;
+}
+
+void collectFramesMetaInfo(const flash_doc& doc, export_item_t& item) {
+    if (!item.ref) {
+        return;
+    }
+    auto& layers = item.ref->timeline.layers;
+    for (auto& layer : layers) {
+        if (setupSpecialLayer(doc, layer, item)) {
+            continue;
+        }
+        for (auto& frame : layer.frames) {
+            if (!frame.script.empty()) {
+                item.node.scripts[frame.index] = frame.script;
+            }
+            if (!frame.name.empty()) {
+                item.node.labels[frame.index] = frame.name;
+            }
+        }
+    }
+}
+
+bool shouldConvertItemToSprite(export_item_t& item) {
+    if (item.children.size() == 1 && item.drawingLayerChild && item.drawingLayerChild->shapes > 0) {
+        return true;
+    } else if (item.node.labels[0] == "*static") {
+        // special user TAG
+        return true;
+    } else if (!item.node.scaleGrid.empty()) {
+        // scale 9 grid items
+        return true;
+    }
+    return false;
+}
+
 void process_transform(const element_t& el, export_item_t& item) {
     item.node.matrix = el.matrix;
     item.node.color = el.color;
+    item.node.visible = el.isVisible;
 }
 
 void process_filters(const element_t& el, export_item_t& item) {
@@ -52,80 +95,16 @@ void process_filters(const element_t& el, export_item_t& item) {
     }
 }
 
-
-void normalize_rotation(movie_layer_data& layer) {
-    // normalize skews, so that we always skew the shortest distance between
-    // two angles (we don't want to skew more than Math.PI)
-    const int end = static_cast<int>(layer.frames.size()) - 1;
-    for (int i = 0; i < end; ++i) {
-        auto& kf = layer.frames[i];
-        auto& nextKf = layer.frames[i + 1];
-        //frameXml = frameXmlList[ii];
-
-        if (kf.skew.x + math::pi < nextKf.skew.x) {
-            nextKf.skew.x += -math::pi2;
-        } else if (kf.skew.x - math::pi > nextKf.skew.x) {
-            nextKf.skew.x += math::pi2;
-        }
-        if (kf.skew.y + math::pi < nextKf.skew.y) {
-            nextKf.skew.y += -math::pi2;
-        } else if (kf.skew.y - math::pi > nextKf.skew.y) {
-            nextKf.skew.y += math::pi2;
-        }
-    }
-}
-
-void add_rotation(movie_layer_data& layer, const std::vector<frame_t>& frames) {
-    float additionalRotation = 0.0f;
-    const int end = static_cast<int>(layer.frames.size()) - 1;
-    for (int i = 0; i < end; ++i) {
-        auto& kf = layer.frames[i];
-        auto& nextKf = layer.frames[i + 1];
-        // reverse
-        const auto& f1 = frames[i];
-        // If a direction is specified, take it into account
-        if (f1.motionTweenRotate != rotation_direction::none) {
-            float direction = (f1.motionTweenRotate == rotation_direction::cw ? 1.0f : -1.0f);
-            // negative scales affect rotation direction
-            direction *= sign(nextKf.scale.x) * sign(nextKf.scale.y);
-
-            while (direction < 0.0f && kf.skew.x < nextKf.skew.x) {
-                nextKf.skew.x -= math::pi2;
-            }
-            while (direction > 0.0f && kf.skew.x > nextKf.skew.x) {
-                nextKf.skew.x += math::pi2;
-            }
-            while (direction < 0.0f && kf.skew.y < nextKf.skew.y) {
-                nextKf.skew.y -= math::pi2;
-            }
-            while (direction > 0.0f && kf.skew.y > nextKf.skew.y) {
-                nextKf.skew.y += math::pi2;
-            }
-
-            // additional rotations specified?
-            additionalRotation += static_cast<float>(f1.motionTweenRotateTimes)
-                                  * static_cast<float>(math::pi2) * direction;
-        }
-
-        nextKf.skew = nextKf.skew + float2{additionalRotation, additionalRotation};
-    }
-}
-
-flash_doc_exporter::flash_doc_exporter(const flash_file& doc)
+flash_doc_exporter::flash_doc_exporter(const flash_doc& doc)
         : doc{doc} {
 }
 
 flash_doc_exporter::~flash_doc_exporter() = default;
-//{
-//    for (auto ch : library.children) {
-//        delete ch;
-//    }
-//}
 
 void flash_doc_exporter::build_library() {
 
     for (const auto& item: doc.library) {
-        process_element(item, &library);
+        process(item, &library);
     }
 
     for (auto* item : library.children) {
@@ -139,50 +118,77 @@ void flash_doc_exporter::build_library() {
         }
     }
 
-//    auto& children = library.children;
-//    children.erase(
-//            std::remove_if(
-//                    children.begin(),
-//                    children.end(),
-//                    [](auto* item) -> bool {
-//                        if (item->usage == 0) {
-//                            delete item;
-//                            return false;
-//                        }
-//                        return true;
-//                    }), children.end());
-//    export_item_t opt_lib;
     std::vector<export_item_t*> chi{};
     for (auto& item : library.children) {
         if (item->usage > 0) {
             chi.push_back(item);
         } else {
-            delete item;
-            item = nullptr;
+            // TODO:
+//            delete item;
+//            item = nullptr;
         }
     }
     library.children = chi;
-//    library = opt_lib;
+}
+
+sg_file flash_doc_exporter::export_library() {
 
     for (auto* item : library.children) {
-        if (item->ref && (item->shapes > 0 || item->ref->bitmap)) {
-            item->node.sprite = item->node.libraryName;
-        }
+        // CHANGE: we disable sprite assignment here
+//        if (item->ref && (item->shapes > 0 || item->ref->bitmap)) {
+//            item->node.sprite = item->node.libraryName;
+//        }
+
         for (auto* child : item->children) {
             item->node.children.push_back(child->node);
         }
-        library.node.children.push_back(item->node);
-    }
-}
 
-sg_file flash_doc_exporter::export_library() const {
+        // if item should be in global registry,
+        // but if it's inline sprite - it's ok to throw it away
+        if (!item->node.libraryName.empty()) {
+            library.node.children.push_back(item->node);
+        }
+    }
+
+    for (auto& item : library.node.children) {
+        for (auto& child : item.children) {
+            const auto* ref = library.find_library_item(child.libraryName);
+            if (ref &&
+                ref->node.sprite == ref->node.libraryName &&
+                ref->node.scaleGrid.empty()
+                    ) {
+                child.sprite = ref->node.sprite;
+                child.libraryName = "";
+            }
+        }
+    }
+
+    // for (const item of this.library.node.children) {
+    //     if (item.children.length === 1) {
+    //         const child = item.children[0];
+    //         if(child.sprite && child.scaleGrid.empty) {
+    //             item.sprite = child.sprite;
+    //             item.children.length = 0;
+    //         }
+    //     }
+    // }
+
     sg_file sg;
-    sg.library = library.node;
     sg.linkages = linkages;
+
+    for (auto& item : library.node.children) {
+        if (item.sprite == item.libraryName
+            && item.scaleGrid.empty()
+            && !isInLinkages(item.libraryName)) {
+            continue;
+        }
+        sg.library.children.push_back(item);
+    }
+
     return sg;
 }
 
-void flash_doc_exporter::process_symbol_instance(const element_t& el, export_item_t* parent) {
+void flash_doc_exporter::process_symbol_instance(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
     assert(el.elementType == element_type::symbol_instance);
 
     auto* item = new export_item_t();
@@ -192,14 +198,16 @@ void flash_doc_exporter::process_symbol_instance(const element_t& el, export_ite
     item->node.libraryName = el.libraryItemName;
     item->node.button = el.symbolType == symbol_type::button;
     item->node.touchable = !el.silent;
-    item->node.visible = el.isVisible;
 
     process_filters(el, *item);
 
     item->append_to(parent);
+    if (bag) {
+        bag->list.push_back(item);
+    }
 }
 
-void flash_doc_exporter::process_bitmap_instance(const element_t& el, export_item_t* parent) {
+void flash_doc_exporter::process_bitmap_instance(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
     assert(el.elementType == element_type::bitmap_instance);
 
     auto* item = new export_item_t;
@@ -207,14 +215,27 @@ void flash_doc_exporter::process_bitmap_instance(const element_t& el, export_ite
     process_transform(el, *item);
     item->node.name = el.item.name;
     item->node.libraryName = el.libraryItemName;
-    item->node.sprite = el.libraryItemName;
 
     process_filters(el, *item);
 
     item->append_to(parent);
+    if (bag) {
+        bag->list.push_back(item);
+    }
 }
 
-void flash_doc_exporter::process_dynamic_text(const element_t& el, export_item_t* parent) {
+void flash_doc_exporter::process_bitmap_item(const element_t& el, export_item_t* lib, processing_bag_t* bag) {
+    auto* item = new export_item_t();
+    item->ref = &el;
+    item->node.libraryName = el.item.name;
+    item->renderThis = true;
+    item->append_to(lib);
+    if (bag) {
+        bag->list.push_back(item);
+    }
+}
+
+void flash_doc_exporter::process_dynamic_text(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
     assert(el.elementType == element_type::dynamic_text);
 
     auto* item = new export_item_t();
@@ -237,6 +258,7 @@ void flash_doc_exporter::process_dynamic_text(const element_t& el, export_item_t
 
     item->node.dynamicText.emplace();
     item->node.dynamicText->rect = expand(el.rect, 2.0f);
+    // TODO: replace '\r' to '\n' ?
     item->node.dynamicText->text = el.textRuns[0].characters;
     item->node.dynamicText->alignment = el.textRuns[0].attributes.alignment;
     item->node.dynamicText->face = face;
@@ -248,10 +270,14 @@ void flash_doc_exporter::process_dynamic_text(const element_t& el, export_item_t
     process_filters(el, *item);
 
     item->append_to(parent);
+    if (bag) {
+        bag->list.push_back(item);
+    }
 }
 
-void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t* parent) {
-    assert(el.elementType == element_type::symbol_item);
+void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
+    assert(el.elementType == element_type::symbol_item ||
+           el.elementType == element_type::scene_timeline);
 
     auto* item = new export_item_t();
     item->ref = &el;
@@ -260,167 +286,153 @@ void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t*
     assert(el.libraryItemName.empty());
     item->node.scaleGrid = el.scaleGrid;
 
-    const auto timeline_frames_total = el.timeline.getTotalFrames();
-    const bool is_static = timeline_frames_total == 1
-                           && (el.symbolType == symbol_type::graphic
-                               || !el.scaleGrid.empty()
-                               || el.item.linkageBaseClass == "flash.display.Sprite");
+    collectFramesMetaInfo(doc, *item);
 
-    if (el.symbolType == symbol_type::button) {
-        EK_TRACE << "== Button symbol ==";
-    }
 
-    if (is_static) {
-        item->shapes++;
-    }
+    const auto frames_count = el.timeline.getTotalFrames();
+    const auto elements_count = el.timeline.getElementsCount();
 
-    if (timeline_frames_total > 1) {
-        item->node.movie.emplace();
-        item->node.movie->frames = timeline_frames_total;
-    }
+    if (shouldConvertItemToSprite(*item)) {
+        item->renderThis = true;
+        item->children.clear();
+    } else {
+        const auto withoutTimeline = frames_count <= 1 ||
+                                     elements_count == 0 ||
+                                     el.item.linkageBaseClass == "flash.display.Sprite" ||
+                                     el.item.linkageBaseClass == "flash.display.Shape";
 
-    int layer_key = 1;
-    const auto& layers = el.timeline.layers;
-    for (auto it = layers.crbegin(); it != layers.crend(); ++it) {
-        movie_layer_data layer_data{};
-        layer_data.key = layer_key;
-        int animation_key = 1;
-        for (const auto& frame_data : it->frames) {
-
-            if (is_hit_rect(it->name)) {
-                item->node.hitRect = estimate_bounds(doc, frame_data.elements);
-            } else if (is_clip_rect(it->name)) {
-                item->node.clipRect = estimate_bounds(doc, frame_data.elements);
-            }
-
-            item->node.script = frame_data.script;
-            if (!item->node.script.empty()) {
-                EK_TRACE << "== SCRIPT: " << item->node.script;
-            }
-
-            switch (it->layerType) {
-                case layer_type::normal:
-                    if (!frame_data.elements.empty() && !is_static) {
-                        for (auto& frame_element: frame_data.elements) {
-                            process_element(frame_element, item);
-                        }
-                        if (item->node.movie
-                            // if we don't have added children there is nothing to animate
-                            && !item->children.empty()) {
-
-                            movie_frame_data ef;
-                            ef.index = frame_data.index;
-                            ef.duration = frame_data.duration;
-                            ef.key = animation_key;
-                            if (frame_data.tweenType == tween_type::none) {
-                                ef.motion_type = 0;
-                            } else {
-                                ef.motion_type = 1;
-                                for (auto& fd : frame_data.tweens) {
-                                    auto& g = ef.tweens.emplace_back();
-                                    g.attribute = static_cast<uint8_t>(fd.target);
-                                    g.ease = static_cast<float>(fd.intensity) / 100.0f;
-                                    g.curve = fd.custom_ease;
-                                }
-                                if (ef.tweens.empty()) {
-                                    auto& g = ef.tweens.emplace_back();
-                                    g.attribute = 0;
-                                    g.ease = static_cast<float>(frame_data.acceleration) / 100.0f;
-                                }
-                            }
-
-                            const auto m = frame_data.elements[0].matrix;
-                            const auto c = frame_data.elements[0].color;
-                            const auto p = frame_data.elements[0].transformationPoint;
-                            ef.pivot = p;
-                            ef.position = m.transform(p);
-                            ef.scale = m.scale();
-                            ef.skew = m.skew();
-                            ef.color = c;
-
-                            layer_data.frames.push_back(ef);
-
-                            auto* child = item->children[static_cast<int>(item->children.size()) - 1];
-                            child->node.animationKey = animation_key;
-                            child->node.layerKey = layer_key;
+        if (withoutTimeline) {
+            const auto layers = el.timeline.layers;
+            for (int layerIndex = int(layers.size()) - 1; layerIndex >= 0; --layerIndex) {
+                const auto& layer = layers[layerIndex];
+                if (layer.layerType == layer_type::normal) {
+                    for (auto& frame : layer.frames) {
+                        for (auto& frameElement : frame.elements) {
+                            _animationSpan0 = 0;
+                            _animationSpan1 = 0;
+                            process(frameElement, item);
                         }
                     }
-                    break;
-                default:
-                    break;
+                }
             }
-            ++animation_key;
+            if (item->children.size() == 1 && item->drawingLayerChild) {
+                item->renderThis = true;
+                item->children.clear();
+            }
+        } else {
+            processTimeline(el, item);
         }
-        const auto keyframe_count = layer_data.frames.size();
-        if (keyframe_count > 1) {
-            normalize_rotation(layer_data);
-            add_rotation(layer_data, it->frames);
-        }
-        item->node.movie->layers.push_back(layer_data);
-        ++layer_key;
     }
 
     item->append_to(parent);
+    if (bag) {
+        bag->list.push_back(item);
+    }
 }
 
-void flash_doc_exporter::process_group(const element_t& el, export_item_t* parent) {
+void flash_doc_exporter::process_group(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
     assert(el.elementType == element_type::group);
     for (const auto& member : el.members) {
-        process_element(member, parent);
+        process(member, parent, bag);
     }
 }
 
-void flash_doc_exporter::process_shape(const element_t& el, export_item_t* parent) {
-    assert(el.elementType == element_type::shape);
-    if (parent) {
-        parent->shapes++;
+void flash_doc_exporter::process_shape(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
+    assert(el.elementType == element_type::shape ||
+           el.elementType == element_type::object_oval ||
+           el.elementType == element_type::object_rectangle);
+    const auto item = addElementToDrawingLayer(parent, el);
+    if (bag) {
+        bag->list.push_back(item);
     }
+//    if (parent) {
+//        parent->shapes++;
+//    }
 }
 
-void flash_doc_exporter::process_element(const element_t& el, export_item_t* parent) {
-    switch (el.elementType) {
+static std::string SHAPE_ID = "$";
+// we need global across all libraries to avoid multiple FLA exports overlapping
+int NEXT_SHAPE_IDX = 0;
+
+export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item, const element_t& el) {
+    if (item->drawingLayerChild) {
+        auto* child = item->drawingLayerChild;
+        if (child->drawingLayerElement && child->ref &&
+            child->animationSpan0 == _animationSpan0 &&
+            child->animationSpan1 == _animationSpan1) {
+            EK_DEBUG << "Found drawing layer " << child->ref->item.name;
+            child->drawingLayerElement->members.push_back(el);
+            child->shapes++;
+            return child;
+        }
+    }
+    auto* layer = new export_item_t();
+    auto* newElement = new element_t();
+    const std::string name = SHAPE_ID + std::to_string(++NEXT_SHAPE_IDX);
+    newElement->libraryItemName = name;
+    newElement->item.name = name;
+    newElement->elementType = element_type::group;
+    newElement->members.push_back(el);
+    layer->ref = newElement;
+    layer->node.libraryName = name;
+    layer->renderThis = true;
+    layer->drawingLayerElement = newElement;
+    layer->animationSpan0 = _animationSpan0;
+    layer->animationSpan1 = _animationSpan1;
+    item->drawingLayerChild = layer;
+    item->add(layer);
+    library.add(layer);
+
+    EK_DEBUG << "Created drawing layer " << newElement->item.name;
+    layer->shapes++;
+    return layer;
+}
+
+void flash_doc_exporter::process(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
+    const auto type = el.elementType;
+    switch (type) {
         case element_type::symbol_instance:
-            process_symbol_instance(el, parent);
+            process_symbol_instance(el, parent, bag);
             break;
         case element_type::bitmap_instance:
-            process_bitmap_instance(el, parent);
+            process_bitmap_instance(el, parent, bag);
             break;
         case element_type::bitmap_item:
-            process_bitmap_item(el, parent);
+            process_bitmap_item(el, parent, bag);
             break;
         case element_type::symbol_item:
-            process_symbol_item(el, parent);
+        case element_type::scene_timeline:
+            process_symbol_item(el, parent, bag);
             break;
         case element_type::dynamic_text:
-            process_dynamic_text(el, parent);
+            process_dynamic_text(el, parent, bag);
             break;
         case element_type::group:
-            process_group(el, parent);
+            process_group(el, parent, bag);
             break;
         case element_type::shape:
-            process_shape(el, parent);
+        case element_type::object_oval:
+        case element_type::object_rectangle:
+            process_shape(el, parent, bag);
             break;
 
         case element_type::font_item:
         case element_type::sound_item:
         case element_type::static_text:
+            EK_WARN << "element type is not supported yet:" << static_cast<int>(type);
+            break;
+
         case element_type::unknown:
-            // TODO:
+            EK_WARN << "unknown element type:" << static_cast<int>(type);
             break;
     }
-}
-
-void flash_doc_exporter::process_bitmap_item(const element_t& el, export_item_t* lib) {
-    auto* item = new export_item_t();
-    item->ref = &el;
-    item->node.libraryName = el.item.name;
-    item->append_to(lib);
 }
 
 /*** rendering ***/
 
 void flash_doc_exporter::render(const export_item_t& item, spritepack::atlas_t& to_atlas) const {
     const element_t& el = *item.ref;
+    const auto spriteID = el.item.name;
     renderer_options_t options;
     for (auto& resolution : to_atlas.resolutions) {
         options.scale = std::min(
@@ -428,20 +440,145 @@ void flash_doc_exporter::render(const export_item_t& item, spritepack::atlas_t& 
                 resolution.resolution_scale * std::min(1.0f, item.estimated_scale)
         );
         auto res = ::ek::flash::render(doc, el, options);
-        res.name = el.item.name;
+        res.name = spriteID;
+        res.trim = item.node.scaleGrid.empty();
         resolution.sprites.push_back(res);
     }
 }
 
 void flash_doc_exporter::build_sprites(spritepack::atlas_t& to_atlas) const {
     for (auto* item : library.children) {
-        // todo: check `node.sprite` instead of these checkings?
-        if (item->ref && (item->shapes > 0 || item->ref->bitmap)) {
+        if (item->renderThis) {
+            item->node.sprite = item->ref->item.name;
             render(*item, to_atlas);
-            //item->node.sprite = item->node.libraryName;
+        }
+        if (!item->node.scaleGrid.empty()) {
+
         }
     }
 }
 
+bool flash_doc_exporter::isInLinkages(const string& id) const {
+    for (const auto& pair : linkages) {
+        if (pair.second == id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* item) {
+    auto& movie = item->node.movie.emplace();
+    movie.frames = el.timeline.getTotalFrames();
+    movie.fps = doc.info.frameRate;
+
+    const auto& layers = el.timeline.layers;
+    for (int layerIndex = int(layers.size()) - 1; layerIndex >= 0; --layerIndex) {
+        auto& layer = layers[layerIndex];
+        // ignore other layers.
+        // TODO: mask layer
+        if (layer.layerType != layer_type::normal) {
+            continue;
+        }
+        for (int frameIndex = 0; frameIndex < layer.frames.size(); ++frameIndex) {
+            auto& frame = layer.frames[frameIndex];
+            processing_bag_t targets;
+            for (const auto& frameElement : frame.elements) {
+                bool found = false;
+                for (auto* prevItem : item->children) {
+                    if (prevItem->ref &&
+                        prevItem->ref->libraryItemName == frameElement.libraryItemName &&
+                        prevItem->ref->item.name == frameElement.item.name &&
+                        prevItem->fromLayer == layerIndex &&
+                        prevItem->linkedMovieLayer) {
+                        targets.list.push_back(prevItem);
+                        // copy new transform
+                        prevItem->ref = &frameElement;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    _animationSpan0 = frame.index;
+                    _animationSpan1 = frame.endFrame();
+                    process(frameElement, item, &targets);
+                }
+            }
+            const auto k0 = createFrameModel(frame);
+            std::optional<keyframe_transform_t> delta;
+            if (k0.motion_type == 1
+                && !frame.elements.empty()
+                && (frameIndex + 1) < layer.frames.size()) {
+                const auto& nextFrame = layer.frames[frameIndex + 1];
+                if (!nextFrame.elements.empty()) {
+                    const auto& el0 = frame.elements.back();
+                    const auto& el1 = nextFrame.elements[0];
+                    delta.emplace(extractTweenDelta(frame, el0, el1));
+                }
+            }
+            for (auto* target : targets.list) {
+                if (target->ref) {
+
+                    if (!target->linkedMovieLayer) {
+                        auto& targetLayer_ = movie.layers.emplace_back();
+                        targetLayer_.targets.push_back(&target->node);
+                        target->fromLayer = layerIndex;
+                        target->linkedMovieLayer = &targetLayer_;
+                    }
+                    auto* targetLayer = target->linkedMovieLayer;
+
+                    auto kf0 = createFrameModel(frame);
+                    setupFrameFromElement(kf0, *target->ref);
+                    targetLayer->frames.push_back(kf0);
+                    if (delta) {
+                        movie_frame_data kf1{};
+                        kf1.index = kf0.index + kf0.duration;
+                        kf1.duration = 0;
+                        kf1.position = kf0.position + delta->position;
+                        kf1.pivot = kf0.pivot + delta->pivot;
+                        kf1.scale = kf0.scale + delta->scale;
+                        kf1.skew = kf0.skew + delta->skew;
+                        kf1.color.multiplier = kf0.color.multiplier + delta->color.multiplier;
+                        kf1.color.offset = kf0.color.offset + delta->color.offset;
+                        kf1.visible = false;
+                        targetLayer->frames.push_back(kf1);
+                    }
+                }
+            }
+        }
+
+        auto it = movie.layers.begin();
+        const auto end = movie.layers.end();
+        while (it != movie.layers.end()) {
+            bool empty = false;
+            if (it->frames.empty()) {
+                empty = true;
+            }
+            if (it->frames.size() == 1) {
+                const auto& frame = it->frames[0];
+                if (frame.index == 0 && frame.motion_type != 2 && frame.duration == movie.frames) {
+                    empty = true;
+                }
+            }
+            if (empty) {
+                it = movie.layers.erase(it);
+            } else {
+                it++;
+            }
+        }
+
+        if (movie.frames > 1 && !movie.layers.empty()) {
+            for (size_t i = 0; i < movie.layers.size(); ++i) {
+                for (auto* target : movie.layers[i].targets) {
+                    target->movieTargetId = static_cast<int>(i);
+                }
+            }
+            item->node.movie = movie;
+        }
+
+        _animationSpan0 = 0;
+        _animationSpan1 = 0;
+    }
+}
 
 }

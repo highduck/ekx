@@ -1,10 +1,10 @@
 #include "dom_scanner.hpp"
 
-#include <ek/flash/doc/flash_file.hpp>
+#include <ek/flash/doc/flash_doc.hpp>
 
 namespace ek::flash {
 
-dom_scanner::dom_scanner(const flash_file& doc) : file_{doc} {
+dom_scanner::dom_scanner(const flash_doc& doc) : file_{doc} {
     reset();
 }
 
@@ -99,7 +99,7 @@ void dom_scanner::pop_transform() {
     stack_.pop_back();
 }
 
-rect_f estimate_bounds(const flash_file& doc, const std::vector<element_t>& elements) {
+rect_f estimate_bounds(const flash_doc& doc, const std::vector<element_t>& elements) {
     dom_scanner scanner(doc);
     for (auto& el: elements) {
         scanner.scan(el);

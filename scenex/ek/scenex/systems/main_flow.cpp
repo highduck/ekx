@@ -33,14 +33,6 @@ void smoothly_advance_time(entity root, float dt) {
 }
 
 void scene_pre_update(entity root, float dt) {
-    const auto screen_size = app::g_app.drawable_size;
-    ecs::get<transform_2d>(root).rect = rect_f{
-            0.0f,
-            0.0f,
-            static_cast<float>(screen_size.x),
-            static_cast<float>(screen_size.y)
-    };
-
     resolve<simple_audio_manager>().update(dt);
     smoothly_advance_time(root, dt);
 
@@ -50,7 +42,6 @@ void scene_pre_update(entity root, float dt) {
     update_emitters();
     update_particles();
     update_shake();
-
 }
 
 void scene_post_update(ecs::entity root, float dt) {

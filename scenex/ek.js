@@ -1,8 +1,6 @@
-module.exports = class File {
-    constructor(ctx) {
-        ctx.modules.push({
-            name: "scenex",
-            cpp: [__dirname]
-        });
-    }
+module.exports = (ctx) => {
+    ctx.modules.push({
+        name: "scenex",
+        cpp: [__dirname]
+    });
 };

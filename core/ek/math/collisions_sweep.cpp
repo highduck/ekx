@@ -133,7 +133,6 @@ sweep_test_result_t sweep_circles(const circle_f& c0,
                                   const circle_f& c1,
                                   const float2& delta) {
     sweep_test_result_t result;
-    result.hit = false;
     const float2 s = c1.center - c0.center;
     const float r = c1.radius + c0.radius;
     const float c = dot(s, s) - r * r;

@@ -42,10 +42,10 @@ void audio_asset_t::load() {
     read_decl();
 
     for (auto& m: music_list_) {
-        audiomini::create_music(m.c_str());
+        audio::create_music(m.c_str());
     }
     for (auto& m: sound_list_) {
-        audiomini::create_sound(m.c_str());
+        audio::create_sound(m.c_str());
     }
 }
 
@@ -66,10 +66,10 @@ void audio_asset_t::gui() {
         ImGui::PushID(music.c_str());
         ImGui::LabelText("Music", "%s", music.c_str());
         if (ImGui::Button("Play Music")) {
-            audiomini::play_music(music.c_str(), 1.0f);
+            audio::play_music(music.c_str(), 1.0f);
         }
         if (ImGui::Button("Stop Music")) {
-            audiomini::play_music(music.c_str(), 0.0f);
+            audio::play_music(music.c_str(), 0.0f);
         }
         ImGui::PopID();
     }
@@ -77,7 +77,7 @@ void audio_asset_t::gui() {
         ImGui::PushID(sound.c_str());
         ImGui::LabelText("Sound", "%s", sound.c_str());
         if (ImGui::Button("Play Sound")) {
-            audiomini::play_sound(sound.c_str(), 1.0f, 0.0f);
+            audio::play_sound(sound.c_str(), 1.0f, 0.0f);
         }
         ImGui::PopID();
     }

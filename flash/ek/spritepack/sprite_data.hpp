@@ -39,6 +39,8 @@ struct sprite_t {
     // reference image;
     image_t* image = nullptr;
 
+    bool trim = false;
+
     [[nodiscard]]
     bool is_packed() const {
         return (flags & static_cast<uint8_t>(sprite_flags_t::packed)) != 0;

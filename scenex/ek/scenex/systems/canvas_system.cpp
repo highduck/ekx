@@ -1,4 +1,5 @@
 #include "canvas_system.hpp"
+#include "layout_system.hpp"
 
 #include <ek/app/app.hpp>
 #include <ek/scenex/components/canvas.hpp>
@@ -22,44 +23,56 @@ void on_scale_factor_changed() {
 void on_rect_changed() {
 }
 
-float2 get_canvas_space_size(ecs::entity e) {
-    float2 size = get_screen_size();
+layout_t get_canvas_space_size(ecs::entity e) {
+    layout_t result;
+    result.rect = {float2::zero, get_screen_size()};
+    result.safeRect = result.rect;
 
     auto parent = ecs::get_or_default<node_t>(e).parent;
     if (parent) {
-        auto transform = ecs::get<transform_2d>(parent);
-        if (!transform.rect.empty()) {
-            size = transform.rect.size;
+        auto layout = ecs::get<layout_t>(parent);
+        if (!layout.safeRect.empty()) {
+            result = layout;
         }
     }
 
-    return size;
+    return result;
 }
 
 float update_canvas(ecs::entity e) {
     auto& canvas = ecs::get<canvas_t>(e);
-    auto size = get_canvas_space_size(e);
+    auto rootLayout = get_canvas_space_size(e);
     auto resolution_size = canvas.resolution.size;
-    float2 scale_ratio = size / resolution_size;
+    float2 scale_ratio = rootLayout.safeRect.size / resolution_size;
 
     float scale = canvas.landscape ? scale_ratio.y : scale_ratio.x;
-    float2 left_top = 0.5f * (size - scale * resolution_size);
+    float2 left_top = 0.5f * (rootLayout.safeRect.size - scale * resolution_size);
+    float2 left_top_full = 0.5f * (rootLayout.rect.size - scale * resolution_size);
 
     if (canvas.scale != scale) {
         canvas.scale = scale;
         on_scale_factor_changed();
     }
 
-    rect_f rc{
-            -left_top / scale,
-            size / scale
+    rect_f rect{
+            (rootLayout.rect.position - left_top_full) / scale,
+            rootLayout.rect.size / scale
     };
 
-    auto& transform = ecs::get<transform_2d>(e);
-    if (transform.rect != rc) {
-        transform.matrix.position(left_top);
+    rect_f safeRect{
+            rect.position + rootLayout.safeRect.position / scale,
+            rootLayout.safeRect.size / scale
+    };
+
+    auto& layout = ecs::get<layout_t>(e);
+    if (layout.safeRect != safeRect) {
+        layout.safeRect = safeRect;
+        layout.rect = rect;
+
+        auto& transform = ecs::get<transform_2d>(e);
+        transform.matrix.position(left_top_full);
         transform.scale = float2{scale, scale};
-        transform.rect = rc;
+
         on_rect_changed();
     }
 
@@ -72,13 +85,13 @@ void update_canvas() {
     }
 }
 
-bool check_aspect_ratio(const ecs::entity e) {
-    const auto& canvas = ecs::get<canvas_t>(e);
-    const auto& resolution = canvas.resolution;
-    const auto& view = ecs::get<transform_2d>(e).rect;
-    const float resolution_ratio = resolution.width / resolution.height;
-    const float view_ratio = view.width / view.height;
-    return canvas.landscape ? view_ratio >= resolution_ratio : view_ratio <= resolution_ratio;
-}
+//bool check_aspect_ratio(const ecs::entity e) {
+//    const auto& canvas = ecs::get<canvas_t>(e);
+//    const auto& resolution = canvas.resolution;
+//    const auto& view = ecs::get<transform_2d>(e).rect;
+//    const float resolution_ratio = resolution.width / resolution.height;
+//    const float view_ratio = view.width / view.height;
+//    return canvas.landscape ? view_ratio >= resolution_ratio : view_ratio <= resolution_ratio;
+//}
 
 }

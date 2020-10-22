@@ -5,7 +5,7 @@ namespace ek::flash {
 
 using render_op = render_command::operation;
 
-render_command shape_edge::to_command() {
+render_command shape_edge::to_command() const {
     if (is_quadratic) {
         return {render_op::curve_to, c, p1};
     } else {

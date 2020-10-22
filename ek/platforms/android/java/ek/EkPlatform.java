@@ -1,14 +1,11 @@
 package ek;
 
 import android.content.res.AssetManager;
-import android.support.annotation.Keep;
+
+import androidx.annotation.Keep;
 
 @Keep
 public class EkPlatform {
-
-    static {
-        System.loadLibrary("native-lib");
-    }
 
     static final int CALL_DISPATCH_FRAME = 0;
     static final int CALL_START = 1;

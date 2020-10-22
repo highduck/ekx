@@ -74,15 +74,27 @@ color_transform_f& operator<<(color_transform_f& color, const xml_node& node) {
     color.multiplier.z = ct.attribute("blueMultiplier").as_float(1.0f);
     color.multiplier.w = ct.attribute("alphaMultiplier").as_float(1.0f);
 
-    color.offset.x = ct.attribute("redOffset").as_float();
-    color.offset.y = ct.attribute("greenOffset").as_float();
-    color.offset.z = ct.attribute("blueOffset").as_float();
-    color.offset.w = ct.attribute("alphaOffset").as_float();
+    color.offset.x = ct.attribute("redOffset").as_float() / 255.0f;
+    color.offset.y = ct.attribute("greenOffset").as_float() / 255.0f;
+    color.offset.z = ct.attribute("blueOffset").as_float() / 255.0f;
+    color.offset.w = ct.attribute("alphaOffset").as_float() / 255.0f;
 
     auto tint_multiplier = ct.attribute("tintMultiplier").as_float();
     auto tint_color = parse_css_color(ct.attribute("tintColor").value());
     if (tint_multiplier > 0.0f) {
         color.tint(tint_color, tint_multiplier);
+    }
+
+    // default: 0, values: -1 ... 1
+    const auto br = math::clamp(ct.attribute("brightness").as_float(0.0f), -1.0f, 1.0f);
+    if (br < 0.0f) {
+        color.multiplier.x =
+        color.multiplier.y =
+        color.multiplier.z = 1.0f + br;
+    } else if (br > 0.0f) {
+        color.offset.x =
+        color.offset.y =
+        color.offset.z = br;
     }
 
     return color;

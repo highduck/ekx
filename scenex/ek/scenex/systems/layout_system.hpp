@@ -16,7 +16,7 @@ public:
               l_{ecs::get_or_create<layout_t>(e)} {
     }
 
-    static rect_f space;
+    static rect_f designCanvasRect;
 
     layout_wrapper& aligned(float rel_x = 0.0f, float abs_x = 0.0f, float rel_y = 0.0f, float abs_y = 0.0f) {
         horizontal(rel_x, abs_x);
@@ -26,14 +26,14 @@ public:
 
     layout_wrapper& hard(float x, float y) {
         auto& transform = ecs::get_or_create<transform_2d>(e_);
-        horizontal(x, transform.matrix.tx - (space.x + space.width * x));
-        vertical(y, transform.matrix.ty - (space.y + space.height * y));
+        horizontal(x, transform.matrix.tx - (designCanvasRect.x + designCanvasRect.width * x));
+        vertical(y, transform.matrix.ty - (designCanvasRect.y + designCanvasRect.height * y));
         return *this;
     }
 
     layout_wrapper& hard_y(float y = 0.0f) {
         auto& transform = ecs::get_or_create<transform_2d>(e_);
-        vertical(y, transform.matrix.ty - (space.y + space.height * y));
+        vertical(y, transform.matrix.ty - (designCanvasRect.y + designCanvasRect.height * y));
         return *this;
     }
 
@@ -59,7 +59,6 @@ public:
         l_.fill_extra = rc;
         return *this;
     }
-
 private:
     ecs::entity e_;
     layout_t& l_;

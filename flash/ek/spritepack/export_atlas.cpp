@@ -3,7 +3,7 @@
 #include "sprite_packing.hpp"
 #include "save_image_png.hpp"
 
-#include <ek/binpack/max_rects.hpp>
+#include <ek/math/max_rects.hpp>
 #include <ek/util/timer.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/math/serialize_math.hpp>
@@ -48,16 +48,6 @@ void save_atlas_resolution(atlas_resolution_t& resolution, const std::string& na
     IO io{os};
     io(const_cast<atlas_resolution_t&>(resolution));
     save_stream(os, path_t{name + get_atlas_suffix(resolution.resolution_scale) + ".atlas"});
-
-    auto json = dump_resolution_json(resolution);
-    path_t json_path{name + get_atlas_suffix(resolution.resolution_scale) + ".atlas.json"};
-    auto h = fopen(json_path.c_str(), "w");
-    if (h) {
-        fwrite(json.data(), 1, json.size(), h);
-        fclose(h);
-    } else {
-        EK_WARN << "fopen error: " << json_path;
-    }
 }
 
 static void export_atlas_thread(const std::string& name,

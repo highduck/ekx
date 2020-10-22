@@ -145,17 +145,6 @@ namespace ek {
         env->CallStaticVoidMethod(class_ref, method_id);
         env->DeleteLocalRef(class_ref);
     }
-
-    std::string get_device_lang() {
-        auto *env = android_jni_get_env();
-        auto class_ref = env->FindClass("ek/EkActivity");
-        auto method = env->GetStaticMethodID(class_ref, "get_device_lang", "()Ljava/lang/String;");
-        auto rv = (jstring) env->CallStaticObjectMethod(class_ref, method);
-        const char *temp_str = env->GetStringUTFChars(rv, 0);
-        std::string result{temp_str};
-        env->ReleaseStringUTFChars(rv, temp_str);
-        return result;
-    }
 }
 
 void handle_enter_frame() {
@@ -201,7 +190,6 @@ EK_JNI_VOID(sendEvent, jint type) {
             break;
         case call_start:
             ::ek::main();
-            g_app.lang = ek::get_device_lang();
             break;
         case call_ready:
             dispatch_device_ready();
@@ -209,7 +197,7 @@ EK_JNI_VOID(sendEvent, jint type) {
         case event_nop:
             break;
         default:
-            dispatch_event({static_cast<event_type>(type)});
+            dispatch_event({static_cast<event_type>(event_type_id)});
             break;
     }
 }

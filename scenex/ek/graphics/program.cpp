@@ -17,6 +17,9 @@ void print_shader_compile_error(GLuint handle, const char* user_data) {
         glGetShaderInfoLog(handle, sizeof(buf) - 1, nullptr, (GLchar*) buf);
         EK_ERROR << buf;
     }
+    else {
+        EK_ERROR << "Empty compilation log";
+    }
 }
 
 void print_program_compile_error(GLuint handle, const char* user_data) {
