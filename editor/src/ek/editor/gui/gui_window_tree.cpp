@@ -13,6 +13,7 @@
 #include <ek/scenex/3d/camera_3d.hpp>
 #include <ek/math/common.hpp>
 #include <ek/scenex/3d/light_3d.hpp>
+#include <ek/scenex/components/movie.hpp>
 
 namespace ek {
 
@@ -139,6 +140,23 @@ void gui_window_tree() {
 //    ImGui::ShowAboutWindow();
 //    ImGui::ShowMetricsWindow();
 //    ImGui::ShowUserGuide();
+}
+
+void gui_movie_clip(ecs::entity entity) {
+    auto& mc = ecs::get<movie_t>(entity);
+    if (ImGui::CollapsingHeader("Movie Clip")) {
+        const auto* data = mc.get_movie_data();
+        if (data) {
+            ImGui::LabelText("Total Frames", "%u", data->frames);
+            ImGui::LabelText("Default FPS", "%f", data->fps);
+
+            ImGui::DragFloat("Time", &mc.time, 1.0f, 0.0f, data->frames);
+            ImGui::DragFloat("FPS", &mc.fps, 1.0f, 0.0f, 100.0f);
+            ImGui::Checkbox("Playing", &mc.playing);
+        }
+
+        ImGui::LabelText("movie_data_symbol", "%s", mc.movie_data_symbol.c_str());
+    }
 }
 
 void gui_transform_2d(ecs::entity entity) {
@@ -308,6 +326,9 @@ void gui_inspector(ecs::entity e) {
     }
     if (ecs::has<display_2d>(e)) {
         gui_display_2d(e);
+    }
+    if (ecs::has<movie_t>(e)) {
+        gui_movie_clip(e);
     }
 
     if (ecs::has<script_holder>(e)) {

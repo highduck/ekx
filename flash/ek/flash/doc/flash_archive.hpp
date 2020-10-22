@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <ek/util/path.hpp>
+#include <memory>
 
 namespace miniz_cpp {
 class zip_file;
@@ -99,6 +100,8 @@ protected:
 private:
     miniz_cpp::zip_file* zip_file_ = nullptr;
 };
+
+std::unique_ptr<basic_entry> load_flash_archive(const path_t& path);
 
 }
 

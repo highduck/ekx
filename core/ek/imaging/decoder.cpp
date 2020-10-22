@@ -2,6 +2,7 @@
 
 #include "image.hpp"
 #include <ek/util/logger.hpp>
+#include <cassert>
 
 #ifndef __EMSCRIPTEN__
 #include "drawing.hpp"

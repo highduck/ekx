@@ -28,11 +28,9 @@ public:
 
     void play_sound(const std::string& name, const float2& position);
 
-    void vibrate(int length);
+    void vibrate(int length) const;
 
     void update(float dt);
-
-    void onMusicFft(const uint8_t* data, size_t size);
 
     void disable_all();
 

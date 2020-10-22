@@ -5,8 +5,8 @@ add_library(${PROJECT_NAME}
         # flash document
         ek/flash/doc/flash_archive.cpp
         ek/flash/doc/flash_archive.hpp
-        ek/flash/doc/flash_file.cpp
-        ek/flash/doc/flash_file.hpp
+        ek/flash/doc/flash_doc.cpp
+        ek/flash/doc/flash_doc.hpp
         ek/flash/doc/types.hpp
 
         ek/flash/doc/parsing/basic_types.cpp
@@ -41,7 +41,6 @@ add_library(${PROJECT_NAME}
 
         ek/spritepack/sprite_data.hpp
         ek/spritepack/export_atlas.cpp
-        ek/spritepack/export_atlas_json.cpp
         ek/spritepack/export_atlas.hpp
         ek/spritepack/sprite_packing.cpp
         ek/spritepack/sprite_packing.hpp
@@ -64,7 +63,7 @@ add_library(${PROJECT_NAME}
         ek/xfl/export_item.cpp
         ek/xfl/export_item.hpp
 
-        )
+        ek/xfl/animation_utility.cpp ek/xfl/animation_utility.hpp)
 
 if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
 target_compile_options(${PROJECT_NAME} PRIVATE
@@ -96,7 +95,6 @@ target_link_libraries(${PROJECT_NAME}
         scenex
         miniz
         stb-image-write
-        nlohmann-json
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)

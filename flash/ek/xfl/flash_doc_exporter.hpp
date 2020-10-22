@@ -7,15 +7,24 @@
 
 namespace ek::flash {
 
-class flash_file;
+class flash_doc;
+
+struct processing_bag_t {
+    std::vector<export_item_t*> list;
+};
 
 class flash_doc_exporter {
 public:
-    const flash_file& doc;
+    const flash_doc& doc;
     export_item_t library;
     std::unordered_map<std::string, std::string> linkages;
 
-    explicit flash_doc_exporter(const flash_file& doc);
+private:
+    int _animationSpan0 = 0;
+    int _animationSpan1 = 0;
+
+public:
+    explicit flash_doc_exporter(const flash_doc& doc);
 
     ~flash_doc_exporter();
 
@@ -23,27 +32,34 @@ public:
 
     void build_sprites(spritepack::atlas_t& to_atlas) const;
 
-    void process_element(const element_t& el, export_item_t* parent);
+    void process(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_symbol_instance(const element_t& el, export_item_t* parent);
+    void process_symbol_instance(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_symbol_item(const element_t& el, export_item_t* parent);
+    void process_symbol_item(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_bitmap_instance(const element_t& el, export_item_t* parent);
+    void process_bitmap_instance(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_bitmap_item(const element_t& el, export_item_t* library);
+    void process_bitmap_item(const element_t& el, export_item_t* library, processing_bag_t* bag = nullptr);
 
-    void process_dynamic_text(const element_t& el, export_item_t* parent);
+    void process_dynamic_text(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_group(const element_t& el, export_item_t* parent);
+    void process_group(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_shape(const element_t& el, export_item_t* parent);
+    void process_shape(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
     void render(const export_item_t& item, spritepack::atlas_t& to_atlas) const;
 
     [[nodiscard]]
-    sg_file export_library() const;
+    sg_file export_library();
 
+
+    export_item_t* addElementToDrawingLayer(export_item_t* item, const element_t& el);
+
+private:
+    [[nodiscard]] bool isInLinkages(const std::string& id) const;
+
+    void processTimeline(const element_t& Element, export_item_t* PItem);
 };
 
 }

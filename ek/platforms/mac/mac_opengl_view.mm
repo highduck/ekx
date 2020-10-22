@@ -1,5 +1,7 @@
 #include "mac_opengl_view.h"
 #include "mac_utils.h"
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
 #include <apple_common.h>
 
 using namespace ek;
@@ -82,12 +84,14 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
     // makeCurrentContext to ensure that our OpenGL context current to this
     // thread (i.e. makeCurrentContext directs all OpenGL calls on this thread
     // to [self openGLContext])
-    [[self openGLContext] makeCurrentContext];
+    const auto glContext = [self openGLContext];
+    [glContext makeCurrentContext];
 
     // Synchronize buffer swaps with vertical refresh rate
     GLint swapInt = 1;
-    [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLContextParameterSwapInterval];
+    [glContext setValues:&swapInt forParameter:NSOpenGLContextParameterSwapInterval];
 
+    const auto version = glGetString(GL_VERSION);
     [self handleResize];
 }
 

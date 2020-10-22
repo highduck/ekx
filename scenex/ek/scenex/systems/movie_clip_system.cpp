@@ -23,6 +23,92 @@ void update_movie_clips() {
     }
 }
 
+int findKeyFrame(const std::vector<movie_frame_data>& frames, float t) {
+    for (size_t i = 0; i < frames.size(); ++i) {
+        const auto& kf = frames[i];
+        if (t >= kf.index && t < kf.index + kf.duration) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void update_target(float time, entity e, const movie_layer_data& layer) {
+    auto& config = ecs::get_or_create<node_state_t>(e);
+    const auto ki = findKeyFrame(layer.frames, time);
+    if (ki < 0) {
+        config.visible = false;
+        return;
+    }
+    const auto& k1 = layer.frames[ki];
+    const auto& k2 = (ki + 1) < layer.frames.size() ? layer.frames[ki + 1] : k1;
+    config.visible = k1.visible;
+
+    auto& transform = ecs::get_or_create<transform_2d>(e);
+    float2 position;
+    if (k1.motion_type == 1) {
+        const float progress = (time - static_cast<float>(k1.index)) / static_cast<float>(k1.duration);
+        float x_position = progress;
+        float x_rotation = progress;
+        float x_scale = progress;
+        float x_color = progress;
+        for (const auto& easing_data : k1.easing) {
+            const float x = ease(progress, easing_data);
+            if (easing_data.attribute == 0) {
+                x_position = x_rotation = x_scale = x_color = x;
+                break;
+            } else if (easing_data.attribute == 1) {
+                x_position = x;
+            } else if (easing_data.attribute == 2) {
+                x_rotation = x;
+            } else if (easing_data.attribute == 3) {
+                x_scale = x;
+            } else if (easing_data.attribute == 4) {
+                x_color = x;
+            }
+        }
+
+        position = lerp(k1.position, k2.position, x_position);
+        transform.skew = lerp(k1.skew, k2.skew, x_rotation);
+        transform.scale = lerp(k1.scale, k2.scale, x_scale);
+        transform.color_multiplier = argb32_t{
+                lerp(k1.color.multiplier, k2.color.multiplier, x_color)
+        };
+        transform.color_offset = argb32_t{
+                lerp(k1.color.offset, k2.color.offset, x_color)
+        };
+    } else {
+        position = k1.position;
+        transform.skew = k1.skew;
+        transform.scale = k1.scale;
+        transform.color_multiplier = argb32_t{k1.color.multiplier};
+        transform.color_offset = argb32_t{k1.color.offset};
+    }
+    auto& m = transform.matrix;
+    m.set(transform.scale, transform.skew);
+    m.tx = position.x - m.a * k1.pivot.x - m.c * k1.pivot.y;
+    m.ty = position.y - m.b * k1.pivot.x - m.d * k1.pivot.y;
+    transform.matrix = m;
+
+    if (k1.loopMode != 0 && ecs::has<movie_t>(e)) {
+        auto& mc = ecs::get<movie_t>(e);
+        const auto loop = k1.loopMode;
+        if (loop == 1) {
+            goto_and_stop(e, time - k1.index);
+        } else if (loop == 2) {
+            const auto offset = fmin(time, k1.index + k1.duration) - k1.index;
+            auto t = k1.firstFrame + offset;
+            const auto* mcData = mc.get_movie_data();
+            if (mcData && t > mcData->frames) {
+                t = mcData->frames;
+            }
+            goto_and_stop(e, t);
+        } else if (loop == 3) {
+            goto_and_stop(e, k1.firstFrame);
+        }
+    }
+}
+
 void apply_frame(entity e, movie_t& mov) {
     auto* data = mov.get_movie_data();
     auto time = mov.time;
@@ -30,90 +116,24 @@ void apply_frame(entity e, movie_t& mov) {
         // no data - exit early
         return;
     }
-    for (const auto& layer : data->layers) {
-        int keyframe_index = 0;
-        int animation_key = 0;
-        const int keyframes_count = layer.frames.size();
-        for (; keyframe_index < keyframes_count; ++keyframe_index) {
-            const auto& k1 = layer.frames[keyframe_index];
-            if (time >= k1.index && time < k1.index + k1.duration) {
-                animation_key = k1.key;
-                break;
+    auto node = ecs::get<node_t>(e);
+    auto it = node.child_first;
+    const auto totalTargets = static_cast<int>(data->layers.size());
+    while (it != nullptr) {
+        if (ecs::has<movie_target_keys>(it)) {
+            const auto idx = ecs::get<movie_target_keys>(it).key_animation;
+            if (idx < totalTargets) {
+                update_target(time, it, data->layers[idx]);
             }
         }
-
-        ecs::entity target{};
-        ecs::entity child = ecs::get<node_t>(e).child_first;
-        while (child) {
-            auto& movie_keys = ecs::get<movie_target_keys>(child);
-            if (movie_keys.key_layer == layer.key) {
-                auto& config = ecs::get_or_create<node_state_t>(child);
-                if (animation_key == movie_keys.key_animation) {
-                    target = child;
-                    config.visible = true;
-                } else {
-                    config.visible = false;
-                }
-            }
-            child = ecs::get<node_t>(child).sibling_next;
-        }
-        if (target) {
-            const auto& k1 = layer.frames[keyframe_index];
-            const auto& k2 = (keyframe_index + 1) < layer.frames.size() ? layer.frames[keyframe_index + 1]
-                                                                        : layer.frames[keyframe_index];
-            auto& transform = ecs::get<transform_2d>(target);
-            float2 position;
-            if (k1.motion_type == 1) {
-                const float progress = (time - static_cast<float>(k1.index)) / static_cast<float>(k1.duration);
-                float x_position = progress;
-                float x_rotation = progress;
-                float x_scale = progress;
-                float x_color = progress;
-                for (const auto& easing_data : k1.tweens) {
-                    const float x = ease(progress, easing_data);
-                    if (easing_data.attribute == 0) {
-                        x_position = x_rotation = x_scale = x_color = x;
-                        break;
-                    } else if (easing_data.attribute == 1) {
-                        x_position = x;
-                    } else if (easing_data.attribute == 2) {
-                        x_rotation = x;
-                    } else if (easing_data.attribute == 3) {
-                        x_scale = x;
-                    } else if (easing_data.attribute == 4) {
-                        x_color = x;
-                    }
-                }
-
-                position = lerp(k1.position, k2.position, x_position);
-                transform.skew = lerp(k1.skew, k2.skew, x_rotation);
-                transform.scale = lerp(k1.scale, k2.scale, x_scale);
-                transform.color_multiplier = argb32_t{
-                        lerp(k1.color.multiplier, k2.color.multiplier, x_color)
-                };
-                transform.color_offset = argb32_t{
-                        lerp(k1.color.offset, k2.color.offset, x_color)
-                };
-            } else {
-                position = k1.position;
-                transform.skew = k1.skew;
-                transform.scale = k1.scale;
-                transform.color_multiplier = argb32_t{k1.color.multiplier};
-                transform.color_offset = argb32_t{k1.color.offset};
-            }
-            auto& m = transform.matrix;
-            m.set(transform.scale, transform.skew);
-            m.tx = position.x - m.a * k1.pivot.x - m.c * k1.pivot.y;
-            m.ty = position.y - m.b * k1.pivot.x - m.d * k1.pivot.y;
-            transform.matrix = m;
-        }
+        it = ecs::get<node_t>(it).sibling_next;
     }
 }
 
-void goto_and_stop(entity e, int frame) {
+void goto_and_stop(entity e, float frame) {
     auto& mov = ecs::get<movie_t>(e);
     mov.playing = false;
-    mov.time = static_cast<float>(frame);
+    mov.time = frame;
     mov.trunc_time();
     apply_frame(e, mov);
 }

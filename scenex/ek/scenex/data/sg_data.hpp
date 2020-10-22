@@ -64,34 +64,53 @@ struct movie_frame_data {
     int duration = 0;
     int motion_type = 0;
 
-    std::vector<easing_data_t> tweens;
+    std::vector<easing_data_t> easing;
 
+    // TODO: remove key
     int key = 0;
+
+
     float2 position;
     float2 scale;
     float2 skew;
     float2 pivot;
-    color_transform_f color;
+    color_transform_f color{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+
+    bool visible = true;
+
+    // graphic frame control
+    int loopMode = 0; // loop_mode
+    int firstFrame = 0;
+
+    // rotation postprocessing
+
+    int rotate = 0; // rotate_direction
+    int rotateTimes = 0;
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(index, duration, motion_type, key, position, scale, skew, pivot, color, tweens);
+        io(index, duration, motion_type, key, position, scale, skew, pivot, color, easing,
+        visible, loopMode, firstFrame, rotate, rotateTimes);
     }
 };
 
+struct sg_node_data;
+
 struct movie_layer_data {
-    int key;
-//    std::string ref;
     std::vector<movie_frame_data> frames;
+
+    // temp for restoring target ID
+    std::vector<sg_node_data*> targets;
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(key, frames);
+        io(frames);
     }
 };
 
 struct sg_movie_data {
     int frames = 1;
+    float fps = 24.0f;
     std::vector<movie_layer_data> layers;
 
     template<typename S>
@@ -122,11 +141,12 @@ struct sg_node_data {
     rect_f clipRect;
     std::vector<sg_node_data> children;
     std::vector<filter_data> filters;
-    std::string script;
     std::optional<dynamic_text_data> dynamicText;
     std::optional<sg_movie_data> movie;
-    int animationKey = 0;
-    int layerKey = 0;
+    int movieTargetId = -1;
+
+    std::unordered_map<int, std::string> labels;
+    std::unordered_map<int, std::string> scripts;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -140,7 +160,8 @@ struct sg_node_data {
                 touchable,
                 visible,
 
-                script,
+                // TODO: labels and scripts
+                //script,
                 color,
                 scaleGrid,
                 hitRect,
@@ -151,8 +172,7 @@ struct sg_node_data {
                 dynamicText,
                 movie,
 
-                animationKey,
-                layerKey
+                movieTargetId
         );
     }
 };

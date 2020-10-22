@@ -126,6 +126,7 @@ struct app_state final {
 
     vec2 window_size{};
     vec2 drawable_size{};
+
     double content_scale = 1.0;
     bool size_changed = false;
 
@@ -136,8 +137,6 @@ struct app_state final {
 
     bool require_exit = false;
     int exit_code = 0;
-
-    std::string lang;
 
     mouse_cursor cursor = mouse_cursor::parent;
     bool cursor_dirty = false;

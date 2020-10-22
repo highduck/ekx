@@ -19,7 +19,9 @@ using asset_ref = asset_t<sg_file>;
 
 void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     ecs::get<name_t>(entity).name = data->name;
-    ecs::get<movie_target_keys>(entity) = {data->animationKey, data->layerKey};
+    if(data->movieTargetId >= -1) {
+        ecs::get_or_create<movie_target_keys>(entity) = {data->movieTargetId};
+    }
 
     auto& transform = ecs::get<transform_2d>(entity);
     transform.matrix.tx = data->matrix.tx;
@@ -56,6 +58,7 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
         } else {
             mov.data = &(data->movie.value());
         }
+        mov.fps = data->movie->fps;
     }
 
     drawable_sprite* sprite = nullptr;
@@ -99,7 +102,7 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
 ecs::entity create_and_merge(const sg_file& sg, asset_ref asset,
                              const sg_node_data* data,
                              const sg_node_data* over = nullptr) {
-    auto entity = ecs::create<node_t, node_state_t, transform_2d, name_t, movie_target_keys>();
+    auto entity = ecs::create<node_t, node_state_t, transform_2d, name_t>();
     if (data) {
         apply(entity, data, asset);
     }

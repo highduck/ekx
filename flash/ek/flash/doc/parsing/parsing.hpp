@@ -60,6 +60,7 @@ enum class rotation_direction;
 enum class layer_type;
 enum class element_type;
 enum class symbol_type;
+enum class loop_mode;
 
 struct item_properties;
 struct element_t;
@@ -121,6 +122,8 @@ layer_type& operator<<(layer_type& r, const char* str);
 element_type& operator<<(element_type& r, const char* str);
 
 symbol_type& operator<<(symbol_type& r, const char* str);
+
+loop_mode& operator<<(loop_mode& r, const char* str);
 
 item_properties& operator<<(item_properties& r, const xml_node& node);
 

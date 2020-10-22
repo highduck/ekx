@@ -47,6 +47,8 @@ public:
 
     void on_draw_frame();
 
+    void on_event(const app::event_t&);
+
 protected:
     //void on_event(const app::event_t& event);
 
@@ -68,8 +70,8 @@ inline void run_app() {
     auto& app = service_locator_instance<basic_application>::init<T>();
     app.initialize();
     app.preload();
-//    app::g_app.on_event += [&](const auto& e) { app.on_event(e); };
-    app::g_app.on_frame_draw += [&] { app.on_draw_frame(); };
+    app::g_app.on_frame_draw += [&app] { app.on_draw_frame(); };
+    app::g_app.on_event += [&app](const auto& event) { app.on_event(event); };
 }
 
 }

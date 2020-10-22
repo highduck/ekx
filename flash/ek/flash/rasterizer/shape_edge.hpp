@@ -14,8 +14,10 @@ struct shape_edge {
     float2 p1;
     bool is_quadratic = false;
 
-    render_command to_command();
+    [[nodiscard]]
+    render_command to_command() const;
 
+    [[nodiscard]]
     bool connects(const shape_edge& next) const {
         return fill_style_idx == next.fill_style_idx && equals(p1, next.p0);
     }

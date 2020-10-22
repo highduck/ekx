@@ -17,6 +17,7 @@
 #include <ek/scenex/asset2/builtin_assets.hpp>
 #include <ek/graphics/graphics.hpp>
 #include <ek/draw2d/drawer.hpp>
+#include <ek/app/device.hpp>
 
 namespace ek {
 
@@ -31,7 +32,7 @@ basic_application::basic_application()
     assert_created_once<basic_application>();
 
     graphics::init();
-    audiomini::init();
+    audio::init();
 
     asset_manager_ = new asset_manager_t{};
 
@@ -47,14 +48,11 @@ basic_application::~basic_application() {
 }
 
 void basic_application::initialize() {
-    //scale_factor = static_cast<float>(g_app.content_scale);
-
     create_builtin();
 
     //// basic scene
     root = create_node_2d("root");
-    const auto screen_size = g_app.drawable_size;
-    ecs::get<transform_2d>(root).rect.set(0.0f, 0.0f, screen_size.x, screen_size.y);
+    setScreenRects(root);
 
     auto& im = service_locator_instance<interactive_manager>::init();
     service_locator_instance<input_controller>::init(im);
@@ -64,11 +62,11 @@ void basic_application::initialize() {
 
     game = create_node_2d("game");
     ecs::assign<canvas_t>(game, base_resolution.x, base_resolution.y);
-
+    ecs::assign<layout_t>(game);
     append(root, game);
     scale_factor = update_canvas(game);
 
-    layout_wrapper::space = {0.0f, 0.0f, base_resolution.x, base_resolution.y};
+    layout_wrapper::designCanvasRect = {0.0f, 0.0f, base_resolution.x, base_resolution.y};
 }
 
 void basic_application::preload() {
@@ -150,6 +148,12 @@ void basic_application::preload_root_assets_pack() {
 
 void basic_application::start_game() {
 
+}
+
+void basic_application::on_event(const event_t& event) {
+    if(event.type == event_type::app_resize) {
+        setScreenRects(root);
+    }
 }
 
 

@@ -12,7 +12,6 @@
 #include <ek/fonts/export_font.hpp>
 #include <utility>
 #include <memory>
-#include <ek/editor/json/serialize.hpp>
 
 namespace ek {
 
@@ -78,8 +77,6 @@ void freetype_asset_t::build(assets_build_struct_t& data) {
         io(font_data);
         ::ek::save(out, name_ + ".font");
         spritepack::export_atlas(atlas);
-
-        ek::save(to_json_str(font_data), path_t{name_ + ".font.json"});
     });
 
     data.meta("atlas", name_);

@@ -29,10 +29,10 @@ void batch_state_context::apply() {
         prev.texture = curr.texture;
     }
 
-    if (mvp_changed) {
+    if (mvp_changed && curr.program) {
         curr.program->set_uniform(graphics::program_uniforms::mvp, mvp);
-        mvp_changed = false;
     }
+    mvp_changed = false;
 
     if (scissors_dirty) {
         if (scissors_enabled) {

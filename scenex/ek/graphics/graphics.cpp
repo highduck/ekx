@@ -11,6 +11,11 @@ using app::g_app;
 void init() {
     gl::skip_errors();
 
+    EK_INFO << "OpenGL version: " << glGetString(GL_VERSION);
+    gl::check_error();
+    EK_INFO << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION);
+    gl::check_error();
+
     glDepthMask(GL_FALSE);
     gl::check_error();
     glEnable(GL_BLEND);
@@ -38,9 +43,6 @@ void init() {
 
     glFinish();
     gl::check_error();
-
-    EK_INFO << "OpenGL version: " << glGetString(GL_VERSION);
-    EK_INFO << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION);
 }
 
 void begin() {

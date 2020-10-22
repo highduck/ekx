@@ -19,6 +19,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         components/tween.hpp
         components/event_handler.hpp
         components/layout.hpp
+        components/layout.cpp
 
         systems/movie_clip_system.cpp
         systems/movie_clip_system.hpp

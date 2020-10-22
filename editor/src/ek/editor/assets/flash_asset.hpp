@@ -28,7 +28,5 @@ private:
     atlas_decl_t atlas_decl_;
 };
 
-std::unique_ptr<flash::basic_entry> load_flash_archive(const path_t& path);
-
 }
 

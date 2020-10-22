@@ -28,16 +28,21 @@ struct movie_t {
     float fps = 24.0f;
 
     void trunc_time() {
-        auto* dat = get_movie_data();
-        if (dat && time >= static_cast<float>(dat->frames)) {
-            time -= dat->frames * static_cast<int>(time / dat->frames);
+        const auto* dat = get_movie_data();
+        if (dat) {
+            const auto max = static_cast<float>(dat->frames);
+            if(time >= max) {
+                time -= max * truncf(time / max);
+            }
+            if(time < 0) {
+                time = 0;
+            }
         }
     }
 };
 
 struct movie_target_keys {
     int key_animation = 0;
-    int key_layer = 0;
 };
 
 }

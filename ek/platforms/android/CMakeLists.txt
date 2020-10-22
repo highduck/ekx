@@ -10,4 +10,5 @@ target_sources(${PROJECT_NAME} PRIVATE
         sharing.cpp
         static_resources.cpp
         user_preferences.cpp
+        device_android.cpp
         )

@@ -1,8 +1,8 @@
 package ek;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Keep;
+
+import androidx.annotation.Keep;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -11,41 +11,33 @@ public class Analytics {
 
     final private static String TAG = "Analytics";
 
-    private static Activity _activity;
     private static FirebaseAnalytics _analytics;
 
     @Keep
     public static void init() {
-        _activity = EkActivity.getInstance();
         _analytics = FirebaseAnalytics.getInstance(EkActivity.getInstance());
-        _analytics.setAnalyticsCollectionEnabled(true);
-        //_analytics.setMinimumSessionDuration(1000 * 4);
-        _analytics.setSessionTimeoutDuration(1000 * 60 * 30);
+
+        // Test Crash:
+        // throw new RuntimeException("Test Crash"); // Force a crash
+        // then restart application
+        // check console
     }
 
     @Keep
     public static void set_screen(final String s) {
-        _activity.runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        _analytics.setCurrentScreen(_activity, s, null);
-                    }
-                });
+        // TODO: deprecated, to log screen we need to include current screen as param to events?
+        // https://firebase.googleblog.com/2020/08/google-analytics-manual-screen-view.html
 
+        //_activity.runOnUiThread(() -> _analytics.setCurrentScreen(_activity, s, null));
     }
 
     @Keep
     public static void send_event(final String action, final String item) {
-        _activity.runOnUiThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        final Bundle bundle = new Bundle();
-                        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, item);
-                        _analytics.logEvent(action, bundle);
-                    }
-                });
+        EkActivity.runMainThread(() -> {
+            final Bundle bundle = new Bundle();
+            bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, item);
+            _analytics.logEvent(action, bundle);
+        });
     }
 
     // log internal game events from UI thread

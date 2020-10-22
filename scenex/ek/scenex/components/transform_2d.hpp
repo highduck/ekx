@@ -13,7 +13,6 @@ struct transform_2d {
     float2 scale = float2::one;
     float2 skew = float2::zero;
     float2 origin = float2::zero;
-    rect_f rect = rect_f::zero;
 
     matrix_2d* user_matrix = nullptr;
 
@@ -49,7 +48,6 @@ struct transform_2d {
         return color_offset.af();
     }
 };
-
 
 void begin_transform(const transform_2d& transform);
 

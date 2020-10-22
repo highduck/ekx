@@ -4,9 +4,10 @@
 namespace ek::flash {
 
 export_item_t::~export_item_t() {
-    for (auto ch : children) {
-        delete ch;
-    }
+    // TODO:
+//    for (auto ch : children) {
+//        delete ch;
+//    }
 }
 
 void export_item_t::add(export_item_t* item) {

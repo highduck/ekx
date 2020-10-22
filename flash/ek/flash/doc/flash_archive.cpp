@@ -4,6 +4,7 @@
 #include <miniz/zip_file.hpp>
 #include <fstream>
 #include <ek/util/logger.hpp>
+#include <sys/stat.h>
 
 namespace ek::flash {
 
@@ -64,6 +65,53 @@ const std::string& fla_entry::content() const {
         contents_ = zipFile->read(path_.str());
     }
     return contents_;
+}
+
+bool is_dir(const path_t& path) {
+    struct stat sb{};
+    return stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode);
+}
+
+bool is_file(const path_t& path) {
+    struct stat sb{};
+    return stat(path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode);
+}
+
+std::unique_ptr<basic_entry> load_flash_archive(const path_t& path) {
+    using namespace ek::flash;
+
+    if (is_file(path)) {
+        const auto ext = path.ext();
+        // dir/FILE/FILE.xfl
+        if (ext == "xfl") {
+            auto dir = path.dir();
+            if (is_dir(dir)) {
+                return std::make_unique<xfl_entry>(dir);
+            } else {
+                EK_ERROR("Import Flash: loading %s XFL file, but %s is not a dir", path.c_str(), dir.c_str());
+            }
+        } else if (ext == "fla") {
+            return std::make_unique<fla_entry>(path);
+        } else {
+            EK_ERROR << "Import Flash: file is not xfl or fla: " << path;
+        }
+    }
+
+    // dir/FILE.fla
+    const auto fla_file = path + ".fla";
+    if (is_file(fla_file)) {
+        return std::make_unique<fla_entry>(fla_file);
+    } else if (is_dir(path)) {
+        if (is_file(path / path.basename() + ".xfl")) {
+            return std::make_unique<xfl_entry>(path);
+        } else {
+            EK_WARN << "Import Flash: given dir doesn't contain .xfl file: " << path;
+        }
+    }
+
+    EK_ERROR << "Import Flash: file not found: " << path;
+
+    return nullptr;
 }
 
 }

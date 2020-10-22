@@ -10,8 +10,6 @@ struct wsd_ {
 
 inline world* wsd_::ptr{};
 
-//inline static world* wsd_{};
-
 inline void set_world(world* w) {
     wsd_::ptr = w;
 }

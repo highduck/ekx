@@ -34,6 +34,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(EK_COMPILER_LTO "")
 endif ()
 
+#target_compile_definitions(${PROJECT_NAME} PUBLIC)
+
 target_compile_options(${PROJECT_NAME} PRIVATE
         -fno-exceptions
         -fno-rtti

@@ -12,8 +12,8 @@ layer_type& operator<<(layer_type& r, const char* str) {
 }
 
 tween_type& operator<<(tween_type& r, const char* str) {
-    if (equals(str, "motion")) return r = tween_type::motion;
-    // TODO:
+    if (equals(str, "motion")) return r = tween_type::classic;
+    if (equals(str, "motion object")) return r = tween_type::motion_object;
     return r = tween_type::none;
 }
 
@@ -38,6 +38,8 @@ element_type& operator<<(element_type& r, const char* str) {
     if (equals(str, "DOMBitmapInstance")) return r = element_type::bitmap_instance;
     if (equals(str, "DOMBitmapItem")) return r = element_type::bitmap_item;
     if (equals(str, "DOMShape")) return r = element_type::shape;
+    if (equals(str, "DOMOvalObject")) return r = element_type::object_oval;
+    if (equals(str, "DOMRectangleObject")) return r = element_type::object_rectangle;
     if (equals(str, "DOMSymbolInstance")) return r = element_type::symbol_instance;
     if (equals(str, "DOMDynamicText")) return r = element_type::dynamic_text;
     if (equals(str, "DOMStaticText")) return r = element_type::static_text;
@@ -51,6 +53,13 @@ symbol_type& operator<<(symbol_type& r, const char* str) {
     if (equals(str, "button")) return r = symbol_type::button;
     if (equals(str, "graphic")) return r = symbol_type::graphic;
     return r = symbol_type::normal;
+}
+
+loop_mode& operator<<(loop_mode& r, const char* str) {
+    if (equals(str, "loop")) return r = loop_mode::loop;
+    if (equals(str, "play once")) return r = loop_mode::play_once;
+    if (equals(str, "single frame")) return r = loop_mode::single_frame;
+    return r = loop_mode::none;
 }
 
 /** [parsing classes] **/
@@ -126,6 +135,8 @@ element_t& operator<<(element_t& r, const xml_node& node) {
 
     /////   SymbolInstance
     r.symbolType << node.attribute("symbolType").value();
+    r.loop << node.attribute("loop").value();
+    r.firstFrame = node.attribute("firstFrame").as_int(0);
     r.centerPoint3DX = node.attribute("centerPoint3DX").as_float();
     r.centerPoint3DY = node.attribute("centerPoint3DY").as_float();
     r.cacheAsBitmap = node.attribute("cacheAsBitmap").as_bool();

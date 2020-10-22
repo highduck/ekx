@@ -233,32 +233,6 @@ inline void set_color_quad(ecs::entity e, const rect_f& rc, argb32_t color) {
     set_gradient_quad(e, rc, color, color);
 }
 
-inline rect_f get_ancestors_rect(ecs::entity e) {
-    rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
-    auto it = ecs::get<node_t>(e).parent;
-    while (it) {
-        rect = ecs::get<transform_2d>(it).rect;
-        if (!rect.empty()) {
-            break;
-        }
-        it = ecs::get<node_t>(it).parent;
-    }
-    return rect;
-}
-
-inline rect_f find_root_rect(ecs::entity e) {
-    rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
-    auto it = e;
-    while (it) {
-        rect = ecs::get<transform_2d>(it).rect;
-        if (!rect.empty()) {
-            break;
-        }
-        it = ecs::get<node_t>(it).parent;
-    }
-    return rect;
-}
-
 template<typename Component>
 inline ecs::entity find_first_ancestor(ecs::entity e) {
     auto it = ecs::get<node_t>(e).parent;
