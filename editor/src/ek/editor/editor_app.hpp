@@ -1,11 +1,11 @@
 #pragma once
 
-#include <scenex/ek/basic_application.h>
+#include <ek/scenex/app/basic_application.hpp>
 #include <ek/editor/editor.hpp>
 
 namespace ek {
 
-class editor_app_t : public scenex::basic_application {
+class editor_app_t : public basic_application {
 public:
     editor_app_t();
 

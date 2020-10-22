@@ -1,6 +1,6 @@
 #pragma once
 
-namespace scenex {
+namespace ek {
 
 void gui_draw_stats();
 

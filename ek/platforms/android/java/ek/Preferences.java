@@ -2,7 +2,8 @@ package ek;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.Keep;
+
+import androidx.annotation.Keep;
 
 public class Preferences {
 

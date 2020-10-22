@@ -1,17 +1,15 @@
-#include <ek/mini_ads.hpp>
+#include <ek/ext/mini_ads/mini_ads.hpp>
 #include <ek/app/app.hpp>
 #include <ek/util/timer.hpp>
 #include <ek/util/logger.hpp>
 
 namespace ek {
 
-class ads_fake_timer : public application_listener_t {
+class ads_fake_timer final {
 public:
-    ~ads_fake_timer() override = default;
+    ~ads_fake_timer() = default;
 
-    void on_event(const event_t&) override {}
-
-    void on_draw_frame() override {
+    void on_draw_frame() {
         if (fn_ && time_ > 0.0f && timer_.read_seconds() >= time_) {
             time_ = 0.0f;
             fn_();
@@ -32,7 +30,7 @@ private:
 };
 
 // TODO: signals to core module
-static std::function<void(AdsEventType type)> ads_registered_callbacks;
+static std::function<void(ads_event_type type)> ads_registered_callbacks;
 
 void ads_init(const ads_config_t&) {}
 
@@ -46,7 +44,11 @@ static ads_fake_timer* fake_timer = nullptr;
 void ads_play_reward_video() {
     if (!fake_timer) {
         fake_timer = new ads_fake_timer();
-        g_app.listen(fake_timer);
+        app::g_app.on_frame_draw += [] {
+            if (fake_timer) {
+                fake_timer->on_draw_frame();
+            }
+        };
     }
 
     if (ads_registered_callbacks) {
@@ -54,15 +56,15 @@ void ads_play_reward_video() {
             fake_timer->start([] {
                 loaded_ = true;
                 EK_INFO << "ADS_VIDEO_LOADING";
-                ads_registered_callbacks(AdsEventType::ADS_VIDEO_LOADING);
+                ads_registered_callbacks(ads_event_type::video_loading);
                 EK_INFO << "ADS_VIDEO_REWARD_LOADED";
-                ads_registered_callbacks(AdsEventType::ADS_VIDEO_REWARD_LOADED);
+                ads_registered_callbacks(ads_event_type::video_loaded);
             }, 5.0f);
         } else {
             fake_timer->start([] {
                 loaded_ = false;
                 EK_INFO << "ADS VIDEO REWARDED";
-                ads_registered_callbacks(AdsEventType::ADS_VIDEO_REWARDED);
+                ads_registered_callbacks(ads_event_type::video_rewarded);
             }, 5.0f);
 
             //ads_registered_callbacks(AdsEventType::ADS_VIDEO_REWARDED);
@@ -79,7 +81,7 @@ void ads_play_reward_video() {
 
 void ads_show_interstitial() {}
 
-void ads_listen(const std::function<void(AdsEventType type)>& callback) {
+void ads_listen(const std::function<void(ads_event_type type)>& callback) {
     ads_registered_callbacks = callback;
 }
 

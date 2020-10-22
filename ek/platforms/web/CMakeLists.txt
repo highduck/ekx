@@ -3,7 +3,6 @@ message("Platform: Web")
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 target_sources(${PROJECT_NAME} PRIVATE
-        audiomini_web.cpp
         static_resources.cpp
         user_preferences.cpp
         web_app_impl.cpp

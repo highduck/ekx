@@ -6,11 +6,10 @@
 #include <ek/system/working_dir.hpp>
 #include <ek/spritepack/export_atlas.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <scenex/2d/atlas.hpp>
-#include <scenex/2d/sprite.hpp>
-#include <scenex/data/sg_data.h>
+#include <ek/scenex/2d/atlas.hpp>
+#include <ek/scenex/2d/sprite.hpp>
 #include <ek/system/system.hpp>
-#include <fonts/export_font.h>
+#include <ek/fonts/export_font.hpp>
 #include <utility>
 #include <memory>
 
@@ -46,19 +45,19 @@ void freetype_asset_t::load() {
 
     load_temp_atlas(temp_atlas);
 
-    asset_t<scenex::font_t>{name_}.reset(new scenex::font_t(font_data));
+    asset_t<font_t>{name_}.reset(new font_t(font_data));
 }
 
 void freetype_asset_t::unload() {
-    asset_t<scenex::atlas_t>{name_}.reset(nullptr);
-    asset_t<scenex::font_t>{name_}.reset(nullptr);
+    asset_t<atlas_t>{name_}.reset(nullptr);
+    asset_t<font_t>{name_}.reset(nullptr);
 }
 
 void freetype_asset_t::gui() {
-    asset_t<scenex::atlas_t> atlas{name_};
+    asset_t<atlas_t> atlas{name_};
     gui_atlas_view(atlas.get());
 
-    asset_t<scenex::font_t> font{name_};
+    asset_t<font_t> font{name_};
     gui_font_view(font.get());
 }
 

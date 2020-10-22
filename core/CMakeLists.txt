@@ -1,20 +1,22 @@
-cmake_minimum_required(VERSION 3.12)
-project(ek-core LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.13)
+project(ek-core)
 
 add_library(${PROJECT_NAME} STATIC
-
-        ek/binpack/max_rects.hpp
-        ek/binpack/max_rects.cpp
 
         ek/math/internal/compiler_unsafe_begin.h
         ek/math/internal/compiler_unsafe_end.h
         ek/math/common.hpp
         ek/math/serialize_math.hpp
 
-        ek/math/vec_fwd.hpp
-        ek/math/matrix_fwd.hpp
+        ek/math/max_rects.hpp
+        ek/math/max_rects.cpp
+
         ek/math/vec.hpp
+        ek/math/matrix_decl.hpp
+        ek/math/mat.hpp
+        ek/math/mat2x2.hpp
         ek/math/mat3x2.hpp
+        ek/math/mat3x3.hpp
         ek/math/mat4x4.hpp
         ek/math/matrix_inverse.hpp
         ek/math/matrix_camera.hpp
@@ -23,7 +25,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/math/quaternion.hpp
 
         ek/math/box.hpp
-        ek/math/rect.hpp
         ek/math/circle.hpp
         ek/math/bounds_builder.hpp
 
@@ -33,7 +34,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/math/transform.hpp
 
-        ek/math/easing.cpp
         ek/math/easing.hpp
 
         ek/math/collisions.hpp
@@ -80,6 +80,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/util/timer.hpp
         ek/util/path.cpp
         ek/util/path.hpp
+        ek/util/type_index.hpp
 
         # THIRD-PARTY
         stb/stb_image.h
@@ -89,7 +90,7 @@ add_library(${PROJECT_NAME} STATIC
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
+#target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
@@ -109,17 +110,21 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(EK_COMPILER_LTO "")
 endif ()
 
+target_compile_options(${PROJECT_NAME} PRIVATE
+        -fno-exceptions
+        -fno-rtti
+        -fstrict-aliasing
+        ${EK_COMPILE_WARNINGS}
+        )
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(${PROJECT_NAME} PRIVATE
-            -fno-exceptions -fstrict-aliasing -g ${EK_COMPILE_WARNINGS})
+    target_compile_options(${PROJECT_NAME} PRIVATE -g)
 else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE
-            -Os -fno-exceptions -fstrict-aliasing ${EK_COMPILE_WARNINGS})
+    target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
     if (${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
             ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
     else ()
-        set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-        target_compile_options(${PROJECT_NAME} PRIVATE ${EK_COMPILER_LTO})
+        target_compile_options(${PROJECT_NAME} PRIVATE -flto)
     endif ()
 endif ()

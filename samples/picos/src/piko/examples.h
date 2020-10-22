@@ -1,28 +1,28 @@
 #pragma once
 
-#include <scenex/components/script_t.h>
-#include <graphics/render_target.hpp>
+#include <ek/scenex/components/script.hpp>
+#include <ek/graphics/render_target.hpp>
 //#include <ek/editor/gui/screen_recorder.hpp>
 
 namespace ek::piko {
 
-class book : public scenex::script {
+EK_DECL_SCRIPT_CPP(book) {
 public:
     void draw() override;
 };
 
-class dna : public scenex::script {
+EK_DECL_SCRIPT_CPP(dna) {
 public:
     void draw() override;
 };
 
-class diamonds : public scenex::script {
+EK_DECL_SCRIPT_CPP(diamonds) {
 public:
     diamonds();
 
     void draw() override;
 
-    render_target_t rt;
+    graphics::render_target_t rt;
 //    screen_recorder recorder;
     float time = 0.0f;
     bool first_frame = true;

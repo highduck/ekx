@@ -124,6 +124,7 @@ using namespace ek::app;
 
 - (void)applicationDidFinishLaunching:(__unused NSNotification*)notification {
     [_application activateIgnoringOtherApps:YES];
+    [[[self view] openGLContext] makeCurrentContext];
     dispatch_device_ready();
 }
 

@@ -1,7 +1,6 @@
 .idea/
 cmake-build-*/
 build/
-node_modules/
 
 # samples generated resources
 generated/

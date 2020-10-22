@@ -1,7 +1,7 @@
 #pragma once
 
 #include "editor_asset.hpp"
-#include <scenex/particles/particle_decl.h>
+#include <ek/scenex/particles/particle_decl.hpp>
 
 namespace ek {
 
@@ -25,7 +25,7 @@ public:
     void save() override;
 
 private:
-    scenex::particle_decl decl_;
+    particle_decl decl_;
 };
 
 

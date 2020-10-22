@@ -53,7 +53,7 @@ struct quat_t {
         z = c.x * c.y * s.z - s.x * s.y * c.z;
     }
 
-    quat_t(T w_, const vec_t<T, 3>& v)
+    quat_t(T w_, const vec_t<3, T>& v)
             : w{w},
               x{v.x}, y{v.y}, z{v.z} {
     }
@@ -136,10 +136,10 @@ struct quat_t {
         return self_type(w * scalar, x * scalar, y * scalar, z * scalar);
     }
 
-    inline vec_t<T, 3> operator*(const vec_t<T, 3>& v) const {
-        const vec_t<T, 3> qua_vector{x, y, z};
-        const vec_t<T, 3> uv(cross(qua_vector, v));
-        const vec_t<T, 3> uuv(cross(qua_vector, uv));
+    inline vec_t<3, T> operator*(const vec_t<3, T>& v) const {
+        const vec_t<3, T> qua_vector{x, y, z};
+        const vec_t<3, T> uv(cross(qua_vector, v));
+        const vec_t<3, T> uuv(cross(qua_vector, uv));
 
         return v + ((uv * w) + uuv) * static_cast<T>(2);
     }
@@ -305,10 +305,10 @@ quat_t<float> quat_between(const vec3_t <T>& u, const vec3_t <T>& v) {
 }
 
 template<typename T>
-quat_t<T> quat_look_at_rh(const vec3_t <T>& direction, const vec3_t <T>& up) {
-    vec_t<T, 3> u2 = -direction;
-    vec_t<T, 3> u0 = normalize(cross(up, u2));
-    vec_t<T, 3> u1 = cross(u2, u0);
+quat_t<T> quat_look_at_rh(const vec_t<3, T>& direction, const vec_t<3, T>& up) {
+    vec_t<3, T> u2 = -direction;
+    vec_t<3, T> u0 = normalize(cross(up, u2));
+    vec_t<3, T> u1 = cross(u2, u0);
 
     matrix_t<3, 3, T> m{u0, u1, u2};
 

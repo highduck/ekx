@@ -9,7 +9,7 @@ namespace ek {
 template<typename T>
 struct color_transform_t {
 
-    using color_type = vec_t<T, 4>;
+    using color_type = vec_t<4, T>;
     color_type multiplier;
     color_type offset;
 
@@ -59,9 +59,24 @@ struct color_transform_t {
         );
     }
 
+    inline color_transform_t<T> operator-(const color_transform_t<T>& right) const {
+        return color_transform_t<T>(
+                multiplier - right.multiplier,
+                offset - right.offset
+        );
+    }
+
+    inline color_transform_t<T> operator+(const color_transform_t<T>& right) const {
+        return color_transform_t<T>(
+                multiplier + right.multiplier,
+                offset + right.offset
+        );
+    }
+
     inline color_type transform(const color_type& color) const {
         return color * multiplier + offset;
     }
+
 };
 
 using color_transform_f = color_transform_t<float>;

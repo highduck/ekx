@@ -1,9 +1,8 @@
 #include "screen_recorder.hpp"
 
-#include "../../../../../external/stb/stb_image_write.h"
-#include <ek/util/locator.hpp>
+#include <stb_image_write.h>
 #include <ek/math/box.hpp>
-#include <graphics/graphics.hpp>
+#include <ek/graphics/graphics.hpp>
 #include <sys/stat.h>
 
 namespace ek {
@@ -27,7 +26,7 @@ screen_recorder::screen_recorder(const std::string& filename, const rect_u& rect
 }
 
 void screen_recorder::render() {
-    resolve<graphics_t>().get_pixels(rect_.x, rect_.y, rect_.width, rect_.height, buffer_);
+    graphics::get_pixels(rect_.x, rect_.y, rect_.width, rect_.height, buffer_);
     flip_image(buffer_, buffer_swap_, rect_.width * 4u, rect_.height);
     std::string file = filename_ + "/frame" + std::to_string(frame_) + ".png";
     // 3 - RGB

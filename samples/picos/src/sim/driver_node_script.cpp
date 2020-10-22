@@ -2,22 +2,20 @@
 #include "motion_system.h"
 
 #include <ek/util/locator.hpp>
-#include <scenex/interactive_manager.h>
-#include <scenex/components/transform_2d.h>
-#include <scenex/components/node_t.h>
-#include <scenex/components/display_2d.h>
-#include <scenex/goodies/helpers/trail_script.h>
-#include <scenex/goodies/helpers/mouse_follow_script.h>
-#include <scenex/goodies/helpers/target_follow_script.h>
-#include <scenex/utility/scene_management.h>
+#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/goodies/helpers/trail_script.hpp>
+#include <ek/scenex/goodies/helpers/mouse_follow_script.hpp>
+#include <ek/scenex/goodies/helpers/target_follow_script.hpp>
+#include <ek/scenex/utility/scene_management.hpp>
 #include <sim/components/attractor.h>
-#include <scenex/systems/game_time.h>
+#include <ek/scenex/systems/game_time.hpp>
 #include <ek/math/rand.hpp>
 #include <sim/components/position.h>
 #include <sim/components/motion.h>
 #include <piko/examples.h>
-
-using namespace scenex;
 
 namespace ek::piko {
 

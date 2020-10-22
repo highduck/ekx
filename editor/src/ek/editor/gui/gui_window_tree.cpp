@@ -2,20 +2,20 @@
 #include "gui_window_stats.h"
 
 #include <ek/editor/imgui/imgui.hpp>
-#include <scenex/components/node_t.h>
-#include <scenex/components/name_t.h>
-#include <scenex/components/display_2d.h>
-#include <scenex/components/transform_2d.h>
-#include <scenex/components/script_t.h>
-#include <scenex/config.h>
-#include <scenex/components/interactive_t.h>
-#include <scenex/components/event_handler.h>
-#include <scenex/3d/transform_3d.hpp>
-#include <scenex/3d/camera_3d.hpp>
+#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/name.hpp>
+#include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/components/script.hpp>
+#include <ek/scenex/components/interactive.hpp>
+#include <ek/scenex/components/event_handler.hpp>
+#include <ek/scenex/3d/transform_3d.hpp>
+#include <ek/scenex/3d/camera_3d.hpp>
 #include <ek/math/common.hpp>
-#include <scenex/3d/light_3d.hpp>
+#include <ek/scenex/3d/light_3d.hpp>
+#include <ek/scenex/components/movie.hpp>
 
-namespace scenex {
+namespace ek {
 
 void gui_entity(ecs::entity e, bool parent_visible = true);
 
@@ -142,6 +142,23 @@ void gui_window_tree() {
 //    ImGui::ShowUserGuide();
 }
 
+void gui_movie_clip(ecs::entity entity) {
+    auto& mc = ecs::get<movie_t>(entity);
+    if (ImGui::CollapsingHeader("Movie Clip")) {
+        const auto* data = mc.get_movie_data();
+        if (data) {
+            ImGui::LabelText("Total Frames", "%u", data->frames);
+            ImGui::LabelText("Default FPS", "%f", data->fps);
+
+            ImGui::DragFloat("Time", &mc.time, 1.0f, 0.0f, data->frames);
+            ImGui::DragFloat("FPS", &mc.fps, 1.0f, 0.0f, 100.0f);
+            ImGui::Checkbox("Playing", &mc.playing);
+        }
+
+        ImGui::LabelText("movie_data_symbol", "%s", mc.movie_data_symbol.c_str());
+    }
+}
+
 void gui_transform_2d(ecs::entity entity) {
     auto& transform = ecs::get<transform_2d>(entity);
     if (ImGui::CollapsingHeader("Transform 2D")) {
@@ -152,14 +169,14 @@ void gui_transform_2d(ecs::entity entity) {
         ImGui::DragFloat2("Scale", transform.scale.data_, 0.1f, 0.0f, 0.0f, "%.2f", 0.1f);
         ImGui::DragFloat2("Skew", transform.skew.data_, 0.1f, 0.0f, 0.0f, "%.2f", 0.1f);
 
-        auto color = static_cast<float4>(transform.colorMultiplier);
+        auto color = static_cast<float4>(transform.color_multiplier);
         if (ImGui::ColorEdit4("Color Multiplier", color.data_)) {
-            transform.colorMultiplier = argb32_t{color};
+            transform.color_multiplier = argb32_t{color};
         }
 
-        color = static_cast<float4>(transform.colorOffset);
+        color = static_cast<float4>(transform.color_offset);
         if (ImGui::ColorEdit4("Color Offset", color.data_)) {
-            transform.colorOffset = argb32_t{color};
+            transform.color_offset = argb32_t{color};
         }
     }
 
@@ -209,7 +226,7 @@ void gui_light_3d(ecs::entity entity) {
         ImGui::ColorEdit3("Ambient", light.ambient.data_);
         ImGui::ColorEdit3("Diffuse", light.diffuse.data_);
         ImGui::ColorEdit3("Specular", light.specular.data_);
-        
+
         ImGui::DragFloat("Radius", &light.radius, 1.0f, 0.0f, 0.0f, "%.1f");
         ImGui::DragFloat("Falloff", &light.falloff, 0.1f, 0.0f, 0.0f, "%.1f");
     }
@@ -252,33 +269,22 @@ void gui_event_handler(ecs::entity entity) {
 
 void gui_display_2d(ecs::entity entity) {
     auto& comp = ecs::get<display_2d>(entity);
-    if (comp.drawable) {
-        auto* drawable = comp.drawable.get();
-        auto* sprite = dynamic_cast<drawable_sprite*>(drawable);
-        if (sprite) {
-            if (ImGui::CollapsingHeader("Display 2D - Sprite")) {
-                ImGui::LabelText("sprite", "%s", sprite->src.c_str());
-                ImGui::Checkbox("hit pixels", &sprite->hit_pixels);
-                ImGui::Checkbox("scale grid", &sprite->scale_grid_mode);
-            }
+    if (comp.is<drawable_sprite>()) {
+        auto* sprite = comp.get<drawable_sprite>();
+        if (ImGui::CollapsingHeader("Display 2D - Sprite")) {
+            ImGui::LabelText("sprite", "%s", sprite->src.c_str());
+            ImGui::Checkbox("hit pixels", &sprite->hit_pixels);
+            ImGui::Checkbox("scale grid", &sprite->scale_grid_mode);
         }
-        auto* quad = dynamic_cast<drawable_quad*>(drawable);
-        if (quad) {
-            if (ImGui::CollapsingHeader("Display 2D - Quad")) {}
-        }
-        auto* text = dynamic_cast<drawable_text*>(drawable);
-        if (text) {
-            if (ImGui::CollapsingHeader("Display 2D - Text")) {}
-        }
-
-        auto* arc = dynamic_cast<drawable_arc*>(drawable);
-        if (arc) {
-            if (ImGui::CollapsingHeader("Display 2D - Arc")) {}
-        }
+    } else if (comp.is<drawable_quad>()) {
+        if (ImGui::CollapsingHeader("Display 2D - Quad")) {}
+    } else if (comp.is<drawable_text>()) {
+        if (ImGui::CollapsingHeader("Display 2D - Text")) {}
+    } else if (comp.is<drawable_arc>()) {
+        if (ImGui::CollapsingHeader("Display 2D - Arc")) {}
     } else {
-        if (ImGui::CollapsingHeader("Display 2D - NULL")) {}
+        if (ImGui::CollapsingHeader("Display 2D - ???")) {}
     }
-
 }
 
 void gui_inspector(ecs::entity e) {
@@ -320,6 +326,9 @@ void gui_inspector(ecs::entity e) {
     }
     if (ecs::has<display_2d>(e)) {
         gui_display_2d(e);
+    }
+    if (ecs::has<movie_t>(e)) {
+        gui_movie_clip(e);
     }
 
     if (ecs::has<script_holder>(e)) {

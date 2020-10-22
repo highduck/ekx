@@ -1,30 +1,44 @@
 #pragma once
 
 #include "common.hpp"
-#include "vec_fwd.hpp"
 #include <cstdint>
 #include <algorithm>
 
 namespace ek {
 
-template<typename T, unsigned N>
+template<unsigned N, typename T>
 struct vec_t {
 
     constexpr static unsigned dim = N;
-    static_assert(sizeof(vec_t<T, dim>) == sizeof(T) * dim, "struct has extra padding");
+    static_assert(sizeof(vec_t<N, T>) == sizeof(T) * dim, "struct has extra padding");
 
-    using self_type = vec_t<T, N>;
+    using self_type = vec_t<N, T>;
     T data_[N];
 };
 
 template<typename T>
-struct vec_t<T, 2> {
+using vec2_t = vec_t<2, T>;
+using float2 = vec_t<2, float>;
+using int2 = vec_t<2, int>;
+
+template<typename T>
+using vec3_t = vec_t<3, T>;
+using float3 = vec_t<3, float>;
+using int3 = vec_t<3, int>;
+
+template<typename T>
+using vec4_t = vec_t<4, T>;
+using float4 = vec_t<4, float>;
+using int4 = vec_t<4, int>;
+
+template<typename T>
+struct vec_t<2, T> {
 
     constexpr static unsigned dim = 2;
-    using self_type = vec_t<T, 2>;
+    using self_type = vec_t<2, T>;
 
-     static const self_type zero;
-     static const self_type one;
+    static const self_type zero;
+    static const self_type one;
 
 #include <ek/math/internal/compiler_unsafe_begin.h>
 
@@ -90,22 +104,22 @@ struct vec_t<T, 2> {
     }
 };
 
-    template<typename T>
-    inline const vec_t<T, 2> vec_t<T, 2>::zero{0, 0};
-
-    template<typename T>
-    inline const vec_t<T, 2>vec_t<T, 2>:: one{1, 1};
+template<typename T>
+inline const vec_t<2, T> vec_t<2, T>::zero{0, 0};
 
 template<typename T>
-inline vec_t<T, 2> perpendicular(const vec_t<T, 2>& direction) {
+inline const vec_t<2, T>vec_t<2, T>::one{1, 1};
+
+template<typename T>
+inline vec_t<2, T> perpendicular(const vec_t<2, T>& direction) {
     return {-direction.y, direction.x};
 }
 
 template<typename T>
-struct vec_t<T, 3> {
+struct vec_t<3, T> {
 
     constexpr static unsigned dim = 3;
-    using self_type = vec_t<T, 3>;
+    using self_type = vec_t<3, T>;
 
     static const self_type zero;
     static const self_type one;
@@ -138,7 +152,7 @@ struct vec_t<T, 3> {
 
     }
 
-    explicit vec_t(const vec_t<T, 2>& v2) noexcept
+    explicit vec_t(const vec_t<2, T>& v2) noexcept
             : x{v2.x},
               y{v2.y},
               z{0} {
@@ -195,8 +209,8 @@ struct vec_t<T, 3> {
         return x != a.x || y != a.y;
     }
 
-    inline vec_t<T, 2> xy() const {
-        return vec_t<T, 2>{x, y};
+    inline vec_t<2, T> xy() const {
+        return vec_t<2, T>{x, y};
     }
 
     inline T& operator[](const unsigned index) {
@@ -209,18 +223,18 @@ struct vec_t<T, 3> {
 };
 
 template<typename T>
-inline const vec_t<T, 3> vec_t<T,3>::zero{0, 0, 0};
+inline const vec_t<3, T> vec_t<3, T>::zero{0, 0, 0};
 
 template<typename T>
-inline const vec_t<T,3> vec_t<T,3>::one{1, 1, 1};
+inline const vec_t<3, T> vec_t<3, T>::one{1, 1, 1};
 
 template<typename T>
-struct vec_t<T, 4> {
+struct vec_t<4, T> {
     constexpr static unsigned dim = 4;
-    using self_type = vec_t<T, 4>;
+    using self_type = vec_t<4, T>;
 
-     static const self_type zero;
-     static const self_type one;
+    static const self_type zero;
+    static const self_type one;
 
 #include <ek/math/internal/compiler_unsafe_begin.h>
 
@@ -252,7 +266,7 @@ struct vec_t<T, 4> {
 
     }
 
-    vec_t(const vec_t<T, 3>& v, T w_) noexcept
+    vec_t(const vec_t<3, T>& v, T w_) noexcept
             : x{v.x},
               y{v.y},
               z{v.z},
@@ -325,17 +339,17 @@ struct vec_t<T, 4> {
 };
 
 template<typename T>
-    inline const vec_t<T, 4> vec_t<T, 4>::zero{0, 0, 0, 0};
-    template<typename T>
-    inline const vec_t<T, 4> vec_t<T, 4>::one{1, 1, 1, 1};
+inline const vec_t<4, T> vec_t<4, T>::zero{0, 0, 0, 0};
+template<typename T>
+inline const vec_t<4, T> vec_t<4, T>::one{1, 1, 1, 1};
 
 template<typename T, unsigned N>
-inline static vec_t<T, N> operator*(T scalar, const vec_t<T, N>& v) {
+inline static vec_t<N, T> operator*(T scalar, const vec_t<N, T>& v) {
     return v * scalar;
 }
 
 template<typename T, unsigned N>
-inline T dot(const vec_t<T, N>& a, const vec_t<T, N>& b) {
+inline T dot(const vec_t<N, T>& a, const vec_t<N, T>& b) {
     T sum{0};
     for (unsigned i = 0; i < N; ++i) {
         sum += a.data_[i] * b.data_[i];
@@ -344,7 +358,7 @@ inline T dot(const vec_t<T, N>& a, const vec_t<T, N>& b) {
 }
 
 template<typename T, unsigned N>
-bool equals(const vec_t<T, N>& a, const vec_t<T, N>& b) {
+bool equals(const vec_t<N, T>& a, const vec_t<N, T>& b) {
     for (unsigned i = 0; i < N; ++i) {
         if (!math::equals(a.data_[i], b.data_[i])) {
             return false;
@@ -354,34 +368,34 @@ bool equals(const vec_t<T, N>& a, const vec_t<T, N>& b) {
 }
 
 template<typename T, unsigned N>
-inline T length_sqr(const vec_t<T, N>& a) {
+inline T length_sqr(const vec_t<N, T>& a) {
     return dot(a, a);
 }
 
 template<typename T, unsigned N>
-inline T length(const vec_t<T, N>& a) {
+inline T length(const vec_t<N, T>& a) {
     return sqrt(length_sqr(a));
 }
 
 template<typename T, unsigned N>
-inline T distance(const vec_t<T, N>& a, const vec_t<T, N>& b) {
+inline T distance(const vec_t<N, T>& a, const vec_t<N, T>& b) {
     return length(a - b);
 }
 
 template<typename T, unsigned N>
-inline T distance_sqr(const vec_t<T, N>& a, const vec_t<T, N>& b) {
+inline T distance_sqr(const vec_t<N, T>& a, const vec_t<N, T>& b) {
     return length_sqr(a - b);
 }
 
 template<typename T, unsigned N>
-inline vec_t<T, N> reflect(const vec_t<T, N>& direction, const vec_t<T, N>& normal) {
+inline vec_t<N, T> reflect(const vec_t<N, T>& direction, const vec_t<N, T>& normal) {
     // factor = -2 * dot(normal, direction)
     // reflected = factor * normal + direction;
     return direction - T{1} * dot(normal, direction) * normal;
 }
 
 template<typename T, unsigned N>
-inline vec_t<T, N> normalize(const vec_t<T, N>& a) {
+inline vec_t<N, T> normalize(const vec_t<N, T>& a) {
     T len = length(a);
     if (len < math::epsilon<T>()) {
         return {};
@@ -390,13 +404,13 @@ inline vec_t<T, N> normalize(const vec_t<T, N>& a) {
 }
 
 template<typename T, unsigned N>
-inline vec_t<T, N> lerp(const vec_t<T, N>& begin, const vec_t<T, N>& end, T t) {
+inline vec_t<N, T> lerp(const vec_t<N, T>& begin, const vec_t<N, T>& end, T t) {
     return (T{1} - t) * begin + t * end;
 }
 
 // specialized functions
 template<typename T>
-inline vec_t<T, 3> cross(const vec_t<T, 3>& a, const vec_t<T, 3>& b) {
+inline vec_t<3, T> cross(const vec_t<3, T>& a, const vec_t<3, T>& b) {
     return {
             a.y * b.z - a.z * b.y,
             a.z * b.x - a.x * b.z,
@@ -405,13 +419,13 @@ inline vec_t<T, 3> cross(const vec_t<T, 3>& a, const vec_t<T, 3>& b) {
 }
 
 template<typename T>
-inline T sign(const vec_t<T, 2>& p_1, const vec_t<T, 2>& p_2, const vec_t<T, 2>& p_3) {
+inline T sign(const vec_t<2, T>& p_1, const vec_t<2, T>& p_2, const vec_t<2, T>& p_3) {
     return (p_1.x - p_3.x) * (p_2.y - p_3.y) - (p_2.x - p_3.x) * (p_1.y - p_3.y);
 }
 
 template<typename T, unsigned N>
-constexpr vec_t<T, N> min_components(const vec_t<T, N>& a, const vec_t<T, N>& b) noexcept {
-    vec_t<T, N> r;
+constexpr vec_t<N, T> min_components(const vec_t<N, T>& a, const vec_t<N, T>& b) noexcept {
+    vec_t<N, T> r;
     for (unsigned i = 0; i < N; ++i) {
         r.data_[i] = std::min(a.data_[i], b.data_[i]);
     }
@@ -419,8 +433,8 @@ constexpr vec_t<T, N> min_components(const vec_t<T, N>& a, const vec_t<T, N>& b)
 }
 
 template<typename T, unsigned N>
-constexpr vec_t<T, N> max_components(const vec_t<T, N>& a, const vec_t<T, N>& b) noexcept {
-    vec_t<T, N> r;
+constexpr vec_t<N, T> max_components(const vec_t<N, T>& a, const vec_t<N, T>& b) noexcept {
+    vec_t<N, T> r;
     for (unsigned i = 0; i < N; ++i) {
         r.data_[i] = std::max(a.data_[i], b.data_[i]);
     }

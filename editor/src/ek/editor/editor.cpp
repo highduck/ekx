@@ -1,13 +1,13 @@
 #include "editor.hpp"
 
 #include <ek/editor/gui/editor_widgets.hpp>
-#include <ek/editor/gui/gui_dev_mode.h>
+#include <ek/editor/gui/gui_dev_mode.hpp>
 
 namespace ek {
 
 using app::g_app;
 
-editor_context_t::editor_context_t(scenex::basic_application& app)
+editor_context_t::editor_context_t(basic_application& app)
         : app_{&app} {
 
     g_app.on_frame_completed += [&] { gui_.on_frame_completed(); };

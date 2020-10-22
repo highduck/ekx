@@ -35,13 +35,11 @@ public class EkSurfaceView extends GLSurfaceView {
                 EkSurfaceView.this.renderer.onResume();
             }
         });
-        EkAudio.onResume();
     }
 
     @Override
     public void onPause() {
         Log.i(TAG, "GLSurface onPause");
-        EkAudio.onPause();
         this.queueEvent(new Runnable() {
             @Override
             public void run() {
