@@ -1,0 +1,88 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="flump/WalkFlap_R" itemID="50fe21de-0000032c" lastModified="1554964231" lastUniqueIdentifier="5">
+  <timeline>
+    <DOMTimeline name="WalkFlap_R" currentFrame="38">
+      <layers>
+        <DOMLayer name="Flap_R" color="#4FFF4F" current="true" isSelected="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="9" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/flap_R" centerPoint3DX="25.7" centerPoint3DY="-186.75">
+                  <matrix>
+                    <Matrix a="0.178253173828125" b="-1.06825256347656" c="1.022705078125" d="-0.02227783203125" tx="25.45" ty="-187.05"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="9" duration="11" tweenType="motion" motionTweenSnap="true" hasCustomEase="true" keyMode="22017" acceleration="100">
+              <tweens>
+                <CustomEase target="all">
+                  <Point/>
+                  <Point x="0.333333333333333"/>
+                  <Point x="0.666666666666667" y="0.333333333333333"/>
+                  <Point x="1" y="1"/>
+                </CustomEase>
+              </tweens>
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/flap_R" centerPoint3DX="-10.5" centerPoint3DY="-113.4">
+                  <matrix>
+                    <Matrix a="0.058990478515625" b="-1.03594970703125" c="1.17970275878906" d="0.01690673828125" tx="-10.55" ty="-113.35"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="20" duration="10" tweenType="motion" motionTweenSnap="true" hasCustomEase="true" keyMode="22017" acceleration="-100">
+              <tweens>
+                <CustomEase target="all">
+                  <Point/>
+                  <Point x="0.333333333333333" y="0.666666666666667"/>
+                  <Point x="0.666666666666667" y="1"/>
+                  <Point x="1" y="1"/>
+                </CustomEase>
+              </tweens>
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/flap_R" centerPoint3DX="-41.45" centerPoint3DY="-196.9">
+                  <matrix>
+                    <Matrix a="0.26416015625" b="-0.66009521484375" c="0.88092041015625" d="0.013427734375" tx="-40.8" ty="-197.2"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="30" duration="9" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/flap_R" centerPoint3DX="-50" centerPoint3DY="-117.7">
+                  <matrix>
+                    <Matrix a="0.132354736328125" b="-0.8779296875" c="0.98040771484375" d="0.145263671875" tx="-50.05" ty="-117.85"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/flap_R" selected="true" centerPoint3DX="25.7" centerPoint3DY="-186.75">
+                  <matrix>
+                    <Matrix a="0.178253173828125" b="-1.06825256347656" c="1.022705078125" d="-0.02227783203125" tx="25.45" ty="-187.05"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>

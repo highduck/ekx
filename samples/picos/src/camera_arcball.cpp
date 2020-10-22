@@ -1,15 +1,11 @@
 #include "camera_arcball.hpp"
 
 #include <ecxx/ecxx.hpp>
-#include <scenex/3d/camera_3d.hpp>
-#include <scenex/3d/transform_3d.hpp>
-#include <scenex/interactive_manager.h>
-#include <ek/locator.hpp>
-#include <scenex/ek/input_controller.h>
-#include <scenex/systems/game_time.h>
-#include <ek/timer.hpp>
-
-using namespace scenex;
+#include <ek/scenex/3d/camera_3d.hpp>
+#include <ek/scenex/3d/transform_3d.hpp>
+#include <ek/scenex/interactive_manager.hpp>
+#include <ek/util/locator.hpp>
+#include <ek/scenex/app/input_controller.hpp>
 
 namespace ek {
 
@@ -47,17 +43,15 @@ void update_camera_arc_ball(float dt) {
 
         camera_transform.position += -r * delta.x + t * delta.y;
 
-
         auto dd = 0.0f;
         auto& input = resolve<input_controller>();
-        if (input.is_key(key_code::W)) {
+        if (input.is_key(app::key_code::W)) {
             dd -= 10.0f * dt;
         }
-        if (input.is_key(key_code::S)) {
+        if (input.is_key(app::key_code::S)) {
             dd += 10.0f * dt;
         }
         arc_ball.distance = std::max(arc_ball.distance + dd, 0.0f);
-
 
         dir = normalize(arc_ball.center - camera_transform.position);
         camera_transform.position = arc_ball.center - arc_ball.distance * dir;

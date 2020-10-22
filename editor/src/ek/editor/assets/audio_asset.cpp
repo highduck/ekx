@@ -1,21 +1,13 @@
 #include "audio_asset.hpp"
-#include <pugixml.hpp>
-#include <scenex/asset2/asset_manager.hpp>
-#include <ek/fs/path.hpp>
-#include <ek/logger.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/system/system.hpp>
-#include <ek/audiomini.hpp>
-#include <ek/locator.hpp>
+#include <ek/audio/audio.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/editor/gui/editor_widgets.hpp>
-
-using scenex::asset_object_t;
 
 namespace ek {
 
-audio_asset_t::audio_asset_t(std::string path)
-        : path_{std::move(path)} {
+audio_asset_t::audio_asset_t(path_t path)
+        : editor_asset_t{std::move(path), "audio"} {
 }
 
 bool check_filters(const ek::path_t& path, const std::vector<std::string>& filters) {
@@ -27,25 +19,16 @@ bool check_filters(const ek::path_t& path, const std::vector<std::string>& filte
     return false;
 }
 
-void audio_asset_t::read_decl() {
-    pugi::xml_document xml;
-
+void audio_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
     std::vector<std::string> music_filters;
     music_list_.clear();
     sound_list_.clear();
 
-    const auto full_path = project_->base_path / path_;
-    if (xml.load_file(full_path.c_str())) {
-        auto node = xml.first_child();
-        name_ = node.attribute("name").as_string();
-        for (auto music_node : node.children("music")) {
-            music_filters.emplace_back(music_node.attribute("filter").as_string());
-        }
-    } else {
-        EK_ERROR << "Error parse xml: " << full_path;
+    for (auto music_node : node.children("music")) {
+        music_filters.emplace_back(music_node.attribute("filter").as_string());
     }
 
-    auto files = search_files("*.mp3", project_->base_path);
+    auto files = search_files("*.mp3", project->base_path / resource_path_);
     for (auto& file : files) {
         if (check_filters(file, music_filters)) {
             music_list_.push_back(file.str());
@@ -58,12 +41,11 @@ void audio_asset_t::read_decl() {
 void audio_asset_t::load() {
     read_decl();
 
-    auto& audio = resolve<AudioMini>();
     for (auto& m: music_list_) {
-        audio.create_music(m.c_str());
+        audio::create_music(m.c_str());
     }
     for (auto& m: sound_list_) {
-        audio.create_sound(m.c_str());
+        audio::create_sound(m.c_str());
     }
 }
 
@@ -80,77 +62,59 @@ void audio_asset_t::unload() {
 }
 
 void audio_asset_t::gui() {
-    auto& audio = resolve<AudioMini>();
-    if (ImGui::TreeNode(this, "%s (MiniAudio)", path_.c_str())) {
-        ImGui::LabelText("Name", "%s", name_.c_str());
-
-        gui_asset_object_controls(this);
-
-        for (const auto& music : music_list_) {
-            ImGui::PushID(music.c_str());
-            ImGui::LabelText("Music", "%s", music.c_str());
-            if (ImGui::Button("Play Music")) {
-                audio.play_music(music.c_str(), 1.0f);
-            }
-            if (ImGui::Button("Stop Music")) {
-                audio.play_music(music.c_str(), 0.0f);
-            }
-            ImGui::PopID();
+    for (const auto& music : music_list_) {
+        ImGui::PushID(music.c_str());
+        ImGui::LabelText("Music", "%s", music.c_str());
+        if (ImGui::Button("Play Music")) {
+            audio::play_music(music.c_str(), 1.0f);
         }
-        for (const auto& sound : sound_list_) {
-            ImGui::PushID(sound.c_str());
-            ImGui::LabelText("Sound", "%s", sound.c_str());
-            if (ImGui::Button("Play Sound")) {
-                audio.play_sound(sound.c_str(), 1.0f, 0.0f);
-            }
-            ImGui::PopID();
+        if (ImGui::Button("Stop Music")) {
+            audio::play_music(music.c_str(), 0.0f);
         }
-        ImGui::TreePop();
+        ImGui::PopID();
+    }
+    for (const auto& sound : sound_list_) {
+        ImGui::PushID(sound.c_str());
+        ImGui::LabelText("Sound", "%s", sound.c_str());
+        if (ImGui::Button("Play Sound")) {
+            audio::play_sound(sound.c_str(), 1.0f, 0.0f);
+        }
+        ImGui::PopID();
     }
 }
 
-void audio_asset_t::export_() {
+void audio_asset_t::build(assets_build_struct_t& data) {
     read_decl();
 
-    path_t output_path = path_t{project_->export_path} / name_;
+    const path_t output_path = data.output / name_;
+
     make_dirs(output_path);
-    for (const auto& audio_file_path : sound_list_) {
-        copy_file(path_t{audio_file_path}, output_path / path_name(audio_file_path));
+    for (const auto& audio : sound_list_) {
+        path_t path = path_t{name_} / path_name(audio);
+        copy_file(path_t{audio}, data.output / path);
+        data.meta("sound", path.str());
     }
-    for (const auto& audio_file_path : music_list_) {
-        copy_file(path_t{audio_file_path}, output_path / path_name(audio_file_path));
+    for (const auto& audio : music_list_) {
+        path_t path = path_t{name_} / path_name(audio);
+        copy_file(path_t{audio}, data.output / path);
+        data.meta("music", path.str());
     }
 }
 
 void audio_asset_t::save() {
     // TODO:
 //    pugi::xml_document xml;
-//    //if (xml.load_file(path_join(project_->base_path, path_).c_str())) {
+//    //if (xml.load_file(path_join(project->base_path, path_).c_str())) {
 //    auto node = xml.append_child("asset");
 //    node.append_attribute("name").set_value(name_.c_str());
 //    node.append_attribute("type").set_value("flash");
 //    node.append_attribute("path").set_value(flash_path_.c_str());
 //    to_xml(node.append_child("atlas"), atlas_decl_);
 //
-//    const auto full_path = path_join(project_->base_path, path_);
+//    const auto full_path = path_join(project->base_path, path_);
 //    if (!xml.save_file(full_path.c_str())) {
 //        log(log_level::error, "Error write xml file %s", full_path.c_str());
 //    }
-}
-
-void audio_asset_t::export_meta(output_memory_stream& output) {
-    IO io{output};
-
-    std::string sound_type{"sound"};
-    std::string music_type{"music"};
-
-    for (auto& sound : sound_list_) {
-        io(sound_type, sound);
-    }
-
-    for (auto& music : music_list_) {
-        io(music_type, music);
-    }
 }
 
 }

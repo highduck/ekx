@@ -1,0 +1,96 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="flump/WalkFoot_R" itemID="50fe215a-00000311" lastModified="1554964231" lastUniqueIdentifier="7">
+  <timeline>
+    <DOMTimeline name="WalkFoot_R">
+      <layers>
+        <DOMLayer name="Foot_R" color="#4FFF4F" current="true" isSelected="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="5" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/foot_R" centerPoint3DX="18.65" centerPoint3DY="-1.75">
+                  <matrix>
+                    <Matrix a="0" b="-1" c="1" d="0" tx="18.65" ty="-1.75"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="5" duration="8" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/foot_R" centerPoint3DX="76.3" centerPoint3DY="-1.75">
+                  <matrix>
+                    <Matrix a="0" b="-1" c="1" d="0" tx="76.3" ty="-1.75"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="13" duration="6" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/foot_R" centerPoint3DX="128.6" centerPoint3DY="-1.75">
+                  <matrix>
+                    <Matrix a="0" b="-1" c="1" d="0" tx="128.6" ty="-1.75"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="19" duration="5" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/foot_R" centerPoint3DX="6.9" centerPoint3DY="-44.7">
+                  <matrix>
+                    <Matrix a="-0.926788330078125" b="-0.37548828125" c="0.37548828125" d="-0.926788330078125" tx="7.4" ty="-44.75"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="24" duration="6" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/foot_R" centerPoint3DX="-75.35" centerPoint3DY="-1.75">
+                  <matrix>
+                    <Matrix a="0" b="-1" c="1" d="0" tx="-75.35" ty="-1.75"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="30" duration="9" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/foot_R" centerPoint3DX="-37.75" centerPoint3DY="-1.75">
+                  <matrix>
+                    <Matrix a="0" b="-1" c="1" d="0" tx="-37.75" ty="-1.75"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/foot_R" centerPoint3DX="18.65" centerPoint3DY="-1.75">
+                  <matrix>
+                    <Matrix a="0" b="-1" c="1" d="0" tx="18.65" ty="-1.75"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>

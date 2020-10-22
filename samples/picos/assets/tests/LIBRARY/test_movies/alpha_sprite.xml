@@ -1,0 +1,74 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test_movies/alpha_sprite" itemID="5c8bf2d4-00000018" lastModified="1554726073">
+  <timeline>
+    <DOMTimeline name="alpha_sprite">
+      <layers>
+        <DOMLayer name="Layer 1" color="#4FFF4F" current="true" isSelected="true">
+          <frames>
+            <DOMFrame index="0" keyMode="9728">
+              <elements>
+                <DOMShape>
+                  <fills>
+                    <FillStyle index="1">
+                      <SolidColor color="#0066CC"/>
+                    </FillStyle>
+                  </fills>
+                  <strokes>
+                    <StrokeStyle index="1">
+                      <SolidStroke scaleMode="normal" weight="25" joints="miter" miterLimit="1">
+                        <fill>
+                          <SolidColor/>
+                        </fill>
+                      </SolidStroke>
+                    </StrokeStyle>
+                    <StrokeStyle index="2">
+                      <SolidStroke scaleMode="normal" caps="none" weight="16">
+                        <fill>
+                          <SolidColor/>
+                        </fill>
+                      </SolidStroke>
+                    </StrokeStyle>
+                    <StrokeStyle index="3">
+                      <SolidStroke scaleMode="normal" caps="square" weight="30" joints="miter" miterLimit="1">
+                        <fill>
+                          <SolidColor color="#990000"/>
+                        </fill>
+                      </SolidStroke>
+                    </StrokeStyle>
+                    <StrokeStyle index="4">
+                      <SolidStroke scaleMode="normal" caps="none" weight="16.45">
+                        <fill>
+                          <SolidColor color="#FFFF00"/>
+                        </fill>
+                      </SolidStroke>
+                    </StrokeStyle>
+                    <StrokeStyle index="5">
+                      <SolidStroke scaleMode="normal" weight="25">
+                        <fill>
+                          <SolidColor color="#006600"/>
+                        </fill>
+                      </SolidStroke>
+                    </StrokeStyle>
+                  </strokes>
+                  <edges>
+                    <Edge fillStyle1="1" strokeStyle="3" edges="!3951 1901/3951 3876!3951 3876/2229 3876"/>
+                    <Edge fillStyle1="1" strokeStyle="5" edges="!1560 2694/0 2983!0 2983|160 588"/>
+                    <Edge fillStyle1="1" strokeStyle="1" edges="!2229 3876/1560 2694"/>
+                    <Edge fillStyle1="1" strokeStyle="4" edges="!160 588|2488 0"/>
+                    <Edge fillStyle1="1" strokeStyle="2" edges="!2488 0/3951 1901"/>
+                    <Edge cubics="!0 2983(;0,2983 160,588 160,588q0 2983 160 588);"/>
+                    <Edge cubics="!2229 3876(;2229,3876 1560,2694 1560,2694p2229 3876q1560 2694);"/>
+                    <Edge cubics="!1560 2694(;1560,2694 0,2983 0,2983q1560 2694 0 2983);"/>
+                    <Edge cubics="!160 588(;160,588 2488,0 2488,0q160 588 2488 0);"/>
+                    <Edge cubics="!2488 0(;2488,0 3951,1901 3951,1901p2488 0q3951 1901);"/>
+                    <Edge cubics="!3951 1901(;3951,1901 3894,2959 3894,2959q3951 1901 3894 2959);"/>
+                    <Edge cubics="!3894 2959(;3894,2959 2229,3876 2229,3876q3894 2959 2229 3876);"/>
+                  </edges>
+                </DOMShape>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>

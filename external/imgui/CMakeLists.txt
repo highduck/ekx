@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.12)
-project(imgui LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.13)
+project(imgui)
 
 add_library(${PROJECT_NAME} STATIC
         imconfig.h

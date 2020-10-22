@@ -1,51 +1,57 @@
 #include "imgui_module.hpp"
 
 #include <imgui.h>
-#include <graphics/program.hpp>
-#include <graphics/texture.hpp>
-#include <graphics/buffer_object.hpp>
-#include <draw2d/batcher.hpp>
-#include <platform/window.hpp>
-#include <platform/static_resources.hpp>
+#include <ek/graphics/program.hpp>
+#include <ek/graphics/texture.hpp>
+#include <ek/graphics/buffer.hpp>
+#include <ek/draw2d/batcher.hpp>
+#include <ek/app/app.hpp>
 #include <ek/math/matrix_camera.hpp>
-#include <graphics/gl_debug.hpp>
-#include <scenex/ek/input_controller.h>
-#include <ek/locator.hpp>
-#include <ek/fs/path.hpp>
+#include <ek/graphics/gl_debug.hpp>
+#include <ek/scenex/app/input_controller.hpp>
+#include <ek/util/locator.hpp>
+#include <ek/util/path.hpp>
+#include <ek/system/system.hpp>
 
-using namespace ek;
+namespace ek {
 
-namespace scenex {
+using namespace ek::app;
+using namespace ek::graphics;
 
 const GLchar* vertex_shader =
         "#ifdef GL_ES\n"
         "precision highp float;\n"
         "#endif\n"
-        "attribute vec2 Position;\n"
-        "attribute vec2 UV;\n"
-        "attribute vec4 Color;\n"
-        "uniform mat4 ProjMtx;\n"
-        "varying vec2 Frag_UV;\n"
-        "varying vec4 Frag_Color;\n"
+
+        "attribute vec2 aPosition;\n"
+        "attribute vec2 aTexCoord;\n"
+        "attribute vec4 aColorMult;\n"
+
+        "uniform mat4 uModelViewProjection;\n"
+
+        "varying vec2 vTexCoord;\n"
+        "varying vec4 vColorMult;\n"
+
         "void main() {\n"
-        "    Frag_UV = UV;\n"
-        // todo: avoid mult
-        "    Frag_Color = vec4(Color.xyz * Color.a, Color.a);\n"
-        "    gl_Position = ProjMtx * vec4(Position.xy, 0.0, 1.0);\n"
+        "    vTexCoord = aTexCoord;\n"
+        "    vColorMult = vec4(aColorMult.xyz * aColorMult.a, aColorMult.a);\n"
+        "    gl_Position = uModelViewProjection * vec4(aPosition, 0.0, 1.0);\n"
         "}\n";
 
 const GLchar* fragment_shader =
         "#ifdef GL_ES\n"
         "precision mediump float;\n"
         "#endif\n"
-        "varying vec2 Frag_UV;\n"
-        "varying vec4 Frag_Color;\n"
-        "uniform sampler2D Texture;\n"
+
+        "varying vec2 vTexCoord;\n"
+        "varying vec4 vColorMult;\n"
+        "varying vec4 vColorOffset;\n"
+
+        "uniform sampler2D uImage0;\n"
+
         "void main() {\n"
-        "   vec4 pixel_color = texture2D(Texture, Frag_UV);\n"
-        "   pixel_color *= Frag_Color;\n"
-        // gl_FragColor = pixelColor + vColorOffset * pixelColor.wwww;
-        "   gl_FragColor = pixel_color;\n"
+        "    vec4 pixel_color = texture2D(uImage0, vTexCoord);\n"
+        "    gl_FragColor = pixel_color * vColorMult;\n"
         "}\n";
 
 void reset_keys() {
@@ -55,162 +61,115 @@ void reset_keys() {
     }
 }
 
-void imgui_module_t::onKeyEvent(const key_event_t& event) {
-    auto& io = ImGui::GetIO();
-    int key = static_cast<int>(event.code);
-
-    if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown)) {
-        io.KeysDown[key] = (event.type == key_event_type::down);
-    }
-    if ((io.KeyShift && !event.shift) || (io.KeyCtrl && !event.ctrl)
-        || (io.KeyAlt && !event.alt) || (io.KeySuper && !event.super)) {
-        reset_keys();
-    }
-    io.KeyShift = event.shift;
-    io.KeyCtrl = event.ctrl;
-    io.KeyAlt = event.alt;
-    io.KeySuper = event.super;
-
-    if (event.type == key_event_type::down
+void imgui_module_t::on_event(const event_t& event) {
+    if (event.type == event_type::key_down
         && event.code == key_code::A
         && event.ctrl && event.shift) {
         enabled_ = !enabled_;
     }
-}
 
-void imgui_module_t::on_text_event(const text_event_t& event) {
-    ImGui::GetIO().AddInputCharactersUTF8(event.characters.c_str());
-    //return true;
-}
-
-void imgui_module_t::onMouseEvent(const mouse_event_t& event) {
     if (!enabled_) {
         return;
     }
+
     auto& io = ImGui::GetIO();
-    if (event.type == mouse_event_type::down || event.type == mouse_event_type::up) {
-        int button = 0;
-        if (event.button == mouse_button::right) {
-            button = 1;
-        } else if (event.button == mouse_button::other) {
-            button = 2;
+    switch (event.type) {
+        case event_type::key_up:
+        case event_type::key_down:
+        case event_type::key_press: {
+            int key = static_cast<int>(event.code);
+            if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown)) {
+                io.KeysDown[key] = (event.type == event_type::key_down);
+            }
+            if ((io.KeyShift && !event.shift) || (io.KeyCtrl && !event.ctrl)
+                || (io.KeyAlt && !event.alt) || (io.KeySuper && !event.super)) {
+                reset_keys();
+            }
+            io.KeyShift = event.shift;
+            io.KeyCtrl = event.ctrl;
+            io.KeyAlt = event.alt;
+            io.KeySuper = event.super;
         }
-        io.MouseDown[button] = (event.type == mouse_event_type::down);
-    } else if (event.type == mouse_event_type::scroll) {
-        if (fabsf(event.scroll_x) > 0.0f) {
-            io.MouseWheelH += event.scroll_x * 0.1f;
+            break;
+
+        case event_type::text:
+            io.AddInputCharactersUTF8(event.characters.c_str());
+            break;
+
+        case event_type::mouse_down:
+        case event_type::mouse_up: {
+            int button = 0;
+            if (event.button == mouse_button::right) {
+                button = 1;
+            } else if (event.button == mouse_button::other) {
+                button = 2;
+            }
+            io.MouseDown[button] = (event.type == event_type::mouse_down);
         }
-        if (fabsf(event.scroll_y) > 0.0f) {
-            io.MouseWheel += event.scroll_y * 0.1f;
-        }
-    } else if (event.type == mouse_event_type::move) {
-        io.MousePos.x = event.x / g_window.device_pixel_ratio;
-        io.MousePos.y = event.y / g_window.device_pixel_ratio;
+            break;
+        case event_type::mouse_scroll:
+            if (fabs(event.scroll.x) > 0.0) {
+                io.MouseWheelH += static_cast<float>(event.scroll.x * 0.1);
+            }
+            if (fabs(event.scroll.y) > 0.0) {
+                io.MouseWheel += static_cast<float>(event.scroll.y * 0.1);
+            }
+            break;
+
+        case event_type::mouse_move:
+            io.MousePos.x = static_cast<float>(event.pos.x / g_app.content_scale);
+            io.MousePos.y = static_cast<float>(event.pos.y / g_app.content_scale);
+            break;
+
+        default:
+            break;
     }
-}
-
-void imgui_module_t::onTouchEvent(const touch_event_t&) {
 
 }
 
-void imgui_module_t::onAppEvent(const app_event_t&) {
-
-}
-
-void imgui_module_t::onDrawFrame() {
-
-}
-
-void imgui_module_t::enable_vertex_attributes() {
-    glEnableVertexAttribArray((GLuint) locations_.position);
-    gl_check_error();
-
-    glEnableVertexAttribArray((GLuint) locations_.uv);
-    gl_check_error();
-
-    glEnableVertexAttribArray((GLuint) locations_.color);
-    gl_check_error();
-
-    glVertexAttribPointer((GLuint) locations_.position, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert),
-                          (GLvoid*) IM_OFFSETOF(ImDrawVert, pos));
-    gl_check_error();
-
-    glVertexAttribPointer((GLuint) locations_.uv, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert),
-                          (GLvoid*) IM_OFFSETOF(ImDrawVert, uv));
-    gl_check_error();
-
-    glVertexAttribPointer((GLuint) locations_.color, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert),
-                          (GLvoid*) IM_OFFSETOF(ImDrawVert, col));
-    gl_check_error();
-}
-
-// OpenGL3 Render function.
-// (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
-// Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so.
 void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
     ImGuiIO& io = ImGui::GetIO();
-    const float fb_width = draw_data->DisplaySize.x * io.DisplayFramebufferScale.x;
-    const float fb_height = draw_data->DisplaySize.y * io.DisplayFramebufferScale.y;
-    if (fb_width <= 0.0f || fb_height <= 0.0f) {
+    const rect_f viewport_rect{draw_data->DisplayPos.x, draw_data->DisplayPos.y,
+                               draw_data->DisplaySize.x, draw_data->DisplaySize.y};
+    if (viewport_rect.width <= 0.0f || viewport_rect.height <= 0.0f) {
         return;
     }
+
+    const rect_f framebuffer_rect = viewport_rect
+                                    * float2{io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y};
     draw_data->ScaleClipRects(io.DisplayFramebufferScale);
 
     // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, polygon fill
     glEnable(GL_BLEND);
-    gl_check_error();
+    gl::check_error();
     glBlendEquation(GL_FUNC_ADD);
-    gl_check_error();
+    gl::check_error();
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    gl_check_error();
+    gl::check_error();
     glDisable(GL_CULL_FACE);
-    gl_check_error();
+    gl::check_error();
     glDisable(GL_DEPTH_TEST);
-    gl_check_error();
+    gl::check_error();
     glEnable(GL_SCISSOR_TEST);
-    gl_check_error();
+    gl::check_error();
 
-    // Setup viewport, orthographic projection matrix
-    // Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayMin is typically (0,0) for single viewport apps.
-    glViewport(0, 0, (GLsizei) fb_width, (GLsizei) fb_height);
+    glViewport(static_cast<GLint>(framebuffer_rect.x),
+               static_cast<GLint>(framebuffer_rect.y),
+               static_cast<GLsizei>(framebuffer_rect.width),
+               static_cast<GLsizei>(framebuffer_rect.height));
+    gl::check_error();
 
-    gl_check_error();
-    auto mvp = ortho_2d(
-            draw_data->DisplayPos.x,
-            draw_data->DisplayPos.y,
-            draw_data->DisplaySize.x,
-            draw_data->DisplaySize.y
-    );
+    auto mvp = ortho_2d(viewport_rect.x, viewport_rect.y, viewport_rect.width, viewport_rect.height);
     program_->use();
-    glUniform1i(locations_.tex, 0);
-    gl_check_error();
-    glUniformMatrix4fv(locations_.proj, 1, GL_FALSE, mvp.m);
-    gl_check_error();
-#ifdef GL_SAMPLER_BINDING
-    //        glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
-//        glCheckError();
-#endif
-
-//#ifndef WEBGL
-// Recreate the VAO every time
-//     (This is to easily allow multiple GL contexts. VAO are not shared among GL contexts, and we don't track creation/deletion of windows so we don't have an obvious key to use to cache them.)
-//    GLuint vao_handle = 0;
-//    glGenVertexArrays(1, &vao_handle);
-//    glBindVertexArray(vao_handle);
-//#endif
-//    GLuint vao = 0;
-//    glGenVertexArrays(1, &vao);
-//    glCheckError();
-//    glBindVertexArray(vao);
-//    glCheckError();
-
+    program_->bind_image();
+    program_->set_uniform(program_uniforms::mvp, mvp);
 
     GLint batch_prev_texture = 0;
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
-    gl_check_error();
-    // Draw
+    gl::check_error();
+
     ImVec2 pos = draw_data->DisplayPos;
     for (int n = 0; n < draw_data->CmdListsCount; n++) {
         const ImDrawList* cmd_list = draw_data->CmdLists[n];
@@ -219,7 +178,7 @@ void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
         vertex_buffer_->upload(cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
         index_buffer_->upload(cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(uint16_t));
 
-        enable_vertex_attributes();
+        program_->bind_attributes();
 
         for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++) {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
@@ -230,12 +189,17 @@ void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
                 ImVec4 clip_rect = ImVec4(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y,
                                           pcmd->ClipRect.z - pos.x,
                                           pcmd->ClipRect.w - pos.y);
-                if (clip_rect.x < fb_width && clip_rect.y < fb_height && clip_rect.z >= 0.0f &&
-                    clip_rect.w >= 0.0f) {
+                if (clip_rect.x < framebuffer_rect.right()
+                    && clip_rect.y < framebuffer_rect.bottom()
+                    && clip_rect.z >= framebuffer_rect.x
+                    && clip_rect.w >= framebuffer_rect.y) {
+
                     // Apply scissor/clipping rectangle
-                    glScissor((int) clip_rect.x, (int) (fb_height - clip_rect.w), (int) (clip_rect.z - clip_rect.x),
-                              (int) (clip_rect.w - clip_rect.y));
-                    gl_check_error();
+                    glScissor(static_cast<GLint>(clip_rect.x),
+                              static_cast<GLint>(framebuffer_rect.bottom() - clip_rect.w),
+                              static_cast<GLsizei>(clip_rect.z - clip_rect.x),
+                              static_cast<GLsizei>(clip_rect.w - clip_rect.y));
+                    gl::check_error();
 
                     const GLint texture_id = (GLuint) (intptr_t) pcmd->TextureId;
                     if (batch_prev_texture != texture_id) {
@@ -243,22 +207,18 @@ void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
                         // Bind texture
                         glActiveTexture(GL_TEXTURE0);
                         glBindTexture(GL_TEXTURE_2D, (GLuint) texture_id);
-                        gl_check_error();
+                        gl::check_error();
                     }
                     //Draw
                     glDrawElements(GL_TRIANGLES, (GLsizei) pcmd->ElemCount, GL_UNSIGNED_SHORT, idx_buffer_offset);
-                    gl_check_error();
+                    gl::check_error();
                 }
             }
             idx_buffer_offset += pcmd->ElemCount;
         }
     }
-//#ifndef WEBGL
-//    glBindVertexArray(0);
-//    glDeleteVertexArrays(1, &vao);
-//#endif
     glDisable(GL_SCISSOR_TEST);
-    gl_check_error();
+    gl::check_error();
 }
 
 void imgui_module_t::init_fonts() {
@@ -276,118 +236,14 @@ void imgui_module_t::init_fonts() {
     delete[] pma_pixels;
 }
 
-void imgui_module_t::init_program() {
-    GLuint handle = program_->handle();
-    locations_.tex = glGetUniformLocation(handle, "Texture");
-    gl_check_error();
-    locations_.proj = glGetUniformLocation(handle, "ProjMtx");
-    gl_check_error();
-    locations_.position = glGetAttribLocation(handle, "Position");
-    gl_check_error();
-    locations_.uv = glGetAttribLocation(handle, "UV");
-    gl_check_error();
-    locations_.color = glGetAttribLocation(handle, "Color");
-    gl_check_error();
-}
-
-const char* imgui_clipboard_get(void* context) {
-    auto* c = static_cast<imgui_module_t*>(context);
-    if (c) {
-        // TODO: platform clipboard
-        //c->clipboard_text_ = c->_platform->clipboard.get();
-        return c->clipboard_text_.c_str();
-    }
-    return nullptr;
-}
-
-void imgui_clipboard_set(void* context, const char* text) {
-    auto* c = static_cast<imgui_module_t*>(context);
-    if (c) {
-        c->clipboard_text_ = text;
-        // TODO: platform clipboard
-//        c->_platform->clipboard.set(text);
-    }
-}
-
-// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-//    bool ImGuiModule::processEvent(SDL_Event* event) {
-//        ImGuiIO& io = ImGui::GetIO();
-//        switch (event->type) {
-//            case SDL_MOUSEWHEEL: {
-//                if (event->wheel.x > 0) io.MouseWheelH += 1;
-//                if (event->wheel.x < 0) io.MouseWheelH -= 1;
-//                if (event->wheel.y > 0) io.MouseWheel += 1;
-//                if (event->wheel.y < 0) io.MouseWheel -= 1;
-//                return true;
-//            }
-//            case SDL_MOUSEBUTTONDOWN: {
-//                if (event->button.button == SDL_BUTTON_LEFT) _MousePressed[0] = true;
-//                if (event->button.button == SDL_BUTTON_RIGHT) _MousePressed[1] = true;
-//                if (event->button.button == SDL_BUTTON_MIDDLE) _MousePressed[2] = true;
-//                return true;
-//            }
-//            default:
-//                break;
-//        }
-//
-//        return false;
-//    }
-
-void imgui_module_t::update_mouse_state() {
-//    ImGuiIO& io = ImGui::GetIO();
-//    // Set OS mouse position if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
-//    if (io.WantSetMousePos) {
-//        // TODO: force set mouse position
-//        //g_window.->mouse.position((int)io.MousePos.x, (int)io.MousePos.y);
-//    } else {
-//        io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
-//    }
-//
-//    int mx, my;
-//    Uint32 mouse_buttons = SDL_GetMouseState(&mx, &my);
-//    io.MouseDown[0] = _MousePressed[0] || (mouse_buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) !=
-//                                          0;  // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-//    io.MouseDown[1] = _MousePressed[1] || (mouse_buttons & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0;
-//    io.MouseDown[2] = _MousePressed[2] || (mouse_buttons & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0;
-//    _MousePressed[0] = _MousePressed[1] = _MousePressed[2] = false;
-//
-#ifndef __EMSCRIPTEN__
-//    SDL_Window* focused_window = SDL_GetKeyboardFocus();
-//    if (sdl_window == focused_window) {
-//        // SDL_GetMouseState() gives mouse position seemingly based on the last window entered/focused(?)
-//        // The creation of a new windows at runtime and SDL_CaptureMouse both seems to severely mess up with that, so we retrieve that position globally.
-//        int wx, wy;
-//        SDL_GetWindowPosition(focused_window, &wx, &wy);
-//        SDL_GetGlobalMouseState(&mx, &my);
-//        mx -= wx;
-//        my -= wy;
-//        io.MousePos = ImVec2((float)mx, (float)my);
-//    }
-
-    // SDL_CaptureMouse() let the OS know e.g. that our imgui drag outside the SDL window boundaries shouldn't e.g. trigger the OS window resize cursor.
-    // The function is only supported from SDL 2.0.4 (released Jan 2016)
-
-    //bool any_mouse_button_down = ImGui::IsAnyMouseDown();
-    // TODO: capture mouse
-//    SDL_CaptureMouse(any_mouse_button_down ? SDL_TRUE : SDL_FALSE);
-#else
-    // TODO: capture mouse
-//    if (SDL_GetWindowFlags(_window) & SDL_WINDOW_INPUT_FOCUS)
-//            io.MousePos = ImVec2((float)mx, (float)my);
-#endif
-}
-
-void imgui_module_t::update_mouse_cursor() {
+void update_mouse_cursor() {
     ImGuiIO& io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) {
         return;
     }
 
     ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-    auto cursor = mouse_cursor_t::parent;
+    auto cursor = mouse_cursor::parent;
     bool cursor_visible = true;
     if (io.MouseDrawCursor || imgui_cursor == ImGuiMouseCursor_None) {
         // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
@@ -402,15 +258,15 @@ void imgui_module_t::update_mouse_cursor() {
             case ImGuiMouseCursor_ResizeEW:
             case ImGuiMouseCursor_ResizeNESW:
             case ImGuiMouseCursor_ResizeNWSE:
-                cursor = mouse_cursor_t::arrow;
+                cursor = mouse_cursor::arrow;
                 break;
             case ImGuiMouseCursor_Hand:
-                cursor = mouse_cursor_t::button;
+                cursor = mouse_cursor::button;
                 break;
             default:
                 break;
         }
-        g_window.set_cursor(cursor);
+        g_app.cursor = cursor;
         cursor_visible = true;
     }
 
@@ -420,10 +276,11 @@ void imgui_module_t::update_mouse_cursor() {
 
 imgui_module_t::imgui_module_t() {
 
-    vertex_buffer_ = new buffer_object_t{buffer_type::vertex_buffer, buffer_usage::dynamic_buffer};
-    index_buffer_ = new buffer_object_t{buffer_type::index_buffer, buffer_usage::dynamic_buffer};
+    vertex_buffer_ = new buffer_t{buffer_type::vertex_buffer, buffer_usage::dynamic_buffer};
+    index_buffer_ = new buffer_t{buffer_type::index_buffer, buffer_usage::dynamic_buffer};
     texture_ = new texture_t{};
     program_ = new program_t{vertex_shader, fragment_shader};
+    program_->vertex = &vertex_minimal_2d::decl;
 
     /*** imgui setup **/
     // Setup Dear ImGui binding
@@ -454,7 +311,7 @@ imgui_module_t::imgui_module_t() {
     if (sdk_root) {
         font_path = path_t{sdk_root} / "editor/resources" / font_path;
     }
-    auto data = get_content(font_path.c_str());
+    auto data = read_file(font_path);
     if (!data.empty()) {
         font = io.Fonts->AddFontFromMemoryTTF(data.data(), data.size(), 16.0f * scale_factor);
     }
@@ -470,7 +327,6 @@ imgui_module_t::imgui_module_t() {
     font->Scale = 1.0f / scale_factor;
 
     ImGui::StyleColorsDark();
-    init_program();
     init_fonts();
 }
 
@@ -484,16 +340,15 @@ imgui_module_t::~imgui_module_t() {
 }
 
 void imgui_module_t::begin_frame(float dt) {
-    auto w = static_cast<float>(g_window.window_size.width);
-    auto h = static_cast<float>(g_window.window_size.height);
-    auto fb_w = static_cast<float>(g_window.back_buffer_size.width);
-    auto fb_h = static_cast<float>(g_window.back_buffer_size.height);
+    auto w = static_cast<float>(g_app.window_size.x);
+    auto h = static_cast<float>(g_app.window_size.y);
+    auto fb_w = static_cast<float>(g_app.drawable_size.x);
+    auto fb_h = static_cast<float>(g_app.drawable_size.y);
 
     ImGui::GetIO().DisplaySize = ImVec2(w, h);
     ImGui::GetIO().DisplayFramebufferScale = ImVec2(w > 0 ? (fb_w / w) : 0, h > 0 ? (fb_h / h) : 0);
     ImGui::GetIO().DeltaTime = dt;
 
-    update_mouse_state();
     update_mouse_cursor();
 
     ImGui::NewFrame();
@@ -505,64 +360,67 @@ void imgui_module_t::end_frame() {
     if (enabled_) {
         render_frame_data(ImGui::GetDrawData());
     }
-
-//    ImGui::GetIO().MouseDown[0] = false;
-//    ImGui::GetIO().MouseDown[1] = false;
-//    ImGui::GetIO().MouseDown[2] = false;
 }
+
+#define MAP_KEY_CODE(from, to) io.KeyMap[(to)] = static_cast<int>((from))
 
 void imgui_module_t::setup() {
     auto& io = ImGui::GetIO();
     // Setup back-end capabilities flags
-    io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;       // We can honor GetMouseCursor() values (optional)
-    io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;        // We can honor io.WantSetMousePos requests (optional, rarely used)
-
+    io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors |// We can honor GetMouseCursor() values (optional)
+                       ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 
     // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
-    io.KeyMap[ImGuiKey_Tab] = static_cast<int>(key_code::Tab);
-    io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(key_code::ArrowLeft);
-    io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(key_code::ArrowRight);
-    io.KeyMap[ImGuiKey_UpArrow] = static_cast<int>(key_code::ArrowUp);
-    io.KeyMap[ImGuiKey_DownArrow] = static_cast<int>(key_code::ArrowDown);
-    io.KeyMap[ImGuiKey_PageUp] = static_cast<int>(key_code::PageUp);
-    io.KeyMap[ImGuiKey_PageDown] = static_cast<int>(key_code::PageDown);
-    io.KeyMap[ImGuiKey_Home] = static_cast<int>(key_code::Home);
-    io.KeyMap[ImGuiKey_End] = static_cast<int>(key_code::End);
-    io.KeyMap[ImGuiKey_Insert] = static_cast<int>(key_code::Insert);
-    io.KeyMap[ImGuiKey_Delete] = static_cast<int>(key_code::Delete);
-    io.KeyMap[ImGuiKey_Backspace] = static_cast<int>(key_code::Backspace);
-    io.KeyMap[ImGuiKey_Space] = static_cast<int>(key_code::Space);
-    io.KeyMap[ImGuiKey_Enter] = static_cast<int>(key_code::Enter);
-    io.KeyMap[ImGuiKey_Escape] = static_cast<int>(key_code::Escape);
-    io.KeyMap[ImGuiKey_A] = static_cast<int>(key_code::A);
-    io.KeyMap[ImGuiKey_C] = static_cast<int>(key_code::C);
-    io.KeyMap[ImGuiKey_V] = static_cast<int>(key_code::V);
-    io.KeyMap[ImGuiKey_X] = static_cast<int>(key_code::X);
-    io.KeyMap[ImGuiKey_Y] = static_cast<int>(key_code::Y);
-    io.KeyMap[ImGuiKey_Z] = static_cast<int>(key_code::Z);
+    MAP_KEY_CODE(key_code::Tab, ImGuiKey_Tab);
+    MAP_KEY_CODE(key_code::ArrowLeft, ImGuiKey_LeftArrow);
+    MAP_KEY_CODE(key_code::ArrowRight, ImGuiKey_RightArrow);
+    MAP_KEY_CODE(key_code::ArrowUp, ImGuiKey_UpArrow);
+    MAP_KEY_CODE(key_code::ArrowDown, ImGuiKey_DownArrow);
+    MAP_KEY_CODE(key_code::PageUp, ImGuiKey_PageUp);
+    MAP_KEY_CODE(key_code::PageDown, ImGuiKey_PageDown);
+    MAP_KEY_CODE(key_code::Home, ImGuiKey_Home);
+    MAP_KEY_CODE(key_code::End, ImGuiKey_End);
+    MAP_KEY_CODE(key_code::Insert, ImGuiKey_Insert);
+    MAP_KEY_CODE(key_code::Delete, ImGuiKey_Delete);
+    MAP_KEY_CODE(key_code::Backspace, ImGuiKey_Backspace);
+    MAP_KEY_CODE(key_code::Space, ImGuiKey_Space);
+    MAP_KEY_CODE(key_code::Enter, ImGuiKey_Enter);
+    MAP_KEY_CODE(key_code::Escape, ImGuiKey_Escape);
+    MAP_KEY_CODE(key_code::A, ImGuiKey_A);
+    MAP_KEY_CODE(key_code::C, ImGuiKey_C);
+    MAP_KEY_CODE(key_code::V, ImGuiKey_V);
+    MAP_KEY_CODE(key_code::X, ImGuiKey_X);
+    MAP_KEY_CODE(key_code::Y, ImGuiKey_Y);
+    MAP_KEY_CODE(key_code::Z, ImGuiKey_Z);
 
     io.ClipboardUserData = this;
-    io.SetClipboardTextFn = imgui_clipboard_set;
-    io.GetClipboardTextFn = imgui_clipboard_get;
-
-#ifdef _WIN32
-    SDL_SysWMinfo wmInfo;
-        SDL_VERSION(&wmInfo.version);
-        SDL_GetWindowWMInfo(window, &wmInfo);
-        io.ImeWindowHandle = wmInfo.info.win.window;
-#endif
-
+    io.SetClipboardTextFn = [](void* context, const char* text) {
+        auto* c = static_cast<imgui_module_t*>(context);
+        if (c) {
+            c->clipboard_text_ = text;
+            // TODO: platform clipboard
+            //c->_platform->clipboard.set(text);
+        }
+    };
+    io.GetClipboardTextFn = [](void* context) -> const char* {
+        auto* c = static_cast<imgui_module_t*>(context);
+        const char* result = nullptr;
+        if (c) {
+            // TODO: platform clipboard
+            //c->clipboard_text_ = c->_platform->clipboard.get();
+            result = c->clipboard_text_.c_str();
+        }
+        return result;
+    };
 }
 
 void imgui_module_t::on_frame_completed() {
-    application_listener_t::on_frame_completed();
-
     auto& io = ImGui::GetIO();
     if (io.KeySuper || io.KeyCtrl) {
         reset_keys();
     }
 
-    auto* ic = ek::try_resolve<input_controller>();
+    auto* ic = try_resolve<input_controller>();
     if (ic) {
         ic->hovered_by_editor_gui = ImGui::IsAnyWindowHovered() && enabled_;
     }

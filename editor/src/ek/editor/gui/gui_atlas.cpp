@@ -1,10 +1,10 @@
-#include <scenex/2d/atlas.hpp>
+#include <ek/scenex/2d/atlas.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <graphics/texture.hpp>
+#include <ek/graphics/texture.hpp>
 
 namespace ek {
 
-void gui_sprite_view(const scenex::sprite_t* sprite) {
+void gui_sprite_view(const sprite_t* sprite) {
     if (sprite) {
         ImGui::PushID(sprite);
         auto rc = sprite->rect;
@@ -44,7 +44,7 @@ void gui_sprite_view(const scenex::sprite_t* sprite) {
     }
 }
 
-void gui_atlas_view(const scenex::atlas_t* atlas) {
+void gui_atlas_view(const atlas_t* atlas) {
     if (atlas) {
         if (ImGui::TreeNode(atlas, "Atlas")) {
             for (const auto& page : atlas->pages) {

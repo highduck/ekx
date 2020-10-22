@@ -1,7 +1,7 @@
 #pragma once
 
-#include <graphics/gl_def.hpp>
-#include <platform/application.hpp>
+#include <ek/graphics/graphics.hpp>
+#include <ek/app/app.hpp>
 #include <ek/math/vec.hpp>
 #include <string>
 
@@ -9,34 +9,15 @@ struct ImDrawData;
 
 namespace ek {
 
-class texture_t;
-
-class program_t;
-
-class buffer_object_t;
-}
-
-namespace scenex {
-
-class imgui_module_t : public ek::application_listener_t {
+class imgui_module_t final {
 public:
     imgui_module_t();
 
-    ~imgui_module_t() final;
+    ~imgui_module_t();
 
-    void onKeyEvent(const ek::key_event_t& event) override;
+    void on_event(const app::event_t& event);
 
-    void onMouseEvent(const ek::mouse_event_t& event) override;
-
-    void onTouchEvent(const ek::touch_event_t& event) override;
-
-    void onAppEvent(const ek::app_event_t& event) override;
-
-    void onDrawFrame() override;
-
-    void on_text_event(const ek::text_event_t& event) override;
-
-    void on_frame_completed() override;
+    void on_frame_completed();
 
     void begin_frame(float dt);
 
@@ -46,36 +27,16 @@ private:
 
     void setup();
 
-    void init_program();
-
     void init_fonts();
-
-    void enable_vertex_attributes();
 
     void render_frame_data(ImDrawData* draw_data);
 
-    void update_mouse_state();
-
-    void update_mouse_cursor();
-
-public:
-    std::string clipboard_text_{};
-
 private:
-    ek::buffer_object_t* vertex_buffer_;
-    ek::buffer_object_t* index_buffer_;
-    ek::texture_t* texture_;
-    ek::program_t* program_;
-
-    struct program_locations_t {
-        GLint tex = 0;
-        GLint proj = 0;
-        GLint position = 0;
-        GLint uv = 0;
-        GLint color = 0;
-    };
-
-    program_locations_t locations_;
+    graphics::buffer_t* vertex_buffer_ = nullptr;
+    graphics::buffer_t* index_buffer_ = nullptr;
+    graphics::texture_t* texture_ = nullptr;
+    graphics::program_t* program_ = nullptr;
+    std::string clipboard_text_{};
     bool enabled_ = false;
 };
 

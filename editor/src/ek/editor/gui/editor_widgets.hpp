@@ -1,6 +1,6 @@
 #pragma once
 
-namespace scenex {
+namespace ek {
 
 class sprite_t;
 
@@ -10,24 +10,24 @@ class font_t;
 
 struct sg_file;
 
-class asset_manager_t;
+struct editor_project_t;
 
-class asset_object_t;
+struct particle_decl;
 
-}
+class editor_asset_t;
 
-namespace ek {
+void gui_sprite_view(const sprite_t* sprite);
 
-void gui_sprite_view(const scenex::sprite_t* sprite);
+void gui_atlas_view(const atlas_t* atlas);
 
-void gui_atlas_view(const scenex::atlas_t* atlas);
+void gui_font_view(const font_t* font);
 
-void gui_font_view(const scenex::font_t* font);
+void gui_sg_file_view(const sg_file* library);
 
-void gui_sg_file_view(const scenex::sg_file* library);
+void gui_asset_object_controls(editor_asset_t* asset);
 
-void gui_asset_object_controls(scenex::asset_object_t* asset);
+void gui_asset_project(editor_project_t& project);
 
-void gui_asset_project(scenex::asset_manager_t& project);
+void gui_particles(particle_decl* decl);
 
 }

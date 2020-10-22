@@ -1,0 +1,9 @@
+#ifndef RAUDIO_CONFIG_H
+#define RAUDIO_CONFIG_H
+
+#define RAUDIO_STANDALONE
+#define SUPPORT_FILEFORMAT_MP3
+#define MA_NO_STDIO
+#define DR_MP3_NO_STDIO
+
+#endif

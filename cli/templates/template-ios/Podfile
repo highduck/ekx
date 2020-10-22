@@ -1,0 +1,6 @@
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '10.0'
+
+target 'template-ios' do
+  # TEMPLATE DEPENDENCIES
+end

@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 3.12)
-project(picos LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.13)
+project(picos)
 
 add_executable(${PROJECT_NAME}
-        src/main.hpp
-        src/main.cpp
+        src/picos_main.hpp
+        src/picos_main.cpp
         src/piko/piko.h
         src/piko/examples.h
         src/piko/examples.cpp
@@ -33,34 +33,48 @@ set_target_properties(${PROJECT_NAME}
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
+target_compile_options(${PROJECT_NAME} PRIVATE -fno-exceptions -fno-rtti)
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_options(${PROJECT_NAME} PRIVATE -g)
 else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Oz -flto -fno-exceptions -fno-rtti)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Oz -flto)
 endif ()
 
-if (EMSCRIPTEN) #
+if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     #-s SAFE_HEAP=1
     #-s ASSERTIONS=2
     #-s STACK_OVERFLOW_CHECK=2
     #-s ALIASING_FUNCTION_POINTERS=0
     #-s MODULARIZE=1
+    set(EM_COMMON_FLAGS
+            -s FETCH=1
+            -s WASM=1
+            -s WASM_ASYNC_COMPILATION=1
+            -s DISABLE_EXCEPTION_CATCHING=1
+            -s ALLOW_MEMORY_GROWTH=1
+            -s FILESYSTEM=0
+            )
+
+    # defaults:
+    # -s DISABLE_EXCEPTION_CATCHING=1
+    # -s WASM_OBJECT_FILES=0
+    # -s ASSERTIONS=1
+    # TODO: strange runtime DOM exception error with Release, "-s STRICT=1"
 
     if (CMAKE_BUILD_TYPE MATCHES Debug)
-        target_compile_options(${PROJECT_NAME} PUBLIC -g)
-        set(EMSCRIPTEN_C_FLAGS "-s FETCH=1 -s WASM=1 -s BINARYEN_ASYNC_COMPILATION=1 -s NO_EXIT_RUNTIME=1 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=2 -s FILESYSTEM=0")
-        set(EMSCRIPTEN_LINKER_FLAGS "")
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
+                "-s ENVIRONMENT=web -s FETCH=1 -s ALLOW_MEMORY_GROWTH=1 -s FILESYSTEM=0"
+                )
     else ()
-        target_compile_options(${PROJECT_NAME} PUBLIC
-                -Oz -flto -fno-exceptions -fno-rtti)
-        set(EMSCRIPTEN_C_FLAGS "-s WASM_OBJECT_FILES=0 -s FETCH=1 -s WASM=1 -s BINARYEN_ASYNC_COMPILATION=1 -s NO_EXIT_RUNTIME=1 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=0 -s FILESYSTEM=0")
-        set(EMSCRIPTEN_LINKER_FLAGS "--llvm-lto 1 --no-heap-copy --closure 1")
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
+                "-s ENVIRONMENT=web -s FETCH=1 -s ALLOW_MEMORY_GROWTH=1 -s FILESYSTEM=0 -s ASSERTIONS=0 --closure 1"
+                )
+        target_link_options(${PROJECT_NAME} PUBLIC
+                --llvm-lto 1
+                )
     endif ()
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${EMSCRIPTEN_C_FLAGS}")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${EMSCRIPTEN_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${EMSCRIPTEN_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${EMSCRIPTEN_C_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EMSCRIPTEN_LINKER_FLAGS}")
+
 else ()
     if (CMAKE_BUILD_TYPE MATCHES Debug)
     else ()

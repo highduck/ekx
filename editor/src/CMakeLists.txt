@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 add_library(${PROJECT_NAME} STATIC
 
@@ -26,11 +26,10 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/gui/gui_window_tree.cpp
         ek/editor/gui/gui_window_tree.h
         ek/editor/gui/gui_dev_mode.cpp
-        ek/editor/gui/gui_dev_mode.h
+        ek/editor/gui/gui_dev_mode.hpp
 
         ek/editor/imgui/imgui_module.hpp
         ek/editor/imgui/imgui_module.cpp
-        ek/editor/imgui/imgui.cpp
         ek/editor/imgui/imgui.hpp
 
         ek/editor/editor.cpp
@@ -54,7 +53,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/system/file_watcher.cpp
         ek/system/file_watcher.hpp
 
-        ek/editor/editor_app.cpp ek/editor/editor_app.hpp ek/editor/assets/editor_assets.cpp ek/editor/assets/editor_assets.hpp)
+        ek/editor/editor_app.cpp ek/editor/editor_app.hpp ek/editor/assets/editor_project.cpp ek/editor/assets/editor_project.hpp ek/editor/gui/gui_particles.cpp ek/editor/assets/particles_asset.cpp ek/editor/assets/particles_asset.hpp ek/editor/assets/editor_asset.cpp ek/editor/assets/editor_asset.hpp)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
@@ -72,6 +71,12 @@ target_compile_options(${PROJECT_NAME} PUBLIC
         #        -fno-exceptions
         )
 endif()
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+        -fno-exceptions
+        -fno-rtti
+        -fstrict-aliasing
+        )
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_options(${PROJECT_NAME} PRIVATE -g)

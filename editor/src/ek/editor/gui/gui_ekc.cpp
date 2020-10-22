@@ -2,7 +2,7 @@
 #include <ek/system/system.hpp>
 #include <ek/system/working_dir.hpp>
 
-#include <ek/logger.hpp>
+#include <ek/util/logger.hpp>
 #include <ek/editor/marketing/export_marketing.hpp>
 
 namespace ek {

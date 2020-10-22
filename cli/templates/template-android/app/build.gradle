@@ -1,0 +1,92 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+    signingConfigs {
+        release {
+            storeFile file('store.keystore')
+            storePassword 'STORE_PASSWORD'
+            keyAlias 'KEY_ALIAS'
+            keyPassword 'KEY_PASSWORD'
+        }
+    }
+    defaultConfig {
+        applicationId "com.eliasku.template_android" // AUTO
+        versionCode 1 // AUTO
+        versionName "1.0" // AUTO
+        minSdkVersion 16
+        targetSdkVersion 29
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17"
+            }
+        }
+        ndk {
+            abiFilters 'armeabi-v7a', 'x86', 'arm64-v8a', 'x86_64'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            firebaseCrashlytics {
+              // Enable processing and uploading of native symbols to Crashlytics servers.
+              // By default, this is disabled to improve build speeds.
+              // This flag must be enabled to see properly-symbolicated native
+              // stack traces in the Crashlytics dashboard.
+              nativeSymbolUploadEnabled true
+            }
+            ndk {
+                // SYMBOL_TABLE | FULL
+                debugSymbolLevel "FULL"
+            }
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "../CMakeLists.txt"
+            version "3.18.2"
+        }
+    }
+    sourceSets {
+        // TEMPLATE_SOURCE_SETS
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    bundle {
+        language {
+            enableSplit = false
+        }
+        density {
+            enableSplit = false
+        }
+        abi {
+            enableSplit = true
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'androidx.annotation:annotation:1.1.0'
+
+    implementation 'com.google.android.gms:play-services-base:17.4.0'
+    implementation 'com.google.android.gms:play-services-games:20.0.1'
+    implementation 'com.google.android.gms:play-services-auth:18.1.0'
+    implementation 'com.google.android.gms:play-services-identity:17.0.0'
+
+    // Import the BoM for the Firebase platform
+    implementation platform('com.google.firebase:firebase-bom:25.12.0')
+    implementation 'com.google.firebase:firebase-crashlytics-ndk'
+    implementation 'com.google.firebase:firebase-analytics'
+
+    // TEMPLATE_DEPENDENCIES
+}
