@@ -1,0 +1,32 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test_button/001.ai Assets/&amp;#060Path&amp;#062_6" itemID="51198251-000002da" lastModified="1360626257">
+  <timeline>
+    <DOMTimeline name="&amp;#060Path&amp;#062_6">
+      <layers>
+        <DOMLayer name="Layer_1" color="#4FFF4F" current="true" isSelected="true">
+          <frames>
+            <DOMFrame index="0" keyMode="9728">
+              <elements>
+                <DOMShape selected="true" isDrawingObject="true">
+                  <fills>
+                    <FillStyle index="1">
+                      <SolidColor color="#F8E28D"/>
+                    </FillStyle>
+                  </fills>
+                  <edges>
+                    <Edge fillStyle1="1" edges="!5315 180|140 180!140 180[105 183 70 173!70 173[0 154 0 90!0 90[0 26 70 7!70 7[105 -3 140 0!140 0|5315 0!5315 0|5385 12!5385 12[5455 34 5455 90!5455 90[5455 145 5385 168!5385 168|5315 180"/>
+                    <Edge cubics="!5315 180(;5315,180 140,180 140,180q5315 180 140 180);"/>
+                    <Edge cubics="!140 180(;140,180 0,192 0,90q140 180Q105 183q70 173Q0 154q0 90);"/>
+                    <Edge cubics="!0 90(;0,-12 140,0 140,0q0 90Q0 26q70 7Q105 -3q140 0);"/>
+                    <Edge cubics="!140 0(;140,0 5315,0 5315,0q140 0 5315 0);"/>
+                    <Edge cubics="!5315 0(;5315,0 5455,1 5455,90q5315 0Q5315 0q5385 12Q5455 34q5455 90);"/>
+                    <Edge cubics="!5455 90(;5455,178 5315,180 5315,180q5455 90Q5455 145q5385 168Q5315 180q5315 180);"/>
+                  </edges>
+                </DOMShape>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>

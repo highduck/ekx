@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include <ek/fs/path.hpp>
-#include <ek/flash/doc/flash_file.h>
+#include <ek/util/path.hpp>
+#include <ek/flash/doc/flash_doc.hpp>
 
 namespace ek {
 

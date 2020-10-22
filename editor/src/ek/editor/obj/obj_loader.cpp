@@ -3,15 +3,11 @@
 #include <ek/math/packed_color.hpp>
 
 #include <vector>
-#include <platform/static_resources.hpp>
-#include <ek/array_buffer.hpp>
 #include <sstream>
 
 using std::istream;
 using std::string;
 using std::stringstream;
-
-using scenex::mesh_data_t;
 
 namespace ek {
 
@@ -82,7 +78,7 @@ struct obj_model_t {
     }
 };
 
-mesh_data_t load_obj(const ek::array_buffer& buffer) {
+mesh_data_t load_obj(const std::vector<uint8_t>& buffer) {
 
     obj_model_t obj_model{};
     {
@@ -102,7 +98,7 @@ mesh_data_t load_obj(const ek::array_buffer& buffer) {
     result.indices.resize(vertices);
     size_t ptr = 0;
     for (size_t i = 0; i < vertices; ++i) {
-        result.vertices[i] = ek::vertex_3d{
+        result.vertices[i] = graphics::vertex_3d{
                 obj_model.positions[obj_model.faces[ptr]],
                 obj_model.normals[obj_model.faces[ptr + 2]],
                 obj_model.uvs[obj_model.faces[ptr + 1]],

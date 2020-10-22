@@ -1,0 +1,468 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="flump/explode" itemID="50fe19cb-00000279" lastModified="1554964260">
+  <timeline>
+    <DOMTimeline name="explode">
+      <layers>
+        <DOMLayer name="Thigh_R" color="#9933CC" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkThigh_R" centerPoint3DX="68.6" centerPoint3DY="-78.5">
+                  <transformationPoint>
+                    <Point x="68.6" y="-78.5"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkThigh_R" centerPoint3DX="-79.25" centerPoint3DY="-162.9">
+                  <matrix>
+                    <Matrix tx="-147.85" ty="-84.4"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="68.6" y="-78.5"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="78" duration="38" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkThigh_R" selected="true" centerPoint3DX="-79.25" centerPoint3DY="-162.9">
+                  <matrix>
+                    <Matrix tx="-147.85" ty="-84.4"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="68.6" y="-78.5"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="116" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkThigh_R" centerPoint3DX="68.6" centerPoint3DY="-78.5">
+                  <transformationPoint>
+                    <Point x="68.6" y="-78.5"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Foot_R" color="#FF4FFF" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFoot_R" centerPoint3DX="12.65" centerPoint3DY="1.25">
+                  <transformationPoint>
+                    <Point x="12.65" y="1.25"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFoot_R" centerPoint3DX="-167.75" centerPoint3DY="-111.75">
+                  <matrix>
+                    <Matrix tx="-180.4" ty="-113"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="12.65" y="1.25"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="78" duration="38" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFoot_R" centerPoint3DX="-167.75" centerPoint3DY="-111.75">
+                  <matrix>
+                    <Matrix tx="-180.4" ty="-113"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="12.65" y="1.25"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="116" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFoot_R" centerPoint3DX="12.65" centerPoint3DY="1.25">
+                  <transformationPoint>
+                    <Point x="12.65" y="1.25"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Calf_R" color="#FF800A" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkCalf_R" centerPoint3DX="30.75" centerPoint3DY="-35.55">
+                  <transformationPoint>
+                    <Point x="30.75" y="-35.55"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkCalf_R" centerPoint3DX="-74.25" centerPoint3DY="10.45">
+                  <matrix>
+                    <Matrix tx="-105" ty="46"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="30.75" y="-35.55"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="78" duration="38" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkCalf_R" centerPoint3DX="-74.25" centerPoint3DY="10.45">
+                  <matrix>
+                    <Matrix tx="-105" ty="46"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="30.75" y="-35.55"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="116" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkCalf_R" centerPoint3DX="30.75" centerPoint3DY="-35.55">
+                  <transformationPoint>
+                    <Point x="30.75" y="-35.55"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Flap_R" color="#4FFFFF" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFlap_R" centerPoint3DX="25.45" centerPoint3DY="-187.05">
+                  <transformationPoint>
+                    <Point x="25.45" y="-187.05"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFlap_R" centerPoint3DX="-246.05" centerPoint3DY="-188.05">
+                  <matrix>
+                    <Matrix tx="-271.5" ty="-1"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="25.45" y="-187.05"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="78" duration="38" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFlap_R" centerPoint3DX="-246.05" centerPoint3DY="-188.05">
+                  <matrix>
+                    <Matrix tx="-271.5" ty="-1"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="25.45" y="-187.05"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="116" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFlap_R" centerPoint3DX="25.45" centerPoint3DY="-187.05">
+                  <transformationPoint>
+                    <Point x="25.45" y="-187.05"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Gut" color="#4FFF4F" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkGut" centerPoint3DX="-36.3" centerPoint3DY="-132.3">
+                  <transformationPoint>
+                    <Point x="-36.3" y="-132.3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkGut" centerPoint3DX="-277.95" centerPoint3DY="-119.5">
+                  <matrix>
+                    <Matrix tx="-241.65" ty="12.8"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-36.3" y="-132.3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="78" duration="38" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkGut" centerPoint3DX="-277.95" centerPoint3DY="-119.5">
+                  <matrix>
+                    <Matrix tx="-241.65" ty="12.8"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-36.3" y="-132.3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="116" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkGut" centerPoint3DX="-36.3" centerPoint3DY="-132.3">
+                  <transformationPoint>
+                    <Point x="-36.3" y="-132.3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Flap_L" color="#808080" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFlap_L" centerPoint3DX="-87.45" centerPoint3DY="-193.45">
+                  <transformationPoint>
+                    <Point x="-87.45" y="-193.45"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFlap_L" centerPoint3DX="35.9" centerPoint3DY="-171.45">
+                  <matrix>
+                    <Matrix tx="123.35" ty="22"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-87.45" y="-193.45"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="78" duration="38" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFlap_L" centerPoint3DX="35.9" centerPoint3DY="-171.45">
+                  <matrix>
+                    <Matrix tx="123.35" ty="22"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-87.45" y="-193.45"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="116" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFlap_L" centerPoint3DX="-87.45" centerPoint3DY="-193.45">
+                  <transformationPoint>
+                    <Point x="-87.45" y="-193.45"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Body" color="#4F80FF" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkBody" centerPoint3DX="21.4" centerPoint3DY="-174.05">
+                  <transformationPoint>
+                    <Point x="21.4" y="-174.05"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkBody" centerPoint3DX="112.4" centerPoint3DY="16.65">
+                  <matrix>
+                    <Matrix tx="91" ty="190.7"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="21.4" y="-174.05"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="78" duration="38" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkBody" centerPoint3DX="112.4" centerPoint3DY="16.65">
+                  <matrix>
+                    <Matrix tx="91" ty="190.7"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="21.4" y="-174.05"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="116" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkBody" centerPoint3DX="21.4" centerPoint3DY="-174.05">
+                  <transformationPoint>
+                    <Point x="21.4" y="-174.05"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Thigh_L" color="#FF4F4F" locked="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkThigh_L" centerPoint3DX="-35.4" centerPoint3DY="-66.7">
+                  <transformationPoint>
+                    <Point x="-35.4" y="-66.7"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkThigh_L" centerPoint3DX="134.5" centerPoint3DY="-181.05">
+                  <matrix>
+                    <Matrix tx="169.9" ty="-114.35"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-35.4" y="-66.7"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="78" duration="38" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkThigh_L" centerPoint3DX="134.5" centerPoint3DY="-181.05">
+                  <matrix>
+                    <Matrix tx="169.9" ty="-114.35"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-35.4" y="-66.7"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="116" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkThigh_L" centerPoint3DX="-35.4" centerPoint3DY="-66.7">
+                  <transformationPoint>
+                    <Point x="-35.4" y="-66.7"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Calf_L" color="#4FFF4F" locked="true" current="true" isSelected="true" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkCalf_L" centerPoint3DX="-38.75" centerPoint3DY="-40.85">
+                  <transformationPoint>
+                    <Point x="-38.75" y="-40.85"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkCalf_L" centerPoint3DX="-71.8" centerPoint3DY="121.4">
+                  <matrix>
+                    <Matrix tx="-33.05" ty="162.25"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-38.75" y="-40.85"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="78" duration="38" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkCalf_L" centerPoint3DX="-71.8" centerPoint3DY="121.4">
+                  <matrix>
+                    <Matrix tx="-33.05" ty="162.25"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-38.75" y="-40.85"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="116" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkCalf_L" centerPoint3DX="-38.75" centerPoint3DY="-40.85">
+                  <transformationPoint>
+                    <Point x="-38.75" y="-40.85"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Foot_L" color="#9933CC" autoNamed="false">
+          <frames>
+            <DOMFrame index="0" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFoot_L" centerPoint3DX="-7.15" centerPoint3DY="-23.15">
+                  <transformationPoint>
+                    <Point x="-7.15" y="-23.15"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="39" duration="39" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFoot_L" centerPoint3DX="-238.55" centerPoint3DY="110.85">
+                  <matrix>
+                    <Matrix tx="-231.4" ty="134"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-7.15" y="-23.15"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="78" duration="38" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFoot_L" centerPoint3DX="-238.55" centerPoint3DY="110.85">
+                  <matrix>
+                    <Matrix tx="-231.4" ty="134"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-7.15" y="-23.15"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="116" tweenType="motion" motionTweenSnap="true" keyMode="22017">
+              <elements>
+                <DOMSymbolInstance libraryItemName="flump/WalkFoot_L" centerPoint3DX="-7.15" centerPoint3DY="-23.15">
+                  <transformationPoint>
+                    <Point x="-7.15" y="-23.15"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>

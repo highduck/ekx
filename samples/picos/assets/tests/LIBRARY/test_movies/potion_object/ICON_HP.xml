@@ -1,0 +1,43 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test_movies/potion_object/ICON_HP" itemID="4fd8c9e0-0000073c" lastModified="1554964201" lastUniqueIdentifier="8">
+  <timeline>
+    <DOMTimeline name="ICON_HP" currentFrame="9">
+      <layers>
+        <DOMLayer name="Layer 2" color="#9933CC" current="true" isSelected="true">
+          <frames>
+            <DOMFrame index="0" duration="60" tweenType="motion" motionTweenRotate="counter-clockwise" motionTweenRotateTimes="1" motionTweenSync="true" motionTweenSnap="true" keyMode="24065">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/potion_object/swirl_health">
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="60" tweenType="motion" motionTweenRotate="counter-clockwise" motionTweenRotateTimes="1" motionTweenSync="true" motionTweenSnap="true" keyMode="24065">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/potion_object/swirl_health">
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Layer 1" color="#4FFF4F" outline="true" useOutlineView="true">
+          <frames>
+            <DOMFrame index="0" duration="61" keyMode="9728">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/potion_object/swirl_health">
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>

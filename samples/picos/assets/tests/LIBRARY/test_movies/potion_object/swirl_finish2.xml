@@ -1,0 +1,58 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test_movies/potion_object/swirl_finish2" itemID="5016f4d4-00000209" lastModified="1343682027" lastUniqueIdentifier="9">
+  <timeline>
+    <DOMTimeline name="swirl_finish2" currentFrame="27">
+      <layers>
+        <DOMLayer name="Layer 2" color="#9933CC" current="true" isSelected="true">
+          <frames>
+            <DOMFrame index="0" duration="27" tweenType="motion" motionTweenSync="true" motionTweenSnap="true" keyMode="24065">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/potion_object/swirl_health">
+                  <matrix>
+                    <Matrix a="-0.950042724609375" b="0.30902099609375" c="-0.30902099609375" d="-0.950042724609375"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="27" duration="32" tweenType="motion" motionTweenRotate="counter-clockwise" motionTweenSync="true" motionTweenSnap="true" keyMode="24065">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/potion_object/swirl_health" selected="true">
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="59" tweenType="motion" motionTweenSync="true" motionTweenSnap="true" keyMode="24065">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/potion_object/swirl_health">
+                  <matrix>
+                    <Matrix a="-0.950042724609375" b="0.30902099609375" c="-0.30902099609375" d="-0.950042724609375"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Layer 1" color="#4FFF4F">
+          <frames>
+            <DOMFrame index="0" duration="60" keyMode="9728">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/potion_object/swirl_health" centerPoint3DX="-0.5" centerPoint3DY="2">
+                  <transformationPoint>
+                    <Point/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>

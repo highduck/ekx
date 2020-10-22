@@ -1,7 +1,7 @@
-#include <platform/boot.h>
 #include <gtest/gtest.h>
+#include <ek/app/app.hpp>
 
-using namespace ek;
+using namespace ek::app;
 
 TEST(dummy_test, pass) {
 
@@ -10,10 +10,8 @@ TEST(dummy_test, pass) {
 namespace ek {
 
 void main() {
-    auto args = get_program_c_arguments();
-    int argc = args.size();
-    char** argv = const_cast<char**>(args.data());
-    ::testing::InitGoogleTest(&argc, argv);
+    auto args = g_app.args;
+    ::testing::InitGoogleTest(&args.argc, args.argv);
     ::testing::FLAGS_gtest_death_test_style = "fast";
     int exit_code = RUN_ALL_TESTS();
 }
