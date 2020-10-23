@@ -24,7 +24,7 @@ struct render_command {
     };
 
     operation op;
-    float v[8]{};
+    double v[8]{};
     const fill_style* fill{};
     const stroke_style* stroke{};
     const bitmap_t* bitmap{};

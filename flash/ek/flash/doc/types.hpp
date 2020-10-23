@@ -7,6 +7,8 @@
 #include <ek/math/mat3x2.hpp>
 #include <ek/util/path.hpp>
 #include <optional>
+#include <ek/flash/doc/parsing/parsing.hpp>
+
 
 namespace ek::flash {
 
@@ -61,6 +63,24 @@ enum class blend_mode_t {
     erase,
     overlay,
     hardlight
+};
+
+enum class FontRenderingMode {
+    // antialias for readability (default, value not known)
+    normal,
+    // antialias for animation
+    standard,
+    //
+    customThicknessSharpness,
+    device,
+    bitmap
+};
+
+enum class TextLineType {
+    // default, value not known
+    SingleLine,
+    Multiline,
+    MultilineNoWrap
 };
 
 struct edge_t {
@@ -164,7 +184,7 @@ struct fill_style {
     std::vector<gradient_entry> entries;
     matrix_2d matrix{};
     std::string bitmapPath;
-    mutable const bitmap_t* bitmap = nullptr;
+    std::shared_ptr<bitmap_t> bitmap;
 };
 
 struct stroke_style {
@@ -186,7 +206,7 @@ struct stroke_style {
 
 struct element_t;
 
-enum class tween_target : uint8_t {
+enum class tween_target {
     all = 0,
     position = 1,
     rotation = 2,
@@ -403,9 +423,9 @@ struct element_t {
 
     // dynamic text
     bool border;// = false;
-    const char* fontRenderingMode;
+    FontRenderingMode fontRenderingMode = FontRenderingMode::normal;
     bool autoExpand;// = false;
-    const char* lineType; // lineType="multiline no wrap"
+    TextLineType lineType = TextLineType::SingleLine;
 
     blend_mode_t blend_mode = blend_mode_t::last;
 

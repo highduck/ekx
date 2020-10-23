@@ -96,7 +96,7 @@ bool shape_processor::addShapeObject(const element_t& el, const transform_model&
             cmd.v[4] = shape.startAngle;
             cmd.v[5] = shape.endAngle;
             cmd.v[6] = shape.closePath ? 1 : 0;
-            cmd.v[7] = shape.innerRadius / 100.0f;
+            cmd.v[7] = shape.innerRadius / 100.0;
             break;
         default:
             return false;

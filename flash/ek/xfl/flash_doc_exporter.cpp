@@ -123,9 +123,7 @@ void flash_doc_exporter::build_library() {
         if (item->usage > 0) {
             chi.push_back(item);
         } else {
-            // TODO:
-//            delete item;
-//            item = nullptr;
+            delete item;
         }
     }
     library.children = chi;
@@ -175,6 +173,9 @@ sg_file flash_doc_exporter::export_library() {
 
     sg_file sg;
     sg.linkages = linkages;
+    for(auto& pair : doc.scenes) {
+        sg.scenes.push_back(pair.second);
+    }
 
     for (auto& item : library.node.children) {
         if (item.sprite == item.libraryName
@@ -182,7 +183,7 @@ sg_file flash_doc_exporter::export_library() {
             && !isInLinkages(item.libraryName)) {
             continue;
         }
-        sg.library.children.push_back(item);
+        sg.library.push_back(item);
     }
 
     return sg;
@@ -224,12 +225,12 @@ void flash_doc_exporter::process_bitmap_instance(const element_t& el, export_ite
     }
 }
 
-void flash_doc_exporter::process_bitmap_item(const element_t& el, export_item_t* lib, processing_bag_t* bag) {
+void flash_doc_exporter::process_bitmap_item(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
     auto* item = new export_item_t();
     item->ref = &el;
     item->node.libraryName = el.item.name;
     item->renderThis = true;
-    item->append_to(lib);
+    item->append_to(parent);
     if (bag) {
         bag->list.push_back(item);
     }
@@ -381,7 +382,6 @@ export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item,
     layer->animationSpan1 = _animationSpan1;
     item->drawingLayerChild = layer;
     item->add(layer);
-    library.add(layer);
 
     // EK_DEBUG << "Created drawing layer " << newElement->item.name;
     layer->shapes++;

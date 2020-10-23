@@ -174,12 +174,13 @@ struct sg_node_data {
 };
 
 struct sg_file {
+    std::vector<std::string> scenes;
     std::unordered_map<std::string, std::string> linkages;
-    sg_node_data library;
+    std::vector<sg_node_data> library;
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(linkages, library);
+        io(scenes, linkages, library);
     }
 
     [[nodiscard]]

@@ -61,6 +61,9 @@ enum class layer_type;
 enum class element_type;
 enum class symbol_type;
 enum class loop_mode;
+enum class tween_target;
+enum class FontRenderingMode;
+enum class TextLineType;
 
 struct item_properties;
 struct element_t;
@@ -82,6 +85,12 @@ struct bitmap_t;
 
 class basic_entry;
 
+tween_target& operator<<(tween_target& r, const char* str);
+
+FontRenderingMode& operator<<(FontRenderingMode& r, const char* str);
+
+TextLineType& operator<<(TextLineType& r, const char* str);
+
 blend_mode_t& operator<<(blend_mode_t& r, const char* str);
 
 scale_mode& operator<<(scale_mode& r, const char* str);
@@ -97,10 +106,6 @@ fill_type& operator<<(fill_type& r, const char* str);
 spread_method& operator<<(spread_method& r, const char* str);
 
 gradient_entry& operator<<(gradient_entry& r, const xml_node& node);
-
-fill_style& operator<<(fill_style& r, const xml_node& node);
-
-stroke_style& operator<<(stroke_style& r, const xml_node& node);
 
 filter_kind_t& operator<<(filter_kind_t& r, const char* str);
 
@@ -125,14 +130,6 @@ loop_mode& operator<<(loop_mode& r, const char* str);
 item_properties& operator<<(item_properties& r, const xml_node& node);
 
 folder_item& operator<<(folder_item& r, const xml_node& node);
-
-element_t& operator<<(element_t& r, const xml_node& node);
-
-frame_t& operator<<(frame_t& r, const xml_node& node);
-
-layer_t& operator<<(layer_t& r, const xml_node& node);
-
-timeline_t& operator<<(timeline_t& r, const xml_node& node);
 
 document_info& operator<<(document_info& r, const xml_node& node);
 
