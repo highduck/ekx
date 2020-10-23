@@ -360,7 +360,7 @@ export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item,
         if (child->drawingLayerElement && child->ref &&
             child->animationSpan0 == _animationSpan0 &&
             child->animationSpan1 == _animationSpan1) {
-            EK_DEBUG << "Found drawing layer " << child->ref->item.name;
+            // EK_DEBUG << "Found drawing layer " << child->ref->item.name;
             child->drawingLayerElement->members.push_back(el);
             child->shapes++;
             return child;
@@ -383,7 +383,7 @@ export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item,
     item->add(layer);
     library.add(layer);
 
-    EK_DEBUG << "Created drawing layer " << newElement->item.name;
+    // EK_DEBUG << "Created drawing layer " << newElement->item.name;
     layer->shapes++;
     return layer;
 }

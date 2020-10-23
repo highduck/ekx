@@ -38,6 +38,7 @@ private:
     void open();
 
     void fill();
+    void stroke();
 
     void close();
 

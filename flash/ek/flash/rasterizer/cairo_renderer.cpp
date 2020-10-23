@@ -101,47 +101,23 @@ void cairo_renderer::open() {
 }
 
 void cairo_renderer::fill() {
-    cairo_pattern_t* pattern = nullptr;
-    if (fill_style_) {
-        if (fill_style_->type == fill_type::solid) {
-            set_solid_fill(ctx_, transform_.color.transform(fill_style_->entries[0].color));
-        } else {
-            pattern = create_fill_pattern(*fill_style_, transform_);
-        }
-    }
-
-    if (pattern) {
-        cairo_set_source(ctx_, pattern);
-    }
+    auto pattern = set_fill_style(ctx_, *fill_style_, transform_);
 
     cairo_set_fill_rule(ctx_, CAIRO_FILL_RULE_EVEN_ODD);
     cairo_fill_preserve(ctx_);
 
-    if (pattern) {
-        cairo_pattern_destroy(pattern);
-    }
+    pattern.destroy();
 }
 
 void cairo_renderer::paint() {
-    if (fill_flag_) {
+    if (fill_flag_ && fill_style_) {
         // set fill style color
         fill();
     }
 
     if (stroke_flag_ && stroke_style_) {
-        const auto& solid = stroke_style_->solid;
-        set_solid_stroke(ctx_, stroke_style_->solid);
-        float4 c = transform_.color.transform(solid.fill);
-        cairo_set_source_rgba(ctx_, c.x, c.y, c.z, c.w);
-        cairo_stroke_preserve(ctx_);
+        stroke();
     }
-//        else if (fill_flag_) {
-//            static solid_stroke hairline{};
-//            hairline.fill = transform_.color.transform(fill_style_->entries[0].color);
-//            hairline.weight = 0.15f;
-//            set_solid_stroke(ctx_, hairline);
-//            cairo_stroke(ctx_);
-//        }
 
     stroke_flag_ = false;
     fill_flag_ = false;
@@ -173,9 +149,17 @@ void cairo_renderer::draw_bitmap(const bitmap_t* bitmap) {
 
     cairo_set_source(ctx_, source_pattern);
     cairo_fill(ctx_);
-
     cairo_pattern_destroy(source_pattern);
     cairo_surface_destroy(source_surface);
+}
+
+void cairo_renderer::stroke() {
+    auto pattern = set_fill_style(ctx_, stroke_style_->fill, transform_);
+    set_stroke_style(ctx_, *stroke_style_);
+
+    cairo_stroke_preserve(ctx_);
+
+    pattern.destroy();
 }
 
 }

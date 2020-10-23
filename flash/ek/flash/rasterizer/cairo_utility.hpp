@@ -9,11 +9,22 @@ typedef struct _cairo_surface cairo_surface_t;
 
 namespace ek::flash {
 
+struct fill_pattern_data_t {
+    cairo_pattern_t* pattern = nullptr;
+    cairo_surface_t* surface = nullptr;
+
+    void destroy();
+};
+
+void destroy_pattern_data(cairo_t* cr, fill_pattern_data_t& pattern);
+
 void clear(cairo_t* ctx);
 
 void blit_downsample(cairo_t* ctx, cairo_surface_t* source, int w, int h, double upscale);
 
-void set_solid_stroke(cairo_t* ctx, const solid_stroke& solid);
+void set_stroke_style(cairo_t* ctx, const stroke_style& stroke);
+
+fill_pattern_data_t set_fill_style(cairo_t* cr, const fill_style& fill, const transform_model& transform);
 
 void set_line_cap(cairo_t* ctx, line_caps cap);
 
@@ -34,7 +45,7 @@ cairo_pattern_t* create_linear_pattern(const matrix_2d& matrix);
 
 cairo_pattern_t* create_radial_pattern(const matrix_2d& matrix);
 
-cairo_pattern_t* create_fill_pattern(const fill_style& fill, const transform_model& transform);
+fill_pattern_data_t create_fill_pattern(const fill_style& fill, const transform_model& transform);
 
 void cairo_round_rectangle(cairo_t* cr, const float* values);
 
