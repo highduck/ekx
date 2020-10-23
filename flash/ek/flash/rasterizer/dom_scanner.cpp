@@ -14,28 +14,13 @@ void dom_scanner::reset() {
     output.reset();
 }
 
-void dom_scanner::scan_symbol_instance(const element_t& element) {
-    auto* s = file_.find(element.libraryItemName, element_type::symbol_item);
+void dom_scanner::scan_instance(const element_t& element, element_type type) {
+    auto* s = file_.find(element.libraryItemName, type);
     if (s) {
         push_transform(element);
         scan(*s);
         pop_transform();
     }
-}
-
-void dom_scanner::scan_bitmap_instance(const element_t& element) {
-    auto* s = file_.find(element.libraryItemName, element_type::bitmap_item);
-    if (s) {
-        push_transform(element);
-        scan_bitmap_item(*s);
-        pop_transform();
-    }
-}
-
-void dom_scanner::scan_bitmap_item(const element_t& element) {
-    push_transform(element);
-    output.add(element, stack_.back());
-    pop_transform();
 }
 
 void dom_scanner::scan_group(const element_t& element) {
@@ -69,22 +54,23 @@ void dom_scanner::scan_symbol_item(const element_t& element) {
 void dom_scanner::scan(const element_t& element) {
     switch (element.elementType) {
         case element_type::symbol_instance:
-            scan_symbol_instance(element);
+            scan_instance(element, element_type::symbol_item);
+            break;
+        case element_type::bitmap_instance:
+            scan_instance(element, element_type::bitmap_item);
+            break;
+        case element_type::symbol_item:
+        case element_type::scene_timeline:
+            scan_symbol_item(element);
             break;
         case element_type::group:
             scan_group(element);
             break;
         case element_type::shape:
-            scan_shape(element);
-            break;
-        case element_type::symbol_item:
-            scan_symbol_item(element);
-            break;
-        case element_type::bitmap_instance:
-            scan_bitmap_instance(element);
-            break;
+        case element_type::object_rectangle:
+        case element_type::object_oval:
         case element_type::bitmap_item:
-            scan_bitmap_item(element);
+            scan_shape(element);
             break;
         default:
             break;

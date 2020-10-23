@@ -36,6 +36,12 @@ cairo_pattern_t* create_radial_pattern(const matrix_2d& matrix);
 
 cairo_pattern_t* create_fill_pattern(const fill_style& fill, const transform_model& transform);
 
+void cairo_round_rectangle(cairo_t* cr, const float* values);
+
+void cairo_oval(cairo_t* cr, const float* values);
+
+void cairo_transform(cairo_t* cr, const matrix_2d& m);
+
 }
 
 

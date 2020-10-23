@@ -5,6 +5,12 @@ namespace ek::flash {
 
 using render_op = render_command::operation;
 
+enum EdgeSelectionBit {
+    EdgeSelectionBit_FillStyle0 = 1,
+    EdgeSelectionBit_FillStyle1 = 2,
+    EdgeSelectionBit_Stroke = 4
+};
+
 shape_decoder::shape_decoder(const transform_model& transform)
         : transform_{transform} {
 
@@ -116,6 +122,21 @@ void shape_decoder::decode(const element_t& el) {
                 }
 
                 pen = p;
+            }
+            else if (cmd == 'S') {
+                const auto mask = static_cast<uint32_t>(values[valueIndex++]);
+                // fillStyle0
+                if ((mask & EdgeSelectionBit_FillStyle0) != 0) {
+                    // todo:
+                }
+                // fillStyle1
+                if ((mask & EdgeSelectionBit_FillStyle1) != 0) {
+                    // todo:
+                }
+                // stroke
+                if ((mask & EdgeSelectionBit_Stroke) != 0) {
+                    // todo:
+                }
             }
         }
         fills.insert(fills.end(), back_fills.begin(), back_fills.end());

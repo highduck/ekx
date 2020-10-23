@@ -6,7 +6,7 @@ namespace ek::flash {
 
 struct fill_style;
 struct stroke_style;
-
+struct bitmap_t;
 
 struct render_command {
 
@@ -17,13 +17,17 @@ struct render_command {
         fill_end,
         fill_begin,
         line_style_reset,
-        line_style_setup
+        line_style_setup,
+        rectangle,
+        oval,
+        bitmap
     };
 
     operation op;
-    float v[4]{};
+    float v[8]{};
     const fill_style* fill{};
     const stroke_style* stroke{};
+    const bitmap_t* bitmap{};
 
     explicit render_command(operation operation)
             : op{operation} {

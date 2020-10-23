@@ -110,6 +110,38 @@ text_run_t& operator<<(text_run_t& r, const xml_node& node) {
     return r;
 }
 
+timeline_t& operator<<(timeline_t& r, const xml_node& node) {
+    r.name = node.attribute("name").value();
+    for (const auto& item : node.child("layers").children("DOMLayer")) {
+        r.layers.push_back(parse_xml_node<layer_t>(item));
+    }
+    return r;
+}
+
+
+shape_object_t& operator<<(shape_object_t& r, const xml_node& node) {
+    r.objectWidth = node.attribute("objectWidth").as_float();
+    r.objectHeight = node.attribute("objectHeight").as_float();
+    r.x = node.attribute("x").as_float();
+    r.y = node.attribute("y").as_float();
+//    fill?: DOMFillStyle;
+//    stroke?: DOMStrokeStyle;
+
+    // Oval
+    r.endAngle = node.attribute("endAngle").as_float();
+    r.startAngle = node.attribute("startAngle").as_float();
+    r.innerRadius = node.attribute("innerRadius").as_float();
+    r.closePath = node.attribute("closePath").as_bool(true);
+
+    // Rectangle
+    r.topLeftRadius = node.attribute("topLeftRadius").as_float();
+    r.topRightRadius = node.attribute("topRightRadius").as_float();
+    r.bottomLeftRadius = node.attribute("bottomLeftRadius").as_float();
+    r.bottomRightRadius = node.attribute("bottomRightRadius").as_float();
+    r.lockFlag = node.attribute("lockFlag").as_bool(false);
+    return r;
+}
+
 element_t& operator<<(element_t& r, const xml_node& node) {
     r.item << node;
     r.elementType << node.name();
@@ -192,6 +224,25 @@ element_t& operator<<(element_t& r, const xml_node& node) {
     // sound item
     ////  todo:
 
+    switch (r.elementType) {
+        case element_type::object_oval:
+        case element_type::object_rectangle: {
+            r.shape.emplace() << node;
+
+            const auto& fill = node.child("fill");
+            if (!fill.empty()) {
+                r.fills.push_back(parse_xml_node<fill_style>(fill));
+            }
+
+            const auto& stroke = node.child("stroke");
+            if (!stroke.empty()) {
+                r.strokes.push_back(parse_xml_node<stroke_style>(stroke));
+            }
+        }
+            break;
+        default:
+            break;
+    }
 
     return r;
 }
@@ -248,14 +299,6 @@ layer_t& operator<<(layer_t& r, const xml_node& node) {
     r.layerType << node.attribute("layerType").value();
     for (const auto& item: node.child("frames").children("DOMFrame")) {
         r.frames.push_back(parse_xml_node<frame_t>(item));
-    }
-    return r;
-}
-
-timeline_t& operator<<(timeline_t& r, const xml_node& node) {
-    r.name = node.attribute("name").value();
-    for (const auto& item : node.child("layers").children("DOMLayer")) {
-        r.layers.push_back(parse_xml_node<layer_t>(item));
     }
     return r;
 }

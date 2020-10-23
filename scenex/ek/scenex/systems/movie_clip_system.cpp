@@ -24,7 +24,8 @@ void update_movie_clips() {
 }
 
 int findKeyFrame(const std::vector<movie_frame_data>& frames, float t) {
-    for (size_t i = 0; i < frames.size(); ++i) {
+    const int end = int(frames.size());
+    for (int i = 0; i < end; ++i) {
         const auto& kf = frames[i];
         if (t >= kf.index && t < kf.index + kf.duration) {
             return i;
@@ -116,8 +117,7 @@ void apply_frame(entity e, movie_t& mov) {
         // no data - exit early
         return;
     }
-    auto node = ecs::get<node_t>(e);
-    auto it = node.child_first;
+    auto it = ecs::get<node_t>(e).child_first;
     const auto totalTargets = static_cast<int>(data->layers.size());
     while (it != nullptr) {
         if (ecs::has<movie_target_keys>(it)) {

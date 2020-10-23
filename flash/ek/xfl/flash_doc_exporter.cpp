@@ -467,6 +467,17 @@ bool flash_doc_exporter::isInLinkages(const string& id) const {
     return false;
 }
 
+movie_layer_data* findTargetLayer(sg_movie_data& movie, const sg_node_data* item) {
+    for(auto& layer : movie.layers) {
+        for(const auto* t : layer.targets) {
+            if(t == item) {
+                return &layer;
+            }
+        }
+    }
+    return nullptr;
+}
+
 void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* item) {
     auto& movie = item->node.movie.emplace();
     movie.frames = el.timeline.getTotalFrames();
@@ -490,7 +501,7 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
                         prevItem->ref->libraryItemName == frameElement.libraryItemName &&
                         prevItem->ref->item.name == frameElement.item.name &&
                         prevItem->fromLayer == layerIndex &&
-                        prevItem->linkedMovieLayer) {
+                        prevItem->movieLayerIsLinked) {
                         targets.list.push_back(prevItem);
                         // copy new transform
                         prevItem->ref = &frameElement;
@@ -518,14 +529,18 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
             }
             for (auto* target : targets.list) {
                 if (target->ref) {
-
-                    if (!target->linkedMovieLayer) {
-                        auto& targetLayer_ = movie.layers.emplace_back();
-                        targetLayer_.targets.push_back(&target->node);
+                    auto* targetNodeRef = &target->node;
+                    movie_layer_data* targetLayer = nullptr;
+                    if (!target->movieLayerIsLinked) {
+                        targetLayer = &movie.layers.emplace_back();
+                        targetLayer->targets.push_back(targetNodeRef);
                         target->fromLayer = layerIndex;
-                        target->linkedMovieLayer = &targetLayer_;
+                        target->movieLayerIsLinked = true;
                     }
-                    auto* targetLayer = target->linkedMovieLayer;
+                    else {
+                        targetLayer = findTargetLayer(movie, targetNodeRef);
+                        assert(targetLayer);
+                    }
 
                     auto kf0 = createFrameModel(frame);
                     setupFrameFromElement(kf0, *target->ref);

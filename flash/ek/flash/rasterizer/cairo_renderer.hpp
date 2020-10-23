@@ -40,6 +40,8 @@ private:
     void fill();
 
     void close();
+
+    void paint();
 };
 
 }
