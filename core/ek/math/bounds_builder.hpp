@@ -3,6 +3,7 @@
 #include <cfloat>
 #include "vec.hpp"
 #include "box.hpp"
+#include "mat3x2.hpp"
 
 namespace ek {
 
@@ -11,6 +12,7 @@ class bounds_builder_t {
 public:
     using vec_type = vec2_t<T>;
     using rect_type = rect_t<T>;
+    using mat3x2_type = matrix_t<3, 2, T>;
     constexpr static T limit_value = FLT_MAX;
 
     vec_type min{limit_value, limit_value};
@@ -34,6 +36,14 @@ public:
         add(rect.position, rect.position + rect.size);
     }
 
+    void add(const rect_type& rect, const mat3x2_type& matrix, T radius = T{0}) {
+        add(matrix.transform(rect.x, rect.y), radius);
+        add(matrix.transform(rect.right(), rect.y), radius);
+        add(matrix.transform(rect.right(), rect.bottom()), radius);
+        add(matrix.transform(rect.x, rect.bottom()), radius);
+    }
+
+    [[nodiscard]]
     bool empty() const {
         return (max.x - min.x) < math::epsilon<T>() ||
                (max.y - min.y) < math::epsilon<T>();

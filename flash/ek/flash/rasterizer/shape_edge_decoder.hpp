@@ -2,7 +2,7 @@
 
 #include <ek/flash/doc/types.hpp>
 #include "transform_model.hpp"
-#include "shape_renderer.hpp"
+#include "shape_processor.hpp"
 #include "shape_edge.hpp"
 
 namespace ek::flash {

@@ -192,4 +192,109 @@ void clear(cairo_t* ctx) {
     cairo_restore(ctx);
 }
 
+void cairo_round_rectangle(cairo_t* cr, const float* values) {
+    const double l = values[0];
+    const double t = values[1];
+    const double r = values[2];
+    const double b = values[3];
+
+    const double maxRadius = fmin((b - t) / 2, (r - l) / 2);
+
+    const double r0 = math::clamp(double(values[4]), -maxRadius, maxRadius);
+    const double r1 = math::clamp(double(values[5]), -maxRadius, maxRadius);
+    const double r2 = math::clamp(double(values[6]), -maxRadius, maxRadius);
+    const double r3 = math::clamp(double(values[7]), -maxRadius, maxRadius);
+
+    double degrees = M_PI / 180.0;
+
+    cairo_new_sub_path(cr);
+    if (r1 >= 0) {
+        cairo_arc(cr, r - r1, t + r1, r1, -90 * degrees, 0 * degrees);
+    } else {
+        // - add angle value
+        // - set center to corner
+        cairo_arc_negative(cr, r, t, -r1, -180 * degrees, -270 * degrees);
+    }
+    if (r2 >= 0) {
+        cairo_arc(cr, r - r2, b - r2, r2, 0 * degrees, 90 * degrees);
+    } else {
+        cairo_arc_negative(cr, r, b, -r2, -90 * degrees, -180 * degrees);
+    }
+    if (r2 >= 0) {
+        cairo_arc(cr, l + r3, b - r3, r3, 90 * degrees, 180 * degrees);
+    } else {
+        cairo_arc_negative(cr, l, b, -r3, 0 * degrees, -90 * degrees);
+    }
+    if (r0 >= 0) {
+        cairo_arc(cr, l + r0, t + r0, r0, 180 * degrees, 270 * degrees);
+    } else {
+        cairo_arc_negative(cr, l, t, -r0, 90 * degrees, 0 * degrees);
+    }
+    cairo_close_path(cr);
+}
+
+void cairo_oval(cairo_t* cr, const float* values) {
+    const double degrees = M_PI / 180.0;
+
+    const double a0 = values[4];
+    double a1 = values[5];
+    if (a1 <= a0) {
+        a1 += 360;
+    }
+
+    double sweep = a1 - a0;
+    bool close = values[6] > 0;
+    if (a1 == 360 && a0 == 0) {
+        sweep = 360;
+        close = false;
+    }
+    const double l = values[0];
+    const double t = values[1];
+    const double r = values[2];
+    const double b = values[3];
+    const double cx = l + (r - l) / 2;
+    const double cy = t + (b - t) / 2;
+    const double diameter = fmin(r - l, b - t);
+    const double radius = diameter / 2;
+    const double inner = radius * values[7];
+    const double sx = (r - l) / diameter;
+    const double sy = (b - t) / diameter;
+
+    cairo_save(cr);
+    cairo_translate(cr, cx, cy);
+    cairo_scale(cr, sx, sy);
+    cairo_new_sub_path(cr);
+    // path.arcTo({fLeft: l, fTop: t, fRight: r, fBottom: b}, a0, sweep, true);
+    cairo_arc(cr, 0, 0, radius, degrees * a0, degrees * (a0 + sweep));
+    //path.addArc([l, t, r, b], a0, sweep);
+    if (inner > 0) {
+        if (!close) {
+            cairo_new_sub_path(cr);
+        }
+        cairo_arc_negative(cr, 0, 0, inner, degrees * (a0 + sweep), degrees * a0);
+
+        if (close) {
+            //path.arcToOval([l, t, r, b], a0, 0, false);
+            cairo_close_path(cr);
+        }
+    } else {
+        if (close) {
+            cairo_line_to(cr, 0, 0);
+            cairo_close_path(cr);
+        }
+    }
+    cairo_restore(cr);
+}
+
+void cairo_transform(cairo_t* cr, const matrix_2d& m) {
+    cairo_matrix_t transform_matrix;
+    transform_matrix.xx = m.a;
+    transform_matrix.yx = m.b;
+    transform_matrix.xy = m.c;
+    transform_matrix.yy = m.d;
+    transform_matrix.x0 = m.tx;
+    transform_matrix.y0 = m.ty;
+    cairo_transform(cr, &transform_matrix);
+}
+
 }

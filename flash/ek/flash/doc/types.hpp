@@ -6,6 +6,7 @@
 #include <ek/math/color_transform.hpp>
 #include <ek/math/mat3x2.hpp>
 #include <ek/util/path.hpp>
+#include <optional>
 
 namespace ek::flash {
 
@@ -286,6 +287,28 @@ struct timeline_t {
     }
 };
 
+struct shape_object_t {
+    float objectWidth = 0;
+    float objectHeight = 0;
+    float x = 0;
+    float y = 0;
+//    fill?: DOMFillStyle;
+//    stroke?: DOMStrokeStyle;
+
+    // Oval
+    float endAngle = 0;
+    float startAngle = 0;
+    float innerRadius = 0;
+    bool closePath = true;
+
+    // Rectangle
+    float topLeftRadius = 0;
+    float topRightRadius = 0;
+    float bottomLeftRadius = 0;
+    float bottomRightRadius = 0;
+    bool lockFlag = false;
+};
+
 enum class element_type {
     unknown,
     shape,
@@ -401,6 +424,8 @@ struct element_t {
     int size = 0;
     int id = 0;
     // embedRanges="1|2|3|4|5"
+
+    std::optional<shape_object_t> shape;
 
     // SOUND ITEM
     // sourcePlatform="macintosh"

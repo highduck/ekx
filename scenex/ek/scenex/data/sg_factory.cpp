@@ -19,7 +19,7 @@ using asset_ref = asset_t<sg_file>;
 
 void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     ecs::get<name_t>(entity).name = data->name;
-    if(data->movieTargetId >= -1) {
+    if(data->movieTargetId >= 0) {
         ecs::get_or_create<movie_target_keys>(entity) = {data->movieTargetId};
     }
 

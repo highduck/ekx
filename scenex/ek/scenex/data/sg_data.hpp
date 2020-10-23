@@ -66,10 +66,6 @@ struct movie_frame_data {
 
     std::vector<easing_data_t> easing;
 
-    // TODO: remove key
-    int key = 0;
-
-
     float2 position;
     float2 scale;
     float2 skew;
@@ -89,8 +85,8 @@ struct movie_frame_data {
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(index, duration, motion_type, key, position, scale, skew, pivot, color, easing,
-        visible, loopMode, firstFrame, rotate, rotateTimes);
+        io(index, duration, motion_type, position, scale, skew, pivot, color, easing,
+        loopMode, firstFrame, rotate, rotateTimes, visible);
     }
 };
 
@@ -115,7 +111,7 @@ struct sg_movie_data {
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(frames, layers);
+        io(frames, fps, layers);
     }
 };
 

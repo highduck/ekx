@@ -25,7 +25,7 @@ struct export_item_t : private disable_copy_assign_t {
     bool renderThis = false;
 
     int fromLayer = 0;
-    movie_layer_data* linkedMovieLayer = nullptr;
+    bool movieLayerIsLinked = false;
 
     export_item_t() = default;
 

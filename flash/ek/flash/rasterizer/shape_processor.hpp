@@ -21,20 +21,23 @@ struct render_batch {
     int total = 0;
 };
 
-class shape_renderer {
+class shape_processor {
 public:
     std::vector<render_batch> batches;
     bounds_builder_2f bounds{};
 
-    shape_renderer() = default;
+    shape_processor() = default;
 
     void reset();
 
-    bool add(const render_batch& batch);
-
     bool add(const element_t& el, const transform_model& world);
 
+private:
+    bool add(const render_batch& batch);
+
     bool add(const bitmap_t* bitmap, const transform_model& world);
+
+    bool addShapeObject(const element_t& el, const transform_model& world);
 };
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shape_renderer.hpp"
+#include "shape_processor.hpp"
 #include "transform_model.hpp"
 #include <vector>
 #include <string>
@@ -14,7 +14,7 @@ struct element_t;
 class dom_scanner {
 public:
     std::string name;
-    shape_renderer output{};
+    shape_processor output{};
 
     explicit dom_scanner(const flash_doc& doc);
 
@@ -26,14 +26,9 @@ public:
 
     void scan_shape(const element_t& element);
 
-    void scan_symbol_instance(const element_t& element);
+    void scan_instance(const element_t& element, element_type type);
 
     void scan_symbol_item(const element_t& element);
-
-    void scan_bitmap_instance(const element_t& element);
-
-    void scan_bitmap_item(const element_t& element);
-
 private:
     const flash_doc& file_;
 

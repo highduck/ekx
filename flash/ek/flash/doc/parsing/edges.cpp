@@ -28,25 +28,28 @@ std::vector<std::string> split(const std::string& str, const char separator) {
 }
 
 double read_double_hex(const char* str, int len) {
+    if (str[0] == '\0') {
+        return 0.0;
+    }
+
     if (str[0] == '#') {
-        std::string m{str, static_cast<size_t>(len)};
-        auto parts = split(m, '.');
-        m = parts[0];
-        if (parts.size() == 1) {
-            m += "00";
-        } else {
-            const std::string x = parts[1];
-            m += x;
-            if (x.empty()) m += "00";
-            else if (x.size() < 2) m += "0";
+        char* dot = nullptr;
+        uint32_t hex = strtoul(str + 1, &dot, 16);
+        hex = hex << 8;
+        if (dot && dot[0] == '.') {
+            auto n = strnlen(dot + 1, 2);
+            uint32_t postfix = strtoul(dot + 1, nullptr, 16);
+            while (n > 0) {
+                postfix = postfix << 4;
+                --n;
+            }
+            hex = hex | postfix;
         }
-        uint32_t hex = 0;
-        sscanf(m.c_str(), "#%08x", &hex);
-        return (*reinterpret_cast<int32_t*>(&hex)) / 255.0f;
+        return (*reinterpret_cast<int32_t*>(&hex)) / double(1 << 8);
     }
 
     // default floating point format
-    return strtof(str, nullptr);
+    return strtod(str, nullptr);
 }
 
 double read_twips(const char* str, int n) {
@@ -58,7 +61,7 @@ bool is_whitespace(char c) {
 }
 
 bool is_cmd(char c) {
-    return c == '!' || c == '|' || c == '/' || c == '[' || c == ']';
+    return c == '!' || c == '|' || c == '/' || c == '[' || c == ']' || c == 'S';
 }
 
 bool is_eos(char c) {

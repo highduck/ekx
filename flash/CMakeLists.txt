@@ -33,8 +33,8 @@ add_library(${PROJECT_NAME}
         ek/flash/rasterizer/shape_edge_decoder.hpp
         ek/flash/rasterizer/shape_edge.cpp
         ek/flash/rasterizer/shape_edge.hpp
-        ek/flash/rasterizer/shape_renderer.cpp
-        ek/flash/rasterizer/shape_renderer.hpp
+        ek/flash/rasterizer/shape_processor.cpp
+        ek/flash/rasterizer/shape_processor.hpp
         ek/flash/rasterizer/transform_model.hpp
         ek/flash/rasterizer/software_filters.cpp
         ek/flash/rasterizer/software_filters.hpp
