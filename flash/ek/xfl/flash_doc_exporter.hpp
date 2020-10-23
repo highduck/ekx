@@ -13,7 +13,7 @@ struct processing_bag_t {
     std::vector<export_item_t*> list;
 };
 
-class flash_doc_exporter {
+class flash_doc_exporter : private disable_copy_assign_t {
 public:
     const flash_doc& doc;
     export_item_t library;
@@ -52,7 +52,6 @@ public:
 
     [[nodiscard]]
     sg_file export_library();
-
 
     export_item_t* addElementToDrawingLayer(export_item_t* item, const element_t& el);
 

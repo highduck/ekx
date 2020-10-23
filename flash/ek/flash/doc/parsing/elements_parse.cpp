@@ -27,6 +27,20 @@ tween_target& operator<<(tween_target& r, const char* str) {
     return r = tween_target::all;
 }
 
+FontRenderingMode& operator<<(FontRenderingMode& r, const char* str) {
+    if (equals(str, "standard")) return r = FontRenderingMode::standard;
+    if (equals(str, "device")) return r = FontRenderingMode::device;
+    if (equals(str, "bitmap")) return r = FontRenderingMode::bitmap;
+    if (equals(str, "customThicknessSharpness")) return r = FontRenderingMode::customThicknessSharpness;
+    return r = FontRenderingMode::normal;
+}
+
+TextLineType& operator<<(TextLineType& r, const char* str) {
+    if (equals(str, "multiline no wrap")) return r = TextLineType::MultilineNoWrap;
+    if (equals(str, "multiline")) return r = TextLineType::Multiline;
+    return r = TextLineType::SingleLine;
+}
+
 rotation_direction& operator<<(rotation_direction& r, const char* str) {
     if (equals(str, "counter-clockwise")) return r = rotation_direction::ccw;
     else if (equals(str, "clockwise")) return r = rotation_direction::cw;
@@ -107,199 +121,6 @@ text_attributes_t& operator<<(text_attributes_t& r, const xml_node& node) {
 text_run_t& operator<<(text_run_t& r, const xml_node& node) {
     r.characters = node.child("characters").text().as_string();
     r.attributes << node.child("textAttrs").first_child();
-    return r;
-}
-
-timeline_t& operator<<(timeline_t& r, const xml_node& node) {
-    r.name = node.attribute("name").value();
-    for (const auto& item : node.child("layers").children("DOMLayer")) {
-        r.layers.push_back(parse_xml_node<layer_t>(item));
-    }
-    return r;
-}
-
-
-shape_object_t& operator<<(shape_object_t& r, const xml_node& node) {
-    r.objectWidth = node.attribute("objectWidth").as_float();
-    r.objectHeight = node.attribute("objectHeight").as_float();
-    r.x = node.attribute("x").as_float();
-    r.y = node.attribute("y").as_float();
-//    fill?: DOMFillStyle;
-//    stroke?: DOMStrokeStyle;
-
-    // Oval
-    r.endAngle = node.attribute("endAngle").as_float();
-    r.startAngle = node.attribute("startAngle").as_float();
-    r.innerRadius = node.attribute("innerRadius").as_float();
-    r.closePath = node.attribute("closePath").as_bool(true);
-
-    // Rectangle
-    r.topLeftRadius = node.attribute("topLeftRadius").as_float();
-    r.topRightRadius = node.attribute("topRightRadius").as_float();
-    r.bottomLeftRadius = node.attribute("bottomLeftRadius").as_float();
-    r.bottomRightRadius = node.attribute("bottomRightRadius").as_float();
-    r.lockFlag = node.attribute("lockFlag").as_bool(false);
-    return r;
-}
-
-element_t& operator<<(element_t& r, const xml_node& node) {
-    r.item << node;
-    r.elementType << node.name();
-
-    r.rect = read_rect(node);
-
-    //// shape
-    r.isDrawingObject = node.attribute("isDrawingObject").as_bool();
-    for (const auto& el: node.child("fills").children("FillStyle")) {
-        r.fills.push_back(parse_xml_node<fill_style>(el));
-    }
-
-    for (const auto& el: node.child("strokes").children("StrokeStyle")) {
-        r.strokes.push_back(parse_xml_node<stroke_style>(el));
-    }
-
-    for (const auto& el: node.child("edges").children("Edge")) {
-        r.edges.push_back(parse_xml_node<edge_t>(el));
-    }
-
-    /// instances ref
-    r.libraryItemName = node.attribute("libraryItemName").value();
-
-    /////   SymbolInstance
-    r.symbolType << node.attribute("symbolType").value();
-    r.loop << node.attribute("loop").value();
-    r.firstFrame = node.attribute("firstFrame").as_int(0);
-    r.centerPoint3DX = node.attribute("centerPoint3DX").as_float();
-    r.centerPoint3DY = node.attribute("centerPoint3DY").as_float();
-    r.cacheAsBitmap = node.attribute("cacheAsBitmap").as_bool();
-    r.exportAsBitmap = node.attribute("exportAsBitmap").as_bool();
-    bool hasAccessibleData = node.attribute("hasAccessibleData").as_bool();
-    if (hasAccessibleData) {
-        r.forceSimple = node.attribute("forceSimple").as_bool();
-        r.silent = node.attribute("silent").as_bool();
-    }
-    r.isVisible = node.attribute("isVisible").as_bool(true);
-
-    /// text
-    r.isSelectable = node.attribute("isSelectable").as_bool(true);
-
-    /// dynamic text
-    r.border = node.attribute("border").as_bool();
-    r.fontRenderingMode = node.attribute("fontRenderingMode").value();
-    r.autoExpand = node.attribute("autoExpand").as_bool();
-    r.lineType = node.attribute("lineType").value();
-    r.transformationPoint = read_transformation_point(node);
-    r.color << node;
-    r.matrix << node;
-
-    //// group
-    for (const auto& member: node.child("members").children()) {
-        r.members.emplace_back(parse_xml_node<element_t>(member));
-    }
-
-    for (const auto& tr: node.child("textRuns").children("DOMTextRun")) {
-        r.textRuns.push_back(parse_xml_node<text_run_t>(tr));
-    }
-
-    for (const auto& tr: node.child("filters").children()) {
-        r.filters.push_back(parse_xml_node<filter_t>(tr));
-    }
-
-    //// symbol item
-    r.scaleGrid = read_scale_grid(node);
-    r.timeline = parse_xml_node<timeline_t>(node.child("timeline").child("DOMTimeline"));
-    r.blend_mode << node.attribute("blendMode").value();
-
-    // bitmap item
-    r.quality = node.attribute("quality").as_int(100);
-    r.href = node.attribute("href").value();
-    r.bitmapDataHRef = node.attribute("bitmapDataHRef").value();
-    r.isJPEG = node.attribute("isJPEG").as_bool(false);
-
-    // font item
-    r.font = node.attribute("font").value();
-    r.size = node.attribute("size").as_int();
-    r.id = node.attribute("id").as_int();
-
-    // sound item
-    ////  todo:
-
-    switch (r.elementType) {
-        case element_type::object_oval:
-        case element_type::object_rectangle: {
-            r.shape.emplace() << node;
-
-            const auto& fill = node.child("fill");
-            if (!fill.empty()) {
-                r.fills.push_back(parse_xml_node<fill_style>(fill));
-            }
-
-            const auto& stroke = node.child("stroke");
-            if (!stroke.empty()) {
-                r.strokes.push_back(parse_xml_node<stroke_style>(stroke));
-            }
-        }
-            break;
-        default:
-            break;
-    }
-
-    return r;
-}
-
-frame_t& operator<<(frame_t& r, const xml_node& node) {
-    r.index = node.attribute("index").as_int();
-    r.duration = node.attribute("duration").as_int(1);
-    r.tweenType << node.attribute("tweenType").value();
-    r.name = node.attribute("name").value();
-
-    r.motionTweenSnap = node.attribute("motionTweenSnap").as_bool(false);
-    r.motionTweenOrientToPath = node.attribute("motionTweenOrientToPath").as_bool(false);
-
-    r.motionTweenRotate << node.attribute("motionTweenRotate").value();
-    r.motionTweenRotateTimes = node.attribute("motionTweenRotateTimes").as_int(0);
-
-    r.hasCustomEase = node.attribute("hasCustomEase").as_bool(false);
-
-    r.keyMode = node.attribute("keyMode").as_int(0);
-    r.acceleration = node.attribute("acceleration").as_int(0);
-
-    for (const auto& item : node.child("elements").children()) {
-        r.elements.push_back(parse_xml_node<element_t>(item));
-    }
-
-    for (const auto& item : node.child("tweens").children()) {
-        tween_target target;
-        target << item.attribute("target").as_string();
-        tween_object_t* tween_ptr = nullptr;
-        for (auto& t : r.tweens) {
-            if (t.target == target) {
-                tween_ptr = &t;
-                break;
-            }
-        }
-        if (!tween_ptr) {
-            tween_ptr = &r.tweens.emplace_back();
-        }
-
-        if (strcmp(item.name(), "CustomEase") == 0) {
-            for (const auto& point_node : item.children("Point")) {
-                tween_ptr->custom_ease.push_back(read_point(point_node));
-            }
-        } else if (strcmp(item.name(), "Ease") == 0) {
-            tween_ptr->custom_ease.clear();
-            tween_ptr->intensity = item.attribute("intensity").as_int(0);
-        }
-    }
-    return r;
-}
-
-layer_t& operator<<(layer_t& r, const xml_node& node) {
-    r.name = node.attribute("name").value();
-    r.layerType << node.attribute("layerType").value();
-    for (const auto& item: node.child("frames").children("DOMFrame")) {
-        r.frames.push_back(parse_xml_node<frame_t>(item));
-    }
     return r;
 }
 

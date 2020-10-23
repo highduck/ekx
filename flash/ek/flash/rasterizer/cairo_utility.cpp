@@ -224,7 +224,7 @@ void clear(cairo_t* ctx) {
     cairo_restore(ctx);
 }
 
-void cairo_round_rectangle(cairo_t* cr, const float* values) {
+void cairo_round_rectangle(cairo_t* cr, const double* values) {
     const double l = values[0];
     const double t = values[1];
     const double r = values[2];
@@ -232,10 +232,10 @@ void cairo_round_rectangle(cairo_t* cr, const float* values) {
 
     const double maxRadius = fmin((b - t) / 2, (r - l) / 2);
 
-    const double r0 = math::clamp(double(values[4]), -maxRadius, maxRadius);
-    const double r1 = math::clamp(double(values[5]), -maxRadius, maxRadius);
-    const double r2 = math::clamp(double(values[6]), -maxRadius, maxRadius);
-    const double r3 = math::clamp(double(values[7]), -maxRadius, maxRadius);
+    const double r0 = math::clamp(values[4], -maxRadius, maxRadius);
+    const double r1 = math::clamp(values[5], -maxRadius, maxRadius);
+    const double r2 = math::clamp(values[6], -maxRadius, maxRadius);
+    const double r3 = math::clamp(values[7], -maxRadius, maxRadius);
 
     double degrees = M_PI / 180.0;
 
@@ -265,7 +265,7 @@ void cairo_round_rectangle(cairo_t* cr, const float* values) {
     cairo_close_path(cr);
 }
 
-void cairo_oval(cairo_t* cr, const float* values) {
+void cairo_oval(cairo_t* cr, const double* values) {
     const double degrees = M_PI / 180.0;
 
     const double a0 = values[4];

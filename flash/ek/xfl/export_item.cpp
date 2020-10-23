@@ -1,13 +1,13 @@
 #include "export_item.hpp"
 #include <ek/flash/doc/types.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek::flash {
 
 export_item_t::~export_item_t() {
-    // TODO:
-//    for (auto ch : children) {
-//        delete ch;
-//    }
+    for (auto ch : children) {
+        delete ch;
+    }
 }
 
 void export_item_t::add(export_item_t* item) {
@@ -40,6 +40,10 @@ void export_item_t::inc_ref(export_item_t& lib) {
             dependency->inc_ref(lib);
         }
     }
+    // else it's something like dynamic_text?
+//    else {
+//        EK_WARN << ref->item.linkageClassName;
+//    }
     for (auto* child : children) {
         child->inc_ref(lib);
     }

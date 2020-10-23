@@ -63,10 +63,9 @@ void shape_decoder::decode(const element_t& el) {
         for (char cmd : edgeCommands) {
 
             if (cmd == '!') {
-
-                auto v1 = values[valueIndex++];
-                auto v2 = values[valueIndex++];
-                auto p = matrix.transform(v1, v2);
+                const auto v1 = values[valueIndex++];
+                const auto v2 = values[valueIndex++];
+                const auto p = matrix.transform(v1, v2);
 
                 //if (px != penX || py != penY) {
                 if (current_line > 0 && !(line_started && equals(pen, p))) {
@@ -78,10 +77,10 @@ void shape_decoder::decode(const element_t& el) {
 
                 pen = p;
             } else if (cmd == '|' || cmd == '/') {
-                auto v1 = values[valueIndex++];
-                auto v2 = values[valueIndex++];
+                const auto v1 = values[valueIndex++];
+                const auto v2 = values[valueIndex++];
+                const auto p = matrix.transform(v1, v2);
 
-                auto p = matrix.transform(v1, v2);
                 extend(p, radius);
 
                 if (current_line > 0) {
@@ -100,12 +99,12 @@ void shape_decoder::decode(const element_t& el) {
 
                 pen = p;
             } else if (cmd == '[' || cmd == ']') {
-                auto v1 = values[valueIndex++];
-                auto v2 = values[valueIndex++];
-                auto v3 = values[valueIndex++];
-                auto v4 = values[valueIndex++];
-                auto c = matrix.transform(v1, v2);
-                auto p = matrix.transform(v3, v4);
+                const auto v1 = values[valueIndex++];
+                const auto v2 = values[valueIndex++];
+                const auto v3 = values[valueIndex++];
+                const auto v4 = values[valueIndex++];
+                const auto c = matrix.transform(v1, v2);
+                const auto p = matrix.transform(v3, v4);
                 extend(c, radius);
                 extend(p, radius);
 
