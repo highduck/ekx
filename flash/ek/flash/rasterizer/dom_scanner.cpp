@@ -4,7 +4,26 @@
 
 namespace ek::flash {
 
-dom_scanner::dom_scanner(const flash_doc& doc) : file_{doc} {
+void resolveBitmapFill(const flash_doc& doc, const fill_style& fill) {
+    if(fill.type == fill_type::bitmap && !fill.bitmap) {
+        const auto* item = doc.find(fill.bitmapPath, element_type::bitmap_item);
+        if(item && item->bitmap) {
+            fill.bitmap = item->bitmap.get();
+        }
+    }
+}
+
+void resolveBitmapFills(const flash_doc& doc, const element_t& element) {
+    for(auto& fill : element.fills) {
+        resolveBitmapFill(doc, fill);
+    }
+
+    for(auto& stroke : element.strokes) {
+        resolveBitmapFill(doc, stroke.fill);
+    }
+}
+
+dom_scanner::dom_scanner(const flash_doc& doc) : doc_{doc} {
     reset();
 }
 
@@ -15,7 +34,7 @@ void dom_scanner::reset() {
 }
 
 void dom_scanner::scan_instance(const element_t& element, element_type type) {
-    auto* s = file_.find(element.libraryItemName, type);
+    auto* s = doc_.find(element.libraryItemName, type);
     if (s) {
         push_transform(element);
         scan(*s);
@@ -32,6 +51,7 @@ void dom_scanner::scan_group(const element_t& element) {
 
 void dom_scanner::scan_shape(const element_t& element) {
     push_transform(element);
+    resolveBitmapFills(doc_, element);
     output.add(element, stack_.back());
     pop_transform();
 }

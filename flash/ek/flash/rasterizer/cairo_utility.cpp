@@ -6,6 +6,22 @@
 
 namespace ek::flash {
 
+cairo_matrix_t create_matrix(const matrix_2d& m) {
+    cairo_matrix_t cm;
+    cm.xx = m.a;
+    cm.yx = m.b;
+    cm.xy = m.c;
+    cm.yy = m.d;
+    cm.x0 = m.tx;
+    cm.y0 = m.ty;
+    return cm;
+}
+
+void cairo_transform(cairo_t* cr, const matrix_2d& m) {
+    cairo_matrix_t transform_matrix = create_matrix(m);
+    cairo_transform(cr, &transform_matrix);
+}
+
 cairo_line_cap_t convert_line_cap(line_caps cap) {
     switch (cap) {
         case line_caps::none:
@@ -127,30 +143,46 @@ cairo_pattern_t* create_radial_pattern(const matrix_2d& matrix) {
     return cairo_pattern_create_radial(p0.x, p0.y, 0.0, p0.x, p0.y, radius);
 }
 
-void set_solid_stroke(cairo_t* ctx, const solid_stroke& solid) {
-    cairo_set_line_width(ctx, solid.weight);
-    set_line_cap(ctx, solid.caps);
-    set_line_join(ctx, solid.joints);
-    cairo_set_miter_limit(ctx, solid.miterLimit);
+void set_stroke_style(cairo_t* ctx, const stroke_style& stroke) {
+    cairo_set_line_width(ctx, stroke.weight);
+    set_line_cap(ctx, stroke.caps);
+    set_line_join(ctx, stroke.joints);
+    cairo_set_miter_limit(ctx, stroke.miterLimit);
 }
 
-cairo_pattern_t* create_fill_pattern(const fill_style& fill, const transform_model& transform) {
+fill_pattern_data_t create_fill_pattern(const fill_style& fill, const transform_model& transform) {
     cairo_pattern_t* pattern = nullptr;
-
+    cairo_surface_t* surface = nullptr;
     switch (fill.type) {
         case fill_type::linear:
-            pattern = create_linear_pattern(transform.matrix * fill.matrix);
+//            pattern = create_linear_pattern(transform.matrix * fill.matrix);
+            pattern = cairo_pattern_create_linear(-819.2, 0, 819.2, 0);
             add_color_stops(pattern, fill.entries, transform.color);
             break;
         case fill_type::radial:
-            pattern = create_radial_pattern(transform.matrix * fill.matrix);
+            //pattern = create_radial_pattern(transform.matrix * fill.matrix);
+            pattern = cairo_pattern_create_radial(0, 0, 0, 0, 0, 819);
             add_color_stops(pattern, fill.entries, transform.color);
+            break;
+        case fill_type::bitmap:
+            if (fill.bitmap) {
+                auto w = fill.bitmap->width;
+                auto h = fill.bitmap->height;
+                surface = cairo_image_surface_create_for_data(
+                        const_cast<uint8_t*>(fill.bitmap->data.data()),
+                        CAIRO_FORMAT_ARGB32, w, h, w * 4);
+                pattern = cairo_pattern_create_for_surface(surface);
+            }
             break;
         default:
             break;
     }
 
     if (pattern) {
+        auto matrix = create_matrix(transform.matrix * fill.matrix);
+        cairo_matrix_invert(&matrix);
+        cairo_pattern_set_matrix(pattern, &matrix);
+
         switch (fill.spreadMethod) {
             case spread_method::extend:
                 cairo_pattern_set_extend(pattern, CAIRO_EXTEND_PAD);
@@ -166,7 +198,7 @@ cairo_pattern_t* create_fill_pattern(const fill_style& fill, const transform_mod
         cairo_pattern_set_filter(pattern, CAIRO_FILTER_BEST);
     }
 
-    return pattern;
+    return {pattern, surface};
 }
 
 
@@ -286,15 +318,28 @@ void cairo_oval(cairo_t* cr, const float* values) {
     cairo_restore(cr);
 }
 
-void cairo_transform(cairo_t* cr, const matrix_2d& m) {
-    cairo_matrix_t transform_matrix;
-    transform_matrix.xx = m.a;
-    transform_matrix.yx = m.b;
-    transform_matrix.xy = m.c;
-    transform_matrix.yy = m.d;
-    transform_matrix.x0 = m.tx;
-    transform_matrix.y0 = m.ty;
-    cairo_transform(cr, &transform_matrix);
+fill_pattern_data_t set_fill_style(cairo_t* cr, const fill_style& fill, const transform_model& transform) {
+    fill_pattern_data_t pattern{};
+    if (fill.type == fill_type::solid) {
+        set_solid_fill(cr, transform.color.transform(fill.entries[0].color));
+    } else {
+        pattern = create_fill_pattern(fill, transform);
+    }
+
+    if (pattern.pattern) {
+        cairo_set_source(cr, pattern.pattern);
+    }
+    return pattern;
 }
 
+void fill_pattern_data_t::destroy() {
+    if (pattern) {
+        cairo_pattern_destroy(pattern);
+        pattern = nullptr;
+    }
+    if (surface) {
+        cairo_surface_destroy(surface);
+        surface = nullptr;
+    }
+}
 }

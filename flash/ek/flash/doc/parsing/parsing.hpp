@@ -66,7 +66,6 @@ struct item_properties;
 struct element_t;
 struct folder_item;
 struct document_info;
-struct solid_stroke;
 struct gradient_entry;
 struct fill_style;
 struct stroke_style;
@@ -96,8 +95,6 @@ line_joints& operator<<(line_joints& r, const char* str);
 fill_type& operator<<(fill_type& r, const char* str);
 
 spread_method& operator<<(spread_method& r, const char* str);
-
-solid_stroke& operator<<(solid_stroke& solid, const xml_node& node);
 
 gradient_entry& operator<<(gradient_entry& r, const xml_node& node);
 

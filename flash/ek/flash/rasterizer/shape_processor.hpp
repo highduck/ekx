@@ -17,7 +17,6 @@ struct render_batch {
     transform_model transform;
     std::vector<render_command> commands;
     bounds_builder_2f bounds{};
-    const bitmap_t* bitmap = nullptr;
     int total = 0;
 };
 

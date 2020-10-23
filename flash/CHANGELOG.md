@@ -11,3 +11,7 @@
 - Add Rounded Rectangle negative radius support
 - Add Rounded Rectangle shape support
 - Add Oval shape support
+- Fix multisampling rendering
+- Add stroke gradients
+- Fix gradient matrix transform
+- Add Bitmap fills render

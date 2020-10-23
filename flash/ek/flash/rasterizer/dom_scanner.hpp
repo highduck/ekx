@@ -30,7 +30,7 @@ public:
 
     void scan_symbol_item(const element_t& element);
 private:
-    const flash_doc& file_;
+    const flash_doc& doc_;
 
     std::vector<transform_model> stack_;
 

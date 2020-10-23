@@ -47,8 +47,9 @@ rect_f transform(const matrix_2d& m, const rect_f& rc) {
 bool shape_processor::add(const bitmap_t* bitmap, const transform_model& world) {
     render_batch batch{};
     batch.transform = world;
-    batch.bitmap = bitmap;
-    batch.total = 1;
+    render_command cmd{render_command::operation::bitmap};
+    cmd.bitmap = bitmap;
+    batch.commands.push_back(cmd);
 
     const rect_f rc{0.0f, 0.0f,
                     static_cast<float>(bitmap->width),
@@ -60,7 +61,7 @@ bool shape_processor::add(const bitmap_t* bitmap, const transform_model& world) 
 
 
 bool shape_processor::add(const render_batch& batch) {
-    if (batch.total > 0 && !batch.bounds.empty()) {
+    if (!batch.commands.empty() && !batch.bounds.empty()) {
         batches.push_back(batch);
         bounds.add(batch.bounds.rect());
         return true;
@@ -106,10 +107,9 @@ bool shape_processor::addShapeObject(const element_t& el, const transform_model&
 
     render_batch batch{};
     batch.transform = world;
-    batch.total = 1;
     batch.commands.push_back(cmd);
 
-    const float hw = cmd.stroke ? (cmd.stroke->solid.weight / 2.0f) : 0.0f;
+    const float hw = cmd.stroke ? (cmd.stroke->weight / 2.0f) : 0.0f;
     batch.bounds.add(rc, world.matrix, hw);
     return add(batch);
 }

@@ -55,7 +55,7 @@ void shape_decoder::decode(const element_t& el) {
             edges.push_back(line_styles_[line_style_idx]);
             current_line = line_style_idx;
 
-            radius = line_style_idx < 1 ? 0.0f : (el.strokes[line_style_idx - 1].solid.weight / 2.0f);
+            radius = line_style_idx < 1 ? 0.0f : (el.strokes[line_style_idx - 1].weight / 2.0f);
         }
 
         int valueIndex = 0;
