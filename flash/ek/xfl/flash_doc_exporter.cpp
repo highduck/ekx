@@ -52,7 +52,7 @@ void collectFramesMetaInfo(const flash_doc& doc, export_item_t& item) {
 }
 
 bool shouldConvertItemToSprite(export_item_t& item) {
-    if (item.children.size() == 1 && item.drawingLayerChild && item.drawingLayerChild->shapes > 0) {
+    if (item.children.size() == 1 && item.drawingLayerChild) {
         return true;
     } else if (item.node.labels[0] == "*static") {
         // special user TAG
@@ -173,7 +173,7 @@ sg_file flash_doc_exporter::export_library() {
 
     sg_file sg;
     sg.linkages = linkages;
-    for(auto& pair : doc.scenes) {
+    for (auto& pair : doc.scenes) {
         sg.scenes.push_back(pair.second);
     }
 
@@ -289,7 +289,6 @@ void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t*
 
     collectFramesMetaInfo(doc, *item);
 
-
     const auto frames_count = el.timeline.getTotalFrames();
     const auto elements_count = el.timeline.getElementsCount();
 
@@ -303,7 +302,7 @@ void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t*
                                      el.item.linkageBaseClass == "flash.display.Shape";
 
         if (withoutTimeline) {
-            const auto layers = el.timeline.layers;
+            const auto& layers = el.timeline.layers;
             for (int layerIndex = int(layers.size()) - 1; layerIndex >= 0; --layerIndex) {
                 const auto& layer = layers[layerIndex];
                 if (layer.layerType == layer_type::normal) {
@@ -342,7 +341,7 @@ void flash_doc_exporter::process_shape(const element_t& el, export_item_t* paren
     assert(el.elementType == element_type::shape ||
            el.elementType == element_type::object_oval ||
            el.elementType == element_type::object_rectangle);
-    const auto item = addElementToDrawingLayer(parent, el);
+    auto* item = addElementToDrawingLayer(parent, el);
     if (bag) {
         bag->list.push_back(item);
     }
@@ -358,34 +357,50 @@ int NEXT_SHAPE_IDX = 0;
 export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item, const element_t& el) {
     if (item->drawingLayerChild) {
         auto* child = item->drawingLayerChild;
-        if (child->drawingLayerElement && child->ref &&
+        if (item->children.back() == child &&
+            child->drawingLayerItem &&
             child->animationSpan0 == _animationSpan0 &&
             child->animationSpan1 == _animationSpan1) {
             // EK_DEBUG << "Found drawing layer " << child->ref->item.name;
-            child->drawingLayerElement->members.push_back(el);
+            auto& timeline = child->drawingLayerItem->timeline;
+            assert(!timeline.layers.empty());
+            assert(!timeline.layers[0].frames.empty());
+            timeline.layers[0].frames[0].elements.push_back(el);
             child->shapes++;
             return child;
         }
     }
-    auto* layer = new export_item_t();
-    auto* newElement = new element_t();
+    auto shapeItem = std::make_unique<element_t>();
     const std::string name = SHAPE_ID + std::to_string(++NEXT_SHAPE_IDX);
-    newElement->libraryItemName = name;
-    newElement->item.name = name;
-    newElement->elementType = element_type::group;
-    newElement->members.push_back(el);
-    layer->ref = newElement;
+    {
+        shapeItem->item.name = name;
+        shapeItem->elementType = element_type::symbol_item;
+        auto& layer = shapeItem->timeline.layers.emplace_back();
+        auto& frame = layer.frames.emplace_back();
+        frame.elements.push_back(el);
+    }
+
+    auto* layer = new export_item_t();
+    layer->ref = shapeItem.get();
     layer->node.libraryName = name;
     layer->renderThis = true;
-    layer->drawingLayerElement = newElement;
     layer->animationSpan0 = _animationSpan0;
     layer->animationSpan1 = _animationSpan1;
-    item->drawingLayerChild = layer;
-    item->add(layer);
+    layer->append_to(&library);
 
+    auto shapeInstance = std::make_unique<element_t>();
+    shapeInstance->libraryItemName = name;
+    shapeInstance->elementType = element_type::symbol_instance;
+
+    processing_bag_t bag;
+    process(*shapeInstance, item, &bag);
+    auto* drawingLayerInstance = bag.list[0];
+    drawingLayerInstance->drawingLayerInstance = std::move(shapeInstance);
+    drawingLayerInstance->drawingLayerItem = std::move(shapeItem);
+    item->drawingLayerChild = drawingLayerInstance;
+    item->shapes++;
     // EK_DEBUG << "Created drawing layer " << newElement->item.name;
-    layer->shapes++;
-    return layer;
+    return drawingLayerInstance;
 }
 
 void flash_doc_exporter::process(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
@@ -468,9 +483,9 @@ bool flash_doc_exporter::isInLinkages(const string& id) const {
 }
 
 movie_layer_data* findTargetLayer(sg_movie_data& movie, const sg_node_data* item) {
-    for(auto& layer : movie.layers) {
-        for(const auto* t : layer.targets) {
-            if(t == item) {
+    for (auto& layer : movie.layers) {
+        for (const auto* t : layer.targets) {
+            if (t == item) {
                 return &layer;
             }
         }
@@ -536,8 +551,7 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
                         targetLayer->targets.push_back(targetNodeRef);
                         target->fromLayer = layerIndex;
                         target->movieLayerIsLinked = true;
-                    }
-                    else {
+                    } else {
                         targetLayer = findTargetLayer(movie, targetNodeRef);
                         assert(targetLayer);
                     }
@@ -553,8 +567,7 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
                         kf1.pivot = kf0.pivot + delta->pivot;
                         kf1.scale = kf0.scale + delta->scale;
                         kf1.skew = kf0.skew + delta->skew;
-                        kf1.color.multiplier = kf0.color.multiplier + delta->color.multiplier;
-                        kf1.color.offset = kf0.color.offset + delta->color.offset;
+                        kf1.color = kf0.color + delta->color;
                         kf1.visible = false;
                         targetLayer->frames.push_back(kf1);
                     }
