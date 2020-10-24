@@ -28,7 +28,7 @@ std::vector<std::string> split(const std::string& str, const char separator) {
 }
 
 double read_double_hex(const char* str, int len) {
-    if (str[0] == '\0') {
+    if (len == 0) {
         return 0.0;
     }
 
@@ -37,11 +37,12 @@ double read_double_hex(const char* str, int len) {
         uint32_t hex = strtoul(str + 1, &dot, 16);
         hex = hex << 8;
         if (dot && dot[0] == '.') {
-            auto n = strnlen(dot + 1, 2);
+            auto n = len - int(dot - str + 1);
             uint32_t postfix = strtoul(dot + 1, nullptr, 16);
-            while (n > 0) {
+            while (n < 2) {
+                // each trailing zero is 4-bit
                 postfix = postfix << 4;
-                --n;
+                ++n;
             }
             hex = hex | postfix;
         }
