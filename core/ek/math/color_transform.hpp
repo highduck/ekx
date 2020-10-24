@@ -59,6 +59,13 @@ struct color_transform_t {
         );
     }
 
+    inline color_transform_t<T> operator*(T v) const {
+        return color_transform_t<T>(
+                multiplier * v,
+                offset * v
+        );
+    }
+
     inline color_transform_t<T> operator-(const color_transform_t<T>& right) const {
         return color_transform_t<T>(
                 multiplier - right.multiplier,
@@ -78,6 +85,16 @@ struct color_transform_t {
     }
 
 };
+
+template<typename T>
+inline static color_transform_t<T> operator*(T scalar, const color_transform_t<T>& v) {
+    return color_transform_t{scalar * v.multiplier, scalar * v.offset};
+}
+
+template<typename T>
+inline color_transform_t<T> lerp(const color_transform_t<T>& begin, const color_transform_t<T>& end, T t) {
+    return (T{1} - t) * begin + t * end;
+}
 
 using color_transform_f = color_transform_t<float>;
 

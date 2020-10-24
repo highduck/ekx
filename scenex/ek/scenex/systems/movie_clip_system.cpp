@@ -34,6 +34,66 @@ int findKeyFrame(const std::vector<movie_frame_data>& frames, float t) {
     return -1;
 }
 
+struct easing_progress_t {
+    float position;
+    float scale;
+    float skew;
+    float color;
+
+    void fill(float t) {
+        position = scale = skew = color = t;
+    }
+};
+
+keyframe_transform_t
+lerp(const keyframe_transform_t& begin, const keyframe_transform_t& end, const easing_progress_t& progress) {
+    return {
+            lerp(begin.position, end.position, progress.position),
+            lerp(begin.scale, end.scale, progress.scale),
+            lerp(begin.skew, end.skew, progress.skew),
+            begin.pivot,
+            lerp(begin.color, end.color, progress.color)
+    };
+}
+
+easing_progress_t get_easing_progress(const float t, const std::vector<easing_data_t>& easing) {
+    easing_progress_t progress{};
+    if (easing.empty()) {
+        progress.fill(t);
+        return progress;
+    }
+
+    for (const auto& e : easing) {
+        const float x = ease(t, e);
+        if (e.attribute == 0) {
+            progress.fill(x);
+            break;
+        } else if (e.attribute == 1) {
+            progress.position = x;
+        } else if (e.attribute == 2) {
+            progress.skew = x;
+        } else if (e.attribute == 3) {
+            progress.scale = x;
+        } else if (e.attribute == 4) {
+            progress.color = x;
+        }
+    }
+    return progress;
+}
+
+void apply_transform(entity e, const keyframe_transform_t& keyframe) {
+    auto& transform = ecs::get_or_create<transform_2d>(e);
+    transform.skew = keyframe.skew;
+    transform.scale = keyframe.scale;
+    transform.color_multiplier = argb32_t{keyframe.color.multiplier};
+    transform.color_offset = argb32_t{keyframe.color.offset};
+
+    auto& m = transform.matrix;
+    m.set(transform.scale, transform.skew);
+    m.tx = keyframe.position.x - m.a * keyframe.pivot.x - m.c * keyframe.pivot.y;
+    m.ty = keyframe.position.y - m.b * keyframe.pivot.x - m.d * keyframe.pivot.y;
+}
+
 void update_target(float time, entity e, const movie_layer_data& layer) {
     auto& config = ecs::get_or_create<node_state_t>(e);
     const auto ki = findKeyFrame(layer.frames, time);
@@ -42,54 +102,16 @@ void update_target(float time, entity e, const movie_layer_data& layer) {
         return;
     }
     const auto& k1 = layer.frames[ki];
-    const auto& k2 = (ki + 1) < layer.frames.size() ? layer.frames[ki + 1] : k1;
     config.visible = k1.visible;
-
-    auto& transform = ecs::get_or_create<transform_2d>(e);
-    float2 position;
-    if (k1.motion_type == 1) {
-        const float progress = (time - static_cast<float>(k1.index)) / static_cast<float>(k1.duration);
-        float x_position = progress;
-        float x_rotation = progress;
-        float x_scale = progress;
-        float x_color = progress;
-        for (const auto& easing_data : k1.easing) {
-            const float x = ease(progress, easing_data);
-            if (easing_data.attribute == 0) {
-                x_position = x_rotation = x_scale = x_color = x;
-                break;
-            } else if (easing_data.attribute == 1) {
-                x_position = x;
-            } else if (easing_data.attribute == 2) {
-                x_rotation = x;
-            } else if (easing_data.attribute == 3) {
-                x_scale = x;
-            } else if (easing_data.attribute == 4) {
-                x_color = x;
-            }
-        }
-
-        position = lerp(k1.position, k2.position, x_position);
-        transform.skew = lerp(k1.skew, k2.skew, x_rotation);
-        transform.scale = lerp(k1.scale, k2.scale, x_scale);
-        transform.color_multiplier = argb32_t{
-                lerp(k1.color.multiplier, k2.color.multiplier, x_color)
-        };
-        transform.color_offset = argb32_t{
-                lerp(k1.color.offset, k2.color.offset, x_color)
-        };
+    if (k1.motion_type == 1 && (ki + 1) < layer.frames.size()) {
+        const auto& k2 = layer.frames[ki + 1];
+        const float t = k1.getLocalTime(time);
+        const auto progress = get_easing_progress(t, k1.easing);
+        const auto keyframe = lerp(k1.transform, k2.transform, progress);
+        apply_transform(e, keyframe);
     } else {
-        position = k1.position;
-        transform.skew = k1.skew;
-        transform.scale = k1.scale;
-        transform.color_multiplier = argb32_t{k1.color.multiplier};
-        transform.color_offset = argb32_t{k1.color.offset};
+        apply_transform(e, k1.transform);
     }
-    auto& m = transform.matrix;
-    m.set(transform.scale, transform.skew);
-    m.tx = position.x - m.a * k1.pivot.x - m.c * k1.pivot.y;
-    m.ty = position.y - m.b * k1.pivot.x - m.d * k1.pivot.y;
-    transform.matrix = m;
 
     if (k1.loopMode != 0 && ecs::has<movie_t>(e)) {
         auto& mc = ecs::get<movie_t>(e);
