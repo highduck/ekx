@@ -9,7 +9,7 @@ import {
 } from "./utils";
 import * as path from "path";
 import * as fs from "fs";
-import plist from 'plist';
+import * as plist from 'plist';
 import {ekc_export_assets_lazy, ekc_export_market} from "./assets";
 
 function mod_plist(ctx, filepath) {

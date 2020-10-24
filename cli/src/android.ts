@@ -7,7 +7,7 @@ import {
     optimize_png_glob, read_text, replace_all,
     replace_in_file, write_text
 } from "./utils";
-import {XmlDocument} from 'xmldoc';
+import {XmlDocument, XmlTextNode} from 'xmldoc';
 import * as path from "path";
 import {ekc_export_assets_lazy, ekc_export_market} from "./assets";
 import {collect_source_files, collect_src_roots_all} from "./collectSources";
@@ -77,21 +77,24 @@ function mod_strings(ctx) {
     // console.trace(doc.childrenNamed("string"));
     doc.eachChild((child) => {
         if (child.name === "string") {
-            switch (child.attr.name) {
-                case "app_name":
-                    // seems xmldoc is not enough
-                    child.val = ctx.title;
-                    child.firstChild.text = ctx.title;
-                    break;
-                case "package_name":
-                    child.firstChild.text = ctx.android.application_id;
-                    break;
-                case "gs_app_id":
-                    child.firstChild.text = ctx.android.game_services_id;
-                    break;
-                case "admob_app_id":
-                    child.firstChild.text = ctx.android.admob_app_id;
-                    break;
+            const textNode = child.firstChild.type == 'text' ? child.firstChild : null;
+            if(textNode) {
+                switch (child.attr.name) {
+                    case "app_name":
+                        // seems xmldoc is not enough
+                        child.val = ctx.title;
+                        textNode.text = ctx.title;
+                        break;
+                    case "package_name":
+                        textNode.text = ctx.android.application_id;
+                        break;
+                    case "gs_app_id":
+                        textNode.text = ctx.android.game_services_id;
+                        break;
+                    case "admob_app_id":
+                        textNode.text = ctx.android.admob_app_id;
+                        break;
+                }
             }
         }
     });
