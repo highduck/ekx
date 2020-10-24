@@ -563,11 +563,7 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
                         movie_frame_data kf1{};
                         kf1.index = kf0.index + kf0.duration;
                         kf1.duration = 0;
-                        kf1.position = kf0.position + delta->position;
-                        kf1.pivot = kf0.pivot + delta->pivot;
-                        kf1.scale = kf0.scale + delta->scale;
-                        kf1.skew = kf0.skew + delta->skew;
-                        kf1.color = kf0.color + delta->color;
+                        kf1.transform = kf0.transform + *delta;
                         kf1.visible = false;
                         targetLayer->frames.push_back(kf1);
                     }

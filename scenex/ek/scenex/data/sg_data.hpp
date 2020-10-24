@@ -59,6 +59,39 @@ struct easing_data_t {
     }
 };
 
+struct keyframe_transform_t {
+    float2 position;
+    float2 scale{1.0f, 1.0f};
+    float2 skew;
+    float2 pivot;
+    color_transform_f color;
+
+    template<typename S>
+    void serialize(IO<S>& io) {
+        io(position, scale, skew, pivot, color);
+    }
+
+    keyframe_transform_t operator-(const keyframe_transform_t& v) const {
+        return {
+                position - v.position,
+                scale - v.scale,
+                skew - v.skew,
+                pivot - v.pivot,
+                color - v.color,
+        };
+    }
+
+    keyframe_transform_t operator+(const keyframe_transform_t& v) const {
+        return {
+                position + v.position,
+                scale + v.scale,
+                skew + v.skew,
+                pivot + v.pivot,
+                color + v.color,
+        };
+    }
+};
+
 struct movie_frame_data {
     int index = 0;
     int duration = 0;
@@ -66,11 +99,7 @@ struct movie_frame_data {
 
     std::vector<easing_data_t> easing;
 
-    float2 position;
-    float2 scale;
-    float2 skew;
-    float2 pivot;
-    color_transform_f color{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    keyframe_transform_t transform;
 
     bool visible = true;
 
@@ -85,8 +114,13 @@ struct movie_frame_data {
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(index, duration, motion_type, position, scale, skew, pivot, color, easing,
+        io(index, duration, motion_type, transform, easing,
         loopMode, firstFrame, rotate, rotateTimes, visible);
+    }
+
+    [[nodiscard]]
+    float getLocalTime(float time) const {
+        return (time - static_cast<float>(index)) / static_cast<float>(duration);
     }
 };
 
