@@ -19,7 +19,8 @@ struct export_item_t : private disable_copy_assign_t {
     int shapes = 0;
 
     export_item_t* drawingLayerChild = nullptr;
-    element_t* drawingLayerElement = nullptr;
+    std::unique_ptr<element_t> drawingLayerItem = nullptr;
+    std::unique_ptr<element_t> drawingLayerInstance = nullptr;
     int animationSpan0 = 0;
     int animationSpan1 = 0;
     bool renderThis = false;
