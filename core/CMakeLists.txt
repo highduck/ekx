@@ -82,6 +82,9 @@ add_library(${PROJECT_NAME} STATIC
         ek/util/path.hpp
         ek/util/type_index.hpp
 
+        ek/timers.cpp
+        #ek/timers.hpp
+
         # THIRD-PARTY
         stb/stb_image.h
         stb/stb_image.cpp

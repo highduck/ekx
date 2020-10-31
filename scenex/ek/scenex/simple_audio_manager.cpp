@@ -2,11 +2,12 @@
 
 #include <ek/util/locator.hpp>
 #include <ek/app/device.hpp>
+#include <utility>
 
 namespace ek {
 
 simple_audio_manager::simple_audio_manager()
-        : base_path_{"assets/sfx/"} {
+        : base_path_{"assets/sfx"} {
 
 }
 
@@ -19,21 +20,10 @@ void simple_audio_manager::play_music(const std::string& name) {
     music_ = name;
 }
 
-void simple_audio_manager::play_sound(const std::string& name) {
-    if (sound.enabled() && !name.empty()) {
-        audio::play_sound(resolve_path(name).c_str(), 1.0f, 0.0f);
-    }
-}
-
 void simple_audio_manager::play_sound(const std::string& name, float vol) {
     if (sound.enabled() && !name.empty()) {
-        audio::play_sound(resolve_path(name).c_str(), vol, 0.0);
+        audio::play_sound(resolve_path(name).c_str(), vol);
     }
-}
-
-void simple_audio_manager::play_sound(const std::string& name, const float2& position) {
-    (void) position;
-    play_sound(name);
 }
 
 void simple_audio_manager::vibrate(int length) const {
@@ -55,7 +45,7 @@ void simple_audio_manager::disable_all() {
 }
 
 std::string simple_audio_manager::resolve_path(const std::string& id) const {
-    return base_path_ + id + ".mp3";
+    return ((base_path_ / id) + ".mp3").str();
 }
 
 

@@ -1,8 +1,7 @@
 #include "audio.hpp"
 
-#include <raudio/config.h>
 #include <raudio/raudio.h>
-#include <raudio/dr_mp3.h>
+#include <raudio/external/dr_mp3.h>
 
 #include <unordered_map>
 #include <string>
@@ -67,7 +66,7 @@ Music LoadMusicStreamFromMemory(const ek::array_buffer& buffer, const char* file
     if (result > 0) {
         music.stream = InitAudioStream(ctxMp3->sampleRate, 32, ctxMp3->channels);
         music.sampleCount = drmp3_get_pcm_frame_count(ctxMp3) * ctxMp3->channels;
-        music.loopCount = 0;   // Infinite loop by default
+        music.looping = true;   // Infinite loop by default
         musicLoaded = true;
     }
 
@@ -94,8 +93,12 @@ namespace ek::audio {
 std::unordered_map<std::string, Sound> sounds;
 std::unordered_map<std::string, Music> musics;
 
+bool initialized = false;
+
 void init() {
+    assert(!initialized);
     InitAudioDevice();
+    initialized = true;
 }
 
 void create_sound(const char* name) {
@@ -115,7 +118,7 @@ void create_music(const char* name) {
     });
 }
 
-void play_sound(const char* name, float vol, float pan) {
+void play_sound(const char* name, float vol) {
     if (name == nullptr) return;
     auto it = sounds.find(name);
     if (it != sounds.end()) {
@@ -129,15 +132,36 @@ void play_music(const char* name, float vol) {
     if (name == nullptr) return;
     auto it = musics.find(name);
     if (it != musics.end()) {
-        const auto music = it->second;
+        const auto& music = it->second;
         if (!IsMusicPlaying(music)) {
-            SetMusicLoopCount(music, 0);
             SetMusicVolume(music, vol);
             PlayMusicStream(music);
         } else {
             SetMusicVolume(music, vol);
             UpdateMusicStream(music);
         }
+    }
+}
+
+int lockCounter = 0;
+
+void muteDeviceBegin() {
+    assert(lockCounter >= 0);
+    if (lockCounter == 0) {
+        //PauseDevice();
+        SetMasterVolume(0.0f);
+    }
+    ++lockCounter;
+}
+
+void muteDeviceEnd() {
+    --lockCounter;
+    assert(lockCounter >= 0);
+    if (lockCounter == 0) {
+        // device could be paused during background
+        //ResumeDevice();
+
+        SetMasterVolume(1.0f);
     }
 }
 

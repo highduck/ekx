@@ -12,7 +12,7 @@ public:
     using entity_vector_type = std::vector<entity>;
     using entity_vector_iterator = std::vector<entity>::iterator;
     using entity_vector_const_iterator = std::vector<entity>::const_iterator;
-    using entity_index_table = sparse_vector<index_type, 0u>;
+    using entity_index_table = sparse_vector;
 
     entity_map_base() {
         entity_.emplace_back();

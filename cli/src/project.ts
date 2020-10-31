@@ -34,7 +34,7 @@ export class Project {
         try {
             projectConfigurator = require(project_js);
         } catch {
-            console.warn("Project not included", project_js);
+            console.error("Project not included", project_js);
         }
 
         if (projectConfigurator) {

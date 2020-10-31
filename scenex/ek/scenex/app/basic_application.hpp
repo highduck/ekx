@@ -14,7 +14,6 @@ class asset_manager_t;
 class basic_application {
 public:
     /**** assets ***/
-    std::string assets_path{"assets/"};
 
     framed_timer_t frame_timer{};
 

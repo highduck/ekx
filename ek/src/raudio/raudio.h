@@ -31,7 +31,7 @@
 *
 *   LICENSE: zlib/libpng
 *
-*   Copyright (c) 2014-2019 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2014-2020 Ramon Santamaria (@raysan5)
 *
 *   This software is provided "as-is", without any express or implied warranty. In no event
 *   will the authors be held liable for any damages arising from the use of this software.
@@ -111,8 +111,8 @@ typedef struct Music {
     int ctxType;                    // Type of music context (audio filetype)
     void *ctxData;                  // Audio context data, depends on type
 
+    bool looping;                   // Music looping enable
     unsigned int sampleCount;       // Total number of samples
-    unsigned int loopCount;         // Loops count (times music will play), 0 means infinite loop
 
     AudioStream stream;             // Audio stream
 } Music;
@@ -137,14 +137,10 @@ bool IsAudioDeviceReady(void);                                  // Check if audi
 void SetMasterVolume(float volume);                             // Set master volume (listener)
 
 // Wave/Sound loading/unloading functions
-Wave LoadWave(const char *fileName);                            // Load wave data from file
-Sound LoadSound(const char *fileName);                          // Load sound from file
 Sound LoadSoundFromWave(Wave wave);                             // Load sound from wave data
 void UpdateSound(Sound sound, const void *data, int samplesCount);// Update sound buffer with new data
 void UnloadWave(Wave wave);                                     // Unload wave data
 void UnloadSound(Sound sound);                                  // Unload sound
-void ExportWave(Wave wave, const char *fileName);               // Export wave data to file
-void ExportWaveAsCode(Wave wave, const char *fileName);         // Export wave sample data to code (.h)
 
 // Wave/Sound management functions
 void PlaySound(Sound sound);                                    // Play a sound
@@ -163,7 +159,6 @@ void WaveCrop(Wave *wave, int initSample, int finalSample);     // Crop a wave t
 float *GetWaveData(Wave wave);                                  // Get samples data from wave as a floats array
 
 // Music management functions
-Music LoadMusicStream(const char *fileName);                    // Load music stream from file
 void UnloadMusicStream(Music music);                            // Unload music stream
 void PlayMusicStream(Music music);                              // Start music playing
 void UpdateMusicStream(Music music);                            // Updates buffers for music streaming
@@ -173,7 +168,6 @@ void ResumeMusicStream(Music music);                            // Resume playin
 bool IsMusicPlaying(Music music);                               // Check if music is playing
 void SetMusicVolume(Music music, float volume);                 // Set volume for music (1.0 is max level)
 void SetMusicPitch(Music music, float pitch);                   // Set pitch for a music (1.0 is base level)
-void SetMusicLoopCount(Music music, int count);                 // Set music loop count (loop repeats)
 float GetMusicTimeLength(Music music);                          // Get music time length (in seconds)
 float GetMusicTimePlayed(Music music);                          // Get current music time played (in seconds)
 
@@ -189,6 +183,12 @@ bool IsAudioStreamPlaying(AudioStream stream);                  // Check if audi
 void StopAudioStream(AudioStream stream);                       // Stop audio stream
 void SetAudioStreamVolume(AudioStream stream, float volume);    // Set volume for audio stream (1.0 is max level)
 void SetAudioStreamPitch(AudioStream stream, float pitch);      // Set pitch for audio stream (1.0 is base level)
+void SetAudioStreamBufferSizeDefault(int size);                 // Default size for new audio streams
+
+
+// modified
+void PauseDevice();
+void ResumeDevice();
 
 #ifdef __cplusplus
 }
