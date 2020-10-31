@@ -9,10 +9,10 @@
 namespace ek {
 
 struct button_skin {
-    std::string sfx_over = "btn_over";
-    std::string sfx_out = "btn_out";
-    std::string sfx_down = "btn_down";
-    std::string sfx_click = "btn_click";
+    std::string sfx_over = "sfx/btn_over";
+    std::string sfx_out = "sfx/btn_out";
+    std::string sfx_down = "sfx/btn_down";
+    std::string sfx_click = "sfx/btn_click";
 
     float over_speed_forward = 8.0f;
     float over_speed_backward = 8.0f;

@@ -6,7 +6,7 @@
 #include <ek/scenex/components/movie.hpp>
 #include <ek/scenex/systems/movie_clip_system.hpp>
 #include <ek/scenex/components/name.hpp>
-#include <ek/scenex/simple_audio_manager.hpp>
+#include <ek/scenex/AudioManager.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/ext/analytics/analytics.hpp>
 #include <ek/scenex/components/event_handler.hpp>
@@ -15,7 +15,7 @@
 namespace ek {
 
 void play_sound(const std::string& id) {
-    resolve<simple_audio_manager>().play_sound(id);
+    resolve<AudioManager>().play_sound(id);
 }
 
 void start_post_tween(button_t& btn) {

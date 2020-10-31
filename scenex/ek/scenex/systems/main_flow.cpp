@@ -4,7 +4,7 @@
 #include <ek/util/locator.hpp>
 
 #include <ek/scenex/components/transform_2d.hpp>
-#include <ek/scenex/simple_audio_manager.hpp>
+#include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/particles/particle_system.hpp>
 #include <ek/scenex/goodies/shake_system.hpp>
 #include <ek/scenex/interactive_manager.hpp>
@@ -33,7 +33,7 @@ void smoothly_advance_time(entity root, float dt) {
 }
 
 void scene_pre_update(entity root, float dt) {
-    resolve<simple_audio_manager>().update(dt);
+    resolve<AudioManager>().update(dt);
     smoothly_advance_time(root, dt);
 
     update_canvas();

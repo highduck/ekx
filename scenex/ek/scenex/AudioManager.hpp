@@ -7,15 +7,15 @@
 
 namespace ek {
 
-class simple_audio_manager {
+class AudioManager {
 public:
     local_storage_var_t sound{"sound", 1};
     local_storage_var_t music{"music", 1};
     local_storage_var_t vibro{"vibro", 1};
 
-    simple_audio_manager();
+    AudioManager();
 
-    ~simple_audio_manager();
+    ~AudioManager();
 
     void play_music(const std::string& name);
 
@@ -23,7 +23,8 @@ public:
         music_volume_ = volume;
     }
 
-    void play_sound(const std::string& name, float vol = 1.0f);
+    void play_sound(const std::string& name, float vol = 1.0f) const;
+    void play_sound_at(const std::string& name, const float2& position, float vol = 1.0f) const;
 
     void vibrate(int length) const;
 
@@ -32,11 +33,8 @@ public:
     void disable_all();
 
 private:
-    path_t base_path_;
     std::string music_;
     float music_volume_ = 1.0f;
-
-    [[nodiscard]] std::string resolve_path(const std::string& id) const;
 };
 
 }

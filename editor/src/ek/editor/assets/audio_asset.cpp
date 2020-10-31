@@ -3,6 +3,7 @@
 #include <ek/system/system.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/editor/imgui/imgui.hpp>
+#include <ek/util/assets.hpp>
 
 namespace ek {
 
@@ -38,14 +39,17 @@ void audio_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
     }
 }
 
+
 void audio_asset_t::load() {
     read_decl();
 
     for (auto& m: music_list_) {
-        audio::create_music(m.c_str());
+        asset_t<audio::Music>{getRelativeName(m)}
+                .reset(new audio::Music(m.c_str()));
     }
     for (auto& m: sound_list_) {
-        audio::create_sound(m.c_str());
+        asset_t<audio::Sound>{getRelativeName(m)}
+                .reset(new audio::Sound(m.c_str()));
     }
 }
 
@@ -64,20 +68,30 @@ void audio_asset_t::unload() {
 void audio_asset_t::gui() {
     for (const auto& music : music_list_) {
         ImGui::PushID(music.c_str());
-        ImGui::LabelText("Music", "%s", music.c_str());
-        if (ImGui::Button("Play Music")) {
-            audio::play_music(music.c_str(), 1.0f);
-        }
-        if (ImGui::Button("Stop Music")) {
-            audio::play_music(music.c_str(), 0.0f);
+        auto name = getRelativeName(music);
+        ImGui::LabelText("Music", "%s", name.c_str());
+        ImGui::LabelText("Path", "%s", music.c_str());
+        asset_t<audio::Music> musicAsset{name};
+        if(musicAsset) {
+            if (ImGui::Button("Play Music")) {
+                musicAsset->play();
+            }
+            if (ImGui::Button("Stop Music")) {
+                musicAsset->stop();
+            }
         }
         ImGui::PopID();
     }
     for (const auto& sound : sound_list_) {
         ImGui::PushID(sound.c_str());
-        ImGui::LabelText("Sound", "%s", sound.c_str());
-        if (ImGui::Button("Play Sound")) {
-            audio::play_sound(sound.c_str(), 1.0f);
+        auto name = getRelativeName(sound);
+        ImGui::LabelText("Sound", "%s", name.c_str());
+        ImGui::LabelText("Path", "%s", sound.c_str());
+        asset_t<audio::Sound> asset{name};
+        if(asset) {
+            if (ImGui::Button("Play Sound")) {
+                asset->play();
+            }
         }
         ImGui::PopID();
     }
@@ -115,6 +129,15 @@ void audio_asset_t::save() {
 //    if (!xml.save_file(full_path.c_str())) {
 //        log(log_level::error, "Error write xml file %s", full_path.c_str());
 //    }
+}
+
+std::string audio_asset_t::getRelativeName(const std::string& filepath) const {
+    auto name = (path_t{name_} / path_name(filepath)).str();
+    // remove extension
+    if (name.size() > 4) {
+        name.erase(name.size() - 4, 4);
+    }
+    return name;
 }
 
 }

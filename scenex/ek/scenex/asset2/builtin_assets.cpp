@@ -55,25 +55,51 @@ class music_asset_t : public builtin_asset_t {
 public:
     explicit music_asset_t(std::string path)
             : builtin_asset_t(std::move(path)) {
+
+        name_ = path_;
+        // remove extension
+        if(name_.size() > 4) {
+            name_.erase(name_.size() - 4, 4);
+        }
     }
 
     void do_load() override {
-        audio::create_music((project_->base_path / path_).c_str());
+        auto* music = new audio::Music();
+        // TODO: async
+        music->load((project_->base_path / path_).c_str());
+        asset_t<audio::Music>{name_}.reset(music);
         ready_ = true;
     }
 
+    std::string name_;
 };
 
 class sound_asset_t : public builtin_asset_t {
 public:
     explicit sound_asset_t(std::string path)
             : builtin_asset_t(std::move(path)) {
+
+        name_ = path_;
+        // remove extension
+        if(name_.size() > 4) {
+            name_.erase(name_.size() - 4, 4);
+        }
     }
 
     void do_load() override {
-        audio::create_sound((project_->base_path / path_).c_str());
+        auto* sound = new audio::Sound();
+        // TODO: async
+        sound->load((project_->base_path / path_).c_str());
+        asset_t<audio::Sound>{name_}.reset(sound);
         ready_ = true;
     }
+
+    void do_unload() override {
+        asset_t<atlas_t>{path_}.reset(nullptr);
+        ready_ = false;
+    }
+
+    std::string name_;
 };
 
 class atlas_asset_t : public builtin_asset_t {
