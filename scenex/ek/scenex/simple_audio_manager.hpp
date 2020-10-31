@@ -3,6 +3,7 @@
 #include <string>
 #include <ek/scenex/local_storage_var_t.hpp>
 #include <ek/audio/audio.hpp>
+#include <ek/util/path.hpp>
 
 namespace ek {
 
@@ -22,11 +23,7 @@ public:
         music_volume_ = volume;
     }
 
-    void play_sound(const std::string& name);
-
-    void play_sound(const std::string& name, float vol);
-
-    void play_sound(const std::string& name, const float2& position);
+    void play_sound(const std::string& name, float vol = 1.0f);
 
     void vibrate(int length) const;
 
@@ -35,7 +32,7 @@ public:
     void disable_all();
 
 private:
-    std::string base_path_;
+    path_t base_path_;
     std::string music_;
     float music_volume_ = 1.0f;
 

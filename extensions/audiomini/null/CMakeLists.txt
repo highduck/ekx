@@ -1,1 +1,0 @@
-target_sources(${PROJECT_NAME} PUBLIC audiomini.cpp)

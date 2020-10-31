@@ -14,7 +14,8 @@
 #endif
 
 namespace ek {
-[[maybe_unused]] std::string get_device_lang() {
+
+std::string get_device_lang() {
     std::string result;
     CFLocaleRef locale = CFLocaleCopyCurrent();
     auto value = static_cast<CFStringRef>(CFLocaleGetValue(locale, kCFLocaleLanguageCode));

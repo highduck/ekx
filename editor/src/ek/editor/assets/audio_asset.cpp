@@ -77,7 +77,7 @@ void audio_asset_t::gui() {
         ImGui::PushID(sound.c_str());
         ImGui::LabelText("Sound", "%s", sound.c_str());
         if (ImGui::Button("Play Sound")) {
-            audio::play_sound(sound.c_str(), 1.0f, 0.0f);
+            audio::play_sound(sound.c_str(), 1.0f);
         }
         ImGui::PopID();
     }

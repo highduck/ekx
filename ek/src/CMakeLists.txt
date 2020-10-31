@@ -13,8 +13,8 @@ target_sources(${PROJECT_NAME} PUBLIC
 
         raudio/raudio.h
         raudio/raudio.cpp
-        raudio/dr_mp3.h
-        raudio/miniaudio.h
+        raudio/external/dr_mp3.h
+        raudio/external/miniaudio.h
         ek/audio/audio.hpp
         ek/audio/audio.cpp
         )

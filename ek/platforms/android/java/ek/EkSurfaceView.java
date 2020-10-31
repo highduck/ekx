@@ -28,24 +28,18 @@ public class EkSurfaceView extends GLSurfaceView {
         super.onResume();
 
         this.setRenderMode(RENDERMODE_CONTINUOUSLY);
-        this.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                EkPlatform.sendEvent(EkPlatform.RESUME);
-                EkSurfaceView.this.renderer.onResume();
-            }
+        this.queueEvent(() -> {
+            EkPlatform.sendEvent(EkPlatform.RESUME);
+            EkSurfaceView.this.renderer.onResume();
         });
     }
 
     @Override
     public void onPause() {
         Log.i(TAG, "GLSurface onPause");
-        this.queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                EkPlatform.sendEvent(EkPlatform.PAUSE);
-                EkSurfaceView.this.renderer.onPause();
-            }
+        this.queueEvent(() -> {
+            EkPlatform.sendEvent(EkPlatform.PAUSE);
+            EkSurfaceView.this.renderer.onPause();
         });
         this.setRenderMode(RENDERMODE_WHEN_DIRTY);
     }

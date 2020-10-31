@@ -13,18 +13,6 @@ Particles Designer:
 iOS project Generator: 
 - pass list of dependencies for SRC folders and HEADER base-path to Python generator scritps
 
-## Audio packages
-
-#### Old Audio separation:
-1. Decouple and rename current audio package to cocos-audio?
-2. DROP. Replace Android implementation with cocos?
-3. DROP. Make and test Emscripten Howl / cocos-js impl?
-
-#### New Audio implementation goals:
-1. decouple audio to separated ek-module
-2. connect miniaudio.h backend + mp3 support: https://github.com/dr-soft/miniaudio
-3. look raylib audio implementation for controlling sounds: https://github.com/raysan5/raylib/blob/master/src/raudio.c
-
 ## DONE
 
 + check side-project issues

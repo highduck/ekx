@@ -5,7 +5,7 @@
 
 namespace ek {
 
-[[maybe_unused]] std::string get_device_lang();
+std::string get_device_lang();
 
 std::array<int, 4> get_screen_insets();
 

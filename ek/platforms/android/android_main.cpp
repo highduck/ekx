@@ -156,7 +156,7 @@ void handle_enter_frame() {
     }
 }
 
-constexpr uint8_t event_nop = 0x00;
+constexpr uint8_t event_nop = 0xFF;
 constexpr uint8_t call_dispatch_frame = 0x70;
 constexpr uint8_t call_start = 0x71;
 constexpr uint8_t call_ready = 0x72;

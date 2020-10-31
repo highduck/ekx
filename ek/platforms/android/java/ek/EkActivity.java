@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -81,7 +80,7 @@ public class EkActivity extends Activity {
         activity.glView = new EkSurfaceView(activity);
         activity.mainLayout.addView(activity.glView);
 
-        EkExtensionManager.instance.onApplicationStart();
+        EkPluginManager.instance.onStart();
     }
 
     @Override
@@ -159,7 +158,7 @@ public class EkActivity extends Activity {
         Log.d(TAG, "Activity onResume");
         super.onResume();
 
-        EkExtensionManager.instance.onApplicationResume(_hasFocus);
+        EkPluginManager.instance.onResume(_hasFocus);
         resumeIfHasFocus();
     }
 
@@ -171,14 +170,14 @@ public class EkActivity extends Activity {
             return;
         }
 
-        EkExtensionManager.instance.onActivityResult(requestCode, resultCode, intent);
+        EkPluginManager.instance.onActivityResult(requestCode, resultCode, intent);
     }
 
     @Override
     protected void onPause() {
         Log.d(TAG, "Activity onPause");
         glView.onPause();
-        EkExtensionManager.instance.onApplicationPause();
+        EkPluginManager.instance.onPause();
         super.onPause();
     }
 

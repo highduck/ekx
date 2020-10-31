@@ -43,19 +43,19 @@ public:
     template<typename Fn>
     token add(Fn listener) {
 //        assert(!locked_);
-        invocations_.emplace_back(listener);
+        invocations_.push_back(listener);
         auto tk = static_cast<token>(tokens_.size());
-        tokens_.emplace_back(invocations_.size());
+        tokens_.push_back(invocations_.size());
         return tk;
     }
 
     template<typename Fn>
     token add_once(Fn listener) {
 //        assert(!locked_);
-        invocations_.emplace_back(listener);
+        invocations_.push_back(listener);
         auto tk = static_cast<token>(tokens_.size());
-        tokens_.emplace_back(invocations_.size());
-        once_map_.emplace_back(tk);
+        tokens_.push_back(invocations_.size());
+        once_map_.push_back(tk);
         return tk;
     }
 
