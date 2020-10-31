@@ -32,8 +32,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         systems/tween_system.cpp
         systems/tween_system.hpp
 
-        simple_audio_manager.cpp
-        simple_audio_manager.hpp
+        AudioManager.cpp
+        AudioManager.hpp
         scene_system.cpp
         scene_system.hpp
         interactive_manager.cpp

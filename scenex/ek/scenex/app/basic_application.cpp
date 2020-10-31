@@ -4,7 +4,7 @@
 #include "app_utils.hpp"
 
 #include <ek/scenex/interactive_manager.hpp>
-#include <ek/scenex/simple_audio_manager.hpp>
+#include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/components/canvas.hpp>
 #include <ek/scenex/systems/layout_system.hpp>
 #include <ek/scenex/systems/canvas_system.hpp>
@@ -56,7 +56,7 @@ void basic_application::initialize() {
 
     auto& im = service_locator_instance<interactive_manager>::init();
     service_locator_instance<input_controller>::init(im);
-    service_locator_instance<simple_audio_manager>::init();
+    service_locator_instance<AudioManager>::init();
 
     im.set_entity(root);
 

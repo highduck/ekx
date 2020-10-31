@@ -24,6 +24,9 @@ public:
     void save() override;
 
 private:
+
+    std::string getRelativeName(const std::string& filepath) const;
+
     std::vector<std::string> sound_list_;
     std::vector<std::string> music_list_;
 };

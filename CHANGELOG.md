@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- [audio] change api to Sound and Music instances 
+- [audio] change `simple_audio_manager` to `AudioManager`
+- [audio] fix audio loading for EDITOR mode
+
 ## [0.0.1] - 2020-10-31
 
 - Initial release as is

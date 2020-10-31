@@ -9,12 +9,9 @@
 #include <ek/app/res.hpp>
 #include <ek/util/logger.hpp>
 
-// TODO: unload sound/music resources
 // TODO: panning (left/right)
-// TODO: rethink playing
-// TODO: free music source buffer on unload (currently no unload methods)
 
-static Wave LoadMP3(const ek::array_buffer& buffer, const char* optionalName) {
+static Wave LoadMP3(const void* data, size_t size, const char* optionalName) {
     Wave wave = {0};
 
     // Decode an entire MP3 file in one go
@@ -22,8 +19,8 @@ static Wave LoadMP3(const ek::array_buffer& buffer, const char* optionalName) {
     drmp3_config config = {0};
 
     wave.data = drmp3_open_memory_and_read_pcm_frames_f32(
-            buffer.data(),
-            buffer.size(),
+            data,
+            size,
             &config,
             &totalFrameCount,
             NULL
@@ -50,18 +47,15 @@ static Wave LoadMP3(const ek::array_buffer& buffer, const char* optionalName) {
 
 
 // Load music stream from file
-Music LoadMusicStreamFromMemory(const ek::array_buffer& buffer, const char* fileName) {
+Music LoadMusicStreamFromMemory(void* data, size_t size, const char* fileName) {
     Music music = {0};
     bool musicLoaded = false;
 
     drmp3* ctxMp3 = (drmp3*) RL_MALLOC(sizeof(drmp3));
     music.ctxData = ctxMp3;
     music.ctxType = 3 /* MUSIC_AUDIO_MP3 */;
-    auto* data = RL_MALLOC(buffer.size());
-    memcpy(data, buffer.data(), buffer.size());
-    // TODO: free data!
 
-    int result = drmp3_init_memory(ctxMp3, data, buffer.size(), nullptr, nullptr);
+    int result = drmp3_init_memory(ctxMp3, data, size, nullptr, nullptr);
 
     if (result > 0) {
         music.stream = InitAudioStream(ctxMp3->sampleRate, 32, ctxMp3->channels);
@@ -90,57 +84,12 @@ Music LoadMusicStreamFromMemory(const ek::array_buffer& buffer, const char* file
 
 namespace ek::audio {
 
-std::unordered_map<std::string, Sound> sounds;
-std::unordered_map<std::string, Music> musics;
-
 bool initialized = false;
 
 void init() {
     assert(!initialized);
     InitAudioDevice();
     initialized = true;
-}
-
-void create_sound(const char* name) {
-    if (name == nullptr) return;
-
-    get_resource_content_async(name, [name](const array_buffer& buffer) {
-        Wave wave = LoadMP3(buffer, name);
-        sounds[name] = LoadSoundFromWave(wave);
-    });
-}
-
-void create_music(const char* name) {
-    if (name == nullptr) return;
-
-    get_resource_content_async(name, [name](const array_buffer& buffer) {
-        musics[name] = LoadMusicStreamFromMemory(buffer, name);
-    });
-}
-
-void play_sound(const char* name, float vol) {
-    if (name == nullptr) return;
-    auto it = sounds.find(name);
-    if (it != sounds.end()) {
-        const auto sound = it->second;
-        SetSoundVolume(sound, vol);
-        PlaySound(sound);
-    }
-}
-
-void play_music(const char* name, float vol) {
-    if (name == nullptr) return;
-    auto it = musics.find(name);
-    if (it != musics.end()) {
-        const auto& music = it->second;
-        if (!IsMusicPlaying(music)) {
-            SetMusicVolume(music, vol);
-            PlayMusicStream(music);
-        } else {
-            SetMusicVolume(music, vol);
-            UpdateMusicStream(music);
-        }
-    }
 }
 
 int lockCounter = 0;
@@ -170,4 +119,102 @@ void vibrate(int duration_millis) {
 
 }
 #endif
+
+/** Sound **/
+
+void Sound::load(const char* path) {
+    get_resource_content_async(path, [this, path](const array_buffer& buffer) {
+        ::Wave wave = LoadMP3(buffer.data(), buffer.size(), path);
+        ptrHandle = new ::Sound(LoadSoundFromWave(wave));
+        UnloadWave(wave);
+    });
+}
+
+void Sound::unload() {
+    if (ptrHandle) {
+        UnloadSound(*ptrHandle);
+        delete ptrHandle;
+        ptrHandle = nullptr;
+    }
+}
+
+Sound::~Sound() {
+    unload();
+}
+
+void Sound::play(float volume) {
+    if (ptrHandle && volume > 0.0f) {
+        ::Sound handle = *ptrHandle;
+        SetSoundVolume(handle, volume);
+        PlaySound(handle);
+    }
+}
+
+Sound::Sound(const char* path) {
+    load(path);
+}
+
+/** Music **/
+
+void Music::load(const char* path) {
+    get_resource_content_async(path, [this, path](array_buffer buf) {
+        ptrHandle = new ::Music(LoadMusicStreamFromMemory(buf.data(), buf.size(), path));
+        source = std::move(buf);
+    });
+}
+
+void Music::unload() {
+    if (ptrHandle) {
+        UnloadMusicStream(*ptrHandle);
+        delete ptrHandle;
+        ptrHandle = nullptr;
+    }
+    source.resize(0);
+    source.shrink_to_fit();
+}
+
+Music::~Music() {
+    unload();
+}
+
+void Music::play() {
+    if (ptrHandle) {
+        ::Music music = *ptrHandle;
+        if (!IsMusicPlaying(music)) {
+            PlayMusicStream(music);
+        }
+    }
+}
+
+void Music::stop() {
+    if (ptrHandle) {
+        ::Music music = *ptrHandle;
+        if (IsMusicPlaying(music)) {
+            StopMusicStream(music);
+        }
+    }
+}
+
+void Music::update() {
+    if (ptrHandle) {
+        ::Music music = *ptrHandle;
+        UpdateMusicStream(music);
+    }
+}
+
+void Music::setVolume(float volume) {
+    volume_ = volume;
+    if(ptrHandle) {
+        SetMusicVolume(*ptrHandle, volume);
+    }
+}
+
+float Music::getVolume() const {
+    return volume_;
+}
+
+Music::Music(const char* path) {
+    load(path);
+}
+
 }
