@@ -44,8 +44,9 @@ void freetype_asset_t::load() {
                                            temp_atlas);
 
     load_temp_atlas(temp_atlas);
-
-    asset_t<font_t>{name_}.reset(new font_t(font_data));
+    auto* bmFont = new BitmapFont();
+    bmFont->load(font_data);
+    asset_t<font_t>{name_}.reset(new font_t(bmFont));
 }
 
 void freetype_asset_t::unload() {

@@ -13,46 +13,51 @@
 
 namespace ek {
 
-class font_glyph_t {
-public:
-    std::vector<uint32_t> codes;
-    std::array<int, 4> box;
-    int advance_width;
-    std::string sprite;
+namespace graphics {
+class texture_t;
+}
 
-    template<typename S>
-    void serialize(IO<S>& io) {
-        io(codes, box, advance_width, sprite);
-    }
+struct Glyph {
+    float x0, y0, x1, y1;
+    float advanceWidth;
+    float leftSideBearing;
+    int size;
+    rect_f texCoord;
+    const graphics::texture_t* texture;
+    bool rotated;
 };
 
-class font_data_t {
-public:
-    uint16_t units_per_em;
-    std::vector<font_glyph_t> glyphs;
-    std::vector<uint16_t> sizes;
-
-    template<typename S>
-    void serialize(IO<S>& io) {
-        io(units_per_em, sizes, glyphs);
-    }
+struct FontSizeInfo {
+    float metricsScale;
+    float rasterScale;
+    uint16_t baseFontSize;
 };
 
-//struct bitmap_font_size_t {
-//    float size = 0.0f;
-//    std::unordered_map<uint32_t, asset_t<sprite_t>> map;
-//};
+enum class FontType {
+    Bitmap,
+    TrueType
+};
+
+class FontImplBase {
+public:
+    virtual ~FontImplBase() = 0;
+
+    virtual bool getGlyph(uint32_t codepoint, const FontSizeInfo& size, Glyph& outGlyph) = 0;
+
+    virtual FontSizeInfo getSizeInfo(float size) = 0;
+
+    virtual void debugDrawAtlas() {}
+
+    virtual FontType getType() const = 0;
+};
 
 class font_t : private disable_copy_assign_t {
 public:
-    std::vector<uint16_t> bitmap_size_table;
-    std::unordered_map<uint32_t, font_glyph_t> map;
-    uint16_t units_per_em;
+    explicit font_t(FontImplBase* impl);
 
-    explicit font_t(const font_data_t& data);
+    ~font_t();
 
-    [[nodiscard]]
-    const font_glyph_t* get_glyph(uint32_t code) const;
+    void debugDrawAtlas();
 
     void draw(const std::string& text,
               float size,
@@ -73,8 +78,13 @@ public:
     [[nodiscard]]
     rect_f estimate_text_draw_zone(const std::string& text, float size, int begin, int end, float line_height,
                                    float line_spacing = 0.0f) const;
-};
 
-font_t* load_font(const std::vector<uint8_t>& buffer);
+    [[nodiscard]] FontType getType() const;
+
+    [[nodiscard]] const FontImplBase* getImpl() const;
+
+private:
+    FontImplBase* impl = nullptr;
+};
 
 }

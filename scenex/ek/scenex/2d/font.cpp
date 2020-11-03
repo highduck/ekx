@@ -1,26 +1,20 @@
 #include "font.hpp"
 
-#include "sprite.hpp"
 #include <ek/util/locator.hpp>
-#include <ek/app/res.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/math/bounds_builder.hpp>
 
 namespace ek {
 
-font_t::font_t(const font_data_t& data) {
-    units_per_em = data.units_per_em;
-    bitmap_size_table = data.sizes;
-    for (const auto& g : data.glyphs) {
-        for (auto code : g.codes) {
-            map[code] = g;
-        }
-    }
+FontImplBase::~FontImplBase() = default;
+
+font_t::font_t(FontImplBase* impl_) :
+        impl{impl_} {
+
 }
 
-const font_glyph_t* font_t::get_glyph(uint32_t code) const {
-    auto it = map.find(code);
-    return it != map.end() ? &it->second : nullptr;
+font_t::~font_t() {
+    delete impl;
 }
 
 void font_t::draw(const std::string& text,
@@ -30,7 +24,7 @@ void font_t::draw(const std::string& text,
                   float line_height,
                   float line_spacing) const {
 
-    auto sc = size / static_cast<float>(units_per_em);
+    auto sizeInfo = impl->getSizeInfo(size);
 
     float2 current = position;
     float2 start = position;
@@ -39,18 +33,8 @@ void font_t::draw(const std::string& text,
             .multiply_color(color);
     // var vertexColor = drawer.calcVertexColorMultiplier(color);
 
-    int bitmap_size_index = static_cast<int>(bitmap_size_table.size()) - 1;
-    while (bitmap_size_index > 0) {
-        if (size <= static_cast<float>(bitmap_size_table[bitmap_size_index - 1])) {
-            --bitmap_size_index;
-        } else {
-            break;
-        }
-    }
-
-    int bm_font_size = bitmap_size_table[bitmap_size_index];
-    float bitmap_scale = size / bm_font_size;
-
+    const graphics::texture_t* prevTexture = nullptr;
+    Glyph gdata;
     for (char code : text) {
         if (code == '\n' || code == '\r') {
             current.x = start.x;
@@ -58,57 +42,64 @@ void font_t::draw(const std::string& text,
             continue;
         }
 
-        auto gdata = get_glyph(code);
-        if (gdata == nullptr || gdata->sprite.empty()) continue;
+        if (impl->getGlyph(code, sizeInfo, gdata)) {
+            if (gdata.texture) {
+                if (prevTexture != gdata.texture) {
+                    draw2d::state.set_texture(gdata.texture);
+                    prevTexture = gdata.texture;
+                }
+                draw2d::state.set_texture_coords(gdata.texCoord);
+                if (gdata.rotated) {
+                    draw2d::quad_rotated( gdata.x0 + current.x,
+                                          gdata.y0 + current.y,
+                                          gdata.x1 - gdata.x0,
+                                          gdata.y1 - gdata.y0);
 
-        asset_t<sprite_t> spr{
-                gdata->sprite + '_' + std::to_string(bm_font_size)
-        };
+                } else {
+                    draw2d::quad(gdata.x0 + current.x,
+                                 gdata.y0 + current.y,
+                                 gdata.x1 - gdata.x0,
+                                 gdata.y1 - gdata.y0);
+                }
 
-        if (spr) {
-            spr->draw(rect_f{
-                    bitmap_scale * spr->rect.x + current.x,
-                    bitmap_scale * spr->rect.y + current.y,
-                    bitmap_scale * spr->rect.width,
-                    bitmap_scale * spr->rect.height
-            });
+                // SPRITE:
+                // x = 0
+                // y = -10
+                // w = 10
+                // h = 10
 
-            // SPRITE:
-            // x = 0
-            // y = -10
-            // w = 10
-            // h = 10
+                // CBOX:
+                // 0 x-min = 0
+                // 1 y-min = 0
+                // 2 x-max = 625 * 32p / 1000em = 20
+                // 3 y-max = 625 * 32p / 1000em = 20
 
-            // CBOX:
-            // 0 x-min = 0
-            // 1 y-min = 0
-            // 2 x-max = 625 * 32p / 1000em = 20
-            // 3 y-max = 625 * 32p / 1000em = 20
+                // x = 0, w = 20
+                // y = -h = -20, h = 20
 
-            // x = 0, w = 20
-            // y = -h = -20, h = 20
+            }
 
+            current.x += gdata.advanceWidth;
         }
-
-        current.x += sc * gdata->advance_width;
     }
     draw2d::state.restore_color();
 }
 
 float font_t::get_text_segment_width(const std::string& text, float size, int begin, int end) const {
-    const float sc = size / units_per_em;
+    auto sizeInfo = impl->getSizeInfo(size);
     float x = 0.0f;
     float max = 0.0f;
+    Glyph gdata;
     for (int i = begin; i < end; ++i) {
         auto c = text[i];
         if (c == '\n' || c == '\r') {
             x = 0.0f;
         }
-        auto gdata = get_glyph(text[i]);
-        if (gdata == nullptr) continue;
-        x += gdata->advance_width * sc;
-        if (max < x) {
-            max = x;
+        if (impl->getGlyph(text[i], sizeInfo, gdata)) {
+            x += gdata.advanceWidth;
+            if (max < x) {
+                max = x;
+            }
         }
     }
     return max;
@@ -136,50 +127,50 @@ float font_t::get_text_segment_width(const std::string& text, float size, int be
 
 rect_f font_t::get_line_bounding_box(const std::string& text, float size, int begin, int end, float line_height,
                                      float line_spacing) const {
-    float em = units_per_em;
-    float sc = size / em;
+    auto sizeInfo = impl->getSizeInfo(size);
     bounds_builder_2f bounds_builder;
     float x = 0.0f;
     float y = 0.0f;
     if (end < 0) {
         end = text.size();
     }
+    Glyph gdata;
     for (int i = begin; i < end; ++i) {
         int code = text[i];
         if (code == '\n' || code == '\r') {
             x = 0.0f;
             y += line_height + line_spacing;
         }
-        auto gdata = get_glyph(code);
-        if (gdata == nullptr) continue;
+        if (impl->getGlyph(code, sizeInfo, gdata)) {
 
-        // C-BOX:
-        // 0 x-min = 0
-        // 1 y-min = 0
-        // 2 x-max = 625 * 32p / 1000em = 20
-        // 3 y-max = 625 * 32p / 1000em = 20
+            // C-BOX:
+            // 0 x-min = 0
+            // 1 y-min = 0
+            // 2 x-max = 625 * 32p / 1000em = 20
+            // 3 y-max = 625 * 32p / 1000em = 20
 
-        // x = 0, w = 20
-        // y = -h = -20, h = 20
+            // x = 0, w = 20
+            // y = -h = -20, h = 20
 
-        bounds_builder.add(
-                {x + gdata->box[0] * sc, y - gdata->box[3] * sc},
-                {x + gdata->box[2] * sc, y - gdata->box[1] * sc}
-        );
-        x += gdata->advance_width * sc;
+            bounds_builder.add(
+                    {x + gdata.x0, y + gdata.y0},
+                    {x + gdata.x1, y + gdata.y1}
+            );
+            x += gdata.advanceWidth;
+        }
     }
     return bounds_builder.rect();
 }
 
 rect_f font_t::estimate_text_draw_zone(const std::string& text, float size, int begin, int end, float line_height,
                                        float line_spacing) const {
-    float em = units_per_em;
-    float sc = size / em;
+    auto sizeInfo = impl->getSizeInfo(size);
     bounds_builder_2f bounds_builder;
     float2 cursor{0.0f, 0.0f};
     if (end < 0) {
         end = text.size();
     }
+    Glyph gdata;
     for (int i = begin; i < end; ++i) {
         int code = text[i];
         if (code == '\n' || code == '\r') {
@@ -188,30 +179,27 @@ rect_f font_t::estimate_text_draw_zone(const std::string& text, float size, int 
             continue;
         }
 
-        const auto* gdata = get_glyph(code);
-        if (gdata == nullptr) {
-            continue;
-        }
+        if (impl->getGlyph(code, sizeInfo, gdata)) {
 
-        auto w = gdata->advance_width * sc;
-        bounds_builder.add({cursor.x, cursor.y - size, w, size});
-        cursor.x += w;
+            auto w = gdata.advanceWidth;
+            bounds_builder.add({cursor.x, cursor.y - size, w, size});
+            cursor.x += w;
+        }
     }
     return bounds_builder.rect();
 }
 
-font_t* load_font(const std::vector<uint8_t>& buffer) {
-    font_t* font = nullptr;
-    if (!buffer.empty()) {
-        input_memory_stream input{buffer.data(), buffer.size()};
-
-        IO io{input};
-        font_data_t fontData;
-        io(fontData);
-
-        font = new font_t(fontData);
-    }
-    return font;
+void font_t::debugDrawAtlas() {
+    impl->debugDrawAtlas();
 }
+
+FontType font_t::getType() const {
+    return impl->getType();
+}
+
+const FontImplBase* font_t::getImpl() const {
+    return impl;
+}
+
 
 }

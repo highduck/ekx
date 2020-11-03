@@ -6,6 +6,7 @@
 #include "flash_asset.hpp"
 #include "model_asset.hpp"
 #include "audio_asset.hpp"
+#include "ttf_font_editor.hpp"
 
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
@@ -92,6 +93,7 @@ editor_project_t::editor_project_t() {
     register_asset_factory<flash_asset_t>();
     register_asset_factory<model_asset_t>();
     register_asset_factory<audio_asset_t>();
+    register_asset_factory<TTFFontEditor>();
 }
 
 editor_project_t::~editor_project_t() {
