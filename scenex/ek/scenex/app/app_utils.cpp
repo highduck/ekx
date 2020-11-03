@@ -6,7 +6,6 @@
 #include <ek/graphics/vertex_decl.hpp>
 #include <ek/graphics/texture.hpp>
 
-#include <ek/scenex/2d/atlas.hpp>
 #include <ek/scenex/2d/font.hpp>
 
 #include <ek/draw2d/drawer.hpp>
@@ -95,6 +94,8 @@ void frame_stats_t::draw() {
         float2 pos{10.0f, 30.0f};
         font->draw(text, 16, pos + float2::one, 0x0_rgb, 16);
         font->draw(text, 16, pos, 0xFFFFFF_rgb, 16);
+
+        font->debugDrawAtlas();
     }
 #endif
 }

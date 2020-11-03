@@ -17,6 +17,8 @@
 #include <ek/scenex/data/model_data.hpp>
 
 #include <utility>
+#include <ek/rtfont/ttf_font.hpp>
+#include <ek/scenex/2d/bitmap_font.hpp>
 
 namespace ek {
 
@@ -58,7 +60,7 @@ public:
 
         name_ = path_;
         // remove extension
-        if(name_.size() > 4) {
+        if (name_.size() > 4) {
             name_.erase(name_.size() - 4, 4);
         }
     }
@@ -81,7 +83,7 @@ public:
 
         name_ = path_;
         // remove extension
-        if(name_.size() > 4) {
+        if (name_.size() > 4) {
             name_.erase(name_.size() - 4, 4);
         }
     }
@@ -160,7 +162,9 @@ public:
 
     void do_load() override {
         get_resource_content_async((project_->base_path / path_ + ".font").c_str(), [this](auto buffer) {
-            asset_t<font_t>{path_}.reset(load_font(buffer));
+            auto* bmfont = new BitmapFont();
+            bmfont->load(buffer);
+            asset_t<font_t>{path_}.reset(new font_t(bmfont));
             ready_ = true;
         });
     }
@@ -334,6 +338,29 @@ public:
     }
 };
 
+
+class TTFFontAsset : public builtin_asset_t {
+public:
+    explicit TTFFontAsset(std::string path)
+            : builtin_asset_t(std::move(path)) {
+    }
+
+    void do_load() override {
+        get_resource_content_async((project_->base_path / path_ + ".ttf").c_str(), [this](auto buffer) {
+            auto* ttfFont = new TTFFont();
+            ttfFont->setScale(project_->scale_factor);
+            ttfFont->loadFromMemory(std::move(buffer));
+            asset_t<font_t>{path_}.reset(new font_t(ttfFont));
+            ready_ = true;
+        });
+    }
+
+    void do_unload() override {
+        asset_t<TTFFont>{path_}.reset(nullptr);
+        ready_ = false;
+    }
+};
+
 asset_object_t* builtin_asset_resolver_t::create_from_file(const std::string& path) const {
     // todo : potentially could be resolved by file extension
     return nullptr;
@@ -352,6 +379,8 @@ asset_object_t* builtin_asset_resolver_t::create_for_type(const std::string& typ
         return new scene_asset_t(path);
     } else if (type == "font") {
         return new font_asset_t(path);
+    } else if (type == "ttf") {
+        return new TTFFontAsset(path);
     } else if (type == "atlas") {
         return new atlas_asset_t(path);
     } else if (type == "program") {

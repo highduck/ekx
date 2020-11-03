@@ -96,7 +96,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         2d/sprite.cpp
         2d/sprite.hpp
         2d/font.cpp
-        2d/font.hpp
+        2d/bitmap_font.cpp
         2d/text_format.hpp
 
         asset2/asset_object.hpp

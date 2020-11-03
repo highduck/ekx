@@ -54,6 +54,16 @@ void save(const output_memory_stream& stream, const char* path) {
     }
 }
 
+void save(const array_buffer& buffer, const char* path) {
+    auto h = fopen(path, "wb");
+    if (h) {
+        fwrite(buffer.data(), 1, buffer.size(), h);
+        fclose(h);
+    } else {
+        EK_WARN << "fopen error: " << path;
+    }
+}
+
 void save(const std::string& text, const path_t& path) {
     std::ofstream s{path.c_str()};
     if (s.is_open()) {
