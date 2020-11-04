@@ -6,7 +6,7 @@
 #include <ek/graphics/vertex_decl.hpp>
 #include <ek/graphics/texture.hpp>
 
-#include <ek/scenex/2d/font.hpp>
+#include <ek/scenex/text/font.hpp>
 
 #include <ek/draw2d/drawer.hpp>
 #include <ek/imaging/drawing.hpp>
@@ -86,7 +86,7 @@ void frame_stats_t::draw() {
         x += 3.0f;
     }
 
-    asset_t<font_t> font{"mini"};
+    asset_t<Font> font{"mini"};
     if (font) {
         char buf[256];
         snprintf(buf, sizeof(buf) - 1, "FPS: %0.0f\nDC: %u\nTRIS: %u", fps_meter_.fps(), draw_calls_, triangles_);

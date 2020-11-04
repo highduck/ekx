@@ -6,18 +6,24 @@
 
 namespace ek {
 
+FontImplBase::FontImplBase(FontType fontType_) :
+        fontType{fontType_},
+        lineHeightMultiplier{1.09f} {
+
+}
+
 FontImplBase::~FontImplBase() = default;
 
-font_t::font_t(FontImplBase* impl_) :
+Font::Font(FontImplBase* impl_) :
         impl{impl_} {
 
 }
 
-font_t::~font_t() {
+Font::~Font() {
     delete impl;
 }
 
-void font_t::draw(const std::string& text,
+void Font::draw(const std::string& text,
                   float size,
                   const float2& position,
                   argb32_t color,
@@ -50,10 +56,10 @@ void font_t::draw(const std::string& text,
                 }
                 draw2d::state.set_texture_coords(gdata.texCoord);
                 if (gdata.rotated) {
-                    draw2d::quad_rotated( gdata.x0 + current.x,
-                                          gdata.y0 + current.y,
-                                          gdata.x1 - gdata.x0,
-                                          gdata.y1 - gdata.y0);
+                    draw2d::quad_rotated(gdata.x0 + current.x,
+                                         gdata.y0 + current.y,
+                                         gdata.x1 - gdata.x0,
+                                         gdata.y1 - gdata.y0);
 
                 } else {
                     draw2d::quad(gdata.x0 + current.x,
@@ -85,7 +91,7 @@ void font_t::draw(const std::string& text,
     draw2d::state.restore_color();
 }
 
-float font_t::get_text_segment_width(const std::string& text, float size, int begin, int end) const {
+float Font::get_text_segment_width(const std::string& text, float size, int begin, int end) const {
     auto sizeInfo = impl->getSizeInfo(size);
     float x = 0.0f;
     float max = 0.0f;
@@ -125,7 +131,7 @@ float font_t::get_text_segment_width(const std::string& text, float size, int be
 //    return minMax.rect();
 //}
 
-rect_f font_t::get_line_bounding_box(const std::string& text, float size, int begin, int end, float line_height,
+rect_f Font::get_line_bounding_box(const std::string& text, float size, int begin, int end, float line_height,
                                      float line_spacing) const {
     auto sizeInfo = impl->getSizeInfo(size);
     bounds_builder_2f bounds_builder;
@@ -162,7 +168,7 @@ rect_f font_t::get_line_bounding_box(const std::string& text, float size, int be
     return bounds_builder.rect();
 }
 
-rect_f font_t::estimate_text_draw_zone(const std::string& text, float size, int begin, int end, float line_height,
+rect_f Font::estimate_text_draw_zone(const std::string& text, float size, int begin, int end, float line_height,
                                        float line_spacing) const {
     auto sizeInfo = impl->getSizeInfo(size);
     bounds_builder_2f bounds_builder;
@@ -189,17 +195,16 @@ rect_f font_t::estimate_text_draw_zone(const std::string& text, float size, int 
     return bounds_builder.rect();
 }
 
-void font_t::debugDrawAtlas() {
+void Font::debugDrawAtlas() {
     impl->debugDrawAtlas();
 }
 
-FontType font_t::getType() const {
-    return impl->getType();
+FontType Font::getFontType() const {
+    return impl->getFontType();
 }
 
-const FontImplBase* font_t::getImpl() const {
+const FontImplBase* Font::getImpl() const {
     return impl;
 }
-
 
 }

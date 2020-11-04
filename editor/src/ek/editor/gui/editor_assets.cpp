@@ -6,7 +6,7 @@
 #include <ek/scenex/3d/material_3d.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/scenex/2d/atlas.hpp>
-#include <ek/scenex/2d/font.hpp>
+#include <ek/scenex/text/font.hpp>
 #include <ek/scenex/data/sg_data.hpp>
 
 namespace ek {
@@ -69,7 +69,7 @@ void do_editor_debug_runtime_assets() {
     do_editor_debug_runtime_asset_list<static_mesh_t>("Mesh");
     do_editor_debug_runtime_asset_list<atlas_t>("Atlas");
     do_editor_debug_runtime_asset_list<sprite_t>("Sprite");
-    do_editor_debug_runtime_asset_list<font_t>("Font");
+    do_editor_debug_runtime_asset_list<Font>("Font");
     do_editor_debug_runtime_asset_list<sg_file>("Scenes 2D");
 
     ImGui::End();

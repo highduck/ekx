@@ -4,11 +4,11 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/editor/assets/flash_asset.cpp
         ek/editor/assets/audio_asset.cpp
-        ek/editor/assets/freetype_asset.cpp
+        ek/editor/assets/bitmap_font_editor_asset.cpp
         ek/editor/assets/editor_temp_atlas.cpp
         ek/editor/assets/texture_asset.cpp
         ek/editor/assets/model_asset.cpp
-        ek/editor/assets/ttf_font_editor.cpp
+        ek/editor/assets/ttf_editor_asset.cpp
 
         ek/editor/gui/gui_atlas.cpp
         ek/editor/gui/gui_sg_file.cpp

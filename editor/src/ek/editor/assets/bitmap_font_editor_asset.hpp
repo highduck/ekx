@@ -7,11 +7,11 @@
 
 namespace ek {
 
-class freetype_asset_t : public editor_asset_t {
+class BitmapFontEditorAsset : public editor_asset_t {
 public:
-    inline static const char* type_name = "freetype";
+    inline static const char* type_name = "bmfont";
 
-    explicit freetype_asset_t(path_t path);
+    explicit BitmapFontEditorAsset(path_t path);
 
     void read_decl_from_xml(const pugi::xml_node& node) override;
 

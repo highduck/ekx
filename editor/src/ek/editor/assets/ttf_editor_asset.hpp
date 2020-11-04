@@ -4,11 +4,11 @@
 
 namespace ek {
 
-class TTFFontEditor  : public editor_asset_t {
+class TTFEditorAsset  : public editor_asset_t {
 public:
     inline static const char* type_name = "ttf";
 
-    explicit TTFFontEditor(path_t path);
+    explicit TTFEditorAsset(path_t path);
 
     void read_decl_from_xml(const pugi::xml_node& node) override;
 

@@ -4,7 +4,7 @@
 
 #include <ek/util/assets.hpp>
 #include <ek/scenex/2d/sprite.hpp>
-#include <ek/scenex/2d/font.hpp>
+#include <ek/scenex/text/font.hpp>
 #include <ek/draw2d/drawer.hpp>
 
 namespace ek {
@@ -14,7 +14,7 @@ public:
     asset_t<sprite_t> sprite;
     int draw_layer = 0;
     std::string text;
-    asset_t<font_t> font;
+    asset_t<Font> font;
     int font_size = 0;
     float2 pivot = float2::zero;
 

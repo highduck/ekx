@@ -6,7 +6,7 @@ class sprite_t;
 
 class atlas_t;
 
-class font_t;
+class Font;
 
 struct sg_file;
 
@@ -20,7 +20,7 @@ void gui_sprite_view(const sprite_t* sprite);
 
 void gui_atlas_view(const atlas_t* atlas);
 
-void gui_font_view(const font_t* font);
+void gui_font_view(const Font* font);
 
 void gui_sg_file_view(const sg_file* library);
 

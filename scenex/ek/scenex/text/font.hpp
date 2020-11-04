@@ -18,13 +18,14 @@ class texture_t;
 }
 
 struct Glyph {
-    float x0, y0, x1, y1;
-    float advanceWidth;
-    float leftSideBearing;
-    int size;
+    float x0{}, y0{}, x1{}, y1{};
+    float advanceWidth{};
+    float leftSideBearing{};
+    // base font size
+    float size{};
     rect_f texCoord;
-    const graphics::texture_t* texture;
-    bool rotated;
+    const graphics::texture_t* texture{};
+    bool rotated{};
 };
 
 struct FontSizeInfo {
@@ -40,6 +41,8 @@ enum class FontType {
 
 class FontImplBase {
 public:
+    explicit FontImplBase(FontType type);
+
     virtual ~FontImplBase() = 0;
 
     virtual bool getGlyph(uint32_t codepoint, const FontSizeInfo& size, Glyph& outGlyph) = 0;
@@ -48,14 +51,24 @@ public:
 
     virtual void debugDrawAtlas() {}
 
-    virtual FontType getType() const = 0;
+    [[nodiscard]] FontType getFontType() const {
+        return fontType;
+    }
+
+    [[nodiscard]] float getLineHeight(float fontSize) const {
+        return fontSize * lineHeightMultiplier;
+    }
+
+protected:
+    FontType fontType;
+    float lineHeightMultiplier;
 };
 
-class font_t : private disable_copy_assign_t {
+class Font : private disable_copy_assign_t {
 public:
-    explicit font_t(FontImplBase* impl);
+    explicit Font(FontImplBase* impl);
 
-    ~font_t();
+    ~Font();
 
     void debugDrawAtlas();
 
@@ -79,7 +92,7 @@ public:
     rect_f estimate_text_draw_zone(const std::string& text, float size, int begin, int end, float line_height,
                                    float line_spacing = 0.0f) const;
 
-    [[nodiscard]] FontType getType() const;
+    [[nodiscard]] FontType getFontType() const;
 
     [[nodiscard]] const FontImplBase* getImpl() const;
 

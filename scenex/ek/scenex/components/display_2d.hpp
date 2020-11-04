@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <string>
-#include <ek/scenex/2d/text_format.hpp>
+#include <ek/scenex/text/text_format.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/mat3x2.hpp>
 #include <ek/util/type_index.hpp>
