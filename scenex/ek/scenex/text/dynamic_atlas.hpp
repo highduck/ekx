@@ -29,7 +29,7 @@ private:
 //    std::vector<DynamicAtlasSprite> sprites;
     float invWidth = 1.0f / 2048.0f;
     float invHeight = 1.0f / 2048.0f;
-
+    int bytesPerPixel = 1;
     int padding = 1;
     int x = 0;
     int y = 0;

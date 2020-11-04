@@ -1,7 +1,7 @@
 #include "display_2d.hpp"
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/2d/sprite.hpp>
-#include <ek/scenex/2d/font.hpp>
+#include <ek/scenex/text/font.hpp>
 #include <ek/util/assets.hpp>
 
 namespace ek {
@@ -101,7 +101,7 @@ bool drawable_sprite::hit_test(const float2& point) const {
 //// text
 
 static void draw_text(const std::string& text, const text_format_t& format, const rect_f& rc) {
-    asset_t<font_t> f{format.font};
+    asset_t<Font> f{format.font};
     if (f) {
 
 //        resolve<Drawer>().setEmptyTexture();
@@ -131,7 +131,7 @@ static void draw_text(const std::string& text, const text_format_t& format, cons
 }
 
 static rect_f text_bounds(const std::string& text, const text_format_t& format, const rect_f& rc) {
-    asset_t<font_t> f(format.font);
+    asset_t<Font> f(format.font);
     if (!f) {
         return rect_f::zero;
     }

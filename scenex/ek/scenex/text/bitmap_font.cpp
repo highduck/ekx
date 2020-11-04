@@ -1,10 +1,14 @@
 #include "bitmap_font.hpp"
-#include "sprite.hpp"
+#include <ek/scenex/2d/sprite.hpp>
 #include <ek/graphics/texture.hpp>
 
 namespace ek {
 
-BitmapFont::BitmapFont() = default;
+BitmapFont::BitmapFont() :
+        FontImplBase(FontType::Bitmap) {
+
+}
+
 BitmapFont::~BitmapFont() = default;
 
 void BitmapFont::load(const std::vector<uint8_t>& buffer) {
@@ -31,11 +35,11 @@ void BitmapFont::load(const font_data_t& data) {
 
 bool BitmapFont::getGlyph(uint32_t codepoint, const FontSizeInfo& size, Glyph& outGlyph) {
     auto it = map.find(codepoint);
-    if(it != map.end()) {
+    if (it != map.end()) {
         const auto& g = it->second;
         outGlyph.advanceWidth = size.metricsScale * g.advance_width;
         asset_t<sprite_t> spr{g.sprite + '_' + std::to_string(size.baseFontSize)};
-        if(spr) {
+        if (spr) {
             outGlyph.texCoord = spr->tex;
             outGlyph.texture = spr->texture.get();
             outGlyph.rotated = spr->rotated;
@@ -44,8 +48,7 @@ bool BitmapFont::getGlyph(uint32_t codepoint, const FontSizeInfo& size, Glyph& o
             outGlyph.y0 = spr->rect.y * size.rasterScale;
             outGlyph.x1 = spr->rect.right() * size.rasterScale;
             outGlyph.y1 = spr->rect.bottom() * size.rasterScale;
-        }
-        else {
+        } else {
             outGlyph.x0 = g.box[0] * size.metricsScale;
             outGlyph.y0 = -g.box[3] * size.metricsScale;
             outGlyph.x1 = g.box[2] * size.metricsScale;
@@ -73,10 +76,6 @@ FontSizeInfo BitmapFont::getSizeInfo(float size) {
     info.baseFontSize = bitmap_size_table[bitmap_size_index];
     info.rasterScale = size / static_cast<float>(info.baseFontSize);
     return info;
-}
-
-FontType BitmapFont::getType() const {
-    return FontType::Bitmap;
 }
 
 }

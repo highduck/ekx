@@ -10,15 +10,16 @@
 #include <ek/scenex/data/sg_data.hpp>
 #include <ek/scenex/data/sg_factory.hpp>
 #include <ek/scenex/2d/atlas.hpp>
-#include <ek/scenex/2d/font.hpp>
 #include <ek/scenex/data/program_data.hpp>
 #include <ek/scenex/data/texture_data.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/scenex/data/model_data.hpp>
 
+#include <ek/scenex/text/font.hpp>
+#include <ek/scenex/text/truetype_font.hpp>
+#include <ek/scenex/text/bitmap_font.hpp>
+
 #include <utility>
-#include <ek/rtfont/ttf_font.hpp>
-#include <ek/scenex/2d/bitmap_font.hpp>
 
 namespace ek {
 
@@ -154,23 +155,23 @@ public:
 
 };
 
-class font_asset_t : public builtin_asset_t {
+class BitmapFontAsset : public builtin_asset_t {
 public:
-    explicit font_asset_t(std::string path)
+    explicit BitmapFontAsset(std::string path)
             : builtin_asset_t(std::move(path)) {
     }
 
     void do_load() override {
         get_resource_content_async((project_->base_path / path_ + ".font").c_str(), [this](auto buffer) {
-            auto* bmfont = new BitmapFont();
-            bmfont->load(buffer);
-            asset_t<font_t>{path_}.reset(new font_t(bmfont));
+            auto* bmFont = new BitmapFont();
+            bmFont->load(buffer);
+            asset_t<Font>{path_}.reset(new Font(bmFont));
             ready_ = true;
         });
     }
 
     void do_unload() override {
-        asset_t<font_t>{path_}.reset(nullptr);
+        asset_t<Font>{path_}.reset(nullptr);
         ready_ = false;
     }
 };
@@ -339,24 +340,23 @@ public:
 };
 
 
-class TTFFontAsset : public builtin_asset_t {
+class TrueTypeFontAsset : public builtin_asset_t {
 public:
-    explicit TTFFontAsset(std::string path)
+    explicit TrueTypeFontAsset(std::string path)
             : builtin_asset_t(std::move(path)) {
     }
 
     void do_load() override {
         get_resource_content_async((project_->base_path / path_ + ".ttf").c_str(), [this](auto buffer) {
-            auto* ttfFont = new TTFFont();
-            ttfFont->setScale(project_->scale_factor);
+            auto* ttfFont = new TrueTypeFont(project_->scale_factor, 48, 1024);
             ttfFont->loadFromMemory(std::move(buffer));
-            asset_t<font_t>{path_}.reset(new font_t(ttfFont));
+            asset_t<Font>{path_}.reset(new Font(ttfFont));
             ready_ = true;
         });
     }
 
     void do_unload() override {
-        asset_t<TTFFont>{path_}.reset(nullptr);
+        asset_t<TrueTypeFont>{path_}.reset(nullptr);
         ready_ = false;
     }
 };
@@ -377,10 +377,10 @@ asset_object_t* builtin_asset_resolver_t::create_for_type(const std::string& typ
         return new music_asset_t(path);
     } else if (type == "scene") {
         return new scene_asset_t(path);
-    } else if (type == "font") {
-        return new font_asset_t(path);
+    } else if (type == "bmfont") {
+        return new BitmapFontAsset(path);
     } else if (type == "ttf") {
-        return new TTFFontAsset(path);
+        return new TrueTypeFontAsset(path);
     } else if (type == "atlas") {
         return new atlas_asset_t(path);
     } else if (type == "program") {

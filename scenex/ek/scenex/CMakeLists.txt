@@ -92,12 +92,12 @@ target_sources(${PROJECT_NAME} PRIVATE
         local_storage_var_t.hpp
 
         2d/atlas.cpp
-        2d/atlas.hpp
         2d/sprite.cpp
-        2d/sprite.hpp
-        2d/font.cpp
-        2d/bitmap_font.cpp
-        2d/text_format.hpp
+
+        text/bitmap_font.cpp
+        text/truetype_font.cpp
+        text/dynamic_atlas.cpp
+        text/font.cpp
 
         asset2/asset_object.hpp
         asset2/asset_manager.cpp

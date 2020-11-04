@@ -2,11 +2,11 @@
 #include "editor_asset.hpp"
 #include "texture_asset.hpp"
 #include "program_asset.hpp"
-#include "freetype_asset.hpp"
+#include "bitmap_font_editor_asset.hpp"
 #include "flash_asset.hpp"
 #include "model_asset.hpp"
 #include "audio_asset.hpp"
-#include "ttf_font_editor.hpp"
+#include "ttf_editor_asset.hpp"
 
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
@@ -89,11 +89,11 @@ void editor_project_t::unload_all() {
 editor_project_t::editor_project_t() {
     register_asset_factory<texture_asset_t>();
     register_asset_factory<program_asset_t>();
-    register_asset_factory<freetype_asset_t>();
+    register_asset_factory<BitmapFontEditorAsset>();
     register_asset_factory<flash_asset_t>();
     register_asset_factory<model_asset_t>();
     register_asset_factory<audio_asset_t>();
-    register_asset_factory<TTFFontEditor>();
+    register_asset_factory<TTFEditorAsset>();
 }
 
 editor_project_t::~editor_project_t() {

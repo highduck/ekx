@@ -1,10 +1,33 @@
+# ilj features
+
+- virtual atlas asset, need to merge sprites while importing bitmap font and flash files
+- rename asset type `freetype` to `bitmapfont`
+- enable atlas mipmaps? Support bias in shaders
+
+TrueType fonts
+- meta information for atlas page size, base font size
+- outlines/shadows support
+- shared atlas between fonts (?)
+- enable mipmaps (?)
+- fallback to system fonts (?)
+
+Text rendering
+- UTF-8 reading to codepoints
+- line spacing, letter spacing
+- line-endings
+- line alignments
+- fit auto-size
+- text wrapping
+- styling: font, size, color
+- underline, strikethrough
+
 # ekx tasks
 
 - better names for box/rect, sphere/circle?
 - [prefs] change int to number as the most common case
 
 Integrations:
-- Chipmunk 2D would be nice
+- Chipmunk2D or Box2D would be nice
 - Scripting Lua
 
 Particles Designer:

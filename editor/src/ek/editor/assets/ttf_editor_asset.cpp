@@ -1,40 +1,39 @@
-#include "ttf_font_editor.hpp"
+#include "ttf_editor_asset.hpp"
 
 #include <ek/util/assets.hpp>
-#include <ek/rtfont/ttf_font.hpp>
+#include <ek/scenex/text/truetype_font.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/logger.hpp>
 
 namespace ek {
 
-TTFFontEditor::TTFFontEditor(path_t path)
-        : editor_asset_t{std::move(path), "freetype"} {
+TTFEditorAsset::TTFEditorAsset(path_t path)
+        : editor_asset_t{std::move(path), "ttf"} {
 }
 
-void TTFFontEditor::read_decl_from_xml(const pugi::xml_node& node) {
+void TTFEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {
 }
 
-void TTFFontEditor::load() {
+void TTFEditorAsset::load() {
     read_decl();
     auto buffer = read_file(get_relative_path(resource_path_));
     if (buffer.empty()) {
         EK_ERROR("Not found or empty %s", (project->base_path / declaration_path_).c_str());
     } else {
-        auto* ttfFont = new TTFFont();
-        ttfFont->setScale(project->scale_factor);
+        auto* ttfFont = new TrueTypeFont(project->scale_factor, 48, 1024);
         ttfFont->loadFromMemory(std::move(buffer));
-        asset_t<font_t>{name_}.reset(new font_t(ttfFont));
+        asset_t<Font>{name_}.reset(new Font(ttfFont));
     }
 }
 
-void TTFFontEditor::unload() {
-    asset_t<TTFFont>{name_}.reset(nullptr);
+void TTFEditorAsset::unload() {
+    asset_t<TrueTypeFont>{name_}.reset(nullptr);
 }
 
-void TTFFontEditor::gui() {
+void TTFEditorAsset::gui() {
 }
 
-void TTFFontEditor::build(assets_build_struct_t& build_data) {
+void TTFEditorAsset::build(assets_build_struct_t& build_data) {
     read_decl();
 
     const auto output_path = build_data.output / name_;
@@ -45,7 +44,7 @@ void TTFFontEditor::build(assets_build_struct_t& build_data) {
     build_data.meta(type_name_, name_);
 }
 
-void TTFFontEditor::save() {
+void TTFEditorAsset::save() {
 }
 
 }

@@ -1,4 +1,4 @@
-#include "freetype_asset.hpp"
+#include "bitmap_font_editor_asset.hpp"
 
 #include <ek/editor/gui/editor_widgets.hpp>
 #include <ek/editor/assets/editor_temp_atlas.hpp>
@@ -15,11 +15,11 @@
 
 namespace ek {
 
-freetype_asset_t::freetype_asset_t(path_t path)
+BitmapFontEditorAsset::BitmapFontEditorAsset(path_t path)
         : editor_asset_t{std::move(path), "freetype"} {
 }
 
-void freetype_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
+void BitmapFontEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {
     atlas_decl_ = {};
     from_xml(node.child("atlas"), atlas_decl_);
     if (atlas_decl_.name.empty()) {
@@ -33,7 +33,7 @@ void freetype_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
     from_xml(node.child("filters"), filters_decl_);
 }
 
-void freetype_asset_t::load() {
+void BitmapFontEditorAsset::load() {
     read_decl();
 
     auto temp_atlas = prepare_temp_atlas(name_, project->scale_factor);
@@ -46,23 +46,23 @@ void freetype_asset_t::load() {
     load_temp_atlas(temp_atlas);
     auto* bmFont = new BitmapFont();
     bmFont->load(font_data);
-    asset_t<font_t>{name_}.reset(new font_t(bmFont));
+    asset_t<Font>{name_}.reset(new Font(bmFont));
 }
 
-void freetype_asset_t::unload() {
+void BitmapFontEditorAsset::unload() {
     asset_t<atlas_t>{name_}.reset(nullptr);
-    asset_t<font_t>{name_}.reset(nullptr);
+    asset_t<Font>{name_}.reset(nullptr);
 }
 
-void freetype_asset_t::gui() {
+void BitmapFontEditorAsset::gui() {
     asset_t<atlas_t> atlas{name_};
     gui_atlas_view(atlas.get());
 
-    asset_t<font_t> font{name_};
+    asset_t<Font> font{name_};
     gui_font_view(font.get());
 }
 
-void freetype_asset_t::build(assets_build_struct_t& data) {
+void BitmapFontEditorAsset::build(assets_build_struct_t& data) {
     read_decl();
 
     spritepack::atlas_t atlas{atlas_decl_};
@@ -84,7 +84,7 @@ void freetype_asset_t::build(assets_build_struct_t& data) {
     data.meta("font", name_);
 }
 
-void freetype_asset_t::save() {
+void BitmapFontEditorAsset::save() {
     // TODO:
 //    pugi::xml_document xml;
 //    //if (xml.load_file(path_join(project->base_path, path_).c_str())) {
