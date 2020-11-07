@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [audio] change `simple_audio_manager` to `AudioManager`
 - [audio] fix audio loading for EDITOR mode
 - [truetype] add basic support for TTF fonts
-- [demo] update `ek-demo` project, renamed as 
+- remove multiple sizes for bitmap font export
+- [demo] update `ek-demo` project 
 - [graphics] get context type
 - [graphics] add alpha8 texture format
 

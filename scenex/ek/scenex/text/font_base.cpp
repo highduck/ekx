@@ -4,7 +4,7 @@ namespace ek {
 
 FontImplBase::FontImplBase(FontType fontType_) :
         fontType{fontType_},
-        lineHeightMultiplier{1.09f} {
+        lineHeightMultiplier{1.f} {
 
 }
 

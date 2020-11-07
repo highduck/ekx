@@ -36,7 +36,7 @@ void convert_a8_to_argb32pma(uint8_t const* source_a8_buf,
 BitmapFontGlyph build_glyph_data(const ft2_face& face_managed, uint32_t glyph_index, const std::string& name) {
     BitmapFontGlyph data{};
     int box[4]{};
-    face_managed.get_glyph_metrics(glyph_index, box, &data.advance_width);
+    face_managed.get_glyph_metrics(glyph_index, box, &data.advanceWidth);
     int2 lt{box[0], -box[3]};
     int2 rb{box[2], -box[1]};
     data.box = {lt, rb - lt};
@@ -77,46 +77,40 @@ image_t* render_glyph_image(const ft2_face& face_managed, uint32_t glyph_index, 
 void glyph_build_sprites(ft2_face& face,
                          uint32_t glyph_index,
                          const std::string& name,
-                         const std::vector<uint16_t>& sizes,
+                         uint16_t fontSize,
                          const std::vector<filter_data_t>& filters,
                          atlas_t& to_atlas) {
+    const std::string ref = name + std::to_string(glyph_index);
+    for (auto& resolution : to_atlas.resolutions) {
+        const float scale = resolution.resolution_scale;
+        face.set_glyph_size(fontSize, scale);
+        const auto filter_scale = scale;
+        const auto filters_scaled = apply_scale(filters, filter_scale);
 
-    assert(!sizes.empty());
+        rect_i rect;
+        image_t* image = render_glyph_image(face, glyph_index, rect);
+        if (image) {
+            sprite_t sprite;
+            sprite.name = ref;
+            sprite.image = image;
+            sprite.rc = rect * (1.0f / scale);
 
-    float size0 = sizes[0];
-    for (auto size: sizes) {
-        const std::string ref = name + std::to_string(glyph_index) + '_' + std::to_string(size);
-        for (auto& resolution : to_atlas.resolutions) {
-            const float scale = resolution.resolution_scale;
-            face.set_glyph_size(size, scale);
-            const auto filter_scale = scale * (static_cast<float>(size) / size0);
-            const auto filters_scaled = apply_scale(filters, filter_scale);
-
-            rect_i rect;
-            image_t* image = render_glyph_image(face, glyph_index, rect);
-            if (image) {
-                sprite_t sprite;
-                sprite.name = ref;
-                sprite.image = image;
-                sprite.rc = rect * (1.0f / scale);
-
-                // TODO: preserve RC / SOURCE
+            // TODO: preserve RC / SOURCE
 //                sprite.source = {
 //                        0, 0,
 //                        static_cast<int>(image->width()),
 //                        static_cast<int>(image->height())
 //                };
-                sprite.source = rect;
+            sprite.source = rect;
 
-                if (!filters_scaled.empty()) {
-                    flash::apply(filters_scaled, sprite, scale);
-                }
-
-                sprite.source.x = 0;
-                sprite.source.y = 0;
-
-                resolution.sprites.push_back(sprite);
+            if (!filters_scaled.empty()) {
+                flash::apply(filters_scaled, sprite, scale);
             }
+
+            sprite.source.x = 0;
+            sprite.source.y = 0;
+
+            resolution.sprites.push_back(sprite);
         }
     }
 }
@@ -142,16 +136,16 @@ BitmapFontData export_font(const path_t& path,
             auto data = build_glyph_data(face_managed, glyph_index, name);
             mesh_by_glyph_id[glyph_index] = data;
             glyph_build_sprites(face_managed, glyph_index,
-                                name, font_opts.sizes,
+                                name, font_opts.fontSize,
                                 filters_opts.filters,
                                 to_atlas);
         }
         auto* gdata = try_get(mesh_by_glyph_id, glyph_index);
-        gdata->codes.push_back(static_cast<uint32_t>(char_code));
+        gdata->codepoints.push_back(static_cast<uint32_t>(char_code));
         char_to_data[char_code] = gdata;
     }
 
-    if (FT_HAS_KERNING(face) != 0 && font_opts.use_kerning) {
+    if (FT_HAS_KERNING(face) != 0 && font_opts.useKerning) {
         for (auto& id_glyph : mesh_by_glyph_id) {
             auto glyph_left = id_glyph.first;
             for (auto& glyph_p2 : mesh_by_glyph_id) {
@@ -159,22 +153,24 @@ BitmapFontData export_font(const path_t& path,
                 if (glyph_left != glyph_right) {
                     FT_Vector kern;
                     FT_Get_Kerning(face, glyph_left, glyph_right, FT_KERNING_UNSCALED, &kern);
+
+                    // TODO: add Bitmap Font kerning table
                 }
             }
         }
 
     }
 
-    if (font_opts.mirror_case) {
+    if (font_opts.mirrorCase) {
         for (auto& id_glyph : mesh_by_glyph_id) {
-            for (auto code : id_glyph.second.codes) {
+            for (auto code : id_glyph.second.codepoints) {
                 auto upper = (uint32_t) toupper(code);
                 auto lower = (uint32_t) tolower(code);
                 if (lower != upper) {
                     if (try_get(char_to_data, lower) == nullptr) {
-                        id_glyph.second.codes.push_back(lower);
+                        id_glyph.second.codepoints.push_back(lower);
                     } else if (try_get(char_to_data, upper) == nullptr) {
-                        id_glyph.second.codes.push_back(upper);
+                        id_glyph.second.codepoints.push_back(upper);
                     }
                 }
             }
@@ -182,8 +178,8 @@ BitmapFontData export_font(const path_t& path,
     }
 
     BitmapFontData result{};
-    result.units_per_em = face->units_per_EM;
-    result.sizes = font_opts.sizes;
+    result.unitsPerEM = face->units_per_EM;
+    result.fontSize = font_opts.fontSize;
     for (auto& pair : mesh_by_glyph_id) {
         result.glyphs.push_back(pair.second);
     }

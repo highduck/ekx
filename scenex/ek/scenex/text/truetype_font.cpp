@@ -63,7 +63,6 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     auto it = map_.find(codepoint);
     if (it != map_.end()) {
         outGlyph = it->second;
-        outGlyph.scale(quadScale);
         return true;
     }
 
@@ -73,12 +72,12 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         return false;
     }
 
-    const auto scale = stbtt_ScaleForPixelHeight(info, baseFontSize);
+    const float scale = stbtt_ScaleForPixelHeight(info, baseFontSize);
     auto& glyph = map_.try_emplace(codepoint).first->second;
 
     int advanceWidth = 0, leftSideBearing = 0;
     stbtt_GetGlyphHMetrics(info, glyphIndex, &advanceWidth, &leftSideBearing);
-    glyph.advanceWidth = scale * advanceWidth;
+    glyph.advanceWidth = scale * static_cast<float>(advanceWidth) / baseFontSize;
 
     int x0, y0, x1, y1;
     stbtt_GetGlyphBitmapBox(info, glyphIndex, dpiScale * scale, dpiScale * scale, &x0, &y0, &x1, &y1);
@@ -109,15 +108,18 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         auto sprite = atlas.addBitmap(bitmapWidth, bitmapHeight, bmp);
         glyph.texture = sprite.texture;
         glyph.texCoord = sprite.texCoords;
+
         glyph.rect.x = x0;
         glyph.rect.y = y0;
         glyph.rect.width = bitmapWidth;
         glyph.rect.height = bitmapHeight;
-        glyph.rect *= 1.0f / dpiScale;
+
+        // scale to font size unit space
+        glyph.rect *= 1.0f / (dpiScale * baseFontSize);
+        glyph.lineHeight = lineHeightMultiplier;
     }
 
     outGlyph = glyph;
-    outGlyph.scale(quadScale);
     return true;
 }
 
@@ -187,8 +189,5 @@ void TrueTypeFont::setBlur(float radius, int iterations, int strengthPower) {
     map = mapByEffect[hashCode].get();
 }
 
-void TrueTypeFont::setFontSize(float fontSize) {
-    quadScale = fontSize / baseFontSize;
-}
 
 }

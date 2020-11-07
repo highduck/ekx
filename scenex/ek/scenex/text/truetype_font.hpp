@@ -33,7 +33,6 @@ public:
     bool getGlyph(uint32_t codepoint, Glyph& outGlyph) override;
 
     void setBlur(float radius, int iterations, int strengthPower) override;
-    void setFontSize(float fontSize) override;
 
     void debugDrawAtlas(float x, float y) override;
 
@@ -55,8 +54,6 @@ public:
     uint8_t blurRadius_ = 0;
     uint8_t blurIterations_ = 0;
     uint8_t strengthPower_ = 0;
-
-    float quadScale = 1.0f;
 };
 
 }

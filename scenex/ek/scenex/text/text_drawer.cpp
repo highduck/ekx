@@ -11,20 +11,13 @@ void TextDrawer::draw(const std::string& text) const {
     }
 
     auto* impl = const_cast<FontImplBase*>(font->getImpl());
-    impl->setFontSize(fontSize);
 
     FontImplBase* nativeImpl = nullptr;
     if (nativeFont) {
         nativeImpl = const_cast<FontImplBase*>(nativeFont->getImpl());
-        if (nativeImpl) {
-            nativeImpl->setFontSize(fontSize);
-        }
     }
 
-    auto lineHeight = fixedLineHeight;
-    if (lineHeight < 0.0f) {
-        lineHeight = impl->getLineHeight(fontSize);
-    }
+    float lineHeightMul = 0.0f;
     float2 current = position;
     float2 start = position;
 
@@ -43,7 +36,8 @@ void TextDrawer::draw(const std::string& text) const {
         }
         if (codepoint == '\n' || codepoint == '\r') {
             current.x = start.x;
-            current.y += lineHeight + lineSpacing;
+            current.y += fontSize * lineHeightMul + lineSpacing;
+            lineHeightMul = 0.0f;
             continue;
         }
 
@@ -54,6 +48,7 @@ void TextDrawer::draw(const std::string& text) const {
                     prevTexture = gdata.texture;
                 }
                 draw2d::state.set_texture_coords(gdata.texCoord);
+                gdata.rect *= fontSize;
                 if (gdata.rotated) {
                     draw2d::quad_rotated(gdata.rect.x + current.x,
                                          gdata.rect.y + current.y,
@@ -68,7 +63,10 @@ void TextDrawer::draw(const std::string& text) const {
                 }
             }
 
-            current.x += gdata.advanceWidth;
+            current.x += fontSize * gdata.advanceWidth;
+            if(lineHeightMul < gdata.lineHeight) {
+                lineHeightMul = gdata.lineHeight;
+            }
         }
     }
     draw2d::state.restore_color();
