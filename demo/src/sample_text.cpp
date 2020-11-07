@@ -39,7 +39,8 @@ void SampleText::draw() {
     draw2d::state.scale(sf, sf);
     std::string text{u8"£ü÷\n< Приветики >\n你好\nनमस्कार\nこんにちは"};
 
-    textDrawer.position = {100.0f, 100.0f};
+    textDrawer.font = asset_t<Font>("Cousine-Regular");
+    textDrawer.position = {20.0f, 220.0f};
     textDrawer.setBlur(shadow.radius, shadow.iterations, shadow.strength);
     textDrawer.textColor = argb32_t{shadow.color};
     textDrawer.draw(text);
@@ -59,6 +60,13 @@ void SampleText::draw() {
     textDrawer.draw(text);
 //        font->draw(text, 16, pos + float2::one, 0x0_rgb, 16);
 //        font->draw(text, 16, pos, 0xFFFFFF_rgb, 16);
+
+    textDrawer.font = asset_t<Font>("TickingTimebombBB");
+    textDrawer.position = {20.0f, 100.0f};
+    textDrawer.setBlur(0, 0, 0);
+    textDrawer.textColor = 0xFFFFFFFF_argb;
+    textDrawer.draw("88:88:88\n-=98");
+
     draw2d::state.restore_matrix();
 
     if (drawGlyphCache) {

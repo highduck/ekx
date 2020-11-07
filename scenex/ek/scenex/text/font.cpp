@@ -23,11 +23,10 @@ void Font::draw(const std::string& text,
                 float line_height,
                 float line_spacing) const {
 
-    impl->setFontSize(size);
-
     float2 current = position;
     float2 start = position;
 
+//    float lineHeight = 0.0f;
     draw2d::state.save_color()
             .multiply_color(color);
     // var vertexColor = drawer.calcVertexColorMultiplier(color);
@@ -48,6 +47,7 @@ void Font::draw(const std::string& text,
                     prevTexture = gdata.texture;
                 }
                 draw2d::state.set_texture_coords(gdata.texCoord);
+                gdata.rect *= size;
                 if (gdata.rotated) {
                     draw2d::quad_rotated(gdata.rect.x + current.x,
                                          gdata.rect.y + current.y,
@@ -78,14 +78,13 @@ void Font::draw(const std::string& text,
 
             }
 
-            current.x += gdata.advanceWidth;
+            current.x += size * gdata.advanceWidth;
         }
     }
     draw2d::state.restore_color();
 }
 
 float Font::get_text_segment_width(const std::string& text, float size, int begin, int end) const {
-    impl->setFontSize(size);
     float x = 0.0f;
     float max = 0.0f;
     Glyph gdata;
@@ -95,7 +94,7 @@ float Font::get_text_segment_width(const std::string& text, float size, int begi
             x = 0.0f;
         }
         if (impl->getGlyph(text[i], gdata)) {
-            x += gdata.advanceWidth;
+            x += size * gdata.advanceWidth;
             if (max < x) {
                 max = x;
             }
@@ -126,7 +125,6 @@ float Font::get_text_segment_width(const std::string& text, float size, int begi
 
 rect_f Font::get_line_bounding_box(const std::string& text, float size, int begin, int end, float line_height,
                                    float line_spacing) const {
-    impl->setFontSize(size);
     bounds_builder_2f bounds_builder;
     float x = 0.0f;
     float y = 0.0f;
@@ -141,11 +139,12 @@ rect_f Font::get_line_bounding_box(const std::string& text, float size, int begi
             y += line_height + line_spacing;
         }
         if (impl->getGlyph(code, gdata)) {
+            gdata.rect *= size;
             bounds_builder.add(
                     {x + gdata.rect.x, y + gdata.rect.y},
                     {x + gdata.rect.right(), y + gdata.rect.bottom()}
             );
-            x += gdata.advanceWidth;
+            x += size * gdata.advanceWidth;
         }
     }
     return bounds_builder.rect();
@@ -153,7 +152,6 @@ rect_f Font::get_line_bounding_box(const std::string& text, float size, int begi
 
 rect_f Font::estimate_text_draw_zone(const std::string& text, float size, int begin, int end, float line_height,
                                      float line_spacing) const {
-    impl->setFontSize(size);
     bounds_builder_2f bounds_builder;
     float2 cursor{0.0f, 0.0f};
     if (end < 0) {
@@ -169,8 +167,7 @@ rect_f Font::estimate_text_draw_zone(const std::string& text, float size, int be
         }
 
         if (impl->getGlyph(code, gdata)) {
-
-            auto w = gdata.advanceWidth;
+            auto w = size * gdata.advanceWidth;
             bounds_builder.add({cursor.x, cursor.y - size, w, size});
             cursor.x += w;
         }

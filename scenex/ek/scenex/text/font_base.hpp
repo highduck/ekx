@@ -9,22 +9,21 @@ class texture_t;
 }
 
 struct Glyph {
-    rect_f rect{};
     rect_f texCoord{};
+
+    // multiply by fontSize
+    rect_f rect{};
     float advanceWidth{};
+    float lineHeight{};
+
     const graphics::texture_t* texture = nullptr;
     bool rotated = false;
-
-    Glyph& scale(float factor) {
-        rect *= factor;
-        advanceWidth *= factor;
-        return *this;
-    }
 };
 
 enum class FontType {
     Bitmap,
-    TrueType
+    TrueType,
+    Multi
 };
 
 class FontImplBase {
@@ -39,16 +38,10 @@ public:
         // by default blur is not supported
     }
 
-    virtual void setFontSize(float fontSize) = 0;
-
     virtual void debugDrawAtlas(float x, float y) {}
 
     [[nodiscard]] FontType getFontType() const {
         return fontType;
-    }
-
-    [[nodiscard]] float getLineHeight(float fontSize) const {
-        return fontSize * lineHeightMultiplier;
     }
 
 protected:

@@ -12,26 +12,26 @@ namespace ek {
 
 class BitmapFontGlyph {
 public:
-    std::vector<uint32_t> codes;
-    rect_i box;
-    int advance_width;
+    std::vector<uint32_t> codepoints;
+    rect_t<int32_t> box;
+    int32_t advanceWidth;
     std::string sprite;
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(codes, box, advance_width, sprite);
+        io(codepoints, box, advanceWidth, sprite);
     }
 };
 
 class BitmapFontData {
 public:
-    uint16_t units_per_em;
+    uint16_t unitsPerEM;
+    uint16_t fontSize;
     std::vector<BitmapFontGlyph> glyphs;
-    std::vector<uint16_t> sizes;
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(units_per_em, sizes, glyphs);
+        io(unitsPerEM, fontSize, glyphs);
     }
 };
 
@@ -48,16 +48,11 @@ public:
 
     bool getGlyph(uint32_t codepoint, Glyph& outGlyph) override;
 
-    void setFontSize(float fontSize) override;
-
 public:
-    std::vector<uint16_t> bitmap_size_table;
     std::unordered_map<uint32_t, BitmapFontGlyph> map;
-    uint16_t units_per_em{};
-
-    float metricsScale;
-    float rasterScale;
-    uint16_t baseFontSize;
+    float unitsPerEM = 1.0f;
+    float baseFontSize = 1.0f;
+    float baseFontSizeInv = 1.0f;
 };
 
 }

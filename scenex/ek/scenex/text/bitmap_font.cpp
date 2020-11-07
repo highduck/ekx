@@ -24,10 +24,10 @@ void BitmapFont::load(const std::vector<uint8_t>& buffer) {
 }
 
 void BitmapFont::load(const BitmapFontData& data) {
-    units_per_em = data.units_per_em;
-    bitmap_size_table = data.sizes;
+    unitsPerEM = data.unitsPerEM;
+    baseFontSize = data.fontSize;
     for (const auto& g : data.glyphs) {
-        for (auto code : g.codes) {
+        for (auto code : g.codepoints) {
             map[code] = g;
         }
     }
@@ -37,35 +37,20 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     auto it = map.find(codepoint);
     if (it != map.end()) {
         const auto& g = it->second;
-        outGlyph.advanceWidth = metricsScale * g.advance_width;
-        asset_t<sprite_t> spr{g.sprite + '_' + std::to_string(baseFontSize)};
+        outGlyph.advanceWidth = static_cast<float>(g.advanceWidth) / unitsPerEM;
+        outGlyph.lineHeight = lineHeightMultiplier;
+        asset_t<sprite_t> spr{g.sprite};
         if (spr) {
-            outGlyph.rect = spr->rect * rasterScale;
+            outGlyph.rect = spr->rect / baseFontSize;
             outGlyph.texCoord = spr->tex;
             outGlyph.texture = spr->texture.get();
             outGlyph.rotated = spr->rotated;
         } else {
-            outGlyph.rect = rect_f{g.box} * metricsScale;
+            outGlyph.rect = g.box / unitsPerEM;
         }
         return true;
     }
     return false;
-}
-
-void BitmapFont::setFontSize(float fontSize) {
-    metricsScale = fontSize / static_cast<float>(units_per_em);
-
-    int bitmap_size_index = static_cast<int>(bitmap_size_table.size()) - 1;
-    while (bitmap_size_index > 0) {
-        if (fontSize <= static_cast<float>(bitmap_size_table[bitmap_size_index - 1])) {
-            --bitmap_size_index;
-        } else {
-            break;
-        }
-    }
-
-    baseFontSize = bitmap_size_table[bitmap_size_index];
-    rasterScale = fontSize / static_cast<float>(baseFontSize);
 }
 
 }

@@ -95,6 +95,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         2d/sprite.cpp
 
         text/bitmap_font.cpp
+        text/multi_font.cpp
         text/truetype_font.cpp
         text/dynamic_atlas.cpp
         text/font.cpp

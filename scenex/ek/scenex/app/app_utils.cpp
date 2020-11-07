@@ -97,7 +97,8 @@ void frame_stats_t::draw() {
 
         TextDrawer textDrawer;
         textDrawer.font = asset_t<Font>("mini");
-        textDrawer.fontSize = 16.0f;// * app::g_app.content_scale;
+        textDrawer.fontSize = 16.0f;
+        textDrawer.lineSpacing = 2.0f;
         textDrawer.position = {10.0f, 30.0f};
         textDrawer.textColor = 0x0_rgb;
         const std::string text{buf};
