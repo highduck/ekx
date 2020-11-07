@@ -16,14 +16,14 @@ void BitmapFont::load(const std::vector<uint8_t>& buffer) {
         input_memory_stream input{buffer.data(), buffer.size()};
 
         IO io{input};
-        font_data_t fontData;
+        BitmapFontData fontData;
         io(fontData);
 
         load(fontData);
     }
 }
 
-void BitmapFont::load(const font_data_t& data) {
+void BitmapFont::load(const BitmapFontData& data) {
     units_per_em = data.units_per_em;
     bitmap_size_table = data.sizes;
     for (const auto& g : data.glyphs) {
@@ -33,49 +33,39 @@ void BitmapFont::load(const font_data_t& data) {
     }
 }
 
-bool BitmapFont::getGlyph(uint32_t codepoint, const FontSizeInfo& size, Glyph& outGlyph) {
+bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     auto it = map.find(codepoint);
     if (it != map.end()) {
         const auto& g = it->second;
-        outGlyph.advanceWidth = size.metricsScale * g.advance_width;
-        asset_t<sprite_t> spr{g.sprite + '_' + std::to_string(size.baseFontSize)};
+        outGlyph.advanceWidth = metricsScale * g.advance_width;
+        asset_t<sprite_t> spr{g.sprite + '_' + std::to_string(baseFontSize)};
         if (spr) {
+            outGlyph.rect = spr->rect * rasterScale;
             outGlyph.texCoord = spr->tex;
             outGlyph.texture = spr->texture.get();
             outGlyph.rotated = spr->rotated;
-
-            outGlyph.x0 = spr->rect.x * size.rasterScale;
-            outGlyph.y0 = spr->rect.y * size.rasterScale;
-            outGlyph.x1 = spr->rect.right() * size.rasterScale;
-            outGlyph.y1 = spr->rect.bottom() * size.rasterScale;
         } else {
-            outGlyph.x0 = g.box[0] * size.metricsScale;
-            outGlyph.y0 = -g.box[3] * size.metricsScale;
-            outGlyph.x1 = g.box[2] * size.metricsScale;
-            outGlyph.y1 = -g.box[1] * size.metricsScale;
+            outGlyph.rect = rect_f{g.box} * metricsScale;
         }
-
         return true;
     }
     return false;
 }
 
-FontSizeInfo BitmapFont::getSizeInfo(float size) {
-    FontSizeInfo info;
-    info.metricsScale = size / static_cast<float>(units_per_em);
+void BitmapFont::setFontSize(float fontSize) {
+    metricsScale = fontSize / static_cast<float>(units_per_em);
 
     int bitmap_size_index = static_cast<int>(bitmap_size_table.size()) - 1;
     while (bitmap_size_index > 0) {
-        if (size <= static_cast<float>(bitmap_size_table[bitmap_size_index - 1])) {
+        if (fontSize <= static_cast<float>(bitmap_size_table[bitmap_size_index - 1])) {
             --bitmap_size_index;
         } else {
             break;
         }
     }
 
-    info.baseFontSize = bitmap_size_table[bitmap_size_index];
-    info.rasterScale = size / static_cast<float>(info.baseFontSize);
-    return info;
+    baseFontSize = bitmap_size_table[bitmap_size_index];
+    rasterScale = fontSize / static_cast<float>(baseFontSize);
 }
 
 }

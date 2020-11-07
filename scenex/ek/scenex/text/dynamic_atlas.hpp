@@ -21,14 +21,12 @@ public:
 
     DynamicAtlasSprite addBitmap(int width, int height, const std::vector<uint8_t>& pixels);
 
-    int fontSize;
+    graphics::texture_t* texture_ = nullptr;
     int pageWidth;
     int pageHeight;
-    graphics::texture_t* texture_ = nullptr;
 private:
-//    std::vector<DynamicAtlasSprite> sprites;
-    float invWidth = 1.0f / 2048.0f;
-    float invHeight = 1.0f / 2048.0f;
+    float invWidth;
+    float invHeight;
     int bytesPerPixel = 1;
     int padding = 1;
     int x = 0;

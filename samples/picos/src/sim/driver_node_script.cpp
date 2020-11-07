@@ -19,59 +19,6 @@
 
 namespace ek::piko {
 
-void init(ecs::entity game) {
-//        auto entity = sg_fact.create(*asset_t<SgFile>::content("tests"), "test");
-//        if (entity) {
-//            node_utils.append(root_node, entity);
-//        }
-//        add_objects(50'000);
-//
-//    auto mouse_entity = ecs::create<transform_2d, node_t, display_2d>();
-//    set_name(mouse_entity, "Mouse");
-//    assign_script<mouse_follow_script>(mouse_entity);
-//
-//    auto attractor_entity = ecs::create<attractor_t, transform_2d, node_t, display_2d>();
-//    set_name(attractor_entity, "Follower");
-//    auto& attr = assign_script<target_follow_script>(attractor_entity);
-//    attr.target_entity = mouse_entity;
-//    attr.k = 0.1f;
-//    ecs::get<attractor_t>(attractor_entity).radius = 100.0f;
-//    ecs::get<attractor_t>(attractor_entity).force = 5'000.0f;
-//
-//    append(game, mouse_entity);
-//    append(game, attractor_entity);
-//
-//    attractor_entity = ecs::create<attractor_t, transform_2d, node_t, display_2d>();
-//    set_name(attractor_entity, "Centroid");
-//    ecs::get<attractor_t>(attractor_entity).radius = 200.0f;
-//    ecs::get<attractor_t>(attractor_entity).force = -1000.0f;
-//    ecs::get<transform_2d>(attractor_entity).matrix.position(300.0f, 400.0f);
-//    append(game, attractor_entity);
-
-    ecs::entity e;
-//    e = create_node_2d("book");
-//    assign_script<book>(e);
-//    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
-//    ecs::get<transform_2d>(e).matrix.position(100.0f, 100.0f);
-//    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
-//    append(game, e);
-//
-//    e = create_node_2d("dna");
-//    assign_script<dna>(e);
-//    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
-//    ecs::get<transform_2d>(e).matrix.position(100.0f, 100.0f + 2.0f * 128.0f);
-//    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
-//    append(game, e);
-
-    e = create_node_2d("diamonds");
-    assign_script<diamonds>(e);
-    ecs::get<transform_2d>(e).matrix.position(0.0f, 10.0f);
-
-    set_alpha(e, 0.3f);
-//    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
-//    append(game, e);
-}
-
 void add_objects(ecs::entity game, int N) {
     for (int i = 0; i < N; ++i) {
         auto q = ecs::create<node_t, transform_2d, display_2d>();
@@ -93,6 +40,61 @@ void add_objects(ecs::entity game, int N) {
         trail_data.drain_speed = 0.5f;
         append(game, trail);
     }
+}
+
+ecs::entity create() {
+    ecs::entity sampleContainer = create_node_2d("piko");
+
+    // SIM
+    add_objects(sampleContainer, 5'000);
+
+    auto mouse_entity = ecs::create<transform_2d, node_t, display_2d>();
+    set_name(mouse_entity, "Mouse");
+    assign_script<mouse_follow_script>(mouse_entity);
+
+    auto attractor_entity = ecs::create<attractor_t, transform_2d, node_t, display_2d>();
+    set_name(attractor_entity, "Follower");
+    auto& attr = assign_script<target_follow_script>(attractor_entity);
+    attr.target_entity = mouse_entity;
+    attr.k = 0.1f;
+    ecs::get<attractor_t>(attractor_entity).radius = 100.0f;
+    ecs::get<attractor_t>(attractor_entity).force = 5'000.0f;
+
+    append(sampleContainer, mouse_entity);
+    append(sampleContainer, attractor_entity);
+
+    attractor_entity = ecs::create<attractor_t, transform_2d, node_t, display_2d>();
+    set_name(attractor_entity, "Centroid");
+    ecs::get<attractor_t>(attractor_entity).radius = 200.0f;
+    ecs::get<attractor_t>(attractor_entity).force = -1000.0f;
+    ecs::get<transform_2d>(attractor_entity).matrix.position(300.0f, 400.0f);
+    append(sampleContainer, attractor_entity);
+
+    // PIKO
+
+    ecs::entity e;
+    e = create_node_2d("book");
+    assign_script<book>(e);
+    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
+    ecs::get<transform_2d>(e).matrix.position(10.0f, 10.0f);
+//    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+    append(sampleContainer, e);
+
+    e = create_node_2d("dna");
+    assign_script<dna>(e);
+    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
+    ecs::get<transform_2d>(e).matrix.position(10.0f, 10.0f + 2.0f * 128.0f + 10.0f);
+    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+    append(sampleContainer, e);
+
+    e = create_node_2d("diamonds");
+    assign_script<diamonds>(e);
+    ecs::get<transform_2d>(e).matrix.position(100.0f + 2.0f * 128.0f, 10.0f);
+
+//    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+    append(sampleContainer, e);
+
+    return sampleContainer;
 }
 
 void remove_objects(ecs::entity game, int N) {

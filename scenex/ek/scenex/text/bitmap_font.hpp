@@ -1,18 +1,19 @@
 #pragma once
 
-#include "font.hpp"
+#include "font_base.hpp"
 #include <vector>
 #include <array>
 #include <string>
 #include <unordered_map>
+#include <ek/math/serialize_math.hpp>
+#include <ek/util/common_macro.hpp>
 
 namespace ek {
 
-
-class font_glyph_t {
+class BitmapFontGlyph {
 public:
     std::vector<uint32_t> codes;
-    std::array<int, 4> box;
+    rect_i box;
     int advance_width;
     std::string sprite;
 
@@ -22,10 +23,10 @@ public:
     }
 };
 
-class font_data_t {
+class BitmapFontData {
 public:
     uint16_t units_per_em;
-    std::vector<font_glyph_t> glyphs;
+    std::vector<BitmapFontGlyph> glyphs;
     std::vector<uint16_t> sizes;
 
     template<typename S>
@@ -43,18 +44,21 @@ public:
 
     void load(const std::vector<uint8_t>& buffer);
 
-    void load(const font_data_t& data);
+    void load(const BitmapFontData& data);
 
-    bool getGlyph(uint32_t codepoint, const FontSizeInfo& size, Glyph& outGlyph) override;
+    bool getGlyph(uint32_t codepoint, Glyph& outGlyph) override;
 
-    FontSizeInfo getSizeInfo(float size) override;
+    void setFontSize(float fontSize) override;
 
 public:
     std::vector<uint16_t> bitmap_size_table;
-    std::unordered_map<uint32_t, font_glyph_t> map;
+    std::unordered_map<uint32_t, BitmapFontGlyph> map;
     uint16_t units_per_em{};
-};
 
+    float metricsScale;
+    float rasterScale;
+    uint16_t baseFontSize;
+};
 
 }
 

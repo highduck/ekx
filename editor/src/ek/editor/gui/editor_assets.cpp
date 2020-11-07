@@ -24,10 +24,10 @@ void on_editor_debug_asset<static_mesh_t>(const asset_t<static_mesh_t>& asset) {
 template<>
 void on_editor_debug_asset<material_3d>(const asset_t<material_3d>& asset) {
     auto m = asset.get_mutable();
-    ImGui::ColorEdit3("Ambient", m->ambient.data_);
-    ImGui::ColorEdit3("Diffuse", m->diffuse.data_);
-    ImGui::ColorEdit3("Specular", m->specular.data_);
-    ImGui::ColorEdit3("Emission", m->emission.data_);
+    ImGui::ColorEdit3("Ambient", m->ambient.data());
+    ImGui::ColorEdit3("Diffuse", m->diffuse.data());
+    ImGui::ColorEdit3("Specular", m->specular.data());
+    ImGui::ColorEdit3("Emission", m->emission.data());
     ImGui::DragFloat("Shininess", &m->shininess, 0.1f, 1.0f, 128.0f);
     ImGui::DragFloat("Roughness", &m->roughness, 0.01f, 0.001f, 1.0f);
 }

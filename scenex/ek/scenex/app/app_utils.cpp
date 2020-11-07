@@ -10,6 +10,7 @@
 
 #include <ek/draw2d/drawer.hpp>
 #include <ek/imaging/drawing.hpp>
+#include <ek/scenex/text/text_drawer.hpp>
 
 namespace ek {
 
@@ -89,13 +90,21 @@ void frame_stats_t::draw() {
     asset_t<Font> font{"mini"};
     if (font) {
         char buf[256];
-        snprintf(buf, sizeof(buf) - 1, "FPS: %0.0f\nDC: %u\nTRIS: %u", fps_meter_.fps(), draw_calls_, triangles_);
-        const std::string text{buf};
-        float2 pos{10.0f, 30.0f};
-        font->draw(text, 16, pos + float2::one, 0x0_rgb, 16);
-        font->draw(text, 16, pos, 0xFFFFFF_rgb, 16);
+        snprintf(buf, sizeof(buf) - 1, u8"FPS: %0.0f\nDC: %u\nTRIS: %u",
+                 fps_meter_.fps(),
+                 draw_calls_,
+                 triangles_);
 
-        font->debugDrawAtlas();
+        TextDrawer textDrawer;
+        textDrawer.font = asset_t<Font>("mini");
+        textDrawer.fontSize = 16.0f;// * app::g_app.content_scale;
+        textDrawer.position = {10.0f, 30.0f};
+        textDrawer.textColor = 0x0_rgb;
+        const std::string text{buf};
+        textDrawer.draw(text);
+        textDrawer.position -= {1.0f, 1.0f};
+        textDrawer.textColor = 0xFFFFFF_rgb;
+        textDrawer.draw(text);
     }
 #endif
 }

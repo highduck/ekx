@@ -15,8 +15,10 @@ target_sources(${PROJECT_NAME} PUBLIC
         raudio/raudio.cpp
         raudio/external/dr_mp3.h
         raudio/external/miniaudio.h
-        ek/audio/audio.hpp
+
         ek/audio/audio.cpp
+
+        ek/file_view.cpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)

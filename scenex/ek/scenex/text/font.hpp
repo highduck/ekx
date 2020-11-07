@@ -13,56 +13,9 @@
 
 namespace ek {
 
-namespace graphics {
-class texture_t;
-}
+class FontImplBase;
 
-struct Glyph {
-    float x0{}, y0{}, x1{}, y1{};
-    float advanceWidth{};
-    float leftSideBearing{};
-    // base font size
-    float size{};
-    rect_f texCoord;
-    const graphics::texture_t* texture{};
-    bool rotated{};
-};
-
-struct FontSizeInfo {
-    float metricsScale;
-    float rasterScale;
-    uint16_t baseFontSize;
-};
-
-enum class FontType {
-    Bitmap,
-    TrueType
-};
-
-class FontImplBase {
-public:
-    explicit FontImplBase(FontType type);
-
-    virtual ~FontImplBase() = 0;
-
-    virtual bool getGlyph(uint32_t codepoint, const FontSizeInfo& size, Glyph& outGlyph) = 0;
-
-    virtual FontSizeInfo getSizeInfo(float size) = 0;
-
-    virtual void debugDrawAtlas() {}
-
-    [[nodiscard]] FontType getFontType() const {
-        return fontType;
-    }
-
-    [[nodiscard]] float getLineHeight(float fontSize) const {
-        return fontSize * lineHeightMultiplier;
-    }
-
-protected:
-    FontType fontType;
-    float lineHeightMultiplier;
-};
+enum class FontType;
 
 class Font : private disable_copy_assign_t {
 public:
@@ -70,7 +23,7 @@ public:
 
     ~Font();
 
-    void debugDrawAtlas();
+    void debugDrawAtlas(float x, float y);
 
     void draw(const std::string& text,
               float size,
@@ -93,6 +46,8 @@ public:
                                    float line_spacing = 0.0f) const;
 
     [[nodiscard]] FontType getFontType() const;
+
+    [[nodiscard]] FontImplBase* getImpl();
 
     [[nodiscard]] const FontImplBase* getImpl() const;
 

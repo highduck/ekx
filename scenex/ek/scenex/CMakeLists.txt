@@ -98,6 +98,9 @@ target_sources(${PROJECT_NAME} PRIVATE
         text/truetype_font.cpp
         text/dynamic_atlas.cpp
         text/font.cpp
+        text/font_base.cpp
+        text/font_base.hpp
+        text/text_drawer.cpp
 
         asset2/asset_object.hpp
         asset2/asset_manager.cpp

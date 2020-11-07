@@ -14,10 +14,10 @@
 
 namespace ek::font_lib {
 
-font_data_t export_font(const path_t& path,
-                                const std::string& name,
-                                const font_decl_t& font_opts,
-                                const filters_decl_t& filters_opts,
-                                spritepack::atlas_t& to_atlas);
+BitmapFontData export_font(const path_t& path,
+                           const std::string& name,
+                           const font_decl_t& font_opts,
+                           const filters_decl_t& filters_opts,
+                           spritepack::atlas_t& to_atlas);
 
 }

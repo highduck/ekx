@@ -5,6 +5,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC .)
 target_sources(${PROJECT_NAME} PRIVATE
         static_resources.cpp
         user_preferences.cpp
+        device_web.cpp
         web_app_impl.cpp
 
         # MOCK

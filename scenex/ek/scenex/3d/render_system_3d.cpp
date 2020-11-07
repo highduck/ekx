@@ -229,10 +229,10 @@ void clear_camera(const camera_3d& camera_data) {
     GLbitfield clear_bits = 0;
     if (camera_data.clear_color_enabled) {
         glClearColor(
-                camera_data.clear_color.r,
-                camera_data.clear_color.g,
-                camera_data.clear_color.b,
-                camera_data.clear_color.a
+                camera_data.clear_color.x,
+                camera_data.clear_color.y,
+                camera_data.clear_color.z,
+                camera_data.clear_color.w
         );
         gl::check_error();
         clear_bits |= GL_COLOR_BUFFER_BIT;

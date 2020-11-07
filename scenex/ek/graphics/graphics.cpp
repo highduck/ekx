@@ -1,3 +1,4 @@
+#include "graphics.hpp"
 #include <ek/util/logger.hpp>
 #include <ek/app/app.hpp>
 #include "gl_def.hpp"
@@ -8,11 +9,28 @@ namespace ek::graphics {
 
 using app::g_app;
 
+static GraphicsContextType contextType = GraphicsContextType::OpenGL;
+
 void init() {
     gl::skip_errors();
 
-    EK_INFO << "OpenGL version: " << glGetString(GL_VERSION);
+    const uint8_t* version = glGetString(GL_VERSION);
     gl::check_error();
+
+    if(version) {
+        EK_INFO << "OpenGL version: " << version;
+
+        if(memcmp(version, "OpenGL ES ", 10) == 0) {
+            const auto majorVersion = version[10];
+            if(majorVersion == '2') {
+                contextType = GraphicsContextType::OpenGL_ES_2;
+            }
+            else {
+                contextType = GraphicsContextType::OpenGL_ES_3;
+            }
+        }
+    }
+
     EK_INFO << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION);
     gl::check_error();
 
@@ -43,6 +61,10 @@ void init() {
 
     glFinish();
     gl::check_error();
+}
+
+GraphicsContextType getContextType() {
+    return contextType;
 }
 
 void begin() {

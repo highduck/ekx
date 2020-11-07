@@ -33,9 +33,13 @@ void convert_a8_to_argb32pma(uint8_t const* source_a8_buf,
     }
 }
 
-font_glyph_t build_glyph_data(const ft2_face& face_managed, uint32_t glyph_index, const std::string& name) {
-    font_glyph_t data{};
-    face_managed.get_glyph_metrics(glyph_index, data.box.data(), &data.advance_width);
+BitmapFontGlyph build_glyph_data(const ft2_face& face_managed, uint32_t glyph_index, const std::string& name) {
+    BitmapFontGlyph data{};
+    int box[4]{};
+    face_managed.get_glyph_metrics(glyph_index, box, &data.advance_width);
+    int2 lt{box[0], -box[3]};
+    int2 rb{box[2], -box[1]};
+    data.box = {lt, rb - lt};
     data.sprite = name + std::to_string(glyph_index);
     return data;
 }
@@ -117,17 +121,17 @@ void glyph_build_sprites(ft2_face& face,
     }
 }
 
-font_data_t export_font(const path_t& path,
-                                const std::string& name,
-                                const font_decl_t& font_opts,
-                                const filters_decl_t& filters_opts,
-                                atlas_t& to_atlas) {
+BitmapFontData export_font(const path_t& path,
+                           const std::string& name,
+                           const font_decl_t& font_opts,
+                           const filters_decl_t& filters_opts,
+                           atlas_t& to_atlas) {
 
     ft2_face face_managed{ft2_context_, path.str()};
     auto face = face_managed.data();
 //            var simplify = opts.simplify != null ? opts.simplify : 0;
-    std::unordered_map<uint32_t, font_glyph_t> mesh_by_glyph_id;
-    std::unordered_map<uint32_t, font_glyph_t*> char_to_data;
+    std::unordered_map<uint32_t, BitmapFontGlyph> mesh_by_glyph_id;
+    std::unordered_map<uint32_t, BitmapFontGlyph*> char_to_data;
 
     auto char_codes = face_managed.get_available_char_codes(font_opts.ranges);
 
@@ -177,7 +181,7 @@ font_data_t export_font(const path_t& path,
         }
     }
 
-    font_data_t result{};
+    BitmapFontData result{};
     result.units_per_em = face->units_per_EM;
     result.sizes = font_opts.sizes;
     for (auto& pair : mesh_by_glyph_id) {

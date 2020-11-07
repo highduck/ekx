@@ -9,6 +9,7 @@
 namespace ek::graphics {
 
 enum class texture_type {
+    alpha8,
     color32,
     depth16,
     depth24
@@ -32,6 +33,10 @@ public:
     void upload_cubemap(const std::array<image_t*, 6>& image);
 
     void upload_pixels(uint32_t width, uint32_t height, const uint32_t* pixels_rgba32);
+
+    void uploadAlpha8(uint32_t width, uint32_t height, const uint8_t* alphaMap);
+
+    void uploadSubAlpha8(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint8_t* alphaMap);
 
     void bind(int unit) const;
 

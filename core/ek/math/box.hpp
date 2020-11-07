@@ -38,7 +38,6 @@ struct box_t<2, T> {
             T width;
             T height;
         };
-        vec_t<4, T> xyzw;
     };
 
 #include <ek/math/internal/compiler_unsafe_end.h>
@@ -62,6 +61,15 @@ struct box_t<2, T> {
     box_t(const vec_type& position_, const vec_type& size_) noexcept
             : position{position_},
               size{size_} {
+
+    }
+
+    template<typename S>
+    explicit box_t(const box_t<2, S>& box_) noexcept :
+            x{static_cast<T>(box_.x)},
+            y{static_cast<T>(box_.y)},
+            width{static_cast<T>(box_.width)},
+            height{static_cast<T>(box_.height)} {
 
     }
 
@@ -190,6 +198,11 @@ struct box_t<2, T> {
                 width * scale.x,
                 height * scale.y
         };
+    }
+
+    inline self_type& operator*=(T scalar) {
+        *this = *this * scalar;
+        return *this;
     }
 
     static const self_type zero_one;

@@ -30,8 +30,8 @@ void loop() {
 
 EMSCRIPTEN_WEBGL_CONTEXT_HANDLE webgl_context;
 
-const char* DIV_ID = "gamecontainer";
-const char* CANVAS_ID = "gameview";
+const char* DIV_ID = "#gamecontainer";
+const char* CANVAS_ID = "#gameview";
 
 void init_webgl_context() {
     EmscriptenWebGLContextAttributes attrs;
@@ -265,7 +265,7 @@ static EM_BOOL onEmscriptenResize(int type, const EmscriptenUiEvent*, void*) {
 }
 
 void init_canvas() {
-    emscripten_set_resize_callback(nullptr, nullptr, true, onEmscriptenResize);
+    emscripten_set_resize_callback(0, nullptr, true, onEmscriptenResize);
     handle_resize();
 }
 

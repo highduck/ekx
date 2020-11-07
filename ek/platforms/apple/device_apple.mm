@@ -41,4 +41,23 @@ void vibrate(int duration_millis) {
     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 }
 
+std::string getDeviceFontPath(const char* fontName) {
+    CFStringRef targetName = CFStringCreateWithCString(nullptr, fontName, kCFStringEncodingUTF8);
+    CTFontDescriptorRef targetDescriptor = CTFontDescriptorCreateWithNameAndSize(targetName, 0.0);
+    CFURLRef targetURL = (CFURLRef) CTFontDescriptorCopyAttribute(targetDescriptor, kCTFontURLAttribute);
+    std::string fontPath;
+
+    if (targetURL) {
+        UInt8 buffer[PATH_MAX];
+        CFURLGetFileSystemRepresentation(targetURL, true, buffer, PATH_MAX);
+        fontPath = std::string((char*) buffer);
+        CFRelease(targetURL);
+    }
+
+    CFRelease(targetName);
+    CFRelease(targetDescriptor);
+
+    return fontPath;
+}
+
 }
