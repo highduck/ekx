@@ -127,6 +127,7 @@ struct app_state final {
     vec2 window_size{};
     vec2 drawable_size{};
 
+    // TODO: rename to dpiScale (content misunderstood versus game view scaling)
     double content_scale = 1.0;
     bool size_changed = false;
 

@@ -49,4 +49,10 @@ void vibrate(int duration_millis) {
     env->CallStaticVoidMethod(clazz, method, (jlong) duration_millis);
 }
 
+std::string getDeviceFontPath(const char* fontName) {
+    // TODO:
+//    return "/system/fonts/Roboto-Regular.ttf";
+    return "/system/fonts/DroidSansFallback.ttf";
+}
+
 }

@@ -10,6 +10,7 @@
 #include <ek/scenex/2d/sprite.hpp>
 #include <ek/system/system.hpp>
 #include <ek/fonts/export_font.hpp>
+#include <ek/scenex/text/font.hpp>
 #include <utility>
 #include <memory>
 

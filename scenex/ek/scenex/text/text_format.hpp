@@ -53,7 +53,7 @@ class text_format_t {
 public:
     std::string font;
     float size;
-    float lineHeight;
+    float lineHeight = -1.0f;
     float lineSpacing = 0.0f;
     argb32_t color{0xFFFFFFFF};
     float2 alignment;
@@ -66,7 +66,6 @@ public:
     text_format_t(std::string font, float size, align_t align = align_t::TopLeft)
             : font{std::move(font)},
               size{size},
-              lineHeight{size},
               alignment{align.anchor()} {
     }
 };

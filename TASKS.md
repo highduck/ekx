@@ -1,8 +1,16 @@
 # ilj features
 
+## App Review API
+- [android app review API](https://developer.android.com/guide/playcore/in-app-review/)
+- [ios app review API]
+
+## ..
 - virtual atlas asset, need to merge sprites while importing bitmap font and flash files
-- rename asset type `freetype` to `bitmapfont`
 - enable atlas mipmaps? Support bias in shaders
+
+imgui module:
+- fix font loading (EKX_ROOT env variable..)
+- map all another character keyboard keys
 
 TrueType fonts
 - meta information for atlas page size, base font size
@@ -12,7 +20,6 @@ TrueType fonts
 - fallback to system fonts (?)
 
 Text rendering
-- UTF-8 reading to codepoints
 - line spacing, letter spacing
 - line-endings
 - line alignments

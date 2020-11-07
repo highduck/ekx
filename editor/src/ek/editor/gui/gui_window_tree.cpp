@@ -163,19 +163,19 @@ void gui_transform_2d(ecs::entity entity) {
     auto& transform = ecs::get<transform_2d>(entity);
     if (ImGui::CollapsingHeader("Transform 2D")) {
         float2 pos = transform.matrix.position();
-        if (ImGui::DragFloat2("Position", pos.data_, 1.0f, 0.0f, 0.0f, "%.1f", 1.0f)) {
+        if (ImGui::DragFloat2("Position", pos.data(), 1.0f, 0.0f, 0.0f, "%.1f", 1.0f)) {
             transform.matrix.position(pos);
         }
-        ImGui::DragFloat2("Scale", transform.scale.data_, 0.1f, 0.0f, 0.0f, "%.2f", 0.1f);
-        ImGui::DragFloat2("Skew", transform.skew.data_, 0.1f, 0.0f, 0.0f, "%.2f", 0.1f);
+        ImGui::DragFloat2("Scale", transform.scale.data(), 0.1f, 0.0f, 0.0f, "%.2f", 0.1f);
+        ImGui::DragFloat2("Skew", transform.skew.data(), 0.1f, 0.0f, 0.0f, "%.2f", 0.1f);
 
         auto color = static_cast<float4>(transform.color_multiplier);
-        if (ImGui::ColorEdit4("Color Multiplier", color.data_)) {
+        if (ImGui::ColorEdit4("Color Multiplier", color.data())) {
             transform.color_multiplier = argb32_t{color};
         }
 
         color = static_cast<float4>(transform.color_offset);
-        if (ImGui::ColorEdit4("Color Offset", color.data_)) {
+        if (ImGui::ColorEdit4("Color Offset", color.data())) {
             transform.color_offset = argb32_t{color};
         }
     }
@@ -185,10 +185,10 @@ void gui_transform_2d(ecs::entity entity) {
 void gui_transform_3d(ecs::entity entity) {
     auto& transform = ecs::get<transform_3d>(entity);
     if (ImGui::CollapsingHeader("Transform 3D")) {
-        ImGui::DragFloat3("Position", transform.position.data_, 1.0f, 0.0f, 0.0f, "%.1f", 1.0f);
-        ImGui::DragFloat3("Scale", transform.scale.data_, 0.1f, 0.0f, 0.0f, "%.2f", 0.1f);
+        ImGui::DragFloat3("Position", transform.position.data(), 1.0f, 0.0f, 0.0f, "%.1f", 1.0f);
+        ImGui::DragFloat3("Scale", transform.scale.data(), 0.1f, 0.0f, 0.0f, "%.2f", 0.1f);
         float3 euler_angles = transform.rotation * 180.0f / ek::math::pi;
-        if (ImGui::DragFloat3("Rotation", euler_angles.data_, 0.1f, 0.0f, 0.0f, "%.2f", 0.1f)) {
+        if (ImGui::DragFloat3("Rotation", euler_angles.data(), 0.1f, 0.0f, 0.0f, "%.2f", 0.1f)) {
             transform.rotation = euler_angles * ek::math::pi / 180.0f;
         }
     }
@@ -207,7 +207,7 @@ void gui_camera_3d(ecs::entity entity) {
         ImGui::DragFloat("Ortho Size", &camera.orthogonal_size, 1.0f, 0.0f, 0.0f, "%.1f");
 
         ImGui::Checkbox("Clear Color Enabled", &camera.clear_color_enabled);
-        ImGui::ColorEdit4("Clear Color", camera.clear_color.data_);
+        ImGui::ColorEdit4("Clear Color", camera.clear_color.data());
         ImGui::Checkbox("Clear Depth Enabled", &camera.clear_depth_enabled);
         ImGui::DragFloat("Clear Depth", &camera.clear_depth, 1.0f, 0.0f, 0.0f, "%.1f");
     }
@@ -223,9 +223,9 @@ void gui_light_3d(ecs::entity entity) {
         } else if (light.type == light_3d_type::spot) {
             ImGui::Text("Spot Light");
         }
-        ImGui::ColorEdit3("Ambient", light.ambient.data_);
-        ImGui::ColorEdit3("Diffuse", light.diffuse.data_);
-        ImGui::ColorEdit3("Specular", light.specular.data_);
+        ImGui::ColorEdit3("Ambient", light.ambient.data());
+        ImGui::ColorEdit3("Diffuse", light.diffuse.data());
+        ImGui::ColorEdit3("Specular", light.specular.data());
 
         ImGui::DragFloat("Radius", &light.radius, 1.0f, 0.0f, 0.0f, "%.1f");
         ImGui::DragFloat("Falloff", &light.falloff, 0.1f, 0.0f, 0.0f, "%.1f");
@@ -233,8 +233,8 @@ void gui_light_3d(ecs::entity entity) {
 }
 
 void imgui_rect(rect_f& rc) {
-    ImGui::DragFloat2("Position", rc.position.data_);
-    ImGui::DragFloat2("Size", rc.size.data_);
+    ImGui::DragFloat2("Position", rc.position.data());
+    ImGui::DragFloat2("Size", rc.size.data());
 }
 
 void gui_scissors_2d(ecs::entity entity) {

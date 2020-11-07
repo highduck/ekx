@@ -5,6 +5,14 @@
 
 namespace ek::graphics {
 
+enum class GraphicsContextType {
+    OpenGL,
+    OpenGL_ES_2,
+    OpenGL_ES_3,
+    WebGL,
+    WebGL_2
+};
+
 class buffer_t;
 
 class texture_t;
@@ -34,5 +42,7 @@ void set_scissors();
 void get_pixels(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint8_t* out_buffer);
 
 void draw_triangles(uint32_t indices_count);
+
+GraphicsContextType getContextType();
 
 }

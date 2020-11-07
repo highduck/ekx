@@ -1,12 +1,17 @@
 cmake_minimum_required(VERSION 3.13)
-project(picos)
+project(ek-demo)
 
 add_executable(${PROJECT_NAME}
         src/picos_main.hpp
         src/picos_main.cpp
+        src/3d/sample_3d.cpp
+        src/3d/camera_arcball.cpp
+        src/sample_text.cpp
+        src/sample_base.cpp
         src/piko/piko.h
         src/piko/examples.h
         src/piko/examples.cpp
+        src/piko/sample_piko.cpp
         src/sim/driver_node_script.cpp
         src/sim/driver_node_script.h
         src/sim/motion_system.cpp
@@ -14,8 +19,7 @@ add_executable(${PROJECT_NAME}
         src/sim/components/position.h
         src/sim/components/motion.h
         src/sim/components/attractor.h
-        src/camera_arcball.cpp
-        src/camera_arcball.hpp)
+        )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17

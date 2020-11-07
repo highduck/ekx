@@ -15,6 +15,8 @@ public:
 
     editor_project_t project;
 
+    void on_event(const app::event_t& event);
+
 private:
     imgui_module_t gui_;
 
@@ -22,6 +24,8 @@ private:
     signal_t<float>::token t2;
     signal_t<>::token t3;
     basic_application* app_;
+
+    bool enabled_ = false;
 };
 
 }

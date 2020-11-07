@@ -143,7 +143,7 @@ void diamonds::draw() {
     if (first_frame) {
         float4 clear_color{colorf(1)};
         first_frame = false;
-        graphics::clear(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+        graphics::clear(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     }
     draw2d::state
             .save_mvp()

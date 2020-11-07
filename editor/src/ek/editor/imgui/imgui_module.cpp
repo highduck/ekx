@@ -62,16 +62,6 @@ void reset_keys() {
 }
 
 void imgui_module_t::on_event(const event_t& event) {
-    if (event.type == event_type::key_down
-        && event.code == key_code::A
-        && event.ctrl && event.shift) {
-        enabled_ = !enabled_;
-    }
-
-    if (!enabled_) {
-        return;
-    }
-
     auto& io = ImGui::GetIO();
     switch (event.type) {
         case event_type::key_up:
@@ -357,9 +347,9 @@ void imgui_module_t::begin_frame(float dt) {
 void imgui_module_t::end_frame() {
     ImGui::Render();
 
-    if (enabled_) {
+//    if (enabled_) {
         render_frame_data(ImGui::GetDrawData());
-    }
+//    }
 }
 
 #define MAP_KEY_CODE(from, to) io.KeyMap[(to)] = static_cast<int>((from))
@@ -422,7 +412,7 @@ void imgui_module_t::on_frame_completed() {
 
     auto* ic = try_resolve<input_controller>();
     if (ic) {
-        ic->hovered_by_editor_gui = ImGui::IsAnyWindowHovered() && enabled_;
+        ic->hovered_by_editor_gui = ImGui::IsAnyWindowHovered();
     }
 }
 

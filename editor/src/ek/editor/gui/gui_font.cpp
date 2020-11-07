@@ -18,7 +18,7 @@ void gui_font_view(const Font* font) {
                 case FontType::TrueType: {
                     auto* ttf = reinterpret_cast<const TrueTypeFont*>(font->getImpl());
                     ImGui::LabelText("Font Type", "TrueType");
-                    ImGui::LabelText("Glyphs", "%lu", ttf->map_.size());
+//                    ImGui::LabelText("Glyphs", "%lu", ttf->map_.size());
                 }
                     break;
             }

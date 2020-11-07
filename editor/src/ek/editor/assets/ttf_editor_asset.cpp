@@ -2,8 +2,10 @@
 
 #include <ek/util/assets.hpp>
 #include <ek/scenex/text/truetype_font.hpp>
+#include <ek/scenex/text/font.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/logger.hpp>
+#include <ek/app/app.hpp>
 
 namespace ek {
 
@@ -20,7 +22,7 @@ void TTFEditorAsset::load() {
     if (buffer.empty()) {
         EK_ERROR("Not found or empty %s", (project->base_path / declaration_path_).c_str());
     } else {
-        auto* ttfFont = new TrueTypeFont(project->scale_factor, 48, 1024);
+        auto* ttfFont = new TrueTypeFont(project->scale_factor, 48, 2048 * 2);
         ttfFont->loadFromMemory(std::move(buffer));
         asset_t<Font>{name_}.reset(new Font(ttfFont));
     }

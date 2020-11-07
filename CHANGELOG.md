@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [audio] change api to Sound and Music instances 
 - [audio] change `simple_audio_manager` to `AudioManager`
 - [audio] fix audio loading for EDITOR mode
+- [truetype] add basic support for TTF fonts
+- [demo] update `ek-demo` project, renamed as 
+- [graphics] get context type
+- [graphics] add alpha8 texture format
 
 ## [0.0.1] - 2020-10-31
 

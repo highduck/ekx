@@ -70,11 +70,11 @@ void basic_application::initialize() {
 }
 
 void basic_application::preload() {
+    EK_DEBUG("Loading scale: %0.3f", scale_factor);
+    asset_manager_->set_scale_factor(scale_factor);
+
     hook_on_preload();
 
-    EK_DEBUG("Loading scale: %0.3f", scale_factor);
-
-    asset_manager_->set_scale_factor(scale_factor);
     asset_manager_->add_resolver(new builtin_asset_resolver_t());
     // built-in
 //    asset_manager_->add_from_type("font", "mini");
