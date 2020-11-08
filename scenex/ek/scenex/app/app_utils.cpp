@@ -96,16 +96,18 @@ void frame_stats_t::draw() {
                  triangles_);
 
         TextDrawer textDrawer;
-        textDrawer.font = asset_t<Font>("mini");
-        textDrawer.fontSize = 16.0f;
-        textDrawer.lineSpacing = 2.0f;
+        textDrawer.format.font = asset_t<Font>("mini");
+        textDrawer.format.size = 16.0f;
+        textDrawer.format.leading = 2.0f;
+        textDrawer.format.layers[0].color = 0xFFFFFF_rgb;
+        textDrawer.format.layers[1].blurRadius = 1;
+        textDrawer.format.layers[1].offset = {2, 2};
+        textDrawer.format.layers[1].blurIterations = 2;
+        textDrawer.format.layers[1].strength = 2;
+        textDrawer.format.layers[1].color = 0x0_rgb;
+        textDrawer.format.layersCount = 2;
         textDrawer.position = {10.0f, 30.0f};
-        textDrawer.textColor = 0x0_rgb;
-        const std::string text{buf};
-        textDrawer.draw(text);
-        textDrawer.position -= {1.0f, 1.0f};
-        textDrawer.textColor = 0xFFFFFF_rgb;
-        textDrawer.draw(text);
+        textDrawer.draw(buf);
     }
 #endif
 }

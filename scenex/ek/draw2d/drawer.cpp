@@ -643,5 +643,11 @@ void line_arc(float x, float y, float r,
     }
 }
 
+void strokeRect(const rect_f& rc, argb32_t color, float lineWidth) {
+    line({rc.x, rc.y}, {rc.right(), rc.y}, color, lineWidth);
+    line({rc.right(), rc.y}, {rc.right(), rc.bottom()}, color, lineWidth);
+    line({rc.right(), rc.bottom()}, {rc.x, rc.bottom()}, color, lineWidth);
+    line({rc.x, rc.bottom()}, {rc.x, rc.y}, color, lineWidth);
+}
 
 }

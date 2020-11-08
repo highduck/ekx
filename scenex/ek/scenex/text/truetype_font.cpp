@@ -86,7 +86,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     auto glyphHeight = y1 - y0;
 
     if (glyphWidth > 0 && glyphHeight > 0) {
-        int pad = blurRadius_ * 2;
+        int pad = blurRadius_;
 
         x0 -= pad;
         y0 -= pad;
@@ -177,16 +177,23 @@ bool TrueTypeFont::initFromMemory(const uint8_t* data, size_t size) {
 }
 
 void TrueTypeFont::setBlur(float radius, int iterations, int strengthPower) {
-    radius = roundf(dpiScale * radius);
-    blurRadius_ = radius < 0 ? 0 : (radius > 0xFF ? 0xFF : (uint8_t) radius);
-    blurIterations_ = iterations < 0 ? 0 : (iterations > 3 ? 3 : iterations);
-    strengthPower_ = strengthPower < 0 ? 0 : (strengthPower > 7 ? 7 : strengthPower);
-    uint32_t hashCode = (strengthPower_ << 16) | (blurIterations_ << 8) | blurRadius_;
-    auto it = mapByEffect.find(hashCode);
-    if (it == mapByEffect.end()) {
-        mapByEffect[hashCode] = std::make_unique<std::unordered_map<uint32_t, Glyph>>();
+    if (radius > 0.0f && iterations > 0) {
+        radius = roundf(dpiScale * radius);
+        blurRadius_ = radius < 0 ? 0 : (radius > 0xFF ? 0xFF : (uint8_t) radius);
+        blurIterations_ = iterations < 0 ? 0 : (iterations > 3 ? 3 : iterations);
+        strengthPower_ = strengthPower < 0 ? 0 : (strengthPower > 7 ? 7 : strengthPower);
+        uint32_t hashCode = (strengthPower_ << 16) | (blurIterations_ << 8) | blurRadius_;
+        auto it = mapByEffect.find(hashCode);
+        if (it == mapByEffect.end()) {
+            mapByEffect[hashCode] = std::make_unique<std::unordered_map<uint32_t, Glyph>>();
+        }
+        map = mapByEffect[hashCode].get();
+    } else {
+        blurRadius_ = 0;
+        blurIterations_ = 0;
+        strengthPower_ = 0;
+        map = mapByEffect[0].get();
     }
-    map = mapByEffect[hashCode].get();
 }
 
 
