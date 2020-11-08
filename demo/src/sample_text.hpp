@@ -5,15 +5,6 @@
 
 namespace ek {
 
-struct SampleBlurProperties {
-    float radius = 1.0f;
-    int iterations = 1;
-    int strength = 1;
-    float4 color = float4::one;
-
-    void gui();
-};
-
 class SampleText : public SampleBase {
 public:
     SampleText();
@@ -25,9 +16,6 @@ public:
 
 public:
     TextDrawer textDrawer;
-    SampleBlurProperties outline1;
-    SampleBlurProperties outline2;
-    SampleBlurProperties shadow;
     bool drawGlyphCache = false;
 };
 

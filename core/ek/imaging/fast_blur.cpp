@@ -2,26 +2,26 @@
 #include <cassert>
 #include "fast_blur.hpp"
 
-// Based on Exponential blur, Jani Huhtanen, 2006
+// Exponential blur, Jani Huhtanen, 2006
 
-#define APREC 16
-#define ZPREC 7
+#define APREC 12
+#define ZPREC 10
 
 inline void blurCols(uint8_t* data, int width, int height, int stride, int alpha) {
     int x, y;
     for (y = 0; y < height; y++) {
         int z = 0; // force zero border
-        for (x = 1; x < width; x++) {
-            z += (alpha * (((int) (data[x]) << ZPREC) - z)) >> APREC;
-            data[x] = (uint8_t) (z >> ZPREC);
+        for (x = 0; x < width; x++) {
+            z += (alpha * (((int) (data[x]) << ZPREC) - (z >> APREC)));
+            data[x] = (uint8_t) (z >> (ZPREC + APREC));
         }
-        data[width - 1] = 0; // force zero border
+//        data[width - 1] = 0; // force zero border
         z = 0;
-        for (x = width - 2; x >= 0; x--) {
-            z += (alpha * (((int) (data[x]) << ZPREC) - z)) >> APREC;
-            data[x] = (uint8_t) (z >> ZPREC);
+        for (x = width - 1; x >= 0; x--) {
+            z += (alpha * (((int) (data[x]) << ZPREC) - (z >> APREC)));
+            data[x] = (uint8_t) (z >> (ZPREC + APREC));
         }
-        data[0] = 0; // force zero border
+//        data[0] = 0; // force zero border
         data += stride;
     }
 }
@@ -30,26 +30,25 @@ inline void blurRows(uint8_t* data, int width, int height, int stride, int alpha
     int x, y;
     for (x = 0; x < width; x++) {
         int z = 0; // force zero border
-        for (y = stride; y < height * stride; y += stride) {
-            z += (alpha * (((int) (data[y]) << ZPREC) - z)) >> APREC;
-            data[y] = (uint8_t) (z >> ZPREC);
+        for (y = 0; y < height * stride; y += stride) {
+            z += alpha * (((int) (data[y]) << ZPREC) - (z >> APREC));
+            data[y] = (uint8_t) (z >> (ZPREC + APREC));
         }
-        data[(height - 1) * stride] = 0; // force zero border
+        //data[(height - 1) * stride] = 0; // force zero border
         z = 0;
-        for (y = (height - 2) * stride; y >= 0; y -= stride) {
-            z += (alpha * (((int) (data[y]) << ZPREC) - z)) >> APREC;
-            data[y] = (uint8_t) (z >> ZPREC);
+        for (y = (height - 1) * stride; y >= 0; y -= stride) {
+            z += (alpha * (((int) (data[y]) << ZPREC) - (z >> APREC)));
+            data[y] = (uint8_t) (z >> (ZPREC + APREC));
         }
-        data[0] = 0; // force zero border
+        //data[0] = 0; // force zero border
         data++;
     }
 }
 
 void expBlurAlpha(uint8_t* data, int width, int height, int stride, float radius, int iterations) {
-    assert(radius >= 1.0f);
-    // Calculate the alpha such that 90% of the kernel is within the radius. (Kernel extends to infinity)
-    float sigma = radius * 0.57735f; // 1 / sqrt(3)
-    int alpha = (int) ((1 << APREC) * (1.0f - expf(-2.3f / (sigma + 1.0f))));
+    assert(radius >= 1.0f && iterations > 0);
+    float sigma = radius * (1.0f / sqrtf(iterations)); // 1 / sqrt(3)
+    int alpha = (int) ((1 << APREC) * (1.0f - powf(iterations * 5.0f / 255.0f, 1.0f / sigma)));
     for (int i = 0; i < iterations; ++i) {
         blurRows(data, width, height, stride, alpha);
         blurCols(data, width, height, stride, alpha);
