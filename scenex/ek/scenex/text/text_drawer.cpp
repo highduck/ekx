@@ -37,18 +37,7 @@ void TextDrawer::draw(const std::string& text) {
 }
 
 void TextDrawer::drawPass(const std::string& text) {
-    if (font->getFontType() == FontType::Bitmap && pass.blurRadius > 0.0f && length_sqr(pass.offset) <= 0.1f) {
-        return;
-    }
-
-    auto* impl = font->getImpl();
-    impl->setBlur(pass.blurRadius, pass.blurIterations, pass.filterStrength);
-
-    FontImplBase* fallbackImpl = nullptr;
-    if (fallback) {
-        fallbackImpl = fallback->getImpl();
-        fallbackImpl->setBlur(pass.blurRadius, pass.blurIterations, pass.filterStrength);
-    }
+    font->setBlur(pass.blurRadius, pass.blurIterations, pass.filterStrength);
 
     float lineHeightMul = 0.0f;
     const float2 start = position + pass.offset;
@@ -72,7 +61,7 @@ void TextDrawer::drawPass(const std::string& text) {
             continue;
         }
 
-        if (impl->getGlyph(codepoint, gdata) || (fallbackImpl && fallbackImpl->getGlyph(codepoint, gdata))) {
+        if (font->getGlyph(codepoint, gdata)) {
             if (gdata.texture) {
                 if (prevTexture != gdata.texture) {
                     draw2d::state.set_texture(gdata.texture);
@@ -104,14 +93,7 @@ void TextDrawer::drawPass(const std::string& text) {
 }
 
 void TextDrawer::drawGlyphBounds(const std::string& text) {
-    auto* impl = font->getImpl();
-    impl->setBlur(pass.blurRadius, pass.blurIterations, pass.filterStrength);
-
-    FontImplBase* fallbackImpl = nullptr;
-    if (fallback) {
-        fallbackImpl = fallback->getImpl();
-        fallbackImpl->setBlur(pass.blurRadius, pass.blurIterations, pass.filterStrength);
-    }
+    font->setBlur(pass.blurRadius, pass.blurIterations, pass.filterStrength);
 
     float lineHeightMul = 0.0f;
     const float2 start = position + pass.offset;
@@ -134,7 +116,7 @@ void TextDrawer::drawGlyphBounds(const std::string& text) {
             continue;
         }
 
-        if (impl->getGlyph(codepoint, gdata) || (fallbackImpl && fallbackImpl->getGlyph(codepoint, gdata))) {
+        if (font->getGlyph(codepoint, gdata)) {
             if (gdata.texture) {
                 draw2d::strokeRect(translate(gdata.rect * size, current), 0x77FF0000_argb, 1);
             }

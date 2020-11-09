@@ -177,6 +177,9 @@ rect_f Font::estimate_text_draw_zone(const std::string& text, float size, int be
 
 void Font::debugDrawAtlas(float x, float y) {
     impl->debugDrawAtlas(x, y);
+    if(fallback){
+        fallback->debugDrawAtlas(x, y + 512);
+    }
 }
 
 FontType Font::getFontType() const {
@@ -189,6 +192,18 @@ FontImplBase* Font::getImpl() {
 
 const FontImplBase* Font::getImpl() const {
     return impl;
+}
+
+bool Font::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
+    return impl->getGlyph(codepoint, outGlyph) ||
+           (fallback && fallback->getGlyph(codepoint, outGlyph));
+}
+
+void Font::setBlur(float radius, int iterations, int strengthPower) {
+    impl->setBlur(radius, iterations, strengthPower);
+    if (fallback) {
+        fallback->setBlur(radius, iterations, strengthPower);
+    }
 }
 
 }

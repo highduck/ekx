@@ -1,5 +1,7 @@
 #pragma once
 
+#include "font_base.hpp"
+
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
 #include <ek/math/box.hpp>
@@ -12,10 +14,6 @@
 #include <string>
 
 namespace ek {
-
-class FontImplBase;
-
-enum class FontType;
 
 class Font : private disable_copy_assign_t {
 public:
@@ -51,8 +49,16 @@ public:
 
     [[nodiscard]] const FontImplBase* getImpl() const;
 
+    void setFallbackFont(Font* fallbackFont) {
+        fallback = fallbackFont;
+    }
+
+    bool getGlyph(uint32_t codepoint, Glyph& outGlyph);
+
+    void setBlur(float radius, int iterations, int strengthPower);
 private:
     FontImplBase* impl = nullptr;
+    Font* fallback = nullptr;
 };
 
 }

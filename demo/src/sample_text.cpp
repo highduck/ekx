@@ -12,8 +12,6 @@ namespace ek {
 
 SampleText::SampleText() :
         SampleBase() {
-    textDrawer.fallback = asset_t<Font>{"native"};
-
     textDrawer.format.font = asset_t<Font>{"Cousine-Regular"};
     textDrawer.format.size = 48.0f;
 
@@ -22,14 +20,14 @@ SampleText::SampleText() :
 
     // inner stroke
     textDrawer.format.layers[1].blurRadius = 1;
-    textDrawer.format.layers[1].blurIterations = 1;
-    textDrawer.format.layers[1].strength = 7;
+    textDrawer.format.layers[1].blurIterations = 3;
+    textDrawer.format.layers[1].strength = 5;
     textDrawer.format.layers[1].color = 0x330000_rgb;
 
     // outer stroke
     textDrawer.format.layers[2].blurRadius = 2;
-    textDrawer.format.layers[2].blurIterations = 2;
-    textDrawer.format.layers[2].strength = 7;
+    textDrawer.format.layers[2].blurIterations = 3;
+    textDrawer.format.layers[2].strength = 5;
     textDrawer.format.layers[2].color = 0xFFFFFF_rgb;
 
     // shadow
@@ -49,26 +47,21 @@ void SampleText::draw() {
     draw2d::state.save_matrix();
     draw2d::state.scale(sf, sf);
 
-    textDrawer.format.font = asset_t<Font>("Cousine-Regular");
-//    textDrawer.format.layers[0].color = 0xFFFF77_rgb;
-    textDrawer.position = {20.0f, 220.0f};
-    textDrawer.draw(u8"£ü÷\n< Приветики >\n你好\nनमस्कार\nこんにちは");
-
     textDrawer.format.font = asset_t<Font>("TickingTimebombBB");
 //    textDrawer.format.layers[0].color = 0xFFFFFF_rgb;
     textDrawer.position = {20.0f, 100.0f};
     textDrawer.draw("88:88:88\n-=98");
 
+    textDrawer.format.font = asset_t<Font>("Cousine-Regular");
+//    textDrawer.format.layers[0].color = 0xFFFF77_rgb;
+    textDrawer.position = {20.0f, 220.0f};
+    textDrawer.draw(u8"£ü÷\n< Приветики >\n你好\nनमस्कार\nこんにちは");
+
+
     draw2d::state.restore_matrix();
 
-    if (drawGlyphCache) {
-        if (textDrawer.fallback) {
-            textDrawer.fallback->debugDrawAtlas(512, 100);
-        }
-
-        if (textDrawer.font) {
-            textDrawer.font->debugDrawAtlas(512, 100 + 512);
-        }
+    if (drawGlyphCache && textDrawer.format.font) {
+        textDrawer.format.font->debugDrawAtlas(512, 100 + 512);
     }
 }
 
@@ -76,7 +69,9 @@ void SampleText::prepareInternalResources() {
     asset_manager_t* am = resolve<basic_application>().asset_manager_;
     auto* ttfFont = new TrueTypeFont(am->scale_factor, 48, 4096);
     ttfFont->loadDeviceFont("Arial Unicode MS");
-    asset_t<Font>{"native"}.reset(new Font(ttfFont));
+    auto* font = new Font(ttfFont);
+    asset_t<Font>{"native"}.reset(font);
+    asset_t<Font>{"Cousine-Regular"}->setFallbackFont(font);
 }
 
 void guiEffectLayer(TextLayerEffect& layer) {
@@ -93,7 +88,7 @@ void guiEffectLayer(TextLayerEffect& layer) {
     ImGui::DragFloat2("Offset", layer.offset.data(), 1, 0, 8);
 
     float4 color{layer.color};
-    if(ImGui::ColorEdit4("Color", color.data())) {
+    if (ImGui::ColorEdit4("Color", color.data())) {
         layer.color = argb32_t{color};
     }
 
