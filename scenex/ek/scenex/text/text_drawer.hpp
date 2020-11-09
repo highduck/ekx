@@ -46,7 +46,6 @@ public:
 
     // internal renderer state
     asset_t<Font> font;
-    asset_t<Font> fallback;
     float size = 16.0f;
     float leading = 0.0f;
     float letterSpacing = 0.0f;

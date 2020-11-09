@@ -11,13 +11,13 @@ inline void blurCols(uint8_t* data, int width, int height, int stride, int alpha
     int x, y;
     for (y = 0; y < height; y++) {
         int z = 0; // force zero border
-        for (x = 0; x < width; x++) {
+        for (x = 1; x < width; x++) {
             z += (alpha * (((int) (data[x]) << ZPREC) - (z >> APREC)));
             data[x] = (uint8_t) (z >> (ZPREC + APREC));
         }
 //        data[width - 1] = 0; // force zero border
         z = 0;
-        for (x = width - 1; x >= 0; x--) {
+        for (x = width - 2; x >= 0; x--) {
             z += (alpha * (((int) (data[x]) << ZPREC) - (z >> APREC)));
             data[x] = (uint8_t) (z >> (ZPREC + APREC));
         }
@@ -30,13 +30,13 @@ inline void blurRows(uint8_t* data, int width, int height, int stride, int alpha
     int x, y;
     for (x = 0; x < width; x++) {
         int z = 0; // force zero border
-        for (y = 0; y < height * stride; y += stride) {
+        for (y = 1; y < height * stride; y += stride) {
             z += alpha * (((int) (data[y]) << ZPREC) - (z >> APREC));
             data[y] = (uint8_t) (z >> (ZPREC + APREC));
         }
         //data[(height - 1) * stride] = 0; // force zero border
         z = 0;
-        for (y = (height - 1) * stride; y >= 0; y -= stride) {
+        for (y = (height - 2) * stride; y >= 0; y -= stride) {
             z += (alpha * (((int) (data[y]) << ZPREC) - (z >> APREC)));
             data[y] = (uint8_t) (z >> (ZPREC + APREC));
         }
@@ -55,9 +55,9 @@ void expBlurAlpha(uint8_t* data, int width, int height, int stride, float radius
     }
 }
 
-inline uint8_t shiftSat(uint8_t x, uint8_t sh) {
-    uint32_t s = x << sh;
-    return s > 0xFF ? 0xFF : uint8_t(s);
+inline uint8_t shiftSat(int x, int sh) {
+    x <<= sh;
+    return x > 0xFF ? 0xFF : uint8_t(x);
 }
 
 void saturateAlpha(uint8_t* data, int width, int height, int stride, int shift) {

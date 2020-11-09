@@ -29,8 +29,8 @@ void DynamicAtlas::reset() {
 
 DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const std::vector<uint8_t>& pixels) {
     if (x + width + padding > pageWidth) {
-        x = padding;
-        y += lineHeight;
+        x = 0;
+        y += lineHeight + padding;
         lineHeight = 0;
     }
     DynamicAtlasSprite sprite;
