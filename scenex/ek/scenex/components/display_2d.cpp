@@ -1,8 +1,9 @@
 #include "display_2d.hpp"
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/2d/sprite.hpp>
-#include <ek/scenex/2d/font.hpp>
+#include <ek/scenex/text/font.hpp>
 #include <ek/util/assets.hpp>
+#include <ek/scenex/text/text_drawer.hpp>
 
 namespace ek {
 
@@ -96,77 +97,53 @@ bool drawable_sprite::hit_test(const float2& point) const {
     return false;
 }
 
-
-
-//// text
-
-static void draw_text(const std::string& text, const text_format_t& format, const rect_f& rc) {
-    asset_t<font_t> f{format.font};
-    if (f) {
-
-//        resolve<Drawer>().setEmptyTexture();
-//        resolve<Drawer>().quad(rc.x, rc.y, rc.width, rc.height, 0x77FF0000_argb);
-//        resolve<Drawer>().quad(rc.x + 2.0f, rc.y + 2.0f, rc.width - 4, rc.height - 4, 0x77000000_argb);
-
-//        rect_f bounds = f->getLineBoundingBox(text, format.size, 0, text.size(), format.lineHeight, format.lineSpacing);
-        const int begin = 0;
-        const int end = static_cast<int>(text.size());
-        rect_f draw_zone = f->estimate_text_draw_zone(
-                text,
-                format.size,
-                begin,
-                end,
-                format.lineHeight,
-                format.lineSpacing
-        );
-        float2 cur = rc.relative(format.alignment) - draw_zone.relative(format.alignment);
-
-        if (format.shadow) {
-            f->draw(text, format.size, cur + format.shadowOffset, format.shadowColor, format.lineHeight,
-                    format.lineSpacing);
-        }
-        f->draw(text, format.size, cur, format.color, format.lineHeight, format.lineSpacing);
-    }
-
-}
-
-static rect_f text_bounds(const std::string& text, const text_format_t& format, const rect_f& rc) {
-    asset_t<font_t> f(format.font);
-    if (!f) {
-        return rect_f::zero;
-    }
-
-    const int begin = 0;
-    const int end = static_cast<int>(text.size());
-    rect_f rect = f->get_line_bounding_box(text, format.size, begin, end, format.lineHeight);
-
-    const float2 cur = rc.position + rc.size * format.alignment;
-    rect.position += cur;
-
-    float2 line_size{rect.width, format.size};
-    rect.position.y += line_size.y;
-    rect.position -= line_size * format.alignment;
-
-    return rect;
-}
-
 drawable_text::drawable_text()
         : text{},
           format{"mini", 16.0f} {
 
 }
 
-drawable_text::drawable_text(std::string text, text_format_t format)
+drawable_text::drawable_text(std::string text, TextFormat format)
         : text{std::move(text)},
-          format{std::move(format)} {
+          format{format} {
 }
 
 void drawable_text::draw() {
-    draw_text(text, format, rect);
+    TextDrawer drawer;
+    drawer.format = format;
+//    drawer.rect = rect;
+//    drawer.alignment = format.alignment;
+    if (fillColor.a > 0) {
+        draw2d::state.set_empty_texture();
+        draw2d::quad(rect, fillColor);
+    }
+    if (borderColor.a > 0) {
+        draw2d::state.set_empty_texture();
+        draw2d::strokeRect(expand(rect, 1.0f), borderColor, 1);
+    }
+    auto& info = TextDrawer::sharedTextBlockInfo;
+    drawer.getTextSize(text.c_str(), info);
+    auto bounds = info.bounds;
+    drawer.rect.position = rect.relative(format.alignment) - bounds.relative(format.alignment);
+    bounds.position += drawer.rect.position;
+    drawer.rect.size = {};
+    drawer.draw(text.c_str());
+    if (showTextBounds) {
+        draw2d::strokeRect(expand(bounds, 1.0f), 0xFF0000_rgb, 1);
+    }
 }
 
 rect_f drawable_text::get_bounds() const {
-    return text_bounds(text, format, rect);
+    if (hitFullBounds) {
+        return rect;
+    }
+    TextDrawer drawer;
+    drawer.format = format;
+    auto& info = TextDrawer::sharedTextBlockInfo;
+    drawer.getTextSize(text.c_str(), info);
+    auto bounds = info.bounds;
+    bounds.position += rect.relative(format.alignment) - bounds.relative(format.alignment);
+    return bounds;
 }
 
 bool drawable_text::hit_test(const float2& point) const {

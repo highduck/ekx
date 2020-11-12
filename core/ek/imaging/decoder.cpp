@@ -6,7 +6,12 @@
 
 #ifndef __EMSCRIPTEN__
 #include "drawing.hpp"
+
+#ifndef STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
+#endif
+
 #endif
 
 namespace ek {

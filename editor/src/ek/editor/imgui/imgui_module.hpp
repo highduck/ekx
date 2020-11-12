@@ -37,7 +37,6 @@ private:
     graphics::texture_t* texture_ = nullptr;
     graphics::program_t* program_ = nullptr;
     std::string clipboard_text_{};
-    bool enabled_ = false;
 };
 
 }

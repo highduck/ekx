@@ -16,6 +16,7 @@ using vec2 = vec2_t<double>;
 struct window_config final {
     std::string title{"ek"};
     vec2 size{960, 720};
+    bool needDepth = false;
 };
 
 struct arguments final {
@@ -127,6 +128,7 @@ struct app_state final {
     vec2 window_size{};
     vec2 drawable_size{};
 
+    // TODO: rename to dpiScale (content misunderstood versus game view scaling)
     double content_scale = 1.0;
     bool size_changed = false;
 

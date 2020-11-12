@@ -3,6 +3,7 @@
 
 #include <ek/util/logger.hpp>
 #include <ek/util/path.hpp>
+#include <ek/math/common.hpp>
 
 namespace ek {
 
@@ -48,7 +49,7 @@ void asset_manager_t::clear() {
 
 void asset_manager_t::set_scale_factor(float scale) {
     auto new_uid = get_scale_uid(scale);
-    scale_factor = scale;
+    scale_factor = math::clamp(scale, 1.0f, 4.0f);
     if (scale_uid != new_uid) {
         scale_uid = new_uid;
         // todo: maybe better naming `update`?

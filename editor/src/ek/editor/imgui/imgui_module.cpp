@@ -62,16 +62,6 @@ void reset_keys() {
 }
 
 void imgui_module_t::on_event(const event_t& event) {
-    if (event.type == event_type::key_down
-        && event.code == key_code::A
-        && event.ctrl && event.shift) {
-        enabled_ = !enabled_;
-    }
-
-    if (!enabled_) {
-        return;
-    }
-
     auto& io = ImGui::GetIO();
     switch (event.type) {
         case event_type::key_up:
@@ -306,11 +296,11 @@ imgui_module_t::imgui_module_t() {
 //    IM_ASSERT(font != NULL);
     float scale_factor = 2.0f;
     ImFont* font = nullptr;
-    path_t font_path{"Cousine-Regular.ttf"};
-    const char* sdk_root = std::getenv("EKX_ROOT");
-    if (sdk_root) {
-        font_path = path_t{sdk_root} / "editor/resources" / font_path;
-    }
+    path_t font_path{"../assets/Cousine-Regular.ttf"};
+//    const char* sdk_root = std::getenv("EKX_ROOT");
+//    if (sdk_root) {
+//        font_path = path_t{sdk_root} / "editor/resources" / font_path;
+//    }
     auto data = read_file(font_path);
     if (!data.empty()) {
         font = io.Fonts->AddFontFromMemoryTTF(data.data(), data.size(), 16.0f * scale_factor);
@@ -357,9 +347,9 @@ void imgui_module_t::begin_frame(float dt) {
 void imgui_module_t::end_frame() {
     ImGui::Render();
 
-    if (enabled_) {
+//    if (enabled_) {
         render_frame_data(ImGui::GetDrawData());
-    }
+//    }
 }
 
 #define MAP_KEY_CODE(from, to) io.KeyMap[(to)] = static_cast<int>((from))
@@ -422,7 +412,7 @@ void imgui_module_t::on_frame_completed() {
 
     auto* ic = try_resolve<input_controller>();
     if (ic) {
-        ic->hovered_by_editor_gui = ImGui::IsAnyWindowHovered() && enabled_;
+        ic->hovered_by_editor_gui = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
     }
 }
 

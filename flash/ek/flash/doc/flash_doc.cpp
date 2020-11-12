@@ -7,18 +7,40 @@
 
 namespace ek::flash {
 
-const element_t* flash_doc::find(const std::string& name, element_type type) const {
-    for (const auto& s: library) {
-        if (s.item.name == name && s.elementType == type) {
-            return &s;
+const char* findLastOf(const std::string& str, char ch) {
+    int sz = static_cast<int>(str.size());
+    for (int i = sz - 1; i >= 0; --i) {
+        if (str[i] == ch) {
+            return str.c_str() + i;
         }
     }
     return nullptr;
 }
 
-const element_t* flash_doc::find_linkage(const std::string& linkage) const {
+const element_t* flash_doc::find(const std::string& name,
+                                 element_type type,
+                                 bool ignoreFolders) const {
     for (const auto& s: library) {
-        if (s.item.linkageClassName == linkage) {
+        if (type == element_type::unknown || s.elementType == type) {
+            if (s.item.name == name) {
+                return &s;
+            }
+            if (ignoreFolders) {
+                auto stripped = findLastOf(s.item.name, '/');
+                if (stripped != nullptr && name == (stripped + 1)) {
+                    return &s;
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+
+const element_t* flash_doc::find_linkage(const std::string& className, element_type type) const {
+    for (const auto& s: library) {
+        if (s.item.linkageClassName == className &&
+            (type == element_type::unknown || s.elementType == type)) {
             return &s;
         }
     }

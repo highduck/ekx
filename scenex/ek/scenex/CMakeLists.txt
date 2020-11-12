@@ -11,7 +11,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         components/script.hpp
         components/display_2d.cpp
         components/display_2d.hpp
-        components/name.hpp
         components/movie.hpp
         components/button.hpp
         components/canvas.hpp
@@ -64,10 +63,11 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         app/basic_application.cpp
         app/basic_application.hpp
-        app/app_utils.cpp
-        app/app_utils.hpp
+        app/builtin_resources.cpp
+        app/builtin_resources.hpp
         app/input_controller.hpp
         app/input_controller.cpp
+        app/profiler.cpp
 
         goodies/helpers/mouse_follow_script.cpp
         goodies/helpers/mouse_follow_script.hpp
@@ -92,12 +92,15 @@ target_sources(${PROJECT_NAME} PRIVATE
         local_storage_var_t.hpp
 
         2d/atlas.cpp
-        2d/atlas.hpp
         2d/sprite.cpp
-        2d/sprite.hpp
-        2d/font.cpp
-        2d/font.hpp
-        2d/text_format.hpp
+
+        text/bitmap_font.cpp
+        text/truetype_font.cpp
+        text/dynamic_atlas.cpp
+        text/font.cpp
+        text/font_base.cpp
+        text/font_base.hpp
+        text/text_drawer.cpp
 
         asset2/asset_object.hpp
         asset2/asset_manager.cpp

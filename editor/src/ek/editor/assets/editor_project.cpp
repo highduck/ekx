@@ -2,10 +2,11 @@
 #include "editor_asset.hpp"
 #include "texture_asset.hpp"
 #include "program_asset.hpp"
-#include "freetype_asset.hpp"
+#include "bitmap_font_editor_asset.hpp"
 #include "flash_asset.hpp"
 #include "model_asset.hpp"
 #include "audio_asset.hpp"
+#include "ttf_editor_asset.hpp"
 
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
@@ -18,7 +19,7 @@ namespace ek {
 
 void editor_project_t::update_scale_factor(float scale_factor_) {
     const int uid = math::clamp(static_cast<int>(std::ceil(scale_factor_)), 1, 4);
-    scale_factor = scale_factor_;
+    scale_factor = math::clamp(scale_factor_, 1.0f, 4.0f);
     if (scale_uid != uid) {
         scale_uid = uid;
         // todo: maybe better naming `update`?
@@ -41,11 +42,17 @@ void editor_project_t::populate(bool auto_load) {
     }
 }
 
-std::string get_asset_xml_type(const path_t& path) {
-    std::string result;
+struct AssetInfoHeader {
+    std::string type;
+    bool dev = false;
+};
+
+AssetInfoHeader openAssetInfoHeader(const path_t& path) {
+    AssetInfoHeader result{};
     pugi::xml_document doc{};
     if (doc.load_file(path.c_str())) {
-        result = doc.first_child().attribute("type").as_string();
+        result.type = doc.first_child().attribute("type").as_string();
+        result.dev = doc.first_child().attribute("dev").as_bool(false);
     } else {
         EK_ERROR("XML parsing error %s", path.c_str());
     }
@@ -53,15 +60,19 @@ std::string get_asset_xml_type(const path_t& path) {
 }
 
 void editor_project_t::add_file(const path_t& path) {
-    const auto asset_type = get_asset_xml_type(base_path / path);
-    auto factory_method = type_factory[asset_type];
+    const auto header = openAssetInfoHeader(base_path / path);
+    if (header.dev && !devMode) {
+        // skip dev files for build without editor
+        return;
+    }
+    auto factory_method = type_factory[header.type];
     if (factory_method) {
         auto* asset = factory_method(path);
         assert(asset);
         asset->project = this;
         assets.push_back(asset);
     } else {
-        EK_ERROR("Editor asset type %s not found", asset_type.c_str());
+        EK_ERROR("Editor asset type '%s' not found", header.type.c_str());
     }
 }
 
@@ -88,10 +99,11 @@ void editor_project_t::unload_all() {
 editor_project_t::editor_project_t() {
     register_asset_factory<texture_asset_t>();
     register_asset_factory<program_asset_t>();
-    register_asset_factory<freetype_asset_t>();
+    register_asset_factory<BitmapFontEditorAsset>();
     register_asset_factory<flash_asset_t>();
     register_asset_factory<model_asset_t>();
     register_asset_factory<audio_asset_t>();
+    register_asset_factory<TTFEditorAsset>();
 }
 
 editor_project_t::~editor_project_t() {

@@ -1,8 +1,16 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
+#include <string>
 
 namespace ek {
+
+enum NodeFlags {
+    NodeFlags_Visible = 1,
+    NodeFlags_Touchable = 2,
+    NodeFlags_VisibleAndTouchable = NodeFlags_Visible | NodeFlags_Touchable,
+    NodeFlags_LayerMask = 0xFF00
+};
 
 struct node_t {
     ecs::entity parent;
@@ -10,6 +18,33 @@ struct node_t {
     ecs::entity sibling_prev;
     ecs::entity child_first;
     ecs::entity child_last;
+
+    std::string name;
+    uint32_t flags = NodeFlags_LayerMask | NodeFlags_VisibleAndTouchable;
+
+    [[nodiscard]] bool visible() const {
+        return (flags & NodeFlags_Visible) != 0;
+    }
+
+    [[nodiscard]] bool touchable() const {
+        return (flags & NodeFlags_Touchable) != 0;
+    }
+
+    void setVisible(bool v) {
+        flags = v ? (flags | NodeFlags_Visible) : (flags & ~NodeFlags_Visible);
+    }
+
+    void setTouchable(bool v) {
+        flags = v ? (flags | NodeFlags_Touchable) : (flags & ~NodeFlags_Touchable);
+    }
+
+    [[nodiscard]] uint32_t layersMask() const {
+        return (flags & NodeFlags_LayerMask) >> 8;
+    }
+
+    void setLayersMask(int mask) {
+        flags |= (flags & ~NodeFlags_LayerMask) | ((mask << 8) & NodeFlags_LayerMask);
+    }
 };
 
 inline void world_enable_node(ecs::entity entity) {

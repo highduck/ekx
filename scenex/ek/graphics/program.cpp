@@ -232,7 +232,7 @@ GLint program_t::get_uniform(const std::string& name) const {
 void program_t::set_uniform(const std::string& name, const float2& v) const {
     GLint uniform = get_uniform(name);
     if (uniform >= 0) {
-        glUniform2fv(uniform, 1, v.data_);
+        glUniform2fv(uniform, 1, v.data());
         gl::check_error();
     }
 }
@@ -240,7 +240,7 @@ void program_t::set_uniform(const std::string& name, const float2& v) const {
 void program_t::set_uniform(const std::string& name, const float3& v) const {
     GLint uniform = get_uniform(name);
     if (uniform >= 0) {
-        glUniform3fv(uniform, 1, v.data_);
+        glUniform3fv(uniform, 1, v.data());
         gl::check_error();
     }
 }
@@ -248,7 +248,7 @@ void program_t::set_uniform(const std::string& name, const float3& v) const {
 void program_t::set_uniform(const std::string& name, const float4& v) const {
     GLint uniform = get_uniform(name);
     if (uniform >= 0) {
-        glUniform4fv(uniform, 1, v.data_);
+        glUniform4fv(uniform, 1, v.data());
         gl::check_error();
     }
 }

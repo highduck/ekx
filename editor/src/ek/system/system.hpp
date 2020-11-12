@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstdint>
 #include <unordered_map>
+#include <ek/app/res.hpp>
 
 namespace ek {
 
@@ -15,6 +16,8 @@ void save(const output_memory_stream& stream, const path_t& path);
 void save(const output_memory_stream& stream, const std::string& path);
 
 void save(const output_memory_stream& stream, const char* path);
+
+void save(const array_buffer& buffer, const char* path);
 
 void save(const std::string& text, const path_t& path);
 

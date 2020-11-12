@@ -136,13 +136,14 @@ namespace ek::android {
 
 namespace ek {
     void start_application() {
+        int flags = g_app.window_cfg.needDepth ? 1 : 0;
         g_app.view_context_ = android::get_activity();
 
         dispatch_init();
         auto *env = android_jni_get_env();
         auto class_ref = env->FindClass("ek/EkActivity");
-        auto method_id = env->GetStaticMethodID(class_ref, "start_application", "()V");
-        env->CallStaticVoidMethod(class_ref, method_id);
+        auto method_id = env->GetStaticMethodID(class_ref, "start_application", "(I)V");
+        env->CallStaticVoidMethod(class_ref, method_id, flags);
         env->DeleteLocalRef(class_ref);
     }
 }

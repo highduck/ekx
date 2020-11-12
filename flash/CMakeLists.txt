@@ -94,7 +94,7 @@ target_link_libraries(${PROJECT_NAME}
         cairo
         scenex
         miniz
-        stb-image-write
+        stb
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)

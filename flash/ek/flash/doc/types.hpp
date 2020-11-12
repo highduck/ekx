@@ -40,7 +40,7 @@ struct filter_t {
     float distance = 0.0f;
     float angle = 0.0f; // degrees
     uint8_t quality = 1; // TODO: check
-    float strength = 100.0f;
+    float strength = 1.0f;
     bool inner = false;
     bool knockout = false;
     bool hideObject = false;

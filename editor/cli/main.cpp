@@ -8,7 +8,7 @@
 
 #include <ek/editor/assets/flash_asset.hpp>
 #include <ek/editor/assets/audio_asset.hpp>
-#include <ek/editor/assets/freetype_asset.hpp>
+#include <ek/editor/assets/bitmap_font_editor_asset.hpp>
 #include <ek/editor/assets/program_asset.hpp>
 #include <ek/editor/assets/texture_asset.hpp>
 #include <ek/editor/assets/model_asset.hpp>
@@ -53,6 +53,7 @@ void main() {
                     process_market_asset(marketing_data);
                 } else if (what == "assets") {
                     editor_project_t project{};
+                    project.devMode = false;
                     project.base_path = path_t{args[3]};
                     project.populate(false);
                     project.build(path_t{args[4]});

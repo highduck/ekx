@@ -4,7 +4,7 @@
 #include <raudio/external/dr_mp3.h>
 
 #include <unordered_map>
-#include <string>
+#include <cassert>
 
 #include <ek/app/res.hpp>
 #include <ek/util/logger.hpp>
