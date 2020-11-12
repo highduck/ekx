@@ -63,10 +63,11 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         app/basic_application.cpp
         app/basic_application.hpp
-        app/app_utils.cpp
-        app/app_utils.hpp
+        app/builtin_resources.cpp
+        app/builtin_resources.hpp
         app/input_controller.hpp
         app/input_controller.cpp
+        app/profiler.cpp
 
         goodies/helpers/mouse_follow_script.cpp
         goodies/helpers/mouse_follow_script.hpp
