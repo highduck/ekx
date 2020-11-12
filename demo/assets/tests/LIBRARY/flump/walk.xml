@@ -1,6 +1,6 @@
 <DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="flump/walk" itemID="4fb25c3c-000002fb" lastModified="1554964231" lastUniqueIdentifier="46">
   <timeline>
-    <DOMTimeline name="walk" currentFrame="28">
+    <DOMTimeline name="walk">
       <layers>
         <DOMLayer name="Thigh_R" color="#9933CC" autoNamed="false">
           <frames>
@@ -355,7 +355,7 @@
                 <Ease target="all" intensity="-100"/>
               </tweens>
               <elements>
-                <DOMSymbolInstance libraryItemName="flump/Gut" centerPoint3DX="-35.95" centerPoint3DY="-132.9">
+                <DOMSymbolInstance libraryItemName="flump/Gut" selected="true" centerPoint3DX="-35.95" centerPoint3DY="-132.9">
                   <matrix>
                     <Matrix a="0.946701049804688" b="0.145294189453125" c="-0.16204833984375" d="0.97125244140625" tx="-36.3" ty="-132.3"/>
                   </matrix>

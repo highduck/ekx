@@ -206,4 +206,14 @@ void Font::setBlur(float radius, int iterations, int strengthPower) {
     }
 }
 
+bool Font::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
+    return impl->getGlyphMetrics(codepoint, outGlyph) ||
+           (fallback && fallback->getGlyphMetrics(codepoint, outGlyph));
+}
+
+float Font::getKerning(uint32_t codepoint1, uint32_t codepoint2) {
+    return impl->getKerning(codepoint1, codepoint2) ||
+           (fallback && fallback->getKerning(codepoint1, codepoint2));
+}
+
 }

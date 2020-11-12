@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <asset name="TickingTimebombBB" path="TickingTimebombBB.ttf" type="bmfont">
-    <font fontSize="48" mirror_case="true">
+    <font fontSize="24" mirror_case="true">
         <code_range from="0x0020" to="0x007F"/>
     </font>
     <atlas>

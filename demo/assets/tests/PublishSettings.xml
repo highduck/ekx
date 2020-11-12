@@ -36,15 +36,15 @@
   </PublishFormatProperties>
   <PublishHtmlProperties enabled="true">
     <VersionDetectionIfAvailable>0</VersionDetectionIfAvailable>
-    <VersionInfo>30,0,0,0;26,0,0,0;25,0,0,0;23,0,0,0;21,0,0,0;20,0,0,0;19,0,0,0;18,0,0,0;17,0,0,0;16,0,0,0;14,0,0,0;13,0,0,0;12,0,0,0;11,9,0,0;11,8,0,0;11,7,0,0;11,6,0,0;11,5,0,0;11,4,0,0;11,3,0,0;11,2,0,0;11,1,0,0;10,3,0,0;10,2,153,0;10,1,52,0;9,0,124,0;8,0,24,0;7,0,14,0;6,0,79,0;5,0,58,0;4,0,32,0;3,0,8,0;2,0,1,12;1,0,0,1;</VersionInfo>
+    <VersionInfo>32,0,0,0;30,0,0,0;26,0,0,0;25,0,0,0;23,0,0,0;21,0,0,0;20,0,0,0;19,0,0,0;18,0,0,0;17,0,0,0;16,0,0,0;14,0,0,0;13,0,0,0;12,0,0,0;11,9,0,0;11,8,0,0;11,7,0,0;11,6,0,0;11,5,0,0;11,4,0,0;11,3,0,0;11,2,0,0;11,1,0,0;10,3,0,0;10,2,153,0;10,1,52,0;9,0,124,0;8,0,24,0;7,0,14,0;6,0,79,0;5,0,58,0;4,0,32,0;3,0,8,0;2,0,1,12;1,0,0,1;</VersionInfo>
     <UsingDefaultContentFilename>1</UsingDefaultContentFilename>
     <UsingDefaultAlternateFilename>1</UsingDefaultAlternateFilename>
     <ContentFilename>tests_content.html</ContentFilename>
     <AlternateFilename>tests_alternate.html</AlternateFilename>
     <UsingOwnAlternateFile>0</UsingOwnAlternateFile>
     <OwnAlternateFilename></OwnAlternateFilename>
-    <Width>550</Width>
-    <Height>400</Height>
+    <Width>360</Width>
+    <Height>480</Height>
     <Align>0</Align>
     <Units>0</Units>
     <Loop>1</Loop>
@@ -117,8 +117,8 @@
     <TelemetryPassword></TelemetryPassword>
   </PublishFlashProperties>
   <PublishJpegProperties enabled="true">
-    <Width>550</Width>
-    <Height>400</Height>
+    <Width>360</Width>
+    <Height>480</Height>
     <Progressive>0</Progressive>
     <DPI>4718592</DPI>
     <Size>0</Size>
@@ -126,8 +126,8 @@
     <MatchMovieDim>1</MatchMovieDim>
   </PublishJpegProperties>
   <PublishGifProperties enabled="true">
-    <Width>550</Width>
-    <Height>400</Height>
+    <Width>360</Width>
+    <Height>480</Height>
     <Animated>0</Animated>
     <MatchMovieDim>1</MatchMovieDim>
     <Loop>1</Loop>
@@ -136,16 +136,16 @@
     <MaxColors>255</MaxColors>
   </PublishGifProperties>
   <PublishPNGProperties enabled="true">
-    <Width>550</Width>
-    <Height>400</Height>
+    <Width>360</Width>
+    <Height>480</Height>
     <MatchMovieDim>1</MatchMovieDim>
     <Smooth>1</Smooth>
     <BitDepth>24-bit with Alpha</BitDepth>
     <MaxColors>255</MaxColors>
   </PublishPNGProperties>
   <PublishOamProperties enabled="true">
-    <Width>550</Width>
-    <Height>400</Height>
+    <Width>360</Width>
+    <Height>480</Height>
     <CurrentFramePNG>1</CurrentFramePNG>
     <CustomPNG>0</CustomPNG>
     <PNGFilePath></PNGFilePath>

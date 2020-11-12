@@ -296,11 +296,11 @@ imgui_module_t::imgui_module_t() {
 //    IM_ASSERT(font != NULL);
     float scale_factor = 2.0f;
     ImFont* font = nullptr;
-    path_t font_path{"Cousine-Regular.ttf"};
-    const char* sdk_root = std::getenv("EKX_ROOT");
-    if (sdk_root) {
-        font_path = path_t{sdk_root} / "editor/resources" / font_path;
-    }
+    path_t font_path{"../assets/Cousine-Regular.ttf"};
+//    const char* sdk_root = std::getenv("EKX_ROOT");
+//    if (sdk_root) {
+//        font_path = path_t{sdk_root} / "editor/resources" / font_path;
+//    }
     auto data = read_file(font_path);
     if (!data.empty()) {
         font = io.Fonts->AddFontFromMemoryTTF(data.data(), data.size(), 16.0f * scale_factor);
@@ -412,7 +412,7 @@ void imgui_module_t::on_frame_completed() {
 
     auto* ic = try_resolve<input_controller>();
     if (ic) {
-        ic->hovered_by_editor_gui = ImGui::IsAnyWindowHovered();
+        ic->hovered_by_editor_gui = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
     }
 }
 

@@ -33,11 +33,11 @@ EMSCRIPTEN_WEBGL_CONTEXT_HANDLE webgl_context;
 const char* DIV_ID = "#gamecontainer";
 const char* CANVAS_ID = "#gameview";
 
-void init_webgl_context() {
+void init_webgl_context(bool needDepth) {
     EmscriptenWebGLContextAttributes attrs;
     emscripten_webgl_init_context_attributes(&attrs);
     attrs.alpha = false;
-    attrs.depth = true;
+    attrs.depth = needDepth;
     attrs.stencil = false;
     attrs.antialias = false;
 
@@ -274,7 +274,7 @@ namespace ek {
 void start_application() {
     init_canvas();
     subscribe_input();
-    init_webgl_context();
+    init_webgl_context(g_app.window_cfg.needDepth);
 
     dispatch_init();
     dispatch_device_ready();

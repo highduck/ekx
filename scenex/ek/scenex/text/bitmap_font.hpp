@@ -48,6 +48,10 @@ public:
 
     bool getGlyph(uint32_t codepoint, Glyph& outGlyph) override;
 
+    bool getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) override;
+
+    float getKerning(uint32_t codepoint1, uint32_t codepoint2) override;
+
 public:
     std::unordered_map<uint32_t, BitmapFontGlyph> map;
     float unitsPerEM = 1.0f;

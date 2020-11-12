@@ -29,16 +29,54 @@ static const uint8_t utf8d[] = {
         1, 3, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // s7..s8
 };
 
-uint32_t inline decodeUTF8(uint32_t* state, uint32_t* codep, uint32_t byte) {
+uint32_t inline decodeUTF8(uint32_t& state, uint32_t& codepoint, uint32_t byte) {
     uint32_t type = utf8d[byte];
-
-    *codep = (*state != UTF8State_ACCEPT) ?
-             (byte & 0x3fu) | (*codep << 6) :
-             (0xff >> type) & (byte);
-
-    *state = utf8d[256 + *state * 16 + type];
-    return *state;
+    codepoint = (state != UTF8State_ACCEPT) ?
+                (byte & 0x3fu) | (codepoint << 6) :
+                (0xff >> type) & (byte);
+    state = utf8d[256 + state * 16 + type];
+    return state;
 }
+
+struct UTF8Decoder {
+    const uint8_t* it = reinterpret_cast<const uint8_t*>("");
+    uint32_t state = 0;
+
+    explicit UTF8Decoder(const char* data) {
+        reset(reinterpret_cast<const uint8_t*>(data));
+    }
+
+    void reset(const uint8_t* data) {
+        it = data;
+        state = 0;
+    }
+
+    // true if next codepoint decoded
+    inline bool decodeNextByte(uint32_t& codepoint) {
+        return decodeUTF8(state, codepoint, *(it++)) == 0;
+    }
+
+    inline bool decode(uint32_t& codepoint) {
+        if (*it != 0 && decodeNextByte(codepoint)) {
+            return true;
+        }
+        if (*it != 0 && decodeNextByte(codepoint)) {
+            return true;
+        }
+        if (*it != 0 && decodeNextByte(codepoint)) {
+            return true;
+        }
+        if (*it != 0 && decodeNextByte(codepoint)) {
+            return true;
+        }
+        return false;
+    }
+
+    [[nodiscard]] inline bool hasNext() const {
+        return *it != 0;
+    }
+
+};
 
 }
 

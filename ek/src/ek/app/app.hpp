@@ -16,6 +16,7 @@ using vec2 = vec2_t<double>;
 struct window_config final {
     std::string title{"ek"};
     vec2 size{960, 720};
+    bool needDepth = false;
 };
 
 struct arguments final {

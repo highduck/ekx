@@ -1,6 +1,12 @@
 #include "save_image_png.hpp"
 #include <ek/imaging/drawing.hpp>
+
+#ifndef STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #include <stb_image_write.h>
+
+#endif
 
 namespace ek {
 //

@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 project(ek-demo)
 
 add_executable(${PROJECT_NAME}
-        src/picos_main.hpp
-        src/picos_main.cpp
+        src/demo_main.hpp
+        src/demo_main.cpp
         src/3d/sample_3d.cpp
         src/3d/camera_arcball.cpp
         src/sample_text.cpp
@@ -19,6 +19,9 @@ add_executable(${PROJECT_NAME}
         src/sim/components/position.h
         src/sim/components/motion.h
         src/sim/components/attractor.h
+
+        src/sample_flash.hpp
+        src/sample_flash.cpp
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

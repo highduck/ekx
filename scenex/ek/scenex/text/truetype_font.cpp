@@ -10,9 +10,11 @@
 #ifndef STB_TRUETYPE_IMPLEMENTATION
 #define STBTT_STATIC
 #define STB_TRUETYPE_IMPLEMENTATION
+
+#include <stb_truetype.h>
+
 #endif
 
-#include "stb_truetype.h"
 #include "dynamic_atlas.hpp"
 
 namespace ek {
@@ -58,6 +60,9 @@ void TrueTypeFont::unload() {
 // quad scale just multiplier to get fontSize relative to baseFontSize
 bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     assert(map != nullptr);
+    if (!loaded) {
+        return false;
+    }
 
     auto& map_ = *map;
     auto it = map_.find(codepoint);
@@ -78,6 +83,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     int advanceWidth = 0, leftSideBearing = 0;
     stbtt_GetGlyphHMetrics(info, glyphIndex, &advanceWidth, &leftSideBearing);
     glyph.advanceWidth = scale * static_cast<float>(advanceWidth) / baseFontSize;
+    glyph.bearingX = scale * static_cast<float>(leftSideBearing) / baseFontSize;
 
     int x0, y0, x1, y1;
     stbtt_GetGlyphBitmapBox(info, glyphIndex, dpiScale * scale, dpiScale * scale, &x0, &y0, &x1, &y1);
@@ -96,9 +102,9 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         auto bitmapWidth = x1 - x0;
         auto bitmapHeight = y1 - y0;
 
-        std::vector<uint8_t> bmp;
-        bmp.resize(bitmapWidth * bitmapHeight, 0);
-
+        static std::vector<uint8_t> bmp{};
+        bmp.resize(bitmapWidth * bitmapHeight);
+        bmp.assign(bitmapWidth * bitmapHeight, 0);
 
         stbtt_MakeGlyphBitmap(info, bmp.data() + pad * bitmapWidth + pad, glyphWidth, glyphHeight, bitmapWidth,
                               dpiScale * scale, dpiScale * scale, glyphIndex);
@@ -120,6 +126,39 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     }
 
     outGlyph = glyph;
+    return true;
+}
+
+bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
+    assert(map != nullptr);
+
+    auto& map_ = *map;
+    auto it = map_.find(codepoint);
+    if (it != map_.end()) {
+        outGlyph = it->second;
+        return true;
+    }
+
+    const auto glyphIndex = stbtt_FindGlyphIndex(info, codepoint);
+    if (!glyphIndex) {
+        /* @rlyeh: glyph not found, ie, arab chars */
+        return false;
+    }
+
+    const float scale = stbtt_ScaleForPixelHeight(info, baseFontSize);
+    int advanceWidth = 0, leftSideBearing = 0;
+    stbtt_GetGlyphHMetrics(info, glyphIndex, &advanceWidth, &leftSideBearing);
+    outGlyph.advanceWidth = scale * static_cast<float>(advanceWidth) / baseFontSize;
+    outGlyph.bearingX = scale * static_cast<float>(leftSideBearing) / baseFontSize;
+    outGlyph.lineHeight = lineHeightMultiplier;
+
+    int x0, y0, x1, y1;
+    stbtt_GetGlyphBitmapBox(info, glyphIndex, dpiScale * scale, dpiScale * scale, &x0, &y0, &x1, &y1);
+    outGlyph.rect.x = x0;
+    outGlyph.rect.y = y0;
+    outGlyph.rect.width = x1 - x0;
+    outGlyph.rect.height = y1 - y0;
+    outGlyph.rect *= 1.0f / (dpiScale * baseFontSize);
     return true;
 }
 
@@ -196,5 +235,13 @@ void TrueTypeFont::setBlur(float radius, int iterations, int strengthPower) {
     }
 }
 
+float TrueTypeFont::getKerning(uint32_t codepoint1, uint32_t codepoint2) {
+    if (loaded && info->kern) {
+        int kern = stbtt_GetCodepointKernAdvance(info, codepoint1, codepoint2);
+        float scale = stbtt_ScaleForPixelHeight(info, baseFontSize);
+        return static_cast<float>(kern) * scale / baseFontSize;
+    }
+    return 0.0f;
+}
 
 }

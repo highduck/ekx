@@ -42,6 +42,8 @@ public:
 
     float scale_factor = 2.0f;
     int scale_uid = 2;
+
+    bool devMode = true;
 };
 
 }

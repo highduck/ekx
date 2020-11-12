@@ -1,12 +1,12 @@
-<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="_button" itemID="5caf2925-000005f8" linkageExportForAS="true" linkageClassName="_button" lastModified="1554983211">
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="button" itemID="5fac52b9-0000032f" lastModified="1605128889">
   <timeline>
-    <DOMTimeline name="_button">
+    <DOMTimeline name="button">
       <layers>
         <DOMLayer name="Layer_1" color="#00FFFF" current="true" isSelected="true">
           <frames>
             <DOMFrame index="0" keyMode="9728">
               <elements>
-                <DOMSymbolInstance libraryItemName="test_button/button" symbolType="button">
+                <DOMSymbolInstance libraryItemName="test_button/button" selected="true" symbolType="button">
                   <matrix>
                     <Matrix tx="162" ty="102.05"/>
                   </matrix>

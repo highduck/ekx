@@ -10,13 +10,12 @@ public:
     SampleText();
 
     void draw() override;
+
     void update(float dt) override;
 
     static void prepareInternalResources();
 
 public:
-    TextDrawer textDrawer;
-    bool drawGlyphCache = false;
 };
 
 }

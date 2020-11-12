@@ -53,6 +53,7 @@ void main() {
                     process_market_asset(marketing_data);
                 } else if (what == "assets") {
                     editor_project_t project{};
+                    project.devMode = false;
                     project.base_path = path_t{args[3]};
                     project.populate(false);
                     project.build(path_t{args[4]});

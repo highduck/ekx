@@ -14,11 +14,11 @@ using base_app_type = ::ek::basic_application;
 
 #endif
 
-class PikoApp : public base_app_type {
+class DemoApp : public base_app_type {
 public:
-    PikoApp();
+    DemoApp();
 
-    ~PikoApp() override;
+    ~DemoApp() override;
 
     void initialize() override;
 

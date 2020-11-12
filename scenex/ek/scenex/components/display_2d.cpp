@@ -3,6 +3,7 @@
 #include <ek/scenex/2d/sprite.hpp>
 #include <ek/scenex/text/font.hpp>
 #include <ek/util/assets.hpp>
+#include <ek/scenex/text/text_drawer.hpp>
 
 namespace ek {
 
@@ -156,17 +157,47 @@ drawable_text::drawable_text()
 
 }
 
-drawable_text::drawable_text(std::string text, text_format_t format)
+drawable_text::drawable_text(std::string text, TextFormat format)
         : text{std::move(text)},
-          format{std::move(format)} {
+          format{format} {
 }
 
 void drawable_text::draw() {
-    draw_text(text, format, rect);
+    TextDrawer drawer;
+    drawer.format = format;
+//    drawer.rect = rect;
+//    drawer.alignment = format.alignment;
+    if (fillColor.a > 0) {
+        draw2d::state.set_empty_texture();
+        draw2d::quad(rect, fillColor);
+    }
+    if (borderColor.a > 0) {
+        draw2d::state.set_empty_texture();
+        draw2d::strokeRect(expand(rect, 1.0f), borderColor, 1);
+    }
+    auto& info = TextDrawer::sharedTextBlockInfo;
+    drawer.getTextSize(text.c_str(), info);
+    auto bounds = info.bounds;
+    drawer.rect.position = rect.relative(format.alignment) - bounds.relative(format.alignment);
+    bounds.position += drawer.rect.position;
+    drawer.rect.size = {};
+    drawer.draw(text.c_str());
+    if (showTextBounds) {
+        draw2d::strokeRect(expand(bounds, 1.0f), 0xFF0000_rgb, 1);
+    }
 }
 
 rect_f drawable_text::get_bounds() const {
-    return text_bounds(text, format, rect);
+    if (hitFullBounds) {
+        return rect;
+    }
+    TextDrawer drawer;
+    drawer.format = format;
+    auto& info = TextDrawer::sharedTextBlockInfo;
+    drawer.getTextSize(text.c_str(), info);
+    auto bounds = info.bounds;
+    bounds.position += rect.relative(format.alignment) - bounds.relative(format.alignment);
+    return bounds;
 }
 
 bool drawable_text::hit_test(const float2& point) const {
