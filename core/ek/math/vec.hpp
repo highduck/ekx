@@ -2,9 +2,26 @@
 
 #include "common.hpp"
 #include <cstdint>
+#include <cassert>
 #include <algorithm>
 
 namespace ek {
+
+#define MAKE_ARRAY_ACCESS \
+inline T* data() {\
+return reinterpret_cast<T*>(this);\
+}\
+inline const T* data() const {\
+    return reinterpret_cast<const T*>(this);\
+}\
+inline T& operator[](const unsigned index) {\
+    assert(index >= 0 && index < dim);\
+    return data()[index];\
+}\
+inline const T& operator[](const unsigned index) const {\
+    assert(index >= 0 && index < dim);\
+    return data()[index];\
+}
 
 template<unsigned N, typename T>
 struct vec_t {
@@ -13,7 +30,10 @@ struct vec_t {
     static_assert(sizeof(vec_t<N, T>) == sizeof(T) * dim, "struct has extra padding");
 
     using self_type = vec_t<N, T>;
-    T data_[N];
+
+    T elements[N];
+
+    MAKE_ARRAY_ACCESS
 };
 
 template<typename T>
@@ -40,16 +60,8 @@ struct vec_t<2, T> {
     static const self_type zero;
     static const self_type one;
 
-#include <ek/math/internal/compiler_unsafe_begin.h>
-
-    union {
-        struct {
-            T x, y;
-        };
-        T data_[dim];
-    };
-
-#include <ek/math/internal/compiler_unsafe_end.h>
+    T x;
+    T y;
 
     constexpr vec_t() noexcept
             : x{0},
@@ -102,6 +114,8 @@ struct vec_t<2, T> {
     inline bool operator!=(const self_type& a) const {
         return x != a.x || y != a.y;
     }
+
+    MAKE_ARRAY_ACCESS
 };
 
 template<typename T>
@@ -124,19 +138,9 @@ struct vec_t<3, T> {
     static const self_type zero;
     static const self_type one;
 
-#include <ek/math/internal/compiler_unsafe_begin.h>
-
-    union {
-        struct {
-            T x, y, z;
-        };
-        struct {
-            T r, g, b;
-        };
-        T data_[dim];
-    };
-
-#include <ek/math/internal/compiler_unsafe_end.h>
+    T x;
+    T y;
+    T z;
 
     vec_t() noexcept
             : x{0},
@@ -213,13 +217,7 @@ struct vec_t<3, T> {
         return vec_t<2, T>{x, y};
     }
 
-    inline T& operator[](const unsigned index) {
-        return data_[index];
-    }
-
-    inline const T& operator[](const unsigned index) const {
-        return data_[index];
-    }
+    MAKE_ARRAY_ACCESS
 };
 
 template<typename T>
@@ -236,19 +234,10 @@ struct vec_t<4, T> {
     static const self_type zero;
     static const self_type one;
 
-#include <ek/math/internal/compiler_unsafe_begin.h>
-
-    union {
-        struct {
-            T x, y, z, w;
-        };
-        struct {
-            T r, g, b, a;
-        };
-        T data_[dim];
-    };
-
-#include <ek/math/internal/compiler_unsafe_end.h>
+    T x;
+    T y;
+    T z;
+    T w;
 
     vec_t() noexcept
             : x{0},
@@ -336,6 +325,8 @@ struct vec_t<4, T> {
                z != v.z ||
                w != v.w;
     }
+
+    MAKE_ARRAY_ACCESS
 };
 
 template<typename T>
@@ -352,7 +343,7 @@ template<typename T, unsigned N>
 inline T dot(const vec_t<N, T>& a, const vec_t<N, T>& b) {
     T sum{0};
     for (unsigned i = 0; i < N; ++i) {
-        sum += a.data_[i] * b.data_[i];
+        sum += a[i] * b[i];
     }
     return sum;
 }
@@ -360,7 +351,7 @@ inline T dot(const vec_t<N, T>& a, const vec_t<N, T>& b) {
 template<typename T, unsigned N>
 bool equals(const vec_t<N, T>& a, const vec_t<N, T>& b) {
     for (unsigned i = 0; i < N; ++i) {
-        if (!math::equals(a.data_[i], b.data_[i])) {
+        if (!math::equals(a[i], b[i])) {
             return false;
         }
     }
@@ -427,7 +418,7 @@ template<typename T, unsigned N>
 constexpr vec_t<N, T> min_components(const vec_t<N, T>& a, const vec_t<N, T>& b) noexcept {
     vec_t<N, T> r;
     for (unsigned i = 0; i < N; ++i) {
-        r.data_[i] = std::min(a.data_[i], b.data_[i]);
+        r[i] = std::min(a[i], b[i]);
     }
     return r;
 }
@@ -436,7 +427,7 @@ template<typename T, unsigned N>
 constexpr vec_t<N, T> max_components(const vec_t<N, T>& a, const vec_t<N, T>& b) noexcept {
     vec_t<N, T> r;
     for (unsigned i = 0; i < N; ++i) {
-        r.data_[i] = std::max(a.data_[i], b.data_[i]);
+        r[i] = std::max(a[i], b[i]);
     }
     return r;
 }

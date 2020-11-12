@@ -5,7 +5,6 @@
 #include <ek/scenex/components/transform_2d.hpp>
 #include <ek/scenex/components/movie.hpp>
 #include <ek/scenex/systems/movie_clip_system.hpp>
-#include <ek/scenex/components/name.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/ext/analytics/analytics.hpp>
@@ -67,7 +66,7 @@ void initialize_events(ecs::entity e) {
 
         start_post_tween(btn);
         btn.clicked.emit();
-        auto name = ecs::get_or_default<name_t>(e).name;
+        auto name = ecs::get_or_default<node_t>(e).name;
         if (!name.empty()) {
             analytics::event("click", name.c_str());
         }

@@ -23,6 +23,9 @@ int main(int argc, char* argv[]) {
 namespace ek {
 
 void start_application() {
+    // TODO: ios/macos support creation flags
+    //  `g_app.window_cfg.needDepth`
+
 #if TARGET_OS_IOS || TARGET_OS_TV
     int argc = g_app.args.argc;
     char** argv = g_app.args.argv;

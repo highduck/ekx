@@ -4,7 +4,6 @@
 #include <ek/scenex/components/node.hpp>
 #include <ek/scenex/components/transform_2d.hpp>
 #include <ek/scenex/components/display_2d.hpp>
-#include <ek/scenex/components/name.hpp>
 #include <ek/scenex/components/movie.hpp>
 #include <ek/scenex/components/button.hpp>
 #include <ek/scenex/components/interactive.hpp>
@@ -18,8 +17,9 @@ namespace {
 using asset_ref = asset_t<sg_file>;
 
 void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
-    ecs::get<name_t>(entity).name = data->name;
-    if(data->movieTargetId >= 0) {
+    auto& node = ecs::get<node_t>(entity);
+    node.name = data->name;
+    if (data->movieTargetId >= 0) {
         ecs::get_or_create<movie_target_keys>(entity) = {data->movieTargetId};
     }
 
@@ -31,18 +31,26 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     transform.color_multiplier = argb32_t(data->color.multiplier);
     transform.color_offset = argb32_t(data->color.offset);
 
-    auto& node_state = ecs::get<node_state_t>(entity);
-    node_state.touchable = data->touchable;
-    node_state.visible = data->visible;
+    node.setTouchable(data->touchable);
+    node.setVisible(data->visible);
 
     if (data->dynamicText.has_value()) {
         const auto& dynamicText = data->dynamicText.value();
-        text_format_t format{dynamicText.face, dynamicText.size};
+        TextFormat format{dynamicText.font.c_str(), dynamicText.size};
         format.alignment = dynamicText.alignment;
-        format.lineSpacing = dynamicText.line_spacing;
-        format.lineHeight = dynamicText.line_height;
-        format.shadow = false;
-        format.color = dynamicText.color;
+        format.leading = dynamicText.line_spacing;
+        format.layersCount = dynamicText.layers.size();
+        if (format.layersCount > 4) {
+            format.layersCount = 4;
+        }
+        for (int i = 0; i < format.layersCount; ++i) {
+            auto& layer = dynamicText.layers[i];
+            format.layers[i].color = layer.color;
+            format.layers[i].offset = layer.offset;
+            format.layers[i].blurRadius = layer.blurRadius;
+            format.layers[i].blurIterations = layer.blurIterations;
+            format.layers[i].strength = layer.strength;
+        }
 
         auto& display = ecs::get_or_create<display_2d>(entity);
         auto dtext = std::make_unique<drawable_text>(dynamicText.text, format);
@@ -102,7 +110,7 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
 ecs::entity create_and_merge(const sg_file& sg, asset_ref asset,
                              const sg_node_data* data,
                              const sg_node_data* over = nullptr) {
-    auto entity = ecs::create<node_t, node_state_t, transform_2d, name_t>();
+    auto entity = ecs::create<node_t, transform_2d>();
     if (data) {
         apply(entity, data, asset);
     }

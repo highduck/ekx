@@ -10,7 +10,7 @@ class editor_asset_t;
 
 class editor_project_t {
 public:
-    using asset_factory = std::function<editor_asset_t * (path_t)>;
+    using AssetFactory = std::function<editor_asset_t * (path_t)>;
 
     editor_project_t();
 
@@ -30,18 +30,20 @@ public:
 
     void populate(bool auto_load = true);
 
-    template<typename EditorAsset>
+    template<typename EditorAssetType>
     void register_asset_factory() {
-        type_factory[EditorAsset::type_name] = [](auto x) { return new EditorAsset(x); };
+        type_factory[EditorAssetType::type_name] = [](auto x) { return new EditorAssetType(x); };
     }
 
     path_t base_path{"../assets"};
 
     std::vector<editor_asset_t*> assets;
-    std::unordered_map<std::string, asset_factory> type_factory;
+    std::unordered_map<std::string, AssetFactory> type_factory;
 
     float scale_factor = 2.0f;
     int scale_uid = 2;
+
+    bool devMode = true;
 };
 
 }

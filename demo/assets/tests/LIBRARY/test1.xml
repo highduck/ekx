@@ -1,0 +1,157 @@
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test1" itemID="5fac537a-00000330" linkageExportForAS="true" linkageClassName="test1" lastModified="1605129082" lastUniqueIdentifier="1">
+  <timeline>
+    <DOMTimeline name="test1">
+      <layers>
+        <DOMLayer name="Layer_4" color="#FF4FFF">
+          <frames>
+            <DOMFrame index="0" keyMode="9728">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/potion_object/potion">
+                  <matrix>
+                    <Matrix a="0.62896728515625" d="0.62872314453125" tx="251.65" ty="390.85"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-4.2" y="-53.35"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/vilager/villager_01_dance">
+                  <matrix>
+                    <Matrix tx="249.7" ty="389.8"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="0.4" y="0.95"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Layer_1" color="#00FFFF" current="true" isSelected="true">
+          <frames>
+            <DOMFrame index="0" keyMode="9728">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/easing">
+                  <matrix>
+                    <Matrix a="0.2213134765625" d="0.221282958984375" tx="-1" ty="-1"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="66.85" y="264.6"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/mirror">
+                  <matrix>
+                    <Matrix a="0.26190185546875" d="0.26165771484375" tx="147.95" ty="30.85"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="1.9" y="-4.8"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/bone_root">
+                  <matrix>
+                    <Matrix a="0.226364135742188" d="0.226348876953125" tx="138.45" ty="85"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="66.05" y="0.2"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/skew1">
+                  <matrix>
+                    <Matrix a="0.421630859375" d="0.42205810546875" tx="265" ty="30.25"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-1.65" y="2.25"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/skew2">
+                  <matrix>
+                    <Matrix a="0.421630859375" d="0.42205810546875" tx="261.2" ty="85.95"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-19.9" y="14.8"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/skew3">
+                  <matrix>
+                    <Matrix a="0.421630859375" d="0.42205810546875" tx="228.05" ty="148.35"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="76.6" y="4.05"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/alpha_test">
+                  <matrix>
+                    <Matrix a="0.39483642578125" d="0.39471435546875" tx="16" ty="120"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="103.6" y="104.9"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/nesteddance" name="dance_instance" centerPoint3DX="182.15" centerPoint3DY="139.45">
+                  <matrix>
+                    <Matrix a="0.159774780273438" d="0.15966796875" tx="148" ty="135"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-64.45" y="-134.65"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/color_transform/color_transform">
+                  <matrix>
+                    <Matrix tx="20.5" ty="215"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="139.95" y="79.95"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_button/button" selected="true" symbolType="button" centerPoint3DX="100.35" centerPoint3DY="435.25">
+                  <matrix>
+                    <Matrix a="0.999984741210938" d="0.999984741210938" tx="100.05" ty="434.95"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="0.3" y="0.3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_button/button" symbolType="button" centerPoint3DX="259.6" centerPoint3DY="449.45">
+                  <matrix>
+                    <Matrix a="0.499984741210938" d="0.499984741210938" tx="259.3" ty="449.6"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="0.6" y="-0.3"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/cubeAnimation">
+                  <matrix>
+                    <Matrix tx="274.55" ty="207"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-0.4" y="-0.05"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/gg/guybrush" centerPoint3DX="275.25" centerPoint3DY="207.25">
+                  <matrix>
+                    <Matrix a="0.25" d="0.25" tx="275.45" ty="207.25"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-0.8" y="0.6"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+        <DOMLayer name="Layer_2" color="#9933CC">
+          <frames>
+            <DOMFrame index="0" keyMode="9728">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_bg/mc_background">
+                  <transformationPoint>
+                    <Point x="2555" y="1915"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
+      </layers>
+    </DOMTimeline>
+  </timeline>
+</DOMSymbolItem>

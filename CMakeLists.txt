@@ -72,6 +72,4 @@ if (EKX_BUILD_BENCHMARKS)
     add_subdirectory(tests/ecxx/benchmarks)
 endif ()
 
-# Samples
-
-add_subdirectory(samples/picos)
+add_subdirectory(demo)

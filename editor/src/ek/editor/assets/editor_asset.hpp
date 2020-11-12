@@ -6,7 +6,6 @@
 #include <pugixml.hpp>
 #include "editor_project.hpp"
 
-
 namespace ek {
 
 class editor_project_t;
@@ -19,6 +18,9 @@ struct assets_build_struct_t {
 };
 
 
+// Editor asset is a meta resource,
+// - editor asset could be loaded to game from raw resource
+// - editor asset could be exported to asset bundle
 class editor_asset_t {
 public:
     explicit editor_asset_t(path_t path, std::string type_name);
@@ -71,5 +73,6 @@ protected:
     std::string name_;
     std::string type_name_;
 };
+
 }
 

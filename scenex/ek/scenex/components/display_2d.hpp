@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <string>
-#include <ek/scenex/2d/text_format.hpp>
+#include <ek/scenex/text/text_format.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/mat3x2.hpp>
 #include <ek/util/type_index.hpp>
@@ -58,12 +58,6 @@ struct scissors_2d {
 
 struct hit_area_2d {
     rect_f rect;
-};
-
-struct node_state_t {
-    bool visible = true;
-    bool touchable = true;
-    uint8_t layer_mask = 0xFFu;
 };
 
 struct display_2d {
@@ -134,12 +128,21 @@ public:
 class drawable_text : public drawable_2d<drawable_text> {
 public:
     std::string text;
-    text_format_t format;
+    TextFormat format;
     rect_f rect;
+
+    argb32_t borderColor = 0x00FF0000_argb;
+    argb32_t fillColor = 0x00000000_argb;
+
+    // if enabled hit test check not rect, but visible text bounds
+    bool hitFullBounds = true;
+
+    // debug metrics
+    bool showTextBounds = false;
 
     drawable_text();
 
-    drawable_text(std::string text, text_format_t format);
+    drawable_text(std::string text, TextFormat format);
 
     void draw() override;
 

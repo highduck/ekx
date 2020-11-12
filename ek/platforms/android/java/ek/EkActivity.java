@@ -74,10 +74,10 @@ public class EkActivity extends Activity {
     }
 
     @Keep
-    public static void start_application() {
+    public static void start_application(int flags) {
         EkActivity activity = EkActivity.getInstance();
         EkPlatform.initAssets(activity.getAssets());
-        activity.glView = new EkSurfaceView(activity);
+        activity.glView = new EkSurfaceView(activity, (flags & 1) != 0);
         activity.mainLayout.addView(activity.glView);
 
         EkPluginManager.instance.onStart();
@@ -124,7 +124,7 @@ public class EkActivity extends Activity {
                 // Hide the nav bar and status bar
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             flags |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         }
         View decorView = window.getDecorView();
@@ -210,7 +210,7 @@ public class EkActivity extends Activity {
     @Keep
     public static void app_exit(int code) {
         instance.runOnUiThread(() -> {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 instance.finishAndRemoveTask();
             }
             //instance.finishAffinity();

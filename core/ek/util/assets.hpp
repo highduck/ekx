@@ -18,12 +18,14 @@ class asset_t {
     static std::unordered_map<std::string, slot> storage_;
 
 public:
-    asset_t()
-            : slot_{nullptr} {
+    asset_t() :
+            slot_{nullptr} {
 
     }
 
     explicit asset_t(const std::string& id);
+
+    void setID(const std::string& id);
 
     inline void reset(const T* res = nullptr) {
         if (slot_) {
@@ -84,6 +86,11 @@ std::unordered_map<std::string, typename asset_t<T>::slot> asset_t<T>::storage_{
 template<typename T>
 asset_t<T>::asset_t(const std::string& id)
         : slot_{&asset_t<T>::storage_[id]} {
+}
+
+template<typename T>
+void asset_t<T>::setID(const std::string& id) {
+    slot_ = &asset_t<T>::storage_[id];
 }
 
 }

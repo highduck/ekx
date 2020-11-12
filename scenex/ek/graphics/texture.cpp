@@ -1,7 +1,17 @@
 #include "texture.hpp"
 #include "gl_debug.hpp"
+#include "graphics.hpp"
+#include "gl_def.hpp"
 #include <ek/imaging/image.hpp>
 #include <cassert>
+
+#ifndef GL_INTENSITY
+#define GL_INTENSITY                0x8049
+#endif
+
+#ifndef GL_LUMINANCE
+#define GL_LUMINANCE                      0x1909
+#endif
 
 namespace ek::graphics {
 
@@ -35,9 +45,9 @@ void begin_texture_setup(GLuint texture_id, GLenum target_type) {
 #endif
 }
 
-void end_texture_setup(GLenum target_type) {
+void end_texture_setup(GLenum target_type, GLenum minFilter = GL_LINEAR) {
     glTexParameteri(target_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(target_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(target_type, GL_TEXTURE_MIN_FILTER, minFilter);
     glTexParameteri(target_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(target_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 #ifndef EK_GLES2
@@ -71,6 +81,68 @@ void texture_t::upload_pixels(uint32_t width, uint32_t height, const uint32_t* p
     end_texture_setup(gl_texture_target_);
 }
 
+void texture_t::uploadAlpha8(uint32_t width, uint32_t height, const uint8_t* alphaMap) {
+    type_ = texture_type::alpha8;
+
+    begin_texture_setup(handle_, gl_texture_target_);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    graphics::gl::check_error();
+
+    auto textureFormat = GL_INTENSITY;
+    auto internalFormat = GL_LUMINANCE;
+
+    if (getContextType() == GraphicsContextType::OpenGL_ES_3) {
+        textureFormat = GL_R8;
+        internalFormat = GL_RED;
+    }
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelsRgba32);
+    glTexImage2D(gl_texture_target_, 0, textureFormat, width, height, 0, internalFormat, GL_UNSIGNED_BYTE, alphaMap);
+    gl::check_error();
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    graphics::gl::check_error();
+
+    if (getContextType() == GraphicsContextType::OpenGL_ES_3) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_RED);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
+    }
+
+    end_texture_setup(gl_texture_target_);
+}
+
+void texture_t::uploadSubAlpha8(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint8_t* alphaMap) {
+    begin_texture_setup(handle_, gl_texture_target_);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    graphics::gl::check_error();
+
+    auto textureFormat = GL_INTENSITY;
+    auto internalFormat = GL_LUMINANCE;
+
+    if (getContextType() == GraphicsContextType::OpenGL_ES_3) {
+        textureFormat = GL_R8;
+        internalFormat = GL_RED;
+    }
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, internalFormat, GL_UNSIGNED_BYTE, alphaMap);
+    gl::check_error();
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    graphics::gl::check_error();
+
+    if (getContextType() == GraphicsContextType::OpenGL_ES_3) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_RED);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
+    }
+
+    glGenerateMipmap(gl_texture_target_);
+    graphics::gl::check_error();
+    glTexParameterf(gl_texture_target_, GL_TEXTURE_LOD_BIAS, -0.7);
+    end_texture_setup(gl_texture_target_, GL_LINEAR_MIPMAP_LINEAR);
+}
+
 void texture_t::bind(int unit) const {
     glActiveTexture(GL_TEXTURE0 + (GLenum) unit);
     gl::check_error();
@@ -95,6 +167,17 @@ void texture_t::reset(uint32_t width, uint32_t height, texture_type type) {
     GLenum pixel_type = GL_UNSIGNED_BYTE;
 
     switch (type_) {
+        case texture_type::alpha8:
+            if (getContextType() == GraphicsContextType::OpenGL_ES_3) {
+                texture_format = GL_R8;
+                internal_format = GL_RED;
+                pixel_type = GL_UNSIGNED_BYTE;
+            } else {
+                texture_format = GL_INTENSITY;
+                internal_format = GL_LUMINANCE;
+                pixel_type = GL_UNSIGNED_BYTE;
+            }
+            break;
         case texture_type::depth16:
             texture_format = GL_DEPTH_COMPONENT;
             internal_format = GL_DEPTH_COMPONENT16;

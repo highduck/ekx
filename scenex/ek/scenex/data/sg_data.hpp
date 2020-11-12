@@ -9,6 +9,7 @@
 #include <ek/math/box.hpp>
 #include <ek/math/color_transform.hpp>
 #include <ek/util/assets.hpp>
+#include <ek/scenex/text/text_format.hpp>
 
 namespace ek {
 
@@ -31,19 +32,33 @@ struct filter_data {
     }
 };
 
-struct dynamic_text_data {
-    rect_f rect;
-    std::string text;
-    std::string face;
-    float2 alignment;
-    float line_spacing = 0.0f;
-    float line_height = 0.0f;
-    float size;
-    argb32_t color;
+struct SGTextLayerData {
+    argb32_t color = 0xFFFFFFFF_argb;
+    float2 offset{};
+    float blurRadius = 0.0f;
+    int blurIterations = 0;
+    int strength = 0;
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(rect, text, face, alignment, line_spacing, line_height, size, color);
+        io(color, offset, blurRadius, blurIterations, strength);
+    }
+};
+
+struct dynamic_text_data {
+    std::string text;
+    std::string font;
+    float size;
+    float2 alignment;
+    rect_f rect;
+    float line_spacing = 0.0f;
+    float line_height = 0.0f;
+
+    std::vector<SGTextLayerData> layers;
+
+    template<typename S>
+    void serialize(IO<S>& io) {
+        io(text, font, size, alignment, rect, line_spacing, line_height, layers);
     }
 };
 
@@ -115,7 +130,7 @@ struct movie_frame_data {
     template<typename S>
     void serialize(IO<S>& io) {
         io(index, duration, motion_type, transform, easing,
-        loopMode, firstFrame, rotate, rotateTimes, visible);
+           loopMode, firstFrame, rotate, rotateTimes, visible);
     }
 
     [[nodiscard]]

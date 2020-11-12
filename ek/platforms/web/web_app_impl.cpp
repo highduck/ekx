@@ -30,14 +30,14 @@ void loop() {
 
 EMSCRIPTEN_WEBGL_CONTEXT_HANDLE webgl_context;
 
-const char* DIV_ID = "gamecontainer";
-const char* CANVAS_ID = "gameview";
+const char* DIV_ID = "#gamecontainer";
+const char* CANVAS_ID = "#gameview";
 
-void init_webgl_context() {
+void init_webgl_context(bool needDepth) {
     EmscriptenWebGLContextAttributes attrs;
     emscripten_webgl_init_context_attributes(&attrs);
     attrs.alpha = false;
-    attrs.depth = true;
+    attrs.depth = needDepth;
     attrs.stencil = false;
     attrs.antialias = false;
 
@@ -265,7 +265,7 @@ static EM_BOOL onEmscriptenResize(int type, const EmscriptenUiEvent*, void*) {
 }
 
 void init_canvas() {
-    emscripten_set_resize_callback(nullptr, nullptr, true, onEmscriptenResize);
+    emscripten_set_resize_callback(0, nullptr, true, onEmscriptenResize);
     handle_resize();
 }
 
@@ -274,7 +274,7 @@ namespace ek {
 void start_application() {
     init_canvas();
     subscribe_input();
-    init_webgl_context();
+    init_webgl_context(g_app.window_cfg.needDepth);
 
     dispatch_init();
     dispatch_device_ready();

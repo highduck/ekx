@@ -34,7 +34,7 @@ filter_t& operator<<(filter_t& r, const xml_node& node) {
     r.distance = node.attribute("distance").as_float(4.0f);
     r.angle = node.attribute("angle").as_float(45.0f);
     r.quality = node.attribute("quality").as_int(1);
-    r.strength = node.attribute("strength").as_float(100.0f);
+    r.strength = node.attribute("strength").as_float(1.0f);
     r.inner = node.attribute("inner").as_bool(false);
     r.knockout = node.attribute("knockout").as_bool(false);
     r.hideObject = node.attribute("hideObject").as_bool(false);

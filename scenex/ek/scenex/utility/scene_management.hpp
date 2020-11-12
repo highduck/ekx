@@ -4,15 +4,14 @@
 #include <ek/scenex/components/node.hpp>
 #include <ek/scenex/components/transform_2d.hpp>
 #include <ek/scenex/components/script.hpp>
-#include <ek/scenex/components/name.hpp>
 #include <ek/scenex/components/display_2d.hpp>
 #include <ek/scenex/components/event_handler.hpp>
 
 namespace ek {
 
 inline ecs::entity create_node_2d(const std::string& name) {
-    auto e = ecs::create<node_t, transform_2d, name_t>();
-    ecs::get<name_t>(e).name = name;
+    auto e = ecs::create<node_t, transform_2d>();
+    ecs::get<node_t>(e).name = name;
     return e;
 }
 
@@ -57,27 +56,27 @@ inline float2 get_scale(ecs::entity e) {
 }
 
 inline void set_name(ecs::entity e, const std::string& name) {
-    ecs::get_or_create<name_t>(e).name = name;
+    ecs::get_or_create<node_t>(e).name = name;
 }
 
 inline const std::string& get_name(ecs::entity e) {
-    return ecs::get_or_default<name_t>(e).name;
+    return ecs::get_or_default<node_t>(e).name;
 }
 
 inline bool is_visible(ecs::entity e) {
-    return ecs::get_or_default<node_state_t>(e).visible;
+    return ecs::get_or_default<node_t>(e).visible();
 }
 
 inline void set_visible(ecs::entity e, bool v) {
-    ecs::get_or_create<node_state_t>(e).visible = v;
+    ecs::get_or_create<node_t>(e).setVisible(v);
 }
 
 inline bool is_touchable(ecs::entity e) {
-    return ecs::get_or_default<node_state_t>(e).touchable;
+    return ecs::get_or_default<node_t>(e).touchable();
 }
 
 inline void set_touchable(ecs::entity e, bool v) {
-    ecs::get_or_create<node_state_t>(e).touchable = v;
+    ecs::get_or_create<node_t>(e).setTouchable(v);
 }
 
 template<typename S>
@@ -184,10 +183,11 @@ inline void notify_parents(ecs::entity e, const std::string& event, const std::s
 inline ecs::entity find(const ecs::entity e, const char* child_name) {
     auto it = ecs::get<node_t>(e).child_first;
     while (it) {
-        if (ecs::get_or_default<name_t>(it).name == child_name) {
+        const auto& node = ecs::get<node_t>(it);
+        if (node.name == child_name) {
             return it;
         }
-        it = ecs::get<node_t>(it).sibling_next;
+        it = node.sibling_next;
     }
     return ecs::null;
 }

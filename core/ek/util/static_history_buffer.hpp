@@ -2,7 +2,7 @@
 
 namespace ek {
 
-template<typename T, typename SizeType, SizeType Capacity>
+template<typename T, int Capacity>
 class static_history_buffer {
 public:
     void write(const T& v) {
@@ -13,24 +13,32 @@ public:
         return false;
     }
 
-    inline SizeType size() const {
+    inline int size() const {
         return Capacity;
     }
 
-    inline SizeType capacity() const {
+    inline int capacity() const {
         return Capacity;
     }
 
-    inline T at(SizeType index) const {
+    // 0 1 2 3
+    //   ^   ^
+    //   |   1 + 2 = 3
+    //   1 + 0 = 1
+    // ^
+    // 1 + 3 = 4 % 4 = 0
+    //   1 + 4 = 5 % 4 = 1
+
+    inline T at(int index) const {
         return buf_[(idx_write_ + index) % Capacity];
     }
 
-    inline T at_backward(SizeType index) const {
+    inline T at_backward(int index) const {
         return buf_[(Capacity + idx_write_ - 1 - (index % Capacity)) % Capacity];
     }
 
 private:
-    SizeType idx_write_{0};
+    int idx_write_{0};
     T buf_[Capacity]{};
 };
 }

@@ -21,8 +21,10 @@
 #if TARGET_OS_OSX
 
 #include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/glext.h>
+//#include <OpenGL/gl.h>
+//#include <OpenGL/glext.h>
+#include <OpenGL/gl3.h>
+#include <OpenGL/gl3ext.h>
 
 #elif TARGET_OS_IOS
 
@@ -35,6 +37,7 @@
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
 
 #define EK_GLES2
 

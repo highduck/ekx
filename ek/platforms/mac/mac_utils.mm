@@ -34,7 +34,7 @@ void init_scan_table() {
     SCAN_CODE_TABLE[kVK_Home] = key_code::Home;
     SCAN_CODE_TABLE[kVK_End] = key_code::End;
     SCAN_CODE_TABLE[kVK_ANSI_KeypadDivide] = key_code::Insert;
-    SCAN_CODE_TABLE[kVK_Delete] = key_code::Delete;
+    SCAN_CODE_TABLE[kVK_ForwardDelete] = key_code::Delete;
     SCAN_CODE_TABLE[kVK_ANSI_A] = key_code::A;
     SCAN_CODE_TABLE[kVK_ANSI_C] = key_code::C;
     SCAN_CODE_TABLE[kVK_ANSI_V] = key_code::V;

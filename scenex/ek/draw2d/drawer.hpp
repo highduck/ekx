@@ -224,4 +224,6 @@ void line_arc(float x, float y, float r,
               float line_width, int segments,
               argb32_t color_inner, argb32_t color_outer);
 
+void strokeRect(const rect_f& rc, argb32_t color, float lineWidth);
+
 }

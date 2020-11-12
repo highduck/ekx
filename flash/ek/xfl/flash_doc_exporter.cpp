@@ -72,16 +72,14 @@ void process_transform(const element_t& el, export_item_t& item) {
 
 void process_filters(const element_t& el, export_item_t& item) {
     for (auto& filter : el.filters) {
-        float a = math::to_radians(filter.angle);
-        float d = filter.distance;
-        float2 offset{d * cosf(a), d * sinf(a)};
-
         filter_data fd;
         fd.type = sg_filter_type::none;
         fd.color = argb32_t{filter.color};
-        fd.offset = offset;
         fd.blur = filter.blur;
         fd.quality = filter.quality;
+
+        float a = math::to_radians(filter.angle);
+        fd.offset = filter.distance * float2{cosf(a), sinf(a)};
 
         if (filter.type == filter_kind_t::drop_shadow) {
             fd.type = sg_filter_type::drop_shadow;
@@ -92,6 +90,48 @@ void process_filters(const element_t& el, export_item_t& item) {
         if (fd.type != sg_filter_type::none) {
             item.node.filters.push_back(fd);
         }
+    }
+}
+
+void processTextField(const element_t& el, export_item_t& item, const flash_doc& doc) {
+    auto& tf = item.node.dynamicText.emplace();
+    //if(dynamicText.rect != null) {
+//    item->node.matrix.tx += el.rect.x - 2;
+//    item->node.matrix.ty += el.rect.y - 2;
+    //}
+    const auto& textRun = el.textRuns[0];
+    string faceName = textRun.attributes.face;
+    if (!faceName.empty() && faceName.back() == '*') {
+        faceName.pop_back();
+        const auto* fontItem = doc.find(faceName, element_type::font_item, true);
+        if (fontItem) {
+            faceName = fontItem->font;
+        }
+    }
+
+    tf.text = textRun.characters;
+    tf.font = faceName;
+    tf.size = textRun.attributes.size;
+    tf.rect = expand(el.rect, 2.0f);
+    tf.alignment = textRun.attributes.alignment;
+    tf.line_height = textRun.attributes.line_height;
+    tf.line_spacing = textRun.attributes.line_spacing;
+
+    SGTextLayerData layer;
+    layer.color = argb32_t{textRun.attributes.color};
+    tf.layers.push_back(layer);
+
+    for (auto& filter : el.filters) {
+        layer.color = argb32_t{filter.color};
+        layer.blurRadius = std::fmin(filter.blur.x, filter.blur.y);
+        layer.blurIterations = filter.quality;
+        layer.offset = {};
+        if (filter.type == filter_kind_t::drop_shadow) {
+            const float a = math::to_radians(filter.angle);
+            layer.offset = filter.distance * float2{cosf(a), sinf(a)};
+        }
+        layer.strength = int(filter.strength);
+        tf.layers.push_back(layer);
     }
 }
 
@@ -244,31 +284,9 @@ void flash_doc_exporter::process_dynamic_text(const element_t& el, export_item_t
     process_transform(el, *item);
     item->node.name = el.item.name;
 
-    //if(dynamicText.rect != null) {
-//    item->node.matrix.tx += el.rect.x - 2;
-//    item->node.matrix.ty += el.rect.y - 2;
-    //}
-    string face = el.textRuns[0].attributes.face;
-    if (!face.empty() && face.back() == '*') {
-        face.pop_back();
-        const auto* fontItem = doc.find(face, element_type::font_item);
-        if (fontItem) {
-            face = fontItem->font;
-        }
-    }
 
-    item->node.dynamicText.emplace();
-    item->node.dynamicText->rect = expand(el.rect, 2.0f);
     // TODO: replace '\r' to '\n' ?
-    item->node.dynamicText->text = el.textRuns[0].characters;
-    item->node.dynamicText->alignment = el.textRuns[0].attributes.alignment;
-    item->node.dynamicText->face = face;
-    item->node.dynamicText->size = el.textRuns[0].attributes.size;
-    item->node.dynamicText->line_height = el.textRuns[0].attributes.line_height;
-    item->node.dynamicText->line_spacing = el.textRuns[0].attributes.line_spacing;
-    item->node.dynamicText->color = argb32_t{el.textRuns[0].attributes.color};
-
-    process_filters(el, *item);
+    processTextField(el, *item, doc);
 
     item->append_to(parent);
     if (bag) {
@@ -571,13 +589,9 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
             }
         }
 
-        auto it = movie.layers.begin();
-        const auto end = movie.layers.end();
-        while (it != movie.layers.end()) {
-            bool empty = false;
-            if (it->frames.empty()) {
-                empty = true;
-            }
+        auto& movieLayers = movie.layers;
+        for (auto it = movieLayers.begin(); it != movieLayers.end();) {
+            bool empty = it->frames.empty();
             if (it->frames.size() == 1) {
                 const auto& frame = it->frames[0];
                 if (frame.index == 0 && frame.motion_type != 2 && frame.duration == movie.frames) {
@@ -585,15 +599,15 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
                 }
             }
             if (empty) {
-                it = movie.layers.erase(it);
+                it = movieLayers.erase(it);
             } else {
                 it++;
             }
         }
 
-        if (movie.frames > 1 && !movie.layers.empty()) {
-            for (size_t i = 0; i < movie.layers.size(); ++i) {
-                for (auto* target : movie.layers[i].targets) {
+        if (movie.frames > 1 && !movieLayers.empty()) {
+            for (size_t i = 0; i < movieLayers.size(); ++i) {
+                for (auto* target : movieLayers[i].targets) {
                     target->movieTargetId = static_cast<int>(i);
                 }
             }

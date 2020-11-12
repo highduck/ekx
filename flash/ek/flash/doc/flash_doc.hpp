@@ -16,8 +16,11 @@ public:
     explicit flash_doc(std::unique_ptr<basic_entry> root);
     explicit flash_doc(const path_t& path);
 
-    [[nodiscard]] const element_t* find(const std::string& name, element_type type) const;
-    [[nodiscard]] const element_t* find_linkage(const std::string& linkage) const;
+    [[nodiscard]] const element_t* find(const std::string& name,
+                                        element_type type = element_type::unknown,
+                                        bool ignoreFolders = false) const;
+    [[nodiscard]] const element_t* find_linkage(const std::string& className,
+                                                element_type type = element_type::unknown) const;
 
 public:
     document_info info;
