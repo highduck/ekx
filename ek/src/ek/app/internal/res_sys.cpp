@@ -2,6 +2,7 @@
 
 #if EK_STATIC_RESOURCES_READ_FILE
 
+#include <cassert>
 #include <cstdio>
 
 namespace ek::internal {

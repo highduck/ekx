@@ -8,10 +8,10 @@
 #include <utility>
 #include <string>
 
-// _LIBCPP_STD_VER <= 14
+//#if _LIBCPP_STD_VER <= 14
 #if (__cplusplus <= 201402L)
 namespace std {
-    typedef unsigned char byte;
+//    typedef unsigned char byte;
 }
 #endif
 

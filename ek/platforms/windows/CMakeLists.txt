@@ -7,14 +7,14 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         # MOCKS
         analytics.cpp
-        audiomini.cpp
         game_services.cpp
         sharing.cpp
         user_preferences.cpp
         )
 
 target_compile_options(${PROJECT_NAME} PUBLIC
-        -Wno-dollar-in-identifier-extension)
+        #-Wno-dollar-in-identifier-extension
+        )
 
 find_package(OpenGL REQUIRED)
 if (NOT OPENGL_FOUND)

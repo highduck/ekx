@@ -326,7 +326,7 @@ typedef struct AudioData {
     struct {
         AudioBuffer *first;         // Pointer to first AudioBuffer in the list
         AudioBuffer *last;          // Pointer to last AudioBuffer in the list
-        int defaultSize;            // Default audio buffer size for audio streams
+        int defaultSize = DEFAULT_AUDIO_BUFFER_SIZE;            // Default audio buffer size for audio streams
     } Buffer;
     struct {
         AudioBuffer *pool[MAX_AUDIO_BUFFER_POOL_CHANNELS];      // Multichannel AudioBuffer pointers pool
@@ -344,7 +344,7 @@ static AudioData AUDIO = {          // Global AUDIO context
         // After some math, considering a sampleRate of 48000, a buffer refill rate of 1/60 seconds and a
         // standard double-buffering system, a 4096 samples buffer has been chosen, it should be enough
         // In case of music-stalls, just increase this number
-        .Buffer.defaultSize = DEFAULT_AUDIO_BUFFER_SIZE
+//        .Buffer.defaultSize = DEFAULT_AUDIO_BUFFER_SIZE
 };
 
 //----------------------------------------------------------------------------------
