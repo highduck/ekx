@@ -111,27 +111,7 @@ struct TextFormat {
         layer.strength = uint8_t(7 * hardness / 100);
         layer.blurIterations = 3;
         layer.blurRadius = radius;
-    }
-};
-
-class text_format_t {
-public:
-    std::string font;
-    float size;
-    float lineHeight = -1.0f;
-    float lineSpacing = 0.0f;
-    argb32_t color{0xFFFFFFFF};
-    float2 alignment;
-
-    // TODO: remove
-    bool shadow = true;
-    argb32_t shadowColor{0xFF000000};
-    float2 shadowOffset{1.0f, 1.0f};
-
-    text_format_t(std::string font, float size, Alignment align = Alignment::TopLeft)
-            : font{std::move(font)},
-              size{size},
-              alignment{align.anchor()} {
+        layer.offset = offset;
     }
 };
 
