@@ -1,6 +1,6 @@
 #include "file_view.hpp"
 
-#ifndef __EMSCRIPTEN__
+#if !defined(_WINDOWS) && !defined(__EMSCRIPTEN__)
 
 #include <cerrno>
 #include <sys/stat.h>
@@ -63,7 +63,7 @@ int MapFile(const char* inPathName, void** outDataPtr, size_t* outDataLength) {
 namespace ek {
 
 FileView::FileView(const char* path) {
-#ifndef __EMSCRIPTEN__
+#if !defined(_WINDOWS) && !defined(__EMSCRIPTEN__)
     if (MapFile(path, reinterpret_cast<void**>(&data_), &size_) == 0) {
         mapped_ = true;
     }
@@ -72,7 +72,7 @@ FileView::FileView(const char* path) {
 
 FileView::~FileView() {
     if (mapped_) {
-#ifndef __EMSCRIPTEN__
+#if !defined(_WINDOWS) && !defined(__EMSCRIPTEN__)
         munmap(data_, size_);
 #endif
     }

@@ -27,7 +27,7 @@ void set_user_data(const std::string& key, const std::vector<uint8_t>& buffer) {
 }
 
 std::vector<uint8_t> get_user_data(const std::string& key) {
-    return ek::base64::decode(get_user_string(key));
+    return ek::base64::decode(get_user_string(key, ""));
 }
 
 }
