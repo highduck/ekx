@@ -96,6 +96,15 @@ struct box_t<2, T> {
         };
     }
 
+    inline T* data() {
+        return reinterpret_cast<T*>(this);
+    }
+
+    [[nodiscard]]
+    inline const T* data() const {
+        return reinterpret_cast<const T*>(this);
+    }
+
     inline T left() const { return x; }
 
     inline void left(T v) { x = v; };

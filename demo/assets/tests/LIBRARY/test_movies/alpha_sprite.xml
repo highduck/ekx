@@ -52,8 +52,8 @@
                   <edges>
                     <Edge fillStyle1="1" strokeStyle="3" edges="!3951 1901/3951 3876!3951 3876/2229 3876"/>
                     <Edge fillStyle1="1" strokeStyle="5" edges="!1560 2694/0 2983!0 2983|160 588"/>
-                    <Edge fillStyle1="1" strokeStyle="1" edges="!2229 3876/1560 2694"/>
                     <Edge fillStyle1="1" strokeStyle="4" edges="!160 588|2488 0"/>
+                    <Edge fillStyle1="1" strokeStyle="1" edges="!2229 3876/1560 2694"/>
                     <Edge fillStyle1="1" strokeStyle="2" edges="!2488 0/3951 1901"/>
                     <Edge cubics="!0 2983(;0,2983 160,588 160,588q0 2983 160 588);"/>
                     <Edge cubics="!2229 3876(;2229,3876 1560,2694 1560,2694p2229 3876q1560 2694);"/>

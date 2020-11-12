@@ -1,12 +1,12 @@
-<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test_button/button" itemID="51199b56-00000898" symbolType="button" lastModified="1554983143" lastUniqueIdentifier="6">
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test_button/button" itemID="51199b56-00000898" symbolType="button" lastModified="1605180408" lastUniqueIdentifier="6">
   <timeline>
     <DOMTimeline name="button" currentFrame="2" layerDepthEnabled="true">
       <layers>
-        <DOMLayer name="text" color="#FF800A" locked="true" autoNamed="false">
+        <DOMLayer name="text" color="#FF800A" current="true" isSelected="true" autoNamed="false">
           <frames>
-            <DOMFrame index="0" duration="4" keyMode="9728">
+            <DOMFrame index="0" duration="2" keyMode="9728">
               <elements>
-                <DOMDynamicText name="tf_text" selected="true" width="155.95" height="82" isSelectable="false" lineType="multiline">
+                <DOMDynamicText name="tf_text" selected="true" width="155.95" height="81.2" isSelectable="false" lineType="multiline">
                   <matrix>
                     <Matrix tx="-79" ty="-41"/>
                   </matrix>
@@ -17,13 +17,37 @@
                     <DOMTextRun>
                       <characters>Button&#xD;Button</characters>
                       <textAttrs>
-                        <DOMTextAttrs alignment="center" aliasText="false" rotation="true" lineSpacing="-14" lineHeight="40" size="40" bitmapSize="800" face="Foo-Regular" fillColor="#FDCD00"/>
+                        <DOMTextAttrs alignment="center" aliasText="false" rotation="true" letterSpacing="-3" lineSpacing="-8" lineHeight="44.6" size="40" bitmapSize="800" face="Font 1*" fillColor="#FDCD00"/>
                       </textAttrs>
                     </DOMTextRun>
                   </textRuns>
                   <filters>
                     <GlowFilter blurX="2" blurY="2" color="#000000" strength="3"/>
-                    <DropShadowFilter color="#412601" distance="1"/>
+                    <DropShadowFilter blurX="4" blurY="4" color="#412601" distance="1"/>
+                  </filters>
+                </DOMDynamicText>
+              </elements>
+            </DOMFrame>
+            <DOMFrame index="2" duration="2" keyMode="9728">
+              <elements>
+                <DOMDynamicText name="tf_text" selected="true" width="155.95" height="81.2" isSelectable="false" lineType="multiline">
+                  <matrix>
+                    <Matrix tx="-79" ty="-41"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="80.1" y="50.1"/>
+                  </transformationPoint>
+                  <textRuns>
+                    <DOMTextRun>
+                      <characters>Button&#xD;Button</characters>
+                      <textAttrs>
+                        <DOMTextAttrs alignment="center" aliasText="false" rotation="true" letterSpacing="-3" lineSpacing="-8" lineHeight="44.6" size="40" bitmapSize="800" face="Font 1*" fillColor="#FDCD00"/>
+                      </textAttrs>
+                    </DOMTextRun>
+                  </textRuns>
+                  <filters>
+                    <GlowFilter blurX="2" blurY="2" color="#000000" quality="3" strength="3"/>
+                    <DropShadowFilter blurX="4" blurY="4" color="#412601" distance="1" quality="3"/>
                   </filters>
                 </DOMDynamicText>
               </elements>
@@ -34,7 +58,7 @@
           <frames>
             <DOMFrame index="0" duration="2" keyMode="9728">
               <elements>
-                <DOMSymbolInstance libraryItemName="test_button/button_normal" name="out" selected="true">
+                <DOMSymbolInstance libraryItemName="test_button/button_normal" name="out">
                   <matrix>
                     <Matrix a="0.5" d="0.5"/>
                   </matrix>
@@ -49,7 +73,7 @@
             </DOMFrame>
           </frames>
         </DOMLayer>
-        <DOMLayer name="down" color="#9933CC" locked="true" current="true" isSelected="true" autoNamed="false">
+        <DOMLayer name="down" color="#9933CC" autoNamed="false">
           <frames>
             <DOMFrame index="0" duration="2" keyMode="9728">
               <elements/>

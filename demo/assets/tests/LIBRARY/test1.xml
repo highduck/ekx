@@ -1,7 +1,31 @@
-<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test" itemID="5c8beb55-0000011f" linkageExportForAS="true" linkageClassName="test" lastModified="1574072841">
+<DOMSymbolItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://ns.adobe.com/xfl/2008/" name="test1" itemID="5fac537a-00000330" linkageExportForAS="true" linkageClassName="test1" lastModified="1605129082" lastUniqueIdentifier="1">
   <timeline>
-    <DOMTimeline name="test">
+    <DOMTimeline name="test1">
       <layers>
+        <DOMLayer name="Layer_4" color="#FF4FFF">
+          <frames>
+            <DOMFrame index="0" keyMode="9728">
+              <elements>
+                <DOMSymbolInstance libraryItemName="test_movies/potion_object/potion">
+                  <matrix>
+                    <Matrix a="0.62896728515625" d="0.62872314453125" tx="251.65" ty="390.85"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="-4.2" y="-53.35"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+                <DOMSymbolInstance libraryItemName="test_movies/vilager/villager_01_dance">
+                  <matrix>
+                    <Matrix tx="249.7" ty="389.8"/>
+                  </matrix>
+                  <transformationPoint>
+                    <Point x="0.4" y="0.95"/>
+                  </transformationPoint>
+                </DOMSymbolInstance>
+              </elements>
+            </DOMFrame>
+          </frames>
+        </DOMLayer>
         <DOMLayer name="Layer_1" color="#00FFFF" current="true" isSelected="true">
           <frames>
             <DOMFrame index="0" keyMode="9728">
@@ -16,7 +40,7 @@
                 </DOMSymbolInstance>
                 <DOMSymbolInstance libraryItemName="test_movies/mirror">
                   <matrix>
-                    <Matrix a="0.26190185546875" d="0.26165771484375" tx="178" ty="28"/>
+                    <Matrix a="0.26190185546875" d="0.26165771484375" tx="147.95" ty="30.85"/>
                   </matrix>
                   <transformationPoint>
                     <Point x="1.9" y="-4.8"/>
@@ -24,7 +48,7 @@
                 </DOMSymbolInstance>
                 <DOMSymbolInstance libraryItemName="test_movies/bone_root">
                   <matrix>
-                    <Matrix a="0.226364135742188" d="0.226348876953125" tx="159" ty="85"/>
+                    <Matrix a="0.226364135742188" d="0.226348876953125" tx="138.45" ty="85"/>
                   </matrix>
                   <transformationPoint>
                     <Point x="66.05" y="0.2"/>
@@ -32,7 +56,7 @@
                 </DOMSymbolInstance>
                 <DOMSymbolInstance libraryItemName="test_movies/skew1">
                   <matrix>
-                    <Matrix a="0.421630859375" d="0.42205810546875" tx="314" ty="33"/>
+                    <Matrix a="0.421630859375" d="0.42205810546875" tx="265" ty="30.25"/>
                   </matrix>
                   <transformationPoint>
                     <Point x="-1.65" y="2.25"/>
@@ -40,7 +64,7 @@
                 </DOMSymbolInstance>
                 <DOMSymbolInstance libraryItemName="test_movies/skew2">
                   <matrix>
-                    <Matrix a="0.421630859375" d="0.42205810546875" tx="309" ty="86"/>
+                    <Matrix a="0.421630859375" d="0.42205810546875" tx="261.2" ty="85.95"/>
                   </matrix>
                   <transformationPoint>
                     <Point x="-19.9" y="14.8"/>
@@ -48,7 +72,7 @@
                 </DOMSymbolInstance>
                 <DOMSymbolInstance libraryItemName="test_movies/skew3">
                   <matrix>
-                    <Matrix a="0.421630859375" d="0.42205810546875" tx="349" ty="69"/>
+                    <Matrix a="0.421630859375" d="0.42205810546875" tx="228.05" ty="148.35"/>
                   </matrix>
                   <transformationPoint>
                     <Point x="76.6" y="4.05"/>
@@ -70,81 +94,25 @@
                     <Point x="-64.45" y="-134.65"/>
                   </transformationPoint>
                 </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="test_movies/vilager/villager_01_dance">
-                  <matrix>
-                    <Matrix tx="286" ty="195"/>
-                  </matrix>
-                  <transformationPoint>
-                    <Point x="0.4" y="0.95"/>
-                  </transformationPoint>
-                </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="test_movies/potion_object/potion">
-                  <matrix>
-                    <Matrix a="0.62896728515625" d="0.62872314453125" tx="411" ty="211"/>
-                  </matrix>
-                  <transformationPoint>
-                    <Point x="-4.2" y="-53.35"/>
-                  </transformationPoint>
-                </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="test_movies/gg/guybrush">
-                  <matrix>
-                    <Matrix tx="517" ty="92"/>
-                  </matrix>
-                  <transformationPoint>
-                    <Point x="-0.95" y="0.45"/>
-                  </transformationPoint>
-                </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="flump/walk">
-                  <matrix>
-                    <Matrix a="0.374298095703125" d="0.372848510742188" tx="45" ty="376"/>
-                  </matrix>
-                  <transformationPoint>
-                    <Point x="28.7" y="-126.75"/>
-                  </transformationPoint>
-                </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="flump/idle">
-                  <matrix>
-                    <Matrix a="0.374298095703125" d="0.372848510742188" tx="208" ty="365"/>
-                  </matrix>
-                  <transformationPoint>
-                    <Point x="13.2" y="-112.4"/>
-                  </transformationPoint>
-                </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="flump/defeat">
-                  <matrix>
-                    <Matrix a="0.374298095703125" d="0.372848510742188" tx="366" ty="365"/>
-                  </matrix>
-                  <transformationPoint>
-                    <Point x="16.55" y="-112.4"/>
-                  </transformationPoint>
-                </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="flump/attack">
-                  <matrix>
-                    <Matrix a="0.374298095703125" d="0.372848510742188" tx="517" ty="365"/>
-                  </matrix>
-                  <transformationPoint>
-                    <Point x="10.3" y="-111.85"/>
-                  </transformationPoint>
-                </DOMSymbolInstance>
                 <DOMSymbolInstance libraryItemName="test_movies/color_transform/color_transform">
                   <matrix>
-                    <Matrix tx="-9" ty="424"/>
+                    <Matrix tx="20.5" ty="215"/>
                   </matrix>
                   <transformationPoint>
                     <Point x="139.95" y="79.95"/>
                   </transformationPoint>
                 </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="test_button/button" symbolType="button" centerPoint3DX="373.3" centerPoint3DY="472.3">
+                <DOMSymbolInstance libraryItemName="test_button/button" selected="true" symbolType="button" centerPoint3DX="100.35" centerPoint3DY="435.25">
                   <matrix>
-                    <Matrix a="0.999984741210938" d="0.999984741210938" tx="373" ty="472"/>
+                    <Matrix a="0.999984741210938" d="0.999984741210938" tx="100.05" ty="434.95"/>
                   </matrix>
                   <transformationPoint>
                     <Point x="0.3" y="0.3"/>
                   </transformationPoint>
                 </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="test_button/button" symbolType="button" centerPoint3DX="530.3" centerPoint3DY="449.85">
+                <DOMSymbolInstance libraryItemName="test_button/button" symbolType="button" centerPoint3DX="259.6" centerPoint3DY="449.45">
                   <matrix>
-                    <Matrix a="0.499984741210938" d="0.499984741210938" tx="530" ty="450"/>
+                    <Matrix a="0.499984741210938" d="0.499984741210938" tx="259.3" ty="449.6"/>
                   </matrix>
                   <transformationPoint>
                     <Point x="0.6" y="-0.3"/>
@@ -152,34 +120,18 @@
                 </DOMSymbolInstance>
                 <DOMSymbolInstance libraryItemName="test_movies/cubeAnimation">
                   <matrix>
-                    <Matrix tx="193" ty="560"/>
+                    <Matrix tx="274.55" ty="207"/>
                   </matrix>
                   <transformationPoint>
                     <Point x="-0.4" y="-0.05"/>
                   </transformationPoint>
                 </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="bella/walk">
+                <DOMSymbolInstance libraryItemName="test_movies/gg/guybrush" centerPoint3DX="275.25" centerPoint3DY="207.25">
                   <matrix>
-                    <Matrix tx="674" ty="229"/>
+                    <Matrix a="0.25" d="0.25" tx="275.45" ty="207.25"/>
                   </matrix>
                   <transformationPoint>
-                    <Point x="5.05" y="0.3"/>
-                  </transformationPoint>
-                </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="bella/dance_01">
-                  <matrix>
-                    <Matrix tx="844" ty="230"/>
-                  </matrix>
-                  <transformationPoint>
-                    <Point x="-6.75" y="-5.95"/>
-                  </transformationPoint>
-                </DOMSymbolInstance>
-                <DOMSymbolInstance libraryItemName="bella/dance_02">
-                  <matrix>
-                    <Matrix tx="1000" ty="213"/>
-                  </matrix>
-                  <transformationPoint>
-                    <Point x="-6.45" y="9.75"/>
+                    <Point x="-0.8" y="0.6"/>
                   </transformationPoint>
                 </DOMSymbolInstance>
               </elements>

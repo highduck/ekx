@@ -10,7 +10,7 @@
 #include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/util/assets.hpp>
 
-#include <picos_main.hpp>
+#include <demo_main.hpp>
 #include <ek/scenex/systems/game_time.hpp>
 #include <ek/math/rand.hpp>
 #include "sample_3d.hpp"
@@ -136,6 +136,8 @@ void Sample3D::draw() {
 }
 
 Sample3D::Sample3D() {
+    title = "SCENE 3D";
+
     auto light_material = new material_3d;
     light_material->emission = float3::one;
     asset_t<material_3d>{"light_material"}.reset(light_material);

@@ -2,67 +2,88 @@
 
 #include <string>
 #include <ek/scenex/text/text_drawer.hpp>
-#include <ek/app/app.hpp>
 #include <ek/scenex/text/truetype_font.hpp>
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
-#include <imgui.h>
+#include <ek/scenex/utility/scene_management.hpp>
 
 namespace ek {
 
-SampleText::SampleText() :
-        SampleBase() {
-    textDrawer.format.font = asset_t<Font>{"Cousine-Regular"};
-    textDrawer.format.size = 48.0f;
+ecs::entity createText(const char* name, const char* font, const char* text) {
+    auto e = create_node_2d(name);
+    auto* tf = new drawable_text();
+
+    tf->format.font = asset_t<Font>(font);
+    tf->format.size = 48.0f;
 
     // primary
-    textDrawer.format.layers[0].color = 0xFFFF77_rgb;
+    tf->format.layers[0].color = 0xFFFF77_rgb;
 
     // inner stroke
-    textDrawer.format.layers[1].blurRadius = 1;
-    textDrawer.format.layers[1].blurIterations = 3;
-    textDrawer.format.layers[1].strength = 5;
-    textDrawer.format.layers[1].color = 0x330000_rgb;
+    tf->format.layers[1].nameID = "inner stroke";
+    tf->format.layers[1].blurRadius = 1;
+    tf->format.layers[1].blurIterations = 3;
+    tf->format.layers[1].strength = 5;
+    tf->format.layers[1].color = 0x330000_rgb;
 
     // outer stroke
-    textDrawer.format.layers[2].blurRadius = 2;
-    textDrawer.format.layers[2].blurIterations = 3;
-    textDrawer.format.layers[2].strength = 5;
-    textDrawer.format.layers[2].color = 0xFFFFFF_rgb;
+    tf->format.layers[2].nameID = "outer stroke";
+    tf->format.layers[2].blurRadius = 2;
+    tf->format.layers[2].blurIterations = 3;
+    tf->format.layers[2].strength = 5;
+    tf->format.layers[2].color = 0xFFFFFF_rgb;
 
     // shadow
-    textDrawer.format.layers[3].blurRadius = 8;
-    textDrawer.format.layers[3].blurIterations = 3;
-    textDrawer.format.layers[3].strength = 1;
-    textDrawer.format.layers[3].offset = {4, 4};
-    textDrawer.format.layers[3].color = 0x0_rgb;
+    tf->format.layers[3].nameID = "shadow";
+    tf->format.layers[3].blurRadius = 8;
+    tf->format.layers[3].blurIterations = 3;
+    tf->format.layers[3].strength = 1;
+    tf->format.layers[3].offset = {4, 4};
+    tf->format.layers[3].color = 0x0_rgb;
 
-    textDrawer.format.layersCount = 4;
+    tf->format.layersCount = 4;
+
+    tf->text = text;
+    ecs::assign<display_2d>(e).drawable.reset(tf);
+
+    return e;
+}
+
+SampleText::SampleText() :
+        SampleBase() {
+    title = "TEXT";
+
+    auto bmText = createText("bmfont", "TickingTimebombBB",
+                             "88:88:88\n-=98");
+    get_drawable<drawable_text>(bmText).format.setAlignment(Alignment::Center);
+    get_drawable<drawable_text>(bmText).format.size = 24;
+    get_drawable<drawable_text>(bmText).borderColor = 0xFF000000_argb;
+    get_drawable<drawable_text>(bmText).rect.set(0, 0, 360 - 40, 100);
+
+    set_position(bmText, {20.0f, 20.0f});
+    append(container, bmText);
+
+    auto ttfText = createText("TTF-Cousine-Regular", "Cousine-Regular",
+                              u8"£ü÷\n< Приветики >\n你好\nनमस्कार\nこんにちは");
+    get_drawable<drawable_text>(ttfText).format.setAlignment(Alignment::Right | Alignment::Top);
+    get_drawable<drawable_text>(ttfText).format.leading = -8;
+    get_drawable<drawable_text>(ttfText).format.setTextColor(0xFF00FF00_argb);
+    set_position(ttfText, {360 - 20, 120.0f});
+    append(container, ttfText);
+
+    auto ttfText2 = createText("TTF-Comfortaa-Regular", "Comfortaa-Regular",
+                               u8"I don't know KERN TABLE.\nНо кириллица тоже есть");
+    get_drawable<drawable_text>(ttfText2).format.setTextColor(0xFFFF00FF_argb);
+    get_drawable<drawable_text>(ttfText2).format.size = 24;
+    set_position(ttfText2, {20.0f, 340.0f});
+    append(container, ttfText2);
 }
 
 void SampleText::draw() {
-
-    auto& ap = resolve<basic_application>();
-    auto sf = ap.asset_manager_->scale_factor;
-    draw2d::state.save_matrix();
-    draw2d::state.scale(sf, sf);
-
-    textDrawer.format.font = asset_t<Font>("TickingTimebombBB");
-//    textDrawer.format.layers[0].color = 0xFFFFFF_rgb;
-    textDrawer.position = {20.0f, 100.0f};
-    textDrawer.draw("88:88:88\n-=98");
-
-    textDrawer.format.font = asset_t<Font>("Cousine-Regular");
-//    textDrawer.format.layers[0].color = 0xFFFF77_rgb;
-    textDrawer.position = {20.0f, 220.0f};
-    textDrawer.draw(u8"£ü÷\n< Приветики >\n你好\nनमस्कार\nこんにちは");
-
-
-    draw2d::state.restore_matrix();
-
-    if (drawGlyphCache && textDrawer.format.font) {
-        textDrawer.format.font->debugDrawAtlas(512, 100 + 512);
-    }
+    // TODO: move to dev-inspector
+//    if (showGlyphCache && textDrawer.format.font) {
+//        textDrawer.format.font->debugDrawAtlas(512, 100 + 512);
+//    }
 }
 
 void SampleText::prepareInternalResources() {
@@ -74,48 +95,8 @@ void SampleText::prepareInternalResources() {
     asset_t<Font>{"Cousine-Regular"}->setFallbackFont(font);
 }
 
-void guiEffectLayer(TextLayerEffect& layer) {
-    ImGui::PushID(&layer);
-    ImGui::Checkbox("Draw Glyph Bounds", &layer.glyphBounds);
-    ImGui::DragFloat("Radius", &layer.blurRadius, 1, 0, 8);
-    int iterations = layer.blurIterations;
-    int strength = layer.strength;
-    ImGui::DragInt("Iterations", &iterations, 1, 0, 3);
-    ImGui::DragInt("Strength", &strength, 1, 0, 7);
-    layer.blurIterations = iterations;
-    layer.strength = strength;
-
-    ImGui::DragFloat2("Offset", layer.offset.data(), 1, 0, 8);
-
-    float4 color{layer.color};
-    if (ImGui::ColorEdit4("Color", color.data())) {
-        layer.color = argb32_t{color};
-    }
-
-    ImGui::PopID();
-}
-
 void SampleText::update(float dt) {
     SampleBase::update(dt);
-
-    ImGui::Begin("Text");
-
-    ImGui::DragFloat("Font Size", &textDrawer.format.size);
-    ImGui::Checkbox("Show Glyph Cache", &drawGlyphCache);
-
-    ImGui::Text("Text");
-    guiEffectLayer(textDrawer.format.layers[0]);
-
-    ImGui::Text("Outline 1");
-    guiEffectLayer(textDrawer.format.layers[1]);
-
-    ImGui::Text("Outline 2");
-    guiEffectLayer(textDrawer.format.layers[2]);
-
-    ImGui::Text("Shadow");
-    guiEffectLayer(textDrawer.format.layers[3]);
-
-    ImGui::End();
 }
 
 }

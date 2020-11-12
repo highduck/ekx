@@ -53,4 +53,20 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     return false;
 }
 
+bool BitmapFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
+    auto it = map.find(codepoint);
+    if (it != map.end()) {
+        const auto& g = it->second;
+        outGlyph.advanceWidth = static_cast<float>(g.advanceWidth) / unitsPerEM;
+        outGlyph.lineHeight = lineHeightMultiplier;
+        outGlyph.rect = g.box / unitsPerEM;
+        return true;
+    }
+    return false;
+}
+
+float BitmapFont::getKerning(uint32_t codepoint1, uint32_t codepoint2) {
+    return 0.0f;
+}
+
 }

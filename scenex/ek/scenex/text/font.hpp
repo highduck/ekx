@@ -55,6 +55,10 @@ public:
 
     bool getGlyph(uint32_t codepoint, Glyph& outGlyph);
 
+    bool getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph);
+
+    float getKerning(uint32_t codepoint1, uint32_t codepoint2);
+
     void setBlur(float radius, int iterations, int strengthPower);
 private:
     FontImplBase* impl = nullptr;

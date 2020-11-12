@@ -32,6 +32,10 @@ public:
 
     bool getGlyph(uint32_t codepoint, Glyph& outGlyph) override;
 
+    bool getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) override;
+
+    float getKerning(uint32_t codepoint1, uint32_t codepoint2) override;
+
     void setBlur(float radius, int iterations, int strengthPower) override;
 
     void debugDrawAtlas(float x, float y) override;

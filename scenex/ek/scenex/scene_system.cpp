@@ -4,7 +4,6 @@
 #include <ek/scenex/particles/particle_system.hpp>
 #include <ek/scenex/components/transform_2d.hpp>
 #include <ek/scenex/components/display_2d.hpp>
-#include <ek/scenex/components/name.hpp>
 #include <ek/scenex/components/node_filters.hpp>
 #include <ek/scenex/data/sg_factory.hpp>
 
@@ -13,8 +12,8 @@ namespace ek {
 using ecs::entity;
 
 entity hit_test(entity e, const float2& position) {
-    const auto& config = ecs::get_or_default<node_state_t>(e);
-    if (!config.visible || !config.touchable) {
+    const auto& node = ecs::get_or_default<node_t>(e);
+    if ((node.flags & NodeFlags_VisibleAndTouchable) != NodeFlags_VisibleAndTouchable) {
         return ecs::null;
     }
 
@@ -27,7 +26,7 @@ entity hit_test(entity e, const float2& position) {
         return ecs::get<hit_area_2d>(e).rect.contains(position) ? e : ecs::null;
     }
 
-    auto it = ecs::get<node_t>(e).child_last;
+    auto it = node.child_last;
     while (it) {
         float2 inverted;
         if (ecs::get<transform_2d>(it).matrix.transform_inverse(position, &inverted)) {
@@ -50,17 +49,17 @@ entity hit_test(entity e, const float2& position) {
 void draw_node(entity e) {
     // debug
 #ifndef NDEBUG
-    const auto& name = ecs::get_or_default<name_t>(e);
+    const auto& name = ecs::get_or_default<node_t>(e).name;
 #endif
 
     if (process_node_filters(e)) {
         return;
     }
 
-    const auto& config = ecs::get_or_default<node_state_t>(e);
+    const auto& node = ecs::get_or_default<node_t>(e);
 
     auto& transform = ecs::get_or_default<transform_2d>(e);
-    if (!config.visible || transform.color_multiplier.a <= 0 || (config.layer_mask & camera_layers) == 0) {
+    if (!node.visible() || transform.color_multiplier.a <= 0 || (node.layersMask() & camera_layers) == 0) {
         return;
     }
 

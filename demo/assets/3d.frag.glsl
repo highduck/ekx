@@ -243,8 +243,8 @@ void main() {
 //    total = tonemap_unreal(total);
     total = tonemap_reinhard(total);
 
-    gl_FragColor = dither(vec4(total, color.w));
-    //gl_FragColor = vec4(total, color.w);
+//    gl_FragColor = dither(vec4(total, color.w));
+    gl_FragColor = vec4(total, color.w);
 
 // Z BUFFER
 //  float far = 1000.0;

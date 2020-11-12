@@ -20,12 +20,14 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/gui/editor_assets.hpp
         ek/editor/gui/screen_recorder.cpp
         ek/editor/gui/screen_recorder.hpp
-        ek/editor/gui/gui_window_stats.cpp
-        ek/editor/gui/gui_window_stats.h
-        ek/editor/gui/gui_window_tree.cpp
-        ek/editor/gui/gui_window_tree.h
+
+        ek/editor/gui/inspector.cpp
+        ek/editor/gui/hierarchy.cpp
+        ek/editor/gui/stats.cpp
+        ek/editor/gui/gui.hpp
         ek/editor/gui/gui_dev_mode.cpp
         ek/editor/gui/gui_dev_mode.hpp
+        ek/editor/gui/utils.cpp
 
         ek/editor/imgui/imgui_module.hpp
         ek/editor/imgui/imgui_module.cpp

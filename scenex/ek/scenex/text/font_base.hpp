@@ -9,21 +9,21 @@ class texture_t;
 }
 
 struct Glyph {
-    rect_f texCoord{};
-
     // multiply by fontSize
     rect_f rect{};
     float advanceWidth{};
+    float bearingX{};
     float lineHeight{};
 
+    // sprite part
+    rect_f texCoord{};
     const graphics::texture_t* texture = nullptr;
     bool rotated = false;
 };
 
 enum class FontType {
     Bitmap,
-    TrueType,
-    Multi
+    TrueType
 };
 
 class FontImplBase {
@@ -33,6 +33,10 @@ public:
     virtual ~FontImplBase() = 0;
 
     virtual bool getGlyph(uint32_t codepoint, Glyph& outGlyph) = 0;
+
+    virtual bool getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) = 0;
+
+    virtual float getKerning(uint32_t codepoint1, uint32_t codepoint2) = 0;
 
     virtual void setBlur(float radius, int iterations, int strengthPower) {
         // by default blur is not supported

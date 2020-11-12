@@ -45,9 +45,9 @@ void begin_texture_setup(GLuint texture_id, GLenum target_type) {
 #endif
 }
 
-void end_texture_setup(GLenum target_type) {
+void end_texture_setup(GLenum target_type, GLenum minFilter = GL_LINEAR) {
     glTexParameteri(target_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(target_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(target_type, GL_TEXTURE_MIN_FILTER, minFilter);
     glTexParameteri(target_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(target_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 #ifndef EK_GLES2
@@ -137,7 +137,10 @@ void texture_t::uploadSubAlpha8(uint32_t x, uint32_t y, uint32_t width, uint32_t
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
     }
 
-    end_texture_setup(gl_texture_target_);
+    glGenerateMipmap(gl_texture_target_);
+    graphics::gl::check_error();
+    glTexParameterf(gl_texture_target_, GL_TEXTURE_LOD_BIAS, -0.7);
+    end_texture_setup(gl_texture_target_, GL_LINEAR_MIPMAP_LINEAR);
 }
 
 void texture_t::bind(int unit) const {

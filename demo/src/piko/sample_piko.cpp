@@ -7,12 +7,9 @@ namespace ek {
 
 SamplePiko::SamplePiko() {
     auto& app = resolve<basic_application>();
-    container = piko::create();
-    append(app.game, container);
-}
-
-SamplePiko::~SamplePiko() {
-    destroy_node(container);
+    node = piko::create();
+    append(container, node);
+    title = "PIKO PIKO";
 }
 
 void SamplePiko::draw() {
@@ -24,4 +21,5 @@ void SamplePiko::update(float dt) {
     auto& app = resolve<basic_application>();
     piko::update(app.game);
 }
+
 }

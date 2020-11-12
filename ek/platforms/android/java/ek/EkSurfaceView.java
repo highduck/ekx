@@ -11,11 +11,12 @@ public class EkSurfaceView extends GLSurfaceView {
 
     public final EkRenderer renderer;
 
-    public EkSurfaceView(Context context) {
+    public EkSurfaceView(Context context, boolean needDepth) {
         super(context);
 
         setEGLContextClientVersion(2);
-        setEGLConfigChooser(false);
+        // TODO: depth option
+        setEGLConfigChooser(needDepth);
         setPreserveEGLContextOnPause(true);
 
         renderer = new EkRenderer(this);

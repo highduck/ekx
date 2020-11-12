@@ -95,14 +95,14 @@ void apply_transform(entity e, const keyframe_transform_t& keyframe) {
 }
 
 void update_target(float time, entity e, const movie_layer_data& layer) {
-    auto& config = ecs::get_or_create<node_state_t>(e);
+    auto& config = ecs::get_or_create<node_t>(e);
     const auto ki = findKeyFrame(layer.frames, time);
     if (ki < 0) {
-        config.visible = false;
+        config.setVisible(false);
         return;
     }
     const auto& k1 = layer.frames[ki];
-    config.visible = k1.visible;
+    config.setVisible(k1.visible);
     if (k1.motion_type == 1 && (ki + 1) < layer.frames.size()) {
         const auto& k2 = layer.frames[ki + 1];
         const float t = k1.getLocalTime(time);

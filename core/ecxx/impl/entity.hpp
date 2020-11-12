@@ -70,6 +70,10 @@ public:
         return value_ != spec::null_value;
     }
 
+    [[nodiscard]] inline value_type passport() const {
+        return value_;
+    }
+
 private:
     value_type value_;
 };

@@ -13,6 +13,7 @@ console.log("Current Target:", project.current_target);
 
 addExportBuildStep(project);
 
+project.include_project(path.join(project.path.EKX_ROOT, "external/stb"));
 project.include_project(path.join(project.path.EKX_ROOT, "ek"));
 project.include_project(path.join(project.path.EKX_ROOT, "core"));
 project.include_project(path.join(project.path.EKX_ROOT, "scenex"));

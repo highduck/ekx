@@ -42,8 +42,10 @@ void texture_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
 void texture_asset_t::load() {
     read_decl();
 
-    texture_t* texture = nullptr;
+    // delete old textures
+    asset_t<texture_t>{name_}.reset(nullptr);
 
+    texture_t* texture = nullptr;
     if (texture_type_ == "cubemap") {
         if (images_.size() != 6) {
             EK_ERROR << "Cubemap requires 6 images";

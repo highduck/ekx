@@ -11,7 +11,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         components/script.hpp
         components/display_2d.cpp
         components/display_2d.hpp
-        components/name.hpp
         components/movie.hpp
         components/button.hpp
         components/canvas.hpp
@@ -95,7 +94,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         2d/sprite.cpp
 
         text/bitmap_font.cpp
-        text/multi_font.cpp
         text/truetype_font.cpp
         text/dynamic_atlas.cpp
         text/font.cpp

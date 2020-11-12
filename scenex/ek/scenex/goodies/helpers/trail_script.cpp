@@ -73,8 +73,9 @@ void trail_script::track(ecs::entity e) {
         auto position_trail_space = global_to_local(entity_, position_global);
         position_ = position_last_ = position_trail_space;
 
-        // tail
         nodes_.clear();
+
+        // tail
         nodes_.emplace_back(position_last_,
                             0.0f,
                             1.0f
