@@ -99,7 +99,6 @@ movie_frame_data createFrameModel(const frame_t& frame) {
 }
 
 void setupFrameFromElement(movie_frame_data& target, const element_t& el) {
-    const auto m = el.matrix;
     target.transform = create_transform(el);
     target.visible = el.isVisible;
     if (el.symbolType == symbol_type::graphic) {

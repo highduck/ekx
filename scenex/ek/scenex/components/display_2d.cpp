@@ -97,60 +97,6 @@ bool drawable_sprite::hit_test(const float2& point) const {
     return false;
 }
 
-
-
-//// text
-
-static void draw_text(const std::string& text, const text_format_t& format, const rect_f& rc) {
-    asset_t<Font> f{format.font};
-    if (f) {
-
-//        resolve<Drawer>().setEmptyTexture();
-//        resolve<Drawer>().quad(rc.x, rc.y, rc.width, rc.height, 0x77FF0000_argb);
-//        resolve<Drawer>().quad(rc.x + 2.0f, rc.y + 2.0f, rc.width - 4, rc.height - 4, 0x77000000_argb);
-
-//        rect_f bounds = f->getLineBoundingBox(text, format.size, 0, text.size(), format.lineHeight, format.lineSpacing);
-        const int begin = 0;
-        const int end = static_cast<int>(text.size());
-        rect_f draw_zone = f->estimate_text_draw_zone(
-                text,
-                format.size,
-                begin,
-                end,
-                format.lineHeight,
-                format.lineSpacing
-        );
-        float2 cur = rc.relative(format.alignment) - draw_zone.relative(format.alignment);
-
-        if (format.shadow) {
-            f->draw(text, format.size, cur + format.shadowOffset, format.shadowColor, format.lineHeight,
-                    format.lineSpacing);
-        }
-        f->draw(text, format.size, cur, format.color, format.lineHeight, format.lineSpacing);
-    }
-
-}
-
-static rect_f text_bounds(const std::string& text, const text_format_t& format, const rect_f& rc) {
-    asset_t<Font> f(format.font);
-    if (!f) {
-        return rect_f::zero;
-    }
-
-    const int begin = 0;
-    const int end = static_cast<int>(text.size());
-    rect_f rect = f->get_line_bounding_box(text, format.size, begin, end, format.lineHeight);
-
-    const float2 cur = rc.position + rc.size * format.alignment;
-    rect.position += cur;
-
-    float2 line_size{rect.width, format.size};
-    rect.position.y += line_size.y;
-    rect.position -= line_size * format.alignment;
-
-    return rect;
-}
-
 drawable_text::drawable_text()
         : text{},
           format{"mini", 16.0f} {

@@ -589,13 +589,9 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
             }
         }
 
-        auto it = movie.layers.begin();
-        const auto end = movie.layers.end();
-        while (it != movie.layers.end()) {
-            bool empty = false;
-            if (it->frames.empty()) {
-                empty = true;
-            }
+        auto& movieLayers = movie.layers;
+        for (auto it = movieLayers.begin(); it != movieLayers.end();) {
+            bool empty = it->frames.empty();
             if (it->frames.size() == 1) {
                 const auto& frame = it->frames[0];
                 if (frame.index == 0 && frame.motion_type != 2 && frame.duration == movie.frames) {
@@ -603,15 +599,15 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
                 }
             }
             if (empty) {
-                it = movie.layers.erase(it);
+                it = movieLayers.erase(it);
             } else {
                 it++;
             }
         }
 
-        if (movie.frames > 1 && !movie.layers.empty()) {
-            for (size_t i = 0; i < movie.layers.size(); ++i) {
-                for (auto* target : movie.layers[i].targets) {
+        if (movie.frames > 1 && !movieLayers.empty()) {
+            for (size_t i = 0; i < movieLayers.size(); ++i) {
+                for (auto* target : movieLayers[i].targets) {
                     target->movieTargetId = static_cast<int>(i);
                 }
             }
