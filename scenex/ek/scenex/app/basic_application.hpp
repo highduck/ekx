@@ -5,7 +5,8 @@
 #include <ek/util/locator.hpp>
 #include <ek/app/app.hpp>
 #include <ek/util/signals.hpp>
-#include "app_utils.hpp"
+#include "builtin_resources.hpp"
+#include "profiler.hpp"
 
 namespace ek {
 
@@ -33,7 +34,7 @@ public:
     ecs::entity game;
     float2 base_resolution;
 
-    frame_stats_t stats_{};
+    Profiler profiler{};
     asset_manager_t* asset_manager_ = nullptr;
 
     basic_application();

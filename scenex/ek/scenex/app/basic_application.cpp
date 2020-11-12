@@ -1,7 +1,7 @@
 #include "basic_application.hpp"
 
 #include "input_controller.hpp"
-#include "app_utils.hpp"
+#include "builtin_resources.hpp"
 
 #include <ek/scenex/interactive_manager.hpp>
 #include <ek/scenex/AudioManager.hpp>
@@ -84,6 +84,7 @@ void basic_application::preload() {
 }
 
 void basic_application::on_draw_frame() {
+    timer_t timer{};
     scale_factor = ecs::get<canvas_t>(game).scale;
     asset_manager_->set_scale_factor(scale_factor);
 
@@ -112,6 +113,8 @@ void basic_application::on_draw_frame() {
 
     hook_on_render_frame();
 
+    profiler.setGameTime(timer.read_millis());
+
     on_frame_end();
 
     draw2d::end();
@@ -134,8 +137,8 @@ void basic_application::render_frame() {
 
 void basic_application::on_frame_end() {
 #if !defined(NDEBUG) && !defined(__EMSCRIPTEN__)
-    stats_.update();
-    stats_.draw();
+    profiler.update();
+    profiler.draw();
 #endif
 }
 
@@ -151,7 +154,7 @@ void basic_application::start_game() {
 }
 
 void basic_application::on_event(const event_t& event) {
-    if(event.type == event_type::app_resize) {
+    if (event.type == event_type::app_resize) {
         setScreenRects(root);
     }
 }

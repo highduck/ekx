@@ -111,7 +111,7 @@ void TextDrawer::drawPass(const char* text, const TextBlockInfo& info) {
                     prevTexture = gdata.texture;
                 }
                 draw2d::state.set_texture_coords(gdata.texCoord);
-                gdata.rect.x += gdata.bearingX;
+                //gdata.rect.x += gdata.bearingX;
                 gdata.rect = translate(gdata.rect * size, current);
                 if (!gdata.rotated) {
                     draw2d::quad(gdata.rect.x,
@@ -166,7 +166,7 @@ void TextDrawer::getTextSize(const char* text, TextBlockInfo& info) {
         }
 
         if (font->getGlyphMetrics(codepoint, metrics)) {
-            metrics.rect.x += metrics.bearingX;
+            //metrics.rect.x += metrics.bearingX;
             info.updateLineLength(x + size * fmax(metrics.rect.right(), metrics.advanceWidth));
             info.updateLineHeight(size * metrics.lineHeight + leading);
             x += size * metrics.advanceWidth + letterSpacing;
