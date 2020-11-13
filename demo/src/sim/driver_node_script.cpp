@@ -50,25 +50,24 @@ ecs::entity create() {
     ecs::entity e;
     e = create_node_2d("book");
     assign_script<book>(e);
-    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
+    //ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
     ecs::get<transform_2d>(e).matrix.position(10.0f, 10.0f);
     // TODO: fix scissors stats
-//    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
     append(sampleContainer, e);
 
     e = create_node_2d("dna");
     assign_script<dna>(e);
-    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
-    ecs::get<transform_2d>(e).matrix.position(10.0f, 10.0f + 2.0f * 128.0f + 10.0f);
+//    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
+    ecs::get<transform_2d>(e).matrix.position(10.0f, 10.0f + 128.0f + 10.0f);
     // TODO: fix scissors stats
-//    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
     append(sampleContainer, e);
 
     e = create_node_2d("diamonds");
     assign_script<diamonds>(e);
-    ecs::get<transform_2d>(e).matrix.position(100.0f + 2.0f * 128.0f, 10.0f);
-
-//    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+    ecs::get<transform_2d>(e).matrix.position(10.0f + 128.0f + 10.0f, 20.0f);
+    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
     append(sampleContainer, e);
 
 

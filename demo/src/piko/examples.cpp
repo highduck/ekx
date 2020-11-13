@@ -139,15 +139,17 @@ void diamonds::draw() {
 
     rt.set();
     graphics::viewport(0, 0, w, h);
-
+    graphics::set_scissors();
     if (first_frame) {
-        float4 clear_color{colorf(1)};
+        float4 clear_color{colorf(2)};
         first_frame = false;
         graphics::clear(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     }
     draw2d::state
             .save_mvp()
-            .save_matrix();
+            .save_matrix()
+            .saveScissors();
+    draw2d::state.setScissors({0.0f, 0.0f, w, h});
     draw2d::state.matrix = matrix_2d{};
     draw2d::state.set_mvp(ortho_2d(0.0f, h, w, -h));
     draw2d::state.set_empty_texture();
@@ -159,8 +161,8 @@ void diamonds::draw() {
     c.af(0.3f);
     for (int i = 0; i < 80; ++i) {
         draw2d::line(float2{ek::random(0.0f, w), ek::random(0.0f, h)},
-                    float2{ek::random(0.0f, w), ek::random(0.0f, h)},
-                    c, sc * 4.0f);
+                     float2{ek::random(0.0f, w), ek::random(0.0f, h)},
+                     c, sc * 4.0f);
     }
 
     for (int n = 1; n <= 10; n += 3) {
@@ -170,12 +172,13 @@ void diamonds::draw() {
             int i = static_cast<int>(floorf(j + t * 3.0f));
             draw2d::line(p + float2{0.0f, sc * 20.0f}, p + float2{j * sc * 20, 0}, colorf(e[n + i % 3]), sc * 1.0f);
             draw2d::line(p + float2{j * sc * 20, 0}, p + float2{j * sc * 10, -sc * 10}, colorf(e[n + (i + 1) % 3]),
-                        sc * 1.0f);
+                         sc * 1.0f);
         }
     }
 
     draw2d::flush_batcher();
     graphics::viewport();
+    draw2d::state.pop_scissors();
     draw2d::state.restore_matrix();
     draw2d::state.restore_mvp();
     rt.unset();
@@ -187,7 +190,7 @@ void diamonds::draw() {
 }
 
 diamonds::diamonds() :
-        rt{128 * 4, 128 * 4}
+        rt{128 , 128 }
 //        recorder{"result", {0, 0, 512 * 2 / 2, 512 * 2 / 2}}
 {
 }

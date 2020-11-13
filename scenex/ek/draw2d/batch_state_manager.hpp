@@ -14,6 +14,7 @@ struct batch_state_context : private disable_copy_assign_t {
         graphics::blend_mode blend = graphics::blend_mode::nop;
         const graphics::program_t* program = nullptr;
         const graphics::texture_t* texture = nullptr;
+        rect_f scissors{};
 
         bool operator==(const state_t& a) const {
             return (blend == a.blend && program == a.program && texture == a.texture);
@@ -30,16 +31,10 @@ struct batch_state_context : private disable_copy_assign_t {
 
     mat4f mvp{};
 
-    rect_f scissors{};
-    bool scissors_enabled = false;
-    bool scissors_dirty = false;
-
-    bool mvp_changed = false;
-    bool changed = true;
+    bool mvpChanged = false;
+    bool anyChanged = true;
 
     void apply();
-
-    void disable_scissors();
 
     void set_scissors(const rect_f& rc);
 

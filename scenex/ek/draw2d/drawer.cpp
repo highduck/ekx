@@ -36,24 +36,23 @@ void drawing_state::finish() {
 
 /** Scissors **/
 
-void drawing_state::push_scissors(const rect_f& scissors_) {
-    size_t size = scissor_stack_.size();
-    rect_f clamped_rect = scissors_;
-    if (size > 0) {
-        // TODO: apply clamped scissors hierarchy (not clamped alternatives)
-        clamped_rect = clamp_bounds(clamped_rect, scissor_stack_.back());
-    }
+void drawing_state::saveScissors() {
+    scissor_stack_.push_back(scissors);
+}
 
-    scissor_stack_.push_back(clamped_rect);
-    scissors_enabled = true;
-    scissors = clamped_rect;
+void drawing_state::setScissors(const rect_f& scissors_) {
+    scissors = scissors_;
     check_scissors = true;
 }
 
+void drawing_state::push_scissors(const rect_f& scissors_) {
+    saveScissors();
+    setScissors(clamp_bounds(scissors, scissors_));
+}
+
 void drawing_state::pop_scissors() {
-    scissor_stack_.pop_back();
-    scissors_enabled = !scissor_stack_.empty();
     scissors = scissor_stack_.back();
+    scissor_stack_.pop_back();
     check_scissors = true;
 }
 
@@ -291,6 +290,7 @@ void drawing_state::set_blend_mode(graphics::blend_mode blending_) {
     check_blending = true;
 }
 
+
 /*** drawings ***/
 void begin(int x, int y, int width, int height) {
     if (!batcher) {
@@ -303,7 +303,7 @@ void begin(int x, int y, int width, int height) {
     state.program = state.default_program.get();
     state.blending = graphics::blend_mode::premultiplied;
     state.mvp = ortho_2d<float>(x, y, width, height);
-    state.scissors_enabled = false;
+    state.scissors.set(x, y, width, height);
     state.check_program = false;
     state.check_scissors = false;
     state.check_blending = false;
@@ -316,6 +316,7 @@ void begin(int x, int y, int width, int height) {
     batcher_states.set_mvp(state.mvp);
     batcher_states.set_blend_mode(state.blending);
     batcher_states.set_texture(state.texture);
+    batcher_states.set_scissors(state.scissors);
 }
 
 void end() {
@@ -355,11 +356,7 @@ void commit_state() {
         state.check_mvp = false;
     }
     if (state.check_scissors) {
-        if (state.scissors_enabled) {
-            batcher->states.set_scissors(state.scissors);
-        } else {
-            batcher->states.disable_scissors();
-        }
+        batcher->states.set_scissors(state.scissors);
         state.check_scissors = false;
     }
 }

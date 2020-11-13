@@ -74,7 +74,7 @@ void batcher_t::draw() {
 }
 
 void batcher_t::alloc_triangles(int vertex_count, int index_count) {
-    if (states.changed || (vertices_count_ + vertex_count) > vertex_index_max_) {
+    if (states.anyChanged || (vertices_count_ + vertex_count) > vertex_index_max_) {
         flush();
         states.invalidate();
     }
@@ -96,7 +96,7 @@ void batcher_t::flush() {
 }
 
 void batcher_t::invalidate_force() {
-    if (states.changed || true) {
+    if (states.anyChanged || true) {
         flush();
         states.invalidate();
     }

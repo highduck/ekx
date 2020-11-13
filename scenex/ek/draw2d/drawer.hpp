@@ -21,12 +21,13 @@ struct drawing_state {
     const graphics::program_t* program{};
     matrix_2d matrix{};
     mat4f mvp{};
-    rect_f scissors{};
-    bool scissors_enabled = false;
     rect_f uv{0.0f, 0.0f, 1.0f, 1.0f};
     argb32_t color_multiplier{0xFFFFFFFF};
     argb32_t color_offset{0x0};
     graphics::blend_mode blending = graphics::blend_mode::premultiplied;
+    rect_f scissors{};
+
+public:
 
     std::vector<matrix_2d> matrix_stack_;
     std::vector<argb32_t> multipliers_;
@@ -52,6 +53,10 @@ struct drawing_state {
     /** Scissors **/
 
     void push_scissors(const rect_f& scissors);
+
+    void saveScissors();
+
+    void setScissors(const rect_f& scissors);
 
     void pop_scissors();
 
