@@ -19,7 +19,7 @@ void batch_state_context::apply() {
         curr.program->use();
         prev.program = curr.program;
         is_texture_changed = true;
-        mvp_changed = true;
+        mvpChanged = true;
     }
 
     if (is_texture_changed) {
@@ -29,82 +29,63 @@ void batch_state_context::apply() {
         prev.texture = curr.texture;
     }
 
-    if (mvp_changed && curr.program) {
+    if (mvpChanged && curr.program) {
         curr.program->set_uniform(graphics::program_uniforms::mvp, mvp);
     }
-    mvp_changed = false;
+    mvpChanged = false;
 
-    if (scissors_dirty) {
-        if (scissors_enabled) {
-            graphics::set_scissors(
-                    (int) scissors.x,
-                    (int) scissors.y,
-                    (int) scissors.width,
-                    (int) scissors.height
-            );
-        } else {
-            graphics::set_scissors();
-        }
-        scissors_dirty = false;
-    }
-}
-
-void batch_state_context::disable_scissors() {
-    if (scissors_enabled) {
-        changed = true;
-        scissors_dirty = true;
-        scissors_enabled = false;
+    if (prev.scissors != curr.scissors) {
+        graphics::set_scissors(curr.scissors.x, curr.scissors.y, curr.scissors.width, curr.scissors.height);
+        prev.scissors = curr.scissors;
     }
 }
 
 void batch_state_context::set_scissors(const rect_f& rc) {
-    changed = true;
-    scissors_dirty = true;
-    scissors = rc;
-    scissors_enabled = true;
+    if (rc != curr.scissors) {
+        anyChanged = true;
+    }
+    next.scissors = rc;
 }
 
 void batch_state_context::set_blend_mode(graphics::blend_mode blending) {
     if (curr.blend != blending) {
-        changed = true;
+        anyChanged = true;
     }
     next.blend = blending;
 }
 
 void batch_state_context::set_texture(const graphics::texture_t* tex) {
     if (curr.texture != tex) {
-        changed = true;
+        anyChanged = true;
     }
     next.texture = tex;
 }
 
 void batch_state_context::set_program(const graphics::program_t* program) {
     if (curr.program != program) {
-        changed = true;
+        anyChanged = true;
     }
     next.program = program;
 }
 
 void batch_state_context::set_mvp(const mat4f& m) {
     mvp = m;
-    mvp_changed = true;
-    changed = true;
+    mvpChanged = true;
+    anyChanged = true;
 }
 
 void batch_state_context::clear() {
-    changed = true;
+    anyChanged = true;
     prev = {};
     curr = {};
     next = {};
-    scissors_enabled = false;
 }
 
 void batch_state_context::invalidate() {
-    if (!changed) {
-        return;
+    if (anyChanged) {
+        curr = next;
+        anyChanged = false;
     }
-    curr = next;
-    changed = false;
 }
 
 }

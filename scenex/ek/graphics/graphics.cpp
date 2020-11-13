@@ -11,21 +11,23 @@ using app::g_app;
 
 static GraphicsContextType contextType = GraphicsContextType::OpenGL;
 
+static int currentFrameBufferWidth = 1;
+static int currentFrameBufferHeight = 1;
+
 void init() {
     gl::skip_errors();
 
     const uint8_t* version = glGetString(GL_VERSION);
     gl::check_error();
 
-    if(version) {
+    if (version) {
         EK_INFO << "OpenGL version: " << version;
 
-        if(memcmp(version, "OpenGL ES ", 10) == 0) {
+        if (memcmp(version, "OpenGL ES ", 10) == 0) {
             const auto majorVersion = version[10];
-            if(majorVersion == '2') {
+            if (majorVersion == '2') {
                 contextType = GraphicsContextType::OpenGL_ES_2;
-            }
-            else {
+            } else {
                 contextType = GraphicsContextType::OpenGL_ES_3;
             }
         }
@@ -80,11 +82,14 @@ void clear(float r, float g, float b, float a) {
 void viewport(int x, int y, int width, int height) {
     glViewport(x, y, width, height);
     gl::check_error();
+    currentFrameBufferWidth = width;
+    currentFrameBufferHeight = height;
 }
 
 void viewport() {
-    glViewport(0, 0, g_app.drawable_size.x, g_app.drawable_size.y);
-    gl::check_error();
+    viewport(0, 0,
+             static_cast<int>(g_app.drawable_size.x),
+             static_cast<int>(g_app.drawable_size.y));
 }
 
 void set_blend_mode(const blend_mode& blending) {
@@ -97,7 +102,7 @@ void set_scissors(int x, int y, int width, int height) {
     glEnable(GL_SCISSOR_TEST);
     gl::check_error();
 
-    const int buffer_height = static_cast<int>(g_app.drawable_size.y);
+    const int buffer_height = currentFrameBufferHeight;
     glScissor(x, buffer_height - y - height, width, height);
     gl::check_error();
 }
@@ -108,9 +113,7 @@ void set_scissors() {
 }
 
 void get_pixels(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint8_t* out_buffer) {
-    const int buffer_height = static_cast<int>(g_app.drawable_size.y);
-
-    glReadPixels(x, buffer_height - y - height, width, height, GL_RGBA, GL_UNSIGNED_BYTE, out_buffer);
+    glReadPixels(x, currentFrameBufferHeight - y - height, width, height, GL_RGBA, GL_UNSIGNED_BYTE, out_buffer);
     gl::check_error();
 }
 

@@ -82,7 +82,8 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
         return;
     }
     draw2d::state.save_program()
-            .set_program(program3d.get());
+            .set_program(program3d.get())
+            .saveScissors();
 
     glCullFace(GL_FRONT);
     gl::check_error();
@@ -95,6 +96,7 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
     graphics::viewport(0, 0, shadow_map_width, shadow_map_height);
     shadow_map_->clear();
     shadow_map_->set();
+    draw2d::state.setScissors({0, 0, shadow_map_width, shadow_map_height});
 
     // find directional light
     float3 light_position{0, 0, 1};
@@ -123,7 +125,7 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
     render_objects_to_shadow_map(depth_projection_, depth_view_);
 
     shadow_map_->unset();
-    draw2d::state.restore_program();
+    draw2d::state.restore_program().pop_scissors();
     graphics::viewport();
 }
 
