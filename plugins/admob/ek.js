@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = (ctx) => {
-    ctx.modules.push({
+    ctx.addModule({
         name: "plugin-admob",
         cpp: [path.join(__dirname, "src")],
         android: {

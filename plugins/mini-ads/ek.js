@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = (ctx) => {
-    ctx.modules.push({
+    ctx.addModule({
         name: "mini-ads",
         cpp: [path.join(__dirname, "src")],
         android: {

@@ -139,7 +139,9 @@ void texture_t::uploadSubAlpha8(uint32_t x, uint32_t y, uint32_t width, uint32_t
 
     glGenerateMipmap(gl_texture_target_);
     graphics::gl::check_error();
+#if !defined(__ANDROID__)
     glTexParameterf(gl_texture_target_, GL_TEXTURE_LOD_BIAS, -0.7);
+#endif
     end_texture_setup(gl_texture_target_, GL_LINEAR_MIPMAP_LINEAR);
 }
 

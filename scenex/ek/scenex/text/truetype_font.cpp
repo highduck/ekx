@@ -130,6 +130,9 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
 }
 
 bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
+    if(!loaded) {
+        return false;
+    }
     assert(map != nullptr);
 
     auto& map_ = *map;
