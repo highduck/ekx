@@ -1,18 +1,13 @@
 #include "demo_main.hpp"
-#include "sample_base.hpp"
 #include "sample_text.hpp"
-#include "3d/sample_3d.hpp"
 #include "sample_flash.hpp"
+#include "3d/sample_3d.hpp"
+#include "piko/sample_piko.hpp"
 
-#include <ek/scenex/systems/main_flow.hpp>
-#include <sim/driver_node_script.h>
-#include <ek/scenex/scene_system.hpp>
 #include <ek/math/rand.hpp>
-#include <ek/scenex/data/sg_factory.hpp>
+#include <ek/scenex/systems/main_flow.hpp>
+#include <ek/scenex/scene_system.hpp>
 #include <ek/scenex/asset2/builtin_assets.hpp>
-#include <ek/scenex/text/truetype_font.hpp>
-#include <ek/scenex/app/input_controller.hpp>
-#include <piko/sample_piko.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/components/button.hpp>
 #include <ek/scenex/components/interactive.hpp>
@@ -98,7 +93,7 @@ void DemoApp::render_frame() {
 
 drawable_text& addText(ecs::entity e, const char* text) {
     auto* tf = new drawable_text();
-    tf->format.font = asset_t<Font>{"mini"};
+    tf->format.font.setID("mini");
     tf->format.size = 16;
     tf->format.addShadow(0x0_rgb, 8);
     tf->text = text;

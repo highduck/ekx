@@ -524,7 +524,8 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
         if (layer.layerType != layer_type::normal) {
             continue;
         }
-        for (int frameIndex = 0; frameIndex < layer.frames.size(); ++frameIndex) {
+        const int framesTotal = static_cast<int>(layer.frames.size());
+        for (int frameIndex = 0; frameIndex < framesTotal; ++frameIndex) {
             auto& frame = layer.frames[frameIndex];
             processing_bag_t targets;
             for (const auto& frameElement : frame.elements) {
@@ -552,7 +553,7 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
             std::optional<keyframe_transform_t> delta;
             if (k0.motion_type == 1
                 && !frame.elements.empty()
-                && (frameIndex + 1) < layer.frames.size()) {
+                && (frameIndex + 1) < framesTotal) {
                 const auto& nextFrame = layer.frames[frameIndex + 1];
                 if (!nextFrame.elements.empty()) {
                     const auto& el0 = frame.elements.back();

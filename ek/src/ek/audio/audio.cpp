@@ -1,7 +1,7 @@
 #include "audio.hpp"
 
 #include <raudio/raudio.h>
-#include <raudio/external/dr_mp3.h>
+#include <dr_mp3.h>
 
 #include <unordered_map>
 #include <cassert>
@@ -26,8 +26,8 @@ static Wave LoadMP3(const void* data, size_t size, const char* optionalName) {
             NULL
     );
 
-    wave.channels = config.outputChannels;
-    wave.sampleRate = config.outputSampleRate;
+    wave.channels = config.channels;
+    wave.sampleRate = config.sampleRate;
     wave.sampleCount = (int) totalFrameCount * wave.channels;
     wave.sampleSize = 32;
 
@@ -55,7 +55,7 @@ Music LoadMusicStreamFromMemory(void* data, size_t size, const char* fileName) {
     music.ctxData = ctxMp3;
     music.ctxType = 3 /* MUSIC_AUDIO_MP3 */;
 
-    int result = drmp3_init_memory(ctxMp3, data, size, nullptr, nullptr);
+    int result = drmp3_init_memory(ctxMp3, data, size, nullptr);
 
     if (result > 0) {
         music.stream = InitAudioStream(ctxMp3->sampleRate, 32, ctxMp3->channels);

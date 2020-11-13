@@ -8,6 +8,8 @@ add_subdirectory(nlohmann-json)
 add_subdirectory(fmt)
 add_subdirectory(imgui)
 add_subdirectory(stb)
+add_subdirectory(dr_libs)
+add_subdirectory(miniaudio)
 
 include(FindFreetype)
 message("FREETYPE INCLUDE: ${FREETYPE_INCLUDE_DIRS}")

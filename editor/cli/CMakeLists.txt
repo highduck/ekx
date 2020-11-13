@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(ekc)
 
 add_executable(${PROJECT_NAME}
-        main.cpp
+        cli_main.cpp
         )
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)

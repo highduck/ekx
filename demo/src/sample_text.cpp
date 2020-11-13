@@ -13,7 +13,7 @@ ecs::entity createText(const char* name, const char* font, const char* text) {
     auto e = create_node_2d(name);
     auto* tf = new drawable_text();
 
-    tf->format.font = asset_t<Font>(font);
+    tf->format.font.setID(font);
     tf->format.size = 48.0f;
 
     // primary

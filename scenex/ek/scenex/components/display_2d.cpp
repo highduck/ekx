@@ -38,59 +38,52 @@ bool drawable_quad::hit_test(const float2& point) const {
 
 drawable_sprite::drawable_sprite() = default;
 
-drawable_sprite::drawable_sprite(std::string sprite_id, rect_f a_scale_grid)
-        : src{std::move(sprite_id)},
+drawable_sprite::drawable_sprite(const std::string& sprite_id, rect_f a_scale_grid)
+        : src{sprite_id},
           scale_grid{a_scale_grid} {
     scale_grid_mode = !scale_grid.empty();
 }
 
 void drawable_sprite::draw() {
-    asset_t<sprite_t> spr{src};
-    if (spr) {
-        if (scale_grid_mode) {
+    if (!src) {
+        return;
+    }
+    auto& spr = *src;
+    if (scale_grid_mode) {
 //				scale.set(5, 5);
-            draw2d::state
-                    .save_matrix()
-                    .scale(1.0f / scale.x, 1.0f / scale.y);
-            // TODO: rotated
-            rect_f target{manual_target};
-            if (target.empty()) {
-                target = {(spr->rect.position + float2{1.0f, 1.0f}) * scale,
-                          (spr->rect.size - float2{2.0f, 2.0f}) * scale};
-            }
-            spr->draw_grid(scale_grid, target);
+        draw2d::state
+                .save_matrix()
+                .scale(1.0f / scale.x, 1.0f / scale.y);
+        // TODO: rotated
+        rect_f target{manual_target};
+        if (target.empty()) {
+            target = {(spr.rect.position + float2{1.0f, 1.0f}) * scale,
+                      (spr.rect.size - float2{2.0f, 2.0f}) * scale};
+        }
+        spr.draw_grid(scale_grid, target);
 //            drawer.set_empty_texture();
 //            drawer.quad(target.x, target.y, target.width, target.height, 0x77FF0000_argb);
 //            drawer.quad(scale_grid.x, scale_grid.y, scale_grid.width, scale_grid.height, 0x77FFFFFF_argb);
-            draw2d::state.restore_matrix();
-        } else {
+        draw2d::state.restore_matrix();
+    } else {
 //            drawer.set_empty_texture();
 //            drawer.quad(spr->rect, 0x77FFFFFF_argb);
-            spr->draw();
-        }
+        spr.draw();
     }
 }
 
 rect_f drawable_sprite::get_bounds() const {
-    asset_t<sprite_t> spr{src};
-    if (spr) {
-//            if (scaleGridMode) {
-//                float sx = scale.x;
-//                float sy = scale.y;
-//                return rect_f{spr->rect.position * scale, spr->rect.size * scale};
-//            }
-        return spr->rect;
+    if (!src) {
+        return rect_f::zero;
     }
-    return rect_f::zero;
+    auto& spr = *src;
+    return spr.rect;
 }
 
 bool drawable_sprite::hit_test(const float2& point) const {
     if (get_bounds().contains(point)) {
-        if (hit_pixels) {
-            asset_t<sprite_t> spr{src};
-            if (spr) {
-                return spr->hit_test(point);
-            }
+        if (hit_pixels && src) {
+            return src->hit_test(point);
         }
         return true;
     }

@@ -10,6 +10,10 @@
 #include <ek/scenex/text/font.hpp>
 #include <ek/scenex/text/text_drawer.hpp>
 
+#ifndef NDEBUG
+#define ENABLE_PROFILER
+#endif
+
 namespace ek {
 
 using namespace std;
@@ -27,7 +31,7 @@ struct RealTimeGraph {
         float width = history.size();
         static char buf[256];
         static TextDrawer textDrawer;
-        textDrawer.format.font = asset_t<Font>("Cousine-Regular");
+        textDrawer.format.font.setID("Cousine-Regular");
         textDrawer.format.size = 10.0f;
         textDrawer.format.leading = 1.0f;
 
@@ -72,7 +76,7 @@ public:
 };
 
 void Profiler::update() {
-#ifndef NDEBUG
+#ifdef ENABLE_PROFILER
     auto& app = resolve<basic_application>();
     auto dt = app.frame_timer.delta_time();
     impl->fpsMeter.update(dt);
@@ -86,7 +90,7 @@ void Profiler::update() {
 }
 
 void Profiler::draw() {
-#ifndef NDEBUG
+#ifdef ENABLE_PROFILER
     const auto scale = static_cast<float>(app::g_app.content_scale);
     auto insets = get_screen_insets();
     draw2d::state.save_matrix()
@@ -107,8 +111,8 @@ void Profiler::draw() {
 }
 
 Profiler::Profiler() {
-#ifndef NDEBUG
-    impl.reset(new Impl());
+#ifdef ENABLE_PROFILER
+    impl = std::make_unique<Impl>();
     impl->graphFrameTime.name = "FPS";
     impl->graphFrameTime.titleFormat = "FPS: %0.0f";
     impl->graphFrameTime.markerFormat = "%0.2f ms";
@@ -144,7 +148,7 @@ Profiler::Profiler() {
 Profiler::~Profiler() = default;
 
 void Profiler::setGameTime(float time) {
-#ifndef NDEBUG
+#ifdef ENABLE_PROFILER
     impl->graphGameTime.history.write(time);
     impl->graphGameTime.value = time;
 #endif
