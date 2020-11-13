@@ -6,6 +6,7 @@
 #include <ek/math/box.hpp>
 #include <ek/math/mat3x2.hpp>
 #include <ek/util/type_index.hpp>
+#include <ek/scenex/2d/sprite.hpp>
 
 namespace ek {
 
@@ -103,7 +104,7 @@ public:
 
 class drawable_sprite : public drawable_2d<drawable_sprite> {
 public:
-    std::string src;
+    asset_t<sprite_t> src;
     bool hit_pixels = true;
 
     bool scale_grid_mode = false;
@@ -113,7 +114,7 @@ public:
 
     drawable_sprite();
 
-    explicit drawable_sprite(std::string sprite_id, rect_f a_scale_grid = rect_f::zero);
+    explicit drawable_sprite(const std::string& sprite_id, rect_f a_scale_grid = rect_f::zero);
 
     void draw() override;
 
@@ -161,7 +162,7 @@ public:
     int segments = 50;
     argb32_t color_inner = argb32_t::one;
     argb32_t color_outer = argb32_t::one;
-    std::string sprite;
+    asset_t<sprite_t> sprite;
 
     void draw() override;
 

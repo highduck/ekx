@@ -136,10 +136,8 @@ void basic_application::render_frame() {
 }
 
 void basic_application::on_frame_end() {
-#if !defined(NDEBUG) && !defined(__EMSCRIPTEN__)
     profiler.update();
     profiler.draw();
-#endif
 }
 
 void basic_application::preload_root_assets_pack() {

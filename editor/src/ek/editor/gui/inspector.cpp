@@ -10,8 +10,23 @@
 #include <ek/scenex/3d/light_3d.hpp>
 #include <ek/scenex/components/movie.hpp>
 #include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/layout.hpp>
+#include <ek/scenex/components/node_filters.hpp>
 
 namespace ek {
+
+template<typename T>
+void selectAsset(const char* label, asset_t<T>& asset) {
+    if (ImGui::BeginCombo(label, asset.getID().c_str())) {
+        for (auto& it : asset_t<T>::map()) {
+            auto& key = it.first;
+            if (ImGui::Selectable(key.c_str(), key == asset.getID())) {
+                asset.setID(key);
+            }
+        }
+        ImGui::EndCombo();
+    }
+}
 
 template<typename C, typename Func>
 inline void guiComponentPanel(const char* name, C& data, Func fn) {
@@ -134,12 +149,31 @@ void gui_interactive(interactive_t& inter) {
 }
 
 void editDisplaySprite(drawable_sprite& sprite) {
-    ImGui::LabelText("sprite", "%s", sprite.src.c_str());
+    selectAsset<sprite_t>("Sprite", sprite.src);
     ImGui::Checkbox("hit pixels", &sprite.hit_pixels);
     ImGui::Checkbox("scale grid", &sprite.scale_grid_mode);
 }
 
+void editDisplayRectangle(drawable_quad& quad) {
+    ImGui::RectEdit("Bounds", quad.rect.data());
+    ImGui::Color32Edit("Color LT", quad.colors[0]);
+    ImGui::Color32Edit("Color RT", quad.colors[1]);
+    ImGui::Color32Edit("Color RB", quad.colors[2]);
+    ImGui::Color32Edit("Color LB", quad.colors[3]);
+}
+
+void editDisplayArc(drawable_arc& arc) {
+    selectAsset<sprite_t>("Sprite", arc.sprite);
+    ImGui::DragFloat("Angle", &arc.angle);
+    ImGui::DragFloat("Radius", &arc.radius);
+    ImGui::DragFloat("Line Width", &arc.line_width);
+    ImGui::DragInt("Segments", &arc.segments);
+    ImGui::Color32Edit("Color Inner", arc.color_inner);
+    ImGui::Color32Edit("Color Outer", arc.color_outer);
+}
+
 void guiTextFormat(TextFormat& format) {
+    selectAsset<Font>("Font", format.font);
     ImGui::DragFloat("Size", &format.size, 1, 8, 128, "%f");
     ImGui::DragFloat("Leading", &format.leading, 1, 0, 128, "%f");
     ImGui::DragFloat("Spacing", &format.letterSpacing, 1, -128, 128, "%f");
@@ -174,6 +208,34 @@ void editDisplayText(drawable_text& tf) {
     guiTextFormat(tf.format);
 }
 
+void guiLayout(layout_t& layout) {
+    ImGui::Checkbox("Fill X", &layout.fill_x);
+    ImGui::Checkbox("Fill Y", &layout.fill_y);
+    ImGui::Checkbox("Align X", &layout.align_x);
+    ImGui::Checkbox("Align Y", &layout.align_y);
+    ImGui::Checkbox("Use Safe Insets", &layout.doSafeInsets);
+    ImGui::RectEdit("Extra Fill", layout.fill_extra.data());
+    ImGui::DragFloat2("Align X (rel, abs)", layout.x.data());
+    ImGui::DragFloat2("Align Y (rel, abs)", layout.y.data());
+
+    ImGui::RectEdit("Rect", layout.rect.data());
+    ImGui::RectEdit("Safe Rect", layout.safeRect.data());
+}
+
+void guiLegacyFilters(node_filters_t& filters) {
+    ImGui::Checkbox("Enabled", &filters.enabled);
+    for (int i = 0; i < filters.filters.size(); ++i) {
+        auto& filter = filters.filters[i];
+        ImGui::PushID(filters.filters.data() + i);
+        ImGui::LabelText("Type", "%d", filter.type);
+        ImGui::Color32Edit("Color", filter.color);
+        ImGui::DragFloat2("Offset", filter.offset.data());
+        ImGui::DragFloat2("Blur", filter.blur.data());
+        ImGui::DragInt("Quality", (int*) &filter.quality);
+        ImGui::PopID();
+    }
+}
+
 void gui_inspector(ecs::entity e) {
     ImGui::PushID(e.passport());
     if (ecs::has<node_t>(e)) {
@@ -184,6 +246,7 @@ void gui_inspector(ecs::entity e) {
         ImGui::LabelText("Layers", "%x", node.layersMask());
     }
 
+    guiComponentPanel<node_filters_t>(e, "LEGACY Filters", guiLegacyFilters);
     guiComponentPanel<transform_2d>(e, "Transform", gui_transform_2d);
     guiComponentPanel<transform_3d>(e, "Transform 3D", gui_transform_3d);
     guiComponentPanel<camera_3d>(e, "Camera 3D", gui_camera_3d);
@@ -192,11 +255,12 @@ void gui_inspector(ecs::entity e) {
     guiComponentPanel<hit_area_2d>(e, "Hit Area", gui_hit_area_2d);
     guiComponentPanel<interactive_t>(e, "Interactive", gui_interactive);
     guiComponentPanel<event_handler_t>(e, "Event Handler", [](auto& c) {});
+    guiComponentPanel<layout_t>(e, "Layout", guiLayout);
 
     guiDisplayComponent<drawable_sprite>(e, "Sprite", editDisplaySprite);
-    guiDisplayComponent<drawable_quad>(e, "Rectangle", [](auto& d) {});
+    guiDisplayComponent<drawable_quad>(e, "Rectangle", editDisplayRectangle);
     guiDisplayComponent<drawable_text>(e, "Text", editDisplayText);
-    guiDisplayComponent<drawable_arc>(e, "Arc", [](auto& d) {});
+    guiDisplayComponent<drawable_arc>(e, "Arc", editDisplayArc);
 
     guiComponentPanel<movie_t>(e, "Movie Clip", gui_movie_clip);
 

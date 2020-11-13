@@ -11,11 +11,11 @@ AudioManager::~AudioManager() = default;
 
 void AudioManager::play_music(const std::string& name) {
     if (name != music_) {
-        auto musicAsset = asset_t<audio::Music>{music_};
+        asset_t<audio::Music> musicAsset{music_};
         if (musicAsset) {
             musicAsset->stop();
         }
-        musicAsset = asset_t<audio::Music>{name};
+        musicAsset.setID(name);
         if (musicAsset) {
             auto volume = music.enabled() ? music_volume_ : 0.0f;
             musicAsset->setVolume(volume);
@@ -49,7 +49,7 @@ void AudioManager::vibrate(int length) const {
 }
 
 void AudioManager::update(float) {
-    auto musicAsset = asset_t<audio::Music>{music_};
+    asset_t<audio::Music> musicAsset{music_};
     if (musicAsset) {
         auto volume = music.enabled() ? music_volume_ : 0.0f;
         musicAsset->setVolume(volume);

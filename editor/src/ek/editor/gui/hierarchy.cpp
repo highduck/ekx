@@ -13,6 +13,7 @@
 #include <ek/scenex/3d/light_3d.hpp>
 #include <ek/scenex/components/movie.hpp>
 #include <ek/scenex/components/button.hpp>
+#include <ek/scenex/app/basic_application.hpp>
 
 namespace ek {
 
@@ -150,11 +151,25 @@ void guiHierarchyWindow(bool* p_open) {
             hierarchyFilterText.clear();
         }
 
-        ecs::each([](auto e) {
-            if (!ecs::has<node_t>(e) || ecs::get<node_t>(e).parent == ecs::null) {
-                gui_entity(e, true, true);
+        static bool showAllRoots = false;
+        ImGui::Checkbox("All Roots", &showAllRoots);
+
+        if (showAllRoots) {
+            // all roots
+            ecs::each([](auto e) {
+                if (!ecs::has<node_t>(e) || ecs::get<node_t>(e).parent == ecs::null) {
+                    gui_entity(e, true, true);
+                }
+            });
+        } else {
+            // game container
+            auto& app = resolve<basic_application>();
+            if (ecs::valid(app.game)) {
+                gui_entity(app.game, true, true);
+            } else {
+                ImGui::TextColored({1, 0, 0, 1}, "Invalid Game container");
             }
-        });
+        }
     }
     ImGui::End();
 }

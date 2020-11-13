@@ -151,7 +151,7 @@ typedef struct tagBITMAPINFOHEADER {
 #define MA_FREE RL_FREE
 
 #define MINIAUDIO_IMPLEMENTATION
-#include "external/miniaudio.h"         // miniaudio library
+#include <miniaudio.h>         // miniaudio library
 #undef PlaySound                        // Win32 API: windows.h > mmsystem.h defines PlaySound macro
 
 #include <stdlib.h>                     // Required for: malloc(), free()
@@ -183,7 +183,7 @@ typedef struct tagBITMAPINFOHEADER {
 // TODO: Remap malloc()/free() calls to RL_MALLOC/RL_FREE
 
     #define STB_VORBIS_IMPLEMENTATION
-    #include "external/stb_vorbis.h"    // OGG loading functions
+    #include <stb_vorbis.h>    // OGG loading functions
 #endif
 
 #if defined(SUPPORT_FILEFORMAT_XM)
@@ -208,7 +208,7 @@ typedef struct tagBITMAPINFOHEADER {
     #define DRWAV_FREE RL_FREE
 
     #define DR_WAV_IMPLEMENTATION
-    #include "external/dr_wav.h"        // WAV loading functions
+    #include <dr_wav.h>        // WAV loading functions
 #endif
 
 #if defined(SUPPORT_FILEFORMAT_MP3)
@@ -217,7 +217,7 @@ typedef struct tagBITMAPINFOHEADER {
     #define DRMP3_FREE RL_FREE
 
     #define DR_MP3_IMPLEMENTATION
-    #include "external/dr_mp3.h"        // MP3 loading functions
+    #include <dr_mp3.h>        // MP3 loading functions
 #endif
 
 #if defined(SUPPORT_FILEFORMAT_FLAC)
@@ -227,7 +227,7 @@ typedef struct tagBITMAPINFOHEADER {
 
     #define DR_FLAC_IMPLEMENTATION
     #define DR_FLAC_NO_WIN32_IO
-    #include "external/dr_flac.h"       // FLAC loading functions
+    #include <dr_flac.h>       // FLAC loading functions
 #endif
 
 #if defined(_MSC_VER)

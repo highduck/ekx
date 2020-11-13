@@ -91,7 +91,7 @@ struct TextFormat {
     }
 
     void setFontName(const char* fontName) {
-        font = asset_t<Font>{fontName};
+        font.setID(fontName);
     }
 
     TextFormat() = default;
