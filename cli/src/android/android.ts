@@ -3,26 +3,23 @@ import {
     copyFolderRecursiveSync,
     deleteFolderRecursive,
     execute,
-    is_dir, is_file, make_dirs,
-    optimize_png_glob, read_text, replace_all,
-    replace_in_file, write_text
-} from "./utils";
-import {XmlDocument, XmlTextNode} from 'xmldoc';
+    is_dir,
+    is_file,
+    make_dirs,
+    optimize_png_glob,
+    read_text,
+    replace_all,
+    replace_in_file,
+    write_text
+} from "../utils";
+import {XmlDocument} from 'xmldoc';
 import * as path from "path";
-import {ekc_export_assets_lazy, ekc_export_market} from "./assets";
-import {collect_source_files, collect_src_roots_all} from "./collectSources";
+import {ekc_export_assets_lazy, ekc_export_market} from "../assets";
+import {collect_source_files, collect_src_roots_all} from "../collectSources";
+import {copySigningKeys, printSigningConfigs} from "./signing";
 
 function open_android_project(android_project_path) {
     execute("open", ["-a", "/Applications/Android Studio.app", android_project_path]);
-}
-
-function copy_keystore(keystore_file) {
-    const src = path.join("../..", keystore_file);
-    if (is_file(src)) {
-        copy_file(src, path.join("app", keystore_file));
-    } else {
-        console.warn("missing keystore", keystore_file);
-    }
 }
 
 function copy_google_services_config_android() {
@@ -78,7 +75,7 @@ function mod_strings(ctx) {
     doc.eachChild((child) => {
         if (child.name === "string") {
             const textNode = child.firstChild.type == 'text' ? child.firstChild : null;
-            if(textNode) {
+            if (textNode) {
                 switch (child.attr.name) {
                     case "app_name":
                         // seems xmldoc is not enough
@@ -98,8 +95,7 @@ function mod_strings(ctx) {
             }
         }
     });
-    // console.trace(doc.childrenNamed("string"));
-    // console.trace(doc.toString());
+
     write_text(res_strings_path, doc.toString());
 }
 
@@ -107,7 +103,7 @@ function mod_strings(ctx) {
 function mod_cmake_lists(ctx) {
     const cmake_path = "CMakeLists.txt";
     const src_files = [];
-    const ext_list = ["hpp", "h", "cpp", "c"];
+    const ext_list = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
 
     const source_dir_list = collect_src_roots_all(ctx, "cpp", "android", ".");
 
@@ -173,10 +169,7 @@ export function export_android(ctx) {
             'versionName "1.0" // AUTO': `versionName "${ctx.version_name}" // AUTO`,
             '// TEMPLATE_SOURCE_SETS': source_sets.join("\n\t\t"),
             '// TEMPLATE_DEPENDENCIES': ctx.build.android.dependencies.join("\n\t"),
-            'KEY_ALIAS': ctx.android.keystore.key_alias,
-            'KEY_PASSWORD': ctx.android.keystore.key_password,
-            'store.keystore': ctx.android.keystore.store_keystore,
-            'STORE_PASSWORD': ctx.android.keystore.store_password
+            '// ${SIGNING_CONFIGS}': printSigningConfigs(ctx.android.keystore),
         });
 
         copyFolderRecursiveSync(path.join(base_path, "export/android/res"), "app/src/main/res");
@@ -186,7 +179,7 @@ export function export_android(ctx) {
         mod_strings(ctx);
         mod_cmake_lists(ctx);
         copy_google_services_config_android();
-        copy_keystore(ctx.android.keystore.store_keystore);
+        copySigningKeys(ctx.android.keystore);
     }
     process.chdir(cwd);
     open_android_project(dest_path);

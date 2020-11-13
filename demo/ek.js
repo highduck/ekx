@@ -1,8 +1,8 @@
 const path = require("path");
 
 module.exports = function (project) {
-    project.modules.push({
-        name: "picos",
+    project.addModule({
+        name: "demo",
         cpp: [path.join(__dirname, "src")],
         assets: [path.join(__dirname, "export/contents")]
     });
@@ -25,25 +25,28 @@ module.exports = function (project) {
     };
 
     if (project.current_target === "android") {
+
+        const secretPath = '/Users/ilyak/Dropbox/dev_keys/demo';
+
         project.android = {
             application_id: "ilj.play.demo",
             package_id: "com.eliasku.iljdemo",
             admob_app_id: "ca-app-pub-3931267664278058~6275600638",
             game_services_id: "300613663654",
             keystore: {
-                store_keystore: "release.keystore",
-                store_password: "digiduckgames",
-                key_alias: "eliasku",
-                key_password: "digiduckgames"
+                release: {
+                    store_keystore: path.join(secretPath, "release.keystore"),
+                    store_password: "digiduckgames",
+                    key_alias: "eliasku",
+                    key_password: "digiduckgames"
+                },
+                debug: {
+                    store_keystore: path.join(secretPath, 'debug2.keystore'),
+                    store_password: 'android',
+                    key_alias: 'androiddebugkey',
+                    key_password: 'android',
+                }
             }
-
-            /*
-            debug {
-            storeFile file('./debug2.keystore')
-            storePassword 'android'
-            keyAlias = 'androiddebugkey'
-            keyPassword 'android'
-             */
         };
     } else if (project.current_target === "ios") {
         project.ios = {
@@ -60,4 +63,7 @@ module.exports = function (project) {
             image_url: "https://eliasku.github.io/picos/preview.png"
         };
     }
+
+    project.includeProject(path.join(project.path.EKX_ROOT, "plugins/admob"));
+    project.includeProject(path.join(project.path.EKX_ROOT, "plugins/billing"));
 };

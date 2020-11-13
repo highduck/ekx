@@ -15,21 +15,76 @@ class ProjectPath {
 
 type RegisteredProject = any;
 
+interface ModuleDef {
+    name?: string;
+    cpp?: string[];
+    assets?: string[];
+    android?: {
+        cpp?: string[];
+        java?: string[];
+        aidl?: string[];
+    };
+    macos?: {
+        cpp?: string[];
+    };
+    ios?: {
+        cpp?: string[];
+        cpp_flags?: {
+            files?: string[];
+            flags?: string;
+        };
+        xcode?: {
+            capabilities?: string[];
+            frameworks?: string[];
+            pods?: string[];
+            plist?: any[];
+        };
+    };
+    web?: {
+        cpp?: string[];
+    };
+    windows?: {
+        cpp?: string[];
+    };
+    linux?: {
+        cpp?: string[];
+    };
+}
+
 export class Project {
     readonly path = new ProjectPath();
     current_target = process.argv[2];
 
     build_steps: (() => void)[] = [];
     projects: { [name: string]: RegisteredProject } = {};
-    modules = [];
+    modules: ModuleDef[] = [];
 
     assets: {
         output: string
     };
     market_asset: string;
 
-    include_project(project_dir: string) {
-        const project_js = path.join(project_dir, "ek.js");
+    build = {
+        android: {
+            dependencies: [],
+            add_manifest: [],
+            add_manifest_application: [],
+            source_dirs: [],
+        }
+    };
+
+    ios = {};
+    html = {};
+
+    addModule(def: ModuleDef) {
+        this.modules.push(def);
+        if(def && def.name) {
+            console.info("Module:", def.name);
+        }
+    }
+
+    includeProject(projectPath: string) {
+        const project_js = path.join(projectPath, "ek.js");
         let projectConfigurator = null;
         try {
             projectConfigurator = require(project_js);
@@ -38,7 +93,7 @@ export class Project {
         }
 
         if (projectConfigurator) {
-            this.projects[project_dir] = projectConfigurator(this);
+            this.projects[projectPath] = projectConfigurator(this);
         }
     }
 

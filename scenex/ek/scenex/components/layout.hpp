@@ -18,6 +18,20 @@ struct layout_t {
 
     rect_f rect;
     rect_f safeRect;
+
+    layout_t& enableAlignX(float relative, float absolute = 0.0f) {
+        align_x = true;
+        x.x = relative;
+        x.y = absolute;
+        return *this;
+    }
+
+    layout_t& enableAlignY(float relative, float absolute = 0.0f) {
+        align_y = true;
+        y.x = relative;
+        y.y = absolute;
+        return *this;
+    }
 };
 
 rect_f find_parent_layout_rect(ecs::entity e, bool safe);

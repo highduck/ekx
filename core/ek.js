@@ -1,5 +1,5 @@
 module.exports = (ctx) => {
-    ctx.modules.push({
+    ctx.addModule({
         name: "core",
         cpp: [__dirname]
     });

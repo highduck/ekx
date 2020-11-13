@@ -13,12 +13,14 @@ console.log("Current Target:", project.current_target);
 
 addExportBuildStep(project);
 
-project.include_project(path.join(project.path.EKX_ROOT, "external/miniaudio"));
-project.include_project(path.join(project.path.EKX_ROOT, "external/dr_libs"));
-project.include_project(path.join(project.path.EKX_ROOT, "external/stb"));
-project.include_project(path.join(project.path.EKX_ROOT, "ek"));
-project.include_project(path.join(project.path.EKX_ROOT, "core"));
-project.include_project(path.join(project.path.EKX_ROOT, "scenex"));
-project.include_project(process.cwd());
+project.includeProject(path.join(project.path.EKX_ROOT, "external/miniaudio"));
+project.includeProject(path.join(project.path.EKX_ROOT, "external/dr_libs"));
+project.includeProject(path.join(project.path.EKX_ROOT, "external/stb"));
+project.includeProject(path.join(project.path.EKX_ROOT, "ek"));
+project.includeProject(path.join(project.path.EKX_ROOT, "core"));
+project.includeProject(path.join(project.path.EKX_ROOT, "scenex"));
+// console.info(project.projects);
+// console.info(project.modules);
+project.includeProject(process.cwd());
 
 project.runBuildSteps();

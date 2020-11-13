@@ -3,6 +3,7 @@
 #include "sample_flash.hpp"
 #include "3d/sample_3d.hpp"
 #include "piko/sample_piko.hpp"
+#include "sample_integrations.hpp"
 
 #include <ek/math/rand.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
@@ -12,6 +13,7 @@
 #include <ek/scenex/components/button.hpp>
 #include <ek/scenex/components/interactive.hpp>
 #include <ek/scenex/components/layout.hpp>
+#include <ui/minimal.hpp>
 
 namespace ek {
 
@@ -91,30 +93,6 @@ void DemoApp::render_frame() {
     draw_node(root);
 }
 
-drawable_text& addText(ecs::entity e, const char* text) {
-    auto* tf = new drawable_text();
-    tf->format.font.setID("mini");
-    tf->format.size = 16;
-    tf->format.addShadow(0x0_rgb, 8);
-    tf->text = text;
-    tf->format.setAlignment(Alignment::Center);
-    ecs::get_or_create<display_2d>(e).drawable.reset(tf);
-    return *tf;
-}
-
-template<typename Func>
-ecs::entity createButton(const char* label, Func fn) {
-    auto e = create_node_2d(label);
-    auto& tf = addText(e, label);
-    tf.fillColor = 0x77000000_argb;
-    tf.borderColor = 0x77FFFFFF_argb;
-    tf.hitFullBounds = true;
-    tf.rect.set(-20, -20, 40, 40);
-    ecs::assign<interactive_t>(e).cursor = app::mouse_cursor::button;
-    ecs::assign<button_t>(e).clicked += fn;
-    return e;
-}
-
 void DemoApp::start_game() {
 //    setup_game(w, game);
 
@@ -123,26 +101,18 @@ void DemoApp::start_game() {
 
     auto prev = createButton("<", [] { scrollSample(-1); });
     auto next = createButton(">", [] { scrollSample(+1); });
-    auto& l = ecs::assign<layout_t>(prev);
-    l.align_x = true;
-    l.x = {0, 30};
-    auto& r = ecs::assign<layout_t>(next);
-    r.align_x = true;
-    r.x = {1, -30};
+    ecs::assign<layout_t>(prev).enableAlignX(0, 30);
+    ecs::assign<layout_t>(next).enableAlignX(1, -30);
 
     tfSampleTitle = create_node_2d("title");
     addText(tfSampleTitle, "");
-    auto& t = ecs::assign<layout_t>(tfSampleTitle);
-    t.align_x = true;
-    t.x = {0.5, 0};
+    ecs::assign<layout_t>(tfSampleTitle).enableAlignX(0.5);
 
     auto controls = create_node_2d("controls");
     append(controls, tfSampleTitle);
     append(controls, prev);
     append(controls, next);
-    auto& c = ecs::assign<layout_t>(controls);
-    c.align_y = true;
-    c.y = {1, -30};
+    ecs::assign<layout_t>(controls).enableAlignY(1, -30);
 
     append(game, controls);
 
@@ -151,6 +121,7 @@ void DemoApp::start_game() {
     sampleFactory.emplace_back([] { return new SamplePiko(); });
     sampleFactory.emplace_back([] { return new SampleFlash("test1"); });
     sampleFactory.emplace_back([] { return new SampleFlash("test2"); });
+    sampleFactory.emplace_back([] { return new SampleIntegrations(); });
     setCurrentSample(0);
 }
 
