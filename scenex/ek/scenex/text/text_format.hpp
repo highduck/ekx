@@ -52,7 +52,15 @@ private:
 
 class Font;
 
+enum class TextLayerType {
+    Text,
+    Stroke1,
+    Stroke2,
+    Shadow
+};
+
 struct TextLayerEffect {
+    TextLayerType type = TextLayerType::Text;
     argb32_t color = 0xFFFFFFFF_argb;
     float2 offset{};
     float blurRadius = 0.0f;
@@ -60,7 +68,6 @@ struct TextLayerEffect {
     uint8_t strength = 0;
     bool visible = true;
     bool showGlyphBounds = false;
-    const char* nameID = nullptr;
 };
 
 struct TextFormat {
@@ -105,10 +112,11 @@ struct TextFormat {
         alignment = align.anchor();
     }
 
-    void addShadow(argb32_t color, float radius, int hardness = 20 /* 0..100 */, float2 offset = {}) {
+    void addShadow(argb32_t color, float radius, float2 offset = {}, float hardness = 0.2f /* 0..1 */) {
         auto& layer = layers[layersCount++];
+        layer.type = TextLayerType::Shadow;
         layer.color = color;
-        layer.strength = uint8_t(7 * hardness / 100);
+        layer.strength = uint8_t(7 * hardness);
         layer.blurIterations = 3;
         layer.blurRadius = radius;
         layer.offset = offset;

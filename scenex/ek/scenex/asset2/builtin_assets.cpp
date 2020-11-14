@@ -348,7 +348,7 @@ public:
 
     void do_load() override {
         get_resource_content_async((project_->base_path / path_ + ".ttf").c_str(), [this](auto buffer) {
-            auto* ttfFont = new TrueTypeFont(project_->scale_factor, 48, 1024);
+            auto* ttfFont = new TrueTypeFont(project_->scale_factor, 48, 2048);
             ttfFont->loadFromMemory(std::move(buffer));
             asset_t<Font>{path_}.reset(new Font(ttfFont));
             ready_ = true;

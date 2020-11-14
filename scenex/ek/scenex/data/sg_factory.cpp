@@ -9,6 +9,7 @@
 #include <ek/scenex/components/interactive.hpp>
 #include <ek/scenex/components/node_filters.hpp>
 #include <ek/util/logger.hpp>
+#include <ek/math/bounds_builder.hpp>
 
 namespace ek {
 
@@ -127,19 +128,15 @@ ecs::entity create_and_merge(const sg_file& sg, asset_ref asset,
     return entity;
 }
 
-void extend_bounds(const sg_file& file, const sg_node_data& data, rect_f& bounds, const matrix_2d& matrix) {
-    if (!data.sprite.empty()) {
-        asset_t<sprite_t> spr{data.sprite};
-        if (spr) {
-            bounds = combine(bounds, points_box(
-                    matrix.transform(spr->rect.position),
-                    matrix.transform(spr->rect.right_bottom())
-            ));
-        }
+void extend_bounds(const sg_file& file, const sg_node_data& data, bounds_builder_2f& boundsBuilder,
+                   const matrix_2d& matrix) {
+    const asset_t<sprite_t> spr{data.sprite};
+    if (spr) {
+        boundsBuilder.add(spr->rect, matrix);
     }
     for (const auto& child : data.children) {
         const auto& symbol = child.libraryName.empty() ? child : *file.get(child.libraryName);
-        extend_bounds(file, symbol, bounds, matrix * child.matrix);
+        extend_bounds(file, symbol, boundsBuilder, matrix * child.matrix);
     }
 }
 
@@ -166,9 +163,9 @@ rect_f sg_get_bounds(const std::string& library, const std::string& name) {
     if (file) {
         const sg_node_data* data = file->get(name);
         if (data) {
-            rect_f rc{};
-            extend_bounds(*file, *data, rc, data->matrix);
-            return rc;
+            bounds_builder_2f bb{};
+            extend_bounds(*file, *data, bb, data->matrix);
+            return bb.rect();
         }
     }
     return {};

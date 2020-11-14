@@ -4,6 +4,7 @@
 #include <ek/scenex/text/font.hpp>
 #include <ek/util/assets.hpp>
 #include <ek/scenex/text/text_drawer.hpp>
+#include <ek/math/bounds_builder.hpp>
 
 namespace ek {
 
@@ -104,8 +105,6 @@ drawable_text::drawable_text(std::string text, TextFormat format)
 void drawable_text::draw() {
     TextDrawer drawer;
     drawer.format = format;
-//    drawer.rect = rect;
-//    drawer.alignment = format.alignment;
     if (fillColor.a > 0) {
         draw2d::state.set_empty_texture();
         draw2d::quad(rect, fillColor);
@@ -116,12 +115,12 @@ void drawable_text::draw() {
     }
     auto& info = TextDrawer::sharedTextBlockInfo;
     drawer.getTextSize(text.c_str(), info);
-    auto bounds = info.bounds;
-    drawer.rect.position = rect.relative(format.alignment) - bounds.relative(format.alignment);
-    bounds.position += drawer.rect.position;
-    drawer.rect.size = {};
-    drawer.draw(text.c_str());
+
+    const float2 position = rect.position + (rect.size - info.size) * format.alignment;
+    drawer.position = position + float2{0.0f, info.line[0].y};
+    drawer.drawWithBlockInfo(text.c_str(), info);
     if (showTextBounds) {
+        const rect_f bounds{position, info.size};
         draw2d::strokeRect(expand(bounds, 1.0f), 0xFF0000_rgb, 1);
     }
 }
@@ -134,9 +133,10 @@ rect_f drawable_text::get_bounds() const {
     drawer.format = format;
     auto& info = TextDrawer::sharedTextBlockInfo;
     drawer.getTextSize(text.c_str(), info);
-    auto bounds = info.bounds;
-    bounds.position += rect.relative(format.alignment) - bounds.relative(format.alignment);
-    return bounds;
+    return {
+            rect.position + (rect.size - info.size) * format.alignment,
+            info.size
+    };
 }
 
 bool drawable_text::hit_test(const float2& point) const {
@@ -144,10 +144,9 @@ bool drawable_text::hit_test(const float2& point) const {
 }
 
 rect_f scissors_2d::world_rect(const matrix_2d& world_matrix) const {
-    return points_box(
-            world_matrix.transform(rect.position),
-            world_matrix.transform(rect.right_bottom())
-    );
+    bounds_builder_2f bb{};
+    bb.add(rect, world_matrix);
+    return bb.rect();
 }
 
 //// arc
