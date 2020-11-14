@@ -26,6 +26,13 @@ public:
 
     void bind() const;
 
+    [[nodiscard]]
+    uint32_t getSize() const {
+        return size_;
+    }
+
+    bool useDataOrphaning = false;
+
 private:
     buffer_type type_;
     buffer_usage usage_;

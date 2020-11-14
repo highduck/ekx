@@ -97,6 +97,10 @@ void basic_application::on_draw_frame() {
     hook_on_update(static_cast<float>(dt));
     update_frame(static_cast<float>(dt));
 
+    profiler.addTime("UPDATE", timer.read_millis());
+    profiler.addTime("FRAME", timer.read_millis());
+    timer.reset();
+
     graphics::begin();
     graphics::viewport();
     //graphics.set_scissors();
@@ -113,9 +117,15 @@ void basic_application::on_draw_frame() {
 
     hook_on_render_frame();
 
-    profiler.setGameTime(timer.read_millis());
+    profiler.addTime("RENDER", timer.read_millis());
+    profiler.addTime("FRAME", timer.read_millis());
+    timer.reset();
 
     on_frame_end();
+
+    profiler.addTime("PROFILER", timer.read_millis());
+    profiler.addTime("FRAME", timer.read_millis());
+    timer.reset();
 
     draw2d::end();
 
@@ -126,6 +136,12 @@ void basic_application::on_draw_frame() {
         start_game();
         started_ = true;
     }
+
+    profiler.addTime("END", timer.read_millis());
+    profiler.addTime("FRAME", timer.read_millis());
+    timer.reset();
+
+    profiler.update(frame_timer.delta_time());
 }
 
 void basic_application::update_frame(float dt) {
@@ -136,7 +152,7 @@ void basic_application::render_frame() {
 }
 
 void basic_application::on_frame_end() {
-    profiler.update();
+    //profiler.update(frame_timer.delta_time());
     profiler.draw();
 }
 
@@ -152,9 +168,12 @@ void basic_application::start_game() {
 }
 
 void basic_application::on_event(const event_t& event) {
+    timer_t timer{};
     if (event.type == event_type::app_resize) {
         setScreenRects(root);
     }
+    profiler.addTime("EVENTS", timer.read_millis());
+    profiler.addTime("FRAME", timer.read_millis());
 }
 
 

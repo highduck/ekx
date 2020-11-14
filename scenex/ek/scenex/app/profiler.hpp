@@ -11,11 +11,12 @@ public:
 
     ~Profiler();
 
-    void update();
+    void update(float dt);
 
     void draw();
 
-    void setGameTime(float time);
+    void addTime(const char* name, float time);
+
 private:
     class Impl;
     std::unique_ptr<Impl> impl;

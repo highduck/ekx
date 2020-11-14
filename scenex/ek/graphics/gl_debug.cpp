@@ -34,7 +34,7 @@ void skip_errors() {
 #endif
 }
 
-void check_error() {
+void check_error(const char* cmd) {
 #ifndef EK_NO_GL_CHECKS
     if (debugging_enabled_) {
         auto err = glGetError();
@@ -60,7 +60,10 @@ void check_error() {
                 default:
                     break;
             }
-            EK_WARN("glGetError %i ( %s )", err, error);
+            EK_WARN("GL error: %i ( %s )", err, error);
+            if(cmd) {
+                EK_WARN("  Call: %s", cmd);
+            }
         }
         if (err != GL_NO_ERROR) {
             abort();

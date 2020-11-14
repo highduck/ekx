@@ -49,11 +49,13 @@ void AudioManager::vibrate(int length) const {
 }
 
 void AudioManager::update(float) {
-    asset_t<audio::Music> musicAsset{music_};
-    if (musicAsset) {
-        auto volume = music.enabled() ? music_volume_ : 0.0f;
-        musicAsset->setVolume(volume);
-        musicAsset->update();
+    if(!music_.empty()) {
+        asset_t<audio::Music> musicAsset{music_};
+        if (musicAsset) {
+            auto volume = music.enabled() ? music_volume_ : 0.0f;
+            musicAsset->setVolume(volume);
+            musicAsset->update();
+        }
     }
 }
 

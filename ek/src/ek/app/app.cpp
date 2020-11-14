@@ -25,8 +25,6 @@ static bool applicationInFocus = true;
 void process_event(const event_t& event) {
     assert(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
 
-
-
     switch(event.type) {
         case event_type::app_pause:
             if(applicationInFocus) {

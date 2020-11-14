@@ -36,18 +36,12 @@ void init() {
     EK_INFO << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION);
     gl::check_error();
 
-    glDepthMask(GL_FALSE);
-    gl::check_error();
-    glEnable(GL_BLEND);
-    gl::check_error();
-    glDisable(GL_DEPTH_TEST);
-    gl::check_error();
-    glDisable(GL_STENCIL_TEST);
-    gl::check_error();
-    glDisable(GL_DITHER);
-    gl::check_error();
-    glDisable(GL_CULL_FACE);
-    gl::check_error();
+    GL_CHECK(glDepthMask(GL_FALSE));
+    GL_CHECK(glEnable(GL_BLEND));
+    GL_CHECK(glDisable(GL_DEPTH_TEST));
+    GL_CHECK(glDisable(GL_STENCIL_TEST));
+    GL_CHECK(glDisable(GL_DITHER));
+    GL_CHECK(glDisable(GL_CULL_FACE));
 
     // TODO:
 //		if (true) {
@@ -61,8 +55,7 @@ void init() {
     //    glCheckError();
 #endif
 
-    glFinish();
-    gl::check_error();
+    GL_CHECK(glFinish());
 }
 
 GraphicsContextType getContextType() {
@@ -74,52 +67,45 @@ void begin() {
 }
 
 void clear(float r, float g, float b, float a) {
-    glClearColor(r, g, b, a);
-    glClear(GL_COLOR_BUFFER_BIT);
-    gl::check_error();
+    GL_CHECK(glClearColor(r, g, b, a));
+    GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
 }
 
 void viewport(int x, int y, int width, int height) {
-    glViewport(x, y, width, height);
-    gl::check_error();
+    GL_CHECK(glViewport(x, y, width, height));
     currentFrameBufferWidth = width;
     currentFrameBufferHeight = height;
 }
 
 void viewport() {
-    viewport(0, 0,
-             static_cast<int>(g_app.drawable_size.x),
-             static_cast<int>(g_app.drawable_size.y));
+    auto w = static_cast<int>(g_app.drawable_size.x);
+    auto h = static_cast<int>(g_app.drawable_size.y);
+    viewport(0, 0, w, h);
 }
 
 void set_blend_mode(const blend_mode& blending) {
-    glBlendFunc(static_cast<GLenum>(blending.source),
-                static_cast<GLenum>(blending.dest));
-    gl::check_error();
+    auto src = static_cast<GLenum>(blending.source);
+    auto dst = static_cast<GLenum>(blending.dest);
+    GL_CHECK(glBlendFunc(src, dst));
 }
 
 void set_scissors(int x, int y, int width, int height) {
-    glEnable(GL_SCISSOR_TEST);
-    gl::check_error();
-
     const int buffer_height = currentFrameBufferHeight;
-    glScissor(x, buffer_height - y - height, width, height);
-    gl::check_error();
+    GL_CHECK(glEnable(GL_SCISSOR_TEST));
+    GL_CHECK(glScissor(x, buffer_height - y - height, width, height));
 }
 
 void set_scissors() {
-    glDisable(GL_SCISSOR_TEST);
-    gl::check_error();
+    GL_CHECK(glDisable(GL_SCISSOR_TEST));
 }
 
 void get_pixels(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint8_t* out_buffer) {
-    glReadPixels(x, currentFrameBufferHeight - y - height, width, height, GL_RGBA, GL_UNSIGNED_BYTE, out_buffer);
-    gl::check_error();
+    GL_CHECK(glReadPixels(x, currentFrameBufferHeight - y - height, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
+                          out_buffer));
 }
 
 void draw_triangles(uint32_t indices_count) {
-    glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_SHORT, nullptr);
-    gl::check_error();
+    GL_CHECK(glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_SHORT, nullptr));
 }
 
 }

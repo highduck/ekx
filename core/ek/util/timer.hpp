@@ -54,38 +54,33 @@ private:
     uint64_t frame_index_ = 0ull;
 };
 
-class fps_meter_t final {
+class FpsMeter final {
 public:
     void update(float dt) {
-        // estimate average FPS for some period
-        counter_ += 1.0f;
-        accum_ += dt;
-        if (accum_ >= avg_period_) {
-            avg_fps_ = counter_ / avg_period_;
-            accum_ -= avg_period_;
-            counter_ = 0.0f;
+        if (measurementsPerSeconds > 0.0f) {
+            // estimate average FPS for some period
+            counter_ += 1.0f;
+            accum_ += dt;
+            const auto period = 1.0f / measurementsPerSeconds;
+            if (accum_ >= period) {
+                avgFPS_ = counter_ * measurementsPerSeconds;
+                accum_ -= period;
+                counter_ = 0.0f;
+            }
+        } else {
+            avgFPS_ = dt > 0.0f ? (1.0f / dt) : 0.0f;
         }
-
-        // update immediate frame FPS count
-        frame_fps_ = dt > (1.0f / max_frame_fps_) ? (1.0f / dt) : max_frame_fps_;
     }
 
     [[nodiscard]]
-    float fps() const {
-        return avg_fps_;
-    }
-
-    [[nodiscard]]
-    float frame_fps() const {
-        return frame_fps_;
+    float getAverageFPS() const {
+        return avgFPS_;
     }
 
 private:
-    const float avg_period_ = 1.0f;
-    const float max_frame_fps_ = 1000.0f;
-
-    float avg_fps_ = 0.0f;
-    float frame_fps_ = 0.0f;
+    // if less or equal 0 - calculate FPS for every frame
+    const float measurementsPerSeconds = 2.0f;
+    float avgFPS_ = 0.0f;
     float counter_ = 0.0f;
     float accum_ = 0.0f;
 };

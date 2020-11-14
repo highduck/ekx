@@ -33,16 +33,13 @@ void buffer_t::upload(const void* data, uint32_t size) {
     const auto type = static_cast<GLenum>(type_);
 
     if (size > size_) {
-        glBufferData(type, size, data, usage);
-        gl::check_error();
-
+        GL_CHECK(glBufferData(type, size, data, usage));
         size_ = size;
     } else {
-        glBufferData(type, size_, nullptr, usage);
-        gl::check_error();
-
-        glBufferSubData(type, 0, size, data);
-        gl::check_error();
+        if (useDataOrphaning) {
+            GL_CHECK(glBufferData(type, size_, nullptr, usage));
+        }
+        GL_CHECK(glBufferSubData(type, 0, size, data));
     }
 }
 
