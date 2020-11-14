@@ -26,10 +26,20 @@ bool RectEdit(const char* label, float xywh[4], float v_speed, const char* forma
 
 namespace ek {
 
+const char* getTextLayerTypeName(TextLayerType type) {
+    static const char* names[] = {
+            "Text",
+            "Stroke1",
+            "Stroke2",
+            "Shadow"
+    };
+    return names[static_cast<int>(type)];
+}
+
 void guiTextLayerEffect(TextLayerEffect& layer) {
     ImGui::PushID(&layer);
 
-    if (ImGui::CollapsingHeader(layer.nameID ? layer.nameID : "Layer")) {
+    if (ImGui::CollapsingHeader(getTextLayerTypeName(layer.type))) {
         ImGui::Checkbox("Visible", &layer.visible);
         ImGui::Checkbox("Show Glyph Bounds", &layer.showGlyphBounds);
         ImGui::DragFloat("Radius", &layer.blurRadius, 1, 0, 8);

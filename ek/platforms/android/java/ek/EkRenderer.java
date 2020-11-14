@@ -21,6 +21,8 @@ public class EkRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         width = view.getWidth();
         height = view.getHeight();
+        scaleFactor = view.getContext().getResources().getDisplayMetrics().density;
+
         Log.i("ek", "onSurfaceCreated: " + width + " x " + height);
         EkPlatform.sendResize(width, height, scaleFactor);
 

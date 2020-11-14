@@ -15,7 +15,7 @@ static Wave LoadMP3(const void* data, size_t size, const char* optionalName) {
     Wave wave = {0};
 
     // Decode an entire MP3 file in one go
-    uint64_t totalFrameCount = 0;
+    drmp3_uint64 totalFrameCount = 0;
     drmp3_config config = {0};
 
     wave.data = drmp3_open_memory_and_read_pcm_frames_f32(
@@ -28,7 +28,7 @@ static Wave LoadMP3(const void* data, size_t size, const char* optionalName) {
 
     wave.channels = config.channels;
     wave.sampleRate = config.sampleRate;
-    wave.sampleCount = (int) totalFrameCount * wave.channels;
+    wave.sampleCount = static_cast<unsigned int>(totalFrameCount * wave.channels);
     wave.sampleSize = 32;
 
     // NOTE: Only support up to 2 channels (mono, stereo)

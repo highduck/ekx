@@ -125,7 +125,7 @@ void texture_t::uploadSubAlpha8(uint32_t x, uint32_t y, uint32_t width, uint32_t
         textureFormat = GL_R8;
         internalFormat = GL_RED;
     }
-    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, internalFormat, GL_UNSIGNED_BYTE, alphaMap);
+    glTexSubImage2D(gl_texture_target_, 0, x, y, width, height, internalFormat, GL_UNSIGNED_BYTE, alphaMap);
     gl::check_error();
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);

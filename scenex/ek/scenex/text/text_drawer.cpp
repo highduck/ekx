@@ -7,36 +7,29 @@ namespace ek {
 
 void TextBlockInfo::pushLine(float emptyLineHeight) {
     assert(numLines < 128);
-    if (maxLength < lineLength[numLines]) {
-        maxLength = lineLength[numLines];
+    if (size.x < line[numLines].x) {
+        size.x = line[numLines].x;
     }
-    if (lineHeight[numLines] <= 0.0f) {
-        lineHeight[numLines] = emptyLineHeight;
+    if (line[numLines].y <= 0.0f) {
+        line[numLines].y = emptyLineHeight;
     }
-    totalHeight += lineHeight[numLines];
+    size.y += line[numLines].y;
     ++numLines;
-    lineLength[numLines] = 0.0f;
-    lineHeight[numLines] = 0.0f;
+    line[numLines] = float2::zero;
 }
 
 void TextBlockInfo::reset() {
-    bounds = {};
-    maxLength = 0.0f;
-    totalHeight = 0.0f;
+    size = float2::zero;
+    line[0] = float2::zero;
     numLines = 0;
-    lineLength[numLines] = 0.0f;
-    lineHeight[numLines] = 0.0f;
 }
 
-void TextBlockInfo::updateLineLength(float length) {
-    if (lineLength[numLines] < length) {
-        lineLength[numLines] = length;
+void TextBlockInfo::updateLine(float length, float height) {
+    if (line[numLines].x < length) {
+        line[numLines].x = length;
     }
-}
-
-void TextBlockInfo::updateLineHeight(float height) {
-    if (lineHeight[numLines] < height) {
-        lineHeight[numLines] = height;
+    if (line[numLines].y < height) {
+        line[numLines].y = height;
     }
 }
 
@@ -46,15 +39,17 @@ void TextDrawer::draw(const char* text) {
     if (!format.font) {
         return;
     }
-    font = format.font;
-    size = format.size;
-    leading = format.leading;
-    kerning = format.kerning;
-    letterSpacing = format.letterSpacing;
-    alignment = format.alignment;
-
     auto& info = sharedTextBlockInfo;
     getTextSize(text, info);
+    drawWithBlockInfo(text, info);
+}
+
+void TextDrawer::drawWithBlockInfo(const char* text, const TextBlockInfo& info) {
+    auto font = format.font;
+    if (!font) {
+        return;
+    }
+    auto alignment = format.alignment;
 
     // render effects first
     for (int i = format.layersCount - 1; i >= 0; --i) {
@@ -66,25 +61,29 @@ void TextDrawer::draw(const char* text) {
             // skip {0;0} strokes for bitmap fonts
             continue;
         }
-        pass.offset = layer.offset;
-        pass.blurRadius = layer.blurRadius;
-        pass.blurIterations = layer.blurIterations;
-        pass.filterStrength = layer.strength;
-        pass.color = layer.color;
-        pass.showGlyphBounds = layer.showGlyphBounds;
-        drawPass(text, info);
+        drawLayer(text, layer, info);
     }
 }
 
-void TextDrawer::drawPass(const char* text, const TextBlockInfo& info) {
-    font->setBlur(pass.blurRadius, pass.blurIterations, pass.filterStrength);
+void TextDrawer::drawLayer(const char* text, const TextLayerEffect& layer, const TextBlockInfo& info) const {
+    auto font = format.font;
+    if (!font) {
+        return;
+    }
+    auto alignment = format.alignment;
+    auto size = format.size;
+    auto letterSpacing = format.letterSpacing;
+    auto kerning = format.kerning;
 
-    const float2 start = rect.position + pass.offset;
+    font->setBlur(layer.blurRadius, layer.blurIterations, layer.strength);
+
+    float2 current = position + layer.offset;
+    const float startX = current.x;
     int lineIndex = 0;
-    float2 current = start;
-    current.x += (info.maxLength - info.lineLength[lineIndex]) * alignment.x;
 
-    draw2d::state.save_color().multiply_color(pass.color);
+    current.x += (info.size.x - info.line[lineIndex].x) * alignment.x;
+
+    draw2d::state.save_color().multiply_color(layer.color);
 
     const graphics::texture_t* prevTexture = nullptr;
     uint32_t prevCodepointOnLine = 0;
@@ -93,10 +92,10 @@ void TextDrawer::drawPass(const char* text, const TextBlockInfo& info) {
     uint32_t codepoint = 0;
     while (decoder.decode(codepoint)) {
         if (codepoint == '\n' || codepoint == '\r') {
-            current.x = start.x;
-            current.y += info.lineHeight[lineIndex];
+            current.x = startX;
+            current.y += info.line[lineIndex].y;
             ++lineIndex;
-            current.x += (info.maxLength - info.lineLength[lineIndex]) * alignment.x;
+            current.x += (info.size.x - info.line[lineIndex].x) * alignment.x;
             prevCodepointOnLine = 0;
             continue;
         }
@@ -111,7 +110,6 @@ void TextDrawer::drawPass(const char* text, const TextBlockInfo& info) {
                     prevTexture = gdata.texture;
                 }
                 draw2d::state.set_texture_coords(gdata.texCoord);
-                //gdata.rect.x += gdata.bearingX;
                 gdata.rect = translate(gdata.rect * size, current);
                 if (!gdata.rotated) {
                     draw2d::quad(gdata.rect.x,
@@ -125,7 +123,7 @@ void TextDrawer::drawPass(const char* text, const TextBlockInfo& info) {
                                          gdata.rect.height);
                 }
                 // only for DEV mode
-                if (pass.showGlyphBounds) {
+                if (layer.showGlyphBounds) {
                     draw2d::state.set_empty_texture();
                     draw2d::strokeRect(gdata.rect, 0xFFFFFF_rgb, 1);
                     draw2d::state.set_texture(gdata.texture);
@@ -140,23 +138,24 @@ void TextDrawer::drawPass(const char* text, const TextBlockInfo& info) {
     draw2d::state.restore_color();
 }
 
-void TextDrawer::getTextSize(const char* text, TextBlockInfo& info) {
+void TextDrawer::getTextSize(const char* text, TextBlockInfo& info) const {
     info.reset();
 
     if (!format.font) {
         return;
     }
 
-    font = format.font;
-    size = format.size;
-    leading = format.leading;
-    kerning = format.kerning;
-    letterSpacing = format.letterSpacing;
-    alignment = format.alignment;
+    auto font = format.font;
+    auto size = format.size;
+    auto leading = format.leading;
+    auto kerning = format.kerning;
+    auto letterSpacing = format.letterSpacing;
+    auto alignment = format.alignment;
 
-    float x;
+    float x = 0.0f;
     Glyph metrics;
     UTF8Decoder decoder{text};
+    uint32_t prevCodepointOnLine = 0;
     uint32_t codepoint = 0;
     while (decoder.decode(codepoint)) {
         if (codepoint == '\n' || codepoint == '\r') {
@@ -166,15 +165,18 @@ void TextDrawer::getTextSize(const char* text, TextBlockInfo& info) {
         }
 
         if (font->getGlyphMetrics(codepoint, metrics)) {
-            //metrics.rect.x += metrics.bearingX;
-            info.updateLineLength(x + size * fmax(metrics.rect.right(), metrics.advanceWidth));
-            info.updateLineHeight(size * metrics.lineHeight + leading);
+            if (kerning && prevCodepointOnLine) {
+                x += font->getKerning(prevCodepointOnLine, codepoint) * size;
+            }
+            info.updateLine(
+                    x + size * fmax(metrics.rect.right(), metrics.advanceWidth),
+                    size * metrics.lineHeight + leading
+            );
             x += size * metrics.advanceWidth + letterSpacing;
         }
+        prevCodepointOnLine = codepoint;
     }
     info.pushLine(size);
-    info.bounds = {{0.0f,           -info.lineHeight[0]},
-                   {info.maxLength, info.totalHeight}};
 }
 
 }

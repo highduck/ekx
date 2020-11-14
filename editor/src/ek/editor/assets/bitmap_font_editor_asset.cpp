@@ -17,7 +17,7 @@
 namespace ek {
 
 BitmapFontEditorAsset::BitmapFontEditorAsset(path_t path)
-        : editor_asset_t{std::move(path), "freetype"} {
+        : editor_asset_t{std::move(path), "bmfont"} {
 }
 
 void BitmapFontEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {
@@ -82,7 +82,7 @@ void BitmapFontEditorAsset::build(assets_build_struct_t& data) {
     });
 
     data.meta("atlas", name_);
-    data.meta("font", name_);
+    data.meta("bmfont", name_);
 }
 
 void BitmapFontEditorAsset::save() {

@@ -10,6 +10,7 @@
 #include <ek/scenex/text/font.hpp>
 #include <ek/scenex/text/text_drawer.hpp>
 
+// TODO: EK_DEV
 #ifndef NDEBUG
 #define ENABLE_PROFILER
 #endif
@@ -50,11 +51,11 @@ struct RealTimeGraph {
             x += 1;
         }
         snprintf(buf, sizeof(buf) - 1, markerFormat, history.at_backward(0));
-        textDrawer.rect.position = {width, H - prev + 0.5f * textDrawer.format.size};
+        textDrawer.position = {width, H - prev + 0.5f * textDrawer.format.size};
         textDrawer.draw(buf);
 
         snprintf(buf, sizeof(buf) - 1, titleFormat, value);
-        textDrawer.rect.position = {2.0f, 2.0f + textDrawer.format.size};
+        textDrawer.position = {2.0f, 2.0f + textDrawer.format.size};
         textDrawer.draw(buf);
     }
 

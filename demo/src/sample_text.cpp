@@ -20,21 +20,21 @@ ecs::entity createText(const char* name, const char* font, const char* text) {
     tf->format.layers[0].color = 0xFFFF77_rgb;
 
     // inner stroke
-    tf->format.layers[1].nameID = "inner stroke";
+    tf->format.layers[1].type = TextLayerType::Stroke1;
     tf->format.layers[1].blurRadius = 1;
     tf->format.layers[1].blurIterations = 3;
     tf->format.layers[1].strength = 5;
     tf->format.layers[1].color = 0x330000_rgb;
 
     // outer stroke
-    tf->format.layers[2].nameID = "outer stroke";
+    tf->format.layers[2].type = TextLayerType::Stroke2;
     tf->format.layers[2].blurRadius = 2;
     tf->format.layers[2].blurIterations = 3;
     tf->format.layers[2].strength = 5;
     tf->format.layers[2].color = 0xFFFFFF_rgb;
 
     // shadow
-    tf->format.layers[3].nameID = "shadow";
+    tf->format.layers[3].type = TextLayerType::Shadow;
     tf->format.layers[3].blurRadius = 8;
     tf->format.layers[3].blurIterations = 3;
     tf->format.layers[3].strength = 1;

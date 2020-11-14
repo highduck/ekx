@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- fix text metrics dangling float value in release-mode
+- fix type `bmfont` for bitmap font 
 - merge `name_t` and `node_state_t` to `node_t`
 - updata ImGui v1.80
 - export filters to text format layers 

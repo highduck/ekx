@@ -135,12 +135,12 @@ bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
     }
     assert(map != nullptr);
 
-    auto& map_ = *map;
-    auto it = map_.find(codepoint);
-    if (it != map_.end()) {
-        outGlyph = it->second;
-        return true;
-    }
+//    auto& map_ = *map;
+//    auto it = map_.find(codepoint);
+//    if (it != map_.end()) {
+//        outGlyph = it->second;
+//        return true;
+//    }
 
     const auto glyphIndex = stbtt_FindGlyphIndex(info, codepoint);
     if (!glyphIndex) {
