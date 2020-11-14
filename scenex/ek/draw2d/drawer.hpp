@@ -164,6 +164,8 @@ void commit_state();
 
 void flush_batcher();
 
+uint32_t getBatchingUsedMemory();
+
 void end();
 
 void write_index(uint16_t index);

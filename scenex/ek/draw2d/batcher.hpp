@@ -7,7 +7,9 @@
 
 namespace ek {
 
-class batcher_t : private disable_copy_assign_t {
+class BufferChain;
+
+class Batcher : private disable_copy_assign_t {
 public:
     constexpr static int max_indices_limit = 0x100000;
     constexpr static int max_vertices_limit = 0xFFFF;
@@ -22,9 +24,9 @@ public:
 
 public:
 
-    batcher_t();
+    Batcher();
 
-    ~batcher_t();
+    ~Batcher();
 
     void begin();
 
@@ -54,12 +56,14 @@ public:
         return base_vertex_ + base_vertex;
     }
 
+    [[nodiscard]]
+    uint32_t getUsedMemory() const;
 private:
 
     void init_memory(uint32_t vertex_max_size, uint32_t vertices_limit, uint32_t indices_limit);
 
-    graphics::buffer_t* vertex_buffer_ = nullptr;
-    graphics::buffer_t* index_buffer_ = nullptr;
+    BufferChain* vertexBuffers_ = nullptr;
+    BufferChain* indexBuffers_ = nullptr;
     uint32_t vertex_max_size_ = 0;
     uint32_t vertex_index_max_ = 0;
     uint32_t vertices_count_ = 0;

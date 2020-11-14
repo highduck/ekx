@@ -15,7 +15,6 @@ public class EkSurfaceView extends GLSurfaceView {
         super(context);
 
         setEGLContextClientVersion(2);
-        // TODO: depth option
         setEGLConfigChooser(needDepth);
         setPreserveEGLContextOnPause(true);
 
@@ -77,11 +76,6 @@ public class EkSurfaceView extends GLSurfaceView {
     }
 
     private void handleTouchEvent(final int type, final int id, final float x, final float y) {
-        queueEvent(new Runnable() {
-            @Override
-            public void run() {
-                EkPlatform.sendTouch(type, id, x, y);
-            }
-        });
+        queueEvent(() -> EkPlatform.sendTouch(type, id, x, y));
     }
 }

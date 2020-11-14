@@ -7,7 +7,7 @@
 
 namespace ek::draw2d {
 
-batcher_t* batcher = nullptr;
+Batcher* batcher = nullptr;
 drawing_state state{};
 
 void drawing_state::finish() {
@@ -294,7 +294,7 @@ void drawing_state::set_blend_mode(graphics::blend_mode blending_) {
 /*** drawings ***/
 void begin(int x, int y, int width, int height) {
     if (!batcher) {
-        batcher = new batcher_t;
+        batcher = new Batcher;
     }
     batcher->stats = {};
     batcher->begin();
@@ -645,6 +645,10 @@ void strokeRect(const rect_f& rc, argb32_t color, float lineWidth) {
     line({rc.right(), rc.y}, {rc.right(), rc.bottom()}, color, lineWidth);
     line({rc.right(), rc.bottom()}, {rc.x, rc.bottom()}, color, lineWidth);
     line({rc.x, rc.bottom()}, {rc.x, rc.y}, color, lineWidth);
+}
+
+uint32_t getBatchingUsedMemory() {
+    return batcher ? batcher->getUsedMemory() : 0;
 }
 
 }
