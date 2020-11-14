@@ -17,7 +17,6 @@
 #include <ek/scenex/asset2/builtin_assets.hpp>
 #include <ek/graphics/graphics.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/app/device.hpp>
 
 namespace ek {
 
@@ -80,7 +79,9 @@ void basic_application::preload() {
 //    asset_manager_->add_from_type("font", "mini");
 //    asset_manager_->add_from_type("atlas", "mini");
 //    asset_manager_->add_from_type("program", "2d");
-    preload_root_assets_pack();
+    if (preloadOnStart) {
+        preload_root_assets_pack();
+    }
 }
 
 void basic_application::on_draw_frame() {

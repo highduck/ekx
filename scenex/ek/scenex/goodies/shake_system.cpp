@@ -20,7 +20,7 @@ void update_shake() {
                 rand_fx.random(-1.0f, 1.0f)
         };
 
-        ecs::get<transform_2d>(e).matrix.position(offset * r * state.strength);
+        ecs::get<transform_2d>(e).position = offset * r * state.strength;
 
         if (state.time <= 0.0f) {
             ecs::remove<shake_state_t>(e);

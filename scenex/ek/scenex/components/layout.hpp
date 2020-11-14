@@ -32,6 +32,12 @@ struct layout_t {
         y.y = absolute;
         return *this;
     }
+
+    layout_t&  fill(bool x, bool y) {
+        fill_x = x;
+        fill_y = y;
+        return *this;
+    }
 };
 
 rect_f find_parent_layout_rect(ecs::entity e, bool safe);

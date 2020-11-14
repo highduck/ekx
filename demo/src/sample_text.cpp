@@ -6,6 +6,7 @@
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
+#include <ek/scenex/components/layout.hpp>
 
 namespace ek {
 
@@ -49,9 +50,32 @@ ecs::entity createText(const char* name, const char* font, const char* text) {
     return e;
 }
 
+ecs::entity createScreenZones() {
+    rect_f resolution{0, 0, 360, 480};
+    auto zones = create_node_2d("zones");
+    auto e = create_node_2d("zone");
+    auto* q = new drawable_quad();
+    q->set_gradient_vertical(0xFFFFFFFF_argb, 0x77FFFFFF_argb);
+    q->rect = resolution;
+    e.assign<display_2d>(q);
+    e.get<transform_2d>().color_multiplier = 0x33FF00FF_argb;
+    ecs::assign<layout_t>(e).fill(true, true).doSafeInsets = true;
+    append(zones, e);
+    e = create_node_2d("safe_zone");
+    q = new drawable_quad();
+    q->set_gradient_vertical(0xFFFFFFFF_argb, 0x77FFFFFF_argb);
+    q->rect = resolution;
+    e.assign<display_2d>(q);
+    e.get<transform_2d>().color_multiplier = 0x3300FF00_argb;
+    append(zones, e);
+    return zones;
+}
+
 SampleText::SampleText() :
         SampleBase() {
     title = "TEXT";
+
+    append(container, createScreenZones());
 
     auto bmText = createText("bmfont", "TickingTimebombBB",
                              "88:88:88\n-=98");

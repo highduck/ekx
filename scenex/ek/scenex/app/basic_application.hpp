@@ -2,6 +2,10 @@
 
 #include <ecxx/ecxx.hpp>
 
+#ifdef EK_EDITOR
+#include <ek/editor/editor.hpp>
+#endif
+
 #include <ek/util/locator.hpp>
 #include <ek/app/app.hpp>
 #include <ek/util/signals.hpp>
@@ -49,6 +53,9 @@ public:
 
     void on_event(const app::event_t&);
 
+public:
+    bool preloadOnStart = true;
+
 protected:
     //void on_event(const app::event_t& event);
 
@@ -68,6 +75,9 @@ protected:
 template<typename T>
 inline void run_app() {
     auto& app = service_locator_instance<basic_application>::init<T>();
+#ifdef EK_EDITOR
+    Editor::initialize();
+#endif
     app.initialize();
     app.preload();
     app::g_app.on_frame_draw += [&app] { app.on_draw_frame(); };

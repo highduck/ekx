@@ -25,16 +25,16 @@ static bool applicationInFocus = true;
 void process_event(const event_t& event) {
     assert(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
 
-    switch(event.type) {
+    switch (event.type) {
         case event_type::app_pause:
-            if(applicationInFocus) {
+            if (applicationInFocus) {
                 applicationInFocus = false;
                 g_app.on_event(event);
                 audio::muteDeviceBegin();
             }
             break;
         case event_type::app_resume:
-            if(!applicationInFocus) {
+            if (!applicationInFocus) {
                 applicationInFocus = true;
                 audio::muteDeviceEnd();
                 g_app.on_event(event);
@@ -94,4 +94,10 @@ std::vector<std::string> arguments::to_vector() const {
     return result;
 }
 
+void app_state::updateMouseCursor(mouse_cursor cursor_) {
+    if (cursor != cursor_) {
+        cursor = cursor_;
+        cursor_dirty = true;
+    }
+}
 }

@@ -16,7 +16,7 @@ public:
 //    void preload() override;
 
 protected:
-    std::unique_ptr<editor_context_t> editor_;
+    std::unique_ptr<Editor> editor_;
 
     void preload_root_assets_pack() override;
 };

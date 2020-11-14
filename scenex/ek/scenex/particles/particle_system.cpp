@@ -55,7 +55,7 @@ particle* produce_particle(const particle_decl& decl) {
 void particles_burst(ecs::entity e, int count) {
     auto& emitter = ecs::get<particle_emitter_t>(e);
     const auto& data = ecs::get<particle_emitter_t>(e).data;
-    const auto& position = ecs::get_or_default<transform_2d>(e).matrix.position() + emitter.position;
+    const auto& position = ecs::get_or_default<transform_2d>(e).position + emitter.position;
     float a = data.dir.random();
     asset_t<particle_decl> decl{emitter.particle};
     auto& layer = find_particle_layer(e);
@@ -89,7 +89,7 @@ void update_emitters() {
         }
 
         auto& layer = find_particle_layer(e);
-        const auto& position = ecs::get_or_default<transform_2d>(e).matrix.position();
+        const auto& position = ecs::get_or_default<transform_2d>(e).position;
 
         emitter.time += dt;
         const auto& data = emitter.data;

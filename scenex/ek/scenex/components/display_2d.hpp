@@ -64,6 +64,12 @@ struct hit_area_2d {
 struct display_2d {
     std::unique_ptr<drawable_2d_base> drawable;
 
+    display_2d() = default;
+
+    explicit display_2d(drawable_2d_base* ptr) :
+            drawable(ptr) {
+    }
+
     template<typename T>
     [[nodiscard]]
     inline T* get() const {

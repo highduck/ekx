@@ -25,8 +25,7 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     }
 
     auto& transform = ecs::get<transform_2d>(entity);
-    transform.matrix.tx = data->matrix.tx;
-    transform.matrix.ty = data->matrix.ty;
+    transform.position = data->matrix.position();
     transform.skew = data->matrix.skew();
     transform.scale = data->matrix.scale();
     transform.color_multiplier = argb32_t(data->color.multiplier);

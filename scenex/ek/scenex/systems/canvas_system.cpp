@@ -45,6 +45,14 @@ float update_canvas(ecs::entity e) {
     auto resolution_size = canvas.resolution.size;
     float2 scale_ratio = rootLayout.safeRect.size / resolution_size;
 
+    float aspect = rootLayout.rect.width / rootLayout.rect.height;
+    float baseAspect = resolution_size.x / resolution_size.y;
+    if (!canvas.landscape && baseAspect < aspect) {
+        scale_ratio *= baseAspect / aspect;
+    } else if (canvas.landscape && baseAspect > aspect) {
+        scale_ratio *= aspect / baseAspect;
+    }
+
     float scale = canvas.landscape ? scale_ratio.y : scale_ratio.x;
     float2 left_top = 0.5f * (rootLayout.safeRect.size - scale * resolution_size);
     float2 left_top_full = 0.5f * (rootLayout.rect.size - scale * resolution_size);
@@ -70,7 +78,7 @@ float update_canvas(ecs::entity e) {
         layout.rect = rect;
 
         auto& transform = ecs::get<transform_2d>(e);
-        transform.matrix.position(left_top_full);
+        transform.position = left_top_full;
         transform.scale = float2{scale, scale};
 
         on_rect_changed();

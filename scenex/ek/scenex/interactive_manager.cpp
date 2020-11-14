@@ -73,7 +73,8 @@ void interactive_manager::update() {
 
     last_targets_ = targets_;
 
-    g_app.cursor = cursor;
+    g_app.updateMouseCursor(cursor);
+
 }
 
 void interactive_manager::handle_mouse_event(const event_t& ev) {

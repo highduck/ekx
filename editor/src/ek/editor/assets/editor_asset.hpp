@@ -35,6 +35,9 @@ public:
 
     virtual void unload() = 0;
 
+    // by default we don't need to reload resource (specialized only for graphics resources)
+    virtual void onScaleFactorChanged();
+
     virtual void gui();
 
     virtual void build(assets_build_struct_t& data) = 0;
@@ -72,6 +75,7 @@ protected:
     path_t declaration_path_;
     std::string name_;
     std::string type_name_;
+    bool reloadOnScaleFactorChanged = false;
 };
 
 }

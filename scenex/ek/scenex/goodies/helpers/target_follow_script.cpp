@@ -11,7 +11,7 @@ void target_follow_script::update(float dt) {
     time_accum += dt;
     if (counter >= n) {
 
-        auto& matrix = get<transform_2d>().matrix;
+        auto& tr = get<transform_2d>();
 
         if (ecs::valid(target_entity)) {
             target = local_to_global(target_entity, float2::zero);
@@ -20,7 +20,7 @@ void target_follow_script::update(float dt) {
             target_entity = ecs::null;
         }
 
-        auto current = matrix.position() - offset;
+        auto current = tr.position - offset;
         if (integration == integration_mode::Exp) {
             const float c = ::logf(1.0f - k) * fixed_frame_rate;
             current = current + (target - current) * (1.0f - exp(c * time_accum));
@@ -35,7 +35,7 @@ void target_follow_script::update(float dt) {
             current = current + (target - current) * k * (time_accum * fixed_frame_rate);
         }
 
-        matrix.position(offset + current);
+        tr.position = offset + current;
         counter = 0;
         time_accum = 0.0f;
     }

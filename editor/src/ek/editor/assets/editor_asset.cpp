@@ -53,4 +53,10 @@ path_t editor_asset_t::get_relative_path(const path_t& path) const {
     return (project->base_path / declaration_path_).dir() / path;
 }
 
+void editor_asset_t::onScaleFactorChanged() {
+    if (reloadOnScaleFactorChanged) {
+        this->load();
+    }
+}
+
 }

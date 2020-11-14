@@ -27,7 +27,7 @@ void editor_app_t::preload_root_assets_pack() {
 
 void editor_app_t::initialize() {
     basic_application::initialize();
-    editor_ = std::make_unique<editor_context_t>(*this);
+    editor_ = std::make_unique<Editor>(*this);
 }
 
 }

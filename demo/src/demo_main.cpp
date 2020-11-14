@@ -54,15 +54,15 @@ void main() {
 using namespace ek;
 
 DemoApp::DemoApp() :
-        base_app_type() {
+        basic_application() {
 }
 
 void DemoApp::initialize() {
-    base_app_type::initialize();
+    basic_application::initialize();
 }
 
 void DemoApp::preload() {
-    base_app_type::preload();
+    basic_application::preload();
 
     clear_color_enabled = true;
 
@@ -70,7 +70,7 @@ void DemoApp::preload() {
 }
 
 void DemoApp::update_frame(float dt) {
-    base_app_type::update_frame(dt);
+    basic_application::update_frame(dt);
 
     scene_pre_update(root, dt);
 

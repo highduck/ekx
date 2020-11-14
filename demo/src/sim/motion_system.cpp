@@ -18,7 +18,7 @@ void update_motion_system(float dt) {
                 auto v = mot.velocity;
 
                 for (auto attractor_entity : attractors) {
-                    auto pointer = ecs::get<transform_2d>(attractor_entity).matrix.position();
+                    auto pointer = ecs::get<transform_2d>(attractor_entity).position;
                     auto& attractor = ecs::get<attractor_t>(attractor_entity);
                     float factor = 1.0f - math::clamp(length(pointer - p) / attractor.radius);
                     v += dt * attractor.force * factor * factor * normalize(pointer - p);
@@ -45,7 +45,7 @@ void update_motion_system(float dt) {
                 v *= expf(-6.0f * dt);
                 pos.position = p;
                 mot.velocity = v;
-                tra.matrix.position(p);
+                tra.position = p;
             }
     );
 }

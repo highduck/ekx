@@ -25,7 +25,7 @@ void add_objects(ecs::entity game, int N) {
         float2 pos = {ek::random(0.0f, 720.0f),
                       ek::random(0.0f, 960.0f)};
         ecs::assign<position_t>(q, pos.x, pos.y);
-        ecs::get<transform_2d>(q).matrix.position(pos);
+        ecs::get<transform_2d>(q).position = pos;
         ecs::assign<motion_t>(q,
                               ek::random(-50.0f, 50.0f),
                               ek::random(-50.0f, 50.0f)
@@ -51,7 +51,7 @@ ecs::entity create() {
     e = create_node_2d("book");
     assign_script<book>(e);
     //ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
-    ecs::get<transform_2d>(e).matrix.position(10.0f, 10.0f);
+    ecs::get<transform_2d>(e).position = {10.0f, 10.0f};
     // TODO: fix scissors stats
     ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
     append(sampleContainer, e);
@@ -59,14 +59,14 @@ ecs::entity create() {
     e = create_node_2d("dna");
     assign_script<dna>(e);
 //    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
-    ecs::get<transform_2d>(e).matrix.position(10.0f, 10.0f + 128.0f + 10.0f);
+    ecs::get<transform_2d>(e).position = {10.0f, 10.0f + 128.0f + 10.0f};
     // TODO: fix scissors stats
     ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
     append(sampleContainer, e);
 
     e = create_node_2d("diamonds");
     assign_script<diamonds>(e);
-    ecs::get<transform_2d>(e).matrix.position(10.0f + 128.0f + 10.0f, 20.0f);
+    ecs::get<transform_2d>(e).position = {10.0f + 128.0f + 10.0f, 20.0f};
     ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
     append(sampleContainer, e);
 
@@ -95,7 +95,7 @@ ecs::entity create() {
     set_name(attractor_entity, "Centroid");
     ecs::get<attractor_t>(attractor_entity).radius = 200.0f;
     ecs::get<attractor_t>(attractor_entity).force = -1000.0f;
-    ecs::get<transform_2d>(attractor_entity).matrix.position(300.0f, 400.0f);
+    ecs::get<transform_2d>(attractor_entity).position = {300.0f, 400.0f};
     append(sampleContainer, attractor_entity);
 
     return sampleContainer;
