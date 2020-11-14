@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- refactor editor initialization
+- fix resizing for any orientation
+- android relax requirements for device orientation 
+- ecxx: entity methods
+- fix mouse cursor
+- refactor `Transform2D` component 
 - fix text metrics dangling float value in release-mode
 - fix type `bmfont` for bitmap font 
 - merge `name_t` and `node_state_t` to `node_t`

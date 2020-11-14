@@ -20,6 +20,7 @@ namespace ek {
 
 flash_asset_t::flash_asset_t(path_t path)
         : editor_asset_t{std::move(path), "flash"} {
+    reloadOnScaleFactorChanged = true;
 }
 
 void flash_asset_t::read_decl_from_xml(const pugi::xml_node& node) {

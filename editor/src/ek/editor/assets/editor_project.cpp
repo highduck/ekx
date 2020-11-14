@@ -17,13 +17,17 @@
 namespace ek {
 
 
-void editor_project_t::update_scale_factor(float scale_factor_) {
-    const int uid = math::clamp(static_cast<int>(std::ceil(scale_factor_)), 1, 4);
-    scale_factor = math::clamp(scale_factor_, 1.0f, 4.0f);
+void editor_project_t::update_scale_factor(float scaleFactor, bool notifyAssets) {
+    const int uid = math::clamp(static_cast<int>(std::ceil(scaleFactor)), 1, 4);
+    scale_factor = math::clamp(scaleFactor, 1.0f, 4.0f);
     if (scale_uid != uid) {
         scale_uid = uid;
-        // todo: maybe better naming `update`?
-        load_all();
+        // notify only if scale index changed
+        if (notifyAssets) {
+            for (auto& asset : assets) {
+                asset->onScaleFactorChanged();
+            }
+        }
     }
 }
 

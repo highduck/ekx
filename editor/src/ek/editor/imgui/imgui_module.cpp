@@ -256,7 +256,7 @@ void update_mouse_cursor() {
             default:
                 break;
         }
-        g_app.cursor = cursor;
+        g_app.updateMouseCursor(cursor);
         cursor_visible = true;
     }
 

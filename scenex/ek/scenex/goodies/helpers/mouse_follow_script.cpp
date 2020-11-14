@@ -13,7 +13,7 @@ void mouse_follow_script::update(float dt) {
     auto& im = resolve<interactive_manager>();
     const auto screen_space_position = im.pointer_global_space;
     const auto parent_space_position = global_to_parent(entity_, screen_space_position);
-    get<transform_2d>().matrix.position(parent_space_position);
+    get<transform_2d>().position = parent_space_position;
 }
 
 void mouse_follow_script::gui_gizmo() {

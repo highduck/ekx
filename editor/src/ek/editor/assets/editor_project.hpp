@@ -16,7 +16,7 @@ public:
 
     ~editor_project_t();
 
-    void update_scale_factor(float scale_factor_);
+    void update_scale_factor(float scaleFactor, bool notifyAssets);
 
     void build(const path_t& output) const;
 

@@ -74,12 +74,11 @@ void gui_movie_clip(movie_t& mc) {
 }
 
 void gui_transform_2d(transform_2d& transform) {
-    float2 pos = transform.matrix.position();
-    if (ImGui::DragFloat2("Position", pos.data(), 1.0f, 0.0f, 0.0f, "%.1f")) {
-        transform.matrix.position(pos);
-    }
+    ImGui::DragFloat2("Position", transform.position.data(), 1.0f, 0.0f, 0.0f, "%.1f");
     ImGui::DragFloat2("Scale", transform.scale.data(), 0.1f, 0.0f, 0.0f, "%.2f");
     ImGui::DragFloat2("Skew", transform.skew.data(), 0.1f, 0.0f, 0.0f, "%.2f");
+    ImGui::DragFloat2("Origin", transform.origin.data(), 0.1f, 0.0f, 0.0f, "%.2f");
+    ImGui::DragFloat2("Pivot", transform.pivot.data(), 0.1f, 0.0f, 0.0f, "%.2f");
 
     auto color = static_cast<float4>(transform.color_multiplier);
     if (ImGui::ColorEdit4("Color Multiplier", color.data())) {

@@ -28,11 +28,11 @@ inline void set_color_offset(ecs::entity e, argb32_t color_offset) {
 }
 
 inline void set_position(ecs::entity e, const float2& pos) {
-    ecs::get_or_create<transform_2d>(e).matrix.position(pos);
+    ecs::get_or_create<transform_2d>(e).position = pos;
 }
 
 inline float2 get_position(const ecs::entity e) {
-    return ecs::get_or_default<transform_2d>(e).matrix.position();
+    return ecs::get_or_default<transform_2d>(e).position;
 }
 
 inline void set_rotation(ecs::entity e, float radians) {

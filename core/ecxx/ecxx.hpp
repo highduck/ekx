@@ -48,6 +48,18 @@ inline void each(Func func) {
     return ecxx::get_world().each(func);
 }
 
+template<typename Component>
+[[nodiscard]] inline bool is_locked() {
+    return ecxx::get_world().is_locked<Component>();
+}
+
+[[nodiscard]] inline bool valid(entity e) {
+    return ecxx::get_world().valid(e);
+}
+
+
+/** Entity methods functional style **/
+
 template<typename Component, typename ...Args>
 inline Component& assign(entity e, Args&& ... args) {
     return ecxx::get_world().assign<Component>(e, args...);
@@ -87,13 +99,51 @@ template<typename Component>
 inline bool try_remove(entity e) {
     return ecxx::get_world().try_remove<Component>(e);
 }
+}
+
+namespace ecxx {
+
+/** Entity methods impl **/
+
+
+template<typename Component, typename ...Args>
+inline Component& entity::assign(Args&& ... args) {
+    return get_world().assign<Component>(*this, args...);
+}
+
+template<typename Component, typename ...Args>
+inline Component& entity::replace_or_assign(Args&& ... args) {
+    return get_world().replace_or_assign<Component>(*this, args...);
+}
 
 template<typename Component>
-[[nodiscard]] inline bool is_locked() {
-    return ecxx::get_world().is_locked<Component>();
+[[nodiscard]] inline bool entity::has() const {
+    return get_world().has<Component>(*this);
 }
 
-[[nodiscard]] inline bool valid(entity e) {
-    return ecxx::get_world().valid(e);
+template<typename Component>
+inline Component& entity::get() {
+    return get_world().get<Component>(*this);
 }
+
+template<typename Component>
+inline Component& entity::get_or_create() {
+    return get_world().get_or_create<Component>(*this);
+}
+
+template<typename Component>
+inline const Component& entity::get_or_default() const {
+    return get_world().get_or_default<Component>(*this);
+}
+
+template<typename Component>
+inline void entity::remove() {
+    return get_world().remove<Component>(*this);
+}
+
+template<typename Component>
+inline bool entity::try_remove() {
+    return get_world().try_remove<Component>(*this);
+}
+
 }

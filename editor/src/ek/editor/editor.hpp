@@ -1,21 +1,34 @@
 #pragma once
 
-#include <ek/scenex/app/basic_application.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/editor/imgui/imgui_module.hpp>
 #include <ek/editor/assets/editor_project.hpp>
 
 namespace ek {
 
-class editor_context_t {
-public:
-    explicit editor_context_t(basic_application& app);
+struct EditorSettings {
+    bool notifyAssetsOnScaleFactorChanged = true;
+    bool showEditor = true;
+    bool showImGuiDemoWindow = false;
+    bool showHierarchyWindow = true;
+    bool showInspectorWindow = true;
+    bool showStatsWindow = false;
+};
 
-    ~editor_context_t();
+class basic_application;
+
+class Editor {
+public:
+    explicit Editor(basic_application& app);
+
+    ~Editor();
 
     editor_project_t project;
 
     void on_event(const app::event_t& event);
+
+public:
+    EditorSettings settings;
 
 private:
     imgui_module_t gui_;
@@ -25,7 +38,8 @@ private:
     signal_t<>::token t3;
     basic_application* app_;
 
-    bool enabled_ = false;
+public:
+    static void initialize();
 };
 
 }

@@ -10,11 +10,12 @@ namespace ek {
 struct transform_2d {
 
     mutable matrix_2d matrix{};
+
+    float2 position = float2::zero;
     float2 scale = float2::one;
     float2 skew = float2::zero;
     float2 origin = float2::zero;
-
-    matrix_2d* user_matrix = nullptr;
+    float2 pivot = float2::zero;
 
     argb32_t color_multiplier = argb32_t::one;
     argb32_t color_offset = argb32_t::zero;
@@ -47,6 +48,8 @@ struct transform_2d {
     [[nodiscard]] inline float get_additive() const {
         return color_offset.af();
     }
+
+    void updateLocalMatrix();
 };
 
 void begin_transform(const transform_2d& transform);

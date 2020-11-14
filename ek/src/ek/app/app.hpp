@@ -150,6 +150,8 @@ struct app_state final {
 
     std::vector<event_t> event_queue_;
     bool event_queue_locked = false;
+
+    void updateMouseCursor(mouse_cursor cursor_);
 };
 
 extern app_state g_app;

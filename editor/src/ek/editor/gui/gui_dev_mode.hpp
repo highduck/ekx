@@ -2,7 +2,9 @@
 
 namespace ek {
 
-void gui_dev_mode();
+class Editor;
+
+void gui_dev_mode(Editor& inspector);
 void gui_ekc();
 
 }

@@ -83,15 +83,12 @@ easing_progress_t get_easing_progress(const float t, const std::vector<easing_da
 
 void apply_transform(entity e, const keyframe_transform_t& keyframe) {
     auto& transform = ecs::get_or_create<transform_2d>(e);
+    transform.position = keyframe.position;
     transform.skew = keyframe.skew;
     transform.scale = keyframe.scale;
+    transform.pivot = keyframe.pivot;
     transform.color_multiplier = argb32_t{keyframe.color.multiplier};
     transform.color_offset = argb32_t{keyframe.color.offset};
-
-    auto& m = transform.matrix;
-    m.set(transform.scale, transform.skew);
-    m.tx = keyframe.position.x - m.a * keyframe.pivot.x - m.c * keyframe.pivot.y;
-    m.ty = keyframe.position.y - m.b * keyframe.pivot.x - m.d * keyframe.pivot.y;
 }
 
 void update_target(float time, entity e, const movie_layer_data& layer) {

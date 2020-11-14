@@ -112,7 +112,7 @@ struct TextFormat {
         alignment = align.anchor();
     }
 
-    void addShadow(argb32_t color, float radius, float2 offset = {}, float hardness = 0.2f /* 0..1 */) {
+    void addShadow(argb32_t color, float radius, float2 offset = float2::zero, float hardness = 0.2f /* 0..1 */) {
         auto& layer = layers[layersCount++];
         layer.type = TextLayerType::Shadow;
         layer.color = color;

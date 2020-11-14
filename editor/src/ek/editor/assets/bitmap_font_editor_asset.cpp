@@ -18,6 +18,7 @@ namespace ek {
 
 BitmapFontEditorAsset::BitmapFontEditorAsset(path_t path)
         : editor_asset_t{std::move(path), "bmfont"} {
+    reloadOnScaleFactorChanged = true;
 }
 
 void BitmapFontEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {

@@ -74,6 +74,31 @@ public:
         return value_;
     }
 
+    /** components manipulations **/
+
+    template<typename Component, typename ...Args>
+    inline Component& assign(Args&& ... args);
+
+    template<typename Component, typename ...Args>
+    inline Component& replace_or_assign(Args&& ... args);
+
+    template<typename Component>
+    [[nodiscard]] inline bool has() const;
+
+    template<typename Component>
+    inline Component& get();
+
+    template<typename Component>
+    inline Component& get_or_create();
+
+    template<typename Component>
+    inline const Component& get_or_default() const;
+
+    template<typename Component>
+    inline void remove();
+
+    template<typename Component>
+    inline bool try_remove();
 private:
     value_type value_;
 };

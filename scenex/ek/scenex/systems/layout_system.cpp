@@ -31,11 +31,11 @@ void update_layout(ecs::entity e) {
             auto bounds = sprite->get_bounds();
             if (!bounds.empty()) {
                 if (l.fill_x) {
-                    transform.matrix.tx = top_rect.x + l.fill_extra.x;
+                    transform.position.x = top_rect.x + l.fill_extra.x;
                     transform.scale.x = (top_rect.width + l.fill_extra.width) / bounds.width;
                 }
                 if (l.fill_y) {
-                    transform.matrix.ty = top_rect.y + l.fill_extra.y;
+                    transform.position.y = top_rect.y + l.fill_extra.y;
                     transform.scale.y = (top_rect.height + l.fill_extra.height) / bounds.height;
                 }
             }
@@ -43,11 +43,11 @@ void update_layout(ecs::entity e) {
     }
 
     if (l.align_x) {
-        transform.matrix.tx = top_rect.x + l.x.y + l.x.x * top_rect.width;
+        transform.position.x = top_rect.x + l.x.y + l.x.x * top_rect.width;
     }
 
     if (l.align_y) {
-        transform.matrix.ty = top_rect.y + l.y.y + l.y.x * top_rect.height;
+        transform.position.y = top_rect.y + l.y.y + l.y.x * top_rect.height;
     }
 }
 
