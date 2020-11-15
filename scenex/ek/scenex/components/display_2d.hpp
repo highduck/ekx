@@ -21,7 +21,7 @@ public:
     virtual void draw() = 0;
 
     [[nodiscard]]
-    virtual bool hit_test(const float2& point) const = 0;
+    virtual bool hit_test(float2 point) const = 0;
 
     [[nodiscard]]
     virtual rect_f get_bounds() const = 0;
@@ -87,6 +87,11 @@ struct display_2d {
     inline bool is() const {
         return drawable && drawable->match_type<T>();
     }
+
+    [[nodiscard]]
+    inline bool hitTest(float2 local) const {
+        return drawable && drawable->hit_test(local);
+    }
 };
 
 class drawable_quad : public drawable_2d<drawable_quad> {
@@ -103,7 +108,7 @@ public:
     rect_f get_bounds() const override;
 
     [[nodiscard]]
-    bool hit_test(const float2& point) const override;
+    bool hit_test(float2 point) const override;
 
     inline void set_gradient_vertical(argb32_t top, argb32_t bottom) {
         colors[0] = colors[1] = top;
@@ -132,7 +137,7 @@ public:
 
 // test in local space
     [[nodiscard]]
-    bool hit_test(float2 const& point) const override;
+    bool hit_test(float2 point) const override;
 };
 
 class drawable_text : public drawable_2d<drawable_text> {
@@ -160,7 +165,7 @@ public:
     rect_f get_bounds() const override;
 
     [[nodiscard]]
-    bool hit_test(const float2& point) const override;
+    bool hit_test(float2 point) const override;
 };
 
 class drawable_arc : public drawable_2d<drawable_arc> {
@@ -179,7 +184,7 @@ public:
     rect_f get_bounds() const override;
 
     [[nodiscard]]
-    bool hit_test(const float2& point) const override;
+    bool hit_test(float2 point) const override;
 };
 
 }

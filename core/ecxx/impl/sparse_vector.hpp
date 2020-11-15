@@ -32,15 +32,17 @@ public:
         size_type count{0u};
     };
 
-    void ensure(page_index_type page) {
+    page_data& ensure(page_index_type page) {
         if (page >= pages_.size()) {
             pages_.resize(page + 1);
         }
 
-        if (!pages_[page].elements) {
-            pages_[page].elements = std::make_unique<T[]>(elements_per_page);
-            std::fill_n(pages_[page].elements.get(), elements_per_page, null_value);
+        auto& result = pages_[page];
+        if (!result.elements) {
+            result.elements = std::make_unique<T[]>(elements_per_page);
+            std::fill_n(result.elements.get(), elements_per_page, null_value);
         }
+        return result;
     }
 
     void insert(size_type i, T v) {
@@ -50,9 +52,9 @@ public:
         page_index_type pi = i >> page_bits;
         page_offset_type po = i & page_mask;
 
-        ensure(pi);
-        pages_[pi].elements[po] = v;
-        pages_[pi].count++;
+        auto& page = ensure(pi);
+        page.elements[po] = v;
+        page.count++;
     }
 
     void replace(size_type i, T v) {
@@ -133,6 +135,7 @@ public:
     void clear() {
         pages_.clear();
     }
+
 private:
     std::vector<page_data> pages_;
 };

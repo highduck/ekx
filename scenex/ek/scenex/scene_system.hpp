@@ -26,6 +26,6 @@ static uint8_t camera_layers = 0xFFu;
 
 void draw_node(ecs::entity e);
 
-ecs::entity hit_test(ecs::entity entity, const float2& position);
+ecs::entity hit_test(ecs::entity entity, float2 parentSpacePosition);
 
 }

@@ -19,7 +19,7 @@ rect_f drawable_quad::get_bounds() const {
     return rect;
 }
 
-bool drawable_quad::hit_test(const float2& point) const {
+bool drawable_quad::hit_test(float2 point) const {
     return rect.contains(point);
 }
 
@@ -81,7 +81,7 @@ rect_f drawable_sprite::get_bounds() const {
     return spr.rect;
 }
 
-bool drawable_sprite::hit_test(const float2& point) const {
+bool drawable_sprite::hit_test(float2 point) const {
     if (get_bounds().contains(point)) {
         if (hit_pixels && src) {
             return src->hit_test(point);
@@ -139,7 +139,7 @@ rect_f drawable_text::get_bounds() const {
     };
 }
 
-bool drawable_text::hit_test(const float2& point) const {
+bool drawable_text::hit_test(float2 point) const {
     return get_bounds().contains(point);
 }
 
@@ -170,7 +170,7 @@ rect_f drawable_arc::get_bounds() const {
     return {-s, -s, 2.0f * s, 2.0f * s};
 }
 
-bool drawable_arc::hit_test(const float2& point) const {
+bool drawable_arc::hit_test(float2 point) const {
     auto len = length(point);
     return len >= radius && len <= (radius + line_width);
 }
