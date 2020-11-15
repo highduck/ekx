@@ -2,8 +2,8 @@
 
 namespace ek {
 
-std::array<int, 4> get_screen_insets() {
-    return {0, 0, 0, 0};
+float4 get_screen_insets() {
+    return float4{};
 }
 
 //void vibrate(int duration_millis);

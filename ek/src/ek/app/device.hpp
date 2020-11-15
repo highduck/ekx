@@ -2,12 +2,14 @@
 
 #include <array>
 #include <string>
+#include <ek/math/vec.hpp>
 
 namespace ek {
 
 std::string get_device_lang();
 
-std::array<int, 4> get_screen_insets();
+// TODO: return float4 ?
+float4 get_screen_insets();
 
 void vibrate(int duration_millis);
 
