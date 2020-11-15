@@ -50,12 +50,16 @@ inline void guiComponentPanel(ecs::entity entity, const char* name, Func fn) {
 }
 
 template<typename C, typename Func>
-inline void guiDisplayComponent(ecs::entity entity, const char* name, Func fn) {
-    if (ecs::has<display_2d>(entity)) {
-        auto& d = ecs::get<display_2d>(entity);
+inline void guiDisplayComponent(ecs::entity e, const char* name, Func fn) {
+    if (e.has<display_2d>()) {
+        auto& d = e.get<display_2d>();
         if (d.is<C>()) {
             auto data = d.get<C>();
             if (data) {
+#ifndef NDEBUG
+                ImGui::Separator();
+                ImGui::Checkbox("Debug Bounds", &d.drawBounds);
+#endif
                 guiComponentPanel(name, *data, fn);
             }
         }
@@ -151,8 +155,8 @@ void gui_interactive(interactive_t& inter) {
 
 void editDisplaySprite(drawable_sprite& sprite) {
     selectAsset<sprite_t>("Sprite", sprite.src);
-    ImGui::Checkbox("hit pixels", &sprite.hit_pixels);
-    ImGui::Checkbox("scale grid", &sprite.scale_grid_mode);
+    ImGui::Checkbox("Scale Grid", &sprite.scale_grid_mode);
+    ImGui::Checkbox("Hit Pixels", &sprite.hit_pixels);
 }
 
 void editDisplayRectangle(drawable_quad& quad) {

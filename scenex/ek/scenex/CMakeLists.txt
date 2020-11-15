@@ -53,9 +53,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         utility/basic_game_utility.hpp
         utility/basic_game_utility.cpp
 
-        goodies/shake_system.hpp
-        goodies/shake_system.cpp
-
         systems/game_time.hpp
         systems/game_time.cpp
         systems/main_flow.cpp
@@ -68,13 +65,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         app/input_controller.hpp
         app/input_controller.cpp
         app/profiler.cpp
-
-        goodies/helpers/mouse_follow_script.cpp
-        goodies/helpers/mouse_follow_script.hpp
-        goodies/helpers/target_follow_script.cpp
-        goodies/helpers/target_follow_script.hpp
-        goodies/helpers/trail_script.cpp
-        goodies/helpers/trail_script.hpp
 
         3d/transform_3d.cpp
         3d/transform_3d.hpp

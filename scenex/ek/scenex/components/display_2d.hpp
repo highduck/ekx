@@ -63,6 +63,9 @@ struct hit_area_2d {
 
 struct display_2d {
     std::unique_ptr<drawable_2d_base> drawable;
+#ifndef NDEBUG
+    bool drawBounds = false;
+#endif
 
     display_2d() = default;
 
