@@ -191,18 +191,16 @@ struct matrix_t<3, 2, T> {
         set(scale, skew);
     }
 
-    bool transform_inverse(const vec2& pos, vec2* out) const {
+    bool transform_inverse(vec2 pos, vec2& out) const {
         const T determinant = det(*this);
-        if (determinant == T{0}) {
-            return false;
-        }
-        if (out != nullptr) {
+        if (determinant != T{0}) {
             const T x = pos.x - tx;
             const T y = pos.y - ty;
-            *out = {(x * d - y * c) / determinant,
-                    (y * a - x * b) / determinant};
+            out.x = (x * d - y * c) / determinant;
+            out.y = (y * a - x * b) / determinant;
+            return true;
         }
-        return true;
+        return false;
     }
 
 };

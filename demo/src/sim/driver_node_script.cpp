@@ -22,6 +22,7 @@ namespace ek::piko {
 void add_objects(ecs::entity game, int N) {
     for (int i = 0; i < N; ++i) {
         auto q = ecs::create<node_t, transform_2d>();
+        q.get<node_t>().setTouchable(false);
         float2 pos = {ek::random(0.0f, 720.0f),
                       ek::random(0.0f, 960.0f)};
         ecs::assign<position_t>(q, pos.x, pos.y);
@@ -33,6 +34,7 @@ void add_objects(ecs::entity game, int N) {
         append(game, q);
 
         auto trail = ecs::create<node_t, transform_2d>();
+        trail.get<node_t>().setTouchable(false);
         auto& trail_data = assign_script<trail_script>(trail);
         trail_data.width = 1.0f;
         trail_data.min_width = 1.0f;
@@ -42,39 +44,41 @@ void add_objects(ecs::entity game, int N) {
     }
 }
 
+bool showPiko = false;
+
 ecs::entity create() {
     ecs::entity sampleContainer = create_node_2d("piko");
 
     // PIKO
+    if (showPiko) {
+        ecs::entity e;
+        e = create_node_2d("book");
+        assign_script<book>(e);
+        //ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
+        ecs::get<transform_2d>(e).position = {10.0f, 10.0f};
+        // TODO: fix scissors stats
+        ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+        append(sampleContainer, e);
 
-    ecs::entity e;
-    e = create_node_2d("book");
-    assign_script<book>(e);
-    //ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
-    ecs::get<transform_2d>(e).position = {10.0f, 10.0f};
-    // TODO: fix scissors stats
-    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
-    append(sampleContainer, e);
-
-    e = create_node_2d("dna");
-    assign_script<dna>(e);
+        e = create_node_2d("dna");
+        assign_script<dna>(e);
 //    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
-    ecs::get<transform_2d>(e).position = {10.0f, 10.0f + 128.0f + 10.0f};
-    // TODO: fix scissors stats
-    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
-    append(sampleContainer, e);
+        ecs::get<transform_2d>(e).position = {10.0f, 10.0f + 128.0f + 10.0f};
+        // TODO: fix scissors stats
+        ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+        append(sampleContainer, e);
 
-    e = create_node_2d("diamonds");
-    assign_script<diamonds>(e);
-    ecs::get<transform_2d>(e).position = {10.0f + 128.0f + 10.0f, 20.0f};
-    ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
-    append(sampleContainer, e);
-
+        e = create_node_2d("diamonds");
+        assign_script<diamonds>(e);
+        ecs::get<transform_2d>(e).position = {10.0f + 128.0f + 10.0f, 20.0f};
+        ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+        append(sampleContainer, e);
+    }
 
     // SIMULATION SAMPLE
 
     // SIM
-    add_objects(sampleContainer, 500);
+    add_objects(sampleContainer, 5000);
 
     auto mouse_entity = ecs::create<transform_2d, node_t>();
     set_name(mouse_entity, "Mouse");

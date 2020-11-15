@@ -107,7 +107,7 @@ inline float2 global_to_local(ecs::entity e, const float2& position) {
     float2 res = position;
     auto it = e;
     while (it) {
-        ecs::get<transform_2d>(it).matrix.transform_inverse(res, &res);
+        ecs::get<transform_2d>(it).matrix.transform_inverse(res, res);
         it = ecs::get<node_t>(it).parent;
     }
     return res;
@@ -117,7 +117,7 @@ inline float2 global_to_parent(ecs::entity e, const float2& pos) {
     float2 res = pos;
     auto it = ecs::get<node_t>(e).parent;
     while (it) {
-        ecs::get<transform_2d>(it).matrix.transform_inverse(res, &res);
+        ecs::get<transform_2d>(it).matrix.transform_inverse(res, res);
         it = ecs::get<node_t>(it).parent;
     }
     return res;
@@ -141,8 +141,8 @@ inline float2 local_to_local(ecs::entity src, ecs::entity dest, const float2& po
 /*** events functions ***/
 
 inline void dispatch_broadcast(ecs::entity e, const event_data& data) {
-    if (ecs::has<event_handler_t>(e)) {
-        ecs::get<event_handler_t>(e).emit(data);
+    if (e.has<event_handler_t>()) {
+        e.get<event_handler_t>().emit(data);
     }
     each_child(e, [&data](ecs::entity child) {
         dispatch_broadcast(child, data);

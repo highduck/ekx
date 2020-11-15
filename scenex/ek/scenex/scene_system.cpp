@@ -11,35 +11,41 @@ namespace ek {
 
 using ecs::entity;
 
-entity hit_test(entity e, const float2& position) {
-    const auto& node = ecs::get_or_default<node_t>(e);
+entity hit_test(entity e, float2 parentPosition) {
+    const auto& node = e.get<node_t>();
     if ((node.flags & NodeFlags_VisibleAndTouchable) != NodeFlags_VisibleAndTouchable) {
         return nullptr;
     }
 
-    if (ecs::has<scissors_2d>(e) &&
-        !ecs::get<scissors_2d>(e).rect.contains(position)) {
-        return nullptr;
-    }
+    float2 local = parentPosition;
+    if (e.has<transform_2d>()) {
+        auto& transform = e.get<transform_2d>();
+        if (!transform.matrix.transform_inverse(local, local)) {
+            return nullptr;
+        }
+        if (e.has<scissors_2d>() && !e.get<scissors_2d>().rect.contains(local.x, local.y)) {
+            return nullptr;
+        }
 
-    if (ecs::has<hit_area_2d>(e)) {
-        return ecs::get<hit_area_2d>(e).rect.contains(position) ? e : nullptr;
+        if (e.has<hit_area_2d>()) {
+            return e.get<hit_area_2d>().rect.contains(local.x, local.y) ? e : nullptr;
+        }
+
+        //if(e.has<Bounds2D>()) {
+        // TODO: check if not drawable out of scope!
+        //}
     }
 
     auto it = node.child_last;
     while (it) {
-        float2 inverted;
-        if (ecs::get<transform_2d>(it).matrix.transform_inverse(position, &inverted)) {
-            auto hit = hit_test(it, inverted);
-            if (hit) {
-                return hit;
-            }
+        auto hit = hit_test(it, local);
+        if (hit) {
+            return hit;
         }
-        it = ecs::get<node_t>(it).sibling_prev;
+        it = it.get<node_t>().sibling_prev;
     }
 
-    const auto& display = ecs::get_or_default<display_2d>(e);
-    if (display.drawable && display.drawable->hit_test(position)) {
+    if (e.has<display_2d>() && e.get<display_2d>().hitTest(local)) {
         return e;
     }
 
@@ -72,7 +78,7 @@ void draw_node(entity e) {
     }
 //
 //    events.emit({PreDraw, this, nullptr});
-    if(e.has<display_2d>()) {
+    if (e.has<display_2d>()) {
         auto& display = e.get<display_2d>();
         if (display.drawable) {
             display.drawable->draw();

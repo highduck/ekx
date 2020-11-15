@@ -158,9 +158,9 @@ struct box_t<2, T> {
     }
 
     // TODO: simplify
-    bool contains(float px, float py) const;
+    bool contains(T px, T py) const;
 
-    bool contains(const vec_type& point) const;
+    inline bool contains(vec_type point) const;
 
     bool overlaps(const self_type& other) const;
 
@@ -237,31 +237,12 @@ inline box_t<N, T> translate(const box_t<N, T>& box, const vec_t <N, T>& offset)
 }
 
 template<typename T>
-bool box_t<2, T>::contains(float px, float py) const {
-    // A little more complicated than usual due to proper handling of negative widths/heights
-    px -= x;
-    if (width >= 0) {
-        if (px < 0 || px > width) {
-            return false;
-        }
-    } else if (px > 0 || px < width) {
-        return false;
-    }
-
-    py -= y;
-    if (height >= 0) {
-        if (py < 0 || py > height) {
-            return false;
-        }
-    } else if (py > 0 || py < height) {
-        return false;
-    }
-
-    return true;
+bool box_t<2, T>::contains(T px, T py) const {
+    return x <= px && px <= (x + width) && y <= py && py <= (y + height);
 }
 
 template<typename T>
-bool box_t<2, T>::contains(const vec_t<2, T>& point) const {
+bool box_t<2, T>::contains(const vec_t<2, T> point) const {
     return contains(point.x, point.y);
 }
 
