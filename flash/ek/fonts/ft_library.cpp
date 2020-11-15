@@ -84,6 +84,8 @@ rect_i ft2_face::get_glyph_bounds(FT_Face face) const {
 }
 
 bool ft2_face::set_glyph_size(int font_size, float scale_factor) {
+    // TODO:
+    //  - make scaling to match freetype/stb openFrameworks/graphics/ofTrueTypeFont.cpp
     auto dpi = static_cast<uint32_t>(72.0f * scale_factor);
     return FT_Set_Char_Size(face_, 0, font_size << 6, dpi, dpi) == 0;
 }

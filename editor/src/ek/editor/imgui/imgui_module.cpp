@@ -216,14 +216,8 @@ void imgui_module_t::init_fonts() {
     int width;
     int height;
     ImGui::GetIO().Fonts->GetTexDataAsAlpha8(&pixels, &width, &height);
-    auto* pma_pixels = new uint32_t[width * height];
-    for (int i = 0; i < width * height; ++i) {
-        const uint32_t c = pixels[i];
-        pma_pixels[i] = (c << 24u) | (c << 16u) | (c << 8u) | c;
-    }
     ImGui::GetIO().Fonts->TexID = reinterpret_cast<ImTextureID>(texture_->handle());
-    texture_->upload_pixels(width, height, pma_pixels);
-    delete[] pma_pixels;
+    texture_->upload_pixels(width, height, pixels);
 }
 
 void update_mouse_cursor() {
@@ -269,6 +263,7 @@ imgui_module_t::imgui_module_t() {
     vertex_buffer_ = new buffer_t{buffer_type::vertex_buffer, buffer_usage::dynamic_buffer};
     index_buffer_ = new buffer_t{buffer_type::index_buffer, buffer_usage::dynamic_buffer};
     texture_ = new texture_t{};
+    texture_->setType(texture_type::alpha8);
     program_ = new program_t{vertex_shader, fragment_shader};
     program_->vertex = &vertex_minimal_2d::decl;
 
@@ -348,7 +343,7 @@ void imgui_module_t::end_frame() {
     ImGui::Render();
 
 //    if (enabled_) {
-        render_frame_data(ImGui::GetDrawData());
+    render_frame_data(ImGui::GetDrawData());
 //    }
 }
 
