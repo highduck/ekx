@@ -6,6 +6,7 @@ add_library(${PROJECT_NAME} STATIC "")
 add_subdirectory(ek/scenex)
 add_subdirectory(ek/draw2d)
 add_subdirectory(ek/graphics)
+add_subdirectory(ek/goodies)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 #target_compile_options(${PROJECT_NAME} INTERFACE -std=c++17)

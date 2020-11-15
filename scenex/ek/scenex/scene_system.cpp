@@ -47,18 +47,15 @@ entity hit_test(entity e, const float2& position) {
 }
 
 void draw_node(entity e) {
-    // debug
-#ifndef NDEBUG
-    const auto& name = ecs::get_or_default<node_t>(e).name;
-#endif
+    assert(e.valid());
 
     if (process_node_filters(e)) {
         return;
     }
 
-    const auto& node = ecs::get_or_default<node_t>(e);
+    const auto& node = e.get_or_default<node_t>();
+    auto& transform = e.get_or_default<transform_2d>();
 
-    auto& transform = ecs::get_or_default<transform_2d>(e);
     if (!node.visible() || transform.color_multiplier.a <= 0 || (node.layersMask() & camera_layers) == 0) {
         return;
     }
@@ -75,10 +72,17 @@ void draw_node(entity e) {
     }
 //
 //    events.emit({PreDraw, this, nullptr});
+    if(e.has<display_2d>()) {
+        auto& display = e.get<display_2d>();
+        if (display.drawable) {
+            display.drawable->draw();
 
-    const auto& display = ecs::get_or_default<display_2d>(e);
-    if (display.drawable) {
-        display.drawable->draw();
+#ifndef NDEBUG
+            if (display.drawBounds) {
+                draw2d::strokeRect(expand(display.drawable->get_bounds(), 1.0f), 0xFFFFFFFF_argb, 1);
+            }
+#endif
+        }
     }
 
     if (ecs::has<script_holder>(e)) {

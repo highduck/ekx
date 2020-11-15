@@ -1,15 +1,13 @@
 #include "main_flow.hpp"
 
-#include <ek/app/app.hpp>
 #include <ek/util/locator.hpp>
 
-#include <ek/scenex/components/transform_2d.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/particles/particle_system.hpp>
-#include <ek/scenex/goodies/shake_system.hpp>
 #include <ek/scenex/interactive_manager.hpp>
 #include <ek/scenex/utility/destroy_delay.hpp>
 #include <ek/scenex/scene_system.hpp>
+#include <ek/goodies/shake_system.hpp>
 
 #include "game_time.hpp"
 #include "layout_system.hpp"

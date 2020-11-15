@@ -7,7 +7,7 @@ namespace ek {
 void destroy_delayed_entities(float dt) {
     static std::vector<ecs::entity> destroy_queue;
     for (auto e : ecs::view<destroy_delay_t>()) {
-        auto& c = ecs::get<destroy_delay_t>(e);
+        auto& c = e.get<destroy_delay_t>();
         c.delay -= dt;
         if (c.delay <= 0.0f) {
             destroy_queue.emplace_back(e);

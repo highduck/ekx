@@ -6,9 +6,9 @@
 #include <ek/scenex/components/transform_2d.hpp>
 #include <ek/scenex/components/node.hpp>
 #include <ek/scenex/components/display_2d.hpp>
-#include <ek/scenex/goodies/helpers/trail_script.hpp>
-#include <ek/scenex/goodies/helpers/mouse_follow_script.hpp>
-#include <ek/scenex/goodies/helpers/target_follow_script.hpp>
+#include <ek/goodies/helpers/trail_script.hpp>
+#include <ek/goodies/helpers/mouse_follow_script.hpp>
+#include <ek/goodies/helpers/target_follow_script.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <sim/components/attractor.h>
 #include <ek/scenex/systems/game_time.hpp>

@@ -105,6 +105,8 @@ public:
         return value_;
     }
 
+    inline bool valid() const;
+
     /** components manipulations **/
 
     template<typename Component, typename ...Args>

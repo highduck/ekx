@@ -10,7 +10,7 @@ namespace ek {
 void update_shake() {
 
     for (auto e: ecs::rview<shake_state_t>()) {
-        auto& state = ecs::get<shake_state_t>(e);
+        auto& state = e.get<shake_state_t>();
         auto dt = get_delta_time(e);
         state.time += dt;
 
@@ -20,16 +20,16 @@ void update_shake() {
                 rand_fx.random(-1.0f, 1.0f)
         };
 
-        ecs::get<transform_2d>(e).position = offset * r * state.strength;
+        e.get<transform_2d>().position = offset * r * state.strength;
 
         if (state.time <= 0.0f) {
-            ecs::remove<shake_state_t>(e);
+            e.remove<shake_state_t>();
         }
     }
 }
 
 void start_shake(ecs::entity e, float time, float strength) {
-    auto& state = ecs::get_or_create<shake_state_t>(e);
+    auto& state = e.get_or_create<shake_state_t>();
     state.time = 0.0f;
     state.time_total = time;
     state.strength = strength;

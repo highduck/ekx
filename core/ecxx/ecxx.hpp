@@ -95,6 +95,9 @@ inline bool try_remove(entity e) {
 
 /** Entity methods impl **/
 
+inline bool entity::valid() const {
+    return world::the.valid(*this);
+}
 
 template<typename Component, typename ...Args>
 inline Component& entity::assign(Args&& ... args) {
