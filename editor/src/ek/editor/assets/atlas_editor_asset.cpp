@@ -1,7 +1,5 @@
 #include "atlas_editor_asset.hpp"
 
-#include <ek/editor/gui/editor_widgets.hpp>
-#include <ek/editor/assets/editor_temp_atlas.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/spritepack/export_atlas.hpp>
@@ -15,6 +13,7 @@
 #include <utility>
 #include <ek/spritepack/sprite_packing.hpp>
 #include <ek/graphics/texture.hpp>
+#include <ek/editor/gui/gui.hpp>
 
 namespace ek {
 

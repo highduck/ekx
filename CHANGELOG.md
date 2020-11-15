@@ -6,30 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- add `Texture` format and mipmaps settings  
-- editor: inspector for `ParticleEmitter` and `ParticleLayer`
-- assets: introduce atlas and dynamic-atlas
-- ttf: configuration base font size and destination dynamic atlas for glyph cache
-- refactor editor initialization
-- fix resizing for any orientation
-- android relax requirements for device orientation 
+- add `DynamicAtlas` multiple pages, mipmaps, alpha8 / color32
+- improvements for editor 
+- add importers for `Atlas` and `DynamicAtlas`
+- fix resize and scale for any orientation
+- android: relax requirements for device orientation 
 - ecxx: entity methods
 - fix mouse cursor
-- refactor `Transform2D` component 
-- fix text metrics dangling float value in release-mode
-- fix type `bmfont` for bitmap font 
+- refactor `Transform2D` component
+- changed BitmapFont typename to `bmfont` 
 - merge `name_t` and `node_state_t` to `node_t`
-- updata ImGui v1.80
-- export filters to text format layers 
+- update ImGui v1.80
 - fix macOS backspace/delete key codes
 - [audio] change api to Sound and Music instances 
 - [audio] change `simple_audio_manager` to `AudioManager`
-- [audio] fix audio loading for EDITOR mode
-- [truetype] add basic support for TTF fonts
+- add `TrueTypeFont`
 - remove multiple sizes for bitmap font export
 - [demo] update `ek-demo` project 
 - [graphics] get context type
-- [graphics] add alpha8 texture format
+- add `alpha8` texture format
 
 ## [0.0.1] - 2020-10-31
 

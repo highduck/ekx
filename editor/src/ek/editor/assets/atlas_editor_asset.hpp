@@ -1,8 +1,6 @@
 #pragma once
 
-
 #include "editor_asset.hpp"
-#include "editor_temp_atlas.hpp"
 #include <ek/spritepack/atlas_declaration.hpp>
 
 namespace ek {

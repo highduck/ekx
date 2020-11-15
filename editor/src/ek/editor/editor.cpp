@@ -1,8 +1,7 @@
 #include "editor.hpp"
 
-#include <ek/editor/gui/editor_widgets.hpp>
-#include <ek/editor/gui/gui_dev_mode.hpp>
 #include <ek/scenex/app/basic_application.hpp>
+#include <ek/editor/gui/gui.hpp>
 
 namespace ek {
 
@@ -22,8 +21,7 @@ Editor::Editor(basic_application& app)
         project.update_scale_factor(app_->scale_factor, settings.notifyAssetsOnScaleFactorChanged);
         gui_.begin_frame(dt);
         if (settings.showEditor) {
-            gui_dev_mode(*this);
-            gui_asset_project(project);
+            guiEditor(*this);
         }
     });
     t1 = app.hook_on_draw_frame.add([this]() {

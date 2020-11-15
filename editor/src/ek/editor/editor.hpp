@@ -13,6 +13,9 @@ struct EditorSettings {
     bool showHierarchyWindow = true;
     bool showInspectorWindow = true;
     bool showStatsWindow = false;
+    bool showResourcesView = false;
+    bool showAssetsView = false;
+    bool showBuildWindow = false;
 };
 
 class basic_application;

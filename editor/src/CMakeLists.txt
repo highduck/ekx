@@ -7,29 +7,25 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/assets/flash_asset.cpp
         ek/editor/assets/audio_asset.cpp
         ek/editor/assets/bitmap_font_editor_asset.cpp
-        ek/editor/assets/editor_temp_atlas.cpp
         ek/editor/assets/texture_asset.cpp
         ek/editor/assets/model_asset.cpp
         ek/editor/assets/ttf_editor_asset.cpp
 
-        ek/editor/gui/gui_atlas.cpp
-        ek/editor/gui/gui_sg_file.cpp
-        ek/editor/gui/editor_widgets.hpp
-        ek/editor/gui/gui_font.cpp
-        ek/editor/gui/gui_asset_object_controls.cpp
-        ek/editor/gui/gui_asset_manager.cpp
-        ek/editor/gui/editor_assets.cpp
-        ek/editor/gui/editor_assets.hpp
-        ek/editor/gui/screen_recorder.cpp
-        ek/editor/gui/screen_recorder.hpp
-
+        ek/editor/gui/gui.hpp
         ek/editor/gui/inspector.cpp
         ek/editor/gui/hierarchy.cpp
         ek/editor/gui/stats.cpp
-        ek/editor/gui/gui.hpp
-        ek/editor/gui/gui_dev_mode.cpp
-        ek/editor/gui/gui_dev_mode.hpp
+        ek/editor/gui/gui_editor.cpp
         ek/editor/gui/utils.cpp
+        ek/editor/gui/gui_atlas.cpp
+        ek/editor/gui/gui_sg_file.cpp
+        ek/editor/gui/gui_font.cpp
+        ek/editor/gui/gui_asset_object_controls.cpp
+        ek/editor/gui/gui_particles.cpp
+        ek/editor/gui/assets_view.cpp
+        ek/editor/gui/resources_view.cpp
+        ek/editor/gui/screen_recorder.cpp
+        ek/editor/gui/screen_recorder.hpp
 
         ek/editor/imgui/imgui_module.hpp
         ek/editor/imgui/imgui_module.cpp
@@ -44,7 +40,7 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/editor/marketing/export_marketing.hpp
         ek/editor/marketing/export_marketing.cpp
-        ek/editor/gui/gui_ekc.cpp
+        ek/editor/gui/gui_build_and_export.cpp
 
         ek/system/system.cpp
         ek/system/system.hpp
@@ -53,11 +49,8 @@ add_library(${PROJECT_NAME} STATIC
         ek/system/file_watcher.cpp
         ek/system/file_watcher.hpp
 
-        ek/editor/editor_app.cpp
-        ek/editor/editor_app.hpp
         ek/editor/assets/editor_project.cpp
         ek/editor/assets/editor_project.hpp
-        ek/editor/gui/gui_particles.cpp
         ek/editor/assets/particles_asset.cpp
         ek/editor/assets/particles_asset.hpp
         ek/editor/assets/editor_asset.cpp
