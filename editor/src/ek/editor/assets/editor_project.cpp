@@ -7,6 +7,8 @@
 #include "model_asset.hpp"
 #include "audio_asset.hpp"
 #include "ttf_editor_asset.hpp"
+#include "atlas_editor_asset.hpp"
+#include "dynamic_atlas_editor_asset.hpp"
 
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
@@ -24,9 +26,7 @@ void editor_project_t::update_scale_factor(float scaleFactor, bool notifyAssets)
         scale_uid = uid;
         // notify only if scale index changed
         if (notifyAssets) {
-            for (auto& asset : assets) {
-                asset->onScaleFactorChanged();
-            }
+            load_all(true);
         }
     }
 }
@@ -65,10 +65,6 @@ AssetInfoHeader openAssetInfoHeader(const path_t& path) {
 
 void editor_project_t::add_file(const path_t& path) {
     const auto header = openAssetInfoHeader(base_path / path);
-    if (header.dev && !devMode) {
-        // skip dev files for build without editor
-        return;
-    }
     auto factory_method = type_factory[header.type];
     if (factory_method) {
         auto* asset = factory_method(path);
@@ -88,10 +84,20 @@ void editor_project_t::clear() {
     assets.clear();
 }
 
-void editor_project_t::load_all() {
-    for (auto asset : assets) {
-        asset->load();
+void editor_project_t::load_all(bool reloadAfterScaleChanged) {
+    std::vector<editor_asset_t*> assetsToLoad;
+    if (reloadAfterScaleChanged) {
+        for (auto* asset : assets) {
+            if (asset->reloadOnScaleFactorChanged) {
+                assetsToLoad.push_back(asset);
+            }
+        }
+    } else {
+        assetsToLoad = assets;
     }
+    for (auto& asset : assetsToLoad) asset->beforeLoad();
+    for (auto& asset : assetsToLoad) asset->load();
+    for (auto& asset : assetsToLoad) asset->afterLoad();
 }
 
 void editor_project_t::unload_all() {
@@ -108,6 +114,8 @@ editor_project_t::editor_project_t() {
     register_asset_factory<model_asset_t>();
     register_asset_factory<audio_asset_t>();
     register_asset_factory<TTFEditorAsset>();
+    register_asset_factory<AtlasEditorAsset>();
+    register_asset_factory<DynamicAtlasEditorAsset>();
 }
 
 editor_project_t::~editor_project_t() {
@@ -115,12 +123,20 @@ editor_project_t::~editor_project_t() {
 }
 
 void editor_project_t::build(const path_t& output) const {
+    std::vector<editor_asset_t*> assetsToBuild;
+    for (auto* asset : assets) {
+        // skip dev files for build without editor
+        if (!asset->isDev()) {
+            assetsToBuild.push_back(asset);
+        }
+    }
     make_dirs(output);
     output_memory_stream out{100};
     assets_build_struct_t build_data{output, &out};
-    for (auto asset : assets) {
-        asset->build(build_data);
-    }
+    for (auto asset : assetsToBuild) asset->beforeBuild(build_data);
+    for (auto asset : assetsToBuild) asset->build(build_data);
+    for (auto asset : assetsToBuild) asset->afterBuild(build_data);
+
     build_data.meta("", "");
     ::ek::save(out, output / "pack_meta");
 }

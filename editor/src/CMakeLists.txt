@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 add_library(${PROJECT_NAME} STATIC
 
+        ek/editor/assets/dynamic_atlas_editor_asset.cpp
+        ek/editor/assets/atlas_editor_asset.cpp
         ek/editor/assets/flash_asset.cpp
         ek/editor/assets/audio_asset.cpp
         ek/editor/assets/bitmap_font_editor_asset.cpp

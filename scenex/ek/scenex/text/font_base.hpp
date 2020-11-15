@@ -42,15 +42,18 @@ public:
         // by default blur is not supported
     }
 
-    virtual void debugDrawAtlas(float x, float y) {}
-
     [[nodiscard]] FontType getFontType() const {
         return fontType;
     }
 
+    bool isReady() const;
+
 protected:
     FontType fontType;
     float lineHeightMultiplier;
+
+    bool loaded_ = false;
+    bool ready_ = false;
 };
 
 }

@@ -31,6 +31,8 @@ void BitmapFont::load(const BitmapFontData& data) {
             map[code] = g;
         }
     }
+
+    ready_ = loaded_ = true;
 }
 
 bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {

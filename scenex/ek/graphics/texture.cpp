@@ -146,11 +146,8 @@ void texture_t::uploadSubAlpha8(uint32_t x, uint32_t y, uint32_t width, uint32_t
 }
 
 void texture_t::bind(int unit) const {
-    glActiveTexture(GL_TEXTURE0 + (GLenum) unit);
-    gl::check_error();
-
-    glBindTexture(gl_texture_target_, handle_);
-    gl::check_error();
+    GL_CHECK(glActiveTexture(GL_TEXTURE0 + (GLenum) unit));
+    GL_CHECK(glBindTexture(gl_texture_target_, handle_));
 
     if (gl_texture_target_ == GL_TEXTURE_CUBE_MAP) {
         prev_texture_cube_map_binding_ = handle_;

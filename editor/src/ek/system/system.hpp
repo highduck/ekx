@@ -17,6 +17,8 @@ void save(const output_memory_stream& stream, const std::string& path);
 
 void save(const output_memory_stream& stream, const char* path);
 
+void save(const array_buffer& buffer, const path_t& path);
+
 void save(const array_buffer& buffer, const char* path);
 
 void save(const std::string& text, const path_t& path);

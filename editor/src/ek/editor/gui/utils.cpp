@@ -13,9 +13,9 @@ bool Color32Edit(const char* label, ek::argb32_t& argb) {
     return changed;
 }
 
-bool RectEdit(const char* label, float xywh[4], float v_speed, const char* format, float power) {
+bool EditRect(const char* label, float * xywh, float v_speed, const char* format, float power) {
     ImGui::PushID(xywh);
-    ImGui::LabelText(label, "x: %f y: %f w: %f h: %f", xywh[0], xywh[1], xywh[2], xywh[3]);
+    ImGui::LabelText(label, "x: %0.2f y: %0.2f w: %0.2f h: %0.2f", xywh[0], xywh[1], xywh[2], xywh[3]);
     bool changed = ImGui::DragFloat2("Position", xywh, v_speed, 0, 0, format, power);
     changed = changed || ImGui::DragFloat2("Size", xywh + 2, v_speed, 0, FLT_MAX, format, power);
     ImGui::PopID();

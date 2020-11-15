@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- editor: inspector for `ParticleEmitter` and `ParticleLayer`
+- assets: introduce atlas and dynamic-atlas
+- ttf: configuration base font size and destination dynamic atlas for glyph cache
 - refactor editor initialization
 - fix resizing for any orientation
 - android relax requirements for device orientation 

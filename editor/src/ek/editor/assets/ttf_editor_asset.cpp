@@ -5,7 +5,6 @@
 #include <ek/scenex/text/font.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/logger.hpp>
-#include <ek/app/app.hpp>
 
 namespace ek {
 
@@ -14,6 +13,8 @@ TTFEditorAsset::TTFEditorAsset(path_t path)
 }
 
 void TTFEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {
+    glyphCache = node.attribute("glyphCache").as_string("default_glyph_cache");
+    baseFontSize = node.attribute("fontSize").as_float(48);
 }
 
 void TTFEditorAsset::load() {
@@ -22,7 +23,7 @@ void TTFEditorAsset::load() {
     if (buffer.empty()) {
         EK_ERROR("Not found or empty %s", (project->base_path / declaration_path_).c_str());
     } else {
-        auto* ttfFont = new TrueTypeFont(project->scale_factor, 48, 2048 * 2);
+        auto* ttfFont = new TrueTypeFont(project->scale_factor, baseFontSize, glyphCache);
         ttfFont->loadFromMemory(std::move(buffer));
         asset_t<Font>{name_}.reset(new Font(ttfFont));
     }
@@ -40,8 +41,15 @@ void TTFEditorAsset::build(assets_build_struct_t& build_data) {
 
     const auto output_path = build_data.output / name_;
     make_dirs(output_path.dir());
+
     auto ttfFileData = ::ek::read_file(project->base_path / resource_path_);
-    ::ek::save(ttfFileData, (output_path + ".ttf").c_str());
+    ek::save(ttfFileData, output_path + ".ttf");
+
+    // save TTF options
+    output_memory_stream out{100};
+    IO io{out};
+    io(baseFontSize, glyphCache);
+    ek::save(out, output_path + ".ttf_settings");
 
     build_data.meta(type_name_, name_);
 }

@@ -79,6 +79,11 @@ public:
         return const_cast<T*>(get());
     }
 
+    inline T& mutableRef() const {
+        auto& ref = *get();
+        return const_cast<T&>(ref);
+    }
+
     inline static const std::unordered_map<std::string, slot_unique_ptr>& map() {
         return storage_;
     }

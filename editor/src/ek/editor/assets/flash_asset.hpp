@@ -25,7 +25,7 @@ public:
 
     void save() override;
 private:
-    atlas_decl_t atlas_decl_;
+    std::string atlasTarget_;
 };
 
 }

@@ -10,4 +10,10 @@ FontImplBase::FontImplBase(FontType fontType_) :
 
 FontImplBase::~FontImplBase() = default;
 
+bool FontImplBase::isReady() const {
+    return ready_ && loaded_;
 }
+
+}
+
+

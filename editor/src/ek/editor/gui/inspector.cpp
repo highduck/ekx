@@ -12,6 +12,8 @@
 #include <ek/scenex/components/node.hpp>
 #include <ek/scenex/components/layout.hpp>
 #include <ek/scenex/components/node_filters.hpp>
+#include <ek/scenex/particles/particle_emitter.hpp>
+#include <ek/scenex/particles/particle_layer.hpp>
 
 namespace ek {
 
@@ -133,11 +135,11 @@ void gui_light_3d(light_3d& light) {
 }
 
 void gui_scissors_2d(scissors_2d& scissors) {
-    ImGui::RectEdit("Bounds", scissors.rect.data());
+    ImGui::EditRect("Bounds", scissors.rect.data());
 }
 
 void gui_hit_area_2d(hit_area_2d& hit_area) {
-    ImGui::RectEdit("Bounds", hit_area.rect.data());
+    ImGui::EditRect("Bounds", hit_area.rect.data());
 }
 
 void gui_interactive(interactive_t& inter) {
@@ -154,7 +156,7 @@ void editDisplaySprite(drawable_sprite& sprite) {
 }
 
 void editDisplayRectangle(drawable_quad& quad) {
-    ImGui::RectEdit("Bounds", quad.rect.data());
+    ImGui::EditRect("Bounds", quad.rect.data());
     ImGui::Color32Edit("Color LT", quad.colors[0]);
     ImGui::Color32Edit("Color RT", quad.colors[1]);
     ImGui::Color32Edit("Color RB", quad.colors[2]);
@@ -199,7 +201,7 @@ void guiTextFormat(TextFormat& format) {
 
 void editDisplayText(drawable_text& tf) {
     ImGui::InputTextMultiline("Text", &tf.text);
-    ImGui::RectEdit("Bounds", tf.rect.data());
+    ImGui::EditRect("Bounds", tf.rect.data());
     ImGui::Color32Edit("Border Color", tf.borderColor);
     ImGui::Color32Edit("Fill Color", tf.fillColor);
     ImGui::Checkbox("Hit Full Bounds", &tf.hitFullBounds);
@@ -213,12 +215,12 @@ void guiLayout(layout_t& layout) {
     ImGui::Checkbox("Align X", &layout.align_x);
     ImGui::Checkbox("Align Y", &layout.align_y);
     ImGui::Checkbox("Use Safe Insets", &layout.doSafeInsets);
-    ImGui::RectEdit("Extra Fill", layout.fill_extra.data());
+    ImGui::EditRect("Extra Fill", layout.fill_extra.data());
     ImGui::DragFloat2("Align X (rel, abs)", layout.x.data());
     ImGui::DragFloat2("Align Y (rel, abs)", layout.y.data());
 
-    ImGui::RectEdit("Rect", layout.rect.data());
-    ImGui::RectEdit("Safe Rect", layout.safeRect.data());
+    ImGui::EditRect("Rect", layout.rect.data());
+    ImGui::EditRect("Safe Rect", layout.safeRect.data());
 }
 
 void guiLegacyFilters(node_filters_t& filters) {
@@ -233,6 +235,43 @@ void guiLegacyFilters(node_filters_t& filters) {
         ImGui::DragInt("Quality", (int*) &filter.quality);
         ImGui::PopID();
     }
+}
+
+void guiEntityRef(const char* label, ecs::entity entity) {
+    if (entity == nullptr) {
+        ImGui::TextDisabled("%s: null", label);
+    } else if (ecs::valid(entity)) {
+        ImGui::LabelText(label, "%s", entity.get_or_default<node_t>().name.c_str());
+    } else {
+        ImGui::TextColored({1, 0, 0, 1}, "%s: invalid", label);
+    }
+}
+
+void guiParticleEmitter(particle_emitter_t& emitter) {
+    ImGui::Checkbox("Enabled", &emitter.enabled);
+    ImGui::Text("_Time: %f", emitter.time);
+    guiEntityRef("Layer", emitter.layer);
+    ImGui::LabelText("Particle ID", "%s", emitter.particle.c_str());
+    ImGui::DragFloat2("Offset", emitter.position.data());
+    ImGui::Separator();
+
+    // data
+    ImGui::EditRect("Rect", emitter.data.rect.data());
+    ImGui::DragFloat2("Offset", emitter.data.offset.data());
+    ImGui::DragInt("Burst", &emitter.data.burst);
+    ImGui::DragFloat("Interval", &emitter.data.interval);
+    ImGui::Separator();
+
+    ImGui::DragFloat2("burst_rotation_delta", emitter.data.burst_rotation_delta.data());
+    ImGui::DragFloat2("speed", emitter.data.speed.data());
+    ImGui::DragFloat2("acc", emitter.data.acc.data());
+    ImGui::DragFloat2("dir", emitter.data.dir.data());
+}
+
+void guiParticleLayer(particle_layer_t& layer) {
+    ImGui::Checkbox("Cycled", &layer.cycled);
+    ImGui::Checkbox("Keep Alive", &layer.keep_alive);
+    ImGui::LabelText("Num Particles", "%lu", layer.particles.size());
 }
 
 void gui_inspector(ecs::entity e) {
@@ -256,6 +295,11 @@ void gui_inspector(ecs::entity e) {
     guiComponentPanel<event_handler_t>(e, "Event Handler", [](auto& c) {});
     guiComponentPanel<layout_t>(e, "Layout", guiLayout);
 
+    // particles
+    guiComponentPanel<particle_emitter_t>(e, "Particle Emitter", guiParticleEmitter);
+    guiComponentPanel<particle_layer_t>(e, "Particle Layer", guiParticleLayer);
+
+    // display2d
     guiDisplayComponent<drawable_sprite>(e, "Sprite", editDisplaySprite);
     guiDisplayComponent<drawable_quad>(e, "Rectangle", editDisplayRectangle);
     guiDisplayComponent<drawable_text>(e, "Text", editDisplayText);

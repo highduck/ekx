@@ -54,6 +54,10 @@ void save(const output_memory_stream& stream, const char* path) {
     }
 }
 
+void save(const array_buffer& buffer, const path_t& path) {
+    save(buffer, path.c_str());
+}
+
 void save(const array_buffer& buffer, const char* path) {
     auto h = fopen(path, "wb");
     if (h) {

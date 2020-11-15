@@ -112,7 +112,7 @@ void SampleText::draw() {
 
 void SampleText::prepareInternalResources() {
     asset_manager_t* am = resolve<basic_application>().asset_manager_;
-    auto* ttfFont = new TrueTypeFont(am->scale_factor, 48, 4096);
+    auto* ttfFont = new TrueTypeFont(am->scale_factor, 48, "default_glyph_cache");
     ttfFont->loadDeviceFont("Arial Unicode MS");
     auto* font = new Font(ttfFont);
     asset_t<Font>{"native"}.reset(font);
