@@ -1,11 +1,11 @@
 #include <ecxx/impl/world.hpp>
 #include <gtest/gtest.h>
 
-using namespace ecxx;
+using namespace ecs;
 
 TEST(world, basic) {
     // TODO:
-    world w;
-    auto e = w.create();
-    w.destroy(e);
+    auto e = world::the.create();
+    world::the.destroy(e);
+    world::the.clear();
 }

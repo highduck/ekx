@@ -189,7 +189,7 @@ inline ecs::entity find(const ecs::entity e, const char* child_name) {
         }
         it = node.sibling_next;
     }
-    return ecs::null;
+    return nullptr;
 }
 
 inline ecs::entity find(const ecs::entity e, const std::string& child_name) {
@@ -201,7 +201,7 @@ inline ecs::entity find_path(const ecs::entity e, const std::vector<std::string>
     for (const auto& p : path) {
         it = find(it, p);
         if (!it) {
-            return ecs::null;
+            return nullptr;
         }
     }
     return it;
@@ -242,7 +242,7 @@ inline ecs::entity find_first_ancestor(ecs::entity e) {
         }
         it = ecs::get<node_t>(it).parent;
     }
-    return ecs::null;
+    return nullptr;
 }
 
 template<typename T>

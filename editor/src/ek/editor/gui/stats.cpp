@@ -16,8 +16,8 @@ void guiStatsWindow(bool* p_open) {
                     draw2d::get_stat_draw_calls(),
                     draw2d::get_stat_triangles()
         );
-        const auto& pool = ecxx::get_world().pool();
-        ImGui::Text("%u entities | %u free", pool.size(), pool.available_for_recycling());
+        const auto& entities = ecs::world::the.entities;
+        ImGui::Text("%u entities | %u free", entities.size(), entities.available_for_recycling());
     }
     ImGui::End();
 }

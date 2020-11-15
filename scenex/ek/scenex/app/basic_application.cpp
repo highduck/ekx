@@ -35,8 +35,6 @@ basic_application::basic_application()
 
     asset_manager_ = new asset_manager_t{};
 
-    ecxx::set_world(&w);
-
     game_services_init();
     // set callbacks before ads initialization (TODO)
     // BasicGameUtility::init();

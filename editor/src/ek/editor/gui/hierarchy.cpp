@@ -82,7 +82,7 @@ bool hasChildren(ecs::entity e) {
     if (ecs::has<node_t>(e)) {
         auto& node = ecs::get<node_t>(e);
         auto firstChild = node.child_first;
-        return firstChild != ecs::null && ecs::valid(firstChild);
+        return firstChild != nullptr && ecs::valid(firstChild);
     }
     return false;
 }
@@ -133,7 +133,7 @@ void gui_entity_node(ecs::entity e, bool visible, bool touchable) {
     if (opened) {
         if (ecs::has<node_t>(e)) {
             auto it = ecs::get<node_t>(e).child_first;
-            while (it != ecs::null && ecs::valid(it)) {
+            while (it != nullptr && ecs::valid(it)) {
                 auto child = it;
                 it = ecs::get<node_t>(it).sibling_next;
                 gui_entity(child, visible, touchable);
@@ -157,7 +157,7 @@ void guiHierarchyWindow(bool* p_open) {
         if (showAllRoots) {
             // all roots
             ecs::each([](auto e) {
-                if (!ecs::has<node_t>(e) || ecs::get<node_t>(e).parent == ecs::null) {
+                if (!ecs::has<node_t>(e) || ecs::get<node_t>(e).parent == nullptr) {
                     gui_entity(e, true, true);
                 }
             });

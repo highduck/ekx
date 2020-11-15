@@ -4,12 +4,12 @@
 
 #include "components_db.hpp"
 
-namespace ecxx {
+namespace ecs {
 
 template<typename ...Component>
 class basic_view {
 public:
-    using index_type = spec::index_type;
+    using index_type = entity::index_type;
     static constexpr auto components_num = sizeof ... (Component);
 
     using table_type = std::array<const entity_map_base*, components_num>;
@@ -55,20 +55,20 @@ public:
                 return true;
             }
             // filter secondary entity vectors
-            const entity entity = m.at(it);
+            const auto idx = m.at(it).index();
             for (uint32_t k = 1u; k < components_num; ++k) {
-                if (!table[k]->has(entity)) {
+                if (!table[k]->has(idx)) {
                     return false;
                 }
             }
             return true;
         }
 
-        inline static bool is_valid_fast(const index_type ei, const table_type& table) {
+        inline static bool is_valid_fast(const index_type idx, const table_type& table) {
             // filter secondary entity vectors
             const uint32_t cn = components_num;
             for (uint32_t k = 1u; k < cn; ++k) {
-                if (!table[k]->index_table().has(ei)) {
+                if (!table[k]->index_table().has(idx)) {
                     return false;
                 }
             }
@@ -137,7 +137,7 @@ private:
 template<typename Component>
 class basic_view<Component> {
 public:
-    using index_type = spec::index_type;
+    using index_type = entity::index_type;
     static constexpr auto components_num = 1;
 
     class iterator final {

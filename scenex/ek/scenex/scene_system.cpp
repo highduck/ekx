@@ -14,16 +14,16 @@ using ecs::entity;
 entity hit_test(entity e, const float2& position) {
     const auto& node = ecs::get_or_default<node_t>(e);
     if ((node.flags & NodeFlags_VisibleAndTouchable) != NodeFlags_VisibleAndTouchable) {
-        return ecs::null;
+        return nullptr;
     }
 
     if (ecs::has<scissors_2d>(e) &&
         !ecs::get<scissors_2d>(e).rect.contains(position)) {
-        return ecs::null;
+        return nullptr;
     }
 
     if (ecs::has<hit_area_2d>(e)) {
-        return ecs::get<hit_area_2d>(e).rect.contains(position) ? e : ecs::null;
+        return ecs::get<hit_area_2d>(e).rect.contains(position) ? e : nullptr;
     }
 
     auto it = node.child_last;
@@ -43,7 +43,7 @@ entity hit_test(entity e, const float2& position) {
         return e;
     }
 
-    return ecs::null;
+    return nullptr;
 }
 
 void draw_node(entity e) {

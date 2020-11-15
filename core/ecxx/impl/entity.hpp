@@ -1,29 +1,55 @@
 #pragma once
 
 #include <cstddef>
-#include "spec.hpp"
+#include <cstdint>
 
-namespace ecxx {
+namespace ecs {
 
 class entity final {
 public:
-    using value_type = spec::value_type;
-    using index_type = spec::index_type;
-    using version_type = spec::version_type;
+/**
+ * Type used for Entity Value code (entity version + entity index)
+ */
+    using value_type = uint32_t;
 
-    inline constexpr entity() noexcept
-            : value_{spec::null_value} {
+/**
+ * Type used for Entity Index
+ */
+    using index_type = uint32_t;
 
+/**
+ * Type used for Entity version
+ */
+    using version_type = uint16_t;
+
+private:
+    // Bits count for Entity Index encoding
+    static constexpr uint32_t index_bits = 20u;
+
+    // Bit mask to clamp Entity's Index
+    static constexpr uint32_t index_mask = (1u << index_bits) - 1u;
+
+    // Bits count for Entity's Version encoding
+    static constexpr uint32_t version_bits = 12u;
+
+    // Bit mask to clamp Entity's Version
+    static constexpr uint32_t version_mask = (1u << version_bits) - 1u;
+public:
+
+    inline constexpr entity() noexcept:
+            value_{0u} {
     }
 
-    inline constexpr explicit entity(value_type v) noexcept
-            : value_{v} {
-
+    inline constexpr entity(std::nullptr_t) noexcept:
+            value_{0u} {
     }
 
-    inline constexpr entity(index_type i, version_type v) noexcept
-            : value_{i | (v << spec::index_bits)} {
+    inline constexpr explicit entity(value_type v) noexcept:
+            value_{v} {
+    }
 
+    inline constexpr entity(index_type i, version_type v) noexcept:
+            value_{i | (v << index_bits)} {
     }
 
     inline constexpr entity(entity&& e) noexcept = default;
@@ -34,20 +60,25 @@ public:
 
     inline constexpr entity& operator=(const entity& e) noexcept = default;
 
-    [[nodiscard]] inline constexpr version_type version() const noexcept {
-        return (value_ >> spec::index_bits) & spec::version_mask;
+    inline constexpr entity& operator=(std::nullptr_t) noexcept {
+        value_ = 0u;
+        return *this;
     }
 
-    inline constexpr void version(version_type v) noexcept {
-        value_ = (value_ & spec::index_mask) | (v << spec::index_bits);
+    [[nodiscard]] inline constexpr version_type version() const noexcept {
+        return (value_ >> index_bits) & version_mask;
+    }
+
+    inline constexpr void version(version_type ver) noexcept {
+        value_ = (value_ & index_mask) | (ver << index_bits);
     }
 
     [[nodiscard]] inline constexpr index_type index() const noexcept {
-        return value_ & spec::index_mask;
+        return value_ & index_mask;
     }
 
-    inline constexpr void index(index_type v) noexcept {
-        value_ = (value_ & ~spec::index_mask) | v;
+    inline constexpr void index(index_type idx) noexcept {
+        value_ = (value_ & ~index_mask) | idx;
     }
 
     inline bool operator==(entity other) const {
@@ -59,15 +90,15 @@ public:
     }
 
     inline bool operator==(std::nullptr_t) const {
-        return value_ == spec::null_value;
+        return value_ == 0u;
     }
 
     inline bool operator!=(std::nullptr_t) const {
-        return value_ != spec::null_value;
+        return value_ != 0u;
     }
 
     inline explicit operator bool() const {
-        return value_ != spec::null_value;
+        return value_ != 0u;
     }
 
     [[nodiscard]] inline value_type passport() const {
@@ -80,7 +111,7 @@ public:
     inline Component& assign(Args&& ... args);
 
     template<typename Component, typename ...Args>
-    inline Component& replace_or_assign(Args&& ... args);
+    inline Component& reassign(Args&& ... args);
 
     template<typename Component>
     [[nodiscard]] inline bool has() const;
@@ -99,6 +130,7 @@ public:
 
     template<typename Component>
     inline bool try_remove();
+
 private:
     value_type value_;
 };

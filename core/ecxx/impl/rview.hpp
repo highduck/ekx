@@ -4,7 +4,7 @@
 
 #include <array>
 
-namespace ecxx {
+namespace ecs {
 
 template<typename ...Component>
 class basic_rview {
@@ -52,8 +52,9 @@ public:
         }
 
         [[nodiscard]] inline bool valid(entity e) const {
+            const auto idx = e.index();
             for (uint32_t i = 1u; i < components_num; ++i) {
-                if (!table_[i]->has(e)) {
+                if (!table_[i]->has(idx)) {
                     return false;
                 }
             }

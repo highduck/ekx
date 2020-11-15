@@ -4,16 +4,23 @@
 
 #include <vector>
 
-namespace ecxx {
+namespace ecs {
 
 class basic_entity_pool {
 public:
     using value_type = entity;
-    using index_type = spec::index_type;
-    using version_type = spec::version_type;
+    using index_type = entity::index_type;
+    using version_type = entity::version_type;
 
     basic_entity_pool() {
         list_.emplace_back();
+    }
+
+    inline void clear() {
+        list_.clear();
+        list_.emplace_back();
+        next_ = 0u;
+        available_ = 0u;
     }
 
     inline value_type allocate() {
@@ -25,6 +32,7 @@ public:
             --available_;
             return e;
         }
+        // construct new from value type, with 0 version
         return list_.emplace_back(static_cast<index_type>(list_.size()));
     }
 
@@ -59,15 +67,14 @@ public:
      *  - dead (index doesn't match #slot)
      *  - null
      */
-    [[nodiscard]] inline version_type current(index_type i) const {
+    [[nodiscard]] inline version_type current(index_type idx) const {
         //assert(is_alive(i));
-        return list_[i].version();
+        return list_[idx].version();
     }
 
-    [[nodiscard]] inline bool is_alive(index_type i) const {
-        return i < list_.size() && i == list_[i].index();
+    [[nodiscard]] inline bool indexIsAlive(index_type idx) const {
+        return idx < list_.size() && idx == list_[idx].index();
     }
-
 
     [[nodiscard]] inline index_type available_for_recycling() const {
         return available_;

@@ -1,13 +1,13 @@
 #pragma once
 
 #include "entity_map.hpp"
-#include "identity_generator.hpp"
+#include "utility.hpp"
 
-namespace ecxx {
+namespace ecs {
 
 class components_db final {
 public:
-    using component_typeid = spec::component_typeid;
+    using component_typeid = uint32_t;
 
     ~components_db() {
         for (auto* pool : pools_) {
@@ -15,9 +15,17 @@ public:
         }
     }
 
+    void clear() {
+        for (auto* pool : pools_) {
+            if(pool) {
+                pool->clear();
+            }
+        }
+    }
+
     template<typename Component>
     inline static constexpr component_typeid type() noexcept {
-        return identity_generator<Component, component_typeid>::value;
+        return details::identity_generator<Component>::value;
     }
 
     template<typename Component>
@@ -56,10 +64,10 @@ public:
         return type < pools_.size() ? pools_[type] : nullptr;
     }
 
-    void remove_all_c(entity e) {
+    void remove_all_c(entity::index_type idx) {
         for (auto* pool : pools_) {
-            if (pool != nullptr && pool->has(e)) {
-                pool->erase_dyn(e);
+            if (pool != nullptr && pool->has(idx)) {
+                pool->erase_dyn(idx);
             }
         }
     }

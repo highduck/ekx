@@ -216,7 +216,7 @@ Sample3D::Sample3D() {
 
 Sample3D::~Sample3D() {
     destroy_node(main_scene_3d);
-    main_scene_3d = ecs::null;
+    main_scene_3d = nullptr;
 }
 
 }

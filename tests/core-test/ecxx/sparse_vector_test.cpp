@@ -1,10 +1,10 @@
 #include <ecxx/impl/sparse_vector.hpp>
 #include <gtest/gtest.h>
 
-using namespace ecxx;
+using namespace ecs;
 
 TEST(sparse_vector, basic) {
-    sparse_vector<int> v;
+    sparse_vector v;
     ASSERT_FALSE(v.has(2));
     ASSERT_FALSE(v.has(3, 3));
 
