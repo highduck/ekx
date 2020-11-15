@@ -32,11 +32,8 @@ public:
 
     void upload_cubemap(const std::array<image_t*, 6>& image);
 
-    void upload_pixels(uint32_t width, uint32_t height, const uint32_t* pixels_rgba32);
-
-    void uploadAlpha8(uint32_t width, uint32_t height, const uint8_t* alphaMap);
-
-    void uploadSubAlpha8(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint8_t* alphaMap);
+    void upload_pixels(uint32_t width, uint32_t height, const uint8_t* data);
+    void updateRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint8_t* data);
 
     void bind(int unit) const;
 
@@ -48,11 +45,22 @@ public:
         return type_;
     }
 
+
+    void setType(texture_type type);
+    void setMipMaps(bool enabled, float bias = -0.7f);
+
 private:
     GLuint handle_ = 0u;
     texture_type type_;
     GLenum gl_texture_target_;
     bool is_cube_map_;
+
+    GLenum textureFormat = GL_RGBA;
+    GLenum internalFormat = GL_RGBA;
+    GLenum pixelType = GL_UNSIGNED_BYTE;
+
+    bool mipmaps = false;
+    float mipmapBias = -0.7f;
 };
 
 void load_texture_lazy(const char* path, texture_t* to_texture);

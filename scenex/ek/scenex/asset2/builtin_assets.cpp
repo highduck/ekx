@@ -146,12 +146,20 @@ public:
             // but current strategy not allow that
             return;
         }
-        loaded_scale_ = project_->scale_uid;
-        int normScaleFactor = int(ceilf(loaded_scale_));
-        int pageSize = std::min(1024 * normScaleFactor, 4096);
-
-        asset_t<DynamicAtlas>{path_}.reset(new DynamicAtlas(pageSize, pageSize));
-        ready_ = true;
+        get_resource_content_async(
+                (project_->base_path / path_ + ".dynamic_atlas").c_str(),
+                [this](auto buffer) {
+                    loaded_scale_ = project_->scale_uid;
+                    int normScaleFactor = int(ceilf(loaded_scale_));
+                    int pageSize = std::min(1024 * normScaleFactor, 4096);
+                    input_memory_stream input{buffer.data(), buffer.size()};
+                    IO io{input};
+                    bool alphaMap = false;
+                    bool mipmaps = false;
+                    io(alphaMap, mipmaps);
+                    asset_t<DynamicAtlas>{path_}.reset(new DynamicAtlas(pageSize, pageSize, alphaMap, mipmaps));
+                    ready_ = true;
+                });
     }
 
     void do_unload() override {

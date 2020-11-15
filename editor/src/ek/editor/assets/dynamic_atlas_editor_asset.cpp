@@ -2,6 +2,7 @@
 #include <ek/system/working_dir.hpp>
 #include <ek/scenex/2d/dynamic_atlas.hpp>
 #include <ek/util/assets.hpp>
+#include <ek/system/system.hpp>
 
 namespace ek {
 
@@ -11,6 +12,8 @@ DynamicAtlasEditorAsset::DynamicAtlasEditorAsset(path_t path)
 }
 
 void DynamicAtlasEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {
+    alphaMap = node.attribute("alphaMap").as_bool(false);
+    mipmaps = node.attribute("mipmaps").as_bool(false);
 }
 
 void DynamicAtlasEditorAsset::load() {
@@ -20,7 +23,7 @@ void DynamicAtlasEditorAsset::load() {
     int normScaleFactor = int(ceilf(scaleFactor));
     int pageSize = std::min(1024 * normScaleFactor, 4096);
 
-    asset_t<DynamicAtlas>{name_}.reset(new DynamicAtlas(pageSize, pageSize));
+    asset_t<DynamicAtlas>{name_}.reset(new DynamicAtlas(pageSize, pageSize, alphaMap, mipmaps));
 }
 
 void DynamicAtlasEditorAsset::unload() {
@@ -42,9 +45,14 @@ void DynamicAtlasEditorAsset::gui() {
 void DynamicAtlasEditorAsset::build(assets_build_struct_t& data) {
     read_decl();
 
-    working_dir_t::with(data.output, [&] {
-        // save options
-    });
+    const auto output_path = data.output / name_;
+    make_dirs(output_path.dir());
+
+    // save TTF options
+    output_memory_stream out{100};
+    IO io{out};
+    io(alphaMap, mipmaps);
+    ek::save(out, output_path + ".dynamic_atlas");
 
     data.meta("dynamic_atlas", name_);
 }

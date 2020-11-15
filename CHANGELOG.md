@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- add `Texture` format and mipmaps settings  
 - editor: inspector for `ParticleEmitter` and `ParticleLayer`
 - assets: introduce atlas and dynamic-atlas
 - ttf: configuration base font size and destination dynamic atlas for glyph cache

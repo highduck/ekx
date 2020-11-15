@@ -23,7 +23,8 @@ public:
     void save() override;
 
 private:
-
+    bool alphaMap = false;
+    bool mipmaps = false;
 };
 
 

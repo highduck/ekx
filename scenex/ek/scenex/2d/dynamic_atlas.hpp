@@ -13,7 +13,7 @@ struct DynamicAtlasSprite {
 
 class DynamicAtlas : private disable_copy_assign_t {
 public:
-    DynamicAtlas(int pageWidth_, int pageHeight_);
+    DynamicAtlas(int pageWidth_, int pageHeight_, bool alphaMap, bool mipmaps);
 
     ~DynamicAtlas();
 
