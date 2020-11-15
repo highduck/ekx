@@ -4,11 +4,11 @@
 
 namespace ek {
 
-class TTFEditorAsset  : public editor_asset_t {
+class DynamicAtlasEditorAsset : public editor_asset_t {
 public:
-    inline static const char* type_name = "ttf";
+    inline static const char* type_name = "dynamic_atlas_settings";
 
-    explicit TTFEditorAsset(path_t path);
+    explicit DynamicAtlasEditorAsset(path_t path);
 
     void read_decl_from_xml(const pugi::xml_node& node) override;
 
@@ -23,9 +23,9 @@ public:
     void save() override;
 
 private:
-    std::string glyphCache;
-    float baseFontSize{};
+
 };
+
 
 }
 

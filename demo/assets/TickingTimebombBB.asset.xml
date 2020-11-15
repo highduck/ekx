@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<asset name="TickingTimebombBB" path="TickingTimebombBB.ttf" type="bmfont">
+<asset name="TickingTimebombBB" path="TickingTimebombBB.ttf" type="bmfont" atlas="main">
     <font fontSize="24" mirror_case="true">
         <code_range from="0x0020" to="0x007F"/>
     </font>
-    <atlas>
-        <resolution scale="1"/>
-        <resolution scale="2"/>
-        <resolution scale="3"/>
-        <resolution scale="4"/>
-    </atlas>
     <filters/>
 </asset>

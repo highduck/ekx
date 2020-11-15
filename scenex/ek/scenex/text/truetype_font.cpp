@@ -15,15 +15,15 @@
 
 #endif
 
-#include "dynamic_atlas.hpp"
+#include <ek/scenex/2d/dynamic_atlas.hpp>
 
 namespace ek {
 
-TrueTypeFont::TrueTypeFont(float dpiScale_, float fontSize, int cachePageSize) :
+TrueTypeFont::TrueTypeFont(float dpiScale_, float fontSize, const std::string& dynamicAtlasName) :
         FontImplBase(FontType::TrueType),
         dpiScale{dpiScale_},
         baseFontSize{fontSize},
-        atlas{cachePageSize, cachePageSize} {
+        atlas{dynamicAtlasName} {
     mapByEffect[0] = std::make_unique<std::unordered_map<uint32_t, Glyph>>();
     map = mapByEffect[0].get();
 }
@@ -33,15 +33,15 @@ TrueTypeFont::~TrueTypeFont() {
 }
 
 void TrueTypeFont::loadFromMemory(array_buffer&& buffer) {
-    assert(!loaded);
+    assert(!loaded_);
     if (!buffer.empty() && initFromMemory(buffer.data(), buffer.size())) {
         source = std::move(buffer);
-        loaded = true;
+        loaded_ = true;
     }
 }
 
 void TrueTypeFont::unload() {
-    if (loaded) {
+    if (loaded_) {
         source.resize(0);
         source.shrink_to_fit();
 
@@ -51,16 +51,21 @@ void TrueTypeFont::unload() {
         delete mappedSourceFile_;
         mappedSourceFile_ = nullptr;
 
-        loaded = false;
+        loaded_ = false;
     }
-
 }
 
 // store prerendered glyph for baseFontSize and upscaled by dpiScale
 // quad scale just multiplier to get fontSize relative to baseFontSize
 bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     assert(map != nullptr);
-    if (!loaded) {
+    if (!loaded_) {
+        return false;
+    }
+
+    assert(!atlas.empty());
+    if (!atlas) {
+        // not ready to fill dynamic atlas :(
         return false;
     }
 
@@ -111,7 +116,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
 
         fastBlurA8(bmp.data(), bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_, strengthPower_);
 
-        auto sprite = atlas.addBitmap(bitmapWidth, bitmapHeight, bmp);
+        auto sprite = atlas->addBitmap(bitmapWidth, bitmapHeight, bmp);
         glyph.texture = sprite.texture;
         glyph.texCoord = sprite.texCoords;
 
@@ -130,7 +135,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
 }
 
 bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
-    if(!loaded) {
+    if (!loaded_) {
         return false;
     }
     assert(map != nullptr);
@@ -165,20 +170,8 @@ bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
     return true;
 }
 
-void TrueTypeFont::debugDrawAtlas(float x, float y) {
-    auto w = (float) atlas.pageWidth;
-    auto h = (float) atlas.pageHeight;
-    draw2d::state.set_empty_texture();
-    draw2d::quad(x, y, w, h, 0x77000000_argb);
-
-    draw2d::state.set_texture(atlas.texture_);
-    draw2d::state.set_texture_coords(0, 0, 1, 1);
-    draw2d::quad(x, y, w, h);
-}
-
-
 void TrueTypeFont::loadDeviceFont(const char* fontName) {
-    assert(!loaded);
+    assert(!loaded_);
 
     auto path = getDeviceFontPath(fontName);
     if (!path.empty()) {
@@ -187,7 +180,7 @@ void TrueTypeFont::loadDeviceFont(const char* fontName) {
 //        });
         auto* file = new FileView(path.c_str());
         if (file->size() > 0 && initFromMemory(file->data(), file->size())) {
-            loaded = true;
+            loaded_ = true;
             mappedSourceFile_ = file;
         } else {
             delete file;
@@ -239,7 +232,7 @@ void TrueTypeFont::setBlur(float radius, int iterations, int strengthPower) {
 }
 
 float TrueTypeFont::getKerning(uint32_t codepoint1, uint32_t codepoint2) {
-    if (loaded && info->kern) {
+    if (loaded_ && info->kern) {
         int kern = stbtt_GetCodepointKernAdvance(info, codepoint1, codepoint2);
         float scale = stbtt_ScaleForPixelHeight(info, baseFontSize);
         return static_cast<float>(kern) * scale / baseFontSize;

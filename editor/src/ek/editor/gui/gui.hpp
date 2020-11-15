@@ -31,6 +31,6 @@ namespace ImGui {
 
 bool Color32Edit(const char* label, ek::argb32_t& argb);
 
-bool RectEdit(const char* label, float xywh[4], float v_speed = 1.0f, const char* format = "%.3f", float power = 1.0f);
+bool EditRect(const char* label, float * xywh, float v_speed = 1.0f, const char* format = "%.3f", float power = 1.0f);
 
 }

@@ -21,8 +21,6 @@ public:
 
     ~Font();
 
-    void debugDrawAtlas(float x, float y);
-
     void draw(const std::string& text,
               float size,
               const float2& position,

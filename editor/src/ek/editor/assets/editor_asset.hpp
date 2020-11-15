@@ -31,7 +31,11 @@ public:
 
     virtual void read_decl_from_xml(const pugi::xml_node& node);
 
-    virtual void load() = 0;
+    virtual void beforeLoad() {}
+
+    virtual void load() {}
+
+    virtual void afterLoad() {}
 
     virtual void unload() = 0;
 
@@ -40,7 +44,11 @@ public:
 
     virtual void gui();
 
-    virtual void build(assets_build_struct_t& data) = 0;
+    virtual void beforeBuild(assets_build_struct_t& data) {}
+
+    virtual void build(assets_build_struct_t& data) {}
+
+    virtual void afterBuild(assets_build_struct_t& data) {}
 
     virtual void save();
 
@@ -66,6 +74,10 @@ public:
 
     editor_project_t* project = nullptr;
 
+    [[nodiscard]]
+    bool isDev() const;
+
+    bool reloadOnScaleFactorChanged = false;
 protected:
 
     [[nodiscard]]
@@ -73,9 +85,10 @@ protected:
 
     path_t resource_path_;
     path_t declaration_path_;
+    bool dev_ = false;
     std::string name_;
     std::string type_name_;
-    bool reloadOnScaleFactorChanged = false;
+
 };
 
 }

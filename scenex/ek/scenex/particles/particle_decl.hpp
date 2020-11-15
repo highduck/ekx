@@ -110,6 +110,14 @@ public:
     [[nodiscard]] inline float random() const {
         return rand_fx.random(min, max);
     }
+
+    [[nodiscard]] const float* data() const {
+        return reinterpret_cast<const float*>(this);
+    }
+
+    [[nodiscard]] float* data() {
+        return reinterpret_cast<float*>(this);
+    }
 };
 
 struct particle_decl {

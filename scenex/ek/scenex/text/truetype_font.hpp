@@ -1,7 +1,6 @@
 #pragma once
 
 #include "font_base.hpp"
-#include "dynamic_atlas.hpp"
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
 #include <ek/math/box.hpp>
@@ -12,13 +11,14 @@ struct stbtt_fontinfo;
 
 namespace ek {
 
+class DynamicAtlas;
 class FileView;
 
 // TODO: metadata for base size, atlas resolution, etc
 // TODO: how to generate outlines?
 class TrueTypeFont : public FontImplBase {
 public:
-    TrueTypeFont(float dpiScale, float fontSize, int cachePageSize);
+    TrueTypeFont(float dpiScale, float fontSize, const std::string& dynamicAtlasName);
 
     ~TrueTypeFont() override;
 
@@ -38,17 +38,14 @@ public:
 
     void setBlur(float radius, int iterations, int strengthPower) override;
 
-    void debugDrawAtlas(float x, float y) override;
-
 public:
     stbtt_fontinfo* info = nullptr;
     std::vector<uint8_t> source;
     FileView* mappedSourceFile_ = nullptr;
-    bool loaded = false;
 
     float baseFontSize;
     float dpiScale;
-    DynamicAtlas atlas;
+    asset_t<DynamicAtlas> atlas;
     std::unordered_map<uint32_t, std::unique_ptr<std::unordered_map<uint32_t, Glyph>>> mapByEffect;
     std::unordered_map<uint32_t, Glyph>* map = nullptr;
 

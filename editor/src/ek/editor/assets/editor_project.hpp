@@ -20,7 +20,7 @@ public:
 
     void build(const path_t& output) const;
 
-    void load_all();
+    void load_all(bool reloadOnScaleChanged = false);
 
     void unload_all();
 

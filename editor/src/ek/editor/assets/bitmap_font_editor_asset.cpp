@@ -22,11 +22,7 @@ BitmapFontEditorAsset::BitmapFontEditorAsset(path_t path)
 }
 
 void BitmapFontEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {
-    atlas_decl_ = {};
-    from_xml(node.child("atlas"), atlas_decl_);
-    if (atlas_decl_.name.empty()) {
-        atlas_decl_.name = name_;
-    }
+    atlasTarget_ = node.attribute("atlas").value();
 
     font_decl_ = {};
     from_xml(node.child("font"), font_decl_);
@@ -38,28 +34,23 @@ void BitmapFontEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {
 void BitmapFontEditorAsset::load() {
     read_decl();
 
-    auto temp_atlas = prepare_temp_atlas(name_, project->scale_factor);
+    asset_t<spritepack::atlas_t> atlasBuild{atlasTarget_};
     auto font_data = font_lib::export_font(project->base_path / resource_path_,
                                            name_,
                                            font_decl_,
                                            filters_decl_,
-                                           temp_atlas);
+                                           atlasBuild.mutableRef());
 
-    load_temp_atlas(temp_atlas);
     auto* bmFont = new BitmapFont();
     bmFont->load(font_data);
     asset_t<Font>{name_}.reset(new Font(bmFont));
 }
 
 void BitmapFontEditorAsset::unload() {
-    asset_t<atlas_t>{name_}.reset(nullptr);
     asset_t<Font>{name_}.reset(nullptr);
 }
 
 void BitmapFontEditorAsset::gui() {
-    asset_t<atlas_t> atlas{name_};
-    gui_atlas_view(atlas.get());
-
     asset_t<Font> font{name_};
     gui_font_view(font.get());
 }
@@ -67,22 +58,21 @@ void BitmapFontEditorAsset::gui() {
 void BitmapFontEditorAsset::build(assets_build_struct_t& data) {
     read_decl();
 
-    spritepack::atlas_t atlas{atlas_decl_};
+    asset_t<spritepack::atlas_t> atlasBuild{atlasTarget_};
     auto font_data = font_lib::export_font(project->base_path / resource_path_,
                                            name_,
                                            font_decl_,
                                            filters_decl_,
-                                           atlas);
+                                           atlasBuild.mutableRef());
+
     working_dir_t::with(data.output, [&] {
         EK_DEBUG << "Export Freetype asset: " << current_working_directory();
         ek::output_memory_stream out{100};
         IO io{out};
         io(font_data);
         ::ek::save(out, name_ + ".font");
-        spritepack::export_atlas(atlas);
     });
 
-    data.meta("atlas", name_);
     data.meta("bmfont", name_);
 }
 

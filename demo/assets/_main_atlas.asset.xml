@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<asset name="main" type="atlas_builder">
+    <resolution scale="1" max_width="2048" max_height="2048"/>
+    <resolution scale="2" max_width="2048" max_height="2048"/>
+    <resolution scale="3" max_width="2048" max_height="2048"/>
+    <resolution scale="4" max_width="2048" max_height="2048"/>
+</asset>

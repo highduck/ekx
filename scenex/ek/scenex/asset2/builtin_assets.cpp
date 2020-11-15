@@ -20,6 +20,7 @@
 #include <ek/scenex/text/bitmap_font.hpp>
 
 #include <utility>
+#include <ek/scenex/2d/dynamic_atlas.hpp>
 
 namespace ek {
 
@@ -127,6 +128,34 @@ public:
 
     void do_unload() override {
         asset_t<atlas_t>{path_}.reset(nullptr);
+        ready_ = false;
+    }
+
+    uint8_t loaded_scale_ = 0;
+};
+
+class DynamicAtlasAsset : public builtin_asset_t {
+public:
+    explicit DynamicAtlasAsset(std::string path)
+            : builtin_asset_t(std::move(path)) {
+    }
+
+    void load() override {
+        if (ready_) {
+            // do not reload dynamic atlas, because references to texture* should be invalidated,
+            // but current strategy not allow that
+            return;
+        }
+        loaded_scale_ = project_->scale_uid;
+        int normScaleFactor = int(ceilf(loaded_scale_));
+        int pageSize = std::min(1024 * normScaleFactor, 4096);
+
+        asset_t<DynamicAtlas>{path_}.reset(new DynamicAtlas(pageSize, pageSize));
+        ready_ = true;
+    }
+
+    void do_unload() override {
+        asset_t<DynamicAtlas>{path_}.reset(nullptr);
         ready_ = false;
     }
 
@@ -347,11 +376,19 @@ public:
     }
 
     void do_load() override {
-        get_resource_content_async((project_->base_path / path_ + ".ttf").c_str(), [this](auto buffer) {
-            auto* ttfFont = new TrueTypeFont(project_->scale_factor, 48, 2048);
-            ttfFont->loadFromMemory(std::move(buffer));
-            asset_t<Font>{path_}.reset(new Font(ttfFont));
-            ready_ = true;
+        get_resource_content_async((project_->base_path / path_ + ".ttf_settings").c_str(), [this](auto buffer) {
+            input_memory_stream input{buffer.data(), buffer.size()};
+            IO io{input};
+            float fontSize = 48.0f;
+            std::string glyphCache = "default_glyph_cache";
+            io(fontSize, glyphCache);
+
+            get_resource_content_async((project_->base_path / path_ + ".ttf").c_str(), [&, this](auto buffer) {
+                auto* ttfFont = new TrueTypeFont(project_->scale_factor, fontSize, glyphCache);
+                ttfFont->loadFromMemory(std::move(buffer));
+                asset_t<Font>{path_}.reset(new Font(ttfFont));
+                ready_ = true;
+            });
         });
     }
 
@@ -383,6 +420,8 @@ asset_object_t* builtin_asset_resolver_t::create_for_type(const std::string& typ
         return new TrueTypeFontAsset(path);
     } else if (type == "atlas") {
         return new atlas_asset_t(path);
+    } else if (type == "dynamic_atlas") {
+        return new DynamicAtlasAsset(path);
     } else if (type == "program") {
         return new program_asset_t(path);
     } else if (type == "model") {

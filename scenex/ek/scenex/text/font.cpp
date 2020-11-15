@@ -175,13 +175,6 @@ rect_f Font::estimate_text_draw_zone(const std::string& text, float size, int be
     return bounds_builder.rect();
 }
 
-void Font::debugDrawAtlas(float x, float y) {
-    impl->debugDrawAtlas(x, y);
-    if(fallback){
-        fallback->debugDrawAtlas(x, y + 512);
-    }
-}
-
 FontType Font::getFontType() const {
     return impl->getFontType();
 }

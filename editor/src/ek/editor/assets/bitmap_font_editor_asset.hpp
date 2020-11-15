@@ -26,8 +26,8 @@ public:
     void save() override;
 
 private:
+    std::string atlasTarget_;
     font_decl_t font_decl_;
-    atlas_decl_t atlas_decl_;
     filters_decl_t filters_decl_;
 };
 

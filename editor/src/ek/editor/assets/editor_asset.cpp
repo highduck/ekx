@@ -34,6 +34,7 @@ void editor_asset_t::read_decl() {
         auto default_name = get_default_name(declaration_path_);
         name_ = node.attribute("name").as_string(default_name.c_str());
         resource_path_ = path_t{node.attribute("path").as_string(default_name.c_str())};
+        dev_ = node.attribute("dev").as_bool(false);
         read_decl_from_xml(node);
     } else {
         EK_ERROR("error parse xml %s", full_path.c_str());
@@ -57,6 +58,10 @@ void editor_asset_t::onScaleFactorChanged() {
     if (reloadOnScaleFactorChanged) {
         this->load();
     }
+}
+
+bool editor_asset_t::isDev() const {
+    return dev_;
 }
 
 }

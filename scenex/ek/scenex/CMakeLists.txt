@@ -93,10 +93,10 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         2d/atlas.cpp
         2d/sprite.cpp
+        2d/dynamic_atlas.cpp
 
         text/bitmap_font.cpp
         text/truetype_font.cpp
-        text/dynamic_atlas.cpp
         text/font.cpp
         text/font_base.cpp
         text/font_base.hpp
