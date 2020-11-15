@@ -12,7 +12,7 @@ ecs::entity get_child_at(ecs::entity e, int index) {
         ++i;
         it = ecs::get<node_t>(it).sibling_next;
     }
-    return ecs::null;
+    return nullptr;
 }
 
 }

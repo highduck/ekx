@@ -88,20 +88,20 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     }
 
     if (!data->clipRect.empty()) {
-        ecs::replace_or_assign<scissors_2d>(entity, data->clipRect);
+        ecs::reassign<scissors_2d>(entity, data->clipRect);
     }
 
     if (!data->hitRect.empty()) {
-        ecs::replace_or_assign<hit_area_2d>(entity, data->hitRect);
+        ecs::reassign<hit_area_2d>(entity, data->hitRect);
     }
 
     if (data->button) {
-        ecs::replace_or_assign<interactive_t>(entity);
-        ecs::replace_or_assign<button_t>(entity);
+        ecs::reassign<interactive_t>(entity);
+        ecs::reassign<button_t>(entity);
     }
 
     if (!data->filters.empty()) {
-        auto& filters_comp = ecs::replace_or_assign<node_filters_t>(entity);
+        auto& filters_comp = ecs::reassign<node_filters_t>(entity);
         filters_comp.filters = data->filters;
 //        ecs::replace_or_assign<node_filters_t>(entity);
     }

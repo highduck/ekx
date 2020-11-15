@@ -17,7 +17,7 @@ void target_follow_script::update(float dt) {
             target = local_to_global(target_entity, float2::zero);
             target = global_to_parent(entity_, target);
         } else {
-            target_entity = ecs::null;
+            target_entity = nullptr;
         }
 
         auto current = tr.position - offset;

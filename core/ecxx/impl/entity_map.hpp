@@ -4,11 +4,11 @@
 #include "entity.hpp"
 #include "sparse_vector.hpp"
 
-namespace ecxx {
+namespace ecs {
 
 class entity_map_base {
 public:
-    using index_type = spec::index_type;
+    using index_type = entity::index_type;
     using entity_vector_type = std::vector<entity>;
     using entity_vector_iterator = std::vector<entity>::iterator;
     using entity_vector_const_iterator = std::vector<entity>::const_iterator;
@@ -22,10 +22,12 @@ public:
 
     virtual void emplace_dyn(entity) = 0;
 
-    virtual void erase_dyn(entity) = 0;
+    virtual void erase_dyn(index_type) = 0;
 
-    inline bool has(entity e) const {
-        return table_.has(e.index());
+    virtual void clear() = 0;
+
+    inline bool has(index_type idx) const {
+        return table_.has(idx);
     }
 
     inline const entity_index_table& index_table() const {
@@ -129,7 +131,7 @@ template<typename DataType>
 class entity_map final : public entity_map_base {
 public:
     using base_type = entity_map_base;
-    using index_type = spec::index_type;
+    using index_type = entity::index_type;
     using data_type = DataType;
 
     static constexpr bool has_data = std::negation_v<typename std::is_empty<data_type>::type>;
@@ -144,7 +146,7 @@ public:
     template<typename ...Args>
     DataType& emplace(entity e, Args&& ...args) {
         assert(!base_type::locked());
-        assert(!base_type::has(e));
+        assert(!base_type::has(e.index()));
 
         auto di = static_cast<index_type>(base_type::entity_.size());
         base_type::entity_.emplace_back(e);
@@ -161,11 +163,11 @@ public:
         }
     }
 
-    void erase(entity e) {
+    void erase(index_type ei) {
         assert(!base_type::locked());
-        assert(base_type::has(e));
+        assert(base_type::has(ei));
 
-        const auto index = base_type::table_.get_and_remove(e.index());
+        const auto index = base_type::table_.get_and_remove(ei);
         const bool swap_with_back = index < base_type::entity_.size() - 1u;
 
         if (swap_with_back) {
@@ -183,25 +185,26 @@ public:
         }
     }
 
-    inline DataType& get(entity e) const {
-        assert(base_type::has(e));
+    inline DataType& get(index_type idx) const {
+        assert(base_type::has(idx));
         if constexpr (has_data) {
-            return get_data(base_type::table_.at(e.index()));
+            return get_data(base_type::table_.at(idx));
         } else {
             return get_data(0u);
         }
     }
 
     DataType& get_or_create(entity e) {
-        if (!base_type::has(e)) {
+        const auto idx = e.index();
+        if (!base_type::has(idx)) {
             emplace(e);
         }
-        return get(e);
+        return get(idx);
     }
 
-    DataType& get_or_default(entity e) const {
+    DataType& get_or_default(index_type idx) const {
         if constexpr (has_data) {
-            return get_data(base_type::has(e) ? base_type::table_.at(e.index()) : 0u);
+            return get_data(base_type::has(idx) ? base_type::table_.at(idx) : 0u);
         } else {
             return get_data(0u);
         }
@@ -211,8 +214,16 @@ public:
         emplace(e);
     }
 
-    void erase_dyn(entity e) final {
-        erase(e);
+    void erase_dyn(index_type idx) final {
+        erase(idx);
+    }
+
+    void clear() final {
+        entity_.clear();
+        entity_.emplace_back();
+        data_.clear();
+        data_.emplace_back();
+        table_.clear();
     }
 
     inline DataType& get_data(index_type i) const {

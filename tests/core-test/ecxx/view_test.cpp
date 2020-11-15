@@ -2,20 +2,22 @@
 #include <gtest/gtest.h>
 #include "common/components.hpp"
 
-using namespace ecxx;
+using namespace ecs;
 
 TEST(view, each) {
-    world w;
+    world& w = world::the;
     w.create<position_t, motion_t>();
     int i = 0;
     w.view<position_t, motion_t>().each([&i](auto& pos, auto& mot) {
         ++i;
     });
     ASSERT_EQ(i, 1);
+
+    w.clear();
 }
 
 TEST(view, locking) {
-    world w;
+    world& w = world::the;
     w.create<position_t, motion_t, value_t>();
     w.create<position_t, motion_t, value_t>();
     w.create<position_t, motion_t, value_t>();
@@ -58,11 +60,12 @@ TEST(view, locking) {
     ASSERT_FALSE(w.is_locked<empty_comp_t>());
 
     ASSERT_EQ(view_count, 5 + 1);
+
+    w.clear();
 }
 
-
 TEST(view, min_to_max) {
-    world w;
+    world& w = world::the;
     uint32_t values_count = 0u;
     for (uint32_t i = 0; i < 100; ++i) {
         auto e = w.create();
@@ -82,10 +85,11 @@ TEST(view, min_to_max) {
     });
 
     ASSERT_EQ(view_count, values_count);
+    w.clear();
 }
 
 TEST(runtime_view, min_to_max) {
-    world w;
+    world& w = world::the;
     uint32_t values_count = 0u;
     for (uint32_t i = 0; i < 100; ++i) {
         auto e = w.create();
@@ -100,7 +104,7 @@ TEST(runtime_view, min_to_max) {
     }
 
     uint32_t view_count = 0u;
-    world::component_typeid types[] = {
+    unsigned types[] = {
             w.type<position_t>(),
             w.type<motion_t>(),
             w.type<value_t>()
@@ -124,7 +128,7 @@ TEST(runtime_view, min_to_max) {
     w.create<empty_comp_t>();
     w.create<empty_comp_t>();
 
-    world::component_typeid types2[] = {
+    unsigned types2[] = {
             w.type<position_t>(),
             w.type<empty_comp_t>()
     };

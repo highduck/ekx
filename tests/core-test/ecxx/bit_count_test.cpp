@@ -1,7 +1,7 @@
-#include <ecxx/impl/bit_count.hpp>
+#include <ecxx/impl/utility.hpp>
 #include <gtest/gtest.h>
 
-using namespace ecxx;
+using namespace ecs::details;
 
 TEST(bit_count, func) {
     ASSERT_EQ(bit_count(0x0), 0);

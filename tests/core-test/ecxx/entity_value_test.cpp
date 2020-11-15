@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-using namespace ecxx;
+using namespace ecs;
 
 constexpr entity null{};
 

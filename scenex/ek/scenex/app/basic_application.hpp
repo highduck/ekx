@@ -3,7 +3,9 @@
 #include <ecxx/ecxx.hpp>
 
 #ifdef EK_EDITOR
+
 #include <ek/editor/editor.hpp>
+
 #endif
 
 #include <ek/util/locator.hpp>
@@ -32,8 +34,6 @@ public:
     signal_t<float> hook_on_update{};
 
     /////
-
-    ecs::world w;
     ecs::entity root;
     ecs::entity game;
     float2 base_resolution;

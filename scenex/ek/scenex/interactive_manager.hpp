@@ -94,16 +94,16 @@ public:
     }
 
 private:
-    ecs::entity debug_hit_target_ = ecs::null;
-    ecs::entity entity_ = ecs::null;
+    ecs::entity debug_hit_target_;
+    ecs::entity entity_;
 
     std::vector<ecs::entity> last_targets_;
     std::vector<ecs::entity> targets_;
 
     bool mouse_active_ = false;
     uint64_t primary_touch_id_ = 0ull;
-    float2 primary_touch_ = float2::zero;
-    float2 primary_mouse_ = float2::zero;
+    float2 primary_touch_;
+    float2 primary_mouse_;
 
     ecs::entity drag_entity_;
 };

@@ -103,12 +103,12 @@ inline void destroy_children(ecs::entity entity) {
         child = ecs::get<node_t>(child).sibling_next;
         destroy_children(temp);
 
-        ecs::get<node_t>(temp).parent = ecs::null;
+        ecs::get<node_t>(temp).parent = nullptr;
         //world_disable_node(temp);
         ecs::destroy(temp);
     }
-    entity_node.child_first = ecs::null;
-    entity_node.child_last = ecs::null;
+    entity_node.child_first = nullptr;
+    entity_node.child_last = nullptr;
 }
 
 /**
@@ -158,9 +158,9 @@ inline void remove_from_parent(ecs::entity e) {
         ecs::get<node_t>(par).child_last = prev;
     }
 
-    entity_node.parent = ecs::null;
-    entity_node.sibling_next = ecs::null;
-    entity_node.sibling_prev = ecs::null;
+    entity_node.parent = nullptr;
+    entity_node.sibling_next = nullptr;
+    entity_node.sibling_prev = nullptr;
 }
 
 // child has node
@@ -261,12 +261,12 @@ inline void remove_children(ecs::entity e) {
         auto temp = child;
         child = ecs::get<node_t>(child).sibling_next;
         auto& temp_node = ecs::get<node_t>(temp);
-        temp_node.parent = ecs::null;
-        temp_node.sibling_next = ecs::null;
-        temp_node.sibling_prev = ecs::null;
+        temp_node.parent = nullptr;
+        temp_node.sibling_next = nullptr;
+        temp_node.sibling_prev = nullptr;
     }
-    entity_node.child_first = ecs::null;
-    entity_node.child_last = ecs::null;
+    entity_node.child_first = nullptr;
+    entity_node.child_last = nullptr;
 }
 
 /**

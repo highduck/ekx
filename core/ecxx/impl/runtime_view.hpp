@@ -4,7 +4,7 @@
 
 #include <array>
 
-namespace ecxx {
+namespace ecs {
 
 class runtime_view_t {
 public:
@@ -46,8 +46,9 @@ public:
 
         [[nodiscard]] inline bool valid(entity e) const {
             const auto end = static_cast<uint32_t>(table_.size());
+            const auto idx = e.index();
             for (uint32_t i = 1u; i < end; ++i) {
-                if (!table_[i]->has(e)) {
+                if (!table_[i]->has(idx)) {
                     return false;
                 }
             }

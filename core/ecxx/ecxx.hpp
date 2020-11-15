@@ -1,22 +1,16 @@
 #pragma once
 
-#include <ecxx/impl/context.hpp>
+#include <ecxx/impl/world.hpp>
 
 namespace ecs {
-
-using entity = ecxx::entity;
-using world = ecxx::world;
 
 /**
  * NULL entity value
  */
-constexpr entity null{};
 
 template<typename ...Component>
 inline auto view() {
-    return ecxx::basic_view<Component...>{
-            ecxx::get_world().components_data()
-    };
+    return basic_view<Component...>{world::the.components_data()};
 }
 
 /** special view provide back-to-front iteration
@@ -24,126 +18,122 @@ inline auto view() {
  **/
 template<typename ...Component>
 inline auto rview() {
-    return ecxx::basic_rview<Component...>{
-            ecxx::get_world().components_data()
+    return basic_rview<Component...>{
+            world::the.components_data()
     };
 }
 
 template<typename ...Component>
 inline entity create() {
-    return ecxx::get_world().create<Component...>();
+    return world::the.create<Component...>();
 }
 
 template<typename ...Component, typename It>
 void create(It begin, It end) {
-    return ecxx::get_world().create<Component...>(begin, end);
+    return world::the.create<Component...>(begin, end);
 }
 
 inline void destroy(entity e) {
-    return ecxx::get_world().destroy(e);
+    return world::the.destroy(e);
 }
 
 template<typename Func>
 inline void each(Func func) {
-    return ecxx::get_world().each(func);
+    return world::the.entities.each(func);
 }
 
 template<typename Component>
 [[nodiscard]] inline bool is_locked() {
-    return ecxx::get_world().is_locked<Component>();
+    return world::the.is_locked<Component>();
 }
 
 [[nodiscard]] inline bool valid(entity e) {
-    return ecxx::get_world().valid(e);
+    return e && world::the.entities.current(e.index()) == e.version();
 }
-
 
 /** Entity methods functional style **/
 
 template<typename Component, typename ...Args>
 inline Component& assign(entity e, Args&& ... args) {
-    return ecxx::get_world().assign<Component>(e, args...);
+    return world::the.assign<Component>(e, args...);
 }
 
 template<typename Component, typename ...Args>
-inline Component& replace_or_assign(entity e, Args&& ... args) {
-    return ecxx::get_world().replace_or_assign<Component>(e, args...);
+inline Component& reassign(entity e, Args&& ... args) {
+    return world::the.reassign<Component>(e, args...);
 }
 
 template<typename Component>
 [[nodiscard]] inline bool has(entity e) {
-    return ecxx::get_world().has<Component>(e);
+    return world::the.has<Component>(e.index());
 }
 
 template<typename Component>
 inline Component& get(entity e) {
-    return ecxx::get_world().get<Component>(e);
+    return world::the.get<Component>(e.index());
 }
 
 template<typename Component>
 inline Component& get_or_create(entity e) {
-    return ecxx::get_world().get_or_create<Component>(e);
+    return world::the.get_or_create<Component>(e);
 }
 
 template<typename Component>
 inline const Component& get_or_default(entity e) {
-    return ecxx::get_world().get_or_default<Component>(e);
+    return world::the.get_or_default<Component>(e.index());
 }
 
 template<typename Component>
 inline void remove(entity e) {
-    return ecxx::get_world().remove<Component>(e);
+    return world::the.remove<Component>(e.index());
 }
 
 template<typename Component>
 inline bool try_remove(entity e) {
-    return ecxx::get_world().try_remove<Component>(e);
+    return world::the.try_remove<Component>(e.index());
 }
-}
-
-namespace ecxx {
 
 /** Entity methods impl **/
 
 
 template<typename Component, typename ...Args>
 inline Component& entity::assign(Args&& ... args) {
-    return get_world().assign<Component>(*this, args...);
+    return world::the.assign<Component>(*this, args...);
 }
 
 template<typename Component, typename ...Args>
-inline Component& entity::replace_or_assign(Args&& ... args) {
-    return get_world().replace_or_assign<Component>(*this, args...);
+inline Component& entity::reassign(Args&& ... args) {
+    return world::the.reassign<Component>(*this, args...);
 }
 
 template<typename Component>
 [[nodiscard]] inline bool entity::has() const {
-    return get_world().has<Component>(*this);
+    return world::the.has<Component>(index());
 }
 
 template<typename Component>
 inline Component& entity::get() {
-    return get_world().get<Component>(*this);
+    return world::the.get<Component>(index());
 }
 
 template<typename Component>
 inline Component& entity::get_or_create() {
-    return get_world().get_or_create<Component>(*this);
+    return world::the.get_or_create<Component>(*this);
 }
 
 template<typename Component>
 inline const Component& entity::get_or_default() const {
-    return get_world().get_or_default<Component>(*this);
+    return world::the.get_or_default<Component>(index());
 }
 
 template<typename Component>
 inline void entity::remove() {
-    return get_world().remove<Component>(*this);
+    return world::the.remove<Component>(index());
 }
 
 template<typename Component>
 inline bool entity::try_remove() {
-    return get_world().try_remove<Component>(*this);
+    return world::the.try_remove<Component>(index());
 }
 
 }

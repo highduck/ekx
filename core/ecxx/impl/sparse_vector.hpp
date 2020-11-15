@@ -5,9 +5,9 @@
 #include <cstdint>
 #include <memory>
 #include <algorithm>
-#include "bit_count.hpp"
+#include "utility.hpp"
 
-namespace ecxx {
+namespace ecs {
 
 class sparse_vector {
 public:
@@ -25,7 +25,7 @@ public:
 
     static constexpr uint32_t elements_per_page = page_size / sizeof(T);
     static constexpr uint32_t page_mask = elements_per_page - 1u;
-    static constexpr uint32_t page_bits = bit_count(page_mask);
+    static constexpr uint32_t page_bits = details::bit_count(page_mask);
 
     struct page_data {
         std::unique_ptr<T[]> elements;
@@ -130,6 +130,9 @@ public:
         }
     }
 
+    void clear() {
+        pages_.clear();
+    }
 private:
     std::vector<page_data> pages_;
 };

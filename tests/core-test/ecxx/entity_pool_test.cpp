@@ -1,7 +1,7 @@
 #include <ecxx/impl/entity_pool.hpp>
 #include <gtest/gtest.h>
 
-using namespace ecxx;
+using namespace ecs;
 
 uint32_t count_entities(basic_entity_pool& pool) {
     uint32_t count = 0u;

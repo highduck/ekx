@@ -5,30 +5,29 @@
 #include "runtime_view.hpp"
 #include "rview.hpp"
 
-namespace ecxx {
+namespace ecs {
 
 class world final {
-public:
-    using component_typeid = spec::component_typeid;
-
     world() = default;
+
+public:
 
     world(const world&) = delete;
 
     inline void reserve(size_t size) {
-        pool_.reserve(size);
+        entities.reserve(size);
     }
 
     template<typename ...Component>
     inline entity create() {
-        auto e = pool_.allocate();
+        auto e = entities.allocate();
         (assign<Component>(e), ...);
         return e;
     }
 
     template<typename ...Component, typename It>
     void create(It begin, It end) {
-        pool_.allocate(begin, end);
+        entities.allocate(begin, end);
         if constexpr (sizeof...(Component) > 0) {
             for (auto it = begin; it != end; ++it) {
                 (assign<Component>(*it), ...);
@@ -37,13 +36,8 @@ public:
     }
 
     inline void destroy(entity e) {
-        components_.remove_all_c(e);
-        pool_.deallocate(e);
-    }
-
-    template<typename Func>
-    inline void each(Func func) const {
-        pool_.each(func);
+        components_.remove_all_c(e.index());
+        entities.deallocate(e);
     }
 
     template<typename Component, typename ...Args>
@@ -53,10 +47,11 @@ public:
     }
 
     template<typename Component, typename ...Args>
-    inline Component& replace_or_assign(entity e, Args&& ... args) {
+    inline Component& reassign(entity e, Args&& ... args) {
         auto& pool = components_.ensure<Component>();
-        if (pool.has(e)) {
-            auto& data = pool.get(e);
+        const auto idx = e.index();
+        if (pool.has(idx)) {
+            auto& data = pool.get(idx);
             data = {args...};
             return data;
         }
@@ -64,23 +59,23 @@ public:
     }
 
     template<typename Component>
-    [[nodiscard]] inline bool has(entity e) const {
+    [[nodiscard]] inline bool has(entity::index_type idx) const {
         const auto* pool = components_.try_get<Component>();
-        return pool && pool->has(e);
+        return pool && pool->has(idx);
     }
 
     template<typename Component>
-    inline const Component& get(entity e) const {
+    inline const Component& get(entity::index_type idx) const {
         const auto* pool = components_.try_get<Component>();
         assert(pool);
-        return pool->get(e);
+        return pool->get(idx);
     }
 
     template<typename Component>
-    inline Component& get(entity e) {
+    inline Component& get(entity::index_type idx) {
         auto* pool = components_.try_get<Component>();
         assert(pool);
-        return pool->get(e);
+        return pool->get(idx);
     }
 
     template<typename Component>
@@ -90,26 +85,24 @@ public:
     }
 
     template<typename Component>
-    inline const Component& get_or_default(entity e) const {
+    inline const Component& get_or_default(entity::index_type idx) const {
         const auto& pool = const_cast<components_db&>(components_).ensure<Component>();
-        return pool.get_or_default(e);
+        return pool.get_or_default(idx);
     }
 
     template<typename Component>
-    inline void remove(entity e) {
+    inline void remove(entity::index_type idx) {
         auto* pool = components_.try_get<Component>();
         assert(pool);
-        pool->erase(e);
+        pool->erase(idx);
     }
 
     template<typename Component>
-    inline bool try_remove(entity e) {
+    inline bool try_remove(entity::index_type idx) {
         auto* pool = components_.try_get<Component>();
-        if (pool) {
-            if (pool->has(e)) {
-                pool->erase(e);
-                return true;
-            }
+        if (pool && pool->has(idx)) {
+            pool->erase(idx);
+            return true;
         }
         return false;
     }
@@ -145,30 +138,34 @@ public:
         return runtime_view_t(table);
     }
 
-    [[nodiscard]] inline const auto& pool() const {
-        return pool_;
-    }
-
-    inline auto& pool() {
-        return pool_;
-    }
-
     template<typename Component>
-    constexpr inline component_typeid type() noexcept {
-        return identity_generator<Component, component_typeid>::value;
+    constexpr inline unsigned type() noexcept {
+        return details::identity_generator<Component>::value;
     }
 
     [[nodiscard]] inline bool valid(entity e) const {
-        return e && pool_.current(e.index()) == e.version();
+        return e && entities.current(e.index()) == e.version();
     }
 
     inline auto& components_data() {
         return components_;
     }
 
+    void clear() {
+        components_.clear();
+        entities.clear();
+    }
+
+    static world the;
+
+    basic_entity_pool entities;
+
 private:
-    basic_entity_pool pool_;
     components_db components_;
+
+
 };
+
+inline world world::the{};
 
 }
