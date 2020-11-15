@@ -119,7 +119,7 @@ void Profiler::draw() {
     const auto scale = static_cast<float>(app::g_app.content_scale);
     auto insets = get_screen_insets();
     draw2d::state.save_matrix()
-            .translate(insets[0], insets[1])
+            .translate(insets.x, insets.y)
             .scale(scale, scale);
     draw2d::state.set_empty_texture();
 

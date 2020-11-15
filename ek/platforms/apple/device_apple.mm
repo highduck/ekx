@@ -1,5 +1,7 @@
 #include <string>
 #include <array>
+#include <ek/math/vec.hpp>
+
 #include <TargetConditionals.h>
 
 #import <CoreFoundation/CoreFoundation.h>
@@ -29,8 +31,8 @@ std::string get_device_lang() {
     return result;
 }
 
-std::array<int, 4> get_screen_insets() {
-    std::array<int, 4> result{0, 0, 0, 0};
+float4 get_screen_insets() {
+    float4 result{};
 #if TARGET_OS_IOS || TARGET_OS_TV
 
 #endif

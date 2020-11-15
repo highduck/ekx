@@ -51,7 +51,7 @@ void basic_application::initialize() {
 
     //// basic scene
     root = create_node_2d("root");
-    setScreenRects(root);
+    updateScreenRect(root);
 
     auto& im = service_locator_instance<interactive_manager>::init();
     service_locator_instance<input_controller>::init(im);
@@ -171,7 +171,7 @@ void basic_application::start_game() {
 void basic_application::on_event(const event_t& event) {
     timer_t timer{};
     if (event.type == event_type::app_resize) {
-        setScreenRects(root);
+        updateScreenRect(root);
     }
     profiler.addTime("EVENTS", timer.read_millis());
     profiler.addTime("FRAME", timer.read_millis());

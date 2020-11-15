@@ -5,6 +5,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <ek/math/vec.hpp>
 
 namespace ek {
 
@@ -19,8 +20,8 @@ namespace ek {
     return result;
 }
 
-std::array<int, 4> get_screen_insets() {
-    std::array<int, 4> result{0, 0, 0, 0};
+float4 get_screen_insets() {
+    float4 result{};
 
     auto* env = android::get_jni_env();
     auto class_ref = env->FindClass("ek/EkDevice");
@@ -29,10 +30,10 @@ std::array<int, 4> get_screen_insets() {
     jsize len = env->GetArrayLength(rv);
     jint* temp_arr = env->GetIntArrayElements(rv, nullptr);
     if (len >= 4) {
-        result[0] = temp_arr[0];
-        result[1] = temp_arr[1];
-        result[2] = temp_arr[2];
-        result[3] = temp_arr[3];
+        result[0] = static_cast<float>(temp_arr[0]);
+        result[1] = static_cast<float>(temp_arr[1]);
+        result[2] = static_cast<float>(temp_arr[2]);
+        result[3] = static_cast<float>(temp_arr[3]);
     }
     env->ReleaseIntArrayElements(rv, temp_arr, 0);
 

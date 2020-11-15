@@ -19,6 +19,10 @@ struct layout_t {
     rect_f rect;
     rect_f safeRect;
 
+    // additional insets can be changed manually: l, t, r, b
+    // to invalidate after change: setScreenRects(basic_application::root);
+    static float4 AdditionalInsets;
+
     layout_t& enableAlignX(float relative, float absolute = 0.0f) {
         align_x = true;
         x.x = relative;
@@ -44,6 +48,6 @@ rect_f find_parent_layout_rect(ecs::entity e, bool safe);
 
 rect_f get_ancestors_rect(ecs::entity e);
 
-void setScreenRects(ecs::entity root);
+void updateScreenRect(ecs::entity root);
 
 }
