@@ -1,13 +1,13 @@
-#include "editor_assets.hpp"
-
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/util/assets.hpp>
 #include <ek/graphics/program.hpp>
+#include <ek/graphics/texture.hpp>
 #include <ek/scenex/3d/material_3d.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/scenex/2d/atlas.hpp>
 #include <ek/scenex/text/font.hpp>
 #include <ek/scenex/data/sg_data.hpp>
+#include <ek/scenex/2d/dynamic_atlas.hpp>
 
 namespace ek {
 
@@ -19,6 +19,18 @@ void on_editor_debug_asset(const asset_t<T>& asset) {
 template<>
 void on_editor_debug_asset<static_mesh_t>(const asset_t<static_mesh_t>& asset) {
     ImGui::Text("Indices: %i", asset->indices_count);
+}
+
+template<>
+void on_editor_debug_asset<DynamicAtlas>(const asset_t<DynamicAtlas>& asset) {
+    auto pagesCount = asset->pages_.size();
+    ImGui::Text("Page Size: %d x %d", asset->pageWidth, asset->pageHeight);
+    ImGui::Text("Page Count: %lu", pagesCount);
+    for (size_t i = 0; i < pagesCount; ++i) {
+        ImGui::Text("Page #%lu", i);
+        auto* page = asset->getPageTexture(i);
+        ImGui::Image(reinterpret_cast<void*>(page->handle()), ImVec2{100.0f, 100.0f});
+    }
 }
 
 template<>
@@ -61,16 +73,17 @@ void do_editor_debug_runtime_asset_list(const std::string& type_name) {
     }
 }
 
-void do_editor_debug_runtime_assets() {
-    ImGui::Begin("Debug Assets");
-
-    do_editor_debug_runtime_asset_list<graphics::program_t>("Program");
-    do_editor_debug_runtime_asset_list<material_3d>("Material");
-    do_editor_debug_runtime_asset_list<static_mesh_t>("Mesh");
-    do_editor_debug_runtime_asset_list<atlas_t>("Atlas");
-    do_editor_debug_runtime_asset_list<sprite_t>("Sprite");
-    do_editor_debug_runtime_asset_list<Font>("Font");
-    do_editor_debug_runtime_asset_list<sg_file>("Scenes 2D");
+void guiResourcesViewWindow(bool* p_open) {
+    if (ImGui::Begin("Resources", p_open)) {
+        do_editor_debug_runtime_asset_list<graphics::program_t>("Program");
+        do_editor_debug_runtime_asset_list<material_3d>("Material");
+        do_editor_debug_runtime_asset_list<static_mesh_t>("Mesh");
+        do_editor_debug_runtime_asset_list<atlas_t>("Atlas");
+        do_editor_debug_runtime_asset_list<sprite_t>("Sprite");
+        do_editor_debug_runtime_asset_list<Font>("Font");
+        do_editor_debug_runtime_asset_list<sg_file>("Scenes 2D");
+        do_editor_debug_runtime_asset_list<DynamicAtlas>("Dynamic Atlas");
+    }
 
     ImGui::End();
 }

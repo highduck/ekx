@@ -1,12 +1,10 @@
 #include "bitmap_font_editor_asset.hpp"
 
-#include <ek/editor/gui/editor_widgets.hpp>
-#include <ek/editor/assets/editor_temp_atlas.hpp>
+#include <ek/editor/gui/gui.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/spritepack/export_atlas.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/2d/atlas.hpp>
 #include <ek/scenex/2d/sprite.hpp>
 #include <ek/system/system.hpp>
 #include <ek/fonts/export_font.hpp>

@@ -10,11 +10,10 @@
 #include <ek/scenex/data/sg_data.hpp>
 #include <ek/xfl/flash_doc_exporter.hpp>
 #include <ek/flash/doc/flash_archive.hpp>
-#include <ek/editor/assets/editor_temp_atlas.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
-#include <ek/editor/gui/editor_widgets.hpp>
 #include <memory>
+#include <ek/editor/gui/gui.hpp>
 
 namespace ek {
 

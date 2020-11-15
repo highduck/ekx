@@ -10,7 +10,6 @@
 #include <ek/graphics/vertex_decl.hpp>
 
 #include <pugixml.hpp>
-#include <ek/editor/gui/editor_widgets.hpp>
 #include <ek/scenex/data/program_data.hpp>
 
 namespace ek {
