@@ -158,7 +158,7 @@ void update_particles() {
 }
 
 void draw_particle_layer(ecs::entity e) {
-    auto& layer = ecs::get<particle_layer_t>(e);
+    auto& layer = e.get<particle_layer_t>();
 
     if (layer.cycled) {
         for (auto* p : layer.particles) {

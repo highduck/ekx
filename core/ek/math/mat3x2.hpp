@@ -160,7 +160,6 @@ struct matrix_t<3, 2, T> {
                 b * right.tx + d * right.ty + ty
         };
 
-//
 //        r.m00 * l.m00 + r.m01 * l.m10
 //        r.m00 * l.m01 + r.m01 * l.m11
 //        r.m00 * l.m02 + r.m01 * l.m12
