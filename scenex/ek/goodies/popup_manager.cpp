@@ -21,17 +21,17 @@ const float animationVertDistance = 200.0f;
 static entity popups_;
 
 void on_popup_pause(entity e) {
-    set_touchable(e, false);
+    setTouchable(e, false);
 }
 
 void on_popup_resume(entity e) {
-    set_touchable(e, true);
+    setTouchable(e, true);
 }
 
 void on_popup_opening(entity e) {
     e.get<Transform2D>().scale = float2::zero;
-    e.get<node_t>().setTouchable(false);
-    e.get<node_t>().setVisible(true);
+    e.get<Node>().setTouchable(false);
+    e.get<Node>().setVisible(true);
 }
 
 void on_popup_open_animation(float t, entity e) {
@@ -44,11 +44,11 @@ void on_popup_open_animation(float t, entity e) {
 }
 
 void on_popup_opened(entity e) {
-    set_touchable(e, true);
+    setTouchable(e, true);
 }
 
 void on_popup_closing(entity e) {
-    set_touchable(e, false);
+    setTouchable(e, false);
 }
 
 void on_popup_closed(entity e) {
@@ -60,13 +60,13 @@ void on_popup_closed(entity e) {
     }
 
     if (state.active.empty()) {
-        set_touchable(popups_, false);
-        set_visible(popups_, false);
+        setTouchable(popups_, false);
+        setVisible(popups_, false);
     } else {
         on_popup_resume(state.active.back());
     }
 
-    set_visible(e, false);
+    setVisible(e, false);
     // TODO: flag auto-delete
     destroy_delay(e);
 }
@@ -103,7 +103,7 @@ void update_popup_managers(float dt) {
                                       p.active.empty() ? 0.0f : 1.0f,
                                       dt / p.fade_duration);
 
-        set_alpha(p.back, p.fade_alpha * p.fade_progress);
+        setAlpha(p.back, p.fade_alpha * p.fade_progress);
 
         if (!p.active.empty()) {
             auto front = p.active.back();
@@ -126,7 +126,7 @@ void open_popup(entity e) {
         return;
     }
 
-    if (ecs::get<node_t>(e).parent == state.layer) {
+    if (ecs::get<Node>(e).parent == state.layer) {
         return;
     }
 
@@ -147,7 +147,7 @@ void open_popup(entity e) {
     };
 
     append(state.layer, e);
-    auto& st = ecs::get_or_create<node_t>(popups_);
+    auto& st = ecs::get_or_create<Node>(popups_);
     st.setTouchable(true);
     st.setVisible(true);
 }
@@ -197,7 +197,7 @@ entity create_popup_manager() {
     layout_wrapper{pm.layer}.aligned(0.5f, 0.0f, 0.5f, 0.0f);
     append(e, pm.layer);
 
-    auto& st = ecs::get_or_create<node_t>(e);
+    auto& st = ecs::get_or_create<Node>(e);
     st.setTouchable(false);
     st.setVisible(false);
 
@@ -218,12 +218,12 @@ void clear_popups() {
     auto& state = ecs::get<popup_manager_t>(popups_);
 
     state.fade_progress = 0.0f;
-    set_alpha(state.back, 0.0f);
+    setAlpha(state.back, 0.0f);
 
-    destroy_children(state.layer);
+    destroyChildren(state.layer);
     state.active.clear();
-    set_touchable(popups_, false);
-    set_visible(popups_, false);
+    setTouchable(popups_, false);
+    setVisible(popups_, false);
 }
 
 void close_all_popups() {

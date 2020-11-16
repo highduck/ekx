@@ -10,7 +10,7 @@ SampleBase::SampleBase() {
 }
 
 SampleBase::~SampleBase() {
-    destroy_node(container);
+    destroyNode(container);
 }
 
 void SampleBase::draw() {}

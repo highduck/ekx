@@ -18,7 +18,7 @@ namespace {
 using asset_ref = asset_t<sg_file>;
 
 void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
-    auto& node = ecs::get<node_t>(entity);
+    auto& node = ecs::get<Node>(entity);
     node.name = data->name;
     if (data->movieTargetId >= 0) {
         ecs::get_or_create<movie_target_keys>(entity) = {data->movieTargetId};
@@ -110,7 +110,7 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
 ecs::entity create_and_merge(const sg_file& sg, asset_ref asset,
                              const sg_node_data* data,
                              const sg_node_data* over = nullptr) {
-    auto entity = ecs::create<node_t, Transform2D>();
+    auto entity = ecs::create<Node, Transform2D>();
     if (data) {
         apply(entity, data, asset);
     }
@@ -120,7 +120,7 @@ ecs::entity create_and_merge(const sg_file& sg, asset_ref asset,
     if (data) {
         for (const auto& child : data->children) {
             auto child_entity = create_and_merge(sg, asset, sg.get(child.libraryName), &child);
-            append_strict(entity, child_entity);
+            appendStrict(entity, child_entity);
         }
     }
 

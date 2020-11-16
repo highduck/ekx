@@ -3,7 +3,7 @@ project(scenex-test)
 
 add_executable(${PROJECT_NAME}
         asset_pack_utils_test.cpp
-        dummy_text_format_test.cpp)
+        )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PRIVATE -fno-exceptions)

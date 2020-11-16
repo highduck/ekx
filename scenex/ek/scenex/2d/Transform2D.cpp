@@ -36,7 +36,7 @@ void Transform2D::updateLocalMatrix() {
 }
 
 void Transform2D::updateLocalMatrixSubTree(ecs::entity src, ecs::entity dst) {
-    auto lca = node_t::findLowerCommonAncestor(src, dst);
+    auto lca = Node::findLowerCommonAncestor(src, dst);
     if (lca) {
         auto it = src;
         while (it && it != lca) {
@@ -44,7 +44,7 @@ void Transform2D::updateLocalMatrixSubTree(ecs::entity src, ecs::entity dst) {
             if (transform) {
                 transform->updateLocalMatrix();
             }
-            it = it.get<node_t>().parent;
+            it = it.get<Node>().parent;
         }
 
         it = dst;
@@ -53,7 +53,7 @@ void Transform2D::updateLocalMatrixSubTree(ecs::entity src, ecs::entity dst) {
             if (transform) {
                 transform->updateLocalMatrix();
             }
-            it = it.get<node_t>().parent;
+            it = it.get<Node>().parent;
         }
 
         auto* transform = lca.tryGet<Transform2D>();
@@ -70,7 +70,7 @@ float2 Transform2D::transformUp(ecs::entity it, ecs::entity top, float2 pos) {
         if (transform) {
             result = transform->matrix.transform(result);
         }
-        it = it.get<node_t>().parent;
+        it = it.get<Node>().parent;
     }
     return result;
 }
@@ -82,14 +82,14 @@ float2 Transform2D::transformDown(ecs::entity top, ecs::entity it, float2 pos) {
         if (transform && !transform->matrix.transform_inverse(result, result)) {
             break;
         }
-        it = it.get<node_t>().parent;
+        it = it.get<Node>().parent;
     }
     return result;
 }
 
 float2 Transform2D::localToLocal(ecs::entity src, ecs::entity dst, float2 pos) {
     float2 result = pos;
-    const auto lca = node_t::findLowerCommonAncestor(src, dst);
+    const auto lca = Node::findLowerCommonAncestor(src, dst);
     if (lca) {
         result = Transform2D::transformUp(src, lca, result);
         result = Transform2D::transformDown(lca, dst, result);
@@ -102,6 +102,44 @@ float2 Transform2D::localToLocal(ecs::entity src, ecs::entity dst, float2 pos) {
 bool Transform2D::fastLocalToLocal(ecs::entity src, ecs::entity dst, float2 pos, float2& out) {
     pos = src.get<Transform2D>().worldMatrix.transform(pos);
     return dst.get<Transform2D>().worldMatrix.transform_inverse(pos, out);
+}
+
+
+/** Invalidate Transform2D **/
+
+void updateWorldTransform(ecs::entity e, const Transform2D* transform) {
+    auto* localTransform = e.tryGet<Transform2D>();
+    if (localTransform) {
+        localTransform->updateLocalMatrix();
+        localTransform->worldMatrix = transform->worldMatrix * localTransform->matrix;
+        localTransform->worldColor = transform->worldColor * localTransform->color;
+        transform = localTransform;
+    }
+    auto it = e.get<Node>().child_first;
+    while (it) {
+        const auto& child = it.get<Node>();
+        if (child.visible()) {
+            updateWorldTransform(it, transform);
+        }
+        it = child.sibling_next;
+    }
+}
+
+void updateWorldTransform2D(ecs::entity root) {
+    auto* transform = root.tryGet<Transform2D>();
+    assert(transform != nullptr);
+    transform->updateLocalMatrix();
+    transform->worldMatrix = transform->matrix;
+    transform->worldColor = transform->color;
+
+    auto it = root.get<Node>().child_first;
+    while (it) {
+        const auto& child = it.get<Node>();
+        if (child.visible()) {
+            updateWorldTransform(it, transform);
+        }
+        it = child.sibling_next;
+    }
 }
 
 

@@ -28,7 +28,7 @@ layout_t get_canvas_space_size(ecs::entity e) {
     result.rect = {float2::zero, get_screen_size()};
     result.safeRect = result.rect;
 
-    auto parent = ecs::get_or_default<node_t>(e).parent;
+    auto parent = ecs::get_or_default<Node>(e).parent;
     if (parent) {
         auto layout = ecs::get<layout_t>(parent);
         if (!layout.safeRect.empty()) {

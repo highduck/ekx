@@ -15,7 +15,7 @@ SampleIntegrations::SampleIntegrations() :
     auto btn = createButton("LEADERBOARD", [] {
         leader_board_show("CgkIpvfh798IEAIQAA");
     });
-    set_position(btn, pos);
+    setPosition(btn, pos);
     get_drawable<Text2D>(btn).rect.set(-100, -25, 200, 50);
     append(container, btn);
     pos.y += 100;
@@ -24,7 +24,7 @@ SampleIntegrations::SampleIntegrations() :
         static int bestScore = 1;
         leader_board_submit("CgkIpvfh798IEAIQAA", ++bestScore);
     });
-    set_position(btn, pos);
+    setPosition(btn, pos);
     get_drawable<Text2D>(btn).rect.set(-100, -25, 200, 50);
     append(container, btn);
 }

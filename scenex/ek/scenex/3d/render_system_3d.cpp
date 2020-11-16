@@ -169,19 +169,19 @@ void end_3d() {
 }
 
 void invalidate_matrix_3d() {
-    for (auto e: ecs::view<transform_3d, node_t>()) {
+    for (auto e: ecs::view<transform_3d, Node>()) {
         auto& tr = ecs::get<transform_3d>(e);
         tr.local = translate_transform(tr.position)
                    * rotation_transform(quat_t<float>(tr.rotation))
                    * scale_transform(tr.scale);
         {
             mat4f world = tr.local;
-            auto p = ecs::get<node_t>(e).parent;
+            auto p = ecs::get<Node>(e).parent;
             while (p) {
                 if (ecs::has<transform_3d>(p)) {
                     world = ecs::get<transform_3d>(p).local * world;
                 }
-                p = ecs::get<node_t>(p).parent;
+                p = ecs::get<Node>(p).parent;
             }
             tr.world = world;
         }
@@ -257,7 +257,7 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     default_material_.set_base_color(0xFF00FF_rgb, 0.2f);
 
     // get view camera orientation
-    if (!camera_entity || !is_visible(camera_entity)) {
+    if (!camera_entity || !isVisible(camera_entity)) {
         return;
     }
 

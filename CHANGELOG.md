@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix mouse cursor
 - refactor `Transform2D` component
 - changed BitmapFont typename to `bmfont` 
-- merge `name_t` and `node_state_t` to `node_t`
+- merge `name_t` and `node_state_t` to `Node`
 - update ImGui v1.80
 - fix macOS backspace/delete key codes
 - [audio] change api to Sound and Music instances 

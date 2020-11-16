@@ -84,7 +84,7 @@ SampleText::SampleText() :
     get_drawable<Text2D>(bmText).borderColor = 0xFF000000_argb;
     get_drawable<Text2D>(bmText).rect.set(0, 0, 360 - 40, 100);
 
-    set_position(bmText, {20.0f, 20.0f});
+    setPosition(bmText, {20.0f, 20.0f});
     append(container, bmText);
 
     auto ttfText = createText("TTF-Cousine-Regular", "Cousine-Regular",
@@ -92,14 +92,14 @@ SampleText::SampleText() :
     get_drawable<Text2D>(ttfText).format.setAlignment(Alignment::Right | Alignment::Top);
     get_drawable<Text2D>(ttfText).format.leading = -8;
     get_drawable<Text2D>(ttfText).format.setTextColor(0xFF00FF00_argb);
-    set_position(ttfText, {360 - 20, 120.0f});
+    setPosition(ttfText, {360 - 20, 120.0f});
     append(container, ttfText);
 
     auto ttfText2 = createText("TTF-Comfortaa-Regular", "Comfortaa-Regular",
                                u8"I don't know KERN TABLE.\nНо кириллица тоже есть");
     get_drawable<Text2D>(ttfText2).format.setTextColor(0xFFFF00FF_argb);
     get_drawable<Text2D>(ttfText2).format.size = 24;
-    set_position(ttfText2, {20.0f, 340.0f});
+    setPosition(ttfText2, {20.0f, 340.0f});
     append(container, ttfText2);
 }
 

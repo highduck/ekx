@@ -10,9 +10,9 @@ namespace ek {
 
 using ecs::entity;
 
-entity hit_test(entity e, float2 parentPosition) {
-    const auto& node = e.get<node_t>();
-    if ((node.flags & NodeFlags_VisibleAndTouchable) != NodeFlags_VisibleAndTouchable) {
+entity hitTest(entity e, float2 parentPosition) {
+    const auto& node = e.get<Node>();
+    if ((node.flags & Node::VisibleAndTouchable) != Node::VisibleAndTouchable) {
         return nullptr;
     }
 
@@ -37,14 +37,15 @@ entity hit_test(entity e, float2 parentPosition) {
 
     auto it = node.child_last;
     while (it) {
-        auto hit = hit_test(it, local);
+        auto hit = hitTest(it, local);
         if (hit) {
             return hit;
         }
-        it = it.get<node_t>().sibling_prev;
+        it = it.get<Node>().sibling_prev;
     }
 
-    if (e.has<Display2D>() && e.get<Display2D>().hitTest(local)) {
+    const auto* display = e.tryGet<Display2D>();
+    if (display && display->hitTest(local)) {
         return e;
     }
 
@@ -95,9 +96,9 @@ void draw_node(entity e) {
 }
 
 void drawScene2DChildren(entity e) {
-    auto it = e.get<node_t>().child_first;
+    auto it = e.get<Node>().child_first;
     while (it) {
-        const auto& child = it.get<node_t>();
+        const auto& child = it.get<Node>();
         if (child.visible() &&
             (child.layersMask() & camera_layers) != 0) {
             const auto& childTransform = it.get<Transform2D>();
@@ -109,18 +110,6 @@ void drawScene2DChildren(entity e) {
         }
         it = child.sibling_next;
     }
-}
-
-void updateScripts() {
-    float dt = TimeLayer::Root->dt;
-    ecs::rview<script_holder>()
-            .each([dt](script_holder& scripts) {
-                for (auto& script : scripts.list) {
-                    if (script) {
-                        script->update(dt);
-                    }
-                }
-            });
 }
 
 /** gizmo drawing pass **/
@@ -150,10 +139,10 @@ void drawSceneGizmo(entity e) {
             }
         }
 
-        auto it = e.get<node_t>().child_first;
+        auto it = e.get<Node>().child_first;
         while (it) {
             drawSceneGizmo(it);
-            it = it.get<node_t>().sibling_next;
+            it = it.get<Node>().sibling_next;
         }
     }
 }
@@ -162,43 +151,6 @@ void drawSceneGizmos(entity root) {
     draw2d::state.save_transform();
     drawSceneGizmo(root);
     draw2d::state.restore_transform();
-}
-
-/** Invalidate Transform2D **/
-
-void invalidateTransform2D(entity e, const Transform2D* transform) {
-    auto* localTransform = e.tryGet<Transform2D>();
-    if (localTransform) {
-        localTransform->updateLocalMatrix();
-        localTransform->worldMatrix = transform->worldMatrix * localTransform->matrix;
-        localTransform->worldColor = transform->worldColor * localTransform->color;
-        transform = localTransform;
-    }
-    auto it = e.get<node_t>().child_first;
-    while (it) {
-        const auto& child = it.get<node_t>();
-        if (child.visible()) {
-            invalidateTransform2D(it, transform);
-        }
-        it = child.sibling_next;
-    }
-}
-
-void invalidateTransform2DRoot(entity root) {
-    auto* transform = root.tryGet<Transform2D>();
-    assert(transform != nullptr);
-    transform->updateLocalMatrix();
-    transform->worldMatrix = transform->matrix;
-    transform->worldColor = transform->color;
-
-    auto it = root.get<node_t>().child_first;
-    while (it) {
-        const auto& child = it.get<node_t>();
-        if (child.visible()) {
-            invalidateTransform2D(it, transform);
-        }
-        it = child.sibling_next;
-    }
 }
 
 }
