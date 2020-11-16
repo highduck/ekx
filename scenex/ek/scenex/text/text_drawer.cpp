@@ -91,7 +91,7 @@ void TextDrawer::drawLayer(const char* text, const TextLayerEffect& layer, const
     UTF8Decoder decoder{text};
     uint32_t codepoint = 0;
     while (decoder.decode(codepoint)) {
-        if (codepoint == '\n' || codepoint == '\r') {
+        if (codepoint == '\n') {
             current.x = startX;
             current.y += info.line[lineIndex].y;
             ++lineIndex;
@@ -102,7 +102,7 @@ void TextDrawer::drawLayer(const char* text, const TextLayerEffect& layer, const
 
         if (font->getGlyph(codepoint, gdata)) {
             if (kerning && prevCodepointOnLine) {
-                current.x += font->getKerning(prevCodepointOnLine, codepoint) * size;
+                current.x += gdata.source->getKerning(prevCodepointOnLine, codepoint) * size;
             }
             if (gdata.texture) {
                 if (prevTexture != gdata.texture) {
@@ -158,7 +158,7 @@ void TextDrawer::getTextSize(const char* text, TextBlockInfo& info) const {
     uint32_t prevCodepointOnLine = 0;
     uint32_t codepoint = 0;
     while (decoder.decode(codepoint)) {
-        if (codepoint == '\n' || codepoint == '\r') {
+        if (codepoint == '\n') {
             info.pushLine(size + leading);
             x = 0.0f;
             continue;
@@ -166,7 +166,7 @@ void TextDrawer::getTextSize(const char* text, TextBlockInfo& info) const {
 
         if (font->getGlyphMetrics(codepoint, metrics)) {
             if (kerning && prevCodepointOnLine) {
-                x += font->getKerning(prevCodepointOnLine, codepoint) * size;
+                x += metrics.source->getKerning(prevCodepointOnLine, codepoint) * size;
             }
             info.updateLine(
                     x + size * fmax(metrics.rect.right(), metrics.advanceWidth),

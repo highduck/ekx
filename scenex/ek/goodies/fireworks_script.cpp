@@ -1,18 +1,18 @@
 #include "fireworks_script.h"
 
 #include <ek/scenex/utility/scene_management.hpp>
-#include <ek/scenex/particles/particle_emitter.hpp>
-#include <ek/scenex/particles/particle_layer.hpp>
-#include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/particles/particle_system.hpp>
+#include <ek/scenex/AudioManager.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/scenex/components/layout.hpp>
+#include <ek/math/box.hpp>
 
 namespace ek {
 
 void fireworks_script::start() {
-    auto& layer = ecs::assign<particle_layer_t>(entity_);
-    auto& emitter = ecs::assign<particle_emitter_t>(entity_);
+    entity_.assign<ParticleLayer2D>();
+    entity_.assign<Display2D>(new ParticleRenderer2D(entity_));
+    auto& emitter = entity_.assign<ParticleEmitter2D>();
     emitter.data.burst = 0;
     emitter.particle = "firework_star";
     set_touchable(entity_, false);
@@ -25,7 +25,7 @@ void fireworks_script::update(float dt) {
 
     timer_ -= dt;
     if (timer_ <= 0) {
-        auto& emitter = ecs::get<particle_emitter_t>(entity_);
+        auto& emitter = ecs::get<ParticleEmitter2D>(entity_);
 
         auto rect = find_parent_layout_rect(entity_, true);
         rect.height = rect.height * 0.5f;
@@ -70,7 +70,7 @@ void fireworks_script::update(float dt) {
 }
 
 void fireworks_script::reset() {
-    ecs::get<particle_layer_t>(entity_).particles.clear();
+    ecs::get<ParticleLayer2D>(entity_).particles.clear();
     timer_ = 0.0f;
 }
 }

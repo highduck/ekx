@@ -2,8 +2,8 @@
 
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/scenex/components/node.hpp>
-#include <ek/scenex/components/display_2d.hpp>
-#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/components/script.hpp>
 #include <ek/scenex/components/interactive.hpp>
 #include <ek/scenex/components/event_handler.hpp>
@@ -56,14 +56,14 @@ const char* getEntityTitle(ecs::entity e) {
 
     const char* type = "Entity";
     if (ecs::has<node_t>(e)) type = "Node";
-    if (ecs::has<transform_2d>(e)) type = "Node 2D";
+    if (ecs::has<Transform2D>(e)) type = "Node 2D";
     if (ecs::has<transform_3d>(e)) type = "Node 3D";
-    if (ecs::has<display_2d>(e)) {
-        const auto& disp = ecs::get<display_2d>(e);
-        if (disp.is<drawable_sprite>()) type = "Sprite";
-        if (disp.is<drawable_quad>()) type = "Rectangle";
-        if (disp.is<drawable_text>()) type = "Text";
-        if (disp.is<drawable_arc>()) type = "Arc";
+    if (ecs::has<Display2D>(e)) {
+        const auto& disp = ecs::get<Display2D>(e);
+        if (disp.is<Sprite2D>()) type = "Sprite";
+        if (disp.is<Quad2D>()) type = "Rectangle";
+        if (disp.is<Text2D>()) type = "Text";
+        if (disp.is<Arc2D>()) type = "Arc";
     }
     if (ecs::has<movie_t>(e)) { type = "MovieClip"; }
     if (ecs::has<interactive_t>(e)) { type = "Interactive"; }

@@ -10,7 +10,6 @@
 #include <ek/scenex/scene_system.hpp>
 #include <ek/scenex/asset2/builtin_assets.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
-#include <ek/scenex/components/button.hpp>
 #include <ek/scenex/components/interactive.hpp>
 #include <ek/scenex/components/layout.hpp>
 #include <ui/minimal.hpp>
@@ -32,7 +31,7 @@ void setCurrentSample(int index) {
         currentSampleIndex = samplesCount - 1;
     }
     currentSample.reset(sampleFactory[currentSampleIndex]());
-    get_drawable<drawable_text>(tfSampleTitle).text = currentSample->title;
+    get_drawable<Text2D>(tfSampleTitle).text = currentSample->title;
 }
 
 void scrollSample(int delta) {
@@ -90,7 +89,7 @@ void DemoApp::render_frame() {
         currentSample->draw();
     }
 
-    drawScene2D(root);
+    scene_render(root);
 }
 
 void DemoApp::start_game() {

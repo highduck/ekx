@@ -115,6 +115,7 @@ text_attributes_t& operator<<(text_attributes_t& r, const xml_node& node) {
     r.bitmap_size = node.attribute("bitmapSize").as_int(static_cast<uint32_t>(r.size * 20u));
     r.face = node.attribute("face").value();
     r.color = read_color(node, "fillColor", "alpha");
+    // TODO: where is kerning? (maybe default is true and we need to disable to see attribute name)
     return r;
 }
 

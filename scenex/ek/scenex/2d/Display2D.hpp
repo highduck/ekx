@@ -10,43 +10,42 @@
 
 namespace ek {
 
-class drawable_2d_base {
+class IDrawable2D {
 public:
-    explicit drawable_2d_base(uint32_t type_id) :
-            type_id_{type_id} {
+    explicit IDrawable2D(uint32_t type_id) :
+            typeID_{type_id} {
     }
 
-    virtual ~drawable_2d_base();
+    virtual ~IDrawable2D();
 
     virtual void draw() = 0;
 
     [[nodiscard]]
-    virtual bool hit_test(float2 point) const = 0;
+    virtual bool hitTest(float2 point) const = 0;
 
     [[nodiscard]]
-    virtual rect_f get_bounds() const = 0;
+    virtual rect_f getBounds() const = 0;
 
     [[nodiscard]]
-    inline uint32_t get_type_id() const {
-        return type_id_;
+    inline uint32_t getTypeID() const {
+        return typeID_;
     }
 
     template<typename T>
-    [[nodiscard]]
-    inline bool match_type() {
-        return type_id_ == type_index<T, drawable_2d_base>::value;
+    [[nodiscard]] inline bool matchType() {
+        return typeID_ == type_index<T, IDrawable2D>::value;
     }
 
 protected:
 
-    uint32_t type_id_ = 0;
+    uint32_t typeID_ = 0;
 };
 
 template<typename T>
-class drawable_2d : public drawable_2d_base {
+class Drawable2D : public IDrawable2D {
 public:
-    explicit drawable_2d() :
-            drawable_2d_base{type_index<T, drawable_2d_base>::value} {
+    Drawable2D() :
+            IDrawable2D{type_index<T, IDrawable2D>::value} {
     }
 };
 
@@ -61,22 +60,22 @@ struct hit_area_2d {
     rect_f rect;
 };
 
-struct display_2d {
-    std::unique_ptr<drawable_2d_base> drawable;
+struct Display2D {
+    std::unique_ptr<IDrawable2D> drawable;
 #ifndef NDEBUG
     bool drawBounds = false;
 #endif
 
-    display_2d() = default;
+    Display2D() = default;
 
-    explicit display_2d(drawable_2d_base* ptr) :
+    explicit Display2D(IDrawable2D* ptr) :
             drawable(ptr) {
     }
 
     template<typename T>
     [[nodiscard]]
     inline T* get() const {
-        if (drawable && drawable->match_type<T>()) {
+        if (drawable && drawable->matchType<T>()) {
             return static_cast<T*>(drawable.get());
         }
         return nullptr;
@@ -85,16 +84,21 @@ struct display_2d {
     template<typename T>
     [[nodiscard]]
     inline bool is() const {
-        return drawable && drawable->match_type<T>();
+        return drawable && drawable->matchType<T>();
     }
 
     [[nodiscard]]
     inline bool hitTest(float2 local) const {
-        return drawable && drawable->hit_test(local);
+        return drawable && drawable->hitTest(local);
+    }
+
+    [[nodiscard]]
+    inline rect_f getBounds() const {
+        return drawable ? drawable->getBounds() : rect_f{};
     }
 };
 
-class drawable_quad : public drawable_2d<drawable_quad> {
+class Quad2D : public Drawable2D<Quad2D> {
 public:
     rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
     argb32_t colors[4]{};
@@ -105,18 +109,18 @@ public:
     void draw() override;
 
     [[nodiscard]]
-    rect_f get_bounds() const override;
+    rect_f getBounds() const override;
 
     [[nodiscard]]
-    bool hit_test(float2 point) const override;
+    bool hitTest(float2 point) const override;
 
-    inline void set_gradient_vertical(argb32_t top, argb32_t bottom) {
+    inline void setGradientVertical(argb32_t top, argb32_t bottom) {
         colors[0] = colors[1] = top;
         colors[2] = colors[3] = bottom;
     };
 };
 
-class drawable_sprite : public drawable_2d<drawable_sprite> {
+class Sprite2D : public Drawable2D<Sprite2D> {
 public:
     asset_t<sprite_t> src;
     bool hit_pixels = true;
@@ -126,21 +130,20 @@ public:
     float2 scale;
     rect_f manual_target;
 
-    drawable_sprite();
+    Sprite2D();
 
-    explicit drawable_sprite(const std::string& sprite_id, rect_f a_scale_grid = rect_f::zero);
+    explicit Sprite2D(const std::string& sprite_id, rect_f a_scale_grid = rect_f::zero);
 
     void draw() override;
 
     [[nodiscard]]
-    rect_f get_bounds() const override;
+    rect_f getBounds() const override;
 
-// test in local space
     [[nodiscard]]
-    bool hit_test(float2 point) const override;
+    bool hitTest(float2 point) const override;
 };
 
-class drawable_text : public drawable_2d<drawable_text> {
+class Text2D : public Drawable2D<Text2D> {
 public:
     std::string text;
     TextFormat format;
@@ -155,20 +158,20 @@ public:
     // debug metrics
     bool showTextBounds = false;
 
-    drawable_text();
+    Text2D();
 
-    drawable_text(std::string text, TextFormat format);
+    Text2D(std::string text, TextFormat format);
 
     void draw() override;
 
     [[nodiscard]]
-    rect_f get_bounds() const override;
+    rect_f getBounds() const override;
 
     [[nodiscard]]
-    bool hit_test(float2 point) const override;
+    bool hitTest(float2 point) const override;
 };
 
-class drawable_arc : public drawable_2d<drawable_arc> {
+class Arc2D : public Drawable2D<Arc2D> {
 public:
     float angle = 0.0f;
     float radius = 10.0f;
@@ -181,10 +184,10 @@ public:
     void draw() override;
 
     [[nodiscard]]
-    rect_f get_bounds() const override;
+    rect_f getBounds() const override;
 
     [[nodiscard]]
-    bool hit_test(float2 point) const override;
+    bool hitTest(float2 point) const override;
 };
 
 }

@@ -94,15 +94,15 @@ public:
     }
 
     template<typename Comp>
-    constexpr inline Comp& unsafe_get(table_index_type i, entity e) {
-        return static_cast<entity_map <Comp>*>(access_[i])->get(e);
+    constexpr inline Comp& unsafe_get(table_index_type i, entity::index_type idx) {
+        return static_cast<entity_map <Comp>*>(access_[i])->get(idx);
     }
 
     template<typename Func>
     void each(Func func) {
         for (auto e : *this) {
             table_index_type i{0u};
-            func(unsafe_get<Component>(i++, e)...);
+            func(unsafe_get<Component>(i++, e.index())...);
         }
     }
 

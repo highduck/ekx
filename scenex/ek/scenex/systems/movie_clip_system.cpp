@@ -1,7 +1,6 @@
 #include "movie_clip_system.hpp"
 
-#include "game_time.hpp"
-#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
 
 namespace ek {
 
@@ -14,7 +13,7 @@ void apply_frame(entity e, movie_t& mov);
 void update_movie_clips() {
     for (auto e : ecs::view<movie_t>()) {
         auto& mov = ecs::get<movie_t>(e);
-        auto dt = get_delta_time(e);
+        auto dt = mov.timer->dt;
         if (mov.playing) {
             mov.time += dt * mov.fps;
             mov.trunc_time();
@@ -82,13 +81,13 @@ easing_progress_t get_easing_progress(const float t, const std::vector<easing_da
 }
 
 void apply_transform(entity e, const keyframe_transform_t& keyframe) {
-    auto& transform = ecs::get_or_create<transform_2d>(e);
+    auto& transform = ecs::get_or_create<Transform2D>(e);
     transform.position = keyframe.position;
     transform.skew = keyframe.skew;
     transform.scale = keyframe.scale;
     transform.pivot = keyframe.pivot;
-    transform.color_multiplier = argb32_t{keyframe.color.multiplier};
-    transform.color_offset = argb32_t{keyframe.color.offset};
+    transform.color.scale = argb32_t{keyframe.color.scale};
+    transform.color.offset = argb32_t{keyframe.color.offset};
 }
 
 void update_target(float time, entity e, const movie_layer_data& layer) {

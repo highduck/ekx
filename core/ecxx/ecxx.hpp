@@ -120,6 +120,11 @@ inline Component& entity::get() {
 }
 
 template<typename Component>
+inline Component* entity::tryGet() {
+    return world::the.tryGet<Component>(index());
+}
+
+template<typename Component>
 inline Component& entity::get_or_create() {
     return world::the.get_or_create<Component>(*this);
 }

@@ -3,7 +3,7 @@
 
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/components/layout.hpp>
-#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
 
 namespace ek {
 
@@ -25,14 +25,14 @@ public:
     }
 
     layout_wrapper& hard(float x, float y) {
-        auto& transform = ecs::get_or_create<transform_2d>(e_);
+        auto& transform = ecs::get_or_create<Transform2D>(e_);
         horizontal(x, transform.position.x - (designCanvasRect.x + designCanvasRect.width * x));
         vertical(y, transform.position.y - (designCanvasRect.y + designCanvasRect.height * y));
         return *this;
     }
 
     layout_wrapper& hard_y(float y = 0.0f) {
-        auto& transform = ecs::get_or_create<transform_2d>(e_);
+        auto& transform = ecs::get_or_create<Transform2D>(e_);
         vertical(y, transform.position.y - (designCanvasRect.y + designCanvasRect.height * y));
         return *this;
     }

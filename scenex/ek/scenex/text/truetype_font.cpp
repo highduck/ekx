@@ -84,6 +84,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
 
     const float scale = stbtt_ScaleForPixelHeight(info, baseFontSize);
     auto& glyph = map_.try_emplace(codepoint).first->second;
+    glyph.source = this;
 
     int advanceWidth = 0, leftSideBearing = 0;
     stbtt_GetGlyphHMetrics(info, glyphIndex, &advanceWidth, &leftSideBearing);
@@ -138,14 +139,13 @@ bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
     if (!loaded_) {
         return false;
     }
-    assert(map != nullptr);
 
-//    auto& map_ = *map;
-//    auto it = map_.find(codepoint);
-//    if (it != map_.end()) {
-//        outGlyph = it->second;
-//        return true;
-//    }
+    auto* map0 = mapByEffect[0].get();
+    auto it = map0->find(codepoint);
+    if (it != map0->end()) {
+        outGlyph = it->second;
+        return true;
+    }
 
     const auto glyphIndex = stbtt_FindGlyphIndex(info, codepoint);
     if (!glyphIndex) {
@@ -167,6 +167,8 @@ bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
     outGlyph.rect.width = x1 - x0;
     outGlyph.rect.height = y1 - y0;
     outGlyph.rect *= 1.0f / (dpiScale * baseFontSize);
+
+    outGlyph.source = this;
     return true;
 }
 
@@ -234,8 +236,10 @@ void TrueTypeFont::setBlur(float radius, int iterations, int strengthPower) {
 float TrueTypeFont::getKerning(uint32_t codepoint1, uint32_t codepoint2) {
     if (loaded_ && info->kern) {
         int kern = stbtt_GetCodepointKernAdvance(info, codepoint1, codepoint2);
-        float scale = stbtt_ScaleForPixelHeight(info, baseFontSize);
-        return static_cast<float>(kern) * scale / baseFontSize;
+        if (kern != 0) {
+            float scale = stbtt_ScaleForPixelHeight(info, baseFontSize);
+            return static_cast<float>(kern) * scale / baseFontSize;
+        }
     }
     return 0.0f;
 }

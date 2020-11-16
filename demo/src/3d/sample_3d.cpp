@@ -2,7 +2,7 @@
 #include <ek/scenex/3d/transform_3d.hpp>
 #include <ek/scenex/3d/camera_3d.hpp>
 #include <ek/scenex/3d/transform_3d.hpp>
-#include <ek/scenex/systems/game_time.hpp>
+#include <ek/scenex/game_time.hpp>
 #include <ek/scenex/3d/render_system_3d.hpp>
 #include <ek/scenex/components/node.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
@@ -11,7 +11,6 @@
 #include <ek/util/assets.hpp>
 
 #include <demo_main.hpp>
-#include <ek/scenex/systems/game_time.hpp>
 #include <ek/math/rand.hpp>
 #include "sample_3d.hpp"
 #include "camera_arcball.hpp"
@@ -105,7 +104,7 @@ void Sample3D::draw() {
     SampleBase::draw();
 
     auto& app = resolve<basic_application>();
-    const float dt = get_delta_time(app.root);
+    const float dt = TimeLayer::Root->dt;
 
     for (auto e : ecs::view<test_rotation_comp>()) {
         auto& tr = ecs::get<transform_3d>(e);

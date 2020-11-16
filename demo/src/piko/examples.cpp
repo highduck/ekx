@@ -2,7 +2,7 @@
 #include "piko.h"
 #include <ek/draw2d/drawer.hpp>
 #include <ek/math/rand.hpp>
-#include <ek/scenex/systems/game_time.hpp>
+#include <ek/scenex/game_time.hpp>
 #include <ek/math/matrix_camera.hpp>
 
 namespace ek::piko {
@@ -130,7 +130,7 @@ void dna::draw() {
 //flip()goto _
 
 void diamonds::draw() {
-    time += get_delta_time(entity_);
+    time += TimeLayer::Root->dt;
     float t = time;
     float w = rt.width();
     float h = rt.height();

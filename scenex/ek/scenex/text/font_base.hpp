@@ -8,6 +8,8 @@ namespace graphics {
 class texture_t;
 }
 
+class FontImplBase;
+
 struct Glyph {
     // multiply by fontSize
     rect_f rect{};
@@ -19,6 +21,11 @@ struct Glyph {
     rect_f texCoord{};
     const graphics::texture_t* texture = nullptr;
     bool rotated = false;
+
+    // we need to know what fallback give us this glyph info,
+    // then we can ask additional info directly from source font implementation,
+    // for example: kerning information
+    FontImplBase* source = nullptr;
 };
 
 enum class FontType {

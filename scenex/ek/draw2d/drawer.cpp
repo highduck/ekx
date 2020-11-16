@@ -4,6 +4,7 @@
 #include <ek/util/common_macro.hpp>
 #include <ek/graphics/gl_def.hpp>
 #include <ek/math/matrix_camera.hpp>
+#include <ek/graphics/gl_debug.hpp>
 
 namespace ek::draw2d {
 
@@ -14,7 +15,7 @@ void drawing_state::finish() {
     // debug checks
     assert(scissor_stack_.empty());
     assert(matrix_stack_.empty());
-    assert(multipliers_.empty());
+    assert(colors_.empty());
     assert(program_stack_.empty());
     assert(texture_stack_.empty());
     assert(blend_mode_stack_.empty());
@@ -24,7 +25,7 @@ void drawing_state::finish() {
 
     scissor_stack_.clear();
     matrix_stack_.clear();
-    multipliers_.clear();
+    colors_.clear();
     program_stack_.clear();
     texture_stack_.clear();
     blend_mode_stack_.clear();
@@ -114,60 +115,52 @@ drawing_state& drawing_state::restore_matrix() {
 /** Color Transform **/
 
 drawing_state& drawing_state::save_color() {
-    multipliers_.push_back(color_multiplier);
-    offsets_.push_back(color_offset);
+    colors_.push_back(color);
     return *this;
 }
 
 drawing_state& drawing_state::restore_color() {
-    color_multiplier = multipliers_.back();
-    color_offset = offsets_.back();
-    multipliers_.pop_back();
-    offsets_.pop_back();
+    color = colors_.back();
+    colors_.pop_back();
     return *this;
 }
 
 drawing_state& drawing_state::multiply_alpha(float alpha) {
-    auto a = (uint8_t) ((color_multiplier.a * ((int) (alpha * 255)) * 258u) >> 16u);
-    color_multiplier.a = a;
+    auto a = (uint8_t) ((color.scale.a * ((int) (alpha * 255)) * 258u) >> 16u);
+    color.scale.a = a;
     return *this;
 }
 
-drawing_state& drawing_state::multiply_color(argb32_t multiplier) {
-    color_multiplier = color_multiplier * multiplier;
+drawing_state& drawing_state::multiply_color(argb32_t scale) {
+    color.scale = color.scale * scale;
     return *this;
 }
 
-drawing_state& drawing_state::combine_color(argb32_t multiplier, argb32_t offset) {
+drawing_state& drawing_state::combine_color(argb32_t scale, argb32_t offset) {
+    using details::clamp_255;
+
     if (offset.argb != 0) {
-
-        using details::clamp_255;
-        color_offset = argb32_t(
-                clamp_255[((color_offset.r * color_multiplier.r * 258u) >> 16u) + offset.r],
-                clamp_255[((color_offset.g * color_multiplier.g * 258u) >> 16u) + offset.g],
-                clamp_255[((color_offset.b * color_multiplier.b * 258u) >> 16u) + offset.b],
-                offset.a
-        );
+        color.offset = argb32_t{clamp_255[color.offset.r + ((offset.r * color.scale.r * 258u) >> 16u)],
+                                clamp_255[color.offset.g + ((offset.g * color.scale.g * 258u) >> 16u)],
+                                clamp_255[color.offset.b + ((offset.b * color.scale.b * 258u) >> 16u)],
+                                clamp_255[color.offset.a + offset.a]};
     }
 
-    if (multiplier.argb != 0xFFFFFFFF) {
-        color_multiplier = color_multiplier * multiplier;
+    if (scale.argb != 0xFFFFFFFF) {
+        color.scale = color.scale * scale;
     }
 
     return *this;
 }
 
 drawing_state& drawing_state::offset_color(argb32_t offset) {
-    argb32_t left_mult = color_multiplier;
-    argb32_t left_offset = color_offset;
-
     using details::clamp_255;
-    color_offset = argb32_t(
-            clamp_255[((left_offset.r * left_mult.r * 258u) >> 16u) + offset.r],
-            clamp_255[((left_offset.g * left_mult.g * 258u) >> 16u) + offset.g],
-            clamp_255[((left_offset.b * left_mult.b * 258u) >> 16u) + offset.b],
-            offset.a
-    );
+    if (offset.argb != 0) {
+        color.offset = argb32_t{clamp_255[color.offset.r + ((offset.r * color.scale.r * 258u) >> 16u)],
+                                clamp_255[color.offset.g + ((offset.g * color.scale.g * 258u) >> 16u)],
+                                clamp_255[color.offset.b + ((offset.b * color.scale.b * 258u) >> 16u)],
+                                clamp_255[color.offset.a + offset.a]};
+    }
     return *this;
 }
 
@@ -323,10 +316,10 @@ void end() {
     batcher->states.apply();
     batcher->flush();
 
-    glBindBuffer(GL_ARRAY_BUFFER, (GLuint) 0u);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u);
-    glBindTexture(GL_TEXTURE_2D, 0u);
-    glUseProgram(0u);
+    GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, (GLuint) 0u));
+    GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u));
+    GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0u));
+    GL_CHECK(glUseProgram(0u));
 
     state.finish();
 }
@@ -383,17 +376,10 @@ void flush_batcher() {
 }
 
 void prepare() {
-    state.vertex_color_multiplier = state.color_multiplier.premultiplied_abgr(state.color_offset.a);
+    state.vertex_color_multiplier = state.color.scale.premultiplied_abgr(state.color.offset.a);
     // for offset: delete alpha, flip R vs B channels
-    state.vertex_color_offset = state.color_offset.bgr();
+    state.vertex_color_offset = state.color.offset.bgr();
 }
-
-//    glDepthMask(GL_FALSE);
-//    glEnable(GL_BLEND);
-//    glDisable(GL_DEPTH_TEST);
-//    glDisable(GL_STENCIL_TEST);
-//    glDisable(GL_DITHER);
-//    glDisable(GL_CULL_FACE);
 
 void triangles(int vertex_count, int index_count) {
     commit_state();

@@ -5,9 +5,9 @@
 
 namespace ek {
 
-class drawable_text;
+class Text2D;
 
-drawable_text& addText(ecs::entity e, const char* text);
+Text2D& addText(ecs::entity e, const char* text);
 
 ecs::entity createButton(const char* label, const std::function<void()>& fn);
 

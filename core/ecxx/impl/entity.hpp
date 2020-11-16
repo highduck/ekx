@@ -122,6 +122,9 @@ public:
     inline Component& get();
 
     template<typename Component>
+    inline Component* tryGet();
+
+    template<typename Component>
     inline Component& get_or_create();
 
     template<typename Component>

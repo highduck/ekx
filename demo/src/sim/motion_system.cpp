@@ -3,23 +3,23 @@
 #include <sim/components/attractor.h>
 #include <sim/components/position.h>
 #include <sim/components/motion.h>
-#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
 
 namespace ek::piko {
 
 void update_motion_system(float dt) {
 
-    auto attractors = ecs::view<attractor_t, transform_2d>();
+    auto attractors = ecs::view<attractor_t>();
 
-    ecs::view<position_t, motion_t, transform_2d>().each(
-            [dt, &attractors](position_t& pos, motion_t& mot, transform_2d& tra) {
+    ecs::view<position_t, motion_t, Transform2D>().each(
+            [dt, &attractors](position_t& pos, motion_t& mot, Transform2D& tra) {
 
                 auto p = pos.position;
                 auto v = mot.velocity;
 
                 for (auto attractor_entity : attractors) {
-                    auto pointer = ecs::get<transform_2d>(attractor_entity).position;
-                    auto& attractor = ecs::get<attractor_t>(attractor_entity);
+                    auto pointer = attractor_entity.get<Transform2D>().position;
+                    auto& attractor = attractor_entity.get<attractor_t>();
                     float factor = 1.0f - math::clamp(length(pointer - p) / attractor.radius);
                     v += dt * attractor.force * factor * factor * normalize(pointer - p);
                 }

@@ -16,7 +16,7 @@ SampleIntegrations::SampleIntegrations() :
         leader_board_show("CgkIpvfh798IEAIQAA");
     });
     set_position(btn, pos);
-    get_drawable<drawable_text>(btn).rect.set(-100, -25, 200, 50);
+    get_drawable<Text2D>(btn).rect.set(-100, -25, 200, 50);
     append(container, btn);
     pos.y += 100;
 
@@ -25,7 +25,7 @@ SampleIntegrations::SampleIntegrations() :
         leader_board_submit("CgkIpvfh798IEAIQAA", ++bestScore);
     });
     set_position(btn, pos);
-    get_drawable<drawable_text>(btn).rect.set(-100, -25, 200, 50);
+    get_drawable<Text2D>(btn).rect.set(-100, -25, 200, 50);
     append(container, btn);
 }
 

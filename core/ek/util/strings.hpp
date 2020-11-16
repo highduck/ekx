@@ -19,7 +19,9 @@ std::vector<std::string> split(const std::string& str, char separator);
 
 std::string join(const std::vector<std::string>& strings, const std::string& delimiter);
 
+// replace all
 std::string replace(const std::string& str, const std::string& search, const std::string& replace);
+std::string replace(const std::string& str, char search, char replace);
 
 bool equals_ignore_case(const std::string& a, const char* b);
 

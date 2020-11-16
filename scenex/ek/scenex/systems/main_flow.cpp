@@ -8,8 +8,11 @@
 #include <ek/scenex/utility/destroy_delay.hpp>
 #include <ek/scenex/scene_system.hpp>
 #include <ek/goodies/shake_system.hpp>
+#include <ek/goodies/helpers/Trail2D.hpp>
+#include <ek/goodies/bubble_text.hpp>
+#include <ek/goodies/popup_manager.hpp>
+#include <ek/scenex/game_time.hpp>
 
-#include "game_time.hpp"
 #include "layout_system.hpp"
 #include "tween_system.hpp"
 #include "canvas_system.hpp"
@@ -20,40 +23,37 @@ namespace ek {
 
 using namespace ecs;
 
-void smoothly_advance_time(entity root, float dt) {
-//    static float steps[3] = {0.0f, 0.0f, 0.0f};
-//    steps[2] = steps[1];
-//    steps[1] = steps[0];
-//    steps[0] = dt;
-//    auto avg = (steps[0] + steps[1] + steps[2]) / 3.0f;
-    update_time(root, dt);
-//    update_time(w, root, 1.0f / 60.0f);
-}
-
 void scene_pre_update(entity root, float dt) {
+    TimeLayer::updateTimers(dt);
+
     resolve<AudioManager>().update(dt);
-    smoothly_advance_time(root, dt);
 
     update_canvas();
     update_layout();
     update_tweens();
     update_shake();
+
+    update_bubble_text(dt);
+    update_popup_managers(dt);
+
+    resolve<interactive_manager>().update();
+    updateScripts();
+    update_buttons(dt);
+    update_movie_clips();
 }
 
 void scene_post_update(ecs::entity root, float dt) {
-    resolve<interactive_manager>().update();
-    update_nodes(root, dt);
-    update_buttons(dt);
-    update_movie_clips();
     destroy_delayed_entities(dt);
+    invalidateTransform2DRoot(root);
 
-    invalidateTransform2D(root);
+    updateTrails();
     update_emitters();
     update_particles();
 }
 
 void scene_render(ecs::entity root) {
     drawScene2D(root);
+    //drawSceneGizmos(root);
 }
 
 }

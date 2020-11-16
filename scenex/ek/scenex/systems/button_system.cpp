@@ -2,7 +2,7 @@
 #include <ek/scenex/components/interactive.hpp>
 #include <ek/math/common.hpp>
 #include <ek/math/rand.hpp>
-#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/components/movie.hpp>
 #include <ek/scenex/systems/movie_clip_system.hpp>
 #include <ek/scenex/AudioManager.hpp>
@@ -29,11 +29,10 @@ void handle_back_button(button_t& btn, const event_data& ev) {
     }
 }
 
-void initialize_base_transform(button_t& btn, const transform_2d& transform) {
-    btn.base_color_multiplier = transform.color_multiplier;
-    btn.base_color_offset = transform.color_offset;
-    btn.base_scale = transform.scale;
-    btn.base_skew = transform.skew;
+void initialize_base_transform(button_t& btn, const Transform2D& transform) {
+    btn.baseColor = transform.color;
+    btn.baseScale = transform.scale;
+    btn.baseSkew = transform.skew;
 }
 
 const button_skin& get_skin(const button_t& btn) {
@@ -80,7 +79,7 @@ void initialize_events(ecs::entity e) {
 
 }
 
-void apply_skin(const button_skin& skin, const button_t& btn, transform_2d& transform) {
+void apply_skin(const button_skin& skin, const button_t& btn, Transform2D& transform) {
     const float over = btn.over_time;
     const float push = btn.push_time;
     const float post = btn.post_time;
@@ -90,11 +89,11 @@ void apply_skin(const button_skin& skin, const button_t& btn, transform_2d& tran
     float sy = 1.0f + 0.5f * sinf((1.0f - post) * pi) * cosf((1.0f - post) * pi * 5.0f) * post;
 
     auto color = lerp(0xFFFFFFFF_argb, 0xFF888888_argb, push);
-    transform.color_multiplier = btn.base_color_multiplier * color;
+    transform.color.scale = btn.baseColor.scale * color;
 
     const float h = 0.1f * over;
-    transform.color_offset = btn.base_color_offset + argb32_t{h, h, h, 0.0f};
-    transform.scale = btn.base_scale * float2(sx, sy);
+    transform.color.offset = btn.baseColor.offset + argb32_t{h, h, h, 0.0f};
+    transform.scale = btn.baseScale * float2(sx, sy);
 }
 
 void update_movie_frame(ecs::entity entity, const interactive_t& interactive) {
@@ -112,10 +111,10 @@ void update_movie_frame(ecs::entity entity, const interactive_t& interactive) {
 
 void update_buttons(float dt) {
 
-    for (auto e : ecs::view<button_t, interactive_t, transform_2d>()) {
+    for (auto e : ecs::view<button_t, interactive_t, Transform2D>()) {
         auto& btn = ecs::get<button_t>(e);
         auto& interactive = ecs::get<interactive_t>(e);
-        auto& transform = ecs::get<transform_2d>(e);
+        auto& transform = ecs::get<Transform2D>(e);
 
         if (!btn.initialized) {
             btn.initialized = true;

@@ -2,8 +2,8 @@
 
 #include <ek/scenex/2d/sprite.hpp>
 #include <ek/scenex/components/node.hpp>
-#include <ek/scenex/components/transform_2d.hpp>
-#include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/components/movie.hpp>
 #include <ek/scenex/components/button.hpp>
 #include <ek/scenex/components/interactive.hpp>
@@ -24,12 +24,12 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
         ecs::get_or_create<movie_target_keys>(entity) = {data->movieTargetId};
     }
 
-    auto& transform = ecs::get<transform_2d>(entity);
+    auto& transform = ecs::get<Transform2D>(entity);
     transform.position = data->matrix.position();
     transform.skew = data->matrix.skew();
     transform.scale = data->matrix.scale();
-    transform.color_multiplier = argb32_t(data->color.multiplier);
-    transform.color_offset = argb32_t(data->color.offset);
+    transform.color.scale = argb32_t(data->color.scale);
+    transform.color.offset = argb32_t(data->color.offset);
 
     node.setTouchable(data->touchable);
     node.setVisible(data->visible);
@@ -52,8 +52,8 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
             format.layers[i].strength = layer.strength;
         }
 
-        auto& display = ecs::get_or_create<display_2d>(entity);
-        auto dtext = std::make_unique<drawable_text>(dynamicText.text, format);
+        auto& display = ecs::get_or_create<Display2D>(entity);
+        auto dtext = std::make_unique<Text2D>(dynamicText.text, format);
         dtext->rect = dynamicText.rect;
         display.drawable = std::move(dtext);
     }
@@ -69,17 +69,17 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
         mov.fps = data->movie->fps;
     }
 
-    drawable_sprite* sprite = nullptr;
-    if (ecs::has<display_2d>(entity)) {
-        auto& display = ecs::get<display_2d>(entity);
-        if (display.is<drawable_sprite>()) {
-            sprite = display.get<drawable_sprite>();
+    Sprite2D* sprite = nullptr;
+    if (ecs::has<Display2D>(entity)) {
+        auto& display = ecs::get<Display2D>(entity);
+        if (display.is<Sprite2D>()) {
+            sprite = display.get<Sprite2D>();
         }
     }
 
     if (!data->sprite.empty() && !sprite) {
-        auto& display = ecs::get_or_create<display_2d>(entity);
-        sprite = new drawable_sprite(data->sprite, data->scaleGrid);
+        auto& display = ecs::get_or_create<Display2D>(entity);
+        sprite = new Sprite2D(data->sprite, data->scaleGrid);
         display.drawable.reset(sprite);
     }
 
@@ -110,7 +110,7 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
 ecs::entity create_and_merge(const sg_file& sg, asset_ref asset,
                              const sg_node_data* data,
                              const sg_node_data* over = nullptr) {
-    auto entity = ecs::create<node_t, transform_2d>();
+    auto entity = ecs::create<node_t, Transform2D>();
     if (data) {
         apply(entity, data, asset);
     }

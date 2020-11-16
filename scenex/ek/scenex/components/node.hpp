@@ -45,6 +45,10 @@ struct node_t {
     void setLayersMask(int mask) {
         flags |= (flags & ~NodeFlags_LayerMask) | ((mask << 8) & NodeFlags_LayerMask);
     }
+
+    static int findDepth(ecs::entity e);
+
+    static ecs::entity findLowerCommonAncestor(ecs::entity e1, ecs::entity e2);
 };
 
 inline void world_enable_node(ecs::entity entity) {
@@ -104,7 +108,6 @@ inline void destroy_children(ecs::entity entity) {
         destroy_children(temp);
 
         ecs::get<node_t>(temp).parent = nullptr;
-        //world_disable_node(temp);
         ecs::destroy(temp);
     }
     entity_node.child_first = nullptr;
@@ -354,18 +357,12 @@ inline uint32_t count_children(ecs::entity entity) {
     return num;
 }
 
-inline void erase_node_component(ecs::entity e) {
-    remove_from_parent(e);
-    destroy_children(e);
-    // TODO: remove_from_parent and destroy_children on component removing
-    ecs::remove<node_t>(e);
-}
-
 // Destroy Entity (hierarchy way):
 // - Remove Entity from parent
 // - destroy all children
 inline void destroy_node(ecs::entity e) {
-    erase_node_component(e);
+    remove_from_parent(e);
+    destroy_children(e);
     ecs::destroy(e);
 }
 

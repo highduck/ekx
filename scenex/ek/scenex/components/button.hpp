@@ -34,10 +34,9 @@ struct button_t {
     float push_time = 0.0f;
     float post_time = 0.0f;
 
-    float2 base_skew{};
-    float2 base_scale = float2::one;
-    argb32_t base_color_multiplier = argb32_t::one;
-    argb32_t base_color_offset = argb32_t::zero;
+    float2 baseSkew{};
+    float2 baseScale = float2::one;
+    ColorMod32 baseColor{};
 };
 
 }

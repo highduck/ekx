@@ -10,30 +10,30 @@ template<typename T>
 struct color_transform_t {
 
     using color_type = vec_t<4, T>;
-    color_type multiplier;
+    color_type scale;
     color_type offset;
 
-    explicit color_transform_t(T red_multiplier,
-                               T green_multiplier = 1,
-                               T blue_multiplier = 1,
-                               T alpha_multiplier = 1,
+    explicit color_transform_t(T red_scale,
+                               T green_scale = 1,
+                               T blue_scale = 1,
+                               T alpha_scale = 1,
                                T red_offset = 0,
                                T green_offset = 0,
                                T blue_offset = 0,
                                T alpha_offset = 0) noexcept
-            : multiplier{red_multiplier, green_multiplier, blue_multiplier, alpha_multiplier},
+            : scale{red_scale, green_scale, blue_scale, alpha_scale},
               offset{red_offset, green_offset, blue_offset, alpha_offset} {
     }
 
     explicit color_transform_t(const color_type& multiplier_,
                                const color_type& offset_ = color_type::zero) noexcept
-            : multiplier{multiplier_},
+            : scale{multiplier_},
               offset{offset_} {
 
     }
 
     inline color_transform_t() noexcept
-            : multiplier{color_type::one},
+            : scale{color_type::one},
               offset{color_type::zero} {
 
     }
@@ -44,9 +44,9 @@ struct color_transform_t {
      * @param intensity - float 0...1
      */
     void tint(uint32_t color, float intensity) {
-        multiplier.x = T(1) - intensity;
-        multiplier.y = T(1) - intensity;
-        multiplier.z = T(1) - intensity;
+        scale.x = T(1) - intensity;
+        scale.y = T(1) - intensity;
+        scale.z = T(1) - intensity;
         offset.x = float((color >> 16u) & 0xFFu) * intensity / 255.0f;
         offset.y = float((color >> 8u) & 0xFFu) * intensity / 255.0f;
         offset.z = float(color & 0xFFu) * intensity / 255.0f;
@@ -54,41 +54,41 @@ struct color_transform_t {
 
     inline color_transform_t<T> operator*(const color_transform_t<T>& right) const {
         return color_transform_t<T>(
-                multiplier * right.multiplier,
-                multiplier * right.offset + offset
+                scale * right.scale,
+                scale * right.offset + offset
         );
     }
 
     inline color_transform_t<T> operator*(T v) const {
         return color_transform_t<T>(
-                multiplier * v,
+                scale * v,
                 offset * v
         );
     }
 
     inline color_transform_t<T> operator-(const color_transform_t<T>& right) const {
         return color_transform_t<T>(
-                multiplier - right.multiplier,
+                scale - right.scale,
                 offset - right.offset
         );
     }
 
     inline color_transform_t<T> operator+(const color_transform_t<T>& right) const {
         return color_transform_t<T>(
-                multiplier + right.multiplier,
+                scale + right.scale,
                 offset + right.offset
         );
     }
 
     inline color_type transform(const color_type& color) const {
-        return color * multiplier + offset;
+        return color * scale + offset;
     }
 
 };
 
 template<typename T>
 inline static color_transform_t<T> operator*(T scalar, const color_transform_t<T>& v) {
-    return color_transform_t{scalar * v.multiplier, scalar * v.offset};
+    return color_transform_t{scalar * v.scale, scalar * v.offset};
 }
 
 template<typename T>

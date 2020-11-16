@@ -65,6 +65,16 @@ std::string replace(const std::string& str, const std::string& search, const std
     return res;
 }
 
+std::string replace(const std::string& str, char search, char repl) {
+    std::string res{str};
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (res[i] == search) {
+            res[i] = repl;
+        }
+    }
+    return res;
+}
+
 inline void append_itoa_fixed_pad_2(int v, std::string& out) {
     if (v < 10) {
         out += '0';
