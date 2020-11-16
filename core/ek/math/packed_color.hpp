@@ -288,6 +288,22 @@ struct ColorMod32 {
         };
     }
 
+    inline void setAlpha(float alpha) {
+        scale.af(alpha);
+    }
+
+    [[nodiscard]] inline float getAlpha() const {
+        return scale.af();
+    }
+
+    inline void setAdditive(float alpha) {
+        offset.af(alpha);
+    }
+
+    [[nodiscard]] inline float getAdditive() const {
+        return offset.af();
+    }
+
 };
 
 }

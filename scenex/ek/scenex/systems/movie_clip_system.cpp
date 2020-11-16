@@ -91,7 +91,7 @@ void apply_transform(entity e, const keyframe_transform_t& keyframe) {
 }
 
 void update_target(float time, entity e, const movie_layer_data& layer) {
-    auto& config = ecs::get_or_create<node_t>(e);
+    auto& config = ecs::get_or_create<Node>(e);
     const auto ki = findKeyFrame(layer.frames, time);
     if (ki < 0) {
         config.setVisible(false);
@@ -135,7 +135,7 @@ void apply_frame(entity e, movie_t& mov) {
         // no data - exit early
         return;
     }
-    auto it = ecs::get<node_t>(e).child_first;
+    auto it = ecs::get<Node>(e).child_first;
     const auto totalTargets = static_cast<int>(data->layers.size());
     while (it != nullptr) {
         if (ecs::has<movie_target_keys>(it)) {
@@ -144,7 +144,7 @@ void apply_frame(entity e, movie_t& mov) {
                 update_target(time, it, data->layers[idx]);
             }
         }
-        it = ecs::get<node_t>(it).sibling_next;
+        it = ecs::get<Node>(it).sibling_next;
     }
 }
 

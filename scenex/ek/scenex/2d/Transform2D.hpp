@@ -35,22 +35,6 @@ struct Transform2D {
         skew.y += value;
     }
 
-    inline void set_alpha(float alpha) {
-        color.scale.af(alpha);
-    }
-
-    [[nodiscard]] inline float get_alpha() const {
-        return color.scale.af();
-    }
-
-    inline void set_additive(float alpha) {
-        color.offset.af(alpha);
-    }
-
-    [[nodiscard]] inline float get_additive() const {
-        return color.offset.af();
-    }
-
     void updateLocalMatrix();
 
     // these function use local matrix, need to rebuild local matrices for [src -> lca -> dst]
@@ -68,9 +52,56 @@ struct Transform2D {
     static bool fastLocalToLocal(ecs::entity src, ecs::entity dst, float2 pos, float2& out);
 };
 
+// TODO : remove
 void begin_transform(const Transform2D& transform);
 
+// TODO : remove
 void end_transform();
+
+/** system to invalidate matrix and color in world space **/
+void updateWorldTransform2D(ecs::entity root);
+
+/** utility functions **/
+
+inline void setAlpha(ecs::entity e, float alpha) {
+    ecs::get_or_create<Transform2D>(e).color.setAlpha(alpha);
+}
+
+inline void setColorScale(ecs::entity e, argb32_t color_multiplier) {
+    ecs::get_or_create<Transform2D>(e).color.scale = color_multiplier;
+}
+
+inline void setColorOffset(ecs::entity e, argb32_t color_offset) {
+    ecs::get_or_create<Transform2D>(e).color.offset = color_offset;
+}
+
+inline void setPosition(ecs::entity e, const float2& pos) {
+    ecs::get_or_create<Transform2D>(e).position = pos;
+}
+
+inline float2 getPosition(const ecs::entity e) {
+    return ecs::get_or_default<Transform2D>(e).position;
+}
+
+inline void setRotation(ecs::entity e, float radians) {
+    ecs::get_or_create<Transform2D>(e).rotation(radians);
+}
+
+inline float getRotation(const ecs::entity e) {
+    return ecs::get_or_default<Transform2D>(e).rotation();
+}
+
+inline void setScale(ecs::entity e, const float2& sc) {
+    ecs::get_or_create<Transform2D>(e).scale = sc;
+}
+
+inline void setScale(ecs::entity e, float xy) {
+    ecs::get_or_create<Transform2D>(e).scale = {xy, xy};
+}
+
+inline float2 getScale(ecs::entity e) {
+    return ecs::get_or_default<Transform2D>(e).scale;
+}
 
 }
 

@@ -47,15 +47,15 @@ std::vector<ecs::entity> hierarchySelectionList{};
 std::string hierarchyFilterText{};
 
 const char* getEntityTitle(ecs::entity e) {
-    if (ecs::has<node_t>(e)) {
-        const auto& nameData = ecs::get<node_t>(e).name;
+    if (ecs::has<Node>(e)) {
+        const auto& nameData = ecs::get<Node>(e).name;
         if (!nameData.empty()) {
             return nameData.c_str();
         }
     }
 
     const char* type = "Entity";
-    if (ecs::has<node_t>(e)) type = "Node";
+    if (ecs::has<Node>(e)) type = "Node";
     if (ecs::has<Transform2D>(e)) type = "Node 2D";
     if (ecs::has<transform_3d>(e)) type = "Node 3D";
     if (ecs::has<Display2D>(e)) {
@@ -79,8 +79,8 @@ bool isSelectedInHierarchy(ecs::entity e) {
 }
 
 bool hasChildren(ecs::entity e) {
-    if (ecs::has<node_t>(e)) {
-        auto& node = ecs::get<node_t>(e);
+    if (ecs::has<Node>(e)) {
+        auto& node = ecs::get<Node>(e);
         auto firstChild = node.child_first;
         return firstChild != nullptr && ecs::valid(firstChild);
     }
@@ -99,8 +99,8 @@ void gui_entity_node(ecs::entity e, bool visible, bool touchable) {
         flags |= ImGuiTreeNodeFlags_Leaf;
     }
 
-    if (ecs::has<node_t>(e)) {
-        const auto& node = ecs::get<node_t>(e);
+    if (ecs::has<Node>(e)) {
+        const auto& node = ecs::get<Node>(e);
         visible = visible && node.visible();
         touchable = touchable && node.touchable();
     }
@@ -112,8 +112,8 @@ void gui_entity_node(ecs::entity e, bool visible, bool touchable) {
         hierarchySelectionList.push_back(e);
     }
 
-    if (ecs::has<node_t>(e)) {
-        auto& node = ecs::get<node_t>(e);
+    if (ecs::has<Node>(e)) {
+        auto& node = ecs::get<Node>(e);
         auto rc = ImGui::GetItemRectMax();
         auto wnd = ImGui::GetWindowPos();
         auto x = rc.x - wnd.x - 40 - ImGui::GetStyle().FramePadding.x * 2.0f;
@@ -131,11 +131,11 @@ void gui_entity_node(ecs::entity e, bool visible, bool touchable) {
     ImGui::PopStyleColor();
 
     if (opened) {
-        if (ecs::has<node_t>(e)) {
-            auto it = ecs::get<node_t>(e).child_first;
+        if (ecs::has<Node>(e)) {
+            auto it = ecs::get<Node>(e).child_first;
             while (it != nullptr && ecs::valid(it)) {
                 auto child = it;
-                it = ecs::get<node_t>(it).sibling_next;
+                it = ecs::get<Node>(it).sibling_next;
                 gui_entity(child, visible, touchable);
             }
         }
@@ -157,7 +157,7 @@ void guiHierarchyWindow(bool* p_open) {
         if (showAllRoots) {
             // all roots
             ecs::each([](auto e) {
-                if (!ecs::has<node_t>(e) || ecs::get<node_t>(e).parent == nullptr) {
+                if (!ecs::has<Node>(e) || ecs::get<Node>(e).parent == nullptr) {
                     gui_entity(e, true, true);
                 }
             });

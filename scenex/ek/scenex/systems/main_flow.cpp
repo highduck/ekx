@@ -44,7 +44,7 @@ void scene_pre_update(entity root, float dt) {
 
 void scene_post_update(ecs::entity root, float dt) {
     destroy_delayed_entities(dt);
-    invalidateTransform2DRoot(root);
+    updateWorldTransform2D(root);
 
     updateTrails();
     update_emitters();

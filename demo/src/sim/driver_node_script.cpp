@@ -21,8 +21,8 @@ namespace ek::piko {
 
 void add_objects(ecs::entity game, int N) {
     for (int i = 0; i < N; ++i) {
-        auto q = ecs::create<node_t, Transform2D>();
-        q.get<node_t>().setTouchable(false);
+        auto q = ecs::create<Node, Transform2D>();
+        q.get<Node>().setTouchable(false);
         float2 pos = {ek::random(0.0f, 720.0f),
                       ek::random(0.0f, 960.0f)};
         ecs::assign<position_t>(q, pos.x, pos.y);
@@ -33,8 +33,8 @@ void add_objects(ecs::entity game, int N) {
         );
         append(game, q);
 
-        auto trail = ecs::create<node_t, Transform2D>();
-        trail.get<node_t>().setTouchable(false);
+        auto trail = ecs::create<Node, Transform2D>();
+        trail.get<Node>().setTouchable(false);
         auto& trail_data = trail.assign<Trail2D>(trail);
         trail_data.drain_speed = 0.5f;
 
@@ -57,7 +57,7 @@ ecs::entity create() {
     if (showPiko) {
         ecs::entity e;
         e = create_node_2d("book");
-        assign_script<book>(e);
+        assignScript<book>(e);
         //ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
         ecs::get<Transform2D>(e).position = {10.0f, 10.0f};
         // TODO: fix scissors stats
@@ -65,7 +65,7 @@ ecs::entity create() {
         append(sampleContainer, e);
 
         e = create_node_2d("dna");
-        assign_script<dna>(e);
+        assignScript<dna>(e);
 //    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
         ecs::get<Transform2D>(e).position = {10.0f, 10.0f + 128.0f + 10.0f};
         // TODO: fix scissors stats
@@ -73,7 +73,7 @@ ecs::entity create() {
         append(sampleContainer, e);
 
         e = create_node_2d("diamonds");
-        assign_script<diamonds>(e);
+        assignScript<diamonds>(e);
         ecs::get<Transform2D>(e).position = {10.0f + 128.0f + 10.0f, 20.0f};
         ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
         append(sampleContainer, e);
@@ -84,13 +84,13 @@ ecs::entity create() {
     // SIM
     add_objects(sampleContainer, 5000);
 
-    auto mouse_entity = ecs::create<Transform2D, node_t>();
-    set_name(mouse_entity, "Mouse");
-    assign_script<mouse_follow_script>(mouse_entity);
+    auto mouse_entity = ecs::create<Transform2D, Node>();
+    setName(mouse_entity, "Mouse");
+    assignScript<mouse_follow_script>(mouse_entity);
 
-    auto attractor_entity = ecs::create<attractor_t, Transform2D, node_t>();
-    set_name(attractor_entity, "Follower");
-    auto& attr = assign_script<target_follow_script>(attractor_entity);
+    auto attractor_entity = ecs::create<attractor_t, Transform2D, Node>();
+    setName(attractor_entity, "Follower");
+    auto& attr = assignScript<target_follow_script>(attractor_entity);
     attr.target_entity = mouse_entity;
     attr.k = 0.1f;
     ecs::get<attractor_t>(attractor_entity).radius = 100.0f;
@@ -99,8 +99,8 @@ ecs::entity create() {
     append(sampleContainer, mouse_entity);
     append(sampleContainer, attractor_entity);
 
-    attractor_entity = ecs::create<attractor_t, Transform2D, node_t>();
-    set_name(attractor_entity, "Centroid");
+    attractor_entity = ecs::create<attractor_t, Transform2D, Node>();
+    setName(attractor_entity, "Centroid");
     ecs::get<attractor_t>(attractor_entity).radius = 200.0f;
     ecs::get<attractor_t>(attractor_entity).force = -1000.0f;
     ecs::get<Transform2D>(attractor_entity).position = {300.0f, 400.0f};
@@ -111,8 +111,8 @@ ecs::entity create() {
 
 void remove_objects(ecs::entity game, int N) {
     int i = 0;
-    for (auto q : ecs::view<node_t, Transform2D, script_holder>()) {
-        remove_from_parent(q);
+    for (auto q : ecs::view<Node, Transform2D, script_holder>()) {
+        removeFromParent(q);
         ecs::destroy(q);
         if (++i == N) {
             break;

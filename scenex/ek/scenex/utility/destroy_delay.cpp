@@ -16,8 +16,8 @@ void destroy_delayed_entities(float dt) {
     }
     for (auto e : destroy_queue) {
         if (e.valid()) {
-            if (e.has<node_t>()) {
-                destroy_node(e);
+            if (e.has<Node>()) {
+                destroyNode(e);
             } else {
                 ecs::destroy(e);
             }
@@ -31,10 +31,10 @@ void destroy_delay(ecs::entity e, float delay, TimeLayer timer) {
 }
 
 void destroy_children_delay(ecs::entity e, float delay, TimeLayer timer) {
-    auto it = e.get<node_t>().child_first;
+    auto it = e.get<Node>().child_first;
     while (it) {
         it.reassign<destroy_delay_t>(delay, timer);
-        it = it.get<node_t>().sibling_next;
+        it = it.get<Node>().sibling_next;
     }
 }
 

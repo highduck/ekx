@@ -8,19 +8,6 @@
 
 namespace ek {
 
-template<typename Func>
-inline void each_script(Func func) {
-    ecs::view<script_holder>().each([&func](script_holder& holder) {
-        for (auto& script : holder.list) {
-            if (script) {
-                func(*script);
-            }
-        }
-    });
-}
-
-void updateScripts();
-
 static uint8_t camera_layers = 0xFFu;
 
 void drawScene2D(ecs::entity root);
@@ -28,8 +15,6 @@ void drawSceneGizmos(ecs::entity root);
 
 void draw_node(ecs::entity e);
 
-ecs::entity hit_test(ecs::entity entity, float2 parentSpacePosition);
-
-void invalidateTransform2DRoot(ecs::entity root);
+ecs::entity hitTest(ecs::entity entity, float2 parentSpacePosition);
 
 }

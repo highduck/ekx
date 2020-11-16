@@ -10,97 +10,9 @@
 namespace ek {
 
 inline ecs::entity create_node_2d(const std::string& name) {
-    auto e = ecs::create<node_t, Transform2D>();
-    ecs::get<node_t>(e).name = name;
+    auto e = ecs::create<Node, Transform2D>();
+    ecs::get<Node>(e).name = name;
     return e;
-}
-
-inline void set_alpha(ecs::entity e, float alpha) {
-    ecs::get_or_create<Transform2D>(e).set_alpha(alpha);
-}
-
-inline void set_color_multiplier(ecs::entity e, argb32_t color_multiplier) {
-    ecs::get_or_create<Transform2D>(e).color.scale = color_multiplier;
-}
-
-inline void set_color_offset(ecs::entity e, argb32_t color_offset) {
-    ecs::get_or_create<Transform2D>(e).color.offset = color_offset;
-}
-
-inline void set_position(ecs::entity e, const float2& pos) {
-    ecs::get_or_create<Transform2D>(e).position = pos;
-}
-
-inline float2 get_position(const ecs::entity e) {
-    return ecs::get_or_default<Transform2D>(e).position;
-}
-
-inline void set_rotation(ecs::entity e, float radians) {
-    ecs::get_or_create<Transform2D>(e).rotation(radians);
-}
-
-inline float get_rotation(const ecs::entity e) {
-    return ecs::get_or_default<Transform2D>(e).rotation();
-}
-
-inline void set_scale(ecs::entity e, const float2& sc) {
-    ecs::get_or_create<Transform2D>(e).scale = sc;
-}
-
-inline void set_scale(ecs::entity e, float xy) {
-    ecs::get_or_create<Transform2D>(e).scale = {xy, xy};
-}
-
-inline float2 get_scale(ecs::entity e) {
-    return ecs::get_or_default<Transform2D>(e).scale;
-}
-
-inline void set_name(ecs::entity e, const std::string& name) {
-    ecs::get_or_create<node_t>(e).name = name;
-}
-
-inline const std::string& get_name(ecs::entity e) {
-    return ecs::get_or_default<node_t>(e).name;
-}
-
-inline bool is_visible(ecs::entity e) {
-    return ecs::get_or_default<node_t>(e).visible();
-}
-
-inline void set_visible(ecs::entity e, bool v) {
-    ecs::get_or_create<node_t>(e).setVisible(v);
-}
-
-inline bool is_touchable(ecs::entity e) {
-    return ecs::get_or_default<node_t>(e).touchable();
-}
-
-inline void set_touchable(ecs::entity e, bool v) {
-    ecs::get_or_create<node_t>(e).setTouchable(v);
-}
-
-template<typename S>
-inline S& assign_script(ecs::entity e) {
-    if (!ecs::has<script_holder>(e)) {
-        ecs::assign<script_holder>(e);
-    }
-    auto& holder = ecs::get<script_holder>(e);
-    auto& script = holder.list.emplace_back(std::make_unique<S>());
-    script->link_to_entity(e);
-    script->start();
-    return *static_cast<S*>(script.get());
-}
-
-template<typename S>
-inline S& get_script(ecs::entity e) {
-    const auto interest_type_id = type_index<S, script_cpp_base>::value;
-    auto& h = ecs::get<script_holder>(e);
-    for (auto& script : h.list) {
-        if (script && script->get_type_id() == interest_type_id) {
-            return static_cast<S&>(*script);
-        }
-    }
-    abort();
 }
 
 inline float2 global_to_local(ecs::entity e, const float2& position) {
@@ -108,17 +20,17 @@ inline float2 global_to_local(ecs::entity e, const float2& position) {
     auto it = e;
     while (it) {
         ecs::get<Transform2D>(it).matrix.transform_inverse(res, res);
-        it = ecs::get<node_t>(it).parent;
+        it = ecs::get<Node>(it).parent;
     }
     return res;
 }
 
 inline float2 global_to_parent(ecs::entity e, const float2& pos) {
     float2 res = pos;
-    auto it = ecs::get<node_t>(e).parent;
+    auto it = ecs::get<Node>(e).parent;
     while (it) {
         ecs::get<Transform2D>(it).matrix.transform_inverse(res, res);
-        it = ecs::get<node_t>(it).parent;
+        it = ecs::get<Node>(it).parent;
     }
     return res;
 }
@@ -128,7 +40,7 @@ inline float2 local_to_global(ecs::entity e, const float2& pos) {
     auto it = e;
     while (it) {
         res = ecs::get<Transform2D>(it).matrix.transform(res);
-        it = ecs::get<node_t>(it).parent;
+        it = ecs::get<Node>(it).parent;
     }
     return res;
 }
@@ -144,18 +56,19 @@ inline void dispatch_broadcast(ecs::entity e, const event_data& data) {
     if (e.has<event_handler_t>()) {
         e.get<event_handler_t>().emit(data);
     }
-    each_child(e, [&data](ecs::entity child) {
+    eachChild(e, [&data](ecs::entity child) {
         dispatch_broadcast(child, data);
     });
 }
 
 inline void dispatch_bubble(ecs::entity e, const event_data& data) {
     auto it = e;
-    while (it && ecs::valid(it)) {
-        if (ecs::has<event_handler_t>(it)) {
-            ecs::get<event_handler_t>(it).emit(data);
+    while (it && it.valid()) {
+        auto* eh = it.tryGet<event_handler_t>();
+        if(eh) {
+            eh->emit(data);
         }
-        it = ecs::get<node_t>(it).parent;
+        it = it.get<Node>().parent;
     }
 }
 
@@ -177,47 +90,6 @@ inline void notify_parents(ecs::entity e, const std::string& event, const std::s
     dispatch_bubble(e, {event, e, std::any{payload}});
 }
 
-
-/*** finds ***/
-
-inline ecs::entity find(const ecs::entity e, const char* child_name) {
-    auto it = ecs::get<node_t>(e).child_first;
-    while (it) {
-        const auto& node = ecs::get<node_t>(it);
-        if (node.name == child_name) {
-            return it;
-        }
-        it = node.sibling_next;
-    }
-    return nullptr;
-}
-
-inline ecs::entity find(const ecs::entity e, const std::string& child_name) {
-    return find(e, child_name.c_str());
-}
-
-inline ecs::entity find_path(const ecs::entity e, const std::vector<std::string>& path) {
-    auto it = e;
-    for (const auto& p : path) {
-        it = find(it, p);
-        if (!it) {
-            return nullptr;
-        }
-    }
-    return it;
-}
-
-inline std::vector<ecs::entity> find_array(const ecs::entity e, const std::vector<std::string>& names) {
-    std::vector<ecs::entity> entities;
-    for (const auto& name : names) {
-        auto f = find(e, name);
-        if (f) {
-            entities.push_back(f);
-        }
-    }
-    return entities;
-}
-
 inline void set_gradient_quad(ecs::entity e, const rect_f& rc, argb32_t top, argb32_t bottom) {
     auto q = std::make_unique<Quad2D>();
     q->rect = rc;
@@ -235,12 +107,12 @@ inline void set_color_quad(ecs::entity e, const rect_f& rc, argb32_t color) {
 
 template<typename Component>
 inline ecs::entity find_first_ancestor(ecs::entity e) {
-    auto it = ecs::get<node_t>(e).parent;
+    auto it = ecs::get<Node>(e).parent;
     while (it) {
         if (ecs::has<Component>(it)) {
             return it;
         }
-        it = ecs::get<node_t>(it).parent;
+        it = ecs::get<Node>(it).parent;
     }
     return nullptr;
 }

@@ -15,7 +15,7 @@ void fireworks_script::start() {
     auto& emitter = entity_.assign<ParticleEmitter2D>();
     emitter.data.burst = 0;
     emitter.particle = "firework_star";
-    set_touchable(entity_, false);
+    setTouchable(entity_, false);
 }
 
 void fireworks_script::update(float dt) {

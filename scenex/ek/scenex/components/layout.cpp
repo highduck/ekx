@@ -17,14 +17,14 @@ rect_f find_parent_layout_rect(ecs::entity e, bool safe) {
                 return safe ? layout.safeRect : layout.rect;
             }
         }
-        it = ecs::get<node_t>(it).parent;
+        it = ecs::get<Node>(it).parent;
     }
     return rect_f::zero_one;
 }
 
 rect_f get_ancestors_rect(ecs::entity e) {
     rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
-    auto it = ecs::get<node_t>(e).parent;
+    auto it = ecs::get<Node>(e).parent;
     while (it) {
         if (ecs::has<layout_t>(it)) {
             rect = ecs::get<layout_t>(it).rect;
@@ -32,7 +32,7 @@ rect_f get_ancestors_rect(ecs::entity e) {
                 break;
             }
         }
-        it = ecs::get<node_t>(it).parent;
+        it = ecs::get<Node>(it).parent;
     }
     return rect;
 }

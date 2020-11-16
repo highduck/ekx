@@ -15,7 +15,7 @@ inline bool contains(const std::vector<T>& vec, const T& value) {
 }
 
 bool dispatch_interactive_event(ecs::entity e, const event_data& data) {
-    if (is_touchable(e)) {
+    if (isTouchable(e)) {
         if (ecs::has<event_handler_t>(e)) {
             auto& eh = ecs::get<event_handler_t>(e);
             eh.emit(data);
@@ -23,9 +23,9 @@ bool dispatch_interactive_event(ecs::entity e, const event_data& data) {
                 return true;
             }
         }
-        auto it = ecs::get<node_t>(e).child_last;
+        auto it = ecs::get<Node>(e).child_last;
         while (it) {
-            auto prev = ecs::get<node_t>(it).sibling_prev;
+            auto prev = ecs::get<Node>(it).sibling_prev;
             if (dispatch_interactive_event(it, data)) {
                 return true;
             }
@@ -174,7 +174,7 @@ mouse_cursor interactive_manager::search_interactive_targets(
         ecs::entity node,
         std::vector<ecs::entity>& out_entities) {
 
-    auto target = hit_test(node, pointer);
+    auto target = hitTest(node, pointer);
     if (ecs::valid(drag_entity_)) {
         target = drag_entity_;
     }
@@ -196,7 +196,7 @@ mouse_cursor interactive_manager::search_interactive_targets(
                 break;
             }
         }
-        target = ecs::get<node_t>(target).parent;
+        target = ecs::get<Node>(target).parent;
     }
     return cursor;
 }

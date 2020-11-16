@@ -24,7 +24,7 @@ void update_bubble_text(float dt) {
         state.time += dt;
 
         if (state.time >= time_max) {
-            destroy_node(e);
+            destroyNode(e);
             continue;
         }
 
@@ -38,10 +38,10 @@ void update_bubble_text(float dt) {
             off = state.offset * easing::P3_OUT.calculate(sct);
         }
 
-        set_scale(e, {sc, sc});
+        setScale(e, {sc, sc});
         float2 fly_pos{0.0f, delta_y * easing::P3_OUT.calculate(r)};
-        set_position(e, state.start + off + fly_pos);
-        set_alpha(e, 1.0f - (r * r * r));
+        setPosition(e, state.start + off + fly_pos);
+        setAlpha(e, 1.0f - (r * r * r));
     }
 }
 
@@ -58,8 +58,8 @@ ecs::entity create_bubble_text(const float2& pos, const std::string& text, float
     format.addShadow(0x88000000_argb, 4, {0.0f, 1.5f});
 
     e.assign<Display2D>(new Text2D(text, format));
-    set_touchable(e, false);
-    set_scale(e, float2::zero);
+    setTouchable(e, false);
+    setScale(e, float2::zero);
     return e;
 }
 

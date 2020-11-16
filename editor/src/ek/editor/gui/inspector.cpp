@@ -33,7 +33,7 @@ void guiEntityRef(const char* label, ecs::entity entity) {
     if (entity == nullptr) {
         ImGui::TextDisabled("%s: null", label);
     } else if (ecs::valid(entity)) {
-        ImGui::LabelText(label, "%s", entity.get_or_default<node_t>().name.c_str());
+        ImGui::LabelText(label, "%s", entity.get_or_default<Node>().name.c_str());
     } else {
         ImGui::TextColored({1, 0, 0, 1}, "%s: invalid", label);
     }
@@ -283,11 +283,11 @@ void guiParticleLayer2D(ParticleLayer2D& layer) {
 
 void gui_inspector(ecs::entity e) {
     ImGui::PushID(e.passport());
-    if (ecs::has<node_t>(e)) {
-        auto& node = ecs::get<node_t>(e);
+    if (ecs::has<Node>(e)) {
+        auto& node = ecs::get<Node>(e);
         ImGui::InputText("Name", &node.name);
-        ImGui::CheckboxFlags("Visible", &node.flags, NodeFlags_Visible);
-        ImGui::CheckboxFlags("Touchable", &node.flags, NodeFlags_Touchable);
+        ImGui::CheckboxFlags("Visible", &node.flags, Node::Visible);
+        ImGui::CheckboxFlags("Touchable", &node.flags, Node::Touchable);
         ImGui::LabelText("Layers", "%x", node.layersMask());
     }
 
@@ -315,8 +315,8 @@ void gui_inspector(ecs::entity e) {
 
     guiComponentPanel<movie_t>(e, "Movie Clip", gui_movie_clip);
 
-    if (ecs::has<script_holder>(e)) {
-        auto& scripts = ecs::get<script_holder>(e).list;
+    if (e.has<script_holder>()) {
+        auto& scripts = e.get<script_holder>().list;
         for (auto& script : scripts) {
             script->gui_inspector();
         }
