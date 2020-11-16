@@ -1,9 +1,9 @@
 #include "layout_system.hpp"
 
 #include <ek/scenex/components/layout.hpp>
-#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/components/node.hpp>
-#include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
 
 namespace ek {
 
@@ -13,11 +13,11 @@ void update_layout(ecs::entity e) {
     if (top_rect.empty()) {
         return;
     }
-    auto& transform = ecs::get<transform_2d>(e);
-    if ((l.fill_x || l.fill_y) && ecs::has<display_2d>(e)) {
-        auto& display = ecs::get<display_2d>(e);
-        if (display.is<drawable_quad>()) {
-            auto* quad = display.get<drawable_quad>();
+    auto& transform = ecs::get<Transform2D>(e);
+    if ((l.fill_x || l.fill_y) && ecs::has<Display2D>(e)) {
+        auto& display = ecs::get<Display2D>(e);
+        if (display.is<Quad2D>()) {
+            auto* quad = display.get<Quad2D>();
             if (l.fill_x) {
                 quad->rect.x = top_rect.x;
                 quad->rect.width = top_rect.width;
@@ -26,9 +26,9 @@ void update_layout(ecs::entity e) {
                 quad->rect.y = top_rect.y;
                 quad->rect.height = top_rect.height;
             }
-        } else if (display.is<drawable_sprite>()) {
-            auto* sprite = display.get<drawable_sprite>();
-            auto bounds = sprite->get_bounds();
+        } else if (display.is<Sprite2D>()) {
+            auto* sprite = display.get<Sprite2D>();
+            auto bounds = sprite->getBounds();
             if (!bounds.empty()) {
                 if (l.fill_x) {
                     transform.position.x = top_rect.x + l.fill_extra.x;
@@ -52,7 +52,7 @@ void update_layout(ecs::entity e) {
 }
 
 void update_layout() {
-    for (auto e : ecs::view<layout_t, transform_2d>()) {
+    for (auto e : ecs::view<layout_t, Transform2D>()) {
         update_layout(e);
     }
 }

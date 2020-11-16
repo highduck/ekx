@@ -11,7 +11,7 @@ void target_follow_script::update(float dt) {
     time_accum += dt;
     if (counter >= n) {
 
-        auto& tr = get<transform_2d>();
+        auto& tr = get<Transform2D>();
 
         if (ecs::valid(target_entity)) {
             target = local_to_global(target_entity, float2::zero);

@@ -1,9 +1,8 @@
 #include "shake_system.hpp"
 
-#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/math/vec.hpp>
 #include <ek/math/rand.hpp>
-#include <ek/scenex/systems/game_time.hpp>
 
 namespace ek {
 
@@ -11,7 +10,7 @@ void update_shake() {
 
     for (auto e: ecs::rview<shake_state_t>()) {
         auto& state = e.get<shake_state_t>();
-        auto dt = get_delta_time(e);
+        auto dt = state.timer->dt;
         state.time += dt;
 
         float r = std::max(0.0f, 1.0f - state.time / state.time_total);
@@ -20,7 +19,7 @@ void update_shake() {
                 rand_fx.random(-1.0f, 1.0f)
         };
 
-        e.get<transform_2d>().position = offset * r * state.strength;
+        e.get<Transform2D>().position = offset * r * state.strength;
 
         if (state.time <= 0.0f) {
             e.remove<shake_state_t>();

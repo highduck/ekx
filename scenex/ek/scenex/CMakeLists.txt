@@ -5,12 +5,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         components/node.cpp
         components/node_filters.cpp
         components/node_filters.hpp
-        components/transform_2d.cpp
-        components/transform_2d.hpp
         components/script.cpp
         components/script.hpp
-        components/display_2d.cpp
-        components/display_2d.hpp
         components/movie.hpp
         components/button.hpp
         components/canvas.hpp
@@ -42,8 +38,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         particles/particle.hpp
         particles/particle_decl.cpp
         particles/particle_decl.hpp
-        particles/particle_layer.hpp
-        particles/particle_emitter.hpp
         particles/particle_system.cpp
         particles/particle_system.hpp
 
@@ -53,8 +47,9 @@ target_sources(${PROJECT_NAME} PRIVATE
         utility/basic_game_utility.hpp
         utility/basic_game_utility.cpp
 
-        systems/game_time.hpp
-        systems/game_time.cpp
+        game_time.hpp
+        game_time.cpp
+
         systems/main_flow.cpp
         systems/main_flow.hpp
 
@@ -84,6 +79,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         2d/atlas.cpp
         2d/sprite.cpp
         2d/dynamic_atlas.cpp
+        2d/Transform2D.cpp
+        2d/Display2D.cpp
 
         text/bitmap_font.cpp
         text/truetype_font.cpp

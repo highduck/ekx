@@ -1,15 +1,17 @@
 #include "tween_system.hpp"
-#include "game_time.hpp"
 
 #include <ek/scenex/components/tween.hpp>
 #include <ek/math/common.hpp>
+#include <ek/scenex/utility/destroy_delay.hpp>
 
 namespace ek {
 
 void handle_end(ecs::entity e) {
     auto& tween = ecs::get<tween_t>(e);
     tween.advanced.clear();
-    if (tween.auto_destroy) {
+    if (tween.destroyEntity) {
+        destroy_delay(e);
+    } else if (tween.auto_destroy) {
         ecs::remove<tween_t>(e);
     }
 }
@@ -21,8 +23,8 @@ void update_frame(tween_t& tween) {
 
 void update_tweens() {
     for (auto e : ecs::rview<tween_t>()) {
-        auto dt = get_delta_time(e);
         auto& tween = ecs::get<tween_t>(e);
+        auto dt = tween.timer->dt;
         if (tween.delay > 0.0f) {
             tween.delay -= dt;
             continue;

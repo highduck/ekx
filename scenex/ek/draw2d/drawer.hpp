@@ -22,16 +22,14 @@ struct drawing_state {
     matrix_2d matrix{};
     mat4f mvp{};
     rect_f uv{0.0f, 0.0f, 1.0f, 1.0f};
-    argb32_t color_multiplier{0xFFFFFFFF};
-    argb32_t color_offset{0x0};
+    ColorMod32 color{};
     graphics::blend_mode blending = graphics::blend_mode::premultiplied;
     rect_f scissors{};
 
 public:
 
     std::vector<matrix_2d> matrix_stack_;
-    std::vector<argb32_t> multipliers_;
-    std::vector<argb32_t> offsets_;
+    std::vector<ColorMod32> colors_;
     std::vector<rect_f> scissor_stack_;
     std::vector<const graphics::program_t*> program_stack_;
     std::vector<const graphics::texture_t*> texture_stack_;
@@ -151,8 +149,8 @@ public:
     void finish();
 
     // internal helper to update vertex color
-    inline premultiplied_abgr32_t calc_vertex_color_multiplier(argb32_t multiplier) {
-        return (color_multiplier * multiplier).premultiplied_abgr(color_offset.a);
+    inline premultiplied_abgr32_t calc_vertex_color_multiplier(argb32_t scale) {
+        return (color.scale * scale).premultiplied_abgr(color.offset.a);
     }
 };
 

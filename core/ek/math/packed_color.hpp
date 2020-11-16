@@ -233,21 +233,6 @@ struct argb32_t final {
     inline bool operator!=(const argb32_t& v) const {
         return argb != v.argb;
     }
-
-    inline static void combine(argb32_t multiplier1, argb32_t offset1,
-                               argb32_t multiplier2, argb32_t offset2,
-                               argb32_t& outMultiplier, argb32_t& outOffset) {
-        using details::clamp_255;
-        outOffset = offset2.argb != 0 ? argb32_t(
-                clamp_255[offset1.r + ((offset2.r * multiplier1.r * 258u) >> 16u)],
-                clamp_255[offset1.g + ((offset2.g * multiplier1.g * 258u) >> 16u)],
-                clamp_255[offset1.b + ((offset2.b * multiplier1.b * 258u) >> 16u)],
-                clamp_255[offset1.a + offset2.a]) :
-                    offset1;
-
-        outMultiplier = multiplier2.argb != 0xFFFFFFFF ? multiplier1 * multiplier2 : multiplier1;
-    }
-
 };
 
 constexpr argb32_t argb32_t::zero{0x0u};
@@ -279,5 +264,30 @@ inline premultiplied_abgr32_t lerp(premultiplied_abgr32_t begin, premultiplied_a
                                   (begin.b * ri + end.b * r) >> 10u,
                                   (begin.a * ri + end.a * r) >> 10u);
 }
+
+
+struct ColorMod32 {
+    argb32_t scale = argb32_t::one;
+    argb32_t offset = argb32_t::zero;
+
+    ColorMod32() = default;
+
+    explicit ColorMod32(argb32_t scale_, argb32_t offset_ = argb32_t::zero) :
+            scale{scale_},
+            offset{offset_} {
+    }
+
+    ColorMod32 operator*(ColorMod32 r) const {
+        using details::clamp_255;
+        return ColorMod32{
+                r.scale.argb != 0xFFFFFFFF ? scale * r.scale : scale,
+                r.offset.argb != 0 ? argb32_t{clamp_255[offset.r + ((r.offset.r * scale.r * 258u) >> 16u)],
+                                              clamp_255[offset.g + ((r.offset.g * scale.g * 258u) >> 16u)],
+                                              clamp_255[offset.b + ((r.offset.b * scale.b * 258u) >> 16u)],
+                                              clamp_255[offset.a + r.offset.a]} : offset
+        };
+    }
+
+};
 
 }

@@ -4,7 +4,7 @@
 #include <ek/app/app.hpp>
 #include <ek/scenex/components/canvas.hpp>
 #include <ek/scenex/components/node.hpp>
-#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
 
 using ek::app::g_app;
 
@@ -77,7 +77,7 @@ float update_canvas(ecs::entity e) {
         layout.safeRect = safeRect;
         layout.rect = rect;
 
-        auto& transform = ecs::get<transform_2d>(e);
+        auto& transform = ecs::get<Transform2D>(e);
         transform.position = left_top_full;
         transform.scale = float2{scale, scale};
 
@@ -88,7 +88,7 @@ float update_canvas(ecs::entity e) {
 }
 
 void update_canvas() {
-    for (auto e : ecs::view<canvas_t, transform_2d>()) {
+    for (auto e : ecs::view<canvas_t, Transform2D>()) {
         update_canvas(e);
     }
 }

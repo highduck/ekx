@@ -1,24 +1,22 @@
 #include "particle_system.hpp"
 
 #include "particle_decl.hpp"
-#include <ek/scenex/particles/particle_emitter.hpp>
-#include <ek/scenex/components/transform_2d.hpp>
-#include <ek/scenex/particles/particle_layer.hpp>
+#include "particle.hpp"
+#include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/util/locator.hpp>
-#include <ek/draw2d/drawer.hpp>
-#include <ek/scenex/systems/game_time.hpp>
+#include <ek/scenex/game_time.hpp>
 
 namespace ek {
 
-particle_layer_t& find_particle_layer(ecs::entity e) {
-    auto l = ecs::get_or_default<particle_emitter_t>(e).layer;
+ParticleLayer2D& find_particle_layer(ecs::entity e) {
+    auto l = ecs::get_or_default<ParticleEmitter2D>(e).layer;
     if (!l) {
         l = e;
     }
-    return ecs::get_or_create<particle_layer_t>(l);
+    return ecs::get_or_create<ParticleLayer2D>(l);
 }
 
-void add_particle(particle_layer_t& layer, particle* particle_) {
+void add_particle(ParticleLayer2D& layer, particle* particle_) {
     if (particle_) {
         layer.particles.push_back(particle_);
         particle_->init();
@@ -53,9 +51,9 @@ particle* produce_particle(const particle_decl& decl) {
 }
 
 void particles_burst(ecs::entity e, int count) {
-    auto& emitter = ecs::get<particle_emitter_t>(e);
-    const auto& data = ecs::get<particle_emitter_t>(e).data;
-    const auto& position = ecs::get_or_default<transform_2d>(e).position + emitter.position;
+    auto& emitter = ecs::get<ParticleEmitter2D>(e);
+    const auto& data = ecs::get<ParticleEmitter2D>(e).data;
+    const auto& position = ecs::get_or_default<Transform2D>(e).position + emitter.position;
     float a = data.dir.random();
     asset_t<particle_decl> decl{emitter.particle};
     auto& layer = find_particle_layer(e);
@@ -81,15 +79,15 @@ void particles_burst(ecs::entity e, int count) {
 }
 
 void update_emitters() {
-    for (auto e : ecs::view<particle_emitter_t>()) {
-        auto dt = get_delta_time(e);
-        auto& emitter = ecs::get<particle_emitter_t>(e);
+    for (auto e : ecs::view<ParticleEmitter2D>()) {
+        auto& emitter = ecs::get<ParticleEmitter2D>(e);
+        auto dt = emitter.timer->dt;
         if (!emitter.enabled || emitter.particle.empty()) {
             continue;
         }
 
         auto& layer = find_particle_layer(e);
-        const auto& position = ecs::get_or_default<transform_2d>(e).position;
+        const auto& position = ecs::get_or_default<Transform2D>(e).position;
 
         emitter.time += dt;
         const auto& data = emitter.data;
@@ -132,7 +130,7 @@ particle* spawn_particle(ecs::entity e, const std::string& particle_id) {
     asset_t<particle_decl> decl{particle_id};
     if (decl) {
         auto* p = produce_particle(*decl);
-        auto& to_layer = ecs::get_or_create<particle_layer_t>(e);
+        auto& to_layer = ecs::get_or_create<ParticleLayer2D>(e);
         add_particle(to_layer, p);
         return p;
     }
@@ -141,9 +139,9 @@ particle* spawn_particle(ecs::entity e, const std::string& particle_id) {
 
 void update_particles() {
     static std::vector<particle*> alive_particles;
-    for (auto e : ecs::view<particle_layer_t>()) {
-        auto dt = get_delta_time(e);
-        auto& layer = ecs::get<particle_layer_t>(e);
+    for (auto e : ecs::view<ParticleLayer2D>()) {
+        auto& layer = ecs::get<ParticleLayer2D>(e);
+        auto dt = layer.timer->dt;
         alive_particles.clear();
         for (auto* p : layer.particles) {
             p->update(dt);
@@ -157,16 +155,20 @@ void update_particles() {
     }
 }
 
-void draw_particle_layer(ecs::entity e) {
-    auto& layer = e.get<particle_layer_t>();
-
-    if (layer.cycled) {
-        for (auto* p : layer.particles) {
-            p->draw_cycled();
-        }
-    } else {
-        for (auto* p : layer.particles) {
-            p->draw(0);
+void ParticleRenderer2D::draw() {
+    if (target) {
+        assert(target.valid());
+        auto* layer = target.tryGet<ParticleLayer2D>();
+        if (layer) {
+            if (cycled) {
+                for (auto* p : layer->particles) {
+                    p->draw_cycled();
+                }
+            } else {
+                for (auto* p : layer->particles) {
+                    p->draw(0);
+                }
+            }
         }
     }
 }

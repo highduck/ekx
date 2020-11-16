@@ -1,8 +1,6 @@
 #pragma once
 
 #include <ek/scenex/components/script.hpp>
-#include <ek/scenex/particles/particle_emitter.hpp>
-#include <ek/math/box.hpp>
 
 namespace ek {
 

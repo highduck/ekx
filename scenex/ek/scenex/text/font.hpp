@@ -31,16 +31,6 @@ public:
     [[nodiscard]]
     float get_text_segment_width(const std::string& text, float size, int begin, int end) const;
 
-//    rect_f getBoundingBox(const std::string& text, float size, int begin, int end) const;
-
-    [[nodiscard]]
-    rect_f get_line_bounding_box(const std::string& text, float size, int begin, int end, float line_height,
-                                 float line_spacing = 0.0f) const;
-
-    [[nodiscard]]
-    rect_f estimate_text_draw_zone(const std::string& text, float size, int begin, int end, float line_height,
-                                   float line_spacing = 0.0f) const;
-
     [[nodiscard]] FontType getFontType() const;
 
     [[nodiscard]] FontImplBase* getImpl();
@@ -54,8 +44,6 @@ public:
     bool getGlyph(uint32_t codepoint, Glyph& outGlyph);
 
     bool getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph);
-
-    float getKerning(uint32_t codepoint1, uint32_t codepoint2);
 
     void setBlur(float radius, int iterations, int strengthPower);
 private:

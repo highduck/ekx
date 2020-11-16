@@ -1,10 +1,10 @@
 #include "gui.hpp"
 #include <ecxx/ecxx.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/components/interactive.hpp>
 #include <ek/scenex/scene_system.hpp>
-#include <ek/scenex/components/transform_2d.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/3d/transform_3d.hpp>
 #include <ek/scenex/3d/camera_3d.hpp>
 #include <ek/scenex/3d/light_3d.hpp>
@@ -12,8 +12,7 @@
 #include <ek/scenex/components/node.hpp>
 #include <ek/scenex/components/layout.hpp>
 #include <ek/scenex/components/node_filters.hpp>
-#include <ek/scenex/particles/particle_emitter.hpp>
-#include <ek/scenex/particles/particle_layer.hpp>
+#include <ek/scenex/particles/particle_system.hpp>
 
 namespace ek {
 
@@ -27,6 +26,16 @@ void selectAsset(const char* label, asset_t<T>& asset) {
             }
         }
         ImGui::EndCombo();
+    }
+}
+
+void guiEntityRef(const char* label, ecs::entity entity) {
+    if (entity == nullptr) {
+        ImGui::TextDisabled("%s: null", label);
+    } else if (ecs::valid(entity)) {
+        ImGui::LabelText(label, "%s", entity.get_or_default<node_t>().name.c_str());
+    } else {
+        ImGui::TextColored({1, 0, 0, 1}, "%s: invalid", label);
     }
 }
 
@@ -51,8 +60,8 @@ inline void guiComponentPanel(ecs::entity entity, const char* name, Func fn) {
 
 template<typename C, typename Func>
 inline void guiDisplayComponent(ecs::entity e, const char* name, Func fn) {
-    if (e.has<display_2d>()) {
-        auto& d = e.get<display_2d>();
+    if (e.has<Display2D>()) {
+        auto& d = e.get<Display2D>();
         if (d.is<C>()) {
             auto data = d.get<C>();
             if (data) {
@@ -79,21 +88,21 @@ void gui_movie_clip(movie_t& mc) {
     }
 }
 
-void gui_transform_2d(transform_2d& transform) {
+void gui_transform_2d(Transform2D& transform) {
     ImGui::DragFloat2("Position", transform.position.data(), 1.0f, 0.0f, 0.0f, "%.1f");
     ImGui::DragFloat2("Scale", transform.scale.data(), 0.1f, 0.0f, 0.0f, "%.2f");
     ImGui::DragFloat2("Skew", transform.skew.data(), 0.1f, 0.0f, 0.0f, "%.2f");
     ImGui::DragFloat2("Origin", transform.origin.data(), 0.1f, 0.0f, 0.0f, "%.2f");
     ImGui::DragFloat2("Pivot", transform.pivot.data(), 0.1f, 0.0f, 0.0f, "%.2f");
 
-    auto color = static_cast<float4>(transform.color_multiplier);
-    if (ImGui::ColorEdit4("Color Multiplier", color.data())) {
-        transform.color_multiplier = argb32_t{color};
+    auto color = static_cast<float4>(transform.color.scale);
+    if (ImGui::ColorEdit4("Color Scale", color.data())) {
+        transform.color.scale = argb32_t{color};
     }
 
-    color = static_cast<float4>(transform.color_offset);
+    color = static_cast<float4>(transform.color.offset);
     if (ImGui::ColorEdit4("Color Offset", color.data())) {
-        transform.color_offset = argb32_t{color};
+        transform.color.offset = argb32_t{color};
     }
 }
 
@@ -153,13 +162,13 @@ void gui_interactive(interactive_t& inter) {
     ImGui::LabelText("cursor", inter.cursor == interactive_t::mouse_cursor::button ? "button" : "?");
 }
 
-void editDisplaySprite(drawable_sprite& sprite) {
+void editDisplaySprite(Sprite2D& sprite) {
     selectAsset<sprite_t>("Sprite", sprite.src);
     ImGui::Checkbox("Scale Grid", &sprite.scale_grid_mode);
     ImGui::Checkbox("Hit Pixels", &sprite.hit_pixels);
 }
 
-void editDisplayRectangle(drawable_quad& quad) {
+void editDisplayRectangle(Quad2D& quad) {
     ImGui::EditRect("Bounds", quad.rect.data());
     ImGui::Color32Edit("Color LT", quad.colors[0]);
     ImGui::Color32Edit("Color RT", quad.colors[1]);
@@ -167,7 +176,7 @@ void editDisplayRectangle(drawable_quad& quad) {
     ImGui::Color32Edit("Color LB", quad.colors[3]);
 }
 
-void editDisplayArc(drawable_arc& arc) {
+void editDisplayArc(Arc2D& arc) {
     selectAsset<sprite_t>("Sprite", arc.sprite);
     ImGui::DragFloat("Angle", &arc.angle);
     ImGui::DragFloat("Radius", &arc.radius);
@@ -175,6 +184,11 @@ void editDisplayArc(drawable_arc& arc) {
     ImGui::DragInt("Segments", &arc.segments);
     ImGui::Color32Edit("Color Inner", arc.color_inner);
     ImGui::Color32Edit("Color Outer", arc.color_outer);
+}
+
+void editParticleRenderer2D(ParticleRenderer2D& p) {
+    guiEntityRef("Target", p.target);
+    ImGui::Checkbox("Cycled Mode", &p.cycled);
 }
 
 void guiTextFormat(TextFormat& format) {
@@ -203,7 +217,7 @@ void guiTextFormat(TextFormat& format) {
     ImGui::Unindent();
 }
 
-void editDisplayText(drawable_text& tf) {
+void editDisplayText(Text2D& tf) {
     ImGui::InputTextMultiline("Text", &tf.text);
     ImGui::EditRect("Bounds", tf.rect.data());
     ImGui::Color32Edit("Border Color", tf.borderColor);
@@ -241,17 +255,7 @@ void guiLegacyFilters(node_filters_t& filters) {
     }
 }
 
-void guiEntityRef(const char* label, ecs::entity entity) {
-    if (entity == nullptr) {
-        ImGui::TextDisabled("%s: null", label);
-    } else if (ecs::valid(entity)) {
-        ImGui::LabelText(label, "%s", entity.get_or_default<node_t>().name.c_str());
-    } else {
-        ImGui::TextColored({1, 0, 0, 1}, "%s: invalid", label);
-    }
-}
-
-void guiParticleEmitter(particle_emitter_t& emitter) {
+void guiParticleEmitter2D(ParticleEmitter2D& emitter) {
     ImGui::Checkbox("Enabled", &emitter.enabled);
     ImGui::Text("_Time: %f", emitter.time);
     guiEntityRef("Layer", emitter.layer);
@@ -272,8 +276,7 @@ void guiParticleEmitter(particle_emitter_t& emitter) {
     ImGui::DragFloat2("dir", emitter.data.dir.data());
 }
 
-void guiParticleLayer(particle_layer_t& layer) {
-    ImGui::Checkbox("Cycled", &layer.cycled);
+void guiParticleLayer2D(ParticleLayer2D& layer) {
     ImGui::Checkbox("Keep Alive", &layer.keep_alive);
     ImGui::LabelText("Num Particles", "%lu", layer.particles.size());
 }
@@ -289,7 +292,7 @@ void gui_inspector(ecs::entity e) {
     }
 
     guiComponentPanel<node_filters_t>(e, "LEGACY Filters", guiLegacyFilters);
-    guiComponentPanel<transform_2d>(e, "Transform", gui_transform_2d);
+    guiComponentPanel<Transform2D>(e, "Transform", gui_transform_2d);
     guiComponentPanel<transform_3d>(e, "Transform 3D", gui_transform_3d);
     guiComponentPanel<camera_3d>(e, "Camera 3D", gui_camera_3d);
     guiComponentPanel<light_3d>(e, "Light 3D", gui_light_3d);
@@ -300,14 +303,15 @@ void gui_inspector(ecs::entity e) {
     guiComponentPanel<layout_t>(e, "Layout", guiLayout);
 
     // particles
-    guiComponentPanel<particle_emitter_t>(e, "Particle Emitter", guiParticleEmitter);
-    guiComponentPanel<particle_layer_t>(e, "Particle Layer", guiParticleLayer);
+    guiComponentPanel<ParticleEmitter2D>(e, "ParticleEmitter2D", guiParticleEmitter2D);
+    guiComponentPanel<ParticleLayer2D>(e, "ParticleLayer2D", guiParticleLayer2D);
 
     // display2d
-    guiDisplayComponent<drawable_sprite>(e, "Sprite", editDisplaySprite);
-    guiDisplayComponent<drawable_quad>(e, "Rectangle", editDisplayRectangle);
-    guiDisplayComponent<drawable_text>(e, "Text", editDisplayText);
-    guiDisplayComponent<drawable_arc>(e, "Arc", editDisplayArc);
+    guiDisplayComponent<Sprite2D>(e, "Sprite", editDisplaySprite);
+    guiDisplayComponent<Quad2D>(e, "Rectangle", editDisplayRectangle);
+    guiDisplayComponent<Text2D>(e, "Text", editDisplayText);
+    guiDisplayComponent<Arc2D>(e, "Arc", editDisplayArc);
+    guiDisplayComponent<ParticleRenderer2D>(e, "ParticleRenderer2D", editParticleRenderer2D);
 
     guiComponentPanel<movie_t>(e, "Movie Clip", gui_movie_clip);
 

@@ -17,8 +17,8 @@ bool process_node_filters(entity e) {
                     filters.processing = true;
                     draw2d::state.save_transform()
                             .translate(data.offset);
-                    draw2d::state.color_multiplier = argb32_t{0x0u, data.color.af()};
-                    draw2d::state.color_offset = argb32_t{data.color.argb, 0.0f};
+                    draw2d::state.color.scale = argb32_t{0x0u, data.color.af()};
+                    draw2d::state.color.offset = argb32_t{data.color.argb, 0.0f};
 
                     draw_node(e);
 
@@ -28,8 +28,8 @@ bool process_node_filters(entity e) {
                 } else if (data.type == sg_filter_type::glow) {
                     filters.processing = true;
                     draw2d::state.save_color();
-                    draw2d::state.color_multiplier = argb32_t{0x0u, data.color.af()};
-                    draw2d::state.color_offset = argb32_t{data.color.argb, 0.0f};
+                    draw2d::state.color.scale = argb32_t{0x0u, data.color.af()};
+                    draw2d::state.color.offset = argb32_t{data.color.argb, 0.0f};
 
                     const int segments = std::min(12,
                                                   8 * std::max(int(std::ceil((data.blur.x + data.blur.y)) / 2.0f), 1));

@@ -29,7 +29,7 @@ void on_popup_resume(entity e) {
 }
 
 void on_popup_opening(entity e) {
-    e.get<transform_2d>().scale = float2::zero;
+    e.get<Transform2D>().scale = float2::zero;
     e.get<node_t>().setTouchable(false);
     e.get<node_t>().setVisible(true);
 }
@@ -38,7 +38,7 @@ void on_popup_open_animation(float t, entity e) {
     t = math::clamp(t, 0.0f, 1.0f);
     float scale = easing::BACK_OUT.calculate(t);
     float fly = easing::P3_OUT.calculate(t);
-    auto& transform = e.get<transform_2d>();
+    auto& transform = e.get<Transform2D>();
     transform.position.y = animationVertDistance * (1.0f - fly);
     transform.scale = {scale, scale};
 }
@@ -75,7 +75,7 @@ void on_popup_close_animation(float t, entity e) {
     t = math::clamp(1.0f - t, 0.0f, 1.0f);
     float scale = easing::BACK_OUT.calculate(t);
     float fly = easing::P3_OUT.calculate(t);
-    auto& transform = ecs::get<transform_2d>(e);
+    auto& transform = ecs::get<Transform2D>(e);
     transform.position.y = animationVertDistance * (fly - 1.0f);
     transform.scale = {scale, scale};
 }

@@ -73,6 +73,12 @@ public:
     }
 
     template<typename Component>
+    inline Component* tryGet(entity::index_type idx) {
+        auto* pool = components.try_get<Component>();
+        return pool ? pool->tryGet(idx) : nullptr;
+    }
+
+    template<typename Component>
     inline Component& get(entity::index_type idx) {
         auto* pool = components.try_get<Component>();
         assert(pool);

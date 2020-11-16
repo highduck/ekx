@@ -5,14 +5,14 @@
 
 namespace ek {
 
-drawable_text& addText(ecs::entity e, const char* text) {
-    auto* tf = new drawable_text();
+Text2D& addText(ecs::entity e, const char* text) {
+    auto* tf = new Text2D();
     tf->format.font.setID("mini");
     tf->format.size = 16;
     tf->format.addShadow(0x0_rgb, 8);
     tf->text = text;
     tf->format.setAlignment(Alignment::Center);
-    ecs::get_or_create<display_2d>(e).drawable.reset(tf);
+    ecs::get_or_create<Display2D>(e).drawable.reset(tf);
     return *tf;
 }
 

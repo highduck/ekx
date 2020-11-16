@@ -12,7 +12,7 @@ namespace ek {
 
 ecs::entity createText(const char* name, const char* font, const char* text) {
     auto e = create_node_2d(name);
-    auto* tf = new drawable_text();
+    auto* tf = new Text2D();
 
     tf->format.font.setID(font);
     tf->format.size = 48.0f;
@@ -45,7 +45,7 @@ ecs::entity createText(const char* name, const char* font, const char* text) {
     tf->format.layersCount = 4;
 
     tf->text = text;
-    ecs::assign<display_2d>(e).drawable.reset(tf);
+    ecs::assign<Display2D>(e).drawable.reset(tf);
 
     return e;
 }
@@ -54,19 +54,19 @@ ecs::entity createScreenZones() {
     rect_f resolution{0, 0, 360, 480};
     auto zones = create_node_2d("zones");
     auto e = create_node_2d("zone");
-    auto* q = new drawable_quad();
-    q->set_gradient_vertical(0xFFFFFFFF_argb, 0x77FFFFFF_argb);
+    auto* q = new Quad2D();
+    q->setGradientVertical(0xFFFFFFFF_argb, 0x77FFFFFF_argb);
     q->rect = resolution;
-    e.assign<display_2d>(q);
-    e.get<transform_2d>().color_multiplier = 0x33FF00FF_argb;
+    e.assign<Display2D>(q);
+    e.get<Transform2D>().color.scale = 0x33FF00FF_argb;
     ecs::assign<layout_t>(e).fill(true, true).doSafeInsets = true;
     append(zones, e);
     e = create_node_2d("safe_zone");
-    q = new drawable_quad();
-    q->set_gradient_vertical(0xFFFFFFFF_argb, 0x77FFFFFF_argb);
+    q = new Quad2D();
+    q->setGradientVertical(0xFFFFFFFF_argb, 0x77FFFFFF_argb);
     q->rect = resolution;
-    e.assign<display_2d>(q);
-    e.get<transform_2d>().color_multiplier = 0x3300FF00_argb;
+    e.assign<Display2D>(q);
+    e.get<Transform2D>().color.scale = 0x3300FF00_argb;
     append(zones, e);
     return zones;
 }
@@ -79,26 +79,26 @@ SampleText::SampleText() :
 
     auto bmText = createText("bmfont", "TickingTimebombBB",
                              "88:88:88\n-=98");
-    get_drawable<drawable_text>(bmText).format.setAlignment(Alignment::Center);
-    get_drawable<drawable_text>(bmText).format.size = 24;
-    get_drawable<drawable_text>(bmText).borderColor = 0xFF000000_argb;
-    get_drawable<drawable_text>(bmText).rect.set(0, 0, 360 - 40, 100);
+    get_drawable<Text2D>(bmText).format.setAlignment(Alignment::Center);
+    get_drawable<Text2D>(bmText).format.size = 24;
+    get_drawable<Text2D>(bmText).borderColor = 0xFF000000_argb;
+    get_drawable<Text2D>(bmText).rect.set(0, 0, 360 - 40, 100);
 
     set_position(bmText, {20.0f, 20.0f});
     append(container, bmText);
 
     auto ttfText = createText("TTF-Cousine-Regular", "Cousine-Regular",
                               u8"£ü÷\n< Приветики >\n你好\nनमस्कार\nこんにちは");
-    get_drawable<drawable_text>(ttfText).format.setAlignment(Alignment::Right | Alignment::Top);
-    get_drawable<drawable_text>(ttfText).format.leading = -8;
-    get_drawable<drawable_text>(ttfText).format.setTextColor(0xFF00FF00_argb);
+    get_drawable<Text2D>(ttfText).format.setAlignment(Alignment::Right | Alignment::Top);
+    get_drawable<Text2D>(ttfText).format.leading = -8;
+    get_drawable<Text2D>(ttfText).format.setTextColor(0xFF00FF00_argb);
     set_position(ttfText, {360 - 20, 120.0f});
     append(container, ttfText);
 
     auto ttfText2 = createText("TTF-Comfortaa-Regular", "Comfortaa-Regular",
                                u8"I don't know KERN TABLE.\nНо кириллица тоже есть");
-    get_drawable<drawable_text>(ttfText2).format.setTextColor(0xFFFF00FF_argb);
-    get_drawable<drawable_text>(ttfText2).format.size = 24;
+    get_drawable<Text2D>(ttfText2).format.setTextColor(0xFFFF00FF_argb);
+    get_drawable<Text2D>(ttfText2).format.size = 24;
     set_position(ttfText2, {20.0f, 340.0f});
     append(container, ttfText2);
 }

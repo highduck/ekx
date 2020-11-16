@@ -1,18 +1,20 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
+#include <ek/scenex/game_time.hpp>
 
 namespace ek {
 
 struct destroy_delay_t {
     float delay = 0.0f;
+    TimeLayer timer{};
 };
 
 void destroy_delayed_entities(float dt);
 
-inline void destroy_delay(ecs::entity e, float delay = 0.0f) {
-    ecs::get_or_create<destroy_delay_t>(e) = {delay};
-}
+void destroy_delay(ecs::entity e, float delay = 0.0f, TimeLayer timer = {});
+
+void destroy_children_delay(ecs::entity e, float delay = 0.0f, TimeLayer timer = {});
 
 }
 

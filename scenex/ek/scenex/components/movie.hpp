@@ -3,6 +3,7 @@
 #include <ek/scenex/data/sg_data.hpp>
 #include <ek/util/assets.hpp>
 #include <optional>
+#include <ek/scenex/game_time.hpp>
 
 namespace ek {
 
@@ -10,6 +11,7 @@ struct movie_t {
     asset_t<sg_file> library_asset;
     std::string movie_data_symbol;
     const sg_movie_data* data = nullptr;
+    TimeLayer timer;
 
     [[nodiscard]]
     const sg_movie_data* get_movie_data() const {
@@ -31,10 +33,10 @@ struct movie_t {
         const auto* dat = get_movie_data();
         if (dat) {
             const auto max = static_cast<float>(dat->frames);
-            if(time >= max) {
+            if (time >= max) {
                 time -= max * truncf(time / max);
             }
-            if(time < 0) {
+            if (time < 0) {
                 time = 0;
             }
         }

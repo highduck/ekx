@@ -1,9 +1,8 @@
 #include "scene_system.hpp"
+#include "game_time.hpp"
 
-#include <ek/scenex/particles/particle_layer.hpp>
-#include <ek/scenex/particles/particle_system.hpp>
-#include <ek/scenex/components/transform_2d.hpp>
-#include <ek/scenex/components/display_2d.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/components/node_filters.hpp>
 #include <ek/scenex/data/sg_factory.hpp>
 
@@ -18,8 +17,8 @@ entity hit_test(entity e, float2 parentPosition) {
     }
 
     float2 local = parentPosition;
-    if (e.has<transform_2d>()) {
-        auto& transform = e.get<transform_2d>();
+    if (e.has<Transform2D>()) {
+        auto& transform = e.get<Transform2D>();
         if (!transform.matrix.transform_inverse(local, local)) {
             return nullptr;
         }
@@ -45,83 +44,12 @@ entity hit_test(entity e, float2 parentPosition) {
         it = it.get<node_t>().sibling_prev;
     }
 
-    if (e.has<display_2d>() && e.get<display_2d>().hitTest(local)) {
+    if (e.has<Display2D>() && e.get<Display2D>().hitTest(local)) {
         return e;
     }
 
     return nullptr;
 }
-//
-//void draw_node(entity e) {
-//    assert(e.valid());
-//
-//    if (process_node_filters(e)) {
-//        return;
-//    }
-//
-//    const auto& node = e.get_or_default<node_t>();
-//    auto& transform = e.get_or_default<transform_2d>();
-//
-//    if (!node.visible() || transform.color_multiplier.a <= 0 || (node.layersMask() & camera_layers) == 0) {
-//        return;
-//    }
-//
-//    begin_transform(transform);
-//
-//    bool scissors = ecs::has<scissors_2d>(e);
-//    if (scissors) {
-//        draw2d::state.push_scissors(
-//                ecs::get<scissors_2d>(e).world_rect(
-//                        draw2d::state.matrix
-//                )
-//        );
-//    }
-////
-////    events.emit({PreDraw, this, nullptr});
-//    if (e.has<display_2d>()) {
-//        auto& display = e.get<display_2d>();
-//        if (display.drawable) {
-//            display.drawable->draw();
-//
-//#ifndef NDEBUG
-//            if (display.drawBounds) {
-//                draw2d::strokeRect(expand(display.drawable->get_bounds(), 1.0f), 0xFFFFFFFF_argb, 1);
-//            }
-//#endif
-//        }
-//    }
-//
-//    if (ecs::has<script_holder>(e)) {
-//        auto& holder = ecs::get<script_holder>(e);
-//        for (auto& script : holder.list) {
-//            if (script) {
-//                script->draw();
-//            }
-//        }
-//    }
-//
-//    if (ecs::has<particle_layer_t>(e)) {
-//        draw_particle_layer(e);
-//    }
-////    events.emit({OnDraw, this, nullptr});
-//
-//    each_child(e, [](entity child) {
-//        draw_node(child);
-//    });
-//
-//    if (scissors) {
-//        draw2d::state.pop_scissors();
-//    }
-//
-//    if (ecs::has<script_holder>(e)) {
-//        auto& scripts = ecs::get<script_holder>(e).list;
-//        for (auto& script : scripts) {
-//            script->gui_gizmo();
-//        }
-//    }
-//
-//    end_transform();
-//}
 
 void drawScene2DChildren(entity e);
 
@@ -140,116 +68,129 @@ void draw_node(entity e) {
 
     //begin_transform(transform);
 
-    bool scissors = ecs::has<scissors_2d>(e);
+    auto* scissors = e.tryGet<scissors_2d>();
     if (scissors) {
-        draw2d::state.push_scissors(e.get<scissors_2d>().world_rect(draw2d::state.matrix));
-    }
-//
-//    events.emit({PreDraw, this, nullptr});
-    if (e.has<display_2d>()) {
-        auto& display = e.get<display_2d>();
-        if (display.drawable) {
-
-            display.drawable->draw();
-
-#ifndef NDEBUG
-            if (display.drawBounds) {
-                draw2d::strokeRect(expand(display.drawable->get_bounds(), 1.0f), 0xFFFFFFFF_argb, 1);
-            }
-#endif
-        }
+        draw2d::state.push_scissors(scissors->world_rect(draw2d::state.matrix));
     }
 
-    if (ecs::has<script_holder>(e)) {
-        auto& holder = ecs::get<script_holder>(e);
-        for (auto& script : holder.list) {
+    auto* display = e.tryGet<Display2D>();
+    if (display && display->drawable) {
+        display->drawable->draw();
+    }
+
+    auto* scripts = e.tryGet<script_holder>();
+    if (scripts) {
+        for (auto& script : scripts->list) {
             if (script) {
                 script->draw();
             }
         }
     }
 
-    if (ecs::has<particle_layer_t>(e)) {
-        draw_particle_layer(e);
-    }
-//    events.emit({OnDraw, this, nullptr});
-
     drawScene2DChildren(e);
 
     if (scissors) {
         draw2d::state.pop_scissors();
     }
-
-    if (ecs::has<script_holder>(e)) {
-        auto& scripts = ecs::get<script_holder>(e).list;
-        for (auto& script : scripts) {
-            script->gui_gizmo();
-        }
-    }
-
-    //end_transform();
 }
 
 void drawScene2DChildren(entity e) {
     auto it = e.get<node_t>().child_first;
     while (it) {
-        const auto& childNode = it.get<node_t>();
-        if (childNode.visible() &&
-            (childNode.layersMask() & camera_layers) != 0) {
-            const auto& childTransform = it.get<transform_2d>();
-            if (childTransform.worldColorMultiplier.a > 0) {
+        const auto& child = it.get<node_t>();
+        if (child.visible() &&
+            (child.layersMask() & camera_layers) != 0) {
+            const auto& childTransform = it.get<Transform2D>();
+            if (childTransform.worldColor.scale.a > 0) {
                 draw2d::state.matrix = childTransform.worldMatrix;
-                draw2d::state.color_multiplier = childTransform.worldColorMultiplier;
-                draw2d::state.color_offset = childTransform.worldColorOffset;
+                draw2d::state.color = childTransform.worldColor;
                 draw_node(it);
             }
         }
-        it = childNode.sibling_next;
+        it = child.sibling_next;
     }
 }
 
-void update_nodes(entity e, float dt) {
-    if (ecs::has<script_holder>(e)) {
-        auto& holder = ecs::get<script_holder>(e);
-        for (auto& script : holder.list) {
-            if (script) {
-                script->update(dt);
+void updateScripts() {
+    float dt = TimeLayer::Root->dt;
+    ecs::rview<script_holder>()
+            .each([dt](script_holder& scripts) {
+                for (auto& script : scripts.list) {
+                    if (script) {
+                        script->update(dt);
+                    }
+                }
+            });
+}
+
+/** gizmo drawing pass **/
+void drawSceneGizmo(entity e) {
+    assert(e.valid());
+    auto* transform = e.tryGet<Transform2D>();
+    if (transform) {
+        auto* display = e.tryGet<Display2D>();
+        if (display && display->drawable && display->drawBounds) {
+            draw2d::state.matrix.set_identity();
+            auto bounds = display->drawable->getBounds();
+            auto v1 = transform->worldMatrix.transform(bounds.position);
+            auto v2 = transform->worldMatrix.transform(bounds.right(), bounds.y);
+            auto v3 = transform->worldMatrix.transform(bounds.right(), bounds.bottom());
+            auto v4 = transform->worldMatrix.transform(bounds.x, bounds.bottom());
+            draw2d::line(v1, v2, 0xFFFFFFFF_argb, 1);
+            draw2d::line(v2, v3, 0xFFFFFFFF_argb, 1);
+            draw2d::line(v3, v4, 0xFFFFFFFF_argb, 1);
+            draw2d::line(v4, v1, 0xFFFFFFFF_argb, 1);
+        }
+
+        auto* scripts = e.tryGet<script_holder>();
+        if (scripts) {
+            draw2d::state.matrix = transform->worldMatrix;
+            for (auto& script : scripts->list) {
+                script->gui_gizmo();
             }
         }
-    }
-
-    each_child(e, [dt](entity child) {
-        update_nodes(child, dt);
-    });
-}
-
-
-/** Invalidate Transform2D **/
-
-void invalidateTransform2D(entity e, const transform_2d& parentTransform) {
-    if (e.has<transform_2d>()) {
-        auto& transform = e.get<transform_2d>();
-        transform.updateLocalMatrix();
-        transform.worldMatrix = parentTransform.worldMatrix * transform.matrix;
-        argb32_t::combine(parentTransform.worldColorMultiplier, parentTransform.worldColorOffset,
-                          transform.color_multiplier, transform.color_offset,
-                          transform.worldColorMultiplier, transform.worldColorOffset);
 
         auto it = e.get<node_t>().child_first;
         while (it) {
-            const auto& child = it.get<node_t>();
-            if (child.visible()) {
-                invalidateTransform2D(it, transform);
-            }
-            it = child.sibling_next;
+            drawSceneGizmo(it);
+            it = it.get<node_t>().sibling_next;
         }
-    } else {
-        assert(false);
     }
 }
 
-void invalidateTransform2D(entity root) {
-    const auto& transform = root.get<transform_2d>();
+void drawSceneGizmos(entity root) {
+    draw2d::state.save_transform();
+    drawSceneGizmo(root);
+    draw2d::state.restore_transform();
+}
+
+/** Invalidate Transform2D **/
+
+void invalidateTransform2D(entity e, const Transform2D* transform) {
+    auto* localTransform = e.tryGet<Transform2D>();
+    if (localTransform) {
+        localTransform->updateLocalMatrix();
+        localTransform->worldMatrix = transform->worldMatrix * localTransform->matrix;
+        localTransform->worldColor = transform->worldColor * localTransform->color;
+        transform = localTransform;
+    }
+    auto it = e.get<node_t>().child_first;
+    while (it) {
+        const auto& child = it.get<node_t>();
+        if (child.visible()) {
+            invalidateTransform2D(it, transform);
+        }
+        it = child.sibling_next;
+    }
+}
+
+void invalidateTransform2DRoot(entity root) {
+    auto* transform = root.tryGet<Transform2D>();
+    assert(transform != nullptr);
+    transform->updateLocalMatrix();
+    transform->worldMatrix = transform->matrix;
+    transform->worldColor = transform->color;
+
     auto it = root.get<node_t>().child_first;
     while (it) {
         const auto& child = it.get<node_t>();

@@ -69,10 +69,10 @@ matrix_2d& operator<<(matrix_2d& r, const xml_node& node) {
 color_transform_f& operator<<(color_transform_f& color, const xml_node& node) {
     const auto& ct = node.child("color").child("Color");
 
-    color.multiplier.x = ct.attribute("redMultiplier").as_float(1.0f);
-    color.multiplier.y = ct.attribute("greenMultiplier").as_float(1.0f);
-    color.multiplier.z = ct.attribute("blueMultiplier").as_float(1.0f);
-    color.multiplier.w = ct.attribute("alphaMultiplier").as_float(1.0f);
+    color.scale.x = ct.attribute("redMultiplier").as_float(1.0f);
+    color.scale.y = ct.attribute("greenMultiplier").as_float(1.0f);
+    color.scale.z = ct.attribute("blueMultiplier").as_float(1.0f);
+    color.scale.w = ct.attribute("alphaMultiplier").as_float(1.0f);
 
     color.offset.x = ct.attribute("redOffset").as_float() / 255.0f;
     color.offset.y = ct.attribute("greenOffset").as_float() / 255.0f;
@@ -88,9 +88,9 @@ color_transform_f& operator<<(color_transform_f& color, const xml_node& node) {
     // default: 0, values: -1 ... 1
     const auto br = math::clamp(ct.attribute("brightness").as_float(0.0f), -1.0f, 1.0f);
     if (br < 0.0f) {
-        color.multiplier.x =
-        color.multiplier.y =
-        color.multiplier.z = 1.0f + br;
+        color.scale.x =
+        color.scale.y =
+        color.scale.z = 1.0f + br;
     } else if (br > 0.0f) {
         color.offset.x =
         color.offset.y =

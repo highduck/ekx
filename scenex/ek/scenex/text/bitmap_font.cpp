@@ -50,6 +50,7 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         } else {
             outGlyph.rect = g.box / unitsPerEM;
         }
+        outGlyph.source = this;
         return true;
     }
     return false;
@@ -62,6 +63,7 @@ bool BitmapFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
         outGlyph.advanceWidth = static_cast<float>(g.advanceWidth) / unitsPerEM;
         outGlyph.lineHeight = lineHeightMultiplier;
         outGlyph.rect = g.box / unitsPerEM;
+        outGlyph.source = this;
         return true;
     }
     return false;

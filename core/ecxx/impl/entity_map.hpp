@@ -149,13 +149,15 @@ public:
         assert(!base_type::has(e.index()));
 
         auto di = static_cast<index_type>(base_type::entity_.size());
-        base_type::entity_.emplace_back(e);
         base_type::table_.insert(e.index(), di);
+        base_type::entity_.push_back(e);
 
         if constexpr (has_data) {
             if constexpr (std::is_aggregate_v<data_type>) {
+//                return data_.emplace_back(data_type{std::forward<Args>(args)...});
                 return data_.emplace_back(data_type{args...});
             } else {
+//                return data_.emplace_back(data_type(std::forward<Args>(args)...));
                 return data_.emplace_back(args...);
             }
         } else {
@@ -192,6 +194,18 @@ public:
         } else {
             return get_data(0u);
         }
+    }
+
+    inline DataType* tryGet(index_type idx) {
+        DataType* ptr = nullptr;
+        if (base_type::table_.has(idx)) {
+            if constexpr (has_data) {
+                ptr = data_.data() + base_type::table_.at(idx);
+            } else {
+                ptr = data_.data();
+            }
+        }
+        return ptr;
     }
 
     DataType& get_or_create(entity e) {

@@ -1,4 +1,4 @@
-#include "display_2d.hpp"
+#include "Display2D.hpp"
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/2d/sprite.hpp>
 #include <ek/scenex/text/font.hpp>
@@ -8,18 +8,18 @@
 
 namespace ek {
 
-drawable_2d_base::~drawable_2d_base() = default;
+IDrawable2D::~IDrawable2D() = default;
 
-void drawable_quad::draw() {
+void Quad2D::draw() {
     draw2d::state.set_empty_texture();
     draw2d::quad(rect.x, rect.y, rect.width, rect.height, colors[0], colors[1], colors[2], colors[3]);
 }
 
-rect_f drawable_quad::get_bounds() const {
+rect_f Quad2D::getBounds() const {
     return rect;
 }
 
-bool drawable_quad::hit_test(float2 point) const {
+bool Quad2D::hitTest(float2 point) const {
     return rect.contains(point);
 }
 
@@ -37,15 +37,15 @@ bool drawable_quad::hit_test(float2 point) const {
 //    return vGradient(rc, color, color);
 //}
 
-drawable_sprite::drawable_sprite() = default;
+Sprite2D::Sprite2D() = default;
 
-drawable_sprite::drawable_sprite(const std::string& sprite_id, rect_f a_scale_grid)
+Sprite2D::Sprite2D(const std::string& sprite_id, rect_f a_scale_grid)
         : src{sprite_id},
           scale_grid{a_scale_grid} {
     scale_grid_mode = !scale_grid.empty();
 }
 
-void drawable_sprite::draw() {
+void Sprite2D::draw() {
     if (!src) {
         return;
     }
@@ -73,7 +73,7 @@ void drawable_sprite::draw() {
     }
 }
 
-rect_f drawable_sprite::get_bounds() const {
+rect_f Sprite2D::getBounds() const {
     if (!src) {
         return rect_f::zero;
     }
@@ -81,8 +81,8 @@ rect_f drawable_sprite::get_bounds() const {
     return spr.rect;
 }
 
-bool drawable_sprite::hit_test(float2 point) const {
-    if (get_bounds().contains(point)) {
+bool Sprite2D::hitTest(float2 point) const {
+    if (getBounds().contains(point)) {
         if (hit_pixels && src) {
             return src->hit_test(point);
         }
@@ -91,18 +91,18 @@ bool drawable_sprite::hit_test(float2 point) const {
     return false;
 }
 
-drawable_text::drawable_text()
+Text2D::Text2D()
         : text{},
           format{"mini", 16.0f} {
 
 }
 
-drawable_text::drawable_text(std::string text, TextFormat format)
+Text2D::Text2D(std::string text, TextFormat format)
         : text{std::move(text)},
           format{format} {
 }
 
-void drawable_text::draw() {
+void Text2D::draw() {
     TextDrawer drawer;
     drawer.format = format;
     if (fillColor.a > 0) {
@@ -125,7 +125,7 @@ void drawable_text::draw() {
     }
 }
 
-rect_f drawable_text::get_bounds() const {
+rect_f Text2D::getBounds() const {
     if (hitFullBounds) {
         return rect;
     }
@@ -139,8 +139,8 @@ rect_f drawable_text::get_bounds() const {
     };
 }
 
-bool drawable_text::hit_test(float2 point) const {
-    return get_bounds().contains(point);
+bool Text2D::hitTest(float2 point) const {
+    return getBounds().contains(point);
 }
 
 rect_f scissors_2d::world_rect(const matrix_2d& world_matrix) const {
@@ -151,7 +151,7 @@ rect_f scissors_2d::world_rect(const matrix_2d& world_matrix) const {
 
 //// arc
 
-void drawable_arc::draw() {
+void Arc2D::draw() {
     asset_t<sprite_t> f{sprite};
     if (f && f->texture) {
         auto& tex = f->tex;
@@ -165,12 +165,12 @@ void drawable_arc::draw() {
     }
 }
 
-rect_f drawable_arc::get_bounds() const {
+rect_f Arc2D::getBounds() const {
     float s = radius + line_width;
     return {-s, -s, 2.0f * s, 2.0f * s};
 }
 
-bool drawable_arc::hit_test(float2 point) const {
+bool Arc2D::hitTest(float2 point) const {
     auto len = length(point);
     return len >= radius && len <= (radius + line_width);
 }

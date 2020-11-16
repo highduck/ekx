@@ -108,8 +108,9 @@ void processTextField(const element_t& el, export_item_t& item, const flash_doc&
             faceName = fontItem->font;
         }
     }
-
-    tf.text = textRun.characters;
+    // animate exports as CR line-ending (legacy MacOS),
+    // we need only LF to not check twice when drawing the text
+    tf.text = replace(textRun.characters, '\r', '\n');
     tf.font = faceName;
     tf.size = textRun.attributes.size;
     tf.rect = expand(el.rect, 2.0f);
@@ -284,8 +285,6 @@ void flash_doc_exporter::process_dynamic_text(const element_t& el, export_item_t
     process_transform(el, *item);
     item->node.name = el.item.name;
 
-
-    // TODO: replace '\r' to '\n' ?
     processTextField(el, *item, doc);
 
     item->append_to(parent);

@@ -91,7 +91,6 @@ struct edge_t {
     int stroke_style = 0;
 };
 
-
 struct text_attributes_t {
     float2 alignment{};// alignment = "left"; / center / right
     bool alias_text = false;
