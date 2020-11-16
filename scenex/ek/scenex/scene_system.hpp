@@ -19,13 +19,17 @@ inline void each_script(Func func) {
     });
 }
 
-
 void update_nodes(ecs::entity entity, float dt);
 
 static uint8_t camera_layers = 0xFFu;
 
+void drawScene2D(ecs::entity root);
 void draw_node(ecs::entity e);
 
 ecs::entity hit_test(ecs::entity entity, float2 parentSpacePosition);
+
+//void draw2D(ecs::entity root);
+
+void invalidateTransform2D(ecs::entity root);
 
 }

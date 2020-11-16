@@ -9,8 +9,6 @@ namespace ek {
 
 struct transform_2d {
 
-    mutable matrix_2d matrix{};
-
     float2 position = float2::zero;
     float2 scale = float2::one;
     float2 skew = float2::zero;
@@ -19,6 +17,11 @@ struct transform_2d {
 
     argb32_t color_multiplier = argb32_t::one;
     argb32_t color_offset = argb32_t::zero;
+    argb32_t worldColorMultiplier = argb32_t::one;
+    argb32_t worldColorOffset = argb32_t::zero;
+
+    matrix_2d matrix{};
+    matrix_2d worldMatrix{};
 
     void rotation(float value) {
         skew = {value, value};

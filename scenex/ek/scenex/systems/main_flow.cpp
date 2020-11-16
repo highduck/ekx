@@ -37,8 +37,6 @@ void scene_pre_update(entity root, float dt) {
     update_canvas();
     update_layout();
     update_tweens();
-    update_emitters();
-    update_particles();
     update_shake();
 }
 
@@ -48,10 +46,14 @@ void scene_post_update(ecs::entity root, float dt) {
     update_buttons(dt);
     update_movie_clips();
     destroy_delayed_entities(dt);
+
+    invalidateTransform2D(root);
+    update_emitters();
+    update_particles();
 }
 
 void scene_render(ecs::entity root) {
-    draw_node(root);
+    drawScene2D(root);
 }
 
 }

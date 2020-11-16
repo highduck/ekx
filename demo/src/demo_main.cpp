@@ -90,7 +90,7 @@ void DemoApp::render_frame() {
         currentSample->draw();
     }
 
-    draw_node(root);
+    drawScene2D(root);
 }
 
 void DemoApp::start_game() {
