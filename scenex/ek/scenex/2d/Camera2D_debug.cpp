@@ -2,10 +2,11 @@
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/scenex/game_time.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include "Camera2D.hpp"
 #include "Transform2D.hpp"
 #include "Display2D.hpp"
+#include <ek/scenex/components/script.hpp>
 
 namespace ek {
 
@@ -162,6 +163,18 @@ void Camera2D::drawGizmo(Camera2D& camera) {
     }
     if (camera.debugGizmoSelf) {
         debugCameraGizmo(camera);
+    }
+    if (camera.debugDrawScriptGizmo) {
+        for (auto e : ecs::view<script_holder>()) {
+            auto* transform = findComponentInParent<Transform2D>(e);
+            if (transform) {
+                draw2d::state.matrix = transform->worldMatrix;
+                draw2d::state.color = transform->worldColor;
+                for (auto& script : e.get<script_holder>().list) {
+                    script->gui_gizmo();
+                }
+            }
+        }
     }
 }
 

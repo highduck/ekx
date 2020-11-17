@@ -7,12 +7,12 @@
 
 #include <ek/math/rand.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
-#include <ek/scenex/scene_system.hpp>
 #include <ek/scenex/asset2/builtin_assets.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/components/interactive.hpp>
 #include <ek/scenex/components/layout.hpp>
 #include <ui/minimal.hpp>
+#include <ek/scenex/2d/Camera2D.hpp>
 
 namespace ek {
 
@@ -58,6 +58,9 @@ DemoApp::DemoApp() :
 
 void DemoApp::initialize() {
     basic_application::initialize();
+
+    Camera2D::Main.get<Camera2D>().clearColorEnabled = true;
+    Camera2D::Main.get<Camera2D>().clearColor = float4{0xFF666666_argb};
 }
 
 void DemoApp::preload() {

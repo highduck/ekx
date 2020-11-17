@@ -2,7 +2,7 @@
 
 #include <ek/scenex/components/layout.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 
 namespace ek {

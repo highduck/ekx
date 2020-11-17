@@ -1,13 +1,13 @@
 #include "sg_factory.hpp"
 
 #include <ek/scenex/2d/Sprite.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/components/movie.hpp>
 #include <ek/scenex/components/button.hpp>
 #include <ek/scenex/components/interactive.hpp>
-#include <ek/scenex/components/node_filters.hpp>
+#include <ek/scenex/2d/UglyFilter2D.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/math/bounds_builder.hpp>
 
@@ -101,7 +101,7 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     }
 
     if (!data->filters.empty()) {
-        auto& filters_comp = ecs::reassign<node_filters_t>(entity);
+        auto& filters_comp = ecs::reassign<UglyFilter2D>(entity);
         filters_comp.filters = data->filters;
 //        ecs::replace_or_assign<node_filters_t>(entity);
     }

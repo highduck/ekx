@@ -1,5 +1,5 @@
 #include "script.hpp"
-#include "node.hpp"
+#include "Node.hpp"
 
 #include <ek/scenex/game_time.hpp>
 

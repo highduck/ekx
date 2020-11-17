@@ -1,16 +1,18 @@
-#include <ek/scenex/app/basic_application.hpp>
+#include "Camera2D.hpp"
+#include "Transform2D.hpp"
+#include "RenderSystem2D.hpp"
+
 #include <ek/math/bounds_builder.hpp>
 #include <ek/math/matrix_inverse.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/scenex/components/node.hpp>
 #include <ek/scenex/components/script.hpp>
-#include "Camera2D.hpp"
-#include "Transform2D.hpp"
-#include "Display2D.hpp"
+#include <ek/scenex/app/basic_application.hpp>
 
 namespace ek {
 
 void drawEntity(ecs::entity e, const Transform2D* transform);
+
+ecs::entity Camera2D::Main{};
 
 matrix_2d Camera2D::getMatrix(ecs::entity root_, float scale) const {
     auto screen = screenRect;
@@ -102,7 +104,7 @@ void Camera2D::render() {
         }
         draw2d::state.color = {};
 
-        drawEntity(camera.root, camera.root.tryGet<Transform2D>());
+        RenderSystem2D::draw(camera.root, camera.root.tryGet<Transform2D>());
 
 #ifndef NDEBUG
         drawGizmo(camera);
@@ -120,57 +122,6 @@ void Camera2D::render() {
 Camera2D::Camera2D(ecs::entity root_) :
         root{root_} {
 
-}
-
-void drawEntity(ecs::entity e, const Transform2D* transform) {
-    assert(e.valid());
-
-    // todo:
-//    if (process_node_filters(e)) {
-//        return;
-//    }
-
-    auto* scissors = e.tryGet<scissors_2d>();
-    if (scissors) {
-        draw2d::state.push_scissors(scissors->world_rect(transform->worldMatrix));
-    }
-
-    auto* display = e.tryGet<Display2D>();
-    if (display && display->drawable) {
-        draw2d::state.matrix = transform->worldMatrix;
-        draw2d::state.color = transform->worldColor;
-        display->drawable->draw();
-    }
-
-    auto* scripts = e.tryGet<script_holder>();
-    if (scripts) {
-        draw2d::state.matrix = transform->worldMatrix;
-        draw2d::state.color = transform->worldColor;
-        for (auto& script : scripts->list) {
-            if (script) {
-                script->draw();
-            }
-        }
-    }
-
-    auto it = e.get<Node>().child_first;
-    while (it) {
-        const auto& child = it.get<Node>();
-        if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
-            const auto* childTransform = it.tryGet<Transform2D>();
-            if (childTransform) {
-                transform = childTransform;
-            }
-            if (transform->color.scale.a > 0) {
-                drawEntity(it, transform);
-            }
-        }
-        it = child.sibling_next;
-    }
-
-    if (scissors) {
-        draw2d::state.pop_scissors();
-    }
 }
 
 }

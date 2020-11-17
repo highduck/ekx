@@ -3,8 +3,8 @@
 #include <ek/scenex/3d/Camera3D.hpp>
 #include <ek/scenex/3d/Transform3D.hpp>
 #include <ek/scenex/game_time.hpp>
-#include <ek/scenex/3d/render_system_3d.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/3d/RenderSystem3D.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/3d/Light3D.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>

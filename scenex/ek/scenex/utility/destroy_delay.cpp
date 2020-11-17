@@ -1,6 +1,6 @@
 #include "destroy_delay.hpp"
 
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include <ek/scenex/game_time.hpp>
 
 namespace ek {

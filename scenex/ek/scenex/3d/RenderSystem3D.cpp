@@ -6,7 +6,7 @@
 #include <ek/util/timer.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app/app.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include <ek/math/matrix_transform.hpp>
 #include <ek/math/matrix_transpose.hpp>
 #include <ek/math/matrix_inverse.hpp>

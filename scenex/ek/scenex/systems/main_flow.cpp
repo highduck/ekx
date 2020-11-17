@@ -6,7 +6,6 @@
 #include <ek/scenex/particles/particle_system.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/utility/destroy_delay.hpp>
-#include <ek/scenex/scene_system.hpp>
 #include <ek/goodies/shake_system.hpp>
 #include <ek/goodies/helpers/Trail2D.hpp>
 #include <ek/goodies/bubble_text.hpp>

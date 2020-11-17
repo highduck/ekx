@@ -1,20 +1,12 @@
 cmake_minimum_required(VERSION 3.13)
 
 target_sources(${PROJECT_NAME} PRIVATE
-        components/node.hpp
-        components/node.cpp
-        components/node_filters.cpp
-        components/node_filters.hpp
+        components/Node.cpp
         components/script.cpp
         components/script.hpp
-        components/movie.hpp
-        components/button.hpp
-        components/canvas.hpp
         components/interactive.cpp
-        components/tween.hpp
-        components/event_handler.hpp
-        components/layout.hpp
         components/layout.cpp
+        components/event_handler.hpp
 
         systems/movie_clip_system.cpp
         systems/movie_clip_system.hpp
@@ -26,11 +18,11 @@ target_sources(${PROJECT_NAME} PRIVATE
         systems/layout_system.hpp
         systems/tween_system.cpp
         systems/tween_system.hpp
+        systems/hitTest.cpp
+        systems/hitTest.hpp
 
         AudioManager.cpp
         AudioManager.hpp
-        scene_system.cpp
-        scene_system.hpp
         InteractionSystem.cpp
         InteractionSystem.hpp
 
@@ -67,8 +59,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         3d/Camera3D.hpp
         3d/static_mesh.cpp
         3d/static_mesh.hpp
-        3d/render_system_3d.cpp
-        3d/render_system_3d.hpp
+        3d/RenderSystem3D.cpp
+        3d/RenderSystem3D.hpp
         3d/Light3D.cpp
         3d/Light3D.hpp
         3d/Material3D.cpp
@@ -83,6 +75,10 @@ target_sources(${PROJECT_NAME} PRIVATE
         2d/Display2D.cpp
         2d/Camera2D.cpp
         2d/Camera2D_debug.cpp
+        2d/UglyFilter2D.cpp
+        2d/UglyFilter2D.hpp
+        2d/RenderSystem2D.cpp
+        2d/RenderSystem2D.hpp
 
         text/BitmapFont.cpp
         text/TrueTypeFont.cpp
