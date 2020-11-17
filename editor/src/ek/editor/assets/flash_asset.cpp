@@ -5,7 +5,7 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/flash/doc/flash_doc.hpp>
 #include <ek/spritepack/export_atlas.hpp>
-#include <ek/scenex/2d/AAtlas.hpp>
+#include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/data/sg_data.hpp>
 #include <ek/xfl/flash_doc_exporter.hpp>

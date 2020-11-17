@@ -1,4 +1,4 @@
-#include "AAtlas.hpp"
+#include "Atlas.hpp"
 #include "Sprite.hpp"
 
 #include <ek/util/logger.hpp>

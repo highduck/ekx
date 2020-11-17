@@ -1,7 +1,7 @@
 #include "sg_factory.hpp"
 
 #include <ek/serialize/streams.hpp>
-#include <ek/scenex/2d/AAtlas.hpp>
+#include <ek/scenex/2d/Atlas.hpp>
 #include <ek/app/res.hpp>
 #include <ek/util/logger.hpp>
 

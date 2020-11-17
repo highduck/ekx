@@ -9,7 +9,7 @@
 #include <ek/graphics/vertex_decl.hpp>
 #include <ek/scenex/data/sg_data.hpp>
 #include <ek/scenex/data/sg_factory.hpp>
-#include <ek/scenex/2d/AAtlas.hpp>
+#include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/data/program_data.hpp>
 #include <ek/scenex/data/texture_data.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>
