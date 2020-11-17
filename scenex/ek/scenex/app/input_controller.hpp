@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/app/app.hpp>
-#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/InteractionSystem.hpp>
 #include <vector>
 
 namespace ek {
@@ -27,7 +27,7 @@ struct touch_state_t {
 class input_controller final {
 public:
 
-    explicit input_controller(interactive_manager& interactions);
+    explicit input_controller(InteractionSystem& interactions);
 
     ~input_controller();
 
@@ -69,7 +69,7 @@ private:
         bool down = false;
     };
 
-    interactive_manager& interactions_;
+    InteractionSystem& interactions_;
     std::string keyboard_text_;
     int keyboard_modifiers_{};
     bool reset_keys_ = false;

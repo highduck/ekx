@@ -117,6 +117,7 @@ void guiCamera2D(Camera2D& camera) {
     ImGui::DragFloat("Content Scale", &camera.contentScale);
     ImGui::Checkbox("Clear Color", &camera.clearColorEnabled);
     ImGui::ColorEdit4("Clear Color", camera.clearColor.data());
+    ImGui::ColorEdit4("Clear Color+", camera.clearColor2.data());
     ImGui::EditRect("viewport", camera.viewport.data());
     ImGui::DragFloat2("relativeOrigin", camera.relativeOrigin.data());
 

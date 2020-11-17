@@ -26,6 +26,10 @@ struct Camera2D {
     bool clearColorEnabled = false;
     float4 clearColor{0.5f, 0.5f, 0.5f, 1.0f};
 
+    // just for fun (quad is used to clear.
+    // todo: know about sync/de-sync clearing surface/RT?)
+    float4 clearColor2 = float4::zero;
+
     bool debugOcclusion = false;
     bool debugVisibleBounds = false;
     bool debugGizmoHitTarget = false;
@@ -51,6 +55,8 @@ public:
     static void render();
 
     static void drawGizmo(Camera2D& camera);
+
+    static std::vector<ecs::entity>& getCameraQueue();
 };
 
 

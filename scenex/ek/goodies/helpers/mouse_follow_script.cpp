@@ -2,7 +2,7 @@
 
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
-#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/InteractionSystem.hpp>
 #include <ek/util/locator.hpp>
 
 namespace ek {
@@ -10,8 +10,8 @@ namespace ek {
 void mouse_follow_script::update(float dt) {
     script_cpp::update(dt);
 
-    auto& im = resolve<interactive_manager>();
-    const auto screen_space_position = im.pointer_global_space;
+    auto& im = resolve<InteractionSystem>();
+    const auto screen_space_position = im.pointerScreenPosition_;
     const auto parent_space_position = global_to_parent(entity_, screen_space_position);
     get<Transform2D>().position = parent_space_position;
 }

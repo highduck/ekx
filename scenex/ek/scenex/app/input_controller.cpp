@@ -4,7 +4,7 @@ namespace ek {
 
 using namespace ek::app;
 
-input_controller::input_controller(interactive_manager& interactions)
+input_controller::input_controller(InteractionSystem& interactions)
         : interactions_{interactions} {
     g_app.on_event += [this](const auto& e) { on_event(e); };
     g_app.on_frame_completed += [this] { on_frame_completed(); };
@@ -76,7 +76,7 @@ void input_controller::on_event(const event_t& event) {
         case event_type::key_up:
         case event_type::key_down:
             if (event.type == event_type::key_down && event.code == key_code::Escape) {
-                interactions_.send_back_button();
+                interactions_.sendBackButton();
             }
             if (event.code != key_code::unknown) {
                 auto& key = keys_[static_cast<size_t>(event.code)];
@@ -93,7 +93,7 @@ void input_controller::on_event(const event_t& event) {
             }
             break;
         case event_type::app_back_button:
-            interactions_.send_back_button();
+            interactions_.sendBackButton();
             break;
         case event_type::app_pause:
             interactions_.handle_system_pause();

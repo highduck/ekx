@@ -1,5 +1,5 @@
 #include <ek/draw2d/drawer.hpp>
-#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/InteractionSystem.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/scenex/game_time.hpp>
 #include <ek/scenex/components/node.hpp>
@@ -10,14 +10,14 @@
 namespace ek {
 
 void debugDrawPointer(Camera2D& camera) {
-    auto& im = resolve<interactive_manager>();
-    auto ptr = im.pointer_global_space;
+    auto& im = resolve<InteractionSystem>();
+    auto ptr = im.pointerScreenPosition_;
     auto v = camera.matrix.transform(ptr.x, ptr.y);
     float t = TimeLayer::Root->total;
     draw2d::state.set_empty_texture();
     draw2d::fill_circle({v.x, v.y, 20 + 5 * sinf(t)}, 0x0_argb, 0xFFFFFFFF_argb, 10);
 
-    if (im.pointer_down) {
+    if (im.pointerDown_) {
         draw2d::fill_circle({v.x, v.y, 40 + 10 * sinf(t * 8)}, 0xFFFFFF00_argb, 0xFFFF0000_argb, 10);
     }
 }
@@ -40,7 +40,7 @@ void drawBox(const rect_f& rc, const matrix_2d& m, argb32_t color1, argb32_t col
 }
 
 void debugDrawHitTarget(Camera2D& camera) {
-    auto& im = resolve<interactive_manager>();
+    auto& im = resolve<InteractionSystem>();
     auto target = im.getHitTarget();
     if (!target) {
         return;

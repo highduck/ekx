@@ -3,7 +3,7 @@
 #include "input_controller.hpp"
 #include "builtin_resources.hpp"
 
-#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/components/canvas.hpp>
 #include <ek/scenex/systems/layout_system.hpp>
@@ -54,11 +54,9 @@ void basic_application::initialize() {
 
     root.assign<Camera2D>(root);
 
-    auto& im = service_locator_instance<interactive_manager>::init();
+    auto& im = service_locator_instance<InteractionSystem>::init(root);
     service_locator_instance<input_controller>::init(im);
     service_locator_instance<AudioManager>::init();
-
-    im.set_entity(root);
 
     game = create_node_2d("game");
     ecs::assign<canvas_t>(game, base_resolution.x, base_resolution.y);

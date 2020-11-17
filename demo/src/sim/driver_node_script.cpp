@@ -2,7 +2,7 @@
 #include "motion_system.h"
 
 #include <ek/util/locator.hpp>
-#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/components/node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
