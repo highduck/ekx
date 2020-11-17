@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/scenex/text/text_drawer.hpp>
+#include <ek/scenex/text/TextDrawer.hpp>
 #include "sample_base.hpp"
 
 namespace ek {

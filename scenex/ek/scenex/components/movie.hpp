@@ -8,7 +8,7 @@
 namespace ek {
 
 struct movie_t {
-    asset_t<sg_file> library_asset;
+    Res<sg_file> library_asset;
     std::string movie_data_symbol;
     const sg_movie_data* data = nullptr;
     TimeLayer timer;

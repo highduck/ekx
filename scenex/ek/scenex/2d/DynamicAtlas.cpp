@@ -1,4 +1,4 @@
-#include "dynamic_atlas.hpp"
+#include "DynamicAtlas.hpp"
 #include <ek/graphics/texture.hpp>
 
 namespace ek {

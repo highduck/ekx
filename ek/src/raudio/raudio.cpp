@@ -150,8 +150,11 @@ typedef struct tagBITMAPINFOHEADER {
 #define MA_MALLOC RL_MALLOC
 #define MA_FREE RL_FREE
 
+#ifndef MINIAUDIO_IMPLEMENTATION
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>         // miniaudio library
+#endif
+
 #undef PlaySound                        // Win32 API: windows.h > mmsystem.h defines PlaySound macro
 
 #include <stdlib.h>                     // Required for: malloc(), free()

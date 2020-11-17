@@ -1,6 +1,6 @@
 #include "sg_factory.hpp"
 
-#include <ek/scenex/2d/sprite.hpp>
+#include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/components/node.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
@@ -15,7 +15,7 @@ namespace ek {
 
 namespace {
 
-using asset_ref = asset_t<sg_file>;
+using asset_ref = Res<sg_file>;
 
 void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     auto& node = ecs::get<Node>(entity);
@@ -129,7 +129,7 @@ ecs::entity create_and_merge(const sg_file& sg, asset_ref asset,
 
 void extend_bounds(const sg_file& file, const sg_node_data& data, bounds_builder_2f& boundsBuilder,
                    const matrix_2d& matrix) {
-    const asset_t<sprite_t> spr{data.sprite};
+    const Res<Sprite> spr{data.sprite};
     if (spr) {
         boundsBuilder.add(spr->rect, matrix);
     }
@@ -143,7 +143,7 @@ void extend_bounds(const sg_file& file, const sg_node_data& data, bounds_builder
 
 ecs::entity sg_create(const std::string& library, const std::string& name) {
     ecs::entity result;
-    asset_t<sg_file> file{library};
+    Res<sg_file> file{library};
     if (file) {
         const sg_node_data* data = file->get(name);
         if (data) {
@@ -158,7 +158,7 @@ ecs::entity sg_create(const std::string& library, const std::string& name) {
 }
 
 rect_f sg_get_bounds(const std::string& library, const std::string& name) {
-    asset_t<sg_file> file{library};
+    Res<sg_file> file{library};
     if (file) {
         const sg_node_data* data = file->get(name);
         if (data) {

@@ -1,6 +1,6 @@
 #include "gui.hpp"
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/text/text_format.hpp>
+#include <ek/scenex/text/TextFormat.hpp>
 
 namespace ImGui {
 

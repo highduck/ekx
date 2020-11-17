@@ -155,21 +155,6 @@ void interactive_manager::handle_system_pause() {
     broadcast(entity_, interactive_event::system_pause);
 }
 
-void interactive_manager::set_debug_hit(ecs::entity hit) {
-    if (debug_hit_target_ != hit) {
-        if (debug_hit_target_) {
-            // TODO:
-//            debug_hit_target_->events.off(PreDradrawBorders);
-//            debug_hit_target_->events.off(OnDradrawBounds);
-        }
-        debug_hit_target_ = hit;
-        if (debug_hit_target_) {
-//            debug_hit_target_->events.on(PreDradrawBorders);
-//            debug_hit_target_->events.on(OnDradrawBounds);
-        }
-    }
-}
-
 mouse_cursor interactive_manager::search_interactive_targets(
         ecs::entity node,
         std::vector<ecs::entity>& out_entities) {
@@ -181,9 +166,7 @@ mouse_cursor interactive_manager::search_interactive_targets(
 
     auto cursor = mouse_cursor::parent;
 
-    if (debug_hit_enabled) {
-        set_debug_hit(target);
-    }
+    hitTarget_ = target;
 
     while (target) {
         if (ecs::has<interactive_t>(target)) {

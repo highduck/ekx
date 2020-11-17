@@ -7,10 +7,10 @@
 #include <ek/scenex/components/script.hpp>
 #include <ek/scenex/components/interactive.hpp>
 #include <ek/scenex/components/event_handler.hpp>
-#include <ek/scenex/3d/transform_3d.hpp>
-#include <ek/scenex/3d/camera_3d.hpp>
+#include <ek/scenex/3d/Transform3D.hpp>
+#include <ek/scenex/3d/Camera3D.hpp>
 #include <ek/math/common.hpp>
-#include <ek/scenex/3d/light_3d.hpp>
+#include <ek/scenex/3d/Light3D.hpp>
 #include <ek/scenex/components/movie.hpp>
 #include <ek/scenex/components/button.hpp>
 #include <ek/scenex/app/basic_application.hpp>
@@ -57,7 +57,7 @@ const char* getEntityTitle(ecs::entity e) {
     const char* type = "Entity";
     if (ecs::has<Node>(e)) type = "Node";
     if (ecs::has<Transform2D>(e)) type = "Node 2D";
-    if (ecs::has<transform_3d>(e)) type = "Node 3D";
+    if (ecs::has<Transform3D>(e)) type = "Node 3D";
     if (ecs::has<Display2D>(e)) {
         const auto& disp = ecs::get<Display2D>(e);
         if (disp.is<Sprite2D>()) type = "Sprite";

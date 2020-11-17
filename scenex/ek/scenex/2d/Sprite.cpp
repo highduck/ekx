@@ -1,4 +1,4 @@
-#include "sprite.hpp"
+#include "Sprite.hpp"
 
 #include <ek/draw2d/drawer.hpp>
 
@@ -18,7 +18,7 @@ static unsigned short nine_patch_indices[] = {
         10, 10 + 1, 10 + 5, 10 + 5, 10 + 4, 10
 };
 
-bool sprite_t::select() const {
+bool Sprite::select() const {
     if (texture) {
         draw2d::state.set_texture_region(texture.get(), tex);
         return true;
@@ -26,11 +26,11 @@ bool sprite_t::select() const {
     return false;
 }
 
-void sprite_t::draw() const {
+void Sprite::draw() const {
     draw(rect);
 }
 
-void sprite_t::draw(const rect_f& rc) const {
+void Sprite::draw(const rect_f& rc) const {
     if (texture) {
         draw2d::state.set_texture_region(texture.get(), tex);
         if (rotated) {
@@ -41,7 +41,7 @@ void sprite_t::draw(const rect_f& rc) const {
     }
 }
 
-void sprite_t::draw_grid(const rect_f& grid, const rect_f& target) const {
+void Sprite::draw_grid(const rect_f& grid, const rect_f& target) const {
     if (!texture) {
         return;
     }
@@ -104,7 +104,7 @@ void sprite_t::draw_grid(const rect_f& grid, const rect_f& target) const {
     draw2d::write_indices(nine_patch_indices, 9 * 6);
 }
 
-bool sprite_t::hit_test(const float2& position) const {
+bool Sprite::hit_test(const float2& position) const {
     (void) position;
     if (texture) {
         return true;

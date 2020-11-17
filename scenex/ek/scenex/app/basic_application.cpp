@@ -17,6 +17,7 @@
 #include <ek/scenex/asset2/builtin_assets.hpp>
 #include <ek/graphics/graphics.hpp>
 #include <ek/draw2d/drawer.hpp>
+#include <ek/scenex/2d/Camera2D.hpp>
 
 namespace ek {
 
@@ -50,6 +51,8 @@ void basic_application::initialize() {
     //// basic scene
     root = create_node_2d("root");
     updateScreenRect(root);
+
+    root.assign<Camera2D>(root);
 
     auto& im = service_locator_instance<interactive_manager>::init();
     service_locator_instance<input_controller>::init(im);
@@ -102,11 +105,6 @@ void basic_application::on_draw_frame() {
 
     graphics::begin();
     graphics::viewport();
-    //graphics.set_scissors();
-
-    if (clear_color_enabled) {
-        graphics::clear(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-    }
 
     draw2d::begin(0, 0,
                   static_cast<int>(g_app.drawable_size.x),
@@ -156,7 +154,7 @@ void basic_application::on_frame_end() {
 }
 
 void basic_application::preload_root_assets_pack() {
-    auto* asset_pack = asset_manager_->add_from_type("pack", "pack_meta");
+    auto *asset_pack = asset_manager_->add_from_type("pack", "pack_meta");
     if (asset_pack) {
         asset_pack->load();
     }

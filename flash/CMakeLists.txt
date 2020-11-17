@@ -63,7 +63,11 @@ add_library(${PROJECT_NAME}
         ek/xfl/export_item.cpp
         ek/xfl/export_item.hpp
 
-        ek/xfl/animation_utility.cpp ek/xfl/animation_utility.hpp ek/flash/doc/parsing/doc_parser.cpp ek/flash/doc/parsing/doc_parser.hpp)
+        ek/xfl/animation_utility.cpp
+        ek/xfl/animation_utility.hpp
+        ek/flash/doc/parsing/doc_parser.cpp
+        ek/flash/doc/parsing/doc_parser.hpp
+        )
 
 if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
 target_compile_options(${PROJECT_NAME} PRIVATE
@@ -103,4 +107,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO)
+        CXX_EXTENSIONS NO
+        #UNITY_BUILD ON
+        )

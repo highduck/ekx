@@ -69,6 +69,13 @@ struct vec_t<2, T> {
 
     }
 
+    template<typename S>
+    explicit constexpr vec_t(vec2_t<S> other) noexcept :
+            x{static_cast<T>(other.x)},
+            y{static_cast<T>(other.y)} {
+
+    }
+
     constexpr vec_t(T x_, T y_) noexcept
             : x{x_},
               y{y_} {

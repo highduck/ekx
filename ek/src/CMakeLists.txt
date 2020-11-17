@@ -11,7 +11,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         ek/ext/game_center/game_center.hpp
         ek/ext/sharing/sharing.hpp
 
-        raudio/raudio.h
         raudio/raudio.cpp
 
         ek/audio/audio.cpp

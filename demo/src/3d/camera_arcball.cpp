@@ -1,8 +1,8 @@
 #include "camera_arcball.hpp"
 
 #include <ecxx/ecxx.hpp>
-#include <ek/scenex/3d/camera_3d.hpp>
-#include <ek/scenex/3d/transform_3d.hpp>
+#include <ek/scenex/3d/Camera3D.hpp>
+#include <ek/scenex/3d/Transform3D.hpp>
 #include <ek/scenex/interactive_manager.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/scenex/app/input_controller.hpp>
@@ -28,10 +28,10 @@ void update_camera_arc_ball(float dt) {
         delta = cur - prev_pointer;
         prev_pointer = cur;
     }
-    for (auto e: ecs::view<camera_3d, camera_arc_ball, transform_3d>()) {
+    for (auto e: ecs::view<Camera3D, camera_arc_ball, Transform3D>()) {
         auto& arc_ball = ecs::get<camera_arc_ball>(e);
-        auto& camera_data = ecs::get<camera_3d>(e);
-        auto& camera_transform = ecs::get<transform_3d>(e);
+        auto& camera_data = ecs::get<Camera3D>(e);
+        auto& camera_transform = ecs::get<Transform3D>(e);
 
         auto dir = normalize(arc_ball.center - camera_transform.position);
         auto r = cross(dir, camera_data.up);

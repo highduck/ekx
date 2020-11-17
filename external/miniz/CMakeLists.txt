@@ -3,8 +3,6 @@ project(miniz)
 
 add_library(${PROJECT_NAME} STATIC
         miniz/miniz.c
-        miniz/miniz.h
-        miniz/miniz_common.h
         miniz/miniz_tdef.c
         miniz/miniz_tdef.h
         miniz/miniz_tinfl.c

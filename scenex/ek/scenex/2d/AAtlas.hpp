@@ -1,0 +1,29 @@
+#pragma once
+
+#include "Sprite.hpp"
+#include <ek/util/common_macro.hpp>
+#include <ek/util/assets.hpp>
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <functional>
+
+namespace ek {
+
+class Atlas : private disable_copy_assign_t {
+public:
+
+    Atlas();
+
+    ~Atlas();
+
+    std::unordered_map<std::string, Res<Sprite>> sprites;
+    std::vector<Res<graphics::texture_t>> pages;
+
+    using LoadCallback = std::function<void(Atlas*)>;
+    static void load(const char* path, float scaleFactor, const LoadCallback& callback);
+};
+
+}
+

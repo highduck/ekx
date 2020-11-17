@@ -5,7 +5,7 @@
 
 namespace ek {
 
-struct material_3d {
+struct Material3D {
     constexpr static float k = 0.8f;
     float3 ambient = k * float3::one;
     float3 diffuse = k * float3::one;

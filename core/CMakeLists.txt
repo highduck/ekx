@@ -86,11 +86,12 @@ add_library(${PROJECT_NAME} STATIC
         ek/timers.cpp
         )
 
-
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-#target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+        CXX_STANDARD 17
+        #UNITY_BUILD ON
+        )
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
     set_source_files_properties(stb/stb_image.cpp PROPERTIES COMPILE_FLAGS -Wno-cast-align)

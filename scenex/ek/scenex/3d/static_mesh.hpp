@@ -1,6 +1,6 @@
 #pragma once
 
-#include "material_3d.hpp"
+#include "Material3D.hpp"
 #include <vector>
 #include <string>
 #include <ek/graphics/vertex_decl.hpp>

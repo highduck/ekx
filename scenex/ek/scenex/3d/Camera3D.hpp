@@ -1,22 +1,27 @@
 #pragma once
 
 #include <ek/math/common.hpp>
-#include <string>
 #include <ek/math/vec.hpp>
+#include <string>
+#include <ek/util/assets.hpp>
 
 #undef near
 #undef far
 
 namespace ek {
 
-struct camera_3d {
+namespace graphics {
+class texture_t;
+}
+
+struct Camera3D {
     // clip plane near-far
     float near = 10.0f;
     float far = 1000.0f;
 
     // orthogonal mode
     bool orthogonal = false;
-    float orthogonal_size = 30.0f;
+    float orthogonalSize = 30.0f;
 
     // field of view in radians
     float fov = math::to_radians(45.0f);
@@ -24,12 +29,13 @@ struct camera_3d {
     // camera up vector
     float3 up{0.0f, 0.0f, 1.0f};
 
-    bool clear_color_enabled = true;
-    float4 clear_color{0.5f, 0.5f, 0.5f, 1.0f};
-    bool clear_depth_enabled = true;
-    float clear_depth = 1.0f;
+    bool clearColorEnabled = true;
+    bool clearDepthEnabled = true;
 
-    std::string cube_map;
+    float4 clearColor{0.5f, 0.5f, 0.5f, 1.0f};
+    float clearDepth = 1.0f;
+
+    Res<graphics::texture_t> cubeMap;
 };
 
 }

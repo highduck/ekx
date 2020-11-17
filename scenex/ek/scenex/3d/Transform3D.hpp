@@ -6,7 +6,7 @@
 
 namespace ek {
 
-struct transform_3d {
+struct Transform3D {
     mat4f local{};
     mat4f world{};
     float3 position{};

@@ -1,8 +1,8 @@
 #include "sample_text.hpp"
 
 #include <string>
-#include <ek/scenex/text/text_drawer.hpp>
-#include <ek/scenex/text/truetype_font.hpp>
+#include <ek/scenex/text/TextDrawer.hpp>
+#include <ek/scenex/text/TrueTypeFont.hpp>
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
@@ -115,8 +115,8 @@ void SampleText::prepareInternalResources() {
     auto* ttfFont = new TrueTypeFont(am->scale_factor, 48, "default_glyph_cache");
     ttfFont->loadDeviceFont("Arial Unicode MS");
     auto* font = new Font(ttfFont);
-    asset_t<Font>{"native"}.reset(font);
-    asset_t<Font>{"Cousine-Regular"}->setFallbackFont(font);
+    Res<Font>{"native"}.reset(font);
+    Res<Font>{"Cousine-Regular"}->setFallbackFont(font);
 }
 
 void SampleText::update(float dt) {

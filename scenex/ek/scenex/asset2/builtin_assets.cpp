@@ -9,18 +9,18 @@
 #include <ek/graphics/vertex_decl.hpp>
 #include <ek/scenex/data/sg_data.hpp>
 #include <ek/scenex/data/sg_factory.hpp>
-#include <ek/scenex/2d/atlas.hpp>
+#include <ek/scenex/2d/AAtlas.hpp>
 #include <ek/scenex/data/program_data.hpp>
 #include <ek/scenex/data/texture_data.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/scenex/data/model_data.hpp>
 
-#include <ek/scenex/text/font.hpp>
-#include <ek/scenex/text/truetype_font.hpp>
-#include <ek/scenex/text/bitmap_font.hpp>
+#include <ek/scenex/text/Font.hpp>
+#include <ek/scenex/text/TrueTypeFont.hpp>
+#include <ek/scenex/text/BitmapFont.hpp>
 
 #include <utility>
-#include <ek/scenex/2d/dynamic_atlas.hpp>
+#include <ek/scenex/2d/DynamicAtlas.hpp>
 
 namespace ek {
 
@@ -71,7 +71,7 @@ public:
         auto* music = new audio::Music();
         // TODO: async
         music->load((project_->base_path / path_).c_str());
-        asset_t<audio::Music>{name_}.reset(music);
+        Res<audio::Music>{name_}.reset(music);
         ready_ = true;
     }
 
@@ -94,12 +94,12 @@ public:
         auto* sound = new audio::Sound();
         // TODO: async
         sound->load((project_->base_path / path_).c_str());
-        asset_t<audio::Sound>{name_}.reset(sound);
+        Res<audio::Sound>{name_}.reset(sound);
         ready_ = true;
     }
 
     void do_unload() override {
-        asset_t<atlas_t>{path_}.reset(nullptr);
+        Res<Atlas>{path_}.reset(nullptr);
         ready_ = false;
     }
 
@@ -116,18 +116,18 @@ public:
         if (!ready_ || loaded_scale_ != project_->scale_uid) {
             loaded_scale_ = project_->scale_uid;
 
-            asset_t<atlas_t>{path_}.reset(nullptr);
+            Res<Atlas>{path_}.reset(nullptr);
             ready_ = false;
 
-            load_atlas((project_->base_path / path_).c_str(), project_->scale_factor, [this](auto* atlas) {
-                asset_t<atlas_t>{path_}.reset(atlas);
+            Atlas::load((project_->base_path / path_).c_str(), project_->scale_factor, [this](auto* atlas) {
+                Res<Atlas>{path_}.reset(atlas);
                 ready_ = true;
             });
         }
     }
 
     void do_unload() override {
-        asset_t<atlas_t>{path_}.reset(nullptr);
+        Res<Atlas>{path_}.reset(nullptr);
         ready_ = false;
     }
 
@@ -157,13 +157,13 @@ public:
                     bool alphaMap = false;
                     bool mipmaps = false;
                     io(alphaMap, mipmaps);
-                    asset_t<DynamicAtlas>{path_}.reset(new DynamicAtlas(pageSize, pageSize, alphaMap, mipmaps));
+                    Res<DynamicAtlas>{path_}.reset(new DynamicAtlas(pageSize, pageSize, alphaMap, mipmaps));
                     ready_ = true;
                 });
     }
 
     void do_unload() override {
-        asset_t<DynamicAtlas>{path_}.reset(nullptr);
+        Res<DynamicAtlas>{path_}.reset(nullptr);
         ready_ = false;
     }
 
@@ -180,13 +180,13 @@ public:
         get_resource_content_async(
                 (project_->base_path / path_ + ".sg").c_str(),
                 [this](auto buffer) {
-                    asset_t<sg_file>{path_}.reset(sg_load(buffer));
+                    Res<sg_file>{path_}.reset(sg_load(buffer));
                     ready_ = true;
                 });
     }
 
     void do_unload() override {
-        asset_t<sg_file>{path_}.reset(nullptr);
+        Res<sg_file>{path_}.reset(nullptr);
         ready_ = false;
     }
 
@@ -202,13 +202,13 @@ public:
         get_resource_content_async((project_->base_path / path_ + ".font").c_str(), [this](auto buffer) {
             auto* bmFont = new BitmapFont();
             bmFont->load(buffer);
-            asset_t<Font>{path_}.reset(new Font(bmFont));
+            Res<Font>{path_}.reset(new Font(bmFont));
             ready_ = true;
         });
     }
 
     void do_unload() override {
-        asset_t<Font>{path_}.reset(nullptr);
+        Res<Font>{path_}.reset(nullptr);
         ready_ = false;
     }
 };
@@ -250,13 +250,13 @@ public:
                 EK_ERROR << "unknown Vertex Layout: " << data.vertex_layout;
             }
 
-            asset_t<program_t>{path_}.reset(program);
+            Res<program_t>{path_}.reset(program);
             ready_ = true;
         });
     }
 
     void do_unload() override {
-        asset_t<program_t>{path_}.reset(nullptr);
+        Res<program_t>{path_}.reset(nullptr);
         ready_ = false;
     }
 };
@@ -300,13 +300,13 @@ public:
                 ready_ = false;
             }
 
-            asset_t<texture_t>{path_}.reset(texture);
+            Res<texture_t>{path_}.reset(texture);
             ready_ = true;
         });
     }
 
     void do_unload() override {
-        asset_t<texture_t>{path_}.reset(nullptr);
+        Res<texture_t>{path_}.reset(nullptr);
         ready_ = false;
     }
 };
@@ -332,13 +332,13 @@ public:
             model_data_t data;
             io(data);
 
-            asset_t<static_mesh_t>{path_}.reset(new static_mesh_t(data.mesh));
+            Res<static_mesh_t>{path_}.reset(new static_mesh_t(data.mesh));
             ready_ = true;
         });
     }
 
     void do_unload() override {
-        asset_t<static_mesh_t>{path_}.reset(nullptr);
+        Res<static_mesh_t>{path_}.reset(nullptr);
         ready_ = false;
     }
 };
@@ -394,14 +394,14 @@ public:
             get_resource_content_async((project_->base_path / path_ + ".ttf").c_str(), [&, this](auto buffer) {
                 auto* ttfFont = new TrueTypeFont(project_->scale_factor, fontSize, glyphCache);
                 ttfFont->loadFromMemory(std::move(buffer));
-                asset_t<Font>{path_}.reset(new Font(ttfFont));
+                Res<Font>{path_}.reset(new Font(ttfFont));
                 ready_ = true;
             });
         });
     }
 
     void do_unload() override {
-        asset_t<TrueTypeFont>{path_}.reset(nullptr);
+        Res<TrueTypeFont>{path_}.reset(nullptr);
         ready_ = false;
     }
 };

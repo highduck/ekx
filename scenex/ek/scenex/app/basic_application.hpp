@@ -24,8 +24,6 @@ public:
 
     framed_timer_t frame_timer{};
 
-    bool clear_color_enabled = false;
-    float4 clear_color{0.3f, 0.3f, 0.3f, 1.0f};
     float scale_factor = 1.0f;
 
     signal_t<> hook_on_preload{};

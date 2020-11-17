@@ -64,7 +64,16 @@ public:
     inline T height() const {
         return max.y > min.y ? (max.y - min.y) : 0.0f;
     }
+
+    static rect_t <T> transform(const rect_t <T>& rect, const mat3x2_t <T>& matrix);
 };
+
+template<typename T>
+rect_t <T> bounds_builder_t<T>::transform(const rect_t <T>& rect, const mat3x2_t <T>& matrix) {
+    bounds_builder_t bb;
+    bb.add(rect, matrix);
+    return bb.rect();
+}
 
 using bounds_builder_2f = bounds_builder_t<float>;
 

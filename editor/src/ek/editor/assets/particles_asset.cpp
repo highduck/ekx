@@ -14,11 +14,11 @@ void particles_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
 void particles_asset_t::load() {
     read_decl();
 
-    asset_t<particle_decl>{name_}.reset(&decl_);
+    Res<particle_decl>{name_}.reset(&decl_);
 }
 
 void particles_asset_t::unload() {
-    asset_t<particle_decl>{name_}.reset(nullptr);
+    Res<particle_decl>{name_}.reset(nullptr);
 }
 
 void particles_asset_t::gui() {

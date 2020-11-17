@@ -7,11 +7,12 @@
 namespace ek {
 
 /** Working directory util **/
-const int path_max_size = 4096;
+
+const int wd_pathMaxSize = 4096;
 
 std::string current_working_directory() {
-    char buf[path_max_size];
-    ::getcwd(buf, path_max_size);
+    char buf[wd_pathMaxSize];
+    ::getcwd(buf, wd_pathMaxSize);
     return std::string{buf};
 }
 

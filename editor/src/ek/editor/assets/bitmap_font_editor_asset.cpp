@@ -5,10 +5,10 @@
 #include <ek/system/working_dir.hpp>
 #include <ek/spritepack/export_atlas.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/2d/sprite.hpp>
+#include <ek/scenex/2d/Sprite.hpp>
 #include <ek/system/system.hpp>
 #include <ek/fonts/export_font.hpp>
-#include <ek/scenex/text/font.hpp>
+#include <ek/scenex/text/Font.hpp>
 #include <utility>
 #include <memory>
 
@@ -32,7 +32,7 @@ void BitmapFontEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {
 void BitmapFontEditorAsset::load() {
     read_decl();
 
-    asset_t<spritepack::atlas_t> atlasBuild{atlasTarget_};
+    Res<spritepack::atlas_t> atlasBuild{atlasTarget_};
     auto font_data = font_lib::export_font(project->base_path / resource_path_,
                                            name_,
                                            font_decl_,
@@ -41,22 +41,22 @@ void BitmapFontEditorAsset::load() {
 
     auto* bmFont = new BitmapFont();
     bmFont->load(font_data);
-    asset_t<Font>{name_}.reset(new Font(bmFont));
+    Res<Font>{name_}.reset(new Font(bmFont));
 }
 
 void BitmapFontEditorAsset::unload() {
-    asset_t<Font>{name_}.reset(nullptr);
+    Res<Font>{name_}.reset(nullptr);
 }
 
 void BitmapFontEditorAsset::gui() {
-    asset_t<Font> font{name_};
+    Res<Font> font{name_};
     gui_font_view(font.get());
 }
 
 void BitmapFontEditorAsset::build(assets_build_struct_t& data) {
     read_decl();
 
-    asset_t<spritepack::atlas_t> atlasBuild{atlasTarget_};
+    Res<spritepack::atlas_t> atlasBuild{atlasTarget_};
     auto font_data = font_lib::export_font(project->base_path / resource_path_,
                                            name_,
                                            font_decl_,

@@ -10,7 +10,7 @@ enum class light_3d_type {
     spot
 };
 
-struct light_3d {
+struct Light3D {
     light_3d_type type = light_3d_type::point;
 
     float3 ambient = 0.1f * float3::one;

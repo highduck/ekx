@@ -71,7 +71,7 @@ struct TextLayerEffect {
 };
 
 struct TextFormat {
-    asset_t <Font> font;
+    Res <Font> font;
     float size = 16.0f;
     float leading = 0.0f;
     float letterSpacing = 0.0f;

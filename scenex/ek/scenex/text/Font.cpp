@@ -1,9 +1,9 @@
-#include "font.hpp"
+#include "Font.hpp"
 
 #include <ek/util/locator.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/math/bounds_builder.hpp>
-#include "font_base.hpp"
+#include "FontImplBase.hpp"
 
 namespace ek {
 
