@@ -4,7 +4,7 @@
 #include <ek/util/locator.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/goodies/helpers/Trail2D.hpp>
 #include <ek/goodies/helpers/mouse_follow_script.hpp>

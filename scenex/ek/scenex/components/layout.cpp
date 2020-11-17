@@ -1,6 +1,6 @@
 #include "layout.hpp"
 #include <ecxx/ecxx.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include <ek/app/device.hpp>
 #include <ek/app/app.hpp>
 

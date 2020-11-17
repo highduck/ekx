@@ -1,12 +1,12 @@
 #include "AudioManager.hpp"
-#include "scene_system.hpp"
 
 #include <ek/app/device.hpp>
-#include <utility>
+#include <ek/util/assets.hpp>
 
 namespace ek {
 
 AudioManager::AudioManager() = default;
+
 AudioManager::~AudioManager() = default;
 
 void AudioManager::play_music(const std::string& name) {
@@ -49,7 +49,7 @@ void AudioManager::vibrate(int length) const {
 }
 
 void AudioManager::update(float) {
-    if(!music_.empty()) {
+    if (!music_.empty()) {
         Res<audio::Music> musicAsset{music_};
         if (musicAsset) {
             auto volume = music.enabled() ? music_volume_ : 0.0f;

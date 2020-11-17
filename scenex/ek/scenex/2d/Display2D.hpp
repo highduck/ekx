@@ -6,7 +6,8 @@
 #include <ek/math/box.hpp>
 #include <ek/math/mat3x2.hpp>
 #include <ek/util/type_index.hpp>
-#include <ek/scenex/2d/Sprite.hpp>
+#include <ecxx/ecxx.hpp>
+#include "Sprite.hpp"
 
 namespace ek {
 
@@ -189,6 +190,23 @@ public:
     [[nodiscard]]
     bool hitTest(float2 point) const override;
 };
+
+
+/** utilities **/
+void set_gradient_quad(ecs::entity e, const rect_f& rc, argb32_t top, argb32_t bottom);
+
+inline void set_color_quad(ecs::entity e, const rect_f& rc, argb32_t color) {
+    set_gradient_quad(e, rc, color, color);
+}
+
+template<typename T>
+inline T& get_drawable(ecs::entity e) {
+    return *static_cast<T*>(e.get<Display2D>().drawable.get());
+}
+
+inline void set_text(ecs::entity e, const std::string& v) {
+    get_drawable<Text2D>(e).text = v;
+}
 
 }
 

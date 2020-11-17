@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/components/script.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
@@ -90,21 +90,6 @@ inline void notify_parents(ecs::entity e, const std::string& event, const std::s
     dispatch_bubble(e, {event, e, std::any{payload}});
 }
 
-inline void set_gradient_quad(ecs::entity e, const rect_f& rc, argb32_t top, argb32_t bottom) {
-    auto q = std::make_unique<Quad2D>();
-    q->rect = rc;
-    q->colors[0] = top;
-    q->colors[1] = top;
-    q->colors[2] = bottom;
-    q->colors[3] = bottom;
-
-    ecs::get_or_create<Display2D>(e).drawable = std::move(q);
-}
-
-inline void set_color_quad(ecs::entity e, const rect_f& rc, argb32_t color) {
-    set_gradient_quad(e, rc, color, color);
-}
-
 template<typename Component>
 inline ecs::entity find_first_ancestor(ecs::entity e) {
     auto it = ecs::get<Node>(e).parent;
@@ -115,16 +100,6 @@ inline ecs::entity find_first_ancestor(ecs::entity e) {
         it = ecs::get<Node>(it).parent;
     }
     return nullptr;
-}
-
-template<typename T>
-inline T& get_drawable(ecs::entity e) {
-    return *static_cast<T*>(ecs::get<Display2D>(e).drawable.get());
-}
-
-inline void set_text(ecs::entity e, const std::string& v) {
-    auto& txt = get_drawable<Text2D>(e);
-    txt.text = v;
 }
 
 }

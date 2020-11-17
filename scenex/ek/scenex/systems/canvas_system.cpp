@@ -3,7 +3,7 @@
 
 #include <ek/app/app.hpp>
 #include <ek/scenex/components/canvas.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 
 using ek::app::g_app;

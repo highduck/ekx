@@ -52,7 +52,8 @@ void basic_application::initialize() {
     root = create_node_2d("root");
     updateScreenRect(root);
 
-    root.assign<Camera2D>(root);
+    auto& defaultCamera = root.assign<Camera2D>(root);
+    Camera2D::Main = root;
 
     auto& im = service_locator_instance<InteractionSystem>::init(root);
     service_locator_instance<input_controller>::init(im);
@@ -152,7 +153,7 @@ void basic_application::on_frame_end() {
 }
 
 void basic_application::preload_root_assets_pack() {
-    auto *asset_pack = asset_manager_->add_from_type("pack", "pack_meta");
+    auto* asset_pack = asset_manager_->add_from_type("pack", "pack_meta");
     if (asset_pack) {
         asset_pack->load();
     }

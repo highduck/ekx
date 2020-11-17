@@ -174,4 +174,16 @@ bool Arc2D::hitTest(float2 point) const {
     auto len = length(point);
     return len >= radius && len <= (radius + line_width);
 }
+
+/** utilities **/
+void set_gradient_quad(ecs::entity e, const rect_f& rc, argb32_t top, argb32_t bottom) {
+    auto q = std::make_unique<Quad2D>();
+    q->rect = rc;
+    q->colors[0] = top;
+    q->colors[1] = top;
+    q->colors[2] = bottom;
+    q->colors[3] = bottom;
+
+    e.get_or_create<Display2D>().drawable = std::move(q);
+}
 }

@@ -1,7 +1,7 @@
 #include "Transform2D.hpp"
 
 #include <ek/draw2d/drawer.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 
 namespace ek {
 

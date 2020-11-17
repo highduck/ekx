@@ -9,8 +9,9 @@ namespace ek {
 
 struct Camera2D {
     bool enabled = true;
-    bool interactive = false;
+    bool interactive = true;
     bool occlusionEnabled = true;
+
     int order = 0;
     int layerMask = 0xFF;
 
@@ -35,6 +36,7 @@ struct Camera2D {
     bool debugGizmoHitTarget = false;
     bool debugGizmoPointer = false;
     bool debugGizmoSelf = false;
+    bool debugDrawScriptGizmo = false;
     float debugDrawScale = 1;
 
     matrix_2d matrix{};
@@ -42,6 +44,7 @@ struct Camera2D {
     rect_f screenRect = rect_f::zero_one;
     rect_f worldRect = rect_f::zero_one;
 
+    static ecs::entity Main;
 public:
     Camera2D() = default;
 

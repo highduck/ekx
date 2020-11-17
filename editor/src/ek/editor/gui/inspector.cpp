@@ -3,15 +3,16 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/components/interactive.hpp>
-#include <ek/scenex/scene_system.hpp>
+#include <ek/scenex/components/script.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/3d/Transform3D.hpp>
 #include <ek/scenex/3d/Camera3D.hpp>
 #include <ek/scenex/3d/Light3D.hpp>
 #include <ek/scenex/components/movie.hpp>
-#include <ek/scenex/components/node.hpp>
+#include <ek/scenex/components/Node.hpp>
 #include <ek/scenex/components/layout.hpp>
-#include <ek/scenex/components/node_filters.hpp>
+#include <ek/scenex/components/event_handler.hpp>
+#include <ek/scenex/2d/UglyFilter2D.hpp>
 #include <ek/scenex/particles/particle_system.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
 
@@ -122,12 +123,13 @@ void guiCamera2D(Camera2D& camera) {
     ImGui::DragFloat2("relativeOrigin", camera.relativeOrigin.data());
 
     ImGui::Separator();
-    ImGui::Checkbox("debugOcclusion", &camera.debugOcclusion);
-    ImGui::Checkbox("debugGizmoFills", &camera.debugVisibleBounds);
-    ImGui::Checkbox("debugGizmoHitTarget", &camera.debugGizmoHitTarget);
-    ImGui::Checkbox("debugGizmoPointer", &camera.debugGizmoPointer);
-    ImGui::Checkbox("debugGizmoSelf", &camera.debugGizmoSelf);
-    ImGui::DragFloat("debugDrawScale", &camera.debugDrawScale);
+    ImGui::Checkbox("Draw Occlusion", &camera.debugOcclusion);
+    ImGui::Checkbox("Draw Bounds", &camera.debugVisibleBounds);
+    ImGui::Checkbox("Draw Hit Target", &camera.debugGizmoHitTarget);
+    ImGui::Checkbox("Draw Pointer", &camera.debugGizmoPointer);
+    ImGui::Checkbox("Draw Camera Gizmo", &camera.debugGizmoSelf);
+    ImGui::Checkbox("Draw Script Gizmo", &camera.debugDrawScriptGizmo);
+    ImGui::DragFloat("Debug Scale", &camera.debugDrawScale);
 }
 
 void guiTransform3D(Transform3D& transform) {
@@ -265,7 +267,7 @@ void guiLayout(layout_t& layout) {
     ImGui::EditRect("Safe Rect", layout.safeRect.data());
 }
 
-void guiLegacyFilters(node_filters_t& filters) {
+void guiUglyFilter2D(UglyFilter2D& filters) {
     ImGui::Checkbox("Enabled", &filters.enabled);
     for (int i = 0; i < filters.filters.size(); ++i) {
         auto& filter = filters.filters[i];
@@ -315,7 +317,7 @@ void gui_inspector(ecs::entity e) {
         ImGui::LabelText("Layers", "%x", node.layersMask());
     }
 
-    guiComponentPanel<node_filters_t>(e, "LEGACY Filters", guiLegacyFilters);
+    guiComponentPanel<UglyFilter2D>(e, "UglyFilter2D", guiUglyFilter2D);
     guiComponentPanel<Transform2D>(e, "Transform2D", guiTransform2D);
     guiComponentPanel<Camera2D>(e, "Camera2D", guiCamera2D);
 

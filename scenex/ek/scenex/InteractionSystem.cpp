@@ -2,9 +2,11 @@
 
 #include <ek/math/vec.hpp>
 #include <ek/scenex/components/interactive.hpp>
-#include <ek/scenex/utility/scene_management.hpp>
-#include <ek/scenex/scene_system.hpp>
+#include <ek/scenex/components/event_handler.hpp>
+#include <ek/scenex/systems/hitTest.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
+#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/utility/scene_management.hpp>
 
 using namespace ek::app;
 
@@ -23,6 +25,7 @@ inline bool contains(const vector<T>& vec, const T& value) {
 }
 
 bool dispatch_interactive_event(ecs::entity e, const event_data& data) {
+
     if (isTouchable(e)) {
         if (ecs::has<event_handler_t>(e)) {
             auto& eh = ecs::get<event_handler_t>(e);
@@ -31,9 +34,9 @@ bool dispatch_interactive_event(ecs::entity e, const event_data& data) {
                 return true;
             }
         }
-        auto it = ecs::get<Node>(e).child_last;
+        auto it = e.get<Node>().child_last;
         while (it) {
-            auto prev = ecs::get<Node>(it).sibling_prev;
+            auto prev = it.get<Node>().sibling_prev;
             if (dispatch_interactive_event(it, data)) {
                 return true;
             }
@@ -157,10 +160,10 @@ void InteractionSystem::handle_system_pause() {
 }
 
 mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::entity node,
-                                                           vector<ecs::entity>& list) {
+                                                         vector<ecs::entity>& list) {
     auto it = dragEntity_;
     if (!it.valid()) {
-        it = hitTest(node, pointer);
+        it = hitTest2D(node, pointer);
     }
     hitTarget_ = it;
 
