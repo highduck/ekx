@@ -6,11 +6,11 @@
 #include <ek/graphics/vertex_decl.hpp>
 #include <ek/graphics/texture.hpp>
 
-#include <ek/scenex/text/font.hpp>
+#include <ek/scenex/text/Font.hpp>
 
 #include <ek/draw2d/drawer.hpp>
 #include <ek/imaging/drawing.hpp>
-#include <ek/scenex/text/text_drawer.hpp>
+#include <ek/scenex/text/TextDrawer.hpp>
 #include <ek/app/device.hpp>
 
 namespace ek {
@@ -63,7 +63,7 @@ const char* program_2d_fs_ = "#ifdef GL_ES\n"
 
 void create_builtin() {
     using namespace graphics;
-    asset_t<texture_t> empty_texture{"empty"};
+    Res<texture_t> empty_texture{"empty"};
     empty_texture.reset(new texture_t);
     image_t image_t{4, 4};
     fill_image(image_t, 0xFFFFFFFFu);
@@ -71,7 +71,7 @@ void create_builtin() {
 
     auto pr = new program_t(program_2d_vs_, program_2d_fs_);
     pr->vertex = &vertex_2d::decl;
-    asset_t<program_t>{"2d"}
+    Res<program_t>{"2d"}
             .reset(pr);
 }
 

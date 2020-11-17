@@ -63,8 +63,6 @@ void DemoApp::initialize() {
 void DemoApp::preload() {
     basic_application::preload();
 
-    clear_color_enabled = true;
-
     SampleText::prepareInternalResources();
 }
 

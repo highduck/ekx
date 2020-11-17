@@ -1,26 +1,7 @@
 #include "file_watcher.hpp"
-
-#include <dirent.h>
+#include "system.hpp"
 
 namespace ek {
-
-bool is_dir_entry_real(const struct dirent* e) {
-    // empty
-    if (!e || e->d_name[0] == 0) {
-        return false;
-    }
-    if (e->d_name[0] == '.') {
-        // "."
-        if (e->d_name[1] == 0) {
-            return false;
-        }
-        // ".."
-        if (e->d_name[1] == '.' && e->d_name[2] == 0) {
-            return false;
-        }
-    }
-    return true;
-}
 //
 //void scan_path(const path_t& path, std::unordered_map<path_t, uint64_t>& file_map) {
 //    DIR* dir = opendir(path.c_str());

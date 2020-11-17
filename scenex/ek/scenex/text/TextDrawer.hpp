@@ -1,8 +1,8 @@
 #pragma once
 
 #include <ek/util/assets.hpp>
-#include "font.hpp"
-#include "text_format.hpp"
+#include "Font.hpp"
+#include "TextFormat.hpp"
 
 namespace ek {
 
@@ -20,6 +20,8 @@ struct TextBlockInfo {
 };
 
 class TextDrawer {
+private:
+    TextDrawer() = default;
 public:
     // user set
     TextFormat format{};
@@ -36,6 +38,8 @@ public:
 
     void draw(const char* text);
 
+    void drawFormat(const char* fmt, ...);
+
     void drawWithBlockInfo(const char* text, const TextBlockInfo& info);
 
     void drawLayer(const char* text, const TextLayerEffect& layer, const TextBlockInfo& info) const;
@@ -44,6 +48,7 @@ public:
     void getTextSize(const char* text, TextBlockInfo& info) const;
 
     static TextBlockInfo sharedTextBlockInfo;
+    static TextDrawer shared;
 };
 
 

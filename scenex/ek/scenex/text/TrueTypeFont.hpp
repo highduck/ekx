@@ -1,6 +1,6 @@
 #pragma once
 
-#include "font_base.hpp"
+#include "FontImplBase.hpp"
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
 #include <ek/math/box.hpp>
@@ -45,7 +45,7 @@ public:
 
     float baseFontSize;
     float dpiScale;
-    asset_t<DynamicAtlas> atlas;
+    Res<DynamicAtlas> atlas;
     std::unordered_map<uint32_t, std::unique_ptr<std::unordered_map<uint32_t, Glyph>>> mapByEffect;
     std::unordered_map<uint32_t, Glyph>* map = nullptr;
 

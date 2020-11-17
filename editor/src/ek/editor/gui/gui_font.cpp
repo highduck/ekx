@@ -1,6 +1,6 @@
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/text/font.hpp>
-#include <ek/scenex/text/truetype_font.hpp>
+#include <ek/scenex/text/Font.hpp>
+#include <ek/scenex/text/TrueTypeFont.hpp>
 #include <ek/fonts/export_font.hpp>
 
 namespace ek {

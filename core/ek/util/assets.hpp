@@ -8,7 +8,7 @@
 namespace ek {
 
 template<typename T>
-class asset_t {
+class Res {
 
     struct slot : private disable_copy_assign_t {
         explicit slot(std::string key_) : key{std::move(key_)} {}
@@ -27,9 +27,9 @@ class asset_t {
     static std::unordered_map<std::string, slot_unique_ptr> storage_;
 
 public:
-    asset_t() : slot_{&emptySlot} {}
+    Res() : slot_{&emptySlot} {}
 
-    explicit asset_t(const std::string& id);
+    explicit Res(const std::string& id);
 
     void setID(const std::string& id);
 
@@ -93,13 +93,13 @@ private:
 };
 
 template<typename T>
-std::unordered_map<std::string, typename asset_t<T>::slot_unique_ptr> asset_t<T>::storage_{};
+std::unordered_map<std::string, typename Res<T>::slot_unique_ptr> Res<T>::storage_{};
 
 template<typename T>
-typename asset_t<T>::slot asset_t<T>::emptySlot{""};
+typename Res<T>::slot Res<T>::emptySlot{""};
 
 template<typename T>
-typename asset_t<T>::slot* asset_t<T>::getSlotPointer(const std::string& id) {
+typename Res<T>::slot* Res<T>::getSlotPointer(const std::string& id) {
     slot_unique_ptr& ptr = storage_[id];
     if (!ptr) {
         ptr.reset(new slot(id));
@@ -108,17 +108,17 @@ typename asset_t<T>::slot* asset_t<T>::getSlotPointer(const std::string& id) {
 }
 
 template<typename T>
-asset_t<T>::asset_t(const std::string& id)
+Res<T>::Res(const std::string& id)
         : slot_{getSlotPointer(id)} {
 }
 
 template<typename T>
-void asset_t<T>::setID(const std::string& id) {
+void Res<T>::setID(const std::string& id) {
     slot_ = getSlotPointer(id);
 }
 
 template<typename T>
-const std::string& asset_t<T>::getID() const {
+const std::string& Res<T>::getID() const {
     return slot_->key;
 }
 

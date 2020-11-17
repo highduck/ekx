@@ -3,18 +3,18 @@
 #include "particle_decl.hpp"
 
 #include <ek/util/assets.hpp>
-#include <ek/scenex/2d/sprite.hpp>
-#include <ek/scenex/text/font.hpp>
+#include <ek/scenex/2d/Sprite.hpp>
+#include <ek/scenex/text/Font.hpp>
 #include <ek/draw2d/drawer.hpp>
 
 namespace ek {
 
 class particle {
 public:
-    asset_t<sprite_t> sprite;
+    Res<Sprite> sprite;
     int draw_layer = 0;
     std::string text;
-    asset_t<Font> font;
+    Res<Font> font;
     int font_size = 0;
     float2 pivot = float2::zero;
 

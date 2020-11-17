@@ -61,33 +61,35 @@ target_sources(${PROJECT_NAME} PRIVATE
         app/input_controller.cpp
         app/profiler.cpp
 
-        3d/transform_3d.cpp
-        3d/transform_3d.hpp
-        3d/camera_3d.cpp
-        3d/camera_3d.hpp
+        3d/Transform3D.cpp
+        3d/Transform3D.hpp
+        3d/Camera3D.cpp
+        3d/Camera3D.hpp
         3d/static_mesh.cpp
         3d/static_mesh.hpp
         3d/render_system_3d.cpp
         3d/render_system_3d.hpp
-        3d/light_3d.cpp
-        3d/light_3d.hpp
-        3d/material_3d.cpp
-        3d/material_3d.hpp
+        3d/Light3D.cpp
+        3d/Light3D.hpp
+        3d/Material3D.cpp
+        3d/Material3D.hpp
 
         local_storage_var_t.hpp
 
-        2d/atlas.cpp
-        2d/sprite.cpp
-        2d/dynamic_atlas.cpp
+        2d/AAtlas.cpp
+        2d/Sprite.cpp
+        2d/DynamicAtlas.cpp
         2d/Transform2D.cpp
         2d/Display2D.cpp
+        2d/Camera2D.cpp
+        2d/Camera2D_debug.cpp
 
-        text/bitmap_font.cpp
-        text/truetype_font.cpp
-        text/font.cpp
-        text/font_base.cpp
-        text/font_base.hpp
-        text/text_drawer.cpp
+        text/BitmapFont.cpp
+        text/TrueTypeFont.cpp
+        text/Font.cpp
+        text/FontImplBase.cpp
+        text/FontImplBase.hpp
+        text/TextDrawer.cpp
 
         asset2/asset_object.hpp
         asset2/asset_manager.cpp

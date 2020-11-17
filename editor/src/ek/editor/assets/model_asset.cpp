@@ -25,7 +25,7 @@ void model_asset_t::load() {
     if (buffer.empty()) {
         EK_ERROR("Not found or empty %s", (project->base_path / declaration_path_).c_str());
     } else {
-        asset_t<static_mesh_t>{name_}.reset(
+        Res<static_mesh_t>{name_}.reset(
                 new static_mesh_t(
                         load_obj(buffer)
                 )
@@ -34,7 +34,7 @@ void model_asset_t::load() {
 }
 
 void model_asset_t::unload() {
-    asset_t<static_mesh_t>{name_}.reset(nullptr);
+    Res<static_mesh_t>{name_}.reset(nullptr);
 }
 
 void model_asset_t::gui() {

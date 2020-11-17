@@ -37,8 +37,9 @@ void drawing_state::finish() {
 
 /** Scissors **/
 
-void drawing_state::saveScissors() {
+drawing_state& drawing_state::saveScissors() {
     scissor_stack_.push_back(scissors);
+    return *this;
 }
 
 void drawing_state::setScissors(const rect_f& scissors_) {
@@ -51,10 +52,11 @@ void drawing_state::push_scissors(const rect_f& scissors_) {
     setScissors(clamp_bounds(scissors, scissors_));
 }
 
-void drawing_state::pop_scissors() {
+drawing_state& drawing_state::pop_scissors() {
     scissors = scissor_stack_.back();
     scissor_stack_.pop_back();
     check_scissors = true;
+    return *this;
 }
 
 /** Matrix Transform **/
@@ -447,6 +449,7 @@ void quad_rotated(float x, float y, float w, float h) {
     write_indices_quad();
 }
 
+// This function should be moved to the dedicated `indexed draw` mode
 void fill_circle(const circle_f& circle, argb32_t inner_color, argb32_t outer_color, int segments) {
     prepare();
     triangles(1 + segments, 3 * segments);
@@ -615,7 +618,7 @@ void line_arc(float x, float y, float r,
         float cs1 = cosf(a1);
         float sn1 = sinf(a1);
 
-        write_vertex(x + r1 * cs0, y + r1 * sn0, 0.0f, 0.0f, m2, co);
+        write_vertex(x + r1 * cs0, y + r1 * sn0, 0, 0, m2, co);
         write_vertex(x + r1 * cs1, y + r1 * sn1, 1, 0, m2, co);
         write_vertex(x + r0 * cs1, y + r0 * sn1, 1, 1, m1, co);
         write_vertex(x + r0 * cs0, y + r0 * sn0, 0, 1, m1, co);

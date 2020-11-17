@@ -13,8 +13,8 @@ namespace ek::draw2d {
 
 struct drawing_state {
 
-    asset_t<graphics::program_t> default_program{"2d"};
-    asset_t<graphics::texture_t> default_texture{"empty"};
+    Res<graphics::program_t> default_program{"2d"};
+    Res<graphics::texture_t> default_texture{"empty"};
 
     rect_f canvas_rect{};
     const graphics::texture_t* texture{};
@@ -52,11 +52,11 @@ public:
 
     void push_scissors(const rect_f& scissors);
 
-    void saveScissors();
+    drawing_state& saveScissors();
 
     void setScissors(const rect_f& scissors);
 
-    void pop_scissors();
+    drawing_state& pop_scissors();
 
     /** Matrix Transform **/
 

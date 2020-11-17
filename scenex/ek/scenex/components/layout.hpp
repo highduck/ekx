@@ -37,9 +37,9 @@ struct layout_t {
         return *this;
     }
 
-    layout_t&  fill(bool x, bool y) {
-        fill_x = x;
-        fill_y = y;
+    layout_t& fill(bool xAxis, bool yAxis) {
+        fill_x = xAxis;
+        fill_y = yAxis;
         return *this;
     }
 };

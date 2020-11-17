@@ -1,8 +1,8 @@
 #pragma once
 
 #include <ek/util/assets.hpp>
-#include <ek/scenex/2d/sprite.hpp>
-#include <ek/scenex/text/font.hpp>
+#include <ek/scenex/2d/Sprite.hpp>
+#include <ek/scenex/text/Font.hpp>
 #include <ek/math/rand.hpp>
 
 #include <vector>
@@ -121,8 +121,8 @@ public:
 };
 
 struct particle_decl {
-    asset_t<sprite_t> sprite;
-    asset_t<Font> font;
+    Res<Sprite> sprite;
+    Res<Font> font;
     int font_size = 0;
     particle_scale_mode scale_mode = particle_scale_mode::None;
     particle_alpha_mode alpha_mode = particle_alpha_mode::None;

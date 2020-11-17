@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <ek/scenex/text/bitmap_font.hpp>
+#include <ek/scenex/text/BitmapFont.hpp>
 #include <ek/spritepack/sprite_data.hpp>
 #include <ek/flash/rasterizer/software_filters.hpp>
 #include <ek/spritepack/atlas_declaration.hpp>

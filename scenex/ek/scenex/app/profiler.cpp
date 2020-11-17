@@ -7,8 +7,8 @@
 #include <ek/util/timer.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app/device.hpp>
-#include <ek/scenex/text/font.hpp>
-#include <ek/scenex/text/text_drawer.hpp>
+#include <ek/scenex/text/Font.hpp>
+#include <ek/scenex/text/TextDrawer.hpp>
 
 // TODO: EK_DEV_BUILD
 //#if !defined(NDEBUG) || defined(EK_DEV_BUILD)
@@ -19,10 +19,12 @@ namespace ek {
 
 using namespace std;
 
+static TextFormat devTextFormat{"Cousine-Regular", 10};
+
 struct RealTimeGraph {
     std::string name{};
-    const char* titleFormat = "%s: %0.0f";
-    const char* markerFormat = "%0.0f";
+    const char *titleFormat = "%s: %0.0f";
+    const char *markerFormat = "%0.0f";
     float thMin = 1.0f / 60.0f;
     float thMax = 1.0f / 30.0f;
     float accum{};
@@ -67,22 +69,17 @@ struct RealTimeGraph {
     }
 
     void drawText() const {
-        static char buf[256];
-        static TextDrawer textDrawer;
-        textDrawer.format.font.setID("Cousine-Regular");
-        textDrawer.format.size = 10.0f;
-        textDrawer.format.leading = 1.0f;
+        devTextFormat.leading = 1;
 
 //        float width = history.size();
 //        float lastValue = history.at_backward(0);
 //        float y = calculateY(lastValue);
-//        snprintf(buf, sizeof(buf) - 1, markerFormat, history.at_backward(0));
-//        textDrawer.position = {width, height - y + 0.5f * textDrawer.format.size};
-//        textDrawer.draw(buf);
+//        TextDrawer::shared.position = {width, height - y + 0.5f * textFormat.size};
+//        TextDrawer::shared.drawFormat(markerFormat, history.at_backward(0));
 
-        snprintf(buf, sizeof(buf) - 1, titleFormat, name.c_str(), value);
-        textDrawer.position = {2.0f, 2.0f + textDrawer.format.size};
-        textDrawer.draw(buf);
+        TextDrawer::shared.format = devTextFormat;
+        TextDrawer::shared.position = {2.0f, 2.0f + devTextFormat.size};
+        TextDrawer::shared.drawFormat(titleFormat, name.c_str(), value);
     }
 
     float min = 0.0f;
@@ -151,17 +148,6 @@ void Profiler::draw() {
         it.second.drawText();
     }
 
-    draw2d::state.translate(0, 35);
-    static char buf[256];
-    static TextDrawer textDrawer;
-    textDrawer.format.font.setID("Cousine-Regular");
-    textDrawer.format.size = 10.0f;
-    textDrawer.format.leading = 1.0f;
-
-    snprintf(buf, sizeof(buf) - 1, "BUF: %0.2f MB", (draw2d::getBatchingUsedMemory() / 1000000.0f));
-    textDrawer.position = {2.0f, 2.0f + textDrawer.format.size};
-    textDrawer.draw(buf);
-
     draw2d::state.restore_matrix();
     draw2d::state.restore_matrix();
 #endif
@@ -198,7 +184,7 @@ Profiler::Profiler() {
 
 Profiler::~Profiler() = default;
 
-void Profiler::addTime(const char* name, float time) {
+void Profiler::addTime(const char *name, float time) {
 #ifdef ENABLE_PROFILER
     auto& graphs = impl->frameGraphs;
     {

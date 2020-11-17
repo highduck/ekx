@@ -2,11 +2,11 @@
 
 #include <memory>
 #include <string>
-#include <ek/scenex/text/text_format.hpp>
+#include <ek/scenex/text/TextFormat.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/mat3x2.hpp>
 #include <ek/util/type_index.hpp>
-#include <ek/scenex/2d/sprite.hpp>
+#include <ek/scenex/2d/Sprite.hpp>
 
 namespace ek {
 
@@ -122,7 +122,7 @@ public:
 
 class Sprite2D : public Drawable2D<Sprite2D> {
 public:
-    asset_t<sprite_t> src;
+    Res<Sprite> src;
     bool hit_pixels = true;
 
     bool scale_grid_mode = false;
@@ -179,7 +179,7 @@ public:
     int segments = 50;
     argb32_t color_inner = argb32_t::one;
     argb32_t color_outer = argb32_t::one;
-    asset_t<sprite_t> sprite;
+    Res<Sprite> sprite;
 
     void draw() override;
 

@@ -36,7 +36,7 @@ void fireworks_script::update(float dt) {
         };
 
         resolve<AudioManager>().play_sound("sfx/firework", random(0.5f, 1.0f));
-        asset_t<particle_decl> part{"firework_star"};
+        Res<particle_decl> part{"firework_star"};
         switch (random_int(0, 3)) {
             case 0:
                 part->color.set_gradient(0xffffff00_argb, 0xffff7f00_argb);

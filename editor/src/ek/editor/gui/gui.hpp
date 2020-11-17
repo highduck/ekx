@@ -34,9 +34,9 @@ struct TextLayerEffect;
 
 void guiTextLayerEffect(TextLayerEffect& layer);
 
-class sprite_t;
+class Sprite;
 
-class atlas_t;
+class Atlas;
 
 class Font;
 
@@ -48,9 +48,9 @@ struct particle_decl;
 
 class editor_asset_t;
 
-void gui_sprite_view(const sprite_t* sprite);
+void gui_sprite_view(const Sprite* sprite);
 
-void gui_atlas_view(const atlas_t* atlas);
+void gui_atlas_view(const Atlas* atlas);
 
 void gui_font_view(const Font* font);
 

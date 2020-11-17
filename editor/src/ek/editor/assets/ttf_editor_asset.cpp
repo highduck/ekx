@@ -1,8 +1,8 @@
 #include "ttf_editor_asset.hpp"
 
 #include <ek/util/assets.hpp>
-#include <ek/scenex/text/truetype_font.hpp>
-#include <ek/scenex/text/font.hpp>
+#include <ek/scenex/text/TrueTypeFont.hpp>
+#include <ek/scenex/text/Font.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/logger.hpp>
 
@@ -25,12 +25,12 @@ void TTFEditorAsset::load() {
     } else {
         auto* ttfFont = new TrueTypeFont(project->scale_factor, baseFontSize, glyphCache);
         ttfFont->loadFromMemory(std::move(buffer));
-        asset_t<Font>{name_}.reset(new Font(ttfFont));
+        Res<Font>{name_}.reset(new Font(ttfFont));
     }
 }
 
 void TTFEditorAsset::unload() {
-    asset_t<TrueTypeFont>{name_}.reset(nullptr);
+    Res<TrueTypeFont>{name_}.reset(nullptr);
 }
 
 void TTFEditorAsset::gui() {

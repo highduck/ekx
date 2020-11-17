@@ -1,7 +1,7 @@
-#include "camera_3d.hpp"
+#include "Camera3D.hpp"
 #include "static_mesh.hpp"
-#include "transform_3d.hpp"
-#include "light_3d.hpp"
+#include "Transform3D.hpp"
+#include "Light3D.hpp"
 
 #include <ek/util/timer.hpp>
 #include <ek/draw2d/drawer.hpp>
@@ -23,18 +23,18 @@ namespace ek {
 
 using namespace graphics;
 
-static material_3d default_material_{};
-static render_target_t* shadow_map_ = nullptr;
+static Material3D default_material_{};
+static render_target_t *shadow_map_ = nullptr;
 
 void render_objects_to_shadow_map(const mat4f& proj, const mat4f& view) {
-    asset_t<program_t> program3d{"3d_shadow_map"};
+    Res<program_t> program3d{"3d_shadow_map"};
 
-    for (auto e: ecs::view<mesh_renderer_component, transform_3d>()) {
+    for (auto e: ecs::view<mesh_renderer_component, Transform3D>()) {
         const auto& filter = ecs::get<mesh_renderer_component>(e);
         if (filter.cast_shadows) {
-            auto* mesh = asset_t<static_mesh_t>{filter.mesh}.get_or(filter.mesh_ptr);
+            auto *mesh = Res<static_mesh_t>{filter.mesh}.get_or(filter.mesh_ptr);
             if (mesh) {
-                mat4f model{ecs::get<transform_3d>(e).world};
+                mat4f model{ecs::get<Transform3D>(e).world};
                 draw2d::state.set_mvp(proj * view * model);
                 draw2d::invalidate_force();
                 draw2d::draw_mesh(mesh->vb, mesh->ib, mesh->indices_count);
@@ -77,7 +77,7 @@ box_t<3, float> get_shadow_map_box(const mat4f& camera_projection, const mat4f& 
 }
 
 void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view) {
-    asset_t<program_t> program3d{"3d_shadow_map"};
+    Res<program_t> program3d{"3d_shadow_map"};
     if (!program3d) {
         return;
     }
@@ -100,10 +100,10 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
 
     // find directional light
     float3 light_position{0, 0, 1};
-    light_3d light_data{};
-    for (auto e : ecs::view<light_3d, transform_3d>()) {
-        auto& l = ecs::get<light_3d>(e);
-        auto& transform = ecs::get<transform_3d>(e);
+    Light3D light_data{};
+    for (auto e : ecs::view<Light3D, Transform3D>()) {
+        auto& l = ecs::get<Light3D>(e);
+        auto& transform = ecs::get<Transform3D>(e);
         if (l.type == light_3d_type::directional) {
             light_data = l;
             light_position = normalize(extract_translation(transform.world));
@@ -127,10 +127,11 @@ void render_shadow_map(const mat4f& camera_projection, const mat4f& camera_view)
     shadow_map_->unset();
     draw2d::state.restore_program().pop_scissors();
     graphics::viewport();
+    graphics::set_scissors();
 }
 
 bool begin_3d() {
-    asset_t<program_t> program3d{"3d"};
+    Res<program_t> program3d{"3d"};
     if (!program3d) {
         return false;
     }
@@ -144,24 +145,21 @@ bool begin_3d() {
 
     draw2d::commit_state();
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
-    glDepthMask(GL_TRUE);
-    glDepthFunc(GL_LEQUAL); // equal needs to correct pass skybox z = 1
-    glDepthRange(0.0f, 1.0f);
-
-    gl::check_error();
+    GL_CHECK(glEnable(GL_DEPTH_TEST));
+    GL_CHECK(glEnable(GL_CULL_FACE));
+    GL_CHECK(glCullFace(GL_BACK));
+    GL_CHECK(glFrontFace(GL_CCW));
+    GL_CHECK(glDepthMask(GL_TRUE));
+    GL_CHECK(glDepthFunc(GL_LEQUAL)); // equal needs to correct pass skybox z = 1
+    GL_CHECK(glDepthRange(0.0f, 1.0f));
 
     return true;
 }
 
 void end_3d() {
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
-    gl::check_error();
+    GL_CHECK(glDisable(GL_CULL_FACE));
+    GL_CHECK(glDisable(GL_DEPTH_TEST));
+    GL_CHECK(glDepthMask(GL_FALSE));
 
     draw2d::state.restore_program();
     draw2d::state.restore_texture();
@@ -169,8 +167,8 @@ void end_3d() {
 }
 
 void invalidate_matrix_3d() {
-    for (auto e: ecs::view<transform_3d, Node>()) {
-        auto& tr = ecs::get<transform_3d>(e);
+    for (auto e: ecs::view<Transform3D, Node>()) {
+        auto& tr = ecs::get<Transform3D>(e);
         tr.local = translate_transform(tr.position)
                    * rotation_transform(quat_t<float>(tr.rotation))
                    * scale_transform(tr.scale);
@@ -178,8 +176,8 @@ void invalidate_matrix_3d() {
             mat4f world = tr.local;
             auto p = ecs::get<Node>(e).parent;
             while (p) {
-                if (ecs::has<transform_3d>(p)) {
-                    world = ecs::get<transform_3d>(p).local * world;
+                if (ecs::has<Transform3D>(p)) {
+                    world = ecs::get<Transform3D>(p).local * world;
                 }
                 p = ecs::get<Node>(p).parent;
             }
@@ -189,14 +187,14 @@ void invalidate_matrix_3d() {
 }
 
 void render_3d_objects(const mat4f& proj, const mat4f& view) {
-    asset_t<program_t> program3d{"3d"};
+    Res<program_t> program3d{"3d"};
 
 //    mat4f pv = proj * view;
-    for (auto e: ecs::view<mesh_renderer_component, transform_3d>()) {
+    for (auto e: ecs::view<mesh_renderer_component, Transform3D>()) {
         const auto& filter = ecs::get<mesh_renderer_component>(e);
-        auto* mesh = asset_t<static_mesh_t>{filter.mesh}.get_or(filter.mesh_ptr);
+        auto *mesh = Res<static_mesh_t>{filter.mesh}.get_or(filter.mesh_ptr);
         if (mesh) {
-            mat4f model{ecs::get<transform_3d>(e).world};
+            mat4f model{ecs::get<Transform3D>(e).world};
             draw2d::state.set_mvp(proj * view * model);
             draw2d::invalidate_force();
 
@@ -208,7 +206,7 @@ void render_3d_objects(const mat4f& proj, const mat4f& view) {
             program3d->set_uniform(program_uniforms::image_shadow_map, 1);
             shadow_map_->texture()->bind(1);
 
-            const auto& material = *(asset_t<material_3d>{filter.material}.get_or(&default_material_));
+            const auto& material = *(Res<Material3D>{filter.material}.get_or(&default_material_));
             program3d->set_uniform("u_material.ambient", material.ambient);
             program3d->set_uniform("u_material.diffuse", material.diffuse);
             program3d->set_uniform("u_material.specular", material.specular);
@@ -222,35 +220,31 @@ void render_3d_objects(const mat4f& proj, const mat4f& view) {
         }
     }
 
-    glActiveTexture(GL_TEXTURE0 + (GLenum) 1);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    gl::check_error();
+    GL_CHECK(glActiveTexture(GL_TEXTURE0 + (GLenum) 1));
+    GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0));
 }
 
-void clear_camera(const camera_3d& camera_data) {
-    GLbitfield clear_bits = 0;
-    if (camera_data.clear_color_enabled) {
-        glClearColor(
-                camera_data.clear_color.x,
-                camera_data.clear_color.y,
-                camera_data.clear_color.z,
-                camera_data.clear_color.w
-        );
-        gl::check_error();
-        clear_bits |= GL_COLOR_BUFFER_BIT;
+void clear_camera(const Camera3D& camera_data) {
+    GLbitfield clearBits = 0;
+    if (camera_data.clearColorEnabled) {
+        GL_CHECK(glClearColor(
+                camera_data.clearColor.x,
+                camera_data.clearColor.y,
+                camera_data.clearColor.z,
+                camera_data.clearColor.w
+        ));
+        clearBits |= GL_COLOR_BUFFER_BIT;
     }
-    if (camera_data.clear_depth_enabled) {
-        glClearDepth(camera_data.clear_depth);
-        gl::check_error();
-        clear_bits |= GL_DEPTH_BUFFER_BIT;
+    if (camera_data.clearDepthEnabled) {
+        GL_CHECK(glClearDepth(camera_data.clearDepth));
+        clearBits |= GL_DEPTH_BUFFER_BIT;
     }
-    if (clear_bits != 0) {
-        glClear(clear_bits);
-        gl::check_error();
+    if (clearBits != 0) {
+        GL_CHECK(glClear(clearBits));
     }
 }
 
-void render_skybox(const std::string& id, const mat4f& view, const mat4f& projection);
+void renderSkyBox(const graphics::texture_t *cubeMapTexture, const mat4f& view, const mat4f& projection);
 
 void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
 
@@ -261,8 +255,8 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
         return;
     }
 
-    auto& camera_data = ecs::get<camera_3d>(camera_entity);
-    auto& camera_transform = ecs::get<transform_3d>(camera_entity);
+    auto& camera_data = camera_entity.get<Camera3D>();
+    auto& camera_transform = camera_entity.get<Transform3D>();
 
     invalidate_matrix_3d();
 
@@ -271,13 +265,13 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     }
 
     float3 point_light_pos{0, 15, 0};
-    light_3d point_light{};
+    Light3D point_light{};
 
     float3 directional_light_pos{0, 0, -1};
-    light_3d directional_light{};
-    for (auto e : ecs::view<light_3d, transform_3d>()) {
-        auto& l = ecs::get<light_3d>(e);
-        auto& transform = ecs::get<transform_3d>(e);
+    Light3D directional_light{};
+    for (auto e : ecs::view<Light3D, Transform3D>()) {
+        auto& l = ecs::get<Light3D>(e);
+        auto& transform = ecs::get<Transform3D>(e);
         if (l.type == light_3d_type::point) {
             point_light = l;
             point_light_pos = extract_translation(transform.world);
@@ -295,7 +289,7 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     mat4f proj{};
     const auto aspect = (float) width / height;
     if (camera_data.orthogonal) {
-        const auto ortho_size = camera_data.orthogonal_size;
+        const auto ortho_size = camera_data.orthogonalSize;
         proj = ortho_projection_rh(-ortho_size * aspect, ortho_size * aspect,
                                    -ortho_size, ortho_size,
                                    camera_data.near,
@@ -306,7 +300,7 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
 
     render_shadow_map(proj, view);
     /////
-    glCullFace(GL_BACK);
+    GL_CHECK(glCullFace(GL_BACK));
 
     clear_camera(camera_data);
     mat4f mvp = proj * view * model;
@@ -314,7 +308,7 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
     draw2d::state.set_mvp(mvp);
     draw2d::invalidate_force();
 
-    asset_t<program_t> program3d{"3d"};
+    Res<program_t> program3d{"3d"};
     program3d->set_uniform(program_uniforms::view_position, extract_translation(camera_transform.world));
 
     program3d->set_uniform("u_lights[0].position", directional_light_pos);
@@ -354,16 +348,15 @@ void render_3d_scene(ecs::entity scene, ecs::entity camera_entity) {
 
     render_3d_objects(proj, view);
 
-    render_skybox(camera_data.cube_map, view, proj);
+    renderSkyBox(camera_data.cubeMap.get(), view, proj);
 
     end_3d();
 }
 
-void render_skybox(const std::string& id, const mat4f& view, const mat4f& projection) {
-    asset_t<texture_t> texture{id};
-    asset_t<program_t> program{"3d_skybox"};
-    asset_t<static_mesh_t> mesh{"cube"};
-    if (texture && program && mesh) {
+void renderSkyBox(const graphics::texture_t *cubeMapTexture, const mat4f& view, const mat4f& projection) {
+    Res<program_t> program{"3d_skybox"};
+    Res<static_mesh_t> mesh{"cube"};
+    if (cubeMapTexture && program && mesh) {
         mat4f model{};
 
         mat4f view3 = view;
@@ -381,7 +374,7 @@ void render_skybox(const std::string& id, const mat4f& view, const mat4f& projec
                 .save_texture()
                 .save_program()
                 .save_mvp()
-                .set_texture(texture.get())
+                .set_texture(cubeMapTexture)
                 .set_program(program.get())
                 .set_mvp(mvp);
         draw2d::commit_state();
@@ -389,11 +382,11 @@ void render_skybox(const std::string& id, const mat4f& view, const mat4f& projec
 
         program->set_uniform(program_uniforms::mvp, projection * view3 * model);
 
-        glDepthMask(GL_FALSE);
-        glCullFace(GL_FRONT);
+        GL_CHECK(glDepthMask(GL_FALSE));
+        GL_CHECK(glCullFace(GL_FRONT));
         draw2d::draw_mesh(mesh->vb, mesh->ib, mesh->indices_count);
-        glDepthMask(GL_TRUE);
-        glCullFace(GL_BACK);
+        GL_CHECK(glDepthMask(GL_TRUE));
+        GL_CHECK(glCullFace(GL_BACK));
 
         draw2d::state
                 .restore_texture()

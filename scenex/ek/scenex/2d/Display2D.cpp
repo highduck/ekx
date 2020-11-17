@@ -1,9 +1,9 @@
 #include "Display2D.hpp"
 #include <ek/draw2d/drawer.hpp>
-#include <ek/scenex/2d/sprite.hpp>
-#include <ek/scenex/text/font.hpp>
+#include <ek/scenex/2d/Sprite.hpp>
+#include <ek/scenex/text/Font.hpp>
 #include <ek/util/assets.hpp>
-#include <ek/scenex/text/text_drawer.hpp>
+#include <ek/scenex/text/TextDrawer.hpp>
 #include <ek/math/bounds_builder.hpp>
 
 namespace ek {
@@ -103,8 +103,9 @@ Text2D::Text2D(std::string text, TextFormat format)
 }
 
 void Text2D::draw() {
-    TextDrawer drawer;
-    drawer.format = format;
+    auto& textDrawer = TextDrawer::shared;
+    auto& blockInfo = TextDrawer::sharedTextBlockInfo;
+    textDrawer.format = format;
     if (fillColor.a > 0) {
         draw2d::state.set_empty_texture();
         draw2d::quad(rect, fillColor);
@@ -113,14 +114,13 @@ void Text2D::draw() {
         draw2d::state.set_empty_texture();
         draw2d::strokeRect(expand(rect, 1.0f), borderColor, 1);
     }
-    auto& info = TextDrawer::sharedTextBlockInfo;
-    drawer.getTextSize(text.c_str(), info);
+    textDrawer.getTextSize(text.c_str(), blockInfo);
 
-    const float2 position = rect.position + (rect.size - info.size) * format.alignment;
-    drawer.position = position + float2{0.0f, info.line[0].y};
-    drawer.drawWithBlockInfo(text.c_str(), info);
+    const float2 position = rect.position + (rect.size - blockInfo.size) * format.alignment;
+    textDrawer.position = position + float2{0.0f, blockInfo.line[0].y};
+    textDrawer.drawWithBlockInfo(text.c_str(), blockInfo);
     if (showTextBounds) {
-        const rect_f bounds{position, info.size};
+        const rect_f bounds{position, blockInfo.size};
         draw2d::strokeRect(expand(bounds, 1.0f), 0xFF0000_rgb, 1);
     }
 }
@@ -129,13 +129,13 @@ rect_f Text2D::getBounds() const {
     if (hitFullBounds) {
         return rect;
     }
-    TextDrawer drawer;
-    drawer.format = format;
-    auto& info = TextDrawer::sharedTextBlockInfo;
-    drawer.getTextSize(text.c_str(), info);
+    auto& textDrawer = TextDrawer::shared;
+    auto& blockInfo = TextDrawer::sharedTextBlockInfo;
+    textDrawer.format = format;
+    textDrawer.getTextSize(text.c_str(), blockInfo);
     return {
-            rect.position + (rect.size - info.size) * format.alignment,
-            info.size
+            rect.position + (rect.size - blockInfo.size) * format.alignment,
+            blockInfo.size
     };
 }
 
@@ -152,7 +152,7 @@ rect_f scissors_2d::world_rect(const matrix_2d& world_matrix) const {
 //// arc
 
 void Arc2D::draw() {
-    asset_t<sprite_t> f{sprite};
+    Res<Sprite> f{sprite};
     if (f && f->texture) {
         auto& tex = f->tex;
         draw2d::state.set_texture_region(

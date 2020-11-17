@@ -1,4 +1,4 @@
-#include "truetype_font.hpp"
+#include "TrueTypeFont.hpp"
 
 #include <unordered_map>
 #include <ek/app/res.hpp>
@@ -15,7 +15,7 @@
 
 #endif
 
-#include <ek/scenex/2d/dynamic_atlas.hpp>
+#include <ek/scenex/2d/DynamicAtlas.hpp>
 
 namespace ek {
 

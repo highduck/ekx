@@ -1,6 +1,6 @@
 #include "dynamic_atlas_editor_asset.hpp"
 #include <ek/system/working_dir.hpp>
-#include <ek/scenex/2d/dynamic_atlas.hpp>
+#include <ek/scenex/2d/DynamicAtlas.hpp>
 #include <ek/util/assets.hpp>
 #include <ek/system/system.hpp>
 
@@ -23,11 +23,11 @@ void DynamicAtlasEditorAsset::load() {
     int normScaleFactor = int(ceilf(scaleFactor));
     int pageSize = std::min(1024 * normScaleFactor, 4096);
 
-    asset_t<DynamicAtlas>{name_}.reset(new DynamicAtlas(pageSize, pageSize, alphaMap, mipmaps));
+    Res<DynamicAtlas>{name_}.reset(new DynamicAtlas(pageSize, pageSize, alphaMap, mipmaps));
 }
 
 void DynamicAtlasEditorAsset::unload() {
-    asset_t<DynamicAtlas>{name_}.reset(nullptr);
+    Res<DynamicAtlas>{name_}.reset(nullptr);
 }
 
 void DynamicAtlasEditorAsset::gui() {

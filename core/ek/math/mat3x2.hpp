@@ -191,15 +191,38 @@ struct matrix_t<3, 2, T> {
     }
 
     bool transform_inverse(vec2 pos, vec2& out) const {
-        const T determinant = det(*this);
-        if (determinant != T{0}) {
+        const T D = det(*this);
+        if (D != T{0}) {
+            const T inv = T{1} / D;
             const T x = pos.x - tx;
             const T y = pos.y - ty;
-            out.x = (x * d - y * c) / determinant;
-            out.y = (y * a - x * b) / determinant;
+            out.x = (x * d - y * c) * inv;
+            out.y = (y * a - x * b) * inv;
             return true;
         }
         return false;
+    }
+
+    bool inverse() {
+        const T D = det(*this);
+        if (D == T{0}) {
+            return false;
+        }
+        const T inv = T{1} / D;
+        const float a_ = a * inv;
+        const float b_ = b * inv;
+        const float c_ = c * inv;
+        const float d_ = d * inv;
+        const float x = tx;
+        const float y = ty;
+        a = d_;
+        b = -b_;
+        c = -c_;
+        d = a_;
+        tx = y * c_ - x * d_;
+        ty = x * b_ - y * a_;
+
+        return true;
     }
 
 };

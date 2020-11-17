@@ -37,11 +37,11 @@ void program_asset_t::load() {
     } else if (vertex_decl_ == "3d") {
         pr->vertex = &vertex_3d::decl;
     }
-    asset_t<program_t>{name_}.reset(pr);
+    Res<program_t>{name_}.reset(pr);
 }
 
 void program_asset_t::unload() {
-    asset_t<program_t>{name_}.reset(nullptr);
+    Res<program_t>{name_}.reset(nullptr);
 }
 
 void program_asset_t::gui() {

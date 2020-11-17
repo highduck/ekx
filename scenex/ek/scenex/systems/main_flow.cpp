@@ -12,6 +12,7 @@
 #include <ek/goodies/bubble_text.hpp>
 #include <ek/goodies/popup_manager.hpp>
 #include <ek/scenex/game_time.hpp>
+#include <ek/scenex/2d/Camera2D.hpp>
 
 #include "layout_system.hpp"
 #include "tween_system.hpp"
@@ -49,10 +50,12 @@ void scene_post_update(ecs::entity root, float dt) {
     updateTrails();
     update_emitters();
     update_particles();
+    Camera2D::updateQueue();
 }
 
 void scene_render(ecs::entity root) {
-    drawScene2D(root);
+    Camera2D::render();
+//    drawScene2D(root);
     //drawSceneGizmos(root);
 }
 

@@ -183,6 +183,26 @@ inline void setTouchable(ecs::entity e, bool v) {
     ecs::get_or_create<Node>(e).setTouchable(v);
 }
 
+/** components searching **/
+
+// Recurse upwards until it finds a valid component of `Comp` type:
+// 1) in the Entity `e`
+// 2) any of its parents
+//
+// Returns `nullptr` if no component found
+template<typename Comp>
+Comp* findComponentInParent(ecs::entity e) {
+    auto it = e;
+    while (it) {
+        auto* c = it.tryGet<Comp>();
+        if (c) {
+            return c;
+        }
+        it = it.get<Node>().parent;
+    }
+    return nullptr;
+}
+
 /** search functions **/
 
 ecs::entity find(ecs::entity e, const char* childName);

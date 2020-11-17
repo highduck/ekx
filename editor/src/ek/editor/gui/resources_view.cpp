@@ -2,27 +2,27 @@
 #include <ek/util/assets.hpp>
 #include <ek/graphics/program.hpp>
 #include <ek/graphics/texture.hpp>
-#include <ek/scenex/3d/material_3d.hpp>
+#include <ek/scenex/3d/Material3D.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>
-#include <ek/scenex/2d/atlas.hpp>
-#include <ek/scenex/text/font.hpp>
+#include <ek/scenex/2d/AAtlas.hpp>
+#include <ek/scenex/text/Font.hpp>
 #include <ek/scenex/data/sg_data.hpp>
-#include <ek/scenex/2d/dynamic_atlas.hpp>
+#include <ek/scenex/2d/DynamicAtlas.hpp>
 
 namespace ek {
 
 template<typename T>
-void on_editor_debug_asset(const asset_t<T>& asset) {
+void on_editor_debug_asset(const Res<T>& asset) {
 
 }
 
 template<>
-void on_editor_debug_asset<static_mesh_t>(const asset_t<static_mesh_t>& asset) {
+void on_editor_debug_asset<static_mesh_t>(const Res<static_mesh_t>& asset) {
     ImGui::Text("Indices: %i", asset->indices_count);
 }
 
 template<>
-void on_editor_debug_asset<DynamicAtlas>(const asset_t<DynamicAtlas>& asset) {
+void on_editor_debug_asset<DynamicAtlas>(const Res<DynamicAtlas>& asset) {
     auto pagesCount = asset->pages_.size();
     ImGui::Text("Page Size: %d x %d", asset->pageWidth, asset->pageHeight);
     ImGui::Text("Page Count: %lu", pagesCount);
@@ -34,7 +34,7 @@ void on_editor_debug_asset<DynamicAtlas>(const asset_t<DynamicAtlas>& asset) {
 }
 
 template<>
-void on_editor_debug_asset<material_3d>(const asset_t<material_3d>& asset) {
+void on_editor_debug_asset<Material3D>(const Res<Material3D>& asset) {
     auto m = asset.get_mutable();
     ImGui::ColorEdit3("Ambient", m->ambient.data());
     ImGui::ColorEdit3("Diffuse", m->diffuse.data());
@@ -45,7 +45,7 @@ void on_editor_debug_asset<material_3d>(const asset_t<material_3d>& asset) {
 }
 
 template<>
-void on_editor_debug_asset<sg_file>(const asset_t<sg_file>& asset) {
+void on_editor_debug_asset<sg_file>(const Res<sg_file>& asset) {
     auto m = asset.get_mutable();
     for (auto[k, v] : m->linkages) {
         if (ImGui::TreeNode("%s %s", k.c_str(), v.c_str())) {
@@ -58,8 +58,8 @@ void on_editor_debug_asset<sg_file>(const asset_t<sg_file>& asset) {
 template<typename T>
 void do_editor_debug_runtime_asset_list(const std::string& type_name) {
     if (ImGui::TreeNode(type_name.c_str())) {
-        for (const auto&[key, value]: asset_t<T>::map()) {
-            asset_t<T> asset{key};
+        for (const auto&[key, value]: Res<T>::map()) {
+            Res<T> asset{key};
             if (asset) {
                 if (ImGui::TreeNode(key.c_str())) {
                     on_editor_debug_asset<T>(asset);
@@ -76,10 +76,10 @@ void do_editor_debug_runtime_asset_list(const std::string& type_name) {
 void guiResourcesViewWindow(bool* p_open) {
     if (ImGui::Begin("Resources", p_open)) {
         do_editor_debug_runtime_asset_list<graphics::program_t>("Program");
-        do_editor_debug_runtime_asset_list<material_3d>("Material");
+        do_editor_debug_runtime_asset_list<Material3D>("Material");
         do_editor_debug_runtime_asset_list<static_mesh_t>("Mesh");
-        do_editor_debug_runtime_asset_list<atlas_t>("Atlas");
-        do_editor_debug_runtime_asset_list<sprite_t>("Sprite");
+        do_editor_debug_runtime_asset_list<Atlas>("Atlas");
+        do_editor_debug_runtime_asset_list<Sprite>("Sprite");
         do_editor_debug_runtime_asset_list<Font>("Font");
         do_editor_debug_runtime_asset_list<sg_file>("Scenes 2D");
         do_editor_debug_runtime_asset_list<DynamicAtlas>("Dynamic Atlas");

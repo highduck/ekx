@@ -55,7 +55,7 @@ void particles_burst(ecs::entity e, int count) {
     const auto& data = ecs::get<ParticleEmitter2D>(e).data;
     const auto& position = ecs::get_or_default<Transform2D>(e).position + emitter.position;
     float a = data.dir.random();
-    asset_t<particle_decl> decl{emitter.particle};
+    Res<particle_decl> decl{emitter.particle};
     auto& layer = find_particle_layer(e);
     while (count > 0) {
         auto* p = produce_particle(*decl);
@@ -92,7 +92,7 @@ void update_emitters() {
         emitter.time += dt;
         const auto& data = emitter.data;
         if (emitter.time >= data.interval) {
-            asset_t<particle_decl> decl{emitter.particle};
+            Res<particle_decl> decl{emitter.particle};
             int count = data.burst;
             float a = data.dir.random();
             while (count > 0) {
@@ -127,7 +127,7 @@ void update_emitters() {
 }
 
 particle* spawn_particle(ecs::entity e, const std::string& particle_id) {
-    asset_t<particle_decl> decl{particle_id};
+    Res<particle_decl> decl{particle_id};
     if (decl) {
         auto* p = produce_particle(*decl);
         auto& to_layer = ecs::get_or_create<ParticleLayer2D>(e);

@@ -59,7 +59,7 @@ struct matrix_t<2, 2, T> {
 };
 
 template<typename T>
-inline T det(const matrix_t<T, 2, 2>& m) {
+inline T det(const matrix_t<2, 2, T>& m) {
     return m.a * m.d - m.c * m.b;
 }
 

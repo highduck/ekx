@@ -5,21 +5,22 @@
 #include <ek/scenex/components/interactive.hpp>
 #include <ek/scenex/scene_system.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/scenex/3d/transform_3d.hpp>
-#include <ek/scenex/3d/camera_3d.hpp>
-#include <ek/scenex/3d/light_3d.hpp>
+#include <ek/scenex/3d/Transform3D.hpp>
+#include <ek/scenex/3d/Camera3D.hpp>
+#include <ek/scenex/3d/Light3D.hpp>
 #include <ek/scenex/components/movie.hpp>
 #include <ek/scenex/components/node.hpp>
 #include <ek/scenex/components/layout.hpp>
 #include <ek/scenex/components/node_filters.hpp>
 #include <ek/scenex/particles/particle_system.hpp>
+#include <ek/scenex/2d/Camera2D.hpp>
 
 namespace ek {
 
 template<typename T>
-void selectAsset(const char* label, asset_t<T>& asset) {
+void selectAsset(const char* label, Res<T>& asset) {
     if (ImGui::BeginCombo(label, asset.getID().c_str())) {
-        for (auto& it : asset_t<T>::map()) {
+        for (auto& it : Res<T>::map()) {
             auto& key = it.first;
             if (ImGui::Selectable(key.c_str(), key == asset.getID())) {
                 asset.setID(key);
@@ -75,7 +76,7 @@ inline void guiDisplayComponent(ecs::entity e, const char* name, Func fn) {
     }
 }
 
-void gui_movie_clip(movie_t& mc) {
+void guiMovieClip(movie_t& mc) {
     ImGui::LabelText("movie_data_symbol", "%s", mc.movie_data_symbol.c_str());
     const auto* data = mc.get_movie_data();
     if (data) {
@@ -88,7 +89,7 @@ void gui_movie_clip(movie_t& mc) {
     }
 }
 
-void gui_transform_2d(Transform2D& transform) {
+void guiTransform2D(Transform2D& transform) {
     ImGui::DragFloat2("Position", transform.position.data(), 1.0f, 0.0f, 0.0f, "%.1f");
     ImGui::DragFloat2("Scale", transform.scale.data(), 0.1f, 0.0f, 0.0f, "%.2f");
     ImGui::DragFloat2("Skew", transform.skew.data(), 0.1f, 0.0f, 0.0f, "%.2f");
@@ -106,7 +107,29 @@ void gui_transform_2d(Transform2D& transform) {
     }
 }
 
-void gui_transform_3d(transform_3d& transform) {
+void guiCamera2D(Camera2D& camera) {
+    ImGui::Checkbox("Enabled", &camera.enabled);
+    ImGui::Checkbox("interactive", &camera.interactive);
+    ImGui::Checkbox("occlusionEnabled", &camera.occlusionEnabled);
+    ImGui::DragInt("Order", &camera.order);
+    ImGui::LabelText("Layers", "%x", camera.layerMask);
+    guiEntityRef("Root Entity", camera.root);
+    ImGui::DragFloat("Content Scale", &camera.contentScale);
+    ImGui::Checkbox("Clear Color", &camera.clearColorEnabled);
+    ImGui::ColorEdit4("Clear Color", camera.clearColor.data());
+    ImGui::EditRect("viewport", camera.viewport.data());
+    ImGui::DragFloat2("relativeOrigin", camera.relativeOrigin.data());
+
+    ImGui::Separator();
+    ImGui::Checkbox("debugOcclusion", &camera.debugOcclusion);
+    ImGui::Checkbox("debugGizmoFills", &camera.debugVisibleBounds);
+    ImGui::Checkbox("debugGizmoHitTarget", &camera.debugGizmoHitTarget);
+    ImGui::Checkbox("debugGizmoPointer", &camera.debugGizmoPointer);
+    ImGui::Checkbox("debugGizmoSelf", &camera.debugGizmoSelf);
+    ImGui::DragFloat("debugDrawScale", &camera.debugDrawScale);
+}
+
+void guiTransform3D(Transform3D& transform) {
     ImGui::DragFloat3("Position", transform.position.data(), 1.0f, 0.0f, 0.0f, "%.1f");
     ImGui::DragFloat3("Scale", transform.scale.data(), 0.1f, 0.0f, 0.0f, "%.2f");
     float3 euler_angles = transform.rotation * 180.0f / ek::math::pi;
@@ -115,7 +138,7 @@ void gui_transform_3d(transform_3d& transform) {
     }
 }
 
-void gui_camera_3d(camera_3d& camera) {
+void guiCamera3D(Camera3D& camera) {
     ImGui::DragFloatRange2("Clip Plane", &camera.near, &camera.far, 1.0f, 0.0f, 0.0f, "%.1f");
     float fov_degree = ek::math::to_degrees(camera.fov);
     if (ImGui::DragFloat("FOV", &fov_degree, 1.0f, 0.0f, 0.0f, "%.1f")) {
@@ -123,15 +146,15 @@ void gui_camera_3d(camera_3d& camera) {
     }
 
     ImGui::Checkbox("Orthogonal", &camera.orthogonal);
-    ImGui::DragFloat("Ortho Size", &camera.orthogonal_size, 1.0f, 0.0f, 0.0f, "%.1f");
+    ImGui::DragFloat("Ortho Size", &camera.orthogonalSize, 1.0f, 0.0f, 0.0f, "%.1f");
 
-    ImGui::Checkbox("Clear Color Enabled", &camera.clear_color_enabled);
-    ImGui::ColorEdit4("Clear Color", camera.clear_color.data());
-    ImGui::Checkbox("Clear Depth Enabled", &camera.clear_depth_enabled);
-    ImGui::DragFloat("Clear Depth", &camera.clear_depth, 1.0f, 0.0f, 0.0f, "%.1f");
+    ImGui::Checkbox("Clear Color Enabled", &camera.clearColorEnabled);
+    ImGui::ColorEdit4("Clear Color", camera.clearColor.data());
+    ImGui::Checkbox("Clear Depth Enabled", &camera.clearDepthEnabled);
+    ImGui::DragFloat("Clear Depth", &camera.clearDepth, 1.0f, 0.0f, 0.0f, "%.1f");
 }
 
-void gui_light_3d(light_3d& light) {
+void guiLight3D(Light3D& light) {
     if (light.type == light_3d_type::directional) {
         ImGui::Text("Directional Light");
     } else if (light.type == light_3d_type::point) {
@@ -163,7 +186,7 @@ void gui_interactive(interactive_t& inter) {
 }
 
 void editDisplaySprite(Sprite2D& sprite) {
-    selectAsset<sprite_t>("Sprite", sprite.src);
+    selectAsset<Sprite>("Sprite", sprite.src);
     ImGui::Checkbox("Scale Grid", &sprite.scale_grid_mode);
     ImGui::Checkbox("Hit Pixels", &sprite.hit_pixels);
 }
@@ -177,7 +200,7 @@ void editDisplayRectangle(Quad2D& quad) {
 }
 
 void editDisplayArc(Arc2D& arc) {
-    selectAsset<sprite_t>("Sprite", arc.sprite);
+    selectAsset<Sprite>("Sprite", arc.sprite);
     ImGui::DragFloat("Angle", &arc.angle);
     ImGui::DragFloat("Radius", &arc.radius);
     ImGui::DragFloat("Line Width", &arc.line_width);
@@ -292,10 +315,12 @@ void gui_inspector(ecs::entity e) {
     }
 
     guiComponentPanel<node_filters_t>(e, "LEGACY Filters", guiLegacyFilters);
-    guiComponentPanel<Transform2D>(e, "Transform", gui_transform_2d);
-    guiComponentPanel<transform_3d>(e, "Transform 3D", gui_transform_3d);
-    guiComponentPanel<camera_3d>(e, "Camera 3D", gui_camera_3d);
-    guiComponentPanel<light_3d>(e, "Light 3D", gui_light_3d);
+    guiComponentPanel<Transform2D>(e, "Transform2D", guiTransform2D);
+    guiComponentPanel<Camera2D>(e, "Camera2D", guiCamera2D);
+
+    guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
+    guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
+    guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);
     guiComponentPanel<scissors_2d>(e, "Scissors", gui_scissors_2d);
     guiComponentPanel<hit_area_2d>(e, "Hit Area", gui_hit_area_2d);
     guiComponentPanel<interactive_t>(e, "Interactive", gui_interactive);
@@ -313,7 +338,7 @@ void gui_inspector(ecs::entity e) {
     guiDisplayComponent<Arc2D>(e, "Arc", editDisplayArc);
     guiDisplayComponent<ParticleRenderer2D>(e, "ParticleRenderer2D", editParticleRenderer2D);
 
-    guiComponentPanel<movie_t>(e, "Movie Clip", gui_movie_clip);
+    guiComponentPanel<movie_t>(e, "Movie Clip", guiMovieClip);
 
     if (e.has<script_holder>()) {
         auto& scripts = e.get<script_holder>().list;

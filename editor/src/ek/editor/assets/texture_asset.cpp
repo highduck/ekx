@@ -43,7 +43,7 @@ void texture_asset_t::load() {
     read_decl();
 
     // delete old textures
-    asset_t<texture_t>{name_}.reset(nullptr);
+    Res<texture_t>{name_}.reset(nullptr);
 
     texture_t* texture = nullptr;
     if (texture_type_ == "cubemap") {
@@ -80,11 +80,11 @@ void texture_asset_t::load() {
         EK_ERROR << "Unknown Texture-type " << texture_type_;
     }
 
-    asset_t<texture_t>{name_}.reset(texture);
+    Res<texture_t>{name_}.reset(texture);
 }
 
 void texture_asset_t::unload() {
-    asset_t<program_t>{name_}.reset(nullptr);
+    Res<program_t>{name_}.reset(nullptr);
     images_.clear();
     texture_type_.clear();
 }

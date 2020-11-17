@@ -44,11 +44,11 @@ void audio_asset_t::load() {
     read_decl();
 
     for (auto& m: music_list_) {
-        asset_t<audio::Music>{getRelativeName(m)}
+        Res<audio::Music>{getRelativeName(m)}
                 .reset(new audio::Music(m.c_str()));
     }
     for (auto& m: sound_list_) {
-        asset_t<audio::Sound>{getRelativeName(m)}
+        Res<audio::Sound>{getRelativeName(m)}
                 .reset(new audio::Sound(m.c_str()));
     }
 }
@@ -71,7 +71,7 @@ void audio_asset_t::gui() {
         auto name = getRelativeName(music);
         ImGui::LabelText("Music", "%s", name.c_str());
         ImGui::LabelText("Path", "%s", music.c_str());
-        asset_t<audio::Music> musicAsset{name};
+        Res<audio::Music> musicAsset{name};
         if(musicAsset) {
             if (ImGui::Button("Play Music")) {
                 musicAsset->play();
@@ -87,7 +87,7 @@ void audio_asset_t::gui() {
         auto name = getRelativeName(sound);
         ImGui::LabelText("Sound", "%s", name.c_str());
         ImGui::LabelText("Path", "%s", sound.c_str());
-        asset_t<audio::Sound> asset{name};
+        Res<audio::Sound> asset{name};
         if(asset) {
             if (ImGui::Button("Play Sound")) {
                 asset->play();

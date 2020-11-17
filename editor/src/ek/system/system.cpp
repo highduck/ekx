@@ -34,7 +34,7 @@
 
 namespace ek {
 
-const int path_max_size = 4096;
+const int system_pathMaxSize = 4096;
 
 void save(const output_memory_stream& stream, const path_t& path) {
     save(stream, path.c_str());
@@ -118,8 +118,8 @@ std::string get_executable_path() {
 #if defined(_WIN32)
     // TODO:
 #elif defined(__APPLE__)
-    char path[path_max_size + 1];
-    uint32_t path_len = path_max_size;
+    char path[system_pathMaxSize + 1];
+    uint32_t path_len = system_pathMaxSize;
     if (_NSGetExecutablePath(path, &path_len)) {
         return {};
     }
@@ -127,8 +127,8 @@ std::string get_executable_path() {
 #elif defined(__ANDROID__)
     return "";
 #elif defined(__linux__)
-    char path[path_max_size];
-    const auto length = readlink("/proc/self/exe", path, path_max_size);
+    char path[system_pathMaxSize];
+    const auto length = readlink("/proc/self/exe", path, system_pathMaxSize);
     return length < 0 ? "" : std::string{path, static_cast<size_t>(length)};
 #endif
 }
@@ -160,11 +160,7 @@ int execute(const std::string& cmd) {
 #endif
 }
 
-
-
 // continue utilities
-
-
 
 void copy_file(const path_t& src, const path_t& dest) {
     std::ifstream stream_src(src.str(), std::ios::binary);
@@ -174,7 +170,7 @@ void copy_file(const path_t& src, const path_t& dest) {
 
 #ifndef EK_DISABLE_SYSTEM_FS
 
-bool is_dir_entry_real(const struct dirent* e) {
+bool is_dir_entry_real(const dirent* e) {
     // empty
     if (!e || e->d_name[0] == 0) {
         return false;

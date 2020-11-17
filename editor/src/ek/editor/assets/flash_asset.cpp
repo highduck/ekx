@@ -5,8 +5,8 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/flash/doc/flash_doc.hpp>
 #include <ek/spritepack/export_atlas.hpp>
-#include <ek/scenex/2d/atlas.hpp>
-#include <ek/scenex/2d/sprite.hpp>
+#include <ek/scenex/2d/AAtlas.hpp>
+#include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/data/sg_data.hpp>
 #include <ek/xfl/flash_doc_exporter.hpp>
 #include <ek/flash/doc/flash_archive.hpp>
@@ -33,19 +33,19 @@ void flash_asset_t::load() {
     flash::flash_doc_exporter fe{ff};
     fe.build_library();
 
-    asset_t<spritepack::atlas_t> atlasBuild{atlasTarget_};
+    Res<spritepack::atlas_t> atlasBuild{atlasTarget_};
     fe.build_sprites(atlasBuild.mutableRef());
 
     sg_file sg = fe.export_library();
-    asset_t<sg_file>{name_}.reset(new sg_file{sg});
+    Res<sg_file>{name_}.reset(new sg_file{sg});
 }
 
 void flash_asset_t::unload() {
-    asset_t<sg_file>{name_}.reset(nullptr);
+    Res<sg_file>{name_}.reset(nullptr);
 }
 
 void flash_asset_t::gui() {
-    asset_t<sg_file> library{name_};
+    Res<sg_file> library{name_};
     gui_sg_file_view(library.get());
 }
 
@@ -56,7 +56,7 @@ void flash_asset_t::build(assets_build_struct_t& data) {
     flash::flash_doc_exporter fe{ff};
     fe.build_library();
 
-    asset_t<spritepack::atlas_t> atlasBuild{atlasTarget_};
+    Res<spritepack::atlas_t> atlasBuild{atlasTarget_};
     fe.build_sprites(atlasBuild.mutableRef());
 
     make_dirs(data.output);
