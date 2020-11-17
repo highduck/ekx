@@ -76,7 +76,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         local_storage_var_t.hpp
 
-        2d/AAtlas.cpp
+        2d/Atlas.cpp
         2d/Sprite.cpp
         2d/DynamicAtlas.cpp
         2d/Transform2D.cpp

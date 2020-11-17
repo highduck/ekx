@@ -1,4 +1,4 @@
-#include <ek/scenex/2d/AAtlas.hpp>
+#include <ek/scenex/2d/Atlas.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/graphics/texture.hpp>
 

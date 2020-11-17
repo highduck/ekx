@@ -4,7 +4,7 @@
 #include <ek/graphics/texture.hpp>
 #include <ek/scenex/3d/Material3D.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>
-#include <ek/scenex/2d/AAtlas.hpp>
+#include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/scenex/data/sg_data.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>

@@ -4,7 +4,7 @@
 #include <ek/system/working_dir.hpp>
 #include <ek/spritepack/export_atlas.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/2d/AAtlas.hpp>
+#include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/system/system.hpp>
 #include <ek/fonts/export_font.hpp>
