@@ -4,7 +4,7 @@
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/systems/layout_system.hpp>
 #include <ek/scenex/components/interactive.hpp>
-#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/systems/tween_system.hpp>
 #include <ek/scenex/components/button.hpp>
 #include <ek/math/easing.hpp>
@@ -183,7 +183,7 @@ entity create_popup_manager() {
     interactive.on_down.add([e] {
         const auto& state = ecs::get<popup_manager_t>(e);
         if (!state.active.empty()) {
-            resolve<interactive_manager>().send_back_button();
+            resolve<InteractionSystem>().sendBackButton();
         }
     });
     auto& eh = ecs::assign<event_handler_t>(pm.back);

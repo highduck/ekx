@@ -20,9 +20,13 @@ matrix_2d Camera2D::getMatrix(ecs::entity root_, float scale) const {
     return m;
 }
 
-static std::vector<ecs::entity> activeCameras;
+static std::vector<ecs::entity> activeCameras{};
 static const Camera2D* currentCamera = nullptr;
 static int currentLayerMask = 0xFF;
+
+std::vector<ecs::entity>& Camera2D::getCameraQueue() {
+    return activeCameras;
+}
 
 void Camera2D::updateQueue() {
     auto& app = resolve<basic_application>();
@@ -88,13 +92,15 @@ void Camera2D::render() {
         //     drawer.invalidateForce();
         //     engine.graphics.clear(camera.clearColor);
         // }
-        draw2d::state.color = {};
+
         draw2d::state.matrix.set_identity();
 
         if (camera.clearColorEnabled) {
             draw2d::state.set_empty_texture();
-            draw2d::quad(camera.worldRect, argb32_t{camera.clearColor});
+            draw2d::state.color = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};
+            draw2d::quad(camera.worldRect);
         }
+        draw2d::state.color = {};
 
         drawEntity(camera.root, camera.root.tryGet<Transform2D>());
 

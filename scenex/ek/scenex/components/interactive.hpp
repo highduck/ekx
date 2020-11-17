@@ -6,6 +6,14 @@
 
 namespace ek {
 
+enum class InteractionEvent {
+    PointerDown,
+    PointerUp,
+    PointerOver,
+    PointerOut,
+    Click
+};
+
 struct interactive_t {
 
     using mouse_cursor = app::mouse_cursor;
@@ -28,31 +36,7 @@ struct interactive_t {
 
     interactive_t() = default;
 
-    void set_pointer_out() {
-        on_out();
-        over = false;
-        pushed = false;
-    }
-
-    void set_pointer_over() {
-        over = true;
-        on_over();
-    }
-
-    void set_pointer_up() {
-        bool shouldBeClicked = pushed && over;
-        pushed = false;
-        on_up();
-
-        if (shouldBeClicked) {
-            on_clicked();
-        }
-    }
-
-    void set_pointer_down() {
-        pushed = true;
-        on_down();
-    }
+    void handle(InteractionEvent event);
 };
 
 }

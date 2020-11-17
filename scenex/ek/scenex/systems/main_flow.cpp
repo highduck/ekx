@@ -4,7 +4,7 @@
 
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/particles/particle_system.hpp>
-#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/utility/destroy_delay.hpp>
 #include <ek/scenex/scene_system.hpp>
 #include <ek/goodies/shake_system.hpp>
@@ -25,6 +25,9 @@ namespace ek {
 using namespace ecs;
 
 void scene_pre_update(entity root, float dt) {
+
+    resolve<InteractionSystem>().process();
+
     TimeLayer::updateTimers(dt);
 
     resolve<AudioManager>().update(dt);
@@ -37,7 +40,6 @@ void scene_pre_update(entity root, float dt) {
     update_bubble_text(dt);
     update_popup_managers(dt);
 
-    resolve<interactive_manager>().update();
     updateScripts();
     update_buttons(dt);
     update_movie_clips();

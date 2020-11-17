@@ -3,7 +3,7 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/3d/Camera3D.hpp>
 #include <ek/scenex/3d/Transform3D.hpp>
-#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/InteractionSystem.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/scenex/app/input_controller.hpp>
 
@@ -11,20 +11,20 @@ namespace ek {
 
 void update_camera_arc_ball(float dt) {
 
-    auto& im = resolve<interactive_manager>();
+    auto& im = resolve<InteractionSystem>();
     static float2 prev_pointer{};
     static bool prev_down = false;
 
     float2 delta{};
-    if (im.pointer_down && !prev_down) {
+    if (im.pointerDown_ && !prev_down) {
         prev_down = true;
-        prev_pointer = im.pointer_global_space;
+        prev_pointer = im.pointerScreenPosition_;
     }
-    if (!im.pointer_down && prev_down) {
+    if (!im.pointerDown_ && prev_down) {
         prev_down = false;
     }
     if (prev_down) {
-        float2 cur = im.pointer_global_space;
+        float2 cur = im.pointerScreenPosition_;
         delta = cur - prev_pointer;
         prev_pointer = cur;
     }

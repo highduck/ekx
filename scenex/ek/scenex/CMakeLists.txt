@@ -10,7 +10,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         components/movie.hpp
         components/button.hpp
         components/canvas.hpp
-        components/interactive.hpp
+        components/interactive.cpp
         components/tween.hpp
         components/event_handler.hpp
         components/layout.hpp
@@ -31,8 +31,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         AudioManager.hpp
         scene_system.cpp
         scene_system.hpp
-        interactive_manager.cpp
-        interactive_manager.hpp
+        InteractionSystem.cpp
+        InteractionSystem.hpp
 
         particles/particle.cpp
         particles/particle.hpp

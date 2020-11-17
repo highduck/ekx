@@ -9,7 +9,7 @@
 #include <ek/util/locator.hpp>
 #include <ek/ext/analytics/analytics.hpp>
 #include <ek/scenex/components/event_handler.hpp>
-#include <ek/scenex/interactive_manager.hpp>
+#include <ek/scenex/InteractionSystem.hpp>
 
 namespace ek {
 
