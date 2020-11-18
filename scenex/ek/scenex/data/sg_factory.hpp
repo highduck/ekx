@@ -1,7 +1,7 @@
 #pragma once
 
 #include "sg_data.hpp"
-#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/base/Node.hpp>
 
 namespace ek {
 

@@ -1,12 +1,12 @@
 #include "sg_factory.hpp"
 
 #include <ek/scenex/2d/Sprite.hpp>
-#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
-#include <ek/scenex/components/movie.hpp>
-#include <ek/scenex/components/button.hpp>
-#include <ek/scenex/components/interactive.hpp>
+#include <ek/scenex/2d/MovieClip.hpp>
+#include <ek/scenex/2d/Button.hpp>
+#include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/2d/UglyFilter2D.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/math/bounds_builder.hpp>
@@ -59,7 +59,7 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     }
 
     if (data->movie.has_value()) {
-        auto& mov = ecs::assign<movie_t>(entity);
+        auto& mov = ecs::assign<MovieClip>(entity);
         if (asset) {
             mov.library_asset = asset;
             mov.movie_data_symbol = data->libraryName;
@@ -88,16 +88,16 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     }
 
     if (!data->clipRect.empty()) {
-        ecs::reassign<scissors_2d>(entity, data->clipRect);
+        ecs::reassign<Scissors>(entity, data->clipRect);
     }
 
     if (!data->hitRect.empty()) {
-        ecs::reassign<hit_area_2d>(entity, data->hitRect);
+        ecs::reassign<HitArea>(entity, data->hitRect);
     }
 
     if (data->button) {
         ecs::reassign<interactive_t>(entity);
-        ecs::reassign<button_t>(entity);
+        ecs::reassign<Button>(entity);
     }
 
     if (!data->filters.empty()) {

@@ -50,14 +50,14 @@ public:
     }
 };
 
-struct scissors_2d {
+struct Scissors {
     rect_f rect;
 
     [[nodiscard]]
     rect_f world_rect(const matrix_2d& world_matrix) const;
 };
 
-struct hit_area_2d {
+struct HitArea {
     rect_f rect;
 };
 

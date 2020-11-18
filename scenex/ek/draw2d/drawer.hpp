@@ -84,7 +84,7 @@ public:
 
     drawing_state& rotate(float radians);
 
-    drawing_state& concat_matrix(const matrix_2d& r);
+    drawing_state& concat(const matrix_2d& r);
 
     drawing_state& restore_matrix();
 
@@ -94,11 +94,13 @@ public:
 
     drawing_state& restore_color();
 
-    drawing_state& multiply_alpha(float alpha);
+    drawing_state& scaleAlpha(float alpha);
 
-    drawing_state& multiply_color(argb32_t multiplier);
+    drawing_state& scaleColor(argb32_t multiplier);
 
-    drawing_state& combine_color(argb32_t multiplier, argb32_t offset);
+    drawing_state& concat(argb32_t scale, argb32_t offset);
+
+    drawing_state& concat(ColorMod32 color);
 
     drawing_state& offset_color(argb32_t offset);
 

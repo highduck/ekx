@@ -1,10 +1,9 @@
-#include "canvas_system.hpp"
-#include "layout_system.hpp"
+#include "Canvas.hpp"
+#include "LayoutRect.hpp"
+#include "Transform2D.hpp"
 
 #include <ek/app/app.hpp>
-#include <ek/scenex/components/canvas.hpp>
-#include <ek/scenex/components/Node.hpp>
-#include <ek/scenex/2d/Transform2D.hpp>
+#include <ek/scenex/base/Node.hpp>
 
 using ek::app::g_app;
 
@@ -23,14 +22,14 @@ void on_scale_factor_changed() {
 void on_rect_changed() {
 }
 
-layout_t get_canvas_space_size(ecs::entity e) {
-    layout_t result;
+LayoutRect get_canvas_space_size(ecs::entity e) {
+    LayoutRect result;
     result.rect = {float2::zero, get_screen_size()};
     result.safeRect = result.rect;
 
     auto parent = ecs::get_or_default<Node>(e).parent;
     if (parent) {
-        auto layout = ecs::get<layout_t>(parent);
+        auto layout = ecs::get<LayoutRect>(parent);
         if (!layout.safeRect.empty()) {
             result = layout;
         }
@@ -40,7 +39,7 @@ layout_t get_canvas_space_size(ecs::entity e) {
 }
 
 float update_canvas(ecs::entity e) {
-    auto& canvas = ecs::get<canvas_t>(e);
+    auto& canvas = ecs::get<Canvas>(e);
     auto rootLayout = get_canvas_space_size(e);
     auto resolution_size = canvas.resolution.size;
     float2 scale_ratio = rootLayout.safeRect.size / resolution_size;
@@ -72,7 +71,7 @@ float update_canvas(ecs::entity e) {
             rootLayout.safeRect.size / scale
     };
 
-    auto& layout = ecs::get<layout_t>(e);
+    auto& layout = ecs::get<LayoutRect>(e);
     if (layout.safeRect != safeRect) {
         layout.safeRect = safeRect;
         layout.rect = rect;
@@ -87,8 +86,8 @@ float update_canvas(ecs::entity e) {
     return scale;
 }
 
-void update_canvas() {
-    for (auto e : ecs::view<canvas_t, Transform2D>()) {
+void Canvas::updateAll() {
+    for (auto e : ecs::view<Canvas, Transform2D>()) {
         update_canvas(e);
     }
 }

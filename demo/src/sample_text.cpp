@@ -6,7 +6,7 @@
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
-#include <ek/scenex/components/layout.hpp>
+#include <ek/scenex/2d/LayoutRect.hpp>
 
 namespace ek {
 
@@ -59,7 +59,7 @@ ecs::entity createScreenZones() {
     q->rect = resolution;
     e.assign<Display2D>(q);
     e.get<Transform2D>().color.scale = 0x33FF00FF_argb;
-    ecs::assign<layout_t>(e).fill(true, true).doSafeInsets = true;
+    ecs::assign<LayoutRect>(e).fill(true, true).doSafeInsets = true;
     append(zones, e);
     e = create_node_2d("safe_zone");
     q = new Quad2D();

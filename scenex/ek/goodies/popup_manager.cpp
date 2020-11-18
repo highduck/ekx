@@ -2,13 +2,13 @@
 
 #include <ek/scenex/utility/destroy_delay.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
-#include <ek/scenex/systems/layout_system.hpp>
-#include <ek/scenex/components/interactive.hpp>
+#include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
-#include <ek/scenex/systems/tween_system.hpp>
-#include <ek/scenex/components/button.hpp>
+#include <ek/scenex/2d/Button.hpp>
+#include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/math/easing.hpp>
 #include <ek/util/locator.hpp>
+#include <ek/scenex/base/Tween.hpp>
 
 namespace ek {
 
@@ -82,8 +82,8 @@ void on_popup_close_animation(float t, entity e) {
 
 void init_basic_popup(entity e) {
     auto node_close = find(e, "btn_close");
-    if (node_close && ecs::has<button_t>(node_close)) {
-        auto& btn_close = ecs::get<button_t>(node_close);
+    if (node_close && ecs::has<Button>(node_close)) {
+        auto& btn_close = ecs::get<Button>(node_close);
         btn_close.clicked.add([e]() {
             close_popup(e);
         });
@@ -136,7 +136,7 @@ void open_popup(entity e) {
     state.active.push_back(e);
     on_popup_opening(e);
 
-    auto& tween = reset_tween(e);
+    auto& tween = Tween::reset(e);
     tween.delay = tweenDelay;
     tween.duration = tweenDuration;
     tween.advanced += [e](float r) {
@@ -160,7 +160,7 @@ void close_popup(entity e) {
 
     on_popup_closing(e);
 
-    auto& tween = reset_tween(e);
+    auto& tween = Tween::reset(e);
     tween.delay = tweenDelay;
     tween.duration = tweenDuration;
     tween.advanced += [e](float t) {
@@ -177,7 +177,7 @@ entity create_popup_manager() {
     pm.back = create_node_2d("back");
     set_color_quad(pm.back, rect_f::zero_one, 0x0_rgb);
     layout_wrapper{pm.back}.fill();
-    pm.back.get<layout_t>().doSafeInsets = false;
+    pm.back.get<LayoutRect>().doSafeInsets = false;
 
     auto& interactive = ecs::assign<interactive_t>(pm.back);
     interactive.on_down.add([e] {

@@ -5,10 +5,11 @@
 #include <ek/util/signals.hpp>
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
+#include "MovieClip.hpp"
 
 namespace ek {
 
-struct button_skin {
+struct ButtonSkin {
     std::string sfx_over = "sfx/btn_over";
     std::string sfx_out = "sfx/btn_out";
     std::string sfx_down = "sfx/btn_down";
@@ -23,8 +24,8 @@ struct button_skin {
     //const basic_ease_t& push_ease{easing::P3_OUT};
 };
 
-struct button_t {
-    button_skin* skin{nullptr};
+struct Button {
+    ButtonSkin* skin{nullptr};
 
     bool back_button = false;
     signal_t<> clicked;
@@ -37,6 +38,10 @@ struct button_t {
     float2 baseSkew{};
     float2 baseScale = float2::one;
     ColorMod32 baseColor{};
+
+    TimeLayer time = TimeLayer::UI;
+
+    static void updateAll();
 };
 
 }

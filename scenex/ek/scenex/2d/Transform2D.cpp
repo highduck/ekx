@@ -1,15 +1,15 @@
 #include "Transform2D.hpp"
 
 #include <ek/draw2d/drawer.hpp>
-#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/base/Node.hpp>
 
 namespace ek {
 
 void begin_transform(const Transform2D& transform) {
     const_cast<Transform2D&>(transform).updateLocalMatrix();
     draw2d::state.save_transform()
-            .combine_color(transform.color.scale, transform.color.offset)
-            .concat_matrix(transform.matrix);
+            .concat(transform.color.scale, transform.color.offset)
+            .concat(transform.matrix);
 }
 
 void end_transform() {

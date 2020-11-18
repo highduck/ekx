@@ -11,6 +11,8 @@ public:
     static int currentLayerMask;
 
     static void draw(ecs::entity e, const Transform2D* transform);
+
+    static void drawStack(ecs::entity e);
 };
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/scenex/components/script.hpp>
+#include <ek/scenex/base/Script.hpp>
 #include <ek/math/packed_color.hpp>
 
 namespace ek {

@@ -27,7 +27,7 @@ void Font::draw(const std::string& text,
     float2 start = position;
 
     draw2d::state.save_color()
-            .multiply_color(color);
+            .scaleColor(color);
 
     const graphics::texture_t* prevTexture = nullptr;
     Glyph gdata;

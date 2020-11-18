@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/scenex/game_time.hpp>
+#include <ek/scenex/TimeLayer.hpp>
 
 namespace ek {
 

@@ -1,11 +1,11 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/scenex/components/script.hpp>
+#include <ek/scenex/base/Script.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
-#include <ek/scenex/components/event_handler.hpp>
+#include <ek/scenex/base/NodeEvents.hpp>
 
 namespace ek {
 

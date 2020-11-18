@@ -1,10 +1,10 @@
 #include "fireworks_script.h"
 
 #include <ek/scenex/utility/scene_management.hpp>
-#include <ek/scenex/particles/particle_system.hpp>
+#include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/util/locator.hpp>
-#include <ek/scenex/components/layout.hpp>
+#include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/math/box.hpp>
 
 namespace ek {
@@ -36,7 +36,7 @@ void fireworks_script::update(float dt) {
         };
 
         resolve<AudioManager>().play_sound("sfx/firework", random(0.5f, 1.0f));
-        Res<particle_decl> part{"firework_star"};
+        Res<ParticleDecl> part{"firework_star"};
         switch (random_int(0, 3)) {
             case 0:
                 part->color.set_gradient(0xffffff00_argb, 0xffff7f00_argb);

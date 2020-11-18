@@ -1,13 +1,14 @@
 #pragma once
 
+#include <ecxx/ecxx.hpp>
 #include <ek/scenex/data/sg_data.hpp>
 #include <ek/util/assets.hpp>
 #include <optional>
-#include <ek/scenex/game_time.hpp>
+#include <ek/scenex/TimeLayer.hpp>
 
 namespace ek {
 
-struct movie_t {
+struct MovieClip {
     Res<sg_file> library_asset;
     std::string movie_data_symbol;
     const sg_movie_data* data = nullptr;
@@ -41,10 +42,14 @@ struct movie_t {
             }
         }
     }
+
+    static void updateAll();
 };
 
 struct movie_target_keys {
     int key_animation = 0;
 };
+
+void goto_and_stop(ecs::entity e, float frame);
 
 }

@@ -85,7 +85,7 @@ void TextDrawer::drawLayer(const char *text, const TextLayerEffect& layer, const
 
     current.x += (info.size.x - info.line[lineIndex].x) * alignment.x;
 
-    draw2d::state.save_color().multiply_color(layer.color);
+    draw2d::state.save_color().scaleColor(layer.color);
 
     const graphics::texture_t *prevTexture = nullptr;
     uint32_t prevCodepointOnLine = 0;
