@@ -24,6 +24,10 @@
     - Marketing assets export from Flash template
     - Simple Binary serialization
 
+## Tasks
+
+[Trello Board](https://trello.com/b/MW9eYAOA/ekx)
+
 ## Prerequisites for tooling
 
 - `python3` and `pip`
@@ -96,14 +100,6 @@ add lines:
 source ~/highduck/ekx/env.sh
 ```
 
-
-## TODO
-
-- Windows support
-- Audio
-- Repack Atlases by Tag
-
-
 # Development
 
 It's very hard to fix platform-side code inside generated projects (XCode, Android Studio), so
@@ -146,15 +142,3 @@ EMSDK = /Users/ilyak/dev/emsdk
 EM_CONFIG = /Users/ilyak/.emscripten
 EMSDK_NODE = /Users/ilyak/dev/emsdk/node/12.9.1_64bit/bin/node
 ```
-
-
-# Plugins
-
-References:
-- https://github.com/oxygine
-- ludei/atomic-plugins: https://github.com/ludei/atomic-plugins-ads
-
-# Android Emulator
-
-create x86 image
-$ANDROID_HOME/emulator/emulator @Nexus_S_API_29 -gpu host -no-boot-anim

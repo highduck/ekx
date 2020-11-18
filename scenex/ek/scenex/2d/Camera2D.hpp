@@ -60,6 +60,8 @@ public:
     static void drawGizmo(Camera2D& camera);
 
     static std::vector<ecs::entity>& getCameraQueue();
+
+    static const Camera2D* getCurrentRenderingCamera();
 };
 
 

@@ -87,12 +87,11 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
         sprite->scale = data->matrix.scale();
     }
 
-    if (!data->clipRect.empty()) {
-        ecs::reassign<Scissors>(entity, data->clipRect);
-    }
-
-    if (!data->hitRect.empty()) {
-        ecs::reassign<HitArea>(entity, data->hitRect);
+    if (data->scissorsEnabled || data->hitAreaEnabled || data->boundsEnabled) {
+        auto& bounds = ecs::reassign<Bounds2D>(entity, data->boundingRect);
+        bounds.scissors = data->scissorsEnabled;
+        bounds.hitArea = data->hitAreaEnabled;
+        bounds.culling = data->boundsEnabled;
     }
 
     if (data->button) {

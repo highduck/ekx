@@ -8,7 +8,7 @@
 
 namespace ek::draw2d {
 
-Batcher* batcher = nullptr;
+static Batcher* batcher = nullptr;
 drawing_state state{};
 
 void drawing_state::finish() {
@@ -378,7 +378,9 @@ void draw_mesh(const graphics::buffer_t& vb, const graphics::buffer_t& ib, int32
 }
 
 void flush_batcher() {
-    batcher->flush();
+    if(batcher) {
+        batcher->flush();
+    }
 }
 
 void prepare() {

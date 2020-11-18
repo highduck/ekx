@@ -173,12 +173,11 @@ void guiLight3D(Light3D& light) {
     ImGui::DragFloat("Falloff", &light.falloff, 0.1f, 0.0f, 0.0f, "%.1f");
 }
 
-void guiScissors(Scissors& scissors) {
-    ImGui::EditRect("Bounds", scissors.rect.data());
-}
-
-void guiHitArea(HitArea& hit_area) {
-    ImGui::EditRect("Bounds", hit_area.rect.data());
+void guiBounds2D(Bounds2D& bounds) {
+    ImGui::EditRect("Rect", bounds.rect.data());
+    ImGui::Checkbox("Hit Area", &bounds.hitArea);
+    ImGui::Checkbox("Scissors", &bounds.scissors);
+    ImGui::Checkbox("Culling (WIP)", &bounds.culling);
 }
 
 void guiInteractive(interactive_t& inter) {
@@ -320,15 +319,14 @@ void gui_inspector(ecs::entity e) {
     guiComponentPanel<UglyFilter2D>(e, "UglyFilter2D", guiUglyFilter2D);
     guiComponentPanel<Transform2D>(e, "Transform2D", guiTransform2D);
     guiComponentPanel<Camera2D>(e, "Camera2D", guiCamera2D);
+    guiComponentPanel<Bounds2D>(e, "Bounds2D", guiBounds2D);
+    guiComponentPanel<LayoutRect>(e, "Layout", guiLayout);
 
     guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
     guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
     guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);
-    guiComponentPanel<Scissors>(e, "Scissors", guiScissors);
-    guiComponentPanel<HitArea>(e, "Hit Area", guiHitArea);
     guiComponentPanel<interactive_t>(e, "Interactive", guiInteractive);
     guiComponentPanel<event_handler_t>(e, "Event Handler", [](auto& c) {});
-    guiComponentPanel<LayoutRect>(e, "Layout", guiLayout);
 
     // particles
     guiComponentPanel<ParticleEmitter2D>(e, "ParticleEmitter2D", guiParticleEmitter2D);
