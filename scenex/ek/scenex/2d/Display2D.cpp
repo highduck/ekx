@@ -143,10 +143,20 @@ bool Text2D::hitTest(float2 point) const {
     return getBounds().contains(point);
 }
 
-rect_f Scissors::world_rect(const matrix_2d& world_matrix) const {
+rect_f Bounds2D::getWorldRect(const matrix_2d& world_matrix) const {
     bounds_builder_2f bb{};
     bb.add(rect, world_matrix);
     return bb.rect();
+}
+
+rect_f Bounds2D::getScreenRect(matrix_2d viewMatrix, matrix_2d worldMatrix) const {
+    auto lt = worldMatrix.transform(rect.position);
+    auto rb = worldMatrix.transform(rect.right_bottom());
+
+    lt = viewMatrix.transform(lt);
+    rb = viewMatrix.transform(rb);
+
+    return points_box(lt, rb);
 }
 
 //// arc

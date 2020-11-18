@@ -61,11 +61,14 @@ const char* getEntityTitle(ecs::entity e) {
         if (disp.is<Quad2D>()) type = "Rectangle";
         if (disp.is<Text2D>()) type = "Text";
         if (disp.is<Arc2D>()) type = "Arc";
+        // TODO: other renderables
     }
     if (ecs::has<MovieClip>(e)) { type = "MovieClip"; }
     if (ecs::has<interactive_t>(e)) { type = "Interactive"; }
     if (ecs::has<Button>(e)) { type = "Button"; }
-    if (ecs::has<Scissors>(e)) { type = "Scissors"; }
+    if (ecs::has<Bounds2D>(e)) {
+        type = "Bounds2D";
+    }
     if (ecs::has<script_holder>(e)) { type = "Script"; }
     return type;
 }

@@ -181,9 +181,11 @@ struct sg_node_data {
     bool button = false;
     bool touchable = true;
     bool visible = true;
+    bool scissorsEnabled = false;
+    bool hitAreaEnabled = false;
+    bool boundsEnabled = false;
+    rect_f boundingRect;
     rect_f scaleGrid;
-    rect_f hitRect;
-    rect_f clipRect;
     std::vector<sg_node_data> children;
     std::vector<filter_data> filters;
     std::optional<dynamic_text_data> dynamicText;
@@ -204,13 +206,16 @@ struct sg_node_data {
                 button,
                 touchable,
                 visible,
+                scissorsEnabled,
+                hitAreaEnabled,
+                boundsEnabled,
+
+                boundingRect,
+                scaleGrid,
 
                 // TODO: labels and scripts
                 //script,
                 color,
-                scaleGrid,
-                hitRect,
-                clipRect,
 
                 children,
                 filters,

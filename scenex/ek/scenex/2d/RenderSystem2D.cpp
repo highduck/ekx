@@ -2,10 +2,12 @@
 #include "Display2D.hpp"
 #include "Transform2D.hpp"
 #include "UglyFilter2D.hpp"
+#include "Camera2D.hpp"
 
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/base/Script.hpp>
+#include <ek/math/bounds_builder.hpp>
 
 namespace ek {
 
@@ -24,9 +26,20 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
         }
     }
 
-    auto* scissors = e.tryGet<Scissors>();
-    if (scissors) {
-        draw2d::state.push_scissors(scissors->world_rect(transform->worldMatrix));
+    auto* bounds = e.tryGet<Bounds2D>();
+    if (bounds) {
+        const auto* camera = Camera2D::getCurrentRenderingCamera();
+        auto rc = bounds->getScreenRect(camera->inverseMatrix, transform->worldMatrix);
+        if (Camera2D::getCurrentRenderingCamera()->occlusionEnabled) {
+            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors)) {
+                // discard
+                return;
+            }
+        }
+        if (bounds->scissors) {
+            draw2d::state.push_scissors(rc);
+            //draw2d::state.push_scissors(scissors->world_rect(transform->worldMatrix));
+        }
     }
 
     auto* display = e.tryGet<Display2D>();
@@ -62,7 +75,7 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
         it = child.sibling_next;
     }
 
-    if (scissors) {
+    if (bounds && bounds->scissors) {
         draw2d::state.pop_scissors();
     }
 }
@@ -79,9 +92,20 @@ void RenderSystem2D::drawStack(ecs::entity e) {
         }
     }
 
-    auto* scissors = e.tryGet<Scissors>();
-    if (scissors) {
-        draw2d::state.push_scissors(scissors->world_rect(draw2d::state.matrix));
+    auto* bounds = e.tryGet<Bounds2D>();
+    if (bounds) {
+        const auto* camera = Camera2D::getCurrentRenderingCamera();
+        auto rc = bounds->getScreenRect(camera->inverseMatrix, draw2d::state.matrix);
+        if (Camera2D::getCurrentRenderingCamera()->occlusionEnabled) {
+            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors)) {
+                // discard
+                return;
+            }
+        }
+        if (bounds->scissors) {
+            draw2d::state.push_scissors(rc);
+            //draw2d::state.push_scissors(scissors->world_rect(transform->worldMatrix));
+        }
     }
 
     auto* display = e.tryGet<Display2D>();
@@ -118,7 +142,7 @@ void RenderSystem2D::drawStack(ecs::entity e) {
         it = child.sibling_next;
     }
 
-    if (scissors) {
+    if (bounds && bounds->scissors) {
         draw2d::state.pop_scissors();
     }
 }

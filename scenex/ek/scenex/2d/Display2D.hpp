@@ -50,15 +50,23 @@ public:
     }
 };
 
-struct Scissors {
+struct Bounds2D {
+//    enum Flags {
+//        HitArea,
+//        Scissors,
+//        Bounds
+//    };
     rect_f rect;
+
+    bool hitArea = false;
+    bool scissors = false;
+    bool culling = false;
 
     [[nodiscard]]
-    rect_f world_rect(const matrix_2d& world_matrix) const;
-};
+    rect_f getWorldRect(const matrix_2d& worldMatrix) const;
 
-struct HitArea {
-    rect_f rect;
+    [[nodiscard]]
+    rect_f getScreenRect(matrix_2d viewMatrix, matrix_2d worldMatrix) const;
 };
 
 struct Display2D {

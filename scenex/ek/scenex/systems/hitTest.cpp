@@ -15,22 +15,18 @@ entity hitTest2D(entity e, float2 parentPosition) {
     }
 
     float2 local = parentPosition;
-    if (e.has<Transform2D>()) {
-        auto& transform = e.get<Transform2D>();
-        if (!transform.matrix.transform_inverse(local, local)) {
+    const auto* transform = e.tryGet<Transform2D>();
+    if (transform && !transform->matrix.transform_inverse(local, local)) {
+        // fail to make transform, discard
+        return nullptr;
+    }
+    auto* bounds = e.tryGet<Bounds2D>();
+    if (bounds) {
+        if (!bounds->rect.contains(local)) {
             return nullptr;
+        } else if (bounds->hitArea) {
+            return e;
         }
-        if (e.has<Scissors>() && !e.get<Scissors>().rect.contains(local.x, local.y)) {
-            return nullptr;
-        }
-
-        if (e.has<HitArea>()) {
-            return e.get<HitArea>().rect.contains(local.x, local.y) ? e : nullptr;
-        }
-
-        //if(e.has<Bounds2D>()) {
-        // TODO: check if not drawable out of scope!
-        //}
     }
 
     auto it = node.child_last;

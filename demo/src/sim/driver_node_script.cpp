@@ -61,7 +61,7 @@ ecs::entity create() {
         //ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
         ecs::get<Transform2D>(e).position = {10.0f, 10.0f};
         // TODO: fix scissors stats
-        ecs::assign<Scissors>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+        ecs::assign<Bounds2D>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f}).scissors = true;
         append(sampleContainer, e);
 
         e = create_node_2d("dna");
@@ -69,13 +69,13 @@ ecs::entity create() {
 //    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
         ecs::get<Transform2D>(e).position = {10.0f, 10.0f + 128.0f + 10.0f};
         // TODO: fix scissors stats
-        ecs::assign<Scissors>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+        ecs::assign<Bounds2D>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f}).scissors = true;
         append(sampleContainer, e);
 
         e = create_node_2d("diamonds");
         assignScript<diamonds>(e);
         ecs::get<Transform2D>(e).position = {10.0f + 128.0f + 10.0f, 20.0f};
-        ecs::assign<Scissors>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+        ecs::assign<Bounds2D>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f}).scissors = true;;
         append(sampleContainer, e);
     }
 

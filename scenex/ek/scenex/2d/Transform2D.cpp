@@ -104,7 +104,6 @@ bool Transform2D::fastLocalToLocal(ecs::entity src, ecs::entity dst, float2 pos,
     return dst.get<Transform2D>().worldMatrix.transform_inverse(pos, out);
 }
 
-
 /** Invalidate Transform2D **/
 
 void updateWorldTransform(ecs::entity e, const Transform2D* transform) {

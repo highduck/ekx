@@ -23,7 +23,7 @@ matrix_2d Camera2D::getMatrix(ecs::entity root_, float scale) const {
 }
 
 static std::vector<ecs::entity> activeCameras{};
-static const Camera2D* currentCamera = nullptr;
+static const Camera2D* currentRenderingCamera = nullptr;
 static int currentLayerMask = 0xFF;
 
 std::vector<ecs::entity>& Camera2D::getCameraQueue() {
@@ -81,7 +81,7 @@ void Camera2D::render() {
         auto& camera = e.get<Camera2D>();
 
         // set current
-        currentCamera = &camera;
+        currentRenderingCamera = &camera;
         currentLayerMask = camera.layerMask;
 
         // apply scissors
@@ -122,6 +122,10 @@ void Camera2D::render() {
 Camera2D::Camera2D(ecs::entity root_) :
         root{root_} {
 
+}
+
+const Camera2D* Camera2D::getCurrentRenderingCamera() {
+    return currentRenderingCamera;
 }
 
 }

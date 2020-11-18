@@ -92,6 +92,8 @@ void set_blend_mode(const blend_mode& blending) {
 void set_scissors(int x, int y, int width, int height) {
     const int buffer_height = currentFrameBufferHeight;
     GL_CHECK(glEnable(GL_SCISSOR_TEST));
+    if (width < 0) width = 0;
+    if (height < 0) height = 0;
     GL_CHECK(glScissor(x, buffer_height - y - height, width, height));
 }
 

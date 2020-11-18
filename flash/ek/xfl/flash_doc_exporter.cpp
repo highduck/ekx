@@ -11,21 +11,40 @@ namespace ek::flash {
 
 using std::string;
 
+enum BoundsMode {
+    Bounds_None = 0,
+    Bounds_Bounds = 1,
+    Bounds_HitArea = 2,
+    Bounds_Scissors = 4
+};
 
-bool is_hit_rect(const string& str) {
-    return equals_ignore_case(str, "hitrect");
-}
-
-bool is_clip_rect(const string& str) {
-    return equals_ignore_case(str, "cliprect");
+int getBoundingRectFlags(const string& str) {
+    int flags = 0;
+    if (equals_ignore_case(str, "hitrect")) {
+        flags |= Bounds_HitArea;
+    }
+    if (equals_ignore_case(str, "bbrect")) {
+        flags |= Bounds_Bounds;
+    }
+    if (equals_ignore_case(str, "cliprect")) {
+        flags |= Bounds_Scissors;
+    }
+    return flags;
 }
 
 bool setupSpecialLayer(const flash_doc& doc, const layer_t& layer, export_item_t& toItem) {
-    if (is_hit_rect(layer.name)) {
-        toItem.node.hitRect = estimate_bounds(doc, layer.frames[0].elements);
-        return true;
-    } else if (is_clip_rect(layer.name)) {
-        toItem.node.clipRect = estimate_bounds(doc, layer.frames[0].elements);
+    auto flags = getBoundingRectFlags(layer.name);
+    if (flags != 0) {
+        toItem.node.boundingRect = estimate_bounds(doc, layer.frames[0].elements);
+        if ((flags & Bounds_HitArea) != 0) {
+            toItem.node.hitAreaEnabled = true;
+        }
+        if ((flags & Bounds_Bounds) != 0) {
+            toItem.node.boundsEnabled = true;
+        }
+        if ((flags & Bounds_Scissors) != 0) {
+            toItem.node.scissorsEnabled = true;
+        }
         return true;
     }
     return false;
