@@ -5,7 +5,7 @@
 #include <ek/math/bounds_builder.hpp>
 #include <ek/math/matrix_inverse.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/scenex/components/script.hpp>
+#include <ek/scenex/base/Script.hpp>
 #include <ek/scenex/app/basic_application.hpp>
 
 namespace ek {

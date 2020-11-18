@@ -1,10 +1,10 @@
-#include "particle_system.hpp"
+#include "ParticleSystem.hpp"
 
-#include "particle_decl.hpp"
-#include "particle.hpp"
+#include "ParticleDecl.hpp"
+#include "Particle.hpp"
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/util/locator.hpp>
-#include <ek/scenex/game_time.hpp>
+#include <ek/scenex/TimeLayer.hpp>
 
 namespace ek {
 
@@ -16,15 +16,15 @@ ParticleLayer2D& find_particle_layer(ecs::entity e) {
     return ecs::get_or_create<ParticleLayer2D>(l);
 }
 
-void add_particle(ParticleLayer2D& layer, particle* particle_) {
+void add_particle(ParticleLayer2D& layer, Particle* particle_) {
     if (particle_) {
         layer.particles.push_back(particle_);
         particle_->init();
     }
 }
 
-particle* produce_particle(const particle_decl& decl) {
-    auto* p = new particle;
+Particle* produce_particle(const ParticleDecl& decl) {
+    auto* p = new Particle;
     p->sprite = decl.sprite;
     p->reflector = decl.use_reflector;
     p->acc = decl.acceleration;
@@ -55,7 +55,7 @@ void particles_burst(ecs::entity e, int count) {
     const auto& data = ecs::get<ParticleEmitter2D>(e).data;
     const auto& position = ecs::get_or_default<Transform2D>(e).position + emitter.position;
     float a = data.dir.random();
-    Res<particle_decl> decl{emitter.particle};
+    Res<ParticleDecl> decl{emitter.particle};
     auto& layer = find_particle_layer(e);
     while (count > 0) {
         auto* p = produce_particle(*decl);
@@ -92,7 +92,7 @@ void update_emitters() {
         emitter.time += dt;
         const auto& data = emitter.data;
         if (emitter.time >= data.interval) {
-            Res<particle_decl> decl{emitter.particle};
+            Res<ParticleDecl> decl{emitter.particle};
             int count = data.burst;
             float a = data.dir.random();
             while (count > 0) {
@@ -126,8 +126,8 @@ void update_emitters() {
     }
 }
 
-particle* spawn_particle(ecs::entity e, const std::string& particle_id) {
-    Res<particle_decl> decl{particle_id};
+Particle* spawn_particle(ecs::entity e, const std::string& particle_id) {
+    Res<ParticleDecl> decl{particle_id};
     if (decl) {
         auto* p = produce_particle(*decl);
         auto& to_layer = ecs::get_or_create<ParticleLayer2D>(e);
@@ -138,7 +138,7 @@ particle* spawn_particle(ecs::entity e, const std::string& particle_id) {
 }
 
 void update_particles() {
-    static std::vector<particle*> alive_particles;
+    static std::vector<Particle*> alive_particles;
     for (auto e : ecs::view<ParticleLayer2D>()) {
         auto& layer = ecs::get<ParticleLayer2D>(e);
         auto dt = layer.timer->dt;

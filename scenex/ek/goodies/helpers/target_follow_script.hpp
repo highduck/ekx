@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/math/vec.hpp>
-#include <ek/scenex/components/script.hpp>
+#include <ek/scenex/base/Script.hpp>
 #include <ecxx/ecxx.hpp>
 
 namespace ek {

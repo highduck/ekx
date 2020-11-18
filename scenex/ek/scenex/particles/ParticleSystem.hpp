@@ -2,15 +2,15 @@
 
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
-#include <ek/scenex/game_time.hpp>
-#include "particle_decl.hpp"
+#include <ek/scenex/TimeLayer.hpp>
+#include "ParticleDecl.hpp"
 
 namespace ek {
 
-class particle;
+class Particle;
 
 struct ParticleLayer2D {
-    std::vector<particle*> particles;
+    std::vector<Particle*> particles;
     bool keep_alive = false;
     TimeLayer timer;
 };
@@ -18,7 +18,7 @@ struct ParticleLayer2D {
 struct ParticleEmitter2D {
     emitter_data data;
     float2 position = float2::zero;
-    std::function<void(particle&)> on_spawn;
+    std::function<void(Particle&)> on_spawn;
     std::string particle;
     ecs::entity layer;
     float time = 0.0f;
@@ -48,7 +48,7 @@ public:
 
 void particles_burst(ecs::entity e, int count);
 
-particle* spawn_particle(ecs::entity e, const std::string& particle_id);
+Particle* spawn_particle(ecs::entity e, const std::string& particle_id);
 
 void update_emitters();
 
@@ -56,9 +56,9 @@ void update_particles();
 
 void draw_particle_layer(ecs::entity e);
 
-particle* produce_particle(const particle_decl& decl);
+Particle* produce_particle(const ParticleDecl& decl);
 
-void add_particle(ParticleLayer2D& layer, particle* particle_);
+void add_particle(ParticleLayer2D& layer, Particle* particle_);
 
 }
 

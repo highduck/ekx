@@ -2,7 +2,7 @@
 
 namespace ek {
 
-void gui_particles(particle_decl* decl) {
+void gui_particles(ParticleDecl* decl) {
 
 }
 

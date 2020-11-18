@@ -4,14 +4,14 @@
 #include <ek/util/locator.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/goodies/helpers/Trail2D.hpp>
 #include <ek/goodies/helpers/mouse_follow_script.hpp>
 #include <ek/goodies/helpers/target_follow_script.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <sim/components/attractor.h>
-#include <ek/scenex/game_time.hpp>
+#include <ek/scenex/TimeLayer.hpp>
 #include <ek/math/rand.hpp>
 #include <sim/components/position.h>
 #include <sim/components/motion.h>
@@ -61,7 +61,7 @@ ecs::entity create() {
         //ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
         ecs::get<Transform2D>(e).position = {10.0f, 10.0f};
         // TODO: fix scissors stats
-        ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+        ecs::assign<Scissors>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
         append(sampleContainer, e);
 
         e = create_node_2d("dna");
@@ -69,13 +69,13 @@ ecs::entity create() {
 //    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
         ecs::get<Transform2D>(e).position = {10.0f, 10.0f + 128.0f + 10.0f};
         // TODO: fix scissors stats
-        ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+        ecs::assign<Scissors>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
         append(sampleContainer, e);
 
         e = create_node_2d("diamonds");
         assignScript<diamonds>(e);
         ecs::get<Transform2D>(e).position = {10.0f + 128.0f + 10.0f, 20.0f};
-        ecs::assign<scissors_2d>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
+        ecs::assign<Scissors>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f});
         append(sampleContainer, e);
     }
 

@@ -11,6 +11,7 @@
 #include <ek/util/locator.hpp>
 #include <ek/app/app.hpp>
 #include <ek/util/signals.hpp>
+#include <utility>
 #include "builtin_resources.hpp"
 #include "profiler.hpp"
 
@@ -34,7 +35,8 @@ public:
     /////
     ecs::entity root;
     ecs::entity game;
-    float2 base_resolution;
+
+    static float2 AppResolution;
 
     Profiler profiler{};
     asset_manager_t* asset_manager_ = nullptr;
@@ -70,16 +72,42 @@ protected:
     bool started_ = false;
 };
 
+inline float2 basic_application::AppResolution{};
+
 template<typename T>
-inline void run_app() {
-    auto& app = service_locator_instance<basic_application>::init<T>();
+inline void run_app(app::window_config cfg) {
+    using app::g_app;
+    using app::vec2;
+
+    basic_application::AppResolution = float2{cfg.size};
+    g_app.window_cfg = std::move(cfg);
+
 #ifdef EK_EDITOR
-    Editor::initialize();
+    Editor::settings.load();
+    if (length(Editor::settings.windowSize) > 0.0f) {
+        g_app.window_cfg.size = vec2{Editor::settings.windowSize};
+        g_app.window_cfg.title = "Ekitor: " + g_app.window_cfg.title;
+    }
 #endif
-    app.initialize();
-    app.preload();
-    app::g_app.on_frame_draw += [&app] { app.on_draw_frame(); };
-    app::g_app.on_event += [&app](const auto& event) { app.on_event(event); };
+
+    g_app.on_device_ready << [] {
+        auto& app = service_locator_instance<basic_application>::init<T>();
+#ifdef EK_EDITOR
+        Editor::initialize();
+#endif
+        app.initialize();
+        app.preload();
+
+        g_app.on_frame_draw += [] {
+            resolve<basic_application>().on_draw_frame();
+        };
+
+        g_app.on_event += [](const auto& event) {
+            resolve<basic_application>().on_event(event);
+        };
+    };
+
+    start_application();
 }
 
 }

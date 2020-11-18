@@ -103,7 +103,7 @@ drawing_state& drawing_state::rotate(float radians) {
     return *this;
 }
 
-drawing_state& drawing_state::concat_matrix(const matrix_2d& r) {
+drawing_state& drawing_state::concat(const matrix_2d& r) {
     matrix = matrix * r;
     return *this;
 }
@@ -127,18 +127,18 @@ drawing_state& drawing_state::restore_color() {
     return *this;
 }
 
-drawing_state& drawing_state::multiply_alpha(float alpha) {
+drawing_state& drawing_state::scaleAlpha(float alpha) {
     auto a = (uint8_t) ((color.scale.a * ((int) (alpha * 255)) * 258u) >> 16u);
     color.scale.a = a;
     return *this;
 }
 
-drawing_state& drawing_state::multiply_color(argb32_t scale) {
-    color.scale = color.scale * scale;
+drawing_state& drawing_state::scaleColor(argb32_t multiplier) {
+    color.scale = color.scale * multiplier;
     return *this;
 }
 
-drawing_state& drawing_state::combine_color(argb32_t scale, argb32_t offset) {
+drawing_state& drawing_state::concat(argb32_t scale, argb32_t offset) {
     using details::clamp_255;
 
     if (offset.argb != 0) {
@@ -153,6 +153,10 @@ drawing_state& drawing_state::combine_color(argb32_t scale, argb32_t offset) {
     }
 
     return *this;
+}
+
+drawing_state& drawing_state::concat(ColorMod32 colorMod) {
+    return concat(colorMod.scale, colorMod.offset);
 }
 
 drawing_state& drawing_state::offset_color(argb32_t offset) {

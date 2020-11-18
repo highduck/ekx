@@ -16,6 +16,12 @@ struct EditorSettings {
     bool showResourcesView = false;
     bool showAssetsView = false;
     bool showBuildWindow = false;
+    float2 windowSize = float2::zero;
+    bool dirty = false;
+
+    void save() const;
+
+    void load();
 };
 
 class basic_application;
@@ -28,10 +34,13 @@ public:
 
     editor_project_t project;
 
-    void on_event(const app::event_t& event);
+    void onEvent(const app::event_t& event);
+    void onFrameCompleted();
 
 public:
-    EditorSettings settings;
+    static EditorSettings settings;
+
+    static void invalidateSettings();
 
 private:
     imgui_module_t gui_;
@@ -42,6 +51,7 @@ private:
     basic_application* app_;
 
 public:
+
     static void initialize();
 };
 

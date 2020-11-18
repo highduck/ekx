@@ -5,9 +5,8 @@
 
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
-#include <ek/scenex/components/canvas.hpp>
-#include <ek/scenex/systems/layout_system.hpp>
-#include <ek/scenex/systems/canvas_system.hpp>
+#include <ek/scenex/2d/Canvas.hpp>
+#include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/ext/game_center/game_center.hpp>
@@ -25,9 +24,7 @@ using ecs::world;
 using ecs::entity;
 using namespace ek::app;
 
-basic_application::basic_application()
-        : base_resolution{static_cast<float>(g_app.window_cfg.size.x),
-                          static_cast<float>(g_app.window_cfg.size.y)} {
+basic_application::basic_application() {
 
     assert_created_once<basic_application>();
 
@@ -53,6 +50,7 @@ void basic_application::initialize() {
     updateScreenRect(root);
 
     auto& defaultCamera = root.assign<Camera2D>(root);
+    defaultCamera.order = 1;
     Camera2D::Main = root;
 
     auto& im = service_locator_instance<InteractionSystem>::init(root);
@@ -60,12 +58,13 @@ void basic_application::initialize() {
     service_locator_instance<AudioManager>::init();
 
     game = create_node_2d("game");
-    ecs::assign<canvas_t>(game, base_resolution.x, base_resolution.y);
-    ecs::assign<layout_t>(game);
+    ecs::assign<Canvas>(game, AppResolution.x, AppResolution.y);
+    ecs::assign<LayoutRect>(game);
     append(root, game);
-    scale_factor = update_canvas(game);
+    Canvas::updateAll();
+    scale_factor = game.get<Canvas>().scale;
 
-    layout_wrapper::designCanvasRect = {0.0f, 0.0f, base_resolution.x, base_resolution.y};
+    layout_wrapper::designCanvasRect = {float2::zero, AppResolution};
 }
 
 void basic_application::preload() {
@@ -86,7 +85,7 @@ void basic_application::preload() {
 
 void basic_application::on_draw_frame() {
     timer_t timer{};
-    scale_factor = ecs::get<canvas_t>(game).scale;
+    scale_factor = ecs::get<Canvas>(game).scale;
     asset_manager_->set_scale_factor(scale_factor);
 
     /** base app BEGIN **/

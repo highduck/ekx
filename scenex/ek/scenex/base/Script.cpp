@@ -1,7 +1,7 @@
-#include "script.hpp"
+#include "Script.hpp"
 #include "Node.hpp"
 
-#include <ek/scenex/game_time.hpp>
+#include <ek/scenex/TimeLayer.hpp>
 
 namespace ek {
 

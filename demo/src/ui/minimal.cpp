@@ -1,6 +1,6 @@
 #include <ek/scenex/utility/scene_management.hpp>
-#include <ek/scenex/components/interactive.hpp>
-#include <ek/scenex/components/button.hpp>
+#include <ek/scenex/base/Interactive.hpp>
+#include <ek/scenex/2d/Button.hpp>
 #include "minimal.hpp"
 
 namespace ek {
@@ -24,7 +24,7 @@ ecs::entity createButton(const char* label, const std::function<void()>& fn) {
     tf.hitFullBounds = true;
     tf.rect.set(-20, -20, 40, 40);
     ecs::assign<interactive_t>(e).cursor = app::mouse_cursor::button;
-    ecs::assign<button_t>(e).clicked += fn;
+    ecs::assign<Button>(e).clicked += fn;
     return e;
 }
 

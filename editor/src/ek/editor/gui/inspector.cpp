@@ -2,18 +2,18 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
-#include <ek/scenex/components/interactive.hpp>
-#include <ek/scenex/components/script.hpp>
+#include <ek/scenex/base/Interactive.hpp>
+#include <ek/scenex/base/Script.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/3d/Transform3D.hpp>
 #include <ek/scenex/3d/Camera3D.hpp>
 #include <ek/scenex/3d/Light3D.hpp>
-#include <ek/scenex/components/movie.hpp>
-#include <ek/scenex/components/Node.hpp>
-#include <ek/scenex/components/layout.hpp>
-#include <ek/scenex/components/event_handler.hpp>
+#include <ek/scenex/2d/MovieClip.hpp>
+#include <ek/scenex/base/Node.hpp>
+#include <ek/scenex/2d/LayoutRect.hpp>
+#include <ek/scenex/base/NodeEvents.hpp>
 #include <ek/scenex/2d/UglyFilter2D.hpp>
-#include <ek/scenex/particles/particle_system.hpp>
+#include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
 
 namespace ek {
@@ -77,7 +77,7 @@ inline void guiDisplayComponent(ecs::entity e, const char* name, Func fn) {
     }
 }
 
-void guiMovieClip(movie_t& mc) {
+void guiMovieClip(MovieClip& mc) {
     ImGui::LabelText("movie_data_symbol", "%s", mc.movie_data_symbol.c_str());
     const auto* data = mc.get_movie_data();
     if (data) {
@@ -173,15 +173,15 @@ void guiLight3D(Light3D& light) {
     ImGui::DragFloat("Falloff", &light.falloff, 0.1f, 0.0f, 0.0f, "%.1f");
 }
 
-void gui_scissors_2d(scissors_2d& scissors) {
+void guiScissors(Scissors& scissors) {
     ImGui::EditRect("Bounds", scissors.rect.data());
 }
 
-void gui_hit_area_2d(hit_area_2d& hit_area) {
+void guiHitArea(HitArea& hit_area) {
     ImGui::EditRect("Bounds", hit_area.rect.data());
 }
 
-void gui_interactive(interactive_t& inter) {
+void guiInteractive(interactive_t& inter) {
     ImGui::Checkbox("pushed", &inter.pushed);
     ImGui::Checkbox("over", &inter.over);
     ImGui::Checkbox("bubble", &inter.bubble);
@@ -253,7 +253,7 @@ void editDisplayText(Text2D& tf) {
     guiTextFormat(tf.format);
 }
 
-void guiLayout(layout_t& layout) {
+void guiLayout(LayoutRect& layout) {
     ImGui::Checkbox("Fill X", &layout.fill_x);
     ImGui::Checkbox("Fill Y", &layout.fill_y);
     ImGui::Checkbox("Align X", &layout.align_x);
@@ -324,11 +324,11 @@ void gui_inspector(ecs::entity e) {
     guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
     guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
     guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);
-    guiComponentPanel<scissors_2d>(e, "Scissors", gui_scissors_2d);
-    guiComponentPanel<hit_area_2d>(e, "Hit Area", gui_hit_area_2d);
-    guiComponentPanel<interactive_t>(e, "Interactive", gui_interactive);
+    guiComponentPanel<Scissors>(e, "Scissors", guiScissors);
+    guiComponentPanel<HitArea>(e, "Hit Area", guiHitArea);
+    guiComponentPanel<interactive_t>(e, "Interactive", guiInteractive);
     guiComponentPanel<event_handler_t>(e, "Event Handler", [](auto& c) {});
-    guiComponentPanel<layout_t>(e, "Layout", guiLayout);
+    guiComponentPanel<LayoutRect>(e, "Layout", guiLayout);
 
     // particles
     guiComponentPanel<ParticleEmitter2D>(e, "ParticleEmitter2D", guiParticleEmitter2D);
@@ -341,7 +341,7 @@ void gui_inspector(ecs::entity e) {
     guiDisplayComponent<Arc2D>(e, "Arc", editDisplayArc);
     guiDisplayComponent<ParticleRenderer2D>(e, "ParticleRenderer2D", editParticleRenderer2D);
 
-    guiComponentPanel<movie_t>(e, "Movie Clip", guiMovieClip);
+    guiComponentPanel<MovieClip>(e, "Movie Clip", guiMovieClip);
 
     if (e.has<script_holder>()) {
         auto& scripts = e.get<script_holder>().list;

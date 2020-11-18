@@ -4,7 +4,7 @@
 
 #include <ek/app/app.hpp>
 #include <string>
-#include <ek/scenex/components/interactive.hpp>
+#include <ek/scenex/base/Interactive.hpp>
 
 namespace ek {
 

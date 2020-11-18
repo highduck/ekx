@@ -2,11 +2,11 @@
 
 #include <ecxx/ecxx.hpp>
 #include <ek/util/signals.hpp>
-#include <ek/scenex/game_time.hpp>
+#include <ek/scenex/TimeLayer.hpp>
 
 namespace ek {
 
-struct tween_t {
+struct Tween {
     float delay = 0.0f;
     float time = 0.0f;
     float duration = 1.0f;
@@ -14,6 +14,9 @@ struct tween_t {
     bool auto_destroy = true;
     bool destroyEntity = false;
     TimeLayer timer;
+
+    static void update();
+    static Tween& reset(ecs::entity e);
 };
 
 }

@@ -1,19 +1,16 @@
 #include "gui.hpp"
 
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/scenex/components/script.hpp>
-#include <ek/scenex/components/interactive.hpp>
-#include <ek/scenex/components/event_handler.hpp>
-#include <ek/scenex/3d/Transform3D.hpp>
-#include <ek/scenex/3d/Camera3D.hpp>
-#include <ek/math/common.hpp>
+#include <ek/scenex/base/Script.hpp>
+#include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/3d/Light3D.hpp>
-#include <ek/scenex/components/movie.hpp>
-#include <ek/scenex/components/button.hpp>
+#include <ek/scenex/2d/MovieClip.hpp>
+#include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/app/basic_application.hpp>
+#include <ek/scenex/3d/Transform3D.hpp>
 
 namespace ek {
 
@@ -34,7 +31,7 @@ void gui_entity_simple(ecs::entity e) {
 void gui_entity(ecs::entity e, bool visible, bool touchable) {
     ImGui::PushID(e.passport());
     ImGui::BeginGroup();
-    if (!ecs::valid(e)) {
+    if (!e.valid()) {
         ImGui::Text("INVALID ENTITY");
     } else {
         gui_entity_node(e, visible, touchable);
@@ -65,10 +62,10 @@ const char* getEntityTitle(ecs::entity e) {
         if (disp.is<Text2D>()) type = "Text";
         if (disp.is<Arc2D>()) type = "Arc";
     }
-    if (ecs::has<movie_t>(e)) { type = "MovieClip"; }
+    if (ecs::has<MovieClip>(e)) { type = "MovieClip"; }
     if (ecs::has<interactive_t>(e)) { type = "Interactive"; }
-    if (ecs::has<button_t>(e)) { type = "Button"; }
-    if (ecs::has<scissors_2d>(e)) { type = "Scissors"; }
+    if (ecs::has<Button>(e)) { type = "Button"; }
+    if (ecs::has<Scissors>(e)) { type = "Scissors"; }
     if (ecs::has<script_holder>(e)) { type = "Script"; }
     return type;
 }
@@ -131,11 +128,11 @@ void gui_entity_node(ecs::entity e, bool visible, bool touchable) {
     ImGui::PopStyleColor();
 
     if (opened) {
-        if (ecs::has<Node>(e)) {
-            auto it = ecs::get<Node>(e).child_first;
-            while (it != nullptr && ecs::valid(it)) {
+        if (e.has<Node>()) {
+            auto it = e.get<Node>().child_first;
+            while (it) {
                 auto child = it;
-                it = ecs::get<Node>(it).sibling_next;
+                it = it.get<Node>().sibling_next;
                 gui_entity(child, visible, touchable);
             }
         }
@@ -156,15 +153,15 @@ void guiHierarchyWindow(bool* p_open) {
 
         if (showAllRoots) {
             // all roots
-            ecs::each([](auto e) {
-                if (!ecs::has<Node>(e) || ecs::get<Node>(e).parent == nullptr) {
+            ecs::each([](ecs::entity e) {
+                if (!e.has<Node>() || e.get<Node>().parent == nullptr) {
                     gui_entity(e, true, true);
                 }
             });
         } else {
             // game container
             auto& app = resolve<basic_application>();
-            if (ecs::valid(app.game)) {
+            if (app.game.valid()) {
                 gui_entity(app.game, true, true);
             } else {
                 ImGui::TextColored({1, 0, 0, 1}, "Invalid Game container");

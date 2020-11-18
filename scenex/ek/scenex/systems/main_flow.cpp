@@ -3,21 +3,20 @@
 #include <ek/util/locator.hpp>
 
 #include <ek/scenex/AudioManager.hpp>
-#include <ek/scenex/particles/particle_system.hpp>
+#include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/utility/destroy_delay.hpp>
 #include <ek/goodies/shake_system.hpp>
 #include <ek/goodies/helpers/Trail2D.hpp>
 #include <ek/goodies/bubble_text.hpp>
 #include <ek/goodies/popup_manager.hpp>
-#include <ek/scenex/game_time.hpp>
+#include <ek/scenex/TimeLayer.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
-
-#include "layout_system.hpp"
-#include "tween_system.hpp"
-#include "canvas_system.hpp"
-#include "button_system.hpp"
-#include "movie_clip_system.hpp"
+#include <ek/scenex/2d/LayoutRect.hpp>
+#include <ek/scenex/2d/Button.hpp>
+#include <ek/scenex/2d/Canvas.hpp>
+#include <ek/scenex/2d/MovieClip.hpp>
+#include <ek/scenex/base/Tween.hpp>
 
 namespace ek {
 
@@ -31,17 +30,17 @@ void scene_pre_update(entity root, float dt) {
 
     resolve<AudioManager>().update(dt);
 
-    update_canvas();
-    update_layout();
-    update_tweens();
+    Canvas::updateAll();
+    LayoutRect::updateAll();
+    Tween::update();
     update_shake();
 
     update_bubble_text(dt);
     update_popup_managers(dt);
 
     updateScripts();
-    update_buttons(dt);
-    update_movie_clips();
+    Button::updateAll();
+    MovieClip::updateAll();
 }
 
 void scene_post_update(ecs::entity root, float dt) {

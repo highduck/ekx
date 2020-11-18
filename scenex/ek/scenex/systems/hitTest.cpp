@@ -2,7 +2,7 @@
 
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
-#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/base/Node.hpp>
 
 namespace ek {
 
@@ -20,12 +20,12 @@ entity hitTest2D(entity e, float2 parentPosition) {
         if (!transform.matrix.transform_inverse(local, local)) {
             return nullptr;
         }
-        if (e.has<scissors_2d>() && !e.get<scissors_2d>().rect.contains(local.x, local.y)) {
+        if (e.has<Scissors>() && !e.get<Scissors>().rect.contains(local.x, local.y)) {
             return nullptr;
         }
 
-        if (e.has<hit_area_2d>()) {
-            return e.get<hit_area_2d>().rect.contains(local.x, local.y) ? e : nullptr;
+        if (e.has<HitArea>()) {
+            return e.get<HitArea>().rect.contains(local.x, local.y) ? e : nullptr;
         }
 
         //if(e.has<Bounds2D>()) {

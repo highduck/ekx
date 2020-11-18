@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/scenex/components/script.hpp>
+#include <ek/scenex/base/Script.hpp>
 #include <ek/graphics/render_target.hpp>
 //#include <ek/editor/gui/screen_recorder.hpp>
 

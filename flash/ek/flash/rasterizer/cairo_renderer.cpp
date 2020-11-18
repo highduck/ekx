@@ -125,7 +125,9 @@ void cairo_renderer::paint() {
 
 void cairo_renderer::close() {
     if (open_flag_) {
-        cairo_close_path(ctx_);
+        if (fill_flag_) {
+            cairo_close_path(ctx_);
+        }
         paint();
         open_flag_ = false;
     }

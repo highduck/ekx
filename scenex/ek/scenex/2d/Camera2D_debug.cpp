@@ -1,12 +1,12 @@
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/util/locator.hpp>
-#include <ek/scenex/game_time.hpp>
-#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/TimeLayer.hpp>
+#include <ek/scenex/base/Node.hpp>
 #include "Camera2D.hpp"
 #include "Transform2D.hpp"
 #include "Display2D.hpp"
-#include <ek/scenex/components/script.hpp>
+#include <ek/scenex/base/Script.hpp>
 
 namespace ek {
 
@@ -55,11 +55,11 @@ void debugDrawHitTarget(Camera2D& camera) {
     if (display && display->drawable) {
         drawBox(display->getBounds(), matrix, 0xFF000000_argb, argb32_t::one, true);
     }
-    auto* hitArea = target.tryGet<hit_area_2d>();
+    auto* hitArea = target.tryGet<HitArea>();
     if (hitArea) {
         drawBox(hitArea->rect, matrix, 0xFF99FF00_argb, argb32_t::one, false);
     }
-    auto* scissors = target.tryGet<scissors_2d>();
+    auto* scissors = target.tryGet<Scissors>();
     if (scissors) {
         drawBox(scissors->rect, matrix, 0xFFFFFF00_argb, argb32_t::one, false);
     }

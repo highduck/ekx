@@ -1,11 +1,12 @@
 #include "InteractionSystem.hpp"
 
 #include <ek/math/vec.hpp>
-#include <ek/scenex/components/interactive.hpp>
-#include <ek/scenex/components/event_handler.hpp>
+#include <ek/scenex/base/Interactive.hpp>
+#include <ek/scenex/base/NodeEvents.hpp>
 #include <ek/scenex/systems/hitTest.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
-#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/2d/RenderSystem2D.hpp>
+#include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 
 using namespace ek::app;

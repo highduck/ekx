@@ -9,8 +9,8 @@
 #include <ek/scenex/systems/main_flow.hpp>
 #include <ek/scenex/asset2/builtin_assets.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
-#include <ek/scenex/components/interactive.hpp>
-#include <ek/scenex/components/layout.hpp>
+#include <ek/scenex/base/Interactive.hpp>
+#include <ek/scenex/2d/LayoutRect.hpp>
 #include <ui/minimal.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
 
@@ -39,15 +39,9 @@ void scrollSample(int delta) {
 }
 
 void main() {
-    app::g_app.window_cfg = {
-            "ekx",
-            app::vec2{360, 480},
-            true};
-    app::g_app.on_device_ready << [] {
-        run_app<DemoApp>();
-    };
-    start_application();
+    run_app<DemoApp>({"ekx", app::vec2{360, 480}, true});
 }
+
 }
 
 using namespace ek;
@@ -101,18 +95,18 @@ void DemoApp::start_game() {
 
     auto prev = createButton("<", [] { scrollSample(-1); });
     auto next = createButton(">", [] { scrollSample(+1); });
-    ecs::assign<layout_t>(prev).enableAlignX(0, 30);
-    ecs::assign<layout_t>(next).enableAlignX(1, -30);
+    ecs::assign<LayoutRect>(prev).enableAlignX(0, 30);
+    ecs::assign<LayoutRect>(next).enableAlignX(1, -30);
 
     tfSampleTitle = create_node_2d("title");
     addText(tfSampleTitle, "");
-    ecs::assign<layout_t>(tfSampleTitle).enableAlignX(0.5);
+    ecs::assign<LayoutRect>(tfSampleTitle).enableAlignX(0.5);
 
     auto controls = create_node_2d("controls");
     append(controls, tfSampleTitle);
     append(controls, prev);
     append(controls, next);
-    ecs::assign<layout_t>(controls).enableAlignY(1, -30);
+    ecs::assign<LayoutRect>(controls).enableAlignY(1, -30);
 
     append(game, controls);
 

@@ -1,6 +1,7 @@
-#include "movie_clip_system.hpp"
+#include "MovieClip.hpp"
+#include "Transform2D.hpp"
 
-#include <ek/scenex/2d/Transform2D.hpp>
+#include <ek/scenex/base/Node.hpp>
 
 namespace ek {
 
@@ -8,11 +9,11 @@ using ecs::entity;
 
 float ease(float x, const easing_data_t& data);
 
-void apply_frame(entity e, movie_t& mov);
+void apply_frame(entity e, MovieClip& mov);
 
-void update_movie_clips() {
-    for (auto e : ecs::view<movie_t>()) {
-        auto& mov = ecs::get<movie_t>(e);
+void MovieClip::updateAll() {
+    for (auto e : ecs::view<MovieClip>()) {
+        auto& mov = ecs::get<MovieClip>(e);
         auto dt = mov.timer->dt;
         if (mov.playing) {
             mov.time += dt * mov.fps;
@@ -91,7 +92,7 @@ void apply_transform(entity e, const keyframe_transform_t& keyframe) {
 }
 
 void update_target(float time, entity e, const movie_layer_data& layer) {
-    auto& config = ecs::get_or_create<Node>(e);
+    auto& config = e.get_or_create<Node>();
     const auto ki = findKeyFrame(layer.frames, time);
     if (ki < 0) {
         config.setVisible(false);
@@ -109,8 +110,8 @@ void update_target(float time, entity e, const movie_layer_data& layer) {
         apply_transform(e, k1.transform);
     }
 
-    if (k1.loopMode != 0 && ecs::has<movie_t>(e)) {
-        auto& mc = ecs::get<movie_t>(e);
+    if (k1.loopMode != 0 && ecs::has<MovieClip>(e)) {
+        auto& mc = ecs::get<MovieClip>(e);
         const auto loop = k1.loopMode;
         if (loop == 1) {
             goto_and_stop(e, time - k1.index);
@@ -128,7 +129,7 @@ void update_target(float time, entity e, const movie_layer_data& layer) {
     }
 }
 
-void apply_frame(entity e, movie_t& mov) {
+void apply_frame(entity e, MovieClip& mov) {
     auto* data = mov.get_movie_data();
     auto time = mov.time;
     if (!data) {
@@ -149,7 +150,7 @@ void apply_frame(entity e, movie_t& mov) {
 }
 
 void goto_and_stop(entity e, float frame) {
-    auto& mov = ecs::get<movie_t>(e);
+    auto& mov = ecs::get<MovieClip>(e);
     mov.playing = false;
     mov.time = frame;
     mov.trunc_time();

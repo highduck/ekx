@@ -1,17 +1,17 @@
-#include "game_time.hpp"
+#include "TimeLayer.hpp"
 
-#include <ek/scenex/components/Node.hpp>
+#include <ek/scenex/base/Node.hpp>
 
 namespace ek {
 
-float updateState(TimeLayerState& layer, float dt_) {
+float updateState(TimeLayer::State& layer, float dt_) {
     auto dt1 = dt_ * layer.scale;
     layer.dt = dt1;
     layer.total += dt1;
     return dt1;
 }
 
-TimeLayerState layers[4]{};
+TimeLayer::State layers[4]{};
 
 const auto MAX_DELTA_TIME = 0.3;
 
@@ -25,11 +25,11 @@ void TimeLayer::updateTimers(float raw) {
     updateState(layers[3], dt);
 }
 
-TimeLayerState* TimeLayer::operator->() {
+TimeLayer::State* TimeLayer::operator->() {
     return layers + id;
 }
 
-const TimeLayerState* TimeLayer::operator->() const {
+const TimeLayer::State* TimeLayer::operator->() const {
     return layers + id;
 }
 

@@ -1,19 +1,66 @@
 #pragma once
 
-
 #include <ecxx/ecxx.hpp>
-#include <ek/scenex/components/layout.hpp>
-#include <ek/scenex/2d/Transform2D.hpp>
+#include <ek/math/vec.hpp>
+#include <ek/math/box.hpp>
+#include "Transform2D.hpp"
 
 namespace ek {
 
-void update_layout();
+struct LayoutRect {
+    float2 x;
+    float2 y;
+    rect_f fill_extra;
+    bool fill_x = false;
+    bool fill_y = false;
+    bool align_x = false;
+    bool align_y = false;
+    bool doSafeInsets = true;
+
+    rect_f rect;
+    rect_f safeRect;
+
+    // additional insets can be changed manually: l, t, r, b
+    // to invalidate after change: setScreenRects(basic_application::root);
+    static float4 AdditionalInsets;
+
+    LayoutRect& enableAlignX(float relative, float absolute = 0.0f) {
+        align_x = true;
+        x.x = relative;
+        x.y = absolute;
+        return *this;
+    }
+
+    LayoutRect& enableAlignY(float relative, float absolute = 0.0f) {
+        align_y = true;
+        y.x = relative;
+        y.y = absolute;
+        return *this;
+    }
+
+    LayoutRect& fill(bool xAxis, bool yAxis) {
+        fill_x = xAxis;
+        fill_y = yAxis;
+        return *this;
+    }
+
+    static void updateAll();
+};
+
+rect_f find_parent_layout_rect(ecs::entity e, bool safe);
+
+rect_f get_ancestors_rect(ecs::entity e);
+
+void updateScreenRect(ecs::entity root);
+
+
+// wrapper
 
 class layout_wrapper {
 public:
     layout_wrapper(ecs::entity e)
             : e_{e},
-              l_{ecs::get_or_create<layout_t>(e)} {
+              l_{ecs::get_or_create<LayoutRect>(e)} {
     }
 
     static rect_f designCanvasRect;
@@ -59,9 +106,6 @@ public:
 
 private:
     ecs::entity e_;
-    layout_t& l_;
+    LayoutRect& l_;
 };
-
 }
-
-
