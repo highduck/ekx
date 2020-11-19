@@ -2,18 +2,19 @@
 
 #include <ecxx/ecxx.hpp>
 #include <ek/util/type_index.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
 
 namespace ek {
 
-class script_cpp_base {
+class ScriptBase {
 public:
 
-    explicit script_cpp_base(uint32_t type_id)
-            : type_id_{type_id} {
+    explicit ScriptBase(uint32_t type_id) :
+            type_id_{type_id} {
 
     }
 
-    virtual ~script_cpp_base();
+    virtual ~ScriptBase();
 
     void link_to_entity(ecs::entity e) {
         entity_ = e;
@@ -51,33 +52,72 @@ protected:
 };
 
 template<typename T>
-class script_cpp : public script_cpp_base {
+class Script : public ScriptBase {
 public:
-    script_cpp()
-            : script_cpp_base{type_index<T, script_cpp_base>::value} {
+    Script() :
+            ScriptBase{type_index<T, ScriptBase>::value} {
 
     }
 
-    ~script_cpp() override = default;
+    ~Script() override = default;
 };
 
-struct script_holder {
-    std::vector<std::unique_ptr<script_cpp_base>> list;
+struct ScriptHolder {
+    ecs::entity owner;
+    std::vector<std::unique_ptr<ScriptBase>> list;
+
+    void link(ecs::entity owner_);
+
+    template<typename T>
+    T& make() {
+        auto& r = *list.emplace_back(std::make_unique<T>());
+        r.link_to_entity(owner);
+        r.start();
+        return static_cast<T&>(r);
+    }
+};
+
+class ScriptDrawable2D : public Drawable2D<ScriptDrawable2D> {
+public:
+    ecs::entity entity_;
+    std::unique_ptr<IDrawable2D> delegate;
+
+    ScriptDrawable2D(ecs::entity entity, std::unique_ptr<IDrawable2D> delegate_) :
+            Drawable2D(),
+            entity_{entity},
+            delegate{std::move(delegate_)} {
+
+    }
+
+    void draw() override {
+        if (delegate) {
+            delegate->draw();
+        }
+        auto* holder = entity_.tryGet<ScriptHolder>();
+        assert(holder);
+        for (auto& script : holder->list) {
+            script->draw();
+        }
+    }
+
+    [[nodiscard]]
+    rect_f getBounds() const override { return delegate ? delegate->getBounds() : rect_f{}; }
+
+    [[nodiscard]]
+    bool hitTest(float2 point) const override { return delegate && delegate->hitTest(point); }
 };
 
 template<typename S>
 inline S& assignScript(ecs::entity e) {
-    auto& holder = e.get_or_create<script_holder>();
-    auto& script = holder.list.emplace_back(std::make_unique<S>());
-    script->link_to_entity(e);
-    script->start();
-    return *static_cast<S*>(script.get());
+    auto& holder = e.get_or_create<ScriptHolder>();
+    holder.link(e);
+    return holder.make<S>();
 }
 
 template<typename S>
 inline S& findScript(ecs::entity e) {
-    const auto interest_type_id = type_index<S, script_cpp_base>::value;
-    auto& h = e.get<script_holder>();
+    const auto interest_type_id = type_index<S, ScriptBase>::value;
+    auto& h = e.get<ScriptHolder>();
     for (auto& script : h.list) {
         if (script && script->get_type_id() == interest_type_id) {
             return static_cast<S&>(*script);
@@ -90,4 +130,4 @@ void updateScripts();
 
 }
 
-#define EK_DECL_SCRIPT_CPP(T) class T : public ::ek::script_cpp<T>
+#define EK_DECL_SCRIPT_CPP(T) class T : public ::ek::Script<T>

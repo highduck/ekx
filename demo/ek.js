@@ -24,8 +24,6 @@ module.exports = function (project) {
         output: "export/contents/assets"
     };
 
-    if (project.current_target === "android") {
-
         const secretPath = '/Users/ilyak/Dropbox/dev_keys/demo';
 
         project.android = {
@@ -48,12 +46,12 @@ module.exports = function (project) {
                 }
             }
         };
-    } else if (project.current_target === "ios") {
+
         project.ios = {
-            application_id: "ilj.play.demo"
+            application_id: "ilj.play.demo",
+            admob_app_id: "ca-app-pub-3931267664278058~8636974437",
         };
-    } else if (project.current_target === "web") {
-        // TODO: update
+
         project.html = {
             google_analytics_property_id: "UA-3755607-9",
             background_color: "black",
@@ -62,7 +60,6 @@ module.exports = function (project) {
             url: "https://eliasku.github.io/picos/book",
             image_url: "https://eliasku.github.io/picos/preview.png"
         };
-    }
 
     project.includeProject(path.join(project.path.EKX_ROOT, "plugins/admob"));
     project.includeProject(path.join(project.path.EKX_ROOT, "plugins/billing"));

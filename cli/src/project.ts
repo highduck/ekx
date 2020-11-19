@@ -78,12 +78,16 @@ export class Project {
 
     addModule(def: ModuleDef) {
         this.modules.push(def);
-        if(def && def.name) {
+        if (def && def.name) {
             console.info("Module:", def.name);
         }
     }
 
     includeProject(projectPath: string) {
+        if (this.projects[projectPath]) {
+            return;
+        }
+
         const project_js = path.join(projectPath, "ek.js");
         let projectConfigurator = null;
         try {

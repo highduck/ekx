@@ -16,7 +16,6 @@ add_executable(${PROJECT_NAME}
         src/sim/driver_node_script.h
         src/sim/motion_system.cpp
         src/sim/motion_system.h
-        src/sim/components/position.h
         src/sim/components/motion.h
         src/sim/components/attractor.h
 

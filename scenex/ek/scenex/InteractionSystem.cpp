@@ -26,11 +26,10 @@ inline bool contains(const vector<T>& vec, const T& value) {
 }
 
 bool dispatch_interactive_event(ecs::entity e, const event_data& data) {
-
     if (isTouchable(e)) {
-        if (ecs::has<event_handler_t>(e)) {
-            auto& eh = ecs::get<event_handler_t>(e);
-            eh.emit(data);
+        auto* eh = e.tryGet<event_handler_t>();
+        if (eh) {
+            eh->emit(data);
             if (data.processed) {
                 return true;
             }

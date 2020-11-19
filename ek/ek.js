@@ -1,9 +1,8 @@
 const path = require('path');
 
 module.exports = (ctx) => {
-    ctx.market_asset = "assets/res";
     ctx.addModule({
-        name: "app",
+        name: "ek",
         cpp: [path.join(__dirname, "src")],
         android: {
             cpp: [path.join(__dirname, "platforms/android")],

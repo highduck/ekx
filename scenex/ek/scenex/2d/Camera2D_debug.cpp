@@ -189,12 +189,12 @@ void Camera2D::drawGizmo(Camera2D& camera) {
         debugCameraGizmo(camera);
     }
     if (camera.debugDrawScriptGizmo) {
-        for (auto e : ecs::view<script_holder>()) {
+        for (auto e : ecs::view<ScriptHolder>()) {
             auto* transform = findComponentInParent<Transform2D>(e);
             if (transform) {
                 draw2d::state.matrix = transform->worldMatrix;
                 draw2d::state.color = transform->worldColor;
-                for (auto& script : e.get<script_holder>().list) {
+                for (auto& script : e.get<ScriptHolder>().list) {
                     script->gui_gizmo();
                 }
             }

@@ -8,7 +8,7 @@ namespace ek {
 Text2D& addText(ecs::entity e, const char* text) {
     auto* tf = new Text2D();
     tf->format.font.setID("mini");
-    tf->format.size = 16;
+    tf->format.size = 14;
     tf->format.addShadow(0x0_rgb, 8);
     tf->text = text;
     tf->format.setAlignment(Alignment::Center);
@@ -23,8 +23,8 @@ ecs::entity createButton(const char* label, const std::function<void()>& fn) {
     tf.borderColor = 0x77FFFFFF_argb;
     tf.hitFullBounds = true;
     tf.rect.set(-20, -20, 40, 40);
-    ecs::assign<interactive_t>(e).cursor = app::mouse_cursor::button;
-    ecs::assign<Button>(e).clicked += fn;
+    e.assign<interactive_t>().cursor = app::mouse_cursor::button;
+    e.assign<Button>().clicked += fn;
     return e;
 }
 

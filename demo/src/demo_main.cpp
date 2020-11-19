@@ -55,6 +55,8 @@ void DemoApp::initialize() {
 
     Camera2D::Main.get<Camera2D>().clearColorEnabled = true;
     Camera2D::Main.get<Camera2D>().clearColor = float4{0xFF666666_argb};
+
+    SampleIntegrations::initializePlugins();
 }
 
 void DemoApp::preload() {

@@ -17,6 +17,7 @@
 #include <ek/scenex/2d/Canvas.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/base/Tween.hpp>
+#include <ek/goodies/GameScreen.hpp>
 
 namespace ek {
 
@@ -30,6 +31,12 @@ void scene_pre_update(entity root, float dt) {
 
     resolve<AudioManager>().update(dt);
 
+    {
+        auto* screenManager = try_resolve<GameScreenManager>();
+        if (screenManager) {
+            screenManager->update();
+        }
+    }
     Canvas::updateAll();
     LayoutRect::updateAll();
     Tween::update();
