@@ -115,12 +115,12 @@ template<typename Component>
 }
 
 template<typename Component>
-inline Component& entity::get() {
+inline Component& entity::get() const {
     return world::the.get<Component>(index());
 }
 
 template<typename Component>
-inline Component* entity::tryGet() {
+inline Component* entity::tryGet() const {
     return world::the.tryGet<Component>(index());
 }
 

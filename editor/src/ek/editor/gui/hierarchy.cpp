@@ -69,7 +69,7 @@ const char* getEntityTitle(ecs::entity e) {
     if (ecs::has<Bounds2D>(e)) {
         type = "Bounds2D";
     }
-    if (ecs::has<script_holder>(e)) { type = "Script"; }
+    if (ecs::has<ScriptHolder>(e)) { type = "Script"; }
     return type;
 }
 

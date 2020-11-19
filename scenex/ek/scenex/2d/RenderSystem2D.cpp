@@ -38,7 +38,6 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
         }
         if (bounds->scissors) {
             draw2d::state.push_scissors(rc);
-            //draw2d::state.push_scissors(scissors->world_rect(transform->worldMatrix));
         }
     }
 
@@ -47,17 +46,6 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
         draw2d::state.matrix = transform->worldMatrix;
         draw2d::state.color = transform->worldColor;
         display->drawable->draw();
-    }
-
-    auto* scripts = e.tryGet<script_holder>();
-    if (scripts) {
-        draw2d::state.matrix = transform->worldMatrix;
-        draw2d::state.color = transform->worldColor;
-        for (auto& script : scripts->list) {
-            if (script) {
-                script->draw();
-            }
-        }
     }
 
     auto it = e.get<Node>().child_first;
@@ -111,15 +99,6 @@ void RenderSystem2D::drawStack(ecs::entity e) {
     auto* display = e.tryGet<Display2D>();
     if (display && display->drawable) {
         display->drawable->draw();
-    }
-
-    auto* scripts = e.tryGet<script_holder>();
-    if (scripts) {
-        for (auto& script : scripts->list) {
-            if (script) {
-                script->draw();
-            }
-        }
     }
 
     auto it = e.get<Node>().child_first;

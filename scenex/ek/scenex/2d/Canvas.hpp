@@ -11,9 +11,9 @@ struct Canvas {
 
     Canvas() = default;
 
-    Canvas(float width, float height)
-            : resolution{0.0f, 0.0f, width, height},
-              landscape{width > height} {
+    Canvas(float width, float height) :
+            resolution{0.0f, 0.0f, width, height},
+            landscape{width > height} {
 
     }
 

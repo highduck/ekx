@@ -12,6 +12,7 @@
 
 #include <demo_main.hpp>
 #include <ek/math/rand.hpp>
+#include <ek/scenex/2d/Camera2D.hpp>
 #include "sample_3d.hpp"
 #include "camera_arcball.hpp"
 
@@ -136,6 +137,7 @@ void Sample3D::draw() {
 
 Sample3D::Sample3D() {
     title = "SCENE 3D";
+    Camera2D::Main.get<Camera2D>().clearColorEnabled = false;
 
     auto light_material = new Material3D;
     light_material->emission = float3::one;
@@ -216,6 +218,7 @@ Sample3D::Sample3D() {
 Sample3D::~Sample3D() {
     destroyNode(main_scene_3d);
     main_scene_3d = nullptr;
+    Camera2D::Main.get<Camera2D>().clearColorEnabled = true;
 }
 
 }

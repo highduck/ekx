@@ -14,6 +14,8 @@ public:
 
     AdMobWrapper();
 
+    virtual ~AdMobWrapper() = default;
+
     virtual void showInterstitial(const std::function<void()>& callback);
 
     virtual void showRewardedAd(const std::function<void(bool)>& callback);

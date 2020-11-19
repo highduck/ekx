@@ -13,24 +13,22 @@
 #include <sim/components/attractor.h>
 #include <ek/scenex/TimeLayer.hpp>
 #include <ek/math/rand.hpp>
-#include <sim/components/position.h>
 #include <sim/components/motion.h>
 #include <piko/examples.h>
 
 namespace ek::piko {
 
+inline const float WIDTH = 360;
+inline const float HEIGHT = 480;
+
 void add_objects(ecs::entity game, int N) {
     for (int i = 0; i < N; ++i) {
         auto q = ecs::create<Node, Transform2D>();
         q.get<Node>().setTouchable(false);
-        float2 pos = {ek::random(0.0f, 720.0f),
-                      ek::random(0.0f, 960.0f)};
-        ecs::assign<position_t>(q, pos.x, pos.y);
-        ecs::get<Transform2D>(q).position = pos;
-        ecs::assign<motion_t>(q,
-                              ek::random(-50.0f, 50.0f),
-                              ek::random(-50.0f, 50.0f)
-        );
+        q.get<Transform2D>().position = {ek::random(0.0f, WIDTH),
+                                             ek::random(0.0f, HEIGHT)};
+        q.assign<motion_t>(ek::random(-50.0f, 50.0f),
+                           ek::random(-50.0f, 50.0f));
         append(game, q);
 
         auto trail = ecs::create<Node, Transform2D>();
@@ -48,7 +46,7 @@ void add_objects(ecs::entity game, int N) {
     }
 }
 
-bool showPiko = false;
+bool showPiko = true;
 
 ecs::entity create() {
     ecs::entity sampleContainer = create_node_2d("piko");
@@ -82,7 +80,7 @@ ecs::entity create() {
     // SIMULATION SAMPLE
 
     // SIM
-    add_objects(sampleContainer, 5000);
+    add_objects(sampleContainer, 500);
 
     auto mouse_entity = ecs::create<Transform2D, Node>();
     setName(mouse_entity, "Mouse");
@@ -111,7 +109,7 @@ ecs::entity create() {
 
 void remove_objects(ecs::entity game, int N) {
     int i = 0;
-    for (auto q : ecs::view<Node, Transform2D, script_holder>()) {
+    for (auto q : ecs::view<Node, Transform2D, ScriptHolder>()) {
         removeFromParent(q);
         ecs::destroy(q);
         if (++i == N) {

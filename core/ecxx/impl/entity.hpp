@@ -119,10 +119,10 @@ public:
     [[nodiscard]] inline bool has() const;
 
     template<typename Component>
-    inline Component& get();
+    inline Component& get() const;
 
     template<typename Component>
-    inline Component* tryGet();
+    inline Component* tryGet() const;
 
     template<typename Component>
     inline Component& get_or_create();

@@ -341,8 +341,8 @@ void gui_inspector(ecs::entity e) {
 
     guiComponentPanel<MovieClip>(e, "Movie Clip", guiMovieClip);
 
-    if (e.has<script_holder>()) {
-        auto& scripts = e.get<script_holder>().list;
+    if (e.has<ScriptHolder>()) {
+        auto& scripts = e.get<ScriptHolder>().list;
         for (auto& script : scripts) {
             script->gui_inspector();
         }
