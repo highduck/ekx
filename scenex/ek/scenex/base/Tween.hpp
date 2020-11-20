@@ -15,7 +15,7 @@ struct Tween {
     bool destroyEntity = false;
     TimeLayer timer;
 
-    static void update();
+    static void updateAll();
     static Tween& reset(ecs::entity e);
 };
 

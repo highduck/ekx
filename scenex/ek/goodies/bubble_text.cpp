@@ -5,16 +5,18 @@
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/math/easing.hpp>
 #include <ek/math/rand.hpp>
+#include <ek/scenex/TimeLayer.hpp>
 
 namespace ek {
 
-void update_bubble_text(float dt) {
+void BubbleText::updateAll() {
+    float dt = TimeLayer::HUD->dt;
     const float time_max = 2.0f;
     const float delta_y = -100.0f;
     const EaseOut<Back> back_out_5{Back{5.0f}};
 
-    for (auto e: ecs::rview<bubble_text_t>()) {
-        auto& state = ecs::get<bubble_text_t>(e);
+    for (auto e: ecs::rview<BubbleText>()) {
+        auto& state = ecs::get<BubbleText>(e);
 
         if (state.delay > 0.0f) {
             state.delay -= dt;
@@ -45,9 +47,9 @@ void update_bubble_text(float dt) {
     }
 }
 
-ecs::entity create_bubble_text(const float2& pos, const std::string& text, float delay) {
+ecs::entity BubbleText::create(const float2& pos, const std::string& text, float delay) {
     auto e = create_node_2d("bb");
-    auto& c = ecs::assign<bubble_text_t>(e);
+    auto& c = ecs::assign<BubbleText>(e);
     c.delay = delay;
     c.start = pos;
     float spread = 10.0f;

@@ -44,6 +44,11 @@ struct LayoutRect {
         return *this;
     }
 
+    LayoutRect& setInsetsMode(bool safe) {
+        doSafeInsets = safe;
+        return *this;
+    }
+
     static void updateAll();
 };
 

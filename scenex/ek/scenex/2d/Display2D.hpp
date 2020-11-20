@@ -105,6 +105,13 @@ struct Display2D {
     inline rect_f getBounds() const {
         return drawable ? drawable->getBounds() : rect_f{};
     }
+
+    template<typename T>
+    static T& make(ecs::entity e) {
+        auto& d = e.get_or_create<Display2D>();
+        d.drawable = std::move(std::make_unique<T>());
+        return static_cast<T&>(*d.drawable);
+    }
 };
 
 class Quad2D : public Drawable2D<Quad2D> {
@@ -123,9 +130,15 @@ public:
     [[nodiscard]]
     bool hitTest(float2 point) const override;
 
-    inline void setGradientVertical(argb32_t top, argb32_t bottom) {
+    inline Quad2D& setGradientVertical(argb32_t top, argb32_t bottom) {
         colors[0] = colors[1] = top;
         colors[2] = colors[3] = bottom;
+        return *this;
+    };
+
+    inline Quad2D& setColor(argb32_t color) {
+        colors[0] = colors[1] = colors[2] = colors[3] = color;
+        return *this;
     };
 };
 
