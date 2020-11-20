@@ -19,7 +19,7 @@ void update_frame(Tween& tween) {
     tween.advanced(t);
 }
 
-void Tween::update() {
+void Tween::updateAll() {
     for (auto e : ecs::rview<Tween>()) {
         auto& tween = ecs::get<Tween>(e);
         auto dt = tween.timer->dt;

@@ -8,13 +8,16 @@ struct close_timeout {
     float time;
 };
 
-struct popup_manager_t {
+struct PopupManager {
     std::vector<ecs::entity> active;
     float fade_progress = 0.0f;
     float fade_duration = 0.4f;
     float fade_alpha = 0.5f;
     ecs::entity back;
     ecs::entity layer;
+
+    static ecs::entity make();
+    static void updateAll();
 };
 
 void init_basic_popup(ecs::entity e);
@@ -26,8 +29,6 @@ void close_popup(ecs::entity e);
 void clear_popups();
 
 void close_all_popups();
-
-ecs::entity create_popup_manager();
 
 void update_popup_managers(float dt);
 

@@ -1,4 +1,4 @@
-#include "shake_system.hpp"
+#include "Shake.hpp"
 
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/math/vec.hpp>
@@ -6,10 +6,10 @@
 
 namespace ek {
 
-void update_shake() {
+void Shake::updateAll() {
 
-    for (auto e: ecs::rview<shake_state_t>()) {
-        auto& state = e.get<shake_state_t>();
+    for (auto e: ecs::rview<Shake>()) {
+        auto& state = e.get<Shake>();
         auto dt = state.timer->dt;
         state.time += dt;
 
@@ -22,13 +22,13 @@ void update_shake() {
         e.get<Transform2D>().position = offset * r * state.strength;
 
         if (state.time <= 0.0f) {
-            e.remove<shake_state_t>();
+            e.remove<Shake>();
         }
     }
 }
 
-void start_shake(ecs::entity e, float time, float strength) {
-    auto& state = e.get_or_create<shake_state_t>();
+void Shake::add(ecs::entity e, float time, float strength) {
+    auto& state = e.get_or_create<Shake>();
     state.time = 0.0f;
     state.time_total = time;
     state.strength = strength;

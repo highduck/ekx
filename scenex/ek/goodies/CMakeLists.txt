@@ -4,10 +4,10 @@ target_sources(${PROJECT_NAME} PRIVATE
         GameScreen.hpp
         GameScreen.cpp
 
-        popup_manager.cpp
-        popup_manager.hpp
-        shake_system.hpp
-        shake_system.cpp
+        PopupManager.cpp
+        PopupManager.hpp
+        Shake.hpp
+        Shake.cpp
         bubble_text.cpp
         bubble_text.hpp
 

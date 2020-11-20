@@ -6,10 +6,10 @@
 #include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/utility/destroy_delay.hpp>
-#include <ek/goodies/shake_system.hpp>
+#include <ek/goodies/Shake.hpp>
 #include <ek/goodies/helpers/Trail2D.hpp>
 #include <ek/goodies/bubble_text.hpp>
-#include <ek/goodies/popup_manager.hpp>
+#include <ek/goodies/PopupManager.hpp>
 #include <ek/scenex/TimeLayer.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
@@ -39,11 +39,11 @@ void scene_pre_update(entity root, float dt) {
     }
     Canvas::updateAll();
     LayoutRect::updateAll();
-    Tween::update();
-    update_shake();
+    Tween::updateAll();
+    Shake::updateAll();
 
-    update_bubble_text(dt);
-    update_popup_managers(dt);
+    BubbleText::updateAll();
+    PopupManager::updateAll();
 
     updateScripts();
     Button::updateAll();

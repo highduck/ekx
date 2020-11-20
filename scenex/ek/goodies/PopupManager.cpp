@@ -1,4 +1,4 @@
-#include "popup_manager.hpp"
+#include "PopupManager.hpp"
 
 #include <ek/scenex/utility/destroy_delay.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
@@ -52,7 +52,7 @@ void on_popup_closing(entity e) {
 }
 
 void on_popup_closed(entity e) {
-    auto& state = ecs::get<popup_manager_t>(popups_);
+    auto& state = ecs::get<PopupManager>(popups_);
 
     auto it = std::find(state.active.begin(), state.active.end(), e);
     if (it != state.active.end()) {
@@ -96,9 +96,10 @@ bool contains(const std::vector<entity>& list, const entity e) {
     return it != list.end();
 }
 
-void update_popup_managers(float dt) {
-    for (auto e : ecs::view<popup_manager_t>()) {
-        auto& p = ecs::get<popup_manager_t>(e);
+void PopupManager::updateAll() {
+    auto dt = TimeLayer::UI->dt;
+    for (auto e : ecs::view<PopupManager>()) {
+        auto& p = ecs::get<PopupManager>(e);
         p.fade_progress = math::reach(p.fade_progress,
                                       p.active.empty() ? 0.0f : 1.0f,
                                       dt / p.fade_duration);
@@ -120,7 +121,7 @@ void update_popup_managers(float dt) {
 }
 
 void open_popup(entity e) {
-    auto& state = popups_.get<popup_manager_t>();
+    auto& state = popups_.get<PopupManager>();
 
     if (contains(state.active, e)) {
         return;
@@ -153,7 +154,7 @@ void open_popup(entity e) {
 }
 
 void close_popup(entity e) {
-    auto& state = ecs::get<popup_manager_t>(popups_);
+    auto& state = ecs::get<PopupManager>(popups_);
     if (!contains(state.active, e)) {
         return;
     }
@@ -171,42 +172,9 @@ void close_popup(entity e) {
     };
 }
 
-entity create_popup_manager() {
-    auto e = create_node_2d("popups");
-    auto& pm = e.assign<popup_manager_t>();
-    pm.back = create_node_2d("back");
-    set_color_quad(pm.back, rect_f::zero_one, 0x0_rgb);
-    layout_wrapper{pm.back}.fill();
-    pm.back.get<LayoutRect>().doSafeInsets = false;
-
-    auto& interactive = ecs::assign<interactive_t>(pm.back);
-    interactive.on_down.add([e] {
-        const auto& state = ecs::get<popup_manager_t>(e);
-        if (!state.active.empty()) {
-            resolve<InteractionSystem>().sendBackButton();
-        }
-    });
-    auto& eh = ecs::assign<event_handler_t>(pm.back);
-    eh.on(interactive_event::back_button, [](const event_data& ev) {
-        ev.processed = true;
-    });
-
-    append(e, pm.back);
-
-    pm.layer = create_node_2d("layer");
-    layout_wrapper{pm.layer}.aligned(0.5f, 0.0f, 0.5f, 0.0f);
-    append(e, pm.layer);
-
-    auto& st = ecs::get_or_create<Node>(e);
-    st.setTouchable(false);
-    st.setVisible(false);
-
-    popups_ = e;
-    return e;
-}
 
 uint32_t count_active_popups() {
-    auto count = popups_.get<popup_manager_t>().active.size();
+    auto count = popups_.get<PopupManager>().active.size();
     return static_cast<uint32_t>(count);
 }
 
@@ -215,7 +183,7 @@ entity get_popup_manager() {
 }
 
 void clear_popups() {
-    auto& state = ecs::get<popup_manager_t>(popups_);
+    auto& state = ecs::get<PopupManager>(popups_);
 
     state.fade_progress = 0.0f;
     setAlpha(state.back, 0.0f);
@@ -227,11 +195,57 @@ void clear_popups() {
 }
 
 void close_all_popups() {
-    auto& state = ecs::get<popup_manager_t>(popups_);
+    auto& state = ecs::get<PopupManager>(popups_);
     auto copy_vec = state.active;
     for (auto p : copy_vec) {
         close_popup(p);
     }
 }
 
+ecs::entity createBackQuad() {
+    auto e = create_node_2d("back");
+    Display2D::make<Quad2D>(e).setColor(argb32_t::black);
+    e.assign<LayoutRect>()
+            .fill(true, true)
+            .setInsetsMode(false);
+
+    // intercept back-button if popup manager is active
+    auto& eh = e.assign<event_handler_t>();
+    eh.on(interactive_event::back_button, [](const event_data& ev) {
+        ev.processed = true;
+    });
+
+    // if touch outside of popups, simulate back-button behavior
+    auto& interactive = e.assign<interactive_t>();
+    interactive.on_down += [e] {
+        const auto* state = findComponentInParent<PopupManager>(e);
+        if (state && !state->active.empty()) {
+            resolve<InteractionSystem>().sendBackButton();
+        }
+    };
+
+    return e;
+}
+
+ecs::entity PopupManager::make() {
+    auto e = create_node_2d("popups");
+    auto& pm = e.assign<PopupManager>();
+    pm.back = createBackQuad();
+    append(e, pm.back);
+
+    pm.layer = create_node_2d("layer");
+    pm.layer.assign<LayoutRect>()
+            .enableAlignX(0.5f)
+            .enableAlignY(0.5f)
+            .setInsetsMode(false);
+    append(e, pm.layer);
+
+    // initially popup manager is deactivated
+    auto& st = e.get_or_create<Node>();
+    st.setTouchable(false);
+    st.setVisible(false);
+
+    popups_ = e;
+    return e;
+}
 }
