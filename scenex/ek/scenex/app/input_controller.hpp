@@ -61,6 +61,7 @@ public:
     }
 
     bool hovered_by_editor_gui = false;
+    bool emulateTouch = false;
 private:
 
     struct key_state_t {

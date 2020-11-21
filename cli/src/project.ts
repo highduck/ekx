@@ -59,10 +59,20 @@ export class Project {
     projects: { [name: string]: RegisteredProject } = {};
     modules: ModuleDef[] = [];
 
-    assets: {
-        output: string
+    assets?: {
+        input?: string;
+        output?: string;
     };
-    market_asset: string;
+
+    getAssetsInput(): string {
+        return this.assets?.input ?? "assets";
+    }
+
+    getAssetsOutput(): string {
+        return this.assets?.output ?? "export/contents/assets";
+    }
+
+    market_asset?: string;
 
     build = {
         android: {

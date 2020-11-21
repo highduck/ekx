@@ -4,6 +4,7 @@
 #include <ek/util/locator.hpp>
 #include <ek/scenex/app/basic_application.hpp>
 #include <imgui.h>
+#include <ek/scenex/app/input_controller.hpp>
 
 namespace ek {
 
@@ -21,9 +22,13 @@ void guiEditor(Editor& editor) {
             settings.dirty |= ImGui::MenuItem("Project Assets", nullptr, &settings.showAssetsView);
             settings.dirty |= ImGui::MenuItem("Build & Export", nullptr, &settings.showBuildWindow);
             ImGui::Separator();
-            if (ImGui::BeginMenu("Debug Insets")) {
-                if (ImGui::DragFloat4("+Insets", LayoutRect::AdditionalInsets.data())) {
+            if (ImGui::BeginMenu("Debug")) {
+                if (ImGui::DragFloat4("Add Insets", LayoutRect::AdditionalInsets.data())) {
                     updateScreenRect(resolve<basic_application>().root);
+                }
+                auto* ic = try_resolve<input_controller>();
+                if (ic) {
+                    ImGui::Checkbox("Touch Emulation", &ic->emulateTouch);
                 }
                 ImGui::EndMenu();
             }

@@ -71,7 +71,9 @@ void input_controller::on_event(const event_t& event) {
             if (!hovered_by_editor_gui) {
                 interactions_.handle_mouse_event(event);
             }
-            //emulate_mouse_as_touch(event, get_or_create_touch(1u));
+            if(emulateTouch) {
+                emulate_mouse_as_touch(event, get_or_create_touch(1u));
+            }
             break;
         case event_type::key_up:
         case event_type::key_down:

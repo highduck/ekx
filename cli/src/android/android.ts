@@ -6,7 +6,6 @@ import {
     is_dir,
     is_file,
     make_dirs,
-    optimize_png_glob,
     read_text,
     replace_all,
     replace_in_file,
@@ -14,7 +13,7 @@ import {
 } from "../utils";
 import {XmlDocument} from 'xmldoc';
 import * as path from "path";
-import {ekc_export_assets_lazy, ekc_export_market} from "../assets";
+import {ekc_export_assets, ekc_export_market} from "../assets";
 import {collect_source_files, collect_src_roots_all} from "../collectSources";
 import {copySigningKeys, printSigningConfigs} from "./signing";
 
@@ -120,11 +119,8 @@ function mod_cmake_lists(ctx) {
 
 export function export_android(ctx) {
 
-    ekc_export_assets_lazy(ctx);
-    if (!is_dir("export/android/res")) {
-        ekc_export_market(ctx, "android", "export/android/res");
-        optimize_png_glob("export/android/res/**/*.png");
-    }
+    ekc_export_assets(ctx);
+    ekc_export_market(ctx, "android", "export/android/res");
 
     const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;

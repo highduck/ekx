@@ -18,8 +18,8 @@ namespace ek::piko {
 
 inline const float WIDTH = 360;
 inline const float HEIGHT = 480;
-bool showPiko = false;
-int simParticlesCount = 5000;
+bool showPiko = true;
+int simParticlesCount = 500;
 
 void add_objects(ecs::entity game, int N) {
     for (int i = 0; i < N; ++i) {

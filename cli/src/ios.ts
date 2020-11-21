@@ -10,7 +10,7 @@ import {
 import * as path from "path";
 import * as fs from "fs";
 import * as plist from 'plist';
-import {ekc_export_assets_lazy, ekc_export_market} from "./assets";
+import {ekc_export_assets, ekc_export_market} from "./assets";
 
 function mod_plist(ctx, filepath) {
     const dict = plist.parse(read_text(filepath));
@@ -86,11 +86,8 @@ function collect_xcode_props(ctx, prop, target) {
 }
 
 export function export_ios(ctx) {
-    ekc_export_assets_lazy(ctx);
-    if (!is_dir("export/ios")) {
-        ekc_export_market(ctx, "ios", "export/ios");
-        optimize_png_glob("export/ios/**/*.png");
-    }
+    ekc_export_assets(ctx);
+    ekc_export_market(ctx, "ios", "export/ios");
 
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;
@@ -112,7 +109,7 @@ export function export_ios(ctx) {
         console.info("Rename project");
         fs.renameSync("template-ios.xcodeproj", platform_proj_name + ".xcodeproj");
 
-        copyFolderRecursiveSync(path.join(base_path, ctx.assets.output), "assets");
+        copyFolderRecursiveSync(path.join(base_path, ctx.getAssetsOutput()), "assets");
         copyFolderRecursiveSync(path.join(base_path, "export/ios/AppIcon.appiconset"),
             "src/Assets.xcassets/AppIcon.appiconset");
 
