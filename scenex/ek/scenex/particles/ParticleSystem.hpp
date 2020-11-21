@@ -43,7 +43,6 @@ public:
 
 public:
     ecs::entity target{};
-    bool cycled = false;
 };
 
 void particles_burst(ecs::entity e, int count);

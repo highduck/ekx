@@ -1,31 +1,27 @@
 #pragma once
 
-#include <cassert>
-#include <vector>
-#include <cstdint>
-#include <memory>
-#include <algorithm>
 #include "utility.hpp"
+#include <vector>
+#include <memory>
 
 namespace ecs {
 
 class sparse_vector {
 public:
-    // PageSize required to be power-of-two value
+    using size_type = unsigned;
+    using page_offset_type = unsigned short;
+    using page_index_type = unsigned short;
 
-    using size_type = uint32_t;
-    using page_offset_type = uint16_t;
-    using page_index_type = uint16_t;
+    using T = unsigned;
 
-    using T = uint32_t;
+    static constexpr unsigned null_value = 0;
+    static constexpr unsigned page_size = 0x8000u / sizeof(T);
+    static constexpr unsigned elements_per_page = page_size / sizeof(T);
+    static constexpr unsigned page_mask = 0x7FFu; // (elements_per_page - 1)
+    static constexpr unsigned page_bits = 11; // bit_count of page_mask
 
-    static constexpr uint32_t null_value = 0;
-    static constexpr uint32_t page_size = 0x8000u / sizeof(T);
+    // `page_size` required to be power-of-two value
     static_assert(page_size > 0u && ((page_size & (page_size - 1u)) == 0u));
-
-    static constexpr uint32_t elements_per_page = page_size / sizeof(T);
-    static constexpr uint32_t page_mask = elements_per_page - 1u;
-    static constexpr uint32_t page_bits = details::bit_count(page_mask);
 
     struct page_data {
         std::unique_ptr<T[]> elements;
@@ -40,67 +36,53 @@ public:
         auto& result = pages_[page];
         if (!result.elements) {
             result.elements = std::make_unique<T[]>(elements_per_page);
-            std::fill_n(result.elements.get(), elements_per_page, null_value);
+            auto* ptr = result.elements.get();
+            for(unsigned i = 0; i < elements_per_page; ++i) {
+                ptr[i] = 0;
+            }
         }
         return result;
     }
 
     void insert(size_type i, T v) {
-        assert(v != null_value);
-        assert(!has(i));
+        ECXX_FULL_ASSERT(v != null_value);
+        ECXX_FULL_ASSERT(!has(i));
 
-        page_index_type pi = i >> page_bits;
-        page_offset_type po = i & page_mask;
-
-        auto& page = ensure(pi);
-        page.elements[po] = v;
-        page.count++;
+        auto& page = ensure(i >> page_bits);
+        page.elements[i & page_mask] = v;
+        ++page.count;
     }
 
     void replace(size_type i, T v) {
-        assert(v != null_value);
-        assert(has(i));
+        ECXX_FULL_ASSERT(v != null_value);
+        ECXX_FULL_ASSERT(has(i));
 
-        page_index_type pi = i >> page_bits;
-        page_offset_type po = i & page_mask;
-        pages_[pi].elements[po] = v;
+        pages_[i >> page_bits].elements[i & page_mask] = v;
     }
-
-    // unsafe just write element to map
-//    void set(size_type i, T v) {
-//        page_index_type pi = i >> page_bits;
-//        page_offset_type po = i & page_mask;
 //
-//        ensure(pi);
-//        pages_[pi].elements[po] = v;
-//        pages_[pi].count++;
+//    [[nodiscard]]
+//    T get_checked(size_type i) const {
+//        const page_index_type page = i >> page_bits;
+//        const page_offset_type offset = i & page_mask;
+//        T el{null_value};
+//        if (page < pages_.size()) {
+//            const page_data& p = pages_[page];
+//            if (p.count) {
+//                el = p.elements[offset];
+//            }
+//        }
+//        return el;
 //    }
 
     [[nodiscard]]
-    T get_checked(size_type i) const {
-        const page_index_type page = i >> page_bits;
-        const page_offset_type offset = i & page_mask;
-        T el{null_value};
-        if (page < pages_.size()) {
-            const page_data& p = pages_[page];
-            if (p.count) {
-                el = p.elements[offset];
-            }
-        }
-        return el;
-    }
-
-    [[nodiscard]]
     inline T at(size_type i) const {
-        const page_index_type page = i >> page_bits;
-        const page_offset_type offset = i & page_mask;
-        return pages_[page].elements[offset];
+        return pages_[i >> page_bits].elements[i & page_mask];
     }
 
     void remove(size_type i) {
         const page_index_type page = i >> page_bits;
         const page_offset_type offset = i & page_mask;
-        assert(has(page, offset));
+        ECXX_FULL_ASSERT(has(page, offset));
         page_data& p = pages_[page];
         p.elements[offset] = null_value;
         --p.count;
@@ -109,7 +91,7 @@ public:
     T get_and_remove(size_type i) {
         const page_index_type page = i >> page_bits;
         const page_offset_type offset = i & page_mask;
-        assert(has(page, offset));
+        ECXX_FULL_ASSERT(has(page, offset));
         page_data& p = pages_[page];
         auto v = p.elements[offset];
         p.elements[offset] = null_value;
@@ -118,9 +100,7 @@ public:
     }
 
     [[nodiscard]] inline bool has(size_type i) const {
-        const page_index_type page = i >> page_bits;
-        const page_offset_type offset = i & page_mask;
-        return has(page, offset);
+        return has(i >> page_bits, i & page_mask);
     }
 
     [[nodiscard]] inline bool has(page_index_type i, page_offset_type j) const {

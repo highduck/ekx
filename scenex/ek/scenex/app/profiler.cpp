@@ -11,9 +11,13 @@
 #include <ek/scenex/text/TextDrawer.hpp>
 
 // TODO: EK_DEV_BUILD
-//#if !defined(NDEBUG) || defined(EK_DEV_BUILD)
+#ifndef NDEBUG
 #define ENABLE_PROFILER
-//#endif
+#endif
+
+#ifdef EK_EDITOR
+#define ENABLE_PROFILER
+#endif
 
 namespace ek {
 

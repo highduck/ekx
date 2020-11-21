@@ -45,11 +45,14 @@ public:
         }
     }
 
-    void deallocate(value_type entity) {
-        const auto i = entity.index();
-        list_[i] = {next_, static_cast<version_type>(entity.version() + 1u)};
-        next_ = i;
+    void deallocate(index_type idx, version_type ver) {
+        list_[idx] = {next_, ++ver};
+        next_ = idx;
         ++available_;
+    }
+
+    void deallocate(entity e) {
+        deallocate(e.index(), e.version());
     }
 
     inline void reserve(size_t size) {
@@ -68,7 +71,7 @@ public:
      *  - null
      */
     [[nodiscard]] inline version_type current(index_type idx) const {
-        //assert(is_alive(i));
+        //ECXX_ASSERT(is_alive(i));
         return list_[idx].version();
     }
 

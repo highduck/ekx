@@ -213,7 +213,6 @@ void editDisplayArc(Arc2D& arc) {
 
 void editParticleRenderer2D(ParticleRenderer2D& p) {
     guiEntityRef("Target", p.target);
-    ImGui::Checkbox("Cycled Mode", &p.cycled);
 }
 
 void guiTextFormat(TextFormat& format) {

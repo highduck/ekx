@@ -59,7 +59,7 @@ struct matrix_t<3, 2, T> {
         };
     }
 
-    inline vec2 transform(const vec2& vec) const {
+    inline vec2 transform(vec2 vec) const {
         return transform(vec.x, vec.y);
     }
 
@@ -193,11 +193,10 @@ struct matrix_t<3, 2, T> {
     bool transform_inverse(vec2 pos, vec2& out) const {
         const T D = det(*this);
         if (D != T{0}) {
-            const T inv = T{1} / D;
             const T x = pos.x - tx;
             const T y = pos.y - ty;
-            out.x = (x * d - y * c) * inv;
-            out.y = (y * a - x * b) * inv;
+            out.x = (x * d - y * c) / D;
+            out.y = (y * a - x * b) / D;
             return true;
         }
         return false;

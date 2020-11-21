@@ -1,14 +1,14 @@
 #pragma once
 
-#include "components_db.hpp"
-
+#include "world.hpp"
 #include <array>
 
 namespace ecs {
 
 template<typename ...Component>
-class basic_rview {
+class view_backward_t {
 public:
+    using index_type = entity::index_type;
     static constexpr auto components_num = sizeof ... (Component);
 
     using table_type = std::array<entity_map_base*, components_num>;
@@ -18,7 +18,7 @@ public:
 
     using entity_vector_iterator = typename std::vector<entity>::iterator;
 
-    class iterator {
+    class iterator final {
     public:
         iterator(table_type& table, uint32_t it)
                 : it_{it},
@@ -43,7 +43,7 @@ public:
 
         inline void skips() {
             // todo: size recovery (case we remove entities before *it)
-            assert(it_ < map_0.vector_size());
+            ECXX_ASSERT(it_ < map_0.vector_size());
 
             while (it_ != 0 && !valid(map_0.at(it_))) {
                 --it_;
@@ -76,7 +76,7 @@ public:
         const entity_map_base& map_0;
     };
 
-    explicit basic_rview(components_db& db) {
+    explicit view_backward_t(world& db) {
         table_index_type i{};
         ((access_[i] = table_[i] = &db.template ensure<Component>(), ++i), ...);
 

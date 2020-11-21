@@ -5,12 +5,12 @@
 
 namespace ek {
 
-struct destroy_delay_t {
+struct DestroyTimer {
     float delay = 0.0f;
     TimeLayer timer{};
-};
 
-void destroy_delayed_entities(float dt);
+    static void updateAll();
+};
 
 void destroy_delay(ecs::entity e, float delay = 0.0f, TimeLayer timer = {});
 

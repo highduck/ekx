@@ -11,7 +11,7 @@ namespace ek {
 
 void fireworks_script::start() {
     entity_.assign<ParticleLayer2D>();
-    entity_.assign<Display2D>(new ParticleRenderer2D(entity_));
+    Display2D::make<ParticleRenderer2D>(entity_).target = entity_;
     auto& emitter = entity_.assign<ParticleEmitter2D>();
     emitter.data.burst = 0;
     emitter.particle = "firework_star";

@@ -8,7 +8,6 @@ target_sources(${PROJECT_NAME} PUBLIC
 
         entity_pool_test.cpp
         entity_map_test.cpp
-        bit_count_test.cpp
         sparse_vector_test.cpp
         entity_value_test.cpp
         world_test.cpp

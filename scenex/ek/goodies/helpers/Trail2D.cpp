@@ -9,24 +9,23 @@ namespace ek {
 void Trail2D::track(ecs::entity e) {
     tracked_target_ = e;
     if (tracked_target_) {
-        Transform2D::updateLocalMatrixSubTree(tracked_target_, entity_);
         position_ = position_last_ = Transform2D::localToLocal(tracked_target_, entity_, offset);
         nodes_.clear();
 
         // tail
-        nodes_.emplace_back(position_last_,0.0f,1.0f);
+        nodes_.emplace_back(position_last_, 0.0f, 1.0f);
 
         // head
-        nodes_.emplace_back(position_last_,1.0f,1.0f);
+        nodes_.emplace_back(position_last_, 1.0f, 1.0f);
     }
 }
 
-void Trail2D::update_trail() {
+void Trail2D::update() {
     float dt = timer->dt;
     auto head_node = nodes_[nodes_.size() - 1];
     if (tracked_target_) {
         if (Transform2D::fastLocalToLocal(tracked_target_, entity_, offset, position_)) {
-            update_position(dt);
+            update_position();
         }
     } else {
         head_node.energy -= dt;
@@ -58,7 +57,7 @@ void Trail2D::update_trail() {
     }
 }
 
-void Trail2D::update_position(float dt) {
+void Trail2D::update_position() {
     //nextPosition.x += FastMath.Range(-10f, 10f);
     //nextPosition.y += FastMath.Range(-10f, 10f);
     auto pos = position_last_;
@@ -67,11 +66,14 @@ void Trail2D::update_position(float dt) {
 
     direction = normalize(direction);
 
+    auto head = nodes_.back();
+
 //    auto limit = 100u;
     while (distance >= segment_distance_max) { // && limit > 0u
         distance -= segment_distance_max;
         pos += direction * segment_distance_max;
-        create_node(pos);
+        head.position = pos;
+        nodes_.push_back(head);
 //        --limit;
     }
 
@@ -80,22 +82,20 @@ void Trail2D::update_position(float dt) {
 //    }
 
     position_last_ = pos;
-    nodes_[nodes_.size() - 1].position = position_;
+    nodes_.back().position = position_;
 }
 
-void Trail2D::create_node(const float2& pos) {
-    auto head_node = nodes_[nodes_.size() - 1];
+void Trail2D::create_node(float2 pos) {
+    auto& head = nodes_.back();
     //if (headNode.power < 1.0f)
     //{
     //	headNode.growPower(1.0f / growSpeed);
     //}
 
-    nodes_[nodes_.size() - 1] = {
-            pos,
-            head_node.energy,
-            head_node.alpha
-    };
-    nodes_.push_back(head_node);
+    head.position = pos;
+
+    // update head position and duplicate to new
+    nodes_.push_back(head);
 }
 
 void TrailRenderer2D::updateMesh(const std::vector<Trail2D::Node>& nodes) {
@@ -133,9 +133,9 @@ void TrailRenderer2D::updateMesh(const std::vector<Trail2D::Node>& nodes) {
 
 }
 
-void updateTrails() {
+void Trail2D::updateAll() {
     ecs::view<Trail2D>().each([](Trail2D& trail) {
-        trail.update_trail();
+        trail.update();
     });
 }
 

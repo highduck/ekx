@@ -2,11 +2,9 @@
 
 #include "entity_map.hpp"
 
-#include <array>
-
 namespace ecs {
 
-class runtime_view_t {
+class view_runtime_t {
 public:
     using table_type = std::vector<entity_map_base*>;
     using table_index_type = typename table_type::size_type;
@@ -70,7 +68,7 @@ public:
         const entity_map_base& map_0;
     };
 
-    explicit runtime_view_t(table_type& table)
+    explicit view_runtime_t(table_type& table)
             : access_{table},
               table_{table} {
 

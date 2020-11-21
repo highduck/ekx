@@ -39,7 +39,7 @@ TEST(entity_pool, deallocate) {
     active.push_back(allocator.allocate());
     active.push_back(allocator.allocate());
     for (auto i : active) {
-        allocator.deallocate(i);
+        allocator.deallocate(i.index(), i.version());
     }
     ASSERT_EQ(allocator.available_for_recycling(), active.size());
     ASSERT_EQ(allocator.size(), 0);

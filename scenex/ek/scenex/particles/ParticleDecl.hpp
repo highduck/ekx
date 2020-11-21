@@ -103,7 +103,7 @@ public:
 struct ParticleDecl {
     Res<Sprite> sprite;
     Res<Font> font;
-    int font_size = 0;
+    float fontSize = 0.0f;
     particle_scale_mode scale_mode = particle_scale_mode::None;
     particle_alpha_mode alpha_mode = particle_alpha_mode::None;
     float_range_t alpha_start{1.0};

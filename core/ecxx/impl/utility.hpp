@@ -1,10 +1,20 @@
 #pragma once
 
-namespace ecs::details {
+#ifndef NDEBUG
 
-constexpr unsigned bit_count(const unsigned long long x) noexcept {
-    return (x == 0u) ? 0u : ((x & 1u) + bit_count(x >> 1u));
-}
+#include <cassert>
+
+#define ECXX_ASSERT(x) assert(x)
+#define ECXX_FULL_ASSERT(x) assert(x)
+
+#else
+
+#define ECXX_ASSERT(ignore) ((void)0)
+#define ECXX_FULL_ASSERT(ignore) ((void)0)
+
+#endif
+
+namespace ecs::details {
 
 struct identity_counter {
     static unsigned counter;

@@ -73,44 +73,30 @@ void Particle::update_current_values() {
 rect_f Particle::get_bounds() {
     if (sprite) {
         bounds = sprite->rect;
-    } else if (font_size > 0 && font && !text.empty()) {
-        float width = font->get_text_segment_width(text, font_size, 0, int(text.size()));
-        bounds.set(-0.5f * width, -0.5f * float(font_size), width, font_size);
+    } else if (fontSize > 0.0f && font && !text.empty()) {
+        float width = font->get_text_segment_width(text, fontSize, 0, int(text.size()));
+        bounds.set(-0.5f * width, -0.5f * fontSize, width, fontSize);
     }
     return bounds;
 }
 
-void Particle::draw_cycled() {
-    auto camera = draw2d::state.canvas_rect;
-    float width = camera.width;
-    auto box = translate(get_bounds().scale(scale), position);
-    if (box.right() >= camera.x && box.x <= camera.right()) {
-        draw(0);
-    }
-    if (box.right() > camera.right() && box.right() - width >= camera.x && box.x - width <= camera.right()) {
-        draw(-width);
-    }
-    if (bounds.x < camera.x && box.right() + width >= camera.x && box.x + width <= camera.right()) {
-        draw(width);
-    }
-}
-
-void Particle::draw(float offset_x) {
+void Particle::draw() {
     float vis_angle = angle_base + rotation + angle_velocity_factor * atan2f(velocity.y, velocity.x);
-    float2 pos = position + float2(offset_x, 0.0f);
 
     draw2d::state
             .save_transform()
-            .transform_pivot(pos, vis_angle, scale, pivot)
+            .transform_pivot(position, vis_angle, scale, pivot)
             .concat(color, offset);
     {
-        const auto size = static_cast<float>(font_size);
         if (sprite) {
             sprite->draw();
-        } else if (size > 0 && font && !text.empty()) {
-            float width = font->get_text_segment_width(text, size, 0, static_cast<int>(text.size()));
-            font->draw(text, size, float2(-0.5f * width, 0.5f * size), argb32_t{0xFFFFFFFF},
-                       size);
+        } else if (fontSize > 0.0f && font && !text.empty()) {
+            float width = font->get_text_segment_width(text, fontSize, 0, static_cast<int>(text.size()));
+            font->draw(text,
+                       fontSize,
+                       {-0.5f * width, 0.5f * fontSize},
+                       argb32_t::one,
+                       fontSize);
         }
     }
     draw2d::state.restore_transform();

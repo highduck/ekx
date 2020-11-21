@@ -18,7 +18,7 @@ public:
     ~Sound();
     void load(const char* path);
     void unload();
-    void play(float volume = 1.0f);
+    void play(float volume = 1.0f, bool multi = false);
 private:
     ::Sound* ptrHandle = nullptr;
 };

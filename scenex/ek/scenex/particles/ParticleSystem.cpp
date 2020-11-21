@@ -31,7 +31,7 @@ Particle* produce_particle(const ParticleDecl& decl) {
     p->alpha_mode = decl.alpha_mode;
     p->scale_mode = decl.scale_mode;
     p->font = decl.font;
-    p->font_size = decl.font_size;
+    p->fontSize = decl.fontSize;
     p->acc_x_phase = decl.acc_x_phase.random();
     p->acc_x_speed = decl.acc_x_speed.random();
     p->scale_off_time = decl.scale_off_time;
@@ -160,14 +160,8 @@ void ParticleRenderer2D::draw() {
         assert(target.valid());
         auto* layer = target.tryGet<ParticleLayer2D>();
         if (layer) {
-            if (cycled) {
-                for (auto* p : layer->particles) {
-                    p->draw_cycled();
-                }
-            } else {
-                for (auto* p : layer->particles) {
-                    p->draw(0);
-                }
+            for (auto* p : layer->particles) {
+                p->draw();
             }
         }
     }

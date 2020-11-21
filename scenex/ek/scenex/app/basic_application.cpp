@@ -49,10 +49,6 @@ void basic_application::initialize() {
     root = create_node_2d("root");
     updateScreenRect(root);
 
-    auto& defaultCamera = root.assign<Camera2D>(root);
-    defaultCamera.order = 1;
-    Camera2D::Main = root;
-
     auto& im = service_locator_instance<InteractionSystem>::init(root);
     service_locator_instance<input_controller>::init(im);
     service_locator_instance<AudioManager>::init();
@@ -63,6 +59,12 @@ void basic_application::initialize() {
     append(root, game);
     Canvas::updateAll();
     scale_factor = game.get<Canvas>().scale;
+
+    auto camera = create_node_2d("camera");
+    auto& defaultCamera = camera.assign<Camera2D>(game);
+    defaultCamera.order = 1;
+    Camera2D::Main = camera;
+    append(root, camera);
 
     layout_wrapper::designCanvasRect = {float2::zero, AppResolution};
 }

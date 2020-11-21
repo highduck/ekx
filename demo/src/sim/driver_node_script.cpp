@@ -1,8 +1,6 @@
 #include "driver_node_script.h"
 #include "motion_system.h"
 
-#include <ek/util/locator.hpp>
-#include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
@@ -20,13 +18,15 @@ namespace ek::piko {
 
 inline const float WIDTH = 360;
 inline const float HEIGHT = 480;
+bool showPiko = false;
+int simParticlesCount = 5000;
 
 void add_objects(ecs::entity game, int N) {
     for (int i = 0; i < N; ++i) {
         auto q = ecs::create<Node, Transform2D>();
         q.get<Node>().setTouchable(false);
         q.get<Transform2D>().position = {ek::random(0.0f, WIDTH),
-                                             ek::random(0.0f, HEIGHT)};
+                                         ek::random(0.0f, HEIGHT)};
         q.assign<motion_t>(ek::random(-50.0f, 50.0f),
                            ek::random(-50.0f, 50.0f));
         append(game, q);
@@ -46,8 +46,6 @@ void add_objects(ecs::entity game, int N) {
     }
 }
 
-bool showPiko = true;
-
 ecs::entity create() {
     ecs::entity sampleContainer = create_node_2d("piko");
 
@@ -57,7 +55,7 @@ ecs::entity create() {
         e = create_node_2d("book");
         assignScript<book>(e);
         //ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
-        ecs::get<Transform2D>(e).position = {10.0f, 10.0f};
+        ecs::get<Transform2D>(e).position = {20.0f, 20.0f};
         // TODO: fix scissors stats
         ecs::assign<Bounds2D>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f}).scissors = true;
         append(sampleContainer, e);
@@ -65,14 +63,14 @@ ecs::entity create() {
         e = create_node_2d("dna");
         assignScript<dna>(e);
 //    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
-        ecs::get<Transform2D>(e).position = {10.0f, 10.0f + 128.0f + 10.0f};
+        ecs::get<Transform2D>(e).position = {20.0f, 20.0f + 128.0f + 10.0f};
         // TODO: fix scissors stats
         ecs::assign<Bounds2D>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f}).scissors = true;
         append(sampleContainer, e);
 
         e = create_node_2d("diamonds");
         assignScript<diamonds>(e);
-        ecs::get<Transform2D>(e).position = {10.0f + 128.0f + 10.0f, 20.0f};
+        ecs::get<Transform2D>(e).position = {20.0f + 128.0f + 10.0f, 20.0f};
         ecs::assign<Bounds2D>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f}).scissors = true;;
         append(sampleContainer, e);
     }
@@ -80,7 +78,7 @@ ecs::entity create() {
     // SIMULATION SAMPLE
 
     // SIM
-    add_objects(sampleContainer, 500);
+    add_objects(sampleContainer, simParticlesCount);
 
     auto mouse_entity = ecs::create<Transform2D, Node>();
     setName(mouse_entity, "Mouse");

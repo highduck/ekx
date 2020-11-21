@@ -145,8 +145,8 @@ public:
 
     template<typename ...Args>
     DataType& emplace(entity e, Args&& ...args) {
-        assert(!base_type::locked());
-        assert(!base_type::has(e.index()));
+        ECXX_ASSERT(!base_type::locked());
+        ECXX_ASSERT(!base_type::has(e.index()));
 
         auto di = static_cast<index_type>(base_type::entity_.size());
         base_type::table_.insert(e.index(), di);
@@ -166,8 +166,8 @@ public:
     }
 
     void erase(index_type ei) {
-        assert(!base_type::locked());
-        assert(base_type::has(ei));
+        ECXX_ASSERT(!base_type::locked());
+        ECXX_ASSERT(base_type::has(ei));
 
         const auto index = base_type::table_.get_and_remove(ei);
         const bool swap_with_back = index < base_type::entity_.size() - 1u;
@@ -188,7 +188,6 @@ public:
     }
 
     inline DataType& get(index_type idx) const {
-        assert(base_type::has(idx));
         if constexpr (has_data) {
             return get_data(base_type::table_.at(idx));
         } else {

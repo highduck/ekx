@@ -18,6 +18,8 @@ struct PopupManager {
 
     static ecs::entity make();
     static void updateAll();
+
+    static ecs::entity Main;
 };
 
 void init_basic_popup(ecs::entity e);
@@ -33,7 +35,5 @@ void close_all_popups();
 void update_popup_managers(float dt);
 
 uint32_t count_active_popups();
-
-ecs::entity get_popup_manager();
 
 }

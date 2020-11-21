@@ -13,7 +13,7 @@ ecs::entity ScriptBase::find_child(const std::string& name) const {
 
 void updateScripts() {
     float dt = TimeLayer::Root->dt;
-    ecs::rview<ScriptHolder>()
+    ecs::view_backward<ScriptHolder>()
             .each([dt](ScriptHolder& scripts) {
                 for (auto& script : scripts.list) {
                     if (script) {

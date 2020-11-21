@@ -8,7 +8,7 @@ TEST(view, each) {
     world& w = world::the;
     w.create<position_t, motion_t>();
     int i = 0;
-    w.view<position_t, motion_t>().each([&i](auto& pos, auto& mot) {
+    view<position_t, motion_t>().each([&i](auto& pos, auto& mot) {
         ++i;
     });
     ASSERT_EQ(i, 1);
@@ -32,7 +32,7 @@ TEST(view, locking) {
 
     uint32_t view_count = 0u;
     {
-        w.view<position_t, motion_t, value_t>().each([&view_count, &w](auto&& ...args) {
+        view<position_t, motion_t, value_t>().each([&view_count, &w](auto&& ...args) {
             ++view_count;
             ASSERT_TRUE(w.is_locked<position_t>());
             ASSERT_TRUE(w.is_locked<motion_t>());
@@ -41,12 +41,12 @@ TEST(view, locking) {
         });
     }
 
-    for (auto e : w.view<position_t, empty_comp_t>()) {
+    for (auto e : view<position_t, empty_comp_t>()) {
         // should not run (no entity found)
         ++view_count;
     }
 
-    for (auto e : w.view<empty_comp_t>()) {
+    for (auto e : view<empty_comp_t>()) {
         ++view_count;
         ASSERT_FALSE(w.is_locked<position_t>());
         ASSERT_FALSE(w.is_locked<motion_t>());
@@ -80,7 +80,7 @@ TEST(view, min_to_max) {
     }
 
     uint32_t view_count = 0u;
-    w.view<position_t, motion_t, value_t>().each([&view_count](auto&& ...args) {
+    view<position_t, motion_t, value_t>().each([&view_count](auto&& ...args) {
         ++view_count;
     });
 
@@ -109,7 +109,7 @@ TEST(runtime_view, min_to_max) {
             w.type<motion_t>(),
             w.type<value_t>()
     };
-    w.runtime_view(std::begin(types), std::end(types)).each([&view_count](auto e) {
+    runtime_view(std::begin(types), std::end(types)).each([&view_count](auto e) {
         ++view_count;
     });
 
@@ -133,7 +133,7 @@ TEST(runtime_view, min_to_max) {
             w.type<empty_comp_t>()
     };
 
-    for (auto e : w.runtime_view(std::begin(types2), std::end(types2))) {
+    for (auto e : runtime_view(std::begin(types2), std::end(types2))) {
         // should not run (no entity found)
         ++view_count;
     }

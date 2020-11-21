@@ -5,7 +5,7 @@
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
-#include <ek/scenex/utility/destroy_delay.hpp>
+#include <ek/scenex/base/DestroyTimer.hpp>
 #include <ek/goodies/Shake.hpp>
 #include <ek/goodies/helpers/Trail2D.hpp>
 #include <ek/goodies/bubble_text.hpp>
@@ -50,11 +50,11 @@ void scene_pre_update(entity root, float dt) {
     MovieClip::updateAll();
 }
 
-void scene_post_update(ecs::entity root, float dt) {
-    destroy_delayed_entities(dt);
+void scene_post_update(ecs::entity root) {
+    DestroyTimer::updateAll();
     updateWorldTransform2D(root);
 
-    updateTrails();
+    Trail2D::updateAll();
     update_emitters();
     update_particles();
     Camera2D::updateQueue();
