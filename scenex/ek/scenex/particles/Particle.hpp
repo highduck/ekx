@@ -14,7 +14,7 @@ struct Particle {
     int draw_layer = 0;
     std::string text;
     Res<Font> font;
-    int font_size = 0;
+    float fontSize = 0.0f;
     float2 pivot = float2::zero;
 
     float time = 0.0f;
@@ -60,7 +60,7 @@ public:
         update_current_values();
     }
 
-    inline bool is_alive() {
+    [[nodiscard]] inline bool is_alive() const {
         return time > 0.0f;
     }
 
@@ -74,9 +74,7 @@ public:
 
     rect_f get_bounds();
 
-    void draw_cycled();
-
-    void draw(float offset_x);
+    void draw();
 };
 
 }

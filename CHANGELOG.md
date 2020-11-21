@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- remove `Particle` cycled mode
 - add `DynamicAtlas` multiple pages, mipmaps, alpha8 / color32
 - improvements for editor 
 - add importers for `Atlas` and `DynamicAtlas`

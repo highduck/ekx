@@ -157,22 +157,27 @@ void guiHierarchyWindow(bool* p_open) {
         if (showAllRoots) {
             // all roots
             ecs::each([](ecs::entity e) {
-                if (!e.has<Node>() || e.get<Node>().parent == nullptr) {
+                auto* node = e.tryGet<Node>();
+                if (!node || !node->parent) {
                     gui_entity(e, true, true);
                 }
             });
         } else {
-            // game container
+            // ROOT
             auto& app = resolve<basic_application>();
-            if (app.game.valid()) {
-                gui_entity(app.game, true, true);
+            auto root = app.root;
+            if (root.valid()) {
+                auto it = root.get<Node>().child_first;
+                while (it) {
+                    gui_entity(it, true, true);
+                    it = it.get<Node>().sibling_next;
+                }
             } else {
-                ImGui::TextColored({1, 0, 0, 1}, "Invalid Game container");
+                ImGui::TextColored({1, 0, 0, 1}, "Invalid ROOT container");
             }
         }
     }
     ImGui::End();
 }
-
 
 }

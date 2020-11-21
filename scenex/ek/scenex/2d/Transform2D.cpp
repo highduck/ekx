@@ -35,7 +35,7 @@ void Transform2D::updateLocalMatrix() {
     matrix.ty = y + rd * yy + rb * xx;
 }
 
-void Transform2D::updateLocalMatrixSubTree(ecs::entity src, ecs::entity dst) {
+ecs::entity Transform2D::updateLocalMatrixSubTree(ecs::entity src, ecs::entity dst) {
     auto lca = Node::findLowerCommonAncestor(src, dst);
     if (lca) {
         auto it = src;
@@ -61,6 +61,7 @@ void Transform2D::updateLocalMatrixSubTree(ecs::entity src, ecs::entity dst) {
             transform->updateLocalMatrix();
         }
     }
+    return lca;
 }
 
 float2 Transform2D::transformUp(ecs::entity it, ecs::entity top, float2 pos) {
@@ -89,7 +90,7 @@ float2 Transform2D::transformDown(ecs::entity top, ecs::entity it, float2 pos) {
 
 float2 Transform2D::localToLocal(ecs::entity src, ecs::entity dst, float2 pos) {
     float2 result = pos;
-    const auto lca = Node::findLowerCommonAncestor(src, dst);
+    const auto lca = updateLocalMatrixSubTree(src, dst);
     if (lca) {
         result = Transform2D::transformUp(src, lca, result);
         result = Transform2D::transformDown(lca, dst, result);
@@ -125,21 +126,19 @@ void updateWorldTransform(ecs::entity e, const Transform2D* transform) {
 }
 
 void updateWorldTransform2D(ecs::entity root) {
-    auto* transform = root.tryGet<Transform2D>();
-    assert(transform != nullptr);
-    transform->updateLocalMatrix();
-    transform->worldMatrix = transform->matrix;
-    transform->worldColor = transform->color;
+    auto& transform = root.get<Transform2D>();
+    transform.updateLocalMatrix();
+    transform.worldMatrix = transform.matrix;
+    transform.worldColor = transform.color;
 
     auto it = root.get<Node>().child_first;
     while (it) {
         const auto& child = it.get<Node>();
         if (child.visible()) {
-            updateWorldTransform(it, transform);
+            updateWorldTransform(it, &transform);
         }
         it = child.sibling_next;
     }
 }
-
 
 }

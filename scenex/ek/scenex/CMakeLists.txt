@@ -11,6 +11,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         base/NodeEvents.hpp
         base/Tween.hpp
         base/Tween.cpp
+        base/DestroyTimer.hpp
+        base/DestroyTimer.cpp
 
         3d/Transform3D.cpp
         3d/Transform3D.hpp
@@ -66,8 +68,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         particles/ParticleSystem.cpp
         particles/ParticleSystem.hpp
 
-        utility/destroy_delay.hpp
-        utility/destroy_delay.cpp
         utility/scene_management.hpp
         utility/basic_game_utility.hpp
         utility/basic_game_utility.cpp

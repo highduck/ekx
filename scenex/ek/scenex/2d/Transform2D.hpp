@@ -37,8 +37,9 @@ struct Transform2D {
 
     void updateLocalMatrix();
 
-    // these function use local matrix, need to rebuild local matrices for [src -> lca -> dst]
-    static void updateLocalMatrixSubTree(ecs::entity src, ecs::entity dst);
+    // Update local matrices for connected nodes `src` and `dst` if common LCA entity is found
+    // returns LCA entity if found, or 0
+    static ecs::entity updateLocalMatrixSubTree(ecs::entity src, ecs::entity dst);
 
     static float2 transformUp(ecs::entity it, ecs::entity top, float2 pos);
 

@@ -142,11 +142,15 @@ Sound::~Sound() {
     unload();
 }
 
-void Sound::play(float volume) {
+void Sound::play(float volume, bool multi) {
     if (ptrHandle && volume > 0.0f) {
         ::Sound handle = *ptrHandle;
         SetSoundVolume(handle, volume);
-        PlaySound(handle);
+        if (multi) {
+            PlaySoundMulti(handle);
+        } else {
+            PlaySound(handle);
+        }
     }
 }
 
@@ -204,7 +208,7 @@ void Music::update() {
 
 void Music::setVolume(float volume) {
     volume_ = volume;
-    if(ptrHandle) {
+    if (ptrHandle) {
         SetMusicVolume(*ptrHandle, volume);
     }
 }

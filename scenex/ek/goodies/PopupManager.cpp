@@ -1,6 +1,6 @@
 #include "PopupManager.hpp"
 
-#include <ek/scenex/utility/destroy_delay.hpp>
+#include <ek/scenex/base/DestroyTimer.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
@@ -18,7 +18,7 @@ const float tweenDelay = 0.05f;
 const float tweenDuration = 0.3f;
 const float animationVertDistance = 200.0f;
 
-static entity popups_;
+entity PopupManager::Main{};
 
 void on_popup_pause(entity e) {
     setTouchable(e, false);
@@ -52,7 +52,8 @@ void on_popup_closing(entity e) {
 }
 
 void on_popup_closed(entity e) {
-    auto& state = ecs::get<PopupManager>(popups_);
+    auto pm = PopupManager::Main;
+    auto& state = pm.get<PopupManager>();
 
     auto it = std::find(state.active.begin(), state.active.end(), e);
     if (it != state.active.end()) {
@@ -60,8 +61,8 @@ void on_popup_closed(entity e) {
     }
 
     if (state.active.empty()) {
-        setTouchable(popups_, false);
-        setVisible(popups_, false);
+        setTouchable(pm, false);
+        setVisible(pm, false);
     } else {
         on_popup_resume(state.active.back());
     }
@@ -121,7 +122,8 @@ void PopupManager::updateAll() {
 }
 
 void open_popup(entity e) {
-    auto& state = popups_.get<PopupManager>();
+    auto pm = PopupManager::Main;
+    auto& state = pm.get<PopupManager>();
 
     if (contains(state.active, e)) {
         return;
@@ -148,13 +150,15 @@ void open_popup(entity e) {
     };
 
     append(state.layer, e);
-    auto& st = ecs::get_or_create<Node>(popups_);
+    auto& st = pm.get_or_create<Node>();
     st.setTouchable(true);
     st.setVisible(true);
 }
 
 void close_popup(entity e) {
-    auto& state = ecs::get<PopupManager>(popups_);
+    auto pm = PopupManager::Main;
+    auto& state = pm.get<PopupManager>();
+
     if (!contains(state.active, e)) {
         return;
     }
@@ -174,28 +178,29 @@ void close_popup(entity e) {
 
 
 uint32_t count_active_popups() {
-    auto count = popups_.get<PopupManager>().active.size();
+    auto pm = PopupManager::Main;
+    auto& state = pm.get<PopupManager>();
+    auto count = state.active.size();
     return static_cast<uint32_t>(count);
 }
 
-entity get_popup_manager() {
-    return popups_;
-}
-
 void clear_popups() {
-    auto& state = ecs::get<PopupManager>(popups_);
+    auto pm = PopupManager::Main;
+    auto& state = pm.get<PopupManager>();
 
     state.fade_progress = 0.0f;
     setAlpha(state.back, 0.0f);
 
     destroyChildren(state.layer);
     state.active.clear();
-    setTouchable(popups_, false);
-    setVisible(popups_, false);
+    setTouchable(pm, false);
+    setVisible(pm, false);
 }
 
 void close_all_popups() {
-    auto& state = ecs::get<PopupManager>(popups_);
+    auto pm = PopupManager::Main;
+    auto& state = pm.get<PopupManager>();
+
     auto copy_vec = state.active;
     for (auto p : copy_vec) {
         close_popup(p);
@@ -245,7 +250,10 @@ ecs::entity PopupManager::make() {
     st.setTouchable(false);
     st.setVisible(false);
 
-    popups_ = e;
+    // safe first default popup-manager
+    if (!Main) {
+        Main = e;
+    }
     return e;
 }
 }

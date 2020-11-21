@@ -25,11 +25,11 @@ void AudioManager::play_music(const std::string& name) {
     }
 }
 
-void AudioManager::play_sound(const std::string& name, float vol) const {
+void AudioManager::play_sound(const std::string& name, float vol, bool multi) const {
     if (sound.enabled()) {
         Res<audio::Sound> soundAsset{name};
         if (soundAsset) {
-            soundAsset->play(vol);
+            soundAsset->play(vol, multi);
         }
     }
 }

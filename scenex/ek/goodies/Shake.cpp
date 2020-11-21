@@ -8,7 +8,7 @@ namespace ek {
 
 void Shake::updateAll() {
 
-    for (auto e: ecs::rview<Shake>()) {
+    for (auto e: ecs::view_backward<Shake>()) {
         auto& state = e.get<Shake>();
         auto dt = state.timer->dt;
         state.time += dt;

@@ -21,6 +21,18 @@ int currentSampleIndex = 0;
 std::unique_ptr<SampleBase> currentSample = nullptr;
 ecs::entity tfSampleTitle;
 
+void setCurrentSample(int index);
+
+void initSamples() {
+    sampleFactory.emplace_back([] { return new SamplePiko(); });
+    //sampleFactory.emplace_back([] { return new SampleFlash("test1"); });
+    sampleFactory.emplace_back([] { return new SampleFlash("test2"); });
+    sampleFactory.emplace_back([] { return new Sample3D(); });
+    sampleFactory.emplace_back([] { return new SampleIntegrations(); });
+    sampleFactory.emplace_back([] { return new SampleText(); });
+    setCurrentSample(0);
+}
+
 void setCurrentSample(int index) {
     int samplesCount = static_cast<int>(sampleFactory.size());
     currentSampleIndex = index;
@@ -75,7 +87,7 @@ void DemoApp::update_frame(float dt) {
     }
 
     //update_game_title_start(w);
-    scene_post_update(root, dt);
+    scene_post_update(root);
 }
 
 void DemoApp::render_frame() {
@@ -112,13 +124,7 @@ void DemoApp::start_game() {
 
     append(game, controls);
 
-    sampleFactory.emplace_back([] { return new SampleText(); });
-    sampleFactory.emplace_back([] { return new Sample3D(); });
-    sampleFactory.emplace_back([] { return new SamplePiko(); });
-    sampleFactory.emplace_back([] { return new SampleFlash("test1"); });
-    sampleFactory.emplace_back([] { return new SampleFlash("test2"); });
-    sampleFactory.emplace_back([] { return new SampleIntegrations(); });
-    setCurrentSample(0);
+    initSamples();
 }
 
 DemoApp::~DemoApp() = default;

@@ -42,13 +42,15 @@ struct Trail2D {
 
     void track(ecs::entity e);
 
-    void update_trail();
+    void update();
+
+    static void updateAll();
 
 private:
 
-    void update_position(float dt);
+    void update_position();
 
-    void create_node(const float2& pos);
+    void create_node(float2 pos);
 
 public:
     ecs::entity tracked_target_;
@@ -82,8 +84,6 @@ public:
     float width = 20.0f;
     float minWidth = 5.0f;
 };
-
-void updateTrails();
 
 }
 

@@ -13,7 +13,7 @@ public:
 
     void reset();
 
-    bool enabled = true;
+    bool enabled = false;
 
 private:
     float timer_ = 1.0f;

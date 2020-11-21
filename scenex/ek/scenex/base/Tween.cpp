@@ -1,5 +1,5 @@
 #include "Tween.hpp"
-#include <ek/scenex/utility/destroy_delay.hpp>
+#include <ek/scenex/base/DestroyTimer.hpp>
 #include <ek/math/common.hpp>
 
 namespace ek {
@@ -20,7 +20,7 @@ void update_frame(Tween& tween) {
 }
 
 void Tween::updateAll() {
-    for (auto e : ecs::rview<Tween>()) {
+    for (auto e : ecs::view_backward<Tween>()) {
         auto& tween = ecs::get<Tween>(e);
         auto dt = tween.timer->dt;
         if (tween.delay > 0.0f) {

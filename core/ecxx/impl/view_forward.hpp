@@ -1,18 +1,17 @@
 #pragma once
 
+#include "world.hpp"
 #include <array>
-
-#include "components_db.hpp"
 
 namespace ecs {
 
 template<typename ...Component>
-class basic_view {
+class view_forward_t {
 public:
     using index_type = entity::index_type;
     static constexpr auto components_num = sizeof ... (Component);
 
-    using table_type = std::array<const entity_map_base*, components_num>;
+    using table_type = std::array<entity_map_base*, components_num>;
     using table_index_type = uint32_t;
 
     using indices_type = std::array<table_index_type, components_num>;
@@ -88,7 +87,7 @@ public:
         const table_type& table_;
     };
 
-    explicit basic_view(components_db& db) {
+    explicit view_forward_t(ecs::world& db) {
         {
             table_index_type i{};
             ((access_[i] = table_[i] = &db.template ensure<Component>(), ++i), ...);
@@ -135,7 +134,7 @@ private:
 };
 
 template<typename Component>
-class basic_view<Component> {
+class view_forward_t<Component> {
 public:
     using index_type = entity::index_type;
     static constexpr auto components_num = 1;
@@ -180,7 +179,7 @@ public:
         const entity_map<Component>& map_;
     };
 
-    explicit basic_view(components_db& db) :
+    explicit view_forward_t(world& db) :
             map_{db.template ensure<Component>()},
             locker_{map_.lock()} {
     }
