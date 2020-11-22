@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- fix android remove ads purchase restore and already owned error handling
+
 ## [0.0.2] - 2020-11-22
 
 - remove `Particle` cycled mode
