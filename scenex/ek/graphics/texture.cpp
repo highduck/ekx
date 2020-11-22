@@ -13,6 +13,10 @@
 #define GL_LUMINANCE                      0x1909
 #endif
 
+#ifndef GL_LUMINANCE_ALPHA
+#define GL_LUMINANCE_ALPHA                0x190A
+#endif
+
 namespace ek::graphics {
 
 texture_t::texture_t()
@@ -67,8 +71,19 @@ void texture_t::upload(const image_t& image) {
 void texture_t::upload_pixels(uint32_t width, uint32_t height, const uint8_t* data) {
     begin_texture_setup(handle_, gl_texture_target_);
 
+    uint8_t* emulatedData = nullptr;
     if (type_ == texture_type::alpha8) {
         GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+        if (getContextType() == GraphicsContextType::OpenGL_ES_2) {
+            emulatedData = new uint8_t[width * height * 2];
+            unsigned len = width * height;
+            uint8_t* ptr = emulatedData;
+            for (unsigned i = 0; i < len; ++i) {
+                *(ptr++) = data[i];
+                *(ptr++) = data[i];
+            }
+            data = emulatedData;
+        }
     }
 
     GL_CHECK(glTexImage2D(gl_texture_target_, 0, textureFormat, width, height,
@@ -90,12 +105,25 @@ void texture_t::upload_pixels(uint32_t width, uint32_t height, const uint8_t* da
 #endif
     }
     end_texture_setup(gl_texture_target_, mipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+
+    delete[] emulatedData;
 }
 
 void texture_t::updateRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint8_t* data) {
     begin_texture_setup(handle_, gl_texture_target_);
 
+    uint8_t* emulatedData = nullptr;
     if (type_ == texture_type::alpha8) {
+        if (getContextType() == GraphicsContextType::OpenGL_ES_2) {
+            emulatedData = new uint8_t[width * height * 2];
+            unsigned len = width * height;
+            uint8_t* ptr = emulatedData;
+            for (unsigned i = 0; i < len; ++i) {
+                *(ptr++) = data[i];
+                *(ptr++) = data[i];
+            }
+            data = emulatedData;
+        }
         GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
     }
 
@@ -117,6 +145,8 @@ void texture_t::updateRect(uint32_t x, uint32_t y, uint32_t width, uint32_t heig
 #endif
     }
     end_texture_setup(gl_texture_target_, mipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+
+    delete[] emulatedData;
 }
 
 void texture_t::bind(int unit) const {
@@ -175,6 +205,10 @@ void texture_t::setType(texture_type type) {
             if (getContextType() == GraphicsContextType::OpenGL_ES_3) {
                 textureFormat = GL_R8;
                 internalFormat = GL_RED;
+                pixelType = GL_UNSIGNED_BYTE;
+            } else if (getContextType() == GraphicsContextType::OpenGL_ES_2) {
+                textureFormat = GL_LUMINANCE_ALPHA;
+                internalFormat = GL_LUMINANCE_ALPHA;
                 pixelType = GL_UNSIGNED_BYTE;
             } else {
                 textureFormat = GL_INTENSITY;
