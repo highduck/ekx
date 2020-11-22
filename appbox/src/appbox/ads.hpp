@@ -39,9 +39,7 @@ public:
         return removed;
     }
 
-    void purchaseRemoveAds() const {
-        billing::purchase(config_.skuRemoveAds, "");
-    }
+    void purchaseRemoveAds() const;
 
     // TODO: rename, try start commercial break
     void gameOver(const std::function<void()>& callback) {

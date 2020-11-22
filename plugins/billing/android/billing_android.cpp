@@ -118,7 +118,8 @@ Java_ek_billing_BillingBridge_nativePurchase(JNIEnv *env, jclass clazz,
                                              jstring token,
                                              jint state,
                                              jstring payload,
-                                             jstring signature) {
+                                             jstring signature,
+                                             jint responseCode) {
     using namespace billing;
     PurchaseData data;
     data.productID = jniGetString(env, productID);
@@ -126,6 +127,7 @@ Java_ek_billing_BillingBridge_nativePurchase(JNIEnv *env, jclass clazz,
     data.payload = jniGetString(env, payload);
     data.signature = jniGetString(env, signature);
     data.state = state;
+    data.errorCode = responseCode;
     onPurchaseChanged(data);
 }
 

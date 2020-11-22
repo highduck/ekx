@@ -41,7 +41,7 @@ public class BillingBridge {
     }
 
     // callbacks
-    native static void nativePurchase(String productID, String purchaseToken, int purchaseState, String payload, String signature);
+    native static void nativePurchase(String productID, String purchaseToken, int purchaseState, String payload, String signature, int responseCode);
 
     native static void nativeDetails(String sku, String price, String currencyCode);
 }

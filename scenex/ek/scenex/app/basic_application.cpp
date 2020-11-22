@@ -131,6 +131,7 @@ void basic_application::on_draw_frame() {
 
     if (!started_ && asset_manager_->is_assets_ready()) {
         start_game();
+        onStartHook();
         started_ = true;
     }
 

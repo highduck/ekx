@@ -29,6 +29,8 @@ public class GooglePlayBilling extends BillingPlugin {
 
     IInAppBillingService service;
 
+    String pendingPurchase;
+
     ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
@@ -81,7 +83,7 @@ public class GooglePlayBilling extends BillingPlugin {
                                     final int state = o.optInt("purchaseState");
                                     final String payload = o.optString("developerPayload");
 
-                                    BillingBridge.nativePurchase(productId, token, state, payload, signatures.get(i));
+                                    BillingBridge.nativePurchase(productId, token, state, payload, signatures.get(i), 0);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -89,8 +91,7 @@ public class GooglePlayBilling extends BillingPlugin {
                         }
                     });
                 }
-            }
-            catch(RemoteException e) {
+            } catch (RemoteException e) {
                 e.printStackTrace();
             }
 
@@ -150,24 +151,23 @@ public class GooglePlayBilling extends BillingPlugin {
 
     @Override
     public void purchase(String sku, String payload) {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
-                if (service == null) {
-                    Log.d(TAG, "purchase failed service is null");
-                    return;
-                }
+        pendingPurchase = sku;
+        activity.runOnUiThread(() -> {
+            if (service == null) {
+                Log.d(TAG, "purchase failed service is null");
+                return;
+            }
 
-                try {
-                    Log.d(TAG, "purchase");
-                    //item = "android.test.purchased";
-                    Bundle buyIntentBundle = service.getBuyIntent(3, activity.getPackageName(), sku, "inapp", payload);
-                    PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
+            try {
+                Log.d(TAG, "purchase");
+                //item = "android.test.purchased";
+                Bundle buyIntentBundle = service.getBuyIntent(3, activity.getPackageName(), sku, "inapp", payload);
+                PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
 
-                    activity.startIntentSenderForResult(pendingIntent.getIntentSender(),
-                            RC_REQUEST, new Intent(), 0, 0, 0);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                activity.startIntentSenderForResult(pendingIntent.getIntentSender(),
+                        RC_REQUEST, new Intent(), 0, 0, 0);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -197,17 +197,34 @@ public class GooglePlayBilling extends BillingPlugin {
         if (requestCode == RC_REQUEST) {
             try {
                 int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
-                final String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-                final String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
-                final JSONObject o = new JSONObject(purchaseData);
-                final String productId = o.optString("productId");
-                final String token = o.optString("token", o.optString("purchaseToken"));
-                final int state = o.optInt("purchaseState");
-                final String payload = o.optString("developerPayload");
-                BillingBridge.nativePurchase(productId, token, state, payload, dataSignature);
+                String productId = pendingPurchase;
+                String token = "";
+                int state = -1;
+                String payload = "";
+
+                String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
+                if (purchaseData != null) {
+                    final JSONObject o = new JSONObject(purchaseData);
+                    productId = o.optString("productId");
+                    token = o.optString("token", o.optString("purchaseToken"));
+                    state = o.optInt("purchaseState");
+                    payload = o.optString("developerPayload");
+                }
+
+                String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
+                if (dataSignature == null) {
+                    dataSignature = "";
+                }
+
+                // handle already owned error
+                if (responseCode == 7 /* BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED */) {
+                    state = 0;
+                }
+                BillingBridge.nativePurchase(productId, token, state, payload, dataSignature, responseCode);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            pendingPurchase = null;
         }
     }
 
