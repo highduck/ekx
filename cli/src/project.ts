@@ -54,6 +54,7 @@ interface ModuleDef {
 export class Project {
     readonly path = new ProjectPath();
     current_target = process.argv[2];
+    args = process.argv.slice(3);
 
     build_steps: (() => void)[] = [];
     projects: { [name: string]: RegisteredProject } = {};

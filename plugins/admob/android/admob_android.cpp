@@ -5,13 +5,13 @@ using namespace ek;
 
 namespace admob {
 
-    const char *class_path = "ek/admob/AdMobPlugin";
+const char *class_path = "ek/admob/AdMobPlugin";
 
 void initialize(const config_t &config) {
     auto *env = android::get_jni_env();
 
     const char *method_name = "initialize";
-    const char *method_sig = "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V";
+    const char *method_sig = "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V";
 
     auto class_ref = env->FindClass(class_path);
     auto banner_ref = env->NewStringUTF(config.banner.c_str());
@@ -22,7 +22,8 @@ void initialize(const config_t &config) {
     env->CallStaticVoidMethod(class_ref, method,
                               banner_ref,
                               video_ref,
-                              inters_ref);
+                              inters_ref,
+                              static_cast<int>(config.childDirected));
 
     env->DeleteLocalRef(class_ref);
     env->DeleteLocalRef(banner_ref);

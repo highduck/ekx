@@ -15,10 +15,17 @@ enum class event_type {
     video_closed = 5
 };
 
+enum class ChildDirected {
+    Unspecified = -1,
+    False = 0,
+    True = 1
+};
+
 struct config_t {
     std::string banner;
     std::string video;
     std::string inters;
+    ChildDirected childDirected = ChildDirected::Unspecified;
 };
 
 void initialize(const config_t& config);

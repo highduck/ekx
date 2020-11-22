@@ -16,6 +16,34 @@ import * as path from "path";
 import {ekc_export_assets, ekc_export_market} from "../assets";
 import {collect_source_files, collect_src_roots_all} from "../collectSources";
 import {copySigningKeys, printSigningConfigs} from "./signing";
+import {execSync} from "child_process";
+
+function getAndroidSdkRoot() {
+    return process.env.ANDROID_SDK_ROOT ?? path.join(process.env.HOME, 'Library/Android/sdk');
+}
+
+function getJavaHome() {
+    // -v 1.8 ?
+    return execSync('/usr/libexec/java_home -v 1.8', {
+        encoding: 'utf-8'
+    });
+}
+
+function gradle(...args: string[]) {
+    const ANDROID_SDK_ROOT = getAndroidSdkRoot();
+
+    let env = Object.create(process.env);
+    env = Object.assign(env, {
+        ANDROID_SDK_ROOT,
+        //JAVA_HOME
+    });
+
+    execSync(`./gradlew ${args.join(' ')}`, {
+        stdio: 'inherit',
+        encoding: 'utf-8',
+        env
+    });
+}
 
 function open_android_project(android_project_path) {
     execute("open", ["-a", "/Applications/Android Studio.app", android_project_path]);
@@ -177,6 +205,17 @@ export function export_android(ctx) {
         copy_google_services_config_android();
         copySigningKeys(ctx.android.keystore);
     }
-    process.chdir(cwd);
-    open_android_project(dest_path);
+
+    if (ctx.args.indexOf("bundle") >= 0) {
+        gradle('bundleRelease');
+        process.chdir(cwd);
+        const aabPath = path.join(dest_path, 'app/build/outputs/bundle/release/app-release.aab');
+        if (is_file(aabPath)) {
+            copy_file(path.join(dest_path, 'app/build/outputs/bundle/release/app-release.aab'),
+                path.join(dest_dir, ctx.name + '_' + ctx.version_name + '.aab'));
+        }
+    } else {
+        process.chdir(cwd);
+        open_android_project(dest_path);
+    }
 }

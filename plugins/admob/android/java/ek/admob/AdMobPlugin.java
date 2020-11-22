@@ -52,10 +52,14 @@ public class AdMobPlugin extends EkPlugin {
     private AdView _banner;
     private RewardedAd _rewardedVideo;
     private InterstitialAd _interstitialAd;
+    private int tagForChildDirectedTreatment;
 
     static AdMobPlugin instance;
 
-    public AdMobPlugin(final String banner, final String video, final String interstitial) {
+    public AdMobPlugin(final String banner,
+                       final String video,
+                       final String interstitial,
+                       final int tagForChildDirectedTreatment) {
         _activity = EkActivity.getInstance();
         _context = _activity;
         _layout = _activity.mainLayout;
@@ -63,6 +67,16 @@ public class AdMobPlugin extends EkPlugin {
         _bannerId = banner;
         _interstitialId = interstitial;
         _videoRewardId = video;
+        this.tagForChildDirectedTreatment = tagForChildDirectedTreatment;
+    }
+
+    static int convertAdMobTagForChildDirectedTreatment(int v) {
+        if (v == 0) {
+            return RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_FALSE;
+        } else if (v == 1) {
+            return RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE;
+        }
+        return RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_UNSPECIFIED;
     }
 
     private void start() {
@@ -72,7 +86,9 @@ public class AdMobPlugin extends EkPlugin {
                             AdRequest.DEVICE_ID_EMULATOR, // All emulators
                             "2AB46EC73CC840F948630EA11ECB6A3F",  // Galaxy A7
                             "3BA93F7574A4ECCF84878025F0B5F9D6"  // Galaxy S2
-                    )).build();
+                    ))
+                    .setTagForChildDirectedTreatment(tagForChildDirectedTreatment)
+                    .build();
             MobileAds.setRequestConfiguration(requestConfig);
             MobileAds.initialize(_context, status -> {
                 if (_bannerId != null && !_bannerId.isEmpty()) {
@@ -125,8 +141,13 @@ public class AdMobPlugin extends EkPlugin {
     public static native void eventCallback(int event);
 
     @Keep
-    public static void initialize(final String banner, final String video, final String interstitial) {
-        instance = new AdMobPlugin(banner, video, interstitial);
+    public static void initialize(final String banner,
+                                  final String video,
+                                  final String interstitial,
+                                  final int tagForChildDirectedTreatment) {
+        instance = new AdMobPlugin(banner, video, interstitial,
+                convertAdMobTagForChildDirectedTreatment(tagForChildDirectedTreatment)
+        );
         EkPluginManager.instance.extensions.add(instance);
         instance.start();
     }
@@ -150,14 +171,12 @@ public class AdMobPlugin extends EkPlugin {
         EkActivity.runMainThread(
                 () -> {
                     if (instance._interstitialAd != null) {
-                        if(instance._interstitialAd.isLoaded()) {
+                        if (instance._interstitialAd.isLoaded()) {
                             instance._interstitialAd.show();
-                        }
-                        else {
+                        } else {
                             postGLEvent(EVENT_INTERSTITIAL_CLOSED);
                         }
-                    }
-                    else {
+                    } else {
                         postGLEvent(EVENT_INTERSTITIAL_CLOSED);
                     }
                 });
