@@ -22,10 +22,10 @@ struct PurchaseData {
     int state;
     std::string payload;
     std::string signature;
-    
+    int errorCode;
+
     // ios
     std::string receipt;
-    int errorCode;
 };
 
 struct ProductDetails {

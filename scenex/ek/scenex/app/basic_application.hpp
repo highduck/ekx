@@ -31,6 +31,7 @@ public:
     signal_t<> hook_on_draw_frame{};
     signal_t<> hook_on_render_frame{};
     signal_t<float> hook_on_update{};
+    signal_t<> onStartHook{};
 
     /////
     ecs::entity root;
