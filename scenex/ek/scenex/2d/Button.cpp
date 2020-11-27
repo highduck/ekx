@@ -86,8 +86,8 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
     const float post = btn.post_time;
     const float pi = math::pi;
 
-    float sx = 1.0f + 0.5f * sinf((1.0f - post) * pi * 5.0f) * post;
-    float sy = 1.0f + 0.5f * sinf((1.0f - post) * pi) * cosf((1.0f - post) * pi * 5.0f) * post;
+    float sx = 1.0f + 0.2f * sinf((1.0f - post) * pi * 5.0f) * post;
+    float sy = 1.0f + 0.2f * sinf((1.0f - post) * pi) * cosf((1.0f - post) * pi * 5.0f) * post;
 
     auto color = lerp(0xFFFFFFFF_argb, 0xFF888888_argb, push);
     transform.color.scale = btn.baseColor.scale * color;

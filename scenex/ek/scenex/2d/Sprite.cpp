@@ -76,10 +76,9 @@ void Sprite::draw_grid(const rect_f& grid, const rect_f& target) const {
     float v2 = 1 - (((y + height) - grid.bottom()) / height);
     float v3 = 1;
 
-    draw2d::prepare();
     draw2d::triangles(4 * 4, 6 * 9);
-    auto cm = draw2d::state.vertex_color_multiplier;
-    auto co = draw2d::state.vertex_color_offset;
+    auto cm = draw2d::state.color.scale;
+    auto co = draw2d::state.color.offset;
     /////
     draw2d::write_vertex(x0, y0, u0, v0, cm, co);
     draw2d::write_vertex(x1, y0, u1, v0, cm, co);

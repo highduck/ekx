@@ -1,6 +1,5 @@
 #include "LayoutRect.hpp"
 #include "Display2D.hpp"
-#include <ecxx/ecxx.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/app/device.hpp>
 #include <ek/app/app.hpp>
@@ -21,21 +20,6 @@ rect_f find_parent_layout_rect(ecs::entity e, bool safe) {
         it = ecs::get<Node>(it).parent;
     }
     return rect_f::zero_one;
-}
-
-rect_f get_ancestors_rect(ecs::entity e) {
-    rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
-    auto it = ecs::get<Node>(e).parent;
-    while (it) {
-        if (ecs::has<LayoutRect>(it)) {
-            rect = ecs::get<LayoutRect>(it).rect;
-            if (!rect.empty()) {
-                break;
-            }
-        }
-        it = ecs::get<Node>(it).parent;
-    }
-    return rect;
 }
 
 void updateScreenRect(ecs::entity root) {

@@ -19,12 +19,13 @@ public:
 
     void play_music(const std::string& name);
 
-    void set_music_volume(float volume) {
-        music_volume_ = volume;
+    void setMusicParams(float volume = 1.0f, float pitch = 1.0f) {
+        musicVolume_ = volume;
+        musicPitch_ = pitch;
     }
 
-    void play_sound(const std::string& name, float vol = 1.0f, bool multi = false) const;
-    void play_sound_at(const std::string& name, const float2& position, float vol = 1.0f) const;
+    void play_sound(const std::string& name, float vol = 1.0f, float pitch = 1.0f, bool multi = false) const;
+    void play_sound_at(const std::string& name, const float2& position, float vol = 1.0f, float pitch = 1.0f) const;
 
     void vibrate(int length) const;
 
@@ -34,7 +35,8 @@ public:
 
 private:
     std::string music_;
-    float music_volume_ = 1.0f;
+    float musicVolume_ = 1.0f;
+    float musicPitch_ = 1.0f;
 };
 
 }

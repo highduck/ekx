@@ -101,8 +101,12 @@ void PopupManager::updateAll() {
     auto dt = TimeLayer::UI->dt;
     for (auto e : ecs::view<PopupManager>()) {
         auto& p = ecs::get<PopupManager>(e);
+        bool needFade = !p.active.empty();
+        if(p.active.size() == 1 && p.active.back() == p.closingLast) {
+            needFade = false;
+        }
         p.fade_progress = math::reach(p.fade_progress,
-                                      p.active.empty() ? 0.0f : 1.0f,
+                                      needFade ? 1.0f : 0.0f,
                                       dt / p.fade_duration);
 
         setAlpha(p.back, p.fade_alpha * p.fade_progress);
@@ -124,6 +128,8 @@ void PopupManager::updateAll() {
 void open_popup(entity e) {
     auto pm = PopupManager::Main;
     auto& state = pm.get<PopupManager>();
+
+    state.closingLast = nullptr;
 
     if (contains(state.active, e)) {
         return;
@@ -163,6 +169,9 @@ void close_popup(entity e) {
         return;
     }
 
+    if (state.active.back() == e) {
+        state.closingLast = e;
+    }
     on_popup_closing(e);
 
     auto& tween = Tween::reset(e);
@@ -188,6 +197,7 @@ void clear_popups() {
     auto pm = PopupManager::Main;
     auto& state = pm.get<PopupManager>();
 
+    state.closingLast = nullptr;
     state.fade_progress = 0.0f;
     setAlpha(state.back, 0.0f);
 
@@ -209,7 +219,9 @@ void close_all_popups() {
 
 ecs::entity createBackQuad() {
     auto e = create_node_2d("back");
-    Display2D::make<Quad2D>(e).setColor(argb32_t::black);
+    auto& display = e.assign<Display2D>();
+    display.makeDrawable<Quad2D>().setColor(argb32_t::black);
+    display.program.setID("2d_color");
     e.assign<LayoutRect>()
             .fill(true, true)
             .setInsetsMode(false);

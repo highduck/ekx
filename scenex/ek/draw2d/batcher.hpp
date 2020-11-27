@@ -7,6 +7,12 @@
 
 namespace ek {
 
+struct FrameStats {
+    uint32_t triangles = 0u;
+    uint32_t drawCalls = 0u;
+    float fillArea = 0.0f;
+};
+
 class BufferChain;
 
 class Batcher : private disable_copy_assign_t {
@@ -14,13 +20,8 @@ public:
     constexpr static int max_indices_limit = 0x100000;
     constexpr static int max_vertices_limit = 0xFFFF;
 
-    struct frame_stats {
-        uint32_t triangles = 0u;
-        uint32_t draw_calls = 0u;
-    };
-
     batch_state_context states;
-    frame_stats stats;
+    FrameStats stats;
 
 public:
 

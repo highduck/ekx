@@ -18,42 +18,6 @@ namespace ek {
 using namespace ek::app;
 using namespace ek::graphics;
 
-const GLchar* vertex_shader =
-        "#ifdef GL_ES\n"
-        "precision highp float;\n"
-        "#endif\n"
-
-        "attribute vec2 aPosition;\n"
-        "attribute vec2 aTexCoord;\n"
-        "attribute vec4 aColorMult;\n"
-
-        "uniform mat4 uModelViewProjection;\n"
-
-        "varying vec2 vTexCoord;\n"
-        "varying vec4 vColorMult;\n"
-
-        "void main() {\n"
-        "    vTexCoord = aTexCoord;\n"
-        "    vColorMult = vec4(aColorMult.xyz * aColorMult.a, aColorMult.a);\n"
-        "    gl_Position = uModelViewProjection * vec4(aPosition, 0.0, 1.0);\n"
-        "}\n";
-
-const GLchar* fragment_shader =
-        "#ifdef GL_ES\n"
-        "precision mediump float;\n"
-        "#endif\n"
-
-        "varying vec2 vTexCoord;\n"
-        "varying vec4 vColorMult;\n"
-        "varying vec4 vColorOffset;\n"
-
-        "uniform sampler2D uImage0;\n"
-
-        "void main() {\n"
-        "    vec4 pixel_color = texture2D(uImage0, vTexCoord);\n"
-        "    gl_FragColor = pixel_color * vColorMult;\n"
-        "}\n";
-
 void reset_keys() {
     auto& io = ImGui::GetIO();
     for (bool& i : io.KeysDown) {
@@ -131,24 +95,17 @@ void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
     draw_data->ScaleClipRects(io.DisplayFramebufferScale);
 
     // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, polygon fill
-    glEnable(GL_BLEND);
-    gl::check_error();
-    glBlendEquation(GL_FUNC_ADD);
-    gl::check_error();
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    gl::check_error();
-    glDisable(GL_CULL_FACE);
-    gl::check_error();
-    glDisable(GL_DEPTH_TEST);
-    gl::check_error();
-    glEnable(GL_SCISSOR_TEST);
-    gl::check_error();
+    GL_CHECK(glEnable(GL_BLEND));
+    GL_CHECK(glBlendEquation(GL_FUNC_ADD));
+    GL_CHECK(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+    GL_CHECK(glDisable(GL_CULL_FACE));
+    GL_CHECK(glDisable(GL_DEPTH_TEST));
+    GL_CHECK(glEnable(GL_SCISSOR_TEST));
 
-    glViewport(static_cast<GLint>(framebuffer_rect.x),
-               static_cast<GLint>(framebuffer_rect.y),
-               static_cast<GLsizei>(framebuffer_rect.width),
-               static_cast<GLsizei>(framebuffer_rect.height));
-    gl::check_error();
+    GL_CHECK(glViewport(static_cast<GLint>(framebuffer_rect.x),
+                        static_cast<GLint>(framebuffer_rect.y),
+                        static_cast<GLsizei>(framebuffer_rect.width),
+                        static_cast<GLsizei>(framebuffer_rect.height)));
 
     auto mvp = ortho_2d(viewport_rect.x, viewport_rect.y, viewport_rect.width, viewport_rect.height);
     program_->use();
@@ -156,9 +113,8 @@ void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
     program_->set_uniform(program_uniforms::mvp, mvp);
 
     GLint batch_prev_texture = 0;
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    gl::check_error();
+    GL_CHECK(glActiveTexture(GL_TEXTURE0));
+    GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0));
 
     ImVec2 pos = draw_data->DisplayPos;
     for (int n = 0; n < draw_data->CmdListsCount; n++) {
@@ -195,20 +151,18 @@ void imgui_module_t::render_frame_data(ImDrawData* draw_data) {
                     if (batch_prev_texture != texture_id) {
                         batch_prev_texture = texture_id;
                         // Bind texture
-                        glActiveTexture(GL_TEXTURE0);
-                        glBindTexture(GL_TEXTURE_2D, (GLuint) texture_id);
-                        gl::check_error();
+                        GL_CHECK(glActiveTexture(GL_TEXTURE0));
+                        GL_CHECK(glBindTexture(GL_TEXTURE_2D, (GLuint) texture_id));
                     }
                     //Draw
-                    glDrawElements(GL_TRIANGLES, (GLsizei) pcmd->ElemCount, GL_UNSIGNED_SHORT, idx_buffer_offset);
-                    gl::check_error();
+                    GL_CHECK(glDrawElements(GL_TRIANGLES, (GLsizei) pcmd->ElemCount, GL_UNSIGNED_SHORT,
+                                            idx_buffer_offset));
                 }
             }
             idx_buffer_offset += pcmd->ElemCount;
         }
     }
-    glDisable(GL_SCISSOR_TEST);
-    gl::check_error();
+    GL_CHECK(glDisable(GL_SCISSOR_TEST));
 }
 
 void imgui_module_t::init_fonts() {
@@ -264,8 +218,6 @@ imgui_module_t::imgui_module_t() {
     index_buffer_ = new buffer_t{buffer_type::index_buffer, buffer_usage::dynamic_buffer};
     texture_ = new texture_t{};
     texture_->setType(texture_type::alpha8);
-    program_ = new program_t{vertex_shader, fragment_shader};
-    program_->vertex = &vertex_minimal_2d::decl;
 
     /*** imgui setup **/
     // Setup Dear ImGui binding
@@ -318,7 +270,6 @@ imgui_module_t::imgui_module_t() {
 imgui_module_t::~imgui_module_t() {
     delete vertex_buffer_;
     delete index_buffer_;
-    delete program_;
     delete texture_;
 
     ImGui::GetIO().Fonts->TexID = nullptr;

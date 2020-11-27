@@ -37,11 +37,11 @@ TEST(entity_map, simple_has_data) {
     entity_map<int> m;
 
     m.emplace({1u, 0u}, 1);
-    ASSERT_TRUE(m.has(1u));
-    ASSERT_FALSE(m.has(5u));
+    ASSERT_TRUE(m.dataTable.has(1u));
+    ASSERT_FALSE(m.dataTable.has(5u));
 
     m.emplace({5u, 0u}, 1);
-    ASSERT_TRUE(m.has(5u));
+    ASSERT_TRUE(m.dataTable.has(5u));
 
     auto def = m.get_or_default(2u);
     ASSERT_EQ(def, 0);
@@ -51,18 +51,18 @@ TEST(entity_map, simple_has_data) {
 
     auto created = m.get_or_create({2u, 0u});
     ASSERT_EQ(created, int{});
-    ASSERT_TRUE(m.has(2u));
+    ASSERT_TRUE(m.dataTable.has(2u));
 
     auto already_created = m.get_or_create({2u, 0u});
     ASSERT_EQ(already_created, int{});
 
     m.erase(2u);
-    ASSERT_FALSE(m.has(2u));
+    ASSERT_FALSE(m.dataTable.has(2u));
 
     // check `swap and pop`
     m.erase(1u);
-    ASSERT_FALSE(m.has(1u));
-    ASSERT_TRUE(m.has(5u));
+    ASSERT_FALSE(m.dataTable.has(1u));
+    ASSERT_TRUE(m.dataTable.has(5u));
 }
 
 TEST(entity_map, simple_empty) {
@@ -73,11 +73,11 @@ TEST(entity_map, simple_empty) {
     entity_map<empty_t> m;
 
     m.emplace({1u, 0u});
-    ASSERT_TRUE(m.has(1u));
-    ASSERT_FALSE(m.has(5u));
+    ASSERT_TRUE(m.dataTable.has(1u));
+    ASSERT_FALSE(m.dataTable.has(5u));
 
     m.emplace({5u, 0u});
-    ASSERT_TRUE(m.has(5u));
+    ASSERT_TRUE(m.dataTable.has(5u));
 
     auto def = m.get_or_default(2u);
     //ASSERT_EQ(def, v);
@@ -87,15 +87,15 @@ TEST(entity_map, simple_empty) {
 
     auto created = m.get_or_create({2u, 0u});
     //ASSERT_EQ(created, v);
-    ASSERT_TRUE(m.has(2u));
+    ASSERT_TRUE(m.dataTable.has(2u));
 
     m.erase(2u);
-    ASSERT_FALSE(m.has(2u));
+    ASSERT_FALSE(m.dataTable.has(2u));
 
     // check `swap and pop`
     m.erase(1u);
-    ASSERT_FALSE(m.has(1u));
-    ASSERT_TRUE(m.has(5u));
+    ASSERT_FALSE(m.dataTable.has(1u));
+    ASSERT_TRUE(m.dataTable.has(5u));
 }
 
 TEST(entity_map, runtime_virtual) {

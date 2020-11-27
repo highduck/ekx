@@ -39,8 +39,4 @@ template<>
 struct declared_as_pod_type<abgr32_t> : public std::true_type {
 };
 
-template<>
-struct declared_as_pod_type<premultiplied_abgr32_t> : public std::true_type {
-};
-
 }

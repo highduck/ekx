@@ -133,22 +133,22 @@ drawing_state& drawing_state::scaleAlpha(float alpha) {
     return *this;
 }
 
-drawing_state& drawing_state::scaleColor(argb32_t multiplier) {
+drawing_state& drawing_state::scaleColor(abgr32_t multiplier) {
     color.scale = color.scale * multiplier;
     return *this;
 }
 
-drawing_state& drawing_state::concat(argb32_t scale, argb32_t offset) {
+drawing_state& drawing_state::concat(abgr32_t scale, abgr32_t offset) {
     using details::clamp_255;
 
-    if (offset.argb != 0) {
-        color.offset = argb32_t{clamp_255[color.offset.r + ((offset.r * color.scale.r * 258u) >> 16u)],
+    if (offset.abgr != 0) {
+        color.offset = abgr32_t{clamp_255[color.offset.r + ((offset.r * color.scale.r * 258u) >> 16u)],
                                 clamp_255[color.offset.g + ((offset.g * color.scale.g * 258u) >> 16u)],
                                 clamp_255[color.offset.b + ((offset.b * color.scale.b * 258u) >> 16u)],
                                 clamp_255[color.offset.a + offset.a]};
     }
 
-    if (scale.argb != 0xFFFFFFFF) {
+    if (scale.abgr != 0xFFFFFFFF) {
         color.scale = color.scale * scale;
     }
 
@@ -159,10 +159,10 @@ drawing_state& drawing_state::concat(ColorMod32 colorMod) {
     return concat(colorMod.scale, colorMod.offset);
 }
 
-drawing_state& drawing_state::offset_color(argb32_t offset) {
+drawing_state& drawing_state::offset_color(abgr32_t offset) {
     using details::clamp_255;
-    if (offset.argb != 0) {
-        color.offset = argb32_t{clamp_255[color.offset.r + ((offset.r * color.scale.r * 258u) >> 16u)],
+    if (offset.abgr != 0) {
+        color.offset = abgr32_t{clamp_255[color.offset.r + ((offset.r * color.scale.r * 258u) >> 16u)],
                                 clamp_255[color.offset.g + ((offset.g * color.scale.g * 258u) >> 16u)],
                                 clamp_255[color.offset.b + ((offset.b * color.scale.b * 258u) >> 16u)],
                                 clamp_255[color.offset.a + offset.a]};
@@ -360,12 +360,8 @@ void commit_state() {
     }
 }
 
-uint32_t get_stat_draw_calls() {
-    return batcher ? batcher->stats.draw_calls : 0;
-}
-
-uint32_t get_stat_triangles() {
-    return batcher ? batcher->stats.triangles : 0;
+FrameStats getDrawStats() {
+    return batcher ? batcher->stats : FrameStats{};
 }
 
 void invalidate_force() {
@@ -378,15 +374,9 @@ void draw_mesh(const graphics::buffer_t& vb, const graphics::buffer_t& ib, int32
 }
 
 void flush_batcher() {
-    if(batcher) {
+    if (batcher) {
         batcher->flush();
     }
-}
-
-void prepare() {
-    state.vertex_color_multiplier = state.color.scale.premultiplied_abgr(state.color.offset.a);
-    // for offset: delete alpha, flip R vs B channels
-    state.vertex_color_offset = state.color.offset.bgr();
 }
 
 void triangles(int vertex_count, int index_count) {
@@ -397,12 +387,10 @@ void triangles(int vertex_count, int index_count) {
 }
 
 void quad(float x, float y, float w, float h) {
-    prepare();
-
     triangles(4, 6);
 
-    const auto cm = state.vertex_color_multiplier;
-    const auto co = state.vertex_color_offset;
+    const auto cm = state.color.scale;
+    const auto co = state.color.offset;
     write_vertex(x, y, 0, 0.0f, cm, co);
     write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
     write_vertex(x + w, y + h, 1.0f, 1.0f, cm, co);
@@ -411,13 +399,11 @@ void quad(float x, float y, float w, float h) {
     write_indices_quad();
 }
 
-void quad(float x, float y, float w, float h, argb32_t color) {
-    prepare();
-
+void quad(float x, float y, float w, float h, abgr32_t color) {
     triangles(4, 6);
 
-    const auto cm = state.calc_vertex_color_multiplier(color);
-    const auto co = state.vertex_color_offset;
+    const auto cm = state.color.scale * color;
+    const auto co = state.color.offset;
     write_vertex(x, y, 0, 0.0f, cm, co);
     write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
     write_vertex(x + w, y + h, 1.0f, 1.0f, cm, co);
@@ -426,27 +412,24 @@ void quad(float x, float y, float w, float h, argb32_t color) {
     write_indices_quad();
 }
 
-void quad(float x, float y, float w, float h, argb32_t c1, argb32_t c2, argb32_t c3, argb32_t c4) {
-    prepare();
-
+void quad(float x, float y, float w, float h, abgr32_t c1, abgr32_t c2, abgr32_t c3, abgr32_t c4) {
     triangles(4, 6);
 
-    const auto co = state.vertex_color_offset;
-    write_vertex(x, y, 0, 0.0f, state.calc_vertex_color_multiplier(c1), co);
-    write_vertex(x + w, y, 1.0f, 0.0f, state.calc_vertex_color_multiplier(c2), co);
-    write_vertex(x + w, y + h, 1.0f, 1.0f, state.calc_vertex_color_multiplier(c3), co);
-    write_vertex(x, y + h, 0.0f, 1.0f, state.calc_vertex_color_multiplier(c4), co);
+    const auto cm = state.color.scale;
+    const auto co = state.color.offset;
+    write_vertex(x, y, 0, 0.0f, cm * c1, co);
+    write_vertex(x + w, y, 1.0f, 0.0f, cm * c2, co);
+    write_vertex(x + w, y + h, 1.0f, 1.0f, cm * c3, co);
+    write_vertex(x, y + h, 0.0f, 1.0f, cm * c4, co);
 
     write_indices_quad();
 }
 
 void quad_rotated(float x, float y, float w, float h) {
-    prepare();
-
     triangles(4, 6);
 
-    const auto cm = state.vertex_color_multiplier;
-    const auto co = state.vertex_color_offset;
+    const auto cm = state.color.scale;
+    const auto co = state.color.offset;
     write_vertex(x, y, 0, 1, cm, co);
     write_vertex(x + w, y, 0, 0, cm, co);
     write_vertex(x + w, y + h, 1, 0, cm, co);
@@ -456,22 +439,22 @@ void quad_rotated(float x, float y, float w, float h) {
 }
 
 // This function should be moved to the dedicated `indexed draw` mode
-void fill_circle(const circle_f& circle, argb32_t inner_color, argb32_t outer_color, int segments) {
-    prepare();
+void fill_circle(const circle_f& circle, abgr32_t inner_color, abgr32_t outer_color, int segments) {
     triangles(1 + segments, 3 * segments);
 
     const float x = circle.center.x;
     const float y = circle.center.y;
     const float r = circle.radius;
 
-    auto inner_cm = state.calc_vertex_color_multiplier(inner_color);
-    auto outer_cm = state.calc_vertex_color_multiplier(outer_color);
-    write_vertex(x, y, 0.0f, 0.0f, inner_cm, state.vertex_color_offset);
+    const auto co = state.color.offset;
+    auto inner_cm = state.color.scale * inner_color;
+    auto outer_cm = state.color.scale * outer_color;
+    write_vertex(x, y, 0.0f, 0.0f, inner_cm, co);
 
     const float da = math::pi2 / segments;
     float a = 0.0f;
     while (a < math::pi2) {
-        write_vertex(x + r * cosf(a), y + r * sinf(a), 1, 1, outer_cm, state.vertex_color_offset);
+        write_vertex(x + r * cosf(a), y + r * sinf(a), 1, 1, outer_cm, co);
         a += da;
     }
 
@@ -486,7 +469,7 @@ void fill_circle(const circle_f& circle, argb32_t inner_color, argb32_t outer_co
     write_index(1u);
 }
 
-void write_vertex(float x, float y, float u, float v, premultiplied_abgr32_t cm, abgr32_t co) {
+void write_vertex(float x, float y, float u, float v, abgr32_t cm, abgr32_t co) {
     auto* ptr = static_cast<graphics::vertex_2d*>(vertex_memory_ptr_);
 
     // could be cached before draw2d
@@ -504,7 +487,7 @@ void write_vertex(float x, float y, float u, float v, premultiplied_abgr32_t cm,
     vertex_memory_ptr_ = (uint8_t*) ptr;
 }
 
-void write_raw_vertex(const float2& pos, const float2& tex_coord, premultiplied_abgr32_t cm, abgr32_t co) {
+void write_raw_vertex(const float2& pos, const float2& tex_coord, abgr32_t cm, abgr32_t co) {
     auto* ptr = static_cast<graphics::vertex_2d*>(vertex_memory_ptr_);
     ptr->position = pos;
     ptr->uv = tex_coord;
@@ -528,6 +511,10 @@ void write_indices_quad(const uint16_t i0,
     *(index_memory_ptr_++) = index + i0;
 }
 
+Batcher* getBatcher() {
+    return batcher;
+}
+
 void write_indices(const uint16_t* source,
                    uint16_t count,
                    uint16_t base_vertex) {
@@ -542,10 +529,9 @@ void write_indices(const uint16_t* source,
 /////
 
 void draw_indexed_triangles(
-        const std::vector<float2>& positions, const std::vector<argb32_t>& colors,
+        const std::vector<float2>& positions, const std::vector<abgr32_t>& colors,
         const std::vector<uint16_t>& indices, const float2& offset, const float2& scale) {
 
-    prepare();
     int verticesTotal = static_cast<int>(positions.size());
     triangles(verticesTotal, indices.size());
     float2 loc_uv;
@@ -557,14 +543,14 @@ void draw_indexed_triangles(
                 local_position.y,
                 loc_uv.x,
                 loc_uv.y,
-                state.calc_vertex_color_multiplier(colors[i]),
-                state.vertex_color_offset
+                state.color.scale * colors[i],
+                state.color.offset
         );
     }
     write_indices(indices.data(), indices.size());
 }
 
-void line(const float2& start, const float2& end, argb32_t color1, argb32_t color2, float lineWidth1,
+void line(const float2& start, const float2& end, abgr32_t color1, abgr32_t color2, float lineWidth1,
           float lineWidth2) {
     float angle = atan2f(end.y - start.y, end.x - start.x);
     float sn = 0.5f * sinf(angle);
@@ -574,12 +560,11 @@ void line(const float2& start, const float2& end, argb32_t color1, argb32_t colo
     float t2sina2 = sn * lineWidth2;
     float t2cosa2 = cs * lineWidth2;
 
-    prepare();
     triangles(4, 6);
 
-    auto m1 = state.calc_vertex_color_multiplier(color1);
-    auto m2 = state.calc_vertex_color_multiplier(color2);
-    auto co = state.vertex_color_offset;
+    auto m1 = state.color.scale * color1;
+    auto m2 = state.color.scale * color2;
+    auto co = state.color.offset;
 
     write_vertex(start.x + t2sina1, start.y - t2cosa1, 0, 0, m1, co);
     write_vertex(end.x + t2sina2, end.y - t2cosa2, 1, 0, m2, co);
@@ -591,27 +576,21 @@ void line(const float2& start, const float2& end, argb32_t color1, argb32_t colo
 
 void line(const float2& start,
           const float2& end,
-          argb32_t color = 0xFFFFFFFF_argb,
-          float lineWidth = 1.0f) {
+          abgr32_t color,
+          float lineWidth) {
     line(start, end, color, color, lineWidth, lineWidth);
 }
-
-void line(const float2& start, const float2& end) {
-    line(start, end, 0xFFFFFFFF_argb, 1.0f);
-}
-
 
 void line_arc(float x, float y, float r,
               float angle_from, float angle_to,
               float line_width, int segments,
-              argb32_t color_inner, argb32_t color_outer) {
+              abgr32_t color_inner, abgr32_t color_outer) {
     auto pi2 = static_cast<float>(math::pi2);
     float da = pi2 / float(segments);
     float a0 = angle_from;
-    prepare();
-    auto m1 = state.calc_vertex_color_multiplier(color_inner);
-    auto m2 = state.calc_vertex_color_multiplier(color_outer);
-    auto co = state.vertex_color_offset;
+    auto m1 = state.color.scale * color_inner;
+    auto m2 = state.color.scale * color_outer;
+    auto co = state.color.offset;
     auto hw = line_width / 2.0f;
     auto r0 = r - hw;
     auto r1 = r + hw;
@@ -635,7 +614,7 @@ void line_arc(float x, float y, float r,
     }
 }
 
-void strokeRect(const rect_f& rc, argb32_t color, float lineWidth) {
+void strokeRect(const rect_f& rc, abgr32_t color, float lineWidth) {
     line({rc.x, rc.y}, {rc.right(), rc.y}, color, lineWidth);
     line({rc.right(), rc.y}, {rc.right(), rc.bottom()}, color, lineWidth);
     line({rc.right(), rc.bottom()}, {rc.x, rc.bottom()}, color, lineWidth);

@@ -17,29 +17,11 @@ inline uint8_t* init_clamp_255() noexcept {
 static const uint8_t* clamp_255 = init_clamp_255();
 }
 
-struct premultiplied_abgr32_t final {
-
-#include <ek/math/internal/compiler_unsafe_begin.h>
-
-    union {
-        struct {
-            uint8_t r, g, b, a;
-        };
-        uint32_t abgr;
-    };
-
-#include <ek/math/internal/compiler_unsafe_end.h>
-
-    inline premultiplied_abgr32_t() {}
-
-    inline explicit premultiplied_abgr32_t(uint32_t abgr_)
-            : abgr{abgr_} {}
-
-    inline premultiplied_abgr32_t(uint8_t r_, uint8_t g_, uint8_t b_, uint8_t a_)
-            : r{r_}, g{g_}, b{b_}, a{a_} {}
-};
-
 struct abgr32_t final {
+
+    static const abgr32_t zero;
+    static const abgr32_t one;
+    static const abgr32_t black;
 
 #include <ek/math/internal/compiler_unsafe_begin.h>
 
@@ -57,7 +39,7 @@ struct abgr32_t final {
 
     }
 
-    inline abgr32_t(uint32_t abgr_) noexcept
+    inline constexpr abgr32_t(uint32_t abgr_) noexcept
             : abgr{abgr_} {
 
     }
@@ -100,6 +82,19 @@ struct abgr32_t final {
 
     inline abgr32_t operator&(uint32_t mask) const {
         return abgr32_t{abgr & mask};
+    }
+
+    [[nodiscard]] inline float af() const { return float(a) / 255.0f; }
+
+    inline void af(float value) { a = uint8_t(static_cast<uint16_t>(value * 255.0f) & 0xFFu); }
+
+    [[nodiscard]] inline abgr32_t scaleAlpha(float scale) const {
+        return abgr32_t{(static_cast<uint8_t>(scale * a) << 24u) | (abgr & 0xFFFFFFu)};
+    }
+
+    template<typename T>
+    explicit operator vec_t<4, T>() {
+        return vec_t<4, T>{T(r) / 255, T(g) / 255, T(b) / 255, T(a) / 255};
     }
 };
 
@@ -153,21 +148,16 @@ struct argb32_t final {
         af(alpha);
     }
 
-    inline premultiplied_abgr32_t premultiplied_abgr(uint8_t additive) const {
-        return premultiplied_abgr32_t(static_cast<uint32_t>(
-                                              ((a * (0xFFu - additive) * 258u) & 0x00FF0000u) << 8u |
-                                              ((a * b * 258u) & 0x00FF0000u) |
-                                              ((a * g * 258u) & 0x00FF0000u) >> 8u |
-                                              (a * r * 258u) >> 16u
-                                      ));
-    }
-
-    inline abgr32_t bgr() {
+    [[nodiscard]] inline constexpr abgr32_t bgr() const noexcept {
         return abgr32_t((static_cast<uint32_t>(b) << 16u) | (argb & 0x0000FF00u) | r);
     }
 
-    inline abgr32_t abgr() {
+    [[nodiscard]] inline constexpr abgr32_t abgr() const noexcept {
         return abgr32_t{(argb & 0xFF00FF00u) | (static_cast<uint32_t>(b) << 16u) | r};
+    }
+
+    inline constexpr operator abgr32_t() const noexcept {
+        return abgr();
     }
 
     inline argb32_t operator*(argb32_t multiplier) const {
@@ -239,6 +229,10 @@ constexpr argb32_t argb32_t::zero{0x0u};
 constexpr argb32_t argb32_t::one{0xFFFFFFFFu};
 constexpr argb32_t argb32_t::black{0xFF000000u};
 
+constexpr abgr32_t abgr32_t::zero{0x0u};
+constexpr abgr32_t abgr32_t::one{0xFFFFFFFFu};
+constexpr abgr32_t abgr32_t::black{0xFF000000u};
+
 constexpr argb32_t operator "" _argb(unsigned long long n) noexcept {
     return argb32_t(0xFFFFFFFFu & n);
 }
@@ -256,19 +250,19 @@ inline argb32_t lerp(argb32_t begin, argb32_t end, float t) {
                     uint8_t((begin.a * ri + end.a * r) >> 10u));
 }
 
-inline premultiplied_abgr32_t lerp(premultiplied_abgr32_t begin, premultiplied_abgr32_t end, float t) {
+inline abgr32_t lerp(abgr32_t begin, abgr32_t end, float t) {
     auto r = static_cast<uint32_t>(t * 1024u);
     uint32_t ri = 1024u - r;
-    return premultiplied_abgr32_t((begin.r * ri + end.r * r) >> 10u,
-                                  (begin.g * ri + end.g * r) >> 10u,
-                                  (begin.b * ri + end.b * r) >> 10u,
-                                  (begin.a * ri + end.a * r) >> 10u);
+    return abgr32_t((begin.r * ri + end.r * r) >> 10u,
+                    (begin.g * ri + end.g * r) >> 10u,
+                    (begin.b * ri + end.b * r) >> 10u,
+                    (begin.a * ri + end.a * r) >> 10u);
 }
 
 
 struct ColorMod32 {
-    argb32_t scale = argb32_t::one;
-    argb32_t offset = argb32_t::zero;
+    abgr32_t scale = abgr32_t::one;
+    abgr32_t offset = abgr32_t::zero;
 
     ColorMod32() = default;
 
@@ -277,11 +271,16 @@ struct ColorMod32 {
             offset{offset_} {
     }
 
+    explicit ColorMod32(abgr32_t scale_, abgr32_t offset_ = abgr32_t::zero) :
+            scale{scale_},
+            offset{offset_} {
+    }
+
     ColorMod32 operator*(ColorMod32 r) const {
         using details::clamp_255;
         return ColorMod32{
-                r.scale.argb != 0xFFFFFFFF ? scale * r.scale : scale,
-                r.offset.argb != 0 ? argb32_t{clamp_255[offset.r + ((r.offset.r * scale.r * 258u) >> 16u)],
+                r.scale.abgr != 0xFFFFFFFF ? scale * r.scale : scale,
+                r.offset.abgr != 0 ? argb32_t{clamp_255[offset.r + ((r.offset.r * scale.r * 258u) >> 16u)],
                                               clamp_255[offset.g + ((r.offset.g * scale.g * 258u) >> 16u)],
                                               clamp_255[offset.b + ((r.offset.b * scale.b * 258u) >> 16u)],
                                               clamp_255[offset.a + r.offset.a]} : offset

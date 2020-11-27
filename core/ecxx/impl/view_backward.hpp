@@ -54,7 +54,7 @@ public:
         [[nodiscard]] inline bool valid(entity e) const {
             const auto idx = e.index();
             for (uint32_t i = 1u; i < components_num; ++i) {
-                if (!table_[i]->has(idx)) {
+                if (!table_[i]->dataTable.has(idx)) {
                     return false;
                 }
             }

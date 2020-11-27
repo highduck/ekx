@@ -38,6 +38,7 @@ public:
 
     void setBlur(float radius, int iterations, int strengthPower) override;
 
+    void resetGlyphs();
 public:
     stbtt_fontinfo* info = nullptr;
     std::vector<uint8_t> source;
@@ -46,6 +47,7 @@ public:
     float baseFontSize;
     float dpiScale;
     Res<DynamicAtlas> atlas;
+    unsigned atlasVersion = 0;
     std::unordered_map<uint32_t, std::unique_ptr<std::unordered_map<uint32_t, Glyph>>> mapByEffect;
     std::unordered_map<uint32_t, Glyph>* map = nullptr;
 

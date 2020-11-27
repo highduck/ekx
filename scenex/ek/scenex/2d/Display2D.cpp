@@ -23,20 +23,6 @@ bool Quad2D::hitTest(float2 point) const {
     return rect.contains(point);
 }
 
-//drawable_quad* drawable_quad::vGradient(const rect_f& rc, argb32_t top, argb32_t bottom) {
-//    auto* q = new CQuad;
-//    q->rect = rc;
-//    q->colors[0] = top;
-//    q->colors[1] = top;
-//    q->colors[2] = bottom;
-//    q->colors[3] = bottom;
-//    return q;
-//}
-//
-//drawable_quad* drawable_quad::colored(const rect_f& rc, argb32_t color) {
-//    return vGradient(rc, color, color);
-//}
-
 Sprite2D::Sprite2D() = default;
 
 Sprite2D::Sprite2D(const std::string& sprite_id, rect_f a_scale_grid)

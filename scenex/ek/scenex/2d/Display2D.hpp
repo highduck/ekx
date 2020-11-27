@@ -7,6 +7,7 @@
 #include <ek/math/mat3x2.hpp>
 #include <ek/util/type_index.hpp>
 #include <ecxx/ecxx.hpp>
+#include <ek/graphics/program.hpp>
 #include "Sprite.hpp"
 
 namespace ek {
@@ -71,6 +72,10 @@ struct Bounds2D {
 
 struct Display2D {
     std::unique_ptr<IDrawable2D> drawable;
+
+    // state management
+    Res<graphics::program_t> program;
+
 #ifndef NDEBUG
     bool drawBounds = false;
 #endif
@@ -112,15 +117,18 @@ struct Display2D {
         d.drawable = std::move(std::make_unique<T>());
         return static_cast<T&>(*d.drawable);
     }
+
+    template<typename T>
+    T& makeDrawable() {
+        drawable = std::move(std::make_unique<T>());
+        return static_cast<T&>(*drawable);
+    }
 };
 
 class Quad2D : public Drawable2D<Quad2D> {
 public:
     rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
     argb32_t colors[4]{};
-
-//    static CQuad* vGradient(rect_f const& rc, argb32_t top, argb32_t bottom);
-//    static CQuad* colored(const rect_f& rc, argb32_t color);
 
     void draw() override;
 

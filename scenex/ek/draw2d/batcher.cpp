@@ -9,6 +9,17 @@ namespace ek {
 
 using namespace ek::graphics;
 
+float getTriangleArea(vertex_2d* vertices, uint16_t* indices, int count) {
+    float sum = 0.0f;
+    for(int i = 0; i < count;) {
+        float2 a = vertices[indices[i++]].position;
+        float2 b = vertices[indices[i++]].position;
+        float2 c = vertices[indices[i++]].position;
+        sum += (a.x * b.y + b.x * c.y + c.x * a.y - a.x * c.y - b.x * a.y - c.x * b.y)/2.0f;
+    }
+    return sum;
+}
+
 class BufferChain {
 public:
     explicit BufferChain(buffer_type type) :
@@ -135,9 +146,11 @@ void Batcher::draw() {
 //        glDeleteVertexArrays(1, &vao);
 //        glCheckError();
 
-
+#ifndef NDEBUG
+    stats.fillArea += getTriangleArea(reinterpret_cast<vertex_2d*>(vertex_memory_), static_cast<uint16_t*>(index_memory_), next_index_pointer_ << 1u);
+#endif
     stats.triangles += indices_count_ / 3;
-    ++stats.draw_calls;
+    ++stats.drawCalls;
 
     // reset stream pointers
     next_index_pointer_ = 0;

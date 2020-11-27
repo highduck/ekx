@@ -26,7 +26,6 @@ using u2_ = check_vec_no_padding<uint32_t, 2>;
 using u3_ = check_vec_no_padding<uint32_t, 3>;
 using u4_ = check_vec_no_padding<uint32_t, 4>;
 
-static_assert(sizeof(premultiplied_abgr32_t) == sizeof(uint8_t) * 4, "extra padding");
 static_assert(sizeof(argb32_t) == sizeof(uint8_t) * 4, "extra padding");
 static_assert(sizeof(abgr32_t) == sizeof(uint8_t) * 4, "extra padding");
 

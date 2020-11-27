@@ -7,14 +7,17 @@
 
 namespace ek {
 
-void guiStatsWindow(bool *p_open) {
+void guiStatsWindow(bool* p_open) {
     if (ImGui::Begin("Stats", p_open)) {
         auto& app = resolve<basic_application>();
         draw2d::flush_batcher();
-        ImGui::Text("%0.2lf ms | dc: %u | tri: %u",
+        auto stats = draw2d::getDrawStats();
+        auto drawableSize = ek::app::g_app.drawable_size;
+        ImGui::Text("%0.2lf ms | dc: %u | tri: %u | fill: %0.2f",
                     app.frame_timer.delta_time() * 1000.0,
-                    draw2d::get_stat_draw_calls(),
-                    draw2d::get_stat_triangles()
+                    stats.drawCalls,
+                    stats.triangles,
+                    stats.fillArea / (drawableSize.x * drawableSize.y)
         );
         const auto& entities = ecs::world::the.entities;
         ImGui::Text("%u entities | %u free", entities.size(), entities.available_for_recycling());

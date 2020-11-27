@@ -54,8 +54,6 @@ struct LayoutRect {
 
 rect_f find_parent_layout_rect(ecs::entity e, bool safe);
 
-rect_f get_ancestors_rect(ecs::entity e);
-
 void updateScreenRect(ecs::entity root);
 
 

@@ -100,6 +100,7 @@ public:
     RealTimeGraph graphFrameTime;
     RealTimeGraph graphTriangles;
     RealTimeGraph graphDrawCalls;
+    RealTimeGraph graphFillRate;
     unordered_map<string, RealTimeGraph> frameGraphs;
 };
 
@@ -108,10 +109,17 @@ void Profiler::update(float dt) {
     impl->fpsMeter.update(dt);
     impl->graphFrameTime.history.write(dt * 1000.0f);
     impl->graphFrameTime.value = impl->fpsMeter.getAverageFPS();
-    impl->graphDrawCalls.history.write(draw2d::get_stat_draw_calls());
-    impl->graphDrawCalls.value = draw2d::get_stat_draw_calls();
-    impl->graphTriangles.history.write(draw2d::get_stat_triangles());
-    impl->graphTriangles.value = draw2d::get_stat_triangles();
+
+    auto stats = draw2d::getDrawStats();
+    impl->graphDrawCalls.history.write(stats.drawCalls);
+    impl->graphDrawCalls.value = stats.drawCalls;
+    impl->graphTriangles.history.write(stats.triangles);
+    impl->graphTriangles.value = stats.triangles;
+
+    auto drawableSize = app::g_app.drawable_size;
+    auto fillRate = stats.fillArea / (drawableSize.x * drawableSize.y);
+    impl->graphFillRate.history.write(fillRate);
+    impl->graphFillRate.value = fillRate;
 #endif
 }
 
@@ -130,6 +138,8 @@ void Profiler::draw() {
     impl->graphDrawCalls.drawGraph();
     draw2d::state.translate(0, 35);
     impl->graphTriangles.drawGraph();
+    draw2d::state.translate(0, 35);
+    impl->graphFillRate.drawGraph();
 
     for (auto& it : impl->frameGraphs) {
         draw2d::state.translate(0, 35);
@@ -146,6 +156,8 @@ void Profiler::draw() {
     impl->graphDrawCalls.drawText();
     draw2d::state.translate(0, 35);
     impl->graphTriangles.drawText();
+    draw2d::state.translate(0, 35);
+    impl->graphFillRate.drawText();
 
     for (auto& it : impl->frameGraphs) {
         draw2d::state.translate(0, 35);
@@ -183,6 +195,14 @@ Profiler::Profiler() {
     impl->graphDrawCalls.thMax = 50;
     impl->graphDrawCalls.min = 0;
     impl->graphDrawCalls.max = 200;
+
+    impl->graphFillRate.name = "FR";
+    impl->graphFillRate.titleFormat = "%s: %0.2f";
+    impl->graphFillRate.markerFormat = "";
+    impl->graphFillRate.thMin = 1;
+    impl->graphFillRate.thMax = 3;
+    impl->graphFillRate.min = 0;
+    impl->graphFillRate.max = 5;
 #endif
 }
 

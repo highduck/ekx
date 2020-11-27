@@ -17,7 +17,8 @@ void AudioManager::play_music(const std::string& name) {
         }
         musicAsset.setID(name);
         if (musicAsset) {
-            auto volume = music.enabled() ? music_volume_ : 0.0f;
+            auto volume = music.enabled() ? musicVolume_ : 0.0f;
+            musicAsset->setPitch(musicPitch_);
             musicAsset->setVolume(volume);
             musicAsset->play();
         }
@@ -25,20 +26,20 @@ void AudioManager::play_music(const std::string& name) {
     }
 }
 
-void AudioManager::play_sound(const std::string& name, float vol, bool multi) const {
+void AudioManager::play_sound(const std::string& name, float vol, float pitch, bool multi) const {
     if (sound.enabled()) {
         Res<audio::Sound> soundAsset{name};
         if (soundAsset) {
-            soundAsset->play(vol, multi);
+            soundAsset->play(vol, pitch, multi);
         }
     }
 }
 
-void AudioManager::play_sound_at(const std::string& name, const float2& position, float volume) const {
+void AudioManager::play_sound_at(const std::string& name, const float2& position, float volume, float pitch) const {
     if (sound.enabled()) {
         auto relVolume = volume;
         //auto spatialPanning = -1 .. 1;
-        play_sound(name, relVolume);
+        play_sound(name, relVolume, pitch);
     }
 }
 
@@ -52,7 +53,7 @@ void AudioManager::update(float) {
     if (!music_.empty()) {
         Res<audio::Music> musicAsset{music_};
         if (musicAsset) {
-            auto volume = music.enabled() ? music_volume_ : 0.0f;
+            auto volume = music.enabled() ? musicVolume_ : 0.0f;
             musicAsset->setVolume(volume);
             musicAsset->update();
         }

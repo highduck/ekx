@@ -27,12 +27,19 @@ public:
 
     [[nodiscard]] const graphics::texture_t* getPageTexture(int index) const;
 
+    void reset();
+
 public:
+    uint8_t* clearPixels = nullptr;
+
     std::vector<Page*> pages_;
     int pageWidth;
     int pageHeight;
     bool alphaMap;
     bool mipmaps;
+
+    // after reset we increase version, so clients could check if cache maps should be cleared
+    unsigned version = 0;
 private:
 };
 

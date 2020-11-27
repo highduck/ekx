@@ -16,21 +16,19 @@ public:
 
         texture = new graphics::texture_t();
         texture->setType(alphaMap ? graphics::texture_type::alpha8 : graphics::texture_type::color32);
-        if (mipmaps) {
-            texture->setMipMaps(true);
-        }
-        reset();
+//        if (mipmaps) {
+//            texture->setMipMaps(true);
+//        }
     }
 
     ~Page() {
         delete texture;
     }
 
-    void reset() {
-        auto emptyData = std::vector<uint8_t>{};
-        emptyData.resize(bytesPerPixel * width * height, 0);
-
-        texture->upload_pixels(width, height, emptyData.data());
+    void reset(uint8_t* clearPixels_ = nullptr) {
+        if (clearPixels_) {
+            texture->upload_pixels(width, height, clearPixels_);
+        }
 
         x = padding;
         y = padding;
@@ -93,13 +91,17 @@ DynamicAtlas::DynamicAtlas(int pageWidth_, int pageHeight_, bool alphaMap_, bool
         alphaMap{alphaMap_},
         mipmaps{mipmaps_} {
 
-    pages_.push_back(new Page(pageWidth_, pageHeight_, alphaMap, mipmaps));
+    clearPixels = new uint8_t[pageWidth_ * pageHeight_ * (alphaMap_ ? 1 : 4)];
+    auto* page = new Page(pageWidth_, pageHeight_, alphaMap, mipmaps);
+    page->reset(clearPixels);
+    pages_.push_back(page);
 }
 
 DynamicAtlas::~DynamicAtlas() {
     for (auto* page : pages_) {
         delete page;
     }
+    delete[]clearPixels;
 }
 
 DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const std::vector<uint8_t>& pixels) {
@@ -114,6 +116,7 @@ DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const std::vec
         }
     }
     auto* newPage = new Page(pageWidth, pageHeight, alphaMap, mipmaps);
+    newPage->reset(clearPixels);
     pages_.push_back(newPage);
     if (!newPage->add(width, height, pixels, sprite)) {
         // how come?
@@ -126,6 +129,13 @@ DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const std::vec
 const graphics::texture_t* DynamicAtlas::getPageTexture(int index) const {
     assert(index < pages_.size() && index >= 0);
     return pages_[index]->texture;
+}
+
+void DynamicAtlas::reset() {
+    for (auto& page : pages_) {
+        page->reset();
+    }
+    ++version;
 }
 
 }

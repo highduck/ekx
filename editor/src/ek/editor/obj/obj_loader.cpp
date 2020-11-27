@@ -102,7 +102,7 @@ mesh_data_t load_obj(const std::vector<uint8_t>& buffer) {
                 obj_model.positions[obj_model.faces[ptr]],
                 obj_model.normals[obj_model.faces[ptr + 2]],
                 obj_model.uvs[obj_model.faces[ptr + 1]],
-                ek::premultiplied_abgr32_t{0xFFFFFFFF},
+                0xFFFFFFFF,
                 0x0
         };
         result.indices[i] = i;

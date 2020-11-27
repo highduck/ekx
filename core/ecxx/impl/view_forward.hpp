@@ -56,7 +56,7 @@ public:
             // filter secondary entity vectors
             const auto idx = m.at(it).index();
             for (uint32_t k = 1u; k < components_num; ++k) {
-                if (!table[k]->has(idx)) {
+                if (!table[k]->dataTable.has(idx)) {
                     return false;
                 }
             }
@@ -67,7 +67,7 @@ public:
             // filter secondary entity vectors
             const uint32_t cn = components_num;
             for (uint32_t k = 1u; k < cn; ++k) {
-                if (!table[k]->index_table().has(idx)) {
+                if (!table[k]->dataTable.has(idx)) {
                     return false;
                 }
             }

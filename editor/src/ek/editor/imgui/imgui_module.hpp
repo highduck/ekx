@@ -3,6 +3,7 @@
 #include <ek/graphics/graphics.hpp>
 #include <ek/app/app.hpp>
 #include <ek/math/vec.hpp>
+#include <ek/util/assets.hpp>
 #include <string>
 
 struct ImDrawData;
@@ -35,7 +36,7 @@ private:
     graphics::buffer_t* vertex_buffer_ = nullptr;
     graphics::buffer_t* index_buffer_ = nullptr;
     graphics::texture_t* texture_ = nullptr;
-    graphics::program_t* program_ = nullptr;
+    Res<graphics::program_t> program_{"2d_min"};
     std::string clipboard_text_{};
 };
 

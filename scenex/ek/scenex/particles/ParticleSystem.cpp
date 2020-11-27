@@ -4,7 +4,6 @@
 #include "Particle.hpp"
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/util/locator.hpp>
-#include <ek/scenex/TimeLayer.hpp>
 
 namespace ek {
 
@@ -30,8 +29,6 @@ Particle* produce_particle(const ParticleDecl& decl) {
     p->acc = decl.acceleration;
     p->alpha_mode = decl.alpha_mode;
     p->scale_mode = decl.scale_mode;
-    p->font = decl.font;
-    p->fontSize = decl.fontSize;
     p->acc_x_phase = decl.acc_x_phase.random();
     p->acc_x_speed = decl.acc_x_speed.random();
     p->scale_off_time = decl.scale_off_time;
@@ -46,7 +43,6 @@ Particle* produce_particle(const ParticleDecl& decl) {
     p->set_life_time(decl.life_time.random());
     p->offset = decl.color_offset;
     p->offset.af(decl.additive);
-    p->color_functor = decl.color_func;
     return p;
 }
 

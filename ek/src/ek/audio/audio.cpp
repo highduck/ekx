@@ -12,11 +12,11 @@
 // TODO: panning (left/right)
 
 static Wave LoadMP3(const void* data, size_t size, const char* optionalName) {
-    Wave wave = {0};
+    Wave wave = {};
 
     // Decode an entire MP3 file in one go
     drmp3_uint64 totalFrameCount = 0;
-    drmp3_config config = {0};
+    drmp3_config config = {};
 
     wave.data = drmp3_open_memory_and_read_pcm_frames_f32(
             data,
@@ -48,7 +48,7 @@ static Wave LoadMP3(const void* data, size_t size, const char* optionalName) {
 
 // Load music stream from file
 Music LoadMusicStreamFromMemory(void* data, size_t size, const char* fileName) {
-    Music music = {0};
+    Music music = {};
     bool musicLoaded = false;
 
     drmp3* ctxMp3 = (drmp3*) RL_MALLOC(sizeof(drmp3));
@@ -142,10 +142,11 @@ Sound::~Sound() {
     unload();
 }
 
-void Sound::play(float volume, bool multi) {
+void Sound::play(float volume, float pitch, bool multi) {
     if (ptrHandle && volume > 0.0f) {
         ::Sound handle = *ptrHandle;
         SetSoundVolume(handle, volume);
+        SetSoundPitch(handle, pitch);
         if (multi) {
             PlaySoundMulti(handle);
         } else {
@@ -215,6 +216,17 @@ void Music::setVolume(float volume) {
 
 float Music::getVolume() const {
     return volume_;
+}
+
+void Music::setPitch(float pitch) {
+    pitch_ = pitch;
+    if (ptrHandle) {
+        SetMusicPitch(*ptrHandle, pitch);
+    }
+}
+
+float Music::getPitch() const {
+    return pitch_;
 }
 
 Music::Music(const char* path) {
