@@ -13,8 +13,6 @@ struct Particle {
     Res<Sprite> sprite;
     int draw_layer = 0;
     std::string text;
-    Res<Font> font;
-    float fontSize = 0.0f;
     float2 pivot = float2::zero;
 
     float time = 0.0f;
@@ -51,9 +49,6 @@ struct Particle {
     bool reflector = false;
 
     rect_f bounds = rect_f::zero_one;
-
-    std::function<argb32_t(Particle&)> color_functor;
-
 public:
 
     void init() {

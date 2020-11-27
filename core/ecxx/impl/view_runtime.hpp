@@ -46,7 +46,7 @@ public:
             const auto end = static_cast<uint32_t>(table_.size());
             const auto idx = e.index();
             for (uint32_t i = 1u; i < end; ++i) {
-                if (!table_[i]->has(idx)) {
+                if (!table_[i]->dataTable.has(idx)) {
                     return false;
                 }
             }

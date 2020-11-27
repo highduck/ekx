@@ -180,7 +180,7 @@ void GameScreenManager::update() {
     const auto dt = TimeLayer::UI->dt;
     if (transition.delayTimer > 0.0f) {
         transition.delayTimer -= dt;
-    } else if (transition.t < 1.0f) {
+    } else if (transition.t <= 1.0f) {
         transition.t += dt * (1.0f / transition.duration);
         if (transition.t > 1.0f) {
             transition.t = 1.0f;
@@ -214,7 +214,7 @@ void GameScreenManager::defaultTransitionEffect(ScreenTransitionState& state) {
         auto& transform = prev.get<Transform2D>();
         float r = easing::P2_IN.calculate(t);
         transform.color.setAlpha(1.0f - r);
-        //transform.color.setAdditive(r);
+        //transform.color.setAdditive(r * r);
         float s = 1.0f + r * 0.3f;
         transform.scale = {s, s};
     }
@@ -224,7 +224,7 @@ void GameScreenManager::defaultTransitionEffect(ScreenTransitionState& state) {
         auto& transform = next.get<Transform2D>();
         float r = easing::P2_OUT.calculate(t);
         transform.color.setAlpha(r);
-        //transform.color.setAdditive(1.0f - r);
+        //transform.color.setAdditive((1.0f - r) * (1.0f - r));
         float s = 1.0f + (1.0f - r) * 0.3f;
         transform.scale = {s, s};
     }

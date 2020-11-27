@@ -71,19 +71,8 @@ void texture_t::upload(const image_t& image) {
 void texture_t::upload_pixels(uint32_t width, uint32_t height, const uint8_t* data) {
     begin_texture_setup(handle_, gl_texture_target_);
 
-    uint8_t* emulatedData = nullptr;
     if (type_ == texture_type::alpha8) {
         GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
-        if (getContextType() == GraphicsContextType::OpenGL_ES_2) {
-            emulatedData = new uint8_t[width * height * 2];
-            unsigned len = width * height;
-            uint8_t* ptr = emulatedData;
-            for (unsigned i = 0; i < len; ++i) {
-                *(ptr++) = data[i];
-                *(ptr++) = data[i];
-            }
-            data = emulatedData;
-        }
     }
 
     GL_CHECK(glTexImage2D(gl_texture_target_, 0, textureFormat, width, height,
@@ -91,11 +80,6 @@ void texture_t::upload_pixels(uint32_t width, uint32_t height, const uint8_t* da
 
     if (type_ == texture_type::alpha8) {
         GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
-        if (getContextType() == GraphicsContextType::OpenGL_ES_3) {
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_RED);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
-        }
     }
 
     if (mipmaps) {
@@ -105,25 +89,12 @@ void texture_t::upload_pixels(uint32_t width, uint32_t height, const uint8_t* da
 #endif
     }
     end_texture_setup(gl_texture_target_, mipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
-
-    delete[] emulatedData;
 }
 
 void texture_t::updateRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint8_t* data) {
     begin_texture_setup(handle_, gl_texture_target_);
 
-    uint8_t* emulatedData = nullptr;
     if (type_ == texture_type::alpha8) {
-        if (getContextType() == GraphicsContextType::OpenGL_ES_2) {
-            emulatedData = new uint8_t[width * height * 2];
-            unsigned len = width * height;
-            uint8_t* ptr = emulatedData;
-            for (unsigned i = 0; i < len; ++i) {
-                *(ptr++) = data[i];
-                *(ptr++) = data[i];
-            }
-            data = emulatedData;
-        }
         GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
     }
 
@@ -131,11 +102,6 @@ void texture_t::updateRect(uint32_t x, uint32_t y, uint32_t width, uint32_t heig
 
     if (type_ == texture_type::alpha8) {
         GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
-        if (getContextType() == GraphicsContextType::OpenGL_ES_3) {
-            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_RED));
-            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED));
-            GL_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED));
-        }
     }
 
     if (mipmaps) {
@@ -145,8 +111,6 @@ void texture_t::updateRect(uint32_t x, uint32_t y, uint32_t width, uint32_t heig
 #endif
     }
     end_texture_setup(gl_texture_target_, mipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
-
-    delete[] emulatedData;
 }
 
 void texture_t::bind(int unit) const {
@@ -202,18 +166,13 @@ void texture_t::setType(texture_type type) {
 
     switch (type_) {
         case texture_type::alpha8:
-            if (getContextType() == GraphicsContextType::OpenGL_ES_3) {
+            if (getContextType() == GraphicsContextType::OpenGL_ES_2 ||
+                getContextType() == GraphicsContextType::WebGL) {
+                textureFormat = GL_LUMINANCE;
+                internalFormat = GL_LUMINANCE;
+            } else {
                 textureFormat = GL_R8;
                 internalFormat = GL_RED;
-                pixelType = GL_UNSIGNED_BYTE;
-            } else if (getContextType() == GraphicsContextType::OpenGL_ES_2) {
-                textureFormat = GL_LUMINANCE_ALPHA;
-                internalFormat = GL_LUMINANCE_ALPHA;
-                pixelType = GL_UNSIGNED_BYTE;
-            } else {
-                textureFormat = GL_INTENSITY;
-                internalFormat = GL_LUMINANCE;
-                pixelType = GL_UNSIGNED_BYTE;
             }
             break;
         case texture_type::depth16:

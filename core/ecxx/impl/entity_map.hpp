@@ -15,7 +15,7 @@ public:
     using entity_index_table = sparse_vector;
 
     entity_map_base() {
-        entity_.emplace_back();
+        entities.emplace_back();
     }
 
     virtual ~entity_map_base() = default;
@@ -26,36 +26,28 @@ public:
 
     virtual void clear() = 0;
 
-    inline bool has(index_type idx) const {
-        return table_.has(idx);
-    }
-
-    inline const entity_index_table& index_table() const {
-        return table_;
-    }
-
     inline entity_vector_iterator begin() const {
-        return ++(const_cast<entity_vector_type&>(entity_).begin());
+        return ++(const_cast<entity_vector_type&>(entities).begin());
     }
 
     inline entity_vector_iterator end() const {
-        return const_cast<entity_vector_type&>(entity_).end();
+        return const_cast<entity_vector_type&>(entities).end();
     }
 
     inline const entity& at(uint32_t index) const {
-        return entity_[index];
+        return entities[index];
     }
 
     inline const entity* at_pointer(uint32_t index) const {
-        return entity_.data() + index;
+        return entities.data() + index;
     }
 
     inline index_type size() const {
-        return static_cast<index_type>(entity_.size() - 1);
+        return static_cast<index_type>(entities.size() - 1);
     }
 
     inline index_type vector_size() const {
-        return static_cast<index_type>(entity_.size());
+        return static_cast<index_type>(entities.size());
     }
 
     inline bool locked() const {
@@ -115,13 +107,13 @@ public:
         return locker{locks_};
     }
 
-protected:
-
     // entity index -> data slot
-    entity_index_table table_;
+    entity_index_table dataTable;
 
     // entity vector
-    entity_vector_type entity_;
+    entity_vector_type entities;
+
+protected:
 
     // lock counter
     mutable uint32_t locks_ = 0u;
@@ -145,12 +137,13 @@ public:
 
     template<typename ...Args>
     DataType& emplace(entity e, Args&& ...args) {
-        ECXX_ASSERT(!base_type::locked());
-        ECXX_ASSERT(!base_type::has(e.index()));
+        bool locked_debug = locked();
+        ECXX_ASSERT(locks_ == 0);
+        ECXX_ASSERT(!dataTable.has(e.index()));
 
-        auto di = static_cast<index_type>(base_type::entity_.size());
-        base_type::table_.insert(e.index(), di);
-        base_type::entity_.push_back(e);
+        auto di = static_cast<index_type>(entities.size());
+        dataTable.insert(e.index(), di);
+        entities.push_back(e);
 
         if constexpr (has_data) {
             if constexpr (std::is_aggregate_v<data_type>) {
@@ -167,21 +160,21 @@ public:
 
     void erase(index_type ei) {
         ECXX_ASSERT(!base_type::locked());
-        ECXX_ASSERT(base_type::has(ei));
+        ECXX_ASSERT(base_type::dataTable.has(ei));
 
-        const auto index = base_type::table_.get_and_remove(ei);
-        const bool swap_with_back = index < base_type::entity_.size() - 1u;
+        const auto index = base_type::dataTable.get_and_remove(ei);
+        const bool swap_with_back = index < base_type::entities.size() - 1u;
 
         if (swap_with_back) {
-            const entity back_entity = base_type::entity_.back();
-            base_type::table_.replace(back_entity.index(), index);
-            std::swap(base_type::entity_.back(), base_type::entity_[index]);
+            const entity back_entity = base_type::entities.back();
+            base_type::dataTable.replace(back_entity.index(), index);
+            std::swap(base_type::entities.back(), base_type::entities[index]);
 
             if constexpr (has_data) {
                 std::swap(data_.back(), data_[index]);
             }
         }
-        base_type::entity_.pop_back();
+        base_type::entities.pop_back();
         if constexpr (has_data) {
             data_.pop_back();
         }
@@ -189,7 +182,7 @@ public:
 
     inline DataType& get(index_type idx) const {
         if constexpr (has_data) {
-            return get_data(base_type::table_.at(idx));
+            return get_data(base_type::dataTable.at(idx));
         } else {
             return get_data(0u);
         }
@@ -197,9 +190,9 @@ public:
 
     inline DataType* tryGet(index_type idx) {
         DataType* ptr = nullptr;
-        if (base_type::table_.has(idx)) {
+        if (base_type::dataTable.has(idx)) {
             if constexpr (has_data) {
-                ptr = data_.data() + base_type::table_.at(idx);
+                ptr = data_.data() + base_type::dataTable.at(idx);
             } else {
                 ptr = data_.data();
             }
@@ -209,7 +202,7 @@ public:
 
     DataType& get_or_create(entity e) {
         const auto idx = e.index();
-        if (!base_type::has(idx)) {
+        if (!base_type::dataTable.has(idx)) {
             emplace(e);
         }
         return get(idx);
@@ -217,7 +210,7 @@ public:
 
     DataType& get_or_default(index_type idx) const {
         if constexpr (has_data) {
-            return get_data(base_type::has(idx) ? base_type::table_.at(idx) : 0u);
+            return get_data(base_type::dataTable.has(idx) ? base_type::dataTable.at(idx) : 0u);
         } else {
             return get_data(0u);
         }
@@ -232,11 +225,11 @@ public:
     }
 
     void clear() final {
-        entity_.clear();
-        entity_.emplace_back();
+        entities.clear();
+        entities.emplace_back();
         data_.clear();
         data_.emplace_back();
-        table_.clear();
+        dataTable.clear();
     }
 
     inline DataType& get_data(index_type i) const {
@@ -245,7 +238,7 @@ public:
 
     inline DataType& get_data_by_entity_index(index_type ei) const {
         if constexpr (has_data) {
-            return get_data_by_index(table_.at(ei));
+            return get_data_by_index(dataTable.at(ei));
         } else {
             return const_cast<DataType&>(data_[0u]);
         }

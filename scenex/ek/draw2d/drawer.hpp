@@ -45,9 +45,6 @@ public:
     bool check_program = false;
     bool check_texture = false;
 
-    premultiplied_abgr32_t vertex_color_multiplier{0xFFFFFFFF};
-    abgr32_t vertex_color_offset{0x0};
-
     /** Scissors **/
 
     void push_scissors(const rect_f& scissors);
@@ -96,13 +93,13 @@ public:
 
     drawing_state& scaleAlpha(float alpha);
 
-    drawing_state& scaleColor(argb32_t multiplier);
+    drawing_state& scaleColor(abgr32_t multiplier);
 
-    drawing_state& concat(argb32_t scale, argb32_t offset);
+    drawing_state& concat(abgr32_t scale, abgr32_t offset);
 
     drawing_state& concat(ColorMod32 color);
 
-    drawing_state& offset_color(argb32_t offset);
+    drawing_state& offset_color(abgr32_t offset);
 
     /** STATES **/
 
@@ -149,11 +146,6 @@ public:
 
     // do extra checking and clear states stack
     void finish();
-
-    // internal helper to update vertex color
-    inline premultiplied_abgr32_t calc_vertex_color_multiplier(argb32_t scale) {
-        return (color.scale * scale).premultiplied_abgr(color.offset.a);
-    }
 };
 
 extern drawing_state state;
@@ -170,15 +162,11 @@ void end();
 
 void write_index(uint16_t index);
 
-uint32_t get_stat_draw_calls();
-
-uint32_t get_stat_triangles();
+FrameStats getDrawStats();
 
 void invalidate_force();
 
 void draw_mesh(const graphics::buffer_t& vb, const graphics::buffer_t& ib, int32_t indices_count);
-
-void prepare();
 
 void triangles(int vertex_count, int index_count);
 
@@ -186,19 +174,19 @@ void quad(float x, float y, float w, float h);
 
 void quad_rotated(float x, float y, float w, float h);
 
-void quad(float x, float y, float w, float h, argb32_t color);
+void quad(float x, float y, float w, float h, abgr32_t color);
 
-void quad(float x, float y, float w, float h, argb32_t c1, argb32_t c2, argb32_t c3, argb32_t c4);
+void quad(float x, float y, float w, float h, abgr32_t c1, abgr32_t c2, abgr32_t c3, abgr32_t c4);
 
-inline void quad(const rect_f& rc, argb32_t color = argb32_t::one) {
+inline void quad(const rect_f& rc, abgr32_t color = abgr32_t::one) {
     quad(rc.x, rc.y, rc.width, rc.height, color);
 }
 
-void fill_circle(const circle_f& circle, argb32_t inner_color, argb32_t outer_color, int segments);
+void fill_circle(const circle_f& circle, abgr32_t inner_color, abgr32_t outer_color, int segments);
 
-void write_vertex(float x, float y, float u, float v, premultiplied_abgr32_t cm, abgr32_t co);
+void write_vertex(float x, float y, float u, float v, abgr32_t cm, abgr32_t co);
 
-void write_raw_vertex(const float2& pos, const float2& tex_coord, premultiplied_abgr32_t cm, abgr32_t co);
+void write_raw_vertex(const float2& pos, const float2& tex_coord, abgr32_t cm, abgr32_t co);
 
 void write_indices_quad(uint16_t i0,
                         uint16_t i1,
@@ -210,27 +198,27 @@ inline void write_indices_quad(const uint16_t base_index = 0) {
     write_indices_quad(0, 1, 2, 3, base_index);
 }
 
+Batcher* getBatcher();
+
 void write_indices(const uint16_t* source, uint16_t count, uint16_t base_vertex = 0);
 
 void draw_indexed_triangles(const std::vector<float2>& positions,
-                            const std::vector<argb32_t>& colors,
+                            const std::vector<abgr32_t>& colors,
                             const std::vector<uint16_t>& indices,
                             const float2& offset,
                             const float2& scale);
 
 void line(const float2& start, const float2& end,
-          argb32_t color1, argb32_t color2,
+          abgr32_t color1, abgr32_t color2,
           float lineWidth1, float lineWidth2);
 
-void line(const float2& start, const float2& end, argb32_t color, float lineWidth);
-
-void line(const float2& start, const float2& end);
+void line(const float2& start, const float2& end, abgr32_t color = abgr32_t::one, float lineWidth = 1.0f);
 
 void line_arc(float x, float y, float r,
               float angle_from, float angle_to,
               float line_width, int segments,
-              argb32_t color_inner, argb32_t color_outer);
+              abgr32_t color_inner, abgr32_t color_outer);
 
-void strokeRect(const rect_f& rc, argb32_t color, float lineWidth);
+void strokeRect(const rect_f& rc, abgr32_t color, float lineWidth);
 
 }

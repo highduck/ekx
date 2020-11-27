@@ -41,11 +41,18 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
         }
     }
 
+    bool programChanged = false;
     auto* display = e.tryGet<Display2D>();
-    if (display && display->drawable) {
-        draw2d::state.matrix = transform->worldMatrix;
-        draw2d::state.color = transform->worldColor;
-        display->drawable->draw();
+    if (display) {
+        if (display->program) {
+            programChanged = true;
+            draw2d::state.save_program().set_program(display->program.get());
+        }
+        if (display->drawable) {
+            draw2d::state.matrix = transform->worldMatrix;
+            draw2d::state.color = transform->worldColor;
+            display->drawable->draw();
+        }
     }
 
     auto it = e.get<Node>().child_first;
@@ -65,6 +72,9 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
 
     if (bounds && bounds->scissors) {
         draw2d::state.pop_scissors();
+    }
+    if (programChanged) {
+        draw2d::state.restore_program();
     }
 }
 
@@ -96,9 +106,16 @@ void RenderSystem2D::drawStack(ecs::entity e) {
         }
     }
 
+    bool programChanged = false;
     auto* display = e.tryGet<Display2D>();
-    if (display && display->drawable) {
-        display->drawable->draw();
+    if (display) {
+        if (display->program) {
+            programChanged = true;
+            draw2d::state.save_program().set_program(display->program.get());
+        }
+        if (display->drawable) {
+            display->drawable->draw();
+        }
     }
 
     auto it = e.get<Node>().child_first;
@@ -123,6 +140,9 @@ void RenderSystem2D::drawStack(ecs::entity e) {
 
     if (bounds && bounds->scissors) {
         draw2d::state.pop_scissors();
+    }
+    if (programChanged) {
+        draw2d::state.restore_program();
     }
 }
 }

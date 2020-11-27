@@ -13,6 +13,7 @@
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ui/minimal.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
+#include <ek/scenex/2d/DynamicAtlas.hpp>
 
 namespace ek {
 

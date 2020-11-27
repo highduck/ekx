@@ -91,7 +91,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
     GLint swapInt = 1;
     [glContext setValues:&swapInt forParameter:NSOpenGLContextParameterSwapInterval];
 
-    const auto version = glGetString(GL_VERSION);
     [self handleResize];
 }
 
@@ -114,6 +113,14 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
 }
 
 - (BOOL)acceptsFirstResponder {
+    return YES;
+}
+
+- (BOOL)isOpaque {
+    return YES;
+}
+
+- (BOOL)canBecomeKeyView {
     return YES;
 }
 

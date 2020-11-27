@@ -42,27 +42,12 @@ void Particle::update_current_values() {
             break;
     }
 
-    if (color_functor) {
-        color = color_functor(*this);
-    }
-
     switch (alpha_mode) {
         case particle_alpha_mode::ByScale:
             color.af(math::clamp(alpha * length(scale)));
             break;
         case particle_alpha_mode::LifeSin:
             color.af(alpha * sinf(float(math::pi) * time / time_total));
-            break;
-        case particle_alpha_mode::DCBlink: {
-            float a = 0.25f;
-            if (time > 0.75f) {
-                a = 1.0f - time;
-            } else if (time < 0.25f) {
-                a = time;
-            }
-            a *= 4.0f;
-            color.af(alpha * a);
-        }
             break;
         default:
             color.af(alpha);
@@ -73,9 +58,6 @@ void Particle::update_current_values() {
 rect_f Particle::get_bounds() {
     if (sprite) {
         bounds = sprite->rect;
-    } else if (fontSize > 0.0f && font && !text.empty()) {
-        float width = font->get_text_segment_width(text, fontSize, 0, int(text.size()));
-        bounds.set(-0.5f * width, -0.5f * fontSize, width, fontSize);
     }
     return bounds;
 }
@@ -83,21 +65,11 @@ rect_f Particle::get_bounds() {
 void Particle::draw() {
     float vis_angle = angle_base + rotation + angle_velocity_factor * atan2f(velocity.y, velocity.x);
 
-    draw2d::state
-            .save_transform()
+    draw2d::state.save_transform()
             .transform_pivot(position, vis_angle, scale, pivot)
             .concat(color, offset);
-    {
-        if (sprite) {
-            sprite->draw();
-        } else if (fontSize > 0.0f && font && !text.empty()) {
-            float width = font->get_text_segment_width(text, fontSize, 0, static_cast<int>(text.size()));
-            font->draw(text,
-                       fontSize,
-                       {-0.5f * width, 0.5f * fontSize},
-                       argb32_t::one,
-                       fontSize);
-        }
+    if (sprite) {
+        sprite->draw();
     }
     draw2d::state.restore_transform();
 }

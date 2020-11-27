@@ -10,8 +10,9 @@ struct close_timeout {
 
 struct PopupManager {
     std::vector<ecs::entity> active;
+    ecs::entity closingLast;
     float fade_progress = 0.0f;
-    float fade_duration = 0.4f;
+    float fade_duration = 0.3f;
     float fade_alpha = 0.5f;
     ecs::entity back;
     ecs::entity layer;

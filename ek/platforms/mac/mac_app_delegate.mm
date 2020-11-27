@@ -8,6 +8,10 @@ using namespace ek::app;
 
 @implementation MacAppDelegate
 
+- (void)quitFromMenu:(id)sender {
+    [[NSApplication sharedApplication] terminate:sender];
+}
+
 - (void)setupMenuBar {
     id menubar = [NSMenu new];
     id menu_item = [NSMenuItem new];
@@ -16,7 +20,7 @@ using namespace ek::app;
     // quit button
     id menu = [NSMenu new];
     id quit_menu_item = [[NSMenuItem alloc] initWithTitle:@"Quit"
-                                                   action:@selector(terminate:)
+                                                   action:@selector(quitFromMenu:)
                                             keyEquivalent:@"q"];
     [menu addItem:quit_menu_item];
     [menu_item setSubmenu:menu];

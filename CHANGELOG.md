@@ -1,10 +1,28 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
+to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### graphics
+
+- change `alpha8` format more portable (R8/LUMINANCE)
+- add default program `2d_alpha`
+- unify 2d shaders
+- change vertex color to non-premultiplied, now calculate pre-multiplication on vertex shader
+
+### appbox / goodies
+
+- buttons: reduce buttons shaking
+- popups: fade tween on last popup closing
+
+### scenex
+
+- Display2D: program state, `2d_color` shader for large background colored quads (reduce gpu load)
+- Profiler: add non-clamped Fill-Rate stats
 
 ## [0.0.3] - 2020-11-22
 
@@ -14,22 +32,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - remove `Particle` cycled mode
 - add `DynamicAtlas` multiple pages, mipmaps, alpha8 / color32
-- improvements for editor 
+- improvements for editor
 - add importers for `Atlas` and `DynamicAtlas`
 - fix resize and scale for any orientation
-- android: relax requirements for device orientation 
+- android: relax requirements for device orientation
 - ecxx: entity methods
 - fix mouse cursor
 - refactor `Transform2D` component
-- changed BitmapFont typename to `bmfont` 
+- changed BitmapFont typename to `bmfont`
 - merge `name_t` and `node_state_t` to `Node`
 - update ImGui v1.80
 - fix macOS backspace/delete key codes
-- [audio] change api to Sound and Music instances 
+- [audio] change api to Sound and Music instances
 - [audio] change `simple_audio_manager` to `AudioManager`
 - add `TrueTypeFont`
 - remove multiple sizes for bitmap font export
-- [demo] update `ek-demo` project 
+- [demo] update `ek-demo` project
 - [graphics] get context type
 - add `alpha8` texture format
 
@@ -50,4 +68,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [billing] initial plugin (ios, android, null)
 
 [Unreleased]: https://github.com/eliasku/ekx/compare/0.0.1...HEAD
+
 [0.0.1]: https://github.com/eliasku/ekx/releases/tag/0.0.1

@@ -68,7 +68,7 @@ public:
 
     GLint u_image0_unit = 0;
 
-    program_t(const char* vs_code, const char* fs_code);
+    program_t(const char* vs_code, const char* fs_code, const char* header = nullptr);
 
     ~program_t();
 

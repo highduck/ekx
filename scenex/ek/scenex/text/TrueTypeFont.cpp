@@ -24,6 +24,7 @@ TrueTypeFont::TrueTypeFont(float dpiScale_, float fontSize, const std::string& d
         dpiScale{dpiScale_},
         baseFontSize{fontSize},
         atlas{dynamicAtlasName} {
+
     mapByEffect[0] = std::make_unique<std::unordered_map<uint32_t, Glyph>>();
     map = mapByEffect[0].get();
 }
@@ -55,7 +56,7 @@ void TrueTypeFont::unload() {
     }
 }
 
-// store prerendered glyph for baseFontSize and upscaled by dpiScale
+// store pre-rendered glyph for baseFontSize and upscaled by dpiScale
 // quad scale just multiplier to get fontSize relative to baseFontSize
 bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     assert(map != nullptr);
@@ -63,10 +64,12 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         return false;
     }
 
-    assert(!atlas.empty());
     if (!atlas) {
+        resetGlyphs();
         // not ready to fill dynamic atlas :(
         return false;
+    } else if (atlasVersion != atlas->version) {
+        resetGlyphs();
     }
 
     auto& map_ = *map;
@@ -242,6 +245,15 @@ float TrueTypeFont::getKerning(uint32_t codepoint1, uint32_t codepoint2) {
         }
     }
     return 0.0f;
+}
+
+void TrueTypeFont::resetGlyphs() {
+    for (auto& it : mapByEffect) {
+        it.second->clear();
+    }
+    if (atlas) {
+        atlasVersion = atlas->version;
+    }
 }
 
 }

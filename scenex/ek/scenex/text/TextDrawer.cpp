@@ -53,6 +53,8 @@ void TextDrawer::drawWithBlockInfo(const char *text, const TextBlockInfo& info) 
     }
     auto alignment = format.alignment;
 
+    draw2d::state.save_program();
+    draw2d::state.set_program(Res<graphics::program_t>{"2d_alpha"}.get());
     // render effects first
     for (int i = format.layersCount - 1; i >= 0; --i) {
         auto& layer = format.layers[i];
@@ -65,6 +67,7 @@ void TextDrawer::drawWithBlockInfo(const char *text, const TextBlockInfo& info) 
         }
         drawLayer(text, layer, info);
     }
+    draw2d::state.restore_program();
 }
 
 void TextDrawer::drawLayer(const char *text, const TextLayerEffect& layer, const TextBlockInfo& info) const {

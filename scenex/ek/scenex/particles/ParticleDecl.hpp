@@ -21,8 +21,7 @@ enum class particle_scale_mode {
 enum class particle_alpha_mode {
     None = 0,
     ByScale = 1,
-    LifeSin = 2,
-    DCBlink = 3
+    LifeSin = 2
 };
 
 enum class rand_color_mode {
@@ -102,8 +101,6 @@ public:
 
 struct ParticleDecl {
     Res<Sprite> sprite;
-    Res<Font> font;
-    float fontSize = 0.0f;
     particle_scale_mode scale_mode = particle_scale_mode::None;
     particle_alpha_mode alpha_mode = particle_alpha_mode::None;
     float_range_t alpha_start{1.0};
@@ -127,8 +124,6 @@ struct ParticleDecl {
 
     float angle_velocity_factor = 0.0f;
     float angle_base = 0.0f;
-
-    std::function<argb32_t(Particle&)> color_func;
 };
 
 class emitter_data {

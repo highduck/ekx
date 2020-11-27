@@ -1,17 +1,28 @@
 #pragma once
 
 #ifndef NDEBUG
+#define ECXX_ENABLE_ASSERT
+#endif
+
+// just use for full debug
+//#define ECXX_ENABLE_ASSERT_PEDANTIC
+
+#if defined(ECXX_ENABLE_ASSERT_PEDANTIC) || defined(ECXX_ENABLE_ASSERT)
 
 #include <cassert>
 
+#endif
+
+#ifdef ECXX_ENABLE_ASSERT
 #define ECXX_ASSERT(x) assert(x)
-#define ECXX_FULL_ASSERT(x) assert(x)
-
 #else
-
 #define ECXX_ASSERT(ignore) ((void)0)
-#define ECXX_FULL_ASSERT(ignore) ((void)0)
+#endif
 
+#ifdef ECXX_ENABLE_ASSERT_PEDANTIC
+#define ECXX_FULL_ASSERT(x) assert(x)
+#else
+#define ECXX_FULL_ASSERT(ignore) ((void)0)
 #endif
 
 namespace ecs::details {

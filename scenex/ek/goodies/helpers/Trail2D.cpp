@@ -148,29 +148,31 @@ void TrailRenderer2D::draw() {
     const auto quads = columns - 1;
     if (quads > 0) {
         draw2d::state.set_empty_texture();
-        draw2d::prepare();
         draw2d::triangles(columns * 2, quads * 6);
 
         int v = 0;
         int node_idx = 0;
 
+        const auto co = draw2d::state.color.offset;
         for (int i = 0; i < columns; ++i) {
-            const auto e0 = nodes[node_idx].energy;
-            const auto cm0 = draw2d::state.calc_vertex_color_multiplier(
-                    argb32_t{1.0f, 1.0f, 1.0f, e0}
-            );
-            const auto co = draw2d::state.vertex_color_offset;
-            const auto v0 = vertices[v];
-            const auto v1 = vertices[v + 1];
+            const auto cm0 = draw2d::state.color.scale.scaleAlpha(nodes[node_idx].energy);
+            const auto v0 = vertices[v++];
+            const auto v1 = vertices[v++];
             draw2d::write_vertex(v0.x, v0.y, 0.0f, 0.0f, cm0, co);
             draw2d::write_vertex(v1.x, v1.y, 0.0f, 1.0f, cm0, co);
-
-            if (i < quads) {
-                draw2d::write_indices_quad(0, 2, 3, 1, v);
-            }
-
-            v += 2;
             ++node_idx;
+        }
+
+        v = draw2d::getBatcher()->get_vertex_index();
+        uint16_t* indices = draw2d::getBatcher()->index_memory_ptr();
+        for (int i = 0; i < quads; ++i) {
+            *(indices++) = v;
+            *(indices++) = v + 2;
+            *(indices++) = v + 3;
+            *(indices++) = v + 3;
+            *(indices++) = v + 1;
+            *(indices++) = v;
+            v += 2;
         }
     }
 }

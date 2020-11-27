@@ -50,7 +50,7 @@ public:
         const auto ver = e.version();
         entities.deallocate(idx, ver);
         for (auto* comp : components) {
-            if (comp && comp->has(idx)) {
+            if (comp && comp->dataTable.has(idx)) {
                 comp->erase_dyn(idx);
             }
         }
@@ -63,9 +63,9 @@ public:
 
     template<typename Component, typename ...Args>
     inline Component& reassign(entity e, Args&& ... args) {
-        auto& pool = ensure<Component>();
         const auto idx = e.index();
-        if (pool.has(idx)) {
+        auto& pool = ensure<Component>();
+        if (pool.dataTable.has(idx)) {
             auto& data = pool.get(idx);
             data = {args...};
             return data;
@@ -76,7 +76,7 @@ public:
     template<typename Component>
     [[nodiscard]] inline bool has(entity::index_type idx) const {
         const auto* pool = tryGetComponents<Component>();
-        return pool && pool->has(idx);
+        return pool && pool->dataTable.has(idx);
     }
 
     template<typename Component>
@@ -95,33 +95,31 @@ public:
     template<typename Component>
     inline Component& get(entity::index_type idx) {
         auto* pool = tryGetComponents<Component>();
-        ECXX_ASSERT(pool && pool->has(idx));
+        ECXX_ASSERT(pool && pool->dataTable.has(idx));
         return pool->get(idx);
     }
 
     template<typename Component>
     inline Component& get_or_create(entity e) {
-        auto& pool = ensure<Component>();
-        return pool.get_or_create(e);
+        return ensure<Component>().get_or_create(e);
     }
 
     template<typename Component>
     inline const Component& get_or_default(entity::index_type idx) {
-        const auto& pool = ensure<Component>();
-        return pool.get_or_default(idx);
+        return ensure<Component>().get_or_default(idx);
     }
 
     template<typename Component>
     inline void remove(entity::index_type idx) {
         auto* pool = tryGetComponents<Component>();
-        ECXX_ASSERT(pool && pool->has(idx));
+        ECXX_ASSERT(pool && pool->dataTable.has(idx));
         pool->erase(idx);
     }
 
     template<typename Component>
     inline bool try_remove(entity::index_type idx) {
         auto* pool = tryGetComponents<Component>();
-        if (pool && pool->has(idx)) {
+        if (pool && pool->dataTable.has(idx)) {
             pool->erase(idx);
             return true;
         }
@@ -151,7 +149,7 @@ public:
     template<typename Component>
     inline entity_map<Component>* tryGetComponents() const {
         ECXX_ASSERT(type<Component>() < ComponentsMax);
-        return static_cast<entity_map<Component>*>(components[world::type<Component>()]);
+        return static_cast<entity_map<Component>*>(components[type<Component>()]);
     }
 //
 //    template<typename ...Component>

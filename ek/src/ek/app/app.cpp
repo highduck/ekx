@@ -5,6 +5,7 @@
 #include <cassert>
 #include <ek/timers.hpp>
 #include <ek/audio/audio.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek::app {
 
@@ -48,7 +49,7 @@ void process_event(const event_t& event) {
 
 void dispatch_event(const event_t& event) {
     assert(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
-
+//    EK_INFO("EVENT: %i", event.type);
     if (event.type == event_type::app_pause) {
         process_event(event);
     } else {

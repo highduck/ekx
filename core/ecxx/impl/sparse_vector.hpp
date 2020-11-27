@@ -15,29 +15,30 @@ public:
     using T = unsigned;
 
     static constexpr unsigned null_value = 0;
-    static constexpr unsigned page_size = 0x8000u / sizeof(T);
+    static constexpr unsigned page_size = 0x8000u; // ~32kb index table per page
     static constexpr unsigned elements_per_page = page_size / sizeof(T);
-    static constexpr unsigned page_mask = 0x7FFu; // (elements_per_page - 1)
-    static constexpr unsigned page_bits = 11; // bit_count of page_mask
+    static constexpr unsigned page_mask = 0x1FFFu; // (elements_per_page - 1)
+    static constexpr unsigned page_bits = 13; // bit_count of page_mask
 
     // `page_size` required to be power-of-two value
-    static_assert(page_size > 0u && ((page_size & (page_size - 1u)) == 0u));
+    static_assert(elements_per_page > 0u && ((elements_per_page & (elements_per_page - 1u)) == 0u));
 
     struct page_data {
         std::unique_ptr<T[]> elements;
-        size_type count{0u};
+        size_type count = 0u;
     };
 
     page_data& ensure(page_index_type page) {
-        if (page >= pages_.size()) {
-            pages_.resize(page + 1);
+        if (page >= pagesCount_) {
+            pagesCount_ = page + 1;
+            pages_.resize(pagesCount_);
         }
 
         auto& result = pages_[page];
         if (!result.elements) {
             result.elements = std::make_unique<T[]>(elements_per_page);
             auto* ptr = result.elements.get();
-            for(unsigned i = 0; i < elements_per_page; ++i) {
+            for (unsigned i = 0; i < elements_per_page; ++i) {
                 ptr[i] = 0;
             }
         }
@@ -59,20 +60,6 @@ public:
 
         pages_[i >> page_bits].elements[i & page_mask] = v;
     }
-//
-//    [[nodiscard]]
-//    T get_checked(size_type i) const {
-//        const page_index_type page = i >> page_bits;
-//        const page_offset_type offset = i & page_mask;
-//        T el{null_value};
-//        if (page < pages_.size()) {
-//            const page_data& p = pages_[page];
-//            if (p.count) {
-//                el = p.elements[offset];
-//            }
-//        }
-//        return el;
-//    }
 
     [[nodiscard]]
     inline T at(size_type i) const {
@@ -104,20 +91,17 @@ public:
     }
 
     [[nodiscard]] inline bool has(page_index_type i, page_offset_type j) const {
-        if (i < pages_.size()) {
-            const page_data& p = pages_[i];
-            return p.count && p.elements[j] != null_value;
-        } else {
-            return false;
-        }
+        return i < pagesCount_ && pages_[i].count && pages_[i].elements[j] != null_value;
     }
 
     void clear() {
         pages_.clear();
+        pagesCount_ = 0;
     }
 
 private:
     std::vector<page_data> pages_;
+    size_type pagesCount_ = 0;
 };
 
 }
