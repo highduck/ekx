@@ -74,8 +74,6 @@ void DemoApp::initialize() {
 
 void DemoApp::preload() {
     basic_application::preload();
-
-    SampleText::prepareInternalResources();
 }
 
 void DemoApp::update_frame(float dt) {
@@ -104,6 +102,7 @@ void DemoApp::render_frame() {
 
 void DemoApp::start_game() {
 //    setup_game(w, game);
+    SampleText::prepareInternalResources();
 
     SampleBase::samplesContainer = create_node_2d("sample");
     append(game, SampleBase::samplesContainer);

@@ -14,8 +14,10 @@ void target_follow_script::update(float dt) {
         auto& tr = get<Transform2D>();
 
         if (ecs::valid(target_entity)) {
-            target = local_to_global(target_entity, float2::zero);
-            target = global_to_parent(entity_, target);
+            auto parent = entity_.get<Node>().parent;
+            if(parent) {
+                target = Transform2D::localToLocal(target_entity, parent, float2::zero);
+            }
         } else {
             target_entity = nullptr;
         }

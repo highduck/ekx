@@ -5,39 +5,43 @@
 #include <ecxx/ecxx.hpp>
 #include <string>
 #include <any>
+#include <utility>
 
 namespace ek {
 
-template<typename T>
-class basic_event_handler {
-public:
+using NodeEventType = std::string;
 
-    using callback_type = std::function<void(const T&)>;
-    using event_type = std::string;
+struct NodeEventData {
+    NodeEventType type;
+    ecs::entity source;
+    std::any payload;
+    mutable bool processed = false;
+};
 
-    template<typename S>
-    using signal_type = signal_t<const S&>;
+struct NodeEventHandler {
+    using Callback = std::function<void(const NodeEventData&)>;
+    using Signal = signal_t<const NodeEventData&>;
 
-    signal_type<T>& require_signal_for_event_type(const std::string& type) {
+    Signal& getSignal(const NodeEventType& type) {
         return map_[type];
     }
 
-    void on(const event_type& type, callback_type listener) {
-        require_signal_for_event_type(type).add(listener);
+    void on(const NodeEventType& type, Callback listener) {
+        getSignal(type).add(std::move(listener));
     }
 
-    void once(const event_type& type, callback_type listener) {
-        require_signal_for_event_type(type).add_once(listener);
+    void once(const NodeEventType& type, Callback listener) {
+        getSignal(type).add_once(std::move(listener));
     }
 
-    void off(const event_type& type, callback_type listener) {
-        auto it = map_.find(type);
-        if (it != map_.end()) {
-            it->second.remove(listener);
-        }
-    }
+//    void off(const NodeEventType& type, Callback listener) {
+//        auto it = map_.find(type);
+//        if (it != map_.end()) {
+//            it->second.remove(listener);
+//        }
+//    }
 
-    T emit(const T& event) {
+    NodeEventData emit(const NodeEventData& event) {
         auto it = map_.find(event.type);
         if (it != map_.end()) {
             it->second.emit(event);
@@ -46,16 +50,7 @@ public:
     }
 
 private:
-    std::unordered_map<event_type, signal_type<T>> map_;
+    std::unordered_map<NodeEventType, Signal> map_;
 };
-
-struct event_data {
-    std::string type;
-    ecs::entity source;
-    std::any payload;
-    mutable bool processed = false;
-};
-
-using event_handler_t = basic_event_handler<event_data>;
 
 }

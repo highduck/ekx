@@ -22,7 +22,7 @@ void start_post_tween(Button& btn) {
     btn.post_time = fmaxf(random(0.7f, 1.0f), btn.post_time);
 }
 
-void handle_back_button(Button& btn, const event_data& ev) {
+void handle_back_button(Button& btn, const NodeEventData& ev) {
     if (btn.back_button) {
         btn.clicked.emit();
         start_post_tween(btn);
@@ -42,7 +42,7 @@ const ButtonSkin& get_skin(const Button& btn) {
 }
 
 void initialize_events(ecs::entity e) {
-    auto& interactive = ecs::get_or_create<interactive_t>(e);
+    auto& interactive = ecs::get_or_create<Interactive>(e);
     interactive.on_over.add([e] {
         const auto& skin = get_skin(ecs::get<Button>(e));
         play_sound(skin.sfx_over);
@@ -50,7 +50,7 @@ void initialize_events(ecs::entity e) {
     interactive.on_out.add([e] {
         auto& btn = ecs::get<Button>(e);
         const auto& skin = get_skin(btn);
-        if (ecs::get<interactive_t>(e).pushed) {
+        if (ecs::get<Interactive>(e).pushed) {
             start_post_tween(btn);
         }
         play_sound(skin.sfx_out);
@@ -72,8 +72,8 @@ void initialize_events(ecs::entity e) {
         }
     });
 
-    ecs::get_or_create<event_handler_t>(e)
-            .on(interactive_event::back_button, [e](const event_data& ev) {
+    ecs::get_or_create<NodeEventHandler>(e)
+            .on(interactive_event::back_button, [e](const NodeEventData& ev) {
                 auto& btn = ecs::get<Button>(e);
                 handle_back_button(btn, ev);
             });
@@ -97,7 +97,7 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
     transform.scale = btn.baseScale * float2(sx, sy);
 }
 
-void update_movie_frame(ecs::entity entity, const interactive_t& interactive) {
+void update_movie_frame(ecs::entity entity, const Interactive& interactive) {
     if (ecs::has<MovieClip>(entity)) {
         int frame = 0;
         if (interactive.over || interactive.pushed) {
@@ -112,15 +112,15 @@ void update_movie_frame(ecs::entity entity, const interactive_t& interactive) {
 
 void Button::updateAll() {
 
-    for (auto e : ecs::view<Button, interactive_t, Transform2D>()) {
+    for (auto e : ecs::view<Button, Interactive, Transform2D>()) {
         auto& btn = ecs::get<Button>(e);
-        auto& interactive = ecs::get<interactive_t>(e);
+        auto& interactive = ecs::get<Interactive>(e);
         auto& transform = ecs::get<Transform2D>(e);
         float dt = btn.time->dt;
 
         if (!btn.initialized) {
             btn.initialized = true;
-            interactive.cursor = interactive_t::mouse_cursor::button;
+            interactive.cursor = Interactive::mouse_cursor::button;
             initialize_base_transform(btn, transform);
             initialize_events(e);
         }

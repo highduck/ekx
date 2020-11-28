@@ -9,7 +9,6 @@
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
-#include <ek/ext/game_center/game_center.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/common_macro.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
@@ -24,6 +23,8 @@ using ecs::world;
 using ecs::entity;
 using namespace ek::app;
 
+void drawPreloader(float progress);
+
 basic_application::basic_application() {
 
     assert_created_once<basic_application>();
@@ -32,10 +33,6 @@ basic_application::basic_application() {
     audio::init();
 
     asset_manager_ = new asset_manager_t{};
-
-    game_services_init();
-    // set callbacks before ads initialization (TODO)
-    // BasicGameUtility::init();
 }
 
 basic_application::~basic_application() {
@@ -112,6 +109,11 @@ void basic_application::on_draw_frame() {
 
     render_frame();
 
+    if (!started_ && rootAssetObject) {
+        rootAssetObject->poll();
+        drawPreloader(rootAssetObject->getProgress());
+    }
+
     hook_on_render_frame();
 
     profiler.addTime("RENDER", timer.read_millis());
@@ -155,9 +157,9 @@ void basic_application::on_frame_end() {
 }
 
 void basic_application::preload_root_assets_pack() {
-    auto* asset_pack = asset_manager_->add_from_type("pack", "pack_meta");
-    if (asset_pack) {
-        asset_pack->load();
+    rootAssetObject = asset_manager_->add_from_type("pack", "pack_meta");
+    if (rootAssetObject) {
+        rootAssetObject->load();
     }
 }
 
@@ -174,7 +176,18 @@ void basic_application::on_event(const event_t& event) {
     profiler.addTime("FRAME", timer.read_millis());
 }
 
+void drawPreloader(float progress){
+    draw2d::state.set_empty_texture();
+    auto pad = 40;
+    auto w = g_app.drawable_size.x - pad * 2;
+    auto h = 16;
+    auto y = (g_app.drawable_size.y - h) / 2;
 
-//void basic_application::on_event(const event_t& event) {}
+    auto color = 0x00000000_argb;
+    color.af(1.0f - progress);
+    draw2d::quad(0, 0, g_app.drawable_size.x, g_app.drawable_size.y, color);
+    draw2d::quad(pad, y, w, h, 0x77000000_argb);
+    draw2d::quad(pad + 4, y + 4, (w - 8) * progress, h - 8, 0x77FFFFFF_argb);
+}
 
 }

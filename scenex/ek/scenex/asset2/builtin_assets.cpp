@@ -21,6 +21,7 @@
 
 #include <utility>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
+#include <ek/util/timer.hpp>
 
 namespace ek {
 
@@ -41,14 +42,16 @@ public:
     virtual void do_unload() {}
 
     void load() override {
-        if (!ready_) {
+        if (state == AssetObjectState::Initial) {
+            state = AssetObjectState::Loading;
             this->do_load();
         }
     }
 
     void unload() override {
-        if (ready_) {
+        if (state == AssetObjectState::Ready) {
             this->do_unload();
+            state = AssetObjectState::Initial;
         }
     }
 
@@ -69,10 +72,9 @@ public:
 
     void do_load() override {
         auto* music = new audio::Music();
-        // TODO: async
         music->load((project_->base_path / path_).c_str());
         Res<audio::Music>{name_}.reset(music);
-        ready_ = true;
+        state = AssetObjectState::Ready;
     }
 
     std::string name_;
@@ -95,12 +97,11 @@ public:
         // TODO: async
         sound->load((project_->base_path / path_).c_str());
         Res<audio::Sound>{name_}.reset(sound);
-        ready_ = true;
+        state = AssetObjectState::Ready;
     }
 
     void do_unload() override {
         Res<Atlas>{path_}.reset(nullptr);
-        ready_ = false;
     }
 
     std::string name_;
@@ -113,22 +114,21 @@ public:
     }
 
     void load() override {
-        if (!ready_ || loaded_scale_ != project_->scale_uid) {
+        if (state != AssetObjectState::Ready || loaded_scale_ != project_->scale_uid) {
             loaded_scale_ = project_->scale_uid;
 
             Res<Atlas>{path_}.reset(nullptr);
-            ready_ = false;
+            state = AssetObjectState::Loading;
 
             Atlas::load((project_->base_path / path_).c_str(), project_->scale_factor, [this](auto* atlas) {
                 Res<Atlas>{path_}.reset(atlas);
-                ready_ = true;
+                state = AssetObjectState::Ready;
             });
         }
     }
 
     void do_unload() override {
         Res<Atlas>{path_}.reset(nullptr);
-        ready_ = false;
     }
 
     uint8_t loaded_scale_ = 0;
@@ -140,31 +140,29 @@ public:
             : builtin_asset_t(std::move(path)) {
     }
 
-    void load() override {
-        if (ready_) {
-            // do not reload dynamic atlas, because references to texture* should be invalidated,
-            // but current strategy not allow that
-            return;
-        }
+    // do not reload dynamic atlas, because references to texture* should be invalidated,
+    // but current strategy not allow that
+    void do_load() override {
         get_resource_content_async(
                 (project_->base_path / path_ + ".dynamic_atlas").c_str(),
                 [this](auto buffer) {
                     loaded_scale_ = project_->scale_uid;
-                    int normScaleFactor = int(ceilf(loaded_scale_));
-                    int pageSize = std::min(1024 * normScaleFactor, 4096);
+                    const int pageSize = DynamicAtlas::estimateBetterSize(project_->scale_factor,
+                                                                          512,
+                                                                          2048);
+
                     input_memory_stream input{buffer.data(), buffer.size()};
                     IO io{input};
                     bool alphaMap = false;
                     bool mipmaps = false;
                     io(alphaMap, mipmaps);
                     Res<DynamicAtlas>{path_}.reset(new DynamicAtlas(pageSize, pageSize, alphaMap, mipmaps));
-                    ready_ = true;
+                    state = AssetObjectState::Ready;
                 });
     }
 
     void do_unload() override {
         Res<DynamicAtlas>{path_}.reset(nullptr);
-        ready_ = false;
     }
 
     uint8_t loaded_scale_ = 0;
@@ -181,13 +179,12 @@ public:
                 (project_->base_path / path_ + ".sg").c_str(),
                 [this](auto buffer) {
                     Res<sg_file>{path_}.reset(sg_load(buffer));
-                    ready_ = true;
+                    state = AssetObjectState::Ready;
                 });
     }
 
     void do_unload() override {
         Res<sg_file>{path_}.reset(nullptr);
-        ready_ = false;
     }
 
 };
@@ -203,13 +200,12 @@ public:
             auto* bmFont = new BitmapFont();
             bmFont->load(buffer);
             Res<Font>{path_}.reset(new Font(bmFont));
-            ready_ = true;
+            state = AssetObjectState::Ready;
         });
     }
 
     void do_unload() override {
         Res<Font>{path_}.reset(nullptr);
-        ready_ = false;
     }
 };
 
@@ -220,7 +216,6 @@ public:
     }
 
     void do_load() override {
-        ready_ = false;
         const auto full_path = project_->base_path / path_ + ".program";
         get_resource_content_async(full_path.c_str(), [this, full_path](auto buffer) {
             if (buffer.empty()) {
@@ -251,20 +246,19 @@ public:
             }
 
             Res<program_t>{path_}.reset(program);
-            ready_ = true;
+            state = AssetObjectState::Ready;
         });
     }
 
     void do_unload() override {
         Res<program_t>{path_}.reset(nullptr);
-        ready_ = false;
     }
 };
 
 class texture_asset_t : public builtin_asset_t {
 public:
-    explicit texture_asset_t(std::string path)
-            : builtin_asset_t(std::move(path)) {
+    explicit texture_asset_t(std::string path) :
+            builtin_asset_t(std::move(path)) {
     }
 
     void do_load() override {
@@ -272,7 +266,7 @@ public:
         get_resource_content_async(full_path.c_str(), [this, full_path](auto buffer) {
             if (buffer.empty()) {
                 EK_ERROR << "TEXTURE resource not found: " << full_path;
-                ready_ = false;
+                error = 1;
             }
 
             EK_DEBUG << "TEXTURE loading: " << full_path;
@@ -297,17 +291,16 @@ public:
                 load_texture_lazy((project_->base_path / data.images[0]).c_str(), texture);
             } else {
                 EK_ERROR << "unknown Texture Type " << data.texture_type;
-                ready_ = false;
+                error = 1;
             }
 
             Res<texture_t>{path_}.reset(texture);
-            ready_ = true;
+            state = AssetObjectState::Ready;
         });
     }
 
     void do_unload() override {
         Res<texture_t>{path_}.reset(nullptr);
-        ready_ = false;
     }
 };
 
@@ -322,7 +315,7 @@ public:
         get_resource_content_async(full_path.c_str(), [this, full_path](auto buffer) {
             if (buffer.empty()) {
                 EK_ERROR << "MODEL resource not found: " << full_path;
-                ready_ = false;
+                error = 1;
             }
 
             EK_DEBUG << "MODEL loading: " << full_path;
@@ -333,20 +326,19 @@ public:
             io(data);
 
             Res<static_mesh_t>{path_}.reset(new static_mesh_t(data.mesh));
-            ready_ = true;
+            state = AssetObjectState::Ready;
         });
     }
 
     void do_unload() override {
         Res<static_mesh_t>{path_}.reset(nullptr);
-        ready_ = false;
     }
 };
 
 class pack_asset_t : public builtin_asset_t {
 public:
-    explicit pack_asset_t(std::string path)
-            : builtin_asset_t(std::move(path)) {
+    explicit pack_asset_t(std::string path) :
+            builtin_asset_t(std::move(path)) {
     }
 
     void do_load() override {
@@ -358,22 +350,75 @@ public:
                 std::string type;
                 std::string path;
                 io(type, path);
-                if (!type.empty() && !path.empty()) {
+                if (type.empty() && path.empty()) {
+                    // special marker of assets end
+                    break;
+                } else {
                     auto* asset = project_->add_from_type(type, path);
                     if (asset) {
-                        asset->load();
+                        assets.push_back(asset);
                     }
-                } else {
-                    break;
                 }
             }
-            ready_ = true;
+            // ready for loading
+            currentAssetLoading = 0;
         });
     }
 
     void do_unload() override {
-
+        for (auto* asset : assets) {
+            asset->unload();
+        }
+        assets.clear();
+        currentAssetLoading = -1;
     }
+
+    void poll() override {
+        if (state == AssetObjectState::Loading && currentAssetLoading >= 0) {
+            timer_t timer;
+            while (true) {
+                auto* asset = assets[currentAssetLoading];
+                if (asset->state == AssetObjectState::Initial) {
+                    asset->load();
+                } else if (asset->state == AssetObjectState::Loading) {
+                    asset->poll();
+                } else if (asset->state == AssetObjectState::Ready) {
+                    ++currentAssetLoading;
+                    if (currentAssetLoading >= assets.size()) {
+                        state = AssetObjectState::Ready;
+                        return;
+                    }
+                }
+                if (timer.read_millis() >= 2) {
+                    return;
+                }
+            }
+        }
+    }
+
+    [[nodiscard]] float getProgress() const override {
+        switch (state) {
+            case AssetObjectState::Ready:
+                return 1.0f;
+            case AssetObjectState::Initial:
+                return 0.0f;
+            case AssetObjectState::Loading:
+                // calculate sub-assets progress
+                if (!assets.empty()) {
+                    float acc = 0.0f;
+                    float total = 0.0f;
+                    for (auto* asset : assets) {
+                        acc += asset->getProgress();
+                        ++total;
+                    }
+                    return acc / total;
+                }
+        }
+        return 0.0f;
+    }
+
+    int currentAssetLoading = -1;
+    std::vector<asset_object_t*> assets;
 };
 
 
@@ -395,14 +440,13 @@ public:
                 auto* ttfFont = new TrueTypeFont(project_->scale_factor, fontSize, glyphCache);
                 ttfFont->loadFromMemory(std::move(buffer));
                 Res<Font>{path_}.reset(new Font(ttfFont));
-                ready_ = true;
+                state = AssetObjectState::Ready;
             });
         });
     }
 
     void do_unload() override {
         Res<TrueTypeFont>{path_}.reset(nullptr);
-        ready_ = false;
     }
 };
 

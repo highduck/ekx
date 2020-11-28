@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import {copyFolderRecursiveSync} from "./utils";
-import {ekc_export_assets, ekc_export_market} from "./assets";
+import {buildAssets, buildMarketingAssets} from "./assets";
 import * as Mustache from 'mustache';
 
 /*** HTML ***/
@@ -20,8 +20,8 @@ export function export_web(ctx) {
         );
     }
 
-    ekc_export_assets(ctx);
-    ekc_export_market(ctx, "web", path.join(output_dir, "icons"));
+    buildAssets(ctx);
+    buildMarketingAssets(ctx, "web", path.join(output_dir, "icons"));
 
     tpl("web/index.html.mustache", "index.html");
     tpl("web/manifest.json.mustache", "manifest.webmanifest");

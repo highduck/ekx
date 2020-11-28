@@ -23,7 +23,7 @@ ecs::entity createButton(const char* label, const std::function<void()>& fn) {
     tf.borderColor = 0x77FFFFFF_argb;
     tf.hitFullBounds = true;
     tf.rect.set(-20, -20, 40, 40);
-    e.assign<interactive_t>().cursor = app::mouse_cursor::button;
+    e.assign<Interactive>().cursor = app::mouse_cursor::button;
     e.assign<Button>().clicked += fn;
     return e;
 }

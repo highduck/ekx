@@ -46,6 +46,8 @@ struct Transform2D {
     static float2 transformDown(ecs::entity top, ecs::entity it, float2 pos);
 
     static float2 localToLocal(ecs::entity src, ecs::entity dst, float2 pos);
+    static float2 localToGlobal(ecs::entity local, float2 localPos);
+    static float2 globalToLocal(ecs::entity local, float2 globalPos);
 
     // these functions just helpers and use calculated world matrices, so use it only:
     // - after transform invalidation phase

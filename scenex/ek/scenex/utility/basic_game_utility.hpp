@@ -30,7 +30,7 @@ public:
 
     static void updateAchievement(const std::string& code, int count);
 
-    static int unlockSite();
+    static void unlockSite();
 
     static void shareScore(const std::string& text);
 

@@ -95,7 +95,7 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     }
 
     if (data->button) {
-        ecs::reassign<interactive_t>(entity);
+        ecs::reassign<Interactive>(entity);
         ecs::reassign<Button>(entity);
     }
 

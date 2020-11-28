@@ -19,9 +19,9 @@ void DynamicAtlasEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {
 void DynamicAtlasEditorAsset::load() {
     read_decl();
 
-    auto scaleFactor = project->scale_factor;
-    int normScaleFactor = int(ceilf(scaleFactor));
-    int pageSize = std::min(1024 * normScaleFactor, 4096);
+    const int pageSize = DynamicAtlas::estimateBetterSize(project->scale_factor,
+                                                    512,
+                                                    2048);
 
     Res<DynamicAtlas>{name_}.reset(new DynamicAtlas(pageSize, pageSize, alphaMap, mipmaps));
 }

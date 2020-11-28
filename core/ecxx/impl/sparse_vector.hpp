@@ -66,6 +66,18 @@ public:
         return pages_[i >> page_bits].elements[i & page_mask];
     }
 
+    // returns mapped index or 0
+    [[nodiscard]] inline T opt(size_type i) const {
+        const page_index_type pageIndex = i >> page_bits;
+        if (pageIndex < pagesCount_) {
+            auto& page = pages_[pageIndex];
+            if (page.count) {
+                return page.elements[i & page_mask];
+            }
+        }
+        return 0;
+    }
+
     void remove(size_type i) {
         const page_index_type page = i >> page_bits;
         const page_offset_type offset = i & page_mask;

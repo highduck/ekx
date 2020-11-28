@@ -25,9 +25,9 @@ inline bool contains(const vector<T>& vec, const T& value) {
     return find(vec.cbegin(), vec.cend(), value) != vec.cend();
 }
 
-bool dispatch_interactive_event(ecs::entity e, const event_data& data) {
+bool dispatch_interactive_event(ecs::entity e, const NodeEventData& data) {
     if (isTouchable(e)) {
-        auto* eh = e.tryGet<event_handler_t>();
+        auto* eh = e.tryGet<NodeEventHandler>();
         if (eh) {
             eh->emit(data);
             if (data.processed) {
@@ -53,7 +53,7 @@ void InteractionSystem::process() {
     currTargets.clear();
 
     //pointer_global_space = float2::zero;
-    auto cursor = interactive_t::mouse_cursor::parent;
+    auto cursor = Interactive::mouse_cursor::parent;
     bool changed = false;
     if (mouseActive_) {
         pointerScreenPosition_ = mousePosition0_;
@@ -93,7 +93,7 @@ void InteractionSystem::fireInteraction(InteractionEvent event, bool prev, bool 
 
     for (auto target : targets) {
         if (target.valid()) {
-            auto* interactive = target.tryGet<interactive_t>();
+            auto* interactive = target.tryGet<Interactive>();
             if (interactive && !(onlyIfChanged && contains(oppositeTargets, target))) {
                 interactive->handle(event);
             }
@@ -169,7 +169,7 @@ mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::en
 
     auto cursor = mouse_cursor::parent;
     while (it) {
-        auto* interactive = it.tryGet<interactive_t>();
+        auto* interactive = it.tryGet<Interactive>();
         if (interactive) {
             if (cursor == mouse_cursor::parent) {
                 cursor = interactive->cursor;

@@ -1,20 +1,20 @@
 import {
-    copy_file,
+    copyFile,
     copyFolderRecursiveSync,
     deleteFolderRecursive,
     execute,
-    is_dir,
-    is_file,
-    make_dirs,
-    read_text,
-    replace_all,
-    replace_in_file,
-    write_text
+    isDir,
+    isFile,
+    makeDirs,
+    readText,
+    replaceAll,
+    replaceInFile,
+    writeText
 } from "../utils";
 import {XmlDocument} from 'xmldoc';
 import * as path from "path";
-import {ekc_export_assets, ekc_export_market} from "../assets";
-import {collect_source_files, collect_src_roots_all} from "../collectSources";
+import {buildAssets, buildMarketingAssets} from "../assets";
+import {collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
 
@@ -52,8 +52,8 @@ function open_android_project(android_project_path) {
 function copy_google_services_config_android() {
     const config_file = "google-services.json";
     const config_path = path.join("../..", config_file);
-    if (is_file(config_path)) {
-        copy_file(config_path, path.join("app", config_file));
+    if (isFile(config_path)) {
+        copyFile(config_path, path.join("app", config_file));
     } else {
         console.warn("missing google-services.json", config_file);
     }
@@ -62,17 +62,17 @@ function copy_google_services_config_android() {
 function mod_main_class(app_package_java) {
     const template_main_activity_java =
         "app/src/main/java/com/eliasku/template_android/MainActivity.java";
-    const java_package_path = replace_all(app_package_java, ".", "/");
+    const java_package_path = replaceAll(app_package_java, ".", "/");
 
-    let text = read_text(template_main_activity_java);
-    text = replace_all(text,
+    let text = readText(template_main_activity_java);
+    text = replaceAll(text,
         "package com.eliasku.template_android;",
         `package ${app_package_java};`
     );
     deleteFolderRecursive("app/src/main/java/com");
     const main_activity_path = path.join("app/src/main/java", java_package_path);
-    make_dirs(main_activity_path);
-    write_text(path.join(main_activity_path, "MainActivity.java"), text);
+    makeDirs(main_activity_path);
+    writeText(path.join(main_activity_path, "MainActivity.java"), text);
 }
 
 function mod_android_manifest(ctx) {
@@ -85,7 +85,7 @@ function mod_android_manifest(ctx) {
         console.warn("unknown orientation", ctx.orientation);
     }
 
-    replace_in_file("app/src/main/AndroidManifest.xml", {
+    replaceInFile("app/src/main/AndroidManifest.xml", {
         "com.eliasku.template_android": ctx.android.package_id,
         'screenOrientation="sensorPortrait"': `screenOrientation="${orientation}"`,
         "<!-- TEMPLATE ROOT -->": ctx.build.android.add_manifest.join("\n"),
@@ -95,7 +95,7 @@ function mod_android_manifest(ctx) {
 
 function mod_strings(ctx) {
     const res_strings_path = "app/src/main/res/values/strings.xml";
-    const xml_text = read_text(res_strings_path);
+    const xml_text = readText(res_strings_path);
     const doc = new XmlDocument(xml_text);
     // console.trace(doc.firstChild);
     // console.trace(doc.childrenNamed("string"));
@@ -123,7 +123,7 @@ function mod_strings(ctx) {
         }
     });
 
-    write_text(res_strings_path, doc.toString());
+    writeText(res_strings_path, doc.toString());
 }
 
 
@@ -132,13 +132,13 @@ function mod_cmake_lists(ctx) {
     const src_files = [];
     const ext_list = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
 
-    const source_dir_list = collect_src_roots_all(ctx, "cpp", "android", ".");
+    const source_dir_list = collectSourceRootsAll(ctx, "cpp", "android", ".");
 
     for (const source_dir of source_dir_list) {
-        collect_source_files(source_dir, ext_list, src_files);
+        collectSourceFiles(source_dir, ext_list, src_files);
     }
 
-    replace_in_file(cmake_path, {
+    replaceInFile(cmake_path, {
         "#-SOURCES-#": src_files.join("\n\t\t"),
         "#-SEARCH_ROOTS-#": source_dir_list.join("\n\t\t")
     });
@@ -147,18 +147,18 @@ function mod_cmake_lists(ctx) {
 
 export function export_android(ctx) {
 
-    ekc_export_assets(ctx);
-    ekc_export_market(ctx, "android", "export/android/res");
+    buildAssets(ctx);
+    buildMarketingAssets(ctx, "android", "export/android/res");
 
     const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;
     const dest_dir = "export";
     const dest_path = path.join(dest_dir, platform_proj_name);
 
-    if (is_dir(dest_path)) {
+    if (isDir(dest_path)) {
         console.info("Remove old project", dest_path);
         deleteFolderRecursive(dest_path);
-        console.assert(!is_dir(dest_path));
+        console.assert(!isDir(dest_path));
     } else {
 
     }
@@ -170,15 +170,15 @@ export function export_android(ctx) {
     process.chdir(dest_path);
     {
         const java_roots =
-            collect_src_roots_all(ctx, "java", "android", "app")
+            collectSourceRootsAll(ctx, "java", "android", "app")
                 .map((p) => `'${p}'`);
 
         const aidl_roots =
-            collect_src_roots_all(ctx, "aidl", "android", "app")
+            collectSourceRootsAll(ctx, "aidl", "android", "app")
                 .map((p) => `'${p}'`);
 
         const assets_roots =
-            collect_src_roots_all(ctx, "assets", "android", "app")
+            collectSourceRootsAll(ctx, "assets", "android", "app")
                 .map((p) => `'${p}'`);
 
         const source_sets = [
@@ -187,7 +187,7 @@ export function export_android(ctx) {
             `main.assets.srcDirs += [${assets_roots.join(", ")}]`
         ];
 
-        replace_in_file("app/build.gradle", {
+        replaceInFile("app/build.gradle", {
             'com.eliasku.template_android': ctx.android.application_id,
             'versionCode 1 // AUTO': `versionCode ${ctx.version_code} // AUTO`,
             'versionName "1.0" // AUTO': `versionName "${ctx.version_name}" // AUTO`,
@@ -210,8 +210,8 @@ export function export_android(ctx) {
         gradle('bundleRelease');
         process.chdir(cwd);
         const aabPath = path.join(dest_path, 'app/build/outputs/bundle/release/app-release.aab');
-        if (is_file(aabPath)) {
-            copy_file(path.join(dest_path, 'app/build/outputs/bundle/release/app-release.aab'),
+        if (isFile(aabPath)) {
+            copyFile(path.join(dest_path, 'app/build/outputs/bundle/release/app-release.aab'),
                 path.join(dest_dir, ctx.name + '_' + ctx.version_name + '.aab'));
         }
     } else {

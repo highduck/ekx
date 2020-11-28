@@ -29,9 +29,10 @@ public:
 
     void reset();
 
-public:
-    uint8_t* clearPixels = nullptr;
+    static int estimateBetterSize(float scaleFactor, unsigned baseSize, unsigned maxSize);
 
+    void invalidate();
+public:
     std::vector<Page*> pages_;
     int pageWidth;
     int pageHeight;

@@ -15,56 +15,21 @@ inline ecs::entity create_node_2d(const std::string& name) {
     return e;
 }
 
-inline float2 global_to_local(ecs::entity e, const float2& position) {
-    float2 res = position;
-    auto it = e;
-    while (it) {
-        ecs::get<Transform2D>(it).matrix.transform_inverse(res, res);
-        it = ecs::get<Node>(it).parent;
-    }
-    return res;
-}
-
-inline float2 global_to_parent(ecs::entity e, const float2& pos) {
-    float2 res = pos;
-    auto it = ecs::get<Node>(e).parent;
-    while (it) {
-        ecs::get<Transform2D>(it).matrix.transform_inverse(res, res);
-        it = ecs::get<Node>(it).parent;
-    }
-    return res;
-}
-
-inline float2 local_to_global(ecs::entity e, const float2& pos) {
-    float2 res = pos;
-    auto it = e;
-    while (it) {
-        res = ecs::get<Transform2D>(it).matrix.transform(res);
-        it = ecs::get<Node>(it).parent;
-    }
-    return res;
-}
-
-inline float2 local_to_local(ecs::entity src, ecs::entity dest, const float2& pos) {
-    auto p = local_to_global(src, pos);
-    return global_to_local(dest, p);
-}
-
 /*** events functions ***/
 
-inline void dispatch_broadcast(ecs::entity e, const event_data& data) {
-    if (e.has<event_handler_t>()) {
-        e.get<event_handler_t>().emit(data);
+inline void dispatch_broadcast(ecs::entity e, const NodeEventData& data) {
+    if (e.has<NodeEventHandler>()) {
+        e.get<NodeEventHandler>().emit(data);
     }
     eachChild(e, [&data](ecs::entity child) {
         dispatch_broadcast(child, data);
     });
 }
 
-inline void dispatch_bubble(ecs::entity e, const event_data& data) {
+inline void dispatch_bubble(ecs::entity e, const NodeEventData& data) {
     auto it = e;
     while (it && it.valid()) {
-        auto* eh = it.tryGet<event_handler_t>();
+        auto* eh = it.tryGet<NodeEventHandler>();
         if(eh) {
             eh->emit(data);
         }
@@ -88,18 +53,6 @@ inline void broadcast(ecs::entity e, const std::string& event, const char* paylo
 
 inline void notify_parents(ecs::entity e, const std::string& event, const std::string& payload = "") {
     dispatch_bubble(e, {event, e, std::any{payload}});
-}
-
-template<typename Component>
-inline ecs::entity find_first_ancestor(ecs::entity e) {
-    auto it = ecs::get<Node>(e).parent;
-    while (it) {
-        if (ecs::has<Component>(it)) {
-            return it;
-        }
-        it = ecs::get<Node>(it).parent;
-    }
-    return nullptr;
 }
 
 }
