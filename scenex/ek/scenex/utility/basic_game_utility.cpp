@@ -44,6 +44,8 @@ void BasicGameUtility::rateUs(const std::string& appId) {
     sharing_rate_us(appId.c_str());
 }
 
-int BasicGameUtility::unlockSite() { return 1; }
+void BasicGameUtility::unlockSite() {
+
+}
 
 }

@@ -18,6 +18,7 @@
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/base/Tween.hpp>
 #include <ek/goodies/GameScreen.hpp>
+#include <ek/scenex/2d/DynamicAtlas.hpp>
 
 namespace ek {
 
@@ -64,6 +65,20 @@ void scene_render(ecs::entity root) {
     Camera2D::render();
 //    drawScene2D(root);
     //drawSceneGizmos(root);
+
+    for (auto& it : Res<DynamicAtlas>::map()) {
+        auto* atlas = const_cast<DynamicAtlas*>(it.second->content);
+        if (atlas) {
+            atlas->invalidate();
+        }
+    }
+
+//    for (auto& it : Res<DynamicAtlas>::map()) {
+//        auto* atlas = const_cast<DynamicAtlas*>(it.second->content);
+//        if (atlas) {
+//            atlas->reset();
+//        }
+//    }
 }
 
 }

@@ -2,7 +2,7 @@
 
 namespace ek {
 
-void interactive_t::handle(InteractionEvent event) {
+void Interactive::handle(InteractionEvent event) {
     switch (event) {
         case InteractionEvent::PointerDown:
             pushed = true;

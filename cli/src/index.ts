@@ -19,8 +19,6 @@ project.includeProject(path.join(project.path.EKX_ROOT, "external/stb"));
 project.includeProject(path.join(project.path.EKX_ROOT, "ek"));
 project.includeProject(path.join(project.path.EKX_ROOT, "core"));
 project.includeProject(path.join(project.path.EKX_ROOT, "scenex"));
-// console.info(project.projects);
-// console.info(project.modules);
 project.includeProject(process.cwd());
 
 project.runBuildSteps();

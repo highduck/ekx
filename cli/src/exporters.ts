@@ -1,7 +1,7 @@
 import {export_web} from "./web";
 import {export_android} from "./android/android";
 import {export_ios} from "./ios";
-import {ekc_export_assets, ekc_export_market} from "./assets";
+import {buildAssets, buildMarketingAssets} from "./assets";
 import {Project} from "./project";
 
 const exporters = {
@@ -9,10 +9,10 @@ const exporters = {
     android: export_android,
     ios: export_ios,
     market: (project: Project) => {
-        ekc_export_market(project, "gen", "export/market");
+        buildMarketingAssets(project, "gen", "export/market");
     },
     assets: (project: Project) => {
-        ekc_export_assets(project);
+        buildAssets(project);
     }
 };
 

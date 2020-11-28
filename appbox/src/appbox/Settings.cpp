@@ -49,7 +49,7 @@ void StandardFeatures::initDefaultControls(ecs::entity e) {
                 txt->hitFullBounds = true;
                 txt->text = "PRIVACY POLICY";
             }
-            e_pp.get_or_create<interactive_t>();
+            e_pp.get_or_create<Interactive>();
             e_pp.get_or_create<Button>().clicked += [this] {
                 BasicGameUtility::navigate(info.privacyPolicyURL, true);
             };

@@ -1,5 +1,5 @@
 import * as path from "path";
-import {copy_file, is_file} from "../utils";
+import {copyFile, isFile} from "../utils";
 
 interface SigningConfig {
     key_alias: string;
@@ -41,14 +41,14 @@ export function copySigningKeys(configs: SigningConfigs) {
             if (config && config.store_keystore) {
                 const filepath = config.store_keystore;
                 let src = filepath;
-                if (!is_file(filepath)) {
+                if (!isFile(filepath)) {
                     src = path.resolve("../..", filepath);
-                    if (!is_file(src)) {
+                    if (!isFile(src)) {
                         console.warn("missing keystore", filepath);
                         continue;
                     }
                 }
-                copy_file(src, path.join("app", path.basename(src)));
+                copyFile(src, path.join("app", path.basename(src)));
             }
         }
     }

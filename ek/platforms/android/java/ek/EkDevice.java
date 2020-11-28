@@ -50,7 +50,7 @@ public final class EkDevice {
         }
 
         if (_vibrator != null) {
-            if (Build.VERSION.SDK_INT >= 26) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 _vibrator.vibrate(VibrationEffect.createOneShot(durationMillis, VibrationEffect.DEFAULT_AMPLITUDE));
             } else {
                 _vibrator.vibrate(durationMillis);

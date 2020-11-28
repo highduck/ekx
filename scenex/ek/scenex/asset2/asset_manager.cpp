@@ -89,7 +89,7 @@ void asset_manager_t::add_file(const std::string& path) {
 
 bool asset_manager_t::is_assets_ready() const {
     for (auto* asset : assets) {
-        if (!asset->ready_) {
+        if (asset->state != AssetObjectState::Ready) {
             return false;
         }
     }

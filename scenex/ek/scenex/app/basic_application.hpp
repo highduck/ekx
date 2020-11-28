@@ -19,6 +19,8 @@ namespace ek {
 
 class asset_manager_t;
 
+class asset_object_t;
+
 class basic_application {
 public:
     /**** assets ***/
@@ -56,6 +58,7 @@ public:
 
 public:
     bool preloadOnStart = true;
+    asset_object_t* rootAssetObject = nullptr;
 
 protected:
     //void on_event(const app::event_t& event);

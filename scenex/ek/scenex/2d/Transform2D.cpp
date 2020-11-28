@@ -98,6 +98,37 @@ float2 Transform2D::localToLocal(ecs::entity src, ecs::entity dst, float2 pos) {
     return result;
 }
 
+float2 Transform2D::localToGlobal(ecs::entity local, float2 localPos) {
+    float2 pos = localPos;
+    auto it = local;
+    while (it) {
+        auto* transform = it.tryGet<Transform2D>();
+        if (transform) {
+            transform->updateLocalMatrix();
+            pos = transform->matrix.transform(pos);
+        }
+        it = it.get<Node>().parent;
+    }
+    return pos;
+}
+
+float2 Transform2D::globalToLocal(ecs::entity local, float2 globalPos) {
+    float2 pos = globalPos;
+    auto it = local;
+    while (it) {
+        auto* transform = it.tryGet<Transform2D>();
+        if (transform) {
+            transform->updateLocalMatrix();
+            if (!it.get<Transform2D>().matrix.transform_inverse(pos, pos)) {
+                break;
+            }
+        }
+
+        it = it.get<Node>().parent;
+    }
+    return pos;
+}
+
 
 /** transformations after invalidation (already have world matrix) **/
 bool Transform2D::fastLocalToLocal(ecs::entity src, ecs::entity dst, float2 pos, float2& out) {

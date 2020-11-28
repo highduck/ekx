@@ -111,4 +111,16 @@ inline int sign(float v) {
     return v > 0.0f ? 1 : (v < 0.0f ? -1 : 0);
 }
 
+/* Thanks to good old Bit Twiddling Hacks for this one: http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2 */
+inline unsigned int nextPowerOf2(unsigned int x) {
+    x--;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    x++;
+    return x;
+}
+
 }

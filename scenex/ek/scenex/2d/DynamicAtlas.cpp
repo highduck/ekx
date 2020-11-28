@@ -1,7 +1,23 @@
 #include "DynamicAtlas.hpp"
 #include <ek/graphics/texture.hpp>
+#include <ek/math/common.hpp>
 
 namespace ek {
+
+//void copy_pixels_normal(image_t& dest, int2 dest_position,
+//                        const image_t& src, const rect_i& src_rect) {
+//    rect_i dest_rc = {dest_position, src_rect.size};
+//    rect_i src_rc = src_rect;
+//    clip_rects(src.bounds<int>(), dest.bounds<int>(),
+//               src_rc, dest_rc);
+//
+//    for (int32_t y = 0; y < src_rc.height; ++y) {
+//        for (int32_t x = 0; x < src_rc.width; ++x) {
+//            const auto pixel = get_pixel_unsafe(src, int2{src_rc.x + x, src_rc.y + y});
+//            set_pixel_unsafe(dest, {dest_rc.x + x, dest_rc.y + y}, pixel);
+//        }
+//    }
+//}
 
 class DynamicAtlas::Page : private disable_copy_assign_t {
 public:
@@ -11,8 +27,15 @@ public:
             invWidth{1.0f / (float) width_},
             invHeight{1.0f / (float) height_},
             bytesPerPixel{alphaMap_ ? 1 : 4},
+            padding{1},
+            x{1},
+            y{1},
+            lineHeight{0},
             alphaMap{alphaMap_},
-            mipmaps{mipmaps_} {
+            mipmaps{mipmaps_},
+            data(width_ * height_ * (alphaMap_ ? 1 : 4), 0u),
+            dirtyRect{0, 0, width_, height_},
+            dirty{true} {
 
         texture = new graphics::texture_t();
         texture->setType(alphaMap ? graphics::texture_type::alpha8 : graphics::texture_type::color32);
@@ -25,11 +48,11 @@ public:
         delete texture;
     }
 
-    void reset(uint8_t* clearPixels_ = nullptr) {
-        if (clearPixels_) {
-            texture->upload_pixels(width, height, clearPixels_);
-        }
-
+    void reset() {
+        //data.assign(data.size(), 0);
+        memset(data.data(), 0u, data.size());
+        dirtyRect.set(0, 0, width, height);
+        dirty = true;
         x = padding;
         y = padding;
         lineHeight = 0;
@@ -56,7 +79,21 @@ public:
         sprite.texture = texture;
         sprite.texCoords.set(invWidth * placeX, invHeight * placeY, invWidth * spriteWidth, invHeight * spriteHeight);
 
-        texture->updateRect(placeX, placeY, spriteWidth, spriteHeight, pixels.data());
+        //texture->updateRect(placeX, placeY, spriteWidth, spriteHeight, pixels.data());
+
+        {
+            auto srcStride = bytesPerPixel * spriteWidth;
+            auto destStride = bytesPerPixel * width;
+            for (int cy = 0; cy < spriteHeight; ++cy) {
+                memcpy(data.data() + placeX + (placeY + cy) * destStride, pixels.data() + cy * srcStride, srcStride);
+            }
+            if (!dirty) {
+                dirtyRect.set(placeX, placeY, spriteWidth, spriteHeight);
+            } else {
+                dirtyRect = combine(dirtyRect, {placeX, placeY, spriteWidth, spriteHeight});
+            }
+            dirty = true;
+        }
 
         if (newLineHeight < spriteHeight) {
             newLineHeight = spriteHeight;
@@ -70,6 +107,15 @@ public:
         return true;
     }
 
+    void invalidate() {
+        if (dirty) {
+            // TODO: dirtyRect?
+            texture->upload_pixels(width, height, data.data());
+//            texture->updateRect(dirtyRect.x, dirtyRect.y, dirtyRect.width, dirtyRect.height, data.data(), );
+            dirty = false;
+        }
+    }
+
     graphics::texture_t* texture;
     int width;
     int height;
@@ -81,6 +127,11 @@ public:
     int y = 0;
     int lineHeight = 0;
 
+    std::vector<uint8_t> data;
+    rect_i dirtyRect;
+    bool dirty;
+
+
     bool alphaMap;
     bool mipmaps;
 };
@@ -91,9 +142,7 @@ DynamicAtlas::DynamicAtlas(int pageWidth_, int pageHeight_, bool alphaMap_, bool
         alphaMap{alphaMap_},
         mipmaps{mipmaps_} {
 
-    clearPixels = new uint8_t[pageWidth_ * pageHeight_ * (alphaMap_ ? 1 : 4)];
     auto* page = new Page(pageWidth_, pageHeight_, alphaMap, mipmaps);
-    page->reset(clearPixels);
     pages_.push_back(page);
 }
 
@@ -101,7 +150,6 @@ DynamicAtlas::~DynamicAtlas() {
     for (auto* page : pages_) {
         delete page;
     }
-    delete[]clearPixels;
 }
 
 DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const std::vector<uint8_t>& pixels) {
@@ -116,7 +164,7 @@ DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const std::vec
         }
     }
     auto* newPage = new Page(pageWidth, pageHeight, alphaMap, mipmaps);
-    newPage->reset(clearPixels);
+    newPage->reset();
     pages_.push_back(newPage);
     if (!newPage->add(width, height, pixels, sprite)) {
         // how come?
@@ -136,6 +184,18 @@ void DynamicAtlas::reset() {
         page->reset();
     }
     ++version;
+}
+
+int DynamicAtlas::estimateBetterSize(float scaleFactor, unsigned baseSize, unsigned maxSize) {
+    auto scaledSize = static_cast<unsigned>(ceilf(static_cast<float>(baseSize) * scaleFactor));
+    auto potSize = math::nextPowerOf2(scaledSize);
+    return std::min(potSize, maxSize);
+}
+
+void DynamicAtlas::invalidate() {
+    for (auto& page : pages_) {
+        page->invalidate();
+    }
 }
 
 }

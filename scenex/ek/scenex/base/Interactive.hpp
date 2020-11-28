@@ -14,7 +14,7 @@ enum class InteractionEvent {
     Click
 };
 
-struct interactive_t {
+struct Interactive {
 
     using mouse_cursor = app::mouse_cursor;
     using signal = signal_t<>;
@@ -34,7 +34,7 @@ struct interactive_t {
     bool over = false;
     bool pushed = false;
 
-    interactive_t() = default;
+    Interactive() = default;
 
     void handle(InteractionEvent event);
 };

@@ -180,11 +180,11 @@ void guiBounds2D(Bounds2D& bounds) {
     ImGui::Checkbox("Culling (WIP)", &bounds.culling);
 }
 
-void guiInteractive(interactive_t& inter) {
+void guiInteractive(Interactive& inter) {
     ImGui::Checkbox("pushed", &inter.pushed);
     ImGui::Checkbox("over", &inter.over);
     ImGui::Checkbox("bubble", &inter.bubble);
-    ImGui::LabelText("cursor", inter.cursor == interactive_t::mouse_cursor::button ? "button" : "?");
+    ImGui::LabelText("cursor", inter.cursor == Interactive::mouse_cursor::button ? "button" : "?");
 }
 
 void editDisplaySprite(Sprite2D& sprite) {
@@ -307,6 +307,7 @@ void guiParticleLayer2D(ParticleLayer2D& layer) {
 
 void gui_inspector(ecs::entity e) {
     ImGui::PushID(e.passport());
+    ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index(), e.version());
     if (ecs::has<Node>(e)) {
         auto& node = ecs::get<Node>(e);
         ImGui::InputText("Name", &node.name);
@@ -324,8 +325,8 @@ void gui_inspector(ecs::entity e) {
     guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
     guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
     guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);
-    guiComponentPanel<interactive_t>(e, "Interactive", guiInteractive);
-    guiComponentPanel<event_handler_t>(e, "Event Handler", [](auto& c) {});
+    guiComponentPanel<Interactive>(e, "Interactive", guiInteractive);
+    guiComponentPanel<NodeEventHandler>(e, "Event Handler", [](auto& c) {});
 
     // particles
     guiComponentPanel<ParticleEmitter2D>(e, "ParticleEmitter2D", guiParticleEmitter2D);

@@ -1,25 +1,25 @@
-import {execute, is_dir, make_dirs, optimize_png_glob} from "./utils";
+import {execute, isDir, makeDirs, optimizePngGlob} from "./utils";
 import * as path from "path";
 import {Project} from "./project";
 import {rmdirSync} from "fs";
 
-export function ekc_export_market(ctx: Project, target_type: string, output: string) {
-    if (is_dir(output)) {
+export function buildMarketingAssets(ctx: Project, target_type: string, output: string) {
+    if (isDir(output)) {
         rmdirSync(output, {recursive: true});
     }
-    make_dirs(output);
+    makeDirs(output);
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
     execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "market", marketAsset, target_type, output]);
-    optimize_png_glob(path.join(output, "**/*.png"));
+    optimizePngGlob(path.join(output, "**/*.png"));
 }
 
-export function ekc_export_assets(ctx: Project) {
+export function buildAssets(ctx: Project) {
     let assetsInput = ctx.getAssetsInput();
     let assetsOutput = ctx.getAssetsOutput();
-    if (is_dir(assetsOutput)) {
+    if (isDir(assetsOutput)) {
         rmdirSync(assetsOutput, {recursive: true});
     }
-    make_dirs(assetsOutput);
+    makeDirs(assetsOutput);
     execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "assets", assetsInput, assetsOutput]);
-    optimize_png_glob(path.join(assetsOutput, "**/*.png"));
+    optimizePngGlob(path.join(assetsOutput, "**/*.png"));
 }

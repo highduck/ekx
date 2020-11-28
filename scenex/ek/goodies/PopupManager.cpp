@@ -227,13 +227,13 @@ ecs::entity createBackQuad() {
             .setInsetsMode(false);
 
     // intercept back-button if popup manager is active
-    auto& eh = e.assign<event_handler_t>();
-    eh.on(interactive_event::back_button, [](const event_data& ev) {
+    auto& eh = e.assign<NodeEventHandler>();
+    eh.on(interactive_event::back_button, [](const NodeEventData& ev) {
         ev.processed = true;
     });
 
     // if touch outside of popups, simulate back-button behavior
-    auto& interactive = e.assign<interactive_t>();
+    auto& interactive = e.assign<Interactive>();
     interactive.on_down += [e] {
         const auto* state = findComponentInParent<PopupManager>(e);
         if (state && !state->active.empty()) {

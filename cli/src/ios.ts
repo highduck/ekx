@@ -1,19 +1,19 @@
 import {
-    copy_file,
+    copyFile,
     copyFolderRecursiveSync,
     deleteFolderRecursive, execute,
-    is_dir,
-    optimize_png_glob,
-    read_text, replace_in_file,
-    write_text
+    isDir,
+    optimizePngGlob,
+    readText, replaceInFile,
+    writeText
 } from "./utils";
 import * as path from "path";
 import * as fs from "fs";
 import * as plist from 'plist';
-import {ekc_export_assets, ekc_export_market} from "./assets";
+import {buildAssets, buildMarketingAssets} from "./assets";
 
 function mod_plist(ctx, filepath) {
-    const dict = plist.parse(read_text(filepath));
+    const dict = plist.parse(readText(filepath));
     dict["CFBundleDisplayName"] = ctx.title;
     dict["CFBundleShortVersionString"] = ctx.version_name;
     dict["CFBundleVersion"] = ctx.version_code;
@@ -47,7 +47,7 @@ function mod_plist(ctx, filepath) {
             dict[k] = v;
         }
     }
-    write_text(filepath, plist.build(dict));
+    writeText(filepath, plist.build(dict));
 }
 
 function get_pods(data) {
@@ -86,18 +86,18 @@ function collect_xcode_props(ctx, prop, target) {
 }
 
 export function export_ios(ctx) {
-    ekc_export_assets(ctx);
-    ekc_export_market(ctx, "ios", "export/ios");
+    buildAssets(ctx);
+    buildMarketingAssets(ctx, "ios", "export/ios");
 
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;
     const dest_dir = "export";
     const dest_path = path.join(dest_dir, platform_proj_name);
 
-    if (is_dir(dest_path)) {
+    if (isDir(dest_path)) {
         console.info("Remove XCode project", dest_path);
         deleteFolderRecursive(dest_path);
-        console.assert(!is_dir(dest_path));
+        console.assert(!isDir(dest_path));
     }
 
     copyFolderRecursiveSync(path.join(ctx.path.templates, "template-" + platform_target), dest_path);
@@ -116,11 +116,11 @@ export function export_ios(ctx) {
         const src_launch_logo_path = path.join(base_path, "export/ios/AppIcon.appiconset");
         const dest_launch_logo_path = "src/Assets.xcassets/LaunchLogo.imageset";
         // launch logo
-        copy_file(path.join(src_launch_logo_path, "iphone_40.png"),
+        copyFile(path.join(src_launch_logo_path, "iphone_40.png"),
             path.join(dest_launch_logo_path, "iphone_40.png"));
-        copy_file(path.join(src_launch_logo_path, "iphone_80.png"),
+        copyFile(path.join(src_launch_logo_path, "iphone_80.png"),
             path.join(dest_launch_logo_path, "iphone_80.png"));
-        copy_file(path.join(src_launch_logo_path, "iphone_120.png"),
+        copyFile(path.join(src_launch_logo_path, "iphone_120.png"),
             path.join(dest_launch_logo_path, "iphone_120.png"));
 
         mod_plist(ctx, "src/Info.plist");
@@ -134,7 +134,7 @@ export function export_ios(ctx) {
 
         console.info("Prepare PodFile");
         const pods = collect_xcode_props(ctx, "pods", "ios").map((v) => `pod '${v}'`).join("\n  ");
-        replace_in_file("Podfile", {
+        replaceInFile("Podfile", {
             "template-ios": platform_proj_name,
             "# TEMPLATE DEPENDENCIES": pods
         });

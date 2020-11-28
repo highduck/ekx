@@ -10,10 +10,11 @@ namespace ek {
 void mouse_follow_script::update(float dt) {
     Script::update(dt);
 
-    auto& im = resolve<InteractionSystem>();
-    const auto screen_space_position = im.pointerScreenPosition_;
-    const auto parent_space_position = global_to_parent(entity_, screen_space_position);
-    get<Transform2D>().position = parent_space_position;
+    auto parent = entity_.get<Node>().parent;
+    if (parent) {
+        auto& im = resolve<InteractionSystem>();
+        get<Transform2D>().position = Transform2D::globalToLocal(parent, im.pointerScreenPosition_);
+    }
 }
 
 void mouse_follow_script::gui_gizmo() {

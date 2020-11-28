@@ -34,6 +34,7 @@ public:
 
     void upload_pixels(uint32_t width, uint32_t height, const uint8_t* data);
     void updateRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height, const uint8_t* data);
+    void updateRect(rect_i destRect, const uint8_t* data, rect_i srcRect);
 
     void bind(int unit) const;
 

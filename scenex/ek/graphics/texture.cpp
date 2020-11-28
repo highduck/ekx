@@ -113,6 +113,28 @@ void texture_t::updateRect(uint32_t x, uint32_t y, uint32_t width, uint32_t heig
     end_texture_setup(gl_texture_target_, mipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
 }
 
+void texture_t::updateRect(rect_i destRect, const uint8_t* data, rect_i srcRect) {
+    begin_texture_setup(handle_, gl_texture_target_);
+
+    if (type_ == texture_type::alpha8) {
+        GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+    }
+
+    GL_CHECK(glTexSubImage2D(gl_texture_target_, 0, destRect.x, destRect.y, destRect.width, destRect.height, internalFormat, pixelType, data));
+
+    if (type_ == texture_type::alpha8) {
+        GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
+    }
+
+    if (mipmaps) {
+        GL_CHECK(glGenerateMipmap(gl_texture_target_));
+#if !defined(__ANDROID__)
+        GL_CHECK(glTexParameterf(gl_texture_target_, GL_TEXTURE_LOD_BIAS, mipmapBias));
+#endif
+    }
+    end_texture_setup(gl_texture_target_, mipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+}
+
 void texture_t::bind(int unit) const {
     GL_CHECK(glActiveTexture(GL_TEXTURE0 + (GLenum) unit));
     GL_CHECK(glBindTexture(gl_texture_target_, handle_));

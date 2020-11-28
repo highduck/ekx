@@ -64,7 +64,7 @@ const char* getEntityTitle(ecs::entity e) {
         // TODO: other renderables
     }
     if (ecs::has<MovieClip>(e)) { type = "MovieClip"; }
-    if (ecs::has<interactive_t>(e)) { type = "Interactive"; }
+    if (ecs::has<Interactive>(e)) { type = "Interactive"; }
     if (ecs::has<Button>(e)) { type = "Button"; }
     if (ecs::has<Bounds2D>(e)) {
         type = "Bounds2D";

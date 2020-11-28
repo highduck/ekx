@@ -7,19 +7,35 @@ namespace ek {
 
 class asset_manager_t;
 
+enum class AssetObjectState {
+    Initial,
+    Loading,
+    Ready
+};
+
 class asset_object_t {
     friend class asset_manager_t;
 
 public:
+    asset_object_t() = default;
+
     virtual ~asset_object_t() = default;
 
     virtual void load() = 0;
 
+    virtual void poll() {}
+
     virtual void unload() = 0;
+
+    AssetObjectState state{AssetObjectState::Initial};
+    int error = 0;
+
+    [[nodiscard]] virtual float getProgress() const {
+        return state == AssetObjectState::Ready ? 1.0f : 0.0f;
+    }
 
 protected:
     asset_manager_t* project_ = nullptr;
-    bool ready_ = false;
 };
 
 class asset_type_resolver_t {
