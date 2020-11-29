@@ -36,10 +36,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/math/easing.hpp
 
-        ek/math/collisions.hpp
-        ek/math/collisions_sweep.cpp
-        ek/math/collisions_test.cpp
-
         ek/math/rand.cpp
         ek/math/rand.hpp
 
