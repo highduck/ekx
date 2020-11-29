@@ -1,8 +1,8 @@
 #pragma once
 
-#include "vec.hpp"
-#include "box.hpp"
-#include "circle.hpp"
+#include <ek/math/vec.hpp>
+#include <ek/math/box.hpp>
+#include <ek/math/circle.hpp>
 
 namespace ek {
 
