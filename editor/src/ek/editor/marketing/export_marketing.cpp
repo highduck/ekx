@@ -4,11 +4,9 @@
 #include <ek/flash/doc/flash_archive.hpp>
 #include <ek/spritepack/save_image_png.hpp>
 #include <ek/xfl/flash_doc_exporter.hpp>
-#include <ek/editor/assets/flash_asset.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/strings.hpp>
-#include <ek/util/logger.hpp>
 
 #include <nlohmann/json.hpp>
 #include <fmt/core.h>
@@ -115,8 +113,7 @@ void process_flash_archive_market(const flash_doc& file, const marketing_asset_t
     for (const auto& command_data : marketing.commands) {
         make_dirs(command_data.output);
         working_dir_t wd;
-        const auto* icon_item = exporter.doc.find_linkage("icon");
-        const auto* icon_round_item = exporter.doc.find_linkage("icon_round");
+        const auto* icon_item = exporter.doc.find_linkage("icon_market");
         wd.in(command_data.output, [&]() {
             if (command_data.target == "gen") {
                 if (icon_item) {

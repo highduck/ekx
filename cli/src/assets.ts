@@ -10,7 +10,9 @@ export function buildMarketingAssets(ctx: Project, target_type: string, output: 
     makeDirs(output);
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
     execute(path.join(ctx.path.EKX_ROOT, "editor/bin/ekc"), ["export", "market", marketAsset, target_type, output]);
-    optimizePngGlob(path.join(output, "**/*.png"));
+
+    // why optimize market assets? :)
+    //optimizePngGlob(path.join(output, "**/*.png"));
 }
 
 export function buildAssets(ctx: Project) {
