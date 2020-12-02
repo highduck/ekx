@@ -50,14 +50,14 @@ void process_event(const event_t& event) {
 void dispatch_event(const event_t& event) {
     assert(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
 //    EK_INFO("EVENT: %i", event.type);
+    event_queue_mtx.lock();
     if (event.type == event_type::app_pause) {
-        process_event(event);
+        g_app.systemPausePending = true;
     } else {
-        event_queue_mtx.lock();
         assert(!g_app.event_queue_locked);
         g_app.event_queue_.push_back(event);
-        event_queue_mtx.unlock();
     }
+    event_queue_mtx.unlock();
 }
 
 void dispatch_draw_frame() {
@@ -83,6 +83,11 @@ void dispatch_draw_frame() {
 
     g_app.on_frame_draw();
     g_app.on_frame_completed();
+
+    if (g_app.systemPausePending) {
+        g_app.systemPausePending = false;
+        process_event({event_type::app_pause});
+    }
 }
 
 std::vector<std::string> arguments::to_vector() const {

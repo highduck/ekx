@@ -53,7 +53,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.0.1] - 2020-10-31
 
-- Initial release as is
+- Initial releaseNode as is
 - start versioning and CHANGELOG
 - update play-services-base 17.5.0
 - [ecxx] remove template parameter for `sparse_vector`

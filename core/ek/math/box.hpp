@@ -117,7 +117,7 @@ struct box_t<2, T> {
 
     inline void right(T v) { x = v - width; }
 
-    inline float bottom() const { return y + height; }
+    inline T bottom() const { return y + height; }
 
     inline void bottom(T v) { y = v - height; }
 

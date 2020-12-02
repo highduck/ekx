@@ -150,6 +150,7 @@ struct app_state final {
 
     std::vector<event_t> event_queue_;
     bool event_queue_locked = false;
+    bool systemPausePending = false;
 
     void updateMouseCursor(mouse_cursor cursor_);
 };
