@@ -156,6 +156,15 @@ public:
         return objectId;
     }
 
+    // optimize full clearing
+    void reset() {
+        nodes.resize(1);
+        nodes[0] = {};
+        objectNext.clear();
+        objectsBoundsArray.clear();
+        objectEntity.clear();
+    }
+
     void clear(int nodeId = 0) {
         auto& node = nodes[nodeId];
         clearNodeObjects(node);

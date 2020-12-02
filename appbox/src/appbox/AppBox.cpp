@@ -11,12 +11,17 @@
 #include <ek/util/strings.hpp>
 #include <utility>
 #include <ek/ext/game_center/game_center.hpp>
+#include <ek/ext/sharing/sharing.hpp>
+#include <ek/scenex/data/sg_factory.hpp>
+#include <ek/goodies/GameScreen.hpp>
 #include "Ads.hpp"
 
 namespace ek {
 
 AppBox::AppBox(AppBoxConfig config_) :
         config{std::move(config_)} {
+
+    // unlock abort()
 
     billing::initialize(config.billingKey);
     admob::initialize(config.admob);
@@ -57,7 +62,7 @@ void AppBox::initDefaultControls(ecs::entity e) {
             }
             e_pp.get_or_create<Interactive>();
             e_pp.get_or_create<Button>().clicked += [this] {
-                BasicGameUtility::navigate(config.privacyPolicyURL, true);
+                sharing_navigate(config.privacyPolicyURL.c_str());
             };
         }
     }
@@ -115,6 +120,43 @@ void AppBox::initDefaultControls(ecs::entity e) {
             }
         }
     }
+}
+
+void AppBox::shareWithAppLink(const std::string& text) {
+    auto msg = text;
+    if (!config.appLinkURL.empty()) {
+        msg += ' ';
+        msg += config.appLinkURL;
+    }
+    sharing_send_message(msg.c_str());
+}
+
+void AppBox::rateUs() {
+    sharing_rate_us(config.appID.c_str());
+}
+
+/// download app feature
+
+void wrap_button(ecs::entity e, const std::string& name, const std::string& link) {
+    auto x = find(e, name);
+    if (!link.empty()) {
+        ecs::get_or_create<Button>(x).clicked.add([link] {
+            sharing_navigate(link.c_str());
+        });
+    } else {
+        setVisible(e, false);
+    }
+}
+
+void AppBox::initDownloadAppButtons(ecs::entity) {
+//    auto banner = sg_create("gfx", "cross_banner");
+//    setName(banner, "banner");
+//    layout_wrapper{banner}.aligned(0.5f, 0.0f, 1.0f, 0.0f);
+//
+//    wrap_button(banner, "google_play", config.downloadApp.googlePlay);
+//    wrap_button(banner, "app_store", config.downloadApp.appStore);
+//
+//    append(e, banner);
 }
 
 }

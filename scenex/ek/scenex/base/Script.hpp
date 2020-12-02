@@ -22,7 +22,7 @@ public:
 
     virtual void start() {}
 
-    virtual void update(float dt) {}
+    virtual void update(float) {}
 
     virtual void draw() {}
 

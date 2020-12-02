@@ -27,25 +27,4 @@ void BasicGameUtility::updateAchievement(const std::string& code, int count) {
     achievement_update(code.c_str(), count);
 }
 
-void BasicGameUtility::navigate(const std::string& url, bool blank) {
-    (void) blank;
-    sharing_navigate(url.c_str());
-}
-
-void BasicGameUtility::shareScore(const std::string& text) {
-    sharing_send_message(text.c_str());
-}
-
-void BasicGameUtility::shareApp(const std::string& text) {
-    sharing_send_message(text.c_str());
-}
-
-void BasicGameUtility::rateUs(const std::string& appId) {
-    sharing_rate_us(appId.c_str());
-}
-
-void BasicGameUtility::unlockSite() {
-
-}
-
 }
