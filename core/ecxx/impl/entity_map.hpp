@@ -161,20 +161,12 @@ public:
         ECXX_ASSERT(locks_ == 0);
         ECXX_ASSERT(dataTable.has(ei));
 
-        const auto index = dataTable.get_and_remove(ei);
-        const bool swap_with_back = index < entities.size() - 1u;
-
-        if (swap_with_back) {
-            const entity back_entity = entities.back();
-            dataTable.replace(back_entity.index(), index);
-            std::swap(entities.back(), entities[index]);
-
-            if constexpr (has_data) {
-                std::swap(data_.back(), data_[index]);
-            }
-        }
+        const entity back_entity = entities.back();
+        const auto index = dataTable.moveRemove(ei, back_entity.index());
+        entities[index] = back_entity;
         entities.pop_back();
         if constexpr (has_data) {
+            data_[index] = std::move(data_.back());
             data_.pop_back();
         }
     }

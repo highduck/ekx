@@ -3,14 +3,14 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/TimeLayer.hpp>
+#include <ek/util/FreeList.hpp>
 #include "ParticleDecl.hpp"
+#include "Particle.hpp"
 
 namespace ek {
 
-class Particle;
-
 struct ParticleLayer2D {
-    std::vector<Particle*> particles;
+    std::vector<Particle> particles;
     bool keep_alive = false;
     TimeLayer timer;
 };
@@ -55,9 +55,7 @@ void update_particles();
 
 void draw_particle_layer(ecs::entity e);
 
-Particle* produce_particle(const ParticleDecl& decl);
-
-void add_particle(ParticleLayer2D& layer, Particle* particle_);
+Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl);
 
 }
 

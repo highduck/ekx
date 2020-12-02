@@ -78,6 +78,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/util/path.cpp
         ek/util/path.hpp
         ek/util/type_index.hpp
+        ek/util/FreeList.hpp
 
         ek/timers.cpp
         )

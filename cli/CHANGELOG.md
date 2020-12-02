@@ -1,8 +1,8 @@
 ## 0.0.4
 
-- add `ekx android bundle` to build release Android Application Bundle file to `export/` folder
+- add `ekx android bundle` to build releaseNode Android Application Bundle file to `export/` folder
 
 ## 0.0.2
 
-- android: debug/release signing options
+- android: debug/releaseNode signing options
 - fix adding modules

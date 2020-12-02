@@ -98,6 +98,25 @@ public:
         return v;
     }
 
+    // get `src` element
+    // if src == dst - remove it from `src`
+    // else - remove it at `src` and assign to `dst`
+    // returns element
+    // src and dst should be not null
+    T moveRemove(size_type src, size_type dst) {
+        const page_index_type page = src >> page_bits;
+        const page_offset_type offset = src & page_mask;
+        ECXX_FULL_ASSERT(has(page, offset));
+        page_data& p = pages_[page];
+        auto v = p.elements[offset];
+        p.elements[offset] = null_value;
+        --p.count;
+        if(src != dst) {
+            replace(dst, v);
+        }
+        return v;
+    }
+
     [[nodiscard]] inline bool has(size_type i) const {
         return has(i >> page_bits, i & page_mask);
     }
