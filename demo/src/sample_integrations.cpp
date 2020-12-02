@@ -2,7 +2,7 @@
 #include <ek/ext/game_center/game_center.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <admob.hpp>
-#include <appbox/ads.hpp>
+#include <appbox/Ads.hpp>
 #include "sample_integrations.hpp"
 #include <ek/util/locator.hpp>
 

@@ -1,8 +1,8 @@
 target_sources(${PROJECT_NAME} PUBLIC
-        appbox/ads.hpp
-        appbox/ads.cpp
-        appbox/Settings.cpp
-        appbox/Settings.hpp
+        appbox/Ads.hpp
+        appbox/Ads.cpp
+        appbox/AppBox.cpp
+        appbox/AppBox.hpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
