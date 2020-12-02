@@ -84,8 +84,10 @@ function mod_android_manifest(ctx) {
     } else {
         console.warn("unknown orientation", ctx.orientation);
     }
+    const configChanges = "keyboardHidden|keyboard|orientation|screenSize|layoutDirection|locale|uiMode|screenLayout|smallestScreenSize|navigation";
 
     replaceInFile("app/src/main/AndroidManifest.xml", {
+        'android:configChanges="PLACEHOLDER"': `android:configChanges="${configChanges}"`,
         "com.eliasku.template_android": ctx.android.package_id,
         'screenOrientation="sensorPortrait"': `screenOrientation="${orientation}"`,
         "<!-- TEMPLATE ROOT -->": ctx.build.android.add_manifest.join("\n"),

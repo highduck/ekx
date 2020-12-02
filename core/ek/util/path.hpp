@@ -10,6 +10,8 @@ std::string path_join(const std::string& p1, const std::string& p2);
 
 std::string path_ext(const std::string& path);
 
+std::string path_without_ext(const std::string& path);
+
 std::string path_dir(const std::string& path);
 
 std::string path_name(const std::string& path);
@@ -54,6 +56,10 @@ public:
 
     path_t operator/(const std::string& path) const noexcept {
         return path_t{path_join(path_, path)};
+    }
+
+    [[nodiscard]] std::string withoutExt() const {
+        return path_without_ext(path_);
     }
 
     [[nodiscard]] std::string ext() const {

@@ -53,6 +53,8 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/assets/editor_project.hpp
         ek/editor/assets/particles_asset.cpp
         ek/editor/assets/particles_asset.hpp
+        ek/editor/assets/TranslationsAsset.hpp
+        ek/editor/assets/TranslationsAsset.cpp
         ek/editor/assets/editor_asset.cpp
         ek/editor/assets/editor_asset.hpp)
 

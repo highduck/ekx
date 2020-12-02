@@ -80,6 +80,9 @@ add_library(${PROJECT_NAME} STATIC
         ek/util/type_index.hpp
         ek/util/FreeList.hpp
 
+        ek/Localization.hpp
+        ek/Localization.cpp
+
         ek/timers.cpp
         )
 
