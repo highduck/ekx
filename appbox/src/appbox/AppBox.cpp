@@ -1,4 +1,4 @@
-#include "Settings.hpp"
+#include "AppBox.hpp"
 
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
@@ -9,13 +9,19 @@
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/util/strings.hpp>
-#include "ads.hpp"
+#include <utility>
+#include <ek/ext/game_center/game_center.hpp>
+#include "Ads.hpp"
 
 namespace ek {
 
-StandardFeatures::StandardFeatures(AppInfo info_) :
-        info{info_} {
+AppBox::AppBox(AppBoxConfig config_) :
+        config{std::move(config_)} {
 
+    billing::initialize(config.billingKey);
+    admob::initialize(config.admob);
+    service_locator_instance<Ads>::init(config.ads);
+    game_services_init();
 }
 
 void set_state_by_name(ecs::entity e, const std::string& state) {
@@ -31,12 +37,12 @@ void set_state_on_off(ecs::entity e, bool enabled) {
     set_state_by_name(e, enabled ? "state_on" : "state_off");
 }
 
-void StandardFeatures::initDefaultControls(ecs::entity e) {
+void AppBox::initDefaultControls(ecs::entity e) {
     {
         // VERSION
         auto e_version = find(e, "version");
         if (e_version) {
-            e_version.get<Display2D>().get<Text2D>()->text = "VERSION: " + info.version;
+            e_version.get<Display2D>().get<Text2D>()->text = "VERSION: " + config.version;
         }
     }
     {
@@ -51,7 +57,7 @@ void StandardFeatures::initDefaultControls(ecs::entity e) {
             }
             e_pp.get_or_create<Interactive>();
             e_pp.get_or_create<Button>().clicked += [this] {
-                BasicGameUtility::navigate(info.privacyPolicyURL, true);
+                BasicGameUtility::navigate(config.privacyPolicyURL, true);
             };
         }
     }
