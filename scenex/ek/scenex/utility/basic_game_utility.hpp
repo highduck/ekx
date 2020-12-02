@@ -21,20 +21,9 @@ private:
 
 class BasicGameUtility {
 public:
-
-    static void navigate(const std::string& url, bool blank);
-
-    static void rateUs(const std::string& appId);
-
     static void showAchievements();
 
     static void updateAchievement(const std::string& code, int count);
-
-    static void unlockSite();
-
-    static void shareScore(const std::string& text);
-
-    static void shareApp(const std::string& text);
 };
 
 }
