@@ -28,15 +28,22 @@ std::string path_ext(const std::string& path) {
     using std::string;
     const auto i = path.find_last_of('.');
     if (i != string::npos) {
-        return path.substr(i + 1);;
+        return path.substr(i + 1);
     }
     return "";
 }
 
+std::string path_without_ext(const std::string& path) {
+    const auto i = path.find_last_of('.');
+    if (i != std::string::npos) {
+        return path.substr(0, i);
+    }
+    return path;
+}
+
 std::string path_dir(const std::string& path) {
-    using std::string;
     const auto i = path.find_last_of('/');
-    if (i != string::npos) {
+    if (i != std::string::npos) {
         return path.substr(0, i);
     }
     return "";

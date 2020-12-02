@@ -9,7 +9,7 @@
 
 namespace ek {
 
-[[maybe_unused]] std::string get_device_lang() {
+std::string get_device_lang() {
     auto* env = android::get_jni_env();
     auto class_ref = env->FindClass("ek/EkDevice");
     auto method = env->GetStaticMethodID(class_ref, "getLanguage", "()Ljava/lang/String;");

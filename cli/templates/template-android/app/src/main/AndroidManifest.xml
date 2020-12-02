@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name="com.eliasku.template_android.MainActivity"
-            android:configChanges="keyboardHidden|keyboard|orientation|screenSize"
+            android:configChanges="PLACEHOLDER"
             android:screenOrientation="sensorPortrait"
             android:theme="@style/AppTheme.Launch"
             android:launchMode="singleTask"

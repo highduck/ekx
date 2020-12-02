@@ -22,6 +22,7 @@
 #include <utility>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
 #include <ek/util/timer.hpp>
+#include <ek/Localization.hpp>
 
 namespace ek {
 
@@ -304,6 +305,52 @@ public:
     }
 };
 
+class StringsAsset : public builtin_asset_t {
+public:
+    explicit StringsAsset(std::string path) :
+            builtin_asset_t(std::move(path)) {
+    }
+
+    void do_load() override {
+        const auto full_path = project_->base_path / path_ / "strings.bin";
+        get_resource_content_async(full_path.c_str(), [this, full_path](auto buffer) {
+            if (buffer.empty()) {
+                EK_ERROR << "Strings resource not found: " << full_path;
+                error = 1;
+            }
+
+            input_memory_stream input{buffer.data(), buffer.size()};
+            IO io{input};
+            std::vector<std::string> langs;
+            io(langs);
+            num = static_cast<int>(langs.size());
+            for (auto& lang : langs) {
+                get_resource_content_async(
+                        (project_->base_path / path_ / lang + ".mo").c_str(),
+                        [this, lang, full_path](std::vector<uint8_t> buffer) {
+                            if (buffer.empty()) {
+                                EK_ERROR << "Strings resource not found: " << full_path;
+                                error = 1;
+                            } else {
+                                Localization::instance.load(lang, std::move(buffer));
+                            }
+
+                            --num;
+                            if (num <= 0) {
+                                state = AssetObjectState::Ready;
+                            }
+                        });
+            }
+        });
+    }
+
+    void do_unload() override {
+        Res<texture_t>{path_}.reset(nullptr);
+    }
+
+    int num = 0;
+};
+
 class model_asset_t : public builtin_asset_t {
 public:
     explicit model_asset_t(std::string path)
@@ -480,6 +527,8 @@ asset_object_t* builtin_asset_resolver_t::create_for_type(const std::string& typ
         return new model_asset_t(path);
     } else if (type == "texture") {
         return new texture_asset_t(path);
+    } else if (type == "strings") {
+        return new StringsAsset(path);
     } else if (type == "pack") {
         return new pack_asset_t(path);
     }

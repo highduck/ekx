@@ -9,6 +9,7 @@
 #include "ttf_editor_asset.hpp"
 #include "atlas_editor_asset.hpp"
 #include "dynamic_atlas_editor_asset.hpp"
+#include "TranslationsAsset.hpp"
 
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
@@ -116,6 +117,7 @@ editor_project_t::editor_project_t() {
     register_asset_factory<TTFEditorAsset>();
     register_asset_factory<AtlasEditorAsset>();
     register_asset_factory<DynamicAtlasEditorAsset>();
+    register_asset_factory<TranslationsAsset>();
 }
 
 editor_project_t::~editor_project_t() {
