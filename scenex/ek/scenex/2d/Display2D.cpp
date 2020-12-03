@@ -89,6 +89,17 @@ Text2D::Text2D(std::string text, TextFormat format)
           format{format} {
 }
 
+float findTextScale(float2 textSize, rect_f rect) {
+    auto textScale = 1.0f;
+    if (rect.width > 0.0f && textSize.x > 0.0f) {
+        textScale = std::min(textScale, rect.width / textSize.x);
+    }
+    if (rect.height > 0.0f && textSize.y > 0.0f) {
+        textScale = std::min(textScale, rect.height / textSize.y);
+    }
+    return textScale;
+}
+
 void Text2D::draw() {
     auto& textDrawer = TextDrawer::shared;
     auto& blockInfo = TextDrawer::sharedTextBlockInfo;
@@ -103,16 +114,31 @@ void Text2D::draw() {
     }
 
     const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
+    if (str == nullptr || *str == '\0') {
+        return;
+    }
+
+    if (adjustsFontSizeToFitBounds) {
+        textDrawer.getTextSize(str, blockInfo);
+        const auto textScale = findTextScale(blockInfo.size, rect);
+        if (textScale < 1.0f) {
+            textDrawer.format.size *= textScale;
+        }
+    }
+
     textDrawer.getTextSize(str, blockInfo);
 
     const float2 position = rect.position + (rect.size - blockInfo.size) * format.alignment;
     textDrawer.position = position + float2{0.0f, blockInfo.line[0].y};
     textDrawer.drawWithBlockInfo(str, blockInfo);
+
     if (showTextBounds) {
         const rect_f bounds{position, blockInfo.size};
         draw2d::strokeRect(expand(bounds, 1.0f), 0xFF0000_rgb, 1);
     }
+
 }
+
 
 rect_f Text2D::getBounds() const {
     if (hitFullBounds) {
@@ -124,11 +150,23 @@ rect_f Text2D::getBounds() const {
 
     const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
 
+    if (adjustsFontSizeToFitBounds) {
+        textDrawer.getTextSize(str, blockInfo);
+        const auto textScale = findTextScale(blockInfo.size, rect);
+        if (textScale < 1.0f) {
+            textDrawer.format.size *= textScale;
+        }
+    }
+
     textDrawer.getTextSize(str, blockInfo);
-    return {
-            rect.position + (rect.size - blockInfo.size) * format.alignment,
-            blockInfo.size
+    const auto textSize = blockInfo.size;
+
+    rect_f textBounds{
+            rect.position + (rect.size - textSize) * format.alignment,
+            textSize
     };
+
+    return textBounds;
 }
 
 bool Text2D::hitTest(float2 point) const {

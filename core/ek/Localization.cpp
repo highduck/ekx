@@ -6,10 +6,6 @@
 
 namespace ek {
 
-bool StringCatalog::has(const std::string& text) const {
-    return strings.find(text) != strings.end();
-}
-
 bool StringCatalog::init(std::vector<uint8_t>&& sourceData) {
     data = std::move(sourceData);
     if (data.empty()) {
@@ -81,14 +77,18 @@ bool StringCatalog::init(std::vector<uint8_t>&& sourceData) {
     return true;
 }
 
-const char* StringCatalog::getTranslation(const std::string& text) const {
+bool StringCatalog::has(const char* text) const {
+    return strings.find(text) != strings.end();
+}
+
+const char* StringCatalog::get(const char* text) const {
     auto it = strings.find(text);
-    return it != strings.end() ? it->second : text.c_str();
+    return it != strings.end() ? it->second : text;
 }
 
 const char* Localization::getText(const char* str) const {
     if (languageCatalog) {
-        return languageCatalog->getTranslation(str);
+        return languageCatalog->get(str);
     }
     return str;
 }
@@ -119,7 +119,7 @@ const std::vector<std::string>& Localization::getAvailableLanguages() const {
     return languagesList;
 }
 
-bool Localization::has(const std::string& text) const {
+bool Localization::has(const char* text) const {
     return languageCatalog && languageCatalog->has(text);
 }
 

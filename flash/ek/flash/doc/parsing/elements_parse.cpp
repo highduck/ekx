@@ -108,7 +108,9 @@ float2 read_alignment(const xml_node& node) {
 
 text_attributes_t& operator<<(text_attributes_t& r, const xml_node& node) {
     r.alignment = read_alignment(node);
-    r.alias_text = node.attribute("aliasText").as_bool();
+    r.aliasText = node.attribute("aliasText").as_bool();
+    r.bold = node.attribute("bold").as_bool();
+    r.italic = node.attribute("italic").as_bool();
     r.size = node.attribute("size").as_float(12.0f);
     r.line_height = node.attribute("lineHeight").as_float(r.size);
     r.line_spacing = node.attribute("lineSpacing").as_float(0.0f);

@@ -183,8 +183,12 @@ public:
     argb32_t fillColor = 0x00000000_argb;
 
     bool localize = false;
+    bool wordWrap = false;
 
-    // if enabled hit test check not rect, but visible text bounds
+    // Reduce font-size until text fits to the field bounds (if bounds not empty)
+    bool adjustsFontSizeToFitBounds = false;
+
+    // if enabled hit test check bounds, otherwise hits visible text bounds
     bool hitFullBounds = true;
 
     // debug metrics

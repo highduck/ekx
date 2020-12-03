@@ -39,11 +39,14 @@ uint32_t inline decodeUTF8(uint32_t& state, uint32_t& codepoint, uint32_t byte) 
 }
 
 struct UTF8Decoder {
-    const uint8_t* it = reinterpret_cast<const uint8_t*>("");
-    uint32_t state = 0;
+    const uint8_t* it;
+    uint32_t state;
 
-    explicit UTF8Decoder(const char* data) {
-        reset(reinterpret_cast<const uint8_t*>(data));
+    UTF8Decoder() = delete;
+
+    explicit UTF8Decoder(const char* data) :
+            it{reinterpret_cast<const uint8_t*>(data)},
+            state{0} {
     }
 
     void reset(const uint8_t* data) {
