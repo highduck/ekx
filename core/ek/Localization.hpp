@@ -17,6 +17,8 @@ public:
     /// specification: https://www.gnu.org/software/gettext/manual/gettext.html#Binaries
     bool init(std::vector<uint8_t>&& sourceData);
 
+    bool has(const std::string& text) const;
+
     // returns translated c-string or original text if not found
     [[nodiscard]] const char* getTranslation(const std::string& text) const;
 
@@ -35,9 +37,14 @@ public:
 
     void load(const std::string& name, std::vector<uint8_t>&& buffer);
 
+    [[nodiscard]] const std::vector<std::string>& getAvailableLanguages() const;
+
+    bool has(const std::string& text) const;
+
 public:
     static Localization instance;
 private:
+    std::vector<std::string> languagesList;
     std::unordered_map<std::string, StringCatalog> languages;
     StringCatalog* languageCatalog = nullptr;
     std::string language;
