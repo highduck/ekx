@@ -5,6 +5,7 @@
 #include <ek/util/assets.hpp>
 #include <ek/scenex/text/TextDrawer.hpp>
 #include <ek/math/bounds_builder.hpp>
+#include <ek/Localization.hpp>
 
 namespace ek {
 
@@ -100,11 +101,13 @@ void Text2D::draw() {
         draw2d::state.set_empty_texture();
         draw2d::strokeRect(expand(rect, 1.0f), borderColor, 1);
     }
-    textDrawer.getTextSize(text.c_str(), blockInfo);
+
+    const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
+    textDrawer.getTextSize(str, blockInfo);
 
     const float2 position = rect.position + (rect.size - blockInfo.size) * format.alignment;
     textDrawer.position = position + float2{0.0f, blockInfo.line[0].y};
-    textDrawer.drawWithBlockInfo(text.c_str(), blockInfo);
+    textDrawer.drawWithBlockInfo(str, blockInfo);
     if (showTextBounds) {
         const rect_f bounds{position, blockInfo.size};
         draw2d::strokeRect(expand(bounds, 1.0f), 0xFF0000_rgb, 1);
@@ -118,7 +121,10 @@ rect_f Text2D::getBounds() const {
     auto& textDrawer = TextDrawer::shared;
     auto& blockInfo = TextDrawer::sharedTextBlockInfo;
     textDrawer.format = format;
-    textDrawer.getTextSize(text.c_str(), blockInfo);
+
+    const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
+
+    textDrawer.getTextSize(str, blockInfo);
     return {
             rect.position + (rect.size - blockInfo.size) * format.alignment,
             blockInfo.size

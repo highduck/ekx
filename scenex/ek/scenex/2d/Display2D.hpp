@@ -182,6 +182,8 @@ public:
     argb32_t borderColor = 0x00FF0000_argb;
     argb32_t fillColor = 0x00000000_argb;
 
+    bool localize = false;
+
     // if enabled hit test check not rect, but visible text bounds
     bool hitFullBounds = true;
 

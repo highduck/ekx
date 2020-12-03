@@ -14,6 +14,8 @@
 #include <ek/ext/sharing/sharing.hpp>
 #include <ek/scenex/data/sg_factory.hpp>
 #include <ek/goodies/GameScreen.hpp>
+#include <ek/app/device.hpp>
+#include <ek/Localization.hpp>
 #include "Ads.hpp"
 
 namespace ek {
@@ -27,6 +29,16 @@ AppBox::AppBox(AppBoxConfig config_) :
     admob::initialize(config.admob);
     service_locator_instance<Ads>::init(config.ads);
     game_services_init();
+
+    // initialize translations
+    auto lang = get_user_string("selected_lang", "");
+    if (lang.empty()) {
+        lang = get_device_lang();
+    }
+    if (lang.size() > 2) {
+        lang.resize(2);
+    }
+    Localization::instance.setLanguage(lang);
 }
 
 void set_state_by_name(ecs::entity e, const std::string& state) {
@@ -119,6 +131,8 @@ void AppBox::initDefaultControls(ecs::entity e) {
                 set_state_on_off(btn, audio.vibro.enabled());
             }
         }
+
+        initLanguageButton(e);
     }
 }
 
@@ -157,6 +171,30 @@ void AppBox::initDownloadAppButtons(ecs::entity) {
 //    wrap_button(banner, "app_store", config.downloadApp.appStore);
 //
 //    append(e, banner);
+}
+
+void AppBox::initLanguageButton(ecs::entity e) {
+    auto btn = find(e, "language");
+    if (btn) {
+        btn.get<Button>().clicked += [btn] {
+            auto& lm = Localization::instance;
+            auto& locales = lm.getAvailableLanguages();
+            auto locale = std::find(locales.begin(), locales.end(), lm.getLanguage());
+            if (locale != locales.end()) {
+                ++locale;
+                if (locale == locales.end()) {
+                    locale = locales.begin();
+                }
+                auto& lang = *locale;
+                lm.setLanguage(lang);
+                set_user_string("selected_lang", lang);
+                auto lbl = find(btn, "label");
+                if (lbl) {
+                    get_drawable<Text2D>(lbl).text = lang;
+                }
+            }
+        };
+    }
 }
 
 }

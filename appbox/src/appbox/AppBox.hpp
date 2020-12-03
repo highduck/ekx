@@ -39,9 +39,9 @@ public:
 
     void rateUs();
 
-
     void initDownloadAppButtons(ecs::entity e);
 
+    void initLanguageButton(ecs::entity e);
 public:
     AppBoxConfig config;
 

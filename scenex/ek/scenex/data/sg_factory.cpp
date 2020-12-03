@@ -10,6 +10,7 @@
 #include <ek/scenex/2d/UglyFilter2D.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/math/bounds_builder.hpp>
+#include <ek/Localization.hpp>
 
 namespace ek {
 
@@ -54,6 +55,7 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
 
         auto& display = ecs::get_or_create<Display2D>(entity);
         auto dtext = std::make_unique<Text2D>(dynamicText.text, format);
+        dtext->localize = Localization::instance.has(dynamicText.text);
         dtext->rect = dynamicText.rect;
         display.drawable = std::move(dtext);
     }
