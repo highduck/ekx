@@ -35,9 +35,16 @@ void TextBlockInfo::updateLine(float length, float height) {
     }
 }
 
+void TextBlockInfo::scale(float factor) {
+    size *= factor;
+    for (int i = 0; i < numLines; ++i) {
+        line[i] *= factor;
+    }
+}
+
 TextBlockInfo TextDrawer::sharedTextBlockInfo{};
 
-void TextDrawer::draw(const char *text) {
+void TextDrawer::draw(const char* text) {
     if (!format.font) {
         return;
     }
@@ -46,7 +53,7 @@ void TextDrawer::draw(const char *text) {
     drawWithBlockInfo(text, info);
 }
 
-void TextDrawer::drawWithBlockInfo(const char *text, const TextBlockInfo& info) {
+void TextDrawer::drawWithBlockInfo(const char* text, const TextBlockInfo& info) {
     auto font = format.font;
     if (!font) {
         return;
@@ -70,7 +77,7 @@ void TextDrawer::drawWithBlockInfo(const char *text, const TextBlockInfo& info) 
     draw2d::state.restore_program();
 }
 
-void TextDrawer::drawLayer(const char *text, const TextLayerEffect& layer, const TextBlockInfo& info) const {
+void TextDrawer::drawLayer(const char* text, const TextLayerEffect& layer, const TextBlockInfo& info) const {
     auto font = format.font;
     if (!font) {
         return;
@@ -90,7 +97,7 @@ void TextDrawer::drawLayer(const char *text, const TextLayerEffect& layer, const
 
     draw2d::state.save_color().scaleColor(layer.color);
 
-    const graphics::texture_t *prevTexture = nullptr;
+    const graphics::texture_t* prevTexture = nullptr;
     uint32_t prevCodepointOnLine = 0;
     Glyph gdata;
     UTF8Decoder decoder{text};
@@ -143,7 +150,7 @@ void TextDrawer::drawLayer(const char *text, const TextLayerEffect& layer, const
     draw2d::state.restore_color();
 }
 
-void TextDrawer::getTextSize(const char *text, TextBlockInfo& info) const {
+void TextDrawer::getTextSize(const char* text, TextBlockInfo& info) const {
     info.reset();
 
     if (!format.font) {
@@ -184,7 +191,7 @@ void TextDrawer::getTextSize(const char *text, TextBlockInfo& info) const {
     info.pushLine(size);
 }
 
-void TextDrawer::drawFormat(const char *fmt, ...) {
+void TextDrawer::drawFormat(const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
     // TODO: TextBuffer with dynamic growing memory for text?

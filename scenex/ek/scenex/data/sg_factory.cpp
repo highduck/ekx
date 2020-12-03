@@ -55,7 +55,8 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
 
         auto& display = ecs::get_or_create<Display2D>(entity);
         auto dtext = std::make_unique<Text2D>(dynamicText.text, format);
-        dtext->localize = Localization::instance.has(dynamicText.text);
+        dtext->adjustsFontSizeToFitBounds =
+                dtext->localize = Localization::instance.has(dynamicText.text.c_str());
         dtext->rect = dynamicText.rect;
         display.drawable = std::move(dtext);
     }

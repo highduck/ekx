@@ -59,7 +59,7 @@ void AppBox::initDefaultControls(ecs::entity e) {
         // VERSION
         auto e_version = find(e, "version");
         if (e_version) {
-            e_version.get<Display2D>().get<Text2D>()->text = "VERSION: " + config.version;
+            e_version.get<Display2D>().get<Text2D>()->text = config.version;
         }
     }
     {
@@ -70,7 +70,6 @@ void AppBox::initDefaultControls(ecs::entity e) {
             if (lbl) {
                 auto* txt = lbl.get<Display2D>().get<Text2D>();
                 txt->hitFullBounds = true;
-                txt->text = "PRIVACY POLICY";
             }
             e_pp.get_or_create<Interactive>();
             e_pp.get_or_create<Button>().clicked += [this] {

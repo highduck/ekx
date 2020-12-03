@@ -93,7 +93,9 @@ struct edge_t {
 
 struct text_attributes_t {
     float2 alignment{};// alignment = "left"; / center / right
-    bool alias_text = false;
+    bool aliasText = false;
+    bool bold = false;
+    bool italic = false;
     float4 color{0.0f, 0.0f, 0.0f, 1.0f};
     std::string face; // face="Font 1*"
     float line_height = 20; // 20
@@ -416,14 +418,16 @@ struct element_t {
     bool isVisible = true;
 
     //// text
-    bool isSelectable;
     std::vector<text_run_t> textRuns;
     std::vector<filter_t> filters;
 
     // dynamic text
-    bool border;// = false;
+    bool isSelectable = true;
+    bool border = false;
+    bool autoExpand = false;
+    bool scrollable = false;
+    bool renderAsHTML = false;
     FontRenderingMode fontRenderingMode = FontRenderingMode::normal;
-    bool autoExpand;// = false;
     TextLineType lineType = TextLineType::SingleLine;
 
     blend_mode_t blend_mode = blend_mode_t::last;

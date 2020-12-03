@@ -82,6 +82,7 @@ struct TextFormat {
     bool kerning = true;
     bool underline = false;
     bool strikethrough = false;
+    bool wordWrap = false;
 
     inline static const int LayersMax = 4;
 

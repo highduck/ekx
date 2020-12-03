@@ -55,12 +55,13 @@ void doc_parser::parse(const xml_node& node, element_t& r) const {
     r.isVisible = node.attribute("isVisible").as_bool(true);
 
     /// text
-    r.isSelectable = node.attribute("isSelectable").as_bool(true);
-
     /// dynamic text
+    r.isSelectable = node.attribute("isSelectable").as_bool(true);
     r.border = node.attribute("border").as_bool();
-    r.fontRenderingMode << node.attribute("fontRenderingMode").value();
     r.autoExpand = node.attribute("autoExpand").as_bool();
+    r.scrollable = node.attribute("scrollable").as_bool();
+    r.renderAsHTML = node.attribute("renderAsHTML").as_bool();
+    r.fontRenderingMode << node.attribute("fontRenderingMode").value();
     r.lineType << node.attribute("lineType").value();
     r.transformationPoint = read_transformation_point(node);
     r.color << node;

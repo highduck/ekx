@@ -7,9 +7,12 @@
 namespace ek {
 
 struct TextBlockInfo {
+
+    inline constexpr static int MaxCount = 128;
+
     // {max length; total height}
     float2 size{};
-    float2 line[128]{};
+    float2 line[MaxCount]{};
     int numLines = 0;
 
     void pushLine(float emptyLineHeight);
@@ -17,11 +20,14 @@ struct TextBlockInfo {
     void reset();
 
     void updateLine(float length, float height);
+
+    void scale(float factor);
 };
 
 class TextDrawer {
 private:
     TextDrawer() = default;
+
 public:
     // user set
     TextFormat format{};
