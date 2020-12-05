@@ -54,7 +54,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         text/Font.cpp
         text/FontImplBase.cpp
         text/FontImplBase.hpp
-        text/TextDrawer.cpp
+        text/TextEngine.cpp
 
         AudioManager.cpp
         AudioManager.hpp

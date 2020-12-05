@@ -112,12 +112,14 @@ text_attributes_t& operator<<(text_attributes_t& r, const xml_node& node) {
     r.bold = node.attribute("bold").as_bool();
     r.italic = node.attribute("italic").as_bool();
     r.size = node.attribute("size").as_float(12.0f);
-    r.line_height = node.attribute("lineHeight").as_float(r.size);
-    r.line_spacing = node.attribute("lineSpacing").as_float(0.0f);
-    r.bitmap_size = node.attribute("bitmapSize").as_int(static_cast<uint32_t>(r.size * 20u));
+    r.lineHeight = node.attribute("lineHeight").as_float(r.size);
+    r.lineSpacing = node.attribute("lineSpacing").as_float(0.0f);
+    r.bitmapSize = node.attribute("bitmapSize").as_int(static_cast<uint32_t>(r.size * 20u));
+    r.autoKern = node.attribute("autoKern").as_bool(true);
+
     r.face = node.attribute("face").value();
     r.color = read_color(node, "fillColor", "alpha");
-    // TODO: where is kerning? (maybe default is true and we need to disable to see attribute name)
+
     return r;
 }
 

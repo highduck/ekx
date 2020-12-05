@@ -8,7 +8,7 @@
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app/device.hpp>
 #include <ek/scenex/text/Font.hpp>
-#include <ek/scenex/text/TextDrawer.hpp>
+#include <ek/scenex/text/TextEngine.hpp>
 
 // TODO: EK_DEV_BUILD
 #ifndef NDEBUG
@@ -81,9 +81,9 @@ struct RealTimeGraph {
 //        TextDrawer::shared.position = {width, height - y + 0.5f * textFormat.size};
 //        TextDrawer::shared.drawFormat(markerFormat, history.at_backward(0));
 
-        TextDrawer::shared.format = devTextFormat;
-        TextDrawer::shared.position = {2.0f, 2.0f + devTextFormat.size};
-        TextDrawer::shared.drawFormat(titleFormat, name.c_str(), value);
+        TextEngine::shared.format = devTextFormat;
+        TextEngine::shared.position = {2.0f, 2.0f + devTextFormat.size};
+        TextEngine::shared.drawFormat(titleFormat, name.c_str(), value);
     }
 
     float min = 0.0f;

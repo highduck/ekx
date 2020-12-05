@@ -183,7 +183,6 @@ public:
     argb32_t fillColor = 0x00000000_argb;
 
     bool localize = false;
-    bool wordWrap = false;
 
     // Reduce font-size until text fits to the field bounds (if bounds not empty)
     bool adjustsFontSizeToFitBounds = false;

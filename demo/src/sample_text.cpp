@@ -1,7 +1,7 @@
 #include "sample_text.hpp"
 
 #include <string>
-#include <ek/scenex/text/TextDrawer.hpp>
+#include <ek/scenex/text/TextEngine.hpp>
 #include <ek/scenex/text/TrueTypeFont.hpp>
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
@@ -16,6 +16,7 @@ ecs::entity createText(const char* name, const char* font, const char* text) {
 
     tf->format.font.setID(font);
     tf->format.size = 48.0f;
+    tf->format.wordWrap = true;
 
     // primary
     tf->format.layers[0].color = 0xFFFF77_rgb;

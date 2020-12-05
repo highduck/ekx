@@ -62,6 +62,7 @@ bool BitmapFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
         const auto& g = it->second;
         outGlyph.advanceWidth = static_cast<float>(g.advanceWidth) / unitsPerEM;
         outGlyph.lineHeight = lineHeightMultiplier;
+        outGlyph.ascender = lineHeightMultiplier;
         outGlyph.rect = g.box / unitsPerEM;
         outGlyph.source = this;
         return true;

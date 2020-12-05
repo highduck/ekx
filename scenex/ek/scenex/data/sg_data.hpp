@@ -51,14 +51,16 @@ struct dynamic_text_data {
     float size;
     float2 alignment;
     rect_f rect;
-    float line_spacing = 0.0f;
-    float line_height = 0.0f;
+    float lineSpacing = 0.0f;
+    float lineHeight = 0.0f;
 
     std::vector<SGTextLayerData> layers;
 
+    bool wordWrap = false;
+
     template<typename S>
     void serialize(IO<S>& io) {
-        io(text, font, size, alignment, rect, line_spacing, line_height, layers);
+        io(text, font, size, alignment, rect, lineSpacing, lineHeight, layers, wordWrap);
     }
 };
 
