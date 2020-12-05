@@ -186,8 +186,8 @@ void GameScreenManager::update() {
             transition.t = 1.0f;
         }
 
-        transition.checkStates();
         applyTransitionEffect(transition);
+        transition.checkStates();
 
         if (transition.nextPlayCompleted && transition.prevPlayCompleted) {
             transition.active = false;

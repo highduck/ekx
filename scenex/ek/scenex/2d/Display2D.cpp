@@ -103,6 +103,9 @@ float findTextScale(float2 textSize, rect_f rect) {
 void adjustFontSize(TextEngine& engine, const char* text, rect_f bounds) {
     auto& info = TextEngine::sharedTextBlockInfo;
     const float minFontSize = 10.0f;
+
+    engine.format.allowLetterWrap = false;
+
     engine.getTextSize(text, info);
 
     if (engine.format.wordWrap) {
@@ -120,6 +123,7 @@ void adjustFontSize(TextEngine& engine, const char* text, rect_f bounds) {
             }
         }
     }
+    engine.format.allowLetterWrap = true;
 }
 
 void Text2D::draw() {

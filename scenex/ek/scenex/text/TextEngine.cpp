@@ -282,7 +282,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
                     continue;
                 }
                     // at least one symbol added to line
-                else if (it > text + line.begin) {
+                else if (it > text + line.begin && format.allowLetterWrap) {
                     line.close(size + leading, static_cast<int>(prev - text));
                     info.addLine(line);
                     line = {};
@@ -293,16 +293,15 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
                     // use current codepoint
                     continue;
                 }
-            } else {
-                if(info.numLines == 0) {
-                    line.updateSize(right, size * metrics.lineHeight + leading);
-                    info.ascender = size * metrics.ascender;
-                }
-                else {
-                    line.updateSize(right, size * metrics.lineHeight);
-                }
-                x += kern + size * metrics.advanceWidth + letterSpacing;
             }
+            if(info.numLines == 0) {
+                line.updateSize(right, size * metrics.lineHeight);
+                info.ascender = std::max(info.ascender, size * metrics.ascender);
+            }
+            else {
+                line.updateSize(right, size * metrics.lineHeight + leading);
+            }
+            x += kern + size * metrics.advanceWidth + letterSpacing;
         }
         prevCodepointOnLine = codepoint;
         prev = it;
