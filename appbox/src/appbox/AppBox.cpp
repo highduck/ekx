@@ -175,7 +175,7 @@ void AppBox::initDownloadAppButtons(ecs::entity) {
 void AppBox::initLanguageButton(ecs::entity e) {
     auto btn = find(e, "language");
     if (btn) {
-        btn.get<Button>().clicked += [btn] {
+        btn.get<Button>().clicked += [] {
             auto& lm = Localization::instance;
             auto& locales = lm.getAvailableLanguages();
             auto locale = std::find(locales.begin(), locales.end(), lm.getLanguage());
@@ -187,10 +187,6 @@ void AppBox::initLanguageButton(ecs::entity e) {
                 auto& lang = *locale;
                 lm.setLanguage(lang);
                 set_user_string("selected_lang", lang);
-                auto lbl = find(btn, "label");
-                if (lbl) {
-                    get_drawable<Text2D>(lbl).text = lang;
-                }
             }
         };
     }

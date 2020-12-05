@@ -3,7 +3,7 @@
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/util/assets.hpp>
-#include <ek/scenex/text/TextDrawer.hpp>
+#include <ek/scenex/text/TextEngine.hpp>
 #include <ek/math/bounds_builder.hpp>
 #include <ek/Localization.hpp>
 
@@ -100,10 +100,33 @@ float findTextScale(float2 textSize, rect_f rect) {
     return textScale;
 }
 
+void adjustFontSize(TextEngine& engine, const char* text, rect_f bounds) {
+    auto& info = TextEngine::sharedTextBlockInfo;
+    const float minFontSize = 10.0f;
+    engine.getTextSize(text, info);
+
+    if (engine.format.wordWrap) {
+        while (engine.format.size > minFontSize &&
+               (info.size.x > bounds.width || info.size.y > bounds.height)) {
+            engine.format.size -= 1.0f;
+            engine.getTextSize(text, info);
+        }
+    } else {
+        const auto textScale = findTextScale(info.size, bounds);
+        if (textScale < 1.0f) {
+            engine.format.size *= textScale;
+            if (engine.format.size < minFontSize) {
+                engine.format.size = minFontSize;
+            }
+        }
+    }
+}
+
 void Text2D::draw() {
-    auto& textDrawer = TextDrawer::shared;
-    auto& blockInfo = TextDrawer::sharedTextBlockInfo;
+    auto& textDrawer = TextEngine::shared;
+    auto& blockInfo = TextEngine::sharedTextBlockInfo;
     textDrawer.format = format;
+    textDrawer.maxWidth = format.wordWrap ? rect.width : 0.0f;
     if (fillColor.a > 0) {
         draw2d::state.set_empty_texture();
         draw2d::quad(rect, fillColor);
@@ -119,43 +142,33 @@ void Text2D::draw() {
     }
 
     if (adjustsFontSizeToFitBounds) {
-        textDrawer.getTextSize(str, blockInfo);
-        const auto textScale = findTextScale(blockInfo.size, rect);
-        if (textScale < 1.0f) {
-            textDrawer.format.size *= textScale;
-        }
+        adjustFontSize(textDrawer, str, rect);
     }
 
     textDrawer.getTextSize(str, blockInfo);
 
     const float2 position = rect.position + (rect.size - blockInfo.size) * format.alignment;
-    textDrawer.position = position + float2{0.0f, blockInfo.line[0].y};
+    textDrawer.position = position + float2{0.0f, blockInfo.ascender};
     textDrawer.drawWithBlockInfo(str, blockInfo);
 
     if (showTextBounds) {
         const rect_f bounds{position, blockInfo.size};
         draw2d::strokeRect(expand(bounds, 1.0f), 0xFF0000_rgb, 1);
     }
-
 }
-
 
 rect_f Text2D::getBounds() const {
     if (hitFullBounds) {
         return rect;
     }
-    auto& textDrawer = TextDrawer::shared;
-    auto& blockInfo = TextDrawer::sharedTextBlockInfo;
+    auto& textDrawer = TextEngine::shared;
+    auto& blockInfo = TextEngine::sharedTextBlockInfo;
     textDrawer.format = format;
 
     const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
 
     if (adjustsFontSizeToFitBounds) {
-        textDrawer.getTextSize(str, blockInfo);
-        const auto textScale = findTextScale(blockInfo.size, rect);
-        if (textScale < 1.0f) {
-            textDrawer.format.size *= textScale;
-        }
+        adjustFontSize(textDrawer, str, rect);
     }
 
     textDrawer.getTextSize(str, blockInfo);

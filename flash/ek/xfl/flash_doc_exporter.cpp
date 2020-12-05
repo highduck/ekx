@@ -132,10 +132,14 @@ void processTextField(const element_t& el, export_item_t& item, const flash_doc&
     tf.text = replace(textRun.characters, '\r', '\n');
     tf.font = faceName;
     tf.size = textRun.attributes.size;
+    if (el.lineType == TextLineType::Multiline) {
+        tf.wordWrap = true;
+    }
     tf.rect = expand(el.rect, 2.0f);
+//    tf.rect = el.rect;
     tf.alignment = textRun.attributes.alignment;
-    tf.line_height = textRun.attributes.line_height;
-    tf.line_spacing = textRun.attributes.line_spacing;
+    tf.lineHeight = textRun.attributes.lineHeight;
+    tf.lineSpacing = textRun.attributes.lineSpacing;
 
     SGTextLayerData layer;
     layer.color = argb32_t{textRun.attributes.color};

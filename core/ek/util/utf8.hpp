@@ -29,13 +29,25 @@ static const uint8_t utf8d[] = {
         1, 3, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // s7..s8
 };
 
-uint32_t inline decodeUTF8(uint32_t& state, uint32_t& codepoint, uint32_t byte) {
+inline uint32_t decodeUTF8(uint32_t& state, uint32_t& codepoint, uint32_t byte) {
     uint32_t type = utf8d[byte];
     codepoint = (state != UTF8State_ACCEPT) ?
                 (byte & 0x3fu) | (codepoint << 6) :
                 (0xff >> type) & (byte);
     state = utf8d[256 + state * 16 + type];
     return state;
+}
+
+inline const char* decodeUTF8(const char* it, uint32_t& codepoint) {
+    uint32_t state = 0;
+    if (decodeUTF8(state, codepoint, *reinterpret_cast<const uint8_t*>(it++)) != 0) {
+        if (decodeUTF8(state, codepoint, *reinterpret_cast<const uint8_t*>(it++)) != 0) {
+            if (decodeUTF8(state, codepoint, *reinterpret_cast<const uint8_t*>(it++)) != 0) {
+                decodeUTF8(state, codepoint, *reinterpret_cast<const uint8_t*>(it++));
+            }
+        }
+    }
+    return it;
 }
 
 struct UTF8Decoder {
@@ -57,6 +69,10 @@ struct UTF8Decoder {
     // true if next codepoint decoded
     inline bool decodeNextByte(uint32_t& codepoint) {
         return decodeUTF8(state, codepoint, *(it++)) == 0;
+    }
+
+    inline int positionTo(const char* ptr) const {
+        return static_cast<int>(it - reinterpret_cast<const uint8_t*>(ptr));
     }
 
     inline bool decode(uint32_t& codepoint) {

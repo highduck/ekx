@@ -265,8 +265,21 @@ void doc_parser::parse(const xml_node& node, frame_t& r) const {
     r.keyMode = node.attribute("keyMode").as_int(0);
     r.acceleration = node.attribute("acceleration").as_int(0);
 
+
+    r.script = node.child("Actionscript").child_value("script");
+
     for (const auto& item : node.child("elements").children()) {
         r.elements.push_back(read<element_t>(item));
+    }
+
+    if(!r.script.empty()) {
+        if (r.script.find("valign=middle") != std::string::npos) {
+            for (auto& el : r.elements) {
+                if (el.elementType == element_type::dynamic_text) {
+                    el.textRuns[0].attributes.alignment.y = 0.5;
+                }
+            }
+        }
     }
 
     for (const auto& item : node.child("tweens").children()) {

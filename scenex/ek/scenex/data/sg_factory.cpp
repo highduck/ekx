@@ -39,7 +39,8 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
         const auto& dynamicText = data->dynamicText.value();
         TextFormat format{dynamicText.font.c_str(), dynamicText.size};
         format.alignment = dynamicText.alignment;
-        format.leading = dynamicText.line_spacing;
+        format.leading = dynamicText.lineSpacing;
+        format.wordWrap = dynamicText.wordWrap;
         format.layersCount = dynamicText.layers.size();
         if (format.layersCount > 4) {
             format.layersCount = 4;
@@ -55,8 +56,8 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
 
         auto& display = ecs::get_or_create<Display2D>(entity);
         auto dtext = std::make_unique<Text2D>(dynamicText.text, format);
-        dtext->adjustsFontSizeToFitBounds =
-                dtext->localize = Localization::instance.has(dynamicText.text.c_str());
+        dtext->localize = Localization::instance.has(dynamicText.text.c_str());
+        dtext->adjustsFontSizeToFitBounds = dtext->localize;
         dtext->rect = dynamicText.rect;
         display.drawable = std::move(dtext);
     }
