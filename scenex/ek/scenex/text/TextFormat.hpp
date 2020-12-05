@@ -83,6 +83,7 @@ struct TextFormat {
     bool underline = false;
     bool strikethrough = false;
     bool wordWrap = false;
+    bool allowLetterWrap = true;
 
     inline static const int LayersMax = 4;
 
