@@ -47,12 +47,12 @@ void add_objects(ecs::entity game, int N) {
 }
 
 ecs::entity create() {
-    ecs::entity sampleContainer = create_node_2d("piko");
+    ecs::entity sampleContainer = createNode2D("piko");
 
     // PIKO
     if (showPiko) {
         ecs::entity e;
-        e = create_node_2d("book");
+        e = createNode2D("book");
         assignScript<book>(e);
         //ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
         ecs::get<Transform2D>(e).position = {20.0f, 20.0f};
@@ -60,7 +60,7 @@ ecs::entity create() {
         ecs::assign<Bounds2D>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f}).scissors = true;
         append(sampleContainer, e);
 
-        e = create_node_2d("dna");
+        e = createNode2D("dna");
         assignScript<dna>(e);
 //    ecs::get<transform_2d>(e).scale = {2.0f, 2.0f};
         ecs::get<Transform2D>(e).position = {20.0f, 20.0f + 128.0f + 10.0f};
@@ -68,7 +68,7 @@ ecs::entity create() {
         ecs::assign<Bounds2D>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f}).scissors = true;
         append(sampleContainer, e);
 
-        e = create_node_2d("diamonds");
+        e = createNode2D("diamonds");
         assignScript<diamonds>(e);
         ecs::get<Transform2D>(e).position = {20.0f + 128.0f + 10.0f, 20.0f};
         ecs::assign<Bounds2D>(e, rect_f{0.0f, 0.0f, 128.0f, 128.0f}).scissors = true;;

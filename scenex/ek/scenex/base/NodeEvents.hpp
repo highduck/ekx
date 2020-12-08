@@ -6,6 +6,7 @@
 #include <string>
 #include <any>
 #include <utility>
+#include "Node.hpp"
 
 namespace ek {
 
@@ -52,5 +53,29 @@ struct NodeEventHandler {
 private:
     std::unordered_map<NodeEventType, Signal> map_;
 };
+
+
+/*** events functions ***/
+
+void dispatch_broadcast(ecs::entity e, const NodeEventData& data);
+void dispatch_bubble(ecs::entity e, const NodeEventData& data);
+
+inline void broadcast(ecs::entity e, const std::string& event) {
+    dispatch_broadcast(e, {event, e, nullptr});
+}
+
+template<typename Payload>
+inline void broadcast(ecs::entity e, const std::string& event, Payload payload) {
+    dispatch_broadcast(e, {event, e, std::any{payload}});
+}
+
+template<>
+inline void broadcast(ecs::entity e, const std::string& event, const char* payload) {
+    dispatch_broadcast(e, {event, e, std::any{std::string{payload}}});
+}
+
+inline void notify_parents(ecs::entity e, const std::string& event, const std::string& payload = "") {
+    dispatch_bubble(e, {event, e, std::any{payload}});
+}
 
 }

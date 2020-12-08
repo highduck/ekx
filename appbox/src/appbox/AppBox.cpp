@@ -5,14 +5,12 @@
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <billing.hpp>
-#include <ek/scenex/utility/basic_game_utility.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/util/strings.hpp>
 #include <utility>
 #include <ek/ext/game_center/game_center.hpp>
 #include <ek/ext/sharing/sharing.hpp>
-#include <ek/scenex/data/sg_factory.hpp>
 #include <ek/goodies/GameScreen.hpp>
 #include <ek/app/device.hpp>
 #include <ek/Localization.hpp>
@@ -190,6 +188,32 @@ void AppBox::initLanguageButton(ecs::entity e) {
             }
         };
     }
+}
+
+void AppBox::showAchievements() {
+    achievement_show();
+}
+
+Leaderboard::Leaderboard(const char* id) :
+        id_{id} {
+
+}
+
+void Leaderboard::show() const {
+    leader_board_show(id_.c_str());
+}
+
+void Leaderboard::submit(int score) const {
+    leader_board_submit(id_.c_str(), score);
+}
+
+Achievement::Achievement(const char* code, int count) :
+        code_{code},
+        count_{count} {
+}
+
+void Achievement::run() {
+    achievement_update(code_.c_str(), count_);
 }
 
 }

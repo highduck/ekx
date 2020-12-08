@@ -13,6 +13,7 @@
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ui/minimal.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
 
 namespace ek {
@@ -104,7 +105,7 @@ void DemoApp::start_game() {
 //    setup_game(w, game);
     SampleText::prepareInternalResources();
 
-    SampleBase::samplesContainer = create_node_2d("sample");
+    SampleBase::samplesContainer = createNode2D("sample");
     append(game, SampleBase::samplesContainer);
 
     auto prev = createButton("<", [] { scrollSample(-1); });
@@ -112,11 +113,11 @@ void DemoApp::start_game() {
     ecs::assign<LayoutRect>(prev).enableAlignX(0, 30);
     ecs::assign<LayoutRect>(next).enableAlignX(1, -30);
 
-    tfSampleTitle = create_node_2d("title");
+    tfSampleTitle = createNode2D("title");
     addText(tfSampleTitle, "");
     ecs::assign<LayoutRect>(tfSampleTitle).enableAlignX(0.5);
 
-    auto controls = create_node_2d("controls");
+    auto controls = createNode2D("controls");
     append(controls, tfSampleTitle);
     append(controls, prev);
     append(controls, next);

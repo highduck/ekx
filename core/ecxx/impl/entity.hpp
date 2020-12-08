@@ -125,7 +125,7 @@ public:
     inline Component* tryGet() const;
 
     template<typename Component>
-    inline Component& get_or_create();
+    inline Component& get_or_create() const;
 
     template<typename Component>
     inline const Component& get_or_default() const;

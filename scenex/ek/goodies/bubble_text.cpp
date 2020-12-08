@@ -1,6 +1,7 @@
 #include "bubble_text.hpp"
 
 #include <ek/scenex/2d/Transform2D.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/math/easing.hpp>
@@ -16,7 +17,7 @@ void BubbleText::updateAll() {
     const EaseOut<Back> back_out_5{Back{5.0f}};
 
     for (auto e: ecs::view_backward<BubbleText>()) {
-        auto& state = ecs::get<BubbleText>(e);
+        auto& state = e.get<BubbleText>();
 
         if (state.delay > 0.0f) {
             state.delay -= dt;
@@ -50,8 +51,8 @@ void BubbleText::updateAll() {
 }
 
 ecs::entity BubbleText::create(const float2& pos, const std::string& text, float delay) {
-    auto e = create_node_2d("bb");
-    auto& c = ecs::assign<BubbleText>(e);
+    auto e = createNode2D();
+    auto& c = e.assign<BubbleText>();
     c.delay = delay;
     c.start = pos;
     float spread = 10.0f;

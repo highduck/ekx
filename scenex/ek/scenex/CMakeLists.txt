@@ -9,6 +9,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         base/Interactive.hpp
         base/Interactive.cpp
         base/NodeEvents.hpp
+        base/NodeEvents.cpp
         base/Tween.hpp
         base/Tween.cpp
         base/DestroyTimer.hpp
@@ -69,8 +70,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         particles/ParticleSystem.hpp
 
         utility/scene_management.hpp
-        utility/basic_game_utility.hpp
-        utility/basic_game_utility.cpp
 
         TimeLayer.hpp
         TimeLayer.cpp
