@@ -1,5 +1,13 @@
 #include "GameScreen.hpp"
 
+#include <ek/math/easing.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
+#include <ek/scenex/base/Node.hpp>
+#include <ek/ext/analytics/analytics.hpp>
+#include <ek/util/logger.hpp>
+#include <ek/scenex/2d/LayoutRect.hpp>
+#include <ek/scenex/TimeLayer.hpp>
+
 namespace ek {
 
 /** GameScreen component **/

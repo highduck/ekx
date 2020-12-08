@@ -42,13 +42,42 @@ public:
     void initDownloadAppButtons(ecs::entity e);
 
     void initLanguageButton(ecs::entity e);
+
+    static void showAchievements();
+
 public:
     AppBoxConfig config;
 
 private:
 };
 
+class Leaderboard {
+public:
+    Leaderboard() = delete;
 
+    explicit Leaderboard(const char* id);
+
+    void show() const;
+
+    void submit(int score) const;
+
+private:
+    std::string id_;
+};
+
+class Achievement {
+public:
+
+    Achievement() = delete;
+
+    explicit Achievement(const char* code, int count);
+
+    void run();
+
+private:
+    std::string code_;
+    int count_;
+};
 
 }
 

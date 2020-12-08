@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Keep;
-import androidx.annotation.NonNull;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -17,9 +16,6 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.games.AchievementsClient;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.LeaderboardsClient;
-import com.google.android.gms.games.leaderboard.ScoreSubmissionData;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -77,17 +73,14 @@ public class GameServices {
         _isConnecting = true;
         _isConnected = false;
         _googleSignInClient.silentSignIn().addOnCompleteListener(_activity,
-                new OnCompleteListener<GoogleSignInAccount>() {
-                    @Override
-                    public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "signInSilently(): success");
-                            onConnected(task.getResult());
-                        } else {
-                            Log.d(TAG, "signInSilently(): failure", task.getException());
-                            onDisconnected();
+                task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "signInSilently(): success");
+                        onConnected(task.getResult());
+                    } else {
+                        Log.d(TAG, "signInSilently(): failure", task.getException());
+                        onDisconnected();
 //                            _silentSignInFailed = true;
-                        }
                     }
                 });
     }
@@ -98,12 +91,9 @@ public class GameServices {
             Log.d(TAG, "load leaderboard");
             _leaderboards
                     .getLeaderboardIntent(leaderboard_id)
-                    .addOnSuccessListener(new OnSuccessListener<Intent>() {
-                        @Override
-                        public void onSuccess(Intent intent) {
-                            Log.d(TAG, "start leaderboard");
-                            _activity.startActivityForResult(intent, RC_LEADERBOARD_UI);
-                        }
+                    .addOnSuccessListener(intent -> {
+                        Log.d(TAG, "start leaderboard");
+                        _activity.startActivityForResult(intent, RC_LEADERBOARD_UI);
                     });
         } else {
             Log.d(TAG, "[leaderboard_show] not ready");
@@ -116,36 +106,29 @@ public class GameServices {
     @Keep
     public static void leader_board_submit(final String leaderboard_id, final int score) {
         EkActivity.runMainThread(
-                new Runnable() {
-                    @Override
-                    public void run() {
+                () -> {
+                    final Bundle bundle = new Bundle();
+                    bundle.putString(FirebaseAnalytics.Param.SCORE, String.valueOf(score));
+                    Analytics.logEvent("post_score", bundle);
 
-                        final Bundle bundle = new Bundle();
-                        bundle.putString(FirebaseAnalytics.Param.SCORE, String.valueOf(score));
-                        Analytics.logEvent("post_score", bundle);
+                    if (_leaderboards != null) {
+                        Log.d(TAG, "submit leaderboard: " + leaderboard_id + " " + score);
+                        // https://stackoverflow.com/questions/39284039/google-play-games-leaderboard-closes-automatically?rq=1
+                        //_leaderboards.submitScore(leaderboard_id, score);
 
-                        if (_leaderboards != null) {
-                            Log.d(TAG, "submit leaderboard: " + leaderboard_id + " " + score);
-                            // https://stackoverflow.com/questions/39284039/google-play-games-leaderboard-closes-automatically?rq=1
-                            //_leaderboards.submitScore(leaderboard_id, score);
-
-                            _leaderboards.submitScoreImmediate(leaderboard_id, score).addOnCompleteListener(new OnCompleteListener<ScoreSubmissionData>() {
-                                @Override
-                                public void onComplete(@NonNull Task<ScoreSubmissionData> t) {
-                                    if (t.isSuccessful()) {
-                                        Log.d(TAG, "leaderboard_submit successful!");
-                                    } else {
-                                        if (t.getException() != null) {
-                                            Log.d(TAG, "leaderboard_submit error: " + t.getException().getMessage());
-                                        } else {
-                                            Log.d(TAG, "leaderboard_submit unknown error");
-                                        }
-                                    }
+                        _leaderboards.submitScoreImmediate(leaderboard_id, score).addOnCompleteListener(t -> {
+                            if (t.isSuccessful()) {
+                                Log.d(TAG, "leaderboard_submit successful!");
+                            } else {
+                                if (t.getException() != null) {
+                                    Log.d(TAG, "leaderboard_submit error: " + t.getException().getMessage());
+                                } else {
+                                    Log.d(TAG, "leaderboard_submit unknown error");
                                 }
-                            });
-                        } else {
-                            Log.d(TAG, "[leaderboard_submit] not ready");
-                        }
+                            }
+                        });
+                    } else {
+                        Log.d(TAG, "[leaderboard_submit] not ready");
                     }
                 }
         );
@@ -170,12 +153,9 @@ public class GameServices {
     public static void achievement_show() {
         if (_achievements != null) {
             Log.d(TAG, "load achievements");
-            _achievements.getAchievementsIntent().addOnSuccessListener(new OnSuccessListener<Intent>() {
-                @Override
-                public void onSuccess(Intent intent) {
-                    Log.d(TAG, "show achievements");
-                    _activity.startActivityForResult(intent, RC_ACHIEVEMENTS_UI);
-                }
+            _achievements.getAchievementsIntent().addOnSuccessListener(intent -> {
+                Log.d(TAG, "show achievements");
+                _activity.startActivityForResult(intent, RC_ACHIEVEMENTS_UI);
             });
         } else {
             Log.d(TAG, "[achievement_show] not ready");

@@ -7,11 +7,12 @@
 #include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
+#include <piko/examples.h>
 
 namespace ek {
 
 ecs::entity createText(const char* name, const char* font, const char* text) {
-    auto e = create_node_2d(name);
+    auto e = createNode2D(name);
     auto* tf = new Text2D();
 
     tf->format.font.setID(font);
@@ -46,23 +47,23 @@ ecs::entity createText(const char* name, const char* font, const char* text) {
     tf->format.layersCount = 4;
 
     tf->text = text;
-    ecs::assign<Display2D>(e).drawable.reset(tf);
+    e.assign<Display2D>().drawable.reset(tf);
 
     return e;
 }
 
 ecs::entity createScreenZones() {
     rect_f resolution{0, 0, 360, 480};
-    auto zones = create_node_2d("zones");
-    auto e = create_node_2d("zone");
+    auto zones = createNode2D("zones");
+    auto e = createNode2D("zone");
     auto* q = new Quad2D();
     q->setGradientVertical(0xFFFFFFFF_argb, 0x77FFFFFF_argb);
     q->rect = resolution;
     e.assign<Display2D>(q);
     e.get<Transform2D>().color.scale = 0x33FF00FF_argb;
-    ecs::assign<LayoutRect>(e).fill(true, true).doSafeInsets = true;
+    e.assign<LayoutRect>().fill(true, true).doSafeInsets = true;
     append(zones, e);
-    e = create_node_2d("safe_zone");
+    e = createNode2D("safe_zone");
     q = new Quad2D();
     q->setGradientVertical(0xFFFFFFFF_argb, 0x77FFFFFF_argb);
     q->rect = resolution;

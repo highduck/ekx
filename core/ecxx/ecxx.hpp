@@ -152,7 +152,7 @@ inline Component* entity::tryGet() const {
 }
 
 template<typename Component>
-inline Component& entity::get_or_create() {
+inline Component& entity::get_or_create() const {
     ECXX_FULL_ASSERT(valid());
     return world::the.get_or_create<Component>(*this);
 }

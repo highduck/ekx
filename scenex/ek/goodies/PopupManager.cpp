@@ -9,6 +9,8 @@
 #include <ek/math/easing.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/scenex/base/Tween.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
+#include <ek/scenex/base/NodeEvents.hpp>
 
 namespace ek {
 
@@ -76,18 +78,18 @@ void on_popup_close_animation(float t, entity e) {
     t = math::clamp(1.0f - t, 0.0f, 1.0f);
     float scale = easing::BACK_OUT.calculate(t);
     float fly = easing::P3_OUT.calculate(t);
-    auto& transform = ecs::get<Transform2D>(e);
+    auto& transform = e.get<Transform2D>();
     transform.position.y = animationVertDistance * (fly - 1.0f);
     transform.scale = {scale, scale};
 }
 
 void init_basic_popup(entity e) {
     auto node_close = find(e, "btn_close");
-    if (node_close && ecs::has<Button>(node_close)) {
-        auto& btn_close = ecs::get<Button>(node_close);
-        btn_close.clicked.add([e]() {
+    if (node_close && node_close.has<Button>()) {
+        auto& btn_close = node_close.get<Button>();
+        btn_close.clicked += [e] {
             close_popup(e);
-        });
+        };
         btn_close.back_button = true;
     }
 }
@@ -100,9 +102,9 @@ bool contains(const std::vector<entity>& list, const entity e) {
 void PopupManager::updateAll() {
     auto dt = TimeLayer::UI->dt;
     for (auto e : ecs::view<PopupManager>()) {
-        auto& p = ecs::get<PopupManager>(e);
+        auto& p = e.get<PopupManager>();
         bool needFade = !p.active.empty();
-        if(p.active.size() == 1 && p.active.back() == p.closingLast) {
+        if (p.active.size() == 1 && p.active.back() == p.closingLast) {
             needFade = false;
         }
         p.fade_progress = math::reach(p.fade_progress,
@@ -113,11 +115,11 @@ void PopupManager::updateAll() {
 
         if (!p.active.empty()) {
             auto front = p.active.back();
-            if (ecs::has<close_timeout>(front)) {
-                auto& t = ecs::get<close_timeout>(front);
+            if (front.has<close_timeout>()) {
+                auto& t = front.get<close_timeout>();
                 t.time -= dt;
                 if (t.time <= 0.0f) {
-                    ecs::remove<close_timeout>(front);
+                    front.remove<close_timeout>();
                     close_popup(front);
                 }
             }
@@ -135,7 +137,7 @@ void open_popup(entity e) {
         return;
     }
 
-    if (ecs::get<Node>(e).parent == state.layer) {
+    if (e.get<Node>().parent == state.layer) {
         return;
     }
 
@@ -218,7 +220,7 @@ void close_all_popups() {
 }
 
 ecs::entity createBackQuad() {
-    auto e = create_node_2d("back");
+    auto e = createNode2D("back");
     auto& display = e.assign<Display2D>();
     display.makeDrawable<Quad2D>().setColor(argb32_t::black);
     display.program.setID("2d_color");
@@ -245,12 +247,12 @@ ecs::entity createBackQuad() {
 }
 
 ecs::entity PopupManager::make() {
-    auto e = create_node_2d("popups");
+    auto e = createNode2D("popups");
     auto& pm = e.assign<PopupManager>();
     pm.back = createBackQuad();
     append(e, pm.back);
 
-    pm.layer = create_node_2d("layer");
+    pm.layer = createNode2D("layer");
     pm.layer.assign<LayoutRect>()
             .enableAlignX(0.5f)
             .enableAlignY(0.5f)

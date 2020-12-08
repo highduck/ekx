@@ -43,21 +43,21 @@ void basic_application::initialize() {
     create_builtin();
 
     //// basic scene
-    root = create_node_2d("root");
+    root = createNode2D("root");
     updateScreenRect(root);
 
     auto& im = service_locator_instance<InteractionSystem>::init(root);
     service_locator_instance<input_controller>::init(im);
     service_locator_instance<AudioManager>::init();
 
-    game = create_node_2d("game");
+    game = createNode2D("game");
     ecs::assign<Canvas>(game, AppResolution.x, AppResolution.y);
     ecs::assign<LayoutRect>(game);
     append(root, game);
     Canvas::updateAll();
     scale_factor = game.get<Canvas>().scale;
 
-    auto camera = create_node_2d("camera");
+    auto camera = createNode2D("camera");
     auto& defaultCamera = camera.assign<Camera2D>(game);
     defaultCamera.order = 1;
     Camera2D::Main = camera;

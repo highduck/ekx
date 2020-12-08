@@ -1,15 +1,9 @@
 #pragma once
 
-#include <ecxx/impl/entity.hpp>
+#include <ecxx/ecxx.hpp>
 #include <vector>
-#include <ek/math/easing.hpp>
-#include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/scenex/base/Node.hpp>
-#include <ek/scenex/utility/scene_management.hpp>
-#include <ek/ext/analytics/analytics.hpp>
-#include <ek/util/logger.hpp>
-#include <ek/scenex/2d/LayoutRect.hpp>
-#include <ek/scenex/TimeLayer.hpp>
+#include <ek/util/signals.hpp>
+#include <ek/math/box.hpp>
 
 namespace ek {
 

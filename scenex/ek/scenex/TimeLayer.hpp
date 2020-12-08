@@ -2,8 +2,6 @@
 
 namespace ek {
 
-
-
 struct TimeLayer {
     struct State {
         float scale = 1.0f;

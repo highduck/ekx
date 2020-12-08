@@ -1,7 +1,8 @@
+#include "minimal.hpp"
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/2d/Button.hpp>
-#include "minimal.hpp"
+#include <ek/scenex/2d/Display2D.hpp>
 
 namespace ek {
 
@@ -17,7 +18,7 @@ Text2D& addText(ecs::entity e, const char* text) {
 }
 
 ecs::entity createButton(const char* label, const std::function<void()>& fn) {
-    auto e = create_node_2d(label);
+    auto e = createNode2D(label);
     auto& tf = addText(e, label);
     tf.fillColor = 0x77000000_argb;
     tf.borderColor = 0x77FFFFFF_argb;
