@@ -3607,6 +3607,10 @@ static mz_bool mz_zip_reader_read_central_dir(mz_zip_archive *pZip, mz_uint flag
     cdir_disk_index = MZ_READ_LE16(pBuf + MZ_ZIP_ECDH_NUM_DISK_CDIR_OFS);
     cdir_size = MZ_READ_LE32(pBuf + MZ_ZIP_ECDH_CDIR_SIZE_OFS);
     cdir_ofs = MZ_READ_LE32(pBuf + MZ_ZIP_ECDH_CDIR_OFS_OFS);
+    // TODO: PATCH!
+    if(cdir_ofs + cdir_size > pZip->m_archive_size) {
+        cdir_size = pZip->m_archive_size - cdir_ofs;
+    }
 
     if (pZip->m_pState->m_zip64)
     {

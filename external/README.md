@@ -57,8 +57,16 @@ Package: manual from github
 
 ### [miniz](https://github.com/richgel999/miniz)
 
-Package: fetch from github, run `amalgamation.sh` and copy `amalgamation/miniz.*` 
-Version: 10.1.0
+- Package: fetch from github, run `amalgamation.sh` and copy `amalgamation/miniz.*` 
+- Version: 10.1.0
+- Patch `miniz.c`: 
+```c
+cdir_ofs = MZ_READ_LE32(pBuf + MZ_ZIP_ECDH_CDIR_OFS_OFS);
+// TODO: PATCH!
+if(cdir_ofs + cdir_size > pZip->m_archive_size) {
+    cdir_size = pZip->m_archive_size - cdir_ofs;
+}
+```
 
 ### [Dear ImGui](https://github.com/ocornut/imgui)
 
