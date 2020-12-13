@@ -4,7 +4,7 @@
 #include <fstream>
 #include <ek/util/logger.hpp>
 #include <sys/stat.h>
-#include <miniz/miniz_zip.h>
+#include <miniz/miniz.h>
 
 namespace ek::flash {
 

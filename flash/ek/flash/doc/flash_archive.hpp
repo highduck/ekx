@@ -6,11 +6,7 @@
 #include <unordered_map>
 #include <ek/util/path.hpp>
 #include <memory>
-#include <miniz/miniz_zip.h>
-
-namespace miniz_cpp {
-class zip_file;
-}
+#include <miniz/miniz.h>
 
 namespace pugi {
 class xml_document;
