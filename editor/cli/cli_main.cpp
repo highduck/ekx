@@ -5,14 +5,6 @@
 #include <ek/util/strings.hpp>
 
 #include <ek/editor/marketing/export_marketing.hpp>
-
-#include <ek/editor/assets/flash_asset.hpp>
-#include <ek/editor/assets/audio_asset.hpp>
-#include <ek/editor/assets/bitmap_font_editor_asset.hpp>
-#include <ek/editor/assets/program_asset.hpp>
-#include <ek/editor/assets/texture_asset.hpp>
-#include <ek/editor/assets/model_asset.hpp>
-
 #include <ek/editor/assets/editor_project.hpp>
 
 namespace ek {
@@ -59,6 +51,9 @@ void main() {
                     project.build(path_t{args[4]});
                 }
             }
+        }
+        else if(args[1] == "prerender_flash") {
+            runFlashFilePrerender(args);
         }
     }
 }

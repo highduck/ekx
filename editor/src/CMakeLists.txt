@@ -98,8 +98,6 @@ else ()
 endif ()
 
 target_link_libraries(${PROJECT_NAME}
-        nlohmann-json
-        fmt
         imgui
         ek-flash
         )

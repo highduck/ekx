@@ -24,6 +24,13 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Display2D: program state, `2d_color` shader for large background colored quads (reduce gpu load)
 - Profiler: add non-clamped Fill-Rate stats
 
+### Tools
+
+- Remove `{fmt}` and `json` libraries
+- Add command to prerender flash symbols via command-line
+- Changed ios app icon generation
+- Fix ios project generation
+
 ## [0.0.3] - 2020-11-22
 
 - hotfix android remove ads purchase restore and already owned error handling
