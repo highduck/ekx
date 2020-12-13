@@ -2,6 +2,10 @@
 
 namespace ek {
 
+class GameServices {
+
+};
+
 void game_services_init();
 
 void leader_board_show(const char* leader_board_id);
@@ -13,3 +17,4 @@ void achievement_update(const char* achievement_id, int increment);
 void achievement_show();
 
 }
+

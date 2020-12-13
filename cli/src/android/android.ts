@@ -95,39 +95,17 @@ function mod_android_manifest(ctx) {
     });
 }
 
-function mod_strings(ctx) {
-    const res_strings_path = "app/src/main/res/values/strings.xml";
-    const xml_text = readText(res_strings_path);
-    const doc = new XmlDocument(xml_text);
-    // console.trace(doc.firstChild);
-    // console.trace(doc.childrenNamed("string"));
-    doc.eachChild((child) => {
-        if (child.name === "string") {
-            const textNode = child.firstChild.type == 'text' ? child.firstChild : null;
-            if (textNode) {
-                switch (child.attr.name) {
-                    case "app_name":
-                        // seems xmldoc is not enough
-                        child.val = ctx.title;
-                        textNode.text = ctx.title;
-                        break;
-                    case "package_name":
-                        textNode.text = ctx.android.application_id;
-                        break;
-                    case "gs_app_id":
-                        textNode.text = ctx.android.game_services_id;
-                        break;
-                    case "admob_app_id":
-                        textNode.text = ctx.android.admob_app_id;
-                        break;
-                }
-            }
-        }
-    });
-
-    writeText(res_strings_path, doc.toString());
+function createStringsXML(ctx) {
+    const doc = new XmlDocument(`<resources></resources>`);
+    const xmlStrings = ctx.build.android.xmlStrings;
+    xmlStrings.app_name = ctx.title;
+    xmlStrings.package_name = ctx.android.application_id;
+    for (let key of Object.keys(xmlStrings)) {
+        const val = xmlStrings[key];
+        doc.children.push(new XmlDocument(`<string name="${key}" translatable="false">${val}</string>`));
+    }
+    writeText("app/src/main/res/values/strings.xml", doc.toString());
 }
-
 
 function mod_cmake_lists(ctx) {
     const cmake_path = "CMakeLists.txt";
@@ -202,7 +180,7 @@ export function export_android(ctx) {
 
         mod_main_class(ctx.android.package_id);
         mod_android_manifest(ctx);
-        mod_strings(ctx);
+        createStringsXML(ctx);
         mod_cmake_lists(ctx);
         copy_google_services_config_android();
         copySigningKeys(ctx.android.keystore);

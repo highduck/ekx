@@ -1,6 +1,4 @@
 <resources>
     <string name="app_name">template-android</string>
-    <string name="gs_app_id" translatable="false">233407531247</string>
     <string name="package_name" translatable="false">com.eliasku.template_android</string>
-    <string name="admob_app_id" translatable="false">ca-app-pub-0000000000000000~0000000000</string>
 </resources>

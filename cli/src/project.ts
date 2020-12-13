@@ -23,6 +23,7 @@ interface ModuleDef {
         cpp?: string[];
         java?: string[];
         aidl?: string[];
+        xmlStrings?: {[name:string]:string};
     };
     macos?: {
         cpp?: string[];
@@ -81,6 +82,7 @@ export class Project {
             add_manifest: [],
             add_manifest_application: [],
             source_dirs: [],
+            xmlStrings: {}
         }
     };
 

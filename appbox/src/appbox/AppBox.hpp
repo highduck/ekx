@@ -72,7 +72,7 @@ public:
 
     explicit Achievement(const char* code, int count);
 
-    void run();
+    void run() const;
 
 private:
     std::string code_;

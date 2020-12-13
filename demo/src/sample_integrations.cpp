@@ -1,5 +1,5 @@
 #include <ui/minimal.hpp>
-#include <ek/ext/game_center/game_center.hpp>
+#include <GameServices.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <admob.hpp>

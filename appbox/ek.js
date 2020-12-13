@@ -8,4 +8,5 @@ module.exports = (project) => {
 
     project.includeProject(path.join(project.path.EKX_ROOT, "plugins/admob"));
     project.includeProject(path.join(project.path.EKX_ROOT, "plugins/billing"));
+    project.includeProject(path.join(project.path.EKX_ROOT, "plugins/game-services"));
 };

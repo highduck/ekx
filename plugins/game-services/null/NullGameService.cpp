@@ -1,4 +1,4 @@
-#include <ek/ext/game_center/game_center.hpp>
+#include <GameServices.hpp>
 
 namespace ek {
 
