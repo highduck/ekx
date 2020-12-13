@@ -3,14 +3,15 @@ import {
     copyFolderRecursiveSync,
     deleteFolderRecursive, execute,
     isDir,
-    optimizePngGlob,
     readText, replaceInFile,
     writeText
-} from "./utils";
+} from "../utils";
 import * as path from "path";
 import * as fs from "fs";
 import * as plist from 'plist';
-import {buildAssets, buildMarketingAssets} from "./assets";
+import {buildAssets, buildMarketingAssets} from "../assets";
+import {iosBuildAppIcon} from "./iosAppIcon";
+import {Project} from "../project";
 
 function mod_plist(ctx, filepath) {
     const dict = plist.parse(readText(filepath));
@@ -85,9 +86,9 @@ function collect_xcode_props(ctx, prop, target) {
     return list;
 }
 
-export function export_ios(ctx) {
+export function export_ios(ctx:Project) {
     buildAssets(ctx);
-    buildMarketingAssets(ctx, "ios", "export/ios");
+    iosBuildAppIcon(ctx, "export/ios");
 
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;

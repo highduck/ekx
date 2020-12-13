@@ -19,4 +19,5 @@ struct marketing_asset_t {
 
 void process_market_asset(const marketing_asset_t& config);
 
+void runFlashFilePrerender(const std::vector<std::string>& args);
 }

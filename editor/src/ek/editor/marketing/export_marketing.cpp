@@ -8,13 +8,6 @@
 #include <ek/system/system.hpp>
 #include <ek/util/strings.hpp>
 
-#include <nlohmann/json.hpp>
-#include <fmt/core.h>
-#include <iomanip>
-#include <fstream>
-
-using json = nlohmann::json;
-
 using namespace ek::flash;
 using namespace ek::spritepack;
 using namespace std;
@@ -40,45 +33,6 @@ void store_hi_res_icon(const flash_doc& doc, const element_t& symbol, int size, 
     path_t icon_path{prefix + std::to_string(size) + ".png"};
     save_sprite_png(spr, icon_path);
     destroy_sprite_data(spr);
-}
-
-json create_ios_icons_template() {
-    const auto path = path_t{getenv("EKX_ROOT")}
-                      / "ek/templates/template-ios/src/Assets.xcassets/AppIcon.appiconset/Contents.json";
-    json res;
-    ifstream is(path.c_str());
-    is >> res;
-    return res;
-}
-
-void render_ios_icons(const flash_doc& doc, const element_t& symbol) {
-    const path_t path{"AppIcon.appiconset"};
-    make_dir(path);
-    json ios_icon = create_ios_icons_template();
-    json images = json::array();
-    const float original_size = 64.0f;
-    for (auto image : ios_icon["images"]) {
-        const float scale_factor = strtof(image["scale"].get<string>().c_str(), nullptr);
-        const float size = scale_factor * strtof(image["size"].get<string>().c_str(), nullptr);
-        const int sizei = static_cast<int>(size);
-        string filename = fmt::format("{}_{}.png", image["idiom"].get<string>(), sizei);
-
-        renderer_options_t opts{size / original_size,
-                                sizei, sizei,
-                                true, true};
-        auto spr = render(doc, symbol, opts);
-        // disable alpha: AppStore require OPAQUE icons
-        save_sprite_png(spr, path / filename, false);
-        destroy_sprite_data(spr);
-
-        image["filename"] = filename;
-        images.emplace_back(image);
-    }
-
-    {
-        ofstream os{(path / "Contents.json").str()};
-        os << setw(4) << json{{"images", images}} << endl;
-    }
 }
 
 void render_android_icons(const flash_doc& doc, const element_t& symbol, const string& name) {
@@ -165,10 +119,6 @@ void process_flash_archive_market(const flash_doc& file, const marketing_asset_t
                 if (icon_item) {
                     render_android_icons(doc, *icon_item, "ic_launcher.png");
                 }
-            } else if (command_data.target == "ios") {
-                if (icon_item) {
-                    render_ios_icons(doc, *icon_item);
-                }
             } else if (command_data.target == "web") {
                 if (icon_item) {
                     for (auto size : {36, 48, 72, 96, 144, 192, 256, 512}) {
@@ -183,9 +133,36 @@ void process_flash_archive_market(const flash_doc& file, const marketing_asset_t
 void process_market_asset(const marketing_asset_t& marketing) {
     using namespace ek::flash;
     using ek::path_join;
-    
+
     flash_doc ff{marketing.input};
     process_flash_archive_market(ff, marketing);
+}
+
+// prerender_flash INPUT SYMBOL [Scale WIDTH HEIGHT ALPHA TRIM OUTPUT_PATH]
+void runFlashFilePrerender(const vector<std::string>& args) {
+    path_t inputPath{args[2]};
+    flash_doc ff{inputPath};
+    flash_doc_exporter exporter{ff};
+    auto& doc = exporter.doc;
+
+    auto* item = doc.find_linkage(args[3]);
+    if (item) {
+        int i = 4;
+        while (i < args.size()) {
+            const float scale = strtof(args[i].c_str(), nullptr);
+            const int width = atoi(args[i + 1].c_str());
+            const int height = atoi(args[i + 2].c_str());
+            const bool alpha = atoi(args[i + 3].c_str()) != 0;
+            const bool trim = atoi(args[i + 4].c_str()) != 0;
+            const path_t output{args[i + 5]};
+
+            renderer_options_t opts{scale, width, height, alpha, trim};
+            auto spr = render(doc, *item, opts);
+            save_sprite_png(spr, output, alpha);
+            destroy_sprite_data(spr);
+            i += 6;
+        }
+    }
 }
 
 }

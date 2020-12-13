@@ -23,7 +23,7 @@ interface ModuleDef {
         cpp?: string[];
         java?: string[];
         aidl?: string[];
-        xmlStrings?: {[name:string]:string};
+        xmlStrings?: { [name: string]: string };
     };
     macos?: {
         cpp?: string[];
@@ -57,6 +57,7 @@ export class Project {
     current_target = process.argv[2];
     args = process.argv.slice(3);
 
+    name: string;
     build_steps: (() => void)[] = [];
     projects: { [name: string]: RegisteredProject } = {};
     modules: ModuleDef[] = [];
@@ -86,7 +87,7 @@ export class Project {
         }
     };
 
-    ios = {};
+    ios: { application_id?: string } = {};
     html = {};
 
     addModule(def: ModuleDef) {

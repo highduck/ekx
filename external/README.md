@@ -66,18 +66,6 @@ Package: manual from github
 
 Package: manual from github
 
-### [{fmt}](https://github.com/fmtlib/fmt)
-
-Package: manual from github
-
-- Export marketing resources
-
-### [nlohmann-json](https://github.com/nlohmann/json)
-
-Package: manual from github
-
-- Export marketing resources
-
 ### Cairo
 
 Package: CMake module included

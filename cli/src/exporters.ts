@@ -1,6 +1,6 @@
 import {export_web} from "./web";
 import {export_android} from "./android/android";
-import {export_ios} from "./ios";
+import {export_ios} from "./ios/ios";
 import {buildAssets, buildMarketingAssets} from "./assets";
 import {Project} from "./project";
 
