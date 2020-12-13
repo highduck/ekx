@@ -31,24 +31,12 @@
 ## Prerequisites for tooling
 
 - `python3` and `pip`
-- Conan Package Manager
-- CMake >= 3.12
+- NodeJS, NPM
+- CMake >= 3.13
 - XCode for iOS
 - Android Studio for Android
 
 ## Dependencies
-
-### Output Mode Dependencies
-
-Game output dependencies are required to be source packed in.
-
-Platform requirements are Frameworks or Libraries are resolved later when you build final version.
- TODO: examples   
-
-#### Built-in
-- `stb_image` (included)
-
-### Edit Mode Dependencies
 
 #### System packages
 
@@ -60,45 +48,6 @@ brew install cairo
 - pkg-config
 - Cairo
 - Freetype2
-
-#### Built-in
-- `miniz` and `zip_file.cpp` (patched)
-- `stb_image_write` (included)
-
-#### External packages
-- `imgui` !
-- `pugixml`
-- `fmt`
-- `json_for_modern_cpp`
-
-#### Tooling dependencies
-- [will be removed] `mod-pbxproj` for XCode project patching
-
-### Development requirements
-
-- cmake >= 3.12
-- modern c++17 compiler
-- NodeJS (ver >=12), NPM
-- EMSDK
-- [could be removed] python3
-
-## Installation
-
-```bash
-pip3 install --upgrade conan
-conan remote add -f eliasku https://api.bintray.com/conan/eliasku/public-conan
-conan install -if cmake-build-debug -pr clion-debug -b missing .
-```
-
-add tooling root to environment
-```
-open -e ~/.bash_profile
-```
-
-add lines:
-```
-source ~/highduck/ekx/env.sh
-```
 
 # Development
 

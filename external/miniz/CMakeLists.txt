@@ -9,7 +9,6 @@ add_library(${PROJECT_NAME} STATIC
         miniz/miniz_tinfl.h
         miniz/miniz_zip.c
         miniz/miniz_zip.h
-        miniz/zip_file.hpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)

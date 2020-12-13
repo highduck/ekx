@@ -1,10 +1,10 @@
 #include "flash_archive.hpp"
 
 #include <pugixml.hpp>
-#include <miniz/zip_file.hpp>
 #include <fstream>
 #include <ek/util/logger.hpp>
 #include <sys/stat.h>
+#include <miniz/miniz_zip.h>
 
 namespace ek::flash {
 
@@ -53,16 +53,29 @@ const std::string& xfl_entry::content() const {
 
 fla_entry::fla_entry(const path_t& zip_file_path)
         : basic_entry{{}, this} {
-    zip_file_ = new miniz_cpp::zip_file(zip_file_path.str());
-    //zip_file_->printdir();
+
+    zip_ = new mz_zip_archive;
+    memset(zip_, 0, sizeof(mz_zip_archive));
+
+    auto status = mz_zip_reader_init_file(zip_, zip_file_path.c_str(), 0);
+    if (!status) {
+        // warning?
+    }
 }
 
-fla_entry::~fla_entry() = default;
+fla_entry::~fla_entry() {
+    delete zip_;
+}
 
 const std::string& fla_entry::content() const {
-    auto* zipFile = static_cast<fla_entry*>(root_)->zip_file_;
-    if (contents_.empty() && zipFile->has_file(path_.str())) {
-        contents_ = zipFile->read(path_.str());
+    auto* zip = static_cast<fla_entry*>(root_)->zip_;
+    if (contents_.empty()) {
+        std::size_t size;
+        char* data = (char*) mz_zip_reader_extract_file_to_heap(zip, path_.c_str(), &size, 0);
+        if (data != nullptr) {
+            contents_.assign(data, data + size);
+            mz_free(data);
+        }
     }
     return contents_;
 }
