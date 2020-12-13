@@ -57,9 +57,10 @@ fla_entry::fla_entry(const path_t& zip_file_path)
     zip_ = new mz_zip_archive;
     memset(zip_, 0, sizeof(mz_zip_archive));
 
+    // MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY
     auto status = mz_zip_reader_init_file(zip_, zip_file_path.c_str(), 0);
     if (!status) {
-        // warning?
+        EK_WARN << "Error reading FLA zip archive";
     }
 }
 
