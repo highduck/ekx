@@ -57,9 +57,8 @@ Package: manual from github
 
 ### [miniz](https://github.com/richgel999/miniz)
 
-Package: manual from github
-
-(!) **versions is fixed**
+Package: fetch from github, run `amalgamation.sh` and copy `amalgamation/miniz.*` 
+Version: 10.1.0
 
 ### [Dear ImGui](https://github.com/ocornut/imgui)
 
