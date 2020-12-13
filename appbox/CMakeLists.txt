@@ -10,6 +10,7 @@ target_link_libraries(${PROJECT_NAME}
         scenex
         plugin-admob
         plugin-billing
+        plugin-game-services
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

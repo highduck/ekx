@@ -1,4 +1,8 @@
-package ek;
+package ek.gpgs;
+
+import ek.EkActivity;
+import ek.AppUtils;
+import ek.Analytics;
 
 import android.app.Activity;
 import android.content.Intent;

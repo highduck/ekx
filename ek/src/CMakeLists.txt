@@ -8,7 +8,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         ek/app/internal/res_sys.cpp
 
         ek/ext/analytics/analytics.hpp
-        ek/ext/game_center/game_center.hpp
         ek/ext/sharing/sharing.hpp
 
         raudio/raudio.cpp

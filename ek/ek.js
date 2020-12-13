@@ -26,11 +26,9 @@ module.exports = (ctx) => {
                 flags: "-x objective-c++"
             },
             xcode: {
-                capabilities: ["com.apple.GameCenter"],
                 frameworks: [
                     "UIKit", "OpenGLES", "QuartzCore", "Foundation",
-                    "OpenAL", "AudioToolbox", "AVFoundation",
-                    "GameKit"
+                    "OpenAL", "AudioToolbox", "AVFoundation"
                 ],
                 pods: [
                     "Firebase/Crashlytics",

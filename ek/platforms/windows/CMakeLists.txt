@@ -7,7 +7,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         # MOCKS
         analytics.cpp
-        game_services.cpp
         sharing.cpp
         user_preferences.cpp
         )

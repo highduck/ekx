@@ -31,6 +31,8 @@ module.exports = (ctx) => {
     ctx.build.android.add_manifest_application.push(`
         <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id"/>`);
 
+    ctx.build.android.xmlStrings.admob_app_id = ctx.android.admob_app_id;
+
     if (ctx.current_target === "android") {
         if (!ctx.android.admob_app_id) {
             console.error("please set android.admob_app_id");

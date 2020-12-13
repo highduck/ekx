@@ -9,7 +9,7 @@
 #include <ek/util/locator.hpp>
 #include <ek/util/strings.hpp>
 #include <utility>
-#include <ek/ext/game_center/game_center.hpp>
+#include <GameServices.hpp>
 #include <ek/ext/sharing/sharing.hpp>
 #include <ek/goodies/GameScreen.hpp>
 #include <ek/app/device.hpp>
@@ -212,7 +212,7 @@ Achievement::Achievement(const char* code, int count) :
         count_{count} {
 }
 
-void Achievement::run() {
+void Achievement::run() const {
     achievement_update(code_.c_str(), count_);
 }
 

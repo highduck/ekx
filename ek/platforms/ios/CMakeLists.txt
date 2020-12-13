@@ -8,7 +8,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         ios_app_delegate.mm
         ios_eagl_view.h
         ios_eagl_view.mm
-        ios_game_center.mm
         ios_sharing.mm
         )
 
