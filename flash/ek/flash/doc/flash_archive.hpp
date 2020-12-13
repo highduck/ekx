@@ -2,9 +2,11 @@
 
 #include <utility>
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include <ek/util/path.hpp>
 #include <memory>
+#include <miniz/miniz_zip.h>
 
 namespace miniz_cpp {
 class zip_file;
@@ -83,8 +85,8 @@ public:
 
     explicit fla_entry(const path_t& zip_file_path);
 
-    fla_entry(const path_t& path, basic_entry* root)
-            : basic_entry{path, root} {
+    fla_entry(const path_t& path, basic_entry* root) :
+            basic_entry{path, root} {
     }
 
     ~fla_entry() override;
@@ -98,7 +100,7 @@ protected:
     }
 
 private:
-    miniz_cpp::zip_file* zip_file_ = nullptr;
+    mz_zip_archive* zip_ = nullptr;
 };
 
 std::unique_ptr<basic_entry> load_flash_archive(const path_t& path);

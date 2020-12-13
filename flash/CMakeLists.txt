@@ -69,16 +69,16 @@ add_library(${PROJECT_NAME}
         ek/flash/doc/parsing/doc_parser.hpp
         )
 
-if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
-target_compile_options(${PROJECT_NAME} PRIVATE
-        -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type -Woverloaded-virtual -Wcast-align
-        -Wno-deprecated-declarations
-        -Wno-gnu-anonymous-struct
-        -Wno-nested-anon-types
-        -fstrict-aliasing
-        -Wstrict-aliasing
-        )
-endif()
+if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
+    target_compile_options(${PROJECT_NAME} PRIVATE
+            -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type -Woverloaded-virtual -Wcast-align
+            -Wno-deprecated-declarations
+            -Wno-gnu-anonymous-struct
+            -Wno-nested-anon-types
+            -fstrict-aliasing
+            -Wstrict-aliasing
+            )
+endif ()
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_options(${PROJECT_NAME} PRIVATE

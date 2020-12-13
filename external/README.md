@@ -60,7 +60,6 @@ Package: manual from github
 Package: manual from github
 
 (!) **versions is fixed**
-(!) **`zipfile` is patched**
 
 ### [Dear ImGui](https://github.com/ocornut/imgui)
 

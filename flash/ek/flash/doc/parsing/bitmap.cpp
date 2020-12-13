@@ -8,7 +8,7 @@
 
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
 
-#include <miniz/miniz.h>
+//#include <miniz/miniz.h>
 #include <stb_image.h>
 
 namespace ek::flash {
