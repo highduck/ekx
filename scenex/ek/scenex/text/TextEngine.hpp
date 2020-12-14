@@ -8,12 +8,15 @@ namespace ek {
 
 struct TextBlockInfo {
 
-    inline constexpr static int MaxCount = 128;
+    inline constexpr static int WarningLinesCount = 128;
 
     struct Line {
         int begin = 0;
         int end = 0;
         float2 size{};
+        float ascender = 0.0f;
+        float descender = 0.0f;
+        float leading = 0.0f;
 
         void updateSize(float length, float height);
 
@@ -22,9 +25,7 @@ struct TextBlockInfo {
 
     // {max length; total height}
     float2 size{};
-    int numLines = 0;
-    Line lines[MaxCount]{};
-    float ascender = 0.0f;
+    std::vector<Line> lines{};
 
     void addLine(Line line);
 

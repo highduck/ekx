@@ -13,10 +13,11 @@ import {
 } from "../utils";
 import {XmlDocument} from 'xmldoc';
 import * as path from "path";
-import {buildAssets, buildMarketingAssets} from "../assets";
+import {buildAssets} from "../assets";
 import {collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
+import {androidBuildAppIcon} from "./androidAppIcon";
 
 function getAndroidSdkRoot() {
     return process.env.ANDROID_SDK_ROOT ?? path.join(process.env.HOME, 'Library/Android/sdk');
@@ -128,7 +129,7 @@ function mod_cmake_lists(ctx) {
 export function export_android(ctx) {
 
     buildAssets(ctx);
-    buildMarketingAssets(ctx, "android", "export/android/res");
+    androidBuildAppIcon(ctx, "export/android/res");
 
     const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;

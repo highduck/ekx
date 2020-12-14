@@ -16,7 +16,8 @@ struct Glyph {
     float advanceWidth{};
     float bearingX{};
     float lineHeight{};
-    float ascender{};
+    float ascender = 0.0f;
+    float descender = 0.0f;
 
     // sprite part
     rect_f texCoord{};

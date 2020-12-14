@@ -1,8 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
-import {copyFolderRecursiveSync} from "./utils";
-import {buildAssets, buildMarketingAssets} from "./assets";
+import {copyFolderRecursiveSync} from "../utils";
+import {buildAssets, buildMarketingAssets} from "../assets";
 import * as Mustache from 'mustache';
+import {webBuildAppIcon} from "./webAppIcon";
 
 /*** HTML ***/
 export function export_web(ctx) {
@@ -21,7 +22,7 @@ export function export_web(ctx) {
     }
 
     buildAssets(ctx);
-    buildMarketingAssets(ctx, "web", path.join(output_dir, "icons"));
+    webBuildAppIcon(ctx, path.join(output_dir, "icons"));
 
     tpl("web/index.html.mustache", "index.html");
     tpl("web/manifest.json.mustache", "manifest.webmanifest");

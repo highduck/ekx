@@ -152,7 +152,7 @@ void Text2D::draw() {
     textDrawer.getTextSize(str, blockInfo);
 
     const float2 position = rect.position + (rect.size - blockInfo.size) * format.alignment;
-    textDrawer.position = position + float2{0.0f, blockInfo.ascender};
+    textDrawer.position = position + float2{0.0f, blockInfo.lines[0].ascender};
     textDrawer.drawWithBlockInfo(str, blockInfo);
 
     if (showTextBounds) {

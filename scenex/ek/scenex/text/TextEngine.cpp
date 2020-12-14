@@ -24,44 +24,48 @@ void TextBlockInfo::Line::close(float emptyLineHeight, int end_) {
 }
 
 void TextBlockInfo::addLine(TextBlockInfo::Line line) {
-    assert(numLines < 128);
+    assert(lines.size() < WarningLinesCount);
     if (size.x < line.size.x) {
         size.x = line.size.x;
     }
     size.y += line.size.y;
-    lines[numLines++] = line;
+    if (!lines.empty()) {
+        size.y += lines.back().leading;
+    }
+    lines.push_back(line);
 }
 
 void TextBlockInfo::reset() {
     size = float2::zero;
-    lines[0] = {};
-    numLines = 0;
-    ascender = 0.0f;
+    lines.clear();
 }
 
 void TextBlockInfo::scale(float factor) {
     size *= factor;
-    for (int i = 0; i < numLines; ++i) {
-        lines[i].size *= factor;
+    for (auto& line : lines) {
+        line.size *= factor;
+        // for first-line position
+        line.ascender *= factor;
+        //line.descender *= factor;
     }
 }
 
 bool TextBlockInfo::checkIsValid() const {
     int pos = 0;
-    for (int i = 0; i < numLines; ++i) {
-        if (lines[i].end < lines[i].begin) {
+    for (auto& line : lines) {
+        if (line.end < line.begin) {
             assert(false);
             return false;
         }
-        if (lines[i].begin < pos) {
+        if (line.begin < pos) {
             assert(false);
             return false;
         }
-        if (lines[i].end < pos) {
+        if (line.end < pos) {
             assert(false);
             return false;
         }
-        pos = lines[i].end;
+        pos = line.end;
     }
     return true;
 }
@@ -116,6 +120,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
     float2 current = position + layer.offset;
     const float startX = current.x;
     int lineIndex = 0;
+    int numLines = info.lines.size();
 
     current.x += (info.size.x - info.lines[lineIndex].size.x) * alignment.x;
 
@@ -125,9 +130,9 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
     uint32_t prevCodepointOnLine = 0;
     Glyph gdata;
     uint32_t codepoint = 0;
-    for (int i = 0; i < info.numLines; ++i) {
-        const char* it = text + info.lines[i].begin;
-        const auto* end = text + info.lines[i].end;
+    while (lineIndex < numLines) {
+        const char* it = text + info.lines[lineIndex].begin;
+        const auto* end = text + info.lines[lineIndex].end;
         while (it != end) {
             it = decodeUTF8(it, codepoint);
             if (font->getGlyph(codepoint, gdata)) {
@@ -167,8 +172,9 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
         current.x = startX;
         current.y += info.lines[lineIndex].size.y;
         ++lineIndex;
-        if (lineIndex < info.numLines) {
+        if (lineIndex < numLines) {
             current.x += (info.size.x - info.lines[lineIndex].size.x) * alignment.x;
+            current.y += info.lines[lineIndex - 1].leading;
             prevCodepointOnLine = 0;
         }
     }
@@ -238,7 +244,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
     it = decodeUTF8(it, codepoint);
     while (codepoint) {
         if (codepoint == '\n') {
-            line.close(size + leading, static_cast<int>(prev - text));
+            line.close(size, static_cast<int>(prev - text));
             info.addLine(line);
             line = {};
             line.begin = static_cast<int>(it - text);
@@ -256,11 +262,11 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
             if (TextEngineUtils::isPunctuation(prevCodepointOnLine)) {
                 lastWrapToPosition = TextEngineUtils::skipWhitespaces(prev);
                 lastWrapLine = line;
-                lastWrapLine.close(size + leading, static_cast<int>(prev - text));
+                lastWrapLine.close(size, static_cast<int>(prev - text));
             } else if (TextEngineUtils::isWhitespace(codepoint)) {
                 lastWrapToPosition = TextEngineUtils::skipWhitespaces(it);
                 lastWrapLine = line;
-                lastWrapLine.close(size + leading, static_cast<int>(prev - text));
+                lastWrapLine.close(size, static_cast<int>(prev - text));
             }
         }
         if (font->getGlyphMetrics(codepoint, metrics)) {
@@ -283,7 +289,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
                 }
                     // at least one symbol added to line
                 else if (it > text + line.begin && format.allowLetterWrap) {
-                    line.close(size + leading, static_cast<int>(prev - text));
+                    line.close(size, static_cast<int>(prev - text));
                     info.addLine(line);
                     line = {};
                     lastWrapLine = {};
@@ -294,13 +300,14 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
                     continue;
                 }
             }
-            if(info.numLines == 0) {
-                line.updateSize(right, size * metrics.lineHeight);
-                info.ascender = std::max(info.ascender, size * metrics.ascender);
+            if (line.ascender < size * metrics.ascender) {
+                line.ascender = size * metrics.ascender;
             }
-            else {
-                line.updateSize(right, size * metrics.lineHeight + leading);
+            if (line.descender < size * metrics.descender) {
+                line.descender = size * metrics.descender;
             }
+            line.leading = leading;
+            line.updateSize(right, size * metrics.lineHeight);
             x += kern + size * metrics.advanceWidth + letterSpacing;
         }
         prevCodepointOnLine = codepoint;

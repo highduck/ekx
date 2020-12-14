@@ -27,11 +27,14 @@ class BitmapFontData {
 public:
     uint16_t unitsPerEM;
     uint16_t fontSize;
+    int16_t lineHeight;
+    int16_t ascender;
+    int16_t descender;
     std::vector<BitmapFontGlyph> glyphs;
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(unitsPerEM, fontSize, glyphs);
+        io(unitsPerEM, fontSize, lineHeight, ascender, descender, glyphs);
     }
 };
 
@@ -57,6 +60,9 @@ public:
     float unitsPerEM = 1.0f;
     float baseFontSize = 1.0f;
     float baseFontSizeInv = 1.0f;
+    float lineHeight = 0.0f;
+    float ascender = 0.0f;
+    float descender = 0.0f;
 };
 
 }

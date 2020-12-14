@@ -26,6 +26,9 @@ void BitmapFont::load(const std::vector<uint8_t>& buffer) {
 void BitmapFont::load(const BitmapFontData& data) {
     unitsPerEM = data.unitsPerEM;
     baseFontSize = data.fontSize;
+    ascender = float(data.ascender) / unitsPerEM;
+    descender = float(data.descender) / unitsPerEM;
+    lineHeightMultiplier = float(data.lineHeight) / unitsPerEM;
     for (const auto& g : data.glyphs) {
         for (auto code : g.codepoints) {
             map[code] = g;
@@ -62,7 +65,8 @@ bool BitmapFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
         const auto& g = it->second;
         outGlyph.advanceWidth = static_cast<float>(g.advanceWidth) / unitsPerEM;
         outGlyph.lineHeight = lineHeightMultiplier;
-        outGlyph.ascender = lineHeightMultiplier;
+        outGlyph.ascender = ascender;
+        outGlyph.descender = descender;
         outGlyph.rect = g.box / unitsPerEM;
         outGlyph.source = this;
         return true;

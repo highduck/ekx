@@ -7,7 +7,7 @@
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/system/system.hpp>
-#include <ek/fonts/export_font.hpp>
+#include <ek/fonts/generateBitmapFont.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <memory>
 #include <utility>

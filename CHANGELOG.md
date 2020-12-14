@@ -29,7 +29,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Remove `{fmt}` and `json` libraries
 - Add command to prerender flash symbols via command-line
 - Changed ios app icon generation
-- Fix ios project generation
+- iOS: fix project generation script, compile fixes
+- iOS: update and fix `mod-pbxproj` to `3.2.0`
 
 ## [0.0.3] - 2020-11-22
 

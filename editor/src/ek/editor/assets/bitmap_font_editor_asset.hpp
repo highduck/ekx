@@ -2,8 +2,8 @@
 
 #include "editor_asset.hpp"
 #include <ek/spritepack/atlas_declaration.hpp>
-#include <ek/fonts/filters_declaration.hpp>
-#include <ek/fonts/font_declaration.hpp>
+#include <ek/fonts/generateBitmapFont.hpp>
+#include <ek/filters/filters.hpp>
 
 namespace ek {
 
@@ -27,8 +27,8 @@ public:
 
 private:
     std::string atlasTarget_;
-    font_decl_t font_decl_;
-    filters_decl_t filters_decl_;
+    font_lib::GenBitmapFontDecl font_;
+    FiltersDecl filters_;
 };
 
 }

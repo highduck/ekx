@@ -11,16 +11,11 @@
 
 namespace ek::font_lib {
 
-struct code_range_t {
-    uint32_t min;
-    uint32_t max;
-};
-
-class ft2_context {
+class FreeType2 {
 public:
-    ft2_context();
+    FreeType2();
 
-    ~ft2_context();
+    ~FreeType2();
 
     [[nodiscard]]
     FT_Library handle() const {
@@ -31,25 +26,43 @@ private:
     FT_Library lib_{};
 };
 
-class ft2_face {
-public:
-    ft2_face(const ft2_context& lib, const std::string& path);
+struct FontFaceInfo {
+    uint16_t unitsPerEM;
+    int16_t ascender;
+    int16_t descender;
+    int16_t lineHeight;
+    bool hasKerning;
+};
 
-    ~ft2_face();
+class FontFace {
+public:
+    FontFace(const FreeType2& lib, const std::string& path);
+
+    ~FontFace();
 
     [[nodiscard]]
     FT_Face data() const { return face_; }
 
-    bool get_glyph_metrics(FT_UInt glyph_index, int* out_bbox, int* out_advance) const;
+    bool getGlyphMetrics(uint32_t glyphIndex, int* out_bbox, int* out_advance) const;
 
     [[nodiscard]]
-    std::vector<FT_ULong> get_available_char_codes(const std::vector<code_range_t>& ranges) const;
+    std::vector<uint32_t> getAvailableCodepoints(const std::vector<std::pair<uint32_t, uint32_t>>& ranges) const;
 
-    rect_i get_glyph_bounds(FT_Face face) const;
+    bool setGlyphSize(int fontSize, float scaleFactor);
 
-    bool set_glyph_size(int font_size, float scale_factor);
+    uint32_t getGlyphIndex(uint32_t codepoint) const;
 
+    bool loadGlyph(uint32_t glyphIndex) const;
+
+    bool renderGlyph(uint8_t** buffer, uint32_t* width, uint32_t* height) const;
+
+    rect_i getGlyphBounds() const;
+
+    bool getKerning(uint32_t index1, uint32_t index2, int* x, int* y) const;
+
+    FontFaceInfo getInfo() const;
 private:
     FT_Face face_{};
 };
+
 }
