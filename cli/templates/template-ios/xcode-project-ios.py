@@ -1,6 +1,9 @@
 import json
 import os
 import sys
+import re
+
+#from sys import print
 
 # PBXPROJ: https://github.com/kronenthaler/mod-pbxproj/wiki
 from pbxproj import XcodeProject, PBXGenericObject
@@ -20,16 +23,21 @@ sdk_root = sys.argv[3]
 
 print('EKX ROOT: ( ' + sdk_root + " )")
 
-
 def set_cpp_flags_for_files(project, files, flags):
     for file_path in files:
+        print(file_path)
+        # check absolute path
+        for file in project.get_files_by_path(file_path, '<absolute>'):
+            print(file)
+            for build_file in project.get_build_files_for_file(file.get_id()):
+                build_file.add_compiler_flags(flags)
+        # check relative path
         rel_path = os.path.relpath(file_path, ".")
         for file in project.get_files_by_path(rel_path):
             for build_file in project.get_build_files_for_file(file.get_id()):
                 build_file.add_compiler_flags(flags)
 
-
-excludes = ["^build$", "^CMakeLists.txt$", "^.*\.md$", "^.*\.js$", "^.*\.glsl$"]
+excludes = ["^build$", "^CMakeLists.txt$", "^.DS_Store$", "^.*\.md$", "^.*\.js$", "^.*\.glsl$"]
 project = XcodeProject.load(f"{proj_ios_name}.xcodeproj/project.pbxproj")
 
 project_target = project.get_target_by_name("template-ios")
@@ -51,7 +59,7 @@ def apply_module_settings(decl, group):
 
     if "cpp" in decl:
         for src in decl["cpp"]:
-            project.add_folder(src, parent=group, excludes=excludes)
+            my_add_folder(src, parent=group, excludes=excludes)
             header_search_paths.append(src)
     if "cpp_flags" in decl and "files" in decl["cpp_flags"]:
         set_cpp_flags_for_files(project, decl["cpp_flags"]["files"], decl["cpp_flags"]["flags"])
@@ -65,7 +73,26 @@ def apply_module_settings(decl, group):
             for cap in decl["xcode"]["capabilities"]:
                 caps.append(cap)
 
+def my_add_folder(path, parent, excludes):
+    file_options = FileOptions()
 
+    if not os.path.isdir(path):
+        return None
+
+    # iterate over the objects in the directory
+    for child in os.listdir(path):
+        # exclude dirs or files matching any of the expressions
+        if [pattern for pattern in excludes if re.match(pattern, child)]:
+            continue
+
+        full_path = os.path.join(path, child)
+        if os.path.isfile(full_path):
+            # check if the file exists already, if not add it
+            project.add_file(full_path, parent, target_name=None, force=False, tree='<absolute>',
+                                     file_options=file_options)
+        else:
+            new_parent = project.add_group(child, child, parent)
+            my_add_folder(full_path, new_parent, excludes)
 
 for module in config_data["modules"]:
     group = project.add_group(module["name"])

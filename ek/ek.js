@@ -3,6 +3,7 @@ const path = require('path');
 module.exports = (ctx) => {
     ctx.addModule({
         name: "ek",
+        path: __dirname,
         cpp: [path.join(__dirname, "src")],
         android: {
             cpp: [path.join(__dirname, "platforms/android")],

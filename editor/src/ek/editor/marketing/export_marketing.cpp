@@ -35,31 +35,6 @@ void store_hi_res_icon(const flash_doc& doc, const element_t& symbol, int size, 
     destroy_sprite_data(spr);
 }
 
-void render_android_icons(const flash_doc& doc, const element_t& symbol, const string& name) {
-    map<string, int> resolution_map{
-            {"ldpi",    36},
-            {"mdpi",    48},
-            {"hdpi",    72},
-            {"xhdpi",   96},
-            {"xxhdpi",  144},
-            {"xxxhdpi", 192},
-    };
-    float original_size = 64.0f;
-    float scale_factor = 1.0f / original_size;
-    for (const auto& resolution: resolution_map) {
-        auto size = resolution.second;
-        renderer_options_t opts{scale_factor * size,
-                                size, size,
-                                true, true};
-        path_t dir{"mipmap-" + resolution.first};
-        make_dir(dir);
-
-        auto spr = render(doc, symbol, opts);
-        save_sprite_png(spr, dir / name);
-        destroy_sprite_data(spr);
-    }
-}
-
 void process_flash_archive_market(const flash_doc& file, const marketing_asset_t& marketing) {
     flash_doc_exporter exporter{file};
     auto& doc = exporter.doc;
@@ -114,10 +89,6 @@ void process_flash_archive_market(const flash_doc& file, const marketing_asset_t
                             destroy_sprite_data(spr);
                         });
                     }
-                }
-            } else if (command_data.target == "android") {
-                if (icon_item) {
-                    render_android_icons(doc, *icon_item, "ic_launcher.png");
                 }
             } else if (command_data.target == "web") {
                 if (icon_item) {

@@ -5,6 +5,7 @@
 #include <TargetConditionals.h>
 
 #import <CoreFoundation/CoreFoundation.h>
+#import <CoreText/CoreText.h>
 #import <AudioToolbox/AudioToolbox.h>
 
 #if TARGET_OS_IOS || TARGET_OS_TV

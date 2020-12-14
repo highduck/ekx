@@ -1,5 +1,9 @@
 #include "filters.hpp"
-#include "drawing.hpp"
+
+#include <ek/imaging/drawing.hpp>
+#include <ek/spritepack/sprite_data.hpp>
+#include <pugixml.hpp>
+#include <ek/util/strings.hpp>
 
 namespace ek {
 
@@ -341,6 +345,104 @@ void apply(image_t& image, const filter_data_t& filter, const rect_i& bounds) {
             break;
         default:
             break;
+    }
+}
+
+
+void apply(const std::vector<filter_data_t>& filters, spritepack::sprite_t& sprite, float scale) {
+    const rect_i bounds = get_filtered_rect(sprite.source, filters);
+    auto res = sprite;
+    uint32_t width = bounds.width;
+    uint32_t height = bounds.height;
+    auto* dest = new image_t(width, height);
+    const int2 dest_pos = sprite.source.position - bounds.position;
+    image_t& img = *sprite.image;
+    copy_pixels_normal(*dest, dest_pos, img, img.bounds<int>());
+
+    for (auto& filter : filters) {
+        apply(*dest, filter, bounds);
+    }
+
+    res.rc = bounds * (1.0f / scale);
+    res.source = bounds;
+
+    res.image = dest;
+    // TODO: preserved pixels?
+    delete sprite.image;
+    sprite.image = nullptr;
+    sprite = res;
+}
+
+
+
+filter_type get_filter_type(const std::string& type) {
+    if (type == "refill") {
+        return filter_type::refill;
+    } else if (type == "glow") {
+        return filter_type::glow;
+    } else if (type == "shadow") {
+        return filter_type::shadow;
+    }
+    return filter_type::bypass;
+}
+
+std::string filter_type_to_string(filter_type type) {
+    if (type == filter_type::refill) {
+        return "refill";
+    } else if (type == filter_type::glow) {
+        return "glow";
+    } else if (type == filter_type::shadow) {
+        return "shadow";
+    }
+    return "bypass";
+}
+
+argb32_t parse_argb32(const std::string& str) {
+    uint32_t c = 0x0;
+    sscanf(str.c_str(), "#%08x", &c);
+    return argb32_t{c};
+}
+
+void filterDataFromXML(const pugi::xml_node& node, filter_data_t& filter) {
+    filter.type = get_filter_type(node.attribute("type").as_string());
+    filter.top = node.attribute("top").as_float(0.0f);
+    filter.bottom = node.attribute("bottom").as_float(100.0f);
+    filter.distance = node.attribute("distance").as_float(0.0f);
+    filter.quality = node.attribute("quality").as_int(1);
+    filter.strength = node.attribute("strength").as_float(1.0f);
+    filter.angle = ek::math::to_radians(node.attribute("angle").as_float(0.0f));
+    filter.blur.x = node.attribute("blur_x").as_float(4.0f);
+    filter.blur.y = node.attribute("blur_y").as_float(4.0f);
+    filter.color = parse_argb32(node.attribute("color").as_string("#FF000000"));
+    filter.color_bottom = parse_argb32(node.attribute("color_bottom").as_string("#FF000000"));
+}
+
+void filterDataToXML(pugi::xml_node& node, const filter_data_t& filter) {
+    node.append_attribute("type").set_value(filter_type_to_string(filter.type).c_str());
+    node.append_attribute("top").set_value(filter.top);
+    node.append_attribute("bottom").set_value(filter.bottom);
+    node.append_attribute("distance").set_value(filter.distance);
+    node.append_attribute("quality").set_value(filter.quality);
+    node.append_attribute("strength").set_value(filter.strength);
+    node.append_attribute("angle").set_value(ek::math::to_degrees(filter.angle));
+    node.append_attribute("blur_x").set_value(filter.blur.x);
+    node.append_attribute("blur_y").set_value(filter.blur.y);
+    node.append_attribute("color").set_value(("#" + to_hex(filter.color.argb)).c_str());
+    node.append_attribute("color_bottom").set_value(("#" + to_hex(filter.color_bottom.argb)).c_str());
+}
+
+void FiltersDecl::readFromXML(const pugi::xml_node& node) {
+    for (auto& filter_node: node.children("filter")) {
+        filter_data_t f{};
+        filterDataFromXML(filter_node, f);
+        filters.push_back(f);
+    }
+}
+
+void FiltersDecl::writeToXML(pugi::xml_node& node) const {
+    for (auto& filter: filters) {
+        auto filter_node = node.append_child("filter");
+        filterDataToXML(filter_node, filter);
     }
 }
 

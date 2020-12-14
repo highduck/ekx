@@ -51,8 +51,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/imaging/image.hpp
         ek/imaging/drawing.cpp
         ek/imaging/drawing.hpp
-        ek/imaging/filters.cpp
-        ek/imaging/filters.hpp
         ek/imaging/decoder.cpp
         ek/imaging/decoder.hpp
         ek/imaging/fast_blur.cpp

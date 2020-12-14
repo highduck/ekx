@@ -132,6 +132,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         glyph.rect *= 1.0f / (dpiScale * baseFontSize);
         glyph.lineHeight = lineHeightMultiplier;
         glyph.ascender = ascender;
+        glyph.descender = descender;
     }
 
     outGlyph = glyph;
@@ -163,6 +164,7 @@ bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
     outGlyph.bearingX = scale * static_cast<float>(leftSideBearing) / baseFontSize;
     outGlyph.lineHeight = lineHeightMultiplier;
     outGlyph.ascender = ascender;
+    outGlyph.descender = descender;
 
     int x0, y0, x1, y1;
     stbtt_GetGlyphBitmapBox(info, glyphIndex, dpiScale * scale, dpiScale * scale, &x0, &y0, &x1, &y1);

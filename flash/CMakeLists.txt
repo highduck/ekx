@@ -36,8 +36,6 @@ add_library(${PROJECT_NAME}
         ek/flash/rasterizer/shape_processor.cpp
         ek/flash/rasterizer/shape_processor.hpp
         ek/flash/rasterizer/transform_model.hpp
-        ek/flash/rasterizer/software_filters.cpp
-        ek/flash/rasterizer/software_filters.hpp
 
         ek/spritepack/sprite_data.hpp
         ek/spritepack/export_atlas.cpp
@@ -49,14 +47,13 @@ add_library(${PROJECT_NAME}
         ek/spritepack/atlas_declaration.cpp
         ek/spritepack/atlas_declaration.hpp
 
-        ek/fonts/export_font.cpp
-        ek/fonts/export_font.hpp
+        ek/fonts/generateBitmapFont.cpp
+        ek/fonts/generateBitmapFont.hpp
         ek/fonts/ft_library.cpp
         ek/fonts/ft_library.hpp
-        ek/fonts/font_declaration.cpp
-        ek/fonts/font_declaration.hpp
-        ek/fonts/filters_declaration.cpp
-        ek/fonts/filters_declaration.hpp
+
+        ek/filters/filters.cpp
+        ek/filters/filters.hpp
 
         ek/xfl/flash_doc_exporter.cpp
         ek/xfl/flash_doc_exporter.hpp

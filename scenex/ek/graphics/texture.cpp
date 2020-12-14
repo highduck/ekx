@@ -3,6 +3,7 @@
 #include "graphics.hpp"
 #include "gl_def.hpp"
 #include <ek/imaging/image.hpp>
+#include <ek/util/detect_platform.hpp>
 #include <cassert>
 
 #ifndef GL_INTENSITY
@@ -15,6 +16,10 @@
 
 #ifndef GL_LUMINANCE_ALPHA
 #define GL_LUMINANCE_ALPHA                0x190A
+#endif
+
+#if !EK_ANDROID && !EK_IOS
+#define EK_ENABLE_LOD_BIAS
 #endif
 
 namespace ek::graphics {
@@ -84,7 +89,7 @@ void texture_t::upload_pixels(uint32_t width, uint32_t height, const uint8_t* da
 
     if (mipmaps) {
         GL_CHECK(glGenerateMipmap(gl_texture_target_));
-#if !defined(__ANDROID__)
+#ifdef EK_ENABLE_LOD_BIAS
         GL_CHECK(glTexParameterf(gl_texture_target_, GL_TEXTURE_LOD_BIAS, mipmapBias));
 #endif
     }
@@ -106,7 +111,7 @@ void texture_t::updateRect(uint32_t x, uint32_t y, uint32_t width, uint32_t heig
 
     if (mipmaps) {
         GL_CHECK(glGenerateMipmap(gl_texture_target_));
-#if !defined(__ANDROID__)
+#ifdef EK_ENABLE_LOD_BIAS
         GL_CHECK(glTexParameterf(gl_texture_target_, GL_TEXTURE_LOD_BIAS, mipmapBias));
 #endif
     }
@@ -128,7 +133,7 @@ void texture_t::updateRect(rect_i destRect, const uint8_t* data, rect_i srcRect)
 
     if (mipmaps) {
         GL_CHECK(glGenerateMipmap(gl_texture_target_));
-#if !defined(__ANDROID__)
+#ifdef EK_ENABLE_LOD_BIAS
         GL_CHECK(glTexParameterf(gl_texture_target_, GL_TEXTURE_LOD_BIAS, mipmapBias));
 #endif
     }
