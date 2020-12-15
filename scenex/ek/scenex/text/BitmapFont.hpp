@@ -25,11 +25,12 @@ public:
 
 class BitmapFontData {
 public:
-    uint16_t unitsPerEM;
-    uint16_t fontSize;
-    int16_t lineHeight;
-    int16_t ascender;
-    int16_t descender;
+    // 16 bits, but we need align memory for reading buffer
+    int32_t unitsPerEM;
+    int32_t fontSize;
+    int32_t lineHeight;
+    int32_t ascender;
+    int32_t descender;
     std::vector<BitmapFontGlyph> glyphs;
 
     template<typename S>
