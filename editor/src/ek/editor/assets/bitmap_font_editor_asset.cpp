@@ -3,11 +3,10 @@
 #include <ek/editor/gui/gui.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/system/working_dir.hpp>
-#include <ek/spritepack/export_atlas.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/system/system.hpp>
-#include <ek/fonts/generateBitmapFont.hpp>
+#include <ek/builders/BitmapFontBuilder.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <utility>
 #include <memory>
@@ -32,12 +31,12 @@ void BitmapFontEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {
 void BitmapFontEditorAsset::load() {
     read_decl();
 
-    Res<spritepack::atlas_t> atlasBuild{atlasTarget_};
-    auto font_data = font_lib::generateBitmapFont(project->base_path / resource_path_,
-                                                  name_,
-                                                  font_,
-                                                  filters_,
-                                                  atlasBuild.mutableRef());
+    Res<MultiResAtlasData> atlasBuild{atlasTarget_};
+    auto font_data = buildBitmapFont(project->base_path / resource_path_,
+                                     name_,
+                                     font_,
+                                     filters_,
+                                     atlasBuild.mutableRef());
 
     auto* bmFont = new BitmapFont();
     bmFont->load(font_data);
@@ -56,12 +55,12 @@ void BitmapFontEditorAsset::gui() {
 void BitmapFontEditorAsset::build(assets_build_struct_t& data) {
     read_decl();
 
-    Res<spritepack::atlas_t> atlasBuild{atlasTarget_};
-    auto font_data = font_lib::generateBitmapFont(project->base_path / resource_path_,
-                                                  name_,
-                                                  font_,
-                                                  filters_,
-                                                  atlasBuild.mutableRef());
+    Res<MultiResAtlasData> atlasBuild{atlasTarget_};
+    auto font_data = buildBitmapFont(project->base_path / resource_path_,
+                                     name_,
+                                     font_,
+                                     filters_,
+                                     atlasBuild.mutableRef());
 
     working_dir_t::with(data.output, [&] {
         EK_DEBUG << "Export Freetype asset: " << current_working_directory();

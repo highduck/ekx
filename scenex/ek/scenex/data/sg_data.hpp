@@ -8,7 +8,7 @@
 #include <ek/math/mat3x2.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/color_transform.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <ek/scenex/text/TextFormat.hpp>
 
 namespace ek {

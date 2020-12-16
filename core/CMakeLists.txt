@@ -55,10 +55,10 @@ add_library(${PROJECT_NAME} STATIC
         ek/imaging/decoder.hpp
         ek/imaging/fast_blur.cpp
 
+        ek/util/Res.hpp
         ek/util/source_location.hpp
         ek/util/logger.hpp
         ek/util/logger.cpp
-        #ek/util/assets.hpp
         ek/util/locator.hpp
         ek/util/signals.hpp
         ek/util/base64.hpp
@@ -69,14 +69,15 @@ add_library(${PROJECT_NAME} STATIC
         ek/util/common_macro.hpp
         ek/util/strings.hpp
         ek/util/strings.cpp
-        ek/util/static_ring_buffer.hpp
-        ek/util/static_history_buffer.hpp
-        ek/util/bit_vector.hpp
         ek/util/timer.hpp
         ek/util/path.cpp
         ek/util/path.hpp
         ek/util/type_index.hpp
-        ek/util/FreeList.hpp
+
+        ek/ds/FreeList.hpp
+        ek/ds/StaticRingBuffer.hpp
+        ek/ds/StaticHistoryBuffer.hpp
+        ek/ds/BitVector.hpp
 
         ek/Localization.hpp
         ek/Localization.cpp

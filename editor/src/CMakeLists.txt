@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 add_library(${PROJECT_NAME} STATIC
 
         ek/editor/assets/dynamic_atlas_editor_asset.cpp
-        ek/editor/assets/atlas_editor_asset.cpp
+        ek/editor/assets/MultiResAtlasEditorAsset.cpp
         ek/editor/assets/flash_asset.cpp
         ek/editor/assets/audio_asset.cpp
         ek/editor/assets/bitmap_font_editor_asset.cpp
@@ -56,7 +56,8 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/assets/TranslationsAsset.hpp
         ek/editor/assets/TranslationsAsset.cpp
         ek/editor/assets/editor_asset.cpp
-        ek/editor/assets/editor_asset.hpp)
+        ek/editor/assets/editor_asset.hpp
+        )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
@@ -65,7 +66,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
-target_compile_definitions(${PROJECT_NAME} PUBLIC EK_EDITOR)
+target_compile_definitions(${PROJECT_NAME} PUBLIC
+        EK_EDITOR
+        )
+
 
 if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
 target_compile_options(${PROJECT_NAME} PUBLIC

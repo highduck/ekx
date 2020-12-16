@@ -1,7 +1,7 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/scenex/text/TrueTypeFont.hpp>
-#include <ek/fonts/generateBitmapFont.hpp>
+#include <ek/builders/BitmapFontBuilder.hpp>
 
 namespace ek {
 

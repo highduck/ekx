@@ -1,24 +1,21 @@
 #include "flash_asset.hpp"
 
-#include <ek/util/logger.hpp>
+#include <memory>
 #include <utility>
+#include <ek/util/logger.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/flash/doc/flash_doc.hpp>
-#include <ek/spritepack/export_atlas.hpp>
-#include <ek/scenex/2d/Atlas.hpp>
+#include <ek/xfl/Doc.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/data/sg_data.hpp>
-#include <ek/xfl/flash_doc_exporter.hpp>
-#include <ek/flash/doc/flash_archive.hpp>
+#include <ek/builders/xfl/flash_doc_exporter.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
-#include <memory>
 #include <ek/editor/gui/gui.hpp>
 
 namespace ek {
 
-flash_asset_t::flash_asset_t(path_t path)
-        : editor_asset_t{std::move(path), "flash"} {
+flash_asset_t::flash_asset_t(path_t path) :
+        editor_asset_t{std::move(path), "flash"} {
     reloadOnScaleFactorChanged = true;
 }
 
@@ -29,11 +26,11 @@ void flash_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
 void flash_asset_t::load() {
     read_decl();
 
-    flash::flash_doc ff{project->base_path / resource_path_};
-    flash::flash_doc_exporter fe{ff};
+    xfl::Doc ff{project->base_path / resource_path_};
+    xfl::flash_doc_exporter fe{ff};
     fe.build_library();
 
-    Res<spritepack::atlas_t> atlasBuild{atlasTarget_};
+    Res<MultiResAtlasData> atlasBuild{atlasTarget_};
     fe.build_sprites(atlasBuild.mutableRef());
 
     sg_file sg = fe.export_library();
@@ -52,11 +49,11 @@ void flash_asset_t::gui() {
 void flash_asset_t::build(assets_build_struct_t& data) {
     read_decl();
 
-    flash::flash_doc ff{project->base_path / resource_path_};
-    flash::flash_doc_exporter fe{ff};
+    xfl::Doc ff{project->base_path / resource_path_};
+    xfl::flash_doc_exporter fe{ff};
     fe.build_library();
 
-    Res<spritepack::atlas_t> atlasBuild{atlasTarget_};
+    Res<MultiResAtlasData> atlasBuild{atlasTarget_};
     fe.build_sprites(atlasBuild.mutableRef());
 
     make_dirs(data.output);

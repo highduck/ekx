@@ -7,7 +7,7 @@
 #include "model_asset.hpp"
 #include "audio_asset.hpp"
 #include "ttf_editor_asset.hpp"
-#include "atlas_editor_asset.hpp"
+#include "MultiResAtlasEditorAsset.hpp"
 #include "dynamic_atlas_editor_asset.hpp"
 #include "TranslationsAsset.hpp"
 
@@ -115,7 +115,7 @@ editor_project_t::editor_project_t() {
     register_asset_factory<model_asset_t>();
     register_asset_factory<audio_asset_t>();
     register_asset_factory<TTFEditorAsset>();
-    register_asset_factory<AtlasEditorAsset>();
+    register_asset_factory<MultiResAtlasEditorAsset>();
     register_asset_factory<DynamicAtlasEditorAsset>();
     register_asset_factory<TranslationsAsset>();
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/math/rand.hpp>

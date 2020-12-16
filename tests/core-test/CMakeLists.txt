@@ -7,7 +7,7 @@ add_executable(${PROJECT_NAME}
         ek/math/vec.test.cpp
         ek/imaging/image.test.cpp
         ek/util/base64.test.cpp
-        ek/util/bit_vector.test.cpp
+        ek/util/BitVector.test.cpp
         ek/util/strings.test.cpp
         ek/util/signals.test.cpp
         ek/util/logger.test.cpp

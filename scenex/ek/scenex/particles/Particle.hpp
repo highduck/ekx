@@ -2,7 +2,7 @@
 
 #include "ParticleDecl.hpp"
 
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/draw2d/drawer.hpp>
