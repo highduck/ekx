@@ -1,24 +1,26 @@
-#include "shape_processor.hpp"
-#include "shape_edge_decoder.hpp"
+#include "ShapeProcessor.hpp"
+#include "ShapeDecoder.hpp"
 
 namespace ek::xfl {
 
-void shape_processor::reset() {
+using Op = RenderCommand::Operation;
+
+void ShapeProcessor::reset() {
     batches.clear();
     bounds = {};
 }
 
-bool shape_processor::add(const element_t& el, const transform_model& world) {
+bool ShapeProcessor::add(const Element& el, const TransformModel& world) {
     switch (el.elementType) {
-        case element_type::bitmap_item:
+        case ElementType::bitmap_item:
             return add(el.bitmap.get(), world);
-        case element_type::object_oval:
-        case element_type::object_rectangle:
+        case ElementType::object_oval:
+        case ElementType::object_rectangle:
             return addShapeObject(el, world);
         default:
             break;
     }
-    shape_decoder decoder{world};
+    ShapeDecoder decoder{world};
     decoder.decode(el);
     return !decoder.empty() && add(decoder.result());
 }
@@ -43,10 +45,10 @@ rect_f transform(const matrix_2d& m, const rect_f& rc) {
     return {xMin, yMin, xMax - xMin, yMax - yMin};
 }
 
-bool shape_processor::add(const BitmapData* bitmap, const transform_model& world) {
-    render_batch batch{};
+bool ShapeProcessor::add(const BitmapData* bitmap, const TransformModel& world) {
+    RenderCommandsBatch batch{};
     batch.transform = world;
-    render_command cmd{render_command::operation::bitmap};
+    RenderCommand cmd{Op::bitmap};
     cmd.bitmap = bitmap;
     batch.commands.push_back(cmd);
 
@@ -59,7 +61,7 @@ bool shape_processor::add(const BitmapData* bitmap, const transform_model& world
 }
 
 
-bool shape_processor::add(const render_batch& batch) {
+bool ShapeProcessor::add(const RenderCommandsBatch& batch) {
     if (!batch.commands.empty() && !batch.bounds.empty()) {
         batches.push_back(batch);
         bounds.add(batch.bounds.rect());
@@ -68,30 +70,27 @@ bool shape_processor::add(const render_batch& batch) {
     return false;
 }
 
-bool shape_processor::addShapeObject(const element_t& el, const transform_model& world) {
+bool ShapeProcessor::addShapeObject(const Element& el, const TransformModel& world) {
     if (!el.shape) {
         return false;
     }
     const auto& shape = *el.shape;
     rect_f rc{shape.x, shape.y, shape.objectWidth, shape.objectHeight};
-    render_command::operation op =
-            el.elementType == element_type::object_rectangle ?
-            render_command::operation::rectangle :
-            render_command::operation::oval;
+    Op op = el.elementType == ElementType::object_rectangle ? Op::rectangle : Op::oval;
 
-    render_command cmd{op};
+    RenderCommand cmd{op};
     cmd.v[0] = rc.x;
     cmd.v[1] = rc.y;
     cmd.v[2] = rc.right();
     cmd.v[3] = rc.bottom();
     switch (el.elementType) {
-        case element_type::object_rectangle:
+        case ElementType::object_rectangle:
             cmd.v[4] = shape.topLeftRadius;
             cmd.v[5] = shape.topRightRadius;
             cmd.v[6] = shape.bottomRightRadius;
             cmd.v[7] = shape.bottomLeftRadius;
             break;
-        case element_type::object_oval:
+        case ElementType::object_oval:
             cmd.v[4] = shape.startAngle;
             cmd.v[5] = shape.endAngle;
             cmd.v[6] = shape.closePath ? 1 : 0;
@@ -104,7 +103,7 @@ bool shape_processor::addShapeObject(const element_t& el, const transform_model&
     cmd.fill = !el.fills.empty() ? &el.fills[0] : nullptr;
     cmd.stroke = !el.strokes.empty() > 0 ? &el.strokes[0] : nullptr;
 
-    render_batch batch{};
+    RenderCommandsBatch batch{};
     batch.transform = world;
     batch.commands.push_back(cmd);
 

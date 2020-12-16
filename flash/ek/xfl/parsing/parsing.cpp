@@ -113,25 +113,25 @@ static float4 read_color(const xml_node& node, const char* color_tag = "color", 
 }
 
 /** Element parsing **/
-layer_type& operator<<(layer_type& r, const char* str) {
-    if (equals(str, "guide")) return r = layer_type::guide;
-    return r = layer_type::normal;
+LayerType& operator<<(LayerType& r, const char* str) {
+    if (equals(str, "guide")) return r = LayerType::guide;
+    return r = LayerType::normal;
 }
 
-tween_type& operator<<(tween_type& r, const char* str) {
-    if (equals(str, "motion")) return r = tween_type::classic;
-    if (equals(str, "motion object")) return r = tween_type::motion_object;
-    return r = tween_type::none;
+TweenType& operator<<(TweenType& r, const char* str) {
+    if (equals(str, "motion")) return r = TweenType::classic;
+    if (equals(str, "motion object")) return r = TweenType::motion_object;
+    return r = TweenType::none;
 }
 
-tween_target& operator<<(tween_target& r, const char* str) {
-    if (equals(str, "all")) return r = tween_target::all;
-    if (equals(str, "position")) return r = tween_target::position;
-    if (equals(str, "rotation")) return r = tween_target::rotation;
-    if (equals(str, "scale")) return r = tween_target::scale;
-    if (equals(str, "color")) return r = tween_target::color;
-    if (equals(str, "filters")) return r = tween_target::filters;
-    return r = tween_target::all;
+TweenTarget& operator<<(TweenTarget& r, const char* str) {
+    if (equals(str, "all")) return r = TweenTarget::all;
+    if (equals(str, "position")) return r = TweenTarget::position;
+    if (equals(str, "rotation")) return r = TweenTarget::rotation;
+    if (equals(str, "scale")) return r = TweenTarget::scale;
+    if (equals(str, "color")) return r = TweenTarget::color;
+    if (equals(str, "filters")) return r = TweenTarget::filters;
+    return r = TweenTarget::all;
 }
 
 FontRenderingMode& operator<<(FontRenderingMode& r, const char* str) {
@@ -148,44 +148,44 @@ TextLineType& operator<<(TextLineType& r, const char* str) {
     return r = TextLineType::SingleLine;
 }
 
-rotation_direction& operator<<(rotation_direction& r, const char* str) {
-    if (equals(str, "counter-clockwise")) return r = rotation_direction::ccw;
-    else if (equals(str, "clockwise")) return r = rotation_direction::cw;
-    return r = rotation_direction::none;
+RotationDirection& operator<<(RotationDirection& r, const char* str) {
+    if (equals(str, "counter-clockwise")) return r = RotationDirection::ccw;
+    else if (equals(str, "clockwise")) return r = RotationDirection::cw;
+    return r = RotationDirection::none;
 }
 
-element_type& operator<<(element_type& r, const char* str) {
-    if (equals(str, "DOMGroup")) return r = element_type::group;
-    if (equals(str, "DOMBitmapInstance")) return r = element_type::bitmap_instance;
-    if (equals(str, "DOMBitmapItem")) return r = element_type::bitmap_item;
-    if (equals(str, "DOMShape")) return r = element_type::shape;
-    if (equals(str, "DOMOvalObject")) return r = element_type::object_oval;
-    if (equals(str, "DOMRectangleObject")) return r = element_type::object_rectangle;
-    if (equals(str, "DOMSymbolInstance")) return r = element_type::symbol_instance;
-    if (equals(str, "DOMDynamicText")) return r = element_type::dynamic_text;
-    if (equals(str, "DOMStaticText")) return r = element_type::static_text;
-    if (equals(str, "DOMSymbolItem")) return r = element_type::symbol_item;
-    if (equals(str, "DOMFontItem")) return r = element_type::font_item;
-    if (equals(str, "DOMSoundItem")) return r = element_type::sound_item;
-    return r = element_type::unknown;
+ElementType& operator<<(ElementType& r, const char* str) {
+    if (equals(str, "DOMGroup")) return r = ElementType::group;
+    if (equals(str, "DOMBitmapInstance")) return r = ElementType::bitmap_instance;
+    if (equals(str, "DOMBitmapItem")) return r = ElementType::bitmap_item;
+    if (equals(str, "DOMShape")) return r = ElementType::shape;
+    if (equals(str, "DOMOvalObject")) return r = ElementType::object_oval;
+    if (equals(str, "DOMRectangleObject")) return r = ElementType::object_rectangle;
+    if (equals(str, "DOMSymbolInstance")) return r = ElementType::symbol_instance;
+    if (equals(str, "DOMDynamicText")) return r = ElementType::dynamic_text;
+    if (equals(str, "DOMStaticText")) return r = ElementType::static_text;
+    if (equals(str, "DOMSymbolItem")) return r = ElementType::symbol_item;
+    if (equals(str, "DOMFontItem")) return r = ElementType::font_item;
+    if (equals(str, "DOMSoundItem")) return r = ElementType::sound_item;
+    return r = ElementType::unknown;
 }
 
-symbol_type& operator<<(symbol_type& r, const char* str) {
-    if (equals(str, "button")) return r = symbol_type::button;
-    if (equals(str, "graphic")) return r = symbol_type::graphic;
-    return r = symbol_type::normal;
+SymbolType& operator<<(SymbolType& r, const char* str) {
+    if (equals(str, "button")) return r = SymbolType::button;
+    if (equals(str, "graphic")) return r = SymbolType::graphic;
+    return r = SymbolType::normal;
 }
 
-loop_mode& operator<<(loop_mode& r, const char* str) {
-    if (equals(str, "loop")) return r = loop_mode::loop;
-    if (equals(str, "play once")) return r = loop_mode::play_once;
-    if (equals(str, "single frame")) return r = loop_mode::single_frame;
-    return r = loop_mode::none;
+LoopMode& operator<<(LoopMode& r, const char* str) {
+    if (equals(str, "loop")) return r = LoopMode::loop;
+    if (equals(str, "play once")) return r = LoopMode::play_once;
+    if (equals(str, "single frame")) return r = LoopMode::single_frame;
+    return r = LoopMode::none;
 }
 
 /** [parsing classes] **/
 
-item_properties& operator<<(item_properties& r, const xml_node& node) {
+ItemProperties& operator<<(ItemProperties& r, const xml_node& node) {
     r.name = node.attribute("name").value();
     r.itemID = node.attribute("itemID").value();
     r.sourceLastImported = node.attribute("sourceLastImported").as_int();
@@ -197,7 +197,7 @@ item_properties& operator<<(item_properties& r, const xml_node& node) {
     return r;
 }
 
-folder_item& operator<<(folder_item& r, const xml_node& node) {
+FolderItem& operator<<(FolderItem& r, const xml_node& node) {
     r.item << node;
     return r;
 }
@@ -213,7 +213,7 @@ float2 read_alignment(const xml_node& node) {
     return r;
 }
 
-text_attributes_t& operator<<(text_attributes_t& r, const xml_node& node) {
+TextAttributes& operator<<(TextAttributes& r, const xml_node& node) {
     r.alignment = read_alignment(node);
     r.aliasText = node.attribute("aliasText").as_bool();
     r.bold = node.attribute("bold").as_bool();
@@ -230,13 +230,13 @@ text_attributes_t& operator<<(text_attributes_t& r, const xml_node& node) {
     return r;
 }
 
-text_run_t& operator<<(text_run_t& r, const xml_node& node) {
+TextRun& operator<<(TextRun& r, const xml_node& node) {
     r.characters = node.child("characters").text().as_string();
     r.attributes << node.child("textAttrs").first_child();
     return r;
 }
 
-document_info& operator<<(document_info& r, const xml_node& node) {
+DocInfo& operator<<(DocInfo& r, const xml_node& node) {
     r.width = node.attribute("width").as_int(550);
     r.height = node.attribute("height").as_int(400);
     r.backgroundColor = parse_css_color(node.attribute("backgroundColor").as_string());
@@ -252,53 +252,53 @@ document_info& operator<<(document_info& r, const xml_node& node) {
 
 /** Graphics objects parsing **/
 
-scale_mode& operator<<(scale_mode& r, const char* str) {
-    if (equals(str, "normal")) return r = scale_mode::normal;
-    else if (equals(str, "horizontal")) return r = scale_mode::horizontal;
-    else if (equals(str, "vertical")) return r = scale_mode::vertical;
-    else if (equals(str, "none")) return r = scale_mode::none;
+ScaleMode& operator<<(ScaleMode& r, const char* str) {
+    if (equals(str, "normal")) return r = ScaleMode::normal;
+    else if (equals(str, "horizontal")) return r = ScaleMode::horizontal;
+    else if (equals(str, "vertical")) return r = ScaleMode::vertical;
+    else if (equals(str, "none")) return r = ScaleMode::none;
     else if (str && *str) EK_WARN("unknown ScaleMode: %s", str);
-    return r = scale_mode::none;
+    return r = ScaleMode::none;
 }
 
-solid_style_type& operator<<(solid_style_type& r, const char* str) {
-    if (equals(str, "hairline")) return r = solid_style_type::hairline;
+SolidStyleType& operator<<(SolidStyleType& r, const char* str) {
+    if (equals(str, "hairline")) return r = SolidStyleType::hairline;
     else if (str && *str) EK_WARN("unknown SolidStyle: %s", str);
-    return r = solid_style_type::hairline;
+    return r = SolidStyleType::hairline;
 }
 
-line_caps& operator<<(line_caps& r, const char* str) {
-    if (equals(str, "none")) return r = line_caps::none;
-    else if (equals(str, "round")) return r = line_caps::round;
-    else if (equals(str, "square")) return r = line_caps::square;
+LineCaps& operator<<(LineCaps& r, const char* str) {
+    if (equals(str, "none")) return r = LineCaps::none;
+    else if (equals(str, "round")) return r = LineCaps::round;
+    else if (equals(str, "square")) return r = LineCaps::square;
     else if (str && *str) EK_WARN("unknown LineCaps: %s", str);
-    return r = line_caps::round;
+    return r = LineCaps::round;
 }
 
-line_joints& operator<<(line_joints& r, const char* str) {
-    if (equals(str, "miter")) return r = line_joints::miter;
-    else if (equals(str, "round")) return r = line_joints::round;
-    else if (equals(str, "bevel")) return r = line_joints::bevel;
+LineJoints& operator<<(LineJoints& r, const char* str) {
+    if (equals(str, "miter")) return r = LineJoints::miter;
+    else if (equals(str, "round")) return r = LineJoints::round;
+    else if (equals(str, "bevel")) return r = LineJoints::bevel;
     else if (str && *str) EK_WARN("unknown LineJoints: %s", str);
-    return r = line_joints::round;
+    return r = LineJoints::round;
 }
 
-fill_type& operator<<(fill_type& r, const char* str) {
-    if (equals(str, "SolidColor")) return r = fill_type::solid;
-    if (equals(str, "LinearGradient")) return r = fill_type::linear;
-    if (equals(str, "RadialGradient")) return r = fill_type::radial;
-    if (equals(str, "BitmapFill")) return r = fill_type::bitmap;
-    return r = fill_type::unknown;
+FillType& operator<<(FillType& r, const char* str) {
+    if (equals(str, "SolidColor")) return r = FillType::solid;
+    if (equals(str, "LinearGradient")) return r = FillType::linear;
+    if (equals(str, "RadialGradient")) return r = FillType::radial;
+    if (equals(str, "BitmapFill")) return r = FillType::bitmap;
+    return r = FillType::unknown;
 }
 
-spread_method& operator<<(spread_method& r, const char* str) {
+SpreadMethod& operator<<(SpreadMethod& r, const char* str) {
     //const char* str = node.attribute("spreadMethod").value();
-    if (equals(str, "reflect")) return r = spread_method::reflect;
-    if (equals(str, "repeat")) return r = spread_method::repeat;
-    return r = spread_method::extend;
+    if (equals(str, "reflect")) return r = SpreadMethod::reflect;
+    if (equals(str, "repeat")) return r = SpreadMethod::repeat;
+    return r = SpreadMethod::extend;
 }
 
-gradient_entry& operator<<(gradient_entry& r, const xml_node& node) {
+GradientEntry& operator<<(GradientEntry& r, const xml_node& node) {
     r.color = read_color(node);
     r.ratio = node.attribute("ratio").as_float();
     return r;
@@ -307,24 +307,24 @@ gradient_entry& operator<<(gradient_entry& r, const xml_node& node) {
 /** Blend Mode parsing **/
 
 
-blend_mode_t& operator<<(blend_mode_t& r, const char* str) {
-    if (!str || !(*str)) return r = blend_mode_t::last;
-    else if (equals(str, "normal")) return r = blend_mode_t::normal;
-    else if (equals(str, "layer")) return r = blend_mode_t::layer;
-    else if (equals(str, "multiply")) return r = blend_mode_t::multiply;
-    else if (equals(str, "screen")) return r = blend_mode_t::screen;
-    else if (equals(str, "lighten")) return r = blend_mode_t::lighten;
-    else if (equals(str, "darken")) return r = blend_mode_t::darken;
-    else if (equals(str, "difference")) return r = blend_mode_t::difference;
-    else if (equals(str, "add")) return r = blend_mode_t::add;
-    else if (equals(str, "subtract")) return r = blend_mode_t::subtract;
-    else if (equals(str, "invert")) return r = blend_mode_t::invert;
-    else if (equals(str, "alpha")) return r = blend_mode_t::alpha;
-    else if (equals(str, "erase")) return r = blend_mode_t::erase;
-    else if (equals(str, "overlay")) return r = blend_mode_t::overlay;
-    else if (equals(str, "hardlight")) return r = blend_mode_t::hardlight;
+BlendMode& operator<<(BlendMode& r, const char* str) {
+    if (!str || !(*str)) return r = BlendMode::last;
+    else if (equals(str, "normal")) return r = BlendMode::normal;
+    else if (equals(str, "layer")) return r = BlendMode::layer;
+    else if (equals(str, "multiply")) return r = BlendMode::multiply;
+    else if (equals(str, "screen")) return r = BlendMode::screen;
+    else if (equals(str, "lighten")) return r = BlendMode::lighten;
+    else if (equals(str, "darken")) return r = BlendMode::darken;
+    else if (equals(str, "difference")) return r = BlendMode::difference;
+    else if (equals(str, "add")) return r = BlendMode::add;
+    else if (equals(str, "subtract")) return r = BlendMode::subtract;
+    else if (equals(str, "invert")) return r = BlendMode::invert;
+    else if (equals(str, "alpha")) return r = BlendMode::alpha;
+    else if (equals(str, "erase")) return r = BlendMode::erase;
+    else if (equals(str, "overlay")) return r = BlendMode::overlay;
+    else if (equals(str, "hardlight")) return r = BlendMode::hardlight;
     EK_WARN("unknown BlendMode: %s", str);
-    return r = blend_mode_t::normal;
+    return r = BlendMode::normal;
 }
 
 /** Filters parsing **/
@@ -461,7 +461,7 @@ void parse_edges(const char* data, std::vector<char>& out_commands, std::vector<
     }
 }
 
-edge_t& operator<<(edge_t& r, const xml_node& node) {
+Edge& operator<<(Edge& r, const xml_node& node) {
     parse_edges(node.attribute("edges").value(), r.commands, r.values);
     r.fill_style_0 = node.attribute("fillStyle0").as_int();
     r.fill_style_1 = node.attribute("fillStyle1").as_int();

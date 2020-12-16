@@ -1,6 +1,5 @@
 #include "parsing.hpp"
 
-#include <ek/xfl/Doc.hpp>
 #include <ek/xfl/types.hpp>
 
 #include <ek/serialize/serialize.hpp>
@@ -16,7 +15,7 @@ const uint16_t SIGNATURE_JPEG = 0xD8FF;
 const uint16_t SIGNATURE_ARGB = 0x0503;
 const uint16_t SIGNATURE_CLUT = 0x0303;
 
-struct bitmap_desc_t {
+struct BitmapItemHeader {
     uint16_t stride;
     uint16_t width;
     uint16_t height;
@@ -27,7 +26,7 @@ struct bitmap_desc_t {
     uint8_t flags;
 
     template<typename S>
-    void serialize(IO<S> io) {
+    void serialize(IO <S> io) {
         io(
                 stride,
                 width,
@@ -90,9 +89,8 @@ size_t ekUncompress(input_memory_stream& input, uint8_t* dest, size_t dest_size)
     return sz;
 }
 
-
 void readBitmapARGB(input_memory_stream& input, BitmapData& bitmap) {
-    bitmap_desc_t desc{};
+    BitmapItemHeader desc{};
     IO io{input};
     io(desc);
     const auto compressed = input.read<uint8_t>();
@@ -118,7 +116,7 @@ void readBitmapARGB(input_memory_stream& input, BitmapData& bitmap) {
 }
 
 void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
-    bitmap_desc_t desc{};
+    BitmapItemHeader desc{};
     IO io{input};
     io(desc);
     assert(desc.width_tw == desc.width * 20u);
@@ -184,7 +182,6 @@ void readBitmapJPEG(const std::string& data, BitmapData& bitmap) {
 BitmapData* load_bitmap(const std::string& data) {
     auto* bitmap_ptr = new BitmapData;
     auto& bitmap = *bitmap_ptr;
-    //bitmap.path = path;
 
     input_memory_stream input{data.data(), data.size()};
 

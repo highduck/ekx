@@ -48,18 +48,15 @@ public:
         return path_;
     }
 
-    const File* open(const path_t& rpath) const override {
-        auto child_path = path_ / rpath;
-
-        FileNode* entry = nullptr;
-        auto it = root_->children_.find(child_path.str());
-        if (it == root_->children_.end()) {
-            entry = create(child_path, root_);
-            root_->children_[child_path.str()] = entry;
-        } else {
-            entry = it->second;
+    const File* open(const path_t& relPath) const override {
+        auto childPath = path_ / relPath;
+        auto& children = root_->children_;
+        const auto& key = childPath.str();
+        auto it = children.find(key);
+        if (it == children.end()) {
+            children[key] = create(childPath, root_);
         }
-        return entry;
+        return children[key];
     }
 
 protected:
@@ -156,20 +153,18 @@ bool is_file(const path_t& path) {
     return stat(path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode);
 }
 
-std::unique_ptr<File> load_flash_archive(const path_t& path) {
-    using namespace ek::xfl;
-
+std::unique_ptr<File> File::load(const path_t& path) {
     if (is_file(path)) {
         const auto ext = path.ext();
         // dir/FILE/FILE.xfl
-        if (ext == "xfl") {
+        if (ext == ".xfl") {
             auto dir = path.dir();
             if (is_dir(dir)) {
                 return std::make_unique<XFLNode>(dir, nullptr);
             } else {
                 EK_ERROR("Import Flash: loading %s XFL file, but %s is not a dir", path.c_str(), dir.c_str());
             }
-        } else if (ext == "fla" || ext == "zip") {
+        } else if (ext == ".fla" || ext == ".zip") {
             return std::make_unique<FLANode>(path);
         } else {
             EK_ERROR << "Import Flash: file is not xfl or fla: " << path;

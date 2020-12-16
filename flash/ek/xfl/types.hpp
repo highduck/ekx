@@ -43,8 +43,7 @@ struct Filter {
     bool hideObject = false;
 };
 
-
-enum class blend_mode_t {
+enum class BlendMode {
     last, // default
     normal, // default
     layer,
@@ -80,7 +79,7 @@ enum class TextLineType {
     MultilineNoWrap
 };
 
-struct edge_t {
+struct Edge {
     std::vector<char> commands;
     std::vector<double> values;
     int fill_style_0 = 0;
@@ -88,7 +87,7 @@ struct edge_t {
     int stroke_style = 0;
 };
 
-struct text_attributes_t {
+struct TextAttributes {
     float2 alignment{};// alignment = "left"; / center / right
     bool aliasText = false;
     bool bold = false;
@@ -102,54 +101,53 @@ struct text_attributes_t {
     bool autoKern = true;
 };
 
-struct text_run_t {
+struct TextRun {
     std::string characters;
-    text_attributes_t attributes;
+    TextAttributes attributes;
 };
 
 
-struct motion_object_t {
+struct MotionObject {
     int duration;
     int timeScale;
 };
 
-enum class tween_type {
+enum class TweenType {
     none,
     classic,
     motion_object
 };
 
-enum class rotation_direction {
+enum class RotationDirection {
     none = 0,
     ccw,
     cw
 };
 
-
-enum class scale_mode {
+enum class ScaleMode {
     none,
     normal,
     horizontal,
     vertical
 };
 
-enum class solid_style_type {
+enum class SolidStyleType {
     hairline
 };
 
-enum class line_caps {
+enum class LineCaps {
     none,
     round, // default
     square
 };
 
-enum class line_joints {
+enum class LineJoints {
     miter,
     round, // default
     bevel
 };
 
-enum class fill_type {
+enum class FillType {
     unknown = 0,
     solid = 1,
     linear = 2,
@@ -157,45 +155,44 @@ enum class fill_type {
     bitmap = 4
 };
 
-enum class spread_method {
+enum class SpreadMethod {
     extend = 0,
     reflect = 1,
     repeat = 2
 };
 
-struct gradient_entry {
+struct GradientEntry {
     float4 color;
     float ratio = 0.0f;
 
-    gradient_entry() = default;
+    GradientEntry() = default;
 
-    explicit gradient_entry(const float4& color, float ratio = 0.0f)
-            : color{color},
-              ratio{ratio} {
+    explicit GradientEntry(const float4& color, float ratio = 0.0f) : color{color},
+                                                                      ratio{ratio} {
     }
 };
 
-struct fill_style {
+struct FillStyle {
     int index = 0;
 
-    fill_type type = fill_type::solid;
-    spread_method spreadMethod = spread_method::repeat;
-    std::vector<gradient_entry> entries;
+    FillType type = FillType::solid;
+    SpreadMethod spreadMethod = SpreadMethod::repeat;
+    std::vector<GradientEntry> entries;
     matrix_2d matrix{};
     std::string bitmapPath;
     std::shared_ptr<BitmapData> bitmap;
 };
 
-struct stroke_style {
+struct StrokeStyle {
     int index = 0;
     bool is_solid = true;
 
-    fill_style fill{};
-    scale_mode scaleMode = scale_mode::none;
-    solid_style_type solidStyle = solid_style_type::hairline;
+    FillStyle fill{};
+    ScaleMode scaleMode = ScaleMode::none;
+    SolidStyleType solidStyle = SolidStyleType::hairline;
     float weight = 1.0f;
-    line_caps caps = line_caps::round;
-    line_joints joints = line_joints::round;
+    LineCaps caps = LineCaps::round;
+    LineJoints joints = LineJoints::round;
     float miterLimit = 0.0f;
     bool pixelHinting = false;
 };
@@ -203,9 +200,9 @@ struct stroke_style {
 /**** elements tree ****/
 
 
-struct element_t;
+struct Element;
 
-enum class tween_target {
+enum class TweenTarget {
     all = 0,
     position = 1,
     rotation = 2,
@@ -214,48 +211,47 @@ enum class tween_target {
     filters = 5
 };
 
-struct tween_object_t {
-    tween_target target = tween_target::all;
+struct TweenObject {
+    TweenTarget target = TweenTarget::all;
     int intensity; // <Ease intensity="-100...100" />
     std::vector<float2> custom_ease;
 };
 
-struct frame_t {
+struct Frame {
     int index = 0;
 
-    [[nodiscard]]
-    int endFrame() const {
+    [[nodiscard]] int endFrame() const {
         return index + duration - 1;
     }
 
     int duration = 1;
-    tween_type tweenType = tween_type::none;
+    TweenType tweenType = TweenType::none;
     int keyMode = 0;
 
     bool motionTweenSnap;
     bool motionTweenOrientToPath;
-    rotation_direction motionTweenRotate = rotation_direction::none;
+    RotationDirection motionTweenRotate = RotationDirection::none;
     int motionTweenRotateTimes = 0;
 
     std::string name; // label
     int acceleration; // ease -100...100
 
     bool hasCustomEase;
-    std::vector<tween_object_t> tweens;
+    std::vector<TweenObject> tweens;
 
     std::string script;
-    std::vector<element_t> elements;
-    motion_object_t motionObject;
+    std::vector<Element> elements;
+    MotionObject motionObject;
 };
 
-enum class layer_type {
+enum class LayerType {
     normal,
     guide
 };
 
-struct layer_t {
+struct Layer {
     std::string name;
-    layer_type layerType = layer_type::normal;
+    LayerType layerType = LayerType::normal;
     float4 color;
 
     bool autoNamed = false;
@@ -263,7 +259,7 @@ struct layer_t {
     bool isSelected = false;
     bool locked = false;
 
-    std::vector<frame_t> frames;
+    std::vector<Frame> frames;
 
     [[nodiscard]]
     size_t duration() const {
@@ -284,9 +280,9 @@ struct layer_t {
     }
 };
 
-struct timeline_t {
+struct Timeline {
     std::string name;
-    std::vector<layer_t> layers;
+    std::vector<Layer> layers;
 
     [[nodiscard]]
     size_t getTotalFrames() const {
@@ -307,7 +303,7 @@ struct timeline_t {
     }
 };
 
-struct shape_object_t {
+struct ShapeObject {
     float objectWidth = 0;
     float objectHeight = 0;
     float x = 0;
@@ -329,7 +325,7 @@ struct shape_object_t {
     bool lockFlag = false;
 };
 
-enum class element_type {
+enum class ElementType {
     unknown,
     shape,
     object_oval,
@@ -347,20 +343,20 @@ enum class element_type {
     scene_timeline
 };
 
-enum class symbol_type {
+enum class SymbolType {
     normal,
     button,
     graphic
 };
 
-enum class loop_mode {
+enum class LoopMode {
     none = 0,
     loop,
     play_once,
     single_frame
 };
 
-struct item_properties {
+struct ItemProperties {
     std::string name;
     std::string itemID;
 
@@ -373,19 +369,40 @@ struct item_properties {
     bool linkageExportForAS;
 };
 
-struct element_t {
-    item_properties item;
+struct TransformModel {
+    matrix_2d matrix{};
+    color_transform_f color{};
+    BlendMode blendMode{BlendMode::normal};
 
-    element_type elementType = element_type::unknown;
+    TransformModel() = default;
+
+    TransformModel(const matrix_2d& matrix_, const color_transform_f& color_, BlendMode blend_mode_ = BlendMode::last) :
+            matrix{matrix_},
+            color{color_},
+            blendMode{blend_mode_} {
+    }
+
+    inline TransformModel operator*(const TransformModel& right) const {
+        return {
+                matrix * right.matrix,
+                color * right.color,
+                right.blendMode == BlendMode::last ? blendMode : right.blendMode
+        };
+    }
+};
+
+struct Element {
+    ItemProperties item;
+
+    ElementType elementType = ElementType::unknown;
 
     /** Transform point (Free Transform Tool) for current element, in LOCAL SPACE (do not applicate matrix) **/
+    TransformModel transform;
     float2 transformationPoint;
-    matrix_2d matrix;
-    color_transform_f color;
     rect_f rect;
 
     /// SYMBOL ITEM
-    timeline_t timeline{};
+    Timeline timeline{};
 
     rect_f scaleGrid; //scaleGridLeft="-2" scaleGridRight="2" scaleGridTop="-2" scaleGridBottom="2"
 
@@ -393,22 +410,22 @@ struct element_t {
     std::string libraryItemName;
 
 ////// group
-    std::vector<element_t> members;
+    std::vector<Element> members;
 
 ///// SHAPE
-    std::vector<edge_t> edges;
-    std::vector<fill_style> fills;
-    std::vector<stroke_style> strokes;
+    std::vector<Edge> edges;
+    std::vector<FillStyle> fills;
+    std::vector<StrokeStyle> strokes;
     bool isDrawingObject;
 
     ///// Symbol instance
-    symbol_type symbolType;
+    SymbolType symbolType;
     float centerPoint3DX;
     float centerPoint3DY;
     bool cacheAsBitmap;
     bool exportAsBitmap;
 
-    loop_mode loop;
+    LoopMode loop;
     int firstFrame;
 
     bool silent = false;
@@ -416,7 +433,7 @@ struct element_t {
     bool isVisible = true;
 
     //// text
-    std::vector<text_run_t> textRuns;
+    std::vector<TextRun> textRuns;
     std::vector<Filter> filters;
 
     // dynamic text
@@ -427,8 +444,6 @@ struct element_t {
     bool renderAsHTML = false;
     FontRenderingMode fontRenderingMode = FontRenderingMode::normal;
     TextLineType lineType = TextLineType::SingleLine;
-
-    blend_mode_t blend_mode = blend_mode_t::last;
 
     // bitmap item
     std::string bitmapDataHRef;
@@ -447,7 +462,7 @@ struct element_t {
     int id = 0;
     // embedRanges="1|2|3|4|5"
 
-    std::optional<shape_object_t> shape;
+    std::optional<ShapeObject> shape;
 
     // SOUND ITEM
     // sourcePlatform="macintosh"
@@ -463,15 +478,15 @@ struct element_t {
     // cacheFormat="5kHz 8bit Stereo"
     // cachedSampleCount="6480"
 
-    element_t() = default;
+    Element() = default;
 };
 
-struct folder_item {
-    item_properties item;
+struct FolderItem {
+    ItemProperties item;
     bool isExpanded = false;
 };
 
-struct document_info {
+struct DocInfo {
     int width = 550;
     int height = 400;
     float xflVersion = 0.0f;

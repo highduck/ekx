@@ -10,14 +10,14 @@ inline float sign(float a) {
     return a > 0.0f ? 1.0f : (a < 0.0f ? -1.0f : 0.0f);
 }
 
-keyframe_transform_t create_transform(const element_t& el) {
-    const auto m = el.matrix;
+keyframe_transform_t create_transform(const Element& el) {
+    const auto m = el.transform.matrix;
     keyframe_transform_t r;
     r.position = m.transform(el.transformationPoint);
     r.scale = m.scale();
     r.skew = m.skew();
     r.pivot = el.transformationPoint;
-    r.color = el.color;
+    r.color = el.transform.color;
     return r;
 }
 
@@ -34,13 +34,13 @@ void fixRotation(keyframe_transform_t& curr, const keyframe_transform_t& prev) {
     }
 }
 
-void addRotation(keyframe_transform_t& curr, const frame_t& frame, const keyframe_transform_t& prev) {
+void addRotation(keyframe_transform_t& curr, const Frame& frame, const keyframe_transform_t& prev) {
     double additionalRotation = 0;
     const auto rotate = frame.motionTweenRotate;
     const auto times = frame.motionTweenRotateTimes;
 // If a direction is specified, take it into account
-    if (rotate != rotation_direction::none) {
-        float direction = (rotate == rotation_direction::cw ? 1.0f : -1.0f);
+    if (rotate != RotationDirection::none) {
+        float direction = (rotate == RotationDirection::cw ? 1.0f : -1.0f);
 // negative scales affect rotation direction
         direction *= sign(curr.scale.x) * sign(curr.scale.y);
 
@@ -65,7 +65,7 @@ void addRotation(keyframe_transform_t& curr, const frame_t& frame, const keyfram
     curr.skew.y += additionalRotation;
 }
 
-keyframe_transform_t extractTweenDelta(const frame_t& frame, const element_t& el0, const element_t& el1) {
+keyframe_transform_t extractTweenDelta(const Frame& frame, const Element& el0, const Element& el1) {
     auto t0 = create_transform(el0);
     auto t1 = create_transform(el1);
     fixRotation(t1, t0);
@@ -73,11 +73,11 @@ keyframe_transform_t extractTweenDelta(const frame_t& frame, const element_t& el
     return t1 - t0;
 }
 
-movie_frame_data createFrameModel(const frame_t& frame) {
+movie_frame_data createFrameModel(const Frame& frame) {
     movie_frame_data ef;
     ef.index = frame.index;
     ef.duration = frame.duration;
-    if (frame.tweenType == tween_type::classic) {
+    if (frame.tweenType == TweenType::classic) {
         ef.motion_type = 1;
         for (const auto& fd : frame.tweens) {
             auto& g = ef.easing.emplace_back();
@@ -92,16 +92,16 @@ movie_frame_data createFrameModel(const frame_t& frame) {
         }
         ef.rotate = (int) frame.motionTweenRotate;
         ef.rotateTimes = frame.motionTweenRotateTimes;
-    } else if (frame.tweenType == tween_type::motion_object) {
+    } else if (frame.tweenType == TweenType::motion_object) {
         EK_WARN << "motion object is not supported";
     }
     return ef;
 }
 
-void setupFrameFromElement(movie_frame_data& target, const element_t& el) {
+void setupFrameFromElement(movie_frame_data& target, const Element& el) {
     target.transform = create_transform(el);
     target.visible = el.isVisible;
-    if (el.symbolType == symbol_type::graphic) {
+    if (el.symbolType == SymbolType::graphic) {
         target.loopMode = static_cast<int>(el.loop);
         target.firstFrame = el.firstFrame;
     }

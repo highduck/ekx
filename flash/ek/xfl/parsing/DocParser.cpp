@@ -1,4 +1,4 @@
-#include "doc_parser.hpp"
+#include "DocParser.hpp"
 #include "parsing.hpp"
 
 #include <pugixml.hpp>
@@ -10,13 +10,13 @@ xml_document* load_xml(const File& root, const path_t& path) {
     return root.open(path)->xml();
 }
 
-doc_parser::doc_parser(Doc& doc_, std::unique_ptr<File> root_) :
+DocParser::DocParser(Doc& doc_, std::unique_ptr<File> root_) :
         doc{doc_},
         root{std::move(root_)} {
 
 }
 
-void doc_parser::parse(const xml_node& node, element_t& r) const {
+void DocParser::parse(const xml_node& node, Element& r) const {
     r.item << node;
     r.elementType << node.name();
 
@@ -25,15 +25,15 @@ void doc_parser::parse(const xml_node& node, element_t& r) const {
     //// shape
     r.isDrawingObject = node.attribute("isDrawingObject").as_bool();
     for (const auto& el: node.child("fills").children("FillStyle")) {
-        r.fills.push_back(read<fill_style>(el));
+        r.fills.push_back(read<FillStyle>(el));
     }
 
     for (const auto& el: node.child("strokes").children("StrokeStyle")) {
-        r.strokes.push_back(read<stroke_style>(el));
+        r.strokes.push_back(read<StrokeStyle>(el));
     }
 
     for (const auto& el: node.child("edges").children("Edge")) {
-        r.edges.push_back(parse_xml_node<edge_t>(el));
+        r.edges.push_back(parse_xml_node<Edge>(el));
     }
 
     /// instances ref
@@ -64,16 +64,17 @@ void doc_parser::parse(const xml_node& node, element_t& r) const {
     r.fontRenderingMode << node.attribute("fontRenderingMode").value();
     r.lineType << node.attribute("lineType").value();
     r.transformationPoint = read_transformation_point(node);
-    r.color << node;
-    r.matrix << node;
+    r.transform.matrix << node;
+    r.transform.color << node;
+    r.transform.blendMode << node.attribute("blendMode").value();
 
     //// group
     for (const auto& member: node.child("members").children()) {
-        r.members.push_back(read<element_t>(member));
+        r.members.push_back(read<Element>(member));
     }
 
     for (const auto& tr: node.child("textRuns").children("DOMTextRun")) {
-        r.textRuns.push_back(parse_xml_node<text_run_t>(tr));
+        r.textRuns.push_back(parse_xml_node<TextRun>(tr));
     }
 
     for (const auto& tr: node.child("filters").children()) {
@@ -82,8 +83,7 @@ void doc_parser::parse(const xml_node& node, element_t& r) const {
 
     //// symbol item
     r.scaleGrid = read_scale_grid(node);
-    r.timeline = read<timeline_t>(node.child("timeline").child("DOMTimeline"));
-    r.blend_mode << node.attribute("blendMode").value();
+    r.timeline = read<Timeline>(node.child("timeline").child("DOMTimeline"));
 
     // bitmap item
     r.quality = node.attribute("quality").as_int(100);
@@ -100,19 +100,19 @@ void doc_parser::parse(const xml_node& node, element_t& r) const {
     ////  todo:
 
     switch (r.elementType) {
-        case element_type::object_oval:
-        case element_type::object_rectangle: {
-            shape_object_t& shape = r.shape.emplace();
+        case ElementType::object_oval:
+        case ElementType::object_rectangle: {
+            ShapeObject& shape = r.shape.emplace();
             parse(node, shape);
 
             const auto& fill = node.child("fill");
             if (!fill.empty()) {
-                r.fills.push_back(read<fill_style>(fill));
+                r.fills.push_back(read<FillStyle>(fill));
             }
 
             const auto& stroke = node.child("stroke");
             if (!stroke.empty()) {
-                r.strokes.push_back(read<stroke_style>(stroke));
+                r.strokes.push_back(read<StrokeStyle>(stroke));
             }
         }
             break;
@@ -121,22 +121,22 @@ void doc_parser::parse(const xml_node& node, element_t& r) const {
     }
 }
 
-void doc_parser::load() {
+void DocParser::load() {
     auto* xml = load_xml(*root, path_t{"DOMDocument.xml"});
     auto node = xml->child("DOMDocument");
 
     doc.info << node;
 
     for (const auto& item: node.child("folders").children("DOMFolderItem")) {
-        doc.folders.push_back(parse_xml_node<folder_item>(item));
+        doc.folders.push_back(parse_xml_node<FolderItem>(item));
     }
 
     for (const auto& item: node.child("fonts").children("DOMFontItem")) {
-        doc.library.push_back(read<element_t>(item));
+        doc.library.push_back(read<Element>(item));
     }
 
     for (const auto& item: node.child("media").children("DOMBitmapItem")) {
-        element_t bi;
+        Element bi;
         parse(item, bi);
         auto* file = root->open(path_t{"bin"} / bi.bitmapDataHRef);
         bi.bitmap.reset(load_bitmap(file->content()));
@@ -144,20 +144,20 @@ void doc_parser::load() {
     }
 
     for (const auto& item: node.child("media").children("DOMSoundItem")) {
-        doc.library.push_back(read<element_t>(item));
+        doc.library.push_back(read<Element>(item));
     }
 
     for (const auto& item: node.child("symbols").children("Include")) {
         auto library_doc = load_xml(*root, path_t{"LIBRARY"} / item.attribute("href").value());
-        auto symbol = read<element_t>(library_doc->child("DOMSymbolItem"));
+        auto symbol = read<Element>(library_doc->child("DOMSymbolItem"));
         doc.library.push_back(std::move(symbol));
     }
 
     for (const auto& item: node.child("timelines").children("DOMTimeline")) {
-        element_t el;
-        el.timeline = read<timeline_t>(item);
+        Element el;
+        el.timeline = read<Timeline>(item);
         if (!el.timeline.name.empty()) {
-            el.elementType = element_type::scene_timeline;
+            el.elementType = ElementType::scene_timeline;
             el.item.name = "_SCENE_" + el.timeline.name;
             el.item.linkageExportForAS = true;
             el.item.linkageClassName = el.item.name;
@@ -167,7 +167,7 @@ void doc_parser::load() {
     }
 }
 
-void doc_parser::parse(const xml_node& node, shape_object_t& r) {
+void DocParser::parse(const xml_node& node, ShapeObject& r) {
     r.objectWidth = node.attribute("objectWidth").as_float();
     r.objectHeight = node.attribute("objectHeight").as_float();
     r.x = node.attribute("x").as_float();
@@ -189,29 +189,29 @@ void doc_parser::parse(const xml_node& node, shape_object_t& r) {
     r.lockFlag = node.attribute("lockFlag").as_bool(false);
 }
 
-void doc_parser::parse(const xml_node& node, fill_style& r) const {
+void DocParser::parse(const xml_node& node, FillStyle& r) const {
     r.index = node.attribute("index").as_int();
     for (const auto& el : node.children()) {
         r.type << el.name();
         switch (r.type) {
-            case fill_type::solid:
-                r.entries.push_back(parse_xml_node<gradient_entry>(el));
+            case FillType::solid:
+                r.entries.push_back(parse_xml_node<GradientEntry>(el));
                 break;
-            case fill_type::linear:
-            case fill_type::radial:
+            case FillType::linear:
+            case FillType::radial:
                 r.spreadMethod << el.attribute("spreadMethod").value();
                 r.matrix << el;
                 for (const auto& e: el.children("GradientEntry")) {
-                    r.entries.push_back(parse_xml_node<gradient_entry>(e));
+                    r.entries.push_back(parse_xml_node<GradientEntry>(e));
                 }
                 break;
-            case fill_type::bitmap:
-                r.spreadMethod = spread_method::repeat;
+            case FillType::bitmap:
+                r.spreadMethod = SpreadMethod::repeat;
                 r.matrix << el;
                 r.matrix = r.matrix.scale(1.0f / 20.0f, 1.0f / 20.0f);
                 r.bitmapPath = el.attribute("bitmapPath").value();
                 {
-                    const auto* item = doc.find(r.bitmapPath, element_type::bitmap_item);
+                    const auto* item = doc.find(r.bitmapPath, ElementType::bitmap_item);
                     if (item && item->bitmap) {
                         r.bitmap = item->bitmap;
                     } else {
@@ -219,17 +219,17 @@ void doc_parser::parse(const xml_node& node, fill_style& r) const {
                     }
                 }
                 break;
-            case fill_type::unknown:
+            case FillType::unknown:
                 EK_ERROR << "Fill Style has unknown type!";
                 break;
         }
         if (math::equals(det(r.matrix), 0.0f)) {
-            r.type = fill_type::solid;
+            r.type = FillType::solid;
         }
     }
 }
 
-void doc_parser::parse(const xml_node& node, stroke_style& r) const {
+void DocParser::parse(const xml_node& node, StrokeStyle& r) const {
     r.index = node.attribute("index").as_int();
 
     auto solid = node.child("SolidStroke");
@@ -249,7 +249,7 @@ void doc_parser::parse(const xml_node& node, stroke_style& r) const {
     }
 }
 
-void doc_parser::parse(const xml_node& node, frame_t& r) const {
+void DocParser::parse(const xml_node& node, Frame& r) const {
     r.index = node.attribute("index").as_int();
     r.duration = node.attribute("duration").as_int(1);
     r.tweenType << node.attribute("tweenType").value();
@@ -270,13 +270,13 @@ void doc_parser::parse(const xml_node& node, frame_t& r) const {
     r.script = node.child("Actionscript").child_value("script");
 
     for (const auto& item : node.child("elements").children()) {
-        r.elements.push_back(read<element_t>(item));
+        r.elements.push_back(read<Element>(item));
     }
 
     if (!r.script.empty()) {
         if (r.script.find("valign=middle") != std::string::npos) {
             for (auto& el : r.elements) {
-                if (el.elementType == element_type::dynamic_text) {
+                if (el.elementType == ElementType::dynamic_text) {
                     el.textRuns[0].attributes.alignment.y = 0.5;
                 }
             }
@@ -284,9 +284,9 @@ void doc_parser::parse(const xml_node& node, frame_t& r) const {
     }
 
     for (const auto& item : node.child("tweens").children()) {
-        tween_target target;
+        TweenTarget target;
         target << item.attribute("target").as_string();
-        tween_object_t* tween_ptr = nullptr;
+        TweenObject* tween_ptr = nullptr;
         for (auto& t : r.tweens) {
             if (t.target == target) {
                 tween_ptr = &t;
@@ -308,18 +308,18 @@ void doc_parser::parse(const xml_node& node, frame_t& r) const {
     }
 }
 
-void doc_parser::parse(const xml_node& node, layer_t& r) const {
+void DocParser::parse(const xml_node& node, Layer& r) const {
     r.name = node.attribute("name").value();
     r.layerType << node.attribute("layerType").value();
     for (const auto& item: node.child("frames").children("DOMFrame")) {
-        r.frames.push_back(read<frame_t>(item));
+        r.frames.push_back(read<Frame>(item));
     }
 }
 
-void doc_parser::parse(const xml_node& node, timeline_t& r) const {
+void DocParser::parse(const xml_node& node, Timeline& r) const {
     r.name = node.attribute("name").value();
     for (const auto& item : node.child("layers").children("DOMLayer")) {
-        r.layers.push_back(read<layer_t>(item));
+        r.layers.push_back(read<Layer>(item));
     }
 }
 

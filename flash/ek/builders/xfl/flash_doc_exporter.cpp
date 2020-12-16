@@ -4,7 +4,7 @@
 #include "render_to_sprite.hpp"
 
 #include <ek/xfl/Doc.hpp>
-#include <ek/xfl/renderer/dom_scanner.hpp>
+#include <ek/xfl/renderer/Scanner.hpp>
 #include <ek/util/strings.hpp>
 #include <ek/util/logger.hpp>
 
@@ -33,10 +33,10 @@ int getBoundingRectFlags(const string& str) {
     return flags;
 }
 
-bool setupSpecialLayer(const Doc& doc, const layer_t& layer, export_item_t& toItem) {
+bool setupSpecialLayer(const Doc& doc, const Layer& layer, export_item_t& toItem) {
     auto flags = getBoundingRectFlags(layer.name);
     if (flags != 0) {
-        toItem.node.boundingRect = estimate_bounds(doc, layer.frames[0].elements);
+        toItem.node.boundingRect = Scanner::getBounds(doc, layer.frames[0].elements);
         if ((flags & Bounds_HitArea) != 0) {
             toItem.node.hitAreaEnabled = true;
         }
@@ -84,13 +84,13 @@ bool shouldConvertItemToSprite(export_item_t& item) {
     return false;
 }
 
-void process_transform(const element_t& el, export_item_t& item) {
-    item.node.matrix = el.matrix;
-    item.node.color = el.color;
+void process_transform(const Element& el, export_item_t& item) {
+    item.node.matrix = el.transform.matrix;
+    item.node.color = el.transform.color;
     item.node.visible = el.isVisible;
 }
 
-void process_filters(const element_t& el, export_item_t& item) {
+void process_filters(const Element& el, export_item_t& item) {
     for (auto& filter : el.filters) {
         filter_data fd;
         fd.type = sg_filter_type::none;
@@ -113,7 +113,7 @@ void process_filters(const element_t& el, export_item_t& item) {
     }
 }
 
-void processTextField(const element_t& el, export_item_t& item, const Doc& doc) {
+void processTextField(const Element& el, export_item_t& item, const Doc& doc) {
     auto& tf = item.node.dynamicText.emplace();
     //if(dynamicText.rect != null) {
 //    item->node.matrix.tx += el.rect.x - 2;
@@ -123,7 +123,7 @@ void processTextField(const element_t& el, export_item_t& item, const Doc& doc) 
     string faceName = textRun.attributes.face;
     if (!faceName.empty() && faceName.back() == '*') {
         faceName.pop_back();
-        const auto* fontItem = doc.find(faceName, element_type::font_item, true);
+        const auto* fontItem = doc.find(faceName, ElementType::font_item, true);
         if (fontItem) {
             faceName = fontItem->font;
         }
@@ -254,15 +254,15 @@ sg_file flash_doc_exporter::export_library() {
     return sg;
 }
 
-void flash_doc_exporter::process_symbol_instance(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
-    assert(el.elementType == element_type::symbol_instance);
+void flash_doc_exporter::process_symbol_instance(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+    assert(el.elementType == ElementType::symbol_instance);
 
     auto* item = new export_item_t();
     item->ref = &el;
     process_transform(el, *item);
     item->node.name = el.item.name;
     item->node.libraryName = el.libraryItemName;
-    item->node.button = el.symbolType == symbol_type::button;
+    item->node.button = el.symbolType == SymbolType::button;
     item->node.touchable = !el.silent;
 
     process_filters(el, *item);
@@ -273,8 +273,8 @@ void flash_doc_exporter::process_symbol_instance(const element_t& el, export_ite
     }
 }
 
-void flash_doc_exporter::process_bitmap_instance(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
-    assert(el.elementType == element_type::bitmap_instance);
+void flash_doc_exporter::process_bitmap_instance(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+    assert(el.elementType == ElementType::bitmap_instance);
 
     auto* item = new export_item_t;
     item->ref = &el;
@@ -290,7 +290,7 @@ void flash_doc_exporter::process_bitmap_instance(const element_t& el, export_ite
     }
 }
 
-void flash_doc_exporter::process_bitmap_item(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
+void flash_doc_exporter::process_bitmap_item(const Element& el, export_item_t* parent, processing_bag_t* bag) {
     auto* item = new export_item_t();
     item->ref = &el;
     item->node.libraryName = el.item.name;
@@ -301,8 +301,8 @@ void flash_doc_exporter::process_bitmap_item(const element_t& el, export_item_t*
     }
 }
 
-void flash_doc_exporter::process_dynamic_text(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
-    assert(el.elementType == element_type::dynamic_text);
+void flash_doc_exporter::process_dynamic_text(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+    assert(el.elementType == ElementType::dynamic_text);
 
     auto* item = new export_item_t();
     item->ref = &el;
@@ -317,9 +317,9 @@ void flash_doc_exporter::process_dynamic_text(const element_t& el, export_item_t
     }
 }
 
-void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
-    assert(el.elementType == element_type::symbol_item ||
-           el.elementType == element_type::scene_timeline);
+void flash_doc_exporter::process_symbol_item(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+    assert(el.elementType == ElementType::symbol_item ||
+           el.elementType == ElementType::scene_timeline);
 
     auto* item = new export_item_t();
     item->ref = &el;
@@ -346,7 +346,7 @@ void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t*
             const auto& layers = el.timeline.layers;
             for (int layerIndex = int(layers.size()) - 1; layerIndex >= 0; --layerIndex) {
                 const auto& layer = layers[layerIndex];
-                if (layer.layerType == layer_type::normal) {
+                if (layer.layerType == LayerType::normal) {
                     for (auto& frame : layer.frames) {
                         for (auto& frameElement : frame.elements) {
                             _animationSpan0 = 0;
@@ -371,17 +371,17 @@ void flash_doc_exporter::process_symbol_item(const element_t& el, export_item_t*
     }
 }
 
-void flash_doc_exporter::process_group(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
-    assert(el.elementType == element_type::group);
+void flash_doc_exporter::process_group(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+    assert(el.elementType == ElementType::group);
     for (const auto& member : el.members) {
         process(member, parent, bag);
     }
 }
 
-void flash_doc_exporter::process_shape(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
-    assert(el.elementType == element_type::shape ||
-           el.elementType == element_type::object_oval ||
-           el.elementType == element_type::object_rectangle);
+void flash_doc_exporter::process_shape(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+    assert(el.elementType == ElementType::shape ||
+           el.elementType == ElementType::object_oval ||
+           el.elementType == ElementType::object_rectangle);
     auto* item = addElementToDrawingLayer(parent, el);
     if (bag) {
         bag->list.push_back(item);
@@ -395,7 +395,7 @@ static std::string SHAPE_ID = "$";
 // we need global across all libraries to avoid multiple FLA exports overlapping
 int NEXT_SHAPE_IDX = 0;
 
-export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item, const element_t& el) {
+export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item, const Element& el) {
     if (item->drawingLayerChild) {
         auto* child = item->drawingLayerChild;
         if (item->children.back() == child &&
@@ -411,11 +411,11 @@ export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item,
             return child;
         }
     }
-    auto shapeItem = std::make_unique<element_t>();
+    auto shapeItem = std::make_unique<Element>();
     const std::string name = SHAPE_ID + std::to_string(++NEXT_SHAPE_IDX);
     {
         shapeItem->item.name = name;
-        shapeItem->elementType = element_type::symbol_item;
+        shapeItem->elementType = ElementType::symbol_item;
         auto& layer = shapeItem->timeline.layers.emplace_back();
         auto& frame = layer.frames.emplace_back();
         frame.elements.push_back(el);
@@ -429,9 +429,9 @@ export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item,
     layer->animationSpan1 = _animationSpan1;
     layer->append_to(&library);
 
-    auto shapeInstance = std::make_unique<element_t>();
+    auto shapeInstance = std::make_unique<Element>();
     shapeInstance->libraryItemName = name;
-    shapeInstance->elementType = element_type::symbol_instance;
+    shapeInstance->elementType = ElementType::symbol_instance;
 
     processing_bag_t bag;
     process(*shapeInstance, item, &bag);
@@ -444,41 +444,41 @@ export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item,
     return drawingLayerInstance;
 }
 
-void flash_doc_exporter::process(const element_t& el, export_item_t* parent, processing_bag_t* bag) {
+void flash_doc_exporter::process(const Element& el, export_item_t* parent, processing_bag_t* bag) {
     const auto type = el.elementType;
     switch (type) {
-        case element_type::symbol_instance:
+        case ElementType::symbol_instance:
             process_symbol_instance(el, parent, bag);
             break;
-        case element_type::bitmap_instance:
+        case ElementType::bitmap_instance:
             process_bitmap_instance(el, parent, bag);
             break;
-        case element_type::bitmap_item:
+        case ElementType::bitmap_item:
             process_bitmap_item(el, parent, bag);
             break;
-        case element_type::symbol_item:
-        case element_type::scene_timeline:
+        case ElementType::symbol_item:
+        case ElementType::scene_timeline:
             process_symbol_item(el, parent, bag);
             break;
-        case element_type::dynamic_text:
+        case ElementType::dynamic_text:
             process_dynamic_text(el, parent, bag);
             break;
-        case element_type::group:
+        case ElementType::group:
             process_group(el, parent, bag);
             break;
-        case element_type::shape:
-        case element_type::object_oval:
-        case element_type::object_rectangle:
+        case ElementType::shape:
+        case ElementType::object_oval:
+        case ElementType::object_rectangle:
             process_shape(el, parent, bag);
             break;
 
-        case element_type::font_item:
-        case element_type::sound_item:
-        case element_type::static_text:
+        case ElementType::font_item:
+        case ElementType::sound_item:
+        case ElementType::static_text:
             EK_WARN << "element type is not supported yet:" << static_cast<int>(type);
             break;
 
-        case element_type::unknown:
+        case ElementType::unknown:
             EK_WARN << "unknown element type:" << static_cast<int>(type);
             break;
     }
@@ -487,7 +487,7 @@ void flash_doc_exporter::process(const element_t& el, export_item_t* parent, pro
 /*** rendering ***/
 
 void flash_doc_exporter::render(const export_item_t& item, MultiResAtlasData& toAtlas) const {
-    const element_t& el = *item.ref;
+    const Element& el = *item.ref;
     const auto spriteID = el.item.name;
     renderer_options_t options;
     for (auto& resolution : toAtlas.resolutions) {
@@ -534,7 +534,7 @@ movie_layer_data* findTargetLayer(sg_movie_data& movie, const sg_node_data* item
     return nullptr;
 }
 
-void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* item) {
+void flash_doc_exporter::processTimeline(const Element& el, export_item_t* item) {
     auto& movie = item->node.movie.emplace();
     movie.frames = el.timeline.getTotalFrames();
     movie.fps = doc.info.frameRate;
@@ -544,7 +544,7 @@ void flash_doc_exporter::processTimeline(const element_t& el, export_item_t* ite
         auto& layer = layers[layerIndex];
         // ignore other layers.
         // TODO: mask layer
-        if (layer.layerType != layer_type::normal) {
+        if (layer.layerType != LayerType::normal) {
             continue;
         }
         const int framesTotal = static_cast<int>(layer.frames.size());

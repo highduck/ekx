@@ -32,33 +32,33 @@ public:
 
     void build_sprites(MultiResAtlasData& toAtlas) const;
 
-    void process(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
+    void process(const Element& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_symbol_instance(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
+    void process_symbol_instance(const Element& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_symbol_item(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
+    void process_symbol_item(const Element& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_bitmap_instance(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
+    void process_bitmap_instance(const Element& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_bitmap_item(const element_t& el, export_item_t* library, processing_bag_t* bag = nullptr);
+    void process_bitmap_item(const Element& el, export_item_t* library, processing_bag_t* bag = nullptr);
 
-    void process_dynamic_text(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
+    void process_dynamic_text(const Element& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_group(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
+    void process_group(const Element& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
-    void process_shape(const element_t& el, export_item_t* parent, processing_bag_t* bag = nullptr);
+    void process_shape(const Element& el, export_item_t* parent, processing_bag_t* bag = nullptr);
 
     void render(const export_item_t& item, MultiResAtlasData& toAtlas) const;
 
     [[nodiscard]]
     sg_file export_library();
 
-    export_item_t* addElementToDrawingLayer(export_item_t* item, const element_t& el);
+    export_item_t* addElementToDrawingLayer(export_item_t* item, const Element& el);
 
 private:
     [[nodiscard]] bool isInLinkages(const std::string& id) const;
 
-    void processTimeline(const element_t& Element, export_item_t* PItem);
+    void processTimeline(const Element& Element, export_item_t* PItem);
 };
 
 }

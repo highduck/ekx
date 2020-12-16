@@ -1,7 +1,7 @@
 #include "CairoRenderer.hpp"
 
-#include "render_command.hpp"
-#include "cairo_utility.hpp"
+#include "RenderCommand.hpp"
+#include "CairoHelpers.hpp"
 #include <cairo.h>
 
 namespace ek::xfl {
@@ -10,13 +10,13 @@ CairoRenderer::CairoRenderer(cairo_t* ctx) : ctx_{ctx} {
 
 }
 
-void CairoRenderer::set_transform(const transform_model& transform) {
+void CairoRenderer::set_transform(const TransformModel& transform) {
     transform_ = transform;
-    set_blend_mode(ctx_, transform.blend_mode);
+    set_blend_mode(ctx_, transform.blendMode);
 }
 
-void CairoRenderer::execute(const render_command& cmd) {
-    using Op = render_command::operation;
+void CairoRenderer::execute(const RenderCommand& cmd) {
+    using Op = RenderCommand::Operation;
 
     switch (cmd.op) {
         case Op::line_style_setup: {

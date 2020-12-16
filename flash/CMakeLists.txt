@@ -29,24 +29,23 @@ add_library(${PROJECT_NAME}
         ek/xfl/parsing/parsing.hpp
         ek/xfl/parsing/parsing.cpp
         ek/xfl/parsing/bitmap.cpp
-        ek/xfl/parsing/doc_parser.hpp
-        ek/xfl/parsing/doc_parser.cpp
+        ek/xfl/parsing/DocParser.hpp
+        ek/xfl/parsing/DocParser.cpp
 
         # Rendering
         ek/xfl/renderer/CairoRenderer.cpp
         ek/xfl/renderer/CairoRenderer.hpp
-        ek/xfl/renderer/cairo_utility.cpp
-        ek/xfl/renderer/cairo_utility.hpp
-        ek/xfl/renderer/render_command.hpp
-        ek/xfl/renderer/dom_scanner.cpp
-        ek/xfl/renderer/dom_scanner.hpp
-        ek/xfl/renderer/shape_edge_decoder.cpp
-        ek/xfl/renderer/shape_edge_decoder.hpp
-        ek/xfl/renderer/shape_edge.cpp
-        ek/xfl/renderer/shape_edge.hpp
-        ek/xfl/renderer/shape_processor.cpp
-        ek/xfl/renderer/shape_processor.hpp
-        ek/xfl/renderer/transform_model.hpp
+        ek/xfl/renderer/CairoHelpers.cpp
+        ek/xfl/renderer/CairoHelpers.hpp
+        ek/xfl/renderer/RenderCommand.hpp
+        ek/xfl/renderer/Scanner.cpp
+        ek/xfl/renderer/Scanner.hpp
+        ek/xfl/renderer/ShapeDecoder.cpp
+        ek/xfl/renderer/ShapeDecoder.hpp
+        ek/xfl/renderer/ShapeEdge.cpp
+        ek/xfl/renderer/ShapeEdge.hpp
+        ek/xfl/renderer/ShapeProcessor.cpp
+        ek/xfl/renderer/ShapeProcessor.hpp
         )
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))

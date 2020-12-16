@@ -4,7 +4,7 @@
 
 namespace ek::xfl {
 
-struct element_t;
+struct Element;
 
 struct export_item_t : private disable_copy_assign_t {
 
@@ -12,15 +12,15 @@ struct export_item_t : private disable_copy_assign_t {
 
     float estimated_scale = 0.001f;
     float max_abs_scale = 100000.0f;
-    const element_t* ref = nullptr;
+    const Element* ref = nullptr;
     std::vector<export_item_t*> children;
     export_item_t* parent = nullptr;
     int usage = 0;
     int shapes = 0;
 
     export_item_t* drawingLayerChild = nullptr;
-    std::unique_ptr<element_t> drawingLayerItem = nullptr;
-    std::unique_ptr<element_t> drawingLayerInstance = nullptr;
+    std::unique_ptr<Element> drawingLayerItem = nullptr;
+    std::unique_ptr<Element> drawingLayerInstance = nullptr;
     int animationSpan0 = 0;
     int animationSpan1 = 0;
     bool renderThis = false;

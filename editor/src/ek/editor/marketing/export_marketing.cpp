@@ -24,7 +24,7 @@ void save_sprite_png(const SpriteData& spr, const path_t& path, bool alpha = tru
     saveImagePNG(*spr.image, path.str(), alpha);
 }
 
-void store_hi_res_icon(const Doc& doc, const element_t& symbol, int size, const std::string& prefix = "icon_") {
+void store_hi_res_icon(const Doc& doc, const Element& symbol, int size, const std::string& prefix = "icon_") {
     renderer_options_t opts{float(size) / 64.0f, size, size, true, true};
     auto spr = render(doc, symbol, opts);
     path_t icon_path{prefix + std::to_string(size) + ".png"};

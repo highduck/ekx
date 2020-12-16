@@ -28,7 +28,7 @@ std::string path_ext(const std::string& path) {
     using std::string;
     const auto i = path.find_last_of('.');
     if (i != string::npos) {
-        return path.substr(i + 1);
+        return path.substr(i);
     }
     return "";
 }
