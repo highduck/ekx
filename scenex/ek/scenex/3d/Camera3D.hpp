@@ -3,7 +3,7 @@
 #include <ek/math/common.hpp>
 #include <ek/math/vec.hpp>
 #include <string>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 
 #undef near
 #undef far

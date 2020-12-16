@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/util/static_history_buffer.hpp>
+#include <ek/ds/StaticHistoryBuffer.hpp>
 #include <ek/util/timer.hpp>
 
 #include <string>

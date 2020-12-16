@@ -6,7 +6,7 @@
 #include <ek/math/mat3x2.hpp>
 #include <ek/graphics/program.hpp>
 #include <ek/graphics/texture.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <ek/math/circle.hpp>
 
 namespace ek::draw2d {

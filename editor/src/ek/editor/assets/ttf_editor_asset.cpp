@@ -1,6 +1,6 @@
 #include "ttf_editor_asset.hpp"
 
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <ek/scenex/text/TrueTypeFont.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/system/system.hpp>

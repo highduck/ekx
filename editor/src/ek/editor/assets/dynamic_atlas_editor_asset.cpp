@@ -1,7 +1,7 @@
 #include "dynamic_atlas_editor_asset.hpp"
 #include <ek/system/working_dir.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <ek/system/system.hpp>
 
 namespace ek {

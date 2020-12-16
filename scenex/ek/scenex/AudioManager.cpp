@@ -1,7 +1,7 @@
 #include "AudioManager.hpp"
 
 #include <ek/app/device.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 
 namespace ek {
 

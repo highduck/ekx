@@ -4,7 +4,7 @@
 #include <string>
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 
 namespace ek {
 

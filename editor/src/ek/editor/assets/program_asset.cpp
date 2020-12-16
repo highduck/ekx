@@ -5,7 +5,7 @@
 #include <ek/system/system.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/util/logger.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <ek/graphics/program.hpp>
 #include <ek/graphics/vertex_decl.hpp>
 

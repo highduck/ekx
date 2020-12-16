@@ -1,9 +1,9 @@
 #pragma once
 
 #include "editor_asset.hpp"
-#include <ek/spritepack/atlas_declaration.hpp>
-#include <ek/fonts/generateBitmapFont.hpp>
-#include <ek/filters/filters.hpp>
+#include <ek/builders/MultiResAtlas.hpp>
+#include <ek/builders/BitmapFontBuilder.hpp>
+#include <ek/builders/SpriteFilters.hpp>
 
 namespace ek {
 
@@ -27,8 +27,8 @@ public:
 
 private:
     std::string atlasTarget_;
-    font_lib::GenBitmapFontDecl font_;
-    FiltersDecl filters_;
+    BuildBitmapFontSettings font_;
+    SpriteFilterList filters_;
 };
 
 }

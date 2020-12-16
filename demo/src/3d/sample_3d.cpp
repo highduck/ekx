@@ -8,7 +8,7 @@
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/3d/Light3D.hpp>
 #include <ek/scenex/3d/static_mesh.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 
 #include <demo_main.hpp>
 #include <ek/math/rand.hpp>

@@ -58,7 +58,7 @@ public:
     }
 
     template<typename T>
-    auto bounds() const -> rect_t <T> {
+    rect_t<T> bounds() const {
         return {static_cast<T>(0),
                 static_cast<T>(0),
                 static_cast<T>(width_),

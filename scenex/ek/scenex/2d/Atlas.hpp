@@ -2,7 +2,7 @@
 
 #include "Sprite.hpp"
 #include <ek/util/common_macro.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <cstdint>
 #include <string>
 #include <vector>

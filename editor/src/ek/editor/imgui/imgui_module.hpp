@@ -3,7 +3,7 @@
 #include <ek/graphics/graphics.hpp>
 #include <ek/app/app.hpp>
 #include <ek/math/vec.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <string>
 
 struct ImDrawData;

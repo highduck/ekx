@@ -2,7 +2,7 @@
 
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/data/sg_data.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <optional>
 #include <ek/scenex/TimeLayer.hpp>
 

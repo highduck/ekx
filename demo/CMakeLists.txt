@@ -31,6 +31,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_EXTENSIONS NO
         )
 
+#target_compile_definitions(${PROJECT_NAME} PUBLIC
+#        )
+
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 
 target_link_libraries(${PROJECT_NAME}

@@ -2,7 +2,7 @@
 #include "Sprite.hpp"
 
 #include <ek/util/logger.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <ek/math/serialize_math.hpp>
 #include <ek/util/path.hpp>
 #include <ek/app/res.hpp>

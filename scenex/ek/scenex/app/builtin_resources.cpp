@@ -1,6 +1,6 @@
 #include "builtin_resources.hpp"
 
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 
 #include <ek/graphics/vertex_decl.hpp>
 #include <ek/graphics/texture.hpp>

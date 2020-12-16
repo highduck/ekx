@@ -1,8 +1,7 @@
 #pragma once
 
 #include "editor_asset.hpp"
-#include <ek/spritepack/atlas_declaration.hpp>
-#include <ek/flash/doc/flash_archive.hpp>
+#include <ek/builders/MultiResAtlas.hpp>
 #include <memory>
 
 namespace ek {

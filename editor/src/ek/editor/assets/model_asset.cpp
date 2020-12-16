@@ -3,7 +3,7 @@
 #include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/logger.hpp>
-#include <ek/util/assets.hpp>
+#include <ek/util/Res.hpp>
 #include <ek/graphics/vertex_decl.hpp>
 #include <ek/scenex/data/model_data.hpp>
 #include <ek/editor/obj/obj_loader.hpp>

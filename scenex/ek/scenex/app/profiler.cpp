@@ -3,7 +3,7 @@
 #include <ek/app/app.hpp>
 #include <memory>
 #include <unordered_map>
-#include <ek/util/static_history_buffer.hpp>
+#include <ek/ds/StaticHistoryBuffer.hpp>
 #include <ek/util/timer.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app/device.hpp>
@@ -33,7 +33,7 @@ struct RealTimeGraph {
     float thMax = 1.0f / 30.0f;
     float accum{};
     float value{};
-    static_history_buffer<float, 60> history{};
+    StaticHistoryBuffer<float, 60> history{};
 
     float height = 30.0f;
 
