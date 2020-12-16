@@ -1,6 +1,6 @@
 #include "Doc.hpp"
 
-#include "parsing/doc_parser.hpp"
+#include "parsing/DocParser.hpp"
 
 namespace ek::xfl {
 
@@ -15,20 +15,18 @@ const char* findLastOf(const std::string& str, char ch) {
 }
 
 Doc::Doc(std::unique_ptr<File> root) {
-    doc_parser parser{*this, std::move(root)};
+    DocParser parser{*this, std::move(root)};
     parser.load();
 }
 
-Doc::Doc(const path_t& path) :
-        Doc{load_flash_archive(path)} {
-
+Doc::Doc(const path_t& path) : Doc{File::load(path)} {
 }
 
-const element_t* Doc::find(const std::string& name,
-                           element_type type,
-                           bool ignoreFolders) const {
+const Element* Doc::find(const std::string& name,
+                         ElementType type,
+                         bool ignoreFolders) const {
     for (const auto& s: library) {
-        if (type == element_type::unknown || s.elementType == type) {
+        if (type == ElementType::unknown || s.elementType == type) {
             if (s.item.name == name) {
                 return &s;
             }
@@ -43,10 +41,10 @@ const element_t* Doc::find(const std::string& name,
     return nullptr;
 }
 
-const element_t* Doc::findLinkage(const std::string& className, element_type type) const {
+const Element* Doc::findLinkage(const std::string& className, ElementType type) const {
     for (const auto& s: library) {
         if (s.item.linkageClassName == className &&
-            (type == element_type::unknown || s.elementType == type)) {
+            (type == ElementType::unknown || s.elementType == type)) {
             return &s;
         }
     }

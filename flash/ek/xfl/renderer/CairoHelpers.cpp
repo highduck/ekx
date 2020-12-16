@@ -1,8 +1,7 @@
-#include "cairo_utility.hpp"
-#include "transform_model.hpp"
+#include "CairoHelpers.hpp"
 
-#include <cairo.h>
 #include <ek/xfl/types.hpp>
+#include <cairo.h>
 
 namespace ek::xfl {
 
@@ -22,33 +21,33 @@ void cairo_transform(cairo_t* cr, const matrix_2d& m) {
     cairo_transform(cr, &transform_matrix);
 }
 
-cairo_line_cap_t convert_line_cap(line_caps cap) {
+cairo_line_cap_t convert_line_cap(LineCaps cap) {
     switch (cap) {
-        case line_caps::none:
+        case LineCaps::none:
             return CAIRO_LINE_CAP_BUTT;
-        case line_caps::round:
+        case LineCaps::round:
             return CAIRO_LINE_CAP_ROUND;
-        case line_caps::square:
+        case LineCaps::square:
             return CAIRO_LINE_CAP_SQUARE;
     }
 }
 
-cairo_line_join_t convert_line_join(line_joints join) {
+cairo_line_join_t convert_line_join(LineJoints join) {
     switch (join) {
-        case line_joints::miter:
+        case LineJoints::miter:
             return CAIRO_LINE_JOIN_MITER;
-        case line_joints::round:
+        case LineJoints::round:
             return CAIRO_LINE_JOIN_ROUND;
-        case line_joints::bevel:
+        case LineJoints::bevel:
             return CAIRO_LINE_JOIN_BEVEL;
     }
 }
 
-void set_line_cap(cairo_t* ctx, line_caps cap) {
+void set_line_cap(cairo_t* ctx, LineCaps cap) {
     cairo_set_line_cap(ctx, convert_line_cap(cap));
 }
 
-void set_line_join(cairo_t* ctx, line_joints join) {
+void set_line_join(cairo_t* ctx, LineJoints join) {
     cairo_set_line_join(ctx, convert_line_join(join));
 }
 
@@ -56,49 +55,49 @@ void set_solid_fill(cairo_t* context, const float4& color) {
     cairo_set_source_rgba(context, color.x, color.y, color.z, color.w);
 }
 
-void set_blend_mode(cairo_t* ctx, blend_mode_t blend_mode) {
+void set_blend_mode(cairo_t* ctx, BlendMode blend_mode) {
     cairo_operator_t cop{cairo_operator_t::CAIRO_OPERATOR_OVER};
     switch (blend_mode) {
-        case blend_mode_t::multiply:
+        case BlendMode::multiply:
             cop = cairo_operator_t::CAIRO_OPERATOR_MULTIPLY;
             break;
-        case blend_mode_t::screen:
+        case BlendMode::screen:
             cop = cairo_operator_t::CAIRO_OPERATOR_SCREEN;
             break;
-        case blend_mode_t::overlay:
+        case BlendMode::overlay:
             cop = cairo_operator_t::CAIRO_OPERATOR_OVERLAY;
             break;
-        case blend_mode_t::hardlight:
+        case BlendMode::hardlight:
             cop = cairo_operator_t::CAIRO_OPERATOR_HARD_LIGHT;
             break;
-        case blend_mode_t::normal:
+        case BlendMode::normal:
             break;
-        case blend_mode_t::layer:
+        case BlendMode::layer:
             break;
-        case blend_mode_t::last:
+        case BlendMode::last:
             break;
-        case blend_mode_t::lighten:
+        case BlendMode::lighten:
             cop = cairo_operator_t::CAIRO_OPERATOR_LIGHTEN;
             break;
-        case blend_mode_t::darken:
+        case BlendMode::darken:
             cop = cairo_operator_t::CAIRO_OPERATOR_DARKEN;
             break;
-        case blend_mode_t::difference:
+        case BlendMode::difference:
             cop = cairo_operator_t::CAIRO_OPERATOR_DIFFERENCE;
             break;
-        case blend_mode_t::add:
+        case BlendMode::add:
             cop = cairo_operator_t::CAIRO_OPERATOR_ADD;
             break;
-        case blend_mode_t::subtract:
+        case BlendMode::subtract:
             cop = cairo_operator_t::CAIRO_OPERATOR_EXCLUSION;
             break;
-        case blend_mode_t::invert:
+        case BlendMode::invert:
             cop = cairo_operator_t::CAIRO_OPERATOR_XOR; // ?
             break;
-        case blend_mode_t::alpha:
+        case BlendMode::alpha:
             cop = cairo_operator_t::CAIRO_OPERATOR_ATOP; // ?
             break;
-        case blend_mode_t::erase:
+        case BlendMode::erase:
             cop = cairo_operator_t::CAIRO_OPERATOR_CLEAR; // ?
             break;
     }
@@ -121,7 +120,7 @@ void cairo_quadratic_curve_to(cairo_t* context, float x1, float y1, float x2, fl
 }
 
 void add_color_stops(cairo_pattern_t* pattern,
-                     const std::vector<gradient_entry>& entries,
+                     const std::vector<GradientEntry>& entries,
                      const color_transform_f& color_transform) {
     for (const auto& entry: entries) {
         const auto& color = color_transform.transform(entry.color);
@@ -143,28 +142,28 @@ cairo_pattern_t* create_radial_pattern(const matrix_2d& matrix) {
     return cairo_pattern_create_radial(p0.x, p0.y, 0.0, p0.x, p0.y, radius);
 }
 
-void set_stroke_style(cairo_t* ctx, const stroke_style& stroke) {
+void set_stroke_style(cairo_t* ctx, const StrokeStyle& stroke) {
     cairo_set_line_width(ctx, stroke.weight);
     set_line_cap(ctx, stroke.caps);
     set_line_join(ctx, stroke.joints);
     cairo_set_miter_limit(ctx, stroke.miterLimit);
 }
 
-fill_pattern_data_t create_fill_pattern(const fill_style& fill, const transform_model& transform) {
+fill_pattern_data_t create_fill_pattern(const FillStyle& fill, const TransformModel& transform) {
     cairo_pattern_t* pattern = nullptr;
     cairo_surface_t* surface = nullptr;
     switch (fill.type) {
-        case fill_type::linear:
+        case FillType::linear:
 //            pattern = create_linear_pattern(transform.matrix * fill.matrix);
             pattern = cairo_pattern_create_linear(-819.2, 0, 819.2, 0);
             add_color_stops(pattern, fill.entries, transform.color);
             break;
-        case fill_type::radial:
+        case FillType::radial:
             //pattern = create_radial_pattern(transform.matrix * fill.matrix);
             pattern = cairo_pattern_create_radial(0, 0, 0, 0, 0, 819);
             add_color_stops(pattern, fill.entries, transform.color);
             break;
-        case fill_type::bitmap:
+        case FillType::bitmap:
             if (fill.bitmap) {
                 auto w = fill.bitmap->width;
                 auto h = fill.bitmap->height;
@@ -184,13 +183,13 @@ fill_pattern_data_t create_fill_pattern(const fill_style& fill, const transform_
         cairo_pattern_set_matrix(pattern, &matrix);
 
         switch (fill.spreadMethod) {
-            case spread_method::extend:
+            case SpreadMethod::extend:
                 cairo_pattern_set_extend(pattern, CAIRO_EXTEND_PAD);
                 break;
-            case spread_method::reflect:
+            case SpreadMethod::reflect:
                 cairo_pattern_set_extend(pattern, CAIRO_EXTEND_REFLECT);
                 break;
-            case spread_method::repeat:
+            case SpreadMethod::repeat:
                 cairo_pattern_set_extend(pattern, CAIRO_EXTEND_REPEAT);
                 break;
         }
@@ -318,9 +317,9 @@ void cairo_oval(cairo_t* cr, const double* values) {
     cairo_restore(cr);
 }
 
-fill_pattern_data_t set_fill_style(cairo_t* cr, const fill_style& fill, const transform_model& transform) {
+fill_pattern_data_t set_fill_style(cairo_t* cr, const FillStyle& fill, const TransformModel& transform) {
     fill_pattern_data_t pattern{};
-    if (fill.type == fill_type::solid) {
+    if (fill.type == FillType::solid) {
         set_solid_fill(cr, transform.color.transform(fill.entries[0].color));
     } else {
         pattern = create_fill_pattern(fill, transform);

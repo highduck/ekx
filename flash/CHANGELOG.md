@@ -16,6 +16,6 @@
 - Fix gradient matrix transform
 - Add Bitmap fills render
 - Change fill bitmap reference resolving to parsing phase
-- Add `doc_parser` to preserve `doc` instance for parsing methods
+- Add `DocParser` to preserve `doc` instance for parsing methods
 - Change render command values to `double`
 - Add `delete` of `export_item_t` instances

@@ -6,7 +6,7 @@ namespace ek::xfl {
 
 class Doc;
 
-struct element_t;
+struct Element;
 
 struct renderer_options_t {
     float scale = 1.0f;
@@ -16,6 +16,6 @@ struct renderer_options_t {
     bool trim = false;
 };
 
-SpriteData render(const Doc& doc, const element_t& el, const renderer_options_t& options);
+SpriteData render(const Doc& doc, const Element& el, const renderer_options_t& options);
 
 }

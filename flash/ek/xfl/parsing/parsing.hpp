@@ -38,93 +38,93 @@ matrix_2d& operator<<(matrix_2d& r, const xml_node& node);
 
 color_transform_f& operator<<(color_transform_f& color, const xml_node& node);
 
-enum class blend_mode_t;
-enum class scale_mode;
-enum class solid_style_type;
-enum class line_caps;
-enum class line_joints;
-enum class fill_type;
-enum class spread_method;
+enum class BlendMode;
+enum class ScaleMode;
+enum class SolidStyleType;
+enum class LineCaps;
+enum class LineJoints;
+enum class FillType;
+enum class SpreadMethod;
 enum class FilterType;
-enum class tween_type;
-enum class rotation_direction;
-enum class layer_type;
-enum class element_type;
-enum class symbol_type;
-enum class loop_mode;
-enum class tween_target;
+enum class TweenType;
+enum class RotationDirection;
+enum class LayerType;
+enum class ElementType;
+enum class SymbolType;
+enum class LoopMode;
+enum class TweenTarget;
 enum class FontRenderingMode;
 enum class TextLineType;
 
-struct item_properties;
-struct element_t;
-struct folder_item;
-struct document_info;
-struct gradient_entry;
-struct fill_style;
-struct stroke_style;
+struct ItemProperties;
+struct Element;
+struct FolderItem;
+struct DocInfo;
+struct GradientEntry;
+struct FillStyle;
+struct StrokeStyle;
 struct Filter;
-struct motion_object_t;
-struct text_attributes_t;
-struct text_run_t;
-struct element_t;
-struct frame_t;
-struct layer_t;
-struct timeline_t;
-struct edge_t;
+struct MotionObject;
+struct TextAttributes;
+struct TextRun;
+struct Element;
+struct Frame;
+struct Layer;
+struct Timeline;
+struct Edge;
 struct BitmapData;
 
 class FileNode;
 
-tween_target& operator<<(tween_target& r, const char* str);
+TweenTarget& operator<<(TweenTarget& r, const char* str);
 
 FontRenderingMode& operator<<(FontRenderingMode& r, const char* str);
 
 TextLineType& operator<<(TextLineType& r, const char* str);
 
-blend_mode_t& operator<<(blend_mode_t& r, const char* str);
+BlendMode& operator<<(BlendMode& r, const char* str);
 
-scale_mode& operator<<(scale_mode& r, const char* str);
+ScaleMode& operator<<(ScaleMode& r, const char* str);
 
-solid_style_type& operator<<(solid_style_type& r, const char* str);
+SolidStyleType& operator<<(SolidStyleType& r, const char* str);
 
-line_caps& operator<<(line_caps& r, const char* str);
+LineCaps& operator<<(LineCaps& r, const char* str);
 
-line_joints& operator<<(line_joints& r, const char* str);
+LineJoints& operator<<(LineJoints& r, const char* str);
 
-fill_type& operator<<(fill_type& r, const char* str);
+FillType& operator<<(FillType& r, const char* str);
 
-spread_method& operator<<(spread_method& r, const char* str);
+SpreadMethod& operator<<(SpreadMethod& r, const char* str);
 
-gradient_entry& operator<<(gradient_entry& r, const xml_node& node);
+GradientEntry& operator<<(GradientEntry& r, const xml_node& node);
 
 FilterType& operator<<(FilterType& r, const char* str);
 
 Filter& operator<<(Filter& r, const xml_node& node);
 
-tween_type& operator<<(tween_type& r, const char* str);
+TweenType& operator<<(TweenType& r, const char* str);
 
-rotation_direction& operator<<(rotation_direction& r, const char* str);
+RotationDirection& operator<<(RotationDirection& r, const char* str);
 
-text_attributes_t& operator<<(text_attributes_t& r, const xml_node& node);
+TextAttributes& operator<<(TextAttributes& r, const xml_node& node);
 
-text_run_t& operator<<(text_run_t& r, const xml_node& node);
+TextRun& operator<<(TextRun& r, const xml_node& node);
 
-layer_type& operator<<(layer_type& r, const char* str);
+LayerType& operator<<(LayerType& r, const char* str);
 
-element_type& operator<<(element_type& r, const char* str);
+ElementType& operator<<(ElementType& r, const char* str);
 
-symbol_type& operator<<(symbol_type& r, const char* str);
+SymbolType& operator<<(SymbolType& r, const char* str);
 
-loop_mode& operator<<(loop_mode& r, const char* str);
+LoopMode& operator<<(LoopMode& r, const char* str);
 
-item_properties& operator<<(item_properties& r, const xml_node& node);
+ItemProperties& operator<<(ItemProperties& r, const xml_node& node);
 
-folder_item& operator<<(folder_item& r, const xml_node& node);
+FolderItem& operator<<(FolderItem& r, const xml_node& node);
 
-document_info& operator<<(document_info& r, const xml_node& node);
+DocInfo& operator<<(DocInfo& r, const xml_node& node);
 
-edge_t& operator<<(edge_t& r, const xml_node& node);
+Edge& operator<<(Edge& r, const xml_node& node);
 
 BitmapData* load_bitmap(const std::string& data);
 

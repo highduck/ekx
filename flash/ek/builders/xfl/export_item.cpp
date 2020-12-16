@@ -58,7 +58,7 @@ void export_item_t::update_scale(export_item_t& lib, const matrix_2d& parent_mat
     const auto scale = global_matrix.scale();
     const auto s = std::max(scale.x, scale.y);
     estimated_scale = std::max(s, estimated_scale);
-    if (ref && ref->elementType == element_type::bitmap_item) {
+    if (ref && ref->elementType == ElementType::bitmap_item) {
         max_abs_scale = 1.0f;
     }
 

@@ -1,10 +1,10 @@
-#include "shape_edge_decoder.hpp"
+#include "ShapeDecoder.hpp"
 
 #include <ek/util/logger.hpp>
 
 namespace ek::xfl {
 
-using render_op = render_command::operation;
+using Op = RenderCommand::Operation;
 
 enum EdgeSelectionBit {
     EdgeSelectionBit_FillStyle0 = 1,
@@ -12,12 +12,12 @@ enum EdgeSelectionBit {
     EdgeSelectionBit_Stroke = 4
 };
 
-shape_decoder::shape_decoder(const transform_model& transform) :
+ShapeDecoder::ShapeDecoder(const TransformModel& transform) :
         transform_{transform} {
 
 }
 
-void shape_decoder::decode(const element_t& el) {
+void ShapeDecoder::decode(const Element& el) {
     ++total_;
 
     const auto& matrix = transform_.matrix;
@@ -31,9 +31,9 @@ void shape_decoder::decode(const element_t& el) {
     int current_fill_1;
     int current_line = -1;
 
-    std::vector<render_command> edges;
-    std::vector<shape_edge> fills;
-    std::vector<shape_edge> back_fills;
+    std::vector<RenderCommand> edges;
+    std::vector<ShapeEdge> fills;
+    std::vector<ShapeEdge> back_fills;
 
     for (const auto& edge: el.edges) {
         bool line_started = false;
@@ -71,7 +71,7 @@ void shape_decoder::decode(const element_t& el) {
                 //if (px != penX || py != penY) {
                 if (current_line > 0 && !(line_started && equals(pen, p))) {
                     extend(p, radius);
-                    edges.emplace_back(render_op::move_to, p);
+                    edges.emplace_back(Op::move_to, p);
                     line_started = true;
                 }
                 //}
@@ -85,17 +85,17 @@ void shape_decoder::decode(const element_t& el) {
                 extend(p, radius);
 
                 if (current_line > 0) {
-                    edges.emplace_back(render_op::line_to, p);
+                    edges.emplace_back(Op::line_to, p);
                 } else {
-                    edges.emplace_back(render_op::move_to, p);
+                    edges.emplace_back(Op::move_to, p);
                 }
 
                 if (current_fill_0 > 0) {
-                    fills.push_back(shape_edge::line(current_fill_0, pen, p));
+                    fills.push_back(ShapeEdge::line(current_fill_0, pen, p));
                 }
 
                 if (current_fill_1 > 0) {
-                    fills.push_back(shape_edge::line(current_fill_1, p, pen));
+                    fills.push_back(ShapeEdge::line(current_fill_1, p, pen));
                 }
 
                 pen = p;
@@ -110,15 +110,15 @@ void shape_decoder::decode(const element_t& el) {
                 extend(p, radius);
 
                 if (current_line > 0) {
-                    edges.emplace_back(render_op::curve_to, c, p);
+                    edges.emplace_back(Op::curve_to, c, p);
                 }
 
                 if (current_fill_0 > 0) {
-                    fills.push_back(shape_edge::curve(current_fill_0, pen, c, p));
+                    fills.push_back(ShapeEdge::curve(current_fill_0, pen, c, p));
                 }
 
                 if (current_fill_1 > 0) {
-                    fills.push_back(shape_edge::curve(current_fill_1, p, c, pen));
+                    fills.push_back(ShapeEdge::curve(current_fill_1, p, c, pen));
                 }
 
                 pen = p;
@@ -144,35 +144,35 @@ void shape_decoder::decode(const element_t& el) {
 }
 
 
-void shape_decoder::read_fill_styles(const element_t& el) {
+void ShapeDecoder::read_fill_styles(const Element& el) {
     auto& result = fill_styles_;
     result.clear();
 
     // Special null fill-style
-    result.emplace_back(render_op::fill_end);
+    result.emplace_back(Op::fill_end);
 
     for (const auto& fill: el.fills) {
-        result.emplace_back(render_op::fill_begin, &fill);
+        result.emplace_back(Op::fill_begin, &fill);
     }
 }
 
-void shape_decoder::read_line_styles(const element_t& el) {
+void ShapeDecoder::read_line_styles(const Element& el) {
     auto& result = line_styles_;
     result.clear();
 
     // Special null line-style
-    result.emplace_back(render_op::line_style_reset);
+    result.emplace_back(Op::line_style_reset);
 
     for (const auto& stroke: el.strokes) {
         if (stroke.is_solid) {
-            result.emplace_back(render_op::line_style_setup, &stroke);
+            result.emplace_back(Op::line_style_setup, &stroke);
         } else {
             /// TODO: check if not solid stroke
         }
     }
 }
 
-void shape_decoder::flush_commands(const std::vector<render_command>& edges, std::vector<shape_edge>& fills) {
+void ShapeDecoder::flush_commands(const std::vector<RenderCommand>& edges, std::vector<ShapeEdge>& fills) {
     auto left = static_cast<int>(fills.size());
 //        bool init = false;
     int current_fill = 0;
@@ -207,7 +207,7 @@ void shape_decoder::flush_commands(const std::vector<render_command>& edges, std
 //          }
         const float2& m = first.p0;
 
-        commands_.emplace_back(render_op::move_to, m);
+        commands_.emplace_back(Op::move_to, m);
         commands_.push_back(first.to_command());
 
         auto prev = first;
@@ -240,7 +240,7 @@ void shape_decoder::flush_commands(const std::vector<render_command>& edges, std
     }
 
     if (!fills.empty()) {
-        commands_.emplace_back(render_op::fill_end);
+        commands_.emplace_back(Op::fill_end);
     }
 
     if (!edges.empty()) {
@@ -248,20 +248,20 @@ void shape_decoder::flush_commands(const std::vector<render_command>& edges, std
         for (const auto& e: edges) {
             commands_.push_back(e);
         }
-        commands_.emplace_back(render_op::line_style_reset);
+        commands_.emplace_back(Op::line_style_reset);
     }
 }
 
-void shape_decoder::extend(const float2& p, float r) {
+void ShapeDecoder::extend(const float2& p, float r) {
     bounds_builder_.add(p, r);
 }
 
-bool shape_decoder::empty() const {
+bool ShapeDecoder::empty() const {
     return bounds_builder_.empty() || total_ == 0;
 }
 
-render_batch shape_decoder::result() const {
-    render_batch res;
+RenderCommandsBatch ShapeDecoder::result() const {
+    RenderCommandsBatch res;
     res.transform = transform_;
     res.bounds = bounds_builder_;
     res.total = total_;

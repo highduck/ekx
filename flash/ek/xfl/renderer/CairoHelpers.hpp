@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ek/xfl/types.hpp>
-#include "transform_model.hpp"
 
 typedef struct _cairo cairo_t;
 typedef struct _cairo_pattern cairo_pattern_t;
@@ -22,22 +21,22 @@ void clear(cairo_t* ctx);
 
 void blit_downsample(cairo_t* ctx, cairo_surface_t* source, int w, int h, double upscale);
 
-void set_stroke_style(cairo_t* ctx, const stroke_style& stroke);
+void set_stroke_style(cairo_t* ctx, const StrokeStyle& stroke);
 
-fill_pattern_data_t set_fill_style(cairo_t* cr, const fill_style& fill, const transform_model& transform);
+fill_pattern_data_t set_fill_style(cairo_t* cr, const FillStyle& fill, const TransformModel& transform);
 
-void set_line_cap(cairo_t* ctx, line_caps cap);
+void set_line_cap(cairo_t* ctx, LineCaps cap);
 
-void set_line_join(cairo_t* ctx, line_joints join);
+void set_line_join(cairo_t* ctx, LineJoints join);
 
 void set_solid_fill(cairo_t* context, const float4& color);
 
-void set_blend_mode(cairo_t* ctx, blend_mode_t blend_mode);
+void set_blend_mode(cairo_t* ctx, BlendMode blend_mode);
 
 void cairo_quadratic_curve_to(cairo_t* context, float x1, float y1, float x2, float y2);
 
 void add_color_stops(cairo_pattern_t* pattern,
-                     const std::vector<gradient_entry>& entries,
+                     const std::vector<GradientEntry>& entries,
                      const float4& color_multiplier);
 
 // https://github.com/lightspark/lightspark/blob/master/src/backends/graphics.cpp
@@ -45,7 +44,7 @@ cairo_pattern_t* create_linear_pattern(const matrix_2d& matrix);
 
 cairo_pattern_t* create_radial_pattern(const matrix_2d& matrix);
 
-fill_pattern_data_t create_fill_pattern(const fill_style& fill, const transform_model& transform);
+fill_pattern_data_t create_fill_pattern(const FillStyle& fill, const TransformModel& transform);
 
 void cairo_round_rectangle(cairo_t* cr, const double* values);
 
