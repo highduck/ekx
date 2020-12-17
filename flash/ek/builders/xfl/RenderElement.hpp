@@ -1,6 +1,8 @@
 #pragma once
 
-#include <ek/builders/MultiResAtlas.hpp>
+namespace ek {
+struct SpriteData;
+}
 
 namespace ek::xfl {
 
@@ -8,7 +10,7 @@ class Doc;
 
 struct Element;
 
-struct renderer_options_t {
+struct RenderElementOptions {
     float scale = 1.0f;
     int width = 0;
     int height = 0;
@@ -16,6 +18,6 @@ struct renderer_options_t {
     bool trim = false;
 };
 
-SpriteData render(const Doc& doc, const Element& el, const renderer_options_t& options);
+SpriteData renderElement(const Doc& doc, const Element& el, const RenderElementOptions& options);
 
 }

@@ -10,19 +10,20 @@
 #include <ek/math/color_transform.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/scenex/text/TextFormat.hpp>
+#include <ecxx/ecxx.hpp>
 
 namespace ek {
 
-enum class sg_filter_type {
-    none,
-    drop_shadow,
-    glow
+enum class SGFilterType {
+    None,
+    DropShadow,
+    Glow
 };
 
-struct filter_data {
-    sg_filter_type type = sg_filter_type::none;
+struct SGFilter {
+    SGFilterType type = SGFilterType::None;
     uint32_t quality = 1;
-    argb32_t color;
+    argb32_t color = argb32_t::one;
     float2 blur;
     float2 offset;
 
@@ -45,7 +46,7 @@ struct SGTextLayerData {
     }
 };
 
-struct dynamic_text_data {
+struct SGDynamicTextData {
     std::string text;
     std::string font;
     float size;
@@ -65,7 +66,7 @@ struct dynamic_text_data {
 };
 
 // TODO: it should be optimized with easing table store :)
-struct easing_data_t {
+struct SGEasingData {
     uint8_t attribute = 0;
     float ease = 0.0f;
     std::vector<float2> curve;
@@ -76,7 +77,7 @@ struct easing_data_t {
     }
 };
 
-struct keyframe_transform_t {
+struct SGKeyFrameTransform {
     float2 position;
     float2 scale{1.0f, 1.0f};
     float2 skew;
@@ -88,7 +89,7 @@ struct keyframe_transform_t {
         io(position, scale, skew, pivot, color);
     }
 
-    keyframe_transform_t operator-(const keyframe_transform_t& v) const {
+    SGKeyFrameTransform operator-(const SGKeyFrameTransform& v) const {
         return {
                 position - v.position,
                 scale - v.scale,
@@ -98,7 +99,7 @@ struct keyframe_transform_t {
         };
     }
 
-    keyframe_transform_t operator+(const keyframe_transform_t& v) const {
+    SGKeyFrameTransform operator+(const SGKeyFrameTransform& v) const {
         return {
                 position + v.position,
                 scale + v.scale,
@@ -109,14 +110,14 @@ struct keyframe_transform_t {
     }
 };
 
-struct movie_frame_data {
+struct SGMovieFrameData {
     int index = 0;
     int duration = 0;
     int motion_type = 0;
 
-    std::vector<easing_data_t> easing;
+    std::vector<SGEasingData> easing;
 
-    keyframe_transform_t transform;
+    SGKeyFrameTransform transform;
 
     bool visible = true;
 
@@ -141,13 +142,13 @@ struct movie_frame_data {
     }
 };
 
-struct sg_node_data;
+struct SGNodeData;
 
-struct movie_layer_data {
-    std::vector<movie_frame_data> frames;
+struct SGMovieLayerData {
+    std::vector<SGMovieFrameData> frames;
 
     // temp for restoring target ID
-    std::vector<sg_node_data*> targets;
+    std::vector<SGNodeData*> targets;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -155,10 +156,10 @@ struct movie_layer_data {
     }
 };
 
-struct sg_movie_data {
+struct SGMovieData {
     int frames = 1;
     float fps = 24.0f;
-    std::vector<movie_layer_data> layers;
+    std::vector<SGMovieLayerData> layers;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -166,7 +167,7 @@ struct sg_movie_data {
     }
 };
 
-struct sg_node_data {
+struct SGNodeData {
 
     matrix_2d matrix{};
     color_transform_f color{};
@@ -188,10 +189,10 @@ struct sg_node_data {
     bool boundsEnabled = false;
     rect_f boundingRect;
     rect_f scaleGrid;
-    std::vector<sg_node_data> children;
-    std::vector<filter_data> filters;
-    std::optional<dynamic_text_data> dynamicText;
-    std::optional<sg_movie_data> movie;
+    std::vector<SGNodeData> children;
+    std::vector<SGFilter> filters;
+    std::optional<SGDynamicTextData> dynamicText;
+    std::optional<SGMovieData> movie;
     int movieTargetId = -1;
 
     std::unordered_map<int, std::string> labels;
@@ -229,10 +230,10 @@ struct sg_node_data {
     }
 };
 
-struct sg_file {
+struct SGFile {
     std::vector<std::string> scenes;
     std::unordered_map<std::string, std::string> linkages;
-    std::vector<sg_node_data> library;
+    std::vector<SGNodeData> library;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -240,8 +241,14 @@ struct sg_file {
     }
 
     [[nodiscard]]
-    const sg_node_data* get(const std::string& library_name) const;
+    const SGNodeData* get(const std::string& libraryName) const;
 };
+
+SGFile* sg_load(const std::vector<uint8_t>& buffer);
+
+ecs::entity sg_create(const std::string& library, const std::string& name);
+
+rect_f sg_get_bounds(const std::string& library, const std::string& name);
 
 }
 

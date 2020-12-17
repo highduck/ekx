@@ -1,8 +1,10 @@
 #pragma once
 
-#include "ShapeProcessor.hpp"
 #include <vector>
 #include <string>
+#include <ek/math/bounds_builder.hpp>
+#include <ek/xfl/types.hpp>
+#include <ek/xfl/renderer/RenderCommand.hpp>
 
 namespace ek::xfl {
 
@@ -12,33 +14,42 @@ struct Element;
 
 class Scanner {
 public:
-    std::string name;
-    ShapeProcessor output{};
-
-    explicit Scanner(const Doc& doc);
+    Scanner();
 
     void reset();
 
-    void scan(const Element& element);
+    void draw(const Doc& doc, const Element& element);
 
-    void scan_group(const Element& element);
+    void drawGroup(const Doc& doc, const Element& element);
 
-    void scan_shape(const Element& element);
+    void drawShape(const Element& element);
 
-    void scan_instance(const Element& element, ElementType type);
+    void drawInstance(const Doc& doc, const Element& element);
 
-    void scan_symbol_item(const Element& element);
+    void drawSymbolItem(const Doc& doc, const Element& element);
 
     static rect_f getBounds(const Doc& doc, const std::vector<Element>& elements);
 
-private:
-    const Doc& doc_;
+/** Covert concrete objects to render commands **/
 
+    bool render(const Element& el, const TransformModel& world);
+
+    bool render(const RenderCommandsBatch& batch);
+
+    bool render(const BitmapData* bitmap, const TransformModel& world);
+
+    bool renderShapeObject(const Element& el, const TransformModel& world);
+
+public:
+    std::vector<RenderCommandsBatch> batches;
+    bounds_builder_2f bounds{};
+
+private:
     std::vector<TransformModel> stack_;
 
-    void push_transform(const Element& el);
+    void pushTransform(const Element& el);
 
-    void pop_transform();
+    void popTransform();
 };
 
 }

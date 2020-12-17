@@ -139,7 +139,7 @@ void DocParser::load() {
         Element bi;
         parse(item, bi);
         auto* file = root->open(path_t{"bin"} / bi.bitmapDataHRef);
-        bi.bitmap.reset(load_bitmap(file->content()));
+        bi.bitmap.reset(BitmapData::parse(file->content()));
         doc.library.push_back(std::move(bi));
     }
 

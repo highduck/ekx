@@ -20,7 +20,7 @@ bool UglyFilter2D::pass(entity e) {
     draw2d::state.save_transform();
 
     for (auto& filter : filters) {
-        if (filter.type == sg_filter_type::drop_shadow) {
+        if (filter.type == SGFilterType::DropShadow) {
             processing = true;
             draw2d::state.matrix = parentMatrix;
             draw2d::state.color = parentColor;
@@ -35,7 +35,7 @@ bool UglyFilter2D::pass(entity e) {
             RenderSystem2D::drawStack(e);
 
             processing = false;
-        } else if (filter.type == sg_filter_type::glow) {
+        } else if (filter.type == SGFilterType::Glow) {
             processing = true;
             draw2d::state.color = parentColor;
             draw2d::state.concat(argb32_t{0x0u, filter.color.af()}, argb32_t{filter.color.argb, 0.0f});

@@ -11,14 +11,14 @@ add_library(${PROJECT_NAME}
         ek/builders/SpriteFilters.hpp
 
         # XFL Builder
-        ek/builders/xfl/flash_doc_exporter.cpp
-        ek/builders/xfl/flash_doc_exporter.hpp
-        ek/builders/xfl/export_item.cpp
-        ek/builders/xfl/export_item.hpp
-        ek/builders/xfl/animation_utility.cpp
-        ek/builders/xfl/animation_utility.hpp
-        ek/builders/xfl/render_to_sprite.cpp
-        ek/builders/xfl/render_to_sprite.hpp
+        ek/builders/xfl/SGBuilder.cpp
+        ek/builders/xfl/SGBuilder.hpp
+        ek/builders/xfl/ExportItem.cpp
+        ek/builders/xfl/ExportItem.hpp
+        ek/builders/xfl/AnimationHelpers.cpp
+        ek/builders/xfl/AnimationHelpers.hpp
+        ek/builders/xfl/RenderElement.cpp
+        ek/builders/xfl/RenderElement.hpp
 
         # Flash Document
         ek/xfl/DocFile.cpp
@@ -28,7 +28,7 @@ add_library(${PROJECT_NAME}
 
         ek/xfl/parsing/parsing.hpp
         ek/xfl/parsing/parsing.cpp
-        ek/xfl/parsing/bitmap.cpp
+        ek/xfl/parsing/BitmapDataParse.cpp
         ek/xfl/parsing/DocParser.hpp
         ek/xfl/parsing/DocParser.cpp
 
@@ -42,10 +42,6 @@ add_library(${PROJECT_NAME}
         ek/xfl/renderer/Scanner.hpp
         ek/xfl/renderer/ShapeDecoder.cpp
         ek/xfl/renderer/ShapeDecoder.hpp
-        ek/xfl/renderer/ShapeEdge.cpp
-        ek/xfl/renderer/ShapeEdge.hpp
-        ek/xfl/renderer/ShapeProcessor.cpp
-        ek/xfl/renderer/ShapeProcessor.hpp
         )
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))

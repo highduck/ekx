@@ -1,8 +1,8 @@
-#pragma once
+#include "AnimationHelpers.hpp"
 
+#include <ek/scenex/data/SGFile.hpp>
 #include <ek/xfl/Doc.hpp>
 #include <ek/util/logger.hpp>
-#include "export_item.hpp"
 
 namespace ek::xfl {
 
@@ -10,9 +10,9 @@ inline float sign(float a) {
     return a > 0.0f ? 1.0f : (a < 0.0f ? -1.0f : 0.0f);
 }
 
-keyframe_transform_t create_transform(const Element& el) {
+static SGKeyFrameTransform createKeyFrameTransform(const Element& el) {
     const auto m = el.transform.matrix;
-    keyframe_transform_t r;
+    SGKeyFrameTransform r;
     r.position = m.transform(el.transformationPoint);
     r.scale = m.scale();
     r.skew = m.skew();
@@ -21,7 +21,7 @@ keyframe_transform_t create_transform(const Element& el) {
     return r;
 }
 
-void fixRotation(keyframe_transform_t& curr, const keyframe_transform_t& prev) {
+static void fixRotation(SGKeyFrameTransform& curr, const SGKeyFrameTransform& prev) {
     if (prev.skew.x + math::pi < curr.skew.x) {
         curr.skew.x -= 2 * math::pi;
     } else if (prev.skew.x - math::pi > curr.skew.x) {
@@ -34,7 +34,7 @@ void fixRotation(keyframe_transform_t& curr, const keyframe_transform_t& prev) {
     }
 }
 
-void addRotation(keyframe_transform_t& curr, const Frame& frame, const keyframe_transform_t& prev) {
+static void addRotation(SGKeyFrameTransform& curr, const Frame& frame, const SGKeyFrameTransform& prev) {
     double additionalRotation = 0;
     const auto rotate = frame.motionTweenRotate;
     const auto times = frame.motionTweenRotateTimes;
@@ -65,16 +65,16 @@ void addRotation(keyframe_transform_t& curr, const Frame& frame, const keyframe_
     curr.skew.y += additionalRotation;
 }
 
-keyframe_transform_t extractTweenDelta(const Frame& frame, const Element& el0, const Element& el1) {
-    auto t0 = create_transform(el0);
-    auto t1 = create_transform(el1);
+SGKeyFrameTransform extractTweenDelta(const Frame& frame, const Element& el0, const Element& el1) {
+    auto t0 = createKeyFrameTransform(el0);
+    auto t1 = createKeyFrameTransform(el1);
     fixRotation(t1, t0);
     addRotation(t1, frame, t0);
     return t1 - t0;
 }
 
-movie_frame_data createFrameModel(const Frame& frame) {
-    movie_frame_data ef;
+SGMovieFrameData createFrameModel(const Frame& frame) {
+    SGMovieFrameData ef;
     ef.index = frame.index;
     ef.duration = frame.duration;
     if (frame.tweenType == TweenType::classic) {
@@ -98,14 +98,12 @@ movie_frame_data createFrameModel(const Frame& frame) {
     return ef;
 }
 
-void setupFrameFromElement(movie_frame_data& target, const Element& el) {
-    target.transform = create_transform(el);
+void setupFrameFromElement(SGMovieFrameData& target, const Element& el) {
+    target.transform = createKeyFrameTransform(el);
     target.visible = el.isVisible;
     if (el.symbolType == SymbolType::graphic) {
         target.loopMode = static_cast<int>(el.loop);
         target.firstFrame = el.firstFrame;
     }
 }
-
 }
-

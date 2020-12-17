@@ -7,7 +7,7 @@ namespace ek {
 
 using ecs::entity;
 
-float ease(float x, const easing_data_t& data);
+float ease(float x, const SGEasingData& data);
 
 void apply_frame(entity e, MovieClip& mov);
 
@@ -23,7 +23,7 @@ void MovieClip::updateAll() {
     }
 }
 
-int findKeyFrame(const std::vector<movie_frame_data>& frames, float t) {
+int findKeyFrame(const std::vector<SGMovieFrameData>& frames, float t) {
     const int end = int(frames.size());
     for (int i = 0; i < end; ++i) {
         const auto& kf = frames[i];
@@ -45,8 +45,8 @@ struct easing_progress_t {
     }
 };
 
-keyframe_transform_t
-lerp(const keyframe_transform_t& begin, const keyframe_transform_t& end, const easing_progress_t& progress) {
+SGKeyFrameTransform
+lerp(const SGKeyFrameTransform& begin, const SGKeyFrameTransform& end, const easing_progress_t& progress) {
     return {
             lerp(begin.position, end.position, progress.position),
             lerp(begin.scale, end.scale, progress.scale),
@@ -56,7 +56,7 @@ lerp(const keyframe_transform_t& begin, const keyframe_transform_t& end, const e
     };
 }
 
-easing_progress_t get_easing_progress(const float t, const std::vector<easing_data_t>& easing) {
+easing_progress_t get_easing_progress(const float t, const std::vector<SGEasingData>& easing) {
     easing_progress_t progress{};
     if (easing.empty()) {
         progress.fill(t);
@@ -81,7 +81,7 @@ easing_progress_t get_easing_progress(const float t, const std::vector<easing_da
     return progress;
 }
 
-void apply_transform(entity e, const keyframe_transform_t& keyframe) {
+void apply_transform(entity e, const SGKeyFrameTransform& keyframe) {
     auto& transform = ecs::get_or_create<Transform2D>(e);
     transform.position = keyframe.position;
     transform.skew = keyframe.skew;
@@ -91,7 +91,7 @@ void apply_transform(entity e, const keyframe_transform_t& keyframe) {
     transform.color.offset = argb32_t{keyframe.color.offset};
 }
 
-void update_target(float time, entity e, const movie_layer_data& layer) {
+void update_target(float time, entity e, const SGMovieLayerData& layer) {
     auto& config = e.get_or_create<Node>();
     const auto ki = findKeyFrame(layer.frames, time);
     if (ki < 0) {
@@ -274,7 +274,7 @@ float get_bezier_y(const float2* curve, float x) {
                                        curve[3].y);
 }
 
-float ease(float x, const easing_data_t& data) {
+float ease(float x, const SGEasingData& data) {
     float y = x;
     if (data.curve.size() > 3) {
         // bezier

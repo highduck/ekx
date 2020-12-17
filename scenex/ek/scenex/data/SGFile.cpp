@@ -1,5 +1,6 @@
-#include "sg_factory.hpp"
+#include "SGFile.hpp"
 
+#include <ek/serialize/streams.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
@@ -9,16 +10,40 @@
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/2d/UglyFilter2D.hpp>
 #include <ek/util/logger.hpp>
+#include <ek/util/Res.hpp>
 #include <ek/math/bounds_builder.hpp>
 #include <ek/Localization.hpp>
 
 namespace ek {
 
-namespace {
+SGFile* sg_load(const std::vector<uint8_t>& buffer) {
+    SGFile* sg = nullptr;
 
-using asset_ref = Res<sg_file>;
+    if (!buffer.empty()) {
+        input_memory_stream input{buffer.data(), buffer.size()};
+        IO io{input};
 
-void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
+        sg = new SGFile;
+        io(*sg);
+    } else {
+        EK_ERROR("SCENE LOAD: empty buffer");
+    }
+
+    return sg;
+}
+
+const SGNodeData* SGFile::get(const std::string& library_name) const {
+    for (auto& item : library) {
+        if (item.libraryName == library_name) {
+            return &item;
+        }
+    }
+    return nullptr;
+}
+
+using SGFileRes = Res<SGFile>;
+
+void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
     auto& node = ecs::get<Node>(entity);
     node.name = data->name;
     if (data->movieTargetId >= 0) {
@@ -110,9 +135,9 @@ void apply(ecs::entity entity, const sg_node_data* data, asset_ref asset) {
     }
 }
 
-ecs::entity create_and_merge(const sg_file& sg, asset_ref asset,
-                             const sg_node_data* data,
-                             const sg_node_data* over = nullptr) {
+ecs::entity create_and_merge(const SGFile& sg, SGFileRes asset,
+                             const SGNodeData* data,
+                             const SGNodeData* over = nullptr) {
     auto entity = ecs::create<Node, Transform2D>();
     if (data) {
         apply(entity, data, asset);
@@ -130,7 +155,7 @@ ecs::entity create_and_merge(const sg_file& sg, asset_ref asset,
     return entity;
 }
 
-void extend_bounds(const sg_file& file, const sg_node_data& data, bounds_builder_2f& boundsBuilder,
+void extend_bounds(const SGFile& file, const SGNodeData& data, bounds_builder_2f& boundsBuilder,
                    const matrix_2d& matrix) {
     const Res<Sprite> spr{data.sprite};
     if (spr) {
@@ -142,13 +167,11 @@ void extend_bounds(const sg_file& file, const sg_node_data& data, bounds_builder
     }
 }
 
-}
-
 ecs::entity sg_create(const std::string& library, const std::string& name) {
     ecs::entity result;
-    Res<sg_file> file{library};
+    SGFileRes file{library};
     if (file) {
-        const sg_node_data* data = file->get(name);
+        const SGNodeData* data = file->get(name);
         if (data) {
             result = create_and_merge(*file, file, data);
         } else {
@@ -161,9 +184,9 @@ ecs::entity sg_create(const std::string& library, const std::string& name) {
 }
 
 rect_f sg_get_bounds(const std::string& library, const std::string& name) {
-    Res<sg_file> file{library};
+    SGFileRes file{library};
     if (file) {
-        const sg_node_data* data = file->get(name);
+        const SGNodeData* data = file->get(name);
         if (data) {
             bounds_builder_2f bb{};
             extend_bounds(*file, *data, bb, data->matrix);

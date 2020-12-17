@@ -1,7 +1,7 @@
-#include "flash_doc_exporter.hpp"
+#include "SGBuilder.hpp"
 
-#include "animation_utility.hpp"
-#include "render_to_sprite.hpp"
+#include "AnimationHelpers.hpp"
+#include "RenderElement.hpp"
 
 #include <ek/xfl/Doc.hpp>
 #include <ek/xfl/renderer/Scanner.hpp>
@@ -33,7 +33,7 @@ int getBoundingRectFlags(const string& str) {
     return flags;
 }
 
-bool setupSpecialLayer(const Doc& doc, const Layer& layer, export_item_t& toItem) {
+bool setupSpecialLayer(const Doc& doc, const Layer& layer, ExportItem& toItem) {
     auto flags = getBoundingRectFlags(layer.name);
     if (flags != 0) {
         toItem.node.boundingRect = Scanner::getBounds(doc, layer.frames[0].elements);
@@ -51,7 +51,7 @@ bool setupSpecialLayer(const Doc& doc, const Layer& layer, export_item_t& toItem
     return false;
 }
 
-void collectFramesMetaInfo(const Doc& doc, export_item_t& item) {
+void collectFramesMetaInfo(const Doc& doc, ExportItem& item) {
     if (!item.ref) {
         return;
     }
@@ -71,7 +71,7 @@ void collectFramesMetaInfo(const Doc& doc, export_item_t& item) {
     }
 }
 
-bool shouldConvertItemToSprite(export_item_t& item) {
+bool shouldConvertItemToSprite(ExportItem& item) {
     if (item.children.size() == 1 && item.drawingLayerChild) {
         return true;
     } else if (item.node.labels[0] == "*static") {
@@ -84,16 +84,16 @@ bool shouldConvertItemToSprite(export_item_t& item) {
     return false;
 }
 
-void process_transform(const Element& el, export_item_t& item) {
+void process_transform(const Element& el, ExportItem& item) {
     item.node.matrix = el.transform.matrix;
     item.node.color = el.transform.color;
     item.node.visible = el.isVisible;
 }
 
-void process_filters(const Element& el, export_item_t& item) {
+void process_filters(const Element& el, ExportItem& item) {
     for (auto& filter : el.filters) {
-        filter_data fd;
-        fd.type = sg_filter_type::none;
+        SGFilter fd;
+        fd.type = SGFilterType::None;
         fd.color = argb32_t{filter.color};
         fd.blur = filter.blur;
         fd.quality = filter.quality;
@@ -102,18 +102,18 @@ void process_filters(const Element& el, export_item_t& item) {
         fd.offset = filter.distance * float2{cosf(a), sinf(a)};
 
         if (filter.type == FilterType::drop_shadow) {
-            fd.type = sg_filter_type::drop_shadow;
+            fd.type = SGFilterType::DropShadow;
         } else if (filter.type == FilterType::glow) {
-            fd.type = sg_filter_type::glow;
+            fd.type = SGFilterType::Glow;
         }
 
-        if (fd.type != sg_filter_type::none) {
+        if (fd.type != SGFilterType::None) {
             item.node.filters.push_back(fd);
         }
     }
 }
 
-void processTextField(const Element& el, export_item_t& item, const Doc& doc) {
+void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
     auto& tf = item.node.dynamicText.emplace();
     //if(dynamicText.rect != null) {
 //    item->node.matrix.tx += el.rect.x - 2;
@@ -160,13 +160,13 @@ void processTextField(const Element& el, export_item_t& item, const Doc& doc) {
     }
 }
 
-flash_doc_exporter::flash_doc_exporter(const Doc& doc)
+SGBuilder::SGBuilder(const Doc& doc)
         : doc{doc} {
 }
 
-flash_doc_exporter::~flash_doc_exporter() = default;
+SGBuilder::~SGBuilder() = default;
 
-void flash_doc_exporter::build_library() {
+void SGBuilder::build_library() {
 
     for (const auto& item: doc.library) {
         process(item, &library);
@@ -183,7 +183,7 @@ void flash_doc_exporter::build_library() {
         }
     }
 
-    std::vector<export_item_t*> chi{};
+    std::vector<ExportItem*> chi{};
     for (auto& item : library.children) {
         if (item->usage > 0) {
             chi.push_back(item);
@@ -194,7 +194,7 @@ void flash_doc_exporter::build_library() {
     library.children = chi;
 }
 
-sg_file flash_doc_exporter::export_library() {
+SGFile SGBuilder::export_library() {
 
     for (auto* item : library.children) {
         // CHANGE: we disable sprite assignment here
@@ -236,7 +236,7 @@ sg_file flash_doc_exporter::export_library() {
     //     }
     // }
 
-    sg_file sg;
+    SGFile sg;
     sg.linkages = linkages;
     for (auto& pair : doc.scenes) {
         sg.scenes.push_back(pair.second);
@@ -254,10 +254,10 @@ sg_file flash_doc_exporter::export_library() {
     return sg;
 }
 
-void flash_doc_exporter::process_symbol_instance(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+void SGBuilder::process_symbol_instance(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     assert(el.elementType == ElementType::symbol_instance);
 
-    auto* item = new export_item_t();
+    auto* item = new ExportItem();
     item->ref = &el;
     process_transform(el, *item);
     item->node.name = el.item.name;
@@ -273,10 +273,10 @@ void flash_doc_exporter::process_symbol_instance(const Element& el, export_item_
     }
 }
 
-void flash_doc_exporter::process_bitmap_instance(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+void SGBuilder::process_bitmap_instance(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     assert(el.elementType == ElementType::bitmap_instance);
 
-    auto* item = new export_item_t;
+    auto* item = new ExportItem;
     item->ref = &el;
     process_transform(el, *item);
     item->node.name = el.item.name;
@@ -290,8 +290,8 @@ void flash_doc_exporter::process_bitmap_instance(const Element& el, export_item_
     }
 }
 
-void flash_doc_exporter::process_bitmap_item(const Element& el, export_item_t* parent, processing_bag_t* bag) {
-    auto* item = new export_item_t();
+void SGBuilder::process_bitmap_item(const Element& el, ExportItem* parent, processing_bag_t* bag) {
+    auto* item = new ExportItem();
     item->ref = &el;
     item->node.libraryName = el.item.name;
     item->renderThis = true;
@@ -301,10 +301,10 @@ void flash_doc_exporter::process_bitmap_item(const Element& el, export_item_t* p
     }
 }
 
-void flash_doc_exporter::process_dynamic_text(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+void SGBuilder::process_dynamic_text(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     assert(el.elementType == ElementType::dynamic_text);
 
-    auto* item = new export_item_t();
+    auto* item = new ExportItem();
     item->ref = &el;
     process_transform(el, *item);
     item->node.name = el.item.name;
@@ -317,11 +317,11 @@ void flash_doc_exporter::process_dynamic_text(const Element& el, export_item_t* 
     }
 }
 
-void flash_doc_exporter::process_symbol_item(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+void SGBuilder::process_symbol_item(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     assert(el.elementType == ElementType::symbol_item ||
            el.elementType == ElementType::scene_timeline);
 
-    auto* item = new export_item_t();
+    auto* item = new ExportItem();
     item->ref = &el;
     process_transform(el, *item);
     item->node.libraryName = el.item.name;
@@ -371,14 +371,14 @@ void flash_doc_exporter::process_symbol_item(const Element& el, export_item_t* p
     }
 }
 
-void flash_doc_exporter::process_group(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+void SGBuilder::process_group(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     assert(el.elementType == ElementType::group);
     for (const auto& member : el.members) {
         process(member, parent, bag);
     }
 }
 
-void flash_doc_exporter::process_shape(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+void SGBuilder::process_shape(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     assert(el.elementType == ElementType::shape ||
            el.elementType == ElementType::object_oval ||
            el.elementType == ElementType::object_rectangle);
@@ -395,7 +395,7 @@ static std::string SHAPE_ID = "$";
 // we need global across all libraries to avoid multiple FLA exports overlapping
 int NEXT_SHAPE_IDX = 0;
 
-export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item, const Element& el) {
+ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element& el) {
     if (item->drawingLayerChild) {
         auto* child = item->drawingLayerChild;
         if (item->children.back() == child &&
@@ -421,7 +421,7 @@ export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item,
         frame.elements.push_back(el);
     }
 
-    auto* layer = new export_item_t();
+    auto* layer = new ExportItem();
     layer->ref = shapeItem.get();
     layer->node.libraryName = name;
     layer->renderThis = true;
@@ -444,7 +444,7 @@ export_item_t* flash_doc_exporter::addElementToDrawingLayer(export_item_t* item,
     return drawingLayerInstance;
 }
 
-void flash_doc_exporter::process(const Element& el, export_item_t* parent, processing_bag_t* bag) {
+void SGBuilder::process(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     const auto type = el.elementType;
     switch (type) {
         case ElementType::symbol_instance:
@@ -486,23 +486,23 @@ void flash_doc_exporter::process(const Element& el, export_item_t* parent, proce
 
 /*** rendering ***/
 
-void flash_doc_exporter::render(const export_item_t& item, MultiResAtlasData& toAtlas) const {
+void SGBuilder::render(const ExportItem& item, MultiResAtlasData& toAtlas) const {
     const Element& el = *item.ref;
     const auto spriteID = el.item.name;
-    renderer_options_t options;
+    RenderElementOptions options;
     for (auto& resolution : toAtlas.resolutions) {
         options.scale = std::min(
                 item.max_abs_scale,
                 resolution.resolution_scale * std::min(1.0f, item.estimated_scale)
         );
-        auto res = ::ek::xfl::render(doc, el, options);
+        auto res = renderElement(doc, el, options);
         res.name = spriteID;
         res.trim = item.node.scaleGrid.empty();
         resolution.sprites.push_back(res);
     }
 }
 
-void flash_doc_exporter::build_sprites(MultiResAtlasData& to_atlas) const {
+void SGBuilder::build_sprites(MultiResAtlasData& to_atlas) const {
     for (auto* item : library.children) {
         if (item->renderThis) {
             item->node.sprite = item->ref->item.name;
@@ -514,7 +514,7 @@ void flash_doc_exporter::build_sprites(MultiResAtlasData& to_atlas) const {
     }
 }
 
-bool flash_doc_exporter::isInLinkages(const string& id) const {
+bool SGBuilder::isInLinkages(const string& id) const {
     for (const auto& pair : linkages) {
         if (pair.second == id) {
             return true;
@@ -523,7 +523,7 @@ bool flash_doc_exporter::isInLinkages(const string& id) const {
     return false;
 }
 
-movie_layer_data* findTargetLayer(sg_movie_data& movie, const sg_node_data* item) {
+SGMovieLayerData* findTargetLayer(SGMovieData& movie, const SGNodeData* item) {
     for (auto& layer : movie.layers) {
         for (const auto* t : layer.targets) {
             if (t == item) {
@@ -534,7 +534,7 @@ movie_layer_data* findTargetLayer(sg_movie_data& movie, const sg_node_data* item
     return nullptr;
 }
 
-void flash_doc_exporter::processTimeline(const Element& el, export_item_t* item) {
+void SGBuilder::processTimeline(const Element& el, ExportItem* item) {
     auto& movie = item->node.movie.emplace();
     movie.frames = el.timeline.getTotalFrames();
     movie.fps = doc.info.frameRate;
@@ -573,7 +573,7 @@ void flash_doc_exporter::processTimeline(const Element& el, export_item_t* item)
                 }
             }
             const auto k0 = createFrameModel(frame);
-            std::optional<keyframe_transform_t> delta;
+            std::optional<SGKeyFrameTransform> delta;
             if (k0.motion_type == 1
                 && !frame.elements.empty()
                 && (frameIndex + 1) < framesTotal) {
@@ -587,7 +587,7 @@ void flash_doc_exporter::processTimeline(const Element& el, export_item_t* item)
             for (auto* target : targets.list) {
                 if (target->ref) {
                     auto* targetNodeRef = &target->node;
-                    movie_layer_data* targetLayer = nullptr;
+                    SGMovieLayerData* targetLayer = nullptr;
                     if (!target->movieLayerIsLinked) {
                         targetLayer = &movie.layers.emplace_back();
                         targetLayer->targets.push_back(targetNodeRef);
@@ -602,7 +602,7 @@ void flash_doc_exporter::processTimeline(const Element& el, export_item_t* item)
                     setupFrameFromElement(kf0, *target->ref);
                     targetLayer->frames.push_back(kf0);
                     if (delta) {
-                        movie_frame_data kf1{};
+                        SGMovieFrameData kf1{};
                         kf1.index = kf0.index + kf0.duration;
                         kf1.duration = 0;
                         kf1.transform = kf0.transform + *delta;

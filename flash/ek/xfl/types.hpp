@@ -17,6 +17,8 @@ struct BitmapData {
     int bpp = 4;
     bool alpha = true;
     std::vector<uint8_t> data;
+
+    static BitmapData* parse(const std::string& data);
 };
 
 enum class FilterType {
@@ -105,7 +107,6 @@ struct TextRun {
     std::string characters;
     TextAttributes attributes;
 };
-
 
 struct MotionObject {
     int duration;
@@ -262,7 +263,7 @@ struct Layer {
     std::vector<Frame> frames;
 
     [[nodiscard]]
-    size_t duration() const {
+    int duration() const {
         int total = 0;
         for (const auto& frame : frames) {
             total += frame.duration;
@@ -271,7 +272,7 @@ struct Layer {
     }
 
     [[nodiscard]]
-    size_t getElementsCount() const {
+    int getElementsCount() const {
         int i = 0;
         for (auto& frame : frames) {
             i += frame.elements.size();
@@ -285,8 +286,8 @@ struct Timeline {
     std::vector<Layer> layers;
 
     [[nodiscard]]
-    size_t getTotalFrames() const {
-        size_t res = 1u;
+    int getTotalFrames() const {
+        int res = 1u;
         for (const auto& layer : layers) {
             res = std::max(layer.duration(), res);
         }
@@ -294,8 +295,8 @@ struct Timeline {
     }
 
     [[nodiscard]]
-    size_t getElementsCount() const {
-        size_t i = 0;
+    int getElementsCount() const {
+        int i = 0;
         for (auto& layer : layers) {
             i += layer.getElementsCount();
         }

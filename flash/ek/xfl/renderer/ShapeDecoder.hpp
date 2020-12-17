@@ -1,11 +1,29 @@
 #pragma once
 
-#include "ShapeProcessor.hpp"
-#include "ShapeEdge.hpp"
-
-#include <ek/xfl/types.hpp>
+#include "RenderCommand.hpp"
 
 namespace ek::xfl {
+
+struct ShapeEdge {
+
+    int fill_style_idx = -1;
+    float2 p0;
+    float2 c;
+    float2 p1;
+    bool is_quadratic = false;
+
+    [[nodiscard]]
+    RenderCommand to_command() const;
+
+    [[nodiscard]]
+    bool connects(const ShapeEdge& next) const {
+        return fill_style_idx == next.fill_style_idx && equals(p1, next.p0);
+    }
+
+    static ShapeEdge curve(int style, const float2& p0, const float2& c, const float2& p1);
+
+    static ShapeEdge line(int style, const float2& p0, const float2& p1);
+};
 
 class ShapeDecoder {
 public:
@@ -19,7 +37,7 @@ public:
 
 private:
 
-    void extend(const float2& p, float r = 0.0f);
+    void extend(float2 p, float r = 0.0f);
 
     void read_fill_styles(const Element& el);
 

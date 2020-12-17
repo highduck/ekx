@@ -1,42 +1,44 @@
 #include "Scanner.hpp"
+#include "ShapeDecoder.hpp"
 
 #include <ek/xfl/Doc.hpp>
 
 namespace ek::xfl {
 
-Scanner::Scanner(const Doc& doc) : doc_{doc} {
+using Op = RenderCommand::Operation;
+
+Scanner::Scanner() {
     reset();
 }
 
 void Scanner::reset() {
     stack_.clear();
     stack_.emplace_back();
-    output.reset();
+    batches.clear();
+    bounds = {};
 }
 
-void Scanner::scan_instance(const Element& element, ElementType type) {
-    auto* s = doc_.find(element.libraryItemName, type);
+void Scanner::drawInstance(const Doc& doc, const Element& element) {
+    auto* s = doc.find(element.libraryItemName, element.elementType);
     if (s) {
-        push_transform(element);
-        scan(*s);
-        pop_transform();
+        pushTransform(element);
+        draw(doc, *s);
+        popTransform();
     }
 }
 
-void Scanner::scan_group(const Element& element) {
+void Scanner::drawGroup(const Doc& doc, const Element& element) {
     // ! Group Transformation is not applied !
     for (const auto& member : element.members) {
-        scan(member);
+        draw(doc, member);
     }
 }
 
-void Scanner::scan_shape(const Element& element) {
-    push_transform(element);
-    output.add(element, stack_.back());
-    pop_transform();
+void Scanner::drawShape(const Element& element) {
+    render(element, stack_.back() * element.transform);
 }
 
-void Scanner::scan_symbol_item(const Element& element) {
+void Scanner::drawSymbolItem(const Doc& doc, const Element& element) {
     const auto& layers = element.timeline.layers;
     const auto& end = layers.rend();
     for (auto it = layers.rbegin(); it != end; ++it) {
@@ -44,53 +46,156 @@ void Scanner::scan_symbol_item(const Element& element) {
         if (layer.layerType == LayerType::normal) {
             if (!layer.frames.empty()) {
                 for (const auto& el : layer.frames[0].elements) {
-                    scan(el);
+                    draw(doc, el);
                 }
             }
         }
     }
 }
 
-void Scanner::scan(const Element& element) {
+void Scanner::draw(const Doc& doc, const Element& element) {
     switch (element.elementType) {
         case ElementType::symbol_instance:
-            scan_instance(element, ElementType::symbol_item);
-            break;
         case ElementType::bitmap_instance:
-            scan_instance(element, ElementType::bitmap_item);
+            drawInstance(doc, element);
             break;
         case ElementType::symbol_item:
         case ElementType::scene_timeline:
-            scan_symbol_item(element);
+            drawSymbolItem(doc, element);
             break;
         case ElementType::group:
-            scan_group(element);
+            drawGroup(doc, element);
             break;
         case ElementType::shape:
         case ElementType::object_rectangle:
         case ElementType::object_oval:
         case ElementType::bitmap_item:
-            scan_shape(element);
+            drawShape(element);
             break;
         default:
             break;
     }
 }
 
-void Scanner::push_transform(const Element& el) {
+void Scanner::pushTransform(const Element& el) {
     stack_.push_back(stack_.back() * el.transform);
 }
 
-void Scanner::pop_transform() {
+void Scanner::popTransform() {
     stack_.pop_back();
 }
 
 rect_f Scanner::getBounds(const Doc& doc, const std::vector<Element>& elements) {
-    Scanner scanner(doc);
+    Scanner scanner{};
     for (auto& el: elements) {
-        scanner.scan(el);
+        scanner.draw(doc, el);
     }
-    return scanner.output.bounds.rect();
+    return scanner.bounds.rect();
 }
+
+// Convert concrete objects to render commands
+
+bool Scanner::render(const Element& el, const TransformModel& world) {
+    switch (el.elementType) {
+        case ElementType::bitmap_item:
+            return render(el.bitmap.get(), world);
+        case ElementType::object_oval:
+        case ElementType::object_rectangle:
+            return renderShapeObject(el, world);
+        default:
+            break;
+    }
+    ShapeDecoder decoder{world};
+    decoder.decode(el);
+    return !decoder.empty() && render(decoder.result());
+}
+
+rect_f transform(const matrix_2d& m, const rect_f& rc) {
+    const float2 corners[4] = {
+            m.transform(rc.x, rc.y),
+            m.transform(rc.right(), rc.y),
+            m.transform(rc.right(), rc.bottom()),
+            m.transform(rc.x, rc.bottom())
+    };
+    float xMin = corners[0].x;
+    float yMin = corners[0].y;
+    float xMax = corners[0].x;
+    float yMax = corners[0].y;
+    for (int i = 1; i < 4; ++i) {
+        xMin = fmin(xMin, corners[i].x);
+        yMin = fmin(yMin, corners[i].y);
+        xMax = fmax(xMax, corners[i].x);
+        yMax = fmax(yMax, corners[i].y);
+    }
+    return {xMin, yMin, xMax - xMin, yMax - yMin};
+}
+
+bool Scanner::render(const BitmapData* bitmap, const TransformModel& world) {
+    RenderCommandsBatch batch{};
+    batch.transform = world;
+    RenderCommand cmd{Op::bitmap};
+    cmd.bitmap = bitmap;
+    batch.commands.push_back(cmd);
+
+    const rect_f rc{0.0f, 0.0f,
+                    static_cast<float>(bitmap->width),
+                    static_cast<float>(bitmap->height)};
+    batch.bounds.add(rc, world.matrix);
+
+    return render(batch);
+}
+
+
+bool Scanner::render(const RenderCommandsBatch& batch) {
+    if (!batch.commands.empty() && !batch.bounds.empty()) {
+        batches.push_back(batch);
+        bounds.add(batch.bounds.rect());
+        return true;
+    }
+    return false;
+}
+
+bool Scanner::renderShapeObject(const Element& el, const TransformModel& world) {
+    if (!el.shape) {
+        return false;
+    }
+    const auto& shape = *el.shape;
+    rect_f rc{shape.x, shape.y, shape.objectWidth, shape.objectHeight};
+    Op op = el.elementType == ElementType::object_rectangle ? Op::rectangle : Op::oval;
+
+    RenderCommand cmd{op};
+    cmd.v[0] = rc.x;
+    cmd.v[1] = rc.y;
+    cmd.v[2] = rc.right();
+    cmd.v[3] = rc.bottom();
+    switch (el.elementType) {
+        case ElementType::object_rectangle:
+            cmd.v[4] = shape.topLeftRadius;
+            cmd.v[5] = shape.topRightRadius;
+            cmd.v[6] = shape.bottomRightRadius;
+            cmd.v[7] = shape.bottomLeftRadius;
+            break;
+        case ElementType::object_oval:
+            cmd.v[4] = shape.startAngle;
+            cmd.v[5] = shape.endAngle;
+            cmd.v[6] = shape.closePath ? 1 : 0;
+            cmd.v[7] = shape.innerRadius / 100.0;
+            break;
+        default:
+            return false;
+    }
+
+    cmd.fill = !el.fills.empty() ? &el.fills[0] : nullptr;
+    cmd.stroke = !el.strokes.empty() > 0 ? &el.strokes[0] : nullptr;
+
+    RenderCommandsBatch batch{};
+    batch.transform = world;
+    batch.commands.push_back(cmd);
+
+    const float hw = cmd.stroke ? (cmd.stroke->weight / 2.0f) : 0.0f;
+    batch.bounds.add(rc, world.matrix, hw);
+    return render(batch);
+}
+
 
 }

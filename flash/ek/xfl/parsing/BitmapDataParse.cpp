@@ -26,7 +26,7 @@ struct BitmapItemHeader {
     uint8_t flags;
 
     template<typename S>
-    void serialize(IO <S> io) {
+    void serialize(IO<S> io) {
         io(
                 stride,
                 width,
@@ -179,7 +179,7 @@ void readBitmapJPEG(const std::string& data, BitmapData& bitmap) {
     }
 }
 
-BitmapData* load_bitmap(const std::string& data) {
+BitmapData* BitmapData::parse(const std::string& data) {
     auto* bitmap_ptr = new BitmapData;
     auto& bitmap = *bitmap_ptr;
 

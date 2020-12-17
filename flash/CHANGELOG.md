@@ -18,4 +18,4 @@
 - Change fill bitmap reference resolving to parsing phase
 - Add `DocParser` to preserve `doc` instance for parsing methods
 - Change render command values to `double`
-- Add `delete` of `export_item_t` instances
+- Add `delete` of `ExportItem` instances

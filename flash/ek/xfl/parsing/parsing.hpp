@@ -126,7 +126,7 @@ DocInfo& operator<<(DocInfo& r, const xml_node& node);
 
 Edge& operator<<(Edge& r, const xml_node& node);
 
-BitmapData* load_bitmap(const std::string& data);
+BitmapData* parseBitmapData(const std::string& data);
 
 }
 
