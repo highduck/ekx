@@ -12,6 +12,7 @@
 #include <ek/app/app.hpp>
 #include <ek/util/signals.hpp>
 #include <utility>
+#include <ek/timers.hpp>
 #include "builtin_resources.hpp"
 #include "profiler.hpp"
 
@@ -83,6 +84,7 @@ inline void run_app(app::window_config cfg) {
     using app::g_app;
     using app::vec2;
 
+    clock::init();
     basic_application::AppResolution = float2{cfg.size};
     g_app.window_cfg = std::move(cfg);
 

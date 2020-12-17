@@ -10,7 +10,7 @@
 #include <ek/goodies/helpers/Trail2D.hpp>
 #include <ek/goodies/bubble_text.hpp>
 #include <ek/goodies/PopupManager.hpp>
-#include <ek/scenex/TimeLayer.hpp>
+#include <ek/timers.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/2d/Button.hpp>

@@ -71,9 +71,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         utility/scene_management.hpp
 
-        TimeLayer.hpp
-        TimeLayer.cpp
-
         app/basic_application.cpp
         app/basic_application.hpp
         app/builtin_resources.cpp

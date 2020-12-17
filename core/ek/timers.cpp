@@ -1,45 +1,41 @@
 #include "timers.hpp"
 
+#define SOKOL_TIME_IMPL
+
+#include <sokol_time.h>
+
 #include <map>
 #include <memory>
-#include <ek/util/timer.hpp>
 #include <utility>
 
 namespace ek {
 
-struct Timer final {
+struct TimerJob final {
     std::function<void()> fn;
     double time = 0.0;
     double repeat = 0.0;
 };
 
-class Runner final {
+class TimerJobManager final {
 public:
     void update() {
         updateTimers();
         destroyEmptyTimers();
     }
 
-    int addTimer(std::function<void()> fn, double timeout, double interval) {
+    int create(std::function<void()> fn, double timeout, double interval) {
         ++nextID;
-        auto timer = std::make_unique<Timer>();
+        auto timer = std::make_unique<TimerJob>();
         timer->fn = std::move(fn);
         timer->time = clock.read_seconds() + timeout;
         timer->repeat = interval;
-        timers[nextID] = std::move(timer);
+        jobs[nextID] = std::move(timer);
         return nextID;
     }
 
-    static Runner& instance() {
-        if (!instance_) {
-            instance_ = new Runner{};
-        }
-        return *instance_;
-    }
-
     bool cancel(int id) {
-        auto it = timers.find(id);
-        if (it != timers.end()) {
+        auto it = jobs.find(id);
+        if (it != jobs.end()) {
             auto& timer = it->second;
             if (timer) {
                 timer.reset();
@@ -49,18 +45,20 @@ public:
         return false;
     }
 
+    static TimerJobManager* instance;
+
 private:
     void updateTimers() {
         auto now = clock.read_seconds();
-        for (auto& p : timers) {
-            auto& timer = p.second;
-            if (timer) {
-                if (now >= timer->time) {
-                    timer->fn();
-                    if (timer->repeat > 0.0f) {
-                        timer->time += timer->repeat;
+        for (auto& p : jobs) {
+            auto& job = p.second;
+            if (job) {
+                if (now >= job->time) {
+                    job->fn();
+                    if (job->repeat > 0.0f) {
+                        job->time += job->repeat;
                     } else {
-                        timer.reset();
+                        job.reset();
                     }
                 }
             }
@@ -68,35 +66,33 @@ private:
     }
 
     void destroyEmptyTimers() {
-        auto it = timers.begin();
-        while (it != timers.end()) {
+        auto it = jobs.begin();
+        while (it != jobs.end()) {
             if (it->second) {
                 it++;
             } else {
-                it = timers.erase(it);
+                it = jobs.erase(it);
             }
         }
     }
 
-    std::map<int, std::unique_ptr<Timer>> timers{};
+    std::map<int, std::unique_ptr<TimerJob>> jobs{};
     ek::timer_t clock{};
     int nextID = 0;
-
-    static Runner* instance_;
 };
 
-Runner* Runner::instance_{};
+TimerJobManager* TimerJobManager::instance = nullptr;
 
 int setTimeout(std::function<void()> fn, double timeout) {
-    return Runner::instance().addTimer(std::move(fn), timeout, 0.0f);
+    return TimerJobManager::instance->create(std::move(fn), timeout, 0.0f);
 }
 
 int setInterval(std::function<void()> fn, double interval) {
-    return Runner::instance().addTimer(std::move(fn), interval, interval);
+    return TimerJobManager::instance->create(std::move(fn), interval, interval);
 }
 
 bool cancelTimer(int id) {
-    return Runner::instance().cancel(id);
+    return TimerJobManager::instance->cancel(id);
 }
 
 bool clearInterval(int id) {
@@ -108,7 +104,95 @@ bool clearTimeout(int id) {
 }
 
 void dispatchTimers() {
-    Runner::instance().update();
+    TimerJobManager::instance->update();
 }
 
+/** Time Layer system **/
+
+float updateState(TimeLayer::State& layer, float dt_) {
+    auto dt1 = dt_ * layer.scale;
+    layer.dt = dt1;
+    layer.total += dt1;
+    return dt1;
+}
+
+TimeLayer::State layers[4]{};
+
+const auto MAX_DELTA_TIME = 0.3;
+
+void TimeLayer::updateTimers(float raw) {
+    if (raw > MAX_DELTA_TIME) {
+        raw = MAX_DELTA_TIME;
+    }
+    auto dt = updateState(layers[0], raw);
+    updateState(layers[1], dt);
+    updateState(layers[2], dt);
+    updateState(layers[3], dt);
+}
+
+const TimeLayer::State* TimeLayer::operator->() const {
+    return layers + id;
+}
+
+TimeLayer::State* TimeLayer::operator->() {
+    return layers + id;
+}
+
+TimeLayer TimeLayer::Root{0};
+TimeLayer TimeLayer::Game{1};
+TimeLayer TimeLayer::HUD{2};
+TimeLayer TimeLayer::UI{3};
+
+
+namespace clock {
+
+void init() {
+    stm_setup();
+    TimerJobManager::instance = new TimerJobManager();
+}
+
+double now() {
+    return stm_sec(stm_now());
+}
+
+}
+
+timer_t::timer_t() : initial_{stm_now()} {
+
+}
+
+double timer_t::read_seconds() const {
+    return stm_sec(stm_diff(stm_now(), initial_));
+}
+
+double timer_t::read_millis() const {
+    return stm_ms(stm_diff(stm_now(), initial_));
+}
+
+void timer_t::reset() {
+    initial_ = stm_now();
+}
+
+double framed_timer_t::update() {
+    ++frame_index_;
+    delta_time_ = timer_.read_seconds();
+    timer_.reset();
+    return delta_time_;
+}
+
+void FpsMeter::update(float dt) {
+    if (measurementsPerSeconds > 0.0f) {
+        // estimate average FPS for some period
+        counter_ += 1.0f;
+        accum_ += dt;
+        const auto period = 1.0f / measurementsPerSeconds;
+        if (accum_ >= period) {
+            avgFPS_ = counter_ * measurementsPerSeconds;
+            accum_ -= period;
+            counter_ = 0.0f;
+        }
+    } else {
+        avgFPS_ = dt > 0.0f ? (1.0f / dt) : 0.0f;
+    }
+}
 }

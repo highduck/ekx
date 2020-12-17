@@ -3,7 +3,7 @@
 #include "Transform3D.hpp"
 #include "Light3D.hpp"
 
-#include <ek/util/timer.hpp>
+#include <ek/timers.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app/app.hpp>
 #include <ek/scenex/base/Node.hpp>
@@ -14,7 +14,6 @@
 
 #include <ek/graphics/render_target.hpp>
 #include <ek/graphics/gl_debug.hpp>
-#include <ek/scenex/utility/scene_management.hpp>
 
 //#undef near
 //#undef far

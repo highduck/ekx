@@ -1,6 +1,6 @@
 #include "MultiResAtlas.hpp"
 #include <pugixml.hpp>
-#include <ek/util/timer.hpp>
+#include <ek/timers.hpp>
 #include <thread>
 #include <ek/util/logger.hpp>
 #include <ek/util/path.hpp>
