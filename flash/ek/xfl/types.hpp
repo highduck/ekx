@@ -11,7 +11,6 @@
 namespace ek::xfl {
 
 struct BitmapData {
-    //std::string path;
     int width = 0;
     int height = 0;
     int bpp = 4;
