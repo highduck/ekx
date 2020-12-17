@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/scenex/data/sg_data.hpp>
+#include <ek/scenex/data/SGFile.hpp>
 #include <ek/util/Res.hpp>
 #include <optional>
 #include <ek/scenex/TimeLayer.hpp>
@@ -9,14 +9,14 @@
 namespace ek {
 
 struct MovieClip {
-    Res<sg_file> library_asset;
+    Res<SGFile> library_asset;
     std::string movie_data_symbol;
-    const sg_movie_data* data = nullptr;
+    const SGMovieData* data = nullptr;
     TimeLayer timer;
 
     [[nodiscard]]
-    const sg_movie_data* get_movie_data() const {
-        const sg_movie_data* result = data;
+    const SGMovieData* get_movie_data() const {
+        const SGMovieData* result = data;
         if (!data && library_asset) {
             auto* symbol_data = library_asset->get(movie_data_symbol);
             if (symbol_data && symbol_data->movie) {

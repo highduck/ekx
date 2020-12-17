@@ -6,8 +6,8 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/xfl/Doc.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
-#include <ek/scenex/data/sg_data.hpp>
-#include <ek/builders/xfl/flash_doc_exporter.hpp>
+#include <ek/scenex/data/SGFile.hpp>
+#include <ek/builders/xfl/SGBuilder.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
 #include <ek/editor/gui/gui.hpp>
@@ -27,22 +27,22 @@ void flash_asset_t::load() {
     read_decl();
 
     xfl::Doc ff{project->base_path / resource_path_};
-    xfl::flash_doc_exporter fe{ff};
+    xfl::SGBuilder fe{ff};
     fe.build_library();
 
     Res<MultiResAtlasData> atlasBuild{atlasTarget_};
     fe.build_sprites(atlasBuild.mutableRef());
 
-    sg_file sg = fe.export_library();
-    Res<sg_file>{name_}.reset(new sg_file{sg});
+    SGFile sg = fe.export_library();
+    Res<SGFile>{name_}.reset(new SGFile{sg});
 }
 
 void flash_asset_t::unload() {
-    Res<sg_file>{name_}.reset(nullptr);
+    Res<SGFile>{name_}.reset(nullptr);
 }
 
 void flash_asset_t::gui() {
-    Res<sg_file> library{name_};
+    Res<SGFile> library{name_};
     gui_sg_file_view(library.get());
 }
 
@@ -50,7 +50,7 @@ void flash_asset_t::build(assets_build_struct_t& data) {
     read_decl();
 
     xfl::Doc ff{project->base_path / resource_path_};
-    xfl::flash_doc_exporter fe{ff};
+    xfl::SGBuilder fe{ff};
     fe.build_library();
 
     Res<MultiResAtlasData> atlasBuild{atlasTarget_};

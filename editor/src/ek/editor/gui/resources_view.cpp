@@ -6,7 +6,7 @@
 #include <ek/scenex/3d/static_mesh.hpp>
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/text/Font.hpp>
-#include <ek/scenex/data/sg_data.hpp>
+#include <ek/scenex/data/SGFile.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
 
 namespace ek {
@@ -45,7 +45,7 @@ void on_editor_debug_asset<Material3D>(const Res<Material3D>& asset) {
 }
 
 template<>
-void on_editor_debug_asset<sg_file>(const Res<sg_file>& asset) {
+void on_editor_debug_asset<SGFile>(const Res<SGFile>& asset) {
     auto m = asset.get_mutable();
     for (auto[k, v] : m->linkages) {
         if (ImGui::TreeNode("%s %s", k.c_str(), v.c_str())) {
@@ -81,7 +81,7 @@ void guiResourcesViewWindow(bool* p_open) {
         do_editor_debug_runtime_asset_list<Atlas>("Atlas");
         do_editor_debug_runtime_asset_list<Sprite>("Sprite");
         do_editor_debug_runtime_asset_list<Font>("Font");
-        do_editor_debug_runtime_asset_list<sg_file>("Scenes 2D");
+        do_editor_debug_runtime_asset_list<SGFile>("Scenes 2D");
         do_editor_debug_runtime_asset_list<DynamicAtlas>("Dynamic Atlas");
     }
 

@@ -1,12 +1,10 @@
 #pragma once
 
 #include <ek/math/vec.hpp>
+#include <ek/xfl/types.hpp>
+#include <ek/math/bounds_builder.hpp>
 
 namespace ek::xfl {
-
-struct FillStyle;
-struct StrokeStyle;
-struct BitmapData;
 
 struct RenderCommand {
 
@@ -46,6 +44,17 @@ struct RenderCommand {
     RenderCommand(Operation operation, const float2& p0, const float2& p1 = float2()) :
             op{operation},
             v{p0.x, p0.y, p1.x, p1.y} {
+    }
+};
+
+struct RenderCommandsBatch {
+    TransformModel transform;
+    std::vector<RenderCommand> commands;
+    bounds_builder_2f bounds{};
+    int total = 0;
+
+    [[nodiscard]] bool empty() const {
+        return commands.empty() || bounds.empty() || total == 0;
     }
 };
 

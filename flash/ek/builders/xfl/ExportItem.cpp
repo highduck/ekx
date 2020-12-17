@@ -1,28 +1,28 @@
-#include "export_item.hpp"
+#include "ExportItem.hpp"
 #include <ek/xfl/types.hpp>
 
 namespace ek::xfl {
 
-export_item_t::~export_item_t() {
+ExportItem::~ExportItem() {
     for (auto ch : children) {
         delete ch;
     }
 }
 
-void export_item_t::add(export_item_t* item) {
+void ExportItem::add(ExportItem* item) {
     assert(item != nullptr);
     children.push_back(item);
     item->parent = this;
 }
 
-void export_item_t::append_to(export_item_t* parent_) {
+void ExportItem::append_to(ExportItem* parent_) {
     assert(parent == nullptr);
     if (parent_) {
         parent_->add(this);
     }
 }
 
-export_item_t* export_item_t::find_library_item(const std::string& libraryName) const {
+ExportItem* ExportItem::find_library_item(const std::string& libraryName) const {
     for (auto& child : children) {
         if (child->node.libraryName == libraryName) {
             return child;
@@ -31,7 +31,7 @@ export_item_t* export_item_t::find_library_item(const std::string& libraryName) 
     return nullptr;
 }
 
-void export_item_t::inc_ref(export_item_t& lib) {
+void ExportItem::inc_ref(ExportItem& lib) {
     ++usage;
     if (!node.libraryName.empty()) {
         auto* dependency = lib.find_library_item(node.libraryName);
@@ -48,7 +48,7 @@ void export_item_t::inc_ref(export_item_t& lib) {
     }
 }
 
-void export_item_t::update_scale(export_item_t& lib, const matrix_2d& parent_matrix) {
+void ExportItem::update_scale(ExportItem& lib, const matrix_2d& parent_matrix) {
     if (!node.scaleGrid.empty()) {
         estimated_scale = 1.0f;
         return;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/scenex/data/sg_data.hpp>
+#include <ek/scenex/data/SGFile.hpp>
 #include <vector>
 
 namespace ek {
@@ -9,7 +9,7 @@ namespace ek {
 struct UglyFilter2D {
     bool enabled = true;
     bool processing = false;
-    std::vector<filter_data> filters;
+    std::vector<SGFilter> filters;
 
     bool pass(ecs::entity e);
 };

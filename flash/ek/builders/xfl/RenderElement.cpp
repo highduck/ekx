@@ -1,5 +1,6 @@
-#include "render_to_sprite.hpp"
+#include "RenderElement.hpp"
 
+#include <ek/builders/MultiResAtlas.hpp>
 #include <ek/xfl/renderer/Scanner.hpp>
 #include <ek/xfl/renderer/CairoRenderer.hpp>
 #include <ek/xfl/renderer/CairoHelpers.hpp>
@@ -11,7 +12,7 @@ namespace ek::xfl {
 
 SpriteData renderMultiSample(const rect_f& bounds,
                              const std::vector<RenderCommandsBatch>& batches,
-                             const renderer_options_t& options) {
+                             const RenderElementOptions& options) {
     // x4 super-sampling
     const double upscale = 4.0;
 
@@ -93,7 +94,7 @@ SpriteData renderMultiSample(const rect_f& bounds,
 
 SpriteData renderLowQuality(const rect_f& bounds,
                             const std::vector<RenderCommandsBatch>& batches,
-                            const renderer_options_t& options) {
+                            const RenderElementOptions& options) {
     const double scale = options.scale;
     const bool fixed = options.width > 0 && options.height > 0;
 
@@ -153,9 +154,9 @@ SpriteData renderLowQuality(const rect_f& bounds,
 }
 
 bool checkContainsOnlyBitmapOperations(const std::vector<RenderCommandsBatch>& batches) {
-    for(const auto& batch : batches) {
-        for(const auto& cmd : batch.commands) {
-            if(cmd.op != RenderCommand::Operation::bitmap) {
+    for (const auto& batch : batches) {
+        for (const auto& cmd : batch.commands) {
+            if (cmd.op != RenderCommand::Operation::bitmap) {
                 return false;
             }
         }
@@ -163,24 +164,20 @@ bool checkContainsOnlyBitmapOperations(const std::vector<RenderCommandsBatch>& b
     return true;
 }
 
-SpriteData render(const rect_f& bounds,
-                  const std::vector<RenderCommandsBatch>& batches,
-                  const renderer_options_t& options) {
-    if(checkContainsOnlyBitmapOperations(batches)) {
+SpriteData renderElementBatches(const rect_f& bounds,
+                                const std::vector<RenderCommandsBatch>& batches,
+                                const RenderElementOptions& options) {
+    if (checkContainsOnlyBitmapOperations(batches)) {
         return renderLowQuality(bounds, batches, options);
     }
     return renderMultiSample(bounds, batches, options);
 }
 
-SpriteData render(const Doc& doc, const Element& el, const renderer_options_t& options) {
-    Scanner scanner{doc};
-    scanner.scan(el);
+SpriteData renderElement(const Doc& doc, const Element& el, const RenderElementOptions& options) {
+    Scanner scanner{};
+    scanner.draw(doc, el);
 
-    auto spr = render(
-            scanner.output.bounds.rect(),
-            scanner.output.batches,
-            options
-    );
+    auto spr = renderElementBatches(scanner.bounds.rect(), scanner.batches, options);
     spr.name = el.item.name;
     return spr;
 }

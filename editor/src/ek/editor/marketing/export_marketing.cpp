@@ -1,7 +1,7 @@
 #include "export_marketing.hpp"
 
-#include <ek/builders/xfl/render_to_sprite.hpp>
-#include <ek/builders/xfl/flash_doc_exporter.hpp>
+#include <ek/builders/xfl/RenderElement.hpp>
+#include <ek/builders/xfl/SGBuilder.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/strings.hpp>
@@ -25,15 +25,15 @@ void save_sprite_png(const SpriteData& spr, const path_t& path, bool alpha = tru
 }
 
 void store_hi_res_icon(const Doc& doc, const Element& symbol, int size, const std::string& prefix = "icon_") {
-    renderer_options_t opts{float(size) / 64.0f, size, size, true, true};
-    auto spr = render(doc, symbol, opts);
+    RenderElementOptions opts{float(size) / 64.0f, size, size, true, true};
+    auto spr = renderElement(doc, symbol, opts);
     path_t icon_path{prefix + std::to_string(size) + ".png"};
     save_sprite_png(spr, icon_path);
     destroy_sprite_data(spr);
 }
 
 void process_flash_archive_market(const Doc& file, const marketing_asset_t& marketing) {
-    flash_doc_exporter exporter{file};
+    SGBuilder exporter{file};
     auto& doc = exporter.doc;
 
     for (const auto& command_data : marketing.commands) {
@@ -49,29 +49,29 @@ void process_flash_archive_market(const Doc& file, const marketing_asset_t& mark
                 }
                 auto* item = exporter.doc.findLinkage("feature_graphic");
                 if (item) {
-                    renderer_options_t opts{1.0f, 1024, 500, false, true};
-                    auto spr = render(doc, *item, opts);
+                    RenderElementOptions opts{1.0f, 1024, 500, false, true};
+                    auto spr = renderElement(doc, *item, opts);
                     save_sprite_png(spr, path_t{"_feature_graphic.png"});
                     destroy_sprite_data(spr);
                 }
                 item = exporter.doc.findLinkage("promo_graphic");
                 if (item) {
-                    renderer_options_t opts{1.0f, 180, 120, false, true};
-                    auto spr = render(doc, *item, opts);
+                    RenderElementOptions opts{1.0f, 180, 120, false, true};
+                    auto spr = renderElement(doc, *item, opts);
                     save_sprite_png(spr, path_t{"_promo_graphic.png"});
                     destroy_sprite_data(spr);
                 }
                 item = exporter.doc.findLinkage("btn_app_store");
                 if (item) {
-                    renderer_options_t opts{2.0f, 0, 0, false, false};
-                    auto spr = render(doc, *item, opts);
+                    RenderElementOptions opts{2.0f, 0, 0, false, false};
+                    auto spr = renderElement(doc, *item, opts);
                     save_sprite_png(spr, path_t{"btn_app_store.png"});
                     destroy_sprite_data(spr);
                 }
                 item = exporter.doc.findLinkage("btn_google_play");
                 if (item) {
-                    renderer_options_t opts{2.0f, 0, 0, false, false};
-                    auto spr = render(doc, *item, opts);
+                    RenderElementOptions opts{2.0f, 0, 0, false, false};
+                    auto spr = renderElement(doc, *item, opts);
                     save_sprite_png(spr, path_t{"btn_google_play.png"});
                     destroy_sprite_data(spr);
                 }
@@ -80,8 +80,8 @@ void process_flash_archive_market(const Doc& file, const marketing_asset_t& mark
                         auto dir = path_t{s.item.name}.dir();
                         make_dirs(dir);
                         wd.in(dir, [&]() {
-                            renderer_options_t opts{1.0f, 512, 512, false, false};
-                            auto spr = render(doc, s, opts);
+                            RenderElementOptions opts{1.0f, 512, 512, false, false};
+                            auto spr = renderElement(doc, s, opts);
                             save_sprite_png(spr, path_t{s.timeline.name + ".png"});
                             destroy_sprite_data(spr);
                         });
@@ -101,7 +101,7 @@ void process_market_asset(const marketing_asset_t& marketing) {
 void runFlashFilePrerender(const vector<std::string>& args) {
     path_t inputPath{args[2]};
     Doc ff{inputPath};
-    flash_doc_exporter exporter{ff};
+    SGBuilder exporter{ff};
     auto& doc = exporter.doc;
 
     auto* item = doc.findLinkage(args[3]);
@@ -115,8 +115,8 @@ void runFlashFilePrerender(const vector<std::string>& args) {
             const bool trim = atoi(args[i + 4].c_str()) != 0;
             const path_t output{args[i + 5]};
 
-            renderer_options_t opts{scale, width, height, alpha, trim};
-            auto spr = render(doc, *item, opts);
+            RenderElementOptions opts{scale, width, height, alpha, trim};
+            auto spr = renderElement(doc, *item, opts);
             save_sprite_png(spr, output, alpha);
             destroy_sprite_data(spr);
             i += 6;

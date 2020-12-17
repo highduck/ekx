@@ -98,9 +98,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         data/program_data.hpp
         data/texture_data.hpp
         data/model_data.hpp
-        data/sg_data.cpp
-        data/sg_data.hpp
-        data/sg_loader.cpp
-        data/sg_factory.cpp
-        data/sg_factory.hpp
+        data/SGFile.cpp
+        data/SGFile.hpp
         )

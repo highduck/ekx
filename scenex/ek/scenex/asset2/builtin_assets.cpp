@@ -7,8 +7,7 @@
 #include <ek/graphics/program.hpp>
 #include <ek/graphics/texture.hpp>
 #include <ek/graphics/vertex_decl.hpp>
-#include <ek/scenex/data/sg_data.hpp>
-#include <ek/scenex/data/sg_factory.hpp>
+#include <ek/scenex/data/SGFile.hpp>
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/data/program_data.hpp>
 #include <ek/scenex/data/texture_data.hpp>
@@ -179,13 +178,13 @@ public:
         get_resource_content_async(
                 (project_->base_path / path_ + ".sg").c_str(),
                 [this](auto buffer) {
-                    Res<sg_file>{path_}.reset(sg_load(buffer));
+                    Res<SGFile>{path_}.reset(sg_load(buffer));
                     state = AssetObjectState::Ready;
                 });
     }
 
     void do_unload() override {
-        Res<sg_file>{path_}.reset(nullptr);
+        Res<SGFile>{path_}.reset(nullptr);
     }
 
 };

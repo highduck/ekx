@@ -40,7 +40,7 @@ class Atlas;
 
 class Font;
 
-struct sg_file;
+struct SGFile;
 
 struct editor_project_t;
 
@@ -54,7 +54,7 @@ void gui_atlas_view(const Atlas* atlas);
 
 void gui_font_view(const Font* font);
 
-void gui_sg_file_view(const sg_file* library);
+void gui_sg_file_view(const SGFile* library);
 
 void gui_asset_object_controls(editor_asset_t* asset);
 
