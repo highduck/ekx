@@ -63,13 +63,10 @@ add_library(${PROJECT_NAME} STATIC
         ek/util/signals.hpp
         ek/util/base64.hpp
         ek/util/base64.cpp
-        ek/util/clock.hpp
-        ek/util/clock.cpp
         ek/util/detect_platform.hpp
         ek/util/common_macro.hpp
         ek/util/strings.hpp
         ek/util/strings.cpp
-        ek/util/timer.hpp
         ek/util/path.cpp
         ek/util/path.hpp
         ek/util/type_index.hpp
@@ -82,6 +79,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/Localization.hpp
         ek/Localization.cpp
 
+        ek/timers.hpp
         ek/timers.cpp
         )
 
@@ -128,4 +126,4 @@ else ()
     endif ()
 endif ()
 
-target_link_libraries(${PROJECT_NAME} stb)
+target_link_libraries(${PROJECT_NAME} stb sokol)

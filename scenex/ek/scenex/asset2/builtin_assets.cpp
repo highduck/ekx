@@ -20,7 +20,7 @@
 
 #include <utility>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
-#include <ek/util/timer.hpp>
+#include <ek/timers.hpp>
 #include <ek/Localization.hpp>
 
 namespace ek {
@@ -32,9 +32,7 @@ using graphics::vertex_3d;
 
 class builtin_asset_t : public asset_object_t {
 public:
-    explicit builtin_asset_t(std::string path)
-            : path_(std::move(path)) {
-
+    explicit builtin_asset_t(std::string path): path_(std::move(path)) {
     }
 
     virtual void do_load() {}

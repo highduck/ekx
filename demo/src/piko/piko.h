@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/math/packed_color.hpp>
-#include <ek/util/timer.hpp>
+#include <ek/timers.hpp>
 #include <ek/util/locator.hpp>
 #include <algorithm>
 

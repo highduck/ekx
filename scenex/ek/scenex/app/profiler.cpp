@@ -4,7 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include <ek/ds/StaticHistoryBuffer.hpp>
-#include <ek/util/timer.hpp>
+#include <ek/timers.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app/device.hpp>
 #include <ek/scenex/text/Font.hpp>

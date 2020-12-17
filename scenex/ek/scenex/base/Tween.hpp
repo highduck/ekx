@@ -2,7 +2,7 @@
 
 #include <ecxx/ecxx.hpp>
 #include <ek/util/signals.hpp>
-#include <ek/scenex/TimeLayer.hpp>
+#include <ek/timers.hpp>
 
 namespace ek {
 
@@ -16,6 +16,7 @@ struct Tween {
     TimeLayer timer;
 
     static void updateAll();
+
     static Tween& reset(ecs::entity e);
 };
 

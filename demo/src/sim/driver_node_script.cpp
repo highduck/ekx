@@ -9,7 +9,7 @@
 #include <ek/goodies/helpers/target_follow_script.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <sim/components/attractor.h>
-#include <ek/scenex/TimeLayer.hpp>
+#include <ek/timers.hpp>
 #include <ek/math/rand.hpp>
 #include <sim/components/motion.h>
 #include <piko/examples.h>
