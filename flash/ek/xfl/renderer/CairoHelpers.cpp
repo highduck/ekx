@@ -200,7 +200,6 @@ fill_pattern_data_t create_fill_pattern(const FillStyle& fill, const TransformMo
     return {pattern, surface};
 }
 
-
 void blit_downsample(cairo_t* ctx, cairo_surface_t* source, int w, int h, double upscale) {
     auto* pattern = cairo_pattern_create_for_surface(source);
     cairo_pattern_set_filter(pattern, CAIRO_FILTER_BEST);
