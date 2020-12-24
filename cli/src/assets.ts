@@ -15,9 +15,9 @@ export function buildMarketingAssets(ctx: Project, target_type: string, output: 
     //optimizePngGlob(path.join(output, "**/*.png"));
 }
 
-export function buildAssets(ctx: Project) {
+export function buildAssets(ctx: Project, output?: string) {
     let assetsInput = ctx.getAssetsInput();
-    let assetsOutput = ctx.getAssetsOutput();
+    let assetsOutput = output ?? ctx.getAssetsOutput();
     if (isDir(assetsOutput)) {
         rmdirSync(assetsOutput, {recursive: true});
     }
