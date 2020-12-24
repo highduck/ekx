@@ -1,16 +1,14 @@
 #include "decoder.hpp"
 
 #include "image.hpp"
+#include "drawing.hpp"
 #include <ek/util/logger.hpp>
 #include <cassert>
 
-#ifndef __EMSCRIPTEN__
-#include "drawing.hpp"
-
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
+
 #include <stb_image.h>
-#endif
 
 #endif
 
@@ -21,7 +19,6 @@ image_t* decode_image_data([[maybe_unused]] const std::vector<uint8_t>& data) {
 
     image_t* result = nullptr;
 
-#ifndef __EMSCRIPTEN__
     int w = 0;
     int h = 0;
     int channels = 0;
@@ -38,9 +35,6 @@ image_t* decode_image_data([[maybe_unused]] const std::vector<uint8_t>& data) {
     } else {
         EK_ERROR << "image decoding error: " << stbi_failure_reason();
     }
-#else
-    EK_ERROR << "Manual image decoding is not efficient for Web and disabled";
-#endif
     return result;
 }
 
