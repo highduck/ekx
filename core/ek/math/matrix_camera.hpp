@@ -4,7 +4,11 @@
 
 namespace ek {
 
-// perspectiveRH_NO
+// ZO meaning:
+// "The near and far clip planes correspond to z normalized device coordinates of 0 and +1 respectively. (Direct3D clip volume definition)"
+// from @glm library
+
+// perspectiveRH_ZO
 template<typename T>
 matrix_t<4, 4, T> perspective_rh(T fov_y, T aspect, T z_near, T z_far) {
     const T tan_half_fov_y = std::tan(fov_y / static_cast<T>(2));
@@ -19,45 +23,43 @@ matrix_t<4, 4, T> perspective_rh(T fov_y, T aspect, T z_near, T z_far) {
     return m;
 }
 
-// perspectiveLH_NO
-/// Creates a matrix for a right handed, symetric perspective-view frustum.
-/// The near and far clip planes correspond to z normalized device coordinates of -1 and +1 respectively. (OpenGL clip volume definition)
+// perspectiveLH_ZO
 template<typename T>
 matrix_t<4, 4, T> perspective_lh(T fov_y, T aspect, T z_near, T z_far) {
     const T tan_half_fov_y = std::tan(fov_y / static_cast<T>(2));
     matrix_t<4, 4, T> m{0};
     m(0, 0) = static_cast<T>(1) / (aspect * tan_half_fov_y);
     m(1, 1) = static_cast<T>(1) / tan_half_fov_y;
-
-    m(2, 2) = (z_far + z_near) / (z_far - z_near);
+    m(2, 2) = z_far / (z_far - z_near);
     m(2, 3) = static_cast<T>(1);
-    m(3, 2) = -(static_cast<T>(2) * z_far * z_near) / (z_far - z_near);
+    m(3, 2) = -(z_far * z_near) / (z_far - z_near);
     return m;
 }
 
-// orthoLH_NO
+// orthoLH_ZO
 template<typename T>
 mat4_t <T> ortho_projection_lh(T left, T right, T bottom, T top, T z_near, T z_far) {
     mat4_t<T> m{};
     m(0, 0) = static_cast<T>(2) / (right - left);
     m(1, 1) = static_cast<T>(2) / (top - bottom);
-    m(2, 2) = static_cast<T>(2) / (z_far - z_near);
+    m(2, 2) = static_cast<T>(1) / (z_far - z_near);
     m(3, 0) = -(right + left) / (right - left);
     m(3, 1) = -(top + bottom) / (top - bottom);
-    m(3, 2) = -(z_far + z_near) / (z_far - z_near);
+    m(3, 2) = -z_near / (z_far - z_near);
     return m;
 }
 
-// orthoRH_NO
+// orthoRH_ZO
 template<typename T>
 mat4_t <T> ortho_projection_rh(T left, T right, T bottom, T top, T z_near, T z_far) {
     mat4_t<T> m{};
     m(0, 0) = static_cast<T>(2) / (right - left);
     m(1, 1) = static_cast<T>(2) / (top - bottom);
-    m(2, 2) = -static_cast<T>(2) / (z_far - z_near);
+    m(2, 2) = -static_cast<T>(1) / (z_far - z_near);
+
     m(3, 0) = -(right + left) / (right - left);
     m(3, 1) = -(top + bottom) / (top - bottom);
-    m(3, 2) = -(z_far + z_near) / (z_far - z_near);
+    m(3, 2) = -z_near / (z_far - z_near);
     return m;
 }
 
