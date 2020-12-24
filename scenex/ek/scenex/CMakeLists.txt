@@ -17,8 +17,8 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         3d/Transform3D.cpp
         3d/Transform3D.hpp
-        3d/static_mesh.cpp
-        3d/static_mesh.hpp
+        3d/StaticMesh.cpp
+        3d/StaticMesh.hpp
         3d/RenderSystem3D.cpp
         3d/RenderSystem3D.hpp
         3d/Camera3D.cpp
@@ -73,8 +73,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         app/basic_application.cpp
         app/basic_application.hpp
-        app/builtin_resources.cpp
-        app/builtin_resources.hpp
         app/input_controller.hpp
         app/input_controller.cpp
         app/profiler.cpp

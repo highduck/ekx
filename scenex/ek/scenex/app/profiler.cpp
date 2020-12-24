@@ -11,11 +11,7 @@
 #include <ek/scenex/text/TextEngine.hpp>
 
 // TODO: EK_DEV_BUILD
-#ifndef NDEBUG
-#define ENABLE_PROFILER
-#endif
-
-#ifdef EK_EDITOR
+#if !defined(NDEBUG) || defined(EK_EDITOR)
 #define ENABLE_PROFILER
 #endif
 
@@ -127,9 +123,7 @@ void Profiler::draw() {
 #ifdef ENABLE_PROFILER
     const auto scale = static_cast<float>(app::g_app.content_scale);
     auto insets = get_screen_insets();
-    draw2d::state.save_matrix()
-            .translate(insets.x, insets.y)
-            .scale(scale, scale);
+    draw2d::state.matrix = matrix_2d{scale, 0, 0, scale, insets.x, insets.y};
     draw2d::state.set_empty_texture();
 
     draw2d::state.save_matrix();
@@ -164,7 +158,6 @@ void Profiler::draw() {
         it.second.drawText();
     }
 
-    draw2d::state.restore_matrix();
     draw2d::state.restore_matrix();
 #endif
 }

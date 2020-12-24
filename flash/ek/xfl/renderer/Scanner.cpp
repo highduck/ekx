@@ -19,10 +19,14 @@ void Scanner::reset() {
 }
 
 void Scanner::drawInstance(const Doc& doc, const Element& element) {
-    auto* s = doc.find(element.libraryItemName, element.elementType);
-    if (s) {
+    auto itemType = ElementType::symbol_item;
+    if (element.elementType == ElementType::bitmap_instance) {
+        itemType = ElementType::bitmap_item;
+    }
+    auto* item = doc.find(element.libraryItemName, itemType);
+    if (item) {
         pushTransform(element);
-        draw(doc, *s);
+        draw(doc, *item);
         popTransform();
     }
 }

@@ -1,113 +1,124 @@
 #include "graphics.hpp"
 #include <ek/util/logger.hpp>
-#include <ek/app/app.hpp>
-#include "gl_def.hpp"
-#include "blending.hpp"
-#include "gl_debug.hpp"
+#include <ek/math/box.hpp>
+
+#define SOKOL_GFX_IMPL
+
+#include <sokol_gfx.h>
 
 namespace ek::graphics {
 
-using app::g_app;
+/** buffer wrapper **/
+Buffer::Buffer(BufferType type, const void* data, int dataSize) {
+    sg_buffer_desc desc{
+            .size = dataSize,
+            .type = (sg_buffer_type) type,
+            .usage = SG_USAGE_IMMUTABLE,
+            .content = data,
+    };
+    buffer = sg_make_buffer(&desc);
+    size = dataSize;
+}
 
-static GraphicsContextType contextType = GraphicsContextType::OpenGL;
+Buffer::Buffer(BufferType type, Usage usage, int maxSize) {
+    sg_buffer_desc desc{};
+    desc.usage = (sg_usage) usage;
+    desc.type = (sg_buffer_type) type;
+    desc.size = maxSize;
+    buffer = sg_make_buffer(&desc);
+    size = maxSize;
+}
 
-static int currentFrameBufferWidth = 1;
-static int currentFrameBufferHeight = 1;
+Buffer::~Buffer() {
+    sg_destroy_buffer(buffer);
+}
+
+void Buffer::update(const void* data, uint32_t dataSize) {
+    size = dataSize;
+    sg_update_buffer(buffer, data, dataSize);
+//    sg_append_buffer(buffer, data, dataSize);
+//    if (size > size_) {
+//        sg_update_buffer(handle_, data, size);
+//        size_ = size;
+//    } else {
+//        if (useDataOrphaning) {
+//            GL_CHECK(glBufferData(type, size_, nullptr, usage));
+//        }
+//        GL_CHECK(glBufferSubData(type, 0, size, data));
+//    }
+}
+
+/** shader wrapper **/
+Shader::Shader(const sg_shader_desc* desc) {
+    shader = sg_make_shader(desc);
+    numFSImages = desc->fs.images[0].name != nullptr ? 1 : 0;
+}
+
+Shader::~Shader() {
+    sg_destroy_shader(shader);
+}
+
+/** texture wrapper **/
+
+Texture::Texture(const sg_image_desc& desc_) {
+    desc = desc_;
+    image = sg_make_image(desc_);
+}
+
+Texture::~Texture() {
+    sg_destroy_image(image);
+}
+
+void Texture::update(const void* data, uint32_t size) const {
+    sg_image_content content{};
+    content.subimage[0][0].ptr = data;
+    content.subimage[0][0].size = size;
+    sg_update_image(image, content);
+}
+
+Texture* Texture::createSolid32(int width, int height, uint32_t pixelColor) {
+    sg_image_desc desc{
+            .type = SG_IMAGETYPE_2D,
+            .width = width,
+            .height = height,
+            .usage = SG_USAGE_IMMUTABLE,
+            .pixel_format = SG_PIXELFORMAT_RGBA8,
+    };
+    int count = width * height;
+    auto* pixels = new uint32_t[count];
+    for (int i = 0; i < count; ++i) {
+        pixels[i] = pixelColor;
+    }
+    desc.content.subimage[0][0].ptr = pixels;
+    desc.content.subimage[0][0].size = count * 4;
+
+    auto* tex = new Texture(desc);
+    delete[] pixels;
+    return tex;
+}
+
+static std::string BackendToString[] = {
+        "SG_BACKEND_GLCORE33",
+        "SG_BACKEND_GLES2",
+        "SG_BACKEND_GLES3",
+        "SG_BACKEND_D3D11",
+        "SG_BACKEND_METAL_IOS",
+        "SG_BACKEND_METAL_MACOS",
+        "SG_BACKEND_METAL_SIMULATOR",
+        "SG_BACKEND_WGPU",
+        "SG_BACKEND_DUMMY"
+};
 
 void init() {
-    gl::skip_errors();
+    sg_desc desc{};
+    sg_setup(desc);
+    auto backend = sg_query_backend();
+    EK_INFO << "Sokol Backend: " << BackendToString[backend];
 
-    const uint8_t* version = glGetString(GL_VERSION);
-    gl::check_error();
-
-    if (version) {
-        EK_INFO << "OpenGL version: " << version;
-
-        if (memcmp(version, "OpenGL ES ", 10) == 0) {
-            const auto majorVersion = version[10];
-            if (majorVersion == '2') {
-                contextType = GraphicsContextType::OpenGL_ES_2;
-            } else {
-                contextType = GraphicsContextType::OpenGL_ES_3;
-            }
-        }
-    }
-
-    EK_INFO << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION);
-    gl::check_error();
-
-    GL_CHECK(glDepthMask(GL_FALSE));
-    GL_CHECK(glEnable(GL_BLEND));
-    GL_CHECK(glDisable(GL_DEPTH_TEST));
-    GL_CHECK(glDisable(GL_STENCIL_TEST));
-    GL_CHECK(glDisable(GL_DITHER));
-    GL_CHECK(glDisable(GL_CULL_FACE));
-
-    // TODO:
-//		if (true) {
-//			GL.enable(GL.MULTISAMPLE);
-//		}
-//		else {
-//			GL.disable(GL.MULTISAMPLE);
-//		}
+    // TODO: move to app's create context
 #ifdef __EMSCRIPTEN__
     //    glPixelStorei(GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-    //    glCheckError();
 #endif
-
-    GL_CHECK(glFinish());
-}
-
-GraphicsContextType getContextType() {
-    return contextType;
-}
-
-void begin() {
-    gl::skip_errors();
-}
-
-void clear(float r, float g, float b, float a) {
-    GL_CHECK(glClearColor(r, g, b, a));
-    GL_CHECK(glClear(GL_COLOR_BUFFER_BIT));
-}
-
-void viewport(int x, int y, int width, int height) {
-    GL_CHECK(glViewport(x, y, width, height));
-    currentFrameBufferWidth = width;
-    currentFrameBufferHeight = height;
-}
-
-void viewport() {
-    auto w = static_cast<int>(g_app.drawable_size.x);
-    auto h = static_cast<int>(g_app.drawable_size.y);
-    viewport(0, 0, w, h);
-}
-
-void set_blend_mode(const blend_mode& blending) {
-    auto src = static_cast<GLenum>(blending.source);
-    auto dst = static_cast<GLenum>(blending.dest);
-    GL_CHECK(glBlendFunc(src, dst));
-}
-
-void set_scissors(int x, int y, int width, int height) {
-    const int buffer_height = currentFrameBufferHeight;
-    GL_CHECK(glEnable(GL_SCISSOR_TEST));
-    if (width < 0) width = 0;
-    if (height < 0) height = 0;
-    GL_CHECK(glScissor(x, buffer_height - y - height, width, height));
-}
-
-void set_scissors() {
-    GL_CHECK(glDisable(GL_SCISSOR_TEST));
-}
-
-void get_pixels(uint32_t x, uint32_t y, uint32_t width, uint32_t height, uint8_t* out_buffer) {
-    GL_CHECK(glReadPixels(x, currentFrameBufferHeight - y - height, width, height, GL_RGBA, GL_UNSIGNED_BYTE,
-                          out_buffer));
-}
-
-void draw_triangles(uint32_t indices_count) {
-    GL_CHECK(glDrawElements(GL_TRIANGLES, indices_count, GL_UNSIGNED_SHORT, nullptr));
 }
 
 }

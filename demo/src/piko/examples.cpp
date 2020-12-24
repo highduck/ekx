@@ -4,6 +4,7 @@
 #include <ek/math/rand.hpp>
 #include <ek/timers.hpp>
 #include <ek/math/matrix_camera.hpp>
+#include <ek/scenex/app/basic_application.hpp>
 
 namespace ek::piko {
 
@@ -130,30 +131,52 @@ void dna::draw() {
 //flip()goto _
 
 void diamonds::draw() {
+    const float w = rt->desc.width;
+    const float h = rt->desc.height;
+
+    draw2d::state.set_texture_region(rt, rect_f::zero_one);
+    draw2d::quad(0.0f, 0.0f, w, h);
+
+//    recorder.render();
+}
+
+diamonds::diamonds() {
+//        recorder{"result", {0, 0, 512 * 2 / 2, 512 * 2 / 2}}
+    rt = graphics::createRenderTarget(128, 128);
+    ll = resolve<basic_application>().onPreRender.add([this] { prerender(); });
+
+    sg_pass_desc passDesc{};
+    passDesc.color_attachments[0].image = rt->image;
+    passDesc.label = "diamonds-rt-pass";
+    pass = sg_make_pass(passDesc);
+}
+
+diamonds::~diamonds() {
+    sg_destroy_pass(pass);
+    delete rt;
+    resolve<basic_application>().onPreRender.remove(ll);
+}
+
+void diamonds::prerender() {
     time += TimeLayer::Root->dt;
     float t = time;
-    float w = rt.width();
-    float h = rt.height();
+    int w = rt->desc.width;
+    int h = rt->desc.height;
 
-    draw2d::flush_batcher();
-
-    rt.set();
-    graphics::viewport(0, 0, w, h);
-    graphics::set_scissors();
+    sg_pass_action clear{};
     if (first_frame) {
         float4 clear_color{colorf(2)};
+        clear.colors[0].action = SG_ACTION_CLEAR;
+        clear.colors[0].val[0] = clear_color.x;
+        clear.colors[0].val[1] = clear_color.y;
+        clear.colors[0].val[2] = clear_color.z;
+        clear.colors[0].val[3] = clear_color.w;
         first_frame = false;
-        graphics::clear(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    } else {
+        clear.colors[0].action = SG_ACTION_DONTCARE;
     }
-    draw2d::state
-            .save_mvp()
-            .save_matrix()
-            .saveScissors();
-    draw2d::state.setScissors({0.0f, 0.0f, w, h});
-    draw2d::state.matrix = matrix_2d{};
-    draw2d::state.set_mvp(ortho_2d(0.0f, h, w, -h));
-    draw2d::state.set_empty_texture();
-//    drawer.quad(0, 0, 128, 128, 0x0_rgb);
+    sg_begin_pass(pass, clear);
+    draw2d::begin({0, 0, w, h}, matrix_2d{}, rt);
     float sc = w / 128.0f;
     float2 center{w * 0.5f, h * 0.5f};
     int e[] = {0, 3, 11, 5, 8, 14, 2, 9, 10, 4, 13, 7, 6};
@@ -175,23 +198,8 @@ void diamonds::draw() {
                          sc * 1.0f);
         }
     }
-
-    draw2d::flush_batcher();
-    graphics::viewport();
-    draw2d::state.pop_scissors();
-    draw2d::state.restore_matrix();
-    draw2d::state.restore_mvp();
-    rt.unset();
-    draw2d::state.set_texture(rt.texture());
-    draw2d::quad(0.0f, 0.0f, w, h);
-
-    draw2d::flush_batcher();
-//    recorder.render();
+    draw2d::end();
+    sg_end_pass();
 }
 
-diamonds::diamonds() :
-        rt{128 , 128 }
-//        recorder{"result", {0, 0, 512 * 2 / 2, 512 * 2 / 2}}
-{
-}
 }

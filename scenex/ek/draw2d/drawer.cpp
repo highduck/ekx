@@ -2,9 +2,8 @@
 
 #include <ek/util/locator.hpp>
 #include <ek/util/common_macro.hpp>
-#include <ek/graphics/gl_def.hpp>
 #include <ek/math/matrix_camera.hpp>
-#include <ek/graphics/gl_debug.hpp>
+#include "draw2d_shader.h"
 
 namespace ek::draw2d {
 
@@ -13,49 +12,42 @@ drawing_state state{};
 
 void drawing_state::finish() {
     // debug checks
-    assert(scissor_stack_.empty());
+    assert(scissorsStack_.empty());
     assert(matrix_stack_.empty());
     assert(colors_.empty());
     assert(program_stack_.empty());
     assert(texture_stack_.empty());
-    assert(blend_mode_stack_.empty());
-    assert(mvp_stack_.empty());
     assert(tex_coords_stack_.empty());
-    assert(canvas_stack_.empty());
 
-    scissor_stack_.clear();
+    scissorsStack_.clear();
     matrix_stack_.clear();
     colors_.clear();
     program_stack_.clear();
     texture_stack_.clear();
-    blend_mode_stack_.clear();
-    mvp_stack_.clear();
     tex_coords_stack_.clear();
-    canvas_stack_.clear();
 }
-
 
 /** Scissors **/
 
 drawing_state& drawing_state::saveScissors() {
-    scissor_stack_.push_back(scissors);
+    scissorsStack_.push_back(scissors);
     return *this;
 }
 
-void drawing_state::setScissors(const rect_f& scissors_) {
-    scissors = scissors_;
-    check_scissors = true;
+void drawing_state::setScissors(const rect_f& rc) {
+    scissors = rc;
+    checkFlags |= Check_Scissors;
 }
 
-void drawing_state::push_scissors(const rect_f& scissors_) {
+void drawing_state::pushClipRect(const rect_f& rc) {
     saveScissors();
-    setScissors(clamp_bounds(scissors, scissors_));
+    setScissors(clamp_bounds(scissors, rc));
 }
 
-drawing_state& drawing_state::pop_scissors() {
-    scissors = scissor_stack_.back();
-    scissor_stack_.pop_back();
-    check_scissors = true;
+drawing_state& drawing_state::popClipRect() {
+    scissors = scissorsStack_.back();
+    scissorsStack_.pop_back();
+    checkFlags |= Check_Scissors;
     return *this;
 }
 
@@ -172,35 +164,6 @@ drawing_state& drawing_state::offset_color(abgr32_t offset) {
 
 /** STATES **/
 
-drawing_state& drawing_state::save_canvas_rect() {
-    canvas_stack_.push_back(canvas_rect);
-    return *this;
-}
-
-drawing_state& drawing_state::restore_canvas_rect() {
-    canvas_rect = canvas_stack_.back();
-    canvas_stack_.pop_back();
-    return *this;
-}
-
-drawing_state& drawing_state::save_mvp() {
-    mvp_stack_.push_back(mvp);
-    return *this;
-}
-
-drawing_state& drawing_state::set_mvp(const mat4f& m) {
-    mvp = m;
-    check_mvp = true;
-    return *this;
-}
-
-drawing_state& drawing_state::restore_mvp() {
-    mvp = mvp_stack_.back();
-    check_mvp = true;
-    mvp_stack_.pop_back();
-    return *this;
-}
-
 drawing_state& drawing_state::save_texture_coords() {
     tex_coords_stack_.push_back(uv);
     return *this;
@@ -229,105 +192,110 @@ drawing_state& drawing_state::save_texture() {
 
 drawing_state& drawing_state::set_empty_texture() {
     texture = default_texture.get();
-    check_texture = true;
+    checkFlags |= Check_Texture;
     set_texture_coords(0, 0, 1, 1);
     return *this;
 }
 
-drawing_state& drawing_state::set_texture(const graphics::texture_t* texture_) {
+drawing_state& drawing_state::set_texture(const graphics::Texture* texture_) {
     texture = texture_;
-    check_texture = true;
+    checkFlags |= Check_Texture;
     return *this;
 }
 
-drawing_state& drawing_state::set_texture_region(const graphics::texture_t* texture_, const rect_f& region) {
+drawing_state& drawing_state::set_texture_region(const graphics::Texture* texture_, const rect_f& region) {
     texture = texture_ != nullptr ? texture_ : default_texture.get();
-    check_texture = true;
+    checkFlags |= Check_Texture;
     uv = region;
     return *this;
 }
 
 drawing_state& drawing_state::restore_texture() {
     texture = texture_stack_.back();
-    check_texture = true;
+    checkFlags |= Check_Texture;
     texture_stack_.pop_back();
     return *this;
 }
 
-drawing_state& drawing_state::set_program(const graphics::program_t* program_) {
-    program = program_ ? program_ : default_program.get();
-    check_program = true;
+drawing_state& drawing_state::pushProgram(const char* name) {
+    program_stack_.push_back(program);
+    Res<graphics::Shader> pr{name};
+    program = pr.empty() ? default_program.get() : pr.get();
+    checkFlags |= Check_Shader;
     return *this;
 }
 
-drawing_state& drawing_state::save_program() {
+drawing_state& drawing_state::setProgram(const graphics::Shader* program_) {
+    program = program_ ? program_ : default_program.get();
+    checkFlags |= Check_Shader;
+    return *this;
+}
+
+drawing_state& drawing_state::saveProgram() {
     program_stack_.push_back(program);
     return *this;
 }
 
-drawing_state& drawing_state::restore_program() {
+drawing_state& drawing_state::restoreProgram() {
     program = program_stack_.back();
-    check_program = true;
+    checkFlags |= Check_Shader;
     program_stack_.pop_back();
     return *this;
 }
 
-drawing_state& drawing_state::save_blend_mode() {
-    blend_mode_stack_.push_back(blending);
-    return *this;
+void init() {
+    using graphics::Texture;
+    using graphics::Shader;
+    Res<graphics::Texture>{"empty"}.reset(Texture::createSolid32(4, 4, 0xFFFFFFFFu));
+
+    auto pr = new Shader(draw2d_shader_desc());
+    Res<Shader>{"draw2d"}.reset(pr);
+
+    pr = new Shader(draw2d_alpha_shader_desc());
+    Res<Shader>{"draw2d_alpha"}.reset(pr);
+
+    pr = new Shader(draw2d_color_shader_desc());
+    Res<Shader>{"draw2d_color"}.reset(pr);
+
+    batcher = new Batcher();
 }
 
-drawing_state& drawing_state::restore_blend_mode() {
-    blending = blend_mode_stack_.back();
-    blend_mode_stack_.pop_back();
-    check_blending = true;
-    return *this;
+void beginNewFrame() {
+    assert(batcher);
+    batcher->beginNewFrame();
 }
-
-void drawing_state::set_blend_mode(graphics::blend_mode blending_) {
-    blending = blending_;
-    check_blending = true;
-}
-
 
 /*** drawings ***/
-void begin(int x, int y, int width, int height) {
-    if (!batcher) {
-        batcher = new Batcher;
-    }
-    batcher->stats = {};
-    batcher->begin();
-
+void begin(rect_i viewport, const matrix_2d& view, const graphics::Texture* renderTarget) {
+    assert(!state.active);
     state.texture = state.default_texture.get();
     state.program = state.default_program.get();
-    state.blending = graphics::blend_mode::premultiplied;
-    state.mvp = ortho_2d<float>(x, y, width, height);
-    state.scissors.set(x, y, width, height);
-    state.check_program = false;
-    state.check_scissors = false;
-    state.check_blending = false;
-    state.check_mvp = false;
-    state.check_texture = false;
+    state.scissors = rect_f{viewport};
+    state.checkFlags = 0;
+    state.renderTarget = renderTarget;
+    state.matrix.set_identity();
+    state.color = {};
+    state.uv.set(0, 0, 1, 1);
+    state.active = true;
 
-    auto& batcher_states = batcher->states;
-    batcher_states.clear();
-    batcher_states.set_program(state.program);
-    batcher_states.set_mvp(state.mvp);
-    batcher_states.set_blend_mode(state.blending);
-    batcher_states.set_texture(state.texture);
-    batcher_states.set_scissors(state.scissors);
+    batcher->beginPass();
+    batcher->setProgram(state.program->shader, 1);
+    batcher->setTexture(state.texture->image);
+    batcher->setScissors(viewport);
+    batcher->renderTarget = renderTarget;
+    if (renderTarget) {
+        batcher->mvp = ortho_2d<float>(viewport.x, viewport.bottom(), viewport.width, -viewport.height) * view;
+    } else {
+        batcher->mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;
+    }
 }
 
 void end() {
-    batcher->states.apply();
-    batcher->flush();
-
-    GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, (GLuint) 0u));
-    GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0u));
-    GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0u));
-    GL_CHECK(glUseProgram(0u));
-
+    assert(batcher);
+    assert(state.active);
+    batcher->endPass();
     state.finish();
+    state.active = false;
 }
 
 void* vertex_memory_ptr_ = nullptr;
@@ -337,50 +305,27 @@ void write_index(uint16_t index) {
     *(index_memory_ptr_++) = batcher->get_vertex_index(index);
 }
 
-void commit_state() {
-    if (state.check_blending) {
-        batcher->states.set_blend_mode(state.blending);
-        state.check_blending = false;
+void commitStateChanges() {
+    if (state.checkFlags & drawing_state::Check_Texture) {
+        batcher->setTexture(state.texture->image);
     }
-    if (state.check_texture) {
-        batcher->states.set_texture(state.texture);
-        state.check_texture = false;
+    if (state.checkFlags & drawing_state::Check_Shader) {
+        batcher->setProgram(state.program->shader, state.program->numFSImages);
     }
-    if (state.check_program) {
-        batcher->states.set_program(state.program);
-        state.check_program = false;
+    if (state.checkFlags & drawing_state::Check_Scissors) {
+        batcher->setScissors(rect_i{state.scissors});
     }
-    if (state.check_mvp) {
-        batcher->states.set_mvp(state.mvp);
-        state.check_mvp = false;
-    }
-    if (state.check_scissors) {
-        batcher->states.set_scissors(state.scissors);
-        state.check_scissors = false;
-    }
+    state.checkFlags = 0;
 }
 
 FrameStats getDrawStats() {
     return batcher ? batcher->stats : FrameStats{};
 }
 
-void invalidate_force() {
-    commit_state();
-    batcher->invalidate_force();
-}
-
-void draw_mesh(const graphics::buffer_t& vb, const graphics::buffer_t& ib, int32_t indices_count) {
-    batcher->draw_mesh(vb, ib, indices_count);
-}
-
-void flush_batcher() {
-    if (batcher) {
-        batcher->flush();
-    }
-}
-
 void triangles(int vertex_count, int index_count) {
-    commit_state();
+    if (state.checkFlags != 0) {
+        commitStateChanges();
+    }
     batcher->alloc_triangles(vertex_count, index_count);
     vertex_memory_ptr_ = batcher->vertex_memory_ptr();
     index_memory_ptr_ = batcher->index_memory_ptr();
@@ -470,7 +415,7 @@ void fill_circle(const circle_f& circle, abgr32_t inner_color, abgr32_t outer_co
 }
 
 void write_vertex(float x, float y, float u, float v, abgr32_t cm, abgr32_t co) {
-    auto* ptr = static_cast<graphics::vertex_2d*>(vertex_memory_ptr_);
+    auto* ptr = static_cast<Vertex2D*>(vertex_memory_ptr_);
 
     // could be cached before draw2d
     const auto& m = state.matrix;
@@ -488,7 +433,7 @@ void write_vertex(float x, float y, float u, float v, abgr32_t cm, abgr32_t co) 
 }
 
 void write_raw_vertex(const float2& pos, const float2& tex_coord, abgr32_t cm, abgr32_t co) {
-    auto* ptr = static_cast<graphics::vertex_2d*>(vertex_memory_ptr_);
+    auto* ptr = static_cast<Vertex2D*>(vertex_memory_ptr_);
     ptr->position = pos;
     ptr->uv = tex_coord;
     ptr->cm = cm;
@@ -622,7 +567,13 @@ void strokeRect(const rect_f& rc, abgr32_t color, float lineWidth) {
 }
 
 uint32_t getBatchingUsedMemory() {
-    return batcher ? batcher->getUsedMemory() : 0;
+    assert(batcher);
+    return batcher->getUsedMemory();
+}
+
+void endFrame() {
+    assert(batcher);
+    batcher->completeFrame();
 }
 
 }

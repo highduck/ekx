@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
+#include <cassert>
 #include <string>
 #include <vector>
 

@@ -1,7 +1,6 @@
 #include "editor_project.hpp"
 #include "editor_asset.hpp"
 #include "texture_asset.hpp"
-#include "program_asset.hpp"
 #include "bitmap_font_editor_asset.hpp"
 #include "flash_asset.hpp"
 #include "model_asset.hpp"
@@ -109,7 +108,6 @@ void editor_project_t::unload_all() {
 
 editor_project_t::editor_project_t() {
     register_asset_factory<texture_asset_t>();
-    register_asset_factory<program_asset_t>();
     register_asset_factory<BitmapFontEditorAsset>();
     register_asset_factory<flash_asset_t>();
     register_asset_factory<model_asset_t>();

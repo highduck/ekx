@@ -34,8 +34,8 @@ using namespace ek::app;
     g_app.view_context_ = (__bridge void*) _view;
 
     NSOpenGLPixelFormatAttribute attrs[] = {
-            //NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
-            NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersionLegacy,
+            NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
+//            NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersionLegacy,
             NSOpenGLPFAColorSize, 24,
             NSOpenGLPFAAlphaSize, 8,
             NSOpenGLPFADepthSize, 32,

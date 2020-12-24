@@ -17,5 +17,6 @@
 
 // android issue
 #define MA_NO_AAUDIO
+#define MA_NO_SDL
 
 #endif //EKX_RAUDIO_CONFIG_H

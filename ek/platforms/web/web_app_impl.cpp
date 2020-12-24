@@ -204,9 +204,9 @@ void subscribe_input() {
     emscripten_set_touchmove_callback(CANVAS_ID, nullptr, false, em_touch_callback);
     emscripten_set_touchcancel_callback(CANVAS_ID, nullptr, false, em_touch_callback);
 
-    emscripten_set_keypress_callback(nullptr, nullptr, true, em_keyboard_callback);
-    emscripten_set_keydown_callback(nullptr, nullptr, true, em_keyboard_callback);
-    emscripten_set_keyup_callback(nullptr, nullptr, true, em_keyboard_callback);
+    emscripten_set_keypress_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, em_keyboard_callback);
+    emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, em_keyboard_callback);
+    emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, em_keyboard_callback);
 }
 
 void handle_resize() {
@@ -265,7 +265,7 @@ static EM_BOOL onEmscriptenResize(int type, const EmscriptenUiEvent*, void*) {
 }
 
 void init_canvas() {
-    emscripten_set_resize_callback(0, nullptr, true, onEmscriptenResize);
+    emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, onEmscriptenResize);
     handle_resize();
 }
 

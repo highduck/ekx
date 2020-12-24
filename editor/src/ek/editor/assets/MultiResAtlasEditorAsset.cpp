@@ -6,7 +6,7 @@
 #include <ek/scenex/2d/Sprite.hpp>
 #include <memory>
 #include <utility>
-#include <ek/graphics/texture.hpp>
+#include <ek/graphics/Helpers.hpp>
 #include <ek/editor/gui/gui.hpp>
 
 namespace ek {
@@ -48,8 +48,7 @@ void MultiResAtlasEditorAsset::afterLoad() {
     int page_index = 0;
     for (const auto& page : atlasBuild->resolutions[0].pages) {
         auto& texture_asset = atlas->pages.emplace_back(name_ + "_page_" + std::to_string(page_index++));
-        auto* texture = new graphics::texture_t();
-        texture->upload(*page.image);
+        auto* texture = graphics::createTexture(*page.image);
         texture_asset.reset(texture);
 
         for (auto& spr_data : page.sprites) {

@@ -15,6 +15,7 @@
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek {
 
@@ -32,7 +33,7 @@ void initSamples() {
     sampleFactory.emplace_back([] { return new Sample3D(); });
     sampleFactory.emplace_back([] { return new SampleIntegrations(); });
     sampleFactory.emplace_back([] { return new SampleText(); });
-    setCurrentSample(0);
+    setCurrentSample(2);
 }
 
 void setCurrentSample(int index) {
@@ -103,6 +104,7 @@ void DemoApp::render_frame() {
 
 void DemoApp::start_game() {
 //    setup_game(w, game);
+EK_DEBUG << "Start Demo: prepareInternalResources";
     SampleText::prepareInternalResources();
 
     SampleBase::samplesContainer = createNode2D("sample");
@@ -125,6 +127,7 @@ void DemoApp::start_game() {
 
     append(game, controls);
 
+    EK_DEBUG << "Start Demo: initSamples";
     initSamples();
 }
 

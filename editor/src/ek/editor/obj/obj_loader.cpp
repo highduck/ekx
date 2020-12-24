@@ -78,7 +78,7 @@ struct obj_model_t {
     }
 };
 
-mesh_data_t load_obj(const std::vector<uint8_t>& buffer) {
+MeshData load_obj(const std::vector<uint8_t>& buffer) {
 
     obj_model_t obj_model{};
     {
@@ -90,7 +90,7 @@ mesh_data_t load_obj(const std::vector<uint8_t>& buffer) {
         obj_model.load(str_stream);
     }
 
-    mesh_data_t result;
+    MeshData result;
     auto l = obj_model.faces.size();
     const int attributes_per_vertex = 3;
     auto vertices = l / attributes_per_vertex;
@@ -98,7 +98,7 @@ mesh_data_t load_obj(const std::vector<uint8_t>& buffer) {
     result.indices.resize(vertices);
     size_t ptr = 0;
     for (size_t i = 0; i < vertices; ++i) {
-        result.vertices[i] = graphics::vertex_3d{
+        result.vertices[i] = Vertex3D{
                 obj_model.positions[obj_model.faces[ptr]],
                 obj_model.normals[obj_model.faces[ptr + 2]],
                 obj_model.uvs[obj_model.faces[ptr + 1]],

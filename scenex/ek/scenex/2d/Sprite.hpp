@@ -7,12 +7,12 @@
 namespace ek {
 
 namespace graphics {
-class texture_t;
+class Texture;
 }
 
 class Sprite : private disable_copy_assign_t {
 public:
-    Res<graphics::texture_t> texture;
+    Res<graphics::Texture> texture;
     rect_f rect{0, 0, 1, 1};
     rect_f tex{0, 0, 1, 1};
     bool rotated = false;

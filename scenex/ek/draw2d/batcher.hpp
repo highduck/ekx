@@ -1,11 +1,18 @@
 #pragma once
 
-#include <ek/graphics/vertex_decl.hpp>
 #include <ek/graphics/graphics.hpp>
+#include <ek/math/packed_color.hpp>
+#include <ek/math/mat4x4.hpp>
+#include <ek/math/box.hpp>
 
-#include "batch_state_manager.hpp"
+namespace ek::draw2d {
 
-namespace ek {
+struct Vertex2D {
+    float2 position;
+    float2 uv;
+    abgr32_t cm;
+    abgr32_t co;
+};
 
 struct FrameStats {
     uint32_t triangles = 0u;
@@ -13,15 +20,54 @@ struct FrameStats {
     float fillArea = 0.0f;
 };
 
+enum class BlendMode : uint8_t {
+    PremultipliedAlpha = 0
+};
+
 class BufferChain;
+
+struct BatchState {
+    sg_shader shader{0};
+    sg_image texture{0};
+    rect_i scissors{};
+    BlendMode blend = BlendMode::PremultipliedAlpha;
+    uint8_t shaderTexturesCount = 0;
+
+    bool operator==(const BatchState& a) const {
+        return (blend == a.blend && shader.id == a.shader.id && texture.id == a.texture.id);
+    }
+
+    bool operator!=(const BatchState& a) const {
+        return (blend != a.blend || shader.id != a.shader.id || texture.id != a.texture.id);
+    }
+};
 
 class Batcher : private disable_copy_assign_t {
 public:
     constexpr static int max_indices_limit = 0x100000;
     constexpr static int max_vertices_limit = 0xFFFF;
 
-    batch_state_context states;
+    BatchState curr{};
+    BatchState next{};
+    bool stateChanged = true;
+
+    const graphics::Texture* renderTarget = nullptr;
+    mat4f mvp{};
     FrameStats stats;
+
+    void beginNewFrame();
+
+    void setScissors(rect_i rc);
+
+    void setBlendMode(BlendMode blending);
+
+    void setTexture(sg_image texture);
+
+    void setProgram(sg_shader shader, uint8_t numTextures);
+
+    void clear();
+
+    void setNextState();
 
 public:
 
@@ -29,16 +75,13 @@ public:
 
     ~Batcher();
 
-    void begin();
+    void beginPass();
 
     void draw();
 
-    // force to set current state to device immediately
-    void invalidate_force();
+    void endPass();
 
-    void draw_mesh(const graphics::buffer_t& vb, const graphics::buffer_t& ib, int32_t indices_count);
-
-    void flush();
+    void completeFrame();
 
     void alloc_triangles(int vertex_count, int index_count);
 
@@ -59,6 +102,7 @@ public:
 
     [[nodiscard]]
     uint32_t getUsedMemory() const;
+
 private:
 
     void init_memory(uint32_t vertex_max_size, uint32_t vertices_limit, uint32_t indices_limit);
@@ -79,6 +123,10 @@ private:
 
     uint32_t vertex_size_ = 0;
     uint16_t base_vertex_ = 0;
+
+    sg_pipeline selectedPipeline{};
+    sg_bindings bind{};
+//    mat4f mvp;
 };
 
 }

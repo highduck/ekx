@@ -10,7 +10,6 @@ namespace ek {
 void guiStatsWindow(bool* p_open) {
     if (ImGui::Begin("Stats", p_open)) {
         auto& app = resolve<basic_application>();
-        draw2d::flush_batcher();
         auto stats = draw2d::getDrawStats();
         auto drawableSize = ek::app::g_app.drawable_size;
         ImGui::Text("%0.2lf ms | dc: %u | tri: %u | fill: %0.2f",

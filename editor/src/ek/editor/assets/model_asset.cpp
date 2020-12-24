@@ -1,10 +1,9 @@
 #include "model_asset.hpp"
 
-#include <ek/scenex/3d/static_mesh.hpp>
+#include <ek/scenex/3d/StaticMesh.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/Res.hpp>
-#include <ek/graphics/vertex_decl.hpp>
 #include <ek/scenex/data/model_data.hpp>
 #include <ek/editor/obj/obj_loader.hpp>
 
@@ -25,8 +24,8 @@ void model_asset_t::load() {
     if (buffer.empty()) {
         EK_ERROR("Not found or empty %s", (project->base_path / declaration_path_).c_str());
     } else {
-        Res<static_mesh_t>{name_}.reset(
-                new static_mesh_t(
+        Res<StaticMesh>{name_}.reset(
+                new StaticMesh(
                         load_obj(buffer)
                 )
         );
@@ -34,7 +33,7 @@ void model_asset_t::load() {
 }
 
 void model_asset_t::unload() {
-    Res<static_mesh_t>{name_}.reset(nullptr);
+    Res<StaticMesh>{name_}.reset(nullptr);
 }
 
 void model_asset_t::gui() {

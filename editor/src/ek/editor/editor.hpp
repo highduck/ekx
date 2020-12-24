@@ -42,8 +42,9 @@ public:
 
     static void invalidateSettings();
 
-private:
     imgui_module_t gui_;
+
+private:
 
     signal_t<>::token t1;
     signal_t<float>::token t2;

@@ -8,6 +8,7 @@
 #include <ek/scenex/3d/Transform3D.hpp>
 #include <ek/scenex/3d/Camera3D.hpp>
 #include <ek/scenex/3d/Light3D.hpp>
+#include <ek/scenex/3d/StaticMesh.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
@@ -142,7 +143,7 @@ void guiTransform3D(Transform3D& transform) {
 }
 
 void guiCamera3D(Camera3D& camera) {
-    ImGui::DragFloatRange2("Clip Plane", &camera.near, &camera.far, 1.0f, 0.0f, 0.0f, "%.1f");
+    ImGui::DragFloatRange2("Clip Plane", &camera.zNear, &camera.zFar, 1.0f, 0.0f, 0.0f, "%.1f");
     float fov_degree = ek::math::to_degrees(camera.fov);
     if (ImGui::DragFloat("FOV", &fov_degree, 1.0f, 0.0f, 0.0f, "%.1f")) {
         camera.fov = ek::math::to_radians(fov_degree);
@@ -155,6 +156,11 @@ void guiCamera3D(Camera3D& camera) {
     ImGui::ColorEdit4("Clear Color", camera.clearColor.data());
     ImGui::Checkbox("Clear Depth Enabled", &camera.clearDepthEnabled);
     ImGui::DragFloat("Clear Depth", &camera.clearDepth, 1.0f, 0.0f, 0.0f, "%.1f");
+}
+
+void guiMeshRenderer(MeshRenderer& renderer) {
+    ImGui::Checkbox("Cast Shadows", &renderer.castShadows);
+    ImGui::Checkbox("Receive Shadows", &renderer.receiveShadows);
 }
 
 void guiLight3D(Light3D& light) {
@@ -325,6 +331,8 @@ void gui_inspector(ecs::entity e) {
     guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
     guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
     guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);
+    guiComponentPanel<MeshRenderer>(e, "Mesh Renderer", guiMeshRenderer);
+
     guiComponentPanel<Interactive>(e, "Interactive", guiInteractive);
     guiComponentPanel<NodeEventHandler>(e, "Event Handler", [](auto& c) {});
 

@@ -6,6 +6,9 @@
 #include <ek/util/Res.hpp>
 #include <string>
 
+#include <sokol_gfx.h>
+#include <util/sokol_gfx_imgui.h>
+
 struct ImDrawData;
 
 namespace ek {
@@ -24,20 +27,18 @@ public:
 
     void end_frame();
 
+    sg_imgui_t sokol_gfx_gui_state{};
+
 private:
 
     void setup();
 
-    void init_fonts();
-
-    void render_frame_data(ImDrawData* draw_data);
+    void initializeFontTexture();
 
 private:
-    graphics::buffer_t* vertex_buffer_ = nullptr;
-    graphics::buffer_t* index_buffer_ = nullptr;
-    graphics::texture_t* texture_ = nullptr;
-    Res<graphics::program_t> program_{"2d_min"};
     std::string clipboard_text_{};
+    sg_image fontTexture;
+    float dpiScale = 2.0f;
 };
 
 }

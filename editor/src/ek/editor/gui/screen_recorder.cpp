@@ -4,6 +4,7 @@
 #include <ek/math/box.hpp>
 #include <ek/graphics/graphics.hpp>
 #include <sys/stat.h>
+#include <ek/app/app.hpp>
 
 namespace ek {
 
@@ -26,7 +27,10 @@ screen_recorder::screen_recorder(const std::string& filename, const rect_u& rect
 }
 
 void screen_recorder::render() {
-    graphics::get_pixels(rect_.x, rect_.y, rect_.width, rect_.height, buffer_);
+    int h = ek::app::g_app.drawable_size.y;
+    glReadPixels(rect_.x, h - rect_.y - rect_.height, rect_.width, rect_.height, GL_RGBA, GL_UNSIGNED_BYTE,
+                 buffer_);
+
     flip_image(buffer_, buffer_swap_, rect_.width * 4u, rect_.height);
     std::string file = filename_ + "/frame" + std::to_string(frame_) + ".png";
     // 3 - RGB

@@ -79,7 +79,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
                 )
     else ()
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
-                "-s ENVIRONMENT=web -s FETCH=1 -s ALLOW_MEMORY_GROWTH=1 -s FILESYSTEM=0 -s ASSERTIONS=0 --closure 1"
+                "-s ENVIRONMENT=web -s FETCH=1 -s ALLOW_MEMORY_GROWTH=1 -s FILESYSTEM=0 -s ASSERTIONS=0" # --closure 1
                 )
         target_link_options(${PROJECT_NAME} PUBLIC
                 --llvm-lto 1

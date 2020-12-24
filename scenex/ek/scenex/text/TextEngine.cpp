@@ -1,7 +1,8 @@
-#include <ek/util/utf8.hpp>
 #include "TextEngine.hpp"
 #include "TrueTypeFont.hpp"
 #include "Font.hpp"
+#include <ek/util/utf8.hpp>
+#include <cstdarg>
 
 namespace ek {
 
@@ -88,8 +89,7 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
     }
     auto alignment = format.alignment;
 
-    draw2d::state.save_program();
-    draw2d::state.set_program(Res<graphics::program_t>{"2d_alpha"}.get());
+    draw2d::state.pushProgram("draw2d_alpha");
     // render effects first
     for (int i = format.layersCount - 1; i >= 0; --i) {
         auto& layer = format.layers[i];
@@ -102,7 +102,7 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
         }
         drawLayer(text, layer, info);
     }
-    draw2d::state.restore_program();
+    draw2d::state.restoreProgram();
 }
 
 void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const TextBlockInfo& info) const {
@@ -126,7 +126,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
 
     draw2d::state.save_color().scaleColor(layer.color);
 
-    const graphics::texture_t* prevTexture = nullptr;
+    const graphics::Texture* prevTexture = nullptr;
     uint32_t prevCodepointOnLine = 0;
     Glyph gdata;
     uint32_t codepoint = 0;
