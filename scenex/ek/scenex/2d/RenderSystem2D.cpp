@@ -37,7 +37,7 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
             }
         }
         if (bounds->scissors) {
-            draw2d::state.push_scissors(rc);
+            draw2d::state.pushClipRect(rc);
         }
     }
 
@@ -46,7 +46,7 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
     if (display) {
         if (display->program) {
             programChanged = true;
-            draw2d::state.save_program().set_program(display->program.get());
+            draw2d::state.saveProgram().setProgram(display->program.get());
         }
         if (display->drawable) {
             draw2d::state.matrix = transform->worldMatrix;
@@ -71,10 +71,10 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
     }
 
     if (bounds && bounds->scissors) {
-        draw2d::state.pop_scissors();
+        draw2d::state.popClipRect();
     }
     if (programChanged) {
-        draw2d::state.restore_program();
+        draw2d::state.restoreProgram();
     }
 }
 
@@ -101,7 +101,7 @@ void RenderSystem2D::drawStack(ecs::entity e) {
             }
         }
         if (bounds->scissors) {
-            draw2d::state.push_scissors(rc);
+            draw2d::state.pushClipRect(rc);
             //draw2d::state.push_scissors(scissors->world_rect(transform->worldMatrix));
         }
     }
@@ -111,7 +111,7 @@ void RenderSystem2D::drawStack(ecs::entity e) {
     if (display) {
         if (display->program) {
             programChanged = true;
-            draw2d::state.save_program().set_program(display->program.get());
+            draw2d::state.saveProgram().setProgram(display->program.get());
         }
         if (display->drawable) {
             display->drawable->draw();
@@ -139,10 +139,10 @@ void RenderSystem2D::drawStack(ecs::entity e) {
     }
 
     if (bounds && bounds->scissors) {
-        draw2d::state.pop_scissors();
+        draw2d::state.popClipRect();
     }
     if (programChanged) {
-        draw2d::state.restore_program();
+        draw2d::state.restoreProgram();
     }
 }
 }

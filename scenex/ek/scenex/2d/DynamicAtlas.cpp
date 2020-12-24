@@ -1,5 +1,5 @@
 #include "DynamicAtlas.hpp"
-#include <ek/graphics/texture.hpp>
+#include <ek/graphics/Helpers.hpp>
 #include <ek/math/common.hpp>
 
 namespace ek {
@@ -37,11 +37,18 @@ public:
             dirtyRect{0, 0, width_, height_},
             dirty{true} {
 
-        texture = new graphics::texture_t();
-        texture->setType(alphaMap ? graphics::texture_type::alpha8 : graphics::texture_type::color32);
-//        if (mipmaps) {
-//            texture->setMipMaps(true);
-//        }
+        sg_image_desc desc{
+                .type = SG_IMAGETYPE_2D,
+                .width = width,
+                .height = height,
+                .usage = SG_USAGE_DYNAMIC,
+                .pixel_format = alphaMap ? SG_PIXELFORMAT_R8 : SG_PIXELFORMAT_RGBA8,
+                .min_filter = SG_FILTER_LINEAR,
+                .mag_filter = SG_FILTER_LINEAR,
+                .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
+                .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
+        };
+        texture = new graphics::Texture(desc);
     }
 
     ~Page() {
@@ -109,14 +116,12 @@ public:
 
     void invalidate() {
         if (dirty) {
-            // TODO: dirtyRect?
-            texture->upload_pixels(width, height, data.data());
-//            texture->updateRect(dirtyRect.x, dirtyRect.y, dirtyRect.width, dirtyRect.height, data.data(), );
+            texture->update(data.data(), data.size());
             dirty = false;
         }
     }
 
-    graphics::texture_t* texture;
+    graphics::Texture* texture;
     int width;
     int height;
     float invWidth;
@@ -174,7 +179,7 @@ DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const std::vec
     return sprite;
 }
 
-const graphics::texture_t* DynamicAtlas::getPageTexture(int index) const {
+const graphics::Texture* DynamicAtlas::getPageTexture(int index) const {
     assert(index < pages_.size() && index >= 0);
     return pages_[index]->texture;
 }

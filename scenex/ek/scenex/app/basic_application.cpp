@@ -1,7 +1,6 @@
 #include "basic_application.hpp"
 
 #include "input_controller.hpp"
-#include "builtin_resources.hpp"
 
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
@@ -16,6 +15,8 @@
 #include <ek/graphics/graphics.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
+#include <ek/scenex/3d/RenderSystem3D.hpp>
+#include <ek/scenex/3d/Transform3D.hpp>
 
 namespace ek {
 
@@ -40,7 +41,7 @@ basic_application::~basic_application() {
 }
 
 void basic_application::initialize() {
-    create_builtin();
+    draw2d::init();
 
     //// basic scene
     root = createNode2D("root");
@@ -73,10 +74,6 @@ void basic_application::preload() {
     hook_on_preload();
 
     asset_manager_->add_resolver(new builtin_asset_resolver_t());
-    // built-in
-//    asset_manager_->add_from_type("font", "mini");
-//    asset_manager_->add_from_type("atlas", "mini");
-//    asset_manager_->add_from_type("program", "2d");
     if (preloadOnStart) {
         preload_root_assets_pack();
     }
@@ -89,25 +86,49 @@ void basic_application::on_draw_frame() {
 
     /** base app BEGIN **/
 
-    const double dt = std::min(frame_timer.update(), 0.3);
+    const float dt = std::min(static_cast<float>(frame_timer.update()), 0.3f);
     // fixed for GIF recorder
     //dt = 1.0f / 60.0f;
 
-    hook_on_update(static_cast<float>(dt));
-    update_frame(static_cast<float>(dt));
+    hook_on_update(dt);
+    update_frame(dt);
 
     profiler.addTime("UPDATE", timer.read_millis());
     profiler.addTime("FRAME", timer.read_millis());
     timer.reset();
 
-    graphics::begin();
-    graphics::viewport();
+    draw2d::beginNewFrame();
 
-    draw2d::begin(0, 0,
-                  static_cast<int>(g_app.drawable_size.x),
-                  static_cast<int>(g_app.drawable_size.y));
+    onPreRender();
+
+    auto* r3d = try_resolve<RenderSystem3D>();
+    if (r3d) {
+        Transform3D::updateAll();
+        r3d->prepare();
+        r3d->prerender();
+    }
+
+    static sg_pass_action pass_action{};
+    pass_action.colors[0] = {
+            .action = started_ ? SG_ACTION_DONTCARE : SG_ACTION_CLEAR,
+            .val = {0.0f, 0.0f, 0.0f, 1.0f}
+    };
+    if (r3d) {
+        pass_action.depth.action = SG_ACTION_CLEAR;
+        pass_action.depth.val = 100000.0f;
+    }
+
+    auto fbWidth = static_cast<int>(g_app.drawable_size.x);
+    auto fbHeight = static_cast<int>(g_app.drawable_size.y);
+    sg_begin_default_pass(&pass_action, fbWidth, fbHeight);
+
+    if (r3d) {
+        r3d->render();
+    }
 
     render_frame();
+
+    draw2d::begin({0, 0, fbWidth, fbHeight});
 
     if (!started_ && rootAssetObject) {
         rootAssetObject->poll();
@@ -127,11 +148,15 @@ void basic_application::on_draw_frame() {
     timer.reset();
 
     draw2d::end();
+    draw2d::endFrame();
 
     hook_on_draw_frame();
     /** base app END **/
+    sg_end_pass();
+    sg_commit();
 
     if (!started_ && asset_manager_->is_assets_ready()) {
+        EK_DEBUG << "Start Game";
         start_game();
         onStartHook();
         started_ = true;
@@ -152,7 +177,6 @@ void basic_application::render_frame() {
 }
 
 void basic_application::on_frame_end() {
-    //profiler.update(frame_timer.delta_time());
     profiler.draw();
 }
 
@@ -176,7 +200,7 @@ void basic_application::on_event(const event_t& event) {
     profiler.addTime("FRAME", timer.read_millis());
 }
 
-void drawPreloader(float progress){
+void drawPreloader(float progress) {
     draw2d::state.set_empty_texture();
     auto pad = 40;
     auto w = g_app.drawable_size.x - pad * 2;

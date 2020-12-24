@@ -105,13 +105,6 @@ SampleText::SampleText() :
     append(container, ttfText2);
 }
 
-void SampleText::draw() {
-    // TODO: move to dev-inspector
-//    if (showGlyphCache && textDrawer.format.font) {
-//        textDrawer.format.font->debugDrawAtlas(512, 100 + 512);
-//    }
-}
-
 void SampleText::prepareInternalResources() {
     asset_manager_t* am = resolve<basic_application>().asset_manager_;
     auto* ttfFont = new TrueTypeFont(am->scale_factor, 48, "default_glyph_cache");

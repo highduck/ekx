@@ -29,7 +29,7 @@ void Font::draw(const std::string& text,
     draw2d::state.save_color()
             .scaleColor(color);
 
-    const graphics::texture_t* prevTexture = nullptr;
+    const graphics::Texture* prevTexture = nullptr;
     Glyph gdata;
     for (char code : text) {
         if (code == '\n') {

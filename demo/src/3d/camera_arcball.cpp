@@ -6,6 +6,7 @@
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/scenex/app/input_controller.hpp>
+#include <ek/math/quaternion.hpp>
 
 namespace ek {
 

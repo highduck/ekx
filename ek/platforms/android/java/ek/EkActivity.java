@@ -22,6 +22,8 @@ import androidx.annotation.NonNull;
 import java.util.List;
 import java.util.Locale;
 
+import ek.gpgs.GameServices;
+
 @SuppressLint("Registered")
 public class EkActivity extends Activity {
 

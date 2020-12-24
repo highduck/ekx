@@ -11,13 +11,13 @@
 namespace ek {
 
 namespace graphics {
-class texture_t;
+class Texture;
 }
 
 struct Camera3D {
     // clip plane near-far
-    float near = 10.0f;
-    float far = 1000.0f;
+    float zNear = 10.0f;
+    float zFar = 1000.0f;
 
     // orthogonal mode
     bool orthogonal = false;
@@ -35,7 +35,7 @@ struct Camera3D {
     float4 clearColor{0.5f, 0.5f, 0.5f, 1.0f};
     float clearDepth = 1.0f;
 
-    Res<graphics::texture_t> cubeMap;
+    Res<graphics::Texture> cubeMap;
 };
 
 }

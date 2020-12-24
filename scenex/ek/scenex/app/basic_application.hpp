@@ -13,7 +13,6 @@
 #include <ek/util/signals.hpp>
 #include <utility>
 #include <ek/timers.hpp>
-#include "builtin_resources.hpp"
 #include "profiler.hpp"
 
 namespace ek {
@@ -31,6 +30,10 @@ public:
     float scale_factor = 1.0f;
 
     signal_t<> hook_on_preload{};
+
+    // used to render all offscreen passes
+    signal_t<> onPreRender{};
+
     signal_t<> hook_on_draw_frame{};
     signal_t<> hook_on_render_frame{};
     signal_t<float> hook_on_update{};

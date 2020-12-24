@@ -38,6 +38,17 @@ void guiEditor(Editor& editor) {
             ImGui::MenuItem("Demo", nullptr, &settings.showImGuiDemoWindow);
             ImGui::EndMenu();
         }
+        if (ImGui::BeginMenu("Sokol")) {
+            auto& sokol_gfx_gui_state = editor.gui_.sokol_gfx_gui_state;
+            ImGui::MenuItem("Capabilities", 0, &sokol_gfx_gui_state.caps.open);
+            ImGui::MenuItem("Buffers", 0, &sokol_gfx_gui_state.buffers.open);
+            ImGui::MenuItem("Images", 0, &sokol_gfx_gui_state.images.open);
+            ImGui::MenuItem("Shaders", 0, &sokol_gfx_gui_state.shaders.open);
+            ImGui::MenuItem("Pipelines", 0, &sokol_gfx_gui_state.pipelines.open);
+            ImGui::MenuItem("Passes", 0, &sokol_gfx_gui_state.passes.open);
+            ImGui::MenuItem("Calls", 0, &sokol_gfx_gui_state.capture.open);
+            ImGui::EndMenu();
+        }
         ImGui::EndMainMenuBar();
     }
     if (settings.showImGuiDemoWindow) ImGui::ShowDemoWindow(&settings.showImGuiDemoWindow);

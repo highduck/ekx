@@ -6,7 +6,9 @@
 #include <ek/math/serialize_math.hpp>
 #include <ek/util/path.hpp>
 #include <ek/app/res.hpp>
-#include <ek/graphics/texture.hpp>
+#include <ek/graphics/Helpers.hpp>
+#include <ek/imaging/decoder.hpp>
+#include <ek/imaging/image.hpp>
 
 #include <vector>
 
@@ -64,9 +66,9 @@ struct AtlasInfo {
     }
 };
 
-static const char *kSuffixes[] = {"", "@2x", "@3x", "@4x"};
+static const char* kSuffixes[] = {"", "@2x", "@3x", "@4x"};
 
-const char *get_scale_suffix(float scale) {
+const char* get_scale_suffix(float scale) {
     if (scale > 3.0f) {
         return kSuffixes[3];
     } else if (scale > 2.0f) {
@@ -94,7 +96,7 @@ Atlas::~Atlas() {
     }
 }
 
-void load_atlas_meta(const path_t& base_path, Atlas *atlas, const std::vector<uint8_t>& buffer) {
+void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<uint8_t>& buffer) {
     EK_DEBUG << "Decoding Atlas META";
     EK_DEBUG << "Atlas Base Path: " << base_path;
 
@@ -122,39 +124,38 @@ void load_atlas_meta(const path_t& base_path, Atlas *atlas, const std::vector<ui
 
     for (auto& page : atlasInfo.pages) {
         const auto& page_image_path = page.imagePath;
-        Res<graphics::texture_t> resTexture{page_image_path};
+        Res<graphics::Texture> resTexture{page_image_path};
         if (resTexture) {
             EK_DEBUG << "Destroy old page texture " << page_image_path;
             resTexture.reset(nullptr);
         }
 
         EK_DEBUG << "Load atlas page " << (base_path / page_image_path);
-//        get_resource_content_async((base_path / page_image_path).c_str(), [page_image_path](auto image_buffer) {
-//            if (image_buffer.empty()) {
-//                EK_DEBUG << "Image not found";
-//            } else {
-//                auto* image = decode_image_data(image_buffer);
-//                if (image) {
-//                    asset_t<texture_t> texture_asset{page_image_path};
-//                    texture_asset.reset(new texture_t);
-//                    texture_asset->upload(*image);
-//                    delete image;
-//                }
-//            }
-//        });
-        resTexture.reset(new graphics::texture_t);
-        resTexture->reset(1, 1);
-        load_texture_lazy((base_path / page_image_path).c_str(), resTexture.get_mutable());
+        get_resource_content_async((base_path / page_image_path).c_str(), [page_image_path](auto image_buffer) {
+            if (image_buffer.empty()) {
+                EK_DEBUG << "Image not found";
+            } else {
+                auto* image = decode_image_data(image_buffer);
+                if (image) {
+                    Res<graphics::Texture> res{page_image_path};
+                    auto* texture = graphics::createTexture(*image);
+                    res.reset(texture);
+                    delete image;
+                } else {
+                    EK_DEBUG << "Image decode error";
+                }
+            }
+        });
     }
 }
 
-void Atlas::load(const char *path, float scale_factor, const Atlas::LoadCallback& callback) {
+void Atlas::load(const char* path, float scale_factor, const Atlas::LoadCallback& callback) {
     const path_t uid{path};
     const path_t base_path = uid.dir();
     const path_t file_meta = uid + get_scale_suffix(scale_factor) + ".atlas";
 
     get_resource_content_async(file_meta.c_str(), [callback, file_meta, base_path](auto buffer) {
-        Atlas *atlas = nullptr;
+        Atlas* atlas = nullptr;
         if (buffer.empty()) {
             EK_DEBUG("ATLAS META resource not found: %s", file_meta.c_str());
         } else {

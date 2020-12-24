@@ -7,7 +7,7 @@
 #include <ek/math/mat3x2.hpp>
 #include <ek/util/type_index.hpp>
 #include <ecxx/ecxx.hpp>
-#include <ek/graphics/program.hpp>
+#include <ek/graphics/graphics.hpp>
 #include "Sprite.hpp"
 
 namespace ek {
@@ -74,7 +74,7 @@ struct Display2D {
     std::unique_ptr<IDrawable2D> drawable;
 
     // state management
-    Res<graphics::program_t> program;
+    Res<graphics::Shader> program;
 
 #ifndef NDEBUG
     bool drawBounds = false;

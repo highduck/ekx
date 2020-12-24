@@ -1,9 +1,8 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/util/Res.hpp>
-#include <ek/graphics/program.hpp>
-#include <ek/graphics/texture.hpp>
+#include <ek/graphics/Helpers.hpp>
 #include <ek/scenex/3d/Material3D.hpp>
-#include <ek/scenex/3d/static_mesh.hpp>
+#include <ek/scenex/3d/StaticMesh.hpp>
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/scenex/data/SGFile.hpp>
@@ -17,7 +16,7 @@ void on_editor_debug_asset(const Res<T>& asset) {
 }
 
 template<>
-void on_editor_debug_asset<static_mesh_t>(const Res<static_mesh_t>& asset) {
+void on_editor_debug_asset<StaticMesh>(const Res<StaticMesh>& asset) {
     ImGui::Text("Indices: %i", asset->indices_count);
 }
 
@@ -29,7 +28,7 @@ void on_editor_debug_asset<DynamicAtlas>(const Res<DynamicAtlas>& asset) {
     for (size_t i = 0; i < pagesCount; ++i) {
         ImGui::Text("Page #%lu", i);
         auto* page = asset->getPageTexture(i);
-        ImGui::Image(reinterpret_cast<void*>(page->handle()), ImVec2{100.0f, 100.0f});
+        ImGui::Image(reinterpret_cast<void*>(page->image.id), ImVec2{100.0f, 100.0f});
     }
 }
 
@@ -75,9 +74,9 @@ void do_editor_debug_runtime_asset_list(const std::string& type_name) {
 
 void guiResourcesViewWindow(bool* p_open) {
     if (ImGui::Begin("Resources", p_open)) {
-        do_editor_debug_runtime_asset_list<graphics::program_t>("Program");
+        do_editor_debug_runtime_asset_list<graphics::Shader>("Program");
         do_editor_debug_runtime_asset_list<Material3D>("Material");
-        do_editor_debug_runtime_asset_list<static_mesh_t>("Mesh");
+        do_editor_debug_runtime_asset_list<StaticMesh>("Mesh");
         do_editor_debug_runtime_asset_list<Atlas>("Atlas");
         do_editor_debug_runtime_asset_list<Sprite>("Sprite");
         do_editor_debug_runtime_asset_list<Font>("Font");

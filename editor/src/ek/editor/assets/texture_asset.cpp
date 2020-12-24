@@ -3,18 +3,17 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/Res.hpp>
-#include <ek/graphics/program.hpp>
-#include <ek/graphics/vertex_decl.hpp>
 
-#include <ek/graphics/texture.hpp>
+#include <ek/graphics/Helpers.hpp>
 #include <ek/scenex/data/texture_data.hpp>
 #include <ek/system/system.hpp>
 #include <ek/imaging/decoder.hpp>
+#include <ek/imaging/image.hpp>
 
 namespace ek {
 
-using graphics::texture_t;
-using graphics::program_t;
+using graphics::Texture;
+using graphics::Shader;
 
 image_t* load_image(const path_t& path) {
     image_t* image = nullptr;
@@ -43,9 +42,9 @@ void texture_asset_t::load() {
     read_decl();
 
     // delete old textures
-    Res<texture_t>{name_}.reset(nullptr);
+    Res<Texture>{name_}.reset(nullptr);
 
-    texture_t* texture = nullptr;
+    Texture* texture = nullptr;
     if (texture_type_ == "cubemap") {
         if (images_.size() != 6) {
             EK_ERROR << "Cubemap requires 6 images";
@@ -54,8 +53,7 @@ void texture_asset_t::load() {
         for (size_t i = 0; i < 6; ++i) {
             images[i] = load_image(get_relative_path(path_t{images_[i]}));
         }
-        texture = new texture_t(true);
-        texture->upload_cubemap(images);
+        texture = graphics::createTexture(images);
         // +X : right
         // -X : left
         // +Y : top
@@ -72,19 +70,18 @@ void texture_asset_t::load() {
         }
         auto* img = load_image(get_relative_path(path_t{images_[0]}));
         if (img) {
-            texture = new texture_t(true);
-            texture->upload(*img);
+            texture = graphics::createTexture(*img);
             delete img;
         }
     } else {
         EK_ERROR << "Unknown Texture-type " << texture_type_;
     }
 
-    Res<texture_t>{name_}.reset(texture);
+    Res<Texture>{name_}.reset(texture);
 }
 
 void texture_asset_t::unload() {
-    Res<program_t>{name_}.reset(nullptr);
+    Res<Shader>{name_}.reset(nullptr);
     images_.clear();
     texture_type_.clear();
 }

@@ -128,7 +128,11 @@ void clear_buffers() {
             kEAGLDrawablePropertyColorFormat: kEAGLColorFormatRGBA8
     };
 
-    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+    _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
+    if (_context == nil) {
+        _context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+        g_app.fallbackGLES2 = true;
+    }
 
     if (!_context || ![EAGLContext setCurrentContext:_context]) {
         return false;

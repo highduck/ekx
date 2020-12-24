@@ -4,56 +4,54 @@
 #include "batcher.hpp"
 #include <ek/util/common_macro.hpp>
 #include <ek/math/mat3x2.hpp>
-#include <ek/graphics/program.hpp>
-#include <ek/graphics/texture.hpp>
+#include <ek/graphics/graphics.hpp>
+#include <ek/graphics/Helpers.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/math/circle.hpp>
+#include <ek/math/box.hpp>
 
 namespace ek::draw2d {
 
 struct drawing_state {
 
-    Res<graphics::program_t> default_program{"2d"};
-    Res<graphics::texture_t> default_texture{"empty"};
+    Res<graphics::Shader> default_program{"draw2d"};
+    Res<graphics::Texture> default_texture{"empty"};
 
-    rect_f canvas_rect{};
-    const graphics::texture_t* texture{};
-    const graphics::program_t* program{};
+    const graphics::Texture* texture{};
+    const graphics::Shader* program{};
     matrix_2d matrix{};
     mat4f mvp{};
     rect_f uv{0.0f, 0.0f, 1.0f, 1.0f};
     ColorMod32 color{};
-    graphics::blend_mode blending = graphics::blend_mode::premultiplied;
     rect_f scissors{};
+    const graphics::Texture* renderTarget = nullptr;
+    bool active = false;
 
 public:
 
     std::vector<matrix_2d> matrix_stack_;
     std::vector<ColorMod32> colors_;
-    std::vector<rect_f> scissor_stack_;
-    std::vector<const graphics::program_t*> program_stack_;
-    std::vector<const graphics::texture_t*> texture_stack_;
-    std::vector<graphics::blend_mode> blend_mode_stack_;
-    std::vector<mat4f> mvp_stack_;
+    std::vector<rect_f> scissorsStack_;
+    std::vector<const graphics::Shader*> program_stack_;
+    std::vector<const graphics::Texture*> texture_stack_;
     std::vector<rect_f> tex_coords_stack_;
-    std::vector<rect_f> canvas_stack_;
 
-    // TODO: consumable states check to bit flags
-    bool check_scissors = false;
-    bool check_blending = false;
-    bool check_mvp = false;
-    bool check_program = false;
-    bool check_texture = false;
+    enum CheckFlags : uint8_t {
+        Check_Scissors = 1,
+        Check_Shader = 4,
+        Check_Texture = 8
+    };
+    uint8_t checkFlags = 0;
 
     /** Scissors **/
 
-    void push_scissors(const rect_f& scissors);
+    void pushClipRect(const rect_f& rc);
 
     drawing_state& saveScissors();
 
-    void setScissors(const rect_f& scissors);
+    void setScissors(const rect_f& rc);
 
-    drawing_state& pop_scissors();
+    drawing_state& popClipRect();
 
     /** Matrix Transform **/
 
@@ -101,18 +99,6 @@ public:
 
     drawing_state& offset_color(abgr32_t offset);
 
-    /** STATES **/
-
-    drawing_state& save_canvas_rect();
-
-    drawing_state& restore_canvas_rect();
-
-    drawing_state& set_mvp(const mat4f& m);
-
-    drawing_state& save_mvp();
-
-    drawing_state& restore_mvp();
-
     drawing_state& save_texture_coords();
 
     drawing_state& set_texture_coords(float u0, float v0, float du, float dv);
@@ -125,24 +111,20 @@ public:
 
     drawing_state& set_empty_texture();
 
-    drawing_state& set_texture(const graphics::texture_t* texture);
+    drawing_state& set_texture(const graphics::Texture* texture);
 
-    drawing_state& set_texture_region(const graphics::texture_t* texture = nullptr,
+    drawing_state& set_texture_region(const graphics::Texture* texture = nullptr,
                                       const rect_f& region = rect_f::zero_one);
 
     drawing_state& restore_texture();
 
-    drawing_state& set_program(const graphics::program_t* program_);
+    drawing_state& pushProgram(const char* id);
 
-    drawing_state& save_program();
+    drawing_state& setProgram(const graphics::Shader* program_);
 
-    drawing_state& restore_program();
+    drawing_state& saveProgram();
 
-    drawing_state& save_blend_mode();
-
-    drawing_state& restore_blend_mode();
-
-    void set_blend_mode(graphics::blend_mode blend_mode);
+    drawing_state& restoreProgram();
 
     // do extra checking and clear states stack
     void finish();
@@ -150,23 +132,21 @@ public:
 
 extern drawing_state state;
 
-void begin(int x, int y, int width, int height);
+void init();
 
-void commit_state();
+void beginNewFrame();
 
-void flush_batcher();
+void begin(rect_i viewport, const matrix_2d& view = matrix_2d{}, const graphics::Texture* renderTarget = nullptr);
 
 uint32_t getBatchingUsedMemory();
 
 void end();
 
+void endFrame();
+
 void write_index(uint16_t index);
 
 FrameStats getDrawStats();
-
-void invalidate_force();
-
-void draw_mesh(const graphics::buffer_t& vb, const graphics::buffer_t& ib, int32_t indices_count);
 
 void triangles(int vertex_count, int index_count);
 

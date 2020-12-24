@@ -1,8 +1,7 @@
 #pragma once
 
 #include <ek/math/mat4x4.hpp>
-#include <ek/math/quaternion.hpp>
-#include <ek/math/matrix_transform.hpp>
+#include <ek/math/vec.hpp>
 
 namespace ek {
 
@@ -22,6 +21,8 @@ struct Transform3D {
 //    inline float3 get_euler_angles() const {
 //        euler_angles(rotation);
 //    }
+
+    static void updateAll();
 };
 
 }

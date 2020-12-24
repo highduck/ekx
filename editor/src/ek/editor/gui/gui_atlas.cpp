@@ -1,6 +1,6 @@
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/graphics/texture.hpp>
+#include <ek/graphics/Helpers.hpp>
 
 namespace ek {
 
@@ -11,7 +11,7 @@ void gui_sprite_view(const Sprite* sprite) {
         auto uv0 = sprite->tex.position;
         auto uv1 = sprite->tex.right_bottom();
         if (sprite->texture) {
-            void* tex_id = reinterpret_cast<void*>(sprite->texture->handle());
+            void* tex_id = reinterpret_cast<void*>(sprite->texture->image.id);
             if (sprite->rotated) {
                 ImGui::BeginChild("s", ImVec2{rc.width, rc.height});
                 ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -48,7 +48,7 @@ void gui_atlas_view(const Atlas* atlas) {
     if (atlas) {
         if (ImGui::TreeNode(atlas, "Atlas")) {
             for (const auto& page : atlas->pages) {
-                ImGui::Image(reinterpret_cast<void*>(page->handle()), ImVec2{100.0f, 100.0f});
+                ImGui::Image(reinterpret_cast<void*>(page->image.id), ImVec2{100.0f, 100.0f});
             }
             for (const auto&[id, spr] : atlas->sprites) {
                 ImGui::LabelText("Sprite", "%s", id.c_str());

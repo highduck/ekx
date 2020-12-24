@@ -150,8 +150,14 @@ typedef struct tagBITMAPINFOHEADER {
 #define MA_MALLOC RL_MALLOC
 #define MA_FREE RL_FREE
 
+
 #ifndef MINIAUDIO_IMPLEMENTATION
 #define MINIAUDIO_IMPLEMENTATION
+
+#ifndef NDEBUG
+#define MA_LOG_LEVEL MA_LOG_LEVEL_VERBOSE
+#endif
+
 #include <miniaudio.h>         // miniaudio library
 #endif
 
@@ -166,7 +172,7 @@ typedef struct tagBITMAPINFOHEADER {
     #if !defined(TRACELOG)
         #define TRACELOG(level, ...) (void)0
     #endif
-    
+
     // Allow custom memory allocators
     #ifndef RL_MALLOC
         #define RL_MALLOC(sz)       malloc(sz)
@@ -221,6 +227,8 @@ typedef struct tagBITMAPINFOHEADER {
 
     #define DR_MP3_IMPLEMENTATION
     #include <dr_mp3.h>        // MP3 loading functions
+#include <ek/util/logger.hpp>
+
 #endif
 
 #if defined(SUPPORT_FILEFORMAT_FLAC)
@@ -1319,7 +1327,22 @@ static void OnLog(ma_context *pContext, ma_device *pDevice, ma_uint32 logLevel, 
 {
     (void)pContext;
     (void)pDevice;
-
+#ifndef NDEBUG
+    switch(logLevel) {
+        case MA_LOG_LEVEL_ERROR:
+            EK_ERROR << message;
+            break;
+        case MA_LOG_LEVEL_WARNING:
+            EK_WARN << message;
+            break;
+        case MA_LOG_LEVEL_INFO:
+            EK_INFO << message;
+            break;
+        case MA_LOG_LEVEL_VERBOSE:
+            EK_DEBUG << message;
+            break;
+    }
+#endif
     TRACELOG(LOG_ERROR, "miniaudio: %s", message);   // All log messages from miniaudio are errors
 }
 

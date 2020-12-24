@@ -125,6 +125,7 @@ struct app_state final {
     arguments args;
     window_config window_cfg;
 
+    bool fallbackGLES2 = false;
     vec2 window_size{};
     vec2 drawable_size{};
 

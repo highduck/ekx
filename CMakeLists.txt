@@ -13,11 +13,6 @@ set(EKX_BUILD_TESTS ON)
 #set(EKX_BUILD_BENCHMARKS ON)
 endif ()
 
-# Windows is not ready for Edit-mode
-if (${CMAKE_SYSTEM_NAME} MATCHES Windows)
-    set(EKX_BUILD_EDITOR OFF)
-endif ()
-
 # Mobile platforms are not capable to use Edit-Mode features
 if ((${CMAKE_SYSTEM_NAME} MATCHES Emscripten) OR (${CMAKE_SYSTEM_NAME} MATCHES iOS) OR (${CMAKE_SYSTEM_NAME} MATCHES Android))
     set(EKX_MOBILE ON)
@@ -58,10 +53,11 @@ add_subdirectory(physics)
 add_library(ekx INTERFACE)
 target_link_libraries(ekx INTERFACE appbox ek-core ek scenex)
 
+add_subdirectory(flash)
+add_subdirectory(editor)
+
 if (EKX_BUILD_EDITOR)
     add_compile_definitions(EK_EDITOR)
-    add_subdirectory(flash)
-    add_subdirectory(editor)
     target_link_libraries(ekx INTERFACE ek-editor ek-flash)
 endif ()
 

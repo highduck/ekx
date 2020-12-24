@@ -15,8 +15,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-if()
+set(SCENEX_LIBS ek)
+if(EKX_BUILD_EDITOR)
     target_compile_definitions(${PROJECT_NAME} PUBLIC EK_EDITOR)
+    set(SCENEX_LIBS ek ek-editor)
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -47,7 +49,7 @@ else ()
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Android")
-    target_link_libraries(${PROJECT_NAME} -Wl,--whole-archive ek -Wl,--no-whole-archive)
+    target_link_libraries(${PROJECT_NAME} -Wl,--whole-archive ${SCENEX_LIBS} -Wl,--no-whole-archive)
 else ()
-    target_link_libraries(${PROJECT_NAME} ek)
+    target_link_libraries(${PROJECT_NAME} ${SCENEX_LIBS})
 endif ()

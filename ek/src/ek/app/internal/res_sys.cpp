@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <cstdio>
+#include <ek/util/logger.hpp>
 
 namespace ek::internal {
 
@@ -24,6 +25,9 @@ std::vector<uint8_t> read_file_bytes(const char* path) {
         }
 
         fclose(stream);
+    }
+    else {
+        EK_WARN << "Path " << path << " not found";
     }
     return buffer;
 }

@@ -33,8 +33,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/editor/editor.cpp
         ek/editor/editor.hpp
-        ek/editor/assets/program_asset.cpp
-        ek/editor/assets/program_asset.hpp
         ek/editor/obj/obj_loader.cpp
         ek/editor/obj/obj_loader.hpp
 

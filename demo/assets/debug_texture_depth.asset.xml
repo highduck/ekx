@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<asset type="program" name="debug_texture_depth" vertex_layout="3d">
-    <vertex path="debug_texture_depth.vert.glsl" />
-    <fragment path="debug_texture_depth.frag.glsl"/>
-</asset>

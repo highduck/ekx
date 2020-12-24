@@ -67,42 +67,22 @@ void Camera2D::updateQueue() {
     });
 }
 
-static mat4f tmpProj{};
 
 void Camera2D::render() {
-
-    draw2d::state.save_transform()
-            .save_mvp()
-            .saveScissors();
-
-    tmpProj = draw2d::state.mvp;
-
     for (auto e : activeCameras) {
         auto& camera = e.get<Camera2D>();
-
         // set current
         currentRenderingCamera = &camera;
         currentLayerMask = camera.layerMask;
 
-        // apply scissors
-        draw2d::state.setScissors(camera.screenRect);
-
-        // apply MVP
-        draw2d::state.set_mvp(tmpProj * camera.inverseMatrix);
-
-        // if (camera.clearColorEnabled) {
-        //     drawer.invalidateForce();
-        //     engine.graphics.clear(camera.clearColor);
-        // }
-
-        draw2d::state.matrix.set_identity();
-
+        draw2d::begin(rect_i{camera.screenRect}, camera.inverseMatrix);
         if (camera.clearColorEnabled) {
-            draw2d::state.set_empty_texture();
+            draw2d::state.pushProgram("draw2d_color");
             draw2d::state.color = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};
             draw2d::quad(camera.worldRect);
+            draw2d::state.color = {};
+            draw2d::state.restoreProgram();
         }
-        draw2d::state.color = {};
 
         RenderSystem2D::draw(camera.root, camera.root.tryGet<Transform2D>());
 
@@ -110,13 +90,8 @@ void Camera2D::render() {
         drawGizmo(camera);
 #endif
 
-        draw2d::flush_batcher();
-        // drawer.batcher.state.invalidate();
+        draw2d::end();
     }
-
-    draw2d::state.pop_scissors()
-            .restore_mvp()
-            .restore_transform();
 }
 
 Camera2D::Camera2D(ecs::entity root_) :
