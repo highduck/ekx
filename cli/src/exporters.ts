@@ -12,7 +12,7 @@ const exporters = {
         buildMarketingAssets(project, "gen", "export/market");
     },
     assets: (project: Project) => {
-        buildAssets(project);
+        buildAssets(project, "build/assets");
     }
 };
 
