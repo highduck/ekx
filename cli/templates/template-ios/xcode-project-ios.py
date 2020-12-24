@@ -37,7 +37,16 @@ def set_cpp_flags_for_files(project, files, flags):
             for build_file in project.get_build_files_for_file(file.get_id()):
                 build_file.add_compiler_flags(flags)
 
-excludes = ["^build$", "^CMakeLists.txt$", "^.DS_Store$", "^.*\.md$", "^.*\.js$", "^.*\.glsl$"]
+excludes = [
+    "^build$",
+    "^CMakeLists.txt$",
+    "^.DS_Store$",
+    "^.*\.md$",
+    "^.*\.js$",
+    "^.*\.glsl$",
+    "^.*\.sh$"
+]
+
 project = XcodeProject.load(f"{proj_ios_name}.xcodeproj/project.pbxproj")
 
 project_target = project.get_target_by_name("template-ios")
