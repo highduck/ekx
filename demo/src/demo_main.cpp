@@ -33,7 +33,7 @@ void initSamples() {
     sampleFactory.emplace_back([] { return new Sample3D(); });
     sampleFactory.emplace_back([] { return new SampleIntegrations(); });
     sampleFactory.emplace_back([] { return new SampleText(); });
-    setCurrentSample(2);
+    setCurrentSample(0);
 }
 
 void setCurrentSample(int index) {
