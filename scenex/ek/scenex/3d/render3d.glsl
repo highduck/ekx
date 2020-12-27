@@ -14,9 +14,9 @@ void main() {
     gl_Position = uModelViewProjection * vec4(aPosition, 1.0);
     projZW = gl_Position.zw;
 }
-    #pragma sokol @end
+#pragma sokol @end
 
-    #pragma sokol @fs fs_shadow_map
+#pragma sokol @fs fs_shadow_map
 in vec2 projZW;
 out vec4 fragColor;
 
@@ -67,11 +67,11 @@ void main() {
     gl_Position = uModelViewProjection * vec4(aPosition, 1.0);
 }
 
-    #pragma sokol @end
+#pragma sokol @end
 
-    #pragma sokol @fs fs
+#pragma sokol @fs fs
 
-    #define PI 3.14159265
+#define PI 3.14159265
 
 uniform material_params {
     vec3 mat_ambient;
@@ -82,13 +82,16 @@ uniform material_params {
     float mat_roughness;
 };
 
+// for Directional Light
 uniform light_params {
+    // light direction actually
     vec3 light_position;
     vec3 light_ambient;
     vec3 light_diffuse;
     vec3 light_specular;
 };
 
+// for Point Light
 uniform light2_params {
     vec3 light2_position;
     float light2_radius;
@@ -227,7 +230,6 @@ float calc_spec(vec3 light_dir, vec3 view_dir, vec3 normal) {
 
 float calc_shadow(const float cos_theta) {
     vec3 shadow_pos = v_shadow_pos.xyz / v_shadow_pos.w;
-    //shadow_pos = shadow_pos * 0.5 + 0.5;
     vec2 shadow_uv = shadow_pos.xy;
     shadow_uv = shadow_uv * 0.5 + 0.5;
     #if !SOKOL_GLSL
@@ -236,7 +238,6 @@ float calc_shadow(const float cos_theta) {
     float bias = 0.5 * clamp(0.005 * tan(acos(cos_theta)), 0.0, 0.01);
     // current depth
     float bias_n = shadow_pos.z - bias;
-    //closestDepth < currentDepth - bias ? 0.0 : 1.0;
 //    float its = 1.0 / 2048.0;
 //    float sum = 0.0;
 
@@ -286,12 +287,11 @@ void main() {
 
     // directional light
     {
-        vec3 light_dir = light_position;
-        float diff = oren_nayar_diffuse(light_dir, view_dir, norm, 0.5, 1.0);
+        float diff = oren_nayar_diffuse(light_position, view_dir, norm, 0.5, 1.0);
         total += mat_ambient *  light_ambient;
         if (diff > 0.0) {
-            total += (1.0 - calc_shadow(clamp(lambert_diffuse(light_dir, norm), 0.0, 1.0))) * (
-            mat_specular *  light_specular * calc_spec(light_dir, view_dir, norm) +
+            total += (1.0 - calc_shadow(clamp(lambert_diffuse(light_position, norm), 0.0, 1.0))) * (
+            mat_specular *  light_specular * calc_spec(light_position, view_dir, norm) +
             material_diffuse *  light_diffuse * diff
             );
         }
@@ -318,26 +318,14 @@ void main() {
     //    total = tonemap_unreal(total);
     total = tonemap_reinhard(total);
 
-    //vec3 light_dir = light_position;
-    //total = vec3(calc_shadow(clamp(lambert_diffuse(light_dir, norm), 0.0, 1.0)));
-
     //    gl_FragColor = dither(vec4(total, color.w));
     frag_color = vec4(total, color.w);
-
-    //
-    // Z BUFFER
-    //  float far = 1000.0;
-    //  float near = 0.1;
-    //  float z = gl_FragCoord.z * 2.0 - 1.0; // back to NDC
-    //  z = (2.0 * near * far) / (far + near - z * (far - near));
-    //  z = z / far;
-    //  gl_FragColor = vec4(vec3(z), 1.0);
 }
-    #pragma sokol @end
+#pragma sokol @end
 
-    #pragma sokol @program render3d vs fs
+#pragma sokol @program render3d vs fs
 
-    #pragma sokol @vs vs_skybox
+#pragma sokol @vs vs_skybox
 uniform vs_skybox_params {
     mat4 uModelViewProjection;
 };
@@ -356,9 +344,9 @@ void main() {
     gl_Position = pos.xyww;
 }
 
-    #pragma sokol @end
+#pragma sokol @end
 
-    #pragma sokol @fs fs_skybox
+#pragma sokol @fs fs_skybox
 
 in vec3 vTexCoord;
 uniform samplerCube imageSkybox;
@@ -368,6 +356,6 @@ void main() {
     fragColor = texture(imageSkybox, vTexCoord);
 }
 
-    #pragma sokol @end
+#pragma sokol @end
 
-    #pragma sokol @program render3d_skybox vs_skybox fs_skybox
+#pragma sokol @program render3d_skybox vs_skybox fs_skybox
