@@ -27,7 +27,6 @@ export function export_web(ctx) {
     tpl("web/index.html.mustache", "index.html");
     tpl("web/manifest.json.mustache", "manifest.webmanifest");
     tpl("web/sw.js.mustache", "sw.js");
-    file("web/howler.core.min.js", "howler.core.min.js");
     file("web/pwacompat.min.js", "pwacompat.min.js");
 
     copyFolderRecursiveSync("export/contents/assets", "export/web/assets");
