@@ -5,12 +5,10 @@ self.addEventListener('install', function (e) {
     e.waitUntil(
         caches.open(cacheName).then(function (cache) {
             return cache.addAll([
-                '{{pwa_url}}/',
                 '{{pwa_url}}/index.html',
                 '{{pwa_url}}/pwacompat.min.js',
                 '{{pwa_url}}/{{binary_name}}.js',
-                '{{pwa_url}}/{{binary_name}}.wasm',
-                '{{pwa_url}}/{{binary_name}}.data'
+                '{{pwa_url}}/{{binary_name}}.wasm'
             ]);
         }).then(function () {
             self.skipWaiting();
