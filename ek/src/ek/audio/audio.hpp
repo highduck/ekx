@@ -1,9 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
-struct Sound;
-struct Music;
+struct ma_resource_manager_data_source;
+struct ma_sound;
 
 namespace ek::audio {
 
@@ -28,7 +29,12 @@ public:
     void play(float volume = 1.0f, float pitch = 1.0f, bool multi = false);
 
 private:
-    ::Sound* ptrHandle = nullptr;
+    float volume_ = 1.0f;
+    float pitch_ = 1.0f;
+    std::vector<uint8_t> source{};
+    ma_sound* sound = nullptr;
+    ma_resource_manager_data_source* dataSource = nullptr;
+    std::string dataSourceFilePath{};
 };
 
 class Music {
@@ -62,7 +68,9 @@ private:
     float volume_ = 1.0f;
     float pitch_ = 1.0f;
     std::vector<uint8_t> source{};
-    ::Music* ptrHandle = nullptr;
+    std::string dataSourceFilePath{};
+    ma_sound* sound = nullptr;
+    ma_resource_manager_data_source* dataSource = nullptr;
 };
 
 }

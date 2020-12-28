@@ -1,116 +1,83 @@
 #include "audio.hpp"
 
-#include <raudio/raudio.h>
-#include <dr_mp3.h>
+#define DR_MP3_NO_STDIO
 
-#include <unordered_map>
+#define MA_NO_JACK
+#define MA_NO_WAV
+#define MA_NO_FLAC
+
+#define MA_NO_ENCODING
+#define MA_NO_STDIO
+#define MA_NO_GENERATION
+
+// android issue
+#define MA_NO_AAUDIO
+#define MA_NO_SDL
+
+#define MINIAUDIO_IMPLEMENTATION
+
+#include <miniaudio.h>
+#include <research/miniaudio_engine.h>
+
 #include <cassert>
 
 #include <ek/app/res.hpp>
 #include <ek/util/logger.hpp>
 
-// TODO: panning (left/right)
-
-static Wave LoadMP3(const void* data, size_t size, const char* optionalName) {
-    Wave wave = {};
-
-    // Decode an entire MP3 file in one go
-    drmp3_uint64 totalFrameCount = 0;
-    drmp3_config config = {};
-
-    wave.data = drmp3_open_memory_and_read_pcm_frames_f32(
-            data,
-            size,
-            &config,
-            &totalFrameCount,
-            NULL
-    );
-
-    wave.channels = config.channels;
-    wave.sampleRate = config.sampleRate;
-    wave.sampleCount = static_cast<unsigned int>(totalFrameCount * wave.channels);
-    wave.sampleSize = 32;
-
-    // NOTE: Only support up to 2 channels (mono, stereo)
-    if (wave.channels > 2)
-        EK_WARN("[%s] MP3 channels number (%i) not supported", optionalName, wave.channels);
-
-    if (wave.data == NULL) {
-        EK_WARN("[%s] MP3 data could not be loaded", optionalName);
-    } else
-        EK_INFO("[%s] MP3 file loaded successfully (%i Hz, %i bit, %s)",
-                optionalName, wave.sampleRate, wave.sampleSize,
-                (wave.channels == 1) ? "Mono" : "Stereo");
-
-    return wave;
-}
-
-
-// Load music stream from file
-Music LoadMusicStreamFromMemory(void* data, size_t size, const char* fileName) {
-    Music music = {};
-    bool musicLoaded = false;
-
-    drmp3* ctxMp3 = (drmp3*) RL_MALLOC(sizeof(drmp3));
-    music.ctxData = ctxMp3;
-    music.ctxType = 3 /* MUSIC_AUDIO_MP3 */;
-
-    int result = drmp3_init_memory(ctxMp3, data, size, nullptr);
-
-    if (result > 0) {
-        music.stream = InitAudioStream(ctxMp3->sampleRate, 32, ctxMp3->channels);
-        music.sampleCount = drmp3_get_pcm_frame_count(ctxMp3) * ctxMp3->channels;
-        music.looping = true;   // Infinite loop by default
-        musicLoaded = true;
-    }
-
-    if (!musicLoaded) {
-        drmp3_uninit((drmp3*) music.ctxData);
-        RL_FREE(music.ctxData);
-
-        EK_WARN("[%s] Music file could not be opened", fileName);
-    } else {
-        // Show some music stream info
-        EK_INFO("[%s] Music file successfully loaded:", fileName);
-        EK_INFO("   Total samples: %i", music.sampleCount);
-        EK_INFO("   Sample rate: %i Hz", music.stream.sampleRate);
-        EK_INFO("   Sample size: %i bits", music.stream.sampleSize);
-        EK_INFO("   Channels: %i (%s)", music.stream.channels,
-                (music.stream.channels == 1) ? "Mono" : (music.stream.channels == 2) ? "Stereo" : "Multi");
-    }
-
-    return music;
-}
-
 namespace ek::audio {
 
-bool initialized = false;
+struct AudioSystem {
+    ma_engine engine;
+    ma_resource_manager* pResourceManager;
+    ma_sound_group soundsGroup;
+    ma_sound_group musicGroup;
+    int locks = 0;
+    bool initialized = false;
+};
+
+static AudioSystem audioSystem{};
 
 void init() {
-    assert(!initialized);
-    InitAudioDevice();
-    initialized = true;
+    assert(!audioSystem.initialized);
+    {
+        ma_result result = ma_engine_init(NULL, &audioSystem.engine);
+        if (result != MA_SUCCESS) {
+            EK_WARN("Failed to initialize audio engine.");
+            return;
+        }
+        audioSystem.pResourceManager = audioSystem.engine.pResourceManager;
+
+        result = ma_sound_group_init(&audioSystem.engine, NULL, &audioSystem.soundsGroup);
+        if (result != MA_SUCCESS) {
+            EK_WARN("Failed to create sound group");
+            return;
+        }
+
+        result = ma_sound_group_init(&audioSystem.engine, NULL, &audioSystem.musicGroup);
+        if (result != MA_SUCCESS) {
+            EK_WARN("Failed to create sound group");
+            return;
+        }
+    }
+    audioSystem.initialized = true;
 }
 
-int lockCounter = 0;
-
 void muteDeviceBegin() {
-    assert(lockCounter >= 0);
-    if (lockCounter == 0) {
+    assert(audioSystem.locks >= 0);
+    if (audioSystem.locks == 0) {
         //PauseDevice();
-        SetMasterVolume(0.0f);
+        ma_engine_set_volume(&audioSystem.engine, 0.0f);
     }
-    ++lockCounter;
+    ++audioSystem.locks;
 }
 
 void muteDeviceEnd() {
-    --lockCounter;
-    assert(lockCounter >= 0);
-    if (lockCounter == 0) {
+    --audioSystem.locks;
+    assert(audioSystem.locks >= 0);
+    if (audioSystem.locks == 0) {
         // device could be paused during background
         //ResumeDevice();
-
-        SetMasterVolume(1.0f);
+        ma_engine_set_volume(&audioSystem.engine, 1.0f);
     }
 }
 
@@ -123,18 +90,48 @@ void vibrate(int duration_millis) {
 /** Sound **/
 
 void Sound::load(const char* path) {
-    get_resource_content_async(path, [this, path](const array_buffer& buffer) {
-        ::Wave wave = LoadMP3(buffer.data(), buffer.size(), path);
-        ptrHandle = new ::Sound(LoadSoundFromWave(wave));
-        UnloadWave(wave);
+    dataSourceFilePath = path;
+    get_resource_content_async(path, [this](array_buffer&& buffer) {
+        source = std::move(buffer);
+
+        ma_resource_manager_memory_buffer memoryBuffer;
+        memoryBuffer.encoded.pData = source.data();
+        memoryBuffer.encoded.sizeInBytes = source.size();
+        ma_result result = ma_resource_manager_register_data(
+                audioSystem.pResourceManager,
+                dataSourceFilePath.c_str(),
+                ma_resource_manager_data_buffer_encoding_encoded,
+                &memoryBuffer);
+        if (result != MA_SUCCESS) {
+            EK_WARN("cannot register data");
+        }
+        dataSource = new ma_resource_manager_data_source();
+        result = ma_resource_manager_data_source_init(
+                audioSystem.pResourceManager, dataSourceFilePath.c_str(),
+                MA_DATA_SOURCE_FLAG_DECODE, nullptr, dataSource);
+        if (result != MA_SUCCESS) {
+            EK_WARN("cannot init stream data source");
+        }
+
+        sound = new ma_sound();
+        result = ma_sound_init_from_data_source(&audioSystem.engine, dataSource, MA_DATA_SOURCE_FLAG_DECODE,
+                                                &audioSystem.musicGroup, sound);
+        if (result != MA_SUCCESS) {
+            EK_WARN("cannot init sound for music");
+        }
     });
 }
 
 void Sound::unload() {
-    if (ptrHandle) {
-        UnloadSound(*ptrHandle);
-        delete ptrHandle;
-        ptrHandle = nullptr;
+    if (sound) {
+        ma_sound_uninit(sound);
+        delete sound;
+        sound = nullptr;
+
+        ma_resource_manager_unregister_data(audioSystem.pResourceManager, dataSourceFilePath.c_str());
+        ma_resource_manager_data_source_uninit(dataSource);
+        delete dataSource;
+        dataSource = nullptr;
     }
 }
 
@@ -143,14 +140,15 @@ Sound::~Sound() {
 }
 
 void Sound::play(float volume, float pitch, bool multi) {
-    if (ptrHandle && volume > 0.0f) {
-        ::Sound handle = *ptrHandle;
-        SetSoundVolume(handle, volume);
-        SetSoundPitch(handle, pitch);
+    if (sound && volume > 0.0f) {
+        ma_sound_set_volume(sound, volume);
+        ma_sound_set_pitch(sound, pitch);
         if (multi) {
-            PlaySoundMulti(handle);
+            // TODO:
+            //PlaySoundMulti(handle);
+            ma_sound_start(sound);
         } else {
-            PlaySound(handle);
+            ma_sound_start(sound);
         }
     }
 }
@@ -163,16 +161,48 @@ Sound::Sound(const char* path) {
 
 void Music::load(const char* path) {
     get_resource_content_async(path, [this, path](array_buffer buf) {
-        ptrHandle = new ::Music(LoadMusicStreamFromMemory(buf.data(), buf.size(), path));
         source = std::move(buf);
+
+        dataSourceFilePath = path;
+
+        ma_resource_manager_memory_buffer memoryBuffer;
+        memoryBuffer.encoded.pData = source.data();
+        memoryBuffer.encoded.sizeInBytes = source.size();
+        ma_result result = ma_resource_manager_register_data(
+                audioSystem.pResourceManager,
+                dataSourceFilePath.c_str(),
+                ma_resource_manager_data_buffer_encoding_encoded,
+                &memoryBuffer);
+        if (result != MA_SUCCESS) {
+            EK_WARN("cannot register data");
+        }
+        dataSource = new ma_resource_manager_data_source();
+        result = ma_resource_manager_data_source_init(
+                audioSystem.pResourceManager, path,
+                MA_DATA_SOURCE_FLAG_STREAM, NULL, dataSource);
+        if (result != MA_SUCCESS) {
+            EK_WARN("cannot init stream data source");
+        }
+
+        sound = new ma_sound();
+        result = ma_sound_init_from_data_source(&audioSystem.engine, dataSource, MA_DATA_SOURCE_FLAG_STREAM,
+                                                &audioSystem.musicGroup, sound);
+        if (result != MA_SUCCESS) {
+            EK_WARN("cannot init sound for music");
+        }
     });
 }
 
 void Music::unload() {
-    if (ptrHandle) {
-        UnloadMusicStream(*ptrHandle);
-        delete ptrHandle;
-        ptrHandle = nullptr;
+    if (dataSource) {
+        ma_sound_uninit(sound);
+        delete sound;
+        sound = nullptr;
+
+        ma_resource_manager_unregister_data(audioSystem.pResourceManager, dataSourceFilePath.c_str());
+        ma_resource_manager_data_source_uninit(dataSource);
+        delete dataSource;
+        dataSource = nullptr;
     }
     source.resize(0);
     source.shrink_to_fit();
@@ -183,34 +213,33 @@ Music::~Music() {
 }
 
 void Music::play() {
-    if (ptrHandle) {
-        ::Music music = *ptrHandle;
-        if (!IsMusicPlaying(music)) {
-            PlayMusicStream(music);
+    if (sound) {
+        if (!ma_sound_is_playing(sound)) {
+            ma_sound_start(sound);
         }
     }
 }
 
 void Music::stop() {
-    if (ptrHandle) {
-        ::Music music = *ptrHandle;
-        if (IsMusicPlaying(music)) {
-            StopMusicStream(music);
+    if (sound) {
+        if (ma_sound_is_playing(sound)) {
+            ma_sound_stop(sound);
         }
     }
 }
 
 void Music::update() {
-    if (ptrHandle) {
-        ::Music music = *ptrHandle;
-        UpdateMusicStream(music);
+    if (sound) {
+//        ma_sound_update
+//        ::Music music = *ptrHandle;
+//        UpdateMusicStream(music);
     }
 }
 
 void Music::setVolume(float volume) {
     volume_ = volume;
-    if (ptrHandle) {
-        SetMusicVolume(*ptrHandle, volume);
+    if (sound) {
+        ma_sound_set_volume(sound, volume);
     }
 }
 
@@ -220,8 +249,8 @@ float Music::getVolume() const {
 
 void Music::setPitch(float pitch) {
     pitch_ = pitch;
-    if (ptrHandle) {
-        SetMusicPitch(*ptrHandle, pitch);
+    if (sound) {
+        ma_sound_set_pitch(sound, pitch);
     }
 }
 
