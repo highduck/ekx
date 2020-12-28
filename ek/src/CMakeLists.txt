@@ -10,8 +10,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         ek/ext/analytics/analytics.hpp
         ek/ext/sharing/sharing.hpp
 
-        raudio/raudio.cpp
-
         ek/audio/audio.cpp
 
         ek/file_view.cpp

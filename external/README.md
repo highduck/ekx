@@ -19,14 +19,7 @@ Package: manual from github
 Package: manual from github
 
 - **CLIENT** cross-platform audio device abstraction
-
-### [dr_libs](https://github.com/mackron/dr_libs)
-
-Package: manual from github
-
-`dr_mp3`
-
-- **CLIENT** decoding MP3 file resources
+- **CLIENT** simple audio engine to load and play sounds
 
 ## Only for Editor
 

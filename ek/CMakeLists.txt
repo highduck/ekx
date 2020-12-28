@@ -7,8 +7,7 @@ add_subdirectory(src)
 
 target_link_libraries(${PROJECT_NAME}
         ek-core
-        miniaudio
-        dr_libs)
+        miniaudio)
 
 #target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
 set_target_properties(${PROJECT_NAME} PROPERTIES

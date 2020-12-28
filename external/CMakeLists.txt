@@ -6,7 +6,6 @@ add_subdirectory(miniz)
 add_subdirectory(pugixml)
 add_subdirectory(imgui)
 add_subdirectory(stb)
-add_subdirectory(dr_libs)
 add_subdirectory(miniaudio)
 add_subdirectory(sokol)
 

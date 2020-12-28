@@ -5,6 +5,14 @@
 
 namespace ek {
 
+/*
+ TODO:
+ FileView:
+ - Open, read to buffer, close. Buffer deletes on the end
+ - Map file, unmap file
+ - fetch from network .. store buffer. Delete buffer
+ */
+
 class FileView {
 public:
     explicit FileView(const char* path);
