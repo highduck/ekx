@@ -10,9 +10,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    env:
-      CI: true
-      working-directory: ./cli
 
     strategy:
       matrix:
@@ -26,4 +23,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - run: yarn
+        env:
+          CI: true
+          working-directory: ./cli
       - run: yarn build
+        env:
+          CI: true
+          working-directory: ./cli
