@@ -10,10 +10,10 @@ namespace ek::piko {
 
 void book::draw() {
 
-    draw2d::state.set_empty_texture();
+    draw2d::current().set_empty_texture();
     draw2d::quad(0, 0, 128, 128, 0x0_rgb);
 
-    draw2d::state
+    draw2d::current()
             .save_transform()
             .scale(0.5f, 0.5f)
             .translate(64, 64 + 32);
@@ -39,7 +39,7 @@ void book::draw() {
         }
     }
 
-    draw2d::state.restore_transform();
+    draw2d::current().restore_transform();
 }
 
 void dna::draw() {
@@ -72,7 +72,7 @@ void dna::draw() {
     goto _
      */
 
-    draw2d::state.set_empty_texture();
+    draw2d::current().set_empty_texture();
     draw2d::quad(0, 0, 128, 128, 0x0_rgb);
 
     for (int i = 0; i <= 288; ++i) {
@@ -134,7 +134,7 @@ void diamonds::draw() {
     const float w = rt->desc.width;
     const float h = rt->desc.height;
 
-    draw2d::state.set_texture_region(rt, rect_f::zero_one);
+    draw2d::current().set_texture_region(rt, rect_f::zero_one);
     draw2d::quad(0.0f, 0.0f, w, h);
 
 //    recorder.render();

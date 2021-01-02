@@ -32,15 +32,12 @@ add_library(${PROJECT_NAME} STATIC
         ek/math/color_transform.hpp
         ek/math/packed_color.hpp
 
-        ek/math/transform.hpp
-
         ek/math/easing.hpp
 
         ek/math/rand.cpp
         ek/math/rand.hpp
 
         ek/math/internal/static_check.hpp
-        ek/math/internal/static_check.cpp
 
         ek/serialize/streams.hpp
         ek/serialize/core.hpp

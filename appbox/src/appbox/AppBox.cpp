@@ -57,7 +57,7 @@ void AppBox::initDefaultControls(ecs::entity e) {
         // VERSION
         auto e_version = find(e, "version");
         if (e_version) {
-            e_version.get<Display2D>().get<Text2D>()->text = config.version;
+            e_version.get<Display2D>().get<Text2D>().text = config.version;
         }
     }
     {
@@ -66,7 +66,7 @@ void AppBox::initDefaultControls(ecs::entity e) {
         if (e_pp) {
             auto lbl = find(e_pp, "label");
             if (lbl) {
-                auto* txt = lbl.get<Display2D>().get<Text2D>();
+                auto* txt = lbl.get<Display2D>().tryGet<Text2D>();
                 txt->hitFullBounds = true;
             }
             e_pp.get_or_create<Interactive>();

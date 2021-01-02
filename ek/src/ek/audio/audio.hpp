@@ -26,15 +26,14 @@ public:
 
     void unload();
 
-    void play(float volume = 1.0f, float pitch = 1.0f, bool multi = false);
+    void play(float volume = 1.0f, float pitch = 1.0f);
 
+    ma_sound* getNextSound();
 private:
-    float volume_ = 1.0f;
-    float pitch_ = 1.0f;
     std::vector<uint8_t> source{};
-    ma_sound* sound = nullptr;
     ma_resource_manager_data_source* dataSource = nullptr;
     std::string dataSourceFilePath{};
+    std::vector<ma_sound*> sounds{};
 };
 
 class Music {

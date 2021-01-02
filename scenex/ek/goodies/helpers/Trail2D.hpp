@@ -83,6 +83,7 @@ public:
     std::vector<float2> vertices;
     float width = 20.0f;
     float minWidth = 5.0f;
+    Res<Sprite> sprite{"empty"};
 };
 
 }

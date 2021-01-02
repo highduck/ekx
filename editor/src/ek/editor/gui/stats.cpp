@@ -20,7 +20,7 @@ void guiStatsWindow(bool* p_open) {
         );
         const auto& entities = ecs::world::the.entities;
         ImGui::Text("%u entities | %u free", entities.size(), entities.available_for_recycling());
-        ImGui::Text("Batching buffer objects: %0.2f MB", (draw2d::getBatchingUsedMemory() / 1000000.0f));
+        ImGui::Text("Batching buffer objects: %0.2f MB", (draw2d::current().getUsedMemory() / 1000000.0f));
     }
     ImGui::End();
 }

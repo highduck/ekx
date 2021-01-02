@@ -146,34 +146,58 @@ void TrailRenderer2D::draw() {
 
     const auto columns = static_cast<int>(nodes.size());
     const auto quads = columns - 1;
-    if (quads > 0) {
-        draw2d::state.set_empty_texture();
-        draw2d::triangles(columns * 2, quads * 6);
+    if (quads <= 0) {
+        return;
+    }
+    const auto* spr = sprite.get();
+    if(!spr || spr->texture.empty()) {
+        return;
+    }
 
-        int v = 0;
-        int node_idx = 0;
+    auto& drawer = draw2d::current();
 
-        const auto co = draw2d::state.color.offset;
-        for (int i = 0; i < columns; ++i) {
-            const auto cm0 = draw2d::state.color.scale.scaleAlpha(nodes[node_idx].energy);
-            const auto v0 = vertices[v++];
-            const auto v1 = vertices[v++];
-            draw2d::write_vertex(v0.x, v0.y, 0.0f, 0.0f, cm0, co);
-            draw2d::write_vertex(v1.x, v1.y, 0.0f, 1.0f, cm0, co);
-            ++node_idx;
-        }
+    drawer.set_texture(spr->texture.get());
+    drawer.allocTriangles(columns * 2, quads * 6);
 
-        v = draw2d::getBatcher()->get_vertex_index();
-        uint16_t* indices = draw2d::getBatcher()->index_memory_ptr();
-        for (int i = 0; i < quads; ++i) {
-            *(indices++) = v;
-            *(indices++) = v + 2;
-            *(indices++) = v + 3;
-            *(indices++) = v + 3;
-            *(indices++) = v + 1;
-            *(indices++) = v;
-            v += 2;
-        }
+    int v = 0;
+    int node_idx = 0;
+
+    const auto co = drawer.color.offset;
+    const auto texCoordU = spr->tex.center_x();
+    const auto texCoordV0 = spr->tex.y;
+    const auto texCoordV1 = spr->tex.bottom();
+    const auto& m = drawer.matrix;
+    auto* ptr = drawer.vertexDataPos_;
+
+    for (int i = 0; i < columns; ++i) {
+        const auto cm0 = drawer.color.scale.scaleAlpha(nodes[node_idx].energy);
+        const auto v1 = vertices[v++];
+        const auto v2 = vertices[v++];
+        ptr->position = m.transform(v1.x, v1.y);
+        ptr->uv.x = texCoordU;
+        ptr->uv.y = texCoordV0;
+        ptr->cm = cm0;
+        ptr->co = co;
+        ++ptr;
+        ptr->position = m.transform(v2.x, v2.y);
+        ptr->uv.x = texCoordU;
+        ptr->uv.y = texCoordV1;
+        ptr->cm = cm0;
+        ptr->co = co;
+        ++ptr;
+        ++node_idx;
+    }
+
+    v = drawer.baseVertex_;
+    uint16_t* indices = drawer.indexDataPos_;
+    for (int i = 0; i < quads; ++i) {
+        *(indices++) = v;
+        *(indices++) = v + 2;
+        *(indices++) = v + 3;
+        *(indices++) = v + 3;
+        *(indices++) = v + 1;
+        *(indices++) = v;
+        v += 2;
     }
 }
 }

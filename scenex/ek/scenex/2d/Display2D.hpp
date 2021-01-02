@@ -88,7 +88,13 @@ struct Display2D {
 
     template<typename T>
     [[nodiscard]]
-    inline T* get() const {
+    inline T& get() const {
+        return *static_cast<T*>(drawable.get());
+    }
+
+    template<typename T>
+    [[nodiscard]]
+    inline T* tryGet() const {
         if (drawable && drawable->matchType<T>()) {
             return static_cast<T*>(drawable.get());
         }
@@ -155,14 +161,32 @@ public:
     Res<Sprite> src;
     bool hit_pixels = true;
 
-    bool scale_grid_mode = false;
+    Sprite2D();
+
+    explicit Sprite2D(const std::string& spriteId);
+
+    void draw() override;
+
+    [[nodiscard]]
+    rect_f getBounds() const override;
+
+    [[nodiscard]]
+    bool hitTest(float2 point) const override;
+};
+
+
+class NinePatch2D : public Drawable2D<NinePatch2D> {
+public:
+    Res<Sprite> src;
+    bool hit_pixels = true;
+
     rect_f scale_grid;
     float2 scale;
     rect_f manual_target;
 
-    Sprite2D();
+    NinePatch2D();
 
-    explicit Sprite2D(const std::string& sprite_id, rect_f a_scale_grid = rect_f::zero);
+    explicit NinePatch2D(const std::string& spriteId, rect_f aScaleGrid = rect_f::zero);
 
     void draw() override;
 
