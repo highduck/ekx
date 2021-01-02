@@ -89,7 +89,7 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
     }
     auto alignment = format.alignment;
 
-    draw2d::state.pushProgram("draw2d_alpha");
+    draw2d::current().pushProgram("draw2d_alpha");
     // render effects first
     for (int i = format.layersCount - 1; i >= 0; --i) {
         auto& layer = format.layers[i];
@@ -102,7 +102,7 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
         }
         drawLayer(text, layer, info);
     }
-    draw2d::state.restoreProgram();
+    draw2d::current().restoreProgram();
 }
 
 void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const TextBlockInfo& info) const {
@@ -124,7 +124,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
 
     current.x += (info.size.x - info.lines[lineIndex].size.x) * alignment.x;
 
-    draw2d::state.save_color().scaleColor(layer.color);
+    draw2d::current().save_color().scaleColor(layer.color);
 
     const graphics::Texture* prevTexture = nullptr;
     uint32_t prevCodepointOnLine = 0;
@@ -141,10 +141,10 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
                 }
                 if (gdata.texture) {
                     if (prevTexture != gdata.texture) {
-                        draw2d::state.set_texture(gdata.texture);
+                        draw2d::current().set_texture(gdata.texture);
                         prevTexture = gdata.texture;
                     }
-                    draw2d::state.set_texture_coords(gdata.texCoord);
+                    draw2d::current().set_texture_coords(gdata.texCoord);
                     gdata.rect = translate(gdata.rect * size, current);
                     if (!gdata.rotated) {
                         draw2d::quad(gdata.rect.x,
@@ -159,9 +159,9 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
                     }
                     // only for DEV mode
                     if (layer.showGlyphBounds) {
-                        draw2d::state.set_empty_texture();
+                        draw2d::current().set_empty_texture();
                         draw2d::strokeRect(gdata.rect, 0xFFFFFF_rgb, 1);
-                        draw2d::state.set_texture(gdata.texture);
+                        draw2d::current().set_texture(gdata.texture);
                     }
                 }
 
@@ -179,7 +179,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
         }
     }
 
-    draw2d::state.restore_color();
+    draw2d::current().restore_color();
 }
 
 struct TextEngineUtils {

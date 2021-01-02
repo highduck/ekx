@@ -7,13 +7,13 @@ namespace ek {
 
 void begin_transform(const Transform2D& transform) {
     const_cast<Transform2D&>(transform).updateLocalMatrix();
-    draw2d::state.save_transform()
+    draw2d::current().save_transform()
             .concat(transform.color.scale, transform.color.offset)
             .concat(transform.matrix);
 }
 
 void end_transform() {
-    draw2d::state.restore_transform();
+    draw2d::current().restore_transform();
 }
 
 void Transform2D::updateLocalMatrix() {

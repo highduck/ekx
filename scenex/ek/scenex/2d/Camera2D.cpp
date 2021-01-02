@@ -77,11 +77,11 @@ void Camera2D::render() {
 
         draw2d::begin(rect_i{camera.screenRect}, camera.inverseMatrix);
         if (camera.clearColorEnabled) {
-            draw2d::state.pushProgram("draw2d_color");
-            draw2d::state.color = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};
+            draw2d::current().pushProgram("draw2d_color");
+            draw2d::current().color = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};
             draw2d::quad(camera.worldRect);
-            draw2d::state.color = {};
-            draw2d::state.restoreProgram();
+            draw2d::current().color = {};
+            draw2d::current().restoreProgram();
         }
 
         RenderSystem2D::draw(camera.root, camera.root.tryGet<Transform2D>());

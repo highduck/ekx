@@ -98,22 +98,29 @@ void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
         mov.fps = data->movie->fps;
     }
 
+    auto* display = entity.tryGet<Display2D>();
     Sprite2D* sprite = nullptr;
-    if (ecs::has<Display2D>(entity)) {
-        auto& display = ecs::get<Display2D>(entity);
-        if (display.is<Sprite2D>()) {
-            sprite = display.get<Sprite2D>();
-        }
+    NinePatch2D* ninePatch = nullptr;
+    if (display) {
+        sprite = display->tryGet<Sprite2D>();
+        ninePatch = display->tryGet<NinePatch2D>();
     }
 
     if (!data->sprite.empty() && !sprite) {
-        auto& display = ecs::get_or_create<Display2D>(entity);
-        sprite = new Sprite2D(data->sprite, data->scaleGrid);
-        display.drawable.reset(sprite);
+        if (!display) {
+            display = &entity.assign<Display2D>();
+        }
+        if (data->scaleGrid.empty()) {
+            sprite = new Sprite2D(data->sprite);
+            display->drawable.reset(sprite);
+        } else {
+            ninePatch = new NinePatch2D(data->sprite, data->scaleGrid);
+            display->drawable.reset(ninePatch);
+        }
     }
 
-    if (sprite && sprite->scale_grid_mode) {
-        sprite->scale = data->matrix.scale();
+    if (ninePatch) {
+        ninePatch->scale = data->matrix.scale();
     }
 
     if (data->scissorsEnabled || data->hitAreaEnabled || data->boundsEnabled) {

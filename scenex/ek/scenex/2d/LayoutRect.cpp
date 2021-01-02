@@ -47,8 +47,8 @@ void update_layout(ecs::entity e) {
     auto& transform = ecs::get<Transform2D>(e);
     if ((l.fill_x || l.fill_y) && ecs::has<Display2D>(e)) {
         auto& display = ecs::get<Display2D>(e);
-        if (display.is<Quad2D>()) {
-            auto* quad = display.get<Quad2D>();
+        auto* quad = display.tryGet<Quad2D>();
+        if (quad) {
             if (l.fill_x) {
                 quad->rect.x = top_rect.x;
                 quad->rect.width = top_rect.width;
@@ -58,8 +58,8 @@ void update_layout(ecs::entity e) {
                 quad->rect.height = top_rect.height;
             }
         } else if (display.is<Sprite2D>()) {
-            auto* sprite = display.get<Sprite2D>();
-            auto bounds = sprite->getBounds();
+            auto& sprite = display.get<Sprite2D>();
+            auto bounds = sprite.getBounds();
             if (!bounds.empty()) {
                 if (l.fill_x) {
                     transform.position.x = top_rect.x + l.fill_extra.x;

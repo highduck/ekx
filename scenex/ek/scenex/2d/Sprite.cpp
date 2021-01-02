@@ -20,7 +20,7 @@ static unsigned short nine_patch_indices[] = {
 
 bool Sprite::select() const {
     if (texture) {
-        draw2d::state.set_texture_region(texture.get(), tex);
+        draw2d::current().set_texture_region(texture.get(), tex);
         return true;
     }
     return false;
@@ -32,7 +32,7 @@ void Sprite::draw() const {
 
 void Sprite::draw(const rect_f& rc) const {
     if (texture) {
-        draw2d::state.set_texture_region(texture.get(), tex);
+        draw2d::current().set_texture_region(texture.get(), tex);
         if (rotated) {
             draw2d::quad_rotated(rc.x, rc.y, rc.width, rc.height);
         } else {
@@ -46,7 +46,7 @@ void Sprite::draw_grid(const rect_f& grid, const rect_f& target) const {
         return;
     }
 
-    draw2d::state.set_texture_region(texture.get(), tex);
+    draw2d::current().set_texture_region(texture.get(), tex);
 
     float x = rect.x;
     float y = rect.y;
@@ -77,8 +77,8 @@ void Sprite::draw_grid(const rect_f& grid, const rect_f& target) const {
     float v3 = 1;
 
     draw2d::triangles(4 * 4, 6 * 9);
-    auto cm = draw2d::state.color.scale;
-    auto co = draw2d::state.color.offset;
+    auto cm = draw2d::current().color.scale;
+    auto co = draw2d::current().color.offset;
     /////
     draw2d::write_vertex(x0, y0, u0, v0, cm, co);
     draw2d::write_vertex(x1, y0, u1, v0, cm, co);

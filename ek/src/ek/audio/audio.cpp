@@ -112,21 +112,18 @@ void Sound::load(const char* path) {
         if (result != MA_SUCCESS) {
             EK_WARN("cannot init stream data source");
         }
-
-        sound = new ma_sound();
-        result = ma_sound_init_from_data_source(&audioSystem.engine, dataSource, MA_DATA_SOURCE_FLAG_DECODE,
-                                                &audioSystem.musicGroup, sound);
-        if (result != MA_SUCCESS) {
-            EK_WARN("cannot init sound for music");
-        }
     });
 }
 
 void Sound::unload() {
-    if (sound) {
-        ma_sound_uninit(sound);
-        delete sound;
-        sound = nullptr;
+    if (dataSource) {
+        for (auto* sound : sounds) {
+            if (sound) {
+                ma_sound_uninit(sound);
+                delete sound;
+            }
+        }
+        sounds.resize(0);
 
         ma_resource_manager_unregister_data(audioSystem.pResourceManager, dataSourceFilePath.c_str());
         ma_resource_manager_data_source_uninit(dataSource);
@@ -139,18 +136,40 @@ Sound::~Sound() {
     unload();
 }
 
-void Sound::play(float volume, float pitch, bool multi) {
-    if (sound && volume > 0.0f) {
-        ma_sound_set_volume(sound, volume);
-        ma_sound_set_pitch(sound, pitch);
-        if (multi) {
-            // TODO:
-            //PlaySoundMulti(handle);
-            ma_sound_start(sound);
-        } else {
+void Sound::play(float volume, float pitch) {
+    if (dataSource && volume > 0.0f) {
+        auto* sound = getNextSound();
+        if (sound) {
+            ma_sound_set_volume(sound, volume);
+            ma_sound_set_pitch(sound, pitch);
             ma_sound_start(sound);
         }
     }
+}
+
+ma_sound* Sound::getNextSound() {
+    for (auto* snd : sounds) {
+        if (snd && ma_sound_at_end(snd)) {
+            if (ma_sound_is_playing(snd)) {
+                ma_sound_stop(snd);
+            }
+//            ma_result result = ma_data_source_seek_to_pcm_frame(snd->pDataSource, 0);
+//            if (result != MA_SUCCESS) {
+//                return result;  /* Failed to seek back to the start. */
+//            }
+            return snd;
+        }
+    }
+    auto* sound = new ma_sound();
+//    auto result = ma_sound_init_from_data_source(&audioSystem.engine, dataSource, MA_DATA_SOURCE_FLAG_DECODE,
+//                                            &audioSystem.soundsGroup, sound);
+    auto result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(), MA_DATA_SOURCE_FLAG_DECODE,
+                                          nullptr, &audioSystem.soundsGroup, sound);
+    if (result != MA_SUCCESS) {
+        EK_WARN("cannot init sound for music");
+    }
+    sounds.push_back(sound);
+    return sound;
 }
 
 Sound::Sound(const char* path) {
@@ -185,8 +204,9 @@ void Music::load(const char* path) {
         }
 
         sound = new ma_sound();
-        result = ma_sound_init_from_data_source(&audioSystem.engine, dataSource, MA_DATA_SOURCE_FLAG_STREAM,
-                                                &audioSystem.musicGroup, sound);
+        result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(), MA_DATA_SOURCE_FLAG_STREAM,
+                                         nullptr, &audioSystem.musicGroup, sound);
+        ma_sound_set_looping(sound, true);
         if (result != MA_SUCCESS) {
             EK_WARN("cannot init sound for music");
         }

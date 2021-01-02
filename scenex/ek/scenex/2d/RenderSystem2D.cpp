@@ -18,8 +18,8 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
 
     auto* uglyFilter = e.tryGet<UglyFilter2D>();
     if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {
-        draw2d::state.matrix = transform->worldMatrix;
-        draw2d::state.color = transform->worldColor;
+        draw2d::current().matrix = transform->worldMatrix;
+        draw2d::current().color = transform->worldColor;
         if (uglyFilter->pass(e)) {
             // discard
             return;
@@ -31,13 +31,13 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
         auto rc = bounds->getScreenRect(camera->inverseMatrix, transform->worldMatrix);
         if (Camera2D::getCurrentRenderingCamera()->occlusionEnabled) {
-            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors)) {
+            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::current().scissors)) {
                 // discard
                 return;
             }
         }
         if (bounds->scissors) {
-            draw2d::state.pushClipRect(rc);
+            draw2d::current().pushClipRect(rc);
         }
     }
 
@@ -46,11 +46,11 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
     if (display) {
         if (display->program) {
             programChanged = true;
-            draw2d::state.saveProgram().setProgram(display->program.get());
+            draw2d::current().saveProgram().setProgram(display->program.get());
         }
         if (display->drawable) {
-            draw2d::state.matrix = transform->worldMatrix;
-            draw2d::state.color = transform->worldColor;
+            draw2d::current().matrix = transform->worldMatrix;
+            draw2d::current().color = transform->worldColor;
             display->drawable->draw();
         }
     }
@@ -71,10 +71,10 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
     }
 
     if (bounds && bounds->scissors) {
-        draw2d::state.popClipRect();
+        draw2d::current().popClipRect();
     }
     if (programChanged) {
-        draw2d::state.restoreProgram();
+        draw2d::current().restoreProgram();
     }
 }
 
@@ -93,16 +93,16 @@ void RenderSystem2D::drawStack(ecs::entity e) {
     auto* bounds = e.tryGet<Bounds2D>();
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
-        auto rc = bounds->getScreenRect(camera->inverseMatrix, draw2d::state.matrix);
+        auto rc = bounds->getScreenRect(camera->inverseMatrix, draw2d::current().matrix);
         if (Camera2D::getCurrentRenderingCamera()->occlusionEnabled) {
-            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors)) {
+            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::current().scissors)) {
                 // discard
                 return;
             }
         }
         if (bounds->scissors) {
-            draw2d::state.pushClipRect(rc);
-            //draw2d::state.push_scissors(scissors->world_rect(transform->worldMatrix));
+            draw2d::current().pushClipRect(rc);
+            //draw2d::current().push_scissors(scissors->world_rect(transform->worldMatrix));
         }
     }
 
@@ -111,7 +111,7 @@ void RenderSystem2D::drawStack(ecs::entity e) {
     if (display) {
         if (display->program) {
             programChanged = true;
-            draw2d::state.saveProgram().setProgram(display->program.get());
+            draw2d::current().saveProgram().setProgram(display->program.get());
         }
         if (display->drawable) {
             display->drawable->draw();
@@ -124,25 +124,25 @@ void RenderSystem2D::drawStack(ecs::entity e) {
         if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
             const auto* childTransform = it.tryGet<Transform2D>();
             if (childTransform) {
-                draw2d::state.save_transform();
-                draw2d::state.concat(childTransform->matrix);
-                draw2d::state.concat(childTransform->color);
+                draw2d::current().save_transform();
+                draw2d::current().concat(childTransform->matrix);
+                draw2d::current().concat(childTransform->color);
             }
-            if (draw2d::state.color.scale.a > 0) {
+            if (draw2d::current().color.scale.a > 0) {
                 drawStack(it);
             }
             if (childTransform) {
-                draw2d::state.restore_transform();
+                draw2d::current().restore_transform();
             }
         }
         it = child.sibling_next;
     }
 
     if (bounds && bounds->scissors) {
-        draw2d::state.popClipRect();
+        draw2d::current().popClipRect();
     }
     if (programChanged) {
-        draw2d::state.restoreProgram();
+        draw2d::current().restoreProgram();
     }
 }
 }

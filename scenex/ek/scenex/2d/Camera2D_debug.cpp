@@ -16,7 +16,7 @@ void debugDrawPointer(Camera2D& camera) {
     auto ptr = im.pointerScreenPosition_;
     auto v = camera.matrix.transform(ptr.x, ptr.y);
     float t = TimeLayer::Root->total;
-    draw2d::state.set_empty_texture();
+    draw2d::current().set_empty_texture();
     draw2d::fill_circle({v.x, v.y, 20 + 5 * sinf(t)}, 0x0_argb, 0xFFFFFFFF_argb, 10);
 
     if (im.pointerDown_) {
@@ -27,12 +27,12 @@ void debugDrawPointer(Camera2D& camera) {
 void drawBox(const rect_f& rc, const matrix_2d& m, argb32_t color1, argb32_t color2,
              bool cross = true, argb32_t fillColor = 0_argb) {
 
-    draw2d::state.set_empty_texture();
+    draw2d::current().set_empty_texture();
     if (fillColor != argb32_t::zero) {
-        draw2d::state.save_matrix();
-        draw2d::state.matrix = m;
+        draw2d::current().save_matrix();
+        draw2d::current().matrix = m;
         draw2d::quad(rc, fillColor);
-        draw2d::state.restore_matrix();
+        draw2d::current().restore_matrix();
     }
     auto v1 = m.transform(rc.x, rc.y);
     auto v2 = m.transform(rc.right(), rc.y);
@@ -102,9 +102,9 @@ void traverseVisibleNodes(ecs::entity e, const Transform2D* parentTransform, Fun
 
 void drawFills(Camera2D& camera) {
 
-    draw2d::state.save_transform();
-    draw2d::state.color = {};
-    draw2d::state.set_empty_texture();
+    draw2d::current().save_transform();
+    draw2d::current().color = {};
+    draw2d::current().set_empty_texture();
 
     traverseVisibleNodes<Display2D>(
             camera.root,
@@ -136,14 +136,14 @@ void drawFills(Camera2D& camera) {
                 }
             });
 
-    draw2d::state.restore_transform();
+    draw2d::current().restore_transform();
 }
 
 void drawOcclusion(Camera2D& camera) {
 
-    draw2d::state.save_transform();
-    draw2d::state.color = {};
-    draw2d::state.set_empty_texture();
+    draw2d::current().save_transform();
+    draw2d::current().color = {};
+    draw2d::current().set_empty_texture();
     auto cameraRect = camera.worldRect;
     traverseVisibleNodes<Bounds2D>(camera.root, nullptr,
                                    [cameraRect](const Bounds2D& bounds, const Transform2D* transform) {
@@ -155,7 +155,7 @@ void drawOcclusion(Camera2D& camera) {
                                        const auto boundsColor = occluded ? 0x77770000_argb : 0x77007700_argb;
                                        drawBox(bounds.rect, transform->worldMatrix, boundsColor, boundsColor, false);
                                    });
-    draw2d::state.restore_transform();
+    draw2d::current().restore_transform();
 }
 
 void debugCameraGizmo(Camera2D& camera) {
@@ -170,8 +170,8 @@ void debugCameraGizmo(Camera2D& camera) {
 }
 
 void Camera2D::drawGizmo(Camera2D& camera) {
-    draw2d::state.matrix.set_identity();
-    draw2d::state.color = {};
+    draw2d::current().matrix.set_identity();
+    draw2d::current().color = {};
 
     if (camera.debugVisibleBounds) {
         drawFills(camera);
@@ -192,8 +192,8 @@ void Camera2D::drawGizmo(Camera2D& camera) {
         for (auto e : ecs::view<ScriptHolder>()) {
             auto* transform = findComponentInParent<Transform2D>(e);
             if (transform) {
-                draw2d::state.matrix = transform->worldMatrix;
-                draw2d::state.color = transform->worldColor;
+                draw2d::current().matrix = transform->worldMatrix;
+                draw2d::current().color = transform->worldColor;
                 for (auto& script : e.get<ScriptHolder>().list) {
                     script->gui_gizmo();
                 }

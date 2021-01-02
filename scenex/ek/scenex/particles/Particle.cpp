@@ -65,13 +65,13 @@ rect_f Particle::get_bounds() {
 void Particle::draw() {
     float vis_angle = angle_base + rotation + angle_velocity_factor * atan2f(velocity.y, velocity.x);
 
-    draw2d::state.save_transform()
+    draw2d::current().save_transform()
             .transform_pivot(position, vis_angle, scale, pivot)
             .concat(color, offset);
     if (sprite) {
         sprite->draw();
     }
-    draw2d::state.restore_transform();
+    draw2d::current().restore_transform();
 }
 
 }

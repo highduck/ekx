@@ -5,8 +5,8 @@
 #include <sokol_time.h>
 
 #include <map>
-#include <memory>
-#include <utility>
+//#include <memory>
+//#include <utility>
 
 namespace ek {
 
@@ -36,7 +36,7 @@ public:
     bool cancel(int id) {
         auto it = jobs.find(id);
         if (it != jobs.end()) {
-            auto& timer = it->second;
+            auto& timer = (*it).second;
             if (timer) {
                 timer.reset();
                 return true;

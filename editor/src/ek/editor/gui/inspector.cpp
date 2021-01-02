@@ -66,7 +66,7 @@ inline void guiDisplayComponent(ecs::entity e, const char* name, Func fn) {
     if (e.has<Display2D>()) {
         auto& d = e.get<Display2D>();
         if (d.is<C>()) {
-            auto data = d.get<C>();
+            auto data = d.tryGet<C>();
             if (data) {
 #ifndef NDEBUG
                 ImGui::Separator();
@@ -195,8 +195,14 @@ void guiInteractive(Interactive& inter) {
 
 void editDisplaySprite(Sprite2D& sprite) {
     selectAsset<Sprite>("Sprite", sprite.src);
-    ImGui::Checkbox("Scale Grid", &sprite.scale_grid_mode);
     ImGui::Checkbox("Hit Pixels", &sprite.hit_pixels);
+}
+
+void editDisplayNinePatch(NinePatch2D& ninePatch) {
+    selectAsset<Sprite>("Sprite", ninePatch.src);
+    // TODO: scale, size
+    //ImGui::Checkbox("Scale Grid", &ninePatch.scale_grid_mode);
+    ImGui::Checkbox("Hit Pixels", &ninePatch.hit_pixels);
 }
 
 void editDisplayRectangle(Quad2D& quad) {
@@ -341,10 +347,11 @@ void gui_inspector(ecs::entity e) {
     guiComponentPanel<ParticleLayer2D>(e, "ParticleLayer2D", guiParticleLayer2D);
 
     // display2d
-    guiDisplayComponent<Sprite2D>(e, "Sprite", editDisplaySprite);
-    guiDisplayComponent<Quad2D>(e, "Rectangle", editDisplayRectangle);
-    guiDisplayComponent<Text2D>(e, "Text", editDisplayText);
-    guiDisplayComponent<Arc2D>(e, "Arc", editDisplayArc);
+    guiDisplayComponent<Sprite2D>(e, "Sprite2D", editDisplaySprite);
+    guiDisplayComponent<NinePatch2D>(e, "NinePatch2D", editDisplayNinePatch);
+    guiDisplayComponent<Quad2D>(e, "Quad2D", editDisplayRectangle);
+    guiDisplayComponent<Text2D>(e, "Text2D", editDisplayText);
+    guiDisplayComponent<Arc2D>(e, "Arc2D", editDisplayArc);
     guiDisplayComponent<ParticleRenderer2D>(e, "ParticleRenderer2D", editParticleRenderer2D);
 
     guiComponentPanel<MovieClip>(e, "Movie Clip", guiMovieClip);

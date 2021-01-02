@@ -12,7 +12,7 @@ namespace ek {
 IDrawable2D::~IDrawable2D() = default;
 
 void Quad2D::draw() {
-    draw2d::state.set_empty_texture();
+    draw2d::current().set_empty_texture();
     draw2d::quad(rect.x, rect.y, rect.width, rect.height, colors[0], colors[1], colors[2], colors[3]);
 }
 
@@ -24,12 +24,11 @@ bool Quad2D::hitTest(float2 point) const {
     return rect.contains(point);
 }
 
+/** Sprite2D **/
 Sprite2D::Sprite2D() = default;
 
-Sprite2D::Sprite2D(const std::string& sprite_id, rect_f a_scale_grid)
-        : src{sprite_id},
-          scale_grid{a_scale_grid} {
-    scale_grid_mode = !scale_grid.empty();
+Sprite2D::Sprite2D(const std::string& spriteId) :
+        src{spriteId} {
 }
 
 void Sprite2D::draw() {
@@ -37,27 +36,7 @@ void Sprite2D::draw() {
         return;
     }
     auto& spr = *src;
-    if (scale_grid_mode) {
-//				scale.set(5, 5);
-        draw2d::state
-                .save_matrix()
-                .scale(1.0f / scale.x, 1.0f / scale.y);
-        // TODO: rotated
-        rect_f target{manual_target};
-        if (target.empty()) {
-            target = {(spr.rect.position + float2{1.0f, 1.0f}) * scale,
-                      (spr.rect.size - float2{2.0f, 2.0f}) * scale};
-        }
-        spr.draw_grid(scale_grid, target);
-//            drawer.set_empty_texture();
-//            drawer.quad(target.x, target.y, target.width, target.height, 0x77FF0000_argb);
-//            drawer.quad(scale_grid.x, scale_grid.y, scale_grid.width, scale_grid.height, 0x77FFFFFF_argb);
-        draw2d::state.restore_matrix();
-    } else {
-//            drawer.set_empty_texture();
-//            drawer.quad(spr->rect, 0x77FFFFFF_argb);
-        spr.draw();
-    }
+    spr.draw();
 }
 
 rect_f Sprite2D::getBounds() const {
@@ -77,6 +56,51 @@ bool Sprite2D::hitTest(float2 point) const {
     }
     return false;
 }
+
+/** NinePatch2D **/
+
+NinePatch2D::NinePatch2D() = default;
+
+NinePatch2D::NinePatch2D(const std::string& spriteId, rect_f aScaleGrid) :
+        src{spriteId},
+        scale_grid{aScaleGrid} {
+}
+
+void NinePatch2D::draw() {
+    if (!src) {
+        return;
+    }
+    auto& spr = *src;
+    draw2d::current().save_matrix().scale(1.0f / scale.x, 1.0f / scale.y);
+    // TODO: rotated
+    rect_f target{manual_target};
+    if (target.empty()) {
+        target = {(spr.rect.position + float2{1.0f, 1.0f}) * scale,
+                  (spr.rect.size - float2{2.0f, 2.0f}) * scale};
+    }
+    spr.draw_grid(scale_grid, target);
+    draw2d::current().restore_matrix();
+}
+
+rect_f NinePatch2D::getBounds() const {
+    if (!src) {
+        return rect_f::zero;
+    }
+    auto& spr = *src;
+    return spr.rect;
+}
+
+bool NinePatch2D::hitTest(float2 point) const {
+    if (getBounds().contains(point)) {
+        if (hit_pixels && src) {
+            return src->hit_test(point);
+        }
+        return true;
+    }
+    return false;
+}
+
+/** Text2D **/
 
 Text2D::Text2D()
         : text{},
@@ -132,11 +156,11 @@ void Text2D::draw() {
     textDrawer.format = format;
     textDrawer.maxWidth = format.wordWrap ? rect.width : 0.0f;
     if (fillColor.a > 0) {
-        draw2d::state.set_empty_texture();
+        draw2d::current().set_empty_texture();
         draw2d::quad(rect, fillColor);
     }
     if (borderColor.a > 0) {
-        draw2d::state.set_empty_texture();
+        draw2d::current().set_empty_texture();
         draw2d::strokeRect(expand(rect, 1.0f), borderColor, 1);
     }
 
@@ -212,7 +236,7 @@ void Arc2D::draw() {
     Res<Sprite> f{sprite};
     if (f && f->texture) {
         auto& tex = f->tex;
-        draw2d::state.set_texture_region(
+        draw2d::current().set_texture_region(
                 f->texture.get(),
                 {tex.center_x(), tex.y, 0.0f, tex.height}
         );
