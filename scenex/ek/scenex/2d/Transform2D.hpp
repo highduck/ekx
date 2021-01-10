@@ -8,6 +8,11 @@
 
 namespace ek {
 
+struct WorldTransform2D {
+    matrix_2d matrix{};
+    ColorMod32 color{};
+};
+
 struct Transform2D {
 
     float2 position = float2::zero;
@@ -17,10 +22,7 @@ struct Transform2D {
     float2 pivot = float2::zero;
 
     ColorMod32 color{};
-    ColorMod32 worldColor{};
-
     matrix_2d matrix{};
-    matrix_2d worldMatrix{};
 
     void rotation(float value) {
         skew = {value, value};

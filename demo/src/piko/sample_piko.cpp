@@ -18,8 +18,7 @@ void SamplePiko::draw() {
 
 void SamplePiko::update(float dt) {
     SampleBase::update(dt);
-    auto& app = resolve<basic_application>();
-    piko::update(app.game);
+    piko::update();
 }
 
 }

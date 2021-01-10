@@ -27,7 +27,7 @@ int simParticlesCount = 5000;
 
 void add_objects(ecs::entity game, int N) {
     for (int i = 0; i < N; ++i) {
-        auto q = ecs::create<Node, Transform2D>();
+        auto q = ecs::create<Node, Transform2D, WorldTransform2D>();
         q.get<Node>().setTouchable(false);
         q.get<Transform2D>().position = {ek::random(0.0f, WIDTH),
                                          ek::random(0.0f, HEIGHT)};
@@ -35,7 +35,7 @@ void add_objects(ecs::entity game, int N) {
                            ek::random(-50.0f, 50.0f));
         append(game, q);
 
-        auto trail = ecs::create<Node, Transform2D>();
+        auto trail = ecs::create<Node, Transform2D, WorldTransform2D>();
         trail.get<Node>().setTouchable(false);
         auto& trail_data = trail.assign<Trail2D>(trail);
         trail_data.drain_speed = 0.5f;
@@ -84,46 +84,33 @@ ecs::entity create() {
     // SIM
     add_objects(sampleContainer, simParticlesCount);
 
-    auto mouse_entity = ecs::create<Transform2D, Node>();
-    setName(mouse_entity, "Mouse");
+    auto mouse_entity = createNode2D("Mouse");
     assignScript<mouse_follow_script>(mouse_entity);
 
-    auto attractor_entity = ecs::create<attractor_t, Transform2D, Node>();
-    setName(attractor_entity, "Follower");
+    auto attractor_entity = createNode2D("Follower");
+    attractor_entity.assign<attractor_t>();
     auto& attr = assignScript<target_follow_script>(attractor_entity);
     attr.target_entity = mouse_entity;
     attr.k = 0.1f;
-    ecs::get<attractor_t>(attractor_entity).radius = 100.0f;
-    ecs::get<attractor_t>(attractor_entity).force = 5'000.0f;
+    attractor_entity.get<attractor_t>().radius = 100.0f;
+    attractor_entity.get<attractor_t>().force = 5'000.0f;
 
     append(sampleContainer, mouse_entity);
     append(sampleContainer, attractor_entity);
 
-    attractor_entity = ecs::create<attractor_t, Transform2D, Node>();
-    setName(attractor_entity, "Centroid");
-    ecs::get<attractor_t>(attractor_entity).radius = 200.0f;
-    ecs::get<attractor_t>(attractor_entity).force = -1000.0f;
-    ecs::get<Transform2D>(attractor_entity).position = {300.0f, 400.0f};
+    attractor_entity = createNode2D("Centroid");
+    attractor_entity.assign<attractor_t>();
+    attractor_entity.get<attractor_t>().radius = 200.0f;
+    attractor_entity.get<attractor_t>().force = -1000.0f;
+    attractor_entity.get<Transform2D>().position = {300.0f, 400.0f};
     append(sampleContainer, attractor_entity);
 
     return sampleContainer;
 }
 
-void remove_objects(ecs::entity game, int N) {
-    int i = 0;
-    for (auto q : ecs::view<Node, Transform2D, ScriptHolder>()) {
-        removeFromParent(q);
-        ecs::destroy(q);
-        if (++i == N) {
-            break;
-        }
-    }
-}
-
-void update(ecs::entity game) {
+void update() {
     auto dt = TimeLayer::Game->dt;
     update_motion_system(dt);
 }
-
 
 }

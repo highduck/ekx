@@ -16,7 +16,7 @@ ecs::entity Camera2D::Main{};
 
 matrix_2d Camera2D::getMatrix(ecs::entity root_, float scale) const {
     auto screen = screenRect;
-    auto m = root_.get<Transform2D>().worldMatrix;
+    auto m = root_.get<WorldTransform2D>().matrix;
     float invScale = 1.0f / (scale * contentScale);
     m.scale(invScale, invScale).translate(-screen.position - relativeOrigin * screen.size);
     return m;
@@ -77,14 +77,14 @@ void Camera2D::render() {
 
         draw2d::begin(rect_i{camera.screenRect}, camera.inverseMatrix);
         if (camera.clearColorEnabled) {
-            draw2d::current().pushProgram("draw2d_color");
-            draw2d::current().color = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};
+            draw2d::state.pushProgram("draw2d_color");
+            draw2d::state.color = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};
             draw2d::quad(camera.worldRect);
-            draw2d::current().color = {};
-            draw2d::current().restoreProgram();
+            draw2d::state.color = {};
+            draw2d::state.restoreProgram();
         }
 
-        RenderSystem2D::draw(camera.root, camera.root.tryGet<Transform2D>());
+        RenderSystem2D::draw(camera.root, camera.root.tryGet<WorldTransform2D>());
 
 #ifndef NDEBUG
         drawGizmo(camera);

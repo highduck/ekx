@@ -26,7 +26,7 @@ void Font::draw(const std::string& text,
     float2 current = position;
     float2 start = position;
 
-    draw2d::current().save_color()
+    draw2d::state.save_color()
             .scaleColor(color);
 
     const graphics::Texture* prevTexture = nullptr;
@@ -41,10 +41,10 @@ void Font::draw(const std::string& text,
         if (impl->getGlyph(code, gdata)) {
             if (gdata.texture) {
                 if (prevTexture != gdata.texture) {
-                    draw2d::current().set_texture(gdata.texture);
+                    draw2d::state.set_texture(gdata.texture);
                     prevTexture = gdata.texture;
                 }
-                draw2d::current().set_texture_coords(gdata.texCoord);
+                draw2d::state.set_texture_coords(gdata.texCoord);
                 gdata.rect *= size;
                 if (gdata.rotated) {
                     draw2d::quad_rotated(gdata.rect.x + current.x,
@@ -63,7 +63,7 @@ void Font::draw(const std::string& text,
             current.x += size * gdata.advanceWidth;
         }
     }
-    draw2d::current().restore_color();
+    draw2d::state.restore_color();
 }
 
 float Font::get_text_segment_width(const std::string& text, float size, int begin, int end) const {

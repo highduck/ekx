@@ -41,7 +41,7 @@ AppBox::AppBox(AppBoxConfig config_) :
 
 void set_state_by_name(ecs::entity e, const std::string& state) {
     eachChild(e, [&state](ecs::entity child) {
-        const auto& name = ecs::get_or_default<Node>(child).name;
+        const auto& name = child.get_or_default<NodeName>().name;
         if (starts_with(name, "state_")) {
             setVisible(child, name == state);
         }

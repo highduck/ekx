@@ -34,11 +34,11 @@ void DynamicAtlasEditorAsset::gui() {
     // TODO: preview
 //    auto w = (float) atlas->pageWidth;
 //    auto h = (float) atlas->pageHeight;
-//    draw2d::current().set_empty_texture();
+//    draw2d::state.set_empty_texture();
 //    draw2d::quad(x, y, w, h, 0x77000000_argb);
 //
-//    draw2d::current().set_texture(atlas.texture_);
-//    draw2d::current().set_texture_coords(0, 0, 1, 1);
+//    draw2d::state.set_texture(atlas.texture_);
+//    draw2d::state.set_texture_coords(0, 0, 1, 1);
 //    draw2d::quad(x, y, w, h);
 }
 

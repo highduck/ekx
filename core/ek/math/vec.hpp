@@ -63,40 +63,40 @@ struct vec_t<2, T> {
     T x;
     T y;
 
-    constexpr vec_t() noexcept
-            : x{0},
-              y{0} {
+    constexpr vec_t() noexcept:
+            x{0},
+            y{0} {
 
     }
 
     template<typename S>
-    explicit constexpr vec_t(vec2_t<S> other) noexcept :
+    inline explicit constexpr vec_t(vec2_t<S> other) noexcept:
             x{static_cast<T>(other.x)},
             y{static_cast<T>(other.y)} {
 
     }
 
-    constexpr vec_t(T x_, T y_) noexcept
-            : x{x_},
-              y{y_} {
+    inline constexpr vec_t(T x_, T y_) noexcept:
+            x{x_},
+            y{y_} {
 
     }
 
-    inline self_type operator-() const { return self_type(-x, -y); }
+    inline self_type operator-() const { return self_type{-x, -y}; }
 
-    inline self_type operator-(const self_type& v) const { return self_type(x - v.x, y - v.y); }
+    inline self_type operator-(const self_type& v) const { return self_type{x - v.x, y - v.y}; }
 
-    inline self_type operator+(const self_type& v) const { return self_type(x + v.x, y + v.y); }
+    inline self_type operator+(const self_type& v) const { return self_type{x + v.x, y + v.y}; }
 
-    inline self_type operator*(const self_type& v) const { return self_type(x * v.x, y * v.y); }
+    inline self_type operator*(const self_type& v) const { return self_type{x * v.x, y * v.y}; }
 
-    inline self_type operator/(const self_type& v) const { return self_type(x / v.x, y / v.y); }
+    inline self_type operator/(const self_type& v) const { return self_type{x / v.x, y / v.y}; }
 
-    inline self_type operator*(T scalar) const { return self_type(x * scalar, y * scalar); }
+    inline self_type operator*(T scalar) const { return self_type{x * scalar, y * scalar}; }
 
     inline self_type operator/(T scalar) const {
         T inv = T{1} / scalar;
-        return self_type(x * inv, y * inv);
+        return self_type{x * inv, y * inv};
     }
 
     inline self_type& operator*=(T scalar) {
@@ -132,7 +132,7 @@ template<typename T>
 inline const vec_t<2, T>vec_t<2, T>::one{1, 1};
 
 template<typename T>
-inline vec_t<2, T> perpendicular(const vec_t<2, T>& direction) {
+inline vec_t<2, T> perpendicular(vec_t<2, T> direction) {
     return {-direction.y, direction.x};
 }
 
@@ -373,6 +373,16 @@ inline T length_sqr(const vec_t<N, T>& a) {
 template<typename T, unsigned N>
 inline T length(const vec_t<N, T>& a) {
     return sqrt(length_sqr(a));
+}
+
+template<typename T>
+inline T length_sqr(vec_t<2, T> a) {
+    return a.x * a.x + a.y * a.y;
+}
+
+template<typename T>
+inline T length(vec_t<2, T> a) {
+    return sqrt(a.x * a.x + a.y * a.y);
 }
 
 template<typename T, unsigned N>

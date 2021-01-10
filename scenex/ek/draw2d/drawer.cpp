@@ -10,28 +10,28 @@ using namespace ek::graphics;
 
 namespace ek::draw2d {
 
-void Context::setScissors(rect_i rc) {
+void Context::setNextScissors(rect_i rc) {
     if (rc != curr.scissors) {
         stateChanged = true;
     }
     next.scissors = rc;
 }
 
-void Context::setBlendMode(BlendMode blending) {
+void Context::setNextBlending(BlendMode blending) {
     if (curr.blend != blending) {
         stateChanged = true;
     }
     next.blend = blending;
 }
 
-void Context::setTexture(sg_image texture) {
+void Context::setNextTexture(sg_image texture) {
     if (curr.texture.id != texture.id) {
         stateChanged = true;
     }
     next.texture = texture;
 }
 
-void Context::setProgram(sg_shader shader, uint8_t numTextures) {
+void Context::setNextShader(sg_shader shader, uint8_t numTextures) {
     if (curr.shader.id != shader.id) {
         stateChanged = true;
     }
@@ -39,7 +39,7 @@ void Context::setProgram(sg_shader shader, uint8_t numTextures) {
     next.shaderTexturesCount = numTextures;
 }
 
-void Context::setNextState() {
+void Context::applyNextState() {
     if (stateChanged) {
         curr = next;
         stateChanged = false;
@@ -167,7 +167,8 @@ private:
     uint32_t maxSize;
 };
 
-Context::Context() {
+void Context::initialize() {
+    assert(!initialized_);
 
     using graphics::Texture;
     using graphics::Shader;
@@ -192,9 +193,13 @@ Context::Context() {
     indexBuffers_ = new BufferChain(BufferType::IndexBuffer, (MaxIndex + 1) * sizeof(uint16_t));
     indexData_ = new uint16_t[MaxIndex + 1];
     indexDataNext_ = indexData_;
+
+    initialized_ = true;
 }
 
-Context::~Context() {
+void Context::shutdown() {
+    assert(initialized_);
+
     Res<graphics::Texture>{"empty"}.reset(nullptr);
     Res<Shader>{"draw2d"}.reset(nullptr);
     Res<Shader>{"draw2d_alpha"}.reset(nullptr);
@@ -205,6 +210,8 @@ Context::~Context() {
 
     delete indexBuffers_;
     delete[] indexData_;
+
+    initialized_ = false;
 }
 
 void Context::drawBatch() {
@@ -253,20 +260,20 @@ void Context::drawBatch() {
 void Context::allocTriangles(int vertex_count, int index_count) {
     if (checkFlags != 0) {
         if (checkFlags & Context::Check_Texture) {
-            setTexture(texture->image);
+            setNextTexture(texture->image);
         }
         if (checkFlags & Context::Check_Shader) {
-            setProgram(program->shader, program->numFSImages);
+            setNextShader(program->shader, program->numFSImages);
         }
         if (checkFlags & Context::Check_Scissors) {
-            setScissors(rect_i{scissors});
+            setNextScissors(rect_i{scissors});
         }
         checkFlags = 0;
     }
 
     if (stateChanged || (verticesCount_ + vertex_count) > 0xFFFF) {
         drawBatch();
-        setNextState();
+        applyNextState();
     }
 
     indexDataPos_ = indexDataNext_;
@@ -283,7 +290,7 @@ uint32_t Context::getUsedMemory() const {
     return indexBuffers_->getUsedMemory() + vertexBuffers_->getUsedMemory();
 }
 
-Context* state = nullptr;
+Context state{};
 
 void Context::finish() {
     // debug checks
@@ -519,63 +526,63 @@ Context& Context::restoreProgram() {
 }
 
 void beginNewFrame() {
-    assert(!state->active);
-    state->stats = {};
+    assert(!state.active);
+    state.stats = {};
 }
 
 /*** drawings ***/
 void begin(rect_i viewport, const matrix_2d& view, const graphics::Texture* renderTarget) {
-    assert(!state->active);
-    state->texture = state->emptyTexture;
-    state->program = state->defaultShader;
-    state->scissors = rect_f{viewport};
-    state->checkFlags = 0;
-    state->renderTarget = renderTarget;
-    state->matrix.set_identity();
-    state->color = {};
-    state->uv.set(0, 0, 1, 1);
-    state->active = true;
+    assert(!state.active);
+    state.texture = state.emptyTexture;
+    state.program = state.defaultShader;
+    state.scissors = rect_f{viewport};
+    state.checkFlags = 0;
+    state.renderTarget = renderTarget;
+    state.matrix.set_identity();
+    state.color = {};
+    state.uv.set(0, 0, 1, 1);
+    state.active = true;
 
-    state->curr = {};
-    state->next.shader = state->program->shader;
-    state->next.shaderTexturesCount = 1;
-    state->next.texture = state->texture->image;
-    state->next.scissors = viewport;
-    state->selectedPipeline.id = SG_INVALID_ID;
-    state->stateChanged = true;
+    state.curr = {};
+    state.next.shader = state.program->shader;
+    state.next.shaderTexturesCount = 1;
+    state.next.texture = state.texture->image;
+    state.next.scissors = viewport;
+    state.selectedPipeline.id = SG_INVALID_ID;
+    state.stateChanged = true;
 
-    state->renderTarget = renderTarget;
+    state.renderTarget = renderTarget;
     if (renderTarget) {
-        state->mvp = ortho_2d<float>(viewport.x, viewport.bottom(), viewport.width, -viewport.height) * view;
+        state.mvp = ortho_2d<float>(viewport.x, viewport.bottom(), viewport.width, -viewport.height) * view;
     } else {
-        state->mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;
+        state.mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;
     }
 }
 
 void end() {
-    assert(state->active);
-    state->drawBatch();
-    state->finish();
-    state->active = false;
+    assert(state.active);
+    state.drawBatch();
+    state.finish();
+    state.active = false;
 }
 
 void write_index(uint16_t index) {
-    *(state->indexDataPos_++) = state->baseVertex_ + index;
+    *(state.indexDataPos_++) = state.baseVertex_ + index;
 }
 
 FrameStats getDrawStats() {
-    return state->stats;
+    return state.stats;
 }
 
 void triangles(int vertex_count, int index_count) {
-    state->allocTriangles(vertex_count, index_count);
+    state.allocTriangles(vertex_count, index_count);
 }
 
 void quad(float x, float y, float w, float h) {
     triangles(4, 6);
 
-    const auto cm = state->color.scale;
-    const auto co = state->color.offset;
+    const auto cm = state.color.scale;
+    const auto co = state.color.offset;
     write_vertex(x, y, 0, 0.0f, cm, co);
     write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
     write_vertex(x + w, y + h, 1.0f, 1.0f, cm, co);
@@ -587,8 +594,8 @@ void quad(float x, float y, float w, float h) {
 void quad(float x, float y, float w, float h, abgr32_t color) {
     triangles(4, 6);
 
-    const auto cm = state->color.scale * color;
-    const auto co = state->color.offset;
+    const auto cm = state.color.scale * color;
+    const auto co = state.color.offset;
     write_vertex(x, y, 0, 0.0f, cm, co);
     write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
     write_vertex(x + w, y + h, 1.0f, 1.0f, cm, co);
@@ -600,8 +607,8 @@ void quad(float x, float y, float w, float h, abgr32_t color) {
 void quad(float x, float y, float w, float h, abgr32_t c1, abgr32_t c2, abgr32_t c3, abgr32_t c4) {
     triangles(4, 6);
 
-    const auto cm = state->color.scale;
-    const auto co = state->color.offset;
+    const auto cm = state.color.scale;
+    const auto co = state.color.offset;
     write_vertex(x, y, 0, 0.0f, cm * c1, co);
     write_vertex(x + w, y, 1.0f, 0.0f, cm * c2, co);
     write_vertex(x + w, y + h, 1.0f, 1.0f, cm * c3, co);
@@ -613,8 +620,8 @@ void quad(float x, float y, float w, float h, abgr32_t c1, abgr32_t c2, abgr32_t
 void quad_rotated(float x, float y, float w, float h) {
     triangles(4, 6);
 
-    const auto cm = state->color.scale;
-    const auto co = state->color.offset;
+    const auto cm = state.color.scale;
+    const auto co = state.color.offset;
     write_vertex(x, y, 0, 1, cm, co);
     write_vertex(x + w, y, 0, 0, cm, co);
     write_vertex(x + w, y + h, 1, 0, cm, co);
@@ -631,9 +638,9 @@ void fill_circle(const circle_f& circle, abgr32_t inner_color, abgr32_t outer_co
     const float y = circle.center.y;
     const float r = circle.radius;
 
-    const auto co = state->color.offset;
-    auto inner_cm = state->color.scale * inner_color;
-    auto outer_cm = state->color.scale * outer_color;
+    const auto co = state.color.offset;
+    auto inner_cm = state.color.scale * inner_color;
+    auto outer_cm = state.color.scale * outer_color;
     write_vertex(x, y, 0.0f, 0.0f, inner_cm, co);
 
     const float da = math::pi2 / segments;
@@ -656,10 +663,10 @@ void fill_circle(const circle_f& circle, abgr32_t inner_color, abgr32_t outer_co
 
 void write_vertex(float x, float y, float u, float v, abgr32_t cm, abgr32_t co) {
     // could be cached before draw2d
-    const auto& m = state->matrix;
-    const auto& uv = state->uv;
+    const auto& m = state.matrix;
+    const auto& uv = state.uv;
 
-    auto* ptr = state->vertexDataPos_++;
+    auto* ptr = state.vertexDataPos_++;
     ptr->position.x = x * m.a + y * m.c + m.tx;
     ptr->position.y = x * m.b + y * m.d + m.ty;
     ptr->uv.x = uv.x + u * uv.width;
@@ -669,7 +676,7 @@ void write_vertex(float x, float y, float u, float v, abgr32_t cm, abgr32_t co) 
 }
 
 void write_raw_vertex(const float2& pos, const float2& tex_coord, abgr32_t cm, abgr32_t co) {
-    auto* ptr = state->vertexDataPos_++;
+    auto* ptr = state.vertexDataPos_++;
     ptr->position = pos;
     ptr->uv = tex_coord;
     ptr->cm = cm;
@@ -681,21 +688,21 @@ void write_indices_quad(const uint16_t i0,
                         const uint16_t i2,
                         const uint16_t i3,
                         const uint16_t baseVertex) {
-    const uint16_t index = state->baseVertex_ + baseVertex;
-    *(state->indexDataPos_++) = index + i0;
-    *(state->indexDataPos_++) = index + i1;
-    *(state->indexDataPos_++) = index + i2;
-    *(state->indexDataPos_++) = index + i2;
-    *(state->indexDataPos_++) = index + i3;
-    *(state->indexDataPos_++) = index + i0;
+    const uint16_t index = state.baseVertex_ + baseVertex;
+    *(state.indexDataPos_++) = index + i0;
+    *(state.indexDataPos_++) = index + i1;
+    *(state.indexDataPos_++) = index + i2;
+    *(state.indexDataPos_++) = index + i2;
+    *(state.indexDataPos_++) = index + i3;
+    *(state.indexDataPos_++) = index + i0;
 }
 
 void write_indices(const uint16_t* source,
                    uint16_t count,
                    uint16_t baseVertex) {
-    const uint16_t index = state->baseVertex_ + baseVertex;
+    const uint16_t index = state.baseVertex_ + baseVertex;
     for (int i = 0; i < count; ++i) {
-        *(state->indexDataPos_++) = *(source++) + index;
+        *(state.indexDataPos_++) = *(source++) + index;
     }
 }
 
@@ -716,8 +723,8 @@ void draw_indexed_triangles(
                 local_position.y,
                 loc_uv.x,
                 loc_uv.y,
-                state->color.scale * colors[i],
-                state->color.offset
+                state.color.scale * colors[i],
+                state.color.offset
         );
     }
     write_indices(indices.data(), indices.size());
@@ -735,9 +742,9 @@ void line(const float2& start, const float2& end, abgr32_t color1, abgr32_t colo
 
     triangles(4, 6);
 
-    auto m1 = state->color.scale * color1;
-    auto m2 = state->color.scale * color2;
-    auto co = state->color.offset;
+    auto m1 = state.color.scale * color1;
+    auto m2 = state.color.scale * color2;
+    auto co = state.color.offset;
 
     write_vertex(start.x + t2sina1, start.y - t2cosa1, 0, 0, m1, co);
     write_vertex(end.x + t2sina2, end.y - t2cosa2, 1, 0, m2, co);
@@ -761,9 +768,9 @@ void line_arc(float x, float y, float r,
     auto pi2 = static_cast<float>(math::pi2);
     float da = pi2 / float(segments);
     float a0 = angle_from;
-    auto m1 = state->color.scale * color_inner;
-    auto m2 = state->color.scale * color_outer;
-    auto co = state->color.offset;
+    auto m1 = state.color.scale * color_inner;
+    auto m2 = state.color.scale * color_outer;
+    auto co = state.color.offset;
     auto hw = line_width / 2.0f;
     auto r0 = r - hw;
     auto r1 = r + hw;
@@ -795,13 +802,8 @@ void strokeRect(const rect_f& rc, abgr32_t color, float lineWidth) {
 }
 
 void endFrame() {
-    state->vertexBuffers_->nextFrame();
-    state->indexBuffers_->nextFrame();
-}
-
-void init() {
-    assert(!state);
-    state = new Context();
+    state.vertexBuffers_->nextFrame();
+    state.indexBuffers_->nextFrame();
 }
 
 }

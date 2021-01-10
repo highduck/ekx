@@ -49,7 +49,7 @@ struct RealTimeGraph {
         float x = 0.0f;
         float x0 = 0.0f;
         float prev = calculateY(history.at(0));
-        draw2d::current().set_empty_texture();
+        draw2d::state.set_empty_texture();
         draw2d::quad(0, 0, width, height, 0x77000000_argb);
         for (int i = 0; i < samples; ++i) {
             float val = history.at(i);
@@ -123,42 +123,42 @@ void Profiler::draw() {
 #ifdef ENABLE_PROFILER
     const auto scale = static_cast<float>(app::g_app.content_scale);
     auto insets = get_screen_insets();
-    draw2d::current().matrix = matrix_2d{scale, 0, 0, scale, insets.x, insets.y};
-    draw2d::current().set_empty_texture();
+    draw2d::state.matrix = matrix_2d{scale, 0, 0, scale, insets.x, insets.y};
+    draw2d::state.set_empty_texture();
 
-    draw2d::current().save_matrix();
+    draw2d::state.save_matrix();
     impl->graphFrameTime.drawGraph();
-    draw2d::current().translate(0, 35);
+    draw2d::state.translate(0, 35);
     impl->graphDrawCalls.drawGraph();
-    draw2d::current().translate(0, 35);
+    draw2d::state.translate(0, 35);
     impl->graphTriangles.drawGraph();
-    draw2d::current().translate(0, 35);
+    draw2d::state.translate(0, 35);
     impl->graphFillRate.drawGraph();
 
     for (auto& it : impl->frameGraphs) {
-        draw2d::current().translate(0, 35);
+        draw2d::state.translate(0, 35);
         it.second.history.write(it.second.accum);
         it.second.drawGraph();
         it.second.value = it.second.accum;
         it.second.accum = 0.0f;
     }
-    draw2d::current().restore_matrix();
+    draw2d::state.restore_matrix();
 
-    draw2d::current().save_matrix();
+    draw2d::state.save_matrix();
     impl->graphFrameTime.drawText();
-    draw2d::current().translate(0, 35);
+    draw2d::state.translate(0, 35);
     impl->graphDrawCalls.drawText();
-    draw2d::current().translate(0, 35);
+    draw2d::state.translate(0, 35);
     impl->graphTriangles.drawText();
-    draw2d::current().translate(0, 35);
+    draw2d::state.translate(0, 35);
     impl->graphFillRate.drawText();
 
     for (auto& it : impl->frameGraphs) {
-        draw2d::current().translate(0, 35);
+        draw2d::state.translate(0, 35);
         it.second.drawText();
     }
 
-    draw2d::current().restore_matrix();
+    draw2d::state.restore_matrix();
 #endif
 }
 

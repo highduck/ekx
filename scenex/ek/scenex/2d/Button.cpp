@@ -66,7 +66,7 @@ void initialize_events(ecs::entity e) {
 
         start_post_tween(btn);
         btn.clicked.emit();
-        auto name = e.get_or_default<Node>().name;
+        auto name = e.get_or_default<NodeName>().name;
         if (!name.empty()) {
             analytics::event("click", name.c_str());
         }

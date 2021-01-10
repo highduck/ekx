@@ -7,13 +7,13 @@ namespace ek {
 
 void begin_transform(const Transform2D& transform) {
     const_cast<Transform2D&>(transform).updateLocalMatrix();
-    draw2d::current().save_transform()
+    draw2d::state.save_transform()
             .concat(transform.color.scale, transform.color.offset)
             .concat(transform.matrix);
 }
 
 void end_transform() {
-    draw2d::current().restore_transform();
+    draw2d::state.restore_transform();
 }
 
 void Transform2D::updateLocalMatrix() {
@@ -132,19 +132,22 @@ float2 Transform2D::globalToLocal(ecs::entity local, float2 globalPos) {
 
 /** transformations after invalidation (already have world matrix) **/
 bool Transform2D::fastLocalToLocal(ecs::entity src, ecs::entity dst, float2 pos, float2& out) {
-    pos = src.get<Transform2D>().worldMatrix.transform(pos);
-    return dst.get<Transform2D>().worldMatrix.transform_inverse(pos, out);
+    pos = src.get<WorldTransform2D>().matrix.transform(pos);
+    return dst.get<WorldTransform2D>().matrix.transform_inverse(pos, out);
 }
 
 /** Invalidate Transform2D **/
 
-void updateWorldTransform(ecs::entity e, const Transform2D* transform) {
+void updateWorldTransform(ecs::entity e, const WorldTransform2D* transform) {
     auto* localTransform = e.tryGet<Transform2D>();
+    auto* worldTransform = e.tryGet<WorldTransform2D>();
     if (localTransform) {
         localTransform->updateLocalMatrix();
-        localTransform->worldMatrix = transform->worldMatrix * localTransform->matrix;
-        localTransform->worldColor = transform->worldColor * localTransform->color;
-        transform = localTransform;
+        if (worldTransform) {
+            worldTransform->matrix = transform->matrix * localTransform->matrix;
+            worldTransform->color = transform->color * localTransform->color;
+            transform = worldTransform;
+        }
     }
     auto it = e.get<Node>().child_first;
     while (it) {
@@ -158,15 +161,16 @@ void updateWorldTransform(ecs::entity e, const Transform2D* transform) {
 
 void updateWorldTransform2D(ecs::entity root) {
     auto& transform = root.get<Transform2D>();
+    auto& worldTransform = root.get<WorldTransform2D>();
     transform.updateLocalMatrix();
-    transform.worldMatrix = transform.matrix;
-    transform.worldColor = transform.color;
+    worldTransform.matrix = transform.matrix;
+    worldTransform.color = transform.color;
 
     auto it = root.get<Node>().child_first;
     while (it) {
         const auto& child = it.get<Node>();
         if (child.visible()) {
-            updateWorldTransform(it, &transform);
+            updateWorldTransform(it, &worldTransform);
         }
         it = child.sibling_next;
     }

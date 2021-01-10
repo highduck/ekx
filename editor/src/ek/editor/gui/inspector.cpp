@@ -35,8 +35,8 @@ void selectAsset(const char* label, Res<T>& asset) {
 void guiEntityRef(const char* label, ecs::entity entity) {
     if (entity == nullptr) {
         ImGui::TextDisabled("%s: null", label);
-    } else if (ecs::valid(entity)) {
-        ImGui::LabelText(label, "%s", entity.get_or_default<Node>().name.c_str());
+    } else if (entity.valid()) {
+        ImGui::LabelText(label, "%s", entity.get_or_default<NodeName>().name.c_str());
     } else {
         ImGui::TextColored({1, 0, 0, 1}, "%s: invalid", label);
     }
@@ -320,9 +320,11 @@ void guiParticleLayer2D(ParticleLayer2D& layer) {
 void gui_inspector(ecs::entity e) {
     ImGui::PushID(e.passport());
     ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index(), e.version());
-    if (ecs::has<Node>(e)) {
-        auto& node = ecs::get<Node>(e);
-        ImGui::InputText("Name", &node.name);
+    if (e.has<NodeName>()) {
+        ImGui::InputText("Name", &e.get<NodeName>().name);
+    }
+    if (e.has<Node>()) {
+        auto& node = e.get<Node>();
         ImGui::CheckboxFlags("Visible", &node.flags, Node::Visible);
         ImGui::CheckboxFlags("Touchable", &node.flags, Node::Touchable);
         ImGui::LabelText("Layers", "%x", node.layersMask());

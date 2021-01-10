@@ -44,8 +44,8 @@ std::vector<ecs::entity> hierarchySelectionList{};
 std::string hierarchyFilterText{};
 
 const char* getEntityTitle(ecs::entity e) {
-    if (ecs::has<Node>(e)) {
-        const auto& nameData = ecs::get<Node>(e).name;
+    if (ecs::has<NodeName>(e)) {
+        const auto& nameData = ecs::get<NodeName>(e).name;
         if (!nameData.empty()) {
             return nameData.c_str();
         }
