@@ -13,7 +13,7 @@ namespace ek {
 /** GameScreen component **/
 GameScreen& GameScreen::init(ecs::entity e, const char* name) {
     if (name) {
-        e.get<Node>().name = name;
+        e.get_or_create<NodeName>().name = name;
     }
     e.get<Node>().setVisible(false);
     e.get<Node>().setTouchable(false);
@@ -139,7 +139,7 @@ void GameScreenManager::setScreen(const std::string& name) {
 ecs::entity GameScreenManager::findScreen(const std::string& name) const {
     auto it = layer.get<Node>().child_first;
     while (it) {
-        if (it.get<Node>().name == name && it.has<GameScreen>()) {
+        if (it.has<GameScreen>() && it.get_or_default<NodeName>().name == name) {
             return it;
         }
         it = it.get<Node>().sibling_next;

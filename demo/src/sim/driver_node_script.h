@@ -5,7 +5,7 @@
 namespace ek::piko {
 
 ecs::entity create();
-void update(ecs::entity game);
+void update();
 
 }
 

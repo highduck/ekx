@@ -269,11 +269,11 @@ ecs::entity Node::findLowerCommonAncestor(ecs::entity e1, ecs::entity e2) {
 ecs::entity find(ecs::entity e, const char* childName) {
     auto it = e.get<Node>().child_first;
     while (it) {
-        const auto& node = it.get<Node>();
-        if (node.name == childName) {
+        const auto* nodeName = it.tryGet<NodeName>();
+        if (nodeName && nodeName->name == childName) {
             return it;
         }
-        it = node.sibling_next;
+        it = it.get<Node>().sibling_next;
     }
     return nullptr;
 }

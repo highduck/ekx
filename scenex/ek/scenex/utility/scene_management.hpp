@@ -7,9 +7,9 @@
 namespace ek {
 
 inline ecs::entity createNode2D(const char* name = nullptr) {
-    auto e = ecs::create<Node, Transform2D>();
+    auto e = ecs::create<Node, Transform2D, WorldTransform2D>();
     if (name) {
-        e.get<Node>().name = name;
+        e.assign<NodeName>(name);
     }
     return e;
 }

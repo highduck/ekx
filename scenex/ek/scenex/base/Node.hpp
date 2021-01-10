@@ -7,6 +7,10 @@
 
 namespace ek {
 
+struct NodeName {
+    std::string name;
+};
+
 struct Node {
     enum Flags {
         Visible = 1,
@@ -15,13 +19,12 @@ struct Node {
         LayerMask = 0xFF00
     };
 
-    ecs::entity parent;
     ecs::entity sibling_next;
     ecs::entity sibling_prev;
     ecs::entity child_first;
     ecs::entity child_last;
+    ecs::entity parent;
 
-    std::string name;
     uint32_t flags = LayerMask | VisibleAndTouchable;
 
     [[nodiscard]] bool visible() const {
@@ -161,11 +164,11 @@ ecs::entity getChildAt(ecs::entity e, int index);
 /** utility functions **/
 
 inline void setName(ecs::entity e, const std::string& name) {
-    ecs::get_or_create<Node>(e).name = name;
+    ecs::get_or_create<NodeName>(e).name = name;
 }
 
 inline const std::string& getName(ecs::entity e) {
-    return ecs::get_or_default<Node>(e).name;
+    return ecs::get_or_default<NodeName>(e).name;
 }
 
 inline bool isVisible(ecs::entity e) {

@@ -10,7 +10,7 @@ namespace ek {
 void guiStatsWindow(bool* p_open) {
     if (ImGui::Begin("Stats", p_open)) {
         auto& app = resolve<basic_application>();
-        auto stats = draw2d::getDrawStats();
+        auto stats = draw2d::state.stats;
         auto drawableSize = ek::app::g_app.drawable_size;
         ImGui::Text("%0.2lf ms | dc: %u | tri: %u | fill: %0.2f",
                     app.frame_timer.delta_time() * 1000.0,
@@ -20,7 +20,7 @@ void guiStatsWindow(bool* p_open) {
         );
         const auto& entities = ecs::world::the.entities;
         ImGui::Text("%u entities | %u free", entities.size(), entities.available_for_recycling());
-        ImGui::Text("Batching buffer objects: %0.2f MB", (draw2d::current().getUsedMemory() / 1000000.0f));
+        ImGui::Text("Batching buffer objects: %0.2f MB", (draw2d::state.getUsedMemory() / 1000000.0f));
     }
     ImGui::End();
 }

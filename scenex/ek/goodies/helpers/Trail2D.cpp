@@ -150,27 +150,32 @@ void TrailRenderer2D::draw() {
         return;
     }
     const auto* spr = sprite.get();
-    if(!spr || spr->texture.empty()) {
+    if (spr == nullptr) {
+        return;
+    }
+    const auto* texture = spr->texture.get();
+    if (texture == nullptr) {
         return;
     }
 
-    auto& drawer = draw2d::current();
+    auto& drawer = draw2d::state;
 
-    drawer.set_texture(spr->texture.get());
+    drawer.set_texture(texture);
     drawer.allocTriangles(columns * 2, quads * 6);
 
     int v = 0;
     int node_idx = 0;
 
     const auto co = drawer.color.offset;
+    const auto cm = drawer.color.scale;
     const auto texCoordU = spr->tex.center_x();
     const auto texCoordV0 = spr->tex.y;
     const auto texCoordV1 = spr->tex.bottom();
-    const auto& m = drawer.matrix;
+    const auto m = drawer.matrix;
     auto* ptr = drawer.vertexDataPos_;
 
     for (int i = 0; i < columns; ++i) {
-        const auto cm0 = drawer.color.scale.scaleAlpha(nodes[node_idx].energy);
+        const auto cm0 = cm.scaleAlpha(nodes[node_idx].energy);
         const auto v1 = vertices[v++];
         const auto v2 = vertices[v++];
         ptr->position = m.transform(v1.x, v1.y);

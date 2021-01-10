@@ -44,8 +44,8 @@ const SGNodeData* SGFile::get(const std::string& library_name) const {
 using SGFileRes = Res<SGFile>;
 
 void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
-    auto& node = ecs::get<Node>(entity);
-    node.name = data->name;
+    auto& node = entity.get<Node>();
+    entity.get_or_create<NodeName>().name = data->name;
     if (data->movieTargetId >= 0) {
         ecs::get_or_create<movie_target_keys>(entity) = {data->movieTargetId};
     }

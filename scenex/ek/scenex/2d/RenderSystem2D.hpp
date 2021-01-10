@@ -4,13 +4,13 @@
 
 namespace ek {
 
-struct Transform2D;
+struct WorldTransform2D;
 
 class RenderSystem2D {
 public:
     static int currentLayerMask;
 
-    static void draw(ecs::entity e, const Transform2D* transform);
+    static void draw(ecs::entity e, const WorldTransform2D* transform);
 
     static void drawStack(ecs::entity e);
 };

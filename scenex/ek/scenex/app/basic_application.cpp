@@ -41,7 +41,7 @@ basic_application::~basic_application() {
 }
 
 void basic_application::initialize() {
-    draw2d::init();
+    draw2d::state.initialize();
 
     //// basic scene
     root = createNode2D("root");
@@ -201,7 +201,7 @@ void basic_application::on_event(const event_t& event) {
 }
 
 void drawPreloader(float progress) {
-    draw2d::current().set_empty_texture();
+    draw2d::state.set_empty_texture();
     auto pad = 40;
     auto w = g_app.drawable_size.x - pad * 2;
     auto h = 16;

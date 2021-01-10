@@ -13,13 +13,13 @@ namespace ek {
 
 int RenderSystem2D::currentLayerMask = 0xFF;
 
-void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
+void RenderSystem2D::draw(ecs::entity e, const WorldTransform2D* worldTransform) {
     assert(e.valid());
 
     auto* uglyFilter = e.tryGet<UglyFilter2D>();
     if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {
-        draw2d::current().matrix = transform->worldMatrix;
-        draw2d::current().color = transform->worldColor;
+        draw2d::state.matrix = worldTransform->matrix;
+        draw2d::state.color = worldTransform->color;
         if (uglyFilter->pass(e)) {
             // discard
             return;
@@ -29,15 +29,15 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
     auto* bounds = e.tryGet<Bounds2D>();
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
-        auto rc = bounds->getScreenRect(camera->inverseMatrix, transform->worldMatrix);
+        auto rc = bounds->getScreenRect(camera->inverseMatrix, worldTransform->matrix);
         if (Camera2D::getCurrentRenderingCamera()->occlusionEnabled) {
-            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::current().scissors)) {
+            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors)) {
                 // discard
                 return;
             }
         }
         if (bounds->scissors) {
-            draw2d::current().pushClipRect(rc);
+            draw2d::state.pushClipRect(rc);
         }
     }
 
@@ -46,11 +46,11 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
     if (display) {
         if (display->program) {
             programChanged = true;
-            draw2d::current().saveProgram().setProgram(display->program.get());
+            draw2d::state.saveProgram().setProgram(display->program.get());
         }
         if (display->drawable) {
-            draw2d::current().matrix = transform->worldMatrix;
-            draw2d::current().color = transform->worldColor;
+            draw2d::state.matrix = worldTransform->matrix;
+            draw2d::state.color = worldTransform->color;
             display->drawable->draw();
         }
     }
@@ -59,22 +59,22 @@ void RenderSystem2D::draw(ecs::entity e, const Transform2D* transform) {
     while (it) {
         const auto& child = it.get<Node>();
         if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
-            const auto* childTransform = it.tryGet<Transform2D>();
-            if (childTransform) {
-                transform = childTransform;
+            const auto* childWorldTransform = it.tryGet<WorldTransform2D>();
+            if (childWorldTransform) {
+                worldTransform = childWorldTransform;
             }
-            if (transform->color.scale.a > 0) {
-                draw(it, transform);
+            if (worldTransform->color.scale.a > 0) {
+                draw(it, worldTransform);
             }
         }
         it = child.sibling_next;
     }
 
     if (bounds && bounds->scissors) {
-        draw2d::current().popClipRect();
+        draw2d::state.popClipRect();
     }
     if (programChanged) {
-        draw2d::current().restoreProgram();
+        draw2d::state.restoreProgram();
     }
 }
 
@@ -93,16 +93,16 @@ void RenderSystem2D::drawStack(ecs::entity e) {
     auto* bounds = e.tryGet<Bounds2D>();
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
-        auto rc = bounds->getScreenRect(camera->inverseMatrix, draw2d::current().matrix);
+        auto rc = bounds->getScreenRect(camera->inverseMatrix, draw2d::state.matrix);
         if (Camera2D::getCurrentRenderingCamera()->occlusionEnabled) {
-            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::current().scissors)) {
+            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors)) {
                 // discard
                 return;
             }
         }
         if (bounds->scissors) {
-            draw2d::current().pushClipRect(rc);
-            //draw2d::current().push_scissors(scissors->world_rect(transform->worldMatrix));
+            draw2d::state.pushClipRect(rc);
+            //draw2d::state.push_scissors(scissors->world_rect(transform->worldMatrix));
         }
     }
 
@@ -111,7 +111,7 @@ void RenderSystem2D::drawStack(ecs::entity e) {
     if (display) {
         if (display->program) {
             programChanged = true;
-            draw2d::current().saveProgram().setProgram(display->program.get());
+            draw2d::state.saveProgram().setProgram(display->program.get());
         }
         if (display->drawable) {
             display->drawable->draw();
@@ -124,25 +124,25 @@ void RenderSystem2D::drawStack(ecs::entity e) {
         if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
             const auto* childTransform = it.tryGet<Transform2D>();
             if (childTransform) {
-                draw2d::current().save_transform();
-                draw2d::current().concat(childTransform->matrix);
-                draw2d::current().concat(childTransform->color);
+                draw2d::state.save_transform();
+                draw2d::state.concat(childTransform->matrix);
+                draw2d::state.concat(childTransform->color);
             }
-            if (draw2d::current().color.scale.a > 0) {
+            if (draw2d::state.color.scale.a > 0) {
                 drawStack(it);
             }
             if (childTransform) {
-                draw2d::current().restore_transform();
+                draw2d::state.restore_transform();
             }
         }
         it = child.sibling_next;
     }
 
     if (bounds && bounds->scissors) {
-        draw2d::current().popClipRect();
+        draw2d::state.popClipRect();
     }
     if (programChanged) {
-        draw2d::current().restoreProgram();
+        draw2d::state.restoreProgram();
     }
 }
 }

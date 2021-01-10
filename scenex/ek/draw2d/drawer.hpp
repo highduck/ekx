@@ -49,43 +49,14 @@ struct BatchState {
 };
 
 struct Context : private disable_copy_assign_t {
-    constexpr static int MaxIndex = 0xFFFFF;
-    constexpr static int MaxVertex = 0xFFFF;
 
-    const graphics::Shader* defaultShader = nullptr;
-    const graphics::Shader* alphaMapShader = nullptr;
-    const graphics::Shader* solidColorShader = nullptr;
-    const graphics::Texture* emptyTexture = nullptr;
+//    Context();
+//
+//    ~Context();
 
-    const graphics::Texture* texture = nullptr;
-    const graphics::Shader* program = nullptr;
-    matrix_2d matrix{};
-    rect_f uv{0.0f, 0.0f, 1.0f, 1.0f};
-    ColorMod32 color{};
-    rect_f scissors{};
+    void initialize();
 
-    bool active = false;
-    const graphics::Texture* renderTarget = nullptr;
-    mat4f mvp{};
-public:
-
-    std::vector<matrix_2d> matrixStack;
-    std::vector<ColorMod32> colorStack;
-    std::vector<rect_f> scissorsStack;
-    std::vector<const graphics::Shader*> programStack;
-    std::vector<const graphics::Texture*> textureStack;
-    std::vector<rect_f> texCoordStack;
-
-    enum CheckFlags : uint8_t {
-        Check_Scissors = 1,
-        Check_Shader = 4,
-        Check_Texture = 8
-    };
-    uint8_t checkFlags = 0;
-
-    Context();
-
-    ~Context();
+    void shutdown();
 
     /** Scissors **/
 
@@ -173,21 +144,15 @@ public:
     // do extra checking and clear states stack
     void finish();
 
-    BatchState curr{};
-    BatchState next{};
-    bool stateChanged = true;
+    void setNextScissors(rect_i rc);
 
-    FrameStats stats;
+    void setNextBlending(BlendMode blending);
 
-    void setScissors(rect_i rc);
+    void setNextTexture(sg_image texture);
 
-    void setBlendMode(BlendMode blending);
+    void setNextShader(sg_shader shader, uint8_t numTextures);
 
-    void setTexture(sg_image texture);
-
-    void setProgram(sg_shader shader, uint8_t numTextures);
-
-    void setNextState();
+    void applyNextState();
 
 public:
 
@@ -198,16 +163,64 @@ public:
     [[nodiscard]]
     uint32_t getUsedMemory() const;
 
-public:
-
     sg_pipeline getPipeline(sg_shader shader, bool useRenderTarget);
 
+public:
+
+    constexpr static int MaxIndex = 0xFFFFF;
+    constexpr static int MaxVertex = 0xFFFF;
+
+    // Default resources
+    const graphics::Shader* defaultShader = nullptr;
+    const graphics::Shader* alphaMapShader = nullptr;
+    const graphics::Shader* solidColorShader = nullptr;
+    const graphics::Texture* emptyTexture = nullptr;
+
+    // Current drawing state
+    const graphics::Texture* texture = nullptr;
+    const graphics::Shader* program = nullptr;
+    matrix_2d matrix{};
+    rect_f uv{0.0f, 0.0f, 1.0f, 1.0f};
+    ColorMod32 color{};
+    rect_f scissors{};
+
+    // Current pass state
+    bool active = false;
+    const graphics::Texture* renderTarget = nullptr;
+    mat4f mvp{};
+
+    // Stacks for save-restore states
+    std::vector<matrix_2d> matrixStack;
+    std::vector<ColorMod32> colorStack;
+    std::vector<rect_f> scissorsStack;
+    std::vector<const graphics::Shader*> programStack;
+    std::vector<const graphics::Texture*> textureStack;
+    std::vector<rect_f> texCoordStack;
+
+    // Checking what states could be potentially changed
+    enum CheckFlags : uint8_t {
+        Check_Scissors = 1,
+        Check_Shader = 4,
+        Check_Texture = 8
+    };
+    uint8_t checkFlags = 0;
+
+    // Batch state tracking
+    BatchState curr{};
+    BatchState next{};
+    bool stateChanged = true;
+
+    // Stats during frame
+    FrameStats stats;
+
+    // Index data buffers
     BufferChain* indexBuffers_ = nullptr;
     uint16_t* indexData_ = nullptr;
     uint16_t* indexDataPos_ = nullptr;
     uint16_t* indexDataNext_ = nullptr;
     uint32_t indicesCount_ = 0;
 
+    // Vertex data buffers
     BufferChain* vertexBuffers_ = nullptr;
     Vertex2D* vertexData_ = nullptr;
     Vertex2D* vertexDataPos_ = nullptr;
@@ -215,19 +228,15 @@ public:
     uint32_t verticesCount_ = 0;
     uint16_t baseVertex_ = 0;
 
+    // Batch rendering
     sg_pipeline selectedPipeline{};
     sg_bindings bind{};
-
     std::unordered_map<uint64_t, sg_pipeline> pipelines{};
+
+    bool initialized_ = false;
 };
 
-extern Context* state;
-
-inline Context& current() {
-    return *state;
-}
-
-void init();
+extern Context state;
 
 void beginNewFrame();
 
