@@ -57,8 +57,6 @@ public:
     float2 position_;
     float2 position_last_;
     std::vector<Node> nodes_;
-    float particles_gen_ = 0.0f;
-    bool auto_update_ = true;
 };
 
 class TrailRenderer2D : public Drawable2D<TrailRenderer2D> {

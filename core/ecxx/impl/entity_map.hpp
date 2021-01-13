@@ -34,7 +34,7 @@ public:
         return const_cast<entity_vector_type&>(entities).end();
     }
 
-    inline const entity& at(uint32_t index) const {
+    inline entity at(uint32_t index) const {
         return entities[index];
     }
 

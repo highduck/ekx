@@ -215,8 +215,8 @@ inline ecs::entity find(const ecs::entity e, const std::string& childName) {
     return find(e, childName.c_str());
 }
 
-ecs::entity findByPath(const ecs::entity e, const std::vector<std::string>& path);
+ecs::entity findByPath(ecs::entity e, const std::vector<std::string>& path);
 
-std::vector<ecs::entity> findMany(const ecs::entity e, const std::vector<std::string>& names);
+std::vector<ecs::entity> findMany(ecs::entity e, const std::vector<std::string>& names);
 
 }
