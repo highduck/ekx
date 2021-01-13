@@ -38,6 +38,11 @@ public:
     void gui_inspector() override;
 };
 
+
+//struct SyncPosition {
+//
+//};
+
 }
 
 

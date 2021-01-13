@@ -145,7 +145,7 @@ void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
 ecs::entity create_and_merge(const SGFile& sg, SGFileRes asset,
                              const SGNodeData* data,
                              const SGNodeData* over = nullptr) {
-    auto entity = ecs::create<Node, Transform2D>();
+    auto entity = ecs::create<Node, Transform2D, WorldTransform2D>();
     if (data) {
         apply(entity, data, asset);
     }

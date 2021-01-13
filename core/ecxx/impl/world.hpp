@@ -2,9 +2,6 @@
 
 #include "entity_pool.hpp"
 #include "entity_map.hpp"
-//#include "view.hpp"
-//#include "runtime_view.hpp"
-//#include "rview.hpp"
 
 namespace ecs {
 
