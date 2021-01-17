@@ -78,7 +78,7 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/timers.hpp
         ek/timers.cpp
-        )
+        ecxx/impl/ecxx.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
@@ -123,4 +123,4 @@ else ()
     endif ()
 endif ()
 
-target_link_libraries(${PROJECT_NAME} stb sokol)
+target_link_libraries(${PROJECT_NAME} stb sokol tracy)

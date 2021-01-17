@@ -61,9 +61,8 @@ void updateScreenRect(ecs::entity root);
 
 class layout_wrapper {
 public:
-    layout_wrapper(ecs::entity e)
-            : e_{e},
-              l_{ecs::get_or_create<LayoutRect>(e)} {
+    layout_wrapper(ecs::entity e) : e_{e},
+                                    l_{e.get_or_create<LayoutRect>()} {
     }
 
     static rect_f designCanvasRect;
@@ -75,14 +74,14 @@ public:
     }
 
     layout_wrapper& hard(float x, float y) {
-        auto& transform = ecs::get_or_create<Transform2D>(e_);
+        auto& transform = e_.get_or_create<Transform2D>();
         horizontal(x, transform.position.x - (designCanvasRect.x + designCanvasRect.width * x));
         vertical(y, transform.position.y - (designCanvasRect.y + designCanvasRect.height * y));
         return *this;
     }
 
     layout_wrapper& hard_y(float y = 0.0f) {
-        auto& transform = ecs::get_or_create<Transform2D>(e_);
+        auto& transform = e_.get_or_create<Transform2D>();
         vertical(y, transform.position.y - (designCanvasRect.y + designCanvasRect.height * y));
         return *this;
     }

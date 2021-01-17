@@ -1,9 +1,9 @@
 #pragma once
 
 #include <ecxx/impl/world.hpp>
+#include <ecxx/impl/entity.hpp>
 #include <ecxx/impl/view_forward.hpp>
 #include <ecxx/impl/view_backward.hpp>
-#include <ecxx/impl/view_runtime.hpp>
 
 namespace ecs {
 
@@ -13,7 +13,7 @@ namespace ecs {
 
 template<typename ...Component>
 inline auto view() {
-    return view_forward_t<Component...>{world::the};
+    return view_forward_t<Component...>{&the_world};
 }
 
 /** special view provide back-to-front iteration
@@ -21,158 +21,167 @@ inline auto view() {
  **/
 template<typename ...Component>
 inline auto view_backward() {
-    return view_backward_t<Component...>{world::the};
-}
-
-template<typename It>
-inline view_runtime_t runtime_view(It begin, It end) {
-    std::vector<entity_map_base*> table;
-    for (auto it = begin; it != end; ++it) {
-        auto* set = world::the.components[*it];
-        if (set != nullptr) {
-            table.emplace_back(set);
-        }
-    }
-    return view_runtime_t(table);
+    return view_backward_t<Component...>{&the_world};
 }
 
 template<typename ...Component>
 inline entity create() {
-    return world::the.create<Component...>();
+    Entity e;
+    entity_create<Component...>(&the_world, &e, 1);
+    return entity{e};
 }
 
-template<typename ...Component, typename It>
-void create(It begin, It end) {
-    return world::the.create<Component...>(begin, end);
-}
-
-[[nodiscard]] inline bool valid(entity e) {
-    return e && world::the.entities.current(e.index()) == e.version();
+[[nodiscard]] inline bool valid(EntityRef ref) {
+    return ref && passport_valid(&the_world, ref.passport);
 }
 
 inline void destroy(entity e) {
-    ECXX_FULL_ASSERT(valid(e));
-    return world::the.destroy(e);
+    ECXX_FULL_ASSERT(e.isAlive());
+    entity_destroy(&the_world, &e.index, 1);
 }
 
 template<typename Component>
 [[nodiscard]] inline bool is_locked() {
-    return world::the.is_locked<Component>();
+    return component_is_locked<Component>(the_world);
 }
 
 template<typename Func>
 inline void each(Func func) {
-    return world::the.entities.each(func);
-}
+    const auto* indices = the_world.indices;
+    const auto count = the_world.count;
 
-/** Entity methods functional style **/
-
-template<typename Component, typename ...Args>
-inline Component& assign(entity e, Args&& ... args) {
-    ECXX_FULL_ASSERT(valid(e));
-    return world::the.assign<Component>(e, args...);
-}
-
-template<typename Component, typename ...Args>
-inline Component& reassign(entity e, Args&& ... args) {
-    ECXX_FULL_ASSERT(valid(e));
-    return world::the.reassign<Component>(e, args...);
-}
-
-template<typename Component>
-[[nodiscard]] inline bool has(entity e) {
-    ECXX_FULL_ASSERT(valid(e));
-    return world::the.has<Component>(e.index());
-}
-
-template<typename Component>
-inline Component& get(entity e) {
-    ECXX_FULL_ASSERT(valid(e));
-    return world::the.get<Component>(e.index());
-}
-
-template<typename Component>
-inline Component& get_or_create(entity e) {
-    ECXX_FULL_ASSERT(valid(e));
-    return world::the.get_or_create<Component>(e);
-}
-
-template<typename Component>
-inline const Component& get_or_default(entity e) {
-    ECXX_FULL_ASSERT(valid(e));
-    return world::the.get_or_default<Component>(e.index());
-}
-
-template<typename Component>
-inline void remove(entity e) {
-    ECXX_FULL_ASSERT(valid(e));
-    return world::the.remove<Component>(e.index());
-}
-
-template<typename Component>
-inline bool try_remove(entity e) {
-    ECXX_FULL_ASSERT(valid(e));
-    return world::the.try_remove<Component>(e.index());
+    for (uint32_t i = 1, processed = 1; processed < count; ++i) {
+        const auto index = indices[i];
+        if (index == i) {
+            func(entity{indices[i]});
+            ++processed;
+        }
+    }
 }
 
 /** Entity methods impl **/
 
-inline bool entity::valid() const {
-    return ecs::valid(*this);
+inline bool entity::isAlive() const {
+    return index && the_world.indices[index] == index;
 }
 
 template<typename Component, typename ...Args>
 inline Component& entity::assign(Args&& ... args) {
-    ECXX_FULL_ASSERT(valid());
-    return world::the.assign<Component>(*this, args...);
+    ECXX_FULL_ASSERT(isAlive());
+    return entity_assign<Component>(&the_world, index, args...);
 }
 
 template<typename Component, typename ...Args>
 inline Component& entity::reassign(Args&& ... args) {
-    ECXX_FULL_ASSERT(valid());
-    return world::the.reassign<Component>(*this, args...);
+    ECXX_FULL_ASSERT(isAlive());
+    return entity_reassign<Component>(&the_world, index, args...);
 }
 
 template<typename Component>
 [[nodiscard]] inline bool entity::has() const {
-    ECXX_FULL_ASSERT(valid());
-    return world::the.has<Component>(index());
+    ECXX_FULL_ASSERT(isAlive());
+    return entity_has<Component>(&the_world, index);
 }
 
 template<typename Component>
 inline Component& entity::get() const {
-    ECXX_FULL_ASSERT(valid());
-    return world::the.get<Component>(index());
+    ECXX_FULL_ASSERT(isAlive());
+    return entity_get<Component>(&the_world, index);
 }
 
 template<typename Component>
 inline Component* entity::tryGet() const {
-    ECXX_FULL_ASSERT(valid());
-    return world::the.tryGet<Component>(index());
+    ECXX_FULL_ASSERT(isAlive());
+    return entity_tryGet<Component>(&the_world, index);
 }
 
 template<typename Component>
 inline Component& entity::get_or_create() const {
-    ECXX_FULL_ASSERT(valid());
-    return world::the.get_or_create<Component>(*this);
+    ECXX_FULL_ASSERT(isAlive());
+    return entity_get_or_create<Component>(&the_world, index);
 }
 
 template<typename Component>
 inline const Component& entity::get_or_default() const {
-    ECXX_FULL_ASSERT(valid());
-    return world::the.get_or_default<Component>(index());
+    ECXX_FULL_ASSERT(isAlive());
+    return entity_get_or_default<Component>(&the_world, index);
 }
 
 template<typename Component>
 inline void entity::remove() {
-    ECXX_FULL_ASSERT(valid());
-    return world::the.remove<Component>(index());
+    ECXX_FULL_ASSERT(isAlive());
+    return entity_remove<Component>(&the_world, index);
 }
 
 template<typename Component>
 inline bool entity::try_remove() {
+    ECXX_FULL_ASSERT(isAlive());
+    return entity_try_remove<Component>(&the_world, index);
+}
+
+/** Entity methods impl **/
+
+inline EntityRef::EntityRef(entity ent) noexcept:
+        EntityRef{ent.index, entity_generation(&the_world, ent.index)} {
+
+}
+
+inline bool EntityRef::valid() const {
+    return passport && entity_generation(&the_world, index()) == version();
+}
+
+template<typename Component, typename ...Args>
+inline Component& EntityRef::assign(Args&& ... args) {
     ECXX_FULL_ASSERT(valid());
-    return world::the.try_remove<Component>(index());
+    return entity_assign<Component>(&the_world, *this, args...);
+}
+
+template<typename Component, typename ...Args>
+inline Component& EntityRef::reassign(Args&& ... args) {
+    ECXX_FULL_ASSERT(valid());
+    return entity_reassign<Component>(&the_world, *this, args...);
+}
+
+template<typename Component>
+[[nodiscard]] inline bool EntityRef::has() const {
+    ECXX_FULL_ASSERT(valid());
+    return entity_has<Component>(&the_world, index());
+}
+
+template<typename Component>
+inline Component& EntityRef::get() const {
+    ECXX_FULL_ASSERT(valid());
+    return entity_get<Component>(&the_world, index());
+}
+
+template<typename Component>
+inline Component* EntityRef::tryGet() const {
+    ECXX_FULL_ASSERT(valid());
+    return entity_tryGet<Component>(&the_world, index());
+}
+
+template<typename Component>
+inline Component& EntityRef::get_or_create() const {
+    ECXX_FULL_ASSERT(valid());
+    return entity_get_or_create<Component>(&the_world, *this);
+}
+
+template<typename Component>
+inline const Component& EntityRef::get_or_default() const {
+    ECXX_FULL_ASSERT(valid());
+    return entity_get_or_default<Component>(&the_world, index());
+}
+
+template<typename Component>
+inline void EntityRef::remove() {
+    ECXX_FULL_ASSERT(valid());
+    return entity_remove<Component>(&the_world, index());
+}
+
+template<typename Component>
+inline bool EntityRef::try_remove() {
+    ECXX_FULL_ASSERT(valid());
+    return entity_try_remove<Component>(&the_world, index());
 }
 
 }

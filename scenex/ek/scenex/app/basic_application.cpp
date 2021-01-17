@@ -18,6 +18,10 @@
 #include <ek/scenex/3d/RenderSystem3D.hpp>
 #include <ek/scenex/3d/Transform3D.hpp>
 
+//#ifdef TRACY_ENABLE
+#include "../../tracy/Tracy.hpp"
+//#endif
+
 namespace ek {
 
 using ecs::world;
@@ -27,6 +31,7 @@ using namespace ek::app;
 void drawPreloader(float progress);
 
 basic_application::basic_application() {
+    tracy::SetThreadName("Main");
 
     assert_created_once<basic_application>();
 
@@ -41,9 +46,11 @@ basic_application::~basic_application() {
 }
 
 void basic_application::initialize() {
+    ZoneScopedN("initialize");
     draw2d::state.initialize();
 
     //// basic scene
+    ecs::world_initialize(&ecs::the_world);
     root = createNode2D("root");
     updateScreenRect(root);
 
@@ -52,8 +59,8 @@ void basic_application::initialize() {
     service_locator_instance<AudioManager>::init();
 
     game = createNode2D("game");
-    ecs::assign<Canvas>(game, AppResolution.x, AppResolution.y);
-    ecs::assign<LayoutRect>(game);
+    game.assign<Canvas>(AppResolution.x, AppResolution.y);
+    game.assign<LayoutRect>();
     append(root, game);
     Canvas::updateAll();
     scale_factor = game.get<Canvas>().scale;
@@ -80,8 +87,10 @@ void basic_application::preload() {
 }
 
 void basic_application::on_draw_frame() {
+    FrameMark;
+    ZoneScoped;
     timer_t timer{};
-    scale_factor = ecs::get<Canvas>(game).scale;
+    scale_factor = game.get<Canvas>().scale;
     asset_manager_->set_scale_factor(scale_factor);
 
     /** base app BEGIN **/
@@ -177,6 +186,7 @@ void basic_application::render_frame() {
 }
 
 void basic_application::on_frame_end() {
+    ZoneScoped;
     profiler.draw();
 }
 
@@ -192,6 +202,7 @@ void basic_application::start_game() {
 }
 
 void basic_application::on_event(const event_t& event) {
+    ZoneScoped;
     timer_t timer{};
     if (event.type == event_type::app_resize) {
         updateScreenRect(root);

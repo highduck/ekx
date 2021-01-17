@@ -324,7 +324,7 @@ void RenderSystem3D::renderObjects(const mat4f& proj, const mat4f& view) {
     main->bind.fs_images[SLOT_u_image_shadow_map] = shadows->rtColor->image;
 
     for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
-        const auto& filter = ecs::get<MeshRenderer>(e);
+        const auto& filter = e.get<MeshRenderer>();
         auto* mesh = Res<StaticMesh>{filter.mesh}.get_or(filter.meshPtr);
         if (mesh && e.get_or_default<Node>().visible()) {
             mat4f model = e.get<Transform3D>().world;
@@ -370,7 +370,7 @@ void RenderSystem3D::renderObjects(const mat4f& proj, const mat4f& view) {
 void RenderSystem3D::prepare() {
     defaultMaterial.set_base_color(0xFF00FF_rgb, 0.2f);
 
-    if (!camera.valid() || !scene.valid()) {
+    if (!camera.isAlive() || !scene.isAlive()) {
         camera = nullptr;
         scene = nullptr;
     }

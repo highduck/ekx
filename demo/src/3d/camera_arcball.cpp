@@ -30,9 +30,9 @@ void update_camera_arc_ball(float dt) {
         prev_pointer = cur;
     }
     for (auto e: ecs::view<Camera3D, camera_arc_ball, Transform3D>()) {
-        auto& arc_ball = ecs::get<camera_arc_ball>(e);
-        auto& camera_data = ecs::get<Camera3D>(e);
-        auto& camera_transform = ecs::get<Transform3D>(e);
+        auto& arc_ball = e.get<camera_arc_ball>();
+        auto& camera_data = e.get<Camera3D>();
+        auto& camera_transform = e.get<Transform3D>();
 
         auto dir = normalize(arc_ball.center - camera_transform.position);
         auto r = cross(dir, camera_data.up);

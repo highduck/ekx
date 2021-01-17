@@ -151,7 +151,7 @@ void AppBox::rateUs() {
 void wrap_button(ecs::entity e, const std::string& name, const std::string& link) {
     auto x = find(e, name);
     if (!link.empty()) {
-        ecs::get_or_create<Button>(x).clicked.add([link] {
+        x.get_or_create<Button>().clicked.add([link] {
             sharing_navigate(link.c_str());
         });
     } else {

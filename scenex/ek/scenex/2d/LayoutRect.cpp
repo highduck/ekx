@@ -9,22 +9,20 @@ namespace ek {
 float4 LayoutRect::AdditionalInsets = float4::zero;
 
 rect_f find_parent_layout_rect(ecs::entity e, bool safe) {
-    auto it = e;
+    auto it = e.get<Node>().parent;
     while (it) {
-        if (ecs::has<LayoutRect>(it)) {
-            const auto& layout = ecs::get<LayoutRect>(it);
-            if (!layout.rect.empty()) {
-                return safe ? layout.safeRect : layout.rect;
-            }
+        const auto* layout = it.tryGet<LayoutRect>();
+        if (layout && !layout->rect.empty()) {
+            return safe ? layout->safeRect : layout->rect;
         }
-        it = ecs::get<Node>(it).parent;
+        it = it.get<Node>().parent;
     }
     return rect_f::zero_one;
 }
 
 void updateScreenRect(ecs::entity root) {
     const auto screen_size = app::g_app.drawable_size;
-    auto& rootLayout = ecs::get_or_create<LayoutRect>(root);
+    auto& rootLayout = root.get_or_create<LayoutRect>();
     rootLayout.rect.set(0.0f, 0.0f, screen_size.x, screen_size.y);
 
     auto insets = LayoutRect::AdditionalInsets + get_screen_insets();
@@ -39,14 +37,14 @@ void updateScreenRect(ecs::entity root) {
 
 
 void update_layout(ecs::entity e) {
-    const auto& l = ecs::get<LayoutRect>(e);
+    const auto& l = e.get<LayoutRect>();
     auto top_rect = find_parent_layout_rect(e, l.doSafeInsets);
     if (top_rect.empty()) {
         return;
     }
-    auto& transform = ecs::get<Transform2D>(e);
-    if ((l.fill_x || l.fill_y) && ecs::has<Display2D>(e)) {
-        auto& display = ecs::get<Display2D>(e);
+    auto& transform = e.get<Transform2D>();
+    if ((l.fill_x || l.fill_y) && e.has<Display2D>()) {
+        auto& display = e.get<Display2D>();
         auto* quad = display.tryGet<Quad2D>();
         if (quad) {
             if (l.fill_x) {

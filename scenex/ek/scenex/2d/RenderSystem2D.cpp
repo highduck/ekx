@@ -14,7 +14,7 @@ namespace ek {
 int RenderSystem2D::currentLayerMask = 0xFF;
 
 void RenderSystem2D::draw(ecs::entity e, const WorldTransform2D* worldTransform) {
-    assert(e.valid());
+    assert(e.isAlive());
 
     auto* uglyFilter = e.tryGet<UglyFilter2D>();
     if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {
@@ -80,7 +80,7 @@ void RenderSystem2D::draw(ecs::entity e, const WorldTransform2D* worldTransform)
 
 
 void RenderSystem2D::drawStack(ecs::entity e) {
-    assert(e.valid());
+    assert(e.isAlive());
 
     auto* uglyFilter = e.tryGet<UglyFilter2D>();
     if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {

@@ -43,3 +43,14 @@ if (EKX_BUILD_TESTS)
         add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
     endif ()
 endif ()
+
+
+# Tracy external
+project(tracy)
+add_library(${PROJECT_NAME} STATIC tracy/TracyClient.cpp)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+target_include_directories(${PROJECT_NAME} INTERFACE ./tracy)
+if (EKX_TRACY)
+    target_compile_definitions(${PROJECT_NAME} INTERFACE TRACY_ENABLE)
+    add_definitions(-DTRACY_ENABLE)
+endif ()

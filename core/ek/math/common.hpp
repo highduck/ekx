@@ -111,6 +111,20 @@ inline int sign(float v) {
     return v > 0.0f ? 1 : (v < 0.0f ? -1 : 0);
 }
 
+inline float Q_rsqrt(float x) {
+//    const float x2 = number * 0.5f;
+//    const float threehalfs = 1.5f;
+//
+//    union {
+//        float f;
+//        uint32_t i;
+//    } conv = {.f = number};
+//    conv.i = 0x5f3759df - (conv.i >> 1);
+//    conv.f *= threehalfs - (x2 * conv.f * conv.f);
+//    return conv.f;
+    return 1.0f / sqrtf(x);
+}
+
 /* Thanks to good old Bit Twiddling Hacks for this one: http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2 */
 inline unsigned int nextPowerOf2(unsigned int x) {
     x--;

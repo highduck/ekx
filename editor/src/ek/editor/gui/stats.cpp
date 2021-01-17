@@ -18,8 +18,9 @@ void guiStatsWindow(bool* p_open) {
                     stats.triangles,
                     stats.fillArea / (drawableSize.x * drawableSize.y)
         );
-        const auto& entities = ecs::world::the.entities;
-        ImGui::Text("%u entities | %u free", entities.size(), entities.available_for_recycling());
+        auto entitiesCount = ecs::the_world.count;
+        auto entitiesAvailable = ecs::ENTITIES_MAX_COUNT - entitiesCount;
+        ImGui::Text("%u entities | %u free", entitiesCount - 1, entitiesAvailable);
         ImGui::Text("Batching buffer objects: %0.2f MB", (draw2d::state.getUsedMemory() / 1000000.0f));
     }
     ImGui::End();

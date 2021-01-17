@@ -13,7 +13,7 @@ void apply_frame(entity e, MovieClip& mov);
 
 void MovieClip::updateAll() {
     for (auto e : ecs::view<MovieClip>()) {
-        auto& mov = ecs::get<MovieClip>(e);
+        auto& mov = e.get<MovieClip>();
         auto dt = mov.timer->dt;
         if (mov.playing) {
             mov.time += dt * mov.fps;
@@ -82,7 +82,7 @@ easing_progress_t get_easing_progress(const float t, const std::vector<SGEasingD
 }
 
 void apply_transform(entity e, const SGKeyFrameTransform& keyframe) {
-    auto& transform = ecs::get_or_create<Transform2D>(e);
+    auto& transform = e.get_or_create<Transform2D>();
     transform.position = keyframe.position;
     transform.skew = keyframe.skew;
     transform.scale = keyframe.scale;
@@ -110,8 +110,8 @@ void update_target(float time, entity e, const SGMovieLayerData& layer) {
         apply_transform(e, k1.transform);
     }
 
-    if (k1.loopMode != 0 && ecs::has<MovieClip>(e)) {
-        auto& mc = ecs::get<MovieClip>(e);
+    if (k1.loopMode != 0 && e.has<MovieClip>()) {
+        auto& mc = e.get<MovieClip>();
         const auto loop = k1.loopMode;
         if (loop == 1) {
             goto_and_stop(e, time - k1.index);
@@ -136,21 +136,21 @@ void apply_frame(entity e, MovieClip& mov) {
         // no data - exit early
         return;
     }
-    auto it = ecs::get<Node>(e).child_first;
+    auto it = e.get<Node>().child_first;
     const auto totalTargets = static_cast<int>(data->layers.size());
     while (it != nullptr) {
-        if (ecs::has<movie_target_keys>(it)) {
-            const auto idx = ecs::get<movie_target_keys>(it).key_animation;
+        if (it.has<movie_target_keys>()) {
+            const auto idx = it.get<movie_target_keys>().key_animation;
             if (idx < totalTargets) {
                 update_target(time, it, data->layers[idx]);
             }
         }
-        it = ecs::get<Node>(it).sibling_next;
+        it = it.get<Node>().sibling_next;
     }
 }
 
 void goto_and_stop(entity e, float frame) {
-    auto& mov = ecs::get<MovieClip>(e);
+    auto& mov = e.get<MovieClip>();
     mov.playing = false;
     mov.time = frame;
     mov.trunc_time();

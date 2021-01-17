@@ -42,25 +42,25 @@ const ButtonSkin& get_skin(const Button& btn) {
 }
 
 void initialize_events(ecs::entity e) {
-    auto& interactive = ecs::get_or_create<Interactive>(e);
+    auto& interactive = e.get_or_create<Interactive>();
     interactive.on_over.add([e] {
-        const auto& skin = get_skin(ecs::get<Button>(e));
+        const auto& skin = get_skin(e.get<Button>());
         play_sound(skin.sfx_over);
     });
     interactive.on_out.add([e] {
-        auto& btn = ecs::get<Button>(e);
+        auto& btn = e.get<Button>();
         const auto& skin = get_skin(btn);
-        if (ecs::get<Interactive>(e).pushed) {
+        if (e.get<Interactive>().pushed) {
             start_post_tween(btn);
         }
         play_sound(skin.sfx_out);
     });
     interactive.on_down.add([e] {
-        const auto& skin = get_skin(ecs::get<Button>(e));
+        const auto& skin = get_skin(e.get<Button>());
         play_sound(skin.sfx_down);
     });
     interactive.on_clicked.add([e] {
-        auto& btn = ecs::get<Button>(e);
+        auto& btn = e.get<Button>();
         const auto& skin = get_skin(btn);
         play_sound(skin.sfx_click);
 
@@ -72,9 +72,9 @@ void initialize_events(ecs::entity e) {
         }
     });
 
-    ecs::get_or_create<NodeEventHandler>(e)
+    e.get_or_create<NodeEventHandler>()
             .on(interactive_event::back_button, [e](const NodeEventData& ev) {
-                auto& btn = ecs::get<Button>(e);
+                auto& btn = e.get<Button>();
                 handle_back_button(btn, ev);
             });
 
@@ -98,7 +98,7 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
 }
 
 void update_movie_frame(ecs::entity entity, const Interactive& interactive) {
-    if (ecs::has<MovieClip>(entity)) {
+    if (entity.has<MovieClip>()) {
         int frame = 0;
         if (interactive.over || interactive.pushed) {
             frame = 1;
@@ -106,16 +106,16 @@ void update_movie_frame(ecs::entity entity, const Interactive& interactive) {
                 frame = 2;
             }
         }
-        goto_and_stop(entity, frame);
+        goto_and_stop(entity, static_cast<float>(frame));
     }
 }
 
 void Button::updateAll() {
 
     for (auto e : ecs::view<Button, Interactive, Transform2D>()) {
-        auto& btn = ecs::get<Button>(e);
-        auto& interactive = ecs::get<Interactive>(e);
-        auto& transform = ecs::get<Transform2D>(e);
+        auto& btn = e.get<Button>();
+        auto& interactive = e.get<Interactive>();
+        auto& transform = e.get<Transform2D>();
         float dt = btn.time->dt;
 
         if (!btn.initialized) {

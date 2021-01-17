@@ -19,12 +19,14 @@
 #include <ek/scenex/base/Tween.hpp>
 #include <ek/goodies/GameScreen.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
+#include <Tracy.hpp>
 
 namespace ek {
 
 using namespace ecs;
 
 void scene_pre_update(entity root, float dt) {
+    ZoneScoped;
 
     resolve<InteractionSystem>().process();
 
@@ -52,8 +54,11 @@ void scene_pre_update(entity root, float dt) {
 }
 
 void scene_post_update(ecs::entity root) {
+    ZoneScoped;
+
     DestroyTimer::updateAll();
-    updateWorldTransform2D(root);
+
+    updateWorldTransformAll(&ecs::the_world, root);
 
     Trail2D::updateAll();
     update_emitters();
@@ -62,6 +67,8 @@ void scene_post_update(ecs::entity root) {
 }
 
 void scene_render(ecs::entity root) {
+    ZoneScoped;
+
     Camera2D::render();
 //    drawScene2D(root);
     //drawSceneGizmos(root);

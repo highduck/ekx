@@ -27,9 +27,9 @@ LayoutRect get_canvas_space_size(ecs::entity e) {
     result.rect = {float2::zero, get_screen_size()};
     result.safeRect = result.rect;
 
-    auto parent = ecs::get_or_default<Node>(e).parent;
+    auto parent = e.get_or_default<Node>().parent;
     if (parent) {
-        auto layout = ecs::get<LayoutRect>(parent);
+        auto layout = parent.get<LayoutRect>();
         if (!layout.safeRect.empty()) {
             result = layout;
         }
@@ -39,7 +39,7 @@ LayoutRect get_canvas_space_size(ecs::entity e) {
 }
 
 float update_canvas(ecs::entity e) {
-    auto& canvas = ecs::get<Canvas>(e);
+    auto& canvas = e.get<Canvas>();
     auto rootLayout = get_canvas_space_size(e);
     auto resolution_size = canvas.resolution.size;
     float2 scale_ratio = rootLayout.safeRect.size / resolution_size;
@@ -71,12 +71,12 @@ float update_canvas(ecs::entity e) {
             rootLayout.safeRect.size / scale
     };
 
-    auto& layout = ecs::get<LayoutRect>(e);
+    auto& layout = e.get<LayoutRect>();
     if (layout.safeRect != safeRect) {
         layout.safeRect = safeRect;
         layout.rect = rect;
 
-        auto& transform = ecs::get<Transform2D>(e);
+        auto& transform = e.get<Transform2D>();
         transform.position = left_top_full;
         transform.scale = float2{scale, scale};
 

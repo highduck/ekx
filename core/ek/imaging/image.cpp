@@ -1,29 +1,28 @@
 #include "image.hpp"
 
-#include <ek/util/logger.hpp>
 #include <algorithm>
+#include <Tracy.hpp>
 
 namespace ek {
 
-image_t::image_t(const image_t& image)
-        : width_{image.width_},
-          height_{image.height_},
-          data_{new uint8_t[image.width_ * image.height_ * 4u]} {
+image_t::image_t(const image_t& image) : width_{image.width_},
+                                         height_{image.height_},
+                                         data_{new uint8_t[image.width_ * image.height_ * 4u]} {
+    TracyAlloc(data_, image.width_ * image.height_ * 4u);
     assign(image);
 }
 
-image_t::image_t(uint32_t width, uint32_t height)
-        : width_(width),
-          height_(height),
-          data_{new uint8_t[width * height * 4u]} {
+image_t::image_t(uint32_t width, uint32_t height) : width_(width),
+                                                    height_(height),
+                                                    data_{new uint8_t[width * height * 4u]} {
+    TracyAlloc(data_, width * height * 4u);
     std::fill_n(data_, width * height * 4u, 0u);
 }
 
-image_t::image_t(uint32_t width, uint32_t height, uint8_t* data, bool use_c_free)
-        : width_{width},
-          height_{height},
-          data_{data},
-          use_c_free_{use_c_free} {
+image_t::image_t(uint32_t width, uint32_t height, uint8_t* data, bool use_c_free) : width_{width},
+                                                                                    height_{height},
+                                                                                    data_{data},
+                                                                                    use_c_free_{use_c_free} {
 }
 
 void image_t::assign(const image_t& src) {
@@ -32,6 +31,7 @@ void image_t::assign(const image_t& src) {
 
 void image_t::deallocate() {
     if (data_) {
+        TracyFree(data_);
         if (use_c_free_) {
             free(data_);
         } else {

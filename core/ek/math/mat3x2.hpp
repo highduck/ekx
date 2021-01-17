@@ -151,14 +151,14 @@ struct matrix_t<3, 2, T> {
     // it will act like `this` is right, `m` is left (premultiplication)
     mat3x2 operator*(const mat3x2& right) const {
         //return multiply(right);
-        return mat3x2{
-                a * right.a + c * right.b,
-                b * right.a + d * right.b,
-                a * right.c + c * right.d,
-                b * right.c + d * right.d,
-                a * right.tx + c * right.ty + tx,
-                b * right.tx + d * right.ty + ty
-        };
+        mat3x2 m;
+        m.a = a * right.a + c * right.b;
+        m.b = b * right.a + d * right.b;
+        m.c = a * right.c + c * right.d;
+        m.d = b * right.c + d * right.d;
+        m.tx = a * right.tx + c * right.ty + tx;
+        m.ty = b * right.tx + d * right.ty + ty;
+        return m;
 
 //        r.m00 * l.m00 + r.m01 * l.m10
 //        r.m00 * l.m01 + r.m01 * l.m11
