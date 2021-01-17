@@ -1,9 +1,9 @@
-#include <ecxx/impl/utility.hpp>
+#include <ecxx/impl/world.hpp>
 #include <gtest/gtest.h>
 
 #include "identity_generator_shared.hpp"
 
-using namespace ecs::details;
+using namespace ecs;
 
 TEST(identity_generator, test_2) {
     if (!i_generated) {

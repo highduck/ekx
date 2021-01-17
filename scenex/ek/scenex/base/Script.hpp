@@ -36,12 +36,12 @@ public:
 
     template<typename Component>
     inline Component& get() {
-        return ecs::get<Component>(entity_);
+        return entity_.get<Component>();
     }
 
     template<typename Component>
     inline Component& get_or_create() {
-        return ecs::get_or_create<Component>(entity_);
+        return entity_.get_or_create<Component>();
     }
 
     [[nodiscard]] ecs::entity find_child(const std::string& name) const;

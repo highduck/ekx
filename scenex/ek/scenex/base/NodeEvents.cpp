@@ -14,7 +14,7 @@ void dispatch_broadcast(ecs::entity e, const NodeEventData& data) {
 
 void dispatch_bubble(ecs::entity e, const NodeEventData& data) {
     auto it = e;
-    while (it && it.valid()) {
+    while (it && it.isAlive()) {
         auto* eh = it.tryGet<NodeEventHandler>();
         if (eh) {
             eh->emit(data);

@@ -13,7 +13,8 @@ void mouse_follow_script::update(float dt) {
     auto parent = entity_.get<Node>().parent;
     if (parent) {
         auto& im = resolve<InteractionSystem>();
-        get<Transform2D>().position = Transform2D::globalToLocal(parent, im.pointerScreenPosition_);
+        const auto pos = Transform2D::globalToLocal(parent, im.pointerScreenPosition_);
+        get<Transform2D>().position = pos;
     }
 }
 

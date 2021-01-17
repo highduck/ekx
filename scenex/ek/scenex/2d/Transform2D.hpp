@@ -9,7 +9,7 @@
 namespace ek {
 
 struct WorldTransform2D {
-    matrix_2d matrix{};
+    alignas(16) matrix_2d matrix{};
     ColorMod32 color{};
 };
 
@@ -22,7 +22,8 @@ struct Transform2D {
     float2 pivot = float2::zero;
 
     ColorMod32 color{};
-    matrix_2d matrix{};
+
+    alignas(16) matrix_2d matrix{};
 
     void rotation(float value) {
         skew = {value, value};
@@ -64,48 +65,49 @@ void begin_transform(const Transform2D& transform);
 void end_transform();
 
 /** system to invalidate matrix and color in world space **/
-void updateWorldTransform2D(ecs::entity root);
+//void updateWorldTransform2D(ecs::entity root);
+void updateWorldTransformAll(ecs::world* w, ecs::entity root);
 
 /** utility functions **/
 
 inline void setAlpha(ecs::entity e, float alpha) {
-    ecs::get_or_create<Transform2D>(e).color.setAlpha(alpha);
+    e.get_or_create<Transform2D>().color.setAlpha(alpha);
 }
 
 inline void setColorScale(ecs::entity e, argb32_t color_multiplier) {
-    ecs::get_or_create<Transform2D>(e).color.scale = color_multiplier;
+    e.get_or_create<Transform2D>().color.scale = color_multiplier;
 }
 
 inline void setColorOffset(ecs::entity e, argb32_t color_offset) {
-    ecs::get_or_create<Transform2D>(e).color.offset = color_offset;
+    e.get_or_create<Transform2D>().color.offset = color_offset;
 }
 
 inline void setPosition(ecs::entity e, const float2& pos) {
-    ecs::get_or_create<Transform2D>(e).position = pos;
+    e.get_or_create<Transform2D>().position = pos;
 }
 
 inline float2 getPosition(const ecs::entity e) {
-    return ecs::get_or_default<Transform2D>(e).position;
+    return e.get_or_default<Transform2D>().position;
 }
 
 inline void setRotation(ecs::entity e, float radians) {
-    ecs::get_or_create<Transform2D>(e).rotation(radians);
+    e.get_or_create<Transform2D>().rotation(radians);
 }
 
 inline float getRotation(const ecs::entity e) {
-    return ecs::get_or_default<Transform2D>(e).rotation();
+    return e.get_or_default<Transform2D>().rotation();
 }
 
 inline void setScale(ecs::entity e, const float2& sc) {
-    ecs::get_or_create<Transform2D>(e).scale = sc;
+    e.get_or_create<Transform2D>().scale = sc;
 }
 
 inline void setScale(ecs::entity e, float xy) {
-    ecs::get_or_create<Transform2D>(e).scale = {xy, xy};
+    e.get_or_create<Transform2D>().scale = {xy, xy};
 }
 
 inline float2 getScale(ecs::entity e) {
-    return ecs::get_or_default<Transform2D>(e).scale;
+    return e.get_or_default<Transform2D>().scale;
 }
 
 }

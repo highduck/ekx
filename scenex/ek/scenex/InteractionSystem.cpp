@@ -71,7 +71,7 @@ void InteractionSystem::process() {
             if (camera && camera->enabled && camera->interactive &&
                 camera->screenRect.contains(pointerScreenPosition_)) {
                 pointerWorldPosition = camera->matrix.transform(pointerScreenPosition_);
-                cursor = searchInteractiveTargets(pointerWorldPosition, camera->root, currTargets);
+                cursor = searchInteractiveTargets(pointerWorldPosition, camera->root.ent(), currTargets);
             }
         }
 
@@ -92,7 +92,7 @@ void InteractionSystem::fireInteraction(InteractionEvent event, bool prev, bool 
     auto& oppositeTargets = prev ? getCurrentTargets() : getPrevTargets();
 
     for (auto target : targets) {
-        if (target.valid()) {
+        if (target.isAlive()) {
             auto* interactive = target.tryGet<Interactive>();
             if (interactive && !(onlyIfChanged && contains(oppositeTargets, target))) {
                 interactive->handle(event);
@@ -161,11 +161,14 @@ void InteractionSystem::handle_system_pause() {
 
 mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::entity node,
                                                          vector<ecs::entity>& list) {
-    auto it = dragEntity_;
-    if (!it.valid()) {
+    ecs::entity it = nullptr;
+    if (dragEntity_.valid()) {
+        it = dragEntity_.ent();
+    }
+    else {
         it = hitTest2D(node, pointer);
     }
-    hitTarget_ = it;
+    hitTarget_ = ecs::EntityRef{it};
 
     auto cursor = mouse_cursor::parent;
     while (it) {

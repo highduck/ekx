@@ -226,11 +226,12 @@ vec3_t <T> euler_angles(const quat_t<T>& q) {
 
 template<typename T>
 inline quat_t<T> normalize(const quat_t<T>& a) {
-    const T d = sqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
-    if (d < math::epsilon<T>()) {
-        return {};
-    }
-    return a * (T{1} / d);
+    return a / sqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
+}
+
+template<>
+inline quat_t<float> normalize(const quat_t<float>& a) {
+    return a * math::Q_rsqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
 }
 
 template<typename T>

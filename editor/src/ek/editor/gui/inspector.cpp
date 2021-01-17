@@ -32,11 +32,11 @@ void selectAsset(const char* label, Res<T>& asset) {
     }
 }
 
-void guiEntityRef(const char* label, ecs::entity entity) {
-    if (entity == nullptr) {
+void guiEntityRef(const char* label, ecs::EntityRef ref) {
+    if (ref == nullptr) {
         ImGui::TextDisabled("%s: null", label);
-    } else if (entity.valid()) {
-        ImGui::LabelText(label, "%s", entity.get_or_default<NodeName>().name.c_str());
+    } else if (ref.valid()) {
+        ImGui::LabelText(label, "%s", ref.get_or_default<NodeName>().name.c_str());
     } else {
         ImGui::TextColored({1, 0, 0, 1}, "%s: invalid", label);
     }
@@ -55,8 +55,8 @@ inline void guiComponentPanel(const char* name, C& data, Func fn) {
 
 template<typename C, typename Func>
 inline void guiComponentPanel(ecs::entity entity, const char* name, Func fn) {
-    if (ecs::has<C>(entity)) {
-        auto& data = ecs::get<C>(entity);
+    if (entity.has<C>()) {
+        auto& data = entity.get<C>();
         guiComponentPanel(name, data, fn);
     }
 }
@@ -318,16 +318,18 @@ void guiParticleLayer2D(ParticleLayer2D& layer) {
 }
 
 void gui_inspector(ecs::entity e) {
-    ImGui::PushID(e.passport());
-    ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index(), e.version());
+    ImGui::PushID(e.index);
+    ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index, entity_generation(&ecs::the_world, e.index));
     if (e.has<NodeName>()) {
         ImGui::InputText("Name", &e.get<NodeName>().name);
     }
     if (e.has<Node>()) {
         auto& node = e.get<Node>();
-        ImGui::CheckboxFlags("Visible", &node.flags, Node::Visible);
-        ImGui::CheckboxFlags("Touchable", &node.flags, Node::Touchable);
+        int flags = node.flags;
+        ImGui::CheckboxFlags("Visible", &flags, Node::Visible);
+        ImGui::CheckboxFlags("Touchable", &flags, Node::Touchable);
         ImGui::LabelText("Layers", "%x", node.layersMask());
+        node.flags = flags;
     }
 
     guiComponentPanel<UglyFilter2D>(e, "UglyFilter2D", guiUglyFilter2D);

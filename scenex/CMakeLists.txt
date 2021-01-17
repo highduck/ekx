@@ -16,6 +16,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 set(SCENEX_LIBS ek)
+set(SCENEX_DEFS)
 if(EKX_BUILD_EDITOR)
     target_compile_definitions(${PROJECT_NAME} PUBLIC EK_EDITOR)
     set(SCENEX_LIBS ek ek-editor)

@@ -47,10 +47,10 @@ void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
     auto& node = entity.get<Node>();
     entity.get_or_create<NodeName>().name = data->name;
     if (data->movieTargetId >= 0) {
-        ecs::get_or_create<movie_target_keys>(entity) = {data->movieTargetId};
+        entity.get_or_create<movie_target_keys>() = {data->movieTargetId};
     }
 
-    auto& transform = ecs::get<Transform2D>(entity);
+    auto& transform = entity.get<Transform2D>();
     transform.position = data->matrix.position();
     transform.skew = data->matrix.skew();
     transform.scale = data->matrix.scale();
@@ -79,7 +79,7 @@ void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
             format.layers[i].strength = layer.strength;
         }
 
-        auto& display = ecs::get_or_create<Display2D>(entity);
+        auto& display = entity.get_or_create<Display2D>();
         auto dtext = std::make_unique<Text2D>(dynamicText.text, format);
         dtext->localize = Localization::instance.has(dynamicText.text.c_str());
         dtext->adjustsFontSizeToFitBounds = dtext->localize;
@@ -88,7 +88,7 @@ void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
     }
 
     if (data->movie.has_value()) {
-        auto& mov = ecs::assign<MovieClip>(entity);
+        auto& mov = entity.assign<MovieClip>();
         if (asset) {
             mov.library_asset = asset;
             mov.movie_data_symbol = data->libraryName;
@@ -124,19 +124,19 @@ void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
     }
 
     if (data->scissorsEnabled || data->hitAreaEnabled || data->boundsEnabled) {
-        auto& bounds = ecs::reassign<Bounds2D>(entity, data->boundingRect);
+        auto& bounds = entity.reassign<Bounds2D>(data->boundingRect);
         bounds.scissors = data->scissorsEnabled;
         bounds.hitArea = data->hitAreaEnabled;
         bounds.culling = data->boundsEnabled;
     }
 
     if (data->button) {
-        ecs::reassign<Interactive>(entity);
-        ecs::reassign<Button>(entity);
+        entity.reassign<Interactive>();
+        entity.reassign<Button>();
     }
 
     if (!data->filters.empty()) {
-        auto& filters_comp = ecs::reassign<UglyFilter2D>(entity);
+        auto& filters_comp = entity.reassign<UglyFilter2D>();
         filters_comp.filters = data->filters;
 //        ecs::replace_or_assign<node_filters_t>(entity);
     }

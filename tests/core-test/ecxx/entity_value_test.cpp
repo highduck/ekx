@@ -5,12 +5,13 @@
 using namespace ecs;
 
 constexpr entity null{};
+constexpr EntityRef nullRef{};
 
 TEST(entity_value, basic) {
-    ASSERT_EQ(null.index(), 0u);
-    ASSERT_EQ(null.version(), 0u);
+    ASSERT_EQ(null.index, 0u);
+    ASSERT_EQ(nullRef.version(), 0u);
 
-    entity e{1, 1};
+    EntityRef e{1, 1};
     ASSERT_EQ(e.index(), 1u);
     ASSERT_EQ(e.version(), 1u);
 

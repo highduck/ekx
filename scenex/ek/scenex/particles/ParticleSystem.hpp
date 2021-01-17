@@ -20,7 +20,7 @@ struct ParticleEmitter2D {
     float2 position = float2::zero;
     std::function<void(Particle&)> on_spawn;
     std::string particle;
-    ecs::entity layer;
+    ecs::EntityRef layer;
     float time = 0.0f;
     TimeLayer timer;
     bool enabled = true;
@@ -29,11 +29,8 @@ struct ParticleEmitter2D {
 class ParticleRenderer2D : public Drawable2D<ParticleRenderer2D> {
 public:
     ParticleRenderer2D() = default;
-
-    explicit ParticleRenderer2D(ecs::entity target_) :
-            target{target_} {
-
-    }
+    explicit ParticleRenderer2D(ecs::EntityRef target_) : target{target_} {}
+    explicit ParticleRenderer2D(ecs::entity target_) : target{target_} {}
 
     void draw() override;
 
@@ -42,7 +39,7 @@ public:
     [[nodiscard]] bool hitTest(float2 pos) const override { return false; }
 
 public:
-    ecs::entity target{};
+    ecs::EntityRef target{};
 };
 
 void particles_burst(ecs::entity e, int count);

@@ -112,18 +112,18 @@ EK_DEBUG << "Start Demo: prepareInternalResources";
 
     auto prev = createButton("<", [] { scrollSample(-1); });
     auto next = createButton(">", [] { scrollSample(+1); });
-    ecs::assign<LayoutRect>(prev).enableAlignX(0, 30);
-    ecs::assign<LayoutRect>(next).enableAlignX(1, -30);
+    prev.assign<LayoutRect>().enableAlignX(0, 30);
+    next.assign<LayoutRect>().enableAlignX(1, -30);
 
     tfSampleTitle = createNode2D("title");
     addText(tfSampleTitle, "");
-    ecs::assign<LayoutRect>(tfSampleTitle).enableAlignX(0.5);
+    tfSampleTitle.assign<LayoutRect>().enableAlignX(0.5);
 
     auto controls = createNode2D("controls");
     append(controls, tfSampleTitle);
     append(controls, prev);
     append(controls, next);
-    ecs::assign<LayoutRect>(controls).enableAlignY(1, -30);
+    controls.assign<LayoutRect>().enableAlignY(1, -30);
 
     append(game, controls);
 

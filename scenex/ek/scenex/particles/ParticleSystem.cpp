@@ -8,11 +8,11 @@
 namespace ek {
 
 ParticleLayer2D& find_particle_layer(ecs::entity e) {
-    auto l = ecs::get_or_default<ParticleEmitter2D>(e).layer;
+    auto l = e.get_or_default<ParticleEmitter2D>().layer.ent();
     if (!l) {
         l = e;
     }
-    return ecs::get_or_create<ParticleLayer2D>(l);
+    return l.get_or_create<ParticleLayer2D>();
 }
 
 Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl) {
@@ -40,9 +40,9 @@ Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl) {
 }
 
 void particles_burst(ecs::entity e, int count) {
-    auto& emitter = ecs::get<ParticleEmitter2D>(e);
-    const auto& data = ecs::get<ParticleEmitter2D>(e).data;
-    const auto& position = ecs::get_or_default<Transform2D>(e).position + emitter.position;
+    auto& emitter = e.get<ParticleEmitter2D>();
+    const auto& data = e.get<ParticleEmitter2D>().data;
+    const auto& position = e.get_or_default<Transform2D>().position + emitter.position;
     float a = data.dir.random();
     Res<ParticleDecl> decl{emitter.particle};
     auto& layer = find_particle_layer(e);
@@ -68,14 +68,14 @@ void particles_burst(ecs::entity e, int count) {
 
 void update_emitters() {
     for (auto e : ecs::view<ParticleEmitter2D>()) {
-        auto& emitter = ecs::get<ParticleEmitter2D>(e);
+        auto& emitter = e.get<ParticleEmitter2D>();
         auto dt = emitter.timer->dt;
         if (!emitter.enabled || emitter.particle.empty()) {
             continue;
         }
 
         auto& layer = find_particle_layer(e);
-        const auto& position = ecs::get_or_default<Transform2D>(e).position;
+        const auto& position = e.get_or_default<Transform2D>().position;
 
         emitter.time += dt;
         const auto& data = emitter.data;
@@ -117,7 +117,7 @@ void update_emitters() {
 Particle* spawn_particle(ecs::entity e, const std::string& particle_id) {
     Res<ParticleDecl> decl{particle_id};
     if (decl) {
-        auto& to_layer = ecs::get_or_create<ParticleLayer2D>(e);
+        auto& to_layer = e.get_or_create<ParticleLayer2D>();
         return &produce_particle(to_layer, *decl);
     }
     return nullptr;
@@ -125,7 +125,7 @@ Particle* spawn_particle(ecs::entity e, const std::string& particle_id) {
 
 void update_particles() {
     for (auto e : ecs::view<ParticleLayer2D>()) {
-        auto& layer = ecs::get<ParticleLayer2D>(e);
+        auto& layer = e.get<ParticleLayer2D>();
         auto dt = layer.timer->dt;
         auto size = static_cast<int>(layer.particles.size());
         for (int i = 0; i < size;) {

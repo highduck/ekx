@@ -41,6 +41,7 @@ float4 get_screen_insets() {
 }
 
 void vibrate(int duration_millis) {
+    (void)(duration_millis);
     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 }
 

@@ -404,20 +404,17 @@ inline vec_t<N, T> reflect(const vec_t<N, T>& direction, const vec_t<N, T>& norm
 
 template<typename T, unsigned N>
 inline vec_t<N, T> normalize(const vec_t<N, T>& a) {
-    T len = sqrt(dot(a, a));
-    if (len < math::epsilon<T>()) {
-        return {};
-    }
-    return a * (T{1} / len);
+    return a / sqrt(dot(a, a));
+}
+
+template<unsigned N>
+inline vec_t<N, float> normalize(const vec_t<N, float>& a) {
+    return a * math::Q_rsqrt(dot(a, a));
 }
 
 template<typename T>
-inline vec_t<2, T> normalize(vec_t<2, T> a) {
-    T len = sqrt(a.x * a.x + a.y * a.y);
-    if (len < math::epsilon<T>()) {
-        return {};
-    }
-    return a / len;
+inline vec_t<2, float> normalize(vec_t<2, float> a) {
+    return a * math::Q_rsqrt(a.x * a.x + a.y * a.y);
 }
 
 template<typename T, unsigned N>

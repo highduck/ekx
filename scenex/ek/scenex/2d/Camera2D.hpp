@@ -15,7 +15,7 @@ struct Camera2D {
     int order = 0;
     int layerMask = 0xFF;
 
-    ecs::entity root;
+    ecs::EntityRef root;
     float contentScale = 1;
 
     rect_f viewport = rect_f::zero_one;

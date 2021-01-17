@@ -5,12 +5,12 @@
 namespace ek {
 
 void handle_end(ecs::entity e) {
-    auto& tween = ecs::get<Tween>(e);
+    auto& tween = e.get<Tween>();
     tween.advanced.clear();
     if (tween.destroyEntity) {
         destroy_delay(e);
     } else if (tween.auto_destroy) {
-        ecs::remove<Tween>(e);
+        e.remove<Tween>();
     }
 }
 
@@ -21,7 +21,7 @@ void update_frame(Tween& tween) {
 
 void Tween::updateAll() {
     for (auto e : ecs::view_backward<Tween>()) {
-        auto& tween = ecs::get<Tween>(e);
+        auto& tween = e.get<Tween>();
         auto dt = tween.timer->dt;
         if (tween.delay > 0.0f) {
             tween.delay -= dt;
@@ -38,7 +38,7 @@ void Tween::updateAll() {
 }
 
 Tween& Tween::reset(ecs::entity e) {
-    auto& tween = ecs::get_or_create<Tween>(e);
+    auto& tween = e.get_or_create<Tween>();
     if (tween.time > 0.0f && tween.time < tween.duration) {
         tween.time = tween.duration;
         update_frame(tween);

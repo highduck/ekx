@@ -11,7 +11,7 @@ namespace ek {
 
 void fireworks_script::start() {
     entity_.assign<ParticleLayer2D>();
-    Display2D::make<ParticleRenderer2D>(entity_).target = entity_;
+    Display2D::make<ParticleRenderer2D>(entity_).target = ecs::EntityRef{entity_};
     auto& emitter = entity_.assign<ParticleEmitter2D>();
     emitter.data.burst = 0;
     emitter.particle = "firework_star";
@@ -25,7 +25,7 @@ void fireworks_script::update(float dt) {
 
     timer_ -= dt;
     if (timer_ <= 0) {
-        auto& emitter = ecs::get<ParticleEmitter2D>(entity_);
+        auto& emitter = entity_.get<ParticleEmitter2D>();
 
         auto rect = find_parent_layout_rect(entity_, true);
         rect.height = rect.height * 0.5f;
@@ -70,7 +70,7 @@ void fireworks_script::update(float dt) {
 }
 
 void fireworks_script::reset() {
-    ecs::get<ParticleLayer2D>(entity_).particles.clear();
+    entity_.get<ParticleLayer2D>().particles.clear();
     timer_ = 0.0f;
 }
 }

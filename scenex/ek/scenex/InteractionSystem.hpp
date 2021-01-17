@@ -38,11 +38,11 @@ public:
     void handle_touch_event(const app::event_t& ev);
 
     void drag(ecs::entity entity) {
-        dragEntity_ = entity;
+        dragEntity_ = ecs::EntityRef{entity};
     }
 
     [[nodiscard]] ecs::entity getHitTarget() const {
-        return hitTarget_.valid() ? hitTarget_ : nullptr;
+        return hitTarget_.valid() ? hitTarget_.ent() : nullptr;
     }
 
 private:
@@ -61,7 +61,7 @@ private:
     }
 
 private:
-    ecs::entity hitTarget_;
+    ecs::EntityRef hitTarget_;
     ecs::entity root_;
 
     std::vector<ecs::entity> targetLists[2]{};
@@ -72,7 +72,7 @@ private:
     float2 touchPosition0_;
     float2 mousePosition0_;
 
-    ecs::entity dragEntity_;
+    ecs::EntityRef dragEntity_;
 };
 
 }

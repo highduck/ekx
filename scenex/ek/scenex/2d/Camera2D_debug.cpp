@@ -107,7 +107,7 @@ void drawFills(Camera2D& camera) {
     draw2d::state.set_empty_texture();
 
     traverseVisibleNodes<Display2D>(
-            camera.root,
+            camera.root.ent(),
             nullptr,
             [](Display2D& display, const WorldTransform2D* transform) {
                 if (display.drawable) {
@@ -121,7 +121,7 @@ void drawFills(Camera2D& camera) {
             });
 
     traverseVisibleNodes<Bounds2D>(
-            camera.root,
+            camera.root.ent(),
             nullptr,
             [](Bounds2D& bounds, const WorldTransform2D* transform) {
                 if (bounds.scissors) {
@@ -145,7 +145,7 @@ void drawOcclusion(Camera2D& camera) {
     draw2d::state.color = {};
     draw2d::state.set_empty_texture();
     auto cameraRect = camera.worldRect;
-    traverseVisibleNodes<Bounds2D>(camera.root, nullptr,
+    traverseVisibleNodes<Bounds2D>(camera.root.ent(), nullptr,
                                    [cameraRect](const Bounds2D& bounds, const WorldTransform2D* transform) {
                                        const auto worldRect = bounds_builder_2f::transform(bounds.rect,
                                                                                            transform->matrix);

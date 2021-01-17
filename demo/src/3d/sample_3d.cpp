@@ -43,23 +43,23 @@ void create_test_material(const std::string& name, argb32_t color, float roughne
 void create_lights() {
     auto e_dir_light = ecs::create<Node, Transform3D, Light3D, MeshRenderer>();
     setName(e_dir_light, "light_dir");
-    ecs::get<Light3D>(e_dir_light).type = light_3d_type::directional;
-    ecs::get<MeshRenderer>(e_dir_light).mesh = "sphere";
-    ecs::get<MeshRenderer>(e_dir_light).material = "light_material";
-    ecs::get<MeshRenderer>(e_dir_light).castShadows = false;
-    ecs::get<MeshRenderer>(e_dir_light).receiveShadows = false;
-    ecs::get<Transform3D>(e_dir_light).scale = {5.0f, 5.0f, 1.0f};
-    ecs::get<Transform3D>(e_dir_light).position = {-50.0f, -85.0f, 40.0f};
+    e_dir_light.get<Light3D>().type = light_3d_type::directional;
+    e_dir_light.get<MeshRenderer>().mesh = "sphere";
+    e_dir_light.get<MeshRenderer>().material = "light_material";
+    e_dir_light.get<MeshRenderer>().castShadows = false;
+    e_dir_light.get<MeshRenderer>().receiveShadows = false;
+    e_dir_light.get<Transform3D>().scale = {5.0f, 5.0f, 1.0f};
+    e_dir_light.get<Transform3D>().position = {-50.0f, -85.0f, 40.0f};
     append(main_scene_3d, e_dir_light);
 
     auto e_light = ecs::create<Node, Transform3D, Light3D, MeshRenderer>();
     setName(e_light, "light");
-    ecs::get<Transform3D>(e_light).position = {0.0f, 0.0f, 15.0f};
-    ecs::get<Light3D>(e_light).diffuse = {1, 1, 1};
-    ecs::get<MeshRenderer>(e_light).mesh = "sphere";
-    ecs::get<MeshRenderer>(e_light).material = "light_material";
-    ecs::get<MeshRenderer>(e_light).castShadows = false;
-    ecs::get<MeshRenderer>(e_light).receiveShadows = false;
+    e_light.get<Transform3D>().position = {0.0f, 0.0f, 15.0f};
+    e_light.get<Light3D>().diffuse = {1, 1, 1};
+    e_light.get<MeshRenderer>().mesh = "sphere";
+    e_light.get<MeshRenderer>().material = "light_material";
+    e_light.get<MeshRenderer>().castShadows = false;
+    e_light.get<MeshRenderer>().receiveShadows = false;
     append(main_scene_3d, e_light);
 }
 
@@ -70,29 +70,29 @@ void create_coordinate_system_gizmo() {
 
     auto e = ecs::create<Node, Transform3D>();
     setName(e, "cs");
-    ecs::get<Transform3D>(e).scale = {5.0f, 5.0f, 5.0f};
+    e.get<Transform3D>().scale = {5.0f, 5.0f, 5.0f};
     append(main_scene_3d, e);
 
     auto axis_size = 5.0f;
     auto ax = ecs::create<Node, Transform3D, MeshRenderer>();
-    ecs::get<MeshRenderer>(ax).meshPtr = cube_x;
-    ecs::get<MeshRenderer>(ax).material = "light_material";
-    ecs::get<Transform3D>(ax).position = float3{0.5f * axis_size, 0.0f, 0.0f};
-    ecs::get<Transform3D>(ax).scale = float3{axis_size, 0.1f, 0.1f};
+    ax.get<MeshRenderer>().meshPtr = cube_x;
+    ax.get<MeshRenderer>().material = "light_material";
+    ax.get<Transform3D>().position = float3{0.5f * axis_size, 0.0f, 0.0f};
+    ax.get<Transform3D>().scale = float3{axis_size, 0.1f, 0.1f};
     append(e, ax);
 
     auto ay = ecs::create<Node, Transform3D, MeshRenderer>();
-    ecs::get<MeshRenderer>(ay).meshPtr = cube_y;
-    ecs::get<MeshRenderer>(ay).material = "light_material";
-    ecs::get<Transform3D>(ay).position = float3{0.0f, 0.5f * axis_size, 0.0f};
-    ecs::get<Transform3D>(ay).scale = float3{0.1f, axis_size, 0.1f};
+    ay.get<MeshRenderer>().meshPtr = cube_y;
+    ay.get<MeshRenderer>().material = "light_material";
+    ay.get<Transform3D>().position = float3{0.0f, 0.5f * axis_size, 0.0f};
+    ay.get<Transform3D>().scale = float3{0.1f, axis_size, 0.1f};
     append(e, ay);
 
     auto az = ecs::create<Node, Transform3D, MeshRenderer>();
-    ecs::get<MeshRenderer>(az).meshPtr = cube_z;
-    ecs::get<MeshRenderer>(az).material = "light_material";
-    ecs::get<Transform3D>(az).position = float3{0.0f, 0.0f, 0.5f * axis_size};
-    ecs::get<Transform3D>(az).scale = float3{0.1f, 0.1f, axis_size};
+    az.get<MeshRenderer>().meshPtr = cube_z;
+    az.get<MeshRenderer>().material = "light_material";
+    az.get<Transform3D>().position = float3{0.0f, 0.0f, 0.5f * axis_size};
+    az.get<Transform3D>().scale = float3{0.1f, 0.1f, axis_size};
     append(e, az);
 }
 
@@ -108,7 +108,7 @@ void Sample3D::draw() {
     const float dt = TimeLayer::Root->dt;
 
     for (auto e : ecs::view<test_rotation_comp>()) {
-        auto& tr = ecs::get<Transform3D>(e);
+        auto& tr = e.get<Transform3D>();
         tr.rotation.x += dt;
         if (tr.rotation.x > math::pi2) {
             tr.rotation.x -= math::pi2;
@@ -167,54 +167,54 @@ Sample3D::Sample3D() {
     rs3d->scene = main_scene_3d;
     rs3d->camera = main_camera;
 
-    auto& camera_transform = ecs::get<Transform3D>(main_camera);
+    auto& camera_transform = main_camera.get<Transform3D>();
     camera_transform.position = {-100.0f, -100.0f, 100.0f};
     append(main_scene_3d, main_camera);
-    ecs::get<Camera3D>(main_camera).cubeMap.setID("skybox");
-    ecs::get<Camera3D>(main_camera).clearColorEnabled = false;
+    main_camera.get<Camera3D>().cubeMap.setID("skybox");
+    main_camera.get<Camera3D>().clearColorEnabled = false;
 
     create_lights();
 
     auto e_ground = ecs::create<Node, Transform3D, MeshRenderer>();
-    ecs::get<MeshRenderer>(e_ground).mesh = "cube";
-    ecs::get<MeshRenderer>(e_ground).material = "ground";
+    e_ground.get<MeshRenderer>().mesh = "cube";
+    e_ground.get<MeshRenderer>().material = "ground";
 
     setName(e_ground, "ground");
-    ecs::get<Transform3D>(e_ground).scale = {250.0f, 250.0f, 10.0f};
-    ecs::get<Transform3D>(e_ground).position = {0.0f, 0.0f, -5.0f};
+    e_ground.get<Transform3D>().scale = {250.0f, 250.0f, 10.0f};
+    e_ground.get<Transform3D>().position = {0.0f, 0.0f, -5.0f};
     append(main_scene_3d, e_ground);
 
     for (int i = 0; i < 20; ++i) {
         auto es = ecs::create<Node, Transform3D, MeshRenderer, test_rotation_comp>();
-        ecs::get<MeshRenderer>(es).mesh = "sphere";
+        es.get<MeshRenderer>().mesh = "sphere";
         auto mat_id = "rr" + std::to_string(i);
         auto r = static_cast<float>(i) / 20.0f;
         create_test_material(mat_id,
                              0xFF0000_rgb,
                              math::lerp(0.001f, 0.33f, r));
-        ecs::get<MeshRenderer>(es).material = mat_id;
-        ecs::get<Transform3D>(es).position = {
+        es.get<MeshRenderer>().material = mat_id;
+        es.get<Transform3D>().position = {
                 math::lerp(-100.0f, 100.0f, r),
                 0.0f,
                 5.0f
         };
-        ecs::get<Transform3D>(es).scale = 4.0f * float3::one;
+        es.get<Transform3D>().scale = 4.0f * float3::one;
         append(main_scene_3d, es);
     }
     for (int i = 0; i < 10; ++i) {
         auto e_cube = ecs::create<Node, Transform3D, MeshRenderer, test_rotation_comp>();
-        ecs::get<MeshRenderer>(e_cube).mesh = test_models[rand_fx.random_int(0, 3)];
-        ecs::get<MeshRenderer>(e_cube).material = test_materials[rand_fx.random_int(0, 3)];
+        e_cube.get<MeshRenderer>().mesh = test_models[rand_fx.random_int(0, 3)];
+        e_cube.get<MeshRenderer>().material = test_materials[rand_fx.random_int(0, 3)];
         setName(e_cube, "cube");
-        ecs::get<Transform3D>(e_cube).position = {
+        e_cube.get<Transform3D>().position = {
                 rand_fx.random(-50.0f, 50.0f),
                 rand_fx.random(-50.0f, 50.0f),
                 rand_fx.random(5.0f, 15.0f)
         };
 
         const float tor_scale = rand_fx.random(1.0f, 5.0f);
-        ecs::get<Transform3D>(e_cube).scale = tor_scale * float3::one;
-        ecs::get<Transform3D>(e_cube).rotation = {
+        e_cube.get<Transform3D>().scale = tor_scale * float3::one;
+        e_cube.get<Transform3D>().rotation = {
                 rand_fx.random(0.0f, 180.0f),
                 rand_fx.random(0.0f, 180.0f),
                 rand_fx.random(0.0f, 180.0f)

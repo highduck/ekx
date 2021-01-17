@@ -2,6 +2,7 @@
 
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/base/Node.hpp>
+#include "../../tracy/Tracy.hpp"
 
 namespace ek {
 
@@ -119,7 +120,7 @@ float2 Transform2D::globalToLocal(ecs::entity local, float2 globalPos) {
         auto* transform = it.tryGet<Transform2D>();
         if (transform) {
             transform->updateLocalMatrix();
-            if (!it.get<Transform2D>().matrix.transform_inverse(pos, pos)) {
+            if (!transform->matrix.transform_inverse(pos, pos)) {
                 break;
             }
         }
@@ -138,17 +139,66 @@ bool Transform2D::fastLocalToLocal(ecs::entity src, ecs::entity dst, float2 pos,
 
 /** Invalidate Transform2D **/
 
-void updateWorldTransform(ecs::entity e, const WorldTransform2D* transform) {
-    auto* localTransform = e.tryGet<Transform2D>();
-    auto* worldTransform = e.tryGet<WorldTransform2D>();
-    if (localTransform) {
-        localTransform->updateLocalMatrix();
-        if (worldTransform) {
-            worldTransform->matrix = transform->matrix * localTransform->matrix;
-            worldTransform->color = transform->color * localTransform->color;
-            transform = worldTransform;
-        }
+void updateAllLocalMatrices() {
+    ZoneScoped;
+    Transform2D* localTransforms = ecs::world_tryGetComponents<Transform2D>(&ecs::the_world)->get_ptr_by_handle(0);
+    const uint32_t count = (uint32_t) ecs::world_tryGetComponents<Transform2D>(&ecs::the_world)->count;
+    for (uint32_t i = 1; i < count; ++i) {
+        localTransforms[i].updateLocalMatrix();
     }
+}
+
+// idea to keep index to level start and process entities from that index to next level
+void traverseNodesBreathFirst(ecs::world* w, ecs::entity root, std::vector<ecs::Entity>& out) {
+    ZoneScoped;
+    out.push_back(root.index);
+    uint32_t begin = 0;
+    uint32_t end = 1;
+
+    while (begin < end) {
+        for (uint32_t i = begin; i < end; ++i) {
+            const auto& node = ecs::entity_get<Node>(w, out[i]);
+            auto it = node.child_first.index;
+            while (it) {
+                const auto& childNode = ecs::entity_get<Node>(w, it);
+//                if (childNode.visible()) {
+                out.push_back(it);
+//                }
+                it = childNode.sibling_next.index;
+            }
+        }
+        begin = end;
+        end = static_cast<uint32_t>(out.size());
+    }
+}
+
+void updateWorldTransformAll(ecs::world* w, ecs::entity root) {
+    ZoneScoped;
+    static std::vector<ecs::Entity> vec2{};
+    vec2.clear();
+    traverseNodesBreathFirst(w, root, vec2);
+    for (auto entity : vec2) {
+        auto& tw = ecs::entity_get<WorldTransform2D>(w, entity);
+        const auto parent = ecs::entity_get<Node>(w, entity).parent.index;
+        const auto& tp = ecs::entity_get<WorldTransform2D>(w, parent);
+        auto& tl = ecs::entity_get<Transform2D>(w, entity);
+        tl.updateLocalMatrix();
+        tw.matrix = tp.matrix * tl.matrix;
+        tw.color = tp.color * tl.color;
+    }
+}
+
+void updateWorldTransform(ecs::entity e, const WorldTransform2D* transform) {
+//    auto* localTransform = e.tryGet<Transform2D>();
+
+    auto* worldTransform = e.tryGet<WorldTransform2D>();
+    if (worldTransform) {
+        const auto& localTransform = e.get_or_default<Transform2D>();
+        worldTransform->matrix = transform->matrix * localTransform.matrix;
+        worldTransform->color = transform->color * localTransform.color;
+        transform = worldTransform;
+    }
+
     auto it = e.get<Node>().child_first;
     while (it) {
         const auto& child = it.get<Node>();
@@ -158,22 +208,28 @@ void updateWorldTransform(ecs::entity e, const WorldTransform2D* transform) {
         it = child.sibling_next;
     }
 }
-
-void updateWorldTransform2D(ecs::entity root) {
-    auto& transform = root.get<Transform2D>();
-    auto& worldTransform = root.get<WorldTransform2D>();
-    transform.updateLocalMatrix();
-    worldTransform.matrix = transform.matrix;
-    worldTransform.color = transform.color;
-
-    auto it = root.get<Node>().child_first;
-    while (it) {
-        const auto& child = it.get<Node>();
-        if (child.visible()) {
-            updateWorldTransform(it, &worldTransform);
-        }
-        it = child.sibling_next;
-    }
-}
-
+//
+//void updateWorldTransform2D(ecs::entity root) {
+//    ZoneScoped;
+//    Transform2D* localTransforms = ecs::world_tryGetComponents<Transform2D>(&ecs::the_world)->get_ptr_by_handle(0);
+//    const uint32_t count = (uint32_t) ecs::world_tryGetComponents<Transform2D>(&ecs::the_world)->count;
+//    for (uint32_t i = 1; i < count; ++i) {
+//        localTransforms[i].updateLocalMatrix();
+//    }
+//
+//    auto& transform = root.get<Transform2D>();
+//    auto& worldTransform = root.get<WorldTransform2D>();
+//    //transform.updateLocalMatrix();
+//    worldTransform.matrix = transform.matrix;
+//    worldTransform.color = transform.color;
+//
+//    auto it = root.get<Node>().child_first;
+//    while (it) {
+//        const auto& child = it.get<Node>();
+//        if (child.visible()) {
+//            updateWorldTransform(it, &worldTransform);
+//        }
+//        it = child.sibling_next;
+//    }
+//}
 }

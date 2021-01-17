@@ -13,7 +13,7 @@ Text2D& addText(ecs::entity e, const char* text) {
     tf->format.addShadow(0x0_rgb, 8);
     tf->text = text;
     tf->format.setAlignment(Alignment::Center);
-    ecs::get_or_create<Display2D>(e).drawable.reset(tf);
+    e.get_or_create<Display2D>().drawable.reset(tf);
     return *tf;
 }
 

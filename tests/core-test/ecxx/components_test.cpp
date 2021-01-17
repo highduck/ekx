@@ -6,58 +6,63 @@
 using namespace ecs;
 
 TEST(components, add) {
-    world& world = world::the;
+    world w;
+    world_initialize(&w);
 
-    auto e = world.create();
-    auto& v = world.assign<value_t>(e);
+    Entity e;
+    entity_create(&w, &e, 1);
+    auto& v = entity_assign<value_t>(&w, e);
     ASSERT_EQ(v.value, 0);
 
     v.value = 10;
     ASSERT_EQ(10, v.value);
-    ASSERT_EQ((get<value_t>(e).value), 10);
+    ASSERT_EQ((entity_get<value_t>(&w, e).value), 10);
 
-    // const access
-    const auto& cw = world::the;
-    ASSERT_EQ((get<value_t>(e).value), 10);
 
     // check if comp pool is not created
-    ASSERT_FALSE(has<empty_comp_t>(e));
-    ASSERT_FALSE(has<position_t>(e));
+    ASSERT_FALSE(entity_has<empty_comp_t>(&w, e));
+    ASSERT_FALSE(entity_has<position_t>(&w, e));
 
     // check ensure works
-    e = world.create();
-    world.assign<position_t>(e);
-    ASSERT_TRUE(has<position_t>(e));
+    entity_create(&w, &e, 1);
+    entity_assign<position_t>(&w, e);
+    ASSERT_TRUE(entity_has<position_t>(&w, e));
 
-    world.clear();
+    world_shutdown(&w);
 }
 
 TEST(components, remove) {
-    world& world = world::the;
+    world w;
+    world_initialize(&w);
 
-    auto e = world.create();
-    world.assign<value_t>(e, 1);
-    ASSERT_EQ(get<value_t>(e).value, 1);
-    ASSERT_TRUE(has<value_t>(e));
-    remove<value_t>(e);
-    ASSERT_FALSE(has<value_t>(e));
-    world.destroy(e);
+    Entity e;
+    entity_create(&w, &e, 1);
 
-    world.clear();
+    entity_assign<value_t>(&w, e, 1);
+    ASSERT_EQ(entity_get<value_t>(&w, e).value, 1);
+    ASSERT_TRUE(entity_has<value_t>(&w, e));
+    entity_remove<value_t>(&w, e);
+    ASSERT_FALSE(entity_has<value_t>(&w, e));
+    entity_destroy(&w, &e, 1);
+
+    world_shutdown(&w);
 }
 
 TEST(components, abstract_clear) {
-    world& world = world::the;
+    world w;
+    world_initialize(&w);
 
-    auto e = world.create();
-    world.assign<value_t>(e, 1);
-    world.assign<position_t>(e, 1.0f, 1.0f);
-    ASSERT_TRUE(e.has<value_t>());
-    ASSERT_TRUE(e.has<position_t>());
-    world.destroy(e);
-    ASSERT_FALSE(valid(e));
-    ASSERT_FALSE(e.has<value_t>());
-    ASSERT_FALSE(e.has<position_t>());
+    Entity e;
+    entity_create(&w, &e, 1);
 
-    world.clear();
+    entity_assign<value_t>(&w, e, 1);
+    entity_assign<position_t>(&w, e, 1.0f, 1.0f);
+    ASSERT_TRUE(entity_has<value_t>(&w, e));
+    ASSERT_TRUE(entity_has<position_t>(&w, e));
+    entity_destroy(&w, &e, 1);
+    ASSERT_FALSE(entity_is_allocated(&w, e));
+    ASSERT_FALSE(entity_has<value_t>(&w, e));
+    ASSERT_FALSE(entity_has<position_t>(&w, e));
+
+    world_shutdown(&w);
 }

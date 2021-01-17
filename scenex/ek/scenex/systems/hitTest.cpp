@@ -8,8 +8,7 @@ namespace ek {
 
 using ecs::entity;
 
-entity hitTest2D(entity e, float2 parentPosition) {
-    const auto& node = e.get<Node>();
+entity hitTest2D(entity e, const Node& node, float2 parentPosition) {
     if ((node.flags & Node::VisibleAndTouchable) != Node::VisibleAndTouchable) {
         return nullptr;
     }
@@ -31,11 +30,12 @@ entity hitTest2D(entity e, float2 parentPosition) {
 
     auto it = node.child_last;
     while (it) {
-        auto hit = hitTest2D(it, local);
+        const auto& childNode = it.get<Node>();
+        auto hit = hitTest2D(it, childNode, local);
         if (hit) {
             return hit;
         }
-        it = it.get<Node>().sibling_prev;
+        it = childNode.sibling_prev;
     }
 
     const auto* display = e.tryGet<Display2D>();
@@ -44,6 +44,10 @@ entity hitTest2D(entity e, float2 parentPosition) {
     }
 
     return nullptr;
+}
+
+entity hitTest2D(entity e, float2 parentPosition) {
+    return hitTest2D(e, e.get<Node>(), parentPosition);
 }
 
 }

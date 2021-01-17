@@ -13,10 +13,10 @@ void target_follow_script::update(float dt) {
 
         auto& tr = get<Transform2D>();
 
-        if (ecs::valid(target_entity)) {
+        if (target_entity.valid()) {
             auto parent = entity_.get<Node>().parent;
             if(parent) {
-                target = Transform2D::localToLocal(target_entity, parent, float2::zero);
+                target = Transform2D::localToLocal(target_entity.ent(), parent, float2::zero);
             }
         } else {
             target_entity = nullptr;

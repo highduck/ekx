@@ -21,7 +21,7 @@ void gui_entity_simple(ecs::entity e);
 void gui_entity_node(ecs::entity e, bool visible, bool touchable);
 
 void gui_entity_simple(ecs::entity e) {
-    ImGui::LabelText("entity", "id: %i (v.%i)", e.index(), e.version());
+    ImGui::LabelText("entity", "id: %i (v.%i)", e.index, ecs::the_world.generations[e.index]);
     ImGui::SameLine();
     if (ImGui::Button("-")) {
         ecs::destroy(e);
@@ -29,9 +29,9 @@ void gui_entity_simple(ecs::entity e) {
 }
 
 void gui_entity(ecs::entity e, bool visible, bool touchable) {
-    ImGui::PushID(e.passport());
+    ImGui::PushID(e.index);
     ImGui::BeginGroup();
-    if (!e.valid()) {
+    if (!e.isAlive()) {
         ImGui::Text("INVALID ENTITY");
     } else {
         gui_entity_node(e, visible, touchable);
@@ -44,32 +44,32 @@ std::vector<ecs::entity> hierarchySelectionList{};
 std::string hierarchyFilterText{};
 
 const char* getEntityTitle(ecs::entity e) {
-    if (ecs::has<NodeName>(e)) {
-        const auto& nameData = ecs::get<NodeName>(e).name;
+    if (e.has<NodeName>()) {
+        const auto& nameData = e.get<NodeName>().name;
         if (!nameData.empty()) {
             return nameData.c_str();
         }
     }
 
     const char* type = "Entity";
-    if (ecs::has<Node>(e)) type = "Node";
-    if (ecs::has<Transform2D>(e)) type = "Node 2D";
-    if (ecs::has<Transform3D>(e)) type = "Node 3D";
-    if (ecs::has<Display2D>(e)) {
-        const auto& disp = ecs::get<Display2D>(e);
+    if (e.has<Node>()) type = "Node";
+    if (e.has<Transform2D>()) type = "Node 2D";
+    if (e.has<Transform3D>()) type = "Node 3D";
+    if (e.has<Display2D>()) {
+        const auto& disp = e.get<Display2D>();
         if (disp.is<Sprite2D>()) type = "Sprite";
         if (disp.is<Quad2D>()) type = "Rectangle";
         if (disp.is<Text2D>()) type = "Text";
         if (disp.is<Arc2D>()) type = "Arc";
         // TODO: other renderables
     }
-    if (ecs::has<MovieClip>(e)) { type = "MovieClip"; }
-    if (ecs::has<Interactive>(e)) { type = "Interactive"; }
-    if (ecs::has<Button>(e)) { type = "Button"; }
-    if (ecs::has<Bounds2D>(e)) {
+    if (e.has<MovieClip>()) { type = "MovieClip"; }
+    if (e.has<Interactive>()) { type = "Interactive"; }
+    if (e.has<Button>()) { type = "Button"; }
+    if (e.has<Bounds2D>()) {
         type = "Bounds2D";
     }
-    if (ecs::has<ScriptHolder>(e)) { type = "Script"; }
+    if (e.has<ScriptHolder>()) { type = "Script"; }
     return type;
 }
 
@@ -79,10 +79,10 @@ bool isSelectedInHierarchy(ecs::entity e) {
 }
 
 bool hasChildren(ecs::entity e) {
-    if (ecs::has<Node>(e)) {
-        auto& node = ecs::get<Node>(e);
+    if (e.has<Node>()) {
+        auto& node = e.get<Node>();
         auto firstChild = node.child_first;
-        return firstChild != nullptr && ecs::valid(firstChild);
+        return firstChild != nullptr && firstChild.isAlive();
     }
     return false;
 }
@@ -99,8 +99,8 @@ void gui_entity_node(ecs::entity e, bool visible, bool touchable) {
         flags |= ImGuiTreeNodeFlags_Leaf;
     }
 
-    if (ecs::has<Node>(e)) {
-        const auto& node = ecs::get<Node>(e);
+    if (e.has<Node>()) {
+        const auto& node = e.get<Node>();
         visible = visible && node.visible();
         touchable = touchable && node.touchable();
     }
@@ -112,8 +112,8 @@ void gui_entity_node(ecs::entity e, bool visible, bool touchable) {
         hierarchySelectionList.push_back(e);
     }
 
-    if (ecs::has<Node>(e)) {
-        auto& node = ecs::get<Node>(e);
+    if (e.has<Node>()) {
+        auto& node = e.get<Node>();
         auto rc = ImGui::GetItemRectMax();
         auto wnd = ImGui::GetWindowPos();
         auto x = rc.x - wnd.x - 40 - ImGui::GetStyle().FramePadding.x * 2.0f;
@@ -166,7 +166,7 @@ void guiHierarchyWindow(bool* p_open) {
             // ROOT
             auto& app = resolve<basic_application>();
             auto root = app.root;
-            if (root.valid()) {
+            if (root.isAlive()) {
                 auto it = root.get<Node>().child_first;
                 while (it) {
                     gui_entity(it, true, true);

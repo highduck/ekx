@@ -17,7 +17,7 @@ public:
 
     float2 offset{};
     float2 target{};
-    ecs::entity target_entity{};
+    ecs::EntityRef target_entity{};
 
     float k = 0.1f;
     float fixed_frame_rate = 60.0f;

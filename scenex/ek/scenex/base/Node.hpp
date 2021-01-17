@@ -25,7 +25,7 @@ struct Node {
     ecs::entity child_last;
     ecs::entity parent;
 
-    uint32_t flags = LayerMask | VisibleAndTouchable;
+    uint16_t flags = LayerMask | VisibleAndTouchable;
 
     [[nodiscard]] bool visible() const {
         return (flags & Visible) != 0;
@@ -43,11 +43,11 @@ struct Node {
         flags = v ? (flags | Touchable) : (flags & ~Touchable);
     }
 
-    [[nodiscard]] uint32_t layersMask() const {
+    [[nodiscard]] uint16_t layersMask() const {
         return (flags & LayerMask) >> 8;
     }
 
-    void setLayersMask(int mask) {
+    void setLayersMask(uint16_t mask) {
         flags |= (flags & ~LayerMask) | ((mask << 8) & LayerMask);
     }
 
@@ -164,27 +164,27 @@ ecs::entity getChildAt(ecs::entity e, int index);
 /** utility functions **/
 
 inline void setName(ecs::entity e, const std::string& name) {
-    ecs::get_or_create<NodeName>(e).name = name;
+    e.get_or_create<NodeName>().name = name;
 }
 
 inline const std::string& getName(ecs::entity e) {
-    return ecs::get_or_default<NodeName>(e).name;
+    return e.get_or_default<NodeName>().name;
 }
 
 inline bool isVisible(ecs::entity e) {
-    return ecs::get_or_default<Node>(e).visible();
+    return e.get_or_default<Node>().visible();
 }
 
 inline void setVisible(ecs::entity e, bool v) {
-    ecs::get_or_create<Node>(e).setVisible(v);
+    e.get_or_create<Node>().setVisible(v);
 }
 
 inline bool isTouchable(ecs::entity e) {
-    return ecs::get_or_default<Node>(e).touchable();
+    return e.get_or_default<Node>().touchable();
 }
 
 inline void setTouchable(ecs::entity e, bool v) {
-    ecs::get_or_create<Node>(e).setTouchable(v);
+    e.get_or_create<Node>().setTouchable(v);
 }
 
 /** components searching **/

@@ -18,6 +18,7 @@ void destroy_children_delay(ecs::entity e, float delay, TimeLayer timer) {
 }
 
 void DestroyTimer::updateAll() {
+
     static std::vector<ecs::entity> destroy_queue;
     for (auto e : ecs::view<DestroyTimer>()) {
         auto& c = e.get<DestroyTimer>();
@@ -27,7 +28,7 @@ void DestroyTimer::updateAll() {
         }
     }
     for (auto e : destroy_queue) {
-        if (e.valid()) {
+        if (e.isAlive()) {
             if (e.has<Node>()) {
                 destroyNode(e);
             } else {
