@@ -54,15 +54,15 @@ if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
             -Wstrict-aliasing
             )
 endif ()
-
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(${PROJECT_NAME} PRIVATE
-            -g -fno-exceptions)
-else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE
-            -Os
-            -fno-exceptions -fno-rtti)
-endif ()
+#
+#if (CMAKE_BUILD_TYPE MATCHES Debug)
+#    target_compile_options(${PROJECT_NAME} PRIVATE
+#            -g -fno-exceptions)
+#else ()
+#    target_compile_options(${PROJECT_NAME} PRIVATE
+#            -Os
+#            -fno-exceptions -fno-rtti)
+#endif ()
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC
         -DPUGIXML_NO_XPATH)

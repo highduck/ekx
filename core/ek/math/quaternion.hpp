@@ -53,10 +53,7 @@ struct quat_t {
         z = c.x * c.y * s.z - s.x * s.y * c.z;
     }
 
-    quat_t(T w_, const vec_t<3, T>& v)
-            : w{w},
-              x{v.x}, y{v.y}, z{v.z} {
-    }
+    quat_t(T w_, const vec_t<3, T>& v) : w{w_}, x{v.x}, y{v.y}, z{v.z} {}
 
     explicit quat_t(const matrix_t<4, 4, T>& m) {
         const T four_x_squared_minus_1 = m(0, 0) - m(1, 1) - m(2, 2);

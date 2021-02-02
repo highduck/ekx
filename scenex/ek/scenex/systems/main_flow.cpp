@@ -66,12 +66,64 @@ void scene_post_update(ecs::entity root) {
     Camera2D::updateQueue();
 }
 
+static volatile uint32_t A1 = 0;
+
+__attribute__((noinline))
+void iterate_size_t(size_t n) {
+    for(size_t i = 0; i < n; ++i) {
+        ++A1;
+    }
+};
+
+static volatile uint32_t A2 = 0;
+__attribute__((noinline))
+void iterate_int32(uint32_t n) {
+    for(uint32_t i = 0; i < n; ++i) {
+        ++A2;
+    }
+};
+
+static volatile uint32_t A3 = 0;
+__attribute__((noinline))
+void iterate_int16(uint16_t n) {
+    for(uint16_t i = 0; i < n; ++i) {
+        ++A3;
+    }
+};
+
+static volatile uint32_t A4 = 0;
+__attribute__((noinline))
+void iterate_int16_fast(uint_fast16_t n) {
+    for(uint_fast16_t i = 0; i < n; ++i) {
+        ++A4;
+    }
+};
+
 void scene_render(ecs::entity root) {
     ZoneScoped;
 
     Camera2D::render();
 //    drawScene2D(root);
     //drawSceneGizmos(root);
+
+
+    {
+        const size_t N = 50000;
+        iterate_size_t(N);
+    }
+    {
+        const uint32_t N = 50000;
+        iterate_int32(N);
+    }
+    {
+        const uint16_t N = 50000;
+        iterate_int16(N);
+    }
+
+    {
+        const uint16_t N = 50000;
+        iterate_int16_fast(N);
+    }
 
     for (auto& it : Res<DynamicAtlas>::map()) {
         auto* atlas = const_cast<DynamicAtlas*>(it.second->content);

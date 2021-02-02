@@ -58,25 +58,29 @@ void update_layout(ecs::entity e) {
         } else if (display.is<Sprite2D>()) {
             auto& sprite = display.get<Sprite2D>();
             auto bounds = sprite.getBounds();
-            if (!bounds.empty()) {
+            if (!bounds.empty() && (l.fill_x || l.fill_y)) {
+                auto pos = transform.getPosition();
+                auto scale = transform.getScale();
                 if (l.fill_x) {
-                    transform.position.x = top_rect.x + l.fill_extra.x;
-                    transform.scale.x = (top_rect.width + l.fill_extra.width) / bounds.width;
+                    pos.x = top_rect.x + l.fill_extra.x;
+                    scale.x = (top_rect.width + l.fill_extra.width) / bounds.width;
                 }
                 if (l.fill_y) {
-                    transform.position.y = top_rect.y + l.fill_extra.y;
-                    transform.scale.y = (top_rect.height + l.fill_extra.height) / bounds.height;
+                    pos.y = top_rect.y + l.fill_extra.y;
+                    scale.y = (top_rect.height + l.fill_extra.height) / bounds.height;
                 }
+                transform.setScale(scale);
+                transform.setPosition(pos);
             }
         }
     }
 
     if (l.align_x) {
-        transform.position.x = top_rect.x + l.x.y + l.x.x * top_rect.width;
+        transform.setX(top_rect.x + l.x.y + l.x.x * top_rect.width);
     }
 
     if (l.align_y) {
-        transform.position.y = top_rect.y + l.y.y + l.y.x * top_rect.height;
+        transform.setY(top_rect.y + l.y.y + l.y.x * top_rect.height);
     }
 }
 

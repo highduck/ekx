@@ -44,21 +44,23 @@ const SGNodeData* SGFile::get(const std::string& library_name) const {
 using SGFileRes = Res<SGFile>;
 
 void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
-    auto& node = entity.get<Node>();
     entity.get_or_create<NodeName>().name = data->name;
     if (data->movieTargetId >= 0) {
-        entity.get_or_create<movie_target_keys>() = {data->movieTargetId};
+        entity.get_or_create<MovieClipTargetIndex>() = {data->movieTargetId};
     }
 
-    auto& transform = entity.get<Transform2D>();
-    transform.position = data->matrix.position();
-    transform.skew = data->matrix.skew();
-    transform.scale = data->matrix.scale();
-    transform.color.scale = argb32_t(data->color.scale);
-    transform.color.offset = argb32_t(data->color.offset);
+    {
+        auto& transform = entity.get<Transform2D>();
+        transform.setMatrix(data->matrix);
+        transform.color.scale = argb32_t(data->color.scale);
+        transform.color.offset = argb32_t(data->color.offset);
+    }
 
-    node.setTouchable(data->touchable);
-    node.setVisible(data->visible);
+    {
+        auto& node = entity.get<Node>();
+        node.setTouchable(data->touchable);
+        node.setVisible(data->visible);
+    }
 
     if (data->dynamicText.has_value()) {
         const auto& dynamicText = data->dynamicText.value();

@@ -4,7 +4,7 @@
 #include <fstream>
 #include <ek/util/logger.hpp>
 #include <sys/stat.h>
-#include <miniz/miniz.h>
+#include <miniz.h>
 #include <unordered_map>
 
 using pugi::xml_document;

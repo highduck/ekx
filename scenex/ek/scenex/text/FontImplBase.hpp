@@ -48,6 +48,9 @@ public:
     virtual float getKerning(uint32_t codepoint1, uint32_t codepoint2) = 0;
 
     virtual void setBlur(float radius, int iterations, int strengthPower) {
+        (void)radius;
+        (void)iterations;
+        (void)strengthPower;
         // by default blur is not supported
     }
 

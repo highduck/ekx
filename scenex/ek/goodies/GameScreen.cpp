@@ -43,7 +43,6 @@ void ScreenTransitionState::checkStates() {
 
 void ScreenTransitionState::beginPrev() {
     if (prev) {
-        prev.get<Transform2D>().origin = screenRect.center();
         prev.get<GameScreen>().onExitBegin();
         //broadcast(screenPrev, GameScreen::ExitBegin);
     }
@@ -66,7 +65,6 @@ void ScreenTransitionState::beginNext() {
     if (next) {
         next.get<Node>().setVisible(true);
         next.get<Node>().setTouchable(true);
-        next.get<Transform2D>().origin = screenRect.center();
         next.get<GameScreen>().onEnterBegin();
         //broadcast(screenNext, GameScreen::EnterBegin);
     }
@@ -224,7 +222,8 @@ void GameScreenManager::defaultTransitionEffect(ScreenTransitionState& state) {
         transform.color.setAlpha(1.0f - r);
         //transform.color.setAdditive(r * r);
         float s = 1.0f + r * 0.3f;
-        transform.scale = {s, s};
+        transform.setScale(s);
+        transform.setPosition(float2::zero, float2::zero, state.screenRect.center());
     }
 
     if (next) {
@@ -234,7 +233,8 @@ void GameScreenManager::defaultTransitionEffect(ScreenTransitionState& state) {
         transform.color.setAlpha(r);
         //transform.color.setAdditive((1.0f - r) * (1.0f - r));
         float s = 1.0f + (1.0f - r) * 0.3f;
-        transform.scale = {s, s};
+        transform.setScale(s);
+        transform.setPosition(float2::zero, float2::zero, state.screenRect.center());
     }
 }
 }

@@ -247,8 +247,10 @@ void update_mouse_cursor() {
 void imgui_module_t::begin_frame(float dt) {
     auto w = static_cast<int>(g_app.drawable_size.x);
     auto h = static_cast<int>(g_app.drawable_size.y);
-    update_mouse_cursor();
-    simgui_new_frame(w, h, dt);
+    if(w > 0 && h > 0) {
+        update_mouse_cursor();
+        simgui_new_frame(w, h, dt);
+    }
 }
 
 void imgui_module_t::end_frame() {

@@ -42,9 +42,9 @@ void BubbleText::updateAll() {
         }
 
         auto& transform = e.get<Transform2D>();
-        transform.scale = {sc, sc};
+        transform.setScale(sc);
         float2 fly_pos{0.0f, delta_y * easing::P3_OUT.calculate(r)};
-        transform.position = state.start + off + fly_pos;
+        transform.setPosition(state.start + off + fly_pos);
         transform.color.setAlpha(1.0f - (r * r * r));
         transform.color.setAdditive(r * r * r);
     }

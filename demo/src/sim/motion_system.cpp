@@ -9,27 +9,41 @@ namespace ek::piko {
 inline const float WIDTH = 360;
 inline const float HEIGHT = 480;
 
+struct AttractorsState {
+    attractor_t props;
+    float2 position;
+};
+
 void update_motion_system(float dt) {
+    static std::vector<AttractorsState> attractors{};
+    attractors.clear();
+    for (auto e : ecs::view<attractor_t>()) {
+        attractors.emplace_back(AttractorsState{
+            e.get<attractor_t>(),
+            e.get<Transform2D>().getPosition()
+        });
+    }
+    const auto attractorsCount = static_cast<uint32_t>(attractors.size());
 
-    auto attractors = ecs::view<attractor_t>();
-
+    const auto dumpFactor = expf(-6.0f * dt);
+    const rect_f bounds{0.0f, 0.0f, WIDTH, HEIGHT};
     for (auto e : ecs::view<motion_t>()) {
         auto& mot = e.get<motion_t>();
         auto& tra = e.get<Transform2D>();
 
-        auto p = tra.position;
+        auto p = tra.getPosition();
         auto v = mot.velocity;
 
-        for (auto attractor_entity : attractors) {
-            auto pointer = attractor_entity.get<Transform2D>().position;
-            auto& attractor = attractor_entity.get<attractor_t>();
-            float factor = 1.0f - math::clamp(length(pointer - p) / attractor.radius);
-            v += dt * attractor.force * factor * factor * normalize(pointer - p);
+        for (uint32_t i = 0; i < attractorsCount; ++i) {
+            auto& attractor = attractors[i];
+            auto diff = attractor.position - p;
+            auto len = length(diff);
+            float factor = 1.0f - math::clamp(len / attractor.props.radius);
+            v += dt * attractor.props.force * factor * factor * diff * (1.0f / len);
         }
 
         p += dt * mot.velocity;
 
-        const rect_f bounds{0.0f, 0.0f, WIDTH, HEIGHT};
         if (p.x < bounds.x) {
             v.x = -v.x;
             p.x = bounds.x;
@@ -45,9 +59,8 @@ void update_motion_system(float dt) {
             p.y = bounds.bottom();
         }
 
-        v *= expf(-6.0f * dt);
-        mot.velocity = v;
-        tra.position = p;
+        mot.velocity = v * dumpFactor;
+        tra.setPosition(p);
     }
 }
 

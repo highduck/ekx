@@ -22,7 +22,7 @@ void target_follow_script::update(float dt) {
             target_entity = nullptr;
         }
 
-        auto current = tr.position - offset;
+        auto current = tr.getPosition() - offset;
         if (integration == integration_mode::Exp) {
             const float c = ::logf(1.0f - k) * fixed_frame_rate;
             current = current + (target - current) * (1.0f - exp(c * time_accum));
@@ -37,7 +37,7 @@ void target_follow_script::update(float dt) {
             current = current + (target - current) * k * (time_accum * fixed_frame_rate);
         }
 
-        tr.position = offset + current;
+        tr.setPosition(offset + current);
         counter = 0;
         time_accum = 0.0f;
     }

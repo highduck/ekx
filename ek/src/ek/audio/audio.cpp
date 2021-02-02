@@ -8,7 +8,7 @@
 
 #define MA_NO_ENCODING
 #define MA_NO_STDIO
-#define MA_NO_GENERATION
+//#define MA_NO_GENERATION
 
 // android issue
 #define MA_NO_AAUDIO
@@ -16,8 +16,15 @@
 
 #define MINIAUDIO_IMPLEMENTATION
 
+#include <cstdio>
+
+#define audio_on_assert(e, file, line) ((void)printf("%s:%d: failed assertion `%s'\n", file, line, e), abort())
+#define audio_assert(e) (!(e) ? audio_on_assert(#e, __FILE__, __LINE__) : ((void)0))
+
+#define MA_ASSERT(e) audio_assert(e)
+
 #include <miniaudio.h>
-#include <research/miniaudio_engine.h>
+#include <miniaudio_engine.h>
 
 #include <cassert>
 
@@ -47,13 +54,13 @@ void init() {
         }
         audioSystem.pResourceManager = audioSystem.engine.pResourceManager;
 
-        result = ma_sound_group_init(&audioSystem.engine, NULL, &audioSystem.soundsGroup);
+        result = ma_sound_group_init(&audioSystem.engine, 0, NULL, &audioSystem.soundsGroup);
         if (result != MA_SUCCESS) {
             EK_WARN("Failed to create sound group");
             return;
         }
 
-        result = ma_sound_group_init(&audioSystem.engine, NULL, &audioSystem.musicGroup);
+        result = ma_sound_group_init(&audioSystem.engine, 0, NULL, &audioSystem.musicGroup);
         if (result != MA_SUCCESS) {
             EK_WARN("Failed to create sound group");
             return;
@@ -100,6 +107,7 @@ void Sound::load(const char* path) {
         ma_result result = ma_resource_manager_register_data(
                 audioSystem.pResourceManager,
                 dataSourceFilePath.c_str(),
+                nullptr,
                 ma_resource_manager_data_buffer_encoding_encoded,
                 &memoryBuffer);
         if (result != MA_SUCCESS) {
@@ -166,9 +174,13 @@ ma_sound* Sound::getNextSound() {
     auto result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(), MA_DATA_SOURCE_FLAG_DECODE,
                                           nullptr, &audioSystem.soundsGroup, sound);
     if (result != MA_SUCCESS) {
-        EK_WARN("cannot init sound for music");
+        EK_WARN("cannot init next sound: %s", dataSourceFilePath.c_str());
+        delete sound;
+        sound = nullptr;
     }
-    sounds.push_back(sound);
+    else {
+        sounds.push_back(sound);
+    }
     return sound;
 }
 
@@ -190,6 +202,7 @@ void Music::load(const char* path) {
         ma_result result = ma_resource_manager_register_data(
                 audioSystem.pResourceManager,
                 dataSourceFilePath.c_str(),
+                nullptr,
                 ma_resource_manager_data_buffer_encoding_encoded,
                 &memoryBuffer);
         if (result != MA_SUCCESS) {
@@ -208,7 +221,7 @@ void Music::load(const char* path) {
                                          nullptr, &audioSystem.musicGroup, sound);
         ma_sound_set_looping(sound, true);
         if (result != MA_SUCCESS) {
-            EK_WARN("cannot init sound for music");
+            EK_WARN("cannot init music");
         }
     });
 }

@@ -83,21 +83,21 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -fstrict-aliasing
         )
 
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(${PROJECT_NAME} PRIVATE -g)
-
-else ()
-    #set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-
-    target_compile_options(${PROJECT_NAME} PRIVATE -flto -Os)
-
-    # https://github.com/llvm-mirror/llvm/blob/master/cmake/modules/AddLLVM.cmake
-    #    target_link_options(${PROJECT_NAME}
-    #                        PRIVATE
-    #                        -Wl,-dead_strip
-    #                        -Wl,-dead_strip_dylibs
-    #                        )
-endif ()
+#if (CMAKE_BUILD_TYPE MATCHES Debug)
+#    target_compile_options(${PROJECT_NAME} PRIVATE -g)
+#
+#else ()
+#    #set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+#
+#    target_compile_options(${PROJECT_NAME} PRIVATE -flto -Os)
+#
+#    # https://github.com/llvm-mirror/llvm/blob/master/cmake/modules/AddLLVM.cmake
+#    #    target_link_options(${PROJECT_NAME}
+#    #                        PRIVATE
+#    #                        -Wl,-dead_strip
+#    #                        -Wl,-dead_strip_dylibs
+#    #                        )
+#endif ()
 
 target_link_libraries(${PROJECT_NAME}
         imgui

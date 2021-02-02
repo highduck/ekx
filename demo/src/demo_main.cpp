@@ -4,6 +4,9 @@
 #include "3d/sample_3d.hpp"
 #include "piko/sample_piko.hpp"
 #include "sample_integrations.hpp"
+#include "sim/components/motion.h"
+#include "sim/components/attractor.h"
+#include "3d/camera_arcball.hpp"
 
 #include <ek/math/rand.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
@@ -14,7 +17,6 @@
 #include <ui/minimal.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
-#include <ek/scenex/2d/DynamicAtlas.hpp>
 #include <ek/util/logger.hpp>
 
 namespace ek {
@@ -67,6 +69,10 @@ DemoApp::DemoApp() :
 
 void DemoApp::initialize() {
     basic_application::initialize();
+    ecs::tpl_world_register<motion_t>(&ecs::the_world);
+    ecs::tpl_world_register<attractor_t>(&ecs::the_world);
+    ecs::tpl_world_register<camera_arc_ball>(&ecs::the_world);
+    ecs::tpl_world_register<test_rotation_comp>(&ecs::the_world);
 
     Camera2D::Main.get<Camera2D>().clearColorEnabled = true;
     Camera2D::Main.get<Camera2D>().clearColor = float4{0xFF666666_argb};

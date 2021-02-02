@@ -6,145 +6,71 @@
 
 namespace ek {
 
-void Trail2D::track(ecs::entity e) {
-    tracked_target_ = e;
-    if (tracked_target_) {
-        position_ = position_last_ = Transform2D::localToLocal(tracked_target_, entity_, offset);
-        nodes_.clear();
-
-        // tail
-        nodes_.emplace_back(position_last_, 0.0f, 1.0f);
-
-        // head
-        nodes_.emplace_back(position_last_, 1.0f, 1.0f);
-    }
-}
-
-void Trail2D::update() {
+void Trail2D::update(ecs::Entity owner) {
     float dt = timer->dt;
-    auto head_node = nodes_[nodes_.size() - 1];
-    if (tracked_target_) {
-        if (Transform2D::fastLocalToLocal(tracked_target_, entity_, offset, position_)) {
-            update_position();
-        }
-    } else {
-        head_node.energy -= dt;
-        if (head_node.energy < 0.0f) {
-            head_node.energy = 0.0f;
-        }
-        if (nodes_.size() == 1 && head_node.energy <= 0.0f) {
-            // todo: auto-destroy
-//            view.Dispose();
-//            view = null;
-            return;
-        }
-    }
+    const auto& m = ecs::entity{owner}.get<WorldTransform2D>().matrix;
+    scale = length(m.scale());
+    update_position(m.transform(offset));
 
-    int i = 0;
-    while (i < nodes_.size() - 1) {
-        auto& node = nodes_[i];
+    for (uint32_t i = nodes.first; i < nodes.end; ++i) {
+        auto& node = nodes.data[i];
         node.energy -= dt * drain_speed;
         if (node.energy <= 0.0f) {
             node.energy = 0.0f;
-            if (nodes_[i + 1].energy <= 0.0f) {
-                nodes_.erase(nodes_.begin() + i);
-            } else {
-                ++i;
+            if (i == nodes.first) {
+                nodes.erase_front();
             }
-        } else {
-            ++i;
         }
     }
 }
 
-void Trail2D::update_position() {
+void Trail2D::update_position(float2 newPosition) {
+
+    if (!initialized) {
+        initialized = true;
+        lastPosition = newPosition;
+        return;
+    }
+
     //nextPosition.x += FastMath.Range(-10f, 10f);
     //nextPosition.y += FastMath.Range(-10f, 10f);
-    auto pos = position_last_;
-    auto direction = position_ - position_last_;
-    auto distance = length(direction);
+//    auto pos = lastPosition;
+    const auto distanceSqr = length_sqr(newPosition - lastPosition);
 
-    direction = normalize(direction);
+//    direction *= 1.0f / distance;
 
-    auto head = nodes_.back();
-
-//    auto limit = 100u;
-    while (distance >= segment_distance_max) { // && limit > 0u
-        distance -= segment_distance_max;
-        pos += direction * segment_distance_max;
-        head.position = pos;
-        nodes_.push_back(head);
-//        --limit;
+//    auto headCopy = nodes.back();
+    if (distanceSqr >= segment_distance_max * segment_distance_max) {
+        lastPosition = newPosition;
+        //headCopy.position = newPosition;
+        Node newNode{};
+        newNode.scale = scale;
+        nodes.push_back(newNode);
     }
 
-//    if (ps != null) {
-//        spawnParticles(pos, direction, dt);
-//    }
-
-    position_last_ = pos;
-    nodes_.back().position = position_;
-}
-
-void Trail2D::create_node(float2 pos) {
-    auto& head = nodes_.back();
-    //if (headNode.power < 1.0f)
-    //{
-    //	headNode.growPower(1.0f / growSpeed);
-    //}
-
-    head.position = pos;
-
-    // update head position and duplicate to new
-    nodes_.push_back(head);
-}
-
-void TrailRenderer2D::updateMesh(const std::vector<Trail2D::Node>& nodes) {
-    auto total = nodes.size();
-    auto count = total * 2;
-
-    if (vertices.size() < count) {
-        vertices.resize(count);
+    if (nodes.size() > 0) {
+        nodes.back().position = newPosition;
+        nodes.back().scale = scale;
+    } else {
+        //lastPosition = newPosition;
     }
-    int vi = 0;
-
-    for (int i = 0; i < total; ++i) {
-        const float2 p = nodes[i].position;
-        float2 perp{};
-        if (i > 0) {
-            perp = normalize(nodes[i - 1].position - p);
-            if (i + 1 < total) {
-                perp = normalize(lerp(perp, normalize(p - nodes[i + 1].position), 0.5f));
-            }
-            perp = perpendicular(perp);
-        }
-
-//        if (i == total - 1) {
-//            perp = YUnit2;
-//        }
-
-        auto energy = easing::P2_OUT.calculate(nodes[i].energy);
-        perp *= nodes[i].scale * math::lerp(minWidth, width, energy);
-        vertices[vi] = p - perp;
-        vertices[vi + 1] = p + perp;
-        vi += 2;
-        //m -= dm;
-    }
-//    view.SetPositions(vertices, count);
-
 }
 
 void Trail2D::updateAll() {
-    ecs::view<Trail2D>().each([](Trail2D& trail) {
-        trail.update();
-    });
+    auto* trails = ecs::tpl_world_storage<Trail2D>(&ecs::the_world);
+    const auto count = trails->component.count;
+    for (uint32_t i = 1; i < count; ++i) {
+        auto& trail = trails->data[i];
+        auto e = trails->component.handleToEntity[i];
+        trail.update(e);
+    }
 }
 
 void TrailRenderer2D::draw() {
     auto& trail = target.get<Trail2D>();
-    auto& nodes = trail.nodes_;
-    updateMesh(trail.nodes_);
+    auto& nodeArray = trail.nodes.data;
 
-    const auto columns = static_cast<int>(nodes.size());
+    const auto columns = static_cast<int>(trail.nodes.size());
     const auto quads = columns - 1;
     if (quads <= 0) {
         return;
@@ -163,28 +89,45 @@ void TrailRenderer2D::draw() {
     drawer.set_texture(texture);
     drawer.allocTriangles(columns * 2, quads * 6);
 
-    int v = 0;
-    int node_idx = 0;
+    auto node_idx = trail.nodes.first;
 
     const auto co = drawer.color.offset;
     const auto cm = drawer.color.scale;
     const auto texCoordU = spr->tex.center_x();
     const auto texCoordV0 = spr->tex.y;
     const auto texCoordV1 = spr->tex.bottom();
-    const auto m = drawer.matrix;
+    //const auto m = drawer.matrix;
+    //drawer.matrix.set
     auto* ptr = drawer.vertexDataPos_;
 
+    // we could generate vertices right into destination buffer :)
     for (int i = 0; i < columns; ++i) {
-        const auto cm0 = cm.scaleAlpha(nodes[node_idx].energy);
-        const auto v1 = vertices[v++];
-        const auto v2 = vertices[v++];
-        ptr->position = m.transform(v1.x, v1.y);
+
+//        const auto v1 = vertices[v++];
+//        const auto v2 = vertices[v++];
+        const float2 p = nodeArray[node_idx].position;
+        float2 perp{};
+        if (i > 0/* node_idx > begin */) {
+            perp = normalize_2f(nodeArray[node_idx - 1].position - p);
+            if (i + 1 < columns) {
+                perp = normalize_2f(lerp(perp, normalize_2f(p - nodeArray[node_idx + 1].position), 0.5f));
+            }
+        } else if (i + 1 < columns) {
+            perp = normalize_2f(p - nodeArray[node_idx + 1].position);
+        }
+        perp = perpendicular(perp);
+
+        const auto energy = nodeArray[node_idx].energy;
+        perp *= nodeArray[node_idx].scale * math::lerp(minWidth, width, easing::P2_OUT.calculate(energy));
+
+        const auto cm0 = cm.scaleAlpha(energy);
+        ptr->position = p - perp;
         ptr->uv.x = texCoordU;
         ptr->uv.y = texCoordV0;
         ptr->cm = cm0;
         ptr->co = co;
         ++ptr;
-        ptr->position = m.transform(v2.x, v2.y);
+        ptr->position = p + perp;
         ptr->uv.x = texCoordU;
         ptr->uv.y = texCoordV1;
         ptr->cm = cm0;
@@ -193,16 +136,18 @@ void TrailRenderer2D::draw() {
         ++node_idx;
     }
 
-    v = drawer.baseVertex_;
-    uint16_t* indices = drawer.indexDataPos_;
-    for (int i = 0; i < quads; ++i) {
-        *(indices++) = v;
-        *(indices++) = v + 2;
-        *(indices++) = v + 3;
-        *(indices++) = v + 3;
-        *(indices++) = v + 1;
-        *(indices++) = v;
-        v += 2;
+    {
+        uint16_t v = drawer.baseVertex_;
+        uint16_t* indices = drawer.indexDataPos_;
+        for (int i = 0; i < quads; ++i) {
+            *(indices++) = v;
+            *(indices++) = v + 2;
+            *(indices++) = v + 3;
+            *(indices++) = v + 3;
+            *(indices++) = v + 1;
+            *(indices++) = v;
+            v += 2;
+        }
     }
 }
 }

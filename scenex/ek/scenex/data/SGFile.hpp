@@ -193,7 +193,7 @@ struct SGNodeData {
     std::vector<SGFilter> filters;
     std::optional<SGDynamicTextData> dynamicText;
     std::optional<SGMovieData> movie;
-    int movieTargetId = -1;
+    int32_t movieTargetId = -1;
 
     std::unordered_map<int, std::string> labels;
     std::unordered_map<int, std::string> scripts;

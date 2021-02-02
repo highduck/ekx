@@ -74,15 +74,15 @@ public:
     }
 
     layout_wrapper& hard(float x, float y) {
-        auto& transform = e_.get_or_create<Transform2D>();
-        horizontal(x, transform.position.x - (designCanvasRect.x + designCanvasRect.width * x));
-        vertical(y, transform.position.y - (designCanvasRect.y + designCanvasRect.height * y));
+        const auto pos =  e_.get_or_create<Transform2D>().getPosition();
+        horizontal(x, pos.x - (designCanvasRect.x + designCanvasRect.width * x));
+        vertical(y, pos.y - (designCanvasRect.y + designCanvasRect.height * y));
         return *this;
     }
 
     layout_wrapper& hard_y(float y = 0.0f) {
-        auto& transform = e_.get_or_create<Transform2D>();
-        vertical(y, transform.position.y - (designCanvasRect.y + designCanvasRect.height * y));
+        const auto posY = e_.get_or_create<Transform2D>().getPosition().y;
+        vertical(y, posY - (designCanvasRect.y + designCanvasRect.height * y));
         return *this;
     }
 

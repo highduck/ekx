@@ -10,7 +10,7 @@ class view_backward_t {
 public:
     static constexpr auto components_num = sizeof ... (Component);
 
-    using table_type = std::array<entity_map_base*, components_num>;
+    using table_type = std::array<ComponentHeader*, components_num>;
     using table_index_type = uint32_t;
 
     using indices_type = std::array<table_index_type, components_num>;
@@ -21,7 +21,7 @@ public:
     public:
         iterator(table_type& table, Entity it) : it_{it},
                                                  table_{table},
-                                                 map_0{*table[0]} {
+                                                 map_0{table[0]} {
             skips();
         }
 
@@ -41,18 +41,18 @@ public:
 
         inline void skips() {
             // todo: size recovery (case we remove entities before *it)
-            ECXX_ASSERT(it_ < map_0.count);
+            ECXX_ASSERT(it_ < map_0->count);
 
-            while (it_ != 0 && !valid(map_0.handleToEntity[it_])) {
+            while (it_ != 0 && !valid(map_0->handleToEntity[it_])) {
                 --it_;
             }
-            ent_ = map_0.handleToEntity[it_];
+            ent_ = map_0->handleToEntity[it_];
         }
 
         [[nodiscard]]
         inline bool valid(Entity e) const {
             for (uint32_t i = 1u; i < components_num; ++i) {
-                if (sparse_array_get(table_[i]->entityToHandle, e) == 0) {
+                if (sparse_set_get(&table_[i]->entityToHandle, e) == 0) {
                     return false;
                 }
             }
@@ -71,12 +71,12 @@ public:
         Entity it_;
         Entity ent_;
         const table_type& table_;
-        const entity_map_base& map_0;
+        const ComponentHeader* map_0;
     };
 
-    explicit view_backward_t(world* db) {
+    explicit view_backward_t(world* w) {
         table_index_type i{};
-        ((access_[i] = table_[i] = &component_ensure<Component>(db), ++i), ...);
+        ((access_[i] = table_[i] = world_component_type(w, type<Component>()), ++i), ...);
 
         std::sort(table_.begin(), table_.end(), [](auto a, auto b) -> bool {
             return a->count < b->count;
@@ -93,7 +93,7 @@ public:
 
     template<typename Comp>
     constexpr inline Comp& unsafe_get(table_index_type i, Entity idx) {
-        return static_cast<entity_map <Comp>*>(access_[i])->get(idx);
+        return static_cast<ComponentStorage <Comp>*>(access_[i]->data)->get(idx);
     }
 
     template<typename Func>

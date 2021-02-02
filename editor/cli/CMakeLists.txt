@@ -5,11 +5,11 @@ add_executable(${PROJECT_NAME}
         cli_main.cpp
         )
 
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(${PROJECT_NAME} PRIVATE -g)
-else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Os)
-endif ()
+#if (CMAKE_BUILD_TYPE MATCHES Debug)
+#    target_compile_options(${PROJECT_NAME} PRIVATE -g)
+#else ()
+#    target_compile_options(${PROJECT_NAME} PRIVATE -Os)
+#endif ()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11

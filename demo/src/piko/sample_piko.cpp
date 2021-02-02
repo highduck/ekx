@@ -6,7 +6,6 @@
 namespace ek {
 
 SamplePiko::SamplePiko() {
-    auto& app = resolve<basic_application>();
     node = piko::create();
     append(container, node);
     title = "PIKO PIKO";

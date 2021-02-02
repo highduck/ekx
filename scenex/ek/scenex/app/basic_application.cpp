@@ -17,9 +17,27 @@
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/scenex/3d/RenderSystem3D.hpp>
 #include <ek/scenex/3d/Transform3D.hpp>
+#include <ek/scenex/3d/Camera3D.hpp>
+#include <ek/scenex/3d/Light3D.hpp>
+#include <ek/scenex/3d/StaticMesh.hpp>
+
+#include <ek/scenex/2d/Button.hpp>
+#include <ek/scenex/2d/MovieClip.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
+#include <ek/scenex/2d/UglyFilter2D.hpp>
+#include <ek/scenex/base/Tween.hpp>
+#include <ek/scenex/base/Script.hpp>
+#include <ek/goodies/Shake.hpp>
+#include <ek/goodies/PopupManager.hpp>
+#include <ek/goodies/bubble_text.hpp>
+#include <ek/goodies/GameScreen.hpp>
+#include <ek/goodies/helpers/Trail2D.hpp>
+#include <ek/scenex/base/DestroyTimer.hpp>
+#include <ek/scenex/particles/ParticleSystem.hpp>
+#include <ek/scenex/base/NodeEvents.hpp>
 
 //#ifdef TRACY_ENABLE
-#include "../../tracy/Tracy.hpp"
+#include <Tracy.hpp>
 //#endif
 
 namespace ek {
@@ -51,6 +69,41 @@ void basic_application::initialize() {
 
     //// basic scene
     ecs::world_initialize(&ecs::the_world);
+    ecs::tpl_world_register<Node>(&ecs::the_world);
+    ecs::tpl_world_register<NodeName>(&ecs::the_world);
+
+    ecs::tpl_world_register<Camera2D>(&ecs::the_world);
+    ecs::tpl_world_register<Transform2D>(&ecs::the_world);
+    ecs::tpl_world_register<WorldTransform2D>(&ecs::the_world);
+    ecs::tpl_world_register<Display2D>(&ecs::the_world);
+    ecs::tpl_world_register<Bounds2D>(&ecs::the_world);
+
+    ecs::tpl_world_register<Transform3D>(&ecs::the_world);
+    ecs::tpl_world_register<Camera3D>(&ecs::the_world);
+    ecs::tpl_world_register<Light3D>(&ecs::the_world);
+    ecs::tpl_world_register<MeshRenderer>(&ecs::the_world);
+
+    ecs::tpl_world_register<MovieClip>(&ecs::the_world);
+    ecs::tpl_world_register<MovieClipTargetIndex>(&ecs::the_world);
+
+    ecs::tpl_world_register<LayoutRect>(&ecs::the_world);
+    ecs::tpl_world_register<Canvas>(&ecs::the_world);
+    ecs::tpl_world_register<Button>(&ecs::the_world);
+    ecs::tpl_world_register<Interactive>(&ecs::the_world);
+    ecs::tpl_world_register<Tween>(&ecs::the_world);
+    ecs::tpl_world_register<Shake>(&ecs::the_world);
+    ecs::tpl_world_register<ScriptHolder>(&ecs::the_world);
+    ecs::tpl_world_register<BubbleText>(&ecs::the_world);
+    ecs::tpl_world_register<PopupManager>(&ecs::the_world);
+    ecs::tpl_world_register<GameScreen>(&ecs::the_world);
+    ecs::tpl_world_register<Trail2D>(&ecs::the_world);
+    ecs::tpl_world_register<DestroyTimer>(&ecs::the_world);
+    ecs::tpl_world_register<NodeEventHandler>(&ecs::the_world);
+    ecs::tpl_world_register<ParticleEmitter2D>(&ecs::the_world);
+    ecs::tpl_world_register<ParticleLayer2D>(&ecs::the_world);
+    ecs::tpl_world_register<UglyFilter2D>(&ecs::the_world);
+
+
     root = createNode2D("root");
     updateScreenRect(root);
 
@@ -127,43 +180,48 @@ void basic_application::on_draw_frame() {
         pass_action.depth.val = 100000.0f;
     }
 
-    auto fbWidth = static_cast<int>(g_app.drawable_size.x);
-    auto fbHeight = static_cast<int>(g_app.drawable_size.y);
-    sg_begin_default_pass(&pass_action, fbWidth, fbHeight);
-
-    if (r3d) {
-        r3d->render();
-    }
-
-    render_frame();
-
-    draw2d::begin({0, 0, fbWidth, fbHeight});
-
     if (!started_ && rootAssetObject) {
         rootAssetObject->poll();
-        drawPreloader(rootAssetObject->getProgress());
     }
 
-    hook_on_render_frame();
+    auto fbWidth = static_cast<int>(g_app.drawable_size.x);
+    auto fbHeight = static_cast<int>(g_app.drawable_size.y);
+    if(fbWidth > 0 && fbHeight > 0) {
+        sg_begin_default_pass(&pass_action, fbWidth, fbHeight);
 
-    profiler.addTime("RENDER", timer.read_millis());
-    profiler.addTime("FRAME", timer.read_millis());
-    timer.reset();
+        if (r3d) {
+            r3d->render();
+        }
 
-    on_frame_end();
+        render_frame();
 
-    profiler.addTime("PROFILER", timer.read_millis());
-    profiler.addTime("FRAME", timer.read_millis());
-    timer.reset();
+        draw2d::begin({0, 0, fbWidth, fbHeight});
 
-    draw2d::end();
-    draw2d::endFrame();
+        if (!started_ && rootAssetObject) {
+            drawPreloader(rootAssetObject->getProgress());
+        }
 
-    hook_on_draw_frame();
-    /** base app END **/
-    sg_end_pass();
-    sg_commit();
+        hook_on_render_frame();
 
+        profiler.addTime("RENDER", timer.read_millis());
+        profiler.addTime("FRAME", timer.read_millis());
+        timer.reset();
+
+        on_frame_end();
+
+        profiler.addTime("PROFILER", timer.read_millis());
+        profiler.addTime("FRAME", timer.read_millis());
+        timer.reset();
+
+        draw2d::end();
+        draw2d::endFrame();
+
+        hook_on_draw_frame();
+        /** base app END **/
+        sg_end_pass();
+        sg_commit();
+
+    }
     if (!started_ && asset_manager_->is_assets_ready()) {
         EK_DEBUG << "Start Game";
         start_game();

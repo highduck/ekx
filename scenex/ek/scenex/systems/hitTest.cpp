@@ -15,10 +15,10 @@ entity hitTest2D(entity e, const Node& node, float2 parentPosition) {
 
     float2 local = parentPosition;
     const auto* transform = e.tryGet<Transform2D>();
-    if (transform && !transform->matrix.transform_inverse(local, local)) {
-        // fail to make transform, discard
-        return nullptr;
+    if (transform) {
+        transform->matrix.transform_inverse(local, local);
     }
+
     auto* bounds = e.tryGet<Bounds2D>();
     if (bounds) {
         if (!bounds->rect.contains(local)) {

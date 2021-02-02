@@ -46,8 +46,8 @@ struct MovieClip {
     static void updateAll();
 };
 
-struct movie_target_keys {
-    int key_animation = 0;
+struct MovieClipTargetIndex {
+    int32_t key = 0;
 };
 
 void goto_and_stop(ecs::entity e, float frame);

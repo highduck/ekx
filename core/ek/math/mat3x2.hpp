@@ -190,16 +190,16 @@ struct matrix_t<3, 2, T> {
         set(scale, skew);
     }
 
-    bool transform_inverse(vec2 pos, vec2& out) const {
-        const T D = det(*this);
-        if (D != T{0}) {
-            const T x = pos.x - tx;
-            const T y = pos.y - ty;
-            out.x = (x * d - y * c) / D;
-            out.y = (y * a - x * b) / D;
-            return true;
-        }
-        return false;
+    void transform_inverse(vec2 pos, vec2& out) const {
+        const T a_ = a;
+        const T b_ = b;
+        const T c_ = c;
+        const T d_ = d;
+        const T x_ = pos.x - tx;
+        const T y_ = pos.y - ty;
+        const T invDet = T{1} / (a_ * d_ - c_ * b_);
+        out.x = (x_ * d_ - y_ * c_) * invDet;
+        out.y = (y_ * a_ - x_ * b_) * invDet;
     }
 
     bool inverse() {
@@ -224,6 +224,14 @@ struct matrix_t<3, 2, T> {
         return true;
     }
 
+    inline static void multiply(const mat3x2& l, const mat3x2& r, mat3x2& out) {
+        out.a = l.a * r.a + l.c * r.b;
+        out.b = l.b * r.a + l.d * r.b;
+        out.c = l.a * r.c + l.c * r.d;
+        out.d = l.b * r.c + l.d * r.d;
+        out.tx = l.a * r.tx + l.c * r.ty + l.tx;
+        out.ty = l.b * r.tx + l.d * r.ty + l.ty;
+    }
 };
 
 template<typename T>
