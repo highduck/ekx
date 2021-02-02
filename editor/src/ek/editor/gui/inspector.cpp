@@ -92,11 +92,20 @@ void guiMovieClip(MovieClip& mc) {
 }
 
 void guiTransform2D(Transform2D& transform) {
-    ImGui::DragFloat2("Position", transform.position.data(), 1.0f, 0.0f, 0.0f, "%.1f");
-    ImGui::DragFloat2("Scale", transform.scale.data(), 0.1f, 0.0f, 0.0f, "%.2f");
-    ImGui::DragFloat2("Skew", transform.skew.data(), 0.1f, 0.0f, 0.0f, "%.2f");
-    ImGui::DragFloat2("Origin", transform.origin.data(), 0.1f, 0.0f, 0.0f, "%.2f");
-    ImGui::DragFloat2("Pivot", transform.pivot.data(), 0.1f, 0.0f, 0.0f, "%.2f");
+    auto pos = transform.getPosition();
+    auto scale = transform.getScale();
+    auto skew = transform.getSkew();
+    if(ImGui::DragFloat2("Position", pos.data(), 1.0f, 0.0f, 0.0f, "%.1f")) {
+        transform.setPosition(pos);
+    }
+    if(ImGui::DragFloat2("Scale", scale.data(), 0.1f, 0.0f, 0.0f, "%.2f")) {
+        transform.setScale(scale);
+    }
+    if(ImGui::DragFloat2("Skew", skew.data(), 0.1f, 0.0f, 0.0f, "%.2f")) {
+        transform.setSkew(skew);
+    }
+//    ImGui::DragFloat2("Origin", transform.origin.data(), 0.1f, 0.0f, 0.0f, "%.2f");
+//    ImGui::DragFloat2("Pivot", transform.pivot.data(), 0.1f, 0.0f, 0.0f, "%.2f");
 
     auto color = static_cast<float4>(transform.color.scale);
     if (ImGui::ColorEdit4("Color Scale", color.data())) {

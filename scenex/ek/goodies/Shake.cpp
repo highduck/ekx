@@ -19,7 +19,7 @@ void Shake::updateAll() {
                 rand_fx.random(-1.0f, 1.0f)
         };
 
-        e.get<Transform2D>().position = offset * r * state.strength;
+        e.get<Transform2D>().setPosition(offset * r * state.strength);
 
         if (state.time <= 0.0f) {
             e.remove<Shake>();

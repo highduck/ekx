@@ -14,7 +14,7 @@ void mouse_follow_script::update(float dt) {
     if (parent) {
         auto& im = resolve<InteractionSystem>();
         const auto pos = Transform2D::globalToLocal(parent, im.pointerScreenPosition_);
-        get<Transform2D>().position = pos;
+        get<Transform2D>().setPosition(pos);
     }
 }
 

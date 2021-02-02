@@ -88,7 +88,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         )
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
-    set_source_files_properties(stb/stb_image.cpp PROPERTIES COMPILE_FLAGS -Wno-cast-align)
+    set_source_files_properties(stb/stb_image.cpp PROPERTIES COMPILE_FLAGS -Wno-cast-align) #
 
     set(EK_COMPILE_WARNINGS
             -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type
@@ -110,17 +110,5 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -fstrict-aliasing
         ${EK_COMPILE_WARNINGS}
         )
-
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(${PROJECT_NAME} PRIVATE -g)
-else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
-    if (${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
-            ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
-    else ()
-        target_compile_options(${PROJECT_NAME} PRIVATE -flto)
-    endif ()
-endif ()
 
 target_link_libraries(${PROJECT_NAME} stb sokol tracy)

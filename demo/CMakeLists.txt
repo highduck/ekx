@@ -40,17 +40,27 @@ target_link_libraries(${PROJECT_NAME}
         ekx
         )
 
+add_definitions("-ffast-math -fno-exceptions -fno-rtti -Wall -Wextra")
+
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+#    add_definitions(-DNDEBUG)
+else ()
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Oz -ffast-math -fno-exceptions -fno-rtti -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz -flto")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-dead_strip -Wl,-dead_strip_dylibs")
+#    add_definitions(-DNDEBUG)
+endif()
+
 set_target_properties(${PROJECT_NAME}
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
-target_compile_options(${PROJECT_NAME} PRIVATE -fno-exceptions -fno-rtti)
-
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(${PROJECT_NAME} PRIVATE -g)
-else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Oz -flto)
-endif ()
+#if (CMAKE_BUILD_TYPE MATCHES Debug)
+#    target_compile_options(${PROJECT_NAME} PRIVATE -g -fno-exceptions -fno-rtti)
+#else ()
+#    target_compile_options(${PROJECT_NAME} PRIVATE -g -Oz -fno-exceptions -fno-rtti) #-flto
+#endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     #-s SAFE_HEAP=1
@@ -87,12 +97,12 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     endif ()
 
 else ()
-    if (CMAKE_BUILD_TYPE MATCHES Debug)
-    else ()
-        # https://github.com/llvm-mirror/llvm/blob/master/cmake/modules/AddLLVM.cmake
-        target_link_options(${PROJECT_NAME}
-                PUBLIC
-                -Wl,-dead_strip
-                -Wl,-dead_strip_dylibs)
-    endif ()
+#    if (CMAKE_BUILD_TYPE MATCHES Debug)
+#    else ()
+#        # https://github.com/llvm-mirror/llvm/blob/master/cmake/modules/AddLLVM.cmake
+#        target_link_options(${PROJECT_NAME}
+#                PUBLIC
+#                -Wl,-dead_strip
+#                -Wl,-dead_strip_dylibs)
+#    endif ()
 endif ()

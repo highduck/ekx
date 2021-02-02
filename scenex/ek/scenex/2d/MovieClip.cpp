@@ -83,10 +83,7 @@ easing_progress_t get_easing_progress(const float t, const std::vector<SGEasingD
 
 void apply_transform(entity e, const SGKeyFrameTransform& keyframe) {
     auto& transform = e.get_or_create<Transform2D>();
-    transform.position = keyframe.position;
-    transform.skew = keyframe.skew;
-    transform.scale = keyframe.scale;
-    transform.pivot = keyframe.pivot;
+    transform.setTransform(keyframe.position, keyframe.scale, keyframe.skew, keyframe.pivot);
     transform.color.scale = argb32_t{keyframe.color.scale};
     transform.color.offset = argb32_t{keyframe.color.offset};
 }
@@ -139,8 +136,8 @@ void apply_frame(entity e, MovieClip& mov) {
     auto it = e.get<Node>().child_first;
     const auto totalTargets = static_cast<int>(data->layers.size());
     while (it != nullptr) {
-        if (it.has<movie_target_keys>()) {
-            const auto idx = it.get<movie_target_keys>().key_animation;
+        if (it.has<MovieClipTargetIndex>()) {
+            const auto idx = it.get<MovieClipTargetIndex>().key;
             if (idx < totalTargets) {
                 update_target(time, it, data->layers[idx]);
             }

@@ -37,17 +37,17 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -fstrict-aliasing
         )
 
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(${PROJECT_NAME} PRIVATE -g)
-else ()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
-    if (${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
-            ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
-    else ()
-        target_compile_options(${PROJECT_NAME} PRIVATE -flto)
-    endif ()
-endif ()
+#if (CMAKE_BUILD_TYPE MATCHES Debug)
+#    target_compile_options(${PROJECT_NAME} PRIVATE -g)
+#else ()
+#    target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
+#    if (${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
+#            ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+#
+#    else ()
+#        target_compile_options(${PROJECT_NAME} PRIVATE -flto)
+#    endif ()
+#endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Android")
     target_link_libraries(${PROJECT_NAME} -Wl,--whole-archive ${SCENEX_LIBS} -Wl,--no-whole-archive)

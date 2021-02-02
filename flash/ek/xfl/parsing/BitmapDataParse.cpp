@@ -6,7 +6,7 @@
 #include <ek/util/logger.hpp>
 
 #include <stb_image.h>
-#include <miniz/miniz.h>
+#include <miniz.h>
 
 namespace ek::xfl {
 

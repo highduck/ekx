@@ -42,7 +42,7 @@ Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl) {
 void particles_burst(ecs::entity e, int count) {
     auto& emitter = e.get<ParticleEmitter2D>();
     const auto& data = e.get<ParticleEmitter2D>().data;
-    const auto& position = e.get_or_default<Transform2D>().position + emitter.position;
+    const auto position = e.get_or_default<Transform2D>().getPosition() + emitter.position;
     float a = data.dir.random();
     Res<ParticleDecl> decl{emitter.particle};
     auto& layer = find_particle_layer(e);
@@ -75,7 +75,7 @@ void update_emitters() {
         }
 
         auto& layer = find_particle_layer(e);
-        const auto& position = e.get_or_default<Transform2D>().position;
+        auto position = e.get_or_default<Transform2D>().getPosition();
 
         emitter.time += dt;
         const auto& data = emitter.data;

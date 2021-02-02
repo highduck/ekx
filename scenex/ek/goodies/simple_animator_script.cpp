@@ -10,7 +10,7 @@ void simple_animator_script::update(float dt) {
     hue += dt * hue_speed;
 
     auto& transform = get<Transform2D>();
-    transform.rotation(rotation);
+    transform.setRotation(rotation);
     transform.color.scale = lerp(
             hvs_color_t::get_hue_color(math::reduce(hue, 1.0f, 0.0f)),
             base_color,

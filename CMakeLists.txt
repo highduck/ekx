@@ -30,7 +30,7 @@ if (EKX_MOBILE)
     set(EKX_TRACY OFF)
 endif ()
 
-add_subdirectory(external)
+add_subdirectory(../../ekx-thirdparty external)
 
 if (EKX_BUILD_TESTS)
     enable_testing()

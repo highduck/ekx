@@ -40,11 +40,6 @@ inline void destroy(entity e) {
     entity_destroy(&the_world, &e.index, 1);
 }
 
-template<typename Component>
-[[nodiscard]] inline bool is_locked() {
-    return component_is_locked<Component>(the_world);
-}
-
 template<typename Func>
 inline void each(Func func) {
     const auto* indices = the_world.indices;

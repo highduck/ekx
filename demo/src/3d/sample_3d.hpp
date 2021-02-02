@@ -4,6 +4,9 @@
 
 namespace ek {
 
+struct test_rotation_comp {
+};
+
 class Sample3D : public SampleBase {
 public:
     Sample3D();

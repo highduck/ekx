@@ -32,8 +32,8 @@ void handle_back_button(Button& btn, const NodeEventData& ev) {
 
 void initialize_base_transform(Button& btn, const Transform2D& transform) {
     btn.baseColor = transform.color;
-    btn.baseScale = transform.scale;
-    btn.baseSkew = transform.skew;
+    btn.baseScale = transform.getScale();
+    btn.baseSkew = transform.getSkew();
 }
 
 const ButtonSkin& get_skin(const Button& btn) {
@@ -89,12 +89,13 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
     float sx = 1.0f + 0.2f * sinf((1.0f - post) * pi * 5.0f) * post;
     float sy = 1.0f + 0.2f * sinf((1.0f - post) * pi) * cosf((1.0f - post) * pi * 5.0f) * post;
 
+    transform.setScale(btn.baseScale * float2(sx, sy));
+
     auto color = lerp(0xFFFFFFFF_argb, 0xFF888888_argb, push);
     transform.color.scale = btn.baseColor.scale * color;
 
     const float h = 0.1f * over;
     transform.color.offset = btn.baseColor.offset + argb32_t{h, h, h, 0.0f};
-    transform.scale = btn.baseScale * float2(sx, sy);
 }
 
 void update_movie_frame(ecs::entity entity, const Interactive& interactive) {

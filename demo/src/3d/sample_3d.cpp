@@ -30,9 +30,6 @@ static const char* test_models[4] = {"torus",
                                      "sphere",
                                      "cube"};
 
-struct test_rotation_comp {
-};
-
 void create_test_material(const std::string& name, argb32_t color, float roughness) {
     auto m = new Material3D;
     m->set_base_color(color);
@@ -104,7 +101,6 @@ void Sample3D::update(float dt) {
 void Sample3D::draw() {
     SampleBase::draw();
 
-    auto& app = resolve<basic_application>();
     const float dt = TimeLayer::Root->dt;
 
     for (auto e : ecs::view<test_rotation_comp>()) {

@@ -16,12 +16,6 @@ inline float2 get_screen_size() {
     };
 }
 
-void on_scale_factor_changed() {
-}
-
-void on_rect_changed() {
-}
-
 LayoutRect get_canvas_space_size(ecs::entity e) {
     LayoutRect result;
     result.rect = {float2::zero, get_screen_size()};
@@ -38,67 +32,73 @@ LayoutRect get_canvas_space_size(ecs::entity e) {
     return result;
 }
 
-float update_canvas(ecs::entity e) {
-    auto& canvas = e.get<Canvas>();
-    auto rootLayout = get_canvas_space_size(e);
-    auto resolution_size = canvas.resolution.size;
-    float2 scale_ratio = rootLayout.safeRect.size / resolution_size;
+struct CanvasSystemInput {
+    // screen metrics
+    rect_f fullRect;
+    rect_f safeRect;
+    // logical resolution size
+    float2 resolution;
+    // modes
+    bool landscape;
+};
 
-    float aspect = rootLayout.rect.width / rootLayout.rect.height;
-    float baseAspect = resolution_size.x / resolution_size.y;
-    if (!canvas.landscape && baseAspect < aspect) {
+struct CanvasSystemOutput {
+    rect_f fullRect;
+    rect_f safeRect;
+    float2 offset;
+    float scale;
+};
+
+void calculateCanvas(CanvasSystemInput input, CanvasSystemOutput& output) {
+    float2 scale_ratio = input.safeRect.size / input.resolution;
+
+    const float aspect = input.fullRect.width / input.fullRect.height;
+    const float baseAspect = input.resolution.x / input.resolution.y;
+    if (!input.landscape && baseAspect < aspect) {
         scale_ratio *= baseAspect / aspect;
-    } else if (canvas.landscape && baseAspect > aspect) {
+    } else if (input.landscape && baseAspect > aspect) {
         scale_ratio *= aspect / baseAspect;
     }
 
-    float scale = canvas.landscape ? scale_ratio.y : scale_ratio.x;
-    float2 left_top = 0.5f * (rootLayout.safeRect.size - scale * resolution_size);
-    float2 left_top_full = 0.5f * (rootLayout.rect.size - scale * resolution_size);
+    const float scale = input.landscape ? scale_ratio.y : scale_ratio.x;
+    const float2 left_top = 0.5f * (input.safeRect.size - scale * input.resolution);
+    const float2 left_top_full = 0.5f * (input.fullRect.size - scale * input.resolution);
+    const auto fullRectPosition = (input.fullRect.position - left_top_full) / scale;
 
-    if (canvas.scale != scale) {
-        canvas.scale = scale;
-        on_scale_factor_changed();
-    }
+    output.fullRect.position = fullRectPosition;
+    output.fullRect.size = input.fullRect.size / scale;
+    output.safeRect.position = fullRectPosition + input.safeRect.position / scale;
+    output.safeRect.size = input.safeRect.size / scale;
+    output.offset = left_top_full;
+    output.scale = scale;
+}
 
-    rect_f rect{
-            (rootLayout.rect.position - left_top_full) / scale,
-            rootLayout.rect.size / scale
-    };
-
-    rect_f safeRect{
-            rect.position + rootLayout.safeRect.position / scale,
-            rootLayout.safeRect.size / scale
-    };
-
+void update_canvas(ecs::entity e) {
+    auto& canvas = e.get<Canvas>();
+    auto rootLayout = get_canvas_space_size(e);
+    CanvasSystemInput input;
+    input.resolution = canvas.resolution;
+    input.fullRect = rootLayout.rect;
+    input.safeRect = rootLayout.safeRect;
+    input.landscape = canvas.landscape;
+    CanvasSystemOutput result;
+    calculateCanvas(input, result);
+    canvas.scale = result.scale;
     auto& layout = e.get<LayoutRect>();
-    if (layout.safeRect != safeRect) {
-        layout.safeRect = safeRect;
-        layout.rect = rect;
+    if (layout.safeRect != result.safeRect) {
+        layout.safeRect = result.safeRect;
+        layout.rect = result.fullRect;
 
         auto& transform = e.get<Transform2D>();
-        transform.position = left_top_full;
-        transform.scale = float2{scale, scale};
-
-        on_rect_changed();
+        transform.setPosition(result.offset);
+        transform.setScale(result.scale);
     }
-
-    return scale;
 }
 
 void Canvas::updateAll() {
-    for (auto e : ecs::view<Canvas, Transform2D>()) {
+    for (auto e : ecs::view<Canvas>()) {
         update_canvas(e);
     }
 }
-
-//bool check_aspect_ratio(const ecs::entity e) {
-//    const auto& canvas = ecs::get<canvas_t>(e);
-//    const auto& resolution = canvas.resolution;
-//    const auto& view = ecs::get<transform_2d>(e).rect;
-//    const float resolution_ratio = resolution.width / resolution.height;
-//    const float view_ratio = view.width / view.height;
-//    return canvas.landscape ? view_ratio >= resolution_ratio : view_ratio <= resolution_ratio;
-//}
 
 }

@@ -56,6 +56,7 @@ SampleIntegrations::SampleIntegrations() :
 
     btn = createButton("VIDEO AD", [] {
         resolve<Ads>().showRewardVideo([](bool rewarded) {
+            (void)rewarded;
             // TODO:
         });
     });

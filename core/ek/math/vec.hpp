@@ -402,9 +402,12 @@ inline vec_t<N, T> reflect(const vec_t<N, T>& direction, const vec_t<N, T>& norm
     return direction - T{1} * dot(normal, direction) * normal;
 }
 
-template<typename T, unsigned N>
-inline vec_t<N, T> normalize(const vec_t<N, T>& a) {
-    return a / sqrt(dot(a, a));
+inline vec2_t<float> normalize_2f(vec2_t<float> a) {
+    return a * math::Q_rsqrt(a.x * a.x + a.y * a.y);
+}
+
+inline vec3_t<float> normalize_3f(vec3_t<float> a) {
+    return a * math::Q_rsqrt(a.x * a.x + a.y * a.y + a.z * a.z);
 }
 
 template<unsigned N>
@@ -412,9 +415,9 @@ inline vec_t<N, float> normalize(const vec_t<N, float>& a) {
     return a * math::Q_rsqrt(dot(a, a));
 }
 
-template<typename T>
-inline vec_t<2, float> normalize(vec_t<2, float> a) {
-    return a * math::Q_rsqrt(a.x * a.x + a.y * a.y);
+template<typename T, unsigned N>
+inline vec_t<N, T> normalize(const vec_t<N, T>& a) {
+    return a / sqrt(dot(a, a));
 }
 
 template<typename T, unsigned N>

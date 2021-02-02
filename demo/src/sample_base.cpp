@@ -15,7 +15,9 @@ SampleBase::~SampleBase() {
 
 void SampleBase::draw() {}
 
-void SampleBase::update(float dt) {}
+void SampleBase::update(float dt) {
+    (void)dt;
+}
 
 ecs::entity SampleBase::samplesContainer{};
 
