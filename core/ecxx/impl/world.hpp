@@ -469,8 +469,8 @@ inline void entity_remove(world* w, Entity e) {
 
 template<typename Component>
 inline bool entity_try_remove(world* w, Entity e) {
-    const auto* storage = tpl_world_storage<Component>(w);
-    if (sparse_set_get(storage->component.entityToHandle, e) != 0) {
+    auto* storage = tpl_world_storage<Component>(w);
+    if (sparse_set_get(&storage->component.entityToHandle, e) != 0) {
         storage->erase(e);
         return true;
     }

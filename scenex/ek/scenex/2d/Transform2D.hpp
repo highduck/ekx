@@ -14,6 +14,7 @@ struct WorldTransform2D {
     ColorMod32 color{}; // 2 * 4 = 8
 };
 
+// TODO: mat2x2, position,
 struct Transform2D {
     // 24
     alignas(16) matrix_2d matrix{};
@@ -136,6 +137,28 @@ struct Transform2D {
         cachedSkew = skew_;
         updateMatrix2x2();
         setPosition(position, pivot_);
+    }
+
+    void setTransform(float2 position_, float2 scale_, float rotation_) {
+        cachedScale = scale_;
+        cachedSkew.x = rotation_;
+        cachedSkew.y = rotation_;
+        const auto sn = sinf(rotation_);
+        const auto cs = cosf(rotation_);
+        matrix.a = cs * cachedScale.x;
+        matrix.b = sn * cachedScale.x;
+        matrix.c = -sn * cachedScale.y;
+        matrix.d = cs * cachedScale.y;
+        matrix.tx = position_.x;
+        matrix.ty = position_.y;
+    }
+
+    inline void setTransform(float2 position_, float2 scale_, float2 skew_) {
+        cachedScale = scale_;
+        cachedSkew = skew_;
+        updateMatrix2x2();
+        matrix.tx = position_.x;
+        matrix.ty = position_.y;
     }
 
     void rotate(float value) {
