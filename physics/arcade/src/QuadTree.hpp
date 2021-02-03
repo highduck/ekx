@@ -137,9 +137,9 @@ public:
     // starting from the base node (0) how many times can it (and its children) split
     int maxLevels = 5;
 
-    rect_i bounds{0, -2048, 480, 2048};
+    rect_i bounds;
 
-    QuadTree() {
+    explicit QuadTree(rect_i bounds_) : bounds{bounds_} {
         nodes.emplace_back();
     }
 

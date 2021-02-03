@@ -1,0 +1,3 @@
+[submodule "external"]
+	path = external
+	url = git@github.com:highduck/ekx-thirdparty.git

@@ -95,6 +95,7 @@ void basic_application::initialize() {
     ecs::tpl_world_register<ScriptHolder>(&ecs::the_world);
     ecs::tpl_world_register<BubbleText>(&ecs::the_world);
     ecs::tpl_world_register<PopupManager>(&ecs::the_world);
+    ecs::tpl_world_register<close_timeout>(&ecs::the_world);
     ecs::tpl_world_register<GameScreen>(&ecs::the_world);
     ecs::tpl_world_register<Trail2D>(&ecs::the_world);
     ecs::tpl_world_register<DestroyTimer>(&ecs::the_world);
