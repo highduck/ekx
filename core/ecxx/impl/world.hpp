@@ -54,17 +54,6 @@ typedef uint32_t Passport;
 
 /** Sparse Array: map Entity to Component Handle **/
 
-//inline constexpr uint32_t SS_PAGE_SIZE = 0x8000; // ~32kb index table per page
-inline constexpr uint32_t SS_PAGE_SIZE = 0x1000; // general 4kb pages
-inline constexpr uint32_t SS_ELEMENTS_PER_PAGE = SS_PAGE_SIZE / sizeof(ComponentHandle); // 0x800 = 2048
-static constexpr uint32_t SS_PAGE_MASK = SS_ELEMENTS_PER_PAGE - 1; // 0x7FF
-static constexpr uint32_t SS_PAGE_BITS = 11; // bit_count of page_mask
-
-static constexpr uint32_t SS_PAGES_MAX_COUNT = ENTITIES_MAX_COUNT / SS_ELEMENTS_PER_PAGE; // 32
-
-// `page_size` required to be power-of-two value
-static_assert(SS_ELEMENTS_PER_PAGE > 0 && ((SS_ELEMENTS_PER_PAGE & (SS_ELEMENTS_PER_PAGE - 1)) == 0));
-
 // min memory required:
 // mem per vector = 32 (PagesCountMax) * 8 (ptr to page array) = 256 bytes
 // for 128 components = 256 * 128 = 32768 bytes
@@ -77,29 +66,112 @@ static_assert(SS_ELEMENTS_PER_PAGE > 0 && ((SS_ELEMENTS_PER_PAGE & (SS_ELEMENTS_
 
 // 0 is invalid index (null_value)
 
-struct SparseSetPage {
-    alignas(128) ComponentHandle indices[SS_ELEMENTS_PER_PAGE]; // 4096 bytes, page aligned
-};
-
 // 32 pages per component, so how many components at all we can track if pages will have global U16 id:
 // - 65536 / 32 = 2048 components!
 
 // size: 256 bytes
-struct SparseSet {
+struct /* alignas(256) */ SparseArray {
+    //inline constexpr uint32_t SS_PAGE_SIZE = 0x8000; // ~32kb index table per page
+    static constexpr uint32_t PageSize = 0x1000; // general 4kb pages
+    static constexpr uint32_t ELEMENTS_PER_PAGE = PageSize / sizeof(ComponentHandle); // 0x800 = 2048
+    static constexpr uint32_t PageMask = ELEMENTS_PER_PAGE - 1; // 0x7FF
+    static constexpr uint32_t PageBits = 11; // bit_count of page_mask
+
+    // count on 32 pages for 16-bit entity index
+    static constexpr uint32_t PAGES_MAX_COUNT = ENTITIES_MAX_COUNT / ELEMENTS_PER_PAGE;
+
+    // `page_size` required to be power-of-two value
+    static_assert(ELEMENTS_PER_PAGE > 0 && ((ELEMENTS_PER_PAGE & (ELEMENTS_PER_PAGE - 1)) == 0));
+
+    struct /* alignas(4096) */ Page {
+        static Page INVALID;
+
+        ComponentHandle indices[ELEMENTS_PER_PAGE]; // 4096 bytes, page aligned
+    };
+
     // 32 * 8 = 256
-    alignas(128) SparseSetPage* pages[SS_PAGES_MAX_COUNT];
+    Page* pages[PAGES_MAX_COUNT];
+
+    [[nodiscard]]
+    inline ComponentHandle get(Entity e) const {
+        return pages[e >> PageBits]->indices[e & PageMask];
+    }
+
+    inline void set(Entity e, ComponentHandle handle) {
+        pages[e >> PageBits]->indices[e & PageMask] = handle;
+    }
+
+    void insert(Entity e, ComponentHandle handle);
+
+    [[nodiscard]]
+    ComponentHandle moveRemove(Entity removed, Entity target);
+
+    void init();
+
+    void clear();
+
+    static void initArrays(SparseArray* arrays, uint32_t count);
+
+    static void clearArrays(SparseArray* arrays, uint32_t count);
 };
 
-void sparse_set_insert(SparseSet* set, Entity e, ComponentHandle handle);
+struct EntityDenseArray {
 
-//inline ComponentHandle sparse_set_get(const SparseSet* set, Entity e);
-inline ComponentHandle sparse_set_get(const SparseSet* set, Entity e) {
-    return set->pages[e >> SS_PAGE_BITS]->indices[e & SS_PAGE_MASK];
-}
+    Entity* data;
+    uint32_t size;
+    uint32_t capacity;
 
-void sparse_set_set(SparseSet* set, Entity e, ComponentHandle handle);
+    EntityDenseArray() {
+        data = new Entity[64];
+        *data = 0;
+        size = 1;
+        capacity = 64;
+    }
 
-ComponentHandle sparse_set_move_remove(SparseSet* set, Entity removed, Entity target);
+    ~EntityDenseArray() {
+        delete data;
+    }
+
+    void reset() {
+        *data = 0;
+        size = 1;
+    }
+
+    void grow() {
+        const auto newCapacity = capacity << 1;
+        auto* newData = new Entity[newCapacity];
+        memcpy(newData, data, sizeof(Entity) * size);
+        delete[] data;
+        data = newData;
+        capacity = newCapacity;
+    }
+
+    void push(Entity e) {
+        if (size == capacity) {
+            grow();
+        }
+        *(reinterpret_cast<Entity*>(data) + size) = e;
+        ++size;
+    }
+
+    inline void set(ComponentHandle handle, Entity e) const {
+        *(data + handle) = e;
+    }
+
+    [[nodiscard]]
+    inline Entity get(ComponentHandle handle) const {
+        return *(data + handle);
+    }
+
+    inline void remove_back() {
+        --size;
+    }
+
+    [[nodiscard]]
+    inline Entity back() const {
+        return *(data + size - 1);
+    }
+};
 
 /** Component Managers **/
 
@@ -118,9 +190,9 @@ struct ComponentRegistration {
 // 256 + 74 = 330 bytes
 // 128 * 330 = 42'240 kb
 struct ComponentHeader {
-    alignas(128) SparseSet entityToHandle; // 256 bytes
+    SparseArray entityToHandle; // 256 bytes
 
-    std::vector<Entity> handleToEntity{}; // dynamic (8 + 8 + 8 ~ 24-32 bytes)
+    EntityDenseArray handleToEntity{}; // dynamic (8 + 4 + 4 ~ 16 bytes)
 
     uint32_t count; // 4 bytes
     uint32_t lockCounter; // 4 bytes
@@ -137,100 +209,6 @@ struct ComponentHeader {
 };
 
 void component_type_init(ComponentHeader* component, ComponentTypeId typeId, void* userData);
-
-/**
-* Entity Pool generates dense indices for Entity representation.
-* We track Generations on reusing deleted entities.
-* Generation is 8-bit, so I swear to check references next update.
-* Collision is possible if in one frame we do destroy and create more than 256 times
-*/
-
-/** World **/
-struct world {
-
-    // entity pool data, indices and generations
-    // SIZE: 200 kb
-
-    // entity indices
-    alignas(4096) Entity indices[ENTITIES_MAX_COUNT]; // 2 * ENTITIES_MAX_COUNT = 131072 bytes
-
-    // entity generations
-    alignas(4096) Generation generations[ENTITIES_MAX_COUNT]; // 65536 bytes
-
-    // per component, data manager
-    alignas(1024) ComponentHeader* components[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
-
-    // per component, map entity to data handle
-    alignas(1024) SparseSet* pEntityToHandle[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
-
-    //// control section
-    // allocated entities count
-    uint32_t count;
-
-    // next free index in entity pool
-    Entity next;
-
-    // just zero entity (reserved null entity)
-    Entity zero;
-};
-
-inline ComponentHeader* world_component_type(const world* w, ComponentTypeId componentTypeId) {
-    ECXX_FULL_ASSERT(componentTypeId < COMPONENTS_MAX_COUNT);
-    auto* component = w->components[componentTypeId];
-    ECXX_FULL_ASSERT(component != nullptr);
-    return component;
-}
-
-inline void world_register_component(world* w, ComponentHeader* component) {
-    w->components[component->typeId] = component;
-}
-
-// entity create / destroy
-void entity_alloc(world* w, Entity* entities, uint32_t count);
-
-template<typename ...Component>
-void entity_create(world* w, Entity* entities, uint32_t count);
-
-void entity_destroy(world* w, const Entity* entities, uint32_t count);
-
-// passport
-bool passport_valid(const world* w, uint32_t passport);
-
-inline Generation entity_generation(const world* w, Entity e) {
-    return w->generations[e];
-}
-
-// world create / destroy
-
-void world_initialize(world* w);
-
-void world_reset(world* w);
-
-void world_shutdown(world* w);
-
-inline bool entity_is_allocated(world* w, Entity e) {
-    return w->indices[e] == e;
-}
-
-inline ComponentHandle entity_get(const world* w, Entity e, ComponentTypeId componentId) {
-    const auto* component = world_component_type(w, componentId);
-    return sparse_set_get(&component->entityToHandle, e);
-}
-
-inline ComponentHandle entity_get_or_create(world* w, Entity e, ComponentTypeId componentId) {
-    auto* component = world_component_type(w, componentId);
-    const auto handle = sparse_set_get(&component->entityToHandle, e);
-    if (handle == 0) {
-        return component->emplace(component, e);
-    }
-    return handle;
-}
-
-inline world the_world{};
-
-
-/** Templated generic **/
-
 
 /** Identity Index generator **/
 struct ComponentTypeIdCounter {
@@ -258,6 +236,128 @@ constexpr static inline ComponentTypeId type() noexcept {
     return ComponentTypeIdGenerator<Component>::value;
 }
 
+/**
+* Entity Pool generates dense indices for Entity representation.
+* We track Generations on reusing deleted entities.
+* Generation is 8-bit, so I swear to check references next update.
+* Collision is possible if in one frame we do destroy and create more than 256 times
+*/
+
+/** World **/
+struct world {
+
+    // entity pool data, indices and generations
+    // SIZE: 200 kb
+
+    // entity indices
+    //alignas(4096)
+    Entity entities[ENTITIES_MAX_COUNT]; // 2 * ENTITIES_MAX_COUNT = 131072 bytes
+
+    // entity generations
+    //alignas(4096)
+    Generation generations[ENTITIES_MAX_COUNT]; // 65536 bytes
+
+    // per component, data manager
+    //alignas(1024)
+    ComponentHeader* components[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
+
+    // per component, map entity to data handle
+//    alignas(1024) SparseArray* pEntityToHandle[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
+
+    //// control section
+    // allocated entities count
+    uint32_t size;
+
+    // next free index in entity pool
+    Entity next;
+
+    // just zero entity (reserved null entity)
+    Entity zero;
+
+    [[nodiscard]]
+    inline Generation generation(Entity e) const {
+        return generations[e];
+    }
+
+    [[nodiscard]]
+    inline bool isAllocated(Entity e) const {
+        return entities[e] == e;
+    }
+
+
+    /** lifecycle **/
+
+    void initialize();
+
+    void reset();
+
+    void shutdown();
+
+    /** entity pool **/
+
+// entity create / destroy
+    void create(Entity* outEntities, uint32_t count);
+
+    void destroy(const Entity* entitiesToDestroy, uint32_t count);
+
+    template<typename ...Component>
+    void create(Entity* outEntities, uint32_t count);
+
+    // passport
+    [[nodiscard]]
+    bool check(Passport passport) const;
+
+    [[nodiscard]]
+    inline bool isValid(Entity e) const {
+        return e && entities[e] == e;
+    }
+
+    /** components **/
+
+    template<typename Component>
+    [[nodiscard]] inline bool has(Entity e) const;
+
+    template<typename Component>
+    [[nodiscard]] inline Component& get(Entity e) const;
+
+    template<typename Component>
+    [[nodiscard]] inline Component* tryGet(Entity e) const;
+
+private:
+    void resetEntityPool();
+};
+
+inline ComponentHeader* world_component_type(const world* w, ComponentTypeId componentTypeId) {
+    ECXX_FULL_ASSERT(componentTypeId < COMPONENTS_MAX_COUNT);
+    auto* component = w->components[componentTypeId];
+    ECXX_FULL_ASSERT(component != nullptr);
+    return component;
+}
+
+inline void world_register_component(world* w, ComponentHeader* component) {
+    w->components[component->typeId] = component;
+}
+
+// world create / destroy
+
+inline ComponentHandle entity_get(const world* w, Entity e, ComponentTypeId componentId) {
+    const auto* component = world_component_type(w, componentId);
+    return component->entityToHandle.get(e);
+}
+
+inline ComponentHandle entity_get_or_create(world* w, Entity e, ComponentTypeId componentId) {
+    auto* component = world_component_type(w, componentId);
+    const auto handle = component->entityToHandle.get(e);
+    if (handle == 0) {
+        return component->emplace(component, e);
+    }
+    return handle;
+}
+
+extern world* the_world;
+
+/** Templated generic **/
+
 template<typename DataType>
 class ComponentStorage final {
 public:
@@ -275,14 +375,14 @@ public:
 
     template<typename ...Args>
     DataType& emplace(Entity entity, Args&& ...args) {
-        auto* entityToHandle = &component.entityToHandle;
+        auto& entityToHandle = component.entityToHandle;
         auto& handleToEntity = component.handleToEntity;
         const auto handle = component.count;
         ECXX_ASSERT(component.lockCounter == 0);
-        ECXX_ASSERT(sparse_set_get(entityToHandle, entity) == 0);
+        ECXX_ASSERT(entityToHandle.get(entity) == 0);
 
-        sparse_set_insert(entityToHandle, entity, handle);
-        handleToEntity.push_back(entity);
+        entityToHandle.insert(entity, handle);
+        handleToEntity.push(entity);
         ++component.count;
         if constexpr (has_data) {
             if constexpr (std::is_aggregate_v<DataType>) {
@@ -296,14 +396,14 @@ public:
     }
 
     ComponentHandle emplace_default(Entity entity) {
-        auto* entityToHandle = &component.entityToHandle;
+        auto& entityToHandle = component.entityToHandle;
         auto& handleToEntity = component.handleToEntity;
         const auto handle = component.count;
         ECXX_ASSERT(component.lockCounter == 0);
-        ECXX_ASSERT(sparse_set_get(entityToHandle, entity) == 0);
+        ECXX_ASSERT(entityToHandle.get(entity) == 0);
 
-        sparse_set_insert(entityToHandle, entity, handle);
-        handleToEntity.push_back(entity);
+        entityToHandle.insert(entity, handle);
+        handleToEntity.push(entity);
         ++component.count;
         if constexpr (has_data) {
             data.emplace_back();
@@ -315,7 +415,7 @@ public:
 
     void erase(Entity entity) {
         ECXX_ASSERT(component.lockCounter == 0);
-        ECXX_ASSERT(sparse_set_get(&component.entityToHandle, entity) != 0);
+        ECXX_ASSERT(component.entityToHandle.get(entity) != 0);
         const auto backEntity = component.handleToEntity.back();
         if (entity != backEntity) {
             erase_from_middle(entity, backEntity);
@@ -326,9 +426,9 @@ public:
 
     void erase_from_middle(Entity e, Entity last) {
         --component.count;
-        const auto handle = sparse_set_move_remove(&component.entityToHandle, e, last);
-        component.handleToEntity[handle] = last;
-        component.handleToEntity.pop_back();
+        const auto handle = component.entityToHandle.moveRemove(e, last);
+        component.handleToEntity.set(handle, last);
+        component.handleToEntity.remove_back();
         if constexpr (has_data) {
             data[handle] = std::move(data.back());
             data.pop_back();
@@ -337,8 +437,8 @@ public:
 
     void erase_from_back(Entity e) {
         --component.count;
-        sparse_set_set(&component.entityToHandle, e, 0);
-        component.handleToEntity.pop_back();
+        component.entityToHandle.set(e, 0);
+        component.handleToEntity.remove_back();
         if constexpr (has_data) {
             data.pop_back();
         }
@@ -346,7 +446,7 @@ public:
 
     inline DataType& get(Entity e) const {
         if constexpr (has_data) {
-            return const_cast<DataType&>(data[sparse_set_get(&component.entityToHandle, e)]);
+            return const_cast<DataType&>(data[component.entityToHandle.get(e)]);
         } else {
             return const_cast<DataType&>(data[0]);
         }
@@ -429,7 +529,7 @@ inline void entity_assign(world* w, Entity* entities, uint32_t count, Args&& ...
 template<typename Component, typename ...Args>
 inline Component& entity_reassign(world* w, Entity entity, Args&& ... args) {
     auto* component = world_component_type(w, type<Component>());
-    const auto handle = sparse_set_get(&component->entityToHandle, entity);
+    const auto handle = component->entityToHandle.get(entity);
     auto* storage = static_cast<ComponentStorage<Component>*>(component->data);
     if (handle != 0) {
         auto& data = storage->get_by_handle(handle);
@@ -440,22 +540,22 @@ inline Component& entity_reassign(world* w, Entity entity, Args&& ... args) {
 }
 
 template<typename Component>
-inline bool entity_has(const world* w, Entity e) {
-    const auto* component = world_component_type(w, type<Component>());
-    const auto* entityToHandle = &component->entityToHandle;
-    const auto handle = sparse_set_get(entityToHandle, e);
+inline bool world::has(Entity e) const {
+    const auto* component = world_component_type(this, type<Component>());
+    const auto& entityToHandle = component->entityToHandle;
+    const auto handle = entityToHandle.get(e);
     return handle != 0;
 }
 
 template<typename Component>
-inline Component& entity_get(const world* w, Entity e) {
-    return tpl_world_storage<Component>(w)->get(e);
+inline Component& world::get(Entity e) const {
+    return tpl_world_storage<Component>(this)->get(e);
 }
 
 template<typename Component>
-inline Component* entity_tryGet(world* w, Entity e) {
-    auto* storage = tpl_world_storage<Component>(w);
-    const auto handle = sparse_set_get(&storage->component.entityToHandle, e);
+inline Component* world::tryGet(Entity e) const {
+    auto* storage = tpl_world_storage<Component>(this);
+    const auto handle = storage->component.entityToHandle.get(e);
     if (handle != 0) {
         return storage->get_ptr_by_handle(handle);
     }
@@ -470,7 +570,7 @@ inline void entity_remove(world* w, Entity e) {
 template<typename Component>
 inline bool entity_try_remove(world* w, Entity e) {
     auto* storage = tpl_world_storage<Component>(w);
-    if (sparse_set_get(&storage->component.entityToHandle, e) != 0) {
+    if (storage->component.entityToHandle.get(e) != 0) {
         storage->erase(e);
         return true;
     }
@@ -480,7 +580,7 @@ inline bool entity_try_remove(world* w, Entity e) {
 template<typename Component>
 inline Component& entity_get_or_create(world* w, Entity e) {
     auto* storage = tpl_world_storage<Component>(w);
-    const auto handle = sparse_set_get(&storage->component.entityToHandle, e);
+    const auto handle = storage->component.entityToHandle.get(e);
     if (handle != 0) {
         return storage->get_by_handle(handle);
     }
@@ -491,14 +591,14 @@ inline Component& entity_get_or_create(world* w, Entity e) {
 template<typename Component>
 inline const Component& entity_get_or_default(world* w, Entity e) {
     const auto* storage = tpl_world_storage<Component>(w);
-    const auto handle = sparse_set_get(&storage->component.entityToHandle, e);
+    const auto handle = storage->component.entityToHandle.get(e);
     return storage->get_or_default_by_handle(handle);
 }
 
 template<typename ...Component>
-inline void entity_create(world* w, Entity* entities, uint32_t count) {
-    entity_alloc(w, entities, count);
-    (entity_assign<Component>(w, entities, count), ...);
+inline void world::create(Entity* outEntities, uint32_t count) {
+    create(outEntities, count);
+    (entity_assign<Component>(this, outEntities, count), ...);
 }
 
 template<typename Component>

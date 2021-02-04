@@ -13,20 +13,20 @@ namespace ek {
 
 int RenderSystem2D::currentLayerMask = 0xFF;
 
-void RenderSystem2D::draw(ecs::entity e, const WorldTransform2D* worldTransform) {
-    assert(e.isAlive());
+void RenderSystem2D::draw(const ecs::world& w, ecs::Entity e, const WorldTransform2D* worldTransform) {
+    assert(w.isValid(e));
 
-    auto* uglyFilter = e.tryGet<UglyFilter2D>();
+    auto* uglyFilter = w.tryGet<UglyFilter2D>(e);
     if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {
         draw2d::state.matrix = worldTransform->matrix;
         draw2d::state.color = worldTransform->color;
-        if (uglyFilter->pass(e)) {
+        if (uglyFilter->pass(w, e)) {
             // discard
             return;
         }
     }
 
-    auto* bounds = e.tryGet<Bounds2D>();
+    auto* bounds = w.tryGet<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
         auto rc = bounds->getScreenRect(camera->inverseMatrix, worldTransform->matrix);
@@ -42,7 +42,7 @@ void RenderSystem2D::draw(ecs::entity e, const WorldTransform2D* worldTransform)
     }
 
     bool programChanged = false;
-    auto* display = e.tryGet<Display2D>();
+    auto* display = w.tryGet<Display2D>(e);
     if (display) {
         if (display->program) {
             programChanged = true;
@@ -55,7 +55,7 @@ void RenderSystem2D::draw(ecs::entity e, const WorldTransform2D* worldTransform)
         }
     }
 
-    auto it = e.get<Node>().child_first;
+    auto it = w.get<Node>(e).child_first;
     while (it) {
         const auto& child = it.get<Node>();
         if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
@@ -64,7 +64,7 @@ void RenderSystem2D::draw(ecs::entity e, const WorldTransform2D* worldTransform)
                 worldTransform = childWorldTransform;
             }
             if (worldTransform->color.scale.a > 0) {
-                draw(it, worldTransform);
+                draw(w, it.index, worldTransform);
             }
         }
         it = child.sibling_next;
@@ -79,18 +79,18 @@ void RenderSystem2D::draw(ecs::entity e, const WorldTransform2D* worldTransform)
 }
 
 
-void RenderSystem2D::drawStack(ecs::entity e) {
-    assert(e.isAlive());
+void RenderSystem2D::drawStack(const ecs::world& w, ecs::Entity e) {
+    assert(w.isValid(e));
 
-    auto* uglyFilter = e.tryGet<UglyFilter2D>();
+    auto* uglyFilter = w.tryGet<UglyFilter2D>(e);
     if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {
-        if (uglyFilter->pass(e)) {
+        if (uglyFilter->pass(w, e)) {
             // discard
             return;
         }
     }
 
-    auto* bounds = e.tryGet<Bounds2D>();
+    auto* bounds = w.tryGet<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
         auto rc = bounds->getScreenRect(camera->inverseMatrix, draw2d::state.matrix);
@@ -107,7 +107,7 @@ void RenderSystem2D::drawStack(ecs::entity e) {
     }
 
     bool programChanged = false;
-    auto* display = e.tryGet<Display2D>();
+    auto* display = w.tryGet<Display2D>(e);
     if (display) {
         if (display->program) {
             programChanged = true;
@@ -118,7 +118,7 @@ void RenderSystem2D::drawStack(ecs::entity e) {
         }
     }
 
-    auto it = e.get<Node>().child_first;
+    auto it = w.get<Node>(e).child_first;
     while (it) {
         const auto& child = it.get<Node>();
         if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
@@ -129,7 +129,7 @@ void RenderSystem2D::drawStack(ecs::entity e) {
                 draw2d::state.concat(childTransform->color);
             }
             if (draw2d::state.color.scale.a > 0) {
-                drawStack(it);
+                drawStack(w, it.index);
             }
             if (childTransform) {
                 draw2d::state.restore_transform();

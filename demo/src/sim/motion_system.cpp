@@ -16,20 +16,23 @@ struct AttractorsState {
 
 void update_motion_system(float dt) {
     static std::vector<AttractorsState> attractors{};
+    const auto& w = *ecs::the_world;
     attractors.clear();
-    for (auto e : ecs::view<attractor_t>()) {
+    for (auto e_ : ecs::view<attractor_t>()) {
+        const auto e = e_.index;
         attractors.emplace_back(AttractorsState{
-            e.get<attractor_t>(),
-            e.get<Transform2D>().getPosition()
+            w.get<attractor_t>(e),
+            w.get<Transform2D>(e).getPosition()
         });
     }
     const auto attractorsCount = static_cast<uint32_t>(attractors.size());
 
     const auto dumpFactor = expf(-6.0f * dt);
     const rect_f bounds{0.0f, 0.0f, WIDTH, HEIGHT};
-    for (auto e : ecs::view<motion_t>()) {
-        auto& mot = e.get<motion_t>();
-        auto& tra = e.get<Transform2D>();
+    for (auto e_ : ecs::view<motion_t>()) {
+        auto e = e_.index;
+        auto& mot = w.get<motion_t>(e);
+        auto& tra = w.get<Transform2D>(e);
 
         auto p = tra.getPosition();
         auto v = mot.velocity;

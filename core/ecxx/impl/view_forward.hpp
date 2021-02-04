@@ -52,9 +52,9 @@ public:
                 return true;
             }
             // filter secondary entity vectors
-            const auto entity = m->handleToEntity[it];
+            const auto entity = m->handleToEntity.get(it);
             for (uint32_t k = 1u; k < components_num; ++k) {
-                if (sparse_set_get(&table[k]->entityToHandle, entity) == 0) {
+                if (table[k]->entityToHandle.get(entity) == 0) {
                     return false;
                 }
             }
@@ -65,7 +65,7 @@ public:
             // filter secondary entity vectors
             const uint32_t cn = components_num;
             for (uint32_t k = 1u; k < cn; ++k) {
-                if (sparse_set_get(table[k]->entityToHandle, idx) == 0) {
+                if (table[k]->entityToHandle.get(idx) == 0) {
                     return false;
                 }
             }
@@ -73,11 +73,11 @@ public:
         }
 
         inline entity operator*() const noexcept {
-            return entity{table_[0]->handleToEntity[it_]};
+            return entity{table_[0]->handleToEntity.get(it_)};
         }
 
         inline entity operator*() noexcept {
-            return entity{table_[0]->handleToEntity[it_]};
+            return entity{table_[0]->handleToEntity.get(it_)};
         }
 
     private:
@@ -123,7 +123,7 @@ public:
     void each(Func func) const {
         const ComponentHeader& table_0 = *(table_[0]);
         for (uint32_t i = 1u; i != table_0.count; ++i) {
-            const Entity e = table_0.handleToEntity[i];
+            const Entity e = table_0.handleToEntity.get(i);
             if (iterator::is_valid_fast(e, table_)) {
                 table_index_type k{0u};
                 func(unsafe_get<Component>(k++, e)...);
@@ -168,11 +168,11 @@ public:
         }
 
         inline entity operator*() const noexcept {
-            return entity{map_.component.handleToEntity[it_]};
+            return entity{map_.component.handleToEntity.get(it_)};
         }
 
         inline entity operator*() noexcept {
-            return entity{map_.component.handleToEntity[it_]};
+            return entity{map_.component.handleToEntity.get(it_)};
         }
 
     private:

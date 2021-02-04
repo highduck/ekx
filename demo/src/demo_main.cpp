@@ -69,10 +69,10 @@ DemoApp::DemoApp() :
 
 void DemoApp::initialize() {
     basic_application::initialize();
-    ecs::tpl_world_register<motion_t>(&ecs::the_world);
-    ecs::tpl_world_register<attractor_t>(&ecs::the_world);
-    ecs::tpl_world_register<camera_arc_ball>(&ecs::the_world);
-    ecs::tpl_world_register<test_rotation_comp>(&ecs::the_world);
+    ecs::tpl_world_register<motion_t>(ecs::the_world);
+    ecs::tpl_world_register<attractor_t>(ecs::the_world);
+    ecs::tpl_world_register<camera_arc_ball>(ecs::the_world);
+    ecs::tpl_world_register<test_rotation_comp>(ecs::the_world);
 
     Camera2D::Main.get<Camera2D>().clearColorEnabled = true;
     Camera2D::Main.get<Camera2D>().clearColor = float4{0xFF666666_argb};

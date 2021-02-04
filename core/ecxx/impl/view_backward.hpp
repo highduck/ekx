@@ -43,16 +43,16 @@ public:
             // todo: size recovery (case we remove entities before *it)
             ECXX_ASSERT(it_ < map_0->count);
 
-            while (it_ != 0 && !valid(map_0->handleToEntity[it_])) {
+            while (it_ != 0 && !valid(map_0->handleToEntity.get(it_))) {
                 --it_;
             }
-            ent_ = map_0->handleToEntity[it_];
+            ent_ = map_0->handleToEntity.get(it_);
         }
 
         [[nodiscard]]
         inline bool valid(Entity e) const {
             for (uint32_t i = 1u; i < components_num; ++i) {
-                if (sparse_set_get(&table_[i]->entityToHandle, e) == 0) {
+                if (table_[i]->entityToHandle.get(e) == 0) {
                     return false;
                 }
             }

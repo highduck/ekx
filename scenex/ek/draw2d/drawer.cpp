@@ -101,13 +101,10 @@ float getTriangleArea(const Vertex2D* vertices, const uint16_t* indices, int cou
 class BufferChain {
 public:
     explicit BufferChain(BufferType type, uint32_t bufferSize) : type_{type} {
-        // manual buffering
-        // framesNum_ = 3; // triple-buffering
         buffersLimit_ = 0; // unlimited
 
         // orphaning
         framesNum_ = 1;
-//        buffersLimit_ = 1;
         useOrphaning = true;
         maxSize = bufferSize;
     }
@@ -116,7 +113,6 @@ public:
         Buffer* buf;
         if (pos >= buffers_.size()) {
             buf = new Buffer(type_, Usage::Dynamic, maxSize);
-            //buf->useDataOrphaning = useOrphaning;
             buffers_.push_back(buf);
         } else {
             buf = buffers_[pos];

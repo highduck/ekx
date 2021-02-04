@@ -7,7 +7,7 @@
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/scenex/2d/RenderSystem2D.hpp>
 #include <ek/scenex/base/Node.hpp>
-#include <ek/scenex/utility/scene_management.hpp>
+//#include <ek/scenex/utility/scene_management.hpp>
 
 using namespace ek::app;
 
@@ -166,7 +166,7 @@ mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::en
         it = dragEntity_.ent();
     }
     else {
-        it = hitTest2D(node, pointer);
+        it = ecs::entity{hitTest2D(*ecs::the_world, node.index, pointer)};
     }
     hitTarget_ = ecs::EntityRef{it};
 

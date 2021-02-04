@@ -22,7 +22,7 @@ module.exports = (ctx) => {
             ],
             cpp_flags: {
                 files: [
-                    path.join(__dirname, "src/raudio/raudio.cpp")
+                    path.join(__dirname, "src/ek/audio/audio.cpp")
                 ],
                 flags: "-x objective-c++"
             },

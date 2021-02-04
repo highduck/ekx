@@ -328,7 +328,7 @@ void guiParticleLayer2D(ParticleLayer2D& layer) {
 
 void gui_inspector(ecs::entity e) {
     ImGui::PushID(e.index);
-    ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index, entity_generation(&ecs::the_world, e.index));
+    ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index, ecs::the_world->generation(e.index));
     if (e.has<NodeName>()) {
         ImGui::InputText("Name", &e.get<NodeName>().name);
     }

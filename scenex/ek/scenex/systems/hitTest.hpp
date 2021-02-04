@@ -7,6 +7,6 @@ namespace ek {
 
 struct Node;
 
-ecs::entity hitTest2D(ecs::entity entity, float2 parentSpacePosition);
+ecs::Entity hitTest2D(const ecs::world& w, ecs::Entity e, float2 parentSpacePosition);
 
 }

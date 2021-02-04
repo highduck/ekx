@@ -82,7 +82,7 @@ void traverseNodesBreathFirst(ecs::world* w, ecs::entity root, std::vector<ecs::
     out.push_back(root.index);
     uint32_t begin = 0;
     uint32_t end = 1;
-    const auto* nodes = ecs::tpl_world_storage<Node>(&ecs::the_world);
+    const auto* nodes = ecs::tpl_world_storage<Node>(w);
 
     while (begin < end) {
         for (uint32_t i = begin; i < end; ++i) {
@@ -104,16 +104,50 @@ void updateWorldTransformAll(ecs::world* w, ecs::entity root) {
     vec2.clear();
     traverseNodesBreathFirst(w, root, vec2);
 
-    const auto* localTransforms = ecs::tpl_world_storage<Transform2D>(&ecs::the_world);
-    const auto* worldTransforms = ecs::tpl_world_storage<WorldTransform2D>(&ecs::the_world);
-    const auto* nodes = ecs::tpl_world_storage<Node>(&ecs::the_world);
-    for (auto entity : vec2) {
-        auto& tw = worldTransforms->get(entity);
-        const auto parent = nodes->get(entity).parent.index;
-        const auto& tp = worldTransforms->get(parent);
-        auto& tl = localTransforms->get(entity);
-        matrix_2d::multiply(tp.matrix, tl.matrix, tw.matrix);
-        tw.color = tp.color * tl.color;
+    {
+        const auto* localTransforms = ecs::tpl_world_storage<Transform2D>(w);
+        const auto* worldTransforms = ecs::tpl_world_storage<WorldTransform2D>(w);
+        const auto* nodes = ecs::tpl_world_storage<Node>(w);
+        for (auto entity : vec2) {
+            auto& tw = worldTransforms->get(entity);
+            const auto& tp = worldTransforms->get( /* parent */ nodes->get(entity).parent.index);
+            auto& tl = localTransforms->get(entity);
+            matrix_2d::multiply(tp.matrix, tl.matrix, tw.matrix);
+            ColorMod32::multiply(tp.color, tl.color, tw.color);
+        }
+    }
+}
+
+void updateWorldTransformAll2(ecs::world* w, ecs::entity root) {
+    ZoneScoped;
+    static std::vector<ecs::Entity> out{};
+    out.clear();
+    out.push_back(root.index);
+
+    uint32_t begin = 0;
+    uint32_t end = 1;
+    const auto* nodes = ecs::tpl_world_storage<Node>(w);
+    const auto* localTransforms = ecs::tpl_world_storage<Transform2D>(w);
+    const auto* worldTransforms = ecs::tpl_world_storage<WorldTransform2D>(w);
+    while (begin < end) {
+        for (uint32_t i = begin; i < end; ++i) {
+            const auto parent = out[i];
+            const auto& tp = worldTransforms->get(parent);
+            const auto& node = nodes->get(parent);
+
+            auto it = node.child_first.index;
+            while (it) {
+                auto& tw = worldTransforms->get(it);
+                auto& tl = localTransforms->get(it);
+                matrix_2d::multiply(tp.matrix, tl.matrix, tw.matrix);
+                ColorMod32::multiply(tp.color, tl.color, tw.color);
+
+                out.push_back(it);
+                it = nodes->get(it).sibling_next.index;
+            }
+        }
+        begin = end;
+        end = static_cast<uint32_t>(out.size());
     }
 }
 //
@@ -138,8 +172,8 @@ void updateWorldTransformAll(ecs::world* w, ecs::entity root) {
 //
 //void updateWorldTransform2D(ecs::entity root) {
 //    ZoneScoped;
-//    Transform2D* localTransforms = ecs::world_tryGetComponents<Transform2D>(&ecs::the_world)->get_ptr_by_handle(0);
-//    const uint32_t count = (uint32_t) ecs::world_tryGetComponents<Transform2D>(&ecs::the_world)->count;
+//    Transform2D* localTransforms = ecs::world_tryGetComponents<Transform2D>(ecs::the_world)->get_ptr_by_handle(0);
+//    const uint32_t count = (uint32_t) ecs::world_tryGetComponents<Transform2D>(ecs::the_world)->count;
 //    for (uint32_t i = 1; i < count; ++i) {
 //        localTransforms[i].updateLocalMatrix();
 //    }
