@@ -1,15 +1,15 @@
 #pragma once
 
-class ig_a {
+struct ComponentA {
 };
 
-class ig_b {
+struct ComponentB {
 };
 
-class ig_c {
+struct ComponentC {
 };
 
-static unsigned i1;
-static unsigned i2;
-static unsigned i3;
-static bool i_generated = false;
+static unsigned idComponentA;
+static unsigned idComponentB;
+static unsigned idComponentC;
+inline static bool idsGenerated = false;

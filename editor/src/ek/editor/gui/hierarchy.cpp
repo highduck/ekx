@@ -21,7 +21,7 @@ void gui_entity_simple(ecs::entity e);
 void gui_entity_node(ecs::entity e, bool visible, bool touchable);
 
 void gui_entity_simple(ecs::entity e) {
-    ImGui::LabelText("entity", "id: %i (v.%i)", e.index, ecs::the_world->generations[e.index]);
+    ImGui::LabelText("entity", "id: %i (v.%i)", e.index, ecs::the_world.generations[e.index]);
     ImGui::SameLine();
     if (ImGui::Button("-")) {
         ecs::destroy(e);

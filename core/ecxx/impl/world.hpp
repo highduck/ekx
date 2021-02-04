@@ -243,6 +243,9 @@ constexpr static inline ComponentTypeId type() noexcept {
 * Collision is possible if in one frame we do destroy and create more than 256 times
 */
 
+template<typename DataType>
+class ComponentStorage;
+
 /** World **/
 struct world {
 
@@ -251,7 +254,7 @@ struct world {
 
     // entity indices
     //alignas(4096)
-    Entity entities[ENTITIES_MAX_COUNT]; // 2 * ENTITIES_MAX_COUNT = 131072 bytes
+    Entity entityPool[ENTITIES_MAX_COUNT]; // 2 * ENTITIES_MAX_COUNT = 131072 bytes
 
     // entity generations
     //alignas(4096)
@@ -281,7 +284,7 @@ struct world {
 
     [[nodiscard]]
     inline bool isAllocated(Entity e) const {
-        return entities[e] == e;
+        return entityPool[e] == e;
     }
 
 
@@ -309,7 +312,7 @@ struct world {
 
     [[nodiscard]]
     inline bool isValid(Entity e) const {
-        return e && entities[e] == e;
+        return e && entityPool[e] == e;
     }
 
     /** components **/
@@ -323,38 +326,65 @@ struct world {
     template<typename Component>
     [[nodiscard]] inline Component* tryGet(Entity e) const;
 
+    template<typename Component, typename ...Args>
+    inline Component& assign(Entity index, Args&& ... args) const;
+
+    template<typename Component, typename ...Args>
+    inline void assign(Entity* entities, uint32_t count, Args&& ... args) const;
+
+    template<typename Component, typename ...Args>
+    inline Component& reassign(Entity entity, Args&& ... args) const;
+
+    [[nodiscard]]
+    inline ComponentHeader* getComponentHeader(ComponentTypeId componentTypeId) const {
+        ECXX_FULL_ASSERT(componentTypeId < COMPONENTS_MAX_COUNT);
+        auto* component = *(components + componentTypeId);
+        ECXX_FULL_ASSERT(component != nullptr);
+        return component;
+    }
+
+    template<typename Component>
+    inline ComponentStorage<Component>* getStorage() const;
+
+    [[nodiscard]]
+    inline ComponentHandle get(Entity e, ComponentTypeId componentId) const {
+        return getComponentHeader(componentId)->entityToHandle.get(e);
+    }
+
+    [[nodiscard]]
+    inline ComponentHandle getOrCreate(Entity e, ComponentTypeId componentId) const {
+        auto* component = getComponentHeader(componentId);
+        const auto handle = component->entityToHandle.get(e);
+        if (handle == 0) {
+            return component->emplace(component, e);
+        }
+        return handle;
+    }
+
+    template<typename Component>
+    inline void remove(Entity e) const;
+
+    template<typename Component>
+    inline bool tryRemove(Entity e) const;
+
+    template<typename Component>
+    inline Component& getOrCreate(Entity e) const;
+
+    template<typename Component>
+    inline const Component& getOrDefault(Entity e) const;
+
+    inline void registerComponent(ComponentHeader* component) {
+        components[component->typeId] = component;
+    }
+
+    template<typename Component>
+    inline void registerComponent();
+
 private:
     void resetEntityPool();
 };
 
-inline ComponentHeader* world_component_type(const world* w, ComponentTypeId componentTypeId) {
-    ECXX_FULL_ASSERT(componentTypeId < COMPONENTS_MAX_COUNT);
-    auto* component = w->components[componentTypeId];
-    ECXX_FULL_ASSERT(component != nullptr);
-    return component;
-}
-
-inline void world_register_component(world* w, ComponentHeader* component) {
-    w->components[component->typeId] = component;
-}
-
-// world create / destroy
-
-inline ComponentHandle entity_get(const world* w, Entity e, ComponentTypeId componentId) {
-    const auto* component = world_component_type(w, componentId);
-    return component->entityToHandle.get(e);
-}
-
-inline ComponentHandle entity_get_or_create(world* w, Entity e, ComponentTypeId componentId) {
-    auto* component = world_component_type(w, componentId);
-    const auto handle = component->entityToHandle.get(e);
-    if (handle == 0) {
-        return component->emplace(component, e);
-    }
-    return handle;
-}
-
-extern world* the_world;
+extern world the_world;
 
 /** Templated generic **/
 
@@ -504,33 +534,29 @@ public:
 };
 
 template<typename Component>
-inline ComponentStorage<Component>* tpl_world_storage(const world* w) {
-    const auto componentId = type<Component>();
-    const auto* component = w->components[componentId];
+inline ComponentStorage<Component>* world::getStorage() const {
+    auto* component = components[type<Component>()];
+    ECXX_FULL_ASSERT(component != nullptr);
     return static_cast<ComponentStorage<Component>*>(component->data);
 }
 
 template<typename Component, typename ...Args>
-inline Component& entity_assign(world* w, Entity index, Args&& ... args) {
-    auto* storage = tpl_world_storage<Component>(w);
-    ECXX_FULL_ASSERT(storage != nullptr);
-    return storage->emplace(index, args...);
+inline Component& world::assign(Entity e, Args&& ... args) const {
+    return getStorage<Component>()->emplace(e, args...);
 }
 
 template<typename Component, typename ...Args>
-inline void entity_assign(world* w, Entity* entities, uint32_t count, Args&& ... args) {
-    auto* storage = tpl_world_storage<Component>(w);
-    ECXX_FULL_ASSERT(storage != nullptr);
+inline void world::assign(Entity* entities, uint32_t count, Args&& ... args) const {
+    auto* storage = getStorage<Component>();
     for (uint32_t i = 0; i < count; ++i) {
         storage->emplace(entities[i], args...);
     }
 }
 
 template<typename Component, typename ...Args>
-inline Component& entity_reassign(world* w, Entity entity, Args&& ... args) {
-    auto* component = world_component_type(w, type<Component>());
-    const auto handle = component->entityToHandle.get(entity);
-    auto* storage = static_cast<ComponentStorage<Component>*>(component->data);
+inline Component& world::reassign(Entity entity, Args&& ... args) const {
+    ComponentStorage<Component>* storage = getStorage<Component>();
+    const auto handle = storage->component.entityToHandle.get(entity);
     if (handle != 0) {
         auto& data = storage->get_by_handle(handle);
         data = {args...};
@@ -541,7 +567,7 @@ inline Component& entity_reassign(world* w, Entity entity, Args&& ... args) {
 
 template<typename Component>
 inline bool world::has(Entity e) const {
-    const auto* component = world_component_type(this, type<Component>());
+    const auto* component = getComponentHeader(type<Component>());
     const auto& entityToHandle = component->entityToHandle;
     const auto handle = entityToHandle.get(e);
     return handle != 0;
@@ -549,12 +575,12 @@ inline bool world::has(Entity e) const {
 
 template<typename Component>
 inline Component& world::get(Entity e) const {
-    return tpl_world_storage<Component>(this)->get(e);
+    return getStorage<Component>()->get(e);
 }
 
 template<typename Component>
 inline Component* world::tryGet(Entity e) const {
-    auto* storage = tpl_world_storage<Component>(this);
+    auto* storage = getStorage<Component>();
     const auto handle = storage->component.entityToHandle.get(e);
     if (handle != 0) {
         return storage->get_ptr_by_handle(handle);
@@ -563,13 +589,13 @@ inline Component* world::tryGet(Entity e) const {
 }
 
 template<typename Component>
-inline void entity_remove(world* w, Entity e) {
-    tpl_world_storage<Component>(w)->erase(e);
+inline void world::remove(Entity e) const {
+    getStorage<Component>()->erase(e);
 }
 
 template<typename Component>
-inline bool entity_try_remove(world* w, Entity e) {
-    auto* storage = tpl_world_storage<Component>(w);
+inline bool world::tryRemove(Entity e) const {
+    auto* storage = getStorage<Component>();
     if (storage->component.entityToHandle.get(e) != 0) {
         storage->erase(e);
         return true;
@@ -578,8 +604,8 @@ inline bool entity_try_remove(world* w, Entity e) {
 }
 
 template<typename Component>
-inline Component& entity_get_or_create(world* w, Entity e) {
-    auto* storage = tpl_world_storage<Component>(w);
+inline Component& world::getOrCreate(Entity e) const {
+    auto* storage = getStorage<Component>();
     const auto handle = storage->component.entityToHandle.get(e);
     if (handle != 0) {
         return storage->get_by_handle(handle);
@@ -589,8 +615,8 @@ inline Component& entity_get_or_create(world* w, Entity e) {
 
 
 template<typename Component>
-inline const Component& entity_get_or_default(world* w, Entity e) {
-    const auto* storage = tpl_world_storage<Component>(w);
+inline const Component& world::getOrDefault(Entity e) const {
+    const auto* storage = getStorage<Component>();
     const auto handle = storage->component.entityToHandle.get(e);
     return storage->get_or_default_by_handle(handle);
 }
@@ -598,13 +624,13 @@ inline const Component& entity_get_or_default(world* w, Entity e) {
 template<typename ...Component>
 inline void world::create(Entity* outEntities, uint32_t count) {
     create(outEntities, count);
-    (entity_assign<Component>(this, outEntities, count), ...);
+    (assign<Component>(outEntities, count), ...);
 }
 
 template<typename Component>
-inline void tpl_world_register(world* w) {
+inline void world::registerComponent() {
     auto* storage = new ComponentStorage<Component>();
-    world_register_component(w, &storage->component);
+    registerComponent(&storage->component);
 }
 
 }

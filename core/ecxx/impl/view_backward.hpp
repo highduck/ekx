@@ -76,7 +76,7 @@ public:
 
     explicit view_backward_t(world* w) {
         table_index_type i{};
-        ((access_[i] = table_[i] = world_component_type(w, type<Component>()), ++i), ...);
+        ((access_[i] = table_[i] = w->getComponentHeader(type<Component>()), ++i), ...);
 
         std::sort(table_.begin(), table_.end(), [](auto a, auto b) -> bool {
             return a->count < b->count;

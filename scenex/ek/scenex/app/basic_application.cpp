@@ -68,43 +68,43 @@ void basic_application::initialize() {
     draw2d::state.initialize();
 
     //// basic scene
-    ecs::the_world = new world();
-    ecs::the_world->initialize();
-    ecs::tpl_world_register<Node>(ecs::the_world);
-    ecs::tpl_world_register<NodeName>(ecs::the_world);
+    using ecs::the_world;
 
-    ecs::tpl_world_register<Camera2D>(ecs::the_world);
-    ecs::tpl_world_register<Transform2D>(ecs::the_world);
-    ecs::tpl_world_register<WorldTransform2D>(ecs::the_world);
-    ecs::tpl_world_register<Display2D>(ecs::the_world);
-    ecs::tpl_world_register<Bounds2D>(ecs::the_world);
+    the_world.initialize();
+    the_world.registerComponent<Node>();
+    the_world.registerComponent<NodeName>();
 
-    ecs::tpl_world_register<Transform3D>(ecs::the_world);
-    ecs::tpl_world_register<Camera3D>(ecs::the_world);
-    ecs::tpl_world_register<Light3D>(ecs::the_world);
-    ecs::tpl_world_register<MeshRenderer>(ecs::the_world);
+    the_world.registerComponent<Camera2D>();
+    the_world.registerComponent<Transform2D>();
+    the_world.registerComponent<WorldTransform2D>();
+    the_world.registerComponent<Display2D>();
+    the_world.registerComponent<Bounds2D>();
 
-    ecs::tpl_world_register<MovieClip>(ecs::the_world);
-    ecs::tpl_world_register<MovieClipTargetIndex>(ecs::the_world);
+    the_world.registerComponent<Transform3D>();
+    the_world.registerComponent<Camera3D>();
+    the_world.registerComponent<Light3D>();
+    the_world.registerComponent<MeshRenderer>();
 
-    ecs::tpl_world_register<LayoutRect>(ecs::the_world);
-    ecs::tpl_world_register<Canvas>(ecs::the_world);
-    ecs::tpl_world_register<Button>(ecs::the_world);
-    ecs::tpl_world_register<Interactive>(ecs::the_world);
-    ecs::tpl_world_register<Tween>(ecs::the_world);
-    ecs::tpl_world_register<Shake>(ecs::the_world);
-    ecs::tpl_world_register<ScriptHolder>(ecs::the_world);
-    ecs::tpl_world_register<BubbleText>(ecs::the_world);
-    ecs::tpl_world_register<PopupManager>(ecs::the_world);
-    ecs::tpl_world_register<close_timeout>(ecs::the_world);
-    ecs::tpl_world_register<GameScreen>(ecs::the_world);
-    ecs::tpl_world_register<Trail2D>(ecs::the_world);
-    ecs::tpl_world_register<DestroyTimer>(ecs::the_world);
-    ecs::tpl_world_register<NodeEventHandler>(ecs::the_world);
-    ecs::tpl_world_register<ParticleEmitter2D>(ecs::the_world);
-    ecs::tpl_world_register<ParticleLayer2D>(ecs::the_world);
-    ecs::tpl_world_register<UglyFilter2D>(ecs::the_world);
+    the_world.registerComponent<MovieClip>();
+    the_world.registerComponent<MovieClipTargetIndex>();
 
+    the_world.registerComponent<LayoutRect>();
+    the_world.registerComponent<Canvas>();
+    the_world.registerComponent<Button>();
+    the_world.registerComponent<Interactive>();
+    the_world.registerComponent<Tween>();
+    the_world.registerComponent<Shake>();
+    the_world.registerComponent<ScriptHolder>();
+    the_world.registerComponent<BubbleText>();
+    the_world.registerComponent<PopupManager>();
+    the_world.registerComponent<close_timeout>();
+    the_world.registerComponent<GameScreen>();
+    the_world.registerComponent<Trail2D>();
+    the_world.registerComponent<DestroyTimer>();
+    the_world.registerComponent<NodeEventHandler>();
+    the_world.registerComponent<ParticleEmitter2D>();
+    the_world.registerComponent<ParticleLayer2D>();
+    the_world.registerComponent<UglyFilter2D>();
 
     root = createNode2D("root");
     updateScreenRect(root);

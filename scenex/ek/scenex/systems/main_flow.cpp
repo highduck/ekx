@@ -58,7 +58,7 @@ void scene_post_update(ecs::entity root) {
 
     DestroyTimer::updateAll();
 
-    updateWorldTransformAll2(ecs::the_world, root);
+    updateWorldTransformAll2(&ecs::the_world, root);
 
     Trail2D::updateAll();
     update_emitters();

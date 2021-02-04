@@ -69,13 +69,16 @@ DemoApp::DemoApp() :
 
 void DemoApp::initialize() {
     basic_application::initialize();
-    ecs::tpl_world_register<motion_t>(ecs::the_world);
-    ecs::tpl_world_register<attractor_t>(ecs::the_world);
-    ecs::tpl_world_register<camera_arc_ball>(ecs::the_world);
-    ecs::tpl_world_register<test_rotation_comp>(ecs::the_world);
 
-    Camera2D::Main.get<Camera2D>().clearColorEnabled = true;
-    Camera2D::Main.get<Camera2D>().clearColor = float4{0xFF666666_argb};
+    using ecs::the_world;
+    the_world.registerComponent<motion_t>();
+    the_world.registerComponent<attractor_t>();
+    the_world.registerComponent<camera_arc_ball>();
+    the_world.registerComponent<test_rotation_comp>();
+
+    auto& cam = Camera2D::Main.get<Camera2D>();
+    cam.clearColorEnabled = true;
+    cam.clearColor = float4{0xFF666666_argb};
 
     SampleIntegrations::initializePlugins();
 }
@@ -110,7 +113,7 @@ void DemoApp::render_frame() {
 
 void DemoApp::start_game() {
 //    setup_game(w, game);
-EK_DEBUG << "Start Demo: prepareInternalResources";
+    EK_DEBUG << "Start Demo: prepareInternalResources";
     SampleText::prepareInternalResources();
 
     SampleBase::samplesContainer = createNode2D("sample");

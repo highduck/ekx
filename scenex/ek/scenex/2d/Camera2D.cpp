@@ -84,7 +84,7 @@ void Camera2D::render() {
             draw2d::state.restoreProgram();
         }
 
-        RenderSystem2D::draw(*ecs::the_world, camera.root.index(), camera.root.tryGet<WorldTransform2D>());
+        RenderSystem2D::draw(ecs::the_world, camera.root.index(), camera.root.get().tryGet<WorldTransform2D>());
 
 #ifndef NDEBUG
         drawGizmo(camera);

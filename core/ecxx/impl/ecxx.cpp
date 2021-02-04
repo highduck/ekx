@@ -4,7 +4,7 @@
 
 namespace ecs {
 
-world* the_world = nullptr;
+world the_world;
 
 /** Sparse Array **/
 
@@ -95,16 +95,16 @@ void resetEntityPoolArrays(Entity* entities, Generation* generations) {
 }
 
 void world::resetEntityPool() {
-    resetEntityPoolArrays(entities, generations);
+    resetEntityPoolArrays(entityPool, generations);
 
     // reserve null entity
-    entities[0] = 0;
+    entityPool[0] = 0;
     next = 1;
     size = 1;
 }
 
 void world::create(Entity* outEntities, uint32_t count_) {
-    auto* indices = entities;
+    auto* indices = entityPool;
     auto next_ = next;
 
     for (uint32_t i = 0; i < count_; ++i) {
@@ -120,7 +120,7 @@ void world::create(Entity* outEntities, uint32_t count_) {
 void world::destroy(const Entity* entitiesToDestroy, uint32_t count) {
     {
         // destroy from POOL
-        auto* indices = entities;
+        auto* indices = entityPool;
         auto* generations_ = generations;
         auto next_ = next;
         for (uint32_t i = 0; i < count; ++i) {

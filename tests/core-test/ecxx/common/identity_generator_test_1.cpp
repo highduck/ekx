@@ -2,26 +2,22 @@
 #include <gtest/gtest.h>
 #include "identity_generator_shared.hpp"
 
-using namespace ecs;
-
 TEST(identity_generator, test_1) {
-    if (!i_generated) {
-        i1 = identity_generator<ig_a>::value;
-        i2 = identity_generator<ig_b>::value;
-        i3 = identity_generator<ig_c>::value;
-        i_generated = true;
+
+    using ecs::ComponentTypeIdGenerator;
+
+    if (!idsGenerated) {
+        idComponentA = ComponentTypeIdGenerator<ComponentA>::value;
+        idComponentB = ComponentTypeIdGenerator<ComponentB>::value;
+        idComponentC = ComponentTypeIdGenerator<ComponentC>::value;
+        idsGenerated = true;
     }
 
+    ASSERT_EQ((ComponentTypeIdGenerator<ComponentC>::value), idComponentC);
+    ASSERT_EQ((ComponentTypeIdGenerator<ComponentB>::value), idComponentB);
+    ASSERT_EQ((ComponentTypeIdGenerator<ComponentA>::value), idComponentA);
 
-    ASSERT_EQ((identity_generator<ig_c>::value), i3);
-    ASSERT_EQ((identity_generator<ig_b>::value), i2);
-    ASSERT_EQ((identity_generator<ig_a>::value), i1);
-
-    ASSERT_EQ((identity_generator<ig_a>::value), i1);
-    ASSERT_EQ((identity_generator<ig_b>::value), i2);
-    ASSERT_EQ((identity_generator<ig_c>::value), i3);
-
-//    ASSERT_EQ((identity_generator<ig_c>::value), 0);
-//    ASSERT_EQ((identity_generator<ig_a>::value), 1);
-//    ASSERT_EQ((identity_generator<ig_b>::value), 2);
+    ASSERT_EQ((ComponentTypeIdGenerator<ComponentA>::value), idComponentA);
+    ASSERT_EQ((ComponentTypeIdGenerator<ComponentB>::value), idComponentB);
+    ASSERT_EQ((ComponentTypeIdGenerator<ComponentC>::value), idComponentC);
 }
