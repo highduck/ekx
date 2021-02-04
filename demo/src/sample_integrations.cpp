@@ -99,6 +99,8 @@ void SampleIntegrations::initializePlugins() {
     adHelperConfig.val1 = 98765;
 
     service_locator_instance<Ads>::init(adHelperConfig);
+
+    game_services_init();
 }
 
 }

@@ -193,6 +193,7 @@ struct Transform2D {
 /** system to invalidate matrix and color in world space **/
 //void updateWorldTransform2D(ecs::entity root);
 void updateWorldTransformAll(ecs::world* w, ecs::entity root);
+void updateWorldTransformAll2(ecs::world* w, ecs::entity root);
 
 /** utility functions **/
 

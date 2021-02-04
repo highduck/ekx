@@ -20,8 +20,10 @@ inline const float WIDTH = 360;
 inline const float HEIGHT = 480;
 
 //int simParticlesCount = 500;
-//int simParticlesCount = 5000;
-int simParticlesCount = 20000;
+//int simParticlesCount = 1000;
+int simParticlesCount = 5000;
+//int simParticlesCount = 20000;
+//int simParticlesCount = 20000;
 
 bool showPiko = false;
 //bool showPiko = true;

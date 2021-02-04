@@ -6,23 +6,21 @@
 
 namespace ek {
 
-using ecs::entity;
-
-entity hitTest2D(entity e, const Node& node, float2 parentPosition) {
+ecs::Entity hitTest2D(const ecs::world& w, ecs::Entity e, const Node& node, float2 parentPosition) {
     if ((node.flags & Node::VisibleAndTouchable) != Node::VisibleAndTouchable) {
-        return nullptr;
+        return 0;
     }
 
     float2 local = parentPosition;
-    const auto* transform = e.tryGet<Transform2D>();
+    const auto* transform = w.tryGet<Transform2D>(e);
     if (transform) {
         transform->matrix.transform_inverse(local, local);
     }
 
-    auto* bounds = e.tryGet<Bounds2D>();
+    auto* bounds = w.tryGet<Bounds2D>(e);
     if (bounds) {
         if (!bounds->rect.contains(local)) {
-            return nullptr;
+            return 0;
         } else if (bounds->hitArea) {
             return e;
         }
@@ -31,23 +29,23 @@ entity hitTest2D(entity e, const Node& node, float2 parentPosition) {
     auto it = node.child_last;
     while (it) {
         const auto& childNode = it.get<Node>();
-        auto hit = hitTest2D(it, childNode, local);
+        auto hit = hitTest2D(w, it.index, childNode, local);
         if (hit) {
             return hit;
         }
         it = childNode.sibling_prev;
     }
 
-    const auto* display = e.tryGet<Display2D>();
+    const auto* display = w.tryGet<Display2D>(e);
     if (display && display->hitTest(local)) {
         return e;
     }
 
-    return nullptr;
+    return 0;
 }
 
-entity hitTest2D(entity e, float2 parentPosition) {
-    return hitTest2D(e, e.get<Node>(), parentPosition);
+ecs::Entity hitTest2D(const ecs::world& w, ecs::Entity e, float2 parentPosition) {
+    return hitTest2D(w, e, w.get<Node>(e), parentPosition);
 }
 
 }

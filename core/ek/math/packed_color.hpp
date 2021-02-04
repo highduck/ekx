@@ -280,11 +280,26 @@ struct ColorMod32 {
         using details::clamp_255;
         return ColorMod32{
                 r.scale.abgr != 0xFFFFFFFF ? scale * r.scale : scale,
-                r.offset.abgr != 0 ? argb32_t{clamp_255[offset.r + ((r.offset.r * scale.r * 258u) >> 16u)],
+                r.offset.abgr != 0 ? abgr32_t{clamp_255[offset.r + ((r.offset.r * scale.r * 258u) >> 16u)],
                                               clamp_255[offset.g + ((r.offset.g * scale.g * 258u) >> 16u)],
                                               clamp_255[offset.b + ((r.offset.b * scale.b * 258u) >> 16u)],
                                               clamp_255[offset.a + r.offset.a]} : offset
         };
+    }
+
+    inline static void multiply(ColorMod32 l, ColorMod32 r, ColorMod32& out) {
+        using details::clamp_255;
+//        out.scale = r.scale.abgr != 0xFFFFFFFF ? l.scale * r.scale : l.scale;
+//        out.offset = r.offset.abgr != 0 ? abgr32_t{clamp_255[l.offset.r + ((r.offset.r * l.scale.r * 258u) >> 16u)],
+//                                                   clamp_255[l.offset.g + ((r.offset.g * l.scale.g * 258u) >> 16u)],
+//                                                   clamp_255[l.offset.b + ((r.offset.b * l.scale.b * 258u) >> 16u)],
+//                                                   clamp_255[l.offset.a + r.offset.a]} : l.offset;
+
+        out.scale = l.scale * r.scale;
+        out.offset = abgr32_t{clamp_255[l.offset.r + ((r.offset.r * l.scale.r * 258u) >> 16u)],
+                              clamp_255[l.offset.g + ((r.offset.g * l.scale.g * 258u) >> 16u)],
+                              clamp_255[l.offset.b + ((r.offset.b * l.scale.b * 258u) >> 16u)],
+                              clamp_255[l.offset.a + r.offset.a]};
     }
 
     inline void setAlpha(float alpha) {

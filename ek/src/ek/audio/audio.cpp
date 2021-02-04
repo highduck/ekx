@@ -13,6 +13,7 @@
 // android issue
 #define MA_NO_AAUDIO
 #define MA_NO_SDL
+#define MA_NO_RUNTIME_LINKING
 
 #define MINIAUDIO_IMPLEMENTATION
 
@@ -172,7 +173,7 @@ ma_sound* Sound::getNextSound() {
 //    auto result = ma_sound_init_from_data_source(&audioSystem.engine, dataSource, MA_DATA_SOURCE_FLAG_DECODE,
 //                                            &audioSystem.soundsGroup, sound);
     auto result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(), MA_DATA_SOURCE_FLAG_DECODE,
-                                          nullptr, &audioSystem.soundsGroup, sound);
+                                          &audioSystem.soundsGroup, sound);
     if (result != MA_SUCCESS) {
         EK_WARN("cannot init next sound: %s", dataSourceFilePath.c_str());
         delete sound;
@@ -218,7 +219,7 @@ void Music::load(const char* path) {
 
         sound = new ma_sound();
         result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(), MA_DATA_SOURCE_FLAG_STREAM,
-                                         nullptr, &audioSystem.musicGroup, sound);
+                                            &audioSystem.musicGroup, sound);
         ma_sound_set_looping(sound, true);
         if (result != MA_SUCCESS) {
             EK_WARN("cannot init music");

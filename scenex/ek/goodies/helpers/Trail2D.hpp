@@ -75,7 +75,7 @@ struct Trail2D {
 
     Trail2D() = default;
 
-    void update(ecs::Entity owner);
+    void update(const matrix_2d& m);
 
     static void updateAll();
 
@@ -93,8 +93,9 @@ public:
 class TrailRenderer2D : public Drawable2D<TrailRenderer2D> {
 public:
     explicit TrailRenderer2D(ecs::entity target_) :
+            // TODO: inject world context
+            w{ecs::the_world},
             target{target_} {
-
     }
 
     void draw() override;
@@ -109,6 +110,7 @@ public:
     rect_f getBounds() const override { return rect_f{}; }
 
 public:
+    ecs::world* w = nullptr;
     ecs::entity target{};
     float width = 20.0f;
     float minWidth = 5.0f;

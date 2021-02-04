@@ -6,9 +6,8 @@
 
 namespace ek {
 
-void Trail2D::update(ecs::Entity owner) {
+void Trail2D::update(const matrix_2d& m) {
     float dt = timer->dt;
-    const auto& m = ecs::entity{owner}.get<WorldTransform2D>().matrix;
     scale = length(m.scale());
     update_position(m.transform(offset));
 
@@ -57,17 +56,18 @@ void Trail2D::update_position(float2 newPosition) {
 }
 
 void Trail2D::updateAll() {
-    auto* trails = ecs::tpl_world_storage<Trail2D>(&ecs::the_world);
+    const auto* w = ecs::the_world;
+    auto* trails = ecs::tpl_world_storage<Trail2D>(w);
     const auto count = trails->component.count;
     for (uint32_t i = 1; i < count; ++i) {
-        auto& trail = trails->data[i];
-        auto e = trails->component.handleToEntity[i];
-        trail.update(e);
+        auto e = trails->component.handleToEntity.get(i);
+        const auto& m = w->get<WorldTransform2D>(e).matrix;
+        trails->data[i].update(m);
     }
 }
 
 void TrailRenderer2D::draw() {
-    auto& trail = target.get<Trail2D>();
+    auto& trail = w->get<Trail2D>(target.index);
     auto& nodeArray = trail.nodes.data;
 
     const auto columns = static_cast<int>(trail.nodes.size());

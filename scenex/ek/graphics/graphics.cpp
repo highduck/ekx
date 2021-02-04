@@ -4,6 +4,9 @@
 
 #define SOKOL_GFX_IMPL
 
+//#define SOKOL_ASSERT(x) if(!(x)) {abort();}
+//#define SOKOL_LOG(s) puts(s);
+
 #include <sokol_gfx.h>
 
 namespace ek::graphics {
@@ -26,6 +29,9 @@ Buffer::Buffer(BufferType type, Usage usage, int maxSize) {
     desc.type = (sg_buffer_type) type;
     desc.size = maxSize;
     buffer = sg_make_buffer(&desc);
+    if(buffer.id == 0) {
+        abort();
+    }
     size = maxSize;
 }
 
@@ -111,6 +117,7 @@ static std::string BackendToString[] = {
 
 void init() {
     sg_desc desc{};
+    desc.buffer_pool_size = 256;
     sg_setup(desc);
     auto backend = sg_query_backend();
     EK_INFO << "Sokol Backend: " << BackendToString[backend];

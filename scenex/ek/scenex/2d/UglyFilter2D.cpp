@@ -8,11 +8,9 @@
 
 namespace ek {
 
-using ecs::entity;
-
-bool UglyFilter2D::pass(entity e) {
-    auto* localTransform = e.tryGet<Transform2D>();
-    auto* parentTransform = findComponentInParent<WorldTransform2D>(e.get<Node>().parent);
+bool UglyFilter2D::pass(const ecs::world& w, ecs::Entity e) {
+    auto* localTransform = w.tryGet<Transform2D>(e);
+    auto* parentTransform = findComponentInParent<WorldTransform2D>(w.get<Node>(e).parent);
     assert(parentTransform);
     auto parentMatrix = parentTransform->matrix;
     auto parentColor = parentTransform->color;
@@ -32,7 +30,7 @@ bool UglyFilter2D::pass(entity e) {
                 draw2d::state.concat(localTransform->matrix);
             }
 
-            RenderSystem2D::drawStack(e);
+            RenderSystem2D::drawStack(w, e);
 
             processing = false;
         } else if (filter.type == SGFilterType::Glow) {
@@ -52,7 +50,7 @@ bool UglyFilter2D::pass(entity e) {
                     draw2d::state.concat(localTransform->matrix);
                 }
 
-                RenderSystem2D::drawStack(e);
+                RenderSystem2D::drawStack(w, e);
                 a += da;
             }
             processing = false;

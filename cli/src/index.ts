@@ -13,6 +13,7 @@ console.log("Current Target:", project.current_target);
 
 addExportBuildStep(project);
 
+project.includeProject(path.join(project.path.EKX_ROOT, "external/tracy"));
 project.includeProject(path.join(project.path.EKX_ROOT, "external/miniaudio"));
 project.includeProject(path.join(project.path.EKX_ROOT, "external/stb"));
 project.includeProject(path.join(project.path.EKX_ROOT, "external/sokol"));
