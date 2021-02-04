@@ -94,7 +94,7 @@ class TrailRenderer2D : public Drawable2D<TrailRenderer2D> {
 public:
     explicit TrailRenderer2D(ecs::entity target_) :
             // TODO: inject world context
-            w{ecs::the_world},
+            w{&ecs::the_world},
             target{target_} {
     }
 

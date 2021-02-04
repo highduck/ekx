@@ -161,36 +161,13 @@ public:
 
     inline bool valid() const;
 
-    /** components manipulations **/
+    [[nodiscard]]
+    inline entity get() const {
+        ECXX_ASSERT(the_world.check(passport));
+        return entity{index()};
+    }
 
-    template<typename Component, typename ...Args>
-    inline Component& assign(Args&& ... args);
-
-    template<typename Component, typename ...Args>
-    inline Component& reassign(Args&& ... args);
-
-    template<typename Component>
-    [[nodiscard]] inline bool has() const;
-
-    template<typename Component>
-    inline Component& get() const;
-
-    template<typename Component>
-    inline Component* tryGet() const;
-
-    template<typename Component>
-    inline Component& get_or_create() const;
-
-    template<typename Component>
-    inline const Component& get_or_default() const;
-
-    template<typename Component>
-    inline void remove();
-
-    template<typename Component>
-    inline bool try_remove();
-
-    uint32_t passport;
+    Passport passport;
 };
 #pragma pack()
 

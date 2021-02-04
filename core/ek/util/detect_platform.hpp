@@ -16,7 +16,7 @@
 
 #elif TARGET_OS_MAC
 
-#define EK_MAC 1
+#define EK_MACOS 1
 
 #elif defined(__EMSCRIPTEN__)
 

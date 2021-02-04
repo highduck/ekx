@@ -56,8 +56,8 @@ void Trail2D::update_position(float2 newPosition) {
 }
 
 void Trail2D::updateAll() {
-    const auto* w = ecs::the_world;
-    auto* trails = ecs::tpl_world_storage<Trail2D>(w);
+    const auto* w = &ecs::the_world;
+    auto* trails = w->getStorage<Trail2D>();
     const auto count = trails->component.count;
     for (uint32_t i = 1; i < count; ++i) {
         auto e = trails->component.handleToEntity.get(i);

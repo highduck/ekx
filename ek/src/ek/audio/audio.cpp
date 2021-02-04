@@ -1,3 +1,5 @@
+#include <ek/util/detect_platform.hpp>
+
 #include "audio.hpp"
 
 #define DR_MP3_NO_STDIO
@@ -13,7 +15,10 @@
 // android issue
 #define MA_NO_AAUDIO
 #define MA_NO_SDL
+
+#if (EK_IOS || EK_ANDROID)
 #define MA_NO_RUNTIME_LINKING
+#endif
 
 #define MINIAUDIO_IMPLEMENTATION
 

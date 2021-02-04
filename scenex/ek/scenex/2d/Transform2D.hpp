@@ -25,8 +25,6 @@ struct Transform2D {
     // 16
     float2 cachedScale = float2::one;
     float2 cachedSkew = float2::zero;
-    //float2 cached0 = float2::zero;
-    //float2 cached1 = float2::zero;
 
     inline void setX(float x) {
         matrix.tx = x;
@@ -100,9 +98,29 @@ struct Transform2D {
         updateMatrix2x2();
     }
 
+    inline void setScaleX(float x) {
+        cachedScale.x = x;
+        updateMatrix2x2();
+    }
+
+    inline void setScaleY(float y) {
+        cachedScale.y = y;
+        updateMatrix2x2();
+    }
+
     [[nodiscard]]
     inline float2 getScale() const {
         return cachedScale;
+    }
+
+    [[nodiscard]]
+    inline float getScaleX() const {
+        return cachedScale.x;
+    }
+
+    [[nodiscard]]
+    inline float getScaleY() const {
+        return cachedScale.y;
     }
 
     void setRotation(float value) {

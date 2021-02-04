@@ -82,7 +82,7 @@ void traverseNodesBreathFirst(ecs::world* w, ecs::entity root, std::vector<ecs::
     out.push_back(root.index);
     uint32_t begin = 0;
     uint32_t end = 1;
-    const auto* nodes = ecs::tpl_world_storage<Node>(w);
+    const auto* nodes = w->getStorage<Node>();
 
     while (begin < end) {
         for (uint32_t i = begin; i < end; ++i) {
@@ -105,9 +105,9 @@ void updateWorldTransformAll(ecs::world* w, ecs::entity root) {
     traverseNodesBreathFirst(w, root, vec2);
 
     {
-        const auto* localTransforms = ecs::tpl_world_storage<Transform2D>(w);
-        const auto* worldTransforms = ecs::tpl_world_storage<WorldTransform2D>(w);
-        const auto* nodes = ecs::tpl_world_storage<Node>(w);
+        const auto* localTransforms = w->getStorage<Transform2D>();
+        const auto* worldTransforms = w->getStorage<WorldTransform2D>();
+        const auto* nodes = w->getStorage<Node>();
         for (auto entity : vec2) {
             auto& tw = worldTransforms->get(entity);
             const auto& tp = worldTransforms->get( /* parent */ nodes->get(entity).parent.index);
@@ -126,9 +126,9 @@ void updateWorldTransformAll2(ecs::world* w, ecs::entity root) {
 
     uint32_t begin = 0;
     uint32_t end = 1;
-    const auto* nodes = ecs::tpl_world_storage<Node>(w);
-    const auto* localTransforms = ecs::tpl_world_storage<Transform2D>(w);
-    const auto* worldTransforms = ecs::tpl_world_storage<WorldTransform2D>(w);
+    const auto* nodes = w->getStorage<Node>();
+    const auto* localTransforms = w->getStorage<Transform2D>();
+    const auto* worldTransforms = w->getStorage<WorldTransform2D>();
     while (begin < end) {
         for (uint32_t i = begin; i < end; ++i) {
             const auto parent = out[i];

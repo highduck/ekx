@@ -181,7 +181,7 @@ public:
     };
 
     explicit view_forward_t(world* w) :
-            map_{*tpl_world_storage<Component>(w)} {
+            map_{*w->getStorage<Component>()} {
         ++map_.component.lockCounter;
     }
 

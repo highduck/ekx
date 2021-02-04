@@ -36,7 +36,7 @@ void guiEntityRef(const char* label, ecs::EntityRef ref) {
     if (ref == nullptr) {
         ImGui::TextDisabled("%s: null", label);
     } else if (ref.valid()) {
-        ImGui::LabelText(label, "%s", ref.get_or_default<NodeName>().name.c_str());
+        ImGui::LabelText(label, "%s", ref.get().get_or_default<NodeName>().name.c_str());
     } else {
         ImGui::TextColored({1, 0, 0, 1}, "%s: invalid", label);
     }
@@ -328,7 +328,7 @@ void guiParticleLayer2D(ParticleLayer2D& layer) {
 
 void gui_inspector(ecs::entity e) {
     ImGui::PushID(e.index);
-    ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index, ecs::the_world->generation(e.index));
+    ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index, ecs::the_world.generation(e.index));
     if (e.has<NodeName>()) {
         ImGui::InputText("Name", &e.get<NodeName>().name);
     }

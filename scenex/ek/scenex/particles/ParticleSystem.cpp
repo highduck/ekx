@@ -144,8 +144,7 @@ void update_particles() {
 
 void ParticleRenderer2D::draw() {
     if (target) {
-        assert(target.valid());
-        auto* layer = target.tryGet<ParticleLayer2D>();
+        auto* layer = target.get().tryGet<ParticleLayer2D>();
         if (layer) {
             for (auto& p : layer->particles) {
                 p.draw();

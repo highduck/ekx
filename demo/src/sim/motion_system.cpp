@@ -16,7 +16,7 @@ struct AttractorsState {
 
 void update_motion_system(float dt) {
     static std::vector<AttractorsState> attractors{};
-    const auto& w = *ecs::the_world;
+    const auto& w = ecs::the_world;
     attractors.clear();
     for (auto e_ : ecs::view<attractor_t>()) {
         const auto e = e_.index;

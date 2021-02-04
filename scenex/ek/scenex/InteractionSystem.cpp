@@ -166,7 +166,7 @@ mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::en
         it = dragEntity_.ent();
     }
     else {
-        it = ecs::entity{hitTest2D(*ecs::the_world, node.index, pointer)};
+        it = ecs::entity{hitTest2D(ecs::the_world, node.index, pointer)};
     }
     hitTarget_ = ecs::EntityRef{it};
 
