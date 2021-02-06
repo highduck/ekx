@@ -159,6 +159,7 @@ public:
         return passport != 0u;
     }
 
+    [[nodiscard]]
     inline bool valid() const;
 
     [[nodiscard]]

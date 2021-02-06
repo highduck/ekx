@@ -79,12 +79,12 @@ public:
         ((access_[i] = table_[i] = w->getComponentHeader(type<Component>()), ++i), ...);
 
         std::sort(table_.begin(), table_.end(), [](auto a, auto b) -> bool {
-            return a->count < b->count;
+            return a->count() < b->count();
         });
     }
 
     iterator begin() {
-        return {table_, static_cast<Entity>(table_[0]->count - 1)};
+        return {table_, static_cast<Entity>(table_[0]->count() - 1)};
     }
 
     iterator end() {

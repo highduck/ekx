@@ -14,16 +14,16 @@ add_executable(${PROJECT_NAME}
         src/piko/sample_piko.cpp
         src/sim/driver_node_script.cpp
         src/sim/driver_node_script.h
-        src/sim/motion_system.cpp
-        src/sim/motion_system.h
-        src/sim/components/motion.h
-        src/sim/components/attractor.h
+        src/sim/Motion.cpp
+        src/sim/Motion.hpp
 
         src/sample_flash.hpp
         src/sample_flash.cpp
         src/sample_integrations.cpp
         src/ui/minimal.cpp
-        )
+        src/sim/SampleSim.cpp
+        src/sim/SampleSim.hpp
+)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
@@ -44,13 +44,13 @@ add_definitions("-ffast-math -fno-exceptions -fno-rtti -Wall -Wextra")
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-#    add_definitions(-DNDEBUG)
+    #    add_definitions(-DNDEBUG)
 else ()
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Oz -ffast-math -fno-exceptions -fno-rtti -Wall -Wextra")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz -flto")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-dead_strip -Wl,-dead_strip_dylibs")
-#    add_definitions(-DNDEBUG)
-endif()
+    #    add_definitions(-DNDEBUG)
+endif ()
 
 set_target_properties(${PROJECT_NAME}
         PROPERTIES
@@ -97,12 +97,12 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     endif ()
 
 else ()
-#    if (CMAKE_BUILD_TYPE MATCHES Debug)
-#    else ()
-#        # https://github.com/llvm-mirror/llvm/blob/master/cmake/modules/AddLLVM.cmake
-#        target_link_options(${PROJECT_NAME}
-#                PUBLIC
-#                -Wl,-dead_strip
-#                -Wl,-dead_strip_dylibs)
-#    endif ()
+    #    if (CMAKE_BUILD_TYPE MATCHES Debug)
+    #    else ()
+    #        # https://github.com/llvm-mirror/llvm/blob/master/cmake/modules/AddLLVM.cmake
+    #        target_link_options(${PROJECT_NAME}
+    #                PUBLIC
+    #                -Wl,-dead_strip
+    #                -Wl,-dead_strip_dylibs)
+    #    endif ()
 endif ()

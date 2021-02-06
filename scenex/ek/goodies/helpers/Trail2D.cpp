@@ -58,7 +58,7 @@ void Trail2D::update_position(float2 newPosition) {
 void Trail2D::updateAll() {
     const auto* w = &ecs::the_world;
     auto* trails = w->getStorage<Trail2D>();
-    const auto count = trails->component.count;
+    const auto count = trails->component.count();
     for (uint32_t i = 1; i < count; ++i) {
         auto e = trails->component.handleToEntity.get(i);
         const auto& m = w->get<WorldTransform2D>(e).matrix;
@@ -70,9 +70,8 @@ void TrailRenderer2D::draw() {
     auto& trail = w->get<Trail2D>(target.index);
     auto& nodeArray = trail.nodes.data;
 
-    const auto columns = static_cast<int>(trail.nodes.size());
-    const auto quads = columns - 1;
-    if (quads <= 0) {
+    const uint32_t columns = trail.nodes.size();
+    if(columns < 2) {
         return;
     }
     const auto* spr = sprite.get();
@@ -84,6 +83,7 @@ void TrailRenderer2D::draw() {
         return;
     }
 
+    const uint32_t quads = columns - 1;
     auto& drawer = draw2d::state;
 
     drawer.set_texture(texture);
@@ -102,9 +102,6 @@ void TrailRenderer2D::draw() {
 
     // we could generate vertices right into destination buffer :)
     for (int i = 0; i < columns; ++i) {
-
-//        const auto v1 = vertices[v++];
-//        const auto v2 = vertices[v++];
         const float2 p = nodeArray[node_idx].position;
         float2 perp{};
         if (i > 0/* node_idx > begin */) {

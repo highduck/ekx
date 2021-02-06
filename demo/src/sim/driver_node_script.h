@@ -2,9 +2,9 @@
 
 #include <ecxx/ecxx.hpp>
 
-namespace ek::piko {
+namespace ek::sim {
 
-ecs::entity create();
+void create(ecs::entity container);
 void update();
 
 }

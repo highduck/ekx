@@ -3,9 +3,9 @@
 #include "sample_flash.hpp"
 #include "3d/sample_3d.hpp"
 #include "piko/sample_piko.hpp"
+#include "sim/SampleSim.hpp"
 #include "sample_integrations.hpp"
-#include "sim/components/motion.h"
-#include "sim/components/attractor.h"
+#include "sim/Motion.hpp"
 #include "3d/camera_arcball.hpp"
 
 #include <ek/math/rand.hpp>
@@ -29,6 +29,7 @@ ecs::entity tfSampleTitle;
 void setCurrentSample(int index);
 
 void initSamples() {
+    sampleFactory.emplace_back([] { return new SampleSim(); });
     sampleFactory.emplace_back([] { return new SamplePiko(); });
     //sampleFactory.emplace_back([] { return new SampleFlash("test1"); });
     sampleFactory.emplace_back([] { return new SampleFlash("test2"); });
@@ -71,8 +72,8 @@ void DemoApp::initialize() {
     basic_application::initialize();
 
     using ecs::the_world;
-    the_world.registerComponent<motion_t>();
-    the_world.registerComponent<attractor_t>();
+    the_world.registerComponent<sim::motion_t>();
+    the_world.registerComponent<sim::attractor_t>();
     the_world.registerComponent<camera_arc_ball>();
     the_world.registerComponent<test_rotation_comp>();
 

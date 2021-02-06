@@ -72,13 +72,16 @@ add_library(${PROJECT_NAME} STATIC
         ek/ds/StaticRingBuffer.hpp
         ek/ds/StaticHistoryBuffer.hpp
         ek/ds/BitVector.hpp
+        ek/ds/PodArray.hpp
 
         ek/Localization.hpp
         ek/Localization.cpp
 
         ek/timers.hpp
         ek/timers.cpp
-        ecxx/impl/ecxx.cpp)
+
+        ecxx/impl/ecxx.cpp
+        )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 

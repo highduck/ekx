@@ -1,6 +1,6 @@
 #include "Transform2D.hpp"
 
-#include <ek/draw2d/drawer.hpp>
+#include <ek/ds/PodArray.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <Tracy.hpp>
 
@@ -120,18 +120,18 @@ void updateWorldTransformAll(ecs::world* w, ecs::entity root) {
 
 void updateWorldTransformAll2(ecs::world* w, ecs::entity root) {
     ZoneScoped;
-    static std::vector<ecs::Entity> out{};
-    out.clear();
-    out.push_back(root.index);
+
+    SmallArray<ecs::Entity, ecs::ENTITIES_MAX_COUNT> out;
+    out.push(root.index);
 
     uint32_t begin = 0;
-    uint32_t end = 1;
+    uint32_t end = out.size;
     const auto* nodes = w->getStorage<Node>();
     const auto* localTransforms = w->getStorage<Transform2D>();
     const auto* worldTransforms = w->getStorage<WorldTransform2D>();
     while (begin < end) {
         for (uint32_t i = begin; i < end; ++i) {
-            const auto parent = out[i];
+            const auto parent = out.data[i];
             const auto& tp = worldTransforms->get(parent);
             const auto& node = nodes->get(parent);
 
@@ -142,12 +142,12 @@ void updateWorldTransformAll2(ecs::world* w, ecs::entity root) {
                 matrix_2d::multiply(tp.matrix, tl.matrix, tw.matrix);
                 ColorMod32::multiply(tp.color, tl.color, tw.color);
 
-                out.push_back(it);
+                out.push(it);
                 it = nodes->get(it).sibling_next.index;
             }
         }
         begin = end;
-        end = static_cast<uint32_t>(out.size());
+        end = out.size;
     }
 }
 //

@@ -158,7 +158,7 @@ public:
 
     void drawBatch();
 
-    void allocTriangles(int vertex_count, int index_count);
+    void allocTriangles(uint32_t vertex_count, uint32_t index_count);
 
     [[nodiscard]]
     uint32_t getUsedMemory() const;
