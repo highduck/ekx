@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <ek/scenex/app/basic_application.hpp>
 #include <ek/ds/StaticHistoryBuffer.hpp>
 #include <ek/timers.hpp>
 #include <ek/draw2d/drawer.hpp>

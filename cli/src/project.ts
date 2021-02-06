@@ -95,6 +95,7 @@ export class Project {
         application_id?: string,
         googleServicesConfigDir?: string
     } = {};
+
     html = {};
 
     addModule(def: ModuleDef) {

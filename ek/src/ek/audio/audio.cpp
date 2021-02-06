@@ -28,6 +28,10 @@
 //#define MA_DEBUG_OUTPUT
 // debugging
 
+#if EK_WEB
+#define MA_RESOURCE_MANAGER_MAX_JOB_THREAD_COUNT 0
+#endif
+
 #include <miniaudio.h>
 #include <miniaudio_engine.h>
 
@@ -52,22 +56,36 @@ static AudioSystem audioSystem{};
 void init() {
     assert(!audioSystem.initialized);
     {
-        ma_result result = ma_engine_init(NULL, &audioSystem.engine);
+        auto config = ma_engine_config_init_default();
+
+#if EK_WEB
+        auto rmConfig = ma_resource_manager_config_init();
+        rmConfig.jobThreadCount = 0;
+        rmConfig.flags = MA_RESOURCE_MANAGER_FLAG_NO_THREADING;
+
+        config.pResourceManager = (ma_resource_manager*)malloc(sizeof(ma_resource_manager));
+        memset(config.pResourceManager, 0, sizeof(ma_resource_manager));
+
+        ma_resource_manager_init(&rmConfig, config.pResourceManager);
+#endif
+
+        ma_result result = ma_engine_init(&config, &audioSystem.engine);
+        //ma_result result = ma_engine_init(NULL, &audioSystem.engine);
         if (result != MA_SUCCESS) {
-            EK_WARN("Failed to initialize audio engine.");
+            EK_WARN("Failed to initialize audio engine: %i", result);
             return;
         }
         audioSystem.pResourceManager = audioSystem.engine.pResourceManager;
 
         result = ma_sound_group_init(&audioSystem.engine, 0, NULL, &audioSystem.soundsGroup);
         if (result != MA_SUCCESS) {
-            EK_WARN("Failed to create sound group");
+            EK_WARN("Failed to create sound group: %i", result);
             return;
         }
 
         result = ma_sound_group_init(&audioSystem.engine, 0, NULL, &audioSystem.musicGroup);
         if (result != MA_SUCCESS) {
-            EK_WARN("Failed to create sound group");
+            EK_WARN("Failed to create sound group: %i", result);
             return;
         }
     }
