@@ -18,6 +18,8 @@ import {collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
 import {androidBuildAppIcon} from "./androidAppIcon";
+import * as fs from "fs";
+import {SigningOptions} from "crypto";
 
 function getAndroidSdkRoot() {
     return process.env.ANDROID_SDK_ROOT ?? path.join(process.env.HOME, 'Library/Android/sdk');
@@ -50,9 +52,9 @@ function open_android_project(android_project_path) {
     execute("open", ["-a", "/Applications/Android Studio.app", android_project_path]);
 }
 
-function copy_google_services_config_android() {
+function copy_google_services_config_android(dir: string) {
     const config_file = "google-services.json";
-    const config_path = path.join("../..", config_file);
+    const config_path = path.join(dir, config_file);
     if (isFile(config_path)) {
         copyFile(config_path, path.join("app", config_file));
     } else {
@@ -168,13 +170,26 @@ export function export_android(ctx) {
             `main.assets.srcDirs += [${assets_roots.join(", ")}]`
         ];
 
+        let signingConfig = {};
+        let signingConfigBasePath = "";
+
+        if (ctx.android.signingConfigPath) {
+            const signingConfigJson = fs.readFileSync(ctx.android.signingConfigPath, "utf-8");
+            signingConfig = JSON.parse(signingConfigJson);
+            signingConfigBasePath = path.dirname(ctx.android.signingConfigPath);
+            copySigningKeys(signingConfig, signingConfigBasePath);
+        } else {
+            console.error("signing file not found (todo: default signing config)");
+            return;
+        }
+
         replaceInFile("app/build.gradle", {
             'com.eliasku.template_android': ctx.android.application_id,
             'versionCode 1 // AUTO': `versionCode ${ctx.version_code} // AUTO`,
             'versionName "1.0" // AUTO': `versionName "${ctx.version_name}" // AUTO`,
             '// TEMPLATE_SOURCE_SETS': source_sets.join("\n\t\t"),
             '// TEMPLATE_DEPENDENCIES': ctx.build.android.dependencies.join("\n\t"),
-            '// ${SIGNING_CONFIGS}': printSigningConfigs(ctx.android.keystore),
+            '// ${SIGNING_CONFIGS}': printSigningConfigs(signingConfig),
         });
 
         copyFolderRecursiveSync(path.join(base_path, "export/android/res"), "app/src/main/res");
@@ -183,8 +198,7 @@ export function export_android(ctx) {
         mod_android_manifest(ctx);
         createStringsXML(ctx);
         mod_cmake_lists(ctx);
-        copy_google_services_config_android();
-        copySigningKeys(ctx.android.keystore);
+        copy_google_services_config_android(ctx.android.googleServicesConfigDir);
     }
 
     if (ctx.args.indexOf("bundle") >= 0) {

@@ -129,6 +129,10 @@ export function export_ios(ctx:Project) {
             modules: ctx.modules
         }));
 
+        if(ctx.ios.googleServicesConfigDir) {
+            copyFile(path.join(ctx.ios.googleServicesConfigDir, "GoogleService-Info.plist"), "GoogleService-Info.plist");
+        }
+
         /// PRE MOD PROJECT
         //xcode_patch(ctx, platform_proj_name);
         execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id, ctx.path.EKX_ROOT]);

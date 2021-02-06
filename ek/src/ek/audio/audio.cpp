@@ -1,3 +1,4 @@
+#include <ek/assert.hpp>
 #include <ek/util/detect_platform.hpp>
 
 #include "audio.hpp"
@@ -12,22 +13,20 @@
 #define MA_NO_STDIO
 //#define MA_NO_GENERATION
 
+//#define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
+
 // android issue
 #define MA_NO_AAUDIO
-#define MA_NO_SDL
-
-#if (EK_IOS || EK_ANDROID)
 #define MA_NO_RUNTIME_LINKING
-#endif
 
 #define MINIAUDIO_IMPLEMENTATION
 
-#include <cstdio>
+#define MA_ASSERT(e) EK_ASSERT(e)
 
-#define audio_on_assert(e, file, line) ((void)printf("%s:%d: failed assertion `%s'\n", file, line, e), abort())
-#define audio_assert(e) (!(e) ? audio_on_assert(#e, __FILE__, __LINE__) : ((void)0))
-
-#define MA_ASSERT(e) audio_assert(e)
+// debugging
+//#define MA_LOG_LEVEL 4
+//#define MA_DEBUG_OUTPUT
+// debugging
 
 #include <miniaudio.h>
 #include <miniaudio_engine.h>

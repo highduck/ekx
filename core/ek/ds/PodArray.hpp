@@ -1,21 +1,7 @@
 #pragma once
 
+#include <ek/assert.hpp>
 #include <cstdlib>
-
-#if 0
-
-#include <cstdio>
-
-#define assertR2_handle(e, file, line) ((void)printf("%s:%d: failed assertion `%s'\n", file, line, e), abort())
-#define assertR2(e) (!(e) ? assertR2_handle(#e, __FILE__, __LINE__) : ((void)0))
-
-#define EK_ASSERT_R2(x) assertR2(x)
-
-#else
-
-#define EK_ASSERT_R2(x) ((void)0)
-
-#endif
 
 namespace ek {
 

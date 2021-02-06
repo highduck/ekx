@@ -1,6 +1,5 @@
 #include "profiler.hpp"
 
-#include <ek/app/app.hpp>
 #include <memory>
 #include <unordered_map>
 #include <ek/ds/StaticHistoryBuffer.hpp>
@@ -11,8 +10,12 @@
 #include <ek/scenex/text/TextEngine.hpp>
 
 // TODO: EK_DEV_BUILD
+#ifndef ENABLE_PROFILER
+
 #if !defined(NDEBUG) || defined(EK_EDITOR)
 #define ENABLE_PROFILER
+#endif
+
 #endif
 
 namespace ek {

@@ -1,5 +1,0 @@
-export/
-build/
-cmake-build*/
-assets/**/RECOVER_*
-.firebase/

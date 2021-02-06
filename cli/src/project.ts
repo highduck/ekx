@@ -87,7 +87,14 @@ export class Project {
         }
     };
 
-    ios: { application_id?: string } = {};
+    android: {
+        googleServicesConfigDir?: string,
+    };
+
+    ios: {
+        application_id?: string,
+        googleServicesConfigDir?: string
+    } = {};
     html = {};
 
     addModule(def: ModuleDef) {
