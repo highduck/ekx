@@ -4,9 +4,9 @@
 
 namespace ek {
 
-class SamplePiko : public SampleBase {
+class SampleSim : public SampleBase {
 public:
-    SamplePiko();
+    SampleSim();
 
     void draw() override;
 
@@ -14,4 +14,3 @@ public:
 };
 
 }
-

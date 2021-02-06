@@ -1,6 +1,5 @@
 #include "drawer.hpp"
 
-#include <ek/util/locator.hpp>
 #include <ek/util/common_macro.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include "draw2d_shader.h"
@@ -253,7 +252,7 @@ void Context::drawBatch() {
     indexDataPos_ = nullptr;
 }
 
-void Context::allocTriangles(int vertex_count, int index_count) {
+void Context::allocTriangles(uint32_t vertex_count, uint32_t index_count) {
     if (checkFlags != 0) {
         if (checkFlags & Context::Check_Texture) {
             setNextTexture(texture->image);

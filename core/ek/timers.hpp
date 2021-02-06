@@ -85,7 +85,10 @@ struct TimeLayer {
         float scale = 1.0f;
         float dt = 0.0f;
         float total = 0.0f;
+        float pad_ = 0.0f;
     };
+
+    static State Layers[4];
 
     TimeLayer() = default;
 
@@ -94,9 +97,13 @@ struct TimeLayer {
 
     }
 
-    const State* operator->() const;
+    inline const State* operator->() const {
+        return Layers + id;
+    }
 
-    State* operator->();
+    inline State* operator->() {
+        return Layers + id;
+    }
 
     static TimeLayer Root;
     static TimeLayer Game;

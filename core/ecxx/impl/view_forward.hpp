@@ -48,7 +48,7 @@ public:
         inline static bool is_valid(uint32_t it, const table_type& table) {
             // check primary entity vector end
             const ComponentHeader* m = table[0];
-            if (it == m->count) {
+            if (it == m->count()) {
                 return true;
             }
             // filter secondary entity vectors
@@ -92,7 +92,7 @@ public:
         }
 
         std::sort(table_.begin(), table_.end(), [](auto* a, auto* b) -> bool {
-            return a->count < b->count;
+            return a->count() < b->count();
         });
 
         for (uint32_t j = 0u; j < components_num; ++j) {
@@ -111,7 +111,7 @@ public:
     }
 
     iterator end() const {
-        return {table_, table_[0]->count};
+        return {table_, table_[0]->count()};
     }
 
     template<typename Comp>
@@ -122,7 +122,8 @@ public:
     template<typename Func>
     void each(Func func) const {
         const ComponentHeader& table_0 = *(table_[0]);
-        for (uint32_t i = 1u; i != table_0.count; ++i) {
+        const auto size = table_0.count();
+        for (uint32_t i = 1u; i != size; ++i) {
             const Entity e = table_0.handleToEntity.get(i);
             if (iterator::is_valid_fast(e, table_)) {
                 table_index_type k{0u};
@@ -194,12 +195,13 @@ public:
     }
 
     iterator end() const {
-        return {map_, map_.component.count};
+        return {map_, map_.component.count()};
     }
 
     template<typename Func>
     void each(Func func) const {
-        for (uint32_t i = 1u; i != map_.component.count; ++i) {
+        const auto size = map_.component.count();
+        for (uint32_t i = 1u; i != size; ++i) {
             func(map_.get_data_by_index(i));
         }
     }
