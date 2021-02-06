@@ -36,7 +36,7 @@ inline entity create() {
 }
 
 inline void destroy(entity e) {
-    ECXX_FULL_ASSERT(e.isAlive());
+    EK_ASSERT_R2(e.isAlive());
     the_world.destroy(&e.index, 1);
 }
 
@@ -62,55 +62,55 @@ inline bool entity::isAlive() const {
 
 template<typename Component, typename ...Args>
 inline Component& entity::assign(Args&& ... args) {
-    ECXX_FULL_ASSERT(isAlive());
+    EK_ASSERT_R2(isAlive());
     return the_world.assign<Component>(index, args...);
 }
 
 template<typename Component, typename ...Args>
 inline Component& entity::reassign(Args&& ... args) {
-    ECXX_FULL_ASSERT(isAlive());
+    EK_ASSERT_R2(isAlive());
     return the_world.reassign<Component>(index, args...);
 }
 
 template<typename Component>
 [[nodiscard]] inline bool entity::has() const {
-    ECXX_FULL_ASSERT(isAlive());
+    EK_ASSERT_R2(isAlive());
     return the_world.has<Component>(index);
 }
 
 template<typename Component>
 inline Component& entity::get() const {
-    ECXX_FULL_ASSERT(isAlive());
+    EK_ASSERT_R2(isAlive());
     return the_world.get<Component>(index);
 }
 
 template<typename Component>
 inline Component* entity::tryGet() const {
-    ECXX_FULL_ASSERT(isAlive());
+    EK_ASSERT_R2(isAlive());
     return the_world.tryGet<Component>(index);
 }
 
 template<typename Component>
 inline Component& entity::get_or_create() const {
-    ECXX_FULL_ASSERT(isAlive());
+    EK_ASSERT_R2(isAlive());
     return the_world.getOrCreate<Component>(index);
 }
 
 template<typename Component>
 inline const Component& entity::get_or_default() const {
-    ECXX_FULL_ASSERT(isAlive());
+    EK_ASSERT_R2(isAlive());
     return the_world.getOrDefault<Component>(index);
 }
 
 template<typename Component>
 inline void entity::remove() {
-    ECXX_FULL_ASSERT(isAlive());
+    EK_ASSERT_R2(isAlive());
     return the_world.remove<Component>(index);
 }
 
 template<typename Component>
 inline bool entity::try_remove() {
-    ECXX_FULL_ASSERT(isAlive());
+    EK_ASSERT_R2(isAlive());
     return the_world.tryRemove<Component>(index);
 }
 

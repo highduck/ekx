@@ -1,42 +1,9 @@
 #pragma once
 
 #include <ek/ds/PodArray.hpp>
+#include <ek/assert.hpp>
 #include <cstdint>
 #include <vector>
-
-// TODO: disable at finish
-// enable to force asserts
-//#define ECXX_ENABLE_ASSERT
-// enable to force pedantic asserts
-#define ECXX_ENABLE_ASSERT_PEDANTIC
-
-#ifndef NDEBUG
-#define ECXX_ENABLE_ASSERT
-#endif
-
-#if defined(ECXX_ENABLE_ASSERT_PEDANTIC) || defined(ECXX_ENABLE_ASSERT)
-
-#include <stdio.h>
-
-#define ecxx_on_assert(e, file, line) ((void)printf("%s:%d: failed assertion `%s'\n", file, line, e), abort())
-#define ecxx_assert(e) (!(e) ? ecxx_on_assert(#e, __FILE__, __LINE__) : ((void)0))
-#else
-
-#define ecxx_assert(e) ((void)0)
-
-#endif
-
-#ifdef ECXX_ENABLE_ASSERT
-#define ECXX_ASSERT(e) ecxx_assert(e)
-#else
-#define ECXX_ASSERT(ignore) ((void)0)
-#endif
-
-#ifdef ECXX_ENABLE_ASSERT_PEDANTIC
-#define ECXX_FULL_ASSERT(e) ecxx_assert(e)
-#else
-#define ECXX_FULL_ASSERT(ignore) ((void)0)
-#endif
 
 namespace ecs {
 
@@ -226,9 +193,9 @@ struct world {
 
     [[nodiscard]]
     inline ComponentHeader* getComponentHeader(ComponentTypeId componentTypeId) const {
-        ECXX_FULL_ASSERT(componentTypeId < COMPONENTS_MAX_COUNT);
+        EK_ASSERT_R2(componentTypeId < COMPONENTS_MAX_COUNT);
         auto* component = *(components + componentTypeId);
-        ECXX_FULL_ASSERT(component != nullptr);
+        EK_ASSERT_R2(component != nullptr);
         return component;
     }
 
@@ -297,8 +264,8 @@ public:
         auto& entityToHandle = component.entityToHandle;
         auto& handleToEntity = component.handleToEntity;
         const auto handle = component.count();
-        ECXX_ASSERT(component.lockCounter == 0);
-        ECXX_ASSERT(entityToHandle.get(entity) == 0);
+        EK_ASSERT(component.lockCounter == 0);
+        EK_ASSERT(entityToHandle.get(entity) == 0);
 
         entityToHandle.insert(entity, handle);
         handleToEntity.push(entity);
@@ -317,8 +284,8 @@ public:
         auto& entityToHandle = component.entityToHandle;
         auto& handleToEntity = component.handleToEntity;
         const auto handle = component.count();
-        ECXX_ASSERT(component.lockCounter == 0);
-        ECXX_ASSERT(entityToHandle.get(entity) == 0);
+        EK_ASSERT(component.lockCounter == 0);
+        EK_ASSERT(entityToHandle.get(entity) == 0);
 
         entityToHandle.insert(entity, handle);
         handleToEntity.push(entity);
@@ -331,8 +298,8 @@ public:
     }
 
     void erase(Entity entity) {
-        ECXX_ASSERT(component.lockCounter == 0);
-        ECXX_ASSERT(component.entityToHandle.get(entity) != 0);
+        EK_ASSERT(component.lockCounter == 0);
+        EK_ASSERT(component.entityToHandle.get(entity) != 0);
         const auto backEntity = component.handleToEntity.back();
         if (entity != backEntity) {
             erase_from_middle(entity, backEntity);
@@ -421,7 +388,7 @@ public:
 template<typename Component>
 inline ComponentStorage<Component>* world::getStorage() const {
     auto* component = components[type<Component>()];
-    ECXX_FULL_ASSERT(component != nullptr);
+    EK_ASSERT_R2(component != nullptr);
     return static_cast<ComponentStorage<Component>*>(component->data);
 }
 

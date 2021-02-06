@@ -70,5 +70,3 @@ endif ()
 if (EKX_BUILD_BENCHMARKS)
     add_subdirectory(tests/ecxx/benchmarks)
 endif ()
-
-add_subdirectory(demo)

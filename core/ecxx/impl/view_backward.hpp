@@ -41,7 +41,7 @@ public:
 
         inline void skips() {
             // todo: size recovery (case we remove entities before *it)
-            ECXX_ASSERT(it_ < map_0->count);
+            EK_ASSERT_R2(it_ < map_0->count());
 
             while (it_ != 0 && !valid(map_0->handleToEntity.get(it_))) {
                 --it_;

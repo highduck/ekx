@@ -130,6 +130,6 @@ project.add_other_cflags([
     "-DGLES_SILENCE_DEPRECATION"
 ])
 
-project.add_file("../../GoogleService-Info.plist")
+project.add_file("GoogleService-Info.plist")
 
 project.save()

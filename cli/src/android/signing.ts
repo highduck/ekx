@@ -34,7 +34,7 @@ export function printSigningConfigs(configs: SigningConfigs) {
     return str;
 }
 
-export function copySigningKeys(configs: SigningConfigs) {
+export function copySigningKeys(configs: SigningConfigs, basePath: string) {
     if (configs) {
         for (const flavor of Object.keys(configs)) {
             const config = configs[flavor];
@@ -42,7 +42,7 @@ export function copySigningKeys(configs: SigningConfigs) {
                 const filepath = config.store_keystore;
                 let src = filepath;
                 if (!isFile(filepath)) {
-                    src = path.resolve("../..", filepath);
+                    src = path.resolve(basePath, filepath);
                     if (!isFile(src)) {
                         console.warn("missing keystore", filepath);
                         continue;

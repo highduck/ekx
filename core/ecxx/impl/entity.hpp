@@ -164,7 +164,7 @@ public:
 
     [[nodiscard]]
     inline entity get() const {
-        ECXX_ASSERT(the_world.check(passport));
+        EK_ASSERT(the_world.check(passport));
         return entity{index()};
     }
 
