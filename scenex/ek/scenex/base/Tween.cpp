@@ -8,7 +8,7 @@ void handle_end(ecs::entity e) {
     auto& tween = e.get<Tween>();
     tween.advanced.clear();
     if (tween.destroyEntity) {
-        destroy_delay(e);
+        destroyDelay(e);
     } else if (tween.auto_destroy) {
         e.remove<Tween>();
     }

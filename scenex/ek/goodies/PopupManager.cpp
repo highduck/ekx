@@ -71,7 +71,7 @@ void on_popup_closed(entity e) {
 
     setVisible(e, false);
     // TODO: flag auto-delete
-    destroy_delay(e);
+    destroyDelay(e);
 }
 
 void on_popup_close_animation(float t, entity e) {

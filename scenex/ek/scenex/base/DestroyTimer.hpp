@@ -12,9 +12,9 @@ struct DestroyTimer {
     static void updateAll();
 };
 
-void destroy_delay(ecs::entity e, float delay = 0.0f, TimeLayer timer = {});
+void destroyDelay(ecs::entity e, float delay = 0.0f, TimeLayer timer = {});
 
-void destroy_children_delay(ecs::entity e, float delay = 0.0f, TimeLayer timer = {});
+void destroyChildrenDelay(ecs::entity e, float delay = 0.0f, TimeLayer timer = {});
 
 }
 

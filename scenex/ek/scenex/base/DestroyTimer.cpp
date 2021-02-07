@@ -5,11 +5,11 @@
 
 namespace ek {
 
-void destroy_delay(ecs::entity e, float delay, TimeLayer timer) {
+void destroyDelay(ecs::entity e, float delay, TimeLayer timer) {
     e.reassign<DestroyTimer>(delay, timer);
 }
 
-void destroy_children_delay(ecs::entity e, float delay, TimeLayer timer) {
+void destroyChildrenDelay(ecs::entity e, float delay, TimeLayer timer) {
     auto it = e.get<Node>().child_first;
     while (it) {
         it.reassign<DestroyTimer>(delay, timer);
