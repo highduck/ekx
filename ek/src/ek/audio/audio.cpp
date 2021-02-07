@@ -27,10 +27,6 @@
 //#define MA_DEBUG_OUTPUT
 // debugging
 
-#if EK_WEB
-#define MA_RESOURCE_MANAGER_MAX_JOB_THREAD_COUNT 0
-#endif
-
 #define MINIAUDIO_IMPLEMENTATION
 
 #include <miniaudio.h>
@@ -59,16 +55,16 @@ void init() {
     {
         auto config = ma_engine_config_init_default();
 
-#if EK_WEB
-        auto rmConfig = ma_resource_manager_config_init();
-        rmConfig.jobThreadCount = 0;
-        rmConfig.flags = MA_RESOURCE_MANAGER_FLAG_NO_THREADING;
-
-        config.pResourceManager = (ma_resource_manager*) malloc(sizeof(ma_resource_manager));
-        memset(config.pResourceManager, 0, sizeof(ma_resource_manager));
-
-        ma_resource_manager_init(&rmConfig, config.pResourceManager);
-#endif
+//#if EK_WEB
+//        auto rmConfig = ma_resource_manager_config_init();
+//        rmConfig.jobThreadCount = 0;
+//        rmConfig.flags = MA_RESOURCE_MANAGER_FLAG_NO_THREADING;
+//
+//        config.pResourceManager = (ma_resource_manager*) malloc(sizeof(ma_resource_manager));
+//        memset(config.pResourceManager, 0, sizeof(ma_resource_manager));
+//
+//        ma_resource_manager_init(&rmConfig, config.pResourceManager);
+//#endif
 
         ma_result result = ma_engine_init(&config, &audioSystem.engine);
         //ma_result result = ma_engine_init(NULL, &audioSystem.engine);

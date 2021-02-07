@@ -38,7 +38,8 @@ module.exports = (ctx) => {
             }
         },
         web: {
-            cpp: [path.join(__dirname, "platforms/web")]
+            cpp: [path.join(__dirname, "platforms/web")],
+            js: [path.join(__dirname, "platforms/web")]
         },
         windows: {
             cpp: [path.join(__dirname, "platforms/windows")]

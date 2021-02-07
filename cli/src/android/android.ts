@@ -19,7 +19,6 @@ import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
 import {androidBuildAppIcon} from "./androidAppIcon";
 import * as fs from "fs";
-import {SigningOptions} from "crypto";
 
 function getAndroidSdkRoot() {
     return process.env.ANDROID_SDK_ROOT ?? path.join(process.env.HOME, 'Library/Android/sdk');

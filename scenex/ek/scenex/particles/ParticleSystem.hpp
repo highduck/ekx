@@ -29,14 +29,23 @@ struct ParticleEmitter2D {
 class ParticleRenderer2D : public Drawable2D<ParticleRenderer2D> {
 public:
     ParticleRenderer2D() = default;
+
     explicit ParticleRenderer2D(ecs::EntityRef target_) : target{target_} {}
+
     explicit ParticleRenderer2D(ecs::entity target_) : target{target_} {}
 
     void draw() override;
 
-    [[nodiscard]] rect_f getBounds() const override { return rect_f{}; }
+    [[nodiscard]]
+    rect_f getBounds() const override {
+        return rect_f{};
+    }
 
-    [[nodiscard]] bool hitTest(float2 pos) const override { return false; }
+    [[nodiscard]]
+    bool hitTest(float2 pos) const override {
+        (void) pos;
+        return false;
+    }
 
 public:
     ecs::EntityRef target{};

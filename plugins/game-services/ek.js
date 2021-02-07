@@ -14,7 +14,13 @@ module.exports = (ctx) => {
                 capabilities: ["com.apple.GameCenter"],
                 frameworks: ["GameKit"]
             }
-        }
+        },
+        web: {
+            cpp: [path.join(__dirname, "null")]
+        },
+        macos: {
+            cpp: [path.join(__dirname, "null")]
+        },
     });
 
     ctx.build.android.dependencies.push(

@@ -36,7 +36,12 @@ struct DynArray {
         free(data);
     }
 
-    void reset() {
+    [[nodiscard]]
+    inline bool empty() const {
+        return size == 0;
+    }
+
+    inline void clear() {
         size = 0;
     }
 
@@ -45,7 +50,7 @@ struct DynArray {
         data = (T*) realloc(data, sizeof(T) * capacity);
     }
 
-    inline void push(T el) {
+    inline void push_back(T el) {
         if (size == capacity) {
             grow();
         }

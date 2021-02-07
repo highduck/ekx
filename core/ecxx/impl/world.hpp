@@ -268,7 +268,7 @@ public:
         EK_ASSERT(entityToHandle.get(entity) == 0);
 
         entityToHandle.insert(entity, handle);
-        handleToEntity.push(entity);
+        handleToEntity.push_back(entity);
         if constexpr (has_data) {
             if constexpr (std::is_aggregate_v<DataType>) {
                 return data.emplace_back(DataType{args...});
@@ -288,7 +288,7 @@ public:
         EK_ASSERT(entityToHandle.get(entity) == 0);
 
         entityToHandle.insert(entity, handle);
-        handleToEntity.push(entity);
+        handleToEntity.push_back(entity);
         if constexpr (has_data) {
             data.emplace_back();
             return handle;
