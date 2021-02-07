@@ -15,7 +15,13 @@ module.exports = (ctx) => {
                 capabilities: ["com.apple.InAppPurchase"],
                 frameworks: ["StoreKit"]
             }
-        }
+        },
+        web: {
+            cpp: [path.join(__dirname, "sim")]
+        },
+        macos: {
+            cpp: [path.join(__dirname, "sim")]
+        },
     });
 
     ctx.build.android.add_manifest.push(`

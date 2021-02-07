@@ -81,6 +81,9 @@ void initialize_events(ecs::entity e) {
 }
 
 void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transform) {
+    // TODO: skin params?
+    (void) skin;
+
     const float over = btn.over_time;
     const float push = btn.push_time;
     const float post = btn.post_time;

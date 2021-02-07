@@ -387,23 +387,23 @@ public:
                 }
             }
             // ready for loading
-            currentAssetLoading = 0;
+            assetsLoaded = 0;
         });
     }
 
     void do_unload() override {
-        for (auto* asset : assets) {
-            asset->unload();
+        for (unsigned i = 0; i < assets.size; ++i) {
+            assets.data[i]->unload();
         }
         assets.clear();
-        currentAssetLoading = -1;
+        assetsLoaded = 0;
     }
 
     void poll() override {
-        if (state == AssetObjectState::Loading && currentAssetLoading >= 0) {
+        if (state == AssetObjectState::Loading && assetsLoaded >= 0) {
             timer_t timer;
-            while (true) {
-                auto* asset = assets[currentAssetLoading];
+            while (assetsLoaded < assets.size) {
+                auto* asset = assets.data[assetsLoaded];
                 if (asset->state == AssetObjectState::Initial) {
                     EK_DEBUG << "Loading BEGIN: " << ((builtin_asset_t*) asset)->path_;
                     asset->load();
@@ -411,8 +411,8 @@ public:
                     asset->poll();
                 } else if (asset->state == AssetObjectState::Ready) {
                     EK_DEBUG << "Loading END: " << ((builtin_asset_t*) asset)->path_;
-                    ++currentAssetLoading;
-                    if (currentAssetLoading >= assets.size()) {
+                    ++assetsLoaded;
+                    if (assetsLoaded >= assets.size) {
                         state = AssetObjectState::Ready;
                         return;
                     }
@@ -435,8 +435,8 @@ public:
                 if (!assets.empty()) {
                     float acc = 0.0f;
                     float total = 0.0f;
-                    for (auto* asset : assets) {
-                        acc += asset->getProgress();
+                    for (unsigned i = 0; i < assets.size; ++i) {
+                        acc += assets.data[i]->getProgress();
                         ++total;
                     }
                     return acc / total;
@@ -445,15 +445,15 @@ public:
         return 0.0f;
     }
 
-    int currentAssetLoading = -1;
-    std::vector<asset_object_t*> assets;
+    unsigned assetsLoaded = 0;
+    DynArray<asset_object_t*> assets;
 };
 
 
 class TrueTypeFontAsset : public builtin_asset_t {
 public:
-    explicit TrueTypeFontAsset(std::string path)
-            : builtin_asset_t(std::move(path)) {
+    explicit TrueTypeFontAsset(std::string path) :
+            builtin_asset_t(std::move(path)) {
     }
 
     void do_load() override {
@@ -481,11 +481,13 @@ public:
 };
 
 asset_object_t* builtin_asset_resolver_t::create_from_file(const std::string& path) const {
+    (void)path;
     // todo : potentially could be resolved by file extension
     return nullptr;
 }
 
 asset_object_t* builtin_asset_resolver_t::create(const std::string& path) const {
+    (void)path;
     return nullptr;
 }
 

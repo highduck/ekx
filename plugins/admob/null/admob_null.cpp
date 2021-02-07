@@ -7,10 +7,11 @@ bool hasSupport() {
 }
 
 void initialize(const config_t& config) {
+    (void) config;
 }
 
 void show_banner(int flags) {
-
+    (void) flags;
 }
 
 void show_rewarded_ad() {

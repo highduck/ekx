@@ -123,7 +123,7 @@ void component_type_init(ComponentHeader* component, ComponentTypeId typeId, voi
     component->erase = nullptr;
     component->clear = nullptr;
     component->entityToHandle.init();
-    component->handleToEntity.push(0);
+    component->handleToEntity.push_back(0);
 }
 
 }

@@ -239,6 +239,7 @@ void basic_application::on_draw_frame() {
 }
 
 void basic_application::update_frame(float dt) {
+    (void)dt;
 }
 
 void basic_application::render_frame() {

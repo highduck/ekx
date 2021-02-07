@@ -20,8 +20,8 @@ namespace ek {
 
 TrueTypeFont::TrueTypeFont(float dpiScale_, float fontSize, const std::string& dynamicAtlasName) :
         FontImplBase(FontType::TrueType),
-        dpiScale{dpiScale_},
         baseFontSize{fontSize},
+        dpiScale{dpiScale_},
         atlas{dynamicAtlasName} {
 
     mapByEffect[0] = std::make_unique<std::unordered_map<uint32_t, Glyph>>();

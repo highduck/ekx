@@ -21,7 +21,13 @@ module.exports = (ctx) => {
                     }
                 ]
             }
-        }
+        },
+        web: {
+            cpp: [path.join(__dirname, "null")]
+        },
+        macos: {
+            cpp: [path.join(__dirname, "null")]
+        },
     });
 
     ctx.build.android.dependencies.push(

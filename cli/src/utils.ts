@@ -77,11 +77,15 @@ export function isFile(p: string) {
     return fs.existsSync(p) && fs.lstatSync(p).isFile();
 }
 
-export function replaceInFile(filepath: string, dict: { [key: string]: string }) {
-    let text = readText(filepath);
+export function substituteAll(contents:string, dict: { [key: string]: string }):string {
     for (const [k, v] of Object.entries(dict)) {
-        text = replaceAll(text, k, v);
+        contents = replaceAll(contents, k, v);
     }
+    return contents;
+}
+
+export function replaceInFile(filepath: string, dict: { [key: string]: string }) {
+    const text = substituteAll(readText(filepath), dict);
     writeText(filepath, text);
 }
 

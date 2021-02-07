@@ -30,7 +30,8 @@ public:
     AssetObjectState state{AssetObjectState::Initial};
     int error = 0;
 
-    [[nodiscard]] virtual float getProgress() const {
+    [[nodiscard]]
+    virtual float getProgress() const {
         return state == AssetObjectState::Ready ? 1.0f : 0.0f;
     }
 
