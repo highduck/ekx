@@ -11,15 +11,14 @@
 
 #define MA_NO_ENCODING
 #define MA_NO_STDIO
-//#define MA_NO_GENERATION
-
-//#define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
+#define MA_NO_GENERATION
 
 // android issue
 #define MA_NO_AAUDIO
-#define MA_NO_RUNTIME_LINKING
 
-#define MINIAUDIO_IMPLEMENTATION
+#if EK_WEB || EK_ANDROID || EK_IOS
+#define MA_NO_RUNTIME_LINKING
+#endif
 
 #define MA_ASSERT(e) EK_ASSERT(e)
 
@@ -31,6 +30,8 @@
 #if EK_WEB
 #define MA_RESOURCE_MANAGER_MAX_JOB_THREAD_COUNT 0
 #endif
+
+#define MINIAUDIO_IMPLEMENTATION
 
 #include <miniaudio.h>
 #include <miniaudio_engine.h>
@@ -63,7 +64,7 @@ void init() {
         rmConfig.jobThreadCount = 0;
         rmConfig.flags = MA_RESOURCE_MANAGER_FLAG_NO_THREADING;
 
-        config.pResourceManager = (ma_resource_manager*)malloc(sizeof(ma_resource_manager));
+        config.pResourceManager = (ma_resource_manager*) malloc(sizeof(ma_resource_manager));
         memset(config.pResourceManager, 0, sizeof(ma_resource_manager));
 
         ma_resource_manager_init(&rmConfig, config.pResourceManager);
@@ -112,9 +113,11 @@ void muteDeviceEnd() {
 }
 
 #if !defined(__APPLE__) && !defined(__ANDROID__)
+
 void vibrate(int duration_millis) {
 
 }
+
 #endif
 
 /** Sound **/
@@ -194,14 +197,16 @@ ma_sound* Sound::getNextSound() {
     auto* sound = new ma_sound();
 //    auto result = ma_sound_init_from_data_source(&audioSystem.engine, dataSource, MA_DATA_SOURCE_FLAG_DECODE,
 //                                            &audioSystem.soundsGroup, sound);
-    auto result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(), MA_DATA_SOURCE_FLAG_DECODE,
+
+    auto result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(),
+//                                          MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION |
+                                          MA_SOUND_FLAG_DECODE,
                                           &audioSystem.soundsGroup, sound);
     if (result != MA_SUCCESS) {
         EK_WARN("cannot init next sound: %s", dataSourceFilePath.c_str());
         delete sound;
         sound = nullptr;
-    }
-    else {
+    } else {
         sounds.push_back(sound);
     }
     return sound;
@@ -241,7 +246,7 @@ void Music::load(const char* path) {
 
         sound = new ma_sound();
         result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(), MA_DATA_SOURCE_FLAG_STREAM,
-                                            &audioSystem.musicGroup, sound);
+                                         &audioSystem.musicGroup, sound);
         ma_sound_set_looping(sound, true);
         if (result != MA_SUCCESS) {
             EK_WARN("cannot init music");
