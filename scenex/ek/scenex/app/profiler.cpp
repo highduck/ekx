@@ -206,6 +206,8 @@ Profiler::Profiler() {
 Profiler::~Profiler() = default;
 
 void Profiler::addTime(const char *name, float time) {
+    (void)name;
+    (void)time;
 #ifdef ENABLE_PROFILER
     auto& graphs = impl->frameGraphs;
     {

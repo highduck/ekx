@@ -22,3 +22,7 @@ target_link_options(${PROJECT_NAME}
         )
 
 target_link_libraries(${PROJECT_NAME} GLESv2)
+
+add_custom_target(ek-web-js DEPENDS web.js)
+
+add_dependencies(${PROJECT_NAME} ek-web-js)
