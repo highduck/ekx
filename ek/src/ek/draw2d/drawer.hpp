@@ -148,7 +148,7 @@ struct Context : private disable_copy_assign_t {
 
     void setNextBlending(BlendMode blending);
 
-    void setNextTexture(sg_image texture);
+    void setNextTexture(sg_image nextTexture);
 
     void setNextShader(sg_shader shader, uint8_t numTextures);
 
@@ -240,7 +240,7 @@ extern Context state;
 
 void beginNewFrame();
 
-void begin(rect_i viewport, const matrix_2d& view = matrix_2d{}, const graphics::Texture* renderTarget = nullptr);
+void begin(rect_f viewport, const matrix_2d& view = matrix_2d{}, const graphics::Texture* renderTarget = nullptr);
 
 void end();
 

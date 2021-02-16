@@ -14,7 +14,7 @@ namespace ek {
 void debugDrawPointer(Camera2D& camera) {
     auto& im = resolve<InteractionSystem>();
     auto ptr = im.pointerScreenPosition_;
-    auto v = camera.matrix.transform(ptr.x, ptr.y);
+    auto v = camera.screenToWorldMatrix.transform(ptr.x, ptr.y);
     float t = TimeLayer::Root->total;
     draw2d::state.set_empty_texture();
     draw2d::fill_circle({v.x, v.y, 20 + 5 * sinf(t)}, 0x0_argb, 0xFFFFFFFF_argb, 10);
@@ -162,7 +162,7 @@ void debugCameraGizmo(Camera2D& camera) {
     auto rc = expand(camera.worldRect, -10.0f);
     drawBox(rc, matrix_2d{}, 0xFFFFFFFF_argb, 0xFF000000_argb);
 
-    auto v = camera.matrix.transform(camera.screenRect.relative(camera.relativeOrigin));
+    auto v = camera.screenToWorldMatrix.transform(camera.screenRect.relative(camera.relativeOrigin));
 
     draw2d::fill_circle({v, 10.0f}, 0x00FFFFFF_argb, 0x44FFFFFF_argb, 7);
     draw2d::line(v - float2{20, 0}, v + float2{20, 0}, 0xFF000000_argb, 0xFFFFFFFF_argb, 1, 3);

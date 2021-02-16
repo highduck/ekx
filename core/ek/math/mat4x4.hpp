@@ -209,29 +209,33 @@ inline matrix_t<4, 4, T> operator*(const matrix_t<4, 4, T>& l, const matrix_t<4,
 
 template<typename T>
 matrix_t<4, 4, T> operator*(const matrix_t<4, 4, T>& a, const matrix_t<3, 2, T>& b) {
-    T a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3];
-    T a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
+    const T a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3];
+    const T a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
 
-    T b0 = b.a;
-    T b1 = b.b;
+    const T b0 = b.a;
+    const T b1 = b.b;
+    const T b2 = b.c;
+    const T b3 = b.d;
+    const T bx = b.tx;
+    const T by = b.ty;
 
     return matrix_t<4, 4, T>{
-            b.a * a00 + b.b * a10,
-            b.a * a01 + b.b * a11,
-            b.a * a02 + b.b * a12,
-            b.a * a03 + b.b * a13,
-            b.c * a00 + b.d * a10,
-            b.c * a01 + b.d * a11,
-            b.c * a02 + b.d * a12,
-            b.c * a03 + b.d * a13,
+            b0 * a00 + b1 * a10,
+            b0 * a01 + b1 * a11,
+            b0 * a02 + b1 * a12,
+            b0 * a03 + b1 * a13,
+            b2 * a00 + b3 * a10,
+            b2 * a01 + b3 * a11,
+            b2 * a02 + b3 * a12,
+            b2 * a03 + b3 * a13,
             a[8],
             a[9],
             a[10],
             a[11],
-            b.tx * a00 + b.ty * a10 + a[12],
-            b.tx * a01 + b.ty * a11 + a[13],
-            b.tx * a02 + b.ty * a12 + a[14],
-            b.tx * a03 + b.ty * a13 + a[15]
+            bx * a00 + by * a10 + a[12],
+            bx * a01 + by * a11 + a[13],
+            bx * a02 + by * a12 + a[14],
+            bx * a03 + by * a13 + a[15]
     };
 }
 

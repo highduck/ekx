@@ -3,8 +3,6 @@ project(scenex)
 
 add_library(${PROJECT_NAME} STATIC "")
 
-add_subdirectory(ek/graphics)
-add_subdirectory(ek/draw2d)
 add_subdirectory(ek/scenex)
 add_subdirectory(ek/goodies)
 
@@ -15,11 +13,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-set(SCENEX_LIBS ek)
-set(SCENEX_DEFS)
-if(EKX_BUILD_EDITOR)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC EK_EDITOR)
-    set(SCENEX_LIBS ek ek-editor)
+target_link_libraries(${PROJECT_NAME} PUBLIC ek)
+
+if(EKX_BUILD_DEV_TOOLS)
+    target_link_libraries(${PROJECT_NAME} PUBLIC ek-dev-tools)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC EK_DEV_TOOLS)
 endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -36,21 +34,3 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -fno-rtti
         -fstrict-aliasing
         )
-
-#if (CMAKE_BUILD_TYPE MATCHES Debug)
-#    target_compile_options(${PROJECT_NAME} PRIVATE -g)
-#else ()
-#    target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
-#    if (${CMAKE_SYSTEM_NAME} MATCHES "Android" OR
-#            ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-#
-#    else ()
-#        target_compile_options(${PROJECT_NAME} PRIVATE -flto)
-#    endif ()
-#endif ()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Android")
-    target_link_libraries(${PROJECT_NAME} -Wl,--whole-archive ${SCENEX_LIBS} -Wl,--no-whole-archive)
-else ()
-    target_link_libraries(${PROJECT_NAME} ${SCENEX_LIBS})
-endif ()

@@ -3,7 +3,6 @@
 #include <ek/util/common_macro.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include "draw2d_shader.h"
-#include <ek/scenex/2d/Sprite.hpp>
 
 using namespace ek::graphics;
 
@@ -23,11 +22,11 @@ void Context::setNextBlending(BlendMode blending) {
     next.blend = blending;
 }
 
-void Context::setNextTexture(sg_image texture) {
-    if (curr.texture.id != texture.id) {
+void Context::setNextTexture(sg_image nextTexture) {
+    if (curr.texture.id != nextTexture.id) {
         stateChanged = true;
     }
-    next.texture = texture;
+    next.texture = nextTexture;
 }
 
 void Context::setNextShader(sg_shader shader, uint8_t numTextures) {
@@ -154,12 +153,13 @@ public:
 private:
     BufferType type_;
     std::vector<Buffer*> buffers_;
-    int pos = 0;
-    int frame = 0;
-    int buffersLimit_;
-    int framesNum_;
-    bool useOrphaning = true;
+    uint32_t pos = 0;
+    uint32_t frame = 0;
+    uint32_t buffersLimit_;
+    uint32_t framesNum_;
     uint32_t maxSize;
+
+    bool useOrphaning = true;
 };
 
 void Context::initialize() {
@@ -174,9 +174,6 @@ void Context::initialize() {
     solidColorShader = new Shader(draw2d_color_shader_desc());
 
     Res<Texture>{"empty"}.reset(emptyTexture);
-    auto* spr = new Sprite();
-    spr->texture.setID("empty");
-    Res<Sprite>{"empty"}.reset(spr);
     Res<Shader>{"draw2d"}.reset(defaultShader);
     Res<Shader>{"draw2d_alpha"}.reset(alphaMapShader);
     Res<Shader>{"draw2d_color"}.reset(solidColorShader);
@@ -230,8 +227,10 @@ void Context::drawBatch() {
     bind.fs_images[0].id = curr.shaderTexturesCount == 1 ? curr.texture.id : SG_INVALID_ID;
     sg_apply_bindings(bind);
 
-    auto scissors = curr.scissors;
-    sg_apply_scissor_rect(scissors.x, scissors.y, scissors.width, scissors.height, true);
+    {
+        const auto rc = curr.scissors;
+        sg_apply_scissor_rect(rc.x, rc.y, rc.width, rc.height, true);
+    }
 
     sg_draw(0, (int) indicesCount_, 1);
 
@@ -526,13 +525,12 @@ void beginNewFrame() {
 }
 
 /*** drawings ***/
-void begin(rect_i viewport, const matrix_2d& view, const graphics::Texture* renderTarget) {
+void begin(rect_f viewport, const matrix_2d& view, const graphics::Texture* renderTarget) {
     assert(!state.active);
     state.texture = state.emptyTexture;
     state.program = state.defaultShader;
-    state.scissors = rect_f{viewport};
+    state.scissors = viewport;
     state.checkFlags = 0;
-    state.renderTarget = renderTarget;
     state.matrix.set_identity();
     state.color = {};
     state.uv.set(0, 0, 1, 1);
@@ -542,7 +540,7 @@ void begin(rect_i viewport, const matrix_2d& view, const graphics::Texture* rend
     state.next.shader = state.program->shader;
     state.next.shaderTexturesCount = 1;
     state.next.texture = state.texture->image;
-    state.next.scissors = viewport;
+    state.next.scissors = rect_i{viewport};
     state.selectedPipeline.id = SG_INVALID_ID;
     state.stateChanged = true;
 

@@ -202,6 +202,12 @@ struct matrix_t<3, 2, T> {
         out.y = (y_ * a_ - x_ * b_) * invDet;
     }
 
+    inline vec2 transformInverse(vec2 pos) const {
+        float2 result;
+        transform_inverse(pos, result);
+        return result;
+    }
+
     bool inverse() {
         const T D = det(*this);
         if (D == T{0}) {

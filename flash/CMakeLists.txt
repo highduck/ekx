@@ -68,12 +68,12 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
         -DPUGIXML_NO_XPATH)
 
 target_link_libraries(${PROJECT_NAME}
-        pugixml
-        freetype2
-        cairo
-        scenex
-        miniz
-        stb
+        PUBLIC pugixml
+        PUBLIC freetype2
+        PUBLIC cairo
+        PUBLIC scenex
+        PUBLIC miniz
+        PUBLIC stb
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
@@ -83,5 +83,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
-        #UNITY_BUILD ON
         )

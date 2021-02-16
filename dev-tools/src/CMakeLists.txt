@@ -65,7 +65,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 target_compile_definitions(${PROJECT_NAME} PUBLIC
-        EK_EDITOR
+        EK_DEV_TOOLS
         )
 
 
@@ -83,26 +83,10 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -fstrict-aliasing
         )
 
-#if (CMAKE_BUILD_TYPE MATCHES Debug)
-#    target_compile_options(${PROJECT_NAME} PRIVATE -g)
-#
-#else ()
-#    #set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-#
-#    target_compile_options(${PROJECT_NAME} PRIVATE -flto -Os)
-#
-#    # https://github.com/llvm-mirror/llvm/blob/master/cmake/modules/AddLLVM.cmake
-#    #    target_link_options(${PROJECT_NAME}
-#    #                        PRIVATE
-#    #                        -Wl,-dead_strip
-#    #                        -Wl,-dead_strip_dylibs
-#    #                        )
-#endif ()
-
 target_link_libraries(${PROJECT_NAME}
-        imgui
-        ek-flash
+        PUBLIC imgui
+        PUBLIC ek-flash
         )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../build")
+#set_target_properties(${PROJECT_NAME} PROPERTIES
+#        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../build")

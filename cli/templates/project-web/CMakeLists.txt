@@ -29,9 +29,9 @@ else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Oz -flto")
 endif ()
 
-set_target_properties(${PROJECT_NAME}
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
+#set_target_properties(${PROJECT_NAME}
+#        PROPERTIES
+#        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build")
 
 #-s SAFE_HEAP=1
 #-s ASSERTIONS=2
@@ -53,12 +53,14 @@ set(EM_COMMON_FLAGS
 # -s ASSERTIONS=1
 # TODO: strange runtime DOM exception error with Release, "-s STRICT=1"
 
+#-s FILESYSTEM=0
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
-            "-s ENVIRONMENT=web -s FETCH=1 -s ALLOW_MEMORY_GROWTH=1 -s FILESYSTEM=0"
+            "-s ENVIRONMENT=web -s FETCH=1 -s FILESYSTEM=0 -s ALLOW_MEMORY_GROWTH=1"
             )
 else ()
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
-            "-s ENVIRONMENT=web -s FETCH=1 -s ALLOW_MEMORY_GROWTH=1 -s FILESYSTEM=0 -s ASSERTIONS=0" # --closure 1
+            "-s ENVIRONMENT=web -s FETCH=1 -s FILESYSTEM=0 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=0"
             )
+    # --closure 1
 endif ()

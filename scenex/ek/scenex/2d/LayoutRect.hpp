@@ -20,10 +20,6 @@ struct LayoutRect {
     rect_f rect;
     rect_f safeRect;
 
-    // additional insets can be changed manually: l, t, r, b
-    // to invalidate after change: setScreenRects(basic_application::root);
-    static float4 AdditionalInsets;
-
     LayoutRect& enableAlignX(float relative, float absolute = 0.0f) {
         align_x = true;
         x.x = relative;
@@ -54,15 +50,14 @@ struct LayoutRect {
 
 rect_f find_parent_layout_rect(ecs::entity e, bool safe);
 
-void updateScreenRect(ecs::entity root);
-
 
 // wrapper
 
 class layout_wrapper {
 public:
-    layout_wrapper(ecs::entity e) : e_{e},
-                                    l_{e.get_or_create<LayoutRect>()} {
+    layout_wrapper(ecs::entity e) :
+            e_{e},
+            l_{e.get_or_create<LayoutRect>()} {
     }
 
     static rect_f designCanvasRect;
@@ -74,7 +69,7 @@ public:
     }
 
     layout_wrapper& hard(float x, float y) {
-        const auto pos =  e_.get_or_create<Transform2D>().getPosition();
+        const auto pos = e_.get_or_create<Transform2D>().getPosition();
         horizontal(x, pos.x - (designCanvasRect.x + designCanvasRect.width * x));
         vertical(y, pos.y - (designCanvasRect.y + designCanvasRect.height * y));
         return *this;

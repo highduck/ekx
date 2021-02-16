@@ -20,7 +20,8 @@ mergeInto(LibraryManager.library, {
         if (item != null) {
             var lengthBytes = lengthBytesUTF8(item) + 1;
             var stringOnWasmHeap = _malloc(lengthBytes);
-            return stringToUTF8(item, stringOnWasmHeap, lengthBytes);
+            stringToUTF8(item, stringOnWasmHeap, lengthBytes);
+            return stringOnWasmHeap;
         }
         return 0;
     },
@@ -58,4 +59,17 @@ mergeInto(LibraryManager.library, {
             gameview.style.transform = "translateX(" + offsetX + "px) translateY(" + offsetY + "px)";
         }
     },
+    web_get_lang: function () {
+        var lang = window.navigator.language;
+        lang = lang != null ? lang.substr(0, 2) : "en";
+        var lengthBytes = lengthBytesUTF8(lang) + 1;
+        var stringOnWasmHeap = _malloc(lengthBytes);
+        stringToUTF8(lang, stringOnWasmHeap, lengthBytes);
+        return stringOnWasmHeap;
+    },
+    web_vibrate: function (duration) {
+        if('vibrate' in window.navigator) {
+            window.navigator.vibrate(duration);
+        }
+    }
 });

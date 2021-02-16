@@ -2,7 +2,7 @@
 
 #include <ecxx/ecxx.hpp>
 
-#ifdef EK_EDITOR
+#ifdef EK_DEV_TOOLS
 
 #include <ek/editor/editor.hpp>
 
@@ -41,7 +41,6 @@ public:
 
     /////
     ecs::entity root;
-    ecs::entity game;
 
     static float2 AppResolution;
 
@@ -91,7 +90,7 @@ inline void run_app(app::window_config cfg) {
     basic_application::AppResolution = float2{cfg.size};
     g_app.window_cfg = std::move(cfg);
 
-#ifdef EK_EDITOR
+#ifdef EK_DEV_TOOLS
     Editor::settings.load();
     if (length(Editor::settings.windowSize) > 0.0f) {
         g_app.window_cfg.size = vec2{Editor::settings.windowSize};
@@ -101,7 +100,7 @@ inline void run_app(app::window_config cfg) {
 
     g_app.on_device_ready << [] {
         auto& app = service_locator_instance<basic_application>::init<T>();
-#ifdef EK_EDITOR
+#ifdef EK_DEV_TOOLS
         Editor::initialize();
 #endif
         app.initialize();

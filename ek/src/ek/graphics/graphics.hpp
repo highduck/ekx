@@ -56,15 +56,13 @@
 
 #endif
 
-#ifdef EK_EDITOR
-#define SOKOL_TRACE_HOOKS
-#endif
+//#ifdef EK_DEV_TOOLS
+//#define SOKOL_TRACE_HOOKS
+//#endif
 
 #include <sokol_gfx.h>
 
 #include <ek/util/common_macro.hpp>
-
-
 
 // sokol gfx objects RAII wrappers with utilities
 namespace ek::graphics {

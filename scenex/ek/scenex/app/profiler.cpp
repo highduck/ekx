@@ -13,7 +13,7 @@
 // TODO: EK_DEV_BUILD
 #ifndef ENABLE_PROFILER
 
-#if !defined(NDEBUG) || defined(EK_EDITOR)
+#if !defined(NDEBUG) || defined(EK_DEV_TOOLS)
 #define ENABLE_PROFILER
 #endif
 

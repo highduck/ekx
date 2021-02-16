@@ -7,7 +7,7 @@
 
 namespace ek {
 
-#if EK_EDITOR
+#if EK_DEV_TOOLS
 const bool useAdMobSimulator = true;
 #else
 const bool useAdMobSimulator = false;

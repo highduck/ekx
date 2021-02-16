@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(ek-editor)
+project(ek-dev-tools)
 
 add_subdirectory(src)
 

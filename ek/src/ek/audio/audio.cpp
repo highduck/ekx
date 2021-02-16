@@ -232,16 +232,21 @@ void Music::load(const char* path) {
         if (result != MA_SUCCESS) {
             EK_WARN("cannot register data");
         }
+        auto dataSourceFlags = MA_DATA_SOURCE_FLAG_STREAM;
+#if EK_WEB
+        dataSourceFlags = MA_DATA_SOURCE_FLAG_DECODE;
+#endif
+
         dataSource = new ma_resource_manager_data_source();
         result = ma_resource_manager_data_source_init(
                 audioSystem.pResourceManager, path,
-                MA_DATA_SOURCE_FLAG_STREAM, NULL, dataSource);
+                dataSourceFlags, nullptr, dataSource);
         if (result != MA_SUCCESS) {
             EK_WARN("cannot init stream data source");
         }
 
         sound = new ma_sound();
-        result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(), MA_DATA_SOURCE_FLAG_STREAM,
+        result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(), dataSourceFlags,
                                          &audioSystem.musicGroup, sound);
         ma_sound_set_looping(sound, true);
         if (result != MA_SUCCESS) {

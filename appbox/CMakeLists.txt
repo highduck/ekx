@@ -7,10 +7,10 @@ add_library(${PROJECT_NAME} STATIC ""
 add_subdirectory(src)
 
 target_link_libraries(${PROJECT_NAME}
-        scenex
-        plugin-admob
-        plugin-billing
-        plugin-game-services
+        PUBLIC scenex
+        PUBLIC plugin-admob
+        PUBLIC plugin-billing
+        PUBLIC plugin-game-services
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

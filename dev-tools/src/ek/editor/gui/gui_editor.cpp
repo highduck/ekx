@@ -23,9 +23,9 @@ void guiEditor(Editor& editor) {
             settings.dirty |= ImGui::MenuItem("Build & Export", nullptr, &settings.showBuildWindow);
             ImGui::Separator();
             if (ImGui::BeginMenu("Debug")) {
-                if (ImGui::DragFloat4("Add Insets", LayoutRect::AdditionalInsets.data())) {
-                    updateScreenRect(resolve<basic_application>().root);
-                }
+//                if (ImGui::DragFloat4("Add Insets", LayoutRect::AdditionalInsets.data())) {
+//                    updateScreenRect(resolve<basic_application>().root);
+//                }
                 auto* ic = try_resolve<input_controller>();
                 if (ic) {
                     ImGui::Checkbox("Touch Emulation", &ic->emulateTouch);

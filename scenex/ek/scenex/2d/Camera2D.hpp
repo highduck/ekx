@@ -15,14 +15,12 @@ struct Camera2D {
     int order = 0;
     int layerMask = 0xFF;
 
+    ecs::EntityRef viewportNode;
     ecs::EntityRef root;
     float contentScale = 1;
 
     rect_f viewport = rect_f::zero_one;
     float2 relativeOrigin{};
-
-    // TODO: maybe remove, it's calculated and applied to matrix of entity by canvas scale system...
-    bool syncContentScale = false;
 
     bool clearColorEnabled = false;
     float4 clearColor{0.5f, 0.5f, 0.5f, 1.0f};
@@ -39,8 +37,8 @@ struct Camera2D {
     bool debugDrawScriptGizmo = false;
     float debugDrawScale = 1;
 
-    matrix_2d matrix{};
-    matrix_2d inverseMatrix{};
+    matrix_2d screenToWorldMatrix{};
+    matrix_2d worldToScreenMatrix{};
     rect_f screenRect = rect_f::zero_one;
     rect_f worldRect = rect_f::zero_one;
 
@@ -50,7 +48,7 @@ public:
 
     explicit Camera2D(ecs::entity root);
 
-    [[nodiscard]] matrix_2d getMatrix(ecs::entity view, float scale) const;
+    [[nodiscard]] matrix_2d getMatrix(ecs::entity view, float scale, const float2& screenOffset) const;
 
 public:
     static void updateQueue();

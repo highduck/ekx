@@ -2,10 +2,10 @@ import {Project} from "../project";
 import * as path from "path";
 import {execute, isDir, makeDirs, readText, writeText} from "../utils";
 import {rmdirSync} from "fs";
+import {ekc} from "../ekc";
 
 export function androidBuildAppIcon(ctx: Project, output: string) {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
-    const binEKC = path.join(ctx.path.EKX_ROOT, "editor/bin/ekc");
 
     if (isDir(output)) {
         rmdirSync(output, {recursive: true});
@@ -32,5 +32,5 @@ export function androidBuildAppIcon(ctx: Project, output: string) {
         makeDirs(dir);
         cmd.push(scale.toString(), size.toString(), size.toString(), "0", "1", path.join(dir, filename));
     }
-    execute(binEKC, cmd);
+    ekc(ctx, ...cmd);
 }

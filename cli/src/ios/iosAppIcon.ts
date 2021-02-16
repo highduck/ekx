@@ -2,11 +2,10 @@ import {execute, isDir, makeDirs, readText, writeText} from "../utils";
 import {rmdirSync} from "fs";
 import * as path from "path";
 import {Project} from "../project";
+import {ekc} from "../ekc";
 
 export function iosBuildAppIcon(ctx: Project, output: string) {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
-    const binEKC = path.join(ctx.path.EKX_ROOT, "editor/bin/ekc");
-
     let iosIcon = JSON.parse(readText(path.join(ctx.path.templates, "template-ios/src/Assets.xcassets/AppIcon.appiconset/Contents.json")));
     const appIconFolder = path.join(output, "AppIcon.appiconset");
 
@@ -35,5 +34,5 @@ export function iosBuildAppIcon(ctx: Project, output: string) {
     iosIcon.images = images;
     writeText(path.join(appIconFolder, "Contents.json"), JSON.stringify(iosIcon));
 
-    execute(binEKC, cmd);
+    ekc(ctx, ...cmd);
 }
