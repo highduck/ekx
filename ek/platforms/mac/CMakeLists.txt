@@ -17,8 +17,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         )
 
 target_link_libraries(${PROJECT_NAME}
-        "-framework Cocoa"
-        "-framework OpenGL"
-        "-framework CoreVideo"
+        PRIVATE "-framework Cocoa"
+        PRIVATE "-framework OpenGL"
+        PRIVATE "-framework CoreVideo"
         )
 

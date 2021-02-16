@@ -6,8 +6,6 @@
 
 namespace ek {
 
-float4 LayoutRect::AdditionalInsets = float4::zero;
-
 rect_f find_parent_layout_rect(ecs::entity e, bool safe) {
     auto it = e.get<Node>().parent;
     while (it) {
@@ -20,22 +18,7 @@ rect_f find_parent_layout_rect(ecs::entity e, bool safe) {
     return rect_f::zero_one;
 }
 
-void updateScreenRect(ecs::entity root) {
-    const auto screen_size = app::g_app.drawable_size;
-    auto& rootLayout = root.get_or_create<LayoutRect>();
-    rootLayout.rect.set(0.0f, 0.0f, screen_size.x, screen_size.y);
-
-    auto insets = LayoutRect::AdditionalInsets + get_screen_insets();
-    rootLayout.safeRect = rootLayout.rect;
-    rootLayout.safeRect.x += insets.x;
-    rootLayout.safeRect.y += insets.y;
-    rootLayout.safeRect.width -= insets.x + insets.z;
-    rootLayout.safeRect.height -= insets.y + insets.w;
-}
-
 // system
-
-
 void update_layout(ecs::entity e) {
     const auto& l = e.get<LayoutRect>();
     auto top_rect = find_parent_layout_rect(e, l.doSafeInsets);

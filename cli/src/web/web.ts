@@ -6,6 +6,7 @@ import * as Mustache from 'mustache';
 import {webBuildAppIcon} from "./webAppIcon";
 import {collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {copyFileSync} from "fs";
+import {Project} from "../project";
 
 function renderCMakeFile(ctx, cmakeListContents: string): string {
     const cppSourceFiles = [];
@@ -30,8 +31,7 @@ function renderCMakeFile(ctx, cmakeListContents: string): string {
     });
 }
 
-function buildProject(ctx) {
-    const buildType = "Release";
+function buildProject(ctx, buildType) {
     const platform_proj_name = ctx.name + "-" + ctx.current_target; // "projectName-web"
     const dest_dir = "export";
     const dest_path = path.join(dest_dir, platform_proj_name);
@@ -70,7 +70,7 @@ function buildProject(ctx) {
 }
 
 /*** HTML ***/
-export function export_web(ctx) {
+export function export_web(ctx: Project) {
     const output_dir = ctx.path.CURRENT_PROJECT_DIR + "/export/web";
 
     function tpl(from, to) {
@@ -88,7 +88,8 @@ export function export_web(ctx) {
     buildAssets(ctx);
     webBuildAppIcon(ctx, path.join(output_dir, "icons"));
 
-    buildProject(ctx);
+    const buildType = ctx.args.indexOf("--debug") >= 0 ? "Debug" : "Release";
+    buildProject(ctx, buildType);
 
     tpl("web/index.html.mustache", "index.html");
     tpl("web/manifest.json.mustache", "manifest.webmanifest");
@@ -98,6 +99,6 @@ export function export_web(ctx) {
     copyFolderRecursiveSync("export/contents/assets", "export/web/assets");
 
     const projectDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export", ctx.name + "-" + ctx.current_target);
-    copyFileSync(path.join(projectDir, "build", ctx.name + ".js"), path.join(output_dir, ctx.name + ".js"));
-    copyFileSync(path.join(projectDir, "build", ctx.name + ".wasm"), path.join(output_dir, ctx.name + ".wasm"));
+    copyFileSync(path.join(projectDir, `cmake-build-${buildType.toLowerCase()}`, ctx.name + ".js"), path.join(output_dir, ctx.name + ".js"));
+    copyFileSync(path.join(projectDir, `cmake-build-${buildType.toLowerCase()}`, ctx.name + ".wasm"), path.join(output_dir, ctx.name + ".wasm"));
 }

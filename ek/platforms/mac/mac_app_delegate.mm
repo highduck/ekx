@@ -90,9 +90,9 @@ using namespace ek::app;
 }
 
 - (void)windowDidResize:(__unused NSNotification*)notification {
-    NSSize size = [NSWindow contentRectForFrameRect:_window.frame
+    const NSSize size = [NSWindow contentRectForFrameRect:_window.frame
                                           styleMask:_window.styleMask].size;
-    EK_TRACE("[macOS GL] windowDidResize: %lf, %lf", size.width, size.height);
+    //EK_TRACE("[macOS GL] windowDidResize: %lf, %lf", size.width, size.height);
 
     if (size.width != g_app.window_size.x || size.height != g_app.window_size.y) {
         g_app.window_size = {size.width, size.height};

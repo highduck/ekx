@@ -19,7 +19,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         )
 
 target_link_libraries(${PROJECT_NAME}
-        ek-editor
+        PUBLIC ek-dev-tools
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

@@ -24,7 +24,7 @@ void loop() {
     dispatch_draw_frame();
     update_mouse_cursor();
     if (g_app.require_exit) {
-        EM_ASM({ window.close() }, 0);
+        EM_ASM({window.close()}, 0);
     }
 }
 
@@ -218,21 +218,23 @@ void handle_resize() {
 
     // TODO: configurable min aspect (70/100)
     // TODO: landscape and different modes, native letterbox
-    const double aspect = g_app.window_cfg.size.x / g_app.window_cfg.size.y;
     double w = css_w;
     double h = css_h;
     double offset_x = 0;
     double offset_y = 0;
-    if (aspect > 1.0) {
-        if (w / aspect < h) {
-            h = w / aspect;
+    if (g_app.window_cfg.webKeepCanvasAspectRatio) {
+        const double aspect = g_app.window_cfg.size.x / g_app.window_cfg.size.y;
+        if (aspect > 1.0) {
+            if (w / aspect < h) {
+                h = w / aspect;
+            }
+            offset_y = (css_h - h) / 2;
+        } else {
+            if (h * aspect < w) {
+                w = h * aspect;
+            }
+            offset_x = (css_w - w) / 2;
         }
-        offset_y = (css_h - h) / 2;
-    } else {
-        if (h * aspect < w) {
-            w = h * aspect;
-        }
-        offset_x = (css_w - w) / 2;
     }
 
     css_w = w;
@@ -297,7 +299,7 @@ int main(int argc, char* argv[]) {
 namespace ek {
 
 void sharing_navigate(const char* url) {
-    EM_ASM({ window.open(UTF8ToString($0), "_blank") }, url);
+    EM_ASM({window.open(UTF8ToString($0), "_blank")}, url);
 }
 
 void sharing_rate_us(const char*) {}

@@ -1,11 +1,10 @@
 #include "Camera2D.hpp"
 #include "Transform2D.hpp"
 #include "RenderSystem2D.hpp"
+#include "Viewport.hpp"
 
 #include <ek/math/bounds_builder.hpp>
-#include <ek/math/matrix_inverse.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/scenex/base/Script.hpp>
 #include <ek/scenex/app/basic_application.hpp>
 
 namespace ek {
@@ -14,11 +13,11 @@ void drawEntity(ecs::entity e, const Transform2D* transform);
 
 ecs::entity Camera2D::Main{};
 
-matrix_2d Camera2D::getMatrix(ecs::entity root_, float scale) const {
+matrix_2d Camera2D::getMatrix(ecs::entity root_, float scale, const float2& screenOffset) const {
     auto screen = screenRect;
     auto m = root_.get<WorldTransform2D>().matrix;
     float invScale = 1.0f / (scale * contentScale);
-    m.scale(invScale, invScale).translate(-screen.position - relativeOrigin * screen.size);
+    m.scale(invScale, invScale).translate(screen.position - relativeOrigin * screen.size-screenOffset);
     return m;
 }
 
@@ -32,30 +31,27 @@ std::vector<ecs::entity>& Camera2D::getCameraQueue() {
 
 void Camera2D::updateQueue() {
     auto& app = resolve<basic_application>();
-    const auto contentScale = app.scale_factor;
-    const float2 fbSize{ek::app::g_app.drawable_size};
 
     activeCameras.clear();
     for (auto e : ecs::view<Camera2D>()) {
         auto& camera = e.get<Camera2D>();
+        const auto& vp = camera.viewportNode.get().get<Viewport>();
         if (!camera.enabled) {
             continue;
         }
 
-        if (camera.syncContentScale) {
-            camera.contentScale = contentScale;
-        }
+        // maybe we need region from not 0,0 started input rect
+        camera.screenRect = {
+                vp.input.fullRect.position * camera.viewport.position,
+                vp.input.fullRect.size * camera.viewport.size
+        };
 
-        camera.screenRect = camera.viewport * fbSize;
+        camera.screenToWorldMatrix = camera.getMatrix(e, vp.output.scale, vp.output.offset);
 
-        camera.matrix = camera.getMatrix(e, 1.0f);
+        camera.worldRect = bounds_builder_2f::transform(camera.screenRect, camera.screenToWorldMatrix);
 
-        camera.worldRect = bounds_builder_2f::transform(camera.screenRect, camera.matrix);
-
-        camera.matrix = camera.getMatrix(e, camera.debugDrawScale);
-
-        camera.inverseMatrix = camera.matrix;
-        if (camera.inverseMatrix.inverse()) {
+        camera.worldToScreenMatrix = camera.screenToWorldMatrix;
+        if (camera.worldToScreenMatrix.inverse()) {
             activeCameras.push_back(e);
         } else {
             // please debug camera setup
@@ -75,7 +71,7 @@ void Camera2D::render() {
         currentRenderingCamera = &camera;
         currentLayerMask = camera.layerMask;
 
-        draw2d::begin(rect_i{camera.screenRect}, camera.inverseMatrix);
+        draw2d::begin(camera.screenRect, camera.worldToScreenMatrix);
         if (camera.clearColorEnabled) {
             draw2d::state.pushProgram("draw2d_color");
             draw2d::state.color = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};

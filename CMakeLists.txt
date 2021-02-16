@@ -6,7 +6,7 @@ mark_as_advanced(EKX_BUILD_TESTS)
 
 option(EKX_BUILD_COVERAGE "Build EKX coverage check" OFF)
 option(EKX_BUILD_BENCHMARKS "Build EKX benchmarks projects" OFF)
-option(EKX_BUILD_EDITOR "Build EKX editor projects" ON)
+option(EKX_BUILD_DEV_TOOLS "Build EKX in-game development tools" ON)
 
 if ($ENV{CLION_IDE})
 set(EKX_BUILD_TESTS ON)
@@ -26,7 +26,7 @@ if (EKX_MOBILE)
     set(EKX_BUILD_TESTS OFF)
     set(EKX_BUILD_COVERAGE OFF)
     set(EKX_BUILD_BENCHMARKS OFF)
-    set(EKX_BUILD_EDITOR OFF)
+    set(EKX_BUILD_DEV_TOOLS OFF)
     set(EKX_TRACY OFF)
 endif ()
 
@@ -52,14 +52,20 @@ add_subdirectory(appbox)
 add_subdirectory(physics)
 
 add_library(ekx INTERFACE)
-target_link_libraries(ekx INTERFACE appbox ek-core ek scenex)
+target_link_libraries(ekx
+        INTERFACE appbox
+        INTERFACE ek-core
+        INTERFACE ek
+        INTERFACE scenex)
 
 add_subdirectory(flash)
-add_subdirectory(editor)
+add_subdirectory(dev-tools)
 
-if (EKX_BUILD_EDITOR)
-    add_compile_definitions(EK_EDITOR)
-    target_link_libraries(ekx INTERFACE ek-editor ek-flash)
+if (EKX_BUILD_DEV_TOOLS)
+    add_compile_definitions(EK_DEV_TOOLS)
+    target_link_libraries(ekx
+            INTERFACE ek-dev-tools
+            INTERFACE ek-flash)
 endif ()
 
 if (EKX_BUILD_TESTS)

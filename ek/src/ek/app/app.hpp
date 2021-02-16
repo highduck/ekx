@@ -17,6 +17,7 @@ struct window_config final {
     std::string title{"ek"};
     vec2 size{960, 720};
     bool needDepth = false;
+    bool webKeepCanvasAspectRatio = false;
 };
 
 struct arguments final {

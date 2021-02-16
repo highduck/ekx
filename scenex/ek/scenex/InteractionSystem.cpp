@@ -70,7 +70,7 @@ void InteractionSystem::process() {
             auto* camera = cameras[i].tryGet<Camera2D>();
             if (camera && camera->enabled && camera->interactive &&
                 camera->screenRect.contains(pointerScreenPosition_)) {
-                pointerWorldPosition = camera->matrix.transform(pointerScreenPosition_);
+                pointerWorldPosition = camera->screenToWorldMatrix.transform(pointerScreenPosition_);
                 cursor = searchInteractiveTargets(pointerWorldPosition, camera->root.ent(), currTargets);
             }
         }

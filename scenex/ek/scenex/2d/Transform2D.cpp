@@ -129,6 +129,12 @@ void updateWorldTransformAll2(ecs::world* w, ecs::entity root) {
     const auto* nodes = w->getStorage<Node>();
     const auto* localTransforms = w->getStorage<Transform2D>();
     const auto* worldTransforms = w->getStorage<WorldTransform2D>();
+
+    /// copy transforms for all roots
+    worldTransforms->get(root.index).matrix = localTransforms->get(root.index).matrix;
+    worldTransforms->get(root.index).color = localTransforms->get(root.index).color;
+    ///
+
     while (begin < end) {
         for (uint32_t i = begin; i < end; ++i) {
             const auto parent = out.data[i];

@@ -13,7 +13,7 @@
 - Add Oval shape support
 - Fix multisampling rendering
 - Add stroke gradients
-- Fix gradient matrix transform
+- Fix gradient screenToWorldMatrix transform
 - Add Bitmap fills render
 - Change fill bitmap reference resolving to parsing phase
 - Add `DocParser` to preserve `doc` instance for parsing methods

@@ -29,7 +29,7 @@ void RenderSystem2D::draw(const ecs::world& w, ecs::Entity e, const WorldTransfo
     auto* bounds = w.tryGet<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
-        auto rc = bounds->getScreenRect(camera->inverseMatrix, worldTransform->matrix);
+        auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, worldTransform->matrix);
         if (Camera2D::getCurrentRenderingCamera()->occlusionEnabled) {
             if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors)) {
                 // discard
@@ -93,7 +93,7 @@ void RenderSystem2D::drawStack(const ecs::world& w, ecs::Entity e) {
     auto* bounds = w.tryGet<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
-        auto rc = bounds->getScreenRect(camera->inverseMatrix, draw2d::state.matrix);
+        auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, draw2d::state.matrix);
         if (Camera2D::getCurrentRenderingCamera()->occlusionEnabled) {
             if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors)) {
                 // discard

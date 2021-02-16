@@ -1,5 +1,6 @@
 #include "mouse_follow_script.hpp"
 
+#include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
@@ -13,7 +14,9 @@ void mouse_follow_script::update(float dt) {
     auto parent = entity_.get<Node>().parent;
     if (parent) {
         auto& im = resolve<InteractionSystem>();
-        const auto pos = Transform2D::globalToLocal(parent, im.pointerScreenPosition_);
+        const auto& camera = Camera2D::Main.get<Camera2D>();
+        const auto cameraPointer = camera.screenToWorldMatrix.transform(im.pointerScreenPosition_);
+        const auto pos = Transform2D::globalToLocal(parent, cameraPointer);
         get<Transform2D>().setPosition(pos);
     }
 }

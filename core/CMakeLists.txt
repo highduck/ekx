@@ -87,7 +87,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
-        #UNITY_BUILD ON
+        C_STANDARD 17
         )
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
@@ -97,21 +97,24 @@ if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
             -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type
             -Woverloaded-virtual -Wcast-align -Wno-deprecated-declarations -Wstrict-aliasing)
 
-    set(EK_COMPILER_LTO "-flto")
+    #set(EK_COMPILER_LTO "-flto")
 endif ()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(EK_COMPILE_WARNINGS ${EK_COMPILE_WARNINGS}
             -Wno-dollar-in-identifier-extension -Wno-gnu-anonymous-struct -Wno-nested-anon-types)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set(EK_COMPILER_LTO "")
+    #set(EK_COMPILER_LTO "")
 endif ()
 
 target_compile_options(${PROJECT_NAME} PRIVATE
         -fno-exceptions
         -fno-rtti
         -fstrict-aliasing
-        ${EK_COMPILE_WARNINGS}
         )
 
-target_link_libraries(${PROJECT_NAME} stb sokol tracy)
+target_link_libraries(${PROJECT_NAME}
+        PUBLIC stb
+        PUBLIC sokol
+        PUBLIC tracy
+        )

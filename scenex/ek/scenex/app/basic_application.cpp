@@ -4,11 +4,12 @@
 
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
-#include <ek/scenex/2d/Canvas.hpp>
+#include <ek/scenex/2d/Viewport.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/util/logger.hpp>
+#include <ek/app/device.hpp>
 #include <ek/util/common_macro.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/scenex/asset2/builtin_assets.hpp>
@@ -46,6 +47,25 @@ using ecs::world;
 using ecs::entity;
 using namespace ek::app;
 
+// additional insets can be changed manually: l, t, r, b
+// to invalidate after change: setScreenRects(basic_application::root);
+static const float4 DebugAdditionalInsets = float4::zero;
+//static const float4 DebugAdditionalInsets{10, 20, 30, 40};
+
+void updateRootViewport(Viewport& vp) {
+    const auto screenSize = app::g_app.drawable_size;
+    const auto screenDpiScale = (float)app::g_app.content_scale;
+    const auto screenSafeInsets = DebugAdditionalInsets + get_screen_insets();
+    vp.input.fullRect = rect_f{0.0f, 0.0f, (float)screenSize.x, (float)screenSize.y};
+    vp.input.dpiScale = screenDpiScale;
+    vp.input.safeRect = vp.input.fullRect;
+    vp.input.safeRect.x += screenSafeInsets.x;
+    vp.input.safeRect.y += screenSafeInsets.y;
+    vp.input.safeRect.width -= screenSafeInsets.x + screenSafeInsets.z;
+    vp.input.safeRect.height -= screenSafeInsets.y + screenSafeInsets.w;
+}
+
+
 void drawPreloader(float progress);
 
 basic_application::basic_application() {
@@ -66,6 +86,13 @@ basic_application::~basic_application() {
 void basic_application::initialize() {
     ZoneScopedN("initialize");
     draw2d::state.initialize();
+
+    // init default empty sprite data
+    {
+        auto* spr = new Sprite();
+        spr->texture.setID("empty");
+        Res<Sprite>{"empty"}.reset(spr);
+    }
 
     //// basic scene
     using ecs::the_world;
@@ -89,7 +116,7 @@ void basic_application::initialize() {
     the_world.registerComponent<MovieClipTargetIndex>();
 
     the_world.registerComponent<LayoutRect>();
-    the_world.registerComponent<Canvas>();
+    the_world.registerComponent<Viewport>();
     the_world.registerComponent<Button>();
     the_world.registerComponent<Interactive>();
     the_world.registerComponent<Tween>();
@@ -107,22 +134,20 @@ void basic_application::initialize() {
     the_world.registerComponent<UglyFilter2D>();
 
     root = createNode2D("root");
-    updateScreenRect(root);
+    root.assign<Viewport>(AppResolution.x, AppResolution.y);
+    root.assign<LayoutRect>();
+    updateRootViewport(root.get<Viewport>());
+    Viewport::updateAll();
+    scale_factor = root.get<Viewport>().output.scale;
 
     auto& im = service_locator_instance<InteractionSystem>::init(root);
     service_locator_instance<input_controller>::init(im);
     service_locator_instance<AudioManager>::init();
 
-    game = createNode2D("game");
-    game.assign<Canvas>(AppResolution.x, AppResolution.y);
-    game.assign<LayoutRect>();
-    append(root, game);
-    Canvas::updateAll();
-    scale_factor = game.get<Canvas>().scale;
-
     auto camera = createNode2D("camera");
-    auto& defaultCamera = camera.assign<Camera2D>(game);
+    auto& defaultCamera = camera.assign<Camera2D>(root);
     defaultCamera.order = 1;
+    defaultCamera.viewportNode = ecs::EntityRef{root};
     Camera2D::Main = camera;
     append(root, camera);
 
@@ -145,7 +170,7 @@ void basic_application::on_draw_frame() {
     FrameMark;
     ZoneScoped;
     timer_t timer{};
-    scale_factor = game.get<Canvas>().scale;
+    scale_factor = root.get<Viewport>().output.scale;
     asset_manager_->set_scale_factor(scale_factor);
 
     /** base app BEGIN **/
@@ -197,7 +222,7 @@ void basic_application::on_draw_frame() {
 
         render_frame();
 
-        draw2d::begin({0, 0, fbWidth, fbHeight});
+        draw2d::begin({0, 0, (float)fbWidth, (float)fbHeight});
 
         if (!started_ && rootAssetObject) {
             drawPreloader(rootAssetObject->getProgress());
@@ -266,7 +291,7 @@ void basic_application::on_event(const event_t& event) {
     ZoneScoped;
     timer_t timer{};
     if (event.type == event_type::app_resize) {
-        updateScreenRect(root);
+        updateRootViewport(root.get<Viewport>());
     }
     profiler.addTime("EVENTS", timer.read_millis());
     profiler.addTime("FRAME", timer.read_millis());

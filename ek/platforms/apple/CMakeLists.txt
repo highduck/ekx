@@ -9,4 +9,4 @@ target_sources(${PROJECT_NAME} PRIVATE
         )
 
 target_compile_options(${PROJECT_NAME} PRIVATE -fobjc-arc)
-target_link_libraries(${PROJECT_NAME} "-framework AudioToolbox")
+target_link_libraries(${PROJECT_NAME} PRIVATE "-framework AudioToolbox")

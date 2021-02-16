@@ -43,8 +43,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         2d/Camera2D_debug.cpp
         2d/LayoutRect.hpp
         2d/LayoutRect.cpp
-        2d/Canvas.hpp
-        2d/Canvas.cpp
+        2d/Viewport.hpp
+        2d/Viewport.cpp
         2d/Button.hpp
         2d/Button.cpp
         2d/MovieClip.hpp
