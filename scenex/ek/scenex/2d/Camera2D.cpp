@@ -30,9 +30,8 @@ std::vector<ecs::entity>& Camera2D::getCameraQueue() {
 }
 
 void Camera2D::updateQueue() {
-    auto& app = resolve<basic_application>();
-
     activeCameras.clear();
+
     for (auto e : ecs::view<Camera2D>()) {
         auto& camera = e.get<Camera2D>();
         const auto& vp = camera.viewportNode.get().get<Viewport>();

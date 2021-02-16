@@ -61,14 +61,17 @@ mergeInto(LibraryManager.library, {
     },
     web_get_lang: function () {
         var lang = window.navigator.language;
-        lang = lang != null ? lang.substr(0, 2) : "en";
-        var lengthBytes = lengthBytesUTF8(lang) + 1;
-        var stringOnWasmHeap = _malloc(lengthBytes);
-        stringToUTF8(lang, stringOnWasmHeap, lengthBytes);
-        return stringOnWasmHeap;
+        if(lang != null && lang.length >= 2) {
+            lang = lang.substr(0, 2);
+            var lengthBytes = lengthBytesUTF8(lang) + 1;
+            var stringOnWasmHeap = _malloc(lengthBytes);
+            stringToUTF8(lang, stringOnWasmHeap, lengthBytes);
+            return stringOnWasmHeap;
+        }
+        return 0;
     },
     web_vibrate: function (duration) {
-        if('vibrate' in window.navigator) {
+        if (typeof window.navigator.vibrate === "function") {
             window.navigator.vibrate(duration);
         }
     }

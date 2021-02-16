@@ -1,8 +1,8 @@
-import {execute, isDir, makeDirs, optimizePngGlob} from "./utils";
+import {execute, isDir, makeDirs, optimizePngGlob, optimizePngGlobAsync} from "./utils";
 import * as path from "path";
 import {Project} from "./project";
 import {rmdirSync} from "fs";
-import {ekc} from "./ekc";
+import {ekc, ekcAsync} from "./ekc";
 
 export function buildMarketingAssets(ctx: Project, target_type: string, output: string) {
     if (isDir(output)) {
@@ -25,4 +25,15 @@ export function buildAssets(ctx: Project, output?: string) {
     makeDirs(assetsOutput);
     ekc(ctx, "export", "assets", assetsInput, assetsOutput);
     optimizePngGlob(path.join(assetsOutput, "**/*.png"));
+}
+
+export async function buildAssetsAsync(ctx: Project, output?: string) {
+    let assetsInput = ctx.getAssetsInput();
+    let assetsOutput = output ?? ctx.getAssetsOutput();
+    if (isDir(assetsOutput)) {
+        rmdirSync(assetsOutput, {recursive: true});
+    }
+    makeDirs(assetsOutput);
+    await ekcAsync(ctx, "export", "assets", assetsInput, assetsOutput);
+    await optimizePngGlobAsync(path.join(assetsOutput, "**/*.png"));
 }

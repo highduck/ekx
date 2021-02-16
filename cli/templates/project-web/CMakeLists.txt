@@ -10,6 +10,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         #-SEARCH_ROOTS-#
         )
 
+#{{{CMAKE_CODE}}}
+
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES

@@ -136,5 +136,18 @@ inline unsigned int nextPowerOf2(unsigned int x) {
     x++;
     return x;
 }
+//
+//union FloatInt {
+//    int32_t i;
+//    float f;
+//};
+//
+//inline int32_t fastFloatToInt(float x) {
+//    constexpr FloatInt magic{(150 << 23) | (1 << 22)};
+//    return FloatInt{
+//            .f = x + magic.f
+//    }.i - magic.i;
+//}
+
 
 }

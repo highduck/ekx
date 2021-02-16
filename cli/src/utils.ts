@@ -1,15 +1,33 @@
-import {spawnSync} from "child_process";
+import {spawn, spawnSync} from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as glob from 'glob';
 
-export function execute(cmd, args) {
+export function executeAsync(bin: string, args: string[], workingDir?: string): Promise<number> {
+    return new Promise((resolve, reject) => {
+        const child = spawn(bin, args, {
+            //detached: true,
+            stdio: "inherit",
+            cwd: workingDir
+        });
+        child.on('close', (code) => {
+            if (code === 0) {
+                resolve(code);
+            } else {
+                reject('exit code: ' + code);
+            }
+        });
+    });
+}
+
+export function execute(cmd: string, args: string[], workingDir?: string) {
     console.debug(">> " + [cmd].concat(args).join(" "));
-    console.debug("cwd", process.cwd());
+    const wd = workingDir ?? process.cwd();
+    console.debug("cwd", wd);
     const child = spawnSync(cmd, args, {
             stdio: 'pipe',
             encoding: 'utf-8',
-            cwd: process.cwd()
+            cwd: wd
         }
     );
     console.log("stderr", child.stderr.toString());
@@ -39,6 +57,21 @@ export function optimizePng(input: string, output?: string) {
     }
 }
 
+export async function optimizePngGlobAsync(input_pattern: string): Promise<any> {
+    const pngquant = require('pngquant-bin');
+    const files = glob.sync(input_pattern);
+    const tasks: Promise<number>[] = [];
+    for (const file of files) {
+        tasks.push(executeAsync(pngquant, [
+            "--strip",
+            "--force",
+            "-o", file,
+            file
+        ]).catch());
+    }
+    return Promise.all(tasks);
+}
+
 export function optimizePngGlob(input_pattern: string) {
     const files = glob.sync(input_pattern);
     for (const file of files) {
@@ -46,9 +79,9 @@ export function optimizePngGlob(input_pattern: string) {
     }
 }
 
-export function withPath(path: string, cb: () => void) {
+export function withPath(dir: string, cb: () => void): void {
     const p = process.cwd();
-    process.chdir(path);
+    process.chdir(dir);
     cb();
     process.chdir(p);
 }
@@ -77,7 +110,7 @@ export function isFile(p: string) {
     return fs.existsSync(p) && fs.lstatSync(p).isFile();
 }
 
-export function substituteAll(contents:string, dict: { [key: string]: string }):string {
+export function substituteAll(contents: string, dict: { [key: string]: string }): string {
     for (const [k, v] of Object.entries(dict)) {
         contents = replaceAll(contents, k, v);
     }
