@@ -140,6 +140,7 @@ void basic_application::initialize() {
     root = createNode2D("root");
     root.assign<Viewport>(AppResolution.x, AppResolution.y);
     root.assign<LayoutRect>();
+    root.assign<NodeEventHandler>();
     updateRootViewport(root.get<Viewport>());
     Viewport::updateAll();
     scale_factor = root.get<Viewport>().output.scale;
