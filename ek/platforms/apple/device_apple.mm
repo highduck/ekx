@@ -10,6 +10,7 @@
 
 #if TARGET_OS_IOS || TARGET_OS_TV
 
+#import <ios_app_delegate.h>
 
 #else
 
@@ -32,12 +33,23 @@ std::string get_device_lang() {
     return result;
 }
 
-float4 get_screen_insets() {
-    float4 result{};
-#if TARGET_OS_IOS || TARGET_OS_TV
+void getScreenInsets(float padding[4]) {
+    padding[0] = 0.0f;
+    padding[1] = 0.0f;
+    padding[2] = 0.0f;
+    padding[3] = 0.0f;
 
+#if TARGET_OS_IOS || TARGET_OS_TV
+    if (@available(iOS 11.0, *)) {
+        UIView *view = g_app_delegate.view;
+        CGFloat scaleFactor = view.contentScaleFactor;
+        UIEdgeInsets safeAreaInsets = view.safeAreaInsets;
+        padding[0] = (float)(safeAreaInsets.left * scaleFactor);
+        padding[1] = (float)(safeAreaInsets.top * scaleFactor);
+        padding[2] = (float)(safeAreaInsets.right * scaleFactor);
+        padding[3] = (float)(safeAreaInsets.bottom * scaleFactor);
+    }
 #endif
-    return result;
 }
 
 void vibrate(int duration_millis) {

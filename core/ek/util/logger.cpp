@@ -65,8 +65,30 @@ void write(verbosity_t verbosity,
     }
     __android_log_write(priority, log_tag_, message);
 
-#else
+#elif EK_IOS
+    const char* prefix = nullptr;
+    switch (verbosity) {
+        case verbosity_t::info:
+            prefix = "[i] ";
+            break;
+        case verbosity_t::warning:
+            prefix = "[WARNING] ";
+            break;
+        case verbosity_t::error:
+            prefix = "[ERROR] ";
+            break;
+        case verbosity_t::debug:
+            prefix = "[d] ";
+            break;
+        case verbosity_t::trace:
+            prefix = "[t] ";
+            break;
+        default:
+            return;
+    }
+    printf("%s%s", prefix, message);
 
+#else
     const char* prefix = nullptr;
     switch (verbosity) {
         case verbosity_t::info:

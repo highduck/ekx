@@ -7,8 +7,11 @@ extern void web_vibrate(int cur);
 extern char* web_get_lang();
 }
 
-float4 get_screen_insets() {
-    return float4{};
+void getScreenInsets(float padding[4]) {
+    padding[0] = 0.0f;
+    padding[1] = 0.0f;
+    padding[2] = 0.0f;
+    padding[3] = 0.0f;
 }
 
 void vibrate(int duration_millis) {

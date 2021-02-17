@@ -55,14 +55,18 @@ static const float4 DebugAdditionalInsets = float4::zero;
 void updateRootViewport(Viewport& vp) {
     const auto screenSize = app::g_app.drawable_size;
     const auto screenDpiScale = (float)app::g_app.content_scale;
-    const auto screenSafeInsets = DebugAdditionalInsets + get_screen_insets();
+
+    float4 insets;
+    getScreenInsets(insets.data());
+    insets += DebugAdditionalInsets;
+
     vp.input.fullRect = rect_f{0.0f, 0.0f, (float)screenSize.x, (float)screenSize.y};
     vp.input.dpiScale = screenDpiScale;
     vp.input.safeRect = vp.input.fullRect;
-    vp.input.safeRect.x += screenSafeInsets.x;
-    vp.input.safeRect.y += screenSafeInsets.y;
-    vp.input.safeRect.width -= screenSafeInsets.x + screenSafeInsets.z;
-    vp.input.safeRect.height -= screenSafeInsets.y + screenSafeInsets.w;
+    vp.input.safeRect.x += insets.x;
+    vp.input.safeRect.y += insets.y;
+    vp.input.safeRect.width -= insets.x + insets.z;
+    vp.input.safeRect.height -= insets.y + insets.w;
 }
 
 
