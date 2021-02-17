@@ -20,24 +20,24 @@ std::string get_device_lang() {
     return result;
 }
 
-float4 get_screen_insets() {
-    float4 result{};
-
+void getScreenInsets(float padding[4]) {
     auto* env = android::get_jni_env();
     auto class_ref = env->FindClass("ek/EkDevice");
     auto method = env->GetStaticMethodID(class_ref, "getScreenInsets", "()[I");
     auto rv = (jintArray) env->CallStaticObjectMethod(class_ref, method);
-    jsize len = env->GetArrayLength(rv);
-    jint* temp_arr = env->GetIntArrayElements(rv, nullptr);
-    if (len >= 4) {
-        result[0] = static_cast<float>(temp_arr[0]);
-        result[1] = static_cast<float>(temp_arr[1]);
-        result[2] = static_cast<float>(temp_arr[2]);
-        result[3] = static_cast<float>(temp_arr[3]);
-    }
-    env->ReleaseIntArrayElements(rv, temp_arr, 0);
 
-    return result;
+    jsize len = env->GetArrayLength(rv);
+    EK_ASSERT(len >= 4);
+
+    jint* temp_arr = env->GetIntArrayElements(rv, nullptr);
+    EK_ASSERT(temp_arr);
+
+    padding[0] = static_cast<float>(temp_arr[0]);
+    padding[1] = static_cast<float>(temp_arr[1]);
+    padding[2] = static_cast<float>(temp_arr[2]);
+    padding[3] = static_cast<float>(temp_arr[3]);
+
+    env->ReleaseIntArrayElements(rv, temp_arr, 0);
 }
 
 void vibrate(int duration_millis) {

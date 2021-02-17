@@ -126,7 +126,9 @@ void Profiler::update(float dt) {
 void Profiler::draw() {
 #ifdef ENABLE_PROFILER
     const auto scale = static_cast<float>(app::g_app.content_scale);
-    auto insets = get_screen_insets();
+    float4 insets;
+    getScreenInsets(insets.data());
+
     draw2d::state.matrix = matrix_2d{scale, 0, 0, scale, insets.x, insets.y};
     draw2d::state.set_empty_texture();
 

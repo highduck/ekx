@@ -232,10 +232,14 @@ void Music::load(const char* path) {
         if (result != MA_SUCCESS) {
             EK_WARN("cannot register data");
         }
-        auto dataSourceFlags = MA_DATA_SOURCE_FLAG_STREAM;
-#if EK_WEB
-        dataSourceFlags = MA_DATA_SOURCE_FLAG_DECODE;
-#endif
+        // MA_DATA_SOURCE_FLAG_STREAM: here means reading directly from File using VFS,
+        // MA_DATA_SOURCE_FLAG_DECODE: we decode ahead of time the whole buffer
+        // I think we don't need to set any flag to set decoding by blocks on the fly from encoded memory buffer
+        //auto dataSourceFlags = MA_DATA_SOURCE_FLAG_STREAM;
+        auto dataSourceFlags = 0;
+//#if EK_WEB
+//        dataSourceFlags = MA_DATA_SOURCE_FLAG_DECODE;
+//#endif
 
         dataSource = new ma_resource_manager_data_source();
         result = ma_resource_manager_data_source_init(

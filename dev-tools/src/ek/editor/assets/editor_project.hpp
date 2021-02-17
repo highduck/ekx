@@ -28,7 +28,7 @@ public:
 
     void clear();
 
-    void populate(bool auto_load = true);
+    void populate(bool loadAllAssets = true);
 
     template<typename EditorAssetType>
     void register_asset_factory() {

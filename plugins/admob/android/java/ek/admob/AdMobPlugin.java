@@ -120,6 +120,12 @@ public class AdMobPlugin extends EkPlugin {
                                 _interstitialAd.loadAd(buildAdRequest());
                             }
                         }
+
+                        @Override
+                        public void onAdFailedToLoad(int error) {
+                            //Retry
+                            _interstitialAd.loadAd(buildAdRequest());
+                        }
                     });
                 }
 

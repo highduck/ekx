@@ -11,7 +11,7 @@ module.exports = (ctx) => {
         ios: {
             cpp: [path.join(__dirname, "ios")],
             xcode: {
-                pods: ["Firebase/AdMob"],
+                pods: ["Google-Mobile-Ads-SDK"],
                 plist: [
                     {
                         GADApplicationIdentifier: ctx.ios.admob_app_id,

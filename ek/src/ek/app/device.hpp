@@ -8,8 +8,8 @@ namespace ek {
 
 std::string get_device_lang();
 
-// TODO: return float4 ?
-float4 get_screen_insets();
+// safe area margins left-top-right-bottom
+void getScreenInsets(float padding[4]);
 
 void vibrate(int duration_millis);
 

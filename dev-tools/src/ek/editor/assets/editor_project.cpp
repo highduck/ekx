@@ -36,12 +36,12 @@ std::vector<path_t> search_asset_files(const path_t& path) {
     return search_files("*.asset.xml", path_t{""});
 }
 
-void editor_project_t::populate(bool auto_load) {
+void editor_project_t::populate(bool loadAllAssets) {
     clear();
     for (const auto& path : search_asset_files(base_path)) {
         add_file(path);
     }
-    if (auto_load) {
+    if (loadAllAssets) {
         load_all();
     }
 }
@@ -124,15 +124,20 @@ editor_project_t::~editor_project_t() {
 
 void editor_project_t::build(const path_t& output) const {
     std::vector<editor_asset_t*> assetsToBuild;
+    // read declaration for all populated assets,
+    // and add to queue assets that should be packed (dev / platform)
+    // platform filter is not implemented yet
     for (auto* asset : assets) {
+        asset->read_decl();
         // skip dev files for build without editor
-        if (!asset->isDev()) {
+        if (devMode || !asset->isDev()) {
             assetsToBuild.push_back(asset);
         }
     }
     make_dirs(output);
     output_memory_stream out{100};
     assets_build_struct_t build_data{output, &out};
+    // then all queued assets should pass 3 steps: before build, build, after build
     for (auto asset : assetsToBuild) asset->beforeBuild(build_data);
     for (auto asset : assetsToBuild) asset->build(build_data);
     for (auto asset : assetsToBuild) asset->afterBuild(build_data);
