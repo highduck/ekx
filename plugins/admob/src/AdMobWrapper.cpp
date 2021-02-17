@@ -28,6 +28,7 @@ void AdMobWrapper::showInterstitial(const std::function<void()>& callback) {
 
 void AdMobWrapper::showRewardedAd(const std::function<void(bool)>& callback) {
     rewardedAdCompletedCallback = callback;
+    userRewarded = false;
     admob::show_rewarded_ad();
     audio::muteDeviceBegin();
 }
@@ -44,19 +45,17 @@ void AdMobWrapper::onAdmobEvent(admob::event_type event) {
     using namespace admob;
     switch (event) {
         case event_type::video_rewarded:
-            completeRewardedAd(true);
+            userRewarded = true;
             break;
         case event_type::video_failed:
         case event_type::video_closed:
-            completeRewardedAd(false);
+            completeRewardedAd(userRewarded);
             break;
         case event_type::video_loaded:
             if (rewardedAdCompletedCallback) {
                 show_rewarded_ad();
             }
             break;
-//            case event_type::video_loading:
-//                break;
         default:
             break;
     }

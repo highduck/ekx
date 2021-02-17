@@ -198,8 +198,6 @@ public class AdMobPlugin extends EkPlugin {
                                 @Override
                                 public void onUserEarnedReward(@NonNull RewardItem reward) {
                                     postGLEvent(ADS_VIDEO_REWARDED);
-//                                    reward.getType();
-//                                    reward.getAmount();
                                 }
 
                                 @Override
