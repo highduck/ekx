@@ -10,6 +10,7 @@ protected:
     bool activeInterstitial = false;
 
     std::function<void(bool)> rewardedAdCompletedCallback;
+    bool userRewarded = false;
 public:
 
     AdMobWrapper();

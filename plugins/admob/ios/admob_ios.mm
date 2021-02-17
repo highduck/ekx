@@ -92,12 +92,10 @@ void reloadRewardedAd();
     //admob::reloadRewardedAd();
 }
 
-/// Tells the delegate that the rewarded ad was dismissed.
 - (void)adDidDismissFullScreenContent:(id)ad {
     NSLog(@"Rewarded ad dismissed.");
     admob::onEvent(admob::event_type::video_closed);
 }
-
 
 @end
 
