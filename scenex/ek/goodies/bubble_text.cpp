@@ -50,14 +50,14 @@ void BubbleText::updateAll() {
     }
 }
 
-ecs::entity BubbleText::create(const float2& pos, const std::string& text, float delay) {
+ecs::entity BubbleText::create(const char* fontName, const std::string& text, const float2& pos, float delay) {
     auto e = createNode2D();
     auto& c = e.assign<BubbleText>();
     c.delay = delay;
     c.start = pos;
     float spread = 10.0f;
     c.offset.x = rand_fx.random(-spread, spread);
-    TextFormat format{"Comfortaa-Regular", 32.0f};
+    TextFormat format{fontName, 32.0f};
     format.setAlignment(Alignment::Center);
     format.setTextColor(0xFFFFFFFF_argb);
     format.addShadow(0xFF000000_argb, 4, {0.0f, 1.5f});

@@ -131,6 +131,7 @@ struct Display2D {
     }
 };
 
+// 16 + 16 = 32 bytes
 class Quad2D : public Drawable2D<Quad2D> {
 public:
     rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
@@ -156,6 +157,7 @@ public:
     };
 };
 
+// 8 + 1 = 9 bytes
 class Sprite2D : public Drawable2D<Sprite2D> {
 public:
     Res<Sprite> src;
@@ -174,7 +176,7 @@ public:
     bool hitTest(float2 point) const override;
 };
 
-
+// 8 + 16 + 16 + 8 + 1 = 49 bytes
 class NinePatch2D : public Drawable2D<NinePatch2D> {
 public:
     Res<Sprite> src;
@@ -197,6 +199,7 @@ public:
     bool hitTest(float2 point) const override;
 };
 
+// 8 + 136 + 16 + 8 + 4 = 172 bytes
 class Text2D : public Drawable2D<Text2D> {
 public:
     std::string text;
@@ -230,6 +233,7 @@ public:
     bool hitTest(float2 point) const override;
 };
 
+// 4 + 4 + 4 + 4 + 4 + 4 + 8 = 32 bytes
 class Arc2D : public Drawable2D<Arc2D> {
 public:
     float angle = 0.0f;

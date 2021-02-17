@@ -1,6 +1,7 @@
 package ek.admob;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
@@ -8,17 +9,18 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.ads.AdError;
-import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.RequestConfiguration;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
-import com.google.android.gms.ads.rewarded.RewardedAdCallback;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
 import java.util.Arrays;
@@ -50,9 +52,9 @@ public class AdMobPlugin extends EkPlugin {
     private final String _interstitialId;
 
     private AdView _banner;
-    private RewardedAd _rewardedVideo;
+    private RewardedAd _rewardedAd;
     private InterstitialAd _interstitialAd;
-    private int tagForChildDirectedTreatment;
+    final private int tagForChildDirectedTreatment;
 
     static AdMobPlugin instance;
 
@@ -77,6 +79,59 @@ public class AdMobPlugin extends EkPlugin {
             return RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE;
         }
         return RequestConfiguration.TAG_FOR_CHILD_DIRECTED_TREATMENT_UNSPECIFIED;
+    }
+
+    private void loadInterstitialAd() {
+        _interstitialAd = null;
+        InterstitialAd.load(_activity, _interstitialId, buildAdRequest(), new InterstitialAdLoadCallback() {
+            @Override
+            public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                // The mInterstitialAd reference will be null until
+                // an ad is loaded.
+                Log.i(TAG, "onAdLoaded");
+                _interstitialAd = interstitialAd;
+                _interstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                    @Override
+                    public void onAdDismissedFullScreenContent() {
+                        // Called when fullscreen content is dismissed.
+                        Log.d("TAG", "The ad was dismissed.");
+
+                        postGLEvent(EVENT_INTERSTITIAL_CLOSED);
+
+                        // load next interstitial
+                        loadInterstitialAd();
+                    }
+
+                    @Override
+                    public void onAdFailedToShowFullScreenContent(AdError adError) {
+                        // Called when fullscreen content failed to show.
+                        Log.d("TAG", "The ad failed to show.");
+
+                        postGLEvent(EVENT_INTERSTITIAL_CLOSED);
+
+                        // load next interstitial
+                        loadInterstitialAd();
+                    }
+
+                    @Override
+                    public void onAdShowedFullScreenContent() {
+                        // Called when fullscreen content is shown.
+                        // Make sure to set your reference to null so you don't
+                        // show it a second time.
+                        _interstitialAd = null;
+                        Log.d("TAG", "The ad was shown.");
+                    }
+                });
+            }
+
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                // Handle the error
+                Log.i(TAG, loadAdError.getMessage());
+                _interstitialAd = null;
+                loadInterstitialAd();
+            }
+        });
     }
 
     private void start() {
@@ -107,30 +162,10 @@ public class AdMobPlugin extends EkPlugin {
                 }
 
                 if (_interstitialId != null && !_interstitialId.isEmpty()) {
-                    _interstitialAd = new InterstitialAd(_activity);
-                    _interstitialAd.setAdUnitId(_interstitialId);
-                    _interstitialAd.loadAd(buildAdRequest());
-                    _interstitialAd.setAdListener(new AdListener() {
-                        @Override
-                        public void onAdClosed() {
-                            // Load the next interstitial.
-                            postGLEvent(EVENT_INTERSTITIAL_CLOSED);
-
-                            if (_interstitialAd != null) {
-                                _interstitialAd.loadAd(buildAdRequest());
-                            }
-                        }
-
-                        @Override
-                        public void onAdFailedToLoad(int error) {
-                            //Retry
-                            _interstitialAd.loadAd(buildAdRequest());
-                        }
-                    });
+                    loadInterstitialAd();
                 }
 
                 if (_videoRewardId != null && !_videoRewardId.isEmpty()) {
-                    _rewardedVideo = new RewardedAd(_context, _videoRewardId);
                     loadRewardedVideoAd();
                 }
 
@@ -159,82 +194,98 @@ public class AdMobPlugin extends EkPlugin {
     }
 
     public void loadRewardedVideoAd() {
-        if (_rewardedVideo != null && _videoRewardId != null && !_videoRewardId.isEmpty()) {
-            _rewardedVideo.loadAd(buildAdRequest(), new RewardedAdLoadCallback() {
-                public void onRewardedAdLoaded() {
-                    postGLEvent(ADS_VIDEO_REWARD_LOADED);
-                }
-
-                public void onRewardedAdFailedToLoad(LoadAdError var1) {
-                    postGLEvent(ADS_VIDEO_REWARD_FAIL);
-                }
-            });
+        if (_videoRewardId == null || _videoRewardId.isEmpty()) {
+            return;
         }
+        _rewardedAd = null;
+        RewardedAd.load(_activity, _videoRewardId, buildAdRequest(), new RewardedAdLoadCallback() {
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                _rewardedAd = null;
+                postGLEvent(ADS_VIDEO_REWARD_FAIL);
+            }
+
+            @Override
+            public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
+                Log.d(TAG, "onAdFailedToLoad");
+                _rewardedAd = rewardedAd;
+                _rewardedAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                    @Override
+                    public void onAdShowedFullScreenContent() {
+                        // Called when ad is shown.
+                        Log.d(TAG, "Rewarded Ad was shown");
+                        _rewardedAd = null;
+                    }
+
+                    @Override
+                    public void onAdFailedToShowFullScreenContent(AdError adError) {
+                        // Called when ad fails to show.
+                        Log.d(TAG, "Rewarded Ad failed to show");
+                        postGLEvent(ADS_VIDEO_REWARD_FAIL);
+                    }
+
+                    @Override
+                    public void onAdDismissedFullScreenContent() {
+                        // Called when ad is dismissed.
+                        // Don't forget to set the ad reference to null so you
+                        // don't show the ad a second time.
+                        Log.d(TAG, "Rewarded Ad was dismissed");
+                        postGLEvent(ADS_VIDEO_REWARD_CLOSED);
+                    }
+                });
+                postGLEvent(ADS_VIDEO_REWARD_LOADED);
+            }
+        });
     }
 
     @Keep
     public static void show_interstitial_ad() {
-        EkActivity.runMainThread(
-                () -> {
-                    if (instance._interstitialAd != null) {
-                        if (instance._interstitialAd.isLoaded()) {
-                            instance._interstitialAd.show();
-                        } else {
-                            postGLEvent(EVENT_INTERSTITIAL_CLOSED);
-                        }
-                    } else {
-                        postGLEvent(EVENT_INTERSTITIAL_CLOSED);
-                    }
-                });
+        EkActivity.runMainThread(() -> {
+            if (instance._interstitialAd != null) {
+                // ad is ready to go
+                instance._interstitialAd.show(instance._activity);
+            } else {
+                postGLEvent(EVENT_INTERSTITIAL_CLOSED);
+            }
+        });
     }
 
     @Keep
     public static void show_rewarded_ad() {
-        EkActivity.runMainThread(
-                () -> {
-                    if (instance._rewardedVideo != null) {
-                        if (instance._rewardedVideo.isLoaded()) {
-                            instance._rewardedVideo.show(instance._activity, new RewardedAdCallback() {
-                                @Override
-                                public void onUserEarnedReward(@NonNull RewardItem reward) {
-                                    postGLEvent(ADS_VIDEO_REWARDED);
-                                }
-
-                                @Override
-                                public void onRewardedAdClosed() {
-                                    postGLEvent(ADS_VIDEO_REWARD_CLOSED);
-                                }
-
-                                @Override
-                                public void onRewardedAdFailedToShow(AdError err) {
-                                    postGLEvent(ADS_VIDEO_REWARD_FAIL);
-                                }
-                            });
-                        } else {
-                            instance.loadRewardedVideoAd();
-                            postGLEvent(ADS_VIDEO_LOADING);
-                        }
+        EkActivity.runMainThread(() -> {
+            if (instance._rewardedAd != null) {
+                instance._rewardedAd.show(instance._activity, new OnUserEarnedRewardListener() {
+                    @Override
+                    public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
+                        // Handle the reward.
+                        Log.d(TAG, "The user earned the reward");
+                        //int rewardAmount = rewardItem.getAmount();
+                        //String rewardType = rewardItem.getType();
+                        postGLEvent(ADS_VIDEO_REWARDED);
                     }
                 });
+            } else {
+                instance.loadRewardedVideoAd();
+                postGLEvent(ADS_VIDEO_LOADING);
+            }
+        });
     }
 
     @Keep
     public static void show_banner(final int flags) {
-        EkActivity.runMainThread(
-                () -> {
-                    if (instance._banner != null) {
-                        if (flags != 0) {
-                            if (instance._banner.getParent() == null) {
-                                instance._layout.addView(instance._banner);
-                            }
-                        } else {
-                            if (instance._banner.getParent() != null) {
-                                instance._layout.removeView(instance._banner);
-                            }
-                        }
+        EkActivity.runMainThread(() -> {
+            if (instance._banner != null) {
+                if (flags != 0) {
+                    if (instance._banner.getParent() == null) {
+                        instance._layout.addView(instance._banner);
+                    }
+                } else {
+                    if (instance._banner.getParent() != null) {
+                        instance._layout.removeView(instance._banner);
                     }
                 }
-        );
+            }
+        });
     }
 
     @Override
@@ -245,7 +296,7 @@ public class AdMobPlugin extends EkPlugin {
                 _banner = null;
             }
             _interstitialAd = null;
-            _rewardedVideo = null;
+            _rewardedAd = null;
         } catch (Exception ignored) {
         }
     }

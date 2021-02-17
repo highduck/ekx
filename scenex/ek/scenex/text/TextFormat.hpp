@@ -59,6 +59,9 @@ enum class TextLayerType {
     Shadow
 };
 
+// type + color + offset = 16
+// blur + effects = 8
+// Total: 24 bytes
 struct TextLayerEffect {
     TextLayerType type = TextLayerType::Text;
     argb32_t color = 0xFFFFFFFF_argb;
@@ -70,6 +73,10 @@ struct TextLayerEffect {
     bool showGlyphBounds = false;
 };
 
+// 8 + 4 + 4 + 4 + 8 + 4(flags) = 32
+// layers = 24 bytes * 4 (LayersMax) = 96
+// count / indx = 8
+// Total = 136 bytes
 struct TextFormat {
     Res <Font> font;
     float size = 16.0f;

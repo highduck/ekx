@@ -72,7 +72,7 @@
                 purchase.productID = prodID;
                 purchase.token = trID;
                 purchase.errorCode = (int)transaction.error.code;
-                purchase.state = -1;
+                purchase.state = -1; // failed
                 // SKErrorPaymentCancelled
                 if (transaction.error.code == SKErrorPaymentCancelled) {
                 }
@@ -89,6 +89,7 @@
                 PurchaseData purchase;
                 purchase.productID = prodID;
                 purchase.token = trID;
+                purchase.state = 0; // purchased
                 
 //                NSString* str = [[NSString alloc] initWithData:transaction.transactionReceipt encoding:NSUTF8StringEncoding];
 //                NSData *dataReceipt = [NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]];
@@ -144,6 +145,8 @@
     [self handleQueue:[SKPaymentQueue defaultQueue] updatedTransactions: purchased];
     [self handleQueue:[SKPaymentQueue defaultQueue] updatedTransactions:_transactionsQueue];
     [_transactionsQueue removeAllObjects];
+    
+    [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
 }
 
 - (void)productsRequest:(SKProductsRequest *)request

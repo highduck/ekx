@@ -80,10 +80,19 @@ void AppBox::initDefaultControls(ecs::entity e) {
     {
         auto btn = find(e, "remove_ads");
         if (btn) {
-            btn.get<Node>().setVisible(!resolve<Ads>().isRemoved());
-            btn.get<Button>().clicked += [] {
-                resolve<Ads>().purchaseRemoveAds();
-            };
+            auto& ads = resolve<Ads>();
+            if (ads.isRemoved()) {
+                btn.get<Node>().setVisible(false);
+            } else {
+                ads.onRemoved << [btn] {
+                    if (btn.isAlive()) {
+                        btn.get<Node>().setVisible(false);
+                    }
+                };
+                btn.get<Button>().clicked += [] {
+                    resolve<Ads>().purchaseRemoveAds();
+                };
+            }
         }
     }
     {
