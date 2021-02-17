@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -80,7 +82,7 @@ public class GameServices {
                 task -> {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "signInSilently(): success");
-                        onConnected(task.getResult());
+                        tryConnectWithAccount(task.getResult());
                     } else {
                         Log.d(TAG, "signInSilently(): failure", task.getException());
                         onDisconnected();
@@ -171,11 +173,10 @@ public class GameServices {
 
     public static boolean onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task =
-                    GoogleSignIn.getSignedInAccountFromIntent(intent);
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intent);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                onConnected(account);
+                tryConnectWithAccount(account);
             } catch (ApiException apiException) {
                 String message = apiException.getMessage();
                 if (message == null || message.isEmpty()) {
@@ -193,7 +194,17 @@ public class GameServices {
         return false;
     }
 
-    private static void onConnected(GoogleSignInAccount account) {
+    private static void tryConnectWithAccount(@Nullable GoogleSignInAccount account) {
+        if(account != null) {
+            onConnected(account);
+        }
+        else {
+            Log.d(TAG, "null account: set state to disconnected");
+            onDisconnected();
+        }
+    }
+
+    private static void onConnected(@NonNull GoogleSignInAccount account) {
         Games.getGamesClient(_activity, account).setViewForPopups(_layout);
         _achievements = Games.getAchievementsClient(_activity, account);
         _leaderboards = Games.getLeaderboardsClient(_activity, account);
