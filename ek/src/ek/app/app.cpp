@@ -21,22 +21,20 @@ void dispatch_device_ready() {
     g_app.on_device_ready();
 }
 
-static bool applicationInFocus = true;
-
 void process_event(const event_t& event) {
     assert(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
 
     switch (event.type) {
         case event_type::app_pause:
-            if (applicationInFocus) {
-                applicationInFocus = false;
+            if (g_app.applicationInFocus) {
+                g_app.applicationInFocus = false;
                 g_app.on_event(event);
                 audio::muteDeviceBegin();
             }
             break;
         case event_type::app_resume:
-            if (!applicationInFocus) {
-                applicationInFocus = true;
+            if (!g_app.applicationInFocus) {
+                g_app.applicationInFocus = true;
                 audio::muteDeviceEnd();
                 g_app.on_event(event);
             }
@@ -50,14 +48,26 @@ void process_event(const event_t& event) {
 void dispatch_event(const event_t& event) {
     assert(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
 //    EK_INFO("EVENT: %i", event.type);
-    event_queue_mtx.lock();
     if (event.type == event_type::app_pause) {
-        g_app.systemPausePending = true;
+        ++g_app.systemPauseCounter;
+        if (g_app.systemPauseCounter > 0 && !g_app.systemPaused) {
+            g_app.systemPaused = true;
+            process_event({event_type::app_pause});
+        }
+    } else if(event.type == event_type::app_resume) {
+        if(g_app.systemPauseCounter > 0) {
+            --g_app.systemPauseCounter;
+            if (g_app.systemPauseCounter == 0 && g_app.systemPaused) {
+                g_app.systemPaused = false;
+                process_event({event_type::app_resume});
+            }
+        }
     } else {
+        event_queue_mtx.lock();
         assert(!g_app.event_queue_locked);
         g_app.event_queue_.push_back(event);
+        event_queue_mtx.unlock();
     }
-    event_queue_mtx.unlock();
 }
 
 void dispatch_draw_frame() {
@@ -84,10 +94,14 @@ void dispatch_draw_frame() {
     g_app.on_frame_draw();
     g_app.on_frame_completed();
 
-    if (g_app.systemPausePending) {
-        g_app.systemPausePending = false;
-        process_event({event_type::app_pause});
-    }
+//    if (g_app.systemPauseCounter > 0 && !g_app.systemPaused) {
+//        g_app.systemPaused = true;
+//        process_event({event_type::app_pause});
+//    }
+//    else if(g_app.systemPauseCounter == 0 && g_app.systemPaused) {
+//        g_app.systemPaused = false;
+//        process_event({event_type::app_resume});
+//    }
 }
 
 std::vector<std::string> arguments::to_vector() const {

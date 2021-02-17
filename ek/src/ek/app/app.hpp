@@ -152,7 +152,15 @@ struct app_state final {
 
     std::vector<event_t> event_queue_;
     bool event_queue_locked = false;
-    bool systemPausePending = false;
+
+    // we change counter from posted native events queue
+    int systemPauseCounter = 0;
+    // we decide if system should be paused or resumed
+    bool systemPaused = false;
+
+    // as we handle application pause event after `systemPaused`
+    // we update `applicationInFocus`
+    bool applicationInFocus = true;
 
     void updateMouseCursor(mouse_cursor cursor_);
 };

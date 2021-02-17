@@ -6,6 +6,7 @@
 #include <array>
 #include <vector>
 #include <ek/math/vec.hpp>
+#include <ek/assert.hpp>
 
 namespace ek {
 
