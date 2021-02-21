@@ -20,11 +20,9 @@ public:
     image_t(uint32_t width, uint32_t height);
 
     // delegate constructor
-    image_t(uint32_t width, uint32_t height, uint8_t* data, bool use_c_free = false);
+    image_t(uint32_t width, uint32_t height, uint8_t* data);
 
-    ~image_t() {
-        deallocate();
-    }
+    ~image_t();
 
     void deallocate();
 
@@ -78,7 +76,6 @@ private:
     uint32_t width_;
     uint32_t height_;
     uint8_t* data_;
-    bool use_c_free_ = false;
 };
 
 }

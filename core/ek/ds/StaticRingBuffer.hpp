@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cassert>
+#include "../assert.hpp"
 
 namespace ek {
 
@@ -9,12 +9,12 @@ class StaticRingBuffer {
 public:
 
     void push(const T v) {
-        assert(size() != capacity());
+        EK_ASSERT(size() != capacity());
         buf_[(idx_write_++) % Capacity] = v;
     }
 
     T shift() {
-        assert(size() != 0);
+        EK_ASSERT(size() != 0);
         return buf_[(idx_read_++) % Capacity];
     }
 

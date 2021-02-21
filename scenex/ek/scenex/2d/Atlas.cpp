@@ -135,7 +135,7 @@ void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<ui
             if (image_buffer.empty()) {
                 EK_DEBUG << "Image not found";
             } else {
-                auto* image = decode_image_data(image_buffer);
+                auto* image = decode_image_data(image_buffer.data(), image_buffer.size());
                 if (image) {
                     Res<graphics::Texture> res{page_image_path};
                     auto* texture = graphics::createTexture(*image);

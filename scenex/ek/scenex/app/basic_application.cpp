@@ -36,10 +36,7 @@
 #include <ek/scenex/base/DestroyTimer.hpp>
 #include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
-
-//#ifdef TRACY_ENABLE
 #include <Tracy.hpp>
-//#endif
 
 namespace ek {
 

@@ -1,84 +1,9 @@
 #pragma once
 
-#include <ek/assert.hpp>
-#include <stdlib.h>
+#include "../assert.hpp"
+#include "../Allocator.hpp"
 
 namespace ek {
-
-template<typename T, unsigned MaxCount>
-struct SmallArray {
-
-    static_assert(MaxCount <= 0x10000);
-
-    unsigned size = 0;
-    T data[MaxCount];
-
-    inline void push(T el) {
-        EK_ASSERT_R2(size < MaxCount);
-        data[size++] = el;
-    }
-};
-
-template<typename T>
-struct DynArray {
-
-    unsigned capacity;
-    unsigned size;
-    T* data;
-
-    DynArray() {
-        size = 0;
-        capacity = 64;
-        data = (T*) malloc(sizeof(T) * capacity);
-    }
-
-    ~DynArray() {
-        free(data);
-    }
-
-    [[nodiscard]]
-    inline bool empty() const {
-        return size == 0;
-    }
-
-    inline void clear() {
-        size = 0;
-    }
-
-    void grow() {
-        capacity = capacity << 1;
-        data = (T*) realloc(data, sizeof(T) * capacity);
-    }
-
-    inline void push_back(T el) {
-        if (size == capacity) {
-            grow();
-        }
-        *(data + size) = el;
-        ++size;
-    }
-
-    inline void set(unsigned i, T el) const {
-        EK_ASSERT_R2(i < size);
-        *(data + i) = el;
-    }
-
-    [[nodiscard]]
-    inline T get(unsigned i) const {
-        EK_ASSERT_R2(i < size);
-        return *(data + i);
-    }
-
-    inline void remove_back() {
-        --size;
-    }
-
-    [[nodiscard]]
-    inline T back() const {
-        return *(data + size - 1);
-    }
-};
-
 
 /** Sparse Array: map Entity to Component Handle **/
 
@@ -141,7 +66,7 @@ struct SparseArray {
         if (indices != sInvalidPage.indices) {
             indices[offset] = v;
         } else {
-            auto* pageData = (Page*) calloc(ElementsPerPage, sizeof(V));
+            auto* pageData = (Page*) EK_ALLOC_ZERO(PageSize);
             pageData->indices[offset] = v;
             pages_[page] = pageData;
         }
@@ -196,7 +121,7 @@ struct SparseArray {
             for (unsigned j = 0; j < PagesMaxCount; ++j) {
                 auto* page = pages[j];
                 if (page != pInvalidPage) {
-                    free(page);
+                    EK_FREE(page);
                     pages[j] = pInvalidPage;
                 }
             }

@@ -5,7 +5,8 @@
 #include <ek/serialize/serialize.hpp>
 #include <ek/util/logger.hpp>
 
-#include <stb_image.h>
+#include <ek/imaging/decoder.hpp>
+#include <ek/imaging/image.hpp>
 #include <miniz.h>
 
 namespace ek::xfl {
@@ -159,23 +160,16 @@ void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
 }
 
 void readBitmapJPEG(const std::string& data, BitmapData& bitmap) {
-    int w = 0;
-    int h = 0;
-    int channels = 0;
-    auto* image_data = stbi_load_from_memory(reinterpret_cast<const unsigned char*>(data.data()),
-                                             static_cast<int>(data.size()),
-                                             &w, &h, &channels, 4);
-    if (image_data != nullptr) {
-        bitmap.width = static_cast<uint32_t>(w);
-        bitmap.height = static_cast<uint32_t>(h);
+    auto* image = decode_image_data(data.data(), data.size());
+    if (image != nullptr) {
+        bitmap.width = image->width();
+        bitmap.height = image->height();
         bitmap.bpp = 4;
         bitmap.alpha = false;
         bitmap.data.resize(bitmap.width * bitmap.height * bitmap.bpp);
-        memcpy(bitmap.data.data(), image_data, bitmap.data.size());
-        stbi_image_free(image_data);
+        memcpy(bitmap.data.data(), image->data(), bitmap.data.size());
+        delete image;
         convert_rgba_to_bgra(bitmap.data.data(), bitmap.data.size());
-    } else {
-        EK_ERROR << "image decoding error: " << stbi_failure_reason();
     }
 }
 
