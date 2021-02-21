@@ -29,7 +29,7 @@ module.exports = (ctx) => {
             xcode: {
                 frameworks: [
                     "UIKit", "OpenGLES", "QuartzCore", "Foundation",
-                    "OpenAL", "AudioToolbox", "AVFoundation"
+                    "AudioToolbox" // CoreAudio for miniaudio
                 ],
                 pods: [
                     "Firebase/Crashlytics",
