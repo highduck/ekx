@@ -27,7 +27,7 @@ if (EKX_MOBILE)
     set(EKX_BUILD_COVERAGE OFF)
     set(EKX_BUILD_BENCHMARKS OFF)
     set(EKX_BUILD_DEV_TOOLS OFF)
-    set(EKX_TRACY OFF)
+    set(TRACY_ENABLE OFF)
 endif ()
 
 add_subdirectory(external)

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <cassert>
-#include <algorithm>
+#include "../assert.hpp"
+#include "../Allocator.hpp"
 
 namespace ek {
 
@@ -38,59 +38,57 @@ public:
         data_type mask_;
     };
 
-    explicit BitVector(size_type size)
-            : size_{size},
-              len_{(size >> bit_shift) + 1u},
-              data_{new uint8_t[len_]} {
-        std::fill_n(data_, len_, 0u);
+    explicit BitVector(size_type size) : size_{size},
+                                         len_{(size >> bit_shift) + 1u} {
+        data_ = (uint8_t*) EK_ALLOC_ZERO(len_);
     }
 
     ~BitVector() {
-        delete[] data_;
+        EK_FREE(data_);
     }
 
     inline void enable(size_type index) {
-        assert(data_ != nullptr && index < size_);
+        EK_ASSERT(data_ != nullptr && index < size_);
         data_[address(index)] |= mask(index);
     }
 
     inline void disable(size_type index) {
-        assert(data_ != nullptr && index < size_);
+        EK_ASSERT(data_ != nullptr && index < size_);
         data_[address(index)] &= ~mask(index);
     }
 
     inline bool get(size_type index) const {
-        assert(data_ != nullptr && index < size_);
+        EK_ASSERT(data_ != nullptr && index < size_);
         return (data_[address(index)] & mask(index)) != 0u;
     }
 
     inline void set(size_type index, bool value) {
-        assert(data_ != nullptr && index < size_);
+        EK_ASSERT(data_ != nullptr && index < size_);
         value ? enable(index) : disable(index);
     }
 
     inline bool operator[](size_type index) const {
-        assert(data_ != nullptr && index < size_);
+        EK_ASSERT(data_ != nullptr && index < size_);
         return get(index);
     }
 
     inline reference operator[](size_type index) {
-        assert(data_ != nullptr && index < size_);
+        EK_ASSERT(data_ != nullptr && index < size_);
         return reference{data_[address(index)], mask(index)};
     }
 
     inline bool is_false(size_type index) const {
-        assert(data_ != nullptr && index < size_);
+        EK_ASSERT(data_ != nullptr && index < size_);
         return (data_[address(index)] & mask(index)) == 0u;
     }
 
     inline bool is_true(size_type index) const {
-        assert(data_ != nullptr && index < size_);
+        EK_ASSERT(data_ != nullptr && index < size_);
         return (data_[address(index)] & mask(index)) != 0u;
     }
 
     inline bool enable_if_not(size_type index) {
-        assert(data_ != nullptr && index < size_);
+        EK_ASSERT(data_ != nullptr && index < size_);
         auto a = address(index);
         auto m = mask(index);
         auto v = data_[a];

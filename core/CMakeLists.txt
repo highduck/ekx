@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(ek-core)
 
 add_library(${PROJECT_NAME} STATIC
+        ek/config.hpp
 
         ek/math/internal/compiler_unsafe_begin.h
         ek/math/internal/compiler_unsafe_end.h
@@ -72,16 +73,19 @@ add_library(${PROJECT_NAME} STATIC
         ek/ds/StaticRingBuffer.hpp
         ek/ds/StaticHistoryBuffer.hpp
         ek/ds/BitVector.hpp
-        ek/ds/PodArray.hpp
 
         ek/Localization.hpp
         ek/Localization.cpp
+        ek/ds/SmallArray.hpp
+        ek/ds/DynArray.hpp
+        ek/ds/SparseArray.hpp
+        ek/Allocator.hpp
 
         ek/timers.hpp
         ek/timers.cpp
 
         ecxx/impl/ecxx.cpp
-        )
+        ek/Allocator.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 

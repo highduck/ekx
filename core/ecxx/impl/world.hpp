@@ -1,8 +1,9 @@
 #pragma once
 
-#include <ek/ds/PodArray.hpp>
+#include <stdint.h>
+#include <ek/ds/SparseArray.hpp>
+#include <ek/ds/DynArray.hpp>
 #include <ek/assert.hpp>
-#include <cstdint>
 #include <vector>
 
 namespace ecs {

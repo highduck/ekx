@@ -21,7 +21,7 @@ image_t* load_image(const path_t& path) {
     if (buffer.empty()) {
         EK_WARN("IMAGE resource not found: %s", path.c_str());
     } else {
-        image = decode_image_data(buffer);
+        image = decode_image_data(buffer.data(), buffer.size());
     }
     return image;
 }

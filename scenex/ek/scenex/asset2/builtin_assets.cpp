@@ -240,7 +240,7 @@ public:
                 for (int idx = 0; idx < 6; ++idx) {
                     get_resource_content_async(imagePathList[idx].c_str(),
                                                [this, idx](auto buffer) {
-                                                   images[idx] = decode_image_data(buffer);
+                                                   images[idx] = decode_image_data(buffer.data(), buffer.size());
                                                    --counter;
                                                    EK_DEBUG << "Cube map image loaded: #" << idx << "  counter: "
                                                             << counter;
@@ -257,7 +257,7 @@ public:
             } else if (data.texture_type == "2d") {
                 imagePathList[0] = project_->base_path / data.images[0];
                 get_resource_content_async(imagePathList[0].c_str(), [this](auto buffer) {
-                    image_t* image = decode_image_data(buffer);
+                    image_t* image = decode_image_data(buffer.data(), buffer.size());
                     if (image) {
                         Texture* tex = graphics::createTexture(*image);
                         Res<Texture>{path_}.reset(tex);
