@@ -56,10 +56,6 @@
 
 #endif
 
-//#ifdef EK_DEV_TOOLS
-//#define SOKOL_TRACE_HOOKS
-//#endif
-
 #include <sokol_gfx.h>
 
 #include <ek/util/common_macro.hpp>
@@ -132,6 +128,7 @@ public:
     static Texture* createSolid32(int width, int height, uint32_t pixelColor);
 };
 
-void init();
+void initialize();
+void shutdown();
 
 }

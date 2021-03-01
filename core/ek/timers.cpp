@@ -137,7 +137,7 @@ TimeLayer TimeLayer::UI{3};
 
 namespace clock {
 
-void init() {
+void initialize() {
     stm_setup();
     TimerJobManager::instance = new TimerJobManager();
 }

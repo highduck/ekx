@@ -11,7 +11,7 @@ add_executable(${PROJECT_NAME}
         ek/util/strings.test.cpp
         ek/util/signals.test.cpp
         ek/util/logger.test.cpp
-        ek/util/common_macro.test.cpp
+        ek/core.test.cpp
         )
 
 add_subdirectory(ecxx)

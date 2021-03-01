@@ -1,8 +1,6 @@
 #pragma once
 
-#include <type_traits>
-#include <cassert>
-#include <utility>
+#include "../assert.hpp"
 
 namespace ek {
 
@@ -14,7 +12,7 @@ public:
     ~service_locator_instance() = delete;
 
     inline static Service& get() {
-        assert(value_);
+        EK_ASSERT(value_);
         return *value_;
     }
 
@@ -24,9 +22,15 @@ public:
 
     template<typename ServiceImpl = Service, typename... Args>
     inline static Service& init(Args&& ...args) {
-        assert(value_ == nullptr);
-        value_ = new ServiceImpl(std::forward<Args>(args)...);
+        EK_ASSERT(value_ == nullptr);
+        value_ = new ServiceImpl(args...);
         return *value_;
+    }
+
+    inline static void shutdown() {
+        EK_ASSERT(value_ != nullptr);
+        delete value_;
+        value_ = nullptr;
     }
 
 private:

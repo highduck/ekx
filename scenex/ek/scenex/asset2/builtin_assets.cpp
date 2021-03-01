@@ -392,8 +392,8 @@ public:
     }
 
     void do_unload() override {
-        for (unsigned i = 0; i < assets.size; ++i) {
-            assets.data[i]->unload();
+        for (unsigned i = 0; i < assets._size; ++i) {
+            assets._data[i]->unload();
         }
         assets.clear();
         assetsLoaded = 0;
@@ -402,8 +402,8 @@ public:
     void poll() override {
         if (state == AssetObjectState::Loading && assetsLoaded >= 0) {
             timer_t timer;
-            while (assetsLoaded < assets.size) {
-                auto* asset = assets.data[assetsLoaded];
+            while (assetsLoaded < assets._size) {
+                auto* asset = assets._data[assetsLoaded];
                 if (asset->state == AssetObjectState::Initial) {
                     EK_DEBUG << "Loading BEGIN: " << ((builtin_asset_t*) asset)->path_;
                     asset->load();
@@ -412,7 +412,7 @@ public:
                 } else if (asset->state == AssetObjectState::Ready) {
                     EK_DEBUG << "Loading END: " << ((builtin_asset_t*) asset)->path_;
                     ++assetsLoaded;
-                    if (assetsLoaded >= assets.size) {
+                    if (assetsLoaded >= assets._size) {
                         state = AssetObjectState::Ready;
                         return;
                     }
@@ -435,8 +435,8 @@ public:
                 if (!assets.empty()) {
                     float acc = 0.0f;
                     float total = 0.0f;
-                    for (unsigned i = 0; i < assets.size; ++i) {
-                        acc += assets.data[i]->getProgress();
+                    for (unsigned i = 0; i < assets._size; ++i) {
+                        acc += assets._data[i]->getProgress();
                         ++total;
                     }
                     return acc / total;
@@ -446,7 +446,7 @@ public:
     }
 
     unsigned assetsLoaded = 0;
-    DynArray<asset_object_t*> assets;
+    Array<asset_object_t*> assets;
 };
 
 

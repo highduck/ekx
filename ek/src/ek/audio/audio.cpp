@@ -32,8 +32,6 @@
 #include <miniaudio.h>
 #include <miniaudio_engine.h>
 
-#include <cassert>
-
 #include <ek/app/res.hpp>
 #include <ek/util/logger.hpp>
 
@@ -50,8 +48,8 @@ struct AudioSystem {
 
 static AudioSystem audioSystem{};
 
-void init() {
-    assert(!audioSystem.initialized);
+void initialize() {
+    EK_ASSERT(!audioSystem.initialized);
     {
         auto config = ma_engine_config_init_default();
         ma_result result = ma_engine_init(&config, &audioSystem.engine);
@@ -76,8 +74,14 @@ void init() {
     audioSystem.initialized = true;
 }
 
+void shutdown() {
+    EK_ASSERT(audioSystem.initialized);
+    ma_engine_uninit(&audioSystem.engine);
+    audioSystem.initialized = false;
+}
+
 void muteDeviceBegin() {
-    assert(audioSystem.locks >= 0);
+    EK_ASSERT(audioSystem.locks >= 0);
     if (audioSystem.locks == 0) {
         //PauseDevice();
         ma_engine_set_volume(&audioSystem.engine, 0.0f);
@@ -87,7 +91,7 @@ void muteDeviceBegin() {
 
 void muteDeviceEnd() {
     --audioSystem.locks;
-    assert(audioSystem.locks >= 0);
+    EK_ASSERT(audioSystem.locks >= 0);
     if (audioSystem.locks == 0) {
         // device could be paused during background
         //ResumeDevice();

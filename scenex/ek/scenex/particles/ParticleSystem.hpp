@@ -16,9 +16,11 @@ struct ParticleLayer2D {
 };
 
 struct ParticleEmitter2D {
+    typedef void SpawnCallback(ecs::entity, Particle&);
+
     emitter_data data;
     float2 position = float2::zero;
-    std::function<void(Particle&)> on_spawn;
+    SpawnCallback* on_spawn = nullptr;
     std::string particle;
     ecs::EntityRef layer;
     float time = 0.0f;

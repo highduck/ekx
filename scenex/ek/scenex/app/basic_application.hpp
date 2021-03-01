@@ -14,6 +14,7 @@
 #include <utility>
 #include <ek/timers.hpp>
 #include "profiler.hpp"
+#include <ek/imaging/ImageSubSystem.hpp>
 
 namespace ek {
 
@@ -86,7 +87,10 @@ inline void run_app(app::window_config cfg) {
     using app::g_app;
     using app::vec2;
 
-    clock::init();
+    memory::initialize();
+    app::initialize();
+    clock::initialize();
+    imaging::initialize();
     basic_application::AppResolution = float2{cfg.size};
     g_app.window_cfg = std::move(cfg);
 

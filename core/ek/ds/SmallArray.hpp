@@ -16,6 +16,14 @@ struct SmallArray {
         EK_ASSERT_R2(size < MaxCount);
         data[size++] = el;
     }
+
+    inline T* begin() {
+        return data;
+    }
+
+    inline T* end() {
+        return data + size;
+    }
 };
 
 }

@@ -38,84 +38,88 @@ public:
         data_type mask_;
     };
 
-    explicit BitVector(size_type size) : size_{size},
-                                         len_{(size >> bit_shift) + 1u} {
-        data_ = (uint8_t*) EK_ALLOC_ZERO(len_);
+    explicit BitVector(size_type size, Allocator& allocator = memory::stdAllocator) :
+            _allocator{allocator},
+            _size{size},
+            _len{(size >> bit_shift) + 1u} {
+        _data = (uint8_t*) _allocator.alloc(_len, sizeof(void*));
+        memory::clear(_data, _len);
     }
 
     ~BitVector() {
-        EK_FREE(data_);
+        _allocator.dealloc(_data);
     }
 
     inline void enable(size_type index) {
-        EK_ASSERT(data_ != nullptr && index < size_);
-        data_[address(index)] |= mask(index);
+        EK_ASSERT(_data != nullptr && index < _size);
+        _data[address(index)] |= mask(index);
     }
 
     inline void disable(size_type index) {
-        EK_ASSERT(data_ != nullptr && index < size_);
-        data_[address(index)] &= ~mask(index);
+        EK_ASSERT(_data != nullptr && index < _size);
+        _data[address(index)] &= ~mask(index);
     }
 
     inline bool get(size_type index) const {
-        EK_ASSERT(data_ != nullptr && index < size_);
-        return (data_[address(index)] & mask(index)) != 0u;
+        EK_ASSERT(_data != nullptr && index < _size);
+        return (_data[address(index)] & mask(index)) != 0u;
     }
 
     inline void set(size_type index, bool value) {
-        EK_ASSERT(data_ != nullptr && index < size_);
+        EK_ASSERT(_data != nullptr && index < _size);
         value ? enable(index) : disable(index);
     }
 
     inline bool operator[](size_type index) const {
-        EK_ASSERT(data_ != nullptr && index < size_);
+        EK_ASSERT(_data != nullptr && index < _size);
         return get(index);
     }
 
     inline reference operator[](size_type index) {
-        EK_ASSERT(data_ != nullptr && index < size_);
-        return reference{data_[address(index)], mask(index)};
+        EK_ASSERT(_data != nullptr && index < _size);
+        return reference{_data[address(index)], mask(index)};
     }
 
     inline bool is_false(size_type index) const {
-        EK_ASSERT(data_ != nullptr && index < size_);
-        return (data_[address(index)] & mask(index)) == 0u;
+        EK_ASSERT(_data != nullptr && index < _size);
+        return (_data[address(index)] & mask(index)) == 0u;
     }
 
     inline bool is_true(size_type index) const {
-        EK_ASSERT(data_ != nullptr && index < size_);
-        return (data_[address(index)] & mask(index)) != 0u;
+        EK_ASSERT(_data != nullptr && index < _size);
+        return (_data[address(index)] & mask(index)) != 0u;
     }
 
     inline bool enable_if_not(size_type index) {
-        EK_ASSERT(data_ != nullptr && index < size_);
+        EK_ASSERT(_data != nullptr && index < _size);
         auto a = address(index);
         auto m = mask(index);
-        auto v = data_[a];
+        auto v = _data[a];
         if ((v & m) == 0) {
-            data_[a] = v | m;
+            _data[a] = v | m;
             return true;
         }
         return false;
     }
 
     inline size_type size() const {
-        return size_;
+        return _size;
     }
 
     inline const uint8_t* data() const {
-        return data_;
+        return _data;
     }
 
     inline uint8_t* data() {
-        return data_;
+        return _data;
     }
 
 private:
 
-    size_type size_;
-    size_type len_;
-    uint8_t* data_;
+    Allocator& _allocator;
+    uint8_t* _data;
+    size_type _size;
+    size_type _len;
 
     inline static size_type address(size_type index) {
         return index >> bit_shift;

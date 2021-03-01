@@ -4,13 +4,31 @@ namespace ek {
 
 using namespace ek::app;
 
-input_controller::input_controller(InteractionSystem& interactions)
-        : interactions_{interactions} {
-    g_app.on_event += [this](const auto& e) { on_event(e); };
-    g_app.on_frame_completed += [this] { on_frame_completed(); };
+static input_controller* gInputController = nullptr;
+
+void gInputController_onEvent(const event_t& e) {
+    EK_ASSERT(gInputController != nullptr);
+    gInputController->on_event(e);
 }
 
-input_controller::~input_controller() = default;
+void gInputController_onFrameCompleted() {
+    EK_ASSERT(gInputController != nullptr);
+    gInputController->on_frame_completed();
+}
+
+input_controller::input_controller(InteractionSystem& interactions) :
+        interactions_{interactions} {
+
+    gInputController = this;
+    g_app.on_event += gInputController_onEvent;
+    g_app.on_frame_completed += gInputController_onFrameCompleted;
+}
+
+input_controller::~input_controller() {
+    gInputController = nullptr;
+    g_app.on_event -= gInputController_onEvent;
+    g_app.on_frame_completed -= gInputController_onFrameCompleted;
+}
 
 void emulate_mouse_as_touch(const event_t& event, touch_state_t& data) {
     bool active_prev = data.active;
@@ -71,7 +89,7 @@ void input_controller::on_event(const event_t& event) {
             if (!hovered_by_editor_gui) {
                 interactions_.handle_mouse_event(event);
             }
-            if(emulateTouch) {
+            if (emulateTouch) {
                 emulate_mouse_as_touch(event, get_or_create_touch(1u));
             }
             break;

@@ -2,7 +2,7 @@
 
 #include <ek/ext/analytics/analytics.hpp>
 #include <mutex>
-#include <cassert>
+#include <ek/assert.hpp>
 #include <ek/timers.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/util/logger.hpp>
@@ -10,8 +10,9 @@
 namespace ek::app {
 
 std::mutex event_queue_mtx;
-std::vector<event_t> pool_queue{};
-app_state g_app{};
+
+char G_APP_BUFF[sizeof(app_state)];
+app_state& g_app = *((app_state*) &G_APP_BUFF);
 
 void dispatch_init() {
     analytics::init(); // analytics before crash reporter on ios
@@ -22,7 +23,7 @@ void dispatch_device_ready() {
 }
 
 void process_event(const event_t& event) {
-    assert(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
+    EK_ASSERT(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
 
     switch (event.type) {
         case event_type::app_pause:
@@ -46,7 +47,7 @@ void process_event(const event_t& event) {
 }
 
 void dispatch_event(const event_t& event) {
-    assert(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
+    EK_ASSERT(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
 //    EK_INFO("EVENT: %i", event.type);
     if (event.type == event_type::app_pause) {
         ++g_app.systemPauseCounter;
@@ -54,8 +55,8 @@ void dispatch_event(const event_t& event) {
             g_app.systemPaused = true;
             process_event({event_type::app_pause});
         }
-    } else if(event.type == event_type::app_resume) {
-        if(g_app.systemPauseCounter > 0) {
+    } else if (event.type == event_type::app_resume) {
+        if (g_app.systemPauseCounter > 0) {
             --g_app.systemPauseCounter;
             if (g_app.systemPauseCounter == 0 && g_app.systemPaused) {
                 g_app.systemPaused = false;
@@ -73,9 +74,9 @@ void dispatch_event(const event_t& event) {
 void dispatch_draw_frame() {
     event_queue_mtx.lock();
     // do not call dispatch_draw_frame recursively
-    assert(!g_app.event_queue_locked);
+    EK_ASSERT(!g_app.event_queue_locked);
     g_app.event_queue_locked = true;
-    pool_queue = g_app.event_queue_;
+    g_app.pool_queue = g_app.event_queue_;
     g_app.event_queue_.clear();
     g_app.event_queue_locked = false;
     event_queue_mtx.unlock();
@@ -85,7 +86,7 @@ void dispatch_draw_frame() {
         process_event({event_type::app_resize});
     }
 
-    for (const auto& event : pool_queue) {
+    for (const auto& event : g_app.pool_queue) {
         process_event(event);
     }
 
@@ -120,4 +121,13 @@ void app_state::updateMouseCursor(mouse_cursor cursor_) {
         cursor_dirty = true;
     }
 }
+
+void initialize() {
+    new(G_APP_BUFF)app_state();
+}
+
+void shutdown() {
+    g_app.~app_state();
+}
+
 }

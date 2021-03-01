@@ -3,6 +3,7 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/util/type_index.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
+#include <vector>
 
 namespace ek {
 

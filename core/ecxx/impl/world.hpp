@@ -1,10 +1,9 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <ek/ds/SparseArray.hpp>
-#include <ek/ds/DynArray.hpp>
+#include <ek/ds/Array.hpp>
 #include <ek/assert.hpp>
-#include <vector>
 
 namespace ecs {
 
@@ -44,7 +43,7 @@ using EntityLookup = ek::SparseArray<Entity, ComponentHandle, ENTITIES_MAX_COUNT
 struct ComponentHeader {
     EntityLookup entityToHandle; // 256 bytes
 
-    ek::DynArray<Entity> handleToEntity{}; // dynamic (8 + 4 + 4 ~ 16 bytes)
+    ek::Array<Entity> handleToEntity; // dynamic (8 + 4 + 4 ~ 16 bytes)
 
     void* data; // 8 bytes
 
@@ -54,12 +53,27 @@ struct ComponentHeader {
 
     void (* clear)(ComponentHeader* component); // 8 bytes
 
+    void (* shutdown)(void* manager); // 8 bytes
+
     uint32_t lockCounter; // 4 bytes
 
     ComponentTypeId typeId; // 2 bytes
 
     [[nodiscard]] inline unsigned count() const {
-        return handleToEntity.size;
+        return handleToEntity._size;
+    }
+
+    ComponentHeader(ek::Allocator& allocator, unsigned initialCapacity, ComponentTypeId typeId_, void* manager) :
+            handleToEntity{allocator, initialCapacity} {
+        typeId = typeId_;
+        lockCounter = 0;
+        data = manager;
+        emplace = nullptr;
+        erase = nullptr;
+        clear = nullptr;
+        shutdown = nullptr;
+        entityToHandle.init();
+        handleToEntity.push_back(0);
     }
 };
 
@@ -104,6 +118,7 @@ class ComponentStorage;
 /** World **/
 struct world {
 
+    ek::Allocator* allocator;
     // entity pool data, indices and generations
     // SIZE: 200 kb
 
@@ -235,7 +250,7 @@ struct world {
     }
 
     template<typename Component>
-    inline void registerComponent();
+    inline void registerComponent(unsigned initialCapacity = 64);
 
 private:
     void resetEntityPool();
@@ -248,16 +263,21 @@ extern world the_world;
 template<typename DataType>
 class ComponentStorage final {
 public:
-    ComponentHeader component{};
-    std::vector<DataType> data{1};
+    ComponentHeader component;
+    ek::Allocator& allocator;
+    ek::Array<DataType> data;
 
-    static constexpr bool has_data = std::negation_v<typename std::is_empty<DataType>::type>;
+    static constexpr bool EmptyData = std::is_empty_v<DataType>;
 
-    ComponentStorage() {
-        component_type_init(&component, type<DataType>(), this);
+    ComponentStorage(ek::Allocator& allocator_, unsigned initialCapacity) :
+            component{allocator_, initialCapacity, type<DataType>(), this},
+            allocator{allocator_},
+            data{allocator_, initialCapacity} {
         component.emplace = ComponentStorage<DataType>::s_emplace;
         component.erase = ComponentStorage<DataType>::s_erase;
         component.clear = ComponentStorage<DataType>::s_clear;
+        component.shutdown = ComponentStorage<DataType>::s_shutdown;
+        data.emplace_back();
     }
 
     template<typename ...Args>
@@ -268,16 +288,16 @@ public:
         EK_ASSERT(component.lockCounter == 0);
         EK_ASSERT(entityToHandle.get(entity) == 0);
 
-        entityToHandle.insert(entity, handle);
+        entityToHandle.insert(entity, handle, allocator);
         handleToEntity.push_back(entity);
-        if constexpr (has_data) {
+        if constexpr (EmptyData) {
+            return data.get(0);
+        } else {
             if constexpr (std::is_aggregate_v<DataType>) {
                 return data.emplace_back(DataType{args...});
             } else {
                 return data.emplace_back(args...);
             }
-        } else {
-            return data[0u];
         }
     }
 
@@ -288,13 +308,13 @@ public:
         EK_ASSERT(component.lockCounter == 0);
         EK_ASSERT(entityToHandle.get(entity) == 0);
 
-        entityToHandle.insert(entity, handle);
+        entityToHandle.insert(entity, handle, allocator);
         handleToEntity.push_back(entity);
-        if constexpr (has_data) {
+        if constexpr (EmptyData) {
+            return 0;
+        } else {
             data.emplace_back();
             return handle;
-        } else {
-            return 0;
         }
     }
 
@@ -312,50 +332,49 @@ public:
     void erase_from_middle(Entity e, Entity last) {
         const auto handle = component.entityToHandle.moveRemove(e, last);
         component.handleToEntity.set(handle, last);
-        component.handleToEntity.remove_back();
-        if constexpr (has_data) {
-            data[handle] = std::move(data.back());
-            data.pop_back();
+        component.handleToEntity.pop_back();
+        if constexpr (!EmptyData) {
+            data.remove_swap_back(handle);
         }
     }
 
     void erase_from_back(Entity e) {
         component.entityToHandle.set(e, 0);
-        component.handleToEntity.remove_back();
-        if constexpr (has_data) {
+        component.handleToEntity.pop_back();
+        if constexpr (!EmptyData) {
             data.pop_back();
         }
     }
 
     inline DataType& get(Entity e) const {
-        if constexpr (has_data) {
-            return const_cast<DataType&>(data[component.entityToHandle.get(e)]);
+        if constexpr (EmptyData) {
+            return const_cast<DataType&>(data.get(0));
         } else {
-            return const_cast<DataType&>(data[0]);
+            return const_cast<DataType&>(data.get(component.entityToHandle.get(e)));
         }
     }
 
     inline DataType& get_by_handle(ComponentHandle handle) const {
-        if constexpr (has_data) {
-            return get_data(handle);
-        } else {
+        if constexpr (EmptyData) {
             return get_data(0u);
+        } else {
+            return get_data(handle);
         }
     }
 
     inline DataType* get_ptr_by_handle(ComponentHandle handle) {
-        if constexpr (has_data) {
-            return data.data() + handle;
+        if constexpr (EmptyData) {
+            return data._data;
         } else {
-            return data.data();
+            return data._data + handle;
         }
     }
 
     DataType& get_or_default_by_handle(ComponentHandle handle) const {
-        if constexpr (has_data) {
-            return get_data(handle);
-        } else {
+        if constexpr (EmptyData) {
             return get_data(0u);
+        } else {
+            return get_data(handle);
         }
     }
 
@@ -369,19 +388,23 @@ public:
     }
 
     static void s_clear(ComponentHeader* hdr) {
-        static_cast<ComponentStorage*>(hdr->data)->data.resize(1);
+        static_cast<ComponentStorage*>(hdr->data)->data.reduceSize(1);
+    }
+
+    static void s_shutdown(void* manager) {
+        static_cast<ComponentStorage<DataType>*>(manager)->~ComponentStorage<DataType>();
     }
 
     inline DataType& get_data(ComponentHandle i) const {
-        return const_cast<DataType&>(data[i]);
+        return const_cast<DataType&>(data.get(i));
     }
 
     // get data by packed index
     inline DataType& get_data_by_index(ComponentHandle i) const {
-        if constexpr (has_data) {
-            return const_cast<DataType&>(data[i]);
+        if constexpr (EmptyData) {
+            return const_cast<DataType&>(data.get(0));
         } else {
-            return const_cast<DataType&>(data[0]);
+            return const_cast<DataType&>(data.get(i));
         }
     }
 };
@@ -481,8 +504,8 @@ inline void world::create(Entity* outEntities, uint32_t count) {
 }
 
 template<typename Component>
-inline void world::registerComponent() {
-    auto* storage = new ComponentStorage<Component>();
+inline void world::registerComponent(unsigned initialCapacity) {
+    auto* storage = allocator->create<ComponentStorage<Component>>(*allocator, initialCapacity);
     registerComponent(&storage->component);
 }
 

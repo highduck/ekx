@@ -9,7 +9,7 @@ world the_world;
 /** World **/
 
 void resetEntityPoolArrays(Entity* entities, Generation* generations) {
-    memset(generations, 0, sizeof(Generation) * ENTITIES_MAX_COUNT);
+    ek::memory::clear(generations, sizeof(Generation) * ENTITIES_MAX_COUNT);
     {
         auto* it = entities;
         for (uint32_t i = 1; i <= ENTITIES_MAX_COUNT; ++i) {
@@ -86,8 +86,9 @@ bool world::check(Passport passport) const {
 // World create / destroy
 
 void world::initialize() {
+    allocator = ek::memory::stdAllocator.create<ek::ProxyAllocator>("ecxx");
     resetEntityPool();
-    memset(components, 0, COMPONENTS_MAX_COUNT * sizeof(void*));
+    ek::memory::clear(components, COMPONENTS_MAX_COUNT * sizeof(void*));
 }
 
 void world::reset() {
@@ -97,8 +98,8 @@ void world::reset() {
         auto* component = components_[i];
         if (component) {
             component->clear(component);
-            component->entityToHandle.clear();
-            component->handleToEntity.size = 1;
+            component->entityToHandle.clear(*allocator);
+            component->handleToEntity._size = 1;
         }
     }
 }
@@ -109,21 +110,12 @@ void world::shutdown() {
     for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {
         auto* component = components_[i];
         if (component) {
-            component->entityToHandle.clear();
-            delete component;
+            component->entityToHandle.clear(*allocator);
+            component->shutdown(component->data);
+            allocator->dealloc(component->data);
         }
     }
-}
-
-void component_type_init(ComponentHeader* component, ComponentTypeId typeId, void* userData) {
-    component->typeId = typeId;
-    component->lockCounter = 0;
-    component->data = userData;
-    component->emplace = nullptr;
-    component->erase = nullptr;
-    component->clear = nullptr;
-    component->entityToHandle.init();
-    component->handleToEntity.push_back(0);
+    ek::memory::stdAllocator.destroy(allocator);
 }
 
 }
