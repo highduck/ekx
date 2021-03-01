@@ -211,11 +211,11 @@ void basic_application::on_draw_frame() {
     static sg_pass_action pass_action{};
     pass_action.colors[0] = {
             .action = started_ ? SG_ACTION_DONTCARE : SG_ACTION_CLEAR,
-            .val = {0.0f, 0.0f, 0.0f, 1.0f}
+            .value = {0.0f, 0.0f, 0.0f, 1.0f}
     };
     if (r3d) {
         pass_action.depth.action = SG_ACTION_CLEAR;
-        pass_action.depth.val = 100000.0f;
+        pass_action.depth.value = 100000.0f;
     }
 
     if (!started_ && rootAssetObject) {

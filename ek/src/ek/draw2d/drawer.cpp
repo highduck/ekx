@@ -57,18 +57,22 @@ sg_pipeline createPipeline(sg_shader shader, bool useRenderTarget) {
     pip_desc.layout.attrs[3].format = SG_VERTEXFORMAT_UBYTE4N;
     pip_desc.shader = shader;
     pip_desc.index_type = SG_INDEXTYPE_UINT16;
-    pip_desc.blend.enabled = true;
-    pip_desc.blend.src_factor_rgb = SG_BLENDFACTOR_ONE;
-    pip_desc.blend.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
-    pip_desc.blend.color_write_mask = SG_COLORMASK_RGB;
+    pip_desc.colors[0].write_mask = SG_COLORMASK_RGB;
+    pip_desc.colors[0].blend.enabled = true;
+    pip_desc.colors[0].blend.src_factor_rgb = SG_BLENDFACTOR_ONE;
+    pip_desc.colors[0].blend.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+//    pip_desc.blend.enabled = true;
+//    pip_desc.blend.src_factor_rgb = SG_BLENDFACTOR_ONE;
+//    pip_desc.blend.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+//    pip_desc.blend.color_write_mask = SG_COLORMASK_RGB;
     pip_desc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
     if (useRenderTarget) {
-        pip_desc.blend.color_format = SG_PIXELFORMAT_RGBA8;
-        pip_desc.blend.depth_format = SG_PIXELFORMAT_NONE;
+        pip_desc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
+        pip_desc.depth.pixel_format = SG_PIXELFORMAT_NONE;
     }
-    pip_desc.depth_stencil.depth_write_enabled = false;
-    pip_desc.depth_stencil.stencil_enabled = false;
-    pip_desc.rasterizer.sample_count = 0;
+//    pip_desc.depth_stencil.depth_write_enabled = false;
+//    pip_desc.depth_stencil.stencil_enabled = false;
+//    pip_desc.sample_count = 0;
     pip_desc.label = "draw2d-pipeline";
     return sg_make_pipeline(pip_desc);
 }
@@ -169,9 +173,10 @@ void Context::initialize() {
     using graphics::Shader;
 
     emptyTexture = Texture::createSolid32(4, 4, 0xFFFFFFFFu);
-    defaultShader = new Shader(draw2d_shader_desc());
-    alphaMapShader = new Shader(draw2d_alpha_shader_desc());
-    solidColorShader = new Shader(draw2d_color_shader_desc());
+    const auto backend = sg_query_backend();
+    defaultShader = new Shader(draw2d_shader_desc(backend));
+    alphaMapShader = new Shader(draw2d_alpha_shader_desc(backend));
+    solidColorShader = new Shader(draw2d_color_shader_desc(backend));
 
     Res<Texture>{"empty"}.reset(emptyTexture);
     Res<Shader>{"draw2d"}.reset(defaultShader);
@@ -220,7 +225,7 @@ void Context::drawBatch() {
     if (pip.id != selectedPipeline.id) {
         selectedPipeline = pip;
         sg_apply_pipeline(pip);
-        sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, &mvp, sizeof(mvp));
+        sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
     }
     bind.vertex_buffers[0] = vb->buffer;
     bind.index_buffer = ib->buffer;

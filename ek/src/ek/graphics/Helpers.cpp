@@ -17,8 +17,8 @@ Texture* createTexture(const image_t& image) {
             .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
             .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
     };
-    desc.content.subimage[0][0].ptr = image.data();
-    desc.content.subimage[0][0].size = image.height() * image.stride();
+    desc.data.subimage[0][0].ptr = image.data();
+    desc.data.subimage[0][0].size = image.height() * image.stride();
     return new Texture(desc);
 }
 
@@ -36,8 +36,8 @@ Texture* createTexture(std::array<ek::image_t*, 6> images) {
     };
 
     for (int i = 0; i < 6; ++i) {
-        desc.content.subimage[i][0].ptr = images[i]->data();
-        desc.content.subimage[i][0].size = images[i]->height() * images[i]->stride();
+        desc.data.subimage[i][0].ptr = images[i]->data();
+        desc.data.subimage[i][0].size = images[i]->height() * images[i]->stride();
     }
     return new Texture(desc);
 }
