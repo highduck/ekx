@@ -6,9 +6,18 @@
 #include <ek/util/path.hpp>
 #include <ek/math/max_rects.hpp>
 #include <ek/imaging/drawing.hpp>
+#include <ek/imaging/ImageSubSystem.hpp>
+#include <ek/Allocator.hpp>
+#include <ek/assert.hpp>
 
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+
+#define STBIW_ASSERT(e)   EK_ASSERT(e)
+
+#define STBIW_MALLOC(size)                           ::ek::imaging::allocator.alloc(size, sizeof(void*))
+#define STBIW_REALLOC_SIZED(ptr, oldSize, newSize)   ::ek::imaging::allocator.reallocate(ptr, oldSize, newSize, sizeof(void*))
+#define STBIW_FREE(ptr)                              ::ek::imaging::allocator.dealloc(ptr)
 
 #include <stb_image_write.h>
 
@@ -17,6 +26,7 @@
 namespace ek {
 
 void MultiResAtlasSettings::readFromXML(const pugi::xml_node& node) {
+
     name = node.attribute("name").as_string();
     for (auto& resolution_node: node.children("resolution")) {
         Resolution res{};
@@ -237,7 +247,7 @@ void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
     } else {
 
         size_t pixels_count = img.width() * img.height();
-        auto* buffer = new uint8_t[pixels_count * 3];
+        auto* buffer = (uint8_t*) imaging::allocator.alloc(pixels_count * 3, sizeof(void*));
         auto* buffer_rgb = buffer;
         auto* buffer_rgba = img.data();
 
@@ -256,7 +266,7 @@ void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
                        buffer,
                        3 * static_cast<int>(img.width()));
 
-        delete[] buffer;
+        imaging::allocator.dealloc(buffer);
     }
 }
 

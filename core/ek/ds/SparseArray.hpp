@@ -47,6 +47,9 @@ struct SparseArray {
     // 32 * 8 = 256
     Page* pages[PagesMaxCount];
 
+    explicit SparseArray() : pages{} {
+    }
+
     [[nodiscard]]
     inline V get(K k) const {
         return pages[k >> PageBits]->indices[k & PageMask];
@@ -56,7 +59,7 @@ struct SparseArray {
         pages[k >> PageBits]->indices[k & PageMask] = v;
     }
 
-    void insert(K k, V v) {
+    void insert(K k, V v, Allocator& allocator) {
         EK_ASSERT_R2(v != 0);
         auto* pages_ = pages;
         const auto page = k >> PageBits;
@@ -66,7 +69,8 @@ struct SparseArray {
         if (indices != sInvalidPage.indices) {
             indices[offset] = v;
         } else {
-            auto* pageData = (Page*) EK_ALLOC_ZERO(PageSize);
+            auto* pageData = (Page*) allocator.alloc(PageSize, PageSize);
+            memory::clear(pageData, PageSize);
             pageData->indices[offset] = v;
             pages_[page] = pageData;
         }
@@ -100,8 +104,8 @@ struct SparseArray {
         initArrays(this, 1);
     }
 
-    inline void clear() {
-        clearArrays(this, 1);
+    inline void clear(Allocator& allocator) {
+        clearArrays(this, 1, allocator);
     }
 
     static void initArrays(SparseArray* arrays, unsigned count) {
@@ -114,14 +118,14 @@ struct SparseArray {
         }
     }
 
-    static void clearArrays(SparseArray* arrays, unsigned count) {
+    static void clearArrays(SparseArray* arrays, unsigned count, Allocator& allocator) {
         auto* pInvalidPage = &sInvalidPage;
         for (unsigned i = 0; i < count; ++i) {
             auto* pages = arrays[i].pages;
             for (unsigned j = 0; j < PagesMaxCount; ++j) {
                 auto* page = pages[j];
                 if (page != pInvalidPage) {
-                    EK_FREE(page);
+                    allocator.dealloc(page);
                     pages[j] = pInvalidPage;
                 }
             }

@@ -59,7 +59,7 @@ void particles_burst(ecs::entity e, int count) {
         p.velocity = float2(dx * speed, dy * speed);
         p.acc = float2(p.acc.x + dx * acc, p.acc.y + dy * acc);
         if (emitter.on_spawn) {
-            emitter.on_spawn(p);
+            emitter.on_spawn(e, p);
         }
         --count;
         a += data.burst_rotation_delta.random();
@@ -103,7 +103,7 @@ void update_emitters() {
                 p.acc = float2(dx * acc, dy * acc);
 
                 if (emitter.on_spawn) {
-                    emitter.on_spawn(p);
+                    emitter.on_spawn(e, p);
                 }
 
                 --count;

@@ -1,11 +1,18 @@
 #include "graphics.hpp"
 #include <ek/util/logger.hpp>
 #include <ek/math/box.hpp>
+#include <ek/Allocator.hpp>
+#include <ek/assert.hpp>
+
+static ek::ProxyAllocator* gHeapSokolGfx = nullptr;
 
 #define SOKOL_GFX_IMPL
 
-//#define SOKOL_ASSERT(x) if(!(x)) {abort();}
-//#define SOKOL_LOG(s) puts(s);
+#define SOKOL_ASSERT(x) EK_ASSERT(x)
+#define SOKOL_LOG(s) EK_INFO("SG: %s", s);
+
+#define SOKOL_MALLOC(sz) (::gHeapSokolGfx->alloc(sz, sizeof(void*)))
+#define SOKOL_FREE(p) (::gHeapSokolGfx->dealloc(p))
 
 #include <sokol_gfx.h>
 
@@ -29,7 +36,7 @@ Buffer::Buffer(BufferType type, Usage usage, int maxSize) {
     desc.type = (sg_buffer_type) type;
     desc.size = maxSize;
     buffer = sg_make_buffer(&desc);
-    if(buffer.id == 0) {
+    if (buffer.id == 0) {
         abort();
     }
     size = maxSize;
@@ -115,17 +122,18 @@ static std::string BackendToString[] = {
         "SG_BACKEND_DUMMY"
 };
 
-void init() {
+void initialize() {
+    gHeapSokolGfx = memory::stdAllocator.create<ProxyAllocator>("sokol_gfx");
     sg_desc desc{};
     desc.buffer_pool_size = 256;
     sg_setup(desc);
     auto backend = sg_query_backend();
     EK_INFO << "Sokol Backend: " << BackendToString[backend];
+}
 
-    // TODO: move to app's create context
-#ifdef __EMSCRIPTEN__
-    //    glPixelStorei(GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
-#endif
+void shutdown() {
+    sg_shutdown();
+    memory::stdAllocator.destroy(gHeapSokolGfx);
 }
 
 }

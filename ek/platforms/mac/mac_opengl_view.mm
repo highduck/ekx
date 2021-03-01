@@ -187,6 +187,10 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
 }
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:NSWindowWillCloseNotification
+                                                  object:self.window];
+
 // Stop the display link BEFORE releasing anything in the view
 // otherwise the display link thread may call into the view and crash
 // when it encounters something that has been release

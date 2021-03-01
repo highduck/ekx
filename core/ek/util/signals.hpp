@@ -6,36 +6,9 @@
 namespace ek {
 
 // inspired by https://github.com/klmr/multifunction
-namespace multifunction_details {
-template<typename R, typename...Args>
-struct multicall {
-    static R call(
-            const std::vector<std::function<R(Args...)>>& invokations,
-            Args... args
-    ) {
-        R ret;
-        for (auto listener : invokations) {
-            ret = listener(args...);
-        }
-        return ret;
-    }
-};
 
-template<typename...Args>
-struct multicall<void, Args...> {
-    static void call(
-            const std::vector<std::function<void(Args...)>>& invokations,
-            Args... args
-    ) {
-        for (auto listener : invokations) {
-            listener(args...);
-        }
-    }
-};
-}
-
-template<typename R, typename ...Args>
-class multifunction {
+template<typename ...Args>
+class signal_t {
 public:
 
     using token = unsigned;
@@ -73,12 +46,18 @@ public:
         return i != 0;
     }
 
-    R emit(Args... args) {
-        std::vector<std::function<R(Args...)>> cp = invocations_;
-        for (auto once_token : once_map_) {
-            remove(once_token);
+    void emit(Args... args) {
+        auto prevOnceCount = once_map_.size();
+        auto prevInvocationsCount = invocations_.size();
+        for (size_t i = 0; i < prevInvocationsCount; ++i) {
+            std::function<void(Args...)> cp{invocations_[i]};
+            cp(args...);
         }
-        return multifunction_details::multicall<R, Args...>::call(cp, args...);
+        for (size_t i = 0; i < prevOnceCount; ++i) {
+            auto onceToken = once_map_[i];
+            remove(onceToken);
+        }
+        once_map_.erase(once_map_.begin(), once_map_.begin() + prevOnceCount);
     }
 
     void clear() {
@@ -103,18 +82,25 @@ public:
         return *this;
     }
 
-    inline R operator()(Args...args) {
-        return emit(args...);
+    inline void operator()(Args...args) {
+        emit(args...);
     }
 
+    signal_t() = default;
+
+    signal_t(signal_t&& mf) noexcept = default;
+
+    signal_t(const signal_t& mf) noexcept = default;
+
+    signal_t& operator=(signal_t&& mf) noexcept = default;
+
+    signal_t& operator=(const signal_t& mf) noexcept = default;
+
 private:
-    std::vector<std::function<R(Args...)>> invocations_;
+    std::vector<std::function<void(Args...)>> invocations_;
     std::vector<token> once_map_;
     std::vector<size_t> tokens_;
 };
-
-template<typename ...Args>
-using signal_t = multifunction<void, Args...>;
 
 }
 

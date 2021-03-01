@@ -80,12 +80,12 @@ struct QuadTreeNode {
 class QuadTree {
 public:
     // pools part
-    std::vector<QuadTreeNode> nodes;
+    Array<QuadTreeNode> nodes;
     int nextFreeNode = 0;
 
-    std::vector<int> objectNext;
-    std::vector<ecs::entity> objectEntity;
-    std::vector<rect_i> objectsBoundsArray;
+    Array<int> objectNext;
+    Array<ecs::entity> objectEntity;
+    Array<rect_i> objectsBoundsArray;
     int nextFreeObject = -1;
 
     int allocNode() {
@@ -95,7 +95,7 @@ public:
             nextFreeNode = nodes[nextFreeNode].firstChildNode;
             nodes[freeID].firstChildNode = 0;
         } else {
-            freeID = static_cast<int>(nodes.size());
+            freeID = static_cast<int>(nodes._size);
             nodes.emplace_back();
             nodes.emplace_back();
             nodes.emplace_back();
@@ -118,7 +118,7 @@ public:
             nextFreeObject = objectNext[objId];
             //objectNext[objId] = -1;
         } else {
-            objId = objectNext.size();
+            objId = static_cast<int>(objectNext._size);
             objectNext.push_back(-1);
             objectsBoundsArray.emplace_back();
             objectEntity.emplace_back();
@@ -158,7 +158,7 @@ public:
 
     // optimize full clearing
     void reset() {
-        nodes.resize(1);
+        nodes.reduceSize(1);
         nodes[0] = {};
         objectNext.clear();
         objectsBoundsArray.clear();
@@ -177,7 +177,7 @@ public:
         }
     }
 
-    void queryEntities(const std::set<int>& nodeIds, std::vector<ecs::entity>& outEntityList) {
+    void queryEntities(const std::set<int>& nodeIds, Array<ecs::entity>& outEntityList) {
         for (auto nodeId : nodeIds) {
             auto& node = nodes[nodeId];
             // add all entities

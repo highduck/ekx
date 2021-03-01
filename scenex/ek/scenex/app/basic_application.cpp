@@ -2,6 +2,7 @@
 
 #include "input_controller.hpp"
 
+#include <ek/imaging/ImageSubSystem.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/2d/Viewport.hpp>
@@ -10,7 +11,6 @@
 #include <ek/scenex/utility/scene_management.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/app/device.hpp>
-#include <ek/util/common_macro.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/scenex/asset2/builtin_assets.hpp>
 #include <ek/graphics/graphics.hpp>
@@ -72,16 +72,24 @@ void drawPreloader(float progress);
 basic_application::basic_application() {
     tracy::SetThreadName("Main");
 
-    assert_created_once<basic_application>();
-
-    graphics::init();
-    audio::init();
+    graphics::initialize();
+    audio::initialize();
 
     asset_manager_ = new asset_manager_t{};
 }
 
 basic_application::~basic_application() {
+
+    ecs::the_world.shutdown();
+
+    draw2d::state.shutdown();
+
     delete asset_manager_;
+
+    audio::shutdown();
+    graphics::shutdown();
+
+    service_locator_instance<basic_application>::shutdown();
 }
 
 void basic_application::initialize() {
@@ -99,13 +107,13 @@ void basic_application::initialize() {
     using ecs::the_world;
 
     the_world.initialize();
-    the_world.registerComponent<Node>();
-    the_world.registerComponent<NodeName>();
+    the_world.registerComponent<Node>(512);
+    the_world.registerComponent<NodeName>(512);
 
     the_world.registerComponent<Camera2D>();
-    the_world.registerComponent<Transform2D>();
-    the_world.registerComponent<WorldTransform2D>();
-    the_world.registerComponent<Display2D>();
+    the_world.registerComponent<Transform2D>(512);
+    the_world.registerComponent<WorldTransform2D>(512);
+    the_world.registerComponent<Display2D>(256);
     the_world.registerComponent<Bounds2D>();
 
     the_world.registerComponent<Transform3D>();
@@ -130,7 +138,7 @@ void basic_application::initialize() {
     the_world.registerComponent<Trail2D>();
     the_world.registerComponent<DestroyTimer>();
     the_world.registerComponent<NodeEventHandler>();
-    the_world.registerComponent<ParticleEmitter2D>();
+    the_world.registerComponent<ParticleEmitter2D>(4);
     the_world.registerComponent<ParticleLayer2D>();
     the_world.registerComponent<UglyFilter2D>();
 
@@ -169,6 +177,7 @@ void basic_application::preload() {
 }
 
 void basic_application::on_draw_frame() {
+    tracy::SetThreadName("Render");
     FrameMark;
     ZoneScoped;
     timer_t timer{};

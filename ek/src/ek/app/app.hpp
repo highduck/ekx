@@ -5,7 +5,9 @@
 #include <vector>
 #include <string>
 #include <ek/util/signals.hpp>
+#include <ek/util/StaticSignal.hpp>
 #include <ek/math/vec.hpp>
+#include <ek/ds/Array.hpp>
 
 namespace ek {
 
@@ -145,12 +147,13 @@ struct app_state final {
     mouse_cursor cursor = mouse_cursor::parent;
     bool cursor_dirty = false;
 
-    signal_t<> on_device_ready;
-    signal_t<const event_t&> on_event;
-    signal_t<> on_frame_draw;
-    signal_t<> on_frame_completed;
+    StaticSignal<> on_device_ready;
+    StaticSignal<const event_t&> on_event;
+    StaticSignal<> on_frame_draw;
+    StaticSignal<> on_frame_completed;
 
-    std::vector<event_t> event_queue_;
+    Array<event_t> event_queue_;
+    Array<event_t> pool_queue;
     bool event_queue_locked = false;
 
     // we change counter from posted native events queue
@@ -165,7 +168,7 @@ struct app_state final {
     void updateMouseCursor(mouse_cursor cursor_);
 };
 
-extern app_state g_app;
+extern app_state& g_app;
 
 void dispatch_event(const event_t& event);
 
@@ -174,6 +177,9 @@ void dispatch_draw_frame();
 void dispatch_init();
 
 void dispatch_device_ready();
+
+void initialize();
+void shutdown();
 
 }
 

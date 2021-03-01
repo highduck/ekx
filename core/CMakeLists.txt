@@ -69,23 +69,33 @@ add_library(${PROJECT_NAME} STATIC
         ek/util/path.hpp
         ek/util/type_index.hpp
 
+        ek/Localization.hpp
+        ek/Localization.cpp
+
+        ek/util/StaticStorage.hpp
+        ek/Allocator.hpp
+        ek/Allocator.cpp
+
         ek/ds/FreeList.hpp
         ek/ds/StaticRingBuffer.hpp
         ek/ds/StaticHistoryBuffer.hpp
         ek/ds/BitVector.hpp
-
-        ek/Localization.hpp
-        ek/Localization.cpp
         ek/ds/SmallArray.hpp
-        ek/ds/DynArray.hpp
+        ek/ds/Array.hpp
         ek/ds/SparseArray.hpp
-        ek/Allocator.hpp
+        ek/ds/Hash.hpp
 
         ek/timers.hpp
         ek/timers.cpp
 
         ecxx/impl/ecxx.cpp
-        ek/Allocator.cpp)
+
+
+        ek/imaging/ImageSubSystem.cpp
+        ek/imaging/ImageSubSystem.hpp
+
+
+        )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 

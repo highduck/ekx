@@ -9,11 +9,19 @@ namespace ek {
 
 using app::g_app;
 
+void editor_onFrameCompleted() {
+    resolve<Editor>().onFrameCompleted();
+}
+
+void editor_onEvent(const app::event_t& e) {
+    resolve<Editor>().onEvent(e);
+}
+
 Editor::Editor(basic_application& app) :
         app_{&app} {
 
-    g_app.on_frame_completed += [&] { this->onFrameCompleted(); };
-    g_app.on_event += [&](auto e) { this->onEvent(e); };
+    g_app.on_frame_completed += editor_onFrameCompleted;
+    g_app.on_event += editor_onEvent;
 
     app.hook_on_preload.add([this]() {
         project.update_scale_factor(app_->scale_factor, false);
@@ -40,6 +48,9 @@ Editor::~Editor() {
     app_->hook_on_update.remove(t2);
     app_->hook_on_draw_frame.remove(t1);
     app_->hook_on_render_frame.remove(t3);
+
+    g_app.on_frame_completed -= editor_onFrameCompleted;
+    g_app.on_event -= editor_onEvent;
 }
 
 void Editor::onFrameCompleted() {

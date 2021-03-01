@@ -76,8 +76,7 @@ private:
     bool reset_keys_ = false;
 
     constexpr static size_t keys_count = static_cast<size_t>(app::key_code::max_count);
-    using keys_array = std::array<key_state_t, keys_count>;
-    keys_array keys_;
+    key_state_t keys_[keys_count];
 
     std::vector<touch_state_t> touches_;
 

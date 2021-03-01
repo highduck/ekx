@@ -49,6 +49,7 @@ private:
     signal_t<>::token t1;
     signal_t<float>::token t2;
     signal_t<>::token t3;
+
     basic_application* app_;
 
 public:

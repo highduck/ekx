@@ -1,7 +1,8 @@
 #pragma once
 
 #include "world.hpp"
-#include <array>
+#include <ek/ds/SmallArray.hpp>
+#include <algorithm>
 
 namespace ecs {
 
@@ -10,12 +11,8 @@ class view_forward_t {
 public:
     static constexpr auto components_num = sizeof ... (Component);
 
-    using table_type = std::array<ComponentHeader*, components_num>;
     using table_index_type = uint32_t;
-
-    using indices_type = std::array<table_index_type, components_num>;
-
-    using entity_vector_iterator = typename std::vector<entity>::iterator;
+    using table_type = ComponentHeader*[components_num];
 
     class iterator final {
     public:
@@ -91,7 +88,7 @@ public:
             ((access_[i] = table_[i] = w->components[type<Component>()], ++i), ...);
         }
 
-        std::sort(table_.begin(), table_.end(), [](auto* a, auto* b) -> bool {
+        std::sort(table_, table_ + components_num, [](auto* a, auto* b) -> bool {
             return a->count() < b->count();
         });
 

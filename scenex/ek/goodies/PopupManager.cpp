@@ -59,7 +59,7 @@ void on_popup_closed(entity e) {
 
     auto it = std::find(state.active.begin(), state.active.end(), e);
     if (it != state.active.end()) {
-        state.active.erase(it);
+        state.active.erase(it - state.active.begin());
     }
 
     if (state.active.empty()) {
@@ -94,7 +94,7 @@ void init_basic_popup(entity e) {
     }
 }
 
-bool contains(const std::vector<entity>& list, const entity e) {
+bool contains(const Array<entity>& list, const entity e) {
     const auto it = std::find(list.begin(), list.end(), e);
     return it != list.end();
 }
@@ -104,7 +104,7 @@ void PopupManager::updateAll() {
     for (auto e : ecs::view<PopupManager>()) {
         auto& p = e.get<PopupManager>();
         bool needFade = !p.active.empty();
-        if (p.active.size() == 1 && p.active.back() == p.closingLast) {
+        if (p.active._size == 1 && p.active.back() == p.closingLast) {
             needFade = false;
         }
         p.fade_progress = math::reach(p.fade_progress,
@@ -191,8 +191,7 @@ void close_popup(entity e) {
 uint32_t count_active_popups() {
     auto pm = PopupManager::Main;
     auto& state = pm.get<PopupManager>();
-    auto count = state.active.size();
-    return static_cast<uint32_t>(count);
+    return state.active._size;
 }
 
 void clear_popups() {

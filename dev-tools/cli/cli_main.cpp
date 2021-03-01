@@ -4,6 +4,7 @@
 #include <ek/util/logger.hpp>
 #include <ek/util/strings.hpp>
 #include <ek/timers.hpp>
+#include <ek/imaging/ImageSubSystem.hpp>
 
 #include <ek/editor/marketing/export_marketing.hpp>
 #include <ek/editor/assets/editor_project.hpp>
@@ -32,7 +33,9 @@ void main() {
         return;
     }
 
-    clock::init();
+    memory::initialize();
+    clock::initialize();
+    imaging::initialize();
 
     if (args.size() > 1) {
         if (args[1] == "export") {

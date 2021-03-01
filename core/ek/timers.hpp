@@ -5,7 +5,7 @@
 namespace ek {
 
 namespace clock {
-void init();
+void initialize();
 
 double now();
 }

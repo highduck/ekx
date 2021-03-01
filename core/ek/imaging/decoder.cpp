@@ -5,6 +5,7 @@
 #include <ek/util/logger.hpp>
 #include "../assert.hpp"
 #include "../Allocator.hpp"
+#include "ImageSubSystem.hpp"
 
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -13,11 +14,10 @@
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
 
-static ek::StdAllocator stbi_heap{"stb_image"};
-
-#define STBI_MALLOC(size)               stbi_heap.alloc(size, 4)
-#define STBI_REALLOC(ptr, newSize)      stbi_heap.realloc(ptr, newSize, 4)
-#define STBI_FREE(ptr)                  stbi_heap.dealloc(ptr)
+#define STBI_ASSERT(e)   EK_ASSERT(e)
+#define STBI_MALLOC(size)                           ::ek::imaging::allocator.alloc(size, sizeof(void*))
+#define STBI_REALLOC_SIZED(ptr, oldSize, newSize)   ::ek::imaging::allocator.reallocate(ptr, oldSize, newSize, sizeof(void*))
+#define STBI_FREE(ptr)                              ::ek::imaging::allocator.dealloc(ptr)
 
 #include <stb_image.h>
 
@@ -26,6 +26,7 @@ static ek::StdAllocator stbi_heap{"stb_image"};
 namespace ek {
 
 image_t* decode_image_data(const void* data, size_t size) {
+
     EK_ASSERT(size > 0);
 
     image_t* result = nullptr;
@@ -44,6 +45,7 @@ image_t* decode_image_data(const void* data, size_t size) {
     } else {
         EK_ERROR("image decoding error: %s", stbi_failure_reason());
     }
+
     return result;
 }
 
