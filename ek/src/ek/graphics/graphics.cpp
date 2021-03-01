@@ -21,10 +21,12 @@ namespace ek::graphics {
 /** buffer wrapper **/
 Buffer::Buffer(BufferType type, const void* data, int dataSize) {
     sg_buffer_desc desc{
-            .size = dataSize,
             .type = (sg_buffer_type) type,
             .usage = SG_USAGE_IMMUTABLE,
-            .content = data,
+            .data = {
+                    .ptr = data,
+                    .size = (size_t)dataSize
+            }
     };
     buffer = sg_make_buffer(&desc);
     size = dataSize;
@@ -48,7 +50,10 @@ Buffer::~Buffer() {
 
 void Buffer::update(const void* data, uint32_t dataSize) {
     size = dataSize;
-    sg_update_buffer(buffer, data, dataSize);
+    sg_update_buffer(buffer, sg_range{
+        .ptr = data,
+        .size = dataSize
+    });
 //    sg_append_buffer(buffer, data, dataSize);
 //    if (size > size_) {
 //        sg_update_buffer(handle_, data, size);
@@ -83,10 +88,10 @@ Texture::~Texture() {
 }
 
 void Texture::update(const void* data, uint32_t size) const {
-    sg_image_content content{};
-    content.subimage[0][0].ptr = data;
-    content.subimage[0][0].size = size;
-    sg_update_image(image, content);
+    sg_image_data imageData{};
+    imageData.subimage[0][0].ptr = data;
+    imageData.subimage[0][0].size = size;
+    sg_update_image(image, imageData);
 }
 
 Texture* Texture::createSolid32(int width, int height, uint32_t pixelColor) {
@@ -102,8 +107,10 @@ Texture* Texture::createSolid32(int width, int height, uint32_t pixelColor) {
     for (int i = 0; i < count; ++i) {
         pixels[i] = pixelColor;
     }
-    desc.content.subimage[0][0].ptr = pixels;
-    desc.content.subimage[0][0].size = count * 4;
+    desc.data.subimage[0][0] = {
+            .ptr = pixels,
+            .size = (size_t)count * 4
+    };
 
     auto* tex = new Texture(desc);
     delete[] pixels;

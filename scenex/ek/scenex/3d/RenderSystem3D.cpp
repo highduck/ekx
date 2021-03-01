@@ -96,7 +96,7 @@ struct ShadowMapRes {
 
     void init() {
 
-        shader = new Shader(render3d_shadow_map_shader_desc());
+        shader = new Shader(render3d_shadow_map_shader_desc(sg_query_backend()));
         const uint32_t w = 2048;
         const uint32_t h = 2048;
         auto depthImageDesc = renderTargetDesc(w, h);
@@ -110,24 +110,21 @@ struct ShadowMapRes {
         pipDesc.shader = shader->shader;
         pipDesc.index_type = SG_INDEXTYPE_UINT16;
         pipDesc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
-        pipDesc.rasterizer.cull_mode = SG_CULLMODE_FRONT;
-        pipDesc.rasterizer.face_winding = DEFAULT_FACE_WINDING;
-        pipDesc.rasterizer.sample_count = 1;
-        pipDesc.depth_stencil.depth_write_enabled = true;
-        pipDesc.depth_stencil.depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL;
-        pipDesc.blend.depth_format = SG_PIXELFORMAT_DEPTH;
-        pipDesc.blend.color_format = SG_PIXELFORMAT_RGBA8;
+        pipDesc.cull_mode = SG_CULLMODE_FRONT;
+        pipDesc.face_winding = DEFAULT_FACE_WINDING;
+        pipDesc.sample_count = 1;
+        pipDesc.depth.write_enabled = true;
+        pipDesc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
+        pipDesc.depth.pixel_format = SG_PIXELFORMAT_DEPTH;
+        pipDesc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
         pipDesc.layout = getVertex3DLayout();
         pipDesc.label = "shadow-map-pip";
         pip = sg_make_pipeline(pipDesc);
 
         clear.colors[0].action = SG_ACTION_CLEAR;
-        clear.colors[0].val[0] = 1.0f;
-        clear.colors[0].val[1] = 1.0f;
-        clear.colors[0].val[2] = 1.0f;
-        clear.colors[0].val[3] = 1.0f;
+        clear.colors[0].value = {1.0f, 1.0f, 1.0f, 1.0f};
         clear.depth.action = SG_ACTION_CLEAR;
-        clear.depth.val = 1.0f;
+        clear.depth.value = 1.0f;
 
         sg_pass_desc passDesc{};
         passDesc.color_attachments[0].image = rtColor->image;
@@ -186,7 +183,7 @@ struct ShadowMapRes {
                     bindings.vertex_buffers[0] = mesh->vb.buffer;
                     sg_apply_bindings(bindings);
                     mvp = projection * view * e.get<Transform3D>().world;
-                    sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, &mvp, sizeof(mvp));
+                    sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
                     sg_draw(0, mesh->indices_count, 1);
                 }
             }
@@ -207,18 +204,18 @@ struct Main3DRes {
     light2_params_t pointLightParams{};
 
     void init() {
-        shader = new Shader(render3d_shader_desc());
+        shader = new Shader(render3d_shader_desc(sg_query_backend()));
 
         sg_pipeline_desc pipDesc{
                 .shader = shader->shader,
                 .primitive_type = SG_PRIMITIVETYPE_TRIANGLES,
                 .index_type = SG_INDEXTYPE_UINT16,
         };
-        pipDesc.depth_stencil.depth_write_enabled = true;
-        pipDesc.depth_stencil.depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL;
-        pipDesc.rasterizer.cull_mode = SG_CULLMODE_BACK;
-        pipDesc.rasterizer.face_winding = DEFAULT_FACE_WINDING;
-        pipDesc.rasterizer.sample_count = 1;
+        pipDesc.depth.write_enabled = true;
+        pipDesc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
+        pipDesc.cull_mode = SG_CULLMODE_BACK;
+        pipDesc.face_winding = DEFAULT_FACE_WINDING;
+        pipDesc.sample_count = 1;
         pipDesc.layout = getVertex3DLayout();
 
         pip = sg_make_pipeline(pipDesc);
@@ -246,29 +243,19 @@ struct RenderSkyBoxRes {
     sg_pipeline pip{};
 
     void init() {
-        shader = new Shader(render3d_skybox_shader_desc());
+        shader = new Shader(render3d_skybox_shader_desc(sg_query_backend()));
 
         sg_pipeline_desc pipDesc{
                 .shader = shader->shader,
                 .primitive_type = SG_PRIMITIVETYPE_TRIANGLES,
                 .index_type = SG_INDEXTYPE_UINT16,
         };
-        pipDesc.depth_stencil.depth_write_enabled = false;
-        pipDesc.depth_stencil.depth_compare_func = SG_COMPAREFUNC_LESS_EQUAL;
-//        pipDesc.blend.depth_format = SG_PIXELFORMAT_DEPTH;
-//        pipDesc.blend.color_format = SG_PIXELFORMAT_NONE;
-        pipDesc.rasterizer.cull_mode = SG_CULLMODE_FRONT;
-        pipDesc.rasterizer.face_winding = SG_FACEWINDING_CCW;
-        pipDesc.rasterizer.sample_count = 1;
+        pipDesc.depth.write_enabled = false;
+        pipDesc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
+        pipDesc.cull_mode = SG_CULLMODE_FRONT;
+        pipDesc.face_winding = SG_FACEWINDING_CCW;
+        pipDesc.sample_count = 1;
         pipDesc.layout = getVertex3DLayout();
-
-//        GL_CHECK(glEnable(GL_DEPTH_TEST));
-//    GL_CHECK(glEnable(GL_CULL_FACE));
-//    GL_CHECK(glCullFace(GL_BACK));
-//    GL_CHECK(glFrontFace(GL_CCW));
-//    GL_CHECK(glDepthMask(GL_TRUE));
-//    GL_CHECK(glDepthFunc(GL_LEQUAL)); // equal needs to correct pass skybox z = 1
-//    GL_CHECK(glDepthRange(0.0f, 1.0f));
 
         pip = sg_make_pipeline(pipDesc);
     }
@@ -297,7 +284,7 @@ struct RenderSkyBoxRes {
             bind.index_buffer = mesh->ib.buffer;
             sg_apply_bindings(bind);
 
-            sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, mvp.data_, sizeof(mvp));
+            sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
             sg_draw(0, mesh->indices_count, 1);
         }
     }
@@ -348,7 +335,7 @@ void RenderSystem3D::renderObjects(const mat4f& proj, const mat4f& view) {
             memcpy(params.uModel, model.data_, sizeof(float) * 16);
             memcpy(params.u_depth_mvp, depth_mvp.data_, sizeof(float) * 16);
             memcpy(params.u_normal_matrix, nm4.data_, sizeof(float) * 16);
-            sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, &params, sizeof(vs_params_t));
+            sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, SG_RANGE(params));
 
             material_params_t matParams;
             memcpy(matParams.mat_diffuse, material.diffuse.data(), sizeof(float) * 3);
@@ -357,7 +344,7 @@ void RenderSystem3D::renderObjects(const mat4f& proj, const mat4f& view) {
             memcpy(matParams.mat_emission, material.emission.data(), sizeof(float) * 3);
             matParams.mat_shininess = (1.f / material.roughness) - 1.f;
             matParams.mat_roughness = material.roughness;
-            sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_material_params, &matParams, sizeof(material_params_t));
+            sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_material_params, SG_RANGE(matParams));
 
             main->bind.index_buffer = mesh->ib.buffer;
             main->bind.vertex_buffers[0] = mesh->vb.buffer;
@@ -464,9 +451,9 @@ void RenderSystem3D::render() {
     auto viewPos = extract_translation(cameraTransform.world);
     memcpy(fs_params.uViewPos, viewPos.data(), sizeof(float) * 3);
 
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, &fs_params, sizeof(fs_params_t));
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_light_params, &main->directionalLightParams, sizeof(light_params_t));
-    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_light2_params, &main->pointLightParams, sizeof(light2_params_t));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, SG_RANGE(fs_params));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_light_params, SG_RANGE(main->directionalLightParams));
+    sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_light2_params, SG_RANGE(main->pointLightParams));
 
     renderObjects(cameraProjection, cameraView);
     skybox->render(cameraData.cubeMap.get(), cameraView, cameraProjection);

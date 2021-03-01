@@ -142,8 +142,8 @@ void imgui_module_t::initializeFontTexture() {
     img_desc.wrap_v = SG_WRAP_CLAMP_TO_EDGE;
     img_desc.min_filter = SG_FILTER_LINEAR;
     img_desc.mag_filter = SG_FILTER_LINEAR;
-    img_desc.content.subimage[0][0].ptr = pixels;
-    img_desc.content.subimage[0][0].size = width * height * 4;
+    img_desc.data.subimage[0][0].ptr = pixels;
+    img_desc.data.subimage[0][0].size = width * height * 4;
     img_desc.label = "sokol-imgui-font";
     fontTexture = sg_make_image(&img_desc);
 
