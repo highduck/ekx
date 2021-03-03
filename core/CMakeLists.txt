@@ -54,7 +54,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/imaging/fast_blur.cpp
 
         ek/util/Res.hpp
-        ek/util/source_location.hpp
         ek/util/logger.hpp
         ek/util/logger.cpp
         ek/util/locator.hpp

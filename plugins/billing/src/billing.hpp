@@ -7,6 +7,9 @@
 namespace billing {
 
 void initialize(const std::string& developerKey);
+void _initialize();
+
+void shutdown();
 
 void getPurchases();
 
@@ -34,7 +37,11 @@ struct ProductDetails {
     std::string currencyCode;
 };
 
-extern ek::signal_t<const PurchaseData&> onPurchaseChanged;
-extern ek::signal_t<const ProductDetails&> onProductDetails;
+struct Context {
+    ek::signal_t<const PurchaseData&> onPurchaseChanged;
+    ek::signal_t<const ProductDetails&> onProductDetails;
+};
+
+extern Context& context;
 
 }

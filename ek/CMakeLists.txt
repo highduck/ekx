@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(ek)
 
-add_library(${PROJECT_NAME} STATIC "")
+add_library(${PROJECT_NAME} STATIC "" src/ek/app/prefs.cpp)
 
 add_subdirectory(src)
 

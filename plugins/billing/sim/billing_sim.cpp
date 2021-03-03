@@ -4,6 +4,7 @@ namespace billing {
 
 void initialize(const std::string& developerKey) {
     (void)developerKey;
+    _initialize();
 }
 
 void getPurchases() {

@@ -28,19 +28,24 @@ struct config_t {
     ChildDirected childDirected = ChildDirected::Unspecified;
 };
 
+struct Context {
+    ek::signal_t<event_type> onEvent;
+    ek::signal_t<> onInterstitialClosed;
+    config_t config;
+};
+
+extern Context& context;
+
 void initialize(const config_t& config);
+
+void _initialize();
+void shutdown();
 
 void show_banner(int flags);
 
 void show_rewarded_ad();
 
 void show_interstitial_ad();
-
-// hpp only:
-// inline ek::signal_t<event_type> onEvent{};
-
-extern ek::signal_t<event_type> onEvent;
-extern ek::signal_t<> onInterstitialClosed;
 
 bool hasSupport();
 

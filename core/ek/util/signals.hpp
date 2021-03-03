@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <functional>
+#include "../ds/Array.hpp"
 
 namespace ek {
 
@@ -11,58 +11,60 @@ template<typename ...Args>
 class signal_t {
 public:
 
-    using token = unsigned;
+    using Listener = uint32_t;
+
+    struct Slot {
+        std::function<void(Args...)> fn;
+        Listener id;
+        bool once;
+    };
+
+    uint32_t _nextId = 0;
+    Array<Slot> _slots;
 
     template<typename Fn>
-    token add(Fn listener) {
+    Listener add(Fn listener) {
 //        assert(!locked_);
-        invocations_.push_back(listener);
-        auto tk = static_cast<token>(tokens_.size());
-        tokens_.push_back(invocations_.size());
-        return tk;
+        const auto id = _nextId++;
+        _slots.emplace_back(Slot{static_cast<Fn&&>(listener), id, false});
+        return id;
     }
 
     template<typename Fn>
-    token add_once(Fn listener) {
+    Listener add_once(Fn listener) {
 //        assert(!locked_);
-        invocations_.push_back(listener);
-        auto tk = static_cast<token>(tokens_.size());
-        tokens_.push_back(invocations_.size());
-        once_map_.push_back(tk);
-        return tk;
+        const auto id = _nextId++;
+        _slots.emplace_back(Slot{static_cast<Fn&&>(listener), id, true});
+        return id;
     }
 
-    bool remove(token tk) {
-        size_t i = tokens_[tk];
-        if (i) {
-            for (auto& tk_ref : tokens_) {
-                if (tk_ref && tk_ref > i) {
-                    --tk_ref;
-                }
+    bool remove(Listener id) {
+        for(uint32_t i = 0; i < _slots._size; ++i) {
+            auto& slot = _slots[i];
+            if(slot.id == id) {
+                _slots.erase(i);
+                return true;
             }
-            invocations_.erase(invocations_.begin() + i - 1);
-            tokens_[tk] = 0;
         }
-        return i != 0;
+        return false;
     }
 
     void emit(Args... args) {
-        auto prevOnceCount = once_map_.size();
-        auto prevInvocationsCount = invocations_.size();
-        for (size_t i = 0; i < prevInvocationsCount; ++i) {
-            std::function<void(Args...)> cp{invocations_[i]};
-            cp(args...);
+        uint32_t i = 0;
+        while (i < _slots._size) {
+            // copy slot
+            auto slot = _slots.get(i);
+            slot.fn(args...);
+            if (slot.once) {
+                _slots.erase(i);
+            } else {
+                ++i;
+            }
         }
-        for (size_t i = 0; i < prevOnceCount; ++i) {
-            auto onceToken = once_map_[i];
-            remove(onceToken);
-        }
-        once_map_.erase(once_map_.begin(), once_map_.begin() + prevOnceCount);
     }
 
     void clear() {
-        invocations_.clear();
-        once_map_.clear();
+        _slots.clear();
     }
 
     template<typename Fn>
@@ -77,7 +79,7 @@ public:
         return *this;
     }
 
-    inline auto& operator-=(token tk) {
+    inline auto& operator-=(Listener tk) {
         remove(tk);
         return *this;
     }
@@ -95,11 +97,6 @@ public:
     signal_t& operator=(signal_t&& mf) noexcept = default;
 
     signal_t& operator=(const signal_t& mf) noexcept = default;
-
-private:
-    std::vector<std::function<void(Args...)>> invocations_;
-    std::vector<token> once_map_;
-    std::vector<size_t> tokens_;
 };
 
 }

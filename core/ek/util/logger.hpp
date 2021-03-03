@@ -2,11 +2,29 @@
 
 #include <cstdint>
 #include <sstream>
-#include <ek/util/source_location.hpp>
 
 #ifndef __printflike
 #define __printflike(fmtarg, firstvararg)
 #endif
+
+namespace ek {
+
+struct source_location_t {
+    const char* file = nullptr;
+    unsigned line = 0;
+
+    friend std::ostream& operator<<(std::ostream& out, const source_location_t& location) {
+        if (location.file) {
+            out << location.file;
+            if (location.line) {
+                out << ':' << location.line;
+            }
+        }
+        return out;
+    }
+};
+
+}
 
 namespace ek::logger {
 
@@ -66,11 +84,13 @@ private:
 
 #ifdef NDEBUG
 
+#define EK_CURRENT_LOCATION ::ek::source_location_t{}
 #define EK_TRACE ::ek::logger::null_log_stream_t{::ek::logger::verbosity_t::trace,   EK_CURRENT_LOCATION}
 #define EK_DEBUG ::ek::logger::null_log_stream_t{::ek::logger::verbosity_t::debug,   EK_CURRENT_LOCATION}
 
 #else
 
+#define EK_CURRENT_LOCATION ::ek::source_location_t{__FILE__, __LINE__}
 #define EK_TRACE ::ek::logger::log_stream_t{::ek::logger::verbosity_t::trace,   EK_CURRENT_LOCATION}
 #define EK_DEBUG ::ek::logger::log_stream_t{::ek::logger::verbosity_t::debug,   EK_CURRENT_LOCATION}
 

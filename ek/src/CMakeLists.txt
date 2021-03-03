@@ -3,6 +3,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         ek/app/app.hpp
         ek/app/device.hpp
         ek/app/prefs.hpp
+        ek/app/prefs.cpp
         ek/app/res.hpp
         ek/app/internal/res_sys.hpp
         ek/app/internal/res_sys.cpp

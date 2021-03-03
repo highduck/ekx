@@ -32,6 +32,8 @@ namespace billing {
     const char *class_path = "ek/billing/BillingBridge";
 
     void initialize(const std::string &key) {
+        _initialize();
+
         auto *env = android::get_jni_env();
 
         const char *method_name = "initialize";

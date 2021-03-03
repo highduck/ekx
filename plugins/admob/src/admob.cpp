@@ -1,7 +1,17 @@
 #include "admob.hpp"
+#include <ek/util/StaticStorage.hpp>
 
 namespace admob {
-ek::signal_t<event_type> onEvent{};
-ek::signal_t<> onInterstitialClosed{};
-ek::signal_t<bool> onFocusChanged{};
+
+static ek::StaticStorage<Context> _context;
+Context& context = *_context.ptr();
+
+void _initialize() {
+    _context.initialize();
+}
+
+void shutdown() {
+    _context.shutdown();
+}
+
 }

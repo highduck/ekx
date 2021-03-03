@@ -8,7 +8,7 @@
 namespace ek {
 
 AdMobWrapper::AdMobWrapper() {
-    admob::onEvent += [this](auto event) {
+    admob::context.onEvent += [this](auto event) {
         this->onAdmobEvent(event);
     };
 }
@@ -16,7 +16,7 @@ AdMobWrapper::AdMobWrapper() {
 void AdMobWrapper::showInterstitial(const std::function<void()>& callback) {
     activeInterstitial = true;
     audio::muteDeviceBegin();
-    admob::onInterstitialClosed.add_once([callback, this] {
+    admob::context.onInterstitialClosed.add_once([callback, this] {
         activeInterstitial = false;
         audio::muteDeviceEnd();
         if (callback) {

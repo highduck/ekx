@@ -220,6 +220,7 @@ void initialize(const std::string& developerKey)
     if (_billing) {
         return;
     }
+    _initialize();
     _billing = [Billing new];
 }
 
