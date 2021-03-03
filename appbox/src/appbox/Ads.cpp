@@ -16,7 +16,7 @@ const bool useAdMobSimulator = false;
 Ads::Ads(Ads::Config config) :
         config_{std::move(config)},
         wrapper{AdMobWrapper::create(useAdMobSimulator)} {
-    billing::onPurchaseChanged += [this](auto purchase) { this->onPurchaseChanged(purchase); };
+    billing::context.onPurchaseChanged += [this](auto purchase) { this->onPurchaseChanged(purchase); };
 
 #ifndef NDEBUG
     setRemoveAdsPurchaseCache(true);

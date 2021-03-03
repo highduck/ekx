@@ -132,6 +132,8 @@ void configureChildDirected(ChildDirected childDirected) {
 }
 
 void initialize(const config_t& config) {
+    _initialize();
+
     // settings
     GAD_banner = [NSString stringWithUTF8String:config.banner.c_str()];
     GAD_video = [NSString stringWithUTF8String:config.video.c_str()];

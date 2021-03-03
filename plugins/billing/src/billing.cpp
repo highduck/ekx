@@ -1,8 +1,17 @@
 #include "billing.hpp"
+#include <ek/util/StaticStorage.hpp>
 
 namespace billing {
 
-ek::signal_t<const PurchaseData&> onPurchaseChanged;
-ek::signal_t<const ProductDetails&> onProductDetails;
+static ek::StaticStorage<Context> _context{};
+Context& context = *_context.ptr();
+
+void _initialize() {
+    _context.initialize();
+}
+
+void shutdown() {
+    _context.shutdown();
+}
 
 }

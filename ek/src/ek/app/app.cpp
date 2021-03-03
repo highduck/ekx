@@ -6,13 +6,14 @@
 #include <ek/timers.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/util/logger.hpp>
+#include <ek/util/StaticStorage.hpp>
 
 namespace ek::app {
 
 std::mutex event_queue_mtx;
 
-char G_APP_BUFF[sizeof(app_state)];
-app_state& g_app = *((app_state*) &G_APP_BUFF);
+static StaticStorage<app_state> ssAppState;
+app_state& g_app = *ssAppState.ptr();
 
 void dispatch_init() {
     analytics::init(); // analytics before crash reporter on ios
@@ -123,11 +124,11 @@ void app_state::updateMouseCursor(mouse_cursor cursor_) {
 }
 
 void initialize() {
-    new(G_APP_BUFF)app_state();
+    ssAppState.initialize();
 }
 
 void shutdown() {
-    g_app.~app_state();
+    ssAppState.shutdown();
 }
 
 }

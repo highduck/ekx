@@ -43,15 +43,6 @@ std::string get_user_string(const std::string& key, const std::string& default_v
     return result_str;
 }
 
-void set_user_data(const std::string& key, const std::vector<uint8_t>& buffer) {
-    assert(!key.empty());
-    set_user_string(key, base64::encode(buffer));
-}
-
-std::vector<uint8_t> get_user_data(const std::string& key) {
-    return base64::decode(get_user_string(key, ""));
-}
-
 void set_user_preference(const std::string& key, int value) {
     auto* env = android::get_jni_env();
 

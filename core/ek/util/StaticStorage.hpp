@@ -7,7 +7,7 @@ namespace ek {
 template<typename T>
 class StaticStorage {
     bool initialized = false;
-    char buffer[sizeof(T)];
+    alignas(alignof(T)) char buffer[sizeof(T)]{};
 public:
     template<typename ...Args>
     inline void initialize(Args&& ...args) {
@@ -24,6 +24,10 @@ public:
 
     constexpr inline T* ptr() {
         return (T*) buffer;
+    }
+
+    constexpr inline T& ref() {
+        return *((T*) buffer);
     }
 
     inline void shutdown() {

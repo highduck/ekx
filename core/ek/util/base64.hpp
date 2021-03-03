@@ -1,23 +1,16 @@
 #pragma once
 
 #include <cstdint>
-#include <cstddef>
-#include <vector>
-#include <string>
 
 namespace ek::base64 {
 
-std::string encode(const std::vector<uint8_t>& data);
+uint32_t getEncodedMaxSize(uint32_t bytes_count);
 
-std::vector<uint8_t> decode(const std::string& str);
+uint32_t encode(char* out_str, const uint8_t* bytes, uint32_t bytes_count);
 
-size_t encoded_size(size_t bytes_count);
+uint32_t getDecodedMaxSize(uint32_t string_length);
 
-size_t encode(char* out_str, const uint8_t* bytes, size_t bytes_count);
-
-size_t decoded_size(size_t string_length);
-
-size_t decode(uint8_t* out_buffer, const char* str, size_t chars_to_decode);
+uint32_t decode(uint8_t* out_buffer, const char* str, uint32_t chars_to_decode);
 
 }
 

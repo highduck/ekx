@@ -50,52 +50,5 @@ inline const char* decodeUTF8(const char* it, uint32_t& codepoint) {
     return it;
 }
 
-struct UTF8Decoder {
-    const uint8_t* it;
-    uint32_t state;
-
-    UTF8Decoder() = delete;
-
-    explicit UTF8Decoder(const char* data) :
-            it{reinterpret_cast<const uint8_t*>(data)},
-            state{0} {
-    }
-
-    void reset(const uint8_t* data) {
-        it = data;
-        state = 0;
-    }
-
-    // true if next codepoint decoded
-    inline bool decodeNextByte(uint32_t& codepoint) {
-        return decodeUTF8(state, codepoint, *(it++)) == 0;
-    }
-
-    inline int positionTo(const char* ptr) const {
-        return static_cast<int>(it - reinterpret_cast<const uint8_t*>(ptr));
-    }
-
-    inline bool decode(uint32_t& codepoint) {
-        if (*it != 0 && decodeNextByte(codepoint)) {
-            return true;
-        }
-        if (*it != 0 && decodeNextByte(codepoint)) {
-            return true;
-        }
-        if (*it != 0 && decodeNextByte(codepoint)) {
-            return true;
-        }
-        if (*it != 0 && decodeNextByte(codepoint)) {
-            return true;
-        }
-        return false;
-    }
-
-    [[nodiscard]] inline bool hasNext() const {
-        return *it != 0;
-    }
-
-};
-
 }
 

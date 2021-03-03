@@ -1,7 +1,5 @@
+#include "base64.hpp"
 #include <cstdint>
-#include <cstddef>
-#include <vector>
-#include <string>
 
 namespace ek::base64 {
 
@@ -27,11 +25,11 @@ const uint8_t decoder[256] = {
         64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
 };
 
-size_t decoded_size(size_t string_length) {
+uint32_t getDecodedMaxSize(uint32_t string_length) {
     return ((string_length + 3) / 4) * 3;
 }
 
-size_t decode(uint8_t* out_buffer, const char* str, size_t chars_to_decode) {
+uint32_t decode(uint8_t* out_buffer, const char* str, uint32_t chars_to_decode) {
     const auto* in = reinterpret_cast<const uint8_t*>(str);
     auto* p = out_buffer;
 
@@ -73,11 +71,11 @@ const char alphabet[65] =
         "0123456789+/";
 
 // returns 64-based string length required to store 'bytes_count' bytes
-size_t encoded_size(size_t bytes_count) {
+uint32_t getEncodedMaxSize(uint32_t bytes_count) {
     return (bytes_count + 2) / 3 * 4;
 }
 
-size_t encode(char* out_str, const uint8_t* bytes, size_t bytes_count) {
+uint32_t encode(char* out_str, const uint8_t* bytes, uint32_t bytes_count) {
     char* p = out_str;
     const uint8_t* in = bytes;
     while (bytes_count > 2) {
@@ -105,27 +103,6 @@ size_t encode(char* out_str, const uint8_t* bytes, size_t bytes_count) {
     }
 
     return p - out_str;
-}
-
-using std::string;
-using std::vector;
-
-string encode(const vector<uint8_t>& data) {
-    size_t encoded_len = encoded_size(data.size());
-    std::string result;
-    result.resize(encoded_len);
-    encoded_len = encode(const_cast<char*>(result.data()), data.data(), data.size());
-    result.resize(encoded_len);
-    return result;
-}
-
-vector<uint8_t> decode(const string& str) {
-    size_t decoded_len = decoded_size(str.size());
-    vector<uint8_t> result;
-    result.resize(decoded_len);
-    decoded_len = decode(result.data(), str.data(), str.size());
-    result.resize(decoded_len);
-    return result;
 }
 
 }

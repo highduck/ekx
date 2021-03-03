@@ -1,6 +1,4 @@
 #include <string>
-#include <array>
-#include <ek/math/vec.hpp>
 
 #include <TargetConditionals.h>
 

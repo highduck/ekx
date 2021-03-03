@@ -8,6 +8,8 @@ namespace admob {
 const char *class_path = "ek/admob/AdMobPlugin";
 
 void initialize(const config_t &config) {
+    _initialize();
+
     auto *env = android::get_jni_env();
 
     const char *method_name = "initialize";
