@@ -116,12 +116,12 @@
 
         var script = document.createElement("script");
         script.async = true;
-        script.src = "{{binary_name}}.js?v={{{build_number}}}";
+        script.src = "{{binary_name}}.js?v={{{version_code}}}";
         document.getElementsByTagName("head")[0].append(script);
     }
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('{{{pwa_url}}}/sw.js?v={{{build_number}}}', {
+        navigator.serviceWorker.register('{{{pwa_url}}}/sw.js?v={{{version_code}}}', {
             scope: '{{{pwa_url}}}/'
         }).then(function (registration) {
             console.log('Service Worker Registered');

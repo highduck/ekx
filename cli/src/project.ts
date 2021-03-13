@@ -58,6 +58,8 @@ export class Project {
     args = process.argv.slice(3);
 
     name: string;
+    version_name: string;
+    version_code: string;
     build_steps: (() => void)[] = [];
     projects: { [name: string]: RegisteredProject } = {};
     modules: ModuleDef[] = [];
@@ -88,7 +90,10 @@ export class Project {
     };
 
     android: {
+        application_id?: string,
+        package_id?: string,
         googleServicesConfigDir?: string,
+        signingConfigPath?: string
     };
 
     ios: {

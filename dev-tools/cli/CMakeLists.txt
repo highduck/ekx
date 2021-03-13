@@ -23,4 +23,7 @@ target_link_libraries(${PROJECT_NAME}
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../bin")
+        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../bin"
+        RUNTIME_OUTPUT_NAME "ekc"
+        RUNTIME_OUTPUT_NAME_DEBUG "ekc-debug"
+        )
