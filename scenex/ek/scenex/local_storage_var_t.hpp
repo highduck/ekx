@@ -15,7 +15,7 @@ public:
 
     explicit local_storage_var_t(std::string key, int default_value = 0)
             : key_{std::move(key)} {
-        value_ = get_user_preference(key_, default_value);
+        value_ = get_user_preference(key_.c_str(), default_value);
     }
 
     int value() const {
@@ -25,7 +25,7 @@ public:
     void value(int v) {
         if (value_ != v) {
             value_ = v;
-            set_user_preference(key_, v);
+            set_user_preference(key_.c_str(), v);
             changed.emit(*this);
         }
     }

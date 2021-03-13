@@ -21,6 +21,16 @@
 
 #endif // EK_ALLOCATION_TRACKER
 
+inline void* ek_aligned_alloc(size_t alignment, size_t size) {
+#ifdef __ANDROID__
+    void* buffer = nullptr;
+    posix_memalign(&buffer, alignment, size);
+    return buffer;
+#else
+    return aligned_alloc(alignment, size);
+#endif
+}
+
 namespace ek {
 
 inline static const size_t MinAlign = sizeof(void*);
@@ -69,7 +79,7 @@ public:
             const auto mm = 1 + sizeTotal / aligns;
             sizeTotal = mm * aligns;
         }
-        void* ptr = ::aligned_alloc(aligns, sizeTotal);
+        void* ptr = ek_aligned_alloc(aligns, sizeTotal);
         EK_TRACE_ALLOC(ptr, sizeTotal, "ek allocation tracker");
         return ptr;
     }
@@ -203,7 +213,7 @@ void* StdAllocator::alloc(uint32_t size, uint32_t align) {
         const auto mm = 1 + sizeTotal / aligns;
         sizeTotal = mm * aligns;
     }
-    void* ptr = ::aligned_alloc(aligns, sizeTotal);
+    void* ptr = ek_aligned_alloc(aligns, sizeTotal);
 #ifdef EK_ALLOCATION_TRACKER
     tracker->onAllocation(ptr, size, sizeTotal);
 #endif // EK_ALLOCATION_TRACKER

@@ -193,7 +193,7 @@ void AppBox::initLanguageButton(ecs::entity e) {
                 }
                 auto& lang = *locale;
                 lm.setLanguage(lang);
-                set_user_string("selected_lang", lang);
+                set_user_string("selected_lang", lang.c_str());
             }
         };
     }

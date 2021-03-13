@@ -130,7 +130,7 @@ Java_ek_billing_BillingBridge_nativePurchase(JNIEnv *env, jclass clazz,
     data.signature = jniGetString(env, signature);
     data.state = state;
     data.errorCode = responseCode;
-    onPurchaseChanged(data);
+    context.onPurchaseChanged(data);
 }
 
 extern "C"
@@ -144,5 +144,5 @@ Java_ek_billing_BillingBridge_nativeDetails(JNIEnv *env, jclass clazz,
     data.sku = jniGetString(env, sku);
     data.price = jniGetString(env, price);
     data.currencyCode = jniGetString(env, currencyCode);
-    onProductDetails(data);
+    context.onProductDetails(data);
 }

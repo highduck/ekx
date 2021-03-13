@@ -1,15 +1,14 @@
-#include <ek/util/base64.hpp>
+#include <ek/app/prefs.hpp>
 #include <ek/android.hpp>
-#include <cassert>
 
 namespace ek {
 
-void set_user_string(const std::string& key, const std::string& str) {
+void set_user_string(const char* key, const char* str) {
     auto* env = android::get_jni_env();
 
     auto class_ref = env->FindClass("ek/Preferences");
-    auto key_ref = env->NewStringUTF(key.c_str());
-    auto val_ref = env->NewStringUTF(str.c_str());
+    auto key_ref = env->NewStringUTF(key);
+    auto val_ref = env->NewStringUTF(str);
 
     auto method = env->GetStaticMethodID(class_ref, "set_string", "(Ljava/lang/String;Ljava/lang/String;)V");
     env->CallStaticVoidMethod(class_ref, method, key_ref, val_ref);
@@ -19,12 +18,13 @@ void set_user_string(const std::string& key, const std::string& str) {
     env->DeleteLocalRef(val_ref);
 }
 
-std::string get_user_string(const std::string& key, const std::string& default_value) {
+std::string get_user_string(const char* key, const char* default_value) {
     auto* env = android::get_jni_env();
 
     auto class_ref = env->FindClass("ek/Preferences");
-    auto key_ref = env->NewStringUTF(key.c_str());
-    auto default_value_ref = env->NewStringUTF(default_value.c_str());
+    auto key_ref = env->NewStringUTF(key);
+    // TODO: set default only when value is not presented (return null from jni)
+    auto default_value_ref = env->NewStringUTF(default_value);
 
     auto method = env->GetStaticMethodID(class_ref, "get_string", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
     auto result = (jstring)env->CallStaticObjectMethod(class_ref, method, key_ref, default_value_ref);
@@ -43,11 +43,11 @@ std::string get_user_string(const std::string& key, const std::string& default_v
     return result_str;
 }
 
-void set_user_preference(const std::string& key, int value) {
+void set_user_preference(const char* key, int value) {
     auto* env = android::get_jni_env();
 
     auto class_ref = env->FindClass("ek/Preferences");
-    auto key_ref = env->NewStringUTF(key.c_str());
+    auto key_ref = env->NewStringUTF(key);
 
     auto method = env->GetStaticMethodID(class_ref, "set_int", "(Ljava/lang/String;I)V");
     env->CallStaticVoidMethod(class_ref, method, key_ref, value);
@@ -56,11 +56,11 @@ void set_user_preference(const std::string& key, int value) {
     env->DeleteLocalRef(key_ref);
 }
 
-int get_user_preference(const std::string& key, int default_value) {
+int get_user_preference(const char* key, int default_value) {
     auto* env = android::get_jni_env();
 
     auto class_ref = env->FindClass("ek/Preferences");
-    auto key_ref = env->NewStringUTF(key.c_str());
+    auto key_ref = env->NewStringUTF(key);
 
     auto method = env->GetStaticMethodID(class_ref, "get_int", "(Ljava/lang/String;I)I");
     auto result = env->CallStaticIntMethod(class_ref, method, key_ref, default_value);
