@@ -4,26 +4,28 @@
 
 namespace ek {
 
-void set_user_data(const std::string& key, const std::vector<uint8_t>& buffer) {
-    EK_ASSERT(!key.empty());
+void set_user_data(const char* key, const uint8_t* data, uint32_t size) {
+    EK_ASSERT(key != nullptr && data != nullptr);
 
-    auto size = base64::getEncodedMaxSize(buffer.size());
+    auto encodedSize = base64::getEncodedMaxSize(size);
     std::string encoded;
-    encoded.resize(size);
-    size = base64::encode(encoded.data(), buffer.data(), buffer.size());
-    encoded.resize(size);
+    encoded.resize(encodedSize);
+    encodedSize = base64::encode(encoded.data(), data, size);
+    encoded.resize(encodedSize);
 
-    set_user_string(key, encoded);
+    set_user_string(key, encoded.c_str());
 }
 
-std::vector<uint8_t> get_user_data(const std::string& key) {
-    const std::string str = get_user_string(key, "");
+std::vector<uint8_t> get_user_data(const char* key) {
+    EK_ASSERT(key != nullptr);
+
+    const std::string str = get_user_string(key);
 
     std::vector<uint8_t> decoded{};
-    auto size = base64::getDecodedMaxSize(str.size());
-    decoded.resize(size);
-    size = base64::decode(decoded.data(), str.c_str(), str.size());
-    decoded.resize(size);
+    auto decodedSize = base64::getDecodedMaxSize(str.size());
+    decoded.resize(decodedSize);
+    decodedSize = base64::decode(decoded.data(), str.c_str(), str.size());
+    decoded.resize(decodedSize);
     return decoded;
 }
 

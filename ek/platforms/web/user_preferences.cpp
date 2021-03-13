@@ -1,5 +1,5 @@
-#include <ek/util/base64.hpp>
-#include <cassert>
+#include <ek/app/prefs.hpp>
+#include <ek/assert.hpp>
 #include <emscripten.h>
 
 extern "C" {
@@ -13,26 +13,26 @@ extern char* web_prefs_get_string(const char* key);
 
 namespace ek {
 
-void set_user_preference(const std::string& key, int value) {
-    web_prefs_set_number(key.c_str(), value);
+void set_user_preference(const char* key, int value) {
+    web_prefs_set_number(key, value);
 }
 
-int get_user_preference(const std::string& key, int default_value) {
-    return web_prefs_get_number(key.c_str(), default_value);
+int get_user_preference(const char* key, int default_value) {
+    return web_prefs_get_number(key, default_value);
 }
 
-void set_user_string(const std::string& key, const std::string& value) {
-    web_prefs_set_string(key.c_str(), value.c_str());
+void set_user_string(const char* key, const char* value) {
+    web_prefs_set_string(key, value);
 }
 
-std::string get_user_string(const std::string& key, const std::string& default_value) {
-    char* buffer = web_prefs_get_string(key.c_str());
+std::string get_user_string(const char* key, const char* default_value) {
+    char* buffer = web_prefs_get_string(key);
     if (buffer) {
         std::string str{buffer};
         free(buffer);
         return str;
     }
-    return default_value;
+    return std::string{default_value};
 }
 
 }

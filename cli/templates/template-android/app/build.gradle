@@ -18,6 +18,8 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++17"
+
+                // ANDROID_STL is c++_static by default
             }
         }
         ndk {
@@ -74,7 +76,7 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
 
     // Import the BoM for the Firebase platform
-    implementation platform('com.google.firebase:firebase-bom:26.5.0')
+    implementation platform('com.google.firebase:firebase-bom:26.7.0')
     implementation 'com.google.firebase:firebase-crashlytics-ndk'
     implementation 'com.google.firebase:firebase-analytics'
 

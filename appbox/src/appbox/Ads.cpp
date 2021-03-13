@@ -48,13 +48,13 @@ void Ads::purchaseRemoveAds() const {
 }
 
 void Ads::setRemoveAdsPurchaseCache(bool reset) const {
-    set_user_preference(config_.key0, reset ? 0 : config_.val0);
-    set_user_preference(config_.key1, reset ? 1 : config_.val1);
+    set_user_preference(config_.key0.c_str(), reset ? 0 : config_.val0);
+    set_user_preference(config_.key1.c_str(), reset ? 1 : config_.val1);
 }
 
 bool Ads::checkRemoveAdsPurchase() const {
-    return get_user_preference(config_.key0, 0) == config_.val0 &&
-           get_user_preference(config_.key1, 0) == config_.val1;
+    return get_user_preference(config_.key0.c_str(), 0) == config_.val0 &&
+           get_user_preference(config_.key1.c_str(), 0) == config_.val1;
 }
 
 void Ads::onRemoveAdsPurchased() {

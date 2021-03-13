@@ -85,9 +85,9 @@ extern "C"
 JNIEXPORT void JNICALL Java_ek_admob_AdMobPlugin_eventCallback(JNIEnv *env, jclass type, jint event) {
     using namespace admob;
     if(event == 6) {
-        onInterstitialClosed();
+        context.onInterstitialClosed();
     }
     else {
-        onEvent(static_cast<event_type>(event));
+        context.onEvent(static_cast<event_type>(event));
     }
 }
