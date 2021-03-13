@@ -2,13 +2,27 @@ import {spawn, spawnSync} from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as glob from 'glob';
+import rimraf = require("rimraf");
 
-export function executeAsync(bin: string, args: string[], workingDir?: string): Promise<number> {
+export type UtilityConfig = {
+    verbose?: boolean
+};
+
+export const UtilityConfig: UtilityConfig = {
+    verbose: false
+};
+
+export type ExecuteOptions = {
+    workingDir?: string,
+    verbose?: boolean
+};
+
+export function executeAsync(bin: string, args: string[], options?: ExecuteOptions): Promise<number> {
     return new Promise((resolve, reject) => {
         const child = spawn(bin, args, {
             //detached: true,
-            stdio: "inherit",
-            cwd: workingDir
+            stdio: (options?.verbose ?? UtilityConfig.verbose) ? "inherit" : "ignore",
+            cwd: options?.workingDir
         });
         child.on('close', (code) => {
             if (code === 0) {
@@ -166,4 +180,21 @@ export function deleteFolderRecursive(p: string) {
         });
         fs.rmdirSync(p);
     }
+}
+
+export function rimrafAsync(pattern: string, options?: rimraf.Options): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const cb = (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        };
+        if (options) {
+            rimraf(pattern, options, cb);
+        } else {
+            rimraf(pattern, cb);
+        }
+    });
 }

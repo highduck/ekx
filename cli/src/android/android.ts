@@ -19,6 +19,7 @@ import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
 import {androidBuildAppIcon} from "./androidAppIcon";
 import * as fs from "fs";
+import {Project} from "../project";
 
 function getAndroidSdkRoot() {
     return process.env.ANDROID_SDK_ROOT ?? path.join(process.env.HOME, 'Library/Android/sdk');
@@ -127,7 +128,7 @@ function mod_cmake_lists(ctx) {
 }
 
 
-export function export_android(ctx) {
+export function export_android(ctx:Project) {
 
     buildAssets(ctx);
     androidBuildAppIcon(ctx, "export/android/res");

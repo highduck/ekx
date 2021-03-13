@@ -80,9 +80,9 @@ async function buildProject(ctx, buildType) {
             const EMSDK_PATH = "/Users/ilyak/dev/emsdk";
             const EMSDK_CMAKE_TOOLCHAIN = path.join(EMSDK_PATH, "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake");
             const args = ["-GNinja", `-DCMAKE_TOOLCHAIN_FILE=${EMSDK_CMAKE_TOOLCHAIN}`, `-DCMAKE_BUILD_TYPE=${buildType}`]; // -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-            await executeAsync("cmake", [".."].concat(args), buildDir);
+            await executeAsync("cmake", [".."].concat(args), {workingDir: buildDir});
         }
-        await executeAsync("ninja", ["-d", "explain"], buildDir);
+        await executeAsync("ninja", ["-d", "explain"], {workingDir: buildDir});
     }
 }
 
