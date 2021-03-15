@@ -22,7 +22,8 @@
 #endif // EK_ALLOCATION_TRACKER
 
 inline void* ek_aligned_alloc(size_t alignment, size_t size) {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
+    // `aligned_alloc` is not available for iOS < 13
     void* buffer = nullptr;
     posix_memalign(&buffer, alignment, size);
     return buffer;
@@ -33,7 +34,7 @@ inline void* ek_aligned_alloc(size_t alignment, size_t size) {
 
 namespace ek {
 
-inline static const size_t MinAlign = sizeof(void*);
+inline static const uint32_t MinAlign = EK_SIZEOF_U32(void**);
 
 inline static uint32_t upperPowerOfTwo(uint32_t v) {
     v--;
@@ -73,7 +74,7 @@ public:
     ~StdStaticAllocator() override = default;
 
     void* alloc(uint32_t size, uint32_t align) override {
-        const uint32_t aligns = align < sizeof(void*) ? sizeof(void*) : upperPowerOfTwo(align);
+        const uint32_t aligns = align < MinAlign ? MinAlign : upperPowerOfTwo(align);
         uint32_t sizeTotal = size;
         if ((sizeTotal & (aligns - 1)) != 0) {
             const auto mm = 1 + sizeTotal / aligns;
@@ -170,7 +171,10 @@ struct AllocationTracker {
     }
 
     void onFree(void* ptr) {
-        EK_ASSERT_R2(ptr != nullptr);
+        // some libraries just free nullptr and expect noop
+        if (ptr == nullptr) {
+            return;
+        }
         EK_ASSERT_R2(currentAllocations > 0);
 
         --currentAllocations;
@@ -318,8 +322,10 @@ void clear(void* ptr, uint32_t size) {
 
 void* reallocate(Allocator& allocator, void* ptr, uint32_t oldSizeToCopy, uint32_t newSize, uint32_t align) {
     void* ptrNew = allocator.alloc(newSize, align);
-    copy(ptrNew, ptr, oldSizeToCopy);
-    allocator.dealloc(ptr);
+    if (ptr != nullptr) {
+        copy(ptrNew, ptr, oldSizeToCopy);
+        allocator.dealloc(ptr);
+    }
     return ptrNew;
 }
 

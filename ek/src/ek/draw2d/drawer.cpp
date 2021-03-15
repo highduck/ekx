@@ -1,8 +1,8 @@
 #include "drawer.hpp"
 
-#include <ek/util/common_macro.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include "draw2d_shader.h"
+#include <ek/Allocator.hpp>
 
 using namespace ek::graphics;
 
@@ -61,18 +61,11 @@ sg_pipeline createPipeline(sg_shader shader, bool useRenderTarget) {
     pip_desc.colors[0].blend.enabled = true;
     pip_desc.colors[0].blend.src_factor_rgb = SG_BLENDFACTOR_ONE;
     pip_desc.colors[0].blend.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
-//    pip_desc.blend.enabled = true;
-//    pip_desc.blend.src_factor_rgb = SG_BLENDFACTOR_ONE;
-//    pip_desc.blend.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
-//    pip_desc.blend.color_write_mask = SG_COLORMASK_RGB;
     pip_desc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
     if (useRenderTarget) {
         pip_desc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
         pip_desc.depth.pixel_format = SG_PIXELFORMAT_NONE;
     }
-//    pip_desc.depth_stencil.depth_write_enabled = false;
-//    pip_desc.depth_stencil.stencil_enabled = false;
-//    pip_desc.sample_count = 0;
     pip_desc.label = "draw2d-pipeline";
     return sg_make_pipeline(pip_desc);
 }
@@ -102,68 +95,87 @@ float getTriangleArea(const Vertex2D* vertices, const uint16_t* indices, int cou
 
 class BufferChain {
 public:
-    explicit BufferChain(BufferType type, uint32_t bufferSize) : type_{type} {
-        buffersLimit_ = 0; // unlimited
-
-        // orphaning
-        framesNum_ = 1;
-        useOrphaning = true;
-        maxSize = bufferSize;
+    BufferChain(BufferType type, uint32_t elementsMaxCount, uint32_t elementMaxSize) :
+            type_{type},
+            caps{0x10 * elementMaxSize,
+                 0x100 * elementMaxSize,
+                 0x400 * elementMaxSize,
+                 elementsMaxCount * elementMaxSize} {
     }
 
-    Buffer* nextBuffer() {
+    uint32_t calcSizeBucket(uint32_t requiredSize) {
+        if (requiredSize < caps[0]) {
+            return 0;
+        } else if (requiredSize < caps[1]) {
+            return 1;
+        } else if (requiredSize < caps[2]) {
+            return 2;
+        }
+        return 3;
+    }
+
+    Buffer* nextBuffer(uint32_t requiredSize) {
         Buffer* buf;
-        if (pos >= buffers_.size()) {
-            buf = new Buffer(type_, Usage::Dynamic, maxSize);
-            buffers_.push_back(buf);
+        const auto index = calcSizeBucket(requiredSize);
+        auto& v = buffers_[index];
+        auto position = pos[index];
+        if (position >= v.size()) {
+            buf = new Buffer(type_, Usage::Stream, caps[index]);
+            v.push_back(buf);
         } else {
-            buf = buffers_[pos];
+            buf = v[position];
         }
-        ++pos;
-        if (buffersLimit_ > 0 && pos >= buffersLimit_) {
-            pos = 0;
-        }
+        ++position;
+        pos[index] = position;
         return buf;
     }
 
     [[nodiscard]]
     uint32_t getUsedMemory() const {
         uint32_t mem = 0u;
-        for (const auto* buffer : buffers_) {
-            mem += buffer->getSize();
+        for (auto& v : buffers_) {
+            for (const auto* buffer : v) {
+                mem += buffer->getSize();
+            }
         }
         return mem;
     }
 
     void nextFrame() {
-        ++frame;
-        if (frame >= framesNum_) {
-            frame = 0;
-            pos = 0;
+        resetPositions();
+    }
+
+    void resetPositions() {
+        pos[0] = 0;
+        pos[1] = 0;
+        pos[2] = 0;
+        pos[3] = 0;
+    }
+
+    void disposeBuffers() {
+        for (auto& v : buffers_) {
+            for (auto* b : v) {
+                delete b;
+            }
+            v.resize(0);
         }
     }
 
     void reset() {
-        for (auto* b : buffers_) {
-            delete b;
-        }
-        buffers_.resize(0);
+        disposeBuffers();
+        resetPositions();
     }
 
     ~BufferChain() {
-        reset();
+        disposeBuffers();
     }
 
 private:
     BufferType type_;
-    std::vector<Buffer*> buffers_;
-    uint32_t pos = 0;
-    uint32_t frame = 0;
-    uint32_t buffersLimit_;
-    uint32_t framesNum_;
-    uint32_t maxSize;
-
-    bool useOrphaning = true;
+    std::vector<Buffer*> buffers_[4]{};
+    uint16_t pos[4] = {0, 0, 0, 0};
+    // each bucket buffer size
+    uint32_t caps[4];
 };
 
 void Context::initialize() {
@@ -183,11 +195,11 @@ void Context::initialize() {
     Res<Shader>{"draw2d_alpha"}.reset(alphaMapShader);
     Res<Shader>{"draw2d_color"}.reset(solidColorShader);
 
-    vertexBuffers_ = new BufferChain(BufferType::VertexBuffer, (MaxVertex + 1) * sizeof(Vertex2D));
+    vertexBuffers_ = new BufferChain(BufferType::VertexBuffer, MaxVertex + 1, EK_SIZEOF_U32(Vertex2D));
     vertexData_ = new Vertex2D[MaxVertex + 1];
     vertexDataNext_ = vertexData_;
 
-    indexBuffers_ = new BufferChain(BufferType::IndexBuffer, (MaxIndex + 1) * sizeof(uint16_t));
+    indexBuffers_ = new BufferChain(BufferType::IndexBuffer, MaxIndex + 1, EK_SIZEOF_U32(uint16_t));
     indexData_ = new uint16_t[MaxIndex + 1];
     indexDataNext_ = indexData_;
 
@@ -216,10 +228,12 @@ void Context::drawBatch() {
         return;
     }
 
-    auto* vb = vertexBuffers_->nextBuffer();
-    auto* ib = indexBuffers_->nextBuffer();
-    vb->update(vertexData_, verticesCount_ * sizeof(Vertex2D));
-    ib->update(indexData_, indicesCount_ << 1u);
+    const uint32_t vertexDataSize = verticesCount_ * static_cast<uint32_t>(sizeof(Vertex2D));
+    const uint32_t indexDataSize = indicesCount_ << 1u;
+    auto* vb = vertexBuffers_->nextBuffer(vertexDataSize);
+    auto* ib = indexBuffers_->nextBuffer(indexDataSize);
+    vb->update(vertexData_, vertexDataSize);
+    ib->update(indexData_, indexDataSize);
 
     auto pip = getPipeline(curr.shader, renderTarget != nullptr);
     if (pip.id != selectedPipeline.id) {

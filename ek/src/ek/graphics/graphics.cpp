@@ -11,7 +11,7 @@ static ek::ProxyAllocator* gHeapSokolGfx = nullptr;
 #define SOKOL_ASSERT(x) EK_ASSERT(x)
 #define SOKOL_LOG(s) EK_INFO("SG: %s", s);
 
-#define SOKOL_MALLOC(sz) (::gHeapSokolGfx->alloc(sz, sizeof(void*)))
+#define SOKOL_MALLOC(sz) (::gHeapSokolGfx->alloc(sz, static_cast<uint32_t>(sizeof(void*))))
 #define SOKOL_FREE(p) (::gHeapSokolGfx->dealloc(p))
 
 #include <sokol_gfx.h>
@@ -50,10 +50,10 @@ Buffer::~Buffer() {
 
 void Buffer::update(const void* data, uint32_t dataSize) {
     size = dataSize;
-    sg_update_buffer(buffer, sg_range{
-        .ptr = data,
-        .size = dataSize
-    });
+    sg_range range;
+    range.ptr = data;
+    range.size = dataSize;
+    sg_update_buffer(buffer, range);
 //    sg_append_buffer(buffer, data, dataSize);
 //    if (size > size_) {
 //        sg_update_buffer(handle_, data, size);

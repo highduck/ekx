@@ -5,6 +5,8 @@
 #include <new>
 #include "config.hpp"
 
+#define EK_SIZEOF_U32(Type) static_cast<uint32_t>(sizeof(Type))
+
 namespace ek {
 
 #ifdef EK_ALLOCATION_TRACKER

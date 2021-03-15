@@ -144,6 +144,11 @@ export function export_ios(ctx:Project) {
             "# TEMPLATE DEPENDENCIES": pods
         });
 
+        replaceInFile("fastlane/Appfile", {
+            "[[APP_IDENTIFIER]]": ctx.ios.application_id,
+            "[[APPLE_ID]]": ctx.ios.appleId
+        });
+
         console.info("Install Pods");
         execute("pod", ["install"]);
 
@@ -153,12 +158,14 @@ export function export_ios(ctx:Project) {
     }
     process.chdir(cwd);
 
-    const workspace_path = path.join(dest_path, platform_proj_name + ".xcworkspace");
-    // execute("open", [dest_path]);
-    execute("open", [workspace_path]);
-    // execute("xcodebuild", [
-    //     "-workspace", workspace_path,
-    //     "-scheme", platform_proj_name,
-    //     "-configuration", "Release"
-    // ]);
+    if (ctx.options.openProject) {
+        const workspace_path = path.join(dest_path, platform_proj_name + ".xcworkspace");
+        // execute("open", [dest_path]);
+        execute("open", [workspace_path]);
+        // execute("xcodebuild", [
+        //     "-workspace", workspace_path,
+        //     "-scheme", platform_proj_name,
+        //     "-configuration", "Release"
+        // ]);
+    }
 }

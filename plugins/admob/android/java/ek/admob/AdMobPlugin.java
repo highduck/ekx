@@ -54,6 +54,7 @@ public class AdMobPlugin extends EkPlugin {
     private AdView _banner;
     private RewardedAd _rewardedAd;
     private InterstitialAd _interstitialAd;
+    private boolean _interstitialAdLoading = false;
     final private int tagForChildDirectedTreatment;
 
     static AdMobPlugin instance;
@@ -83,12 +84,14 @@ public class AdMobPlugin extends EkPlugin {
 
     private void loadInterstitialAd() {
         _interstitialAd = null;
+        _interstitialAdLoading = true;
         InterstitialAd.load(_activity, _interstitialId, buildAdRequest(), new InterstitialAdLoadCallback() {
             @Override
             public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
                 // The mInterstitialAd reference will be null until
                 // an ad is loaded.
                 Log.i(TAG, "onAdLoaded");
+                _interstitialAdLoading = false;
                 _interstitialAd = interstitialAd;
                 _interstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                     @Override
@@ -128,8 +131,10 @@ public class AdMobPlugin extends EkPlugin {
             public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                 // Handle the error
                 Log.i(TAG, loadAdError.getMessage());
+                _interstitialAdLoading = false;
                 _interstitialAd = null;
-                loadInterstitialAd();
+                // wait until next request
+                //loadInterstitialAd();
             }
         });
     }
@@ -246,6 +251,9 @@ public class AdMobPlugin extends EkPlugin {
                 instance._interstitialAd.show(instance._activity);
             } else {
                 postGLEvent(EVENT_INTERSTITIAL_CLOSED);
+                if(!instance._interstitialAdLoading) {
+                    instance.loadInterstitialAd();
+                }
             }
         });
     }

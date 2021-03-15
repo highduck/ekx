@@ -57,6 +57,12 @@ export class Project {
     current_target = process.argv[2];
     args = process.argv.slice(3);
 
+    // options evaluated from arguments
+    options: {
+        // open export project
+        openProject?: boolean
+    } = {};
+
     name: string;
     version_name: string;
     version_code: string;
@@ -90,15 +96,21 @@ export class Project {
     };
 
     android: {
+        // android application package name
         application_id?: string,
+        // just package for java code
         package_id?: string,
         googleServicesConfigDir?: string,
-        signingConfigPath?: string
+        signingConfigPath?: string,
+        // path to service account api key json file, used for fastlane automation
+        serviceAccountKey?: string
     };
 
     ios: {
         application_id?: string,
-        googleServicesConfigDir?: string
+        googleServicesConfigDir?: string,
+        // used for automation
+        appleId?: string
     } = {};
 
     html = {};

@@ -21,6 +21,14 @@ function defaultRun() {
 
     console.log("=== EK PROJECT ===");
     console.log("Current Target:", project.current_target);
+    console.log("Arguments:", project.args);
+
+    if(project.args.indexOf("-o") >= 0) {
+        project.options.openProject = true;
+    }
+    else if(project.args.indexOf("do-not-open") < 0) {
+        project.options.openProject = false;
+    }
 
     addExportBuildStep(project);
 
