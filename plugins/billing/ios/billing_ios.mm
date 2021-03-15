@@ -78,7 +78,7 @@
                 }
                 else {
                 }
-                onPurchaseChanged(purchase);
+                context.onPurchaseChanged(purchase);
             }
                 break;
                 
@@ -101,7 +101,7 @@
                     purchase.payload = [userData UTF8String];
                 }
                 
-                onPurchaseChanged(purchase);
+                context.onPurchaseChanged(purchase);
             }
                 break;
                 
@@ -173,7 +173,7 @@
         details.price = [formattedString UTF8String];
         details.currencyCode = [numberFormatter.currencyCode UTF8String];
         
-        onProductDetails(details);
+        context.onProductDetails(details);
     }
 }
 

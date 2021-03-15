@@ -9,9 +9,9 @@ NSString* GAD_banner;
 NSString* GAD_video;
 NSString* GAD_inters;
 
-GADBannerView* bannerView;
-GADInterstitialAd* interstitialAd;
-GADRewardedAd* rewardedAd;
+GADBannerView* bannerView = nil;
+GADInterstitialAd* interstitialAd = nil;
+GADRewardedAd* rewardedAd = nil;
 
 /// AdMob
 void addBannerViewToView(GADBannerView* bannerView) {
@@ -64,13 +64,13 @@ void reloadRewardedAd();
 
 - (void)ad:(id)ad didFailToPresentFullScreenContentWithError:(NSError *)error {
     NSLog(@"Interstitial Ad failed to present full screen content with error %@.", [error localizedDescription]);
-    admob::onInterstitialClosed();
+    admob::context.onInterstitialClosed();
     admob::loadNextInterstitialAd();
 }
 
 - (void)adDidDismissFullScreenContent:(id)ad {
     NSLog(@"Interstitial Ad did dismiss full screen content.");
-    admob::onInterstitialClosed();
+    admob::context.onInterstitialClosed();
     admob::loadNextInterstitialAd();
 }
 
@@ -88,13 +88,13 @@ void reloadRewardedAd();
 
 - (void)ad:(id)ad didFailToPresentFullScreenContentWithError:(NSError *)error {
     NSLog(@"Rewarded ad failed to present with error: %@", [error localizedDescription]);
-    admob::onEvent(admob::event_type::video_failed);
+    admob::context.onEvent(admob::event_type::video_failed);
     //admob::reloadRewardedAd();
 }
 
 - (void)adDidDismissFullScreenContent:(id)ad {
     NSLog(@"Rewarded ad dismissed.");
-    admob::onEvent(admob::event_type::video_closed);
+    admob::context.onEvent(admob::event_type::video_closed);
 }
 
 @end
@@ -114,7 +114,10 @@ void loadNextInterstitialAd() {
                      completionHandler: ^(GADInterstitialAd *ad, NSError *error) {
           if (error) {
               NSLog(@"Failed to load interstitial ad with error: %@", [error localizedDescription]);
-              admob::loadNextInterstitialAd();
+              interstitialAd = nil;
+              context.onInterstitialClosed();
+              // do not load until next show request
+              //loadNextInterstitialAd();
               return;
           }
           interstitialAd = ad;
@@ -161,7 +164,7 @@ void initialize(const config_t& config) {
         // video
         reloadRewardedAd();
         
-        onEvent(event_type::initialized);
+        context.onEvent(event_type::initialized);
     }];
 }
 
@@ -187,12 +190,12 @@ void reloadRewardedAd() {
         if (error) {
             NSLog(@"%@", error.debugDescription);
             // Handle ad failed to load case.
-            onEvent(event_type::video_failed);
+            context.onEvent(event_type::video_failed);
         } else {
             rewardedAd = ad;
             rewardedAd.fullScreenContentDelegate = rewardedAdDelegate;
             // Ad successfully loaded.
-            onEvent(event_type::video_loaded);
+            context.onEvent(event_type::video_loaded);
         }
     }];
 }
@@ -218,12 +221,12 @@ void show_rewarded_ad() {
         [rewardedAd presentFromRootViewController: rootViewController
                 userDidEarnRewardHandler:^ {
                         NSLog(@"rewardedAd:userDidEarnReward:");
-                        admob::onEvent(admob::event_type::video_rewarded);
+                        context.onEvent(admob::event_type::video_rewarded);
                 }];
     } else {
       NSLog(@"Ad wasn't ready");
         reloadRewardedAd();
-        onEvent(event_type::video_loading);
+        context.onEvent(event_type::video_loading);
     }
 }
 
@@ -249,6 +252,10 @@ void show_interstitial_ad() {
         [interstitialAd presentFromRootViewController: rootViewController];
     } else {
         NSLog(@"Interstitial Ad is not ready");
+        context.onInterstitialClosed();
+        if (interstitialAd == nil) {
+            loadNextInterstitialAd();
+        }
     }
 }
 

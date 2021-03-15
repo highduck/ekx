@@ -20,6 +20,7 @@ import {execSync} from "child_process";
 import {androidBuildAppIcon} from "./androidAppIcon";
 import * as fs from "fs";
 import {Project} from "../project";
+import {writeFileSync} from "fs";
 
 function getAndroidSdkRoot() {
     return process.env.ANDROID_SDK_ROOT ?? path.join(process.env.HOME, 'Library/Android/sdk');
@@ -33,18 +34,18 @@ function getJavaHome() {
 }
 
 function gradle(...args: string[]) {
-    const ANDROID_SDK_ROOT = getAndroidSdkRoot();
-
-    let env = Object.create(process.env);
-    env = Object.assign(env, {
-        ANDROID_SDK_ROOT,
-        //JAVA_HOME
-    });
+    // const ANDROID_SDK_ROOT = getAndroidSdkRoot();
+    //
+    // let env = Object.create(process.env);
+    // env = Object.assign(env, {
+    //     ANDROID_SDK_ROOT,
+    //     //JAVA_HOME
+    // });
 
     execSync(`./gradlew ${args.join(' ')}`, {
         stdio: 'inherit',
         encoding: 'utf-8',
-        env
+        // env
     });
 }
 
@@ -128,7 +129,7 @@ function mod_cmake_lists(ctx) {
 }
 
 
-export function export_android(ctx:Project) {
+export function export_android(ctx: Project) {
 
     buildAssets(ctx);
     androidBuildAppIcon(ctx, "export/android/res");
@@ -192,6 +193,13 @@ export function export_android(ctx:Project) {
             '// ${SIGNING_CONFIGS}': printSigningConfigs(signingConfig),
         });
 
+        replaceInFile('fastlane/Appfile', {
+            "__PACKAGE_NAME__": ctx.android.application_id,
+            "__SERVICE_ACCOUNT_KEY_PATH__": ctx.android.serviceAccountKey,
+        });
+
+        writeFileSync('local.properties', `sdk.dir=${getAndroidSdkRoot()}`);
+
         copyFolderRecursiveSync(path.join(base_path, "export/android/res"), "app/src/main/res");
 
         mod_main_class(ctx.android.package_id);
@@ -209,7 +217,9 @@ export function export_android(ctx:Project) {
             copyFile(path.join(dest_path, 'app/build/outputs/bundle/release/app-release.aab'),
                 path.join(dest_dir, ctx.name + '_' + ctx.version_name + '.aab'));
         }
-    } else {
+    }
+
+    if (ctx.options?.openProject) {
         process.chdir(cwd);
         open_android_project(dest_path);
     }

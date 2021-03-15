@@ -9,17 +9,20 @@ void init() {
 }
 
 void screen(const char* name) {
-    NSString* screen_name = name != nullptr ? [NSString stringWithUTF8String: name] : @"unknown";
-    [FIRAnalytics setScreenName: screen_name screenClass: nil];
+    NSString* nsScreenName = name != nullptr ? [NSString stringWithUTF8String: name] : @"unknown";
+    [FIRAnalytics logEventWithName:kFIREventScreenView
+                        parameters:@{
+                            kFIRParameterScreenName : nsScreenName
+                        }];
 }
 
 void event(const char* action, const char* target) {
-    NSString* action_ns = action != NULL ? [NSString stringWithUTF8String: action] : @"unknown";
-    NSString* target_ns = target != NULL ? [NSString stringWithUTF8String: target] : @"unknown";
+    NSString* nsAction = action != nullptr ? [NSString stringWithUTF8String: action] : @"unknown";
+    NSString* nsTarget = target != nullptr ? [NSString stringWithUTF8String: target] : @"unknown";
 
-    [FIRAnalytics logEventWithName: action_ns
+    [FIRAnalytics logEventWithName: nsAction
                         parameters: @{
-                                kFIRParameterItemName: target_ns,
+                                kFIRParameterItemName: nsTarget,
                         }];
 }
 
