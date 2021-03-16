@@ -5,6 +5,7 @@ import androidx.annotation.Keep;
 import ek.EkActivity;
 import ek.EkPluginManager;
 
+@Keep
 public class BillingBridge {
 
     static BillingPlugin plugin;

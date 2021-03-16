@@ -1,4 +1,4 @@
-import {spawn, spawnSync} from "child_process";
+import {spawn, spawnSync, SpawnSyncOptionsWithStringEncoding} from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as glob from 'glob';
@@ -34,23 +34,31 @@ export function executeAsync(bin: string, args: string[], options?: ExecuteOptio
     });
 }
 
-export function execute(cmd: string, args: string[], workingDir?: string) {
-    console.debug(">> " + [cmd].concat(args).join(" "));
+export function execute(cmd: string, args: string[], workingDir?: string, additionalEnvParams?: { [key: string]: string }) {
+    const time = Date.now();
+    console.debug(">>", [cmd].concat(args).join(" "));
     const wd = workingDir ?? process.cwd();
-    console.debug("cwd", wd);
-    const child = spawnSync(cmd, args, {
-            stdio: 'pipe',
-            encoding: 'utf-8',
-            cwd: wd
-        }
-    );
-    console.log("stderr", child.stderr.toString());
-    console.log("stdout", child.stdout.toString());
-    console.log("exit code", child.status);
+    console.debug(" | cwd:", wd);
+
+    const options: SpawnSyncOptionsWithStringEncoding = {
+        stdio: 'inherit',
+        encoding: 'utf-8'
+    };
+
+    if (workingDir) {
+        options.cwd = workingDir;
+    }
+
+    if (additionalEnvParams) {
+        options.env = Object.assign({}, process.env, additionalEnvParams);
+    }
+
+    const child = spawnSync(cmd, args, options);
+    console.log(" | time:", (Date.now() - time) / 1000, "ms");
+    console.log(" | exit code:", child.status);
     if (child.error) {
         console.error(child.error);
     }
-
     return child.status;
 }
 

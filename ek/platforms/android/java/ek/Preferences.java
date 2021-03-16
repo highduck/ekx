@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.Keep;
 
+@Keep
 public class Preferences {
 
     final private static String TAG = "Preferences";

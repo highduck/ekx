@@ -47,7 +47,7 @@ function getCMakeBuildDir(buildType: string) {
 
 async function buildProject(ctx, buildType) {
     const platform_proj_name = ctx.name + "-" + ctx.current_target; // "projectName-web"
-    const dest_dir = "export";
+    const dest_dir = path.resolve(process.cwd(), "export");
     const dest_path = path.join(dest_dir, platform_proj_name);
     const cmakeBuildDir = getCMakeBuildDir(buildType);
 

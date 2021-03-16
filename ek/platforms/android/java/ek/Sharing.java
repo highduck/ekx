@@ -8,6 +8,7 @@ import androidx.annotation.Keep;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+@Keep
 public class Sharing {
 
     @Keep

@@ -4,6 +4,8 @@ import * as path from 'path';
 import {addExportBuildStep} from "./exporters";
 import {Project} from "./project";
 import {rebuild_ekc} from "./ekc";
+import {increaseProjectVersion} from "./version";
+import rimraf = require("rimraf");
 
 console.debug("Arguments:", process.argv);
 console.debug("Working directory:", process.cwd());
@@ -23,11 +25,12 @@ function defaultRun() {
     console.log("Current Target:", project.current_target);
     console.log("Arguments:", project.args);
 
-    if(project.args.indexOf("-o") >= 0) {
-        project.options.openProject = true;
+    if (project.options.clean) {
+        rimraf.sync(path.join(process.cwd(), "export"));
     }
-    else if(project.args.indexOf("do-not-open") < 0) {
-        project.options.openProject = false;
+
+    if (project.options.increaseVersion !== undefined) {
+        increaseProjectVersion(process.cwd(), project.options.increaseVersion);
     }
 
     addExportBuildStep(project);

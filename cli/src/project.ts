@@ -1,4 +1,5 @@
 import * as path from "path";
+import {VERSION_INDEX_MAJOR, VERSION_INDEX_MINOR, VERSION_INDEX_PATCH} from "./version";
 
 class ProjectPath {
     EKX_ROOT = process.env.EKX_ROOT ?? path.resolve(__dirname, '../..');
@@ -60,7 +61,10 @@ export class Project {
     // options evaluated from arguments
     options: {
         // open export project
-        openProject?: boolean
+        clean?: boolean,
+        openProject?: boolean,
+        deployBeta?: boolean
+        increaseVersion?: number
     } = {};
 
     name: string;
@@ -109,8 +113,8 @@ export class Project {
     ios: {
         application_id?: string,
         googleServicesConfigDir?: string,
-        // used for automation
-        appleId?: string
+        // path to JSON with app-store credentials, used for fastlane automation
+        appStoreCredentials?: string
     } = {};
 
     html = {};
@@ -144,5 +148,31 @@ export class Project {
         for (const step of this.build_steps) {
             step();
         }
+    }
+
+
+    constructor() {
+        if(this.args.indexOf("clean") >= 0) {
+            this.options.clean = true;
+        }
+
+        if(this.args.indexOf("-o") >= 0) {
+            this.options.openProject = true;
+        }
+        else if(this.args.indexOf("do-not-open") < 0) {
+            this.options.openProject = false;
+        }
+
+        if(this.args.indexOf("patch") >= 0) {
+            this.options.increaseVersion = VERSION_INDEX_PATCH;
+        }
+        else if(this.args.indexOf("minor") >= 0) {
+            this.options.increaseVersion = VERSION_INDEX_MINOR;
+        }
+        else if(this.args.indexOf("major") >= 0) {
+            this.options.increaseVersion = VERSION_INDEX_MAJOR;
+        }
+
+        this.options.deployBeta = this.args.indexOf("beta") >= 0;
     }
 }

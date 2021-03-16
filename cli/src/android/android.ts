@@ -136,7 +136,7 @@ export function export_android(ctx: Project) {
 
     const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;
-    const dest_dir = "export";
+    const dest_dir = path.resolve(process.cwd(), "export");
     const dest_path = path.join(dest_dir, platform_proj_name);
 
     if (isDir(dest_path)) {
@@ -222,5 +222,9 @@ export function export_android(ctx: Project) {
     if (ctx.options?.openProject) {
         process.chdir(cwd);
         open_android_project(dest_path);
+    }
+
+    if(ctx.options.deployBeta) {
+        execute("fastlane", ["beta"], dest_path);
     }
 }

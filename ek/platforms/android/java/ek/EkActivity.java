@@ -25,6 +25,7 @@ import java.util.Locale;
 import ek.gpgs.GameServices;
 
 @SuppressLint("Registered")
+@Keep
 public class EkActivity extends Activity {
 
     final static String TAG = "ek";
