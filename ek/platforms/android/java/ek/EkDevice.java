@@ -13,6 +13,7 @@ import androidx.annotation.Keep;
 import java.util.List;
 import java.util.Locale;
 
+@Keep
 public final class EkDevice {
 
     @Keep

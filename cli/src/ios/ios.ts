@@ -12,6 +12,15 @@ import * as plist from 'plist';
 import {buildAssets, buildMarketingAssets} from "../assets";
 import {iosBuildAppIcon} from "./iosAppIcon";
 import {Project} from "../project";
+import {readFileSync} from "fs";
+import {spawnSync} from "child_process";
+
+interface AppStoreCredentials {
+    team_id?: string;
+    apple_id?: string;
+    itc_team_id?: string;
+    application_specific_password?: string;
+}
 
 function mod_plist(ctx, filepath) {
     const dict = plist.parse(readText(filepath));
@@ -86,13 +95,20 @@ function collect_xcode_props(ctx, prop, target) {
     return list;
 }
 
-export function export_ios(ctx:Project) {
+export function export_ios(ctx: Project) {
+    // setup automation
+    let credentials: AppStoreCredentials = {};
+    try {
+        credentials = JSON.parse(readFileSync(ctx.ios.appStoreCredentials, "utf-8"));
+    } catch (e) {
+    }
+
     buildAssets(ctx);
     iosBuildAppIcon(ctx, "export/ios");
 
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;
-    const dest_dir = "export";
+    const dest_dir = path.resolve(process.cwd(), "export");
     const dest_path = path.join(dest_dir, platform_proj_name);
 
     if (isDir(dest_path)) {
@@ -129,7 +145,7 @@ export function export_ios(ctx:Project) {
             modules: ctx.modules
         }));
 
-        if(ctx.ios.googleServicesConfigDir) {
+        if (ctx.ios.googleServicesConfigDir) {
             copyFile(path.join(ctx.ios.googleServicesConfigDir, "GoogleService-Info.plist"), "GoogleService-Info.plist");
         }
 
@@ -146,7 +162,9 @@ export function export_ios(ctx:Project) {
 
         replaceInFile("fastlane/Appfile", {
             "[[APP_IDENTIFIER]]": ctx.ios.application_id,
-            "[[APPLE_ID]]": ctx.ios.appleId
+            "[[APPLE_ID]]": credentials.apple_id ?? "",
+            "[[TEAM_ID]]": credentials.team_id ?? "",
+            "[[ITC_TEAM_ID]]": credentials.itc_team_id ?? "",
         });
 
         console.info("Install Pods");
@@ -167,5 +185,11 @@ export function export_ios(ctx:Project) {
         //     "-scheme", platform_proj_name,
         //     "-configuration", "Release"
         // ]);
+    }
+
+    if (ctx.options.deployBeta) {
+        execute("fastlane", ["beta"], dest_path, {
+            FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: credentials.application_specific_password
+        });
     }
 }
