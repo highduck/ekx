@@ -1,0 +1,25 @@
+{
+  "name": "@ekx/temp-external",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "ekxpm resolve-cmake-npm-dependencies && wsrun -m postinstall"
+  },
+  "devDependencies": {
+    "wsrun": "^5.2.4"
+  },
+  "dependencies": {
+    "@ekx/freetype": "0.0.1",
+    "@ekx/cairo": "0.0.1",
+    "@ekx/stb": "0.0.1",
+    "@ekx/imgui": "0.0.1",
+    "@ekx/google-benchmark": "0.0.1",
+    "@ekx/google-test": "0.0.1",
+    "@ekx/tracy": "0.0.1",
+    "@ekx/dev-fonts": "0.0.1",
+    "@ekx/sokol": "0.0.1"
+  },
+  "workspaces": [
+    "../../../npm-deps/packages/*"
+  ]
+}
