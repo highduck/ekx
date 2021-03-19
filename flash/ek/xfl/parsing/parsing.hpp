@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 #include <ek/math/vec.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/mat3x2.hpp>
