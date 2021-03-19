@@ -2,6 +2,7 @@
 
 #include "graphics.hpp"
 #include <array>
+#include <functional>
 
 namespace ek {
 class image_t;
