@@ -76,7 +76,7 @@ struct quat_t {
             biggest_index = 3;
         }
 
-        const T biggest_val = sqrt(four_biggest_squared_minus_1 + static_cast<T>(1)) * static_cast<T>(0.5);
+        const T biggest_val = std::sqrt(four_biggest_squared_minus_1 + static_cast<T>(1)) * static_cast<T>(0.5);
         const T mult = static_cast<T>(0.25) / biggest_val;
 
         switch (biggest_index) {
@@ -253,7 +253,7 @@ quat_t<T> quat_cast(const matrix_t<3, 3, T>& m) {
         biggest_index = 3;
     }
 
-    T biggest_val = sqrt(four_biggest_squared_minus_1 + static_cast<T>(1)) * static_cast<T>(0.5);
+    T biggest_val = std::sqrt(four_biggest_squared_minus_1 + static_cast<T>(1)) * static_cast<T>(0.5);
     T mult = static_cast<T>(0.25) / biggest_val;
 
     switch (biggest_index) {
@@ -284,7 +284,7 @@ quat_t<T> quat_cast(const matrix_t<3, 3, T>& m) {
 
 template<typename T>
 quat_t<float> quat_between(const vec3_t <T>& u, const vec3_t <T>& v) {
-    T norm_u_norm_v = sqrt(dot(u, u) * dot(v, v));
+    T norm_u_norm_v = std::sqrt(dot(u, u) * dot(v, v));
     T real_part = norm_u_norm_v + dot(u, v);
     vec3_t<T> t;
 

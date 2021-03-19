@@ -35,7 +35,7 @@ struct Circ {
 
     [[nodiscard]]
     float calculate(float t) const {
-        return 1.0f - ::sqrt(1.0f - t * t);
+        return 1.0f - sqrtf(1.0f - t * t);
     }
 };
 
