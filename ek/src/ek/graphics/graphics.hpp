@@ -54,6 +54,13 @@
 
 #include <OpenGL/gl3.h>
 
+#elif EK_LINUX
+
+#define SOKOL_GLCORE33
+
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+
 #endif
 
 #include <sokol_gfx.h>
