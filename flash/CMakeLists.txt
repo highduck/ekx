@@ -69,7 +69,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC pugixml
-        PUBLIC freetype2
+        PUBLIC freetype
         PUBLIC cairo
         PUBLIC scenex
         PUBLIC miniz

@@ -30,7 +30,7 @@
 #define MINIAUDIO_IMPLEMENTATION
 
 #include <miniaudio.h>
-#include <miniaudio_engine.h>
+#include <research/miniaudio_engine.h>
 
 #include <ek/app/res.hpp>
 #include <ek/util/logger.hpp>
@@ -53,6 +53,7 @@ void initialize() {
     {
         auto config = ma_engine_config_init_default();
         ma_result result = ma_engine_init(&config, &audioSystem.engine);
+        EK_WARN("config channels: %d", audioSystem.engine.pResourceManager->config.decodedChannels);
         if (result != MA_SUCCESS) {
             EK_WARN("Failed to initialize audio engine: %i", result);
             return;
@@ -114,6 +115,9 @@ void Sound::load(const char* path) {
     get_resource_content_async(path, [this](array_buffer&& buffer) {
         source = std::move(buffer);
 
+        if(source.empty()) {
+            EK_WARN("load sound: empty buffer %s", dataSourceFilePath.c_str());
+        }
         ma_resource_manager_memory_buffer memoryBuffer;
         memoryBuffer.encoded.pData = source.data();
         memoryBuffer.encoded.sizeInBytes = source.size();
@@ -190,12 +194,12 @@ ma_sound* Sound::getNextSound() {
                                           MA_SOUND_FLAG_DECODE,
                                           &audioSystem.soundsGroup, sound);
     if (result != MA_SUCCESS) {
-        EK_WARN("cannot init next sound: %s", dataSourceFilePath.c_str());
+        EK_WARN("cannot init next sound '%s' %s", dataSourceFilePath.c_str(), ma_result_description(result));
         delete sound;
-        sound = nullptr;
-    } else {
-        sounds.push_back(sound);
+        return nullptr;
     }
+
+    sounds.push_back(sound);
     return sound;
 }
 

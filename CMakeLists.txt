@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
+include(npm.cmake)
 project(ekx)
 
 set(EKX_BUILD_TESTS OFF CACHE BOOL "Build EKX unit tests" FORCE)
@@ -12,25 +13,6 @@ if ($ENV{CLION_IDE})
 set(EKX_BUILD_TESTS ON)
 #set(EKX_BUILD_BENCHMARKS ON)
 endif ()
-
-# Mobile platforms are not capable to use Edit-Mode features
-if ((${CMAKE_SYSTEM_NAME} MATCHES Emscripten) OR (${CMAKE_SYSTEM_NAME} MATCHES iOS) OR (${CMAKE_SYSTEM_NAME} MATCHES Android))
-    set(EKX_MOBILE ON)
-    set(EKX_DESKTOP OFF)
-else ()
-    set(EKX_MOBILE OFF)
-    set(EKX_DESKTOP ON)
-endif ()
-
-if (EKX_MOBILE)
-    set(EKX_BUILD_TESTS OFF)
-    set(EKX_BUILD_COVERAGE OFF)
-    set(EKX_BUILD_BENCHMARKS OFF)
-    set(EKX_BUILD_DEV_TOOLS OFF)
-    set(TRACY_ENABLE OFF)
-endif ()
-
-add_subdirectory(external)
 
 if (EKX_BUILD_TESTS)
     enable_testing()

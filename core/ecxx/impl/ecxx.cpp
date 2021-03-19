@@ -86,9 +86,10 @@ bool world::check(Passport passport) const {
 // World create / destroy
 
 void world::initialize() {
-    allocator = ek::memory::stdAllocator.create<ek::ProxyAllocator>("ecxx");
+    using namespace ek::memory;
+    allocator = systemAllocator.create<ek::AlignedAllocator>(systemAllocator, "ecxx");
     resetEntityPool();
-    ek::memory::clear(components, COMPONENTS_MAX_COUNT * sizeof(void*));
+    clear(components, COMPONENTS_MAX_COUNT * sizeof(void*));
 }
 
 void world::reset() {
@@ -105,6 +106,8 @@ void world::reset() {
 }
 
 void world::shutdown() {
+    using namespace ek::memory;
+
     // skip clearing entity pool, because we don't need it anymore
     auto** components_ = components;
     for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {
@@ -115,7 +118,7 @@ void world::shutdown() {
             allocator->dealloc(component->data);
         }
     }
-    ek::memory::stdAllocator.destroy(allocator);
+    systemAllocator.destroy(allocator);
 }
 
 }

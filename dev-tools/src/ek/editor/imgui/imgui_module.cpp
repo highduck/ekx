@@ -172,7 +172,9 @@ void imgui_module_t::on_event(const event_t& event) {
             break;
 
         case event_type::text:
-            io.AddInputCharactersUTF8(event.characters.c_str());
+            if(!event.characters.empty()) {
+                io.AddInputCharactersUTF8(event.characters.c_str());
+            }
             break;
 
         case event_type::mouse_down:

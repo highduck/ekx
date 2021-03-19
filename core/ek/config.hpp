@@ -1,10 +1,10 @@
 #pragma once
 
-#ifndef NDEBUG
+//#ifndef NDEBUG
 
 #define EK_ASSERTION_PEDANTIC
 
 #define EK_ALLOCATION_TRACKER
 #define EK_ALLOCATION_TRACKER_STATS
 
-#endif // NDEBUG
+//#endif // NDEBUG
