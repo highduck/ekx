@@ -22,7 +22,10 @@ jobs:
 
       - name: Setup OpenGL on Ubuntu
         if: ${{ matrix.platform == 'ubuntu-latest' }}
-        uses: openrndr/setup-opengl@v1.1
+#        uses: openrndr/setup-opengl@v1.1
+        run: |
+          sudo apt-get install xorg-dev
+          sudo apt-get install freeglut3-dev
 
       - name: Install dependencies
         run: yarn
