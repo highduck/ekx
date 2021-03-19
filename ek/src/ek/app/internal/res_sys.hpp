@@ -6,7 +6,7 @@
 
 // not optimized for reading app content with stdio
 
-#elseif defined(_WIN32) || defined(_WIN64) || defined(__APPLE__) || defined(__linux__)
+#elif defined(_WIN32) || defined(_WIN64) || defined(__APPLE__) || defined(__linux__)
 
 #define EK_STATIC_RESOURCES_READ_FILE 1
 
