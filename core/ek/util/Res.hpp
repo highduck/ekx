@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <ek/util/common_macro.hpp>
+#include <memory>
 #include <utility>
 
 namespace ek {
