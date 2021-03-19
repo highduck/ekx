@@ -5,6 +5,11 @@
 #include <vector>
 #include <sstream>
 
+// strtok
+#include <cstring>
+// strtol, strtod
+#include <cstdlib>
+
 using std::istream;
 using std::string;
 using std::stringstream;
@@ -32,38 +37,39 @@ struct obj_model_t {
                 memcpy(buf, line.c_str(), line_size);
                 buf[line_size] = '\0';
                 strtok(buf, " ");
-                double x = atof(strtok(nullptr, " "));
-                double y = atof(strtok(nullptr, " "));
-                double z = atof(strtok(nullptr, " "));
+                double x = strtod(strtok(nullptr, " "), nullptr);
+                double y = strtod(strtok(nullptr, " "), nullptr);
+                double z = strtod(strtok(nullptr, " "), nullptr);
                 positions.emplace_back(x, y, z);
             } else if (type == "vt") {
                 memcpy(buf, line.c_str(), line_size);
                 buf[line_size] = '\0';
                 strtok(buf, " ");
-                double x = atof(strtok(nullptr, " "));
-                double y = atof(strtok(nullptr, " "));
+                
+                double x = strtod(strtok(nullptr, " "), nullptr);
+                double y = strtod(strtok(nullptr, " "), nullptr);
                 uvs.emplace_back(x, y);
             } else if (type == "vn") {
                 memcpy(buf, line.c_str(), line_size);
                 buf[line_size] = '\0';
                 strtok(buf, " ");
-                double x = atof(strtok(nullptr, " "));
-                double y = atof(strtok(nullptr, " "));
-                double z = atof(strtok(nullptr, " "));
+                double x = strtod(strtok(nullptr, " "), nullptr);
+                double y = strtod(strtok(nullptr, " "), nullptr);
+                double z = strtod(strtok(nullptr, " "), nullptr);
                 normals.emplace_back(x, y, z);
             } else if (type == "f ") {
                 memcpy(buf, line.c_str(), line_size);
                 buf[line_size] = '\0';
                 strtok(buf, " ");
-                long p1 = atol(strtok(nullptr, " /")) - 1;
-                long t1 = atol(strtok(nullptr, " /")) - 1;
-                long n1 = atol(strtok(nullptr, " /")) - 1;
-                long p2 = atol(strtok(nullptr, " /")) - 1;
-                long t2 = atol(strtok(nullptr, " /")) - 1;
-                long n2 = atol(strtok(nullptr, " /")) - 1;
-                long p3 = atol(strtok(nullptr, " /")) - 1;
-                long t3 = atol(strtok(nullptr, " /")) - 1;
-                long n3 = atol(strtok(nullptr, " /")) - 1;
+                long p1 = strtol(strtok(nullptr, " /"), nullptr, 0) - 1;
+                long t1 = strtol(strtok(nullptr, " /"), nullptr, 0) - 1;
+                long n1 = strtol(strtok(nullptr, " /"), nullptr, 0) - 1;
+                long p2 = strtol(strtok(nullptr, " /"), nullptr, 0) - 1;
+                long t2 = strtol(strtok(nullptr, " /"), nullptr, 0) - 1;
+                long n2 = strtol(strtok(nullptr, " /"), nullptr, 0) - 1;
+                long p3 = strtol(strtok(nullptr, " /"), nullptr, 0) - 1;
+                long t3 = strtol(strtok(nullptr, " /"), nullptr, 0) - 1;
+                long n3 = strtol(strtok(nullptr, " /"), nullptr, 0) - 1;
                 faces.emplace_back(p1);
                 faces.emplace_back(t1);
                 faces.emplace_back(n1);
