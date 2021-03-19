@@ -114,14 +114,14 @@ struct event_t final {
     app::vec2 scroll{0.0, 0.0};
     mouse_button button = mouse_button::other;
 
+    // TODO: view to internal storage
+    std::string characters{};
+
     key_code code = key_code::unknown;
     bool super = false; // cmd/win/..
     bool shift = false;
     bool ctrl = false;
     bool alt = false;
-
-    // TODO: view to internal storage
-    std::string characters{};
 };
 
 struct app_state final {

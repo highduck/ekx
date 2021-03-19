@@ -6,9 +6,14 @@ import {Project} from "./project";
 import {rebuild_ekc} from "./ekc";
 import {increaseProjectVersion} from "./version";
 import rimraf = require("rimraf");
+import {UtilityConfig} from "./utils";
 
 console.debug("Arguments:", process.argv);
 console.debug("Working directory:", process.cwd());
+
+if(process.argv.indexOf("--verbose") >= 0 || process.argv.indexOf("-v") >= 0) {
+    UtilityConfig.verbose = true;
+}
 
 if (process.argv.indexOf("rebuild-ekc") >= 0) {
     rebuild_ekc().then();
@@ -35,10 +40,10 @@ function defaultRun() {
 
     addExportBuildStep(project);
 
-    project.includeProject(path.join(project.path.EKX_ROOT, "external/tracy"));
-    project.includeProject(path.join(project.path.EKX_ROOT, "external/miniaudio"));
-    project.includeProject(path.join(project.path.EKX_ROOT, "external/stb"));
-    project.includeProject(path.join(project.path.EKX_ROOT, "external/sokol"));
+    project.importModule("@ekx/miniaudio", project.path.EKX_ROOT);
+    project.importModule("@ekx/stb", project.path.EKX_ROOT);
+    project.importModule("@ekx/sokol", project.path.EKX_ROOT);
+    project.importModule("@ekx/tracy", project.path.EKX_ROOT);
     project.includeProject(path.join(project.path.EKX_ROOT, "ek"));
     project.includeProject(path.join(project.path.EKX_ROOT, "core"));
     project.includeProject(path.join(project.path.EKX_ROOT, "scenex"));

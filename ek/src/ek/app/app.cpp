@@ -54,17 +54,19 @@ void dispatch_event(const event_t& event) {
         ++g_app.systemPauseCounter;
         if (g_app.systemPauseCounter > 0 && !g_app.systemPaused) {
             g_app.systemPaused = true;
-            process_event({event_type::app_pause});
+            //process_event({event_type::app_pause});
         }
     } else if (event.type == event_type::app_resume) {
         if (g_app.systemPauseCounter > 0) {
             --g_app.systemPauseCounter;
             if (g_app.systemPauseCounter == 0 && g_app.systemPaused) {
                 g_app.systemPaused = false;
-                process_event({event_type::app_resume});
+                //process_event({event_type::app_resume});
             }
         }
-    } else {
+    }
+
+    {
         event_queue_mtx.lock();
         assert(!g_app.event_queue_locked);
         g_app.event_queue_.push_back(event);

@@ -34,7 +34,9 @@ public:
     void* reallocate(void* ptr, uint32_t oldSizeToCopy, uint32_t newSize, uint32_t align);
 };
 
-class StdAllocator;
+class SystemAllocator;
+
+class AlignedAllocator;
 
 class ProxyAllocator;
 
@@ -50,7 +52,9 @@ void copy(void* dest, const void* src, uint32_t size);
 
 void* reallocate(Allocator& allocator, void* ptr, uint32_t oldSizeToCopy, uint32_t newSize, uint32_t align);
 
-extern StdAllocator& stdAllocator;
+extern ProxyAllocator& stdAllocator;
+extern AlignedAllocator& alignedAllocator;
+extern SystemAllocator systemAllocator;
 
 class Globals;
 
@@ -72,22 +76,31 @@ inline void Allocator::destroy(T* ptr) {
     dealloc(ptr);
 }
 
-class StdAllocator : public Allocator {
-    friend class memory::Globals;
-
-protected:
-
-    StdAllocator() noexcept;
-
-    ~StdAllocator() override;
-
+class SystemAllocator : public Allocator {
 public:
+    const char* label;
+
+    explicit SystemAllocator(const char* label_) noexcept;
+
+    ~SystemAllocator() override;
 
     void* alloc(uint32_t size, uint32_t align) override;
 
     void dealloc(void* ptr) override;
+};
 
-    void* realloc(void* ptr, uint32_t newSize);
+class AlignedAllocator : public Allocator {
+public:
+    Allocator& allocator;
+    const char* label;
+
+    AlignedAllocator(Allocator& allocator, const char* label_) noexcept;
+
+    ~AlignedAllocator() override;
+
+    void* alloc(uint32_t size, uint32_t align) override;
+
+    void dealloc(void* ptr) override;
 };
 
 class ProxyAllocator : public Allocator {

@@ -1,12 +1,14 @@
 #include "Allocator.hpp"
 #include "assert.hpp"
-#include <cstdlib>
 #include "util/StaticStorage.hpp"
+#include <cstdlib>
 
 #ifdef EK_ALLOCATION_TRACKER
 
 #ifdef EK_ALLOCATION_TRACKER_STATS
+
 #include "ds/Hash.hpp"
+
 #endif // EK_ALLOCATION_TRACKER_STATS
 
 #include <Tracy.hpp>
@@ -15,35 +17,49 @@
 #define EK_TRACE_ALLOC(ptr,sz,name) TracyAllocNS(ptr,sz,3,name)
 #define EK_TRACE_FREE(ptr,name)     TracyFreeNS(ptr,3,name)
 #else
-#define EK_TRACE_ALLOC(ptr,sz,name) ((void)0)
-#define EK_TRACE_FREE(ptr,name)     ((void)0)
+#define EK_TRACE_ALLOC(ptr, sz, name) ((void)0)
+#define EK_TRACE_FREE(ptr, name)     ((void)0)
 #endif // TRACY_ENABLE
 
 #endif // EK_ALLOCATION_TRACKER
 
-inline void* ek_aligned_alloc(size_t alignment, size_t size) {
-#if defined(__ANDROID__) || defined(__APPLE__)
-    // `aligned_alloc` is not available for iOS < 13
-    void* buffer = nullptr;
-    posix_memalign(&buffer, alignment, size);
-    return buffer;
-#else
-    return aligned_alloc(alignment, size);
-#endif
-}
+/**
+ * standard allocator: malloc / free - no alignment, no tracking, just wraps system-dependent memory allocator,
+ * aligned allocator(allocator): wraps any allocator and align blocks
+ */
+
+// std versions
+//inline void* ek_aligned_alloc(size_t alignment, size_t size) {
+//#if defined(__ANDROID__) || defined(__APPLE__)
+//    // `aligned_alloc` is not available for iOS < 13
+//    void* buffer = nullptr;
+//    posix_memalign(&buffer, alignment, size);
+//    return buffer;
+//#else
+//    return aligned_alloc(alignment, size);
+//#endif
+//}
+
+// own general implementation to avoid memalign/aligned_alloc availability across platforms
+
+// Number of bytes we're using for storing
+// the aligned pointer offset
+typedef uint16_t offset_t;
+#define PTR_OFFSET_SZ sizeof(offset_t)
+
 
 namespace ek {
 
 inline static const uint32_t MinAlign = EK_SIZEOF_U32(void**);
 
 inline static uint32_t upperPowerOfTwo(uint32_t v) {
-    v--;
+    --v;
     v |= v >> 1;
     v |= v >> 2;
     v |= v >> 4;
     v |= v >> 8;
     v |= v >> 16;
-    v++;
+    ++v;
     return v;
 }
 
@@ -62,38 +78,39 @@ inline uint32_t sizeWithPadding(uint32_t size, uint32_t align) {
     return size + align;
 }
 
+void fillMemoryDebug(void* ptr, size_t sz) {
+#ifndef NDEBUG
+    auto* data = static_cast<uint8_t*>(ptr);
+    for (size_t i = 0; i < sz; ++i) {
+        data[i] = 0xCC;
+    }
+#endif
+}
+
+SystemAllocator::SystemAllocator(const char* label_) noexcept:
+        label{label_} {
+
+}
+
+SystemAllocator::~SystemAllocator() = default;
+
+void* SystemAllocator::alloc(uint32_t size, uint32_t align) {
+    void* ptr = std::malloc(size);
 #ifdef EK_ALLOCATION_TRACKER
+    EK_TRACE_ALLOC(ptr, size, label);
+#endif
+    ek::fillMemoryDebug(ptr, size);
+    return ptr;
+}
 
-#ifdef EK_ALLOCATION_TRACKER_STATS
-class StdStaticAllocator : public Allocator {
+void SystemAllocator::dealloc(void* ptr) {
+#ifdef EK_ALLOCATION_TRACKER
+    EK_TRACE_FREE(ptr, label);
+#endif
+    std::free(ptr);
+}
 
-public:
-
-    StdStaticAllocator() noexcept = default;
-
-    ~StdStaticAllocator() override = default;
-
-    void* alloc(uint32_t size, uint32_t align) override {
-        const uint32_t aligns = align < MinAlign ? MinAlign : upperPowerOfTwo(align);
-        uint32_t sizeTotal = size;
-        if ((sizeTotal & (aligns - 1)) != 0) {
-            const auto mm = 1 + sizeTotal / aligns;
-            sizeTotal = mm * aligns;
-        }
-        void* ptr = ek_aligned_alloc(aligns, sizeTotal);
-        EK_TRACE_ALLOC(ptr, sizeTotal, "ek allocation tracker");
-        return ptr;
-    }
-
-    void dealloc(void* ptr) override {
-        EK_TRACE_FREE(ptr, "ek allocation tracker");
-        ::free(ptr);
-    }
-};
-
-inline static StdStaticAllocator staticStdAllocator{};
-
-#endif // EK_ALLOCATION_TRACKER_STATS
+#ifdef EK_ALLOCATION_TRACKER
 
 struct AllocationTracker {
     const char* label;
@@ -117,8 +134,9 @@ struct AllocationTracker {
 
     inline static Rec Invalid{0xFFFFFFFF, 0x0};
 
-    Hash<Rec> _map{staticStdAllocator};
+    Hash<Rec> _map{memory::systemAllocator};
 #endif // EK_ALLOCATION_TRACKER_STATS
+
     explicit AllocationTracker(const char* label_) : label{label_} {
     }
 
@@ -198,48 +216,100 @@ struct AllocationTracker {
 
 #endif // EK_ALLOCATION_TRACKER
 
-StdAllocator::StdAllocator() noexcept {
+inline uintptr_t align_up(uintptr_t num, uintptr_t align) {
+    return (((num) + ((align) - 1)) & ~((align) - 1));
+}
+
+AlignedAllocator::AlignedAllocator(Allocator& allocator_, const char* label_) noexcept:
+        allocator{allocator_},
+        label{label_} {
 #ifdef EK_ALLOCATION_TRACKER
-    tracker = new AllocationTracker("heap");
+    tracker = new AllocationTracker(label_);
+    if (allocator.tracker != nullptr) {
+        ++(allocator.tracker->children);
+    }
 #endif // EK_ALLOCATION_TRACKER
 }
 
-StdAllocator::~StdAllocator() {
+AlignedAllocator::~AlignedAllocator() {
 #ifdef EK_ALLOCATION_TRACKER
+    if (allocator.tracker != nullptr) {
+        --(allocator.tracker->children);
+    }
     delete tracker;
 #endif // EK_ALLOCATION_TRACKER
 }
 
-void* StdAllocator::alloc(uint32_t size, uint32_t align) {
-    const uint32_t aligns = align < MinAlign ? MinAlign : upperPowerOfTwo(align);
-    uint32_t sizeTotal = size;
-    if ((sizeTotal & (aligns - 1)) != 0) {
-        const auto mm = 1 + sizeTotal / aligns;
-        sizeTotal = mm * aligns;
+void* AlignedAllocator::alloc(uint32_t size, uint32_t align) {
+    void* ptr = nullptr;
+
+    EK_ASSERT(align > 0);
+
+    // TODO: maybe contract requirement?
+    if ((align & (align - 1)) != 0) {
+        align = upperPowerOfTwo(align);
     }
-    void* ptr = ek_aligned_alloc(aligns, sizeTotal);
+
+    // We want it to be a power of two since
+    // align_up operates on powers of two
+    EK_ASSERT((align & (align - 1)) == 0);
+
+    if (align && size) {
+        /*
+         * We know we have to fit an offset value
+         * We also allocate extra bytes to ensure we
+         * can meet the alignment
+         */
+        uint32_t hdr_size = PTR_OFFSET_SZ + (align - 1);
+        uint32_t sizeTotal = size + hdr_size;
+        void* p = allocator.alloc(sizeTotal, 0);
+
+        if (p) {
 #ifdef EK_ALLOCATION_TRACKER
-    tracker->onAllocation(ptr, size, sizeTotal);
+            ek::fillMemoryDebug(p, sizeTotal);
+            tracker->onAllocation(p, size, sizeTotal);
 #endif // EK_ALLOCATION_TRACKER
+
+            /*
+             * Add the offset size to malloc's pointer
+             * (we will always store that)
+             * Then align the resulting value to the
+             * target alignment
+             */
+            ptr = (void*) align_up(((uintptr_t) p + PTR_OFFSET_SZ), align);
+
+            // Calculate the offset and store it
+            // behind our aligned pointer
+            offset_t* hdr = ((offset_t*) ptr) - 1;
+            *hdr = (offset_t) ((uintptr_t) ptr - (uintptr_t) p);
+        } // else NULL, could not malloc
+    } //else NULL, invalid arguments
+
     return ptr;
 }
 
-void StdAllocator::dealloc(void* ptr) {
-#ifdef EK_ALLOCATION_TRACKER
-    tracker->onFree(ptr);
-#endif // EK_ALLOCATION_TRACKER
-    ::free(ptr);
-}
+void AlignedAllocator::dealloc(void* ptr) {
+    if (ptr != nullptr) {
 
-void* StdAllocator::realloc(void* ptr, uint32_t newSize) {
+        /*
+        * Walk backwards from the passed-in pointer
+        * to get the pointer offset. We convert to an offset_t
+        * pointer and rely on pointer math to get the data
+        */
+        offset_t offset = *((offset_t*) ptr - 1);
+
+        /*
+        * Once we have the offset, we can get our
+        * original pointer and call free
+        */
+        void* p = (void*) ((uint8_t*) ptr - offset);
+
 #ifdef EK_ALLOCATION_TRACKER
-    tracker->onFree(ptr);
+        tracker->onFree(p);
 #endif // EK_ALLOCATION_TRACKER
-    void* newPtr = ::realloc(ptr, newSize);
-#ifdef EK_ALLOCATION_TRACKER
-    tracker->onAllocation(newPtr, newSize, newSize);
-#endif // EK_ALLOCATION_TRACKER
-    return newPtr;
+
+        allocator.dealloc(p);
+    }
 }
 
 ProxyAllocator::ProxyAllocator(Allocator& allocator_, const char* label_) noexcept:
@@ -255,7 +325,7 @@ ProxyAllocator::ProxyAllocator(Allocator& allocator_, const char* label_) noexce
 }
 
 ProxyAllocator::ProxyAllocator(const char* heapLabel) noexcept:
-        ProxyAllocator{memory::stdAllocator, heapLabel} {
+        ProxyAllocator{memory::systemAllocator, heapLabel} {
 
 }
 
@@ -285,13 +355,17 @@ void ProxyAllocator::dealloc(void* ptr) {
 
 namespace memory {
 
+SystemAllocator systemAllocator{"system"};
+
 class Globals {
 public:
-    StdAllocator std{};
+    ProxyAllocator std{systemAllocator, "global std"};
+    AlignedAllocator aligned{systemAllocator, "global aligned"};
 };
 
 static StaticStorage<Globals> ssGlobals;
-StdAllocator& stdAllocator = ssGlobals.ptr()->std;
+ProxyAllocator& stdAllocator = ssGlobals.ptr()->std;
+AlignedAllocator& alignedAllocator = ssGlobals.ptr()->aligned;
 
 void initialize() {
     ssGlobals.initialize();
@@ -341,7 +415,8 @@ void* operator new(size_t sz) {
     }
 
     if (void* ptr = std::malloc(sz)) {
-        EK_TRACE_ALLOC(ptr, sz, "heap");
+        EK_TRACE_ALLOC(ptr, sz, "c++ new");
+        ek::fillMemoryDebug(ptr, sz);
         return ptr;
     }
 
@@ -349,7 +424,7 @@ void* operator new(size_t sz) {
 }
 
 void operator delete(void* ptr) noexcept {
-    EK_TRACE_FREE(ptr, "heap");
+    EK_TRACE_FREE(ptr, "c++ new");
     std::free(ptr);
 }
 

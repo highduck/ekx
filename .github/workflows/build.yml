@@ -1,35 +1,39 @@
-name: Build CLI
+name: Build
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [14.x]
+        build-tyoe: [Debug, Release]
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js 14
+        uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 14
 
       - name: Install dependencies
-        working-directory: ./cli
         run: yarn
         env:
           CI: true
+          SHOW_SPAWN_CMD: true
 
-      - name: Build library
-        working-directory: ./cli
-        run: yarn build
+      - name: Build ${{ matrix.build-tyoe }} Configuration
+        run: cmake . -B cmake-build-${BUILD_TYPE} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
         env:
           CI: true
+          SHOW_SPAWN_CMD: true
+          BUILD_TYPE: ${{ matrix.build-tyoe }}
+
+      - name: Build ${{ matrix.build-tyoe }} Targets
+        run: cmake --build cmake-build-${{ matrix.build-tyoe }}
+        env:
+          CI: true
+          SHOW_SPAWN_CMD: true

@@ -2,5 +2,11 @@
 cmake-build-*/
 build/
 
+# npm dependencies
+node_modules/
+
+# resolve cmake dependencies on postinstall script
+npm.cmake
+
 # samples generated resources
 generated/

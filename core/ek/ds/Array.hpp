@@ -119,8 +119,14 @@ struct Array {
         if (_size == _capacity) {
             growPow2();
         }
-        *(_data + _size) = el;
-        ++_size;
+
+        // issue `crash on Array::push_back with std::string`
+        // *(_data + _size) = el; <- works only for POD structures
+        // solution to use copy constructor instead of copy assignment
+
+        T* buff = _data + (_size++);
+        // copy constructor
+        new(buff)T(el);
     }
 
     inline T& emplace_back(T&& el) {

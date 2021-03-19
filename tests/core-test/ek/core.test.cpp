@@ -53,6 +53,29 @@ TEST(Allocators, base) {
     memory::shutdown();
 }
 
+struct NonTrivialStruct {
+    int counter = 0;
+
+    NonTrivialStruct() {
+        ++counter;
+    }
+
+    // issue `crash on Array::push_back with std::string`
+    NonTrivialStruct& operator=(const NonTrivialStruct& o) {
+        // check if object is alive (valid state)
+        // this case brake if data structure use COPY ASSIGNMENT
+        // on invalid state object after destructor was called
+        EK_ASSERT(counter > 0);
+        counter = o.counter;
+        return *this;
+    }
+
+    ~NonTrivialStruct() {
+        --counter;
+        EK_ASSERT(counter == 0);
+    }
+};
+
 TEST(Array, moveCopy) {
     memory::initialize();
 
@@ -64,6 +87,12 @@ TEST(Array, moveCopy) {
 
         EK_ASSERT(movedA[0] == 1);
         EK_ASSERT(movedA[1] == 3);
+    }
+    {
+        Array<NonTrivialStruct> a;
+        a.push_back(NonTrivialStruct());
+        a.erase(0u);
+        a.push_back(NonTrivialStruct());
     }
     {
         Array<int> a;

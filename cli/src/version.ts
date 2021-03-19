@@ -42,7 +42,6 @@ export function increaseProjectVersion(p: string, versionIndex: number = VERSION
     let code = parseInt(codeMatch[1]);
 
     incVersion(versionIndex, ver);
-    ver[2]++;
     code++;
 
     config = config.replace(versionMatch[0], `version_name = "${ver[0]}.${ver[1]}.${ver[2]}";`);

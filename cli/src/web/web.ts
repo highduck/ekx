@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import {copyFileSync} from "fs";
 import * as path from "path";
 import {copyFolderRecursiveSync, executeAsync, isDir, isFile, substituteAll, withPath} from "../utils";
 import {buildAssetsAsync} from "../assets";
@@ -48,10 +47,9 @@ function getCMakeBuildDir(buildType: string) {
 async function buildProject(ctx, buildType) {
     const platform_proj_name = ctx.name + "-" + ctx.current_target; // "projectName-web"
     const dest_dir = path.resolve(process.cwd(), "export");
-    const dest_path = path.join(dest_dir, platform_proj_name);
+    const output_path = path.join(dest_dir, platform_proj_name);
     const cmakeBuildDir = getCMakeBuildDir(buildType);
 
-    const output_path = path.join(ctx.path.CURRENT_PROJECT_DIR, dest_path);
     if (!isDir(output_path)) {
         await fs.promises.mkdir(output_path, {recursive: true});
     } else {
@@ -66,23 +64,24 @@ async function buildProject(ctx, buildType) {
         let cmakeFile = await fs.promises.readFile(path.join(ctx.path.templates, "project-web/CMakeLists.txt"), "utf8");
         withPath(output_path, () => {
             cmakeFile = renderCMakeFile(ctx, cmakeFile);
-        })
+        });
         await fs.promises.writeFile(path.join(output_path, "CMakeLists.txt"), cmakeFile);
     }
 
     {
-        const buildDir = path.join(output_path, cmakeBuildDir);
-        if (!isDir(buildDir)) {
-            await fs.promises.mkdir(buildDir);
-        }
-
-        {
-            const EMSDK_PATH = "/Users/ilyak/dev/emsdk";
-            const EMSDK_CMAKE_TOOLCHAIN = path.join(EMSDK_PATH, "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake");
-            const args = ["-GNinja", `-DCMAKE_TOOLCHAIN_FILE=${EMSDK_CMAKE_TOOLCHAIN}`, `-DCMAKE_BUILD_TYPE=${buildType}`]; // -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-            await executeAsync("cmake", [".."].concat(args), {workingDir: buildDir});
-        }
-        await executeAsync("ninja", ["-d", "explain"], {workingDir: buildDir});
+        const EMSDK_PATH = "/Users/ilyak/dev/emsdk";
+        const EMSDK_CMAKE_TOOLCHAIN = path.join(EMSDK_PATH, "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake");
+        // -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        await executeAsync("cmake", [
+            ".",
+            "-B", cmakeBuildDir,
+            "-GNinja",
+            `-DCMAKE_TOOLCHAIN_FILE=${EMSDK_CMAKE_TOOLCHAIN}`,
+            `-DCMAKE_BUILD_TYPE=${buildType}`
+        ], {workingDir: output_path});
+        await executeAsync("cmake", [
+            "--build", cmakeBuildDir
+        ], {workingDir: output_path});
     }
 }
 
@@ -120,8 +119,8 @@ export async function export_web(ctx: Project) {
     await buildTask;
     const cmakeBuildDir = getCMakeBuildDir(buildType);
     const projectDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export", ctx.name + "-" + ctx.current_target);
-    copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".js"), path.join(output_dir, ctx.name + ".js"));
-    copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm"), path.join(output_dir, ctx.name + ".wasm"));
+    // copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".js"), path.join(output_dir, ctx.name + ".js"));
+    // copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm"), path.join(output_dir, ctx.name + ".wasm"));
 
     await iconsTask;
 

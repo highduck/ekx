@@ -1,0 +1,31 @@
+name: Build CLI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        working-directory: ./cli
+        run: yarn
+        env:
+          SHOW_SPAWN_CMD: true
+          CI: true
+
+      - name: Build library
+        working-directory: ./cli
+        run: yarn build
+        env:
+          SHOW_SPAWN_CMD: true
+          CI: true

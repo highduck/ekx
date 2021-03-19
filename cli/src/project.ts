@@ -1,5 +1,6 @@
 import * as path from "path";
 import {VERSION_INDEX_MAJOR, VERSION_INDEX_MINOR, VERSION_INDEX_PATCH} from "./version";
+import {resolveFrom} from "./utility/resolveFrom";
 
 class ProjectPath {
     EKX_ROOT = process.env.EKX_ROOT ?? path.resolve(__dirname, '../..');
@@ -144,12 +145,20 @@ export class Project {
         }
     }
 
+    importModule(moduleId: string, fromDir?: string) {
+        fromDir = fromDir ?? process.cwd();
+        const projectPath = resolveFrom(fromDir, moduleId + "/ek.js");
+        if (projectPath == null) {
+            console.warn("ek.js module not found")
+        }
+        this.includeProject(path.dirname(projectPath));
+    }
+
     runBuildSteps() {
         for (const step of this.build_steps) {
             step();
         }
     }
-
 
     constructor() {
         if(this.args.indexOf("clean") >= 0) {
