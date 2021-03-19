@@ -3,6 +3,7 @@
 
 #include <pugixml.hpp>
 #include <ek/util/logger.hpp>
+#include <cstring>
 
 namespace ek::xfl {
 
