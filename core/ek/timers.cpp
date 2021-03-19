@@ -5,8 +5,8 @@
 #include <sokol_time.h>
 
 #include <map>
-//#include <memory>
-//#include <utility>
+#include <memory>
+#include <utility>
 
 namespace ek {
 
