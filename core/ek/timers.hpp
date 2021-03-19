@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <functional>
 
 namespace ek {
@@ -58,7 +59,7 @@ public:
 private:
     timer_t timer_{};
     double delta_time_ = 0.0;
-    uint64_t frame_index_ = 0ull;
+    uint64_t frame_index_ = 0;
 };
 
 class FpsMeter final {
