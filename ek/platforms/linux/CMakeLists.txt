@@ -1,5 +1,7 @@
 message("Platform: LINUX")
 
+target_include_directories(${PROJECT_NAME} PUBLIC .)
+
 target_sources(${PROJECT_NAME} PRIVATE
         static_resources.cpp
 
@@ -9,8 +11,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         user_preferences.cpp
         )
 
-find_package(OpenGL)
-#    find_package(OpenGL REQUIRED)
+find_package(OpenGL REQUIRED)
 
 message(INFO "OPENGL_LIBRARIES => ${OPENGL_LIBRARIES}")
 message(INFO "OPENGL_FOUND => ${OPENGL_FOUND}")
@@ -22,4 +23,6 @@ message(INFO "OpenGL_EGL_FOUND => ${OpenGL_EGL_FOUND}")
 message(INFO "OPENGL_INCLUDE_DIR => ${OPENGL_INCLUDE_DIR}")
 message(INFO "OPENGL_EGL_INCLUDE_DIRS => ${OPENGL_EGL_INCLUDE_DIRS}")
 
-target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} pthread)
+target_link_libraries(${PROJECT_NAME}
+        PRIVATE ${OPENGL_LIBRARIES}
+        PRIVATE pthread)
