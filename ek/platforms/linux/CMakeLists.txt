@@ -25,4 +25,6 @@ message(INFO "OPENGL_EGL_INCLUDE_DIRS => ${OPENGL_EGL_INCLUDE_DIRS}")
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE ${OPENGL_LIBRARIES}
-        PRIVATE pthread)
+        PRIVATE pthread
+        PRIVATE ${CMAKE_DL_LIBS}
+)
