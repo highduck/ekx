@@ -5,6 +5,8 @@
 
 #include <pugixml.hpp>
 
+#include <cstring>
+
 namespace ek::xfl {
 
 /** Basic Types parsing **/

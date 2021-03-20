@@ -3,6 +3,7 @@
 #include <vector>
 #include <ek/util/path.hpp>
 #include <unordered_map>
+#include <functional>
 
 namespace ek {
 

@@ -3,6 +3,7 @@
 #include <vector>
 #include <ek/util/common_macro.hpp>
 #include <ek/math/box.hpp>
+#include <cstring>
 
 namespace ek {
 

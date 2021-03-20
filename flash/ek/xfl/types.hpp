@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <optional>
 #include <ek/math/box.hpp>
 #include <ek/math/color_transform.hpp>

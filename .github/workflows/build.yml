@@ -7,9 +7,9 @@ jobs:
     strategy:
       matrix:
         # safe the Earth
-        platform: [ ubuntu-latest ]
+        #platform: [ ubuntu-latest ]
         build-tyoe: [ Release ]
-        #platform: [ubuntu-latest, macos-latest]
+        platform: [ubuntu-latest, macos-latest]
         #build-tyoe: [Debug, Release]
 
     runs-on: ${{ matrix.platform }}

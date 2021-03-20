@@ -9,6 +9,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         analytics.cpp
         sharing.cpp
         user_preferences.cpp
+        device_linux.cpp
         )
 
 find_package(OpenGL REQUIRED)
@@ -25,4 +26,6 @@ message(INFO "OPENGL_EGL_INCLUDE_DIRS => ${OPENGL_EGL_INCLUDE_DIRS}")
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE ${OPENGL_LIBRARIES}
-        PRIVATE pthread)
+        PRIVATE pthread
+        PRIVATE ${CMAKE_DL_LIBS}
+)

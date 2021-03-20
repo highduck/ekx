@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include <ecxx/ecxx.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/packed_color.hpp>
