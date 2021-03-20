@@ -2,6 +2,7 @@
 
 #include <ecxx/ecxx.hpp>
 #include <vector>
+#include <string>
 #include <ek/util/signals.hpp>
 #include <ek/math/box.hpp>
 
