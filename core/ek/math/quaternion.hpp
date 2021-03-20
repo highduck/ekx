@@ -37,14 +37,14 @@ struct quat_t {
 
     explicit quat_t(const vec3_t <T>& euler_angles) {
         const vec3_t<T> c{
-                cos(euler_angles.x * static_cast<T>(0.5)),
-                cos(euler_angles.y * static_cast<T>(0.5)),
-                cos(euler_angles.z * static_cast<T>(0.5))
+               std::cos(euler_angles.x * static_cast<T>(0.5)),
+               std::cos(euler_angles.y * static_cast<T>(0.5)),
+               std::cos(euler_angles.z * static_cast<T>(0.5))
         };
         const vec3_t<T> s{
-                sin(euler_angles.x * static_cast<T>(0.5)),
-                sin(euler_angles.y * static_cast<T>(0.5)),
-                sin(euler_angles.z * static_cast<T>(0.5))
+                std::sin(euler_angles.x * static_cast<T>(0.5)),
+                std::sin(euler_angles.y * static_cast<T>(0.5)),
+                std::sin(euler_angles.z * static_cast<T>(0.5))
         };
 
         w = c.x * c.y * c.z + s.x * s.y * s.z;
@@ -213,7 +213,7 @@ T pitch(const quat_t<T>& q) {
 
 template<typename T>
 T yaw(const quat_t<T>& q) {
-    return asin(math::clamp(static_cast<T>(-2) * (q.x * q.z - q.w * q.y), static_cast<T>(-1), static_cast<T>(1)));
+    return std::asin(math::clamp(static_cast<T>(-2) * (q.x * q.z - q.w * q.y), static_cast<T>(-1), static_cast<T>(1)));
 }
 
 template<typename T>
@@ -223,7 +223,7 @@ vec3_t <T> euler_angles(const quat_t<T>& q) {
 
 template<typename T>
 inline quat_t<T> normalize(const quat_t<T>& a) {
-    return a / sqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
+    return a / std::sqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
 }
 
 template<>
@@ -293,7 +293,7 @@ quat_t<float> quat_between(const vec3_t <T>& u, const vec3_t <T>& v) {
         // around an arbitrary orthogonal axis. Axis normalisation
         // can happen later, when we normalise the quaternion.
         real_part = static_cast<T>(0);
-        t = abs(u.x) > abs(u.z) ? vec3_t<T>(-u.y, u.x, static_cast<T>(0)) : vec3_t<T>(static_cast<T>(0), -u.z, u.y);
+        t = std::abs(u.x) > std::abs(u.z) ? vec3_t<T>(-u.y, u.x, static_cast<T>(0)) : vec3_t<T>(static_cast<T>(0), -u.z, u.y);
     } else {
         // Otherwise, build quaternion the standard way.
         t = cross(u, v);
