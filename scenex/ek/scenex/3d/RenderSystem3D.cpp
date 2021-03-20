@@ -16,6 +16,8 @@
 #include <ek/math/matrix_inverse.hpp>
 #include <ek/math/matrix_camera.hpp>
 
+#include <cstring>
+
 namespace ek {
 
 const auto DEFAULT_FACE_WINDING = SG_FACEWINDING_CCW;
