@@ -6,6 +6,7 @@ import * as Mustache from 'mustache';
 import {webBuildAppIconAsync} from "./webAppIcon";
 import {collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {Project} from "../project";
+import {copyFileSync} from "fs";
 
 function renderCMakeFile(ctx, cmakeListContents: string): string {
     const cppSourceFiles = [];
@@ -119,12 +120,16 @@ export async function export_web(ctx: Project) {
     await buildTask;
     const cmakeBuildDir = getCMakeBuildDir(buildType);
     const projectDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export", ctx.name + "-" + ctx.current_target);
-    // copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".js"), path.join(output_dir, ctx.name + ".js"));
-    // copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm"), path.join(output_dir, ctx.name + ".wasm"));
+    copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".js"), path.join(output_dir, ctx.name + ".js"));
+    copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm"), path.join(output_dir, ctx.name + ".wasm"));
 
     await iconsTask;
 
     console.info("Web export completed");
     console.info("Time:", (Date.now() - timestamp) / 1000, "sec");
 
+    if (ctx.options.deployBeta) {
+        console.info("Publish Web beta to Firebase host");
+        await executeAsync("firebase", ["deploy"]);
+    }
 }
