@@ -2,6 +2,8 @@
 
 #include <admob.hpp>
 
+#include <memory>
+
 namespace ek {
 
 class AdMobWrapper {

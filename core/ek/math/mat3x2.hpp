@@ -112,8 +112,8 @@ struct matrix_t<3, 2, T> {
 
     vec2 scale() const {
         vec2 s{
-                sqrt(a * a + b * b),
-                sqrt(c * c + d * d)
+                std::sqrt(a * a + b * b),
+                std::sqrt(c * c + d * d)
         };
 //        if (a < 0.0f) s.x = -s.x;
 //        if (d < 0.0f) s.y = -s.y;

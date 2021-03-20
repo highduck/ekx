@@ -1,6 +1,9 @@
 #include "working_dir.hpp"
 #include "system.hpp"
 
+// PATH_MAX
+#include <climits>
+
 #include <unistd.h>
 #include <ek/util/logger.hpp>
 

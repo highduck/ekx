@@ -7,6 +7,7 @@ import {rebuild_ekc} from "./ekc";
 import {increaseProjectVersion} from "./version";
 import rimraf = require("rimraf");
 import {UtilityConfig} from "./utils";
+import * as fs from "fs";
 
 console.debug("Arguments:", process.argv);
 console.debug("Working directory:", process.cwd());
@@ -31,7 +32,14 @@ function defaultRun() {
     console.log("Arguments:", project.args);
 
     if (project.options.clean) {
-        rimraf.sync(path.join(process.cwd(), "export"));
+        const dir = path.join(process.cwd(), "export");
+        if(fs.existsSync(dir)) {
+            console.info("Clean: remove EXPORT directory", dir)
+            fs.rmSync(dir, {recursive: true});
+        }
+        else {
+            console.log("Clean: nothing to remove", dir)
+        }
     }
 
     if (project.options.increaseVersion !== undefined) {

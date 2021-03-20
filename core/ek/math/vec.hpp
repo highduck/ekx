@@ -372,7 +372,7 @@ inline T length_sqr(const vec_t<N, T>& a) {
 
 template<typename T, unsigned N>
 inline T length(const vec_t<N, T>& a) {
-    return sqrt(length_sqr(a));
+    return std::sqrt(length_sqr(a));
 }
 
 template<typename T>
@@ -382,7 +382,7 @@ inline T length_sqr(vec_t<2, T> a) {
 
 template<typename T>
 inline T length(vec_t<2, T> a) {
-    return sqrt(a.x * a.x + a.y * a.y);
+    return std::sqrt(a.x * a.x + a.y * a.y);
 }
 
 template<typename T, unsigned N>
@@ -417,7 +417,7 @@ inline vec_t<N, float> normalize(const vec_t<N, float>& a) {
 
 template<typename T, unsigned N>
 inline vec_t<N, T> normalize(const vec_t<N, T>& a) {
-    return a / sqrt(dot(a, a));
+    return a / std::sqrt(dot(a, a));
 }
 
 template<typename T, unsigned N>
