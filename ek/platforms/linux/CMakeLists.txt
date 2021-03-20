@@ -9,6 +9,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         analytics.cpp
         sharing.cpp
         user_preferences.cpp
+        device_linux.cpp
         )
 
 find_package(OpenGL REQUIRED)
