@@ -5,6 +5,8 @@
 
 #include <ek/audio/audio.hpp>
 
+#include <memory>
+
 namespace ek {
 
 AdMobWrapper::AdMobWrapper() {
