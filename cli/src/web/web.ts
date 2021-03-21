@@ -158,6 +158,10 @@ export async function export_web(ctx: Project) {
         else {
             console.warn("No Firebase Token. Trying deploy with local firebase auth");
         }
-        await executeAsync("firebase", ["deploy", ...args]);
+        await executeAsync("firebase", [
+            "deploy",
+            "--only", "hosting",
+            ...args
+        ]);
     }
 }
