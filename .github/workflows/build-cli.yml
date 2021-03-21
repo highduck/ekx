@@ -18,14 +18,14 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./cli
-        run: yarn
+        run: npm ci
         env:
           SHOW_SPAWN_CMD: true
           CI: true
 
       - name: Build library
         working-directory: ./cli
-        run: yarn build
+        run: npm run build
         env:
           SHOW_SPAWN_CMD: true
           CI: true

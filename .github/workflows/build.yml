@@ -31,7 +31,7 @@ jobs:
           sudo apt-get install freeglut3-dev
 
       - name: Install dependencies
-        run: yarn
+        run: npm ci
         env:
           CI: true
           SHOW_SPAWN_CMD: true
