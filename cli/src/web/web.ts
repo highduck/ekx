@@ -83,7 +83,7 @@ async function buildProject(ctx, buildType) {
         await executeAsync("cmake", [
             ".",
             "-B", cmakeBuildDir,
-            "-GNinja",
+            //"-GNinja",
             `-DCMAKE_TOOLCHAIN_FILE=${EMSDK_CMAKE_TOOLCHAIN}`,
             `-DCMAKE_BUILD_TYPE=${buildType}`
         ], {workingDir: output_path});
