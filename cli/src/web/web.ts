@@ -8,6 +8,13 @@ import {collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {Project} from "../project";
 import {copyFileSync} from "fs";
 
+function getEmscriptenSDKPath():string {
+    if(process.env.EMSDK) {
+        return process.env.EMSDK;
+    }
+    return path.join(process.env.HOME, "dev/emsdk");
+}
+
 function renderCMakeFile(ctx, cmakeListContents: string): string {
     const cppSourceFiles = [];
     const cppExtensions = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
@@ -70,7 +77,7 @@ async function buildProject(ctx, buildType) {
     }
 
     {
-        const EMSDK_PATH = "/Users/ilyak/dev/emsdk";
+        const EMSDK_PATH = getEmscriptenSDKPath();
         const EMSDK_CMAKE_TOOLCHAIN = path.join(EMSDK_PATH, "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake");
         // -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         await executeAsync("cmake", [
@@ -130,6 +137,27 @@ export async function export_web(ctx: Project) {
 
     if (ctx.options.deployBeta) {
         console.info("Publish Web beta to Firebase host");
-        await executeAsync("firebase", ["deploy"]);
+        const args = [];
+        let token = process.env.FIREBASE_TOKEN;
+        if(!token && ctx.web.firebaseToken) {
+            try {
+                if(fs.existsSync(ctx.web.firebaseToken)) {
+                    token = fs.readFileSync(ctx.web.firebaseToken, 'utf-8');
+                }
+                else {
+                    console.error(`Firebase Token file path not found`);
+                }
+            }
+            catch {
+                console.error(`Cannot read Firebase Token`);
+            }
+        }
+        if (token) {
+            args.push("--token", token);
+        }
+        else {
+            console.warn("No Firebase Token. Trying deploy with local firebase auth");
+        }
+        await executeAsync("firebase", ["deploy", ...args]);
     }
 }

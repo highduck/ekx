@@ -118,6 +118,10 @@ export class Project {
         appStoreCredentials?: string
     } = {};
 
+    web: {
+        firebaseToken?: string
+    } = {};
+
     html = {};
 
     addModule(def: ModuleDef) {
