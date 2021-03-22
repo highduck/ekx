@@ -11,21 +11,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Setup Node.js 15
-        uses: actions/setup-node@v2
-        with:
-          node-version: 15
-
       - name: Install dependencies
         working-directory: ./cli
-        run: npm ci
+        run: yarn --frozen-lockfile
         env:
           SHOW_SPAWN_CMD: true
           CI: true
 
       - name: Build library
         working-directory: ./cli
-        run: npm run build
-        env:
-          SHOW_SPAWN_CMD: true
-          CI: true
+        run: yarn run build

@@ -4,6 +4,7 @@
 #include <ek/math/vec.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/mat.hpp>
+#include <vector>
 
 namespace ek {
 

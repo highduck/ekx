@@ -1,0 +1,10 @@
+{
+  "name": "@ekx/ekc",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "node scripts/build.js"
+  },
+  "private": true,
+  "dependencies": {
+  }
+}
