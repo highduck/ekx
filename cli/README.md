@@ -3,9 +3,9 @@
 ## Build and Set
 
 ```
-npm install
-npm run build
-npm link -g
+yarn
+yarn run build
+yarn link -g
 ```
 
 ### iOS
