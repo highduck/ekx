@@ -40,6 +40,8 @@ target_link_libraries(ekx
         INTERFACE ek
         INTERFACE scenex)
 
+add_library(ekx::ekx ALIAS ekx)
+
 add_subdirectory(flash)
 add_subdirectory(dev-tools)
 add_subdirectory(ekc)
