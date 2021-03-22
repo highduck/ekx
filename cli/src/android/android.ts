@@ -147,6 +147,20 @@ export function export_android(ctx: Project) {
 
     }
 
+    // resolve absolute path to configs
+    let googleServicesConfigDir = ctx.android.googleServicesConfigDir;
+    let signingConfigPath = ctx.android.signingConfigPath;
+    let serviceAccountKey = ctx.android.serviceAccountKey;
+    if(googleServicesConfigDir) {
+        googleServicesConfigDir = path.resolve(ctx.path.CURRENT_PROJECT_DIR, googleServicesConfigDir);
+    }
+    if(signingConfigPath) {
+        signingConfigPath = path.resolve(ctx.path.CURRENT_PROJECT_DIR, signingConfigPath);
+    }
+    if(serviceAccountKey) {
+        serviceAccountKey = path.resolve(ctx.path.CURRENT_PROJECT_DIR, serviceAccountKey);
+    }
+
     copyFolderRecursiveSync(path.join(ctx.path.templates, `template-${platform_target}`), dest_path);
     const base_path = "../..";
 
@@ -174,10 +188,10 @@ export function export_android(ctx: Project) {
         let signingConfig = {};
         let signingConfigBasePath = "";
 
-        if (ctx.android.signingConfigPath) {
-            const signingConfigJson = fs.readFileSync(ctx.android.signingConfigPath, "utf-8");
+        if (signingConfigPath) {
+            const signingConfigJson = fs.readFileSync(signingConfigPath, "utf-8");
             signingConfig = JSON.parse(signingConfigJson);
-            signingConfigBasePath = path.dirname(ctx.android.signingConfigPath);
+            signingConfigBasePath = path.dirname(signingConfigPath);
             copySigningKeys(signingConfig, signingConfigBasePath);
         } else {
             console.error("signing file not found (todo: default signing config)");
@@ -195,7 +209,7 @@ export function export_android(ctx: Project) {
 
         replaceInFile('fastlane/Appfile', {
             "__PACKAGE_NAME__": ctx.android.application_id,
-            "__SERVICE_ACCOUNT_KEY_PATH__": ctx.android.serviceAccountKey,
+            "__SERVICE_ACCOUNT_KEY_PATH__": serviceAccountKey,
         });
 
         writeFileSync('local.properties', `sdk.dir=${getAndroidSdkRoot()}`);
@@ -206,7 +220,7 @@ export function export_android(ctx: Project) {
         mod_android_manifest(ctx);
         createStringsXML(ctx);
         mod_cmake_lists(ctx);
-        copy_google_services_config_android(ctx.android.googleServicesConfigDir);
+        copy_google_services_config_android(googleServicesConfigDir);
     }
 
     if (ctx.args.indexOf("bundle") >= 0) {

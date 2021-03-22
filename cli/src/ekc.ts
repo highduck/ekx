@@ -2,7 +2,6 @@ import * as path from "path";
 import {Project} from "./project";
 import {execute, executeAsync, isDir, rimrafAsync} from "./utils";
 import * as fs from "fs";
-import rimraf = require("rimraf");
 
 export function ekc(ctx: Project, ...args: string[]) {
     const bin = path.join(ctx.path.EKX_ROOT, "dev-tools/bin/ekc");
