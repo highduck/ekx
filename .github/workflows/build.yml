@@ -22,7 +22,7 @@ jobs:
           sudo apt-get install freeglut3-dev
 
       - name: Setup Ninja
-          uses: seanmiddleditch/gha-setup-ninja@master
+        uses: seanmiddleditch/gha-setup-ninja@master
 
       - name: Check installed versions
         run: |
