@@ -126,6 +126,7 @@ export async function export_web(ctx: Project) {
     }
     catch(e) {
         console.error("assets export failed", e);
+        throw e;
     }
     copyFolderRecursiveSync("export/contents/assets", "export/web/assets");
 
@@ -134,6 +135,7 @@ export async function export_web(ctx: Project) {
     }
     catch(e) {
         console.error("build failed", e);
+        throw e;
     }
     const cmakeBuildDir = getCMakeBuildDir(buildType);
     const projectDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export", ctx.name + "-" + ctx.current_target);
@@ -145,6 +147,7 @@ export async function export_web(ctx: Project) {
     }
     catch(e) {
         console.error("icons export failed", e);
+        throw e;
     }
 
     console.info("Web export completed");
