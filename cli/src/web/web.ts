@@ -121,16 +121,31 @@ export async function export_web(ctx: Project) {
     tpl("web/sw.js.mustache", "sw.js");
     file("web/pwacompat.min.js", "pwacompat.min.js");
 
-    await assetsTask;
+    try {
+        await assetsTask;
+    }
+    catch(e) {
+        console.error("assets export failed", e);
+    }
     copyFolderRecursiveSync("export/contents/assets", "export/web/assets");
 
-    await buildTask;
+    try {
+        await buildTask;
+    }
+    catch(e) {
+        console.error("build failed", e);
+    }
     const cmakeBuildDir = getCMakeBuildDir(buildType);
     const projectDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export", ctx.name + "-" + ctx.current_target);
     copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".js"), path.join(output_dir, ctx.name + ".js"));
     copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm"), path.join(output_dir, ctx.name + ".wasm"));
 
-    await iconsTask;
+    try {
+        await iconsTask;
+    }
+    catch(e) {
+        console.error("icons export failed", e);
+    }
 
     console.info("Web export completed");
     console.info("Time:", (Date.now() - timestamp) / 1000, "sec");
