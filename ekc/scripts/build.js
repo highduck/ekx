@@ -8,7 +8,7 @@ for (const buildType of buildTypes) {
     spawnSync("cmake", [
         "..",
         "-B", `build/${buildType.toLowerCase()}`,
-        //"-GNinja",
+        "-G", "Ninja",
         `-DCMAKE_BUILD_TYPE=${buildType}`,
         '-DCMAKE_C_COMPILER=clang',
         '-DCMAKE_CXX_COMPILER=clang++'
@@ -21,8 +21,7 @@ for (const buildType of buildTypes) {
     console.info("Build", buildType);
     spawnSync("cmake", [
         "--build", `build/${buildType.toLowerCase()}`,
-        "--target", "ekc",
-        "--parallel", "10"
+        "--target", "ekc"
     ], {
         stdio: 'inherit'
     });
