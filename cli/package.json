@@ -6,9 +6,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "watch": "tsc -w",
-    "rebuild-ekc": "tsc && node dist/main.js rebuild-ekc"
+    "watch": "tsc -w"
   },
+  "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "ISC",

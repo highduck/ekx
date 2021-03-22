@@ -3,7 +3,6 @@
 import * as path from 'path';
 import {addExportBuildStep} from "./exporters";
 import {Project} from "./project";
-import {rebuild_ekc} from "./ekc";
 import {increaseProjectVersion} from "./version";
 import {UtilityConfig} from "./utils";
 import * as fs from "fs";
@@ -15,11 +14,7 @@ if(process.argv.indexOf("--verbose") >= 0 || process.argv.indexOf("-v") >= 0) {
     UtilityConfig.verbose = true;
 }
 
-if (process.argv.indexOf("rebuild-ekc") >= 0) {
-    rebuild_ekc().then();
-} else {
-    defaultRun();
-}
+defaultRun();
 
 function defaultRun() {
     const project = new Project();

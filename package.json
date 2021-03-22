@@ -3,29 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "npx @ekx/npm-cmake"
-  },
-  "__local_devDependencies": {
-    "wsrun": "^5.2.4"
+    "postinstall": "npm-cmake"
   },
   "dependencies": {
-    "@ekx/cairo": "0.0.3",
-    "@ekx/dev-fonts": "0.0.2",
-    "@ekx/freetype": "0.0.3",
-    "@ekx/google-test": "0.0.3",
-    "@ekx/imgui": "0.0.4",
-    "@ekx/miniaudio": "0.0.2",
-    "@ekx/miniz": "0.0.2",
-    "@ekx/npm-cmake": "0.0.2",
-    "@ekx/pugixml": "0.0.2",
-    "@ekx/sokol": "0.0.2",
-    "@ekx/stb": "0.0.2",
-    "@ekx/tracy": "0.0.4"
+    "@ekx/cairo": "0.0.4",
+    "@ekx/dev-fonts": "0.0.3",
+    "@ekx/freetype": "0.0.4",
+    "@ekx/google-benchmark": "0.0.3",
+    "@ekx/google-test": "0.0.4",
+    "@ekx/imgui": "0.0.5",
+    "@ekx/miniaudio": "0.0.3",
+    "@ekx/miniz": "0.0.3",
+    "npm-cmake": "0.0.2",
+    "@ekx/pugixml": "0.0.3",
+    "@ekx/sokol": "0.0.3",
+    "@ekx/sokol-shdc": "0.0.1",
+    "@ekx/stb": "0.0.3",
+    "@ekx/tracy": "0.0.5"
   },
   "workspaces": {
-    "packages": [],
-    "__local_packages": [
-      "../../npm-deps/packages/*"
-    ]
+    "packages": []
   }
 }
