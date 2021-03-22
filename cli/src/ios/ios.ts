@@ -9,11 +9,10 @@ import {
 import * as path from "path";
 import * as fs from "fs";
 import * as plist from 'plist';
-import {buildAssets, buildMarketingAssets} from "../assets";
+import {buildAssets} from "../assets";
 import {iosBuildAppIcon} from "./iosAppIcon";
 import {Project} from "../project";
 import {readFileSync} from "fs";
-import {spawnSync} from "child_process";
 
 interface AppStoreCredentials {
     team_id?: string;
@@ -119,6 +118,11 @@ export function export_ios(ctx: Project) {
 
     copyFolderRecursiveSync(path.join(ctx.path.templates, "template-" + platform_target), dest_path);
 
+    let googleServicesConfigDir = ctx.ios.googleServicesConfigDir;
+    if(googleServicesConfigDir) {
+        googleServicesConfigDir = path.resolve(ctx.path.CURRENT_PROJECT_DIR, googleServicesConfigDir);
+    }
+
     const base_path = "../..";
     const cwd = process.cwd();
     process.chdir(dest_path);
@@ -145,8 +149,8 @@ export function export_ios(ctx: Project) {
             modules: ctx.modules
         }));
 
-        if (ctx.ios.googleServicesConfigDir) {
-            copyFile(path.join(ctx.ios.googleServicesConfigDir, "GoogleService-Info.plist"), "GoogleService-Info.plist");
+        if (googleServicesConfigDir) {
+            copyFile(path.join(googleServicesConfigDir, "GoogleService-Info.plist"), "GoogleService-Info.plist");
         }
 
         /// PRE MOD PROJECT

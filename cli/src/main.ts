@@ -5,7 +5,6 @@ import {addExportBuildStep} from "./exporters";
 import {Project} from "./project";
 import {rebuild_ekc} from "./ekc";
 import {increaseProjectVersion} from "./version";
-import rimraf = require("rimraf");
 import {UtilityConfig} from "./utils";
 import * as fs from "fs";
 
@@ -24,7 +23,6 @@ if (process.argv.indexOf("rebuild-ekc") >= 0) {
 
 function defaultRun() {
     const project = new Project();
-
     project.path.dump();
 
     console.log("=== EK PROJECT ===");

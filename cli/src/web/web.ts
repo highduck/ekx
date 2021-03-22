@@ -97,7 +97,7 @@ async function buildProject(ctx, buildType) {
 export async function export_web(ctx: Project) {
     const timestamp = Date.now();
 
-    const output_dir = ctx.path.CURRENT_PROJECT_DIR + "/export/web";
+    const output_dir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export/web");
 
     function tpl(from, to) {
         const tpl_text = fs.readFileSync(path.join(ctx.path.templates, from), "utf8");
