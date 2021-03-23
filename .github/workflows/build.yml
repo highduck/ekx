@@ -4,7 +4,10 @@ on: [push, pull_request]
 
 jobs:
   build-cmake:
-    name: Build all CMake targets
+    # skip
+    if: false
+
+    name: Build CMake targets
     strategy:
       matrix:
         build-tyoe: [ Release ]
@@ -44,6 +47,9 @@ jobs:
           BUILD_TYPE: ${{ matrix.build-tyoe }}
 
   build-cli:
+    # skip
+    if: false
+
     name: Build CLI
     runs-on: ubuntu-latest
     steps:
