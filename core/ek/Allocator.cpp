@@ -50,8 +50,6 @@ typedef uint16_t offset_t;
 
 namespace ek {
 
-inline static const uint32_t MinAlign = EK_SIZEOF_U32(void**);
-
 inline static uint32_t upperPowerOfTwo(uint32_t v) {
     --v;
     v |= v >> 1;
@@ -112,7 +110,8 @@ void SystemAllocator::dealloc(void* ptr) {
 
 #ifdef EK_ALLOCATION_TRACKER
 
-struct AllocationTracker {
+class AllocationTracker {
+public:
     const char* label;
 
     size_t currentAllocations = 0;
@@ -242,6 +241,9 @@ AlignedAllocator::~AlignedAllocator() {
 
 void* AlignedAllocator::alloc(uint32_t size, uint32_t align) {
     void* ptr = nullptr;
+
+    // do we need min alignment or just 1?
+    // const uint32_t MinAlign = EK_SIZEOF_U32(void**);
 
     EK_ASSERT(align > 0);
 
