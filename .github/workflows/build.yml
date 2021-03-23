@@ -3,7 +3,8 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-cmake:
+    name: Build all CMake targets
     strategy:
       matrix:
         build-tyoe: [ Release ]
@@ -40,6 +41,19 @@ jobs:
           cmake . -B cmake-build-${BUILD_TYPE} -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
           cmake --build cmake-build-${{ matrix.build-tyoe }}
         env:
-          CI: true
-          SHOW_SPAWN_CMD: true
           BUILD_TYPE: ${{ matrix.build-tyoe }}
+
+  build-cli:
+    name: Build CLI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        working-directory: ./cli
+        run: yarn --frozen-lockfile
+
+      - name: Build library
+        working-directory: ./cli
+        run: yarn run build
