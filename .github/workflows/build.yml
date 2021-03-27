@@ -81,3 +81,35 @@ jobs:
 
       - name: Build
         run: yarn run ci:build
+
+  release:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: build-cmake
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v2
+
+      - name: Intall Dependencies
+        run: |
+          yarn --version
+          yarn --frozen-lockfile
+
+      - name: Build
+        run: yarn run ci:build
+
+      - name: Create Release Pull Request or Publish to NPM
+        id: changesets
+        uses: changesets/action@master
+        with:
+          # This expects you to have a script called release which does a build for your packages and calls changeset publish
+          publish: yarn run release
+          version: yarn run version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
