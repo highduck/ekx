@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "scripts": {
     "build:native": "node scripts/build.js",
-    "postinstall": "npm-cmake"
+    "postinstall": "npx npm-cmake"
   },
+  "files": [
+    "bin"
+  ],
   "publishConfig": {
     "access": "public"
   },

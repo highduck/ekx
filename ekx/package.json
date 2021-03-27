@@ -2,7 +2,7 @@
   "name": "@ekx/ekx",
   "version": "0.1.0",
   "scripts": {
-    "postinstall": "npm-cmake",
+    "postinstall": "npx npm-cmake",
     "build:native": "node build.js"
   },
   "publishConfig": {

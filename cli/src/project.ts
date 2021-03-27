@@ -3,9 +3,12 @@ import {VERSION_INDEX_MAJOR, VERSION_INDEX_MINOR, VERSION_INDEX_PATCH} from "./v
 import {resolveFrom} from "./utility/resolveFrom";
 
 class ProjectPath {
-    EKX_ROOT = process.env.EKX_ROOT ?? path.resolve(__dirname, '../..');
+    ekc = path.dirname(resolveFrom(__dirname, "@ekx/ekc/package.json"));
+    EKX_ROOT = path.dirname(resolveFrom(__dirname, "@ekx/ekx/package.json"));
     CURRENT_PROJECT_DIR = process.cwd();
     OUTPUT = path.join(process.cwd(), "build");
+
+    cli = path.resolve(__dirname, '..');
     templates = path.resolve(__dirname, '../templates');
 
     dump() {

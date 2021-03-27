@@ -19,9 +19,6 @@ for arg in sys.argv:
 
 proj_ios_name = sys.argv[1]
 application_id = sys.argv[2]
-sdk_root = sys.argv[3]
-
-print('EKX ROOT: ( ' + sdk_root + " )")
 
 def set_cpp_flags_for_files(project, files, flags):
     for file_path in files:

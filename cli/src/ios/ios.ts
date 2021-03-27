@@ -155,7 +155,7 @@ export function export_ios(ctx: Project) {
 
         /// PRE MOD PROJECT
         //xcode_patch(ctx, platform_proj_name);
-        execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id, ctx.path.EKX_ROOT]);
+        execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id]);
 
         console.info("Prepare PodFile");
         const pods = collect_xcode_props(ctx, "pods", "ios").map((v) => `pod '${v}'`).join("\n  ");
