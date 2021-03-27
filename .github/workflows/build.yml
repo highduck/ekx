@@ -15,9 +15,9 @@ jobs:
     defaults:
       run:
         shell: '${{ matrix.os.shell }} {0}'
-      env:
-        CC: clang
-        CXX: clang++
+    env:
+      CC: clang
+      CXX: clang++
 
     steps:
       - name: Checkout Repository
