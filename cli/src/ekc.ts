@@ -16,7 +16,7 @@ function getBinaryOS(): string {
 }
 
 function getBinaryPath(ctx:Project) {
-    return path.join(ctx.path.EKX_ROOT, "ekc/bin", getBinaryOS(), "ekc");
+    return path.join(ctx.path.ekc, "bin", getBinaryOS(), "ekc");
 }
 
 export function ekc(ctx: Project, ...args: string[]) {

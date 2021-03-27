@@ -13,7 +13,7 @@
   "workspaces": {
     "packages": [
       "ekx",
-      "ekx",
+      "ekc",
       "cli"
     ]
   }

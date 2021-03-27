@@ -1,6 +1,17 @@
 name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    # auto-update branches checked by created PR
+    branches-ignore:
+      - 'update/*'
+    paths-ignore:
+      - '.changeset/**'
+
+  # only test check PR to master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build-cmake:
@@ -11,7 +22,7 @@ jobs:
         os:
           - { os: ubuntu-latest,  shell: bash }
           - { os: macos-latest,   shell: bash }
-          - { os: windows-latest, shell: msys2 }
+          #- { os: windows-latest, shell: msys2 }
     defaults:
       run:
         shell: '${{ matrix.os.shell }} {0}'
@@ -52,6 +63,11 @@ jobs:
 
       - name: Build
         run: yarn run ci:build-native
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ekc ${{ runner.os }}
+          path: ekc/bin
 
   build-js:
     name: Build JS
