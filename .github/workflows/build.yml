@@ -1,6 +1,17 @@
 name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    # auto-update branches checked by created PR
+    branches-ignore:
+      - 'update/*'
+    paths-ignore:
+      - '.changeset/**'
+
+  # only test check PR to master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build-cmake:
@@ -52,6 +63,11 @@ jobs:
 
       - name: Build
         run: yarn run ci:build-native
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ekc ${{ runner.os }}
+          path: ekc/bin
 
   build-js:
     name: Build JS

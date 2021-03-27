@@ -5,6 +5,9 @@
     "build:native": "node scripts/build.js",
     "postinstall": "npx npm-cmake"
   },
+  "files": [
+    "bin"
+  ],
   "publishConfig": {
     "access": "public"
   },

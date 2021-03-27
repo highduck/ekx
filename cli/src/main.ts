@@ -45,9 +45,9 @@ function defaultRun() {
     project.importModule("@ekx/stb", project.path.EKX_ROOT);
     project.importModule("@ekx/sokol", project.path.EKX_ROOT);
     project.importModule("@ekx/tracy", project.path.EKX_ROOT);
-    project.includeProject(path.join(project.path.EKX_ROOT, "ek"));
-    project.includeProject(path.join(project.path.EKX_ROOT, "core"));
-    project.includeProject(path.join(project.path.EKX_ROOT, "scenex"));
+    project.importModule("@ekx/ekx/ek", project.path.EKX_ROOT);
+    project.importModule("@ekx/ekx/core", project.path.EKX_ROOT);
+    project.importModule("@ekx/ekx/scenex", project.path.EKX_ROOT);
     project.includeProject(process.cwd());
 
     project.runBuildSteps();
