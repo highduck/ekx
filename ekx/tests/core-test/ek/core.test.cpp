@@ -163,3 +163,42 @@ TEST(Hash, general) {
     }
     memory::shutdown();
 }
+
+TEST(Hash, stress) {
+    memory::initialize();
+    {
+        const size_t i0 = 0xFFFFFFFF00000000;
+        const size_t i1 = i0 + 10000000;
+        Hash<int> h{};
+        for(size_t i = i0; i < i1; ++i) {
+            EK_ASSERT(!h.has(i));
+            EK_ASSERT(h.get(i, 0) == 0);
+            h.set(i, 1);
+            EK_ASSERT(h.has(i));
+            EK_ASSERT(h.get(i, 0) == 1);
+        }
+        for(size_t i = i0; i < i1; ++i) {
+            EK_ASSERT(h.has(i));
+            EK_ASSERT(h.get(i, 0) == 1);
+            h.remove(i);
+            EK_ASSERT(!h.has(i));
+            EK_ASSERT(h.get(i, 0) == 0);
+        }
+        for(size_t i = i0; i < i1; ++i) {
+            EK_ASSERT(!h.has(i));
+            EK_ASSERT(h.get(i, 0) == 0);
+            h.set(i, 1);
+            EK_ASSERT(h.has(i));
+            EK_ASSERT(h.get(i, 0) == 1);
+        }
+        for(size_t i = i0; i < i1; ++i) {
+            EK_ASSERT(h.has(i));
+            EK_ASSERT(h.get(i, 0) == 1);
+            h.remove(i);
+            EK_ASSERT(!h.has(i));
+            EK_ASSERT(h.get(i, 0) == 0);
+        }
+        h.clear();
+    }
+    memory::shutdown();
+}

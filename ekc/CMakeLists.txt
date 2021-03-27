@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
+include(npm.cmake)
 project(ekc)
 
 add_executable(${PROJECT_NAME}
@@ -13,7 +14,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         )
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_compile_options(${PROJECT_NAME} PRIVATE -g)
+    target_compile_options(${PROJECT_NAME} PRIVATE -g -Os)
 endif ()
 
 target_link_libraries(${PROJECT_NAME}

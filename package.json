@@ -1,27 +1,20 @@
 {
-  "name": "@ekx/ekx",
-  "version": "0.1.0",
+  "name": "@ekx/ekx-monorepo",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
-    "postinstall": "npm-cmake"
+    "ci:build": "wsrun -m -e -t build",
+    "ci:build-native": "wsrun -m -e -t build:native"
   },
-  "dependencies": {
-    "@ekx/cairo": "0.0.4",
-    "@ekx/dev-fonts": "0.0.3",
-    "@ekx/freetype": "0.0.4",
-    "@ekx/google-benchmark": "0.0.3",
-    "@ekx/google-test": "0.0.4",
-    "@ekx/imgui": "0.0.5",
-    "@ekx/miniaudio": "0.0.3",
-    "@ekx/miniz": "0.0.3",
-    "npm-cmake": "0.0.2",
-    "@ekx/pugixml": "0.0.3",
-    "@ekx/sokol": "0.0.3",
-    "@ekx/sokol-shdc": "0.0.1",
-    "@ekx/stb": "0.0.3",
-    "@ekx/tracy": "0.0.5"
+  "devDependencies": {
+    "@changesets/cli": "^2.14.1",
+    "wsrun": "^5.2.4"
   },
   "workspaces": {
-    "packages": []
+    "packages": [
+      "ekx",
+      "ekx",
+      "cli"
+    ]
   }
 }

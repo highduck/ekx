@@ -2,9 +2,15 @@
   "name": "@ekx/ekc",
   "version": "0.1.0",
   "scripts": {
-    "build": "node scripts/build.js"
+    "build:native": "node scripts/build.js",
+    "postinstall": "npm-cmake"
   },
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
   "dependencies": {
+    "npm-cmake": "^0.0.4",
+    "@ekx/ekx": "0.1.0"
   }
 }
