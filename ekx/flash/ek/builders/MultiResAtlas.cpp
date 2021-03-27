@@ -15,9 +15,14 @@
 
 #define STBIW_ASSERT(e)   EK_ASSERT(e)
 
-#define STBIW_MALLOC(size)                           ::ek::imaging::allocator.alloc(size, sizeof(void*))
-#define STBIW_REALLOC_SIZED(ptr, oldSize, newSize)   ::ek::imaging::allocator.reallocate(ptr, oldSize, newSize, sizeof(void*))
-#define STBIW_FREE(ptr)                              ::ek::imaging::allocator.dealloc(ptr)
+// TODO: enable allocation tracking for multi-threaded tasks
+//#define STBIW_ALLOCATOR  ::ek::imaging::allocator
+// we are using multi-threading there!
+#define STBIW_ALLOCATOR  ::ek::memory::systemAllocator
+
+#define STBIW_MALLOC(size)                           STBIW_ALLOCATOR.alloc(size, sizeof(void**))
+#define STBIW_REALLOC_SIZED(ptr, oldSize, newSize)   STBIW_ALLOCATOR.reallocate(ptr, oldSize, newSize, sizeof(void**))
+#define STBIW_FREE(ptr)                              STBIW_ALLOCATOR.dealloc(ptr)
 
 #include <stb_image_write.h>
 

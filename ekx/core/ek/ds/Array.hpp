@@ -55,6 +55,7 @@ struct Array {
     }
 
     Array& operator=(Array&& m) noexcept {
+        EK_ASSERT_R2(_data != nullptr);
         _allocator.dealloc(_data);
         _allocator = m._allocator;
         _capacity = m._capacity;
@@ -98,6 +99,7 @@ struct Array {
     }
 
     void grow(uint32_t capacity) {
+        EK_ASSERT_R2(_data != nullptr);
         _capacity = capacity;
         T* newPtr = (T*) _allocator.alloc(sizeof(T) * capacity, alignof(T));
         constructMove(newPtr, _data, _size);
@@ -164,14 +166,20 @@ struct Array {
         if (newSize < _size) {
             reduceSize(newSize);
         } else {
+            if(newSize > _capacity) {
+                // TODO: optimize by nextPowerOfTwo
+                grow(newSize);
+            }
             // TODO: optimize pre-reserve if no capacity
             for (unsigned i = _size; i < newSize; ++i) {
-                emplace_back();
+                T* buff = _data + i;
+                new(buff)T();
             }
+            _size = newSize;
         }
     }
 
-    inline void erase(T* el) {
+    inline void eraseIt(T* el) {
         EK_ASSERT_R2(el != nullptr);
         EK_ASSERT_R2(el >= _data);
         erase(el - _data);
@@ -233,10 +241,12 @@ struct Array {
     }
 
     inline T& operator[](unsigned i) {
+        EK_ASSERT_R2(i < _size);
         return *(_data + i);
     }
 
     inline const T& operator[](unsigned i) const {
+        EK_ASSERT_R2(i < _size);
         return *(_data + i);
     }
 };

@@ -44,7 +44,6 @@ add_library(ekx::ekx ALIAS ekx)
 
 add_subdirectory(flash)
 add_subdirectory(dev-tools)
-add_subdirectory(ekc)
 
 if (EKX_BUILD_DEV_TOOLS)
     add_compile_definitions(EK_DEV_TOOLS)

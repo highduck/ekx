@@ -118,7 +118,8 @@ void Sound::load(const char* path) {
         if(source.empty()) {
             EK_WARN("load sound: empty buffer %s", dataSourceFilePath.c_str());
         }
-        ma_resource_manager_memory_buffer memoryBuffer;
+        ma_resource_manager_memory_buffer memoryBuffer{};
+        memoryBuffer.type = ma_resource_manager_data_buffer_encoding_encoded;
         memoryBuffer.encoded.pData = source.data();
         memoryBuffer.encoded.sizeInBytes = source.size();
         ma_result result = ma_resource_manager_register_data(
@@ -215,7 +216,8 @@ void Music::load(const char* path) {
 
         dataSourceFilePath = path;
 
-        ma_resource_manager_memory_buffer memoryBuffer;
+        ma_resource_manager_memory_buffer memoryBuffer{};
+        memoryBuffer.type = ma_resource_manager_data_buffer_encoding_encoded;
         memoryBuffer.encoded.pData = source.data();
         memoryBuffer.encoded.sizeInBytes = source.size();
         ma_result result = ma_resource_manager_register_data(

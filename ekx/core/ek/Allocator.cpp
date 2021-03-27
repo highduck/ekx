@@ -134,6 +134,7 @@ public:
     inline static Rec Invalid{0xFFFFFFFF, 0x0};
 
     Hash<Rec> _map{memory::systemAllocator};
+    Hash<Rec> _freedMap{memory::systemAllocator};
 #endif // EK_ALLOCATION_TRACKER_STATS
 
     explicit AllocationTracker(const char* label_) : label{label_} {
@@ -182,6 +183,8 @@ public:
         EK_ASSERT(_map.has(id));
         EK_ASSERT(_map.get(id, Invalid).sizeTotal == sizeTotal);
 
+        _freedMap.remove(id);
+
 #endif // EK_ALLOCATION_TRACKER_STATS
 
         EK_TRACE_ALLOC(ptr, sizeTotal, label);
@@ -192,22 +195,26 @@ public:
         if (ptr == nullptr) {
             return;
         }
-        EK_ASSERT_R2(currentAllocations > 0);
-
-        --currentAllocations;
-
 #ifdef EK_ALLOCATION_TRACKER_STATS
         const auto id = (uint64_t) ptr;
+        // double free
+        EK_ASSERT(!_freedMap.has(id));
         /// address should not allocated before
+//        if(!_map.has(id)) {
         EK_ASSERT(_map.has(id));
+//        }
         const auto& rec = _map.get(id, Invalid);
         currentSizeRequested -= rec.sizeUsed;
         currentSizeTotal -= rec.sizeTotal;
         _map.remove(id);
+        _freedMap.set(id, rec);
         /// something wrong with map implementation
         EK_ASSERT_R2(!_map.has(id));
 
 #endif // EK_ALLOCATION_TRACKER_STATS
+
+        EK_ASSERT_R2(currentAllocations > 0);
+        --currentAllocations;
 
         EK_TRACE_FREE(ptr, label);
     }
@@ -382,7 +389,7 @@ void copy(void* dest, const void* src, uint32_t size) {
     EK_ASSERT_R2(src != nullptr);
     char* d = static_cast<char*>(dest);
     const char* s = static_cast<const char*>(src);
-    for (size_t i = 0; i < size; ++i) {
+    for (uint32_t i = 0; i < size; ++i) {
         d[i] = s[i];
     }
 }

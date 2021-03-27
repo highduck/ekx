@@ -1,0 +1,31 @@
+{
+  "name": "@ekx/ekx",
+  "version": "0.1.0",
+  "scripts": {
+    "postinstall": "npm-cmake",
+    "build:native": "node build.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@ekx/cairo": "0.0.5",
+    "@ekx/dev-fonts": "0.0.3",
+    "@ekx/freetype": "0.0.6",
+    "@ekx/google-benchmark": "0.0.4",
+    "@ekx/google-test": "0.0.5",
+    "@ekx/imgui": "0.0.8",
+    "@ekx/miniaudio": "0.0.4",
+    "@ekx/miniz": "0.0.3",
+    "@ekx/pugixml": "0.0.3",
+    "@ekx/sokol": "0.0.4",
+    "@ekx/sokol-shdc": "0.0.2",
+    "@ekx/stb": "0.0.3",
+    "@ekx/tracy": "0.0.7",
+    "npm-cmake": "0.0.4"
+  },
+  "workspaces": {
+    "packages": []
+  }
+}

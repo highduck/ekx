@@ -17,7 +17,7 @@ add_executable(${PROJECT_NAME}
 add_subdirectory(ecxx)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
-target_compile_options(${PROJECT_NAME} PRIVATE -fno-exceptions)
+target_compile_options(${PROJECT_NAME} PRIVATE -fno-exceptions -Os)
 
 target_link_libraries(${PROJECT_NAME} gtest gtest_main ek-core)
 

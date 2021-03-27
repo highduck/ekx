@@ -18,8 +18,7 @@ for (const buildType of buildTypes) {
 for (const buildType of buildTypes) {
     console.info("Build", buildType);
     spawnSync("cmake", [
-        "--build", `build/${buildType.toLowerCase()}`,
-        "--target", "ekc"
+        "--build", `build/${buildType.toLowerCase()}`
     ], {
         stdio: 'inherit'
     });

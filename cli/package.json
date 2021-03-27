@@ -11,6 +11,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "glob": "^7.1.6",
     "mustache": "^4.1.0",

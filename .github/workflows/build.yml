@@ -4,26 +4,37 @@ on: [push, pull_request]
 
 jobs:
   build-cmake:
-    # skip
-    if: false
-
     name: Build CMake targets
+    runs-on: ${{ matrix.os.os }}
     strategy:
       matrix:
-        build-tyoe: [ Release ]
-        os: [ubuntu-latest, macos-latest]
-
-    runs-on: ${{ matrix.os }}
+        os:
+          - { os: ubuntu-latest,  shell: bash }
+          - { os: macos-latest,   shell: bash }
+          - { os: windows-latest, shell: msys2 }
+    defaults:
+      run:
+        shell: '${{ matrix.os.shell }} {0}'
+      env:
+        CC: clang
+        CXX: clang++
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+
+      - uses: msys2/setup-msys2@v2
+        if: runner.os == 'Windows'
+        with:
+          path-type: inherit
+          release: false
 
       - name: Setup OpenGL on Ubuntu
         if: runner.os == 'Linux'
         run: |
           sudo apt-get install xorg-dev
           sudo apt-get install freeglut3-dev
+          sudo apt-get install libopengl0
 
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
@@ -39,27 +50,18 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile
 
-      - name: Build ${{ matrix.build-tyoe }}
-        run: |
-          cmake . -B cmake-build-${BUILD_TYPE} -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-          cmake --build cmake-build-${{ matrix.build-tyoe }}
-        env:
-          BUILD_TYPE: ${{ matrix.build-tyoe }}
+      - name: Build
+        run: yarn run ci:build-native
 
-  build-cli:
-    # skip
-    if: false
-
-    name: Build CLI
+  build-js:
+    name: Build JS
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
       - name: Install dependencies
-        working-directory: ./cli
         run: yarn --frozen-lockfile
 
-      - name: Build library
-        working-directory: ./cli
-        run: yarn run build
+      - name: Build
+        run: yarn run ci:build
