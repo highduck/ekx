@@ -239,10 +239,10 @@
   resolved "https://registry.yarnpkg.com/@ekx/google-test/-/google-test-0.0.5.tgz#fd0ae62a912b11d7396949173fd0c674d8467b93"
   integrity sha512-ojBHgjncJwMJDjWpo1YwzZ9ezEYpZ64WAvV/BxosoZUczPUuf/5hqfc47hcc9gJ9kigldX7oOUE9HRjB8fxHYQ==
 
-"@ekx/imgui@0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@ekx/imgui/-/imgui-0.0.8.tgz#200444a653bde19977186abbe4aee6e4246682c4"
-  integrity sha512-qoui+dnNGNvBCCK9Nw6CyGzvelV1iTa3rgCoqwYfdQ9PkgOb7wBfISE1OyVXlmpSjqRj4yyU4hmEB+3Vi8wLtg==
+"@ekx/imgui@0.0.9":
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/@ekx/imgui/-/imgui-0.0.9.tgz#19bf1de3c4840dae87c8afdb762c76fd3d0dc315"
+  integrity sha512-u3LF8ihLEac0C4t0B+3Xu7L3wduKjxb/vXSsX7Ho5P/MRCBlAHhUlLfVNldyisIg4H/j+IrlNgV8zDpz2xpwsQ==
   dependencies:
     "@ekx/freetype" "0.0.6"
     "@ekx/stb" "0.0.3"
@@ -267,10 +267,10 @@
   resolved "https://registry.yarnpkg.com/@ekx/sokol-shdc/-/sokol-shdc-0.0.2.tgz#3c930b6d14ff3db0d6e457d87cec7a609b28f3ee"
   integrity sha512-4fAdwS61j3y84LGk+2eGZAPLK7BQ38JDbmywJCx8s8YsHP0yiR3ssli9Psf9RliMKc5/MNNqhizW00XcB8gkag==
 
-"@ekx/sokol@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@ekx/sokol/-/sokol-0.0.4.tgz#50aa6d0bc0b4e2f05f45d7ba9a6cff9a6f2fa758"
-  integrity sha512-KcQlAhb5L70eW6c/U1GCvOTxnEAwkNnAkR7tbJjTrglKcdjoMPvapUTmYIL8L5ye0E6G9ZTWYCBZr9ZSvYQKSw==
+"@ekx/sokol@0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@ekx/sokol/-/sokol-0.0.5.tgz#1556f5281e14ae6289aecaea29adab7b56b6a38f"
+  integrity sha512-29RAxQxUZHYkveREltil+B4wGMsPzwTzRn44VY8+34ONwmeLR7WQxQtuxZpmmYZv5YTqPr6j4ELSePkbe7KzBg==
 
 "@ekx/stb@0.0.3":
   version "0.0.3"
@@ -2018,7 +2018,7 @@ normalize-url@2.0.1:
     query-string "^5.0.1"
     sort-keys "^2.0.0"
 
-npm-cmake@0.0.4:
+npm-cmake@0.0.4, npm-cmake@^0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/npm-cmake/-/npm-cmake-0.0.4.tgz#7fb043570fca776b5bbf3825c691aeb1d1e96393"
   integrity sha512-mwrxWDubUgtd4y8DBE/DTv3C/ALNeUqcfpTHGKG881uSkq46woxyrql5xWrFWwd6qTuZlOt4dL1vBi//o4e26Q==
