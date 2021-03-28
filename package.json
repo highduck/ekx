@@ -5,6 +5,7 @@
   "scripts": {
     "release": "changeset publish",
     "version": "changeset version && yarn run update-lock",
+    "update-lock": "yarn && git add yarn.lock",
     "ci:build": "wsrun -m -e -t build",
     "ci:build-native": "wsrun -m -e -t build:native"
   },
