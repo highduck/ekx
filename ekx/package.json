@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "scripts": {
     "postinstall": "npx npm-cmake",
-    "build:native": "node build.js"
+    "build:native": "node build.js",
+    "shader:draw2d": "sokol-shdc -i ek/src/ek/draw2d/draw2d.glsl -o ek/src/ek/draw2d/draw2d_shader.h -l glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos",
+    "shader:render3d": "sokol-shdc -i scenex/ek/scenex/3d/render3d.glsl -o scenex/ek/scenex/3d/render3d_shader.h -l glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos"
   },
   "publishConfig": {
     "access": "public"
@@ -20,9 +22,11 @@
     "@ekx/miniz": "0.0.3",
     "@ekx/pugixml": "0.0.3",
     "@ekx/sokol": "0.0.5",
-    "@ekx/sokol-shdc": "0.0.2",
     "@ekx/stb": "0.0.3",
     "@ekx/tracy": "0.0.7",
     "npm-cmake": "0.0.4"
+  },
+  "devDependencies": {
+    "@ekx/sokol-shdc": "0.0.2"
   }
 }

@@ -29,36 +29,30 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 public class GameServices {
 
     private static final String TAG = "GameServices";
-    //    private static GoogleApiClient _googleApiClient;
     private static Activity _activity;
 
-    //    private static GPSGamesListener _listener;
-    // Request code we use when invoking other Activities to complete the
-    // sign-in flow.
+    // Request code we use when invoking other Activities to complete the sign-in flow
     final static int RC_RESOLVE = 9001;
     final static int RC_SIGN_IN = 9001;
     final static int RC_LEADERBOARD_UI = 9002;
     final static int RC_ACHIEVEMENTS_UI = 9003;
 
-
+    private static GoogleSignInOptions _signInOptions;
     private static GoogleSignInClient _googleSignInClient;
     private static AchievementsClient _achievements;
     private static LeaderboardsClient _leaderboards;
     private static View _layout;
     private static boolean _isConnecting = false;
     private static boolean _isConnected = false;
-//    private static boolean _silentSignInFailed = false;
 
     @Keep
     public static void init() {
         Log.d(TAG, "register");
         _activity = EkActivity.getInstance();
         _layout = EkActivity.getInstance().mainLayout;
-        _googleSignInClient = GoogleSignIn.getClient(_activity,
-                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
-                        // OAuth 2.0 API client id
-//                        .requestIdToken(_activity.getString(R.string.server_client_id))
-                        .build());
+
+        _signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build();
+        _googleSignInClient = GoogleSignIn.getClient(_activity, _signInOptions);
         silentSignIn();
     }
 
@@ -78,17 +72,22 @@ public class GameServices {
         }
         _isConnecting = true;
         _isConnected = false;
-        _googleSignInClient.silentSignIn().addOnCompleteListener(_activity,
-                task -> {
+        EkActivity.runMainThread(() -> {
+            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(_activity);
+            if (GoogleSignIn.hasPermissions(account, _signInOptions.getScopeArray())) {
+                tryConnectWithAccount(account);
+            } else {
+                _googleSignInClient.silentSignIn().addOnCompleteListener(_activity, task -> {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "signInSilently(): success");
                         tryConnectWithAccount(task.getResult());
                     } else {
                         Log.d(TAG, "signInSilently(): failure", task.getException());
                         onDisconnected();
-//                            _silentSignInFailed = true;
                     }
                 });
+            }
+        });
     }
 
     @Keep
@@ -111,33 +110,12 @@ public class GameServices {
 
     @Keep
     public static void leader_board_submit(final String leaderboard_id, final int score) {
-        EkActivity.runMainThread(
-                () -> {
-                    final Bundle bundle = new Bundle();
-                    bundle.putString(FirebaseAnalytics.Param.SCORE, String.valueOf(score));
-                    Analytics.logEvent("post_score", bundle);
-
-                    if (_leaderboards != null) {
-                        Log.d(TAG, "submit leaderboard: " + leaderboard_id + " " + score);
-                        // https://stackoverflow.com/questions/39284039/google-play-games-leaderboard-closes-automatically?rq=1
-                        //_leaderboards.submitScore(leaderboard_id, score);
-
-                        _leaderboards.submitScoreImmediate(leaderboard_id, score).addOnCompleteListener(t -> {
-                            if (t.isSuccessful()) {
-                                Log.d(TAG, "leaderboard_submit successful!");
-                            } else {
-                                if (t.getException() != null) {
-                                    Log.d(TAG, "leaderboard_submit error: " + t.getException().getMessage());
-                                } else {
-                                    Log.d(TAG, "leaderboard_submit unknown error");
-                                }
-                            }
-                        });
-                    } else {
-                        Log.d(TAG, "[leaderboard_submit] not ready");
-                    }
-                }
-        );
+        if (_leaderboards != null) {
+            Log.d(TAG, "submit leaderboard: " + leaderboard_id + " " + score);
+            _leaderboards.submitScore(leaderboard_id, score);
+        } else {
+            Log.d(TAG, "[leaderboard_submit] not ready");
+        }
     }
 
     @Keep
