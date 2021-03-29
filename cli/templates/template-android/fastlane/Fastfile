@@ -8,6 +8,10 @@ platform :android do
     gradle(task: "clean")
     gradle(task: "bundle", build_type: "Release")
     upload_to_play_store(track: 'beta')
-    # slack(message: 'Successfully distributed a new beta build')
+  end
+  lane :internal do
+    gradle(task: "clean")
+    gradle(task: "bundle", build_type: "Release")
+    upload_to_play_store(track: 'internal')
   end
 end

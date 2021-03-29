@@ -1,5 +1,5 @@
 import * as path from "path";
-import {VERSION_INDEX_MAJOR, VERSION_INDEX_MINOR, VERSION_INDEX_PATCH} from "./version";
+import {VERSION_INDEX_CODE, VERSION_INDEX_MAJOR, VERSION_INDEX_MINOR, VERSION_INDEX_PATCH} from "./version";
 import {resolveFrom} from "./utility/resolveFrom";
 
 class ProjectPath {
@@ -67,13 +67,22 @@ export class Project {
         // open export project
         clean?: boolean,
         openProject?: boolean,
-        deployBeta?: boolean
-        increaseVersion?: number
+        deployBeta?: boolean,
+        deployInternal?: boolean,
+        increaseVersion?: number,
     } = {};
 
     name: string;
     version_name: string;
     version_code: string;
+    title?: string;
+    desc?: string;
+    binary_name?: string;
+    pwa_url?: string; // empty string by defualt
+    cmake_target?: string;
+    build_dir?: string; // build
+    orientation: "landscape" | "portrait";
+
     build_steps: (() => void)[] = [];
     projects: { [name: string]: RegisteredProject } = {};
     modules: ModuleDef[] = [];
@@ -122,7 +131,8 @@ export class Project {
     } = {};
 
     web: {
-        firebaseToken?: string
+        firebaseToken?: string,
+        applications?: { platform: string, url: string, id?: string }[]
     } = {};
 
     html = {};
@@ -168,27 +178,29 @@ export class Project {
     }
 
     constructor() {
-        if(this.args.indexOf("clean") >= 0) {
+        if (this.args.indexOf("clean") >= 0) {
             this.options.clean = true;
         }
 
-        if(this.args.indexOf("-o") >= 0) {
+        if (this.args.indexOf("-o") >= 0) {
             this.options.openProject = true;
-        }
-        else if(this.args.indexOf("do-not-open") < 0) {
+        } else if (this.args.indexOf("do-not-open") < 0) {
             this.options.openProject = false;
         }
 
-        if(this.args.indexOf("patch") >= 0) {
-            this.options.increaseVersion = VERSION_INDEX_PATCH;
-        }
-        else if(this.args.indexOf("minor") >= 0) {
-            this.options.increaseVersion = VERSION_INDEX_MINOR;
-        }
-        else if(this.args.indexOf("major") >= 0) {
-            this.options.increaseVersion = VERSION_INDEX_MAJOR;
+        if (this.args.indexOf("--bump") >= 0) {
+            this.options.increaseVersion = VERSION_INDEX_CODE;
+
+            if (this.args.indexOf("--bump patch") >= 0) {
+                this.options.increaseVersion = VERSION_INDEX_PATCH;
+            } else if (this.args.indexOf("--bump minor") >= 0) {
+                this.options.increaseVersion = VERSION_INDEX_MINOR;
+            } else if (this.args.indexOf("--bump major") >= 0) {
+                this.options.increaseVersion = VERSION_INDEX_MAJOR;
+            }
         }
 
         this.options.deployBeta = this.args.indexOf("beta") >= 0;
+        this.options.deployInternal = this.args.indexOf("internal") >= 0;
     }
 }

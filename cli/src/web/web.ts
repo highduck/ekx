@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import {copyFolderRecursiveSync, executeAsync, isDir, isFile, substituteAll, withPath} from "../utils";
+import {copyFolderRecursiveSync, executeAsync, isDir, isFile, makeDirs, substituteAll, withPath} from "../utils";
 import {buildAssetsAsync} from "../assets";
 import * as Mustache from 'mustache';
 import {webBuildAppIconAsync} from "./webAppIcon";
@@ -98,6 +98,7 @@ export async function export_web(ctx: Project) {
     const timestamp = Date.now();
 
     const output_dir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export/web");
+    makeDirs(output_dir);
 
     function tpl(from, to) {
         const tpl_text = fs.readFileSync(path.join(ctx.path.templates, from), "utf8");
@@ -114,11 +115,21 @@ export async function export_web(ctx: Project) {
     const buildType = ctx.args.indexOf("--debug") >= 0 ? "Debug" : "Release";
     const buildTask = buildProject(ctx, buildType);
     const assetsTask = buildAssetsAsync(ctx);
-    const iconsTask = webBuildAppIconAsync(ctx, path.join(output_dir, "icons"));
+
+    const webManifest = JSON.parse(fs.readFileSync(path.join(ctx.path.templates, "web/manifest.json"), "utf8"));
+    webManifest.name = ctx.title;
+    webManifest.short_name = ctx.name;
+    webManifest.description = ctx.desc;
+    webManifest.start_url = (ctx.pwa_url ?? "") + "/index.html";
+    if(ctx.web?.applications != null) {
+        webManifest.related_applications = ctx.web?.applications;
+    }
+
+    fs.writeFileSync(path.join(output_dir, "manifest.json"), JSON.stringify(webManifest), "utf8");
+    const iconsTask = webBuildAppIconAsync(ctx, webManifest.icons, output_dir);
 
     tpl("web/index.html.mustache", "index.html");
-    tpl("web/manifest.json.mustache", "manifest.webmanifest");
-    tpl("web/sw.js.mustache", "sw.js");
+    tpl("web/sw.js", "sw.js");
     file("web/pwacompat.min.js", "pwacompat.min.js");
 
     try {

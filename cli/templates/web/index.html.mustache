@@ -2,10 +2,26 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style>
+        link[rel="manifest"] {
+            --pwacompat-splash-font: bold 24px Cursive;
+        }
+
+        body, html {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color:{{{html.background_color}}};
+        }
+    </style>
     <title>{{title}}</title>
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1,user-scalable=no">
     <link rel="icon" type="image/png" href="icons/icon192.png" sizes="192x192"/>
-    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="manifest" href="manifest.json">
 
     {{#html.google_analytics_property_id}}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{{html.google_analytics_property_id}}}"></script>
@@ -32,8 +48,6 @@
     };
     </script>
     {{/html.google_analytics_property_id}}
-
-    <script async src="pwacompat.min.js"></script>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="Description" content="{{desc}}">
@@ -41,19 +55,7 @@
     <meta property="og:description" content="{{desc}}">
     <meta property="og:image" content="{{html.image_url}}">
     <meta property="og:url" content="{{html.url}}">
-
-    <style>
-        body, html {
-            height: 100%;
-            overflow: hidden;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color:{{{html.background_color}}};
-        }
-    </style>
+    <script async src="pwacompat.min.js"></script>
 </head>
 <body onload="init()">
 
@@ -121,16 +123,23 @@
     }
 
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('{{{pwa_url}}}/sw.js?v={{{version_code}}}', {
+        navigator.serviceWorker.register('{{{pwa_url}}}/sw.js', {
             scope: '{{{pwa_url}}}/'
-        }).then(function (registration) {
-            console.log('Service Worker Registered');
-        }).catch(function (e) {
-            console.log('Service Worker Error: ' + e);
+        }).then(function(reg) {
+            if(reg.installing) {
+                console.log('Service worker installing');
+            } else if(reg.waiting) {
+                console.log('Service worker installed');
+            } else if(reg.active) {
+                console.log('Service worker active');
+            }
+        }).catch(function(e) {
+            // registration failed
+            console.log('Registration failed with', e);
         });
-        navigator.serviceWorker.ready.then(function (registration) {
-            console.log('Service Worker Ready');
-        });
+        //navigator.serviceWorker.ready.then(function (registration) {
+        //    console.log('Service Worker Ready');
+        //});
     }
 </script>
 </body>
