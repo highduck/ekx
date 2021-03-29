@@ -238,10 +238,7 @@ export function export_android(ctx: Project) {
         open_android_project(dest_path);
     }
 
-    if(ctx.options.deployBeta) {
-        execute("fastlane", ["beta"], dest_path);
-    }
-    else if(ctx.options.deployInternal) {
-        execute("fastlane", ["internal"], dest_path);
+    if(ctx.options.deploy != null) {
+        execute("fastlane", [ctx.options.deploy], dest_path);
     }
 }

@@ -191,8 +191,8 @@ export function export_ios(ctx: Project) {
         // ]);
     }
 
-    if (ctx.options.deployBeta) {
-        execute("fastlane", ["beta"], dest_path, {
+    if (ctx.options.deploy != null) {
+        execute("fastlane", [ctx.options.deploy], dest_path, {
             FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: credentials.application_specific_password
         });
     }
