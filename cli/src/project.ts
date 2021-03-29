@@ -67,8 +67,7 @@ export class Project {
         // open export project
         clean?: boolean,
         openProject?: boolean,
-        deployBeta?: boolean,
-        deployInternal?: boolean,
+        deploy?: string,
         increaseVersion?: number,
     } = {};
 
@@ -188,19 +187,33 @@ export class Project {
             this.options.openProject = false;
         }
 
-        if (this.args.indexOf("--bump") >= 0) {
-            this.options.increaseVersion = VERSION_INDEX_CODE;
-
-            if (this.args.indexOf("--bump patch") >= 0) {
-                this.options.increaseVersion = VERSION_INDEX_PATCH;
-            } else if (this.args.indexOf("--bump minor") >= 0) {
-                this.options.increaseVersion = VERSION_INDEX_MINOR;
-            } else if (this.args.indexOf("--bump major") >= 0) {
-                this.options.increaseVersion = VERSION_INDEX_MAJOR;
+        {
+            const i = this.args.indexOf("--bump");
+            if (i >= 0) {
+                this.options.increaseVersion = VERSION_INDEX_CODE;
+                if (i + 1 < this.args.length) {
+                    const second = this.args[i + 1];
+                    if (second == "patch") {
+                        this.options.increaseVersion = VERSION_INDEX_PATCH;
+                    } else if (second == "minor") {
+                        this.options.increaseVersion = VERSION_INDEX_MINOR;
+                    } else if (second == "major") {
+                        this.options.increaseVersion = VERSION_INDEX_MAJOR;
+                    }
+                }
             }
         }
-
-        this.options.deployBeta = this.args.indexOf("beta") >= 0;
-        this.options.deployInternal = this.args.indexOf("internal") >= 0;
+        {
+            const i = this.args.indexOf("--deploy");
+            if (i >= 0) {
+                this.options.deploy = "internal";
+                if (i + 1 < this.args.length) {
+                    const second = this.args[i + 1];
+                    if (second === "beta" || second === "alpha" || second === "production") {
+                        this.options.deploy = second;
+                    }
+                }
+            }
+        }
     }
 }

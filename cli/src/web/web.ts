@@ -164,7 +164,8 @@ export async function export_web(ctx: Project) {
     console.info("Web export completed");
     console.info("Time:", (Date.now() - timestamp) / 1000, "sec");
 
-    if (ctx.options.deployBeta) {
+    if (ctx.options.deploy != null) {
+        // always deploy just to the default firebase hosting
         console.info("Publish Web beta to Firebase host");
         const args = [];
         let token = process.env.FIREBASE_TOKEN;
