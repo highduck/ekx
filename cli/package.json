@@ -27,8 +27,8 @@
     "rimraf": "^3.0.2",
     "xcode": "^3.0.1",
     "xmldoc": "^1.1.2",
-    "@ekx/ekx": "0.1.0",
-    "@ekx/ekc": "0.1.0"
+    "@ekx/ekx": "^0.1.0",
+    "@ekx/ekc": "^0.1.0"
   },
   "devDependencies": {
     "@types/glob": "^7.1.3",
