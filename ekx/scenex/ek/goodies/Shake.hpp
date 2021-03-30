@@ -12,7 +12,7 @@ struct Shake {
     TimeLayer timer;
 
     static void updateAll();
-    static void add(ecs::entity e, float time = 2.0f, float strength = 16.0f);
+    static void add(ecs::EntityApi e, float time = 2.0f, float strength = 16.0f);
 };
 
 }

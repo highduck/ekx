@@ -33,15 +33,15 @@ class AppBox {
 public:
     explicit AppBox(AppBoxConfig info);
 
-    void initDefaultControls(ecs::entity e);
+    void initDefaultControls(ecs::EntityApi e);
 
     void shareWithAppLink(const std::string& text);
 
     void rateUs();
 
-    void initDownloadAppButtons(ecs::entity e);
+    void initDownloadAppButtons(ecs::EntityApi e);
 
-    void initLanguageButton(ecs::entity e);
+    void initLanguageButton(ecs::EntityApi e);
 
     static void showAchievements();
 

@@ -2,40 +2,66 @@
 
 #include <cstddef>
 #include <cstdint>
-#include "world.hpp"
 
 namespace ecs {
 
+class World;
+
+extern World the_world;
+
+template<typename ...Component>
+class ViewForward;
+
+template<typename ...Component>
+class ViewBackward;
+
+struct EntityApi;
+
+struct EntityRef;
+
+/** Static configuration definition **/
+inline constexpr uint32_t COMPONENTS_MAX_COUNT = 128;
+inline constexpr uint32_t ENTITIES_MAX_COUNT = 0x10000;
+inline constexpr uint32_t INDEX_BITS = 16;
+inline constexpr uint32_t INDEX_MASK = 0xFFFF;
+inline constexpr uint32_t GENERATION_MASK = 0xFF;
+
+typedef uint16_t EntityIndex;
+typedef uint8_t EntityGeneration;
+//typedef uint8_t WorldIndex;
+typedef uint32_t EntityPassport; // Passport is compressed unique ID with information for: world index, entity index, entity generation
+
+typedef uint16_t ComponentHandle;
+typedef uint16_t ComponentTypeId;
+
 #pragma pack(1)
-class entity final {
-public:
 
-public:
+struct EntityApi final {
 
-    inline constexpr entity() noexcept: index{0} {}
+    inline constexpr EntityApi() noexcept: index{0} {}
 
-    inline constexpr entity(std::nullptr_t) noexcept: index{0} {}
+    inline constexpr EntityApi(std::nullptr_t) noexcept: index{0} {}
 
-    inline constexpr explicit entity(Entity entity_index) noexcept: index{entity_index} {}
+    inline constexpr explicit EntityApi(EntityIndex entity_index) noexcept: index{entity_index} {}
 
-    inline constexpr entity(entity&& e) noexcept = default;
+    inline constexpr EntityApi(EntityApi&& e) noexcept = default;
 
-    inline constexpr entity(const entity& e) noexcept = default;
+    inline constexpr EntityApi(const EntityApi& e) noexcept = default;
 
-    inline constexpr entity& operator=(entity&& e) noexcept = default;
+    inline constexpr EntityApi& operator=(EntityApi&& e) noexcept = default;
 
-    inline constexpr entity& operator=(const entity& e) noexcept = default;
+    inline constexpr EntityApi& operator=(const EntityApi& e) noexcept = default;
 
-    inline constexpr entity& operator=(std::nullptr_t) noexcept {
+    inline constexpr EntityApi& operator=(std::nullptr_t) noexcept {
         index = 0u;
         return *this;
     }
 
-    inline bool operator==(entity other) const {
+    inline bool operator==(EntityApi other) const {
         return index == other.index;
     }
 
-    inline bool operator!=(entity other) const {
+    inline bool operator!=(EntityApi other) const {
         return index != other.index;
     }
 
@@ -82,26 +108,23 @@ public:
     template<typename Component>
     inline bool try_remove();
 
-    Entity index;
+    EntityIndex index;
 };
 
-
-class EntityRef final {
-public:
-
+struct EntityRef final {
     inline constexpr EntityRef() noexcept: passport{0u} {
     }
 
     inline constexpr EntityRef(std::nullptr_t) noexcept: passport{0} {
     }
 
-    inline constexpr explicit EntityRef(Passport passport_) noexcept: passport{passport_} {
+    inline constexpr explicit EntityRef(EntityPassport passport_) noexcept: passport{passport_} {
     }
 
-    inline explicit EntityRef(entity ent) noexcept;
+    inline explicit EntityRef(EntityApi ent) noexcept;
 
-    inline constexpr EntityRef(Entity entity, Generation generation) noexcept:
-            passport{static_cast<Passport>(entity) | (generation << INDEX_BITS)} {
+    inline constexpr EntityRef(EntityIndex entity, EntityGeneration generation) noexcept:
+            passport{static_cast<EntityPassport>(entity) | (generation << INDEX_BITS)} {
     }
 
     inline constexpr EntityRef(EntityRef&& e) noexcept = default;
@@ -119,23 +142,24 @@ public:
 
     // TODO: rename version to Generation,
     // TODO: rename index to entity_index,
-    [[nodiscard]] inline constexpr Generation version() const noexcept {
+    [[nodiscard]]
+    inline constexpr EntityGeneration version() const noexcept {
         return (passport >> INDEX_BITS) & GENERATION_MASK;
     }
 
-    inline constexpr void version(Generation generation) noexcept {
+    inline constexpr void version(EntityGeneration generation) noexcept {
         passport = (passport & INDEX_MASK) | (generation << INDEX_BITS);
     }
 
-    [[nodiscard]] inline constexpr Entity index() const noexcept {
+    [[nodiscard]] inline constexpr EntityIndex index() const noexcept {
         return passport & INDEX_MASK;
     }
 
-    [[nodiscard]] inline constexpr entity ent() const noexcept {
-        return entity{static_cast<Entity>(passport & INDEX_MASK)};
+    [[nodiscard]] inline constexpr EntityApi ent() const noexcept {
+        return EntityApi{static_cast<EntityIndex>(passport & INDEX_MASK)};
     }
 
-    inline constexpr void index(Entity entity) noexcept {
+    inline constexpr void index(EntityIndex entity) noexcept {
         passport = (passport & ~INDEX_MASK) | entity;
     }
 
@@ -163,13 +187,18 @@ public:
     inline bool valid() const;
 
     [[nodiscard]]
-    inline entity get() const {
-        EK_ASSERT(the_world.check(passport));
-        return entity{index()};
-    }
+    inline EntityApi get() const;
 
-    Passport passport;
+    EntityPassport passport;
 };
+
 #pragma pack()
+
+// compat
+
+using world = World;
+
+using entity = EntityApi;
+
 
 }

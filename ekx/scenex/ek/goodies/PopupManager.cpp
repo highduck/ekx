@@ -20,23 +20,23 @@ const float tweenDelay = 0.05f;
 const float tweenDuration = 0.3f;
 const float animationVertDistance = 200.0f;
 
-entity PopupManager::Main{};
+EntityApi PopupManager::Main{};
 
-void on_popup_pause(entity e) {
+void on_popup_pause(EntityApi e) {
     setTouchable(e, false);
 }
 
-void on_popup_resume(entity e) {
+void on_popup_resume(EntityApi e) {
     setTouchable(e, true);
 }
 
-void on_popup_opening(entity e) {
+void on_popup_opening(EntityApi e) {
     e.get<Transform2D>().setScale(0);
     e.get<Node>().setTouchable(false);
     e.get<Node>().setVisible(true);
 }
 
-void on_popup_open_animation(float t, entity e) {
+void on_popup_open_animation(float t, EntityApi e) {
     t = math::clamp(t, 0.0f, 1.0f);
     float scale = easing::BACK_OUT.calculate(t);
     float fly = easing::P3_OUT.calculate(t);
@@ -45,15 +45,15 @@ void on_popup_open_animation(float t, entity e) {
     transform.setY(animationVertDistance * (1.0f - fly));
 }
 
-void on_popup_opened(entity e) {
+void on_popup_opened(EntityApi e) {
     setTouchable(e, true);
 }
 
-void on_popup_closing(entity e) {
+void on_popup_closing(EntityApi e) {
     setTouchable(e, false);
 }
 
-void on_popup_closed(entity e) {
+void on_popup_closed(EntityApi e) {
     auto pm = PopupManager::Main;
     auto& state = pm.get<PopupManager>();
 
@@ -74,7 +74,7 @@ void on_popup_closed(entity e) {
     destroyDelay(e);
 }
 
-void on_popup_close_animation(float t, entity e) {
+void on_popup_close_animation(float t, EntityApi e) {
     t = math::clamp(1.0f - t, 0.0f, 1.0f);
     float scale = easing::BACK_OUT.calculate(t);
     float fly = easing::P3_OUT.calculate(t);
@@ -83,7 +83,7 @@ void on_popup_close_animation(float t, entity e) {
     transform.setY(animationVertDistance * (fly - 1.0f));
 }
 
-void init_basic_popup(entity e) {
+void init_basic_popup(EntityApi e) {
     auto node_close = find(e, "btn_close");
     if (node_close && node_close.has<Button>()) {
         auto& btn_close = node_close.get<Button>();
@@ -94,7 +94,7 @@ void init_basic_popup(entity e) {
     }
 }
 
-bool contains(const Array<entity>& list, const entity e) {
+bool contains(const Array<EntityApi>& list, const EntityApi e) {
     const auto it = std::find(list.begin(), list.end(), e);
     return it != list.end();
 }
@@ -127,7 +127,7 @@ void PopupManager::updateAll() {
     }
 }
 
-void open_popup(entity e) {
+void open_popup(EntityApi e) {
     auto pm = PopupManager::Main;
     auto& state = pm.get<PopupManager>();
 
@@ -163,7 +163,7 @@ void open_popup(entity e) {
     st.setVisible(true);
 }
 
-void close_popup(entity e) {
+void close_popup(EntityApi e) {
     auto pm = PopupManager::Main;
     auto& state = pm.get<PopupManager>();
 
@@ -218,7 +218,7 @@ void close_all_popups() {
     }
 }
 
-ecs::entity createBackQuad() {
+ecs::EntityApi createBackQuad() {
     auto e = createNode2D("back");
     auto& display = e.assign<Display2D>();
     display.makeDrawable<Quad2D>().setColor(argb32_t::black);
@@ -245,7 +245,7 @@ ecs::entity createBackQuad() {
     return e;
 }
 
-ecs::entity PopupManager::make() {
+ecs::EntityApi PopupManager::make() {
     auto e = createNode2D("popups");
     auto& pm = e.assign<PopupManager>();
     pm.back = createBackQuad();

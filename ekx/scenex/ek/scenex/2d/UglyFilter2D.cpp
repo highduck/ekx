@@ -8,7 +8,7 @@
 
 namespace ek {
 
-bool UglyFilter2D::pass(const ecs::world& w, ecs::Entity e) {
+bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
     auto* localTransform = w.tryGet<Transform2D>(e);
     auto* parentTransform = findComponentInParent<WorldTransform2D>(w.get<Node>(e).parent);
     assert(parentTransform);

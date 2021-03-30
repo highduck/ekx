@@ -6,7 +6,7 @@
 
 namespace ek {
 
-float2 Transform2D::transformUp(ecs::entity it, ecs::entity top, float2 pos) {
+float2 Transform2D::transformUp(ecs::EntityApi it, ecs::EntityApi top, float2 pos) {
     float2 result = pos;
     while (it && it != top) {
         const auto* transform = it.tryGet<Transform2D>();
@@ -18,7 +18,7 @@ float2 Transform2D::transformUp(ecs::entity it, ecs::entity top, float2 pos) {
     return result;
 }
 
-float2 Transform2D::transformDown(ecs::entity top, ecs::entity it, float2 pos) {
+float2 Transform2D::transformDown(ecs::EntityApi top, ecs::EntityApi it, float2 pos) {
     float2 result = pos;
     while (it != top && it != nullptr) {
         const auto* transform = it.tryGet<Transform2D>();
@@ -30,7 +30,7 @@ float2 Transform2D::transformDown(ecs::entity top, ecs::entity it, float2 pos) {
     return result;
 }
 
-float2 Transform2D::localToLocal(ecs::entity src, ecs::entity dst, float2 pos) {
+float2 Transform2D::localToLocal(ecs::EntityApi src, ecs::EntityApi dst, float2 pos) {
     float2 result = pos;
     const auto lca = Node::findLowerCommonAncestor(src, dst);
     if (lca) {
@@ -40,7 +40,7 @@ float2 Transform2D::localToLocal(ecs::entity src, ecs::entity dst, float2 pos) {
     return result;
 }
 
-float2 Transform2D::localToGlobal(ecs::entity local, float2 localPos) {
+float2 Transform2D::localToGlobal(ecs::EntityApi local, float2 localPos) {
     float2 pos = localPos;
     auto it = local;
     while (it) {
@@ -53,7 +53,7 @@ float2 Transform2D::localToGlobal(ecs::entity local, float2 localPos) {
     return pos;
 }
 
-float2 Transform2D::globalToLocal(ecs::entity local, float2 globalPos) {
+float2 Transform2D::globalToLocal(ecs::EntityApi local, float2 globalPos) {
     float2 pos = globalPos;
     auto it = local;
     while (it) {
@@ -69,7 +69,7 @@ float2 Transform2D::globalToLocal(ecs::entity local, float2 globalPos) {
 
 
 /** transformations after invalidation (already have world matrix) **/
-void Transform2D::fastLocalToLocal(ecs::entity src, ecs::entity dst, float2 pos, float2& out) {
+void Transform2D::fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, float2 pos, float2& out) {
     pos = src.get<WorldTransform2D>().matrix.transform(pos);
     dst.get<WorldTransform2D>().matrix.transform_inverse(pos, out);
 }
@@ -77,7 +77,7 @@ void Transform2D::fastLocalToLocal(ecs::entity src, ecs::entity dst, float2 pos,
 /** Invalidate Transform2D **/
 
 // idea to keep index to level start and process entities from that index to next level
-void traverseNodesBreathFirst(ecs::world* w, ecs::entity root, std::vector<ecs::Entity>& out) {
+void traverseNodesBreathFirst(ecs::World* w, ecs::EntityApi root, std::vector<ecs::EntityIndex>& out) {
     ZoneScoped;
     out.push_back(root.index);
     uint32_t begin = 0;
@@ -98,9 +98,9 @@ void traverseNodesBreathFirst(ecs::world* w, ecs::entity root, std::vector<ecs::
     }
 }
 
-void updateWorldTransformAll(ecs::world* w, ecs::entity root) {
+void updateWorldTransformAll(ecs::World* w, ecs::EntityApi root) {
     ZoneScoped;
-    static std::vector<ecs::Entity> vec2{};
+    static std::vector<ecs::EntityIndex> vec2{};
     vec2.clear();
     traverseNodesBreathFirst(w, root, vec2);
 
@@ -118,10 +118,10 @@ void updateWorldTransformAll(ecs::world* w, ecs::entity root) {
     }
 }
 
-void updateWorldTransformAll2(ecs::world* w, ecs::entity root) {
+void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root) {
     ZoneScoped;
 
-    SmallArray<ecs::Entity, ecs::ENTITIES_MAX_COUNT> out;
+    SmallArray<ecs::EntityIndex, ecs::ENTITIES_MAX_COUNT> out;
     out.push(root.index);
 
     uint32_t begin = 0;
@@ -157,7 +157,7 @@ void updateWorldTransformAll2(ecs::world* w, ecs::entity root) {
     }
 }
 //
-//void updateWorldTransform(ecs::entity e, const WorldTransform2D* transform) {
+//void updateWorldTransform(ecs::EntityApi e, const WorldTransform2D* transform) {
 //    auto* worldTransform = e.tryGet<WorldTransform2D>();
 //    if (worldTransform) {
 //        const auto& localTransform = e.get_or_default<Transform2D>();
@@ -176,10 +176,10 @@ void updateWorldTransformAll2(ecs::world* w, ecs::entity root) {
 //    }
 //}
 //
-//void updateWorldTransform2D(ecs::entity root) {
+//void updateWorldTransform2D(ecs::EntityApi root) {
 //    ZoneScoped;
-//    Transform2D* localTransforms = ecs::world_tryGetComponents<Transform2D>(ecs::the_world)->get_ptr_by_handle(0);
-//    const uint32_t count = (uint32_t) ecs::world_tryGetComponents<Transform2D>(ecs::the_world)->count;
+//    Transform2D* localTransforms = ecs::World_tryGetComponents<Transform2D>(ecs::the_world)->get_ptr_by_handle(0);
+//    const uint32_t count = (uint32_t) ecs::World_tryGetComponents<Transform2D>(ecs::the_world)->count;
 //    for (uint32_t i = 1; i < count; ++i) {
 //        localTransforms[i].updateLocalMatrix();
 //    }

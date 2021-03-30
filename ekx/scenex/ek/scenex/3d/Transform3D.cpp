@@ -6,7 +6,7 @@
 
 namespace ek {
 
-void updateWorldMatrix3D(ecs::entity e, const mat4f* parent) {
+void updateWorldMatrix3D(ecs::EntityApi e, const mat4f* parent) {
     auto* tr = e.tryGet<Transform3D>();
     if (tr) {
         tr->world = tr->local * (*parent);

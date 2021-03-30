@@ -118,7 +118,7 @@ struct Display2D {
     }
 
     template<typename T>
-    static T& make(ecs::entity e) {
+    static T& make(ecs::EntityApi e) {
         auto& d = e.get_or_create<Display2D>();
         d.drawable = std::move(std::make_unique<T>());
         return static_cast<T&>(*d.drawable);
@@ -255,18 +255,18 @@ public:
 
 
 /** utilities **/
-void set_gradient_quad(ecs::entity e, const rect_f& rc, argb32_t top, argb32_t bottom);
+void set_gradient_quad(ecs::EntityApi e, const rect_f& rc, argb32_t top, argb32_t bottom);
 
-inline void set_color_quad(ecs::entity e, const rect_f& rc, argb32_t color) {
+inline void set_color_quad(ecs::EntityApi e, const rect_f& rc, argb32_t color) {
     set_gradient_quad(e, rc, color, color);
 }
 
 template<typename T>
-inline T& get_drawable(ecs::entity e) {
+inline T& get_drawable(ecs::EntityApi e) {
     return *static_cast<T*>(e.get<Display2D>().drawable.get());
 }
 
-inline void set_text(ecs::entity e, const std::string& v) {
+inline void set_text(ecs::EntityApi e, const std::string& v) {
     get_drawable<Text2D>(e).text = v;
 }
 

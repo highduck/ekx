@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
+#include <ecxx/ecxx_fwd.hpp>
 
 #include <ek/app/app.hpp>
 #include <string>
@@ -21,13 +21,13 @@ public:
     float2 pointerScreenPosition_ = float2::zero;
     bool pointerDown_ = false;
 
-    explicit InteractionSystem(ecs::entity root);
+    explicit InteractionSystem(ecs::EntityApi root);
 
     ~InteractionSystem() = delete;
 
     void process();
 
-    app::mouse_cursor searchInteractiveTargets(float2 pos, ecs::entity node, std::vector<ecs::entity>& out_entities);
+    app::mouse_cursor searchInteractiveTargets(float2 pos, ecs::EntityApi node, std::vector<ecs::EntityApi>& out_entities);
 
     void sendBackButton();
 
@@ -37,22 +37,19 @@ public:
 
     void handle_touch_event(const app::event_t& ev);
 
-    void drag(ecs::entity entity) {
-        dragEntity_ = ecs::EntityRef{entity};
-    }
+    void drag(ecs::EntityApi entity);
 
-    [[nodiscard]] ecs::entity getHitTarget() const {
-        return hitTarget_.valid() ? hitTarget_.ent() : nullptr;
-    }
+    [[nodiscard]]
+    ecs::EntityApi getHitTarget() const;
 
 private:
     void fireInteraction(InteractionEvent event, bool prev = true, bool onlyIfChanged = false);
 
-    std::vector<ecs::entity>& getPrevTargets() {
+    std::vector<ecs::EntityApi>& getPrevTargets() {
         return targetLists[targetListIndex];
     }
 
-    std::vector<ecs::entity>& getCurrentTargets() {
+    std::vector<ecs::EntityApi>& getCurrentTargets() {
         return targetLists[(targetListIndex + 1) & 1];
     }
 
@@ -62,9 +59,9 @@ private:
 
 private:
     ecs::EntityRef hitTarget_;
-    ecs::entity root_;
+    ecs::EntityApi root_;
 
-    std::vector<ecs::entity> targetLists[2]{};
+    std::vector<ecs::EntityApi> targetLists[2]{};
     int targetListIndex = 0;
 
     bool mouseActive_ = false;

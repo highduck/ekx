@@ -6,14 +6,13 @@
 
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/base/Node.hpp>
-#include <ek/scenex/base/Script.hpp>
 #include <ek/math/bounds_builder.hpp>
 
 namespace ek {
 
 int RenderSystem2D::currentLayerMask = 0xFF;
 
-void RenderSystem2D::draw(const ecs::world& w, ecs::Entity e, const WorldTransform2D* worldTransform) {
+void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTransform2D* worldTransform) {
     assert(w.isValid(e));
 
     auto* uglyFilter = w.tryGet<UglyFilter2D>(e);
@@ -79,7 +78,7 @@ void RenderSystem2D::draw(const ecs::world& w, ecs::Entity e, const WorldTransfo
 }
 
 
-void RenderSystem2D::drawStack(const ecs::world& w, ecs::Entity e) {
+void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
     assert(w.isValid(e));
 
     auto* uglyFilter = w.tryGet<UglyFilter2D>(e);

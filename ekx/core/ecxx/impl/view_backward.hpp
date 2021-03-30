@@ -6,7 +6,7 @@
 namespace ecs {
 
 template<typename ...Component>
-class view_backward_t {
+class ViewBackward {
 public:
     static constexpr auto components_num = sizeof ... (Component);
 
@@ -15,7 +15,7 @@ public:
 
     class iterator final {
     public:
-        iterator(table_type& table, Entity it) : it_{it},
+        iterator(table_type& table, EntityIndex it) : it_{it},
                                                  table_{table},
                                                  map_0{table[0]} {
             skips();
@@ -46,7 +46,7 @@ public:
         }
 
         [[nodiscard]]
-        inline bool valid(Entity e) const {
+        inline bool valid(EntityIndex e) const {
             for (uint32_t i = 1u; i < components_num; ++i) {
                 if (table_[i]->entityToHandle.get(e) == 0) {
                     return false;
@@ -55,24 +55,24 @@ public:
             return true;
         }
 
-        inline entity operator*() const {
-            return entity{ent_};
+        inline EntityApi operator*() const {
+            return EntityApi{ent_};
         }
 
-        inline entity operator*() {
-            return entity{ent_};
+        inline EntityApi operator*() {
+            return EntityApi{ent_};
         }
 
     private:
-        Entity it_;
-        Entity ent_;
+        EntityIndex it_;
+        EntityIndex ent_;
         const table_type& table_;
         const ComponentHeader* map_0;
     };
 
-    explicit view_backward_t(world* w) {
+    explicit ViewBackward(World& w) {
         table_index_type i{};
-        ((access_[i] = table_[i] = w->getComponentHeader(type<Component>()), ++i), ...);
+        ((access_[i] = table_[i] = w.getComponentHeader(type<Component>()), ++i), ...);
 
         std::sort(table_, table_ + components_num, [](auto a, auto b) -> bool {
             return a->count() < b->count();
@@ -80,7 +80,7 @@ public:
     }
 
     iterator begin() {
-        return {table_, static_cast<Entity>(table_[0]->count() - 1)};
+        return {table_, static_cast<EntityIndex>(table_[0]->count() - 1)};
     }
 
     iterator end() {
@@ -88,7 +88,7 @@ public:
     }
 
     template<typename Comp>
-    constexpr inline Comp& unsafe_get(table_index_type i, Entity idx) {
+    constexpr inline Comp& unsafe_get(table_index_type i, EntityIndex idx) {
         return static_cast<ComponentStorage <Comp>*>(access_[i]->data)->get(idx);
     }
 

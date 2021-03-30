@@ -11,7 +11,7 @@ struct UglyFilter2D {
     bool processing = false;
     std::vector<SGFilter> filters;
 
-    bool pass(const ecs::world& w, ecs::Entity e);
+    bool pass(const ecs::World& w, ecs::EntityIndex e);
 };
 
 }

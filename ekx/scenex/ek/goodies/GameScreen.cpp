@@ -11,7 +11,7 @@
 namespace ek {
 
 /** GameScreen component **/
-GameScreen& GameScreen::init(ecs::entity e, const char* name) {
+GameScreen& GameScreen::init(ecs::EntityApi e, const char* name) {
     if (name) {
         e.get_or_create<NodeName>().name = name;
     }
@@ -91,7 +91,7 @@ float ScreenTransitionState::getNextProgress() const {
 
 
 
-GameScreenManager::GameScreenManager(ecs::entity layer_) :
+GameScreenManager::GameScreenManager(ecs::EntityApi layer_) :
         layer{layer_} {
 }
 
@@ -134,7 +134,7 @@ void GameScreenManager::setScreen(const std::string& name) {
     }
 }
 
-ecs::entity GameScreenManager::findScreen(const std::string& name) const {
+ecs::EntityApi GameScreenManager::findScreen(const std::string& name) const {
     auto it = layer.get<Node>().child_first;
     while (it) {
         if (it.has<GameScreen>() && it.get_or_default<NodeName>().name == name) {

@@ -75,7 +75,7 @@ void debugDrawHitTarget(Camera2D& camera) {
 }
 
 template<typename Comp, typename Func>
-void traverseVisibleNodes(ecs::entity e, const WorldTransform2D* parentTransform, Func callback) {
+void traverseVisibleNodes(ecs::EntityApi e, const WorldTransform2D* parentTransform, Func callback) {
     if (!e.get<Node>().visible()) {
         return;
     }

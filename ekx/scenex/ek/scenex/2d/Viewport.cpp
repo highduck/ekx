@@ -31,7 +31,7 @@ void doScale(ViewportScaleInput input, ViewportScaleOptions options, ViewportSca
     output.safeRect = translate(input.safeRect, -output.offset) * invScale;
 }
 
-void updateViewport(ecs::entity e) {
+void updateViewport(ecs::EntityApi e) {
     auto& vp = e.get<Viewport>();
     doScale(vp.input, vp.options, vp.output);
 

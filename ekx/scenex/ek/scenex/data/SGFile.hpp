@@ -246,7 +246,7 @@ struct SGFile {
 
 SGFile* sg_load(const std::vector<uint8_t>& buffer);
 
-ecs::entity sg_create(const std::string& library, const std::string& name);
+ecs::EntityApi sg_create(const std::string& library, const std::string& name);
 
 rect_f sg_get_bounds(const std::string& library, const std::string& name);
 

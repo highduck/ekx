@@ -14,13 +14,13 @@
 
 namespace ek {
 
-void gui_entity(ecs::entity e, bool visible, bool touchable);
+void gui_entity(ecs::EntityApi e, bool visible, bool touchable);
 
-void gui_entity_simple(ecs::entity e);
+void gui_entity_simple(ecs::EntityApi e);
 
-void gui_entity_node(ecs::entity e, bool visible, bool touchable);
+void gui_entity_node(ecs::EntityApi e, bool visible, bool touchable);
 
-void gui_entity_simple(ecs::entity e) {
+void gui_entity_simple(ecs::EntityApi e) {
     ImGui::LabelText("entity", "id: %i (v.%i)", e.index, ecs::the_world.generations[e.index]);
     ImGui::SameLine();
     if (ImGui::Button("-")) {
@@ -28,7 +28,7 @@ void gui_entity_simple(ecs::entity e) {
     }
 }
 
-void gui_entity(ecs::entity e, bool visible, bool touchable) {
+void gui_entity(ecs::EntityApi e, bool visible, bool touchable) {
     ImGui::PushID(e.index);
     ImGui::BeginGroup();
     if (!e.isAlive()) {
@@ -40,10 +40,10 @@ void gui_entity(ecs::entity e, bool visible, bool touchable) {
     ImGui::PopID();
 }
 
-std::vector<ecs::entity> hierarchySelectionList{};
+std::vector<ecs::EntityApi> hierarchySelectionList{};
 std::string hierarchyFilterText{};
 
-const char* getEntityTitle(ecs::entity e) {
+const char* getEntityTitle(ecs::EntityApi e) {
     if (e.has<NodeName>()) {
         const auto& nameData = e.get<NodeName>().name;
         if (!nameData.empty()) {
@@ -73,12 +73,12 @@ const char* getEntityTitle(ecs::entity e) {
     return type;
 }
 
-bool isSelectedInHierarchy(ecs::entity e) {
+bool isSelectedInHierarchy(ecs::EntityApi e) {
     auto it = std::find(hierarchySelectionList.begin(), hierarchySelectionList.end(), e);
     return it != hierarchySelectionList.end();
 }
 
-bool hasChildren(ecs::entity e) {
+bool hasChildren(ecs::EntityApi e) {
     if (e.has<Node>()) {
         auto& node = e.get<Node>();
         auto firstChild = node.child_first;
@@ -87,7 +87,7 @@ bool hasChildren(ecs::entity e) {
     return false;
 }
 
-void gui_entity_node(ecs::entity e, bool visible, bool touchable) {
+void gui_entity_node(ecs::EntityApi e, bool visible, bool touchable) {
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow
                                | ImGuiTreeNodeFlags_OpenOnDoubleClick
                                | ImGuiTreeNodeFlags_AllowItemOverlap
@@ -156,7 +156,7 @@ void guiHierarchyWindow(bool* p_open) {
 
         if (showAllRoots) {
             // all roots
-            ecs::each([](ecs::entity e) {
+            ecs::each([](ecs::EntityApi e) {
                 auto* node = e.tryGet<Node>();
                 if (!node || !node->parent) {
                     gui_entity(e, true, true);

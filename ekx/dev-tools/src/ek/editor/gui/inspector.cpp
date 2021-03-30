@@ -54,7 +54,7 @@ inline void guiComponentPanel(const char* name, C& data, Func fn) {
 }
 
 template<typename C, typename Func>
-inline void guiComponentPanel(ecs::entity entity, const char* name, Func fn) {
+inline void guiComponentPanel(ecs::EntityApi entity, const char* name, Func fn) {
     if (entity.has<C>()) {
         auto& data = entity.get<C>();
         guiComponentPanel(name, data, fn);
@@ -62,7 +62,7 @@ inline void guiComponentPanel(ecs::entity entity, const char* name, Func fn) {
 }
 
 template<typename C, typename Func>
-inline void guiDisplayComponent(ecs::entity e, const char* name, Func fn) {
+inline void guiDisplayComponent(ecs::EntityApi e, const char* name, Func fn) {
     if (e.has<Display2D>()) {
         auto& d = e.get<Display2D>();
         if (d.is<C>()) {
@@ -326,7 +326,7 @@ void guiParticleLayer2D(ParticleLayer2D& layer) {
     ImGui::LabelText("Num Particles", "%lu", layer.particles.size());
 }
 
-void gui_inspector(ecs::entity e) {
+void gui_inspector(ecs::EntityApi e) {
     ImGui::PushID(e.index);
     ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index, ecs::the_world.generation(e.index));
     if (e.has<NodeName>()) {

@@ -192,66 +192,66 @@ struct Transform2D {
         matrix.d = cosf(cachedSkew.x) * cachedScale.y;
     }
 
-    static float2 transformUp(ecs::entity it, ecs::entity top, float2 pos);
+    static float2 transformUp(ecs::EntityApi it, ecs::EntityApi top, float2 pos);
 
-    static float2 transformDown(ecs::entity top, ecs::entity it, float2 pos);
+    static float2 transformDown(ecs::EntityApi top, ecs::EntityApi it, float2 pos);
 
-    static float2 localToLocal(ecs::entity src, ecs::entity dst, float2 pos);
+    static float2 localToLocal(ecs::EntityApi src, ecs::EntityApi dst, float2 pos);
 
-    static float2 localToGlobal(ecs::entity local, float2 localPos);
+    static float2 localToGlobal(ecs::EntityApi local, float2 localPos);
 
-    static float2 globalToLocal(ecs::entity local, float2 globalPos);
+    static float2 globalToLocal(ecs::EntityApi local, float2 globalPos);
 
     // these functions just helpers and use calculated world matrices, so use it only:
     // - after transform invalidation phase
     // - if node has own Transform2D components
-    static void fastLocalToLocal(ecs::entity src, ecs::entity dst, float2 pos, float2& out);
+    static void fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, float2 pos, float2& out);
 };
 
 /** system to invalidate matrix and color in world space **/
-//void updateWorldTransform2D(ecs::entity root);
-void updateWorldTransformAll(ecs::world* w, ecs::entity root);
-void updateWorldTransformAll2(ecs::world* w, ecs::entity root);
+//void updateWorldTransform2D(ecs::EntityApi root);
+void updateWorldTransformAll(ecs::World* w, ecs::EntityApi root);
+void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root);
 
 /** utility functions **/
 
-inline void setAlpha(ecs::entity e, float alpha) {
+inline void setAlpha(ecs::EntityApi e, float alpha) {
     e.get_or_create<Transform2D>().color.setAlpha(alpha);
 }
 
-inline void setColorScale(ecs::entity e, argb32_t color_multiplier) {
+inline void setColorScale(ecs::EntityApi e, argb32_t color_multiplier) {
     e.get_or_create<Transform2D>().color.scale = color_multiplier;
 }
 
-inline void setColorOffset(ecs::entity e, argb32_t color_offset) {
+inline void setColorOffset(ecs::EntityApi e, argb32_t color_offset) {
     e.get_or_create<Transform2D>().color.offset = color_offset;
 }
 
-inline void setPosition(ecs::entity e, float2 pos) {
+inline void setPosition(ecs::EntityApi e, float2 pos) {
     e.get_or_create<Transform2D>().setPosition(pos);
 }
 
-inline float2 getPosition(const ecs::entity e) {
+inline float2 getPosition(const ecs::EntityApi e) {
     return e.get_or_default<Transform2D>().getPosition();
 }
 
-inline void setRotation(ecs::entity e, float radians) {
+inline void setRotation(ecs::EntityApi e, float radians) {
     e.get_or_create<Transform2D>().setRotation(radians);
 }
 
-inline float getRotation(const ecs::entity e) {
+inline float getRotation(const ecs::EntityApi e) {
     return e.get_or_default<Transform2D>().getRotation();
 }
 
-inline void setScale(ecs::entity e, float2 sc) {
+inline void setScale(ecs::EntityApi e, float2 sc) {
     e.get_or_create<Transform2D>().setScale(sc);
 }
 
-inline void setScale(ecs::entity e, float xy) {
+inline void setScale(ecs::EntityApi e, float xy) {
     e.get_or_create<Transform2D>().setScale(xy, xy);
 }
 
-inline float2 getScale(ecs::entity e) {
+inline float2 getScale(ecs::EntityApi e) {
     return e.get_or_default<Transform2D>().getScale();
 }
 

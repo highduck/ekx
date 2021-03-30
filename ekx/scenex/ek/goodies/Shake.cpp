@@ -27,7 +27,7 @@ void Shake::updateAll() {
     }
 }
 
-void Shake::add(ecs::entity e, float time, float strength) {
+void Shake::add(ecs::EntityApi e, float time, float strength) {
     auto& state = e.get_or_create<Shake>();
     state.time = 0.0f;
     state.time_total = time;

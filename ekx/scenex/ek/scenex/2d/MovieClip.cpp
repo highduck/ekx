@@ -5,11 +5,11 @@
 
 namespace ek {
 
-using ecs::entity;
+using ecs::EntityApi;
 
 float ease(float x, const SGEasingData& data);
 
-void apply_frame(entity e, MovieClip& mov);
+void apply_frame(EntityApi e, MovieClip& mov);
 
 void MovieClip::updateAll() {
     for (auto e : ecs::view<MovieClip>()) {
@@ -81,14 +81,14 @@ easing_progress_t get_easing_progress(const float t, const std::vector<SGEasingD
     return progress;
 }
 
-void apply_transform(entity e, const SGKeyFrameTransform& keyframe) {
+void apply_transform(EntityApi e, const SGKeyFrameTransform& keyframe) {
     auto& transform = e.get_or_create<Transform2D>();
     transform.setTransform(keyframe.position, keyframe.scale, keyframe.skew, keyframe.pivot);
     transform.color.scale = argb32_t{keyframe.color.scale};
     transform.color.offset = argb32_t{keyframe.color.offset};
 }
 
-void update_target(float time, entity e, const SGMovieLayerData& layer) {
+void update_target(float time, EntityApi e, const SGMovieLayerData& layer) {
     auto& config = e.get_or_create<Node>();
     const auto ki = findKeyFrame(layer.frames, time);
     if (ki < 0) {
@@ -126,7 +126,7 @@ void update_target(float time, entity e, const SGMovieLayerData& layer) {
     }
 }
 
-void apply_frame(entity e, MovieClip& mov) {
+void apply_frame(EntityApi e, MovieClip& mov) {
     auto* data = mov.get_movie_data();
     auto time = mov.time;
     if (!data) {
@@ -146,7 +146,7 @@ void apply_frame(entity e, MovieClip& mov) {
     }
 }
 
-void goto_and_stop(entity e, float frame) {
+void goto_and_stop(EntityApi e, float frame) {
     auto& mov = e.get<MovieClip>();
     mov.playing = false;
     mov.time = frame;

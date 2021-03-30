@@ -1,55 +1,40 @@
 #pragma once
 
-#include <cstdint>
 #include <ek/ds/SparseArray.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/assert.hpp>
+#include "../ecxx_fwd.hpp"
 
 namespace ecs {
-
-/** Static configuration definition **/
-inline constexpr uint32_t COMPONENTS_MAX_COUNT = 128;
-inline constexpr uint32_t ENTITIES_MAX_COUNT = 0x10000;
-inline constexpr uint32_t INDEX_BITS = 16;
-inline constexpr uint32_t INDEX_MASK = 0xFFFF;
-inline constexpr uint32_t GENERATION_MASK = 0xFF;
-
-typedef uint16_t Entity;
-typedef uint8_t Generation;
-//typedef uint8_t WorldIndex;
-typedef uint32_t Passport; // Passport is compressed unique ID with information for: world index, entity index, entity generation
-
-typedef uint16_t ComponentHandle;
-typedef uint16_t ComponentTypeId;
 
 /** Component Managers **/
 
 struct ComponentRegistration {
     void* data; // 8 bytes
 
-    ComponentHandle (* emplace)(void* component, Entity entity); // 8 bytes
+    ComponentHandle (* emplace)(void* component, EntityIndex entity); // 8 bytes
 
-    void (* erase)(void* component, Entity entity); // 8 bytes
+    void (* erase)(void* component, EntityIndex entity); // 8 bytes
 
     void (* clear)(void* component); // 8 bytes
 
     ComponentTypeId typeId; // 2 bytes
 };
 
-using EntityLookup = ek::SparseArray<Entity, ComponentHandle, ENTITIES_MAX_COUNT>;
+using EntityLookup = ek::SparseArray<EntityIndex, ComponentHandle, ENTITIES_MAX_COUNT>;
 
 // 256 + 74 = 330 bytes
 // 128 * 330 = 42'240 kb
 struct ComponentHeader {
     EntityLookup entityToHandle; // 256 bytes
 
-    ek::Array<Entity> handleToEntity; // dynamic (8 + 4 + 4 ~ 16 bytes)
+    ek::Array<EntityIndex> handleToEntity; // dynamic (8 + 4 + 4 ~ 16 bytes)
 
     void* data; // 8 bytes
 
-    ComponentHandle (* emplace)(ComponentHeader* component, Entity entity); // 8 bytes
+    ComponentHandle (* emplace)(ComponentHeader* component, EntityIndex entity); // 8 bytes
 
-    void (* erase)(ComponentHeader* component, Entity entity); // 8 bytes
+    void (* erase)(ComponentHeader* component, EntityIndex entity); // 8 bytes
 
     void (* clear)(ComponentHeader* component); // 8 bytes
 
@@ -116,7 +101,8 @@ template<typename DataType>
 class ComponentStorage;
 
 /** World **/
-struct world {
+class World {
+public:
 
     ek::Allocator* allocator;
     // entity pool data, indices and generations
@@ -124,11 +110,11 @@ struct world {
 
     // entity indices
     //alignas(4096)
-    Entity entityPool[ENTITIES_MAX_COUNT]; // 2 * ENTITIES_MAX_COUNT = 131072 bytes
+    EntityIndex entityPool[ENTITIES_MAX_COUNT]; // 2 * ENTITIES_MAX_COUNT = 131072 bytes
 
     // entity generations
     //alignas(4096)
-    Generation generations[ENTITIES_MAX_COUNT]; // 65536 bytes
+    EntityGeneration generations[ENTITIES_MAX_COUNT]; // 65536 bytes
 
     //EntityLookup componentEntityToHandle[COMPONENTS_MAX_COUNT]; // 256 * 128 = 32768 bytes
 
@@ -144,21 +130,20 @@ struct world {
     uint32_t size;
 
     // next free index in entity pool
-    Entity next;
+    EntityIndex next;
 
     // just zero entity (reserved null entity)
-    Entity zero;
+    EntityIndex zero;
 
     [[nodiscard]]
-    inline Generation generation(Entity e) const {
+    inline EntityGeneration generation(EntityIndex e) const {
         return generations[e];
     }
 
     [[nodiscard]]
-    inline bool isAllocated(Entity e) const {
+    inline bool isAllocated(EntityIndex e) const {
         return entityPool[e] == e;
     }
-
 
     /** lifecycle **/
 
@@ -171,41 +156,41 @@ struct world {
     /** entity pool **/
 
 // entity create / destroy
-    void create(Entity* outEntities, uint32_t count);
+    void create(EntityIndex* outEntities, uint32_t count);
 
-    void destroy(const Entity* entitiesToDestroy, uint32_t count);
+    void destroy(const EntityIndex* entitiesToDestroy, uint32_t count);
 
     template<typename ...Component>
-    void create(Entity* outEntities, uint32_t count);
+    void create(EntityIndex* outEntities, uint32_t count);
 
     // passport
     [[nodiscard]]
-    bool check(Passport passport) const;
+    bool check(EntityPassport passport) const;
 
     [[nodiscard]]
-    inline bool isValid(Entity e) const {
+    inline bool isValid(EntityIndex e) const {
         return e && entityPool[e] == e;
     }
 
     /** components **/
 
     template<typename Component>
-    [[nodiscard]] inline bool has(Entity e) const;
+    [[nodiscard]] inline bool has(EntityIndex e) const;
 
     template<typename Component>
-    [[nodiscard]] inline Component& get(Entity e) const;
+    [[nodiscard]] inline Component& get(EntityIndex e) const;
 
     template<typename Component>
-    [[nodiscard]] inline Component* tryGet(Entity e) const;
+    [[nodiscard]] inline Component* tryGet(EntityIndex e) const;
 
     template<typename Component, typename ...Args>
-    inline Component& assign(Entity e, Args&& ... args) const;
+    inline Component& assign(EntityIndex e, Args&& ... args) const;
 
     template<typename Component, typename ...Args>
-    inline void assignBatch(Entity* entities, uint32_t count, Args&& ... args) const;
+    inline void assignBatch(EntityIndex* entities, uint32_t count, Args&& ... args) const;
 
     template<typename Component, typename ...Args>
-    inline Component& reassign(Entity e, Args&& ... args) const;
+    inline Component& reassign(EntityIndex e, Args&& ... args) const;
 
     [[nodiscard]]
     inline ComponentHeader* getComponentHeader(ComponentTypeId componentTypeId) const {
@@ -219,12 +204,12 @@ struct world {
     inline ComponentStorage<Component>* getStorage() const;
 
     [[nodiscard]]
-    inline ComponentHandle get(Entity e, ComponentTypeId componentId) const {
+    inline ComponentHandle get(EntityIndex e, ComponentTypeId componentId) const {
         return getComponentHeader(componentId)->entityToHandle.get(e);
     }
 
     [[nodiscard]]
-    inline ComponentHandle getOrCreate(Entity e, ComponentTypeId componentId) const {
+    inline ComponentHandle getOrCreate(EntityIndex e, ComponentTypeId componentId) const {
         auto* component = getComponentHeader(componentId);
         const auto handle = component->entityToHandle.get(e);
         if (handle == 0) {
@@ -234,16 +219,16 @@ struct world {
     }
 
     template<typename Component>
-    inline void remove(Entity e) const;
+    inline void remove(EntityIndex e) const;
 
     template<typename Component>
-    inline bool tryRemove(Entity e) const;
+    inline bool tryRemove(EntityIndex e) const;
 
     template<typename Component>
-    inline Component& getOrCreate(Entity e) const;
+    inline Component& getOrCreate(EntityIndex e) const;
 
     template<typename Component>
-    inline const Component& getOrDefault(Entity e) const;
+    inline const Component& getOrDefault(EntityIndex e) const;
 
     inline void registerComponent(ComponentHeader* component) {
         components[component->typeId] = component;
@@ -255,8 +240,6 @@ struct world {
 private:
     void resetEntityPool();
 };
-
-extern world the_world;
 
 /** Templated generic **/
 
@@ -281,7 +264,7 @@ public:
     }
 
     template<typename ...Args>
-    DataType& emplace(Entity entity, Args&& ...args) {
+    DataType& emplace(EntityIndex entity, Args&& ...args) {
         auto& entityToHandle = component.entityToHandle;
         auto& handleToEntity = component.handleToEntity;
         const auto handle = component.count();
@@ -301,7 +284,7 @@ public:
         }
     }
 
-    ComponentHandle emplace_default(Entity entity) {
+    ComponentHandle emplace_default(EntityIndex entity) {
         auto& entityToHandle = component.entityToHandle;
         auto& handleToEntity = component.handleToEntity;
         const auto handle = component.count();
@@ -318,7 +301,7 @@ public:
         }
     }
 
-    void erase(Entity entity) {
+    void erase(EntityIndex entity) {
         EK_ASSERT(component.lockCounter == 0);
         EK_ASSERT(component.entityToHandle.get(entity) != 0);
         const auto backEntity = component.handleToEntity.back();
@@ -329,7 +312,7 @@ public:
         }
     }
 
-    void erase_from_middle(Entity e, Entity last) {
+    void erase_from_middle(EntityIndex e, EntityIndex last) {
         const auto handle = component.entityToHandle.moveRemove(e, last);
         component.handleToEntity.set(handle, last);
         component.handleToEntity.pop_back();
@@ -338,7 +321,7 @@ public:
         }
     }
 
-    void erase_from_back(Entity e) {
+    void erase_from_back(EntityIndex e) {
         component.entityToHandle.set(e, 0);
         component.handleToEntity.pop_back();
         if constexpr (!EmptyData) {
@@ -346,7 +329,7 @@ public:
         }
     }
 
-    inline DataType& get(Entity e) const {
+    inline DataType& get(EntityIndex e) const {
         if constexpr (EmptyData) {
             return const_cast<DataType&>(data.get(0));
         } else {
@@ -379,11 +362,11 @@ public:
     }
 
     /** Methods used for dynamic operations instead of using virtual calls **/
-    static ComponentHandle s_emplace(ComponentHeader* hdr, Entity e) {
+    static ComponentHandle s_emplace(ComponentHeader* hdr, EntityIndex e) {
         return static_cast<ComponentStorage*>(hdr->data)->emplace_default(e);
     }
 
-    static void s_erase(ComponentHeader* hdr, Entity entity) {
+    static void s_erase(ComponentHeader* hdr, EntityIndex entity) {
         static_cast<ComponentStorage*>(hdr->data)->erase(entity);
     }
 
@@ -410,19 +393,19 @@ public:
 };
 
 template<typename Component>
-inline ComponentStorage<Component>* world::getStorage() const {
+inline ComponentStorage<Component>* World::getStorage() const {
     auto* component = components[type<Component>()];
     EK_ASSERT_R2(component != nullptr);
     return static_cast<ComponentStorage<Component>*>(component->data);
 }
 
 template<typename Component, typename ...Args>
-inline Component& world::assign(Entity e, Args&& ... args) const {
+inline Component& World::assign(EntityIndex e, Args&& ... args) const {
     return getStorage<Component>()->emplace(e, args...);
 }
 
 template<typename Component, typename ...Args>
-inline void world::assignBatch(Entity* entities, uint32_t count, Args&& ... args) const {
+inline void World::assignBatch(EntityIndex* entities, uint32_t count, Args&& ... args) const {
     auto* storage = getStorage<Component>();
     for (uint32_t i = 0; i < count; ++i) {
         storage->emplace(entities[i], args...);
@@ -430,7 +413,7 @@ inline void world::assignBatch(Entity* entities, uint32_t count, Args&& ... args
 }
 
 template<typename Component, typename ...Args>
-inline Component& world::reassign(Entity e, Args&& ... args) const {
+inline Component& World::reassign(EntityIndex e, Args&& ... args) const {
     ComponentStorage<Component>* storage = getStorage<Component>();
     const auto handle = storage->component.entityToHandle.get(e);
     if (handle != 0) {
@@ -442,7 +425,7 @@ inline Component& world::reassign(Entity e, Args&& ... args) const {
 }
 
 template<typename Component>
-inline bool world::has(Entity e) const {
+inline bool World::has(EntityIndex e) const {
     const auto* component = getComponentHeader(type<Component>());
     const auto& entityToHandle = component->entityToHandle;
     const auto handle = entityToHandle.get(e);
@@ -450,12 +433,12 @@ inline bool world::has(Entity e) const {
 }
 
 template<typename Component>
-inline Component& world::get(Entity e) const {
+inline Component& World::get(EntityIndex e) const {
     return getStorage<Component>()->get(e);
 }
 
 template<typename Component>
-inline Component* world::tryGet(Entity e) const {
+inline Component* World::tryGet(EntityIndex e) const {
     auto* storage = getStorage<Component>();
     const auto handle = storage->component.entityToHandle.get(e);
     if (handle != 0) {
@@ -465,12 +448,12 @@ inline Component* world::tryGet(Entity e) const {
 }
 
 template<typename Component>
-inline void world::remove(Entity e) const {
+inline void World::remove(EntityIndex e) const {
     getStorage<Component>()->erase(e);
 }
 
 template<typename Component>
-inline bool world::tryRemove(Entity e) const {
+inline bool World::tryRemove(EntityIndex e) const {
     auto* storage = getStorage<Component>();
     if (storage->component.entityToHandle.get(e) != 0) {
         storage->erase(e);
@@ -480,7 +463,7 @@ inline bool world::tryRemove(Entity e) const {
 }
 
 template<typename Component>
-inline Component& world::getOrCreate(Entity e) const {
+inline Component& World::getOrCreate(EntityIndex e) const {
     auto* storage = getStorage<Component>();
     const auto handle = storage->component.entityToHandle.get(e);
     if (handle != 0) {
@@ -491,20 +474,20 @@ inline Component& world::getOrCreate(Entity e) const {
 
 
 template<typename Component>
-inline const Component& world::getOrDefault(Entity e) const {
+inline const Component& World::getOrDefault(EntityIndex e) const {
     const auto* storage = getStorage<Component>();
     const auto handle = storage->component.entityToHandle.get(e);
     return storage->get_or_default_by_handle(handle);
 }
 
 template<typename ...Component>
-inline void world::create(Entity* outEntities, uint32_t count) {
+inline void World::create(EntityIndex* outEntities, uint32_t count) {
     create(outEntities, count);
     (assignBatch<Component>(outEntities, count), ...);
 }
 
 template<typename Component>
-inline void world::registerComponent(unsigned initialCapacity) {
+inline void World::registerComponent(unsigned initialCapacity) {
     auto* storage = allocator->create<ComponentStorage<Component>>(*allocator, initialCapacity);
     registerComponent(&storage->component);
 }

@@ -7,12 +7,12 @@
 namespace ecs {
 
 template<typename ...Component>
-class view_forward_t {
+class ViewForward {
 public:
     static constexpr auto components_num = sizeof ... (Component);
 
     using table_index_type = uint32_t;
-    using table_type = ComponentHeader*[components_num];
+    using table_type = ComponentHeader* [components_num];
 
     class iterator final {
     public:
@@ -58,7 +58,7 @@ public:
             return true;
         }
 
-        inline static bool is_valid_fast(Entity idx, const table_type& table) {
+        inline static bool is_valid_fast(EntityIndex idx, const table_type& table) {
             // filter secondary entity vectors
             const uint32_t cn = components_num;
             for (uint32_t k = 1u; k < cn; ++k) {
@@ -69,12 +69,12 @@ public:
             return true;
         }
 
-        inline entity operator*() const noexcept {
-            return entity{table_[0]->handleToEntity.get(it_)};
+        inline EntityApi operator*() const noexcept {
+            return EntityApi{table_[0]->handleToEntity.get(it_)};
         }
 
-        inline entity operator*() noexcept {
-            return entity{table_[0]->handleToEntity.get(it_)};
+        inline EntityApi operator*() noexcept {
+            return EntityApi{table_[0]->handleToEntity.get(it_)};
         }
 
     private:
@@ -82,10 +82,10 @@ public:
         const table_type& table_;
     };
 
-    explicit view_forward_t(world* w) {
+    explicit ViewForward(World& w) {
         {
             table_index_type i{};
-            ((access_[i] = table_[i] = w->components[type<Component>()], ++i), ...);
+            ((access_[i] = table_[i] = w.components[type<Component>()], ++i), ...);
         }
 
         std::sort(table_, table_ + components_num, [](auto* a, auto* b) -> bool {
@@ -97,7 +97,7 @@ public:
         }
     }
 
-    ~view_forward_t() {
+    ~ViewForward() {
         for (uint32_t j = 0u; j < components_num; ++j) {
             --access_[j]->lockCounter;
         }
@@ -112,8 +112,8 @@ public:
     }
 
     template<typename Comp>
-    constexpr inline Comp& unsafe_get(table_index_type i, Entity ei) const {
-        return static_cast<const ComponentStorage<Comp>*>(access_[i]->data)->get(ei);
+    constexpr inline Comp& unsafe_get(table_index_type i, EntityIndex ei) const {
+        return static_cast<const ComponentStorage <Comp>*>(access_[i]->data)->get(ei);
     }
 
     template<typename Func>
@@ -121,7 +121,7 @@ public:
         const ComponentHeader& table_0 = *(table_[0]);
         const auto size = table_0.count();
         for (uint32_t i = 1u; i != size; ++i) {
-            const Entity e = table_0.handleToEntity.get(i);
+            const EntityIndex e = table_0.handleToEntity.get(i);
             if (iterator::is_valid_fast(e, table_)) {
                 table_index_type k{0u};
                 func(unsafe_get<Component>(k++, e)...);
@@ -135,14 +135,14 @@ private:
 };
 
 template<typename Component>
-class view_forward_t<Component> {
+class ViewForward<Component> {
 public:
     static constexpr auto components_num = 1;
 
     class iterator final {
     public:
-        iterator(const ComponentStorage<Component>& m, uint32_t it) noexcept : it_{it},
-                  map_{m} {
+        iterator(const ComponentStorage <Component>& m, uint32_t it) noexcept: it_{it},
+                                                                               map_{m} {
         }
 
         iterator() noexcept = default;
@@ -165,25 +165,25 @@ public:
             return it_ != other.it_;
         }
 
-        inline entity operator*() const noexcept {
-            return entity{map_.component.handleToEntity.get(it_)};
+        inline EntityApi operator*() const noexcept {
+            return EntityApi{map_.component.handleToEntity.get(it_)};
         }
 
-        inline entity operator*() noexcept {
-            return entity{map_.component.handleToEntity.get(it_)};
+        inline EntityApi operator*() noexcept {
+            return EntityApi{map_.component.handleToEntity.get(it_)};
         }
 
     private:
         uint32_t it_{};
-        const ComponentStorage<Component>& map_;
+        const ComponentStorage <Component>& map_;
     };
 
-    explicit view_forward_t(world* w) :
-            map_{*w->getStorage<Component>()} {
+    explicit ViewForward(World& w) :
+            map_{*w.getStorage<Component>()} {
         ++map_.component.lockCounter;
     }
 
-    ~view_forward_t() {
+    ~ViewForward() {
         --map_.component.lockCounter;
     }
 
@@ -204,7 +204,7 @@ public:
     }
 
 private:
-    ComponentStorage<Component>& map_;
+    ComponentStorage <Component>& map_;
 };
 
 }

@@ -50,6 +50,6 @@ struct MovieClipTargetIndex {
     int32_t key = 0;
 };
 
-void goto_and_stop(ecs::entity e, float frame);
+void goto_and_stop(ecs::EntityApi e, float frame);
 
 }

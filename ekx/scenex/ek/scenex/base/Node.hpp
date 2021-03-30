@@ -19,11 +19,11 @@ struct Node {
         LayerMask = 0xFF00
     };
 
-    ecs::entity sibling_next;
-    ecs::entity sibling_prev;
-    ecs::entity child_first;
-    ecs::entity child_last;
-    ecs::entity parent;
+    ecs::EntityApi sibling_next;
+    ecs::EntityApi sibling_prev;
+    ecs::EntityApi child_first;
+    ecs::EntityApi child_last;
+    ecs::EntityApi parent;
 
     uint16_t flags = LayerMask | VisibleAndTouchable;
 
@@ -51,13 +51,13 @@ struct Node {
         flags |= (flags & ~LayerMask) | ((mask << 8) & LayerMask);
     }
 
-    static int findDepth(ecs::entity e);
+    static int findDepth(ecs::EntityApi e);
 
-    static ecs::entity findLowerCommonAncestor(ecs::entity e1, ecs::entity e2);
+    static ecs::EntityApi findLowerCommonAncestor(ecs::EntityApi e1, ecs::EntityApi e2);
 };
 
 template<typename Func>
-inline void eachChild(ecs::entity e, Func func) {
+inline void eachChild(ecs::EntityApi e, Func func) {
     auto it = e.get<Node>().child_first;
     while (it) {
         auto temp = it;
@@ -67,7 +67,7 @@ inline void eachChild(ecs::entity e, Func func) {
 }
 
 template<typename Func>
-inline void eachChildBackward(ecs::entity e, Func func) {
+inline void eachChildBackward(ecs::EntityApi e, Func func) {
     auto it = e.get<Node>().child_last;
     while (it) {
         auto temp = it;
@@ -76,9 +76,9 @@ inline void eachChildBackward(ecs::entity e, Func func) {
     }
 }
 
-ecs::entity getRoot(ecs::entity e);
+ecs::EntityApi getRoot(ecs::EntityApi e);
 
-inline ecs::entity getFirstChild(ecs::entity e) {
+inline ecs::EntityApi getFirstChild(ecs::EntityApi e) {
     assert(e.has<Node>());
     return e.get<Node>().child_first;
 }
@@ -87,45 +87,45 @@ inline ecs::entity getFirstChild(ecs::entity e) {
     Delete all children and sub-children of entity `e`
     if `e` has Node component.
 **/
-void destroyChildren(ecs::entity e);
+void destroyChildren(ecs::EntityApi e);
 
 /**
     Returns true if entity is descendant of ancestor.
 **/
-bool isDescendant(ecs::entity e, ecs::entity ancestor);
+bool isDescendant(ecs::EntityApi e, ecs::EntityApi ancestor);
 
 /**
     Remove entity `e` from it's parent
     if `e` has Node component and is a child.
 **/
-void removeFromParent(ecs::entity e);
+void removeFromParent(ecs::EntityApi e);
 
 // child has node
 // entity has node
 // child hasn't parent
-void appendStrict(ecs::entity e, ecs::entity child);
+void appendStrict(ecs::EntityApi e, ecs::EntityApi child);
 
 /**
     Add `child` to `entity` to the end.
     If `child` or `entity` have no Node component, it will be created.
     `child` will be removed from it's current parent.
 **/
-void append(ecs::entity e, ecs::entity child);
+void append(ecs::EntityApi e, ecs::EntityApi child);
 
-void prependStrict(ecs::entity e, ecs::entity child);
+void prependStrict(ecs::EntityApi e, ecs::EntityApi child);
 
 /**
     Add `child` to `entity` to the beginning.
     If `child` or `entity` have no Node component, it will be created.
     `child` will be removed from it's current parent.
 **/
-void prepend(ecs::entity e, ecs::entity child);
+void prepend(ecs::EntityApi e, ecs::EntityApi child);
 
 /**
     Remove all children of `entity`
     if `entity` has Node component and is a child.
 **/
-void removeChildren(ecs::entity e);
+void removeChildren(ecs::EntityApi e);
 
 /**
     Insert `childAfter` next to the `entity`.
@@ -133,9 +133,9 @@ void removeChildren(ecs::entity e);
     `childAfter` will be removed from it's current parent.
     If `childAfter` has not Node component, it will be added.
 **/
-void insertAfter(ecs::entity e, ecs::entity childAfter);
+void insertAfter(ecs::EntityApi e, ecs::EntityApi childAfter);
 
-void insertBeforeStrict(ecs::entity e, ecs::entity childBefore);
+void insertBeforeStrict(ecs::EntityApi e, ecs::EntityApi childBefore);
 
 /**
     Insert `childBefore` back to the `entity`.
@@ -143,7 +143,7 @@ void insertBeforeStrict(ecs::entity e, ecs::entity childBefore);
     `childBefore` will be removed from it's current parent.
     If `childBefore` has not Node component, it will be added.
 **/
-void insertBefore(ecs::entity e, ecs::entity child_before);
+void insertBefore(ecs::EntityApi e, ecs::EntityApi child_before);
 
 /**
    Number of children of `entity`.
@@ -152,38 +152,38 @@ void insertBefore(ecs::entity e, ecs::entity child_before);
    Note: children will be counted in fast-traversing
    from the first to the last child of `entity`
 **/
-uint32_t countChildren(ecs::entity e);
+uint32_t countChildren(ecs::EntityApi e);
 
 // Destroy Entity (hierarchy way):
 // - Remove Entity from parent
 // - destroy all children
-void destroyNode(ecs::entity e);
+void destroyNode(ecs::EntityApi e);
 
-ecs::entity getChildAt(ecs::entity e, int index);
+ecs::EntityApi getChildAt(ecs::EntityApi e, int index);
 
 /** utility functions **/
 
-inline void setName(ecs::entity e, const std::string& name) {
+inline void setName(ecs::EntityApi e, const std::string& name) {
     e.get_or_create<NodeName>().name = name;
 }
 
-inline const std::string& getName(ecs::entity e) {
+inline const std::string& getName(ecs::EntityApi e) {
     return e.get_or_default<NodeName>().name;
 }
 
-inline bool isVisible(ecs::entity e) {
+inline bool isVisible(ecs::EntityApi e) {
     return e.get_or_default<Node>().visible();
 }
 
-inline void setVisible(ecs::entity e, bool v) {
+inline void setVisible(ecs::EntityApi e, bool v) {
     e.get_or_create<Node>().setVisible(v);
 }
 
-inline bool isTouchable(ecs::entity e) {
+inline bool isTouchable(ecs::EntityApi e) {
     return e.get_or_default<Node>().touchable();
 }
 
-inline void setTouchable(ecs::entity e, bool v) {
+inline void setTouchable(ecs::EntityApi e, bool v) {
     e.get_or_create<Node>().setTouchable(v);
 }
 
@@ -195,7 +195,7 @@ inline void setTouchable(ecs::entity e, bool v) {
 //
 // Returns `nullptr` if no component found
 template<typename Comp>
-Comp* findComponentInParent(ecs::entity e) {
+Comp* findComponentInParent(ecs::EntityApi e) {
     auto it = e;
     while (it) {
         auto* c = it.tryGet<Comp>();
@@ -209,14 +209,14 @@ Comp* findComponentInParent(ecs::entity e) {
 
 /** search functions **/
 
-ecs::entity find(ecs::entity e, const char* childName);
+ecs::EntityApi find(ecs::EntityApi e, const char* childName);
 
-inline ecs::entity find(const ecs::entity e, const std::string& childName) {
+inline ecs::EntityApi find(const ecs::EntityApi e, const std::string& childName) {
     return find(e, childName.c_str());
 }
 
-ecs::entity findByPath(ecs::entity e, const std::vector<std::string>& path);
+ecs::EntityApi findByPath(ecs::EntityApi e, const std::vector<std::string>& path);
 
-std::vector<ecs::entity> findMany(ecs::entity e, const std::vector<std::string>& names);
+std::vector<ecs::EntityApi> findMany(ecs::EntityApi e, const std::vector<std::string>& names);
 
 }

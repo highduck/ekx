@@ -9,25 +9,25 @@ struct close_timeout {
 };
 
 struct PopupManager {
-    Array<ecs::entity> active;
-    ecs::entity closingLast;
+    Array<ecs::EntityApi> active;
+    ecs::EntityApi closingLast;
     float fade_progress = 0.0f;
     float fade_duration = 0.3f;
     float fade_alpha = 0.5f;
-    ecs::entity back;
-    ecs::entity layer;
+    ecs::EntityApi back;
+    ecs::EntityApi layer;
 
-    static ecs::entity make();
+    static ecs::EntityApi make();
     static void updateAll();
 
-    static ecs::entity Main;
+    static ecs::EntityApi Main;
 };
 
-void init_basic_popup(ecs::entity e);
+void init_basic_popup(ecs::EntityApi e);
 
-void open_popup(ecs::entity e);
+void open_popup(ecs::EntityApi e);
 
-void close_popup(ecs::entity e);
+void close_popup(ecs::EntityApi e);
 
 void clear_popups();
 

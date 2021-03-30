@@ -9,11 +9,11 @@
 
 namespace ek {
 
-void drawEntity(ecs::entity e, const Transform2D* transform);
+void drawEntity(ecs::EntityApi e, const Transform2D* transform);
 
-ecs::entity Camera2D::Main{};
+ecs::EntityApi Camera2D::Main{};
 
-matrix_2d Camera2D::getMatrix(ecs::entity root_, float scale, const float2& screenOffset) const {
+matrix_2d Camera2D::getMatrix(ecs::EntityApi root_, float scale, const float2& screenOffset) const {
     auto screen = screenRect;
     auto m = root_.get<WorldTransform2D>().matrix;
     float invScale = 1.0f / (scale * contentScale);
@@ -21,11 +21,11 @@ matrix_2d Camera2D::getMatrix(ecs::entity root_, float scale, const float2& scre
     return m;
 }
 
-static std::vector<ecs::entity> activeCameras{};
+static std::vector<ecs::EntityApi> activeCameras{};
 static const Camera2D* currentRenderingCamera = nullptr;
 static int currentLayerMask = 0xFF;
 
-std::vector<ecs::entity>& Camera2D::getCameraQueue() {
+std::vector<ecs::EntityApi>& Camera2D::getCameraQueue() {
     return activeCameras;
 }
 
@@ -57,7 +57,7 @@ void Camera2D::updateQueue() {
             assert(false);
         }
     }
-    std::sort(activeCameras.begin(), activeCameras.end(), [](ecs::entity a, ecs::entity b) -> bool {
+    std::sort(activeCameras.begin(), activeCameras.end(), [](ecs::EntityApi a, ecs::EntityApi b) -> bool {
         return a.get<Camera2D>().order < b.get<Camera2D>().order;
     });
 }
@@ -89,7 +89,7 @@ void Camera2D::render() {
     }
 }
 
-Camera2D::Camera2D(ecs::entity root_) :
+Camera2D::Camera2D(ecs::EntityApi root_) :
         root{root_} {
 
 }

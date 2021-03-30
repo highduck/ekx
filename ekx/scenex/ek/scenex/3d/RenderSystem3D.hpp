@@ -29,8 +29,8 @@ public:
     mat4f cameraProjection;
     mat4f cameraView;
 
-    ecs::entity scene;
-    ecs::entity camera;
+    ecs::EntityApi scene;
+    ecs::EntityApi camera;
 };
 
 

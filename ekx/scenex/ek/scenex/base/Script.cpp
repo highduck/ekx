@@ -7,7 +7,7 @@ namespace ek {
 
 ScriptBase::~ScriptBase() = default;
 
-ecs::entity ScriptBase::find_child(const std::string& name) const {
+ecs::EntityApi ScriptBase::find_child(const std::string& name) const {
     return find(entity_, name);
 }
 
@@ -23,7 +23,7 @@ void updateScripts() {
             });
 }
 
-void ScriptHolder::link(ecs::entity owner_) {
+void ScriptHolder::link(ecs::EntityApi owner_) {
     if (!owner) {
         owner = owner_;
         auto& display = owner_.get_or_create<Display2D>();
