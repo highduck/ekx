@@ -4,7 +4,7 @@
 
 namespace ek {
 
-void handle_end(ecs::entity e) {
+void handle_end(ecs::EntityApi e) {
     auto& tween = e.get<Tween>();
     tween.advanced.clear();
     if (tween.destroyEntity) {
@@ -37,7 +37,7 @@ void Tween::updateAll() {
     }
 }
 
-Tween& Tween::reset(ecs::entity e) {
+Tween& Tween::reset(ecs::EntityApi e) {
     auto& tween = e.get_or_create<Tween>();
     if (tween.time > 0.0f && tween.time < tween.duration) {
         tween.time = tween.duration;

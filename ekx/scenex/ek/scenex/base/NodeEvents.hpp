@@ -14,7 +14,7 @@ using NodeEventType = std::string;
 
 struct NodeEventData {
     NodeEventType type;
-    ecs::entity source;
+    ecs::EntityApi source;
     std::any payload;
     mutable bool processed = false;
 };
@@ -57,24 +57,24 @@ private:
 
 /*** events functions ***/
 
-void dispatch_broadcast(ecs::entity e, const NodeEventData& data);
-void dispatch_bubble(ecs::entity e, const NodeEventData& data);
+void dispatch_broadcast(ecs::EntityApi e, const NodeEventData& data);
+void dispatch_bubble(ecs::EntityApi e, const NodeEventData& data);
 
-inline void broadcast(ecs::entity e, const std::string& event) {
+inline void broadcast(ecs::EntityApi e, const std::string& event) {
     dispatch_broadcast(e, {event, e, nullptr});
 }
 
 template<typename Payload>
-inline void broadcast(ecs::entity e, const std::string& event, Payload payload) {
+inline void broadcast(ecs::EntityApi e, const std::string& event, Payload payload) {
     dispatch_broadcast(e, {event, e, std::any{payload}});
 }
 
 template<>
-inline void broadcast(ecs::entity e, const std::string& event, const char* payload) {
+inline void broadcast(ecs::EntityApi e, const std::string& event, const char* payload) {
     dispatch_broadcast(e, {event, e, std::any{std::string{payload}}});
 }
 
-inline void notify_parents(ecs::entity e, const std::string& event, const std::string& payload = "") {
+inline void notify_parents(ecs::EntityApi e, const std::string& event, const std::string& payload = "") {
     dispatch_bubble(e, {event, e, std::any{payload}});
 }
 

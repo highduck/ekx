@@ -17,7 +17,7 @@ public:
 
     virtual ~ScriptBase();
 
-    void link_to_entity(ecs::entity e) {
+    void link_to_entity(ecs::EntityApi e) {
         entity_ = e;
     }
 
@@ -45,10 +45,10 @@ public:
         return entity_.get_or_create<Component>();
     }
 
-    [[nodiscard]] ecs::entity find_child(const std::string& name) const;
+    [[nodiscard]] ecs::EntityApi find_child(const std::string& name) const;
 
 protected:
-    ecs::entity entity_;
+    ecs::EntityApi entity_;
     uint32_t type_id_;
 };
 
@@ -64,10 +64,10 @@ public:
 };
 
 struct ScriptHolder {
-    ecs::entity owner;
+    ecs::EntityApi owner;
     std::vector<std::unique_ptr<ScriptBase>> list;
 
-    void link(ecs::entity owner_);
+    void link(ecs::EntityApi owner_);
 
     template<typename T>
     T& make() {
@@ -80,10 +80,10 @@ struct ScriptHolder {
 
 class ScriptDrawable2D : public Drawable2D<ScriptDrawable2D> {
 public:
-    ecs::entity entity_;
+    ecs::EntityApi entity_;
     std::unique_ptr<IDrawable2D> delegate;
 
-    ScriptDrawable2D(ecs::entity entity, std::unique_ptr<IDrawable2D> delegate_) :
+    ScriptDrawable2D(ecs::EntityApi entity, std::unique_ptr<IDrawable2D> delegate_) :
             Drawable2D(),
             entity_{entity},
             delegate{std::move(delegate_)} {
@@ -109,14 +109,14 @@ public:
 };
 
 template<typename S>
-inline S& assignScript(ecs::entity e) {
+inline S& assignScript(ecs::EntityApi e) {
     auto& holder = e.get_or_create<ScriptHolder>();
     holder.link(e);
     return holder.make<S>();
 }
 
 template<typename S>
-inline S& findScript(ecs::entity e) {
+inline S& findScript(ecs::EntityApi e) {
     const auto interest_type_id = type_index<S, ScriptBase>::value;
     auto& h = e.get<ScriptHolder>();
     for (auto& script : h.list) {

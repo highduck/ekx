@@ -2,7 +2,7 @@
 
 namespace ek {
 
-ecs::entity getChildAt(ecs::entity e, int index) {
+ecs::EntityApi getChildAt(ecs::EntityApi e, int index) {
     int i = 0;
     auto it = e.get<Node>().child_first;
     while (it) {
@@ -15,7 +15,7 @@ ecs::entity getChildAt(ecs::entity e, int index) {
     return nullptr;
 }
 
-void destroyChildren(ecs::entity e) {
+void destroyChildren(ecs::EntityApi e) {
     auto* entityNode = e.tryGet<Node>();
     if (!entityNode) {
         return;
@@ -35,7 +35,7 @@ void destroyChildren(ecs::entity e) {
     entityNode->child_last = nullptr;
 }
 
-bool isDescendant(ecs::entity e, ecs::entity ancestor) {
+bool isDescendant(ecs::EntityApi e, ecs::EntityApi ancestor) {
     if (!e.has<Node>() || !ancestor.has<Node>()) {
         return false;
     }
@@ -50,7 +50,7 @@ bool isDescendant(ecs::entity e, ecs::entity ancestor) {
     return false;
 }
 
-void removeFromParent(ecs::entity e) {
+void removeFromParent(ecs::EntityApi e) {
     auto* entityNode = e.tryGet<Node>();
     if (!entityNode) {
         return;
@@ -81,7 +81,7 @@ void removeFromParent(ecs::entity e) {
     entityNode->sibling_prev = nullptr;
 }
 
-void appendStrict(ecs::entity e, ecs::entity child) {
+void appendStrict(ecs::EntityApi e, ecs::EntityApi child) {
     assert(e != child);
     assert(e.has<Node>());
     assert(child.has<Node>());
@@ -101,7 +101,7 @@ void appendStrict(ecs::entity e, ecs::entity child) {
     child_node.parent = e;
 }
 
-void append(ecs::entity e, ecs::entity child) {
+void append(ecs::EntityApi e, ecs::EntityApi child) {
     e.get_or_create<Node>();
     if (child.get_or_create<Node>().parent) {
         removeFromParent(child);
@@ -109,7 +109,7 @@ void append(ecs::entity e, ecs::entity child) {
     appendStrict(e, child);
 }
 
-void prependStrict(ecs::entity e, ecs::entity child) {
+void prependStrict(ecs::EntityApi e, ecs::EntityApi child) {
     assert(e != child);
     assert(e.has<Node>());
     assert(child.has<Node>());
@@ -130,7 +130,7 @@ void prependStrict(ecs::entity e, ecs::entity child) {
     child_node.parent = e;
 }
 
-void prepend(ecs::entity e, ecs::entity child) {
+void prepend(ecs::EntityApi e, ecs::EntityApi child) {
     e.get_or_create<Node>();
     if (child.get_or_create<Node>().parent) {
         removeFromParent(child);
@@ -138,7 +138,7 @@ void prepend(ecs::entity e, ecs::entity child) {
     prependStrict(e, child);
 }
 
-void removeChildren(ecs::entity e) {
+void removeChildren(ecs::EntityApi e) {
     auto* entityNode = e.tryGet<Node>();
     if (!entityNode) {
         return;
@@ -157,7 +157,7 @@ void removeChildren(ecs::entity e) {
     entityNode->child_last = nullptr;
 }
 
-void insertAfter(ecs::entity e, ecs::entity childAfter) {
+void insertAfter(ecs::EntityApi e, ecs::EntityApi childAfter) {
     auto& entityNode = e.get<Node>();
     assert (entityNode.parent);
     auto& childAfterNode = childAfter.get_or_create<Node>();
@@ -174,7 +174,7 @@ void insertAfter(ecs::entity e, ecs::entity childAfter) {
     childAfterNode.parent = entityNode.parent;
 }
 
-void insertBeforeStrict(ecs::entity e, ecs::entity childBefore) {
+void insertBeforeStrict(ecs::EntityApi e, ecs::EntityApi childBefore) {
     assert(e.has<Node>());
     assert(childBefore.has<Node>());
     assert(!childBefore.get<Node>().parent);
@@ -194,7 +194,7 @@ void insertBeforeStrict(ecs::entity e, ecs::entity childBefore) {
     childNode.parent = entityNode.parent;
 }
 
-void insertBefore(ecs::entity e, ecs::entity childBefore) {
+void insertBefore(ecs::EntityApi e, ecs::EntityApi childBefore) {
     assert(e.get<Node>().parent);
 
     // TODO: a lot of places just require assign if not exists
@@ -205,7 +205,7 @@ void insertBefore(ecs::entity e, ecs::entity childBefore) {
     insertBeforeStrict(e, childBefore);
 }
 
-uint32_t countChildren(ecs::entity e) {
+uint32_t countChildren(ecs::EntityApi e) {
     uint32_t num = 0u;
     auto* node = e.tryGet<Node>();
     if (node) {
@@ -218,13 +218,13 @@ uint32_t countChildren(ecs::entity e) {
     return num;
 }
 
-void destroyNode(ecs::entity e) {
+void destroyNode(ecs::EntityApi e) {
     removeFromParent(e);
     destroyChildren(e);
     ecs::destroy(e);
 }
 
-ecs::entity getRoot(ecs::entity e) {
+ecs::EntityApi getRoot(ecs::EntityApi e) {
     assert(e.has<Node>());
     while (e && e.get<Node>().parent) {
         e = e.get<Node>().parent;
@@ -232,7 +232,7 @@ ecs::entity getRoot(ecs::entity e) {
     return e;
 }
 
-int Node::findDepth(ecs::entity e) {
+int Node::findDepth(ecs::EntityApi e) {
     int depth = 0;
     auto it = e.get<Node>().parent;
     while (it) {
@@ -242,7 +242,7 @@ int Node::findDepth(ecs::entity e) {
     return depth;
 }
 
-ecs::entity Node::findLowerCommonAncestor(ecs::entity e1, ecs::entity e2) {
+ecs::EntityApi Node::findLowerCommonAncestor(ecs::EntityApi e1, ecs::EntityApi e2) {
     auto depth1 = Node::findDepth(e1);
     auto depth2 = Node::findDepth(e2);
     auto it1 = e1;
@@ -266,7 +266,7 @@ ecs::entity Node::findLowerCommonAncestor(ecs::entity e1, ecs::entity e2) {
 }
 
 
-ecs::entity find(ecs::entity e, const char* childName) {
+ecs::EntityApi find(ecs::EntityApi e, const char* childName) {
     auto it = e.get<Node>().child_first;
     while (it) {
         const auto* nodeName = it.tryGet<NodeName>();
@@ -278,7 +278,7 @@ ecs::entity find(ecs::entity e, const char* childName) {
     return nullptr;
 }
 
-ecs::entity findByPath(const ecs::entity e, const std::vector<std::string>& path) {
+ecs::EntityApi findByPath(const ecs::EntityApi e, const std::vector<std::string>& path) {
     auto it = e;
     for (const auto& p : path) {
         it = find(it, p.c_str());
@@ -289,8 +289,8 @@ ecs::entity findByPath(const ecs::entity e, const std::vector<std::string>& path
     return it;
 }
 
-std::vector<ecs::entity> findMany(const ecs::entity e, const std::vector<std::string>& names) {
-    std::vector<ecs::entity> entities;
+std::vector<ecs::EntityApi> findMany(const ecs::EntityApi e, const std::vector<std::string>& names) {
+    std::vector<ecs::EntityApi> entities;
     for (const auto& name : names) {
         auto f = find(e, name.c_str());
         if (f) {

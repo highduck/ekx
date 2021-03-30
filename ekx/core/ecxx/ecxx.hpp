@@ -1,9 +1,8 @@
 #pragma once
 
-#include <ecxx/impl/world.hpp>
-#include <ecxx/impl/entity.hpp>
-#include <ecxx/impl/view_forward.hpp>
-#include <ecxx/impl/view_backward.hpp>
+#include "impl/world.hpp"
+#include "impl/view_forward.hpp"
+#include "impl/view_backward.hpp"
 
 namespace ecs {
 
@@ -13,7 +12,7 @@ namespace ecs {
 
 template<typename ...Component>
 inline auto view() {
-    return view_forward_t<Component...>{&the_world};
+    return ViewForward<Component...>{the_world};
 }
 
 /** special view provide back-to-front iteration
@@ -21,21 +20,21 @@ inline auto view() {
  **/
 template<typename ...Component>
 inline auto view_backward() {
-    return view_backward_t<Component...>{&the_world};
+    return ViewBackward<Component...>{the_world};
 }
 
 template<typename ...Component>
-inline entity create() {
-    Entity e;
+inline EntityApi create() {
+    EntityIndex e;
     the_world.create<Component...>(&e, 1);
-    return entity{e};
+    return EntityApi{e};
 }
 
 [[nodiscard]] inline bool valid(EntityRef ref) {
     return ref && the_world.check(ref.passport);
 }
 
-inline void destroy(entity e) {
+inline void destroy(EntityApi e) {
     EK_ASSERT_R2(e.isAlive());
     the_world.destroy(&e.index, 1);
 }
@@ -48,7 +47,7 @@ inline void each(Func func) {
     for (uint32_t i = 1, processed = 1; processed < count; ++i) {
         const auto index = entities[i];
         if (index == i) {
-            func(entity{index});
+            func(EntityApi{index});
             ++processed;
         }
     }
@@ -56,67 +55,67 @@ inline void each(Func func) {
 
 /** Entity methods impl **/
 
-inline bool entity::isAlive() const {
+inline bool EntityApi::isAlive() const {
     return index && the_world.entityPool[index] == index;
 }
 
 template<typename Component, typename ...Args>
-inline Component& entity::assign(Args&& ... args) {
+inline Component& EntityApi::assign(Args&& ... args) {
     EK_ASSERT_R2(isAlive());
     return the_world.assign<Component>(index, args...);
 }
 
 template<typename Component, typename ...Args>
-inline Component& entity::reassign(Args&& ... args) {
+inline Component& EntityApi::reassign(Args&& ... args) {
     EK_ASSERT_R2(isAlive());
     return the_world.reassign<Component>(index, args...);
 }
 
 template<typename Component>
-[[nodiscard]] inline bool entity::has() const {
+[[nodiscard]] inline bool EntityApi::has() const {
     EK_ASSERT_R2(isAlive());
     return the_world.has<Component>(index);
 }
 
 template<typename Component>
-inline Component& entity::get() const {
+inline Component& EntityApi::get() const {
     EK_ASSERT_R2(isAlive());
     return the_world.get<Component>(index);
 }
 
 template<typename Component>
-inline Component* entity::tryGet() const {
+inline Component* EntityApi::tryGet() const {
     EK_ASSERT_R2(isAlive());
     return the_world.tryGet<Component>(index);
 }
 
 template<typename Component>
-inline Component& entity::get_or_create() const {
+inline Component& EntityApi::get_or_create() const {
     EK_ASSERT_R2(isAlive());
     return the_world.getOrCreate<Component>(index);
 }
 
 template<typename Component>
-inline const Component& entity::get_or_default() const {
+inline const Component& EntityApi::get_or_default() const {
     EK_ASSERT_R2(isAlive());
     return the_world.getOrDefault<Component>(index);
 }
 
 template<typename Component>
-inline void entity::remove() {
+inline void EntityApi::remove() {
     EK_ASSERT_R2(isAlive());
     return the_world.remove<Component>(index);
 }
 
 template<typename Component>
-inline bool entity::try_remove() {
+inline bool EntityApi::try_remove() {
     EK_ASSERT_R2(isAlive());
     return the_world.tryRemove<Component>(index);
 }
 
 /** Entity methods impl **/
 
-inline EntityRef::EntityRef(entity ent) noexcept:
+inline EntityRef::EntityRef(EntityApi ent) noexcept:
         EntityRef{ent.index, the_world.generation(ent.index)} {
 
 }
@@ -124,5 +123,19 @@ inline EntityRef::EntityRef(entity ent) noexcept:
 inline bool EntityRef::valid() const {
     return passport && the_world.generation(index()) == version();
 }
+
+[[nodiscard]]
+inline EntityApi EntityRef::get() const {
+    EK_ASSERT(the_world.check(passport));
+    return EntityApi{index()};
+}
+
+// compat
+
+template<typename ...Component>
+using view_forward_t = ViewForward<Component...>;
+
+template<typename ...Component>
+using view_backward_t = ViewBackward<Component...>;
 
 }

@@ -7,7 +7,7 @@
 
 namespace ek {
 
-ParticleLayer2D& find_particle_layer(ecs::entity e) {
+ParticleLayer2D& find_particle_layer(ecs::EntityApi e) {
     auto l = e.get_or_default<ParticleEmitter2D>().layer.ent();
     if (!l) {
         l = e;
@@ -39,7 +39,7 @@ Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl) {
     return p;
 }
 
-void particles_burst(ecs::entity e, int count) {
+void particles_burst(ecs::EntityApi e, int count) {
     auto& emitter = e.get<ParticleEmitter2D>();
     const auto& data = e.get<ParticleEmitter2D>().data;
     const auto position = e.get_or_default<Transform2D>().getPosition() + emitter.position;
@@ -114,7 +114,7 @@ void update_emitters() {
     }
 }
 
-Particle* spawn_particle(ecs::entity e, const std::string& particle_id) {
+Particle* spawn_particle(ecs::EntityApi e, const std::string& particle_id) {
     Res<ParticleDecl> decl{particle_id};
     if (decl) {
         auto& to_layer = e.get_or_create<ParticleLayer2D>();

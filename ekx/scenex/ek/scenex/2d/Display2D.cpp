@@ -257,7 +257,7 @@ bool Arc2D::hitTest(float2 point) const {
 }
 
 /** utilities **/
-void set_gradient_quad(ecs::entity e, const rect_f& rc, argb32_t top, argb32_t bottom) {
+void set_gradient_quad(ecs::EntityApi e, const rect_f& rc, argb32_t top, argb32_t bottom) {
     auto q = std::make_unique<Quad2D>();
     q->rect = rc;
     q->colors[0] = top;

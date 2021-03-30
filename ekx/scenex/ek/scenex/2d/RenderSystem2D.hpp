@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecxx/impl/entity.hpp>
+#include <ecxx/ecxx_fwd.hpp>
 
 namespace ek {
 
@@ -10,9 +10,9 @@ class RenderSystem2D {
 public:
     static int currentLayerMask;
 
-    static void draw(const ecs::world& w, ecs::Entity e, const WorldTransform2D* transform);
+    static void draw(const ecs::World& w, ecs::EntityIndex e, const WorldTransform2D* transform);
 
-    static void drawStack(const ecs::world& w, ecs::Entity e);
+    static void drawStack(const ecs::World& w, ecs::EntityIndex e);
 };
 
 }

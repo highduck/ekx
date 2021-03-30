@@ -25,7 +25,7 @@ namespace ek {
 
 using namespace ecs;
 
-void scene_pre_update(entity root, float dt) {
+void scene_pre_update(EntityApi root, float dt) {
     ZoneScoped;
 
     resolve<InteractionSystem>().process();
@@ -53,7 +53,7 @@ void scene_pre_update(entity root, float dt) {
     MovieClip::updateAll();
 }
 
-void scene_post_update(ecs::entity root) {
+void scene_post_update(ecs::EntityApi root) {
     ZoneScoped;
 
     DestroyTimer::updateAll();
@@ -66,7 +66,7 @@ void scene_post_update(ecs::entity root) {
     Camera2D::updateQueue();
 }
 
-void scene_render(ecs::entity root) {
+void scene_render(ecs::EntityApi root) {
     ZoneScoped;
 
     for (auto& it : Res<DynamicAtlas>::map()) {

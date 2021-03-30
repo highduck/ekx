@@ -43,13 +43,13 @@ struct Camera2D {
     rect_f screenRect = rect_f::zero_one;
     rect_f worldRect = rect_f::zero_one;
 
-    static ecs::entity Main;
+    static ecs::EntityApi Main;
 public:
     Camera2D() = default;
 
-    explicit Camera2D(ecs::entity root);
+    explicit Camera2D(ecs::EntityApi root);
 
-    [[nodiscard]] matrix_2d getMatrix(ecs::entity view, float scale, const float2& screenOffset) const;
+    [[nodiscard]] matrix_2d getMatrix(ecs::EntityApi view, float scale, const float2& screenOffset) const;
 
 public:
     static void updateQueue();
@@ -58,7 +58,7 @@ public:
 
     static void drawGizmo(Camera2D& camera);
 
-    static std::vector<ecs::entity>& getCameraQueue();
+    static std::vector<ecs::EntityApi>& getCameraQueue();
 
     static const Camera2D* getCurrentRenderingCamera();
 };

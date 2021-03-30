@@ -6,7 +6,7 @@
 
 namespace ek {
 
-rect_f find_parent_layout_rect(ecs::entity e, bool safe) {
+rect_f find_parent_layout_rect(ecs::EntityApi e, bool safe) {
     auto it = e.get<Node>().parent;
     while (it) {
         const auto* layout = it.tryGet<LayoutRect>();
@@ -19,7 +19,7 @@ rect_f find_parent_layout_rect(ecs::entity e, bool safe) {
 }
 
 // system
-void update_layout(ecs::entity e) {
+void update_layout(ecs::EntityApi e) {
     const auto& l = e.get<LayoutRect>();
     auto top_rect = find_parent_layout_rect(e, l.doSafeInsets);
     if (top_rect.empty()) {

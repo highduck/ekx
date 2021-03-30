@@ -6,8 +6,8 @@
 #include <ecxx/ecxx.hpp>
 #include "common.hpp"
 
-using ecs::world;
-using ecs::entity;
+using ecs::World;
+using ecs::EntityApi;
 
 namespace ecxx_b {
 
@@ -28,7 +28,7 @@ struct comp {
 
 template<typename Func>
 void pathological(Func func) {
-    world registry;
+    World registry;
 
     for (std::uint64_t i = 0; i < 500'000L; i++) {
         const auto e = registry.create();
@@ -71,7 +71,7 @@ void construct(run_context_t& ctx) {
 
 void construct_many(run_context_t& ctx) {
     world w;
-    std::vector<entity> entities(1'000'000L);
+    std::vector<EntityApi> entities(1'000'000L);
 
     ctx.measure([&]{
         w.create(entities.begin(), entities.end());
@@ -80,7 +80,7 @@ void construct_many(run_context_t& ctx) {
 
 void construct_many_and_assign_components(run_context_t& ctx) {
     world w;
-    std::vector<entity> entities(1'000'000L);
+    std::vector<EntityApi> entities(1'000'000L);
 
     ctx.measure([&]{
         w.create(entities.begin(), entities.end());
@@ -93,7 +93,7 @@ void construct_many_and_assign_components(run_context_t& ctx) {
 
 void construct_many_with_components(run_context_t& ctx) {
     world w;
-    std::vector<entity> entities(1'000'000L);
+    std::vector<EntityApi> entities(1'000'000L);
 
     ctx.measure([&]{
         w.create<position, velocity>(entities.begin(), entities.end());
@@ -156,7 +156,7 @@ void IterateSingleComponentRuntime1M(run_context_t& ctx) {
 }
 
 void IterateTwoComponents1M(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -177,7 +177,7 @@ void IterateTwoComponents1M(run_context_t& ctx) {
 }
 
 void IterateTwoComponents1MHalf(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -201,7 +201,7 @@ void IterateTwoComponents1MHalf(run_context_t& ctx) {
 }
 
 void IterateTwoComponents1MOne(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -225,7 +225,7 @@ void IterateTwoComponents1MOne(run_context_t& ctx) {
 }
 
 //void IterateTwoComponentsNonOwningGroup1M(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    registry.group<>(entt::get<position, velocity>);
 //
 //    
@@ -249,7 +249,7 @@ void IterateTwoComponents1MOne(run_context_t& ctx) {
 //}
 //
 //void IterateTwoComponentsFullOwningGroup1M(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    registry.group<position, velocity>();
 //
 //    
@@ -273,7 +273,7 @@ void IterateTwoComponents1MOne(run_context_t& ctx) {
 //}
 //
 //void IterateTwoComponentsPartialOwningGroup1M(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    registry.group<position>(entt::get<velocity>);
 //
 //    
@@ -297,7 +297,7 @@ void IterateTwoComponents1MOne(run_context_t& ctx) {
 //}
 
 void IterateTwoComponentsRuntime1M(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -322,7 +322,7 @@ void IterateTwoComponentsRuntime1M(run_context_t& ctx) {
 }
 
 void IterateTwoComponentsRuntime1MHalf(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -350,7 +350,7 @@ void IterateTwoComponentsRuntime1MHalf(run_context_t& ctx) {
 }
 
 void IterateTwoComponentsRuntime1MOne(run_context_t& ctx) {
-    world registry;
+    World registry;
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
         const auto e = registry.create();
@@ -377,7 +377,7 @@ void IterateTwoComponentsRuntime1MOne(run_context_t& ctx) {
 }
 
 void IterateThreeComponents1M(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -399,7 +399,7 @@ void IterateThreeComponents1M(run_context_t& ctx) {
 }
 
 void IterateThreeComponents1MHalf(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -424,7 +424,7 @@ void IterateThreeComponents1MHalf(run_context_t& ctx) {
 }
 
 void IterateThreeComponents1MOne(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -449,7 +449,7 @@ void IterateThreeComponents1MOne(run_context_t& ctx) {
 }
 
 //void IterateThreeComponentsNonOwningGroup1M(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    registry.group<>(entt::get<position, velocity, comp<0>>);
 //
 //    
@@ -474,7 +474,7 @@ void IterateThreeComponents1MOne(run_context_t& ctx) {
 //}
 //
 //void IterateThreeComponentsFullOwningGroup1M(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    registry.group<position, velocity, comp<0>>();
 //
 //    
@@ -499,7 +499,7 @@ void IterateThreeComponents1MOne(run_context_t& ctx) {
 //}
 //
 //void IterateThreeComponentsPartialOwningGroup1M(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    registry.group<position, velocity>(entt::get<comp<0>>);
 //
 //    
@@ -524,7 +524,7 @@ void IterateThreeComponents1MOne(run_context_t& ctx) {
 //}
 
 void IterateThreeComponentsRuntime1M(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -551,7 +551,7 @@ void IterateThreeComponentsRuntime1M(run_context_t& ctx) {
 }
 
 void IterateThreeComponentsRuntime1MHalf(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -581,7 +581,7 @@ void IterateThreeComponentsRuntime1MHalf(run_context_t& ctx) {
 }
 
 void IterateThreeComponentsRuntime1MOne(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -623,7 +623,7 @@ void IterateFiveComponents1M_IMPL(world& registry, run_context_t& ctx) {
 }
 
 void IterateFiveComponents1M(run_context_t& ctx) {
-    world registry;
+    World registry;
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
         const auto e = registry.create();
@@ -648,7 +648,7 @@ void IterateFiveComponents1M(run_context_t& ctx) {
 }
 
 void IterateFiveComponents1MHalf(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -676,7 +676,7 @@ void IterateFiveComponents1MHalf(run_context_t& ctx) {
 }
 
 void IterateFiveComponents1MOne(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -703,7 +703,7 @@ void IterateFiveComponents1MOne(run_context_t& ctx) {
 }
 
 //void IterateFiveComponentsNonOwningGroup1M(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    registry.group<>(entt::get<position, velocity, comp<0>, comp<1>, comp<2>>);
 //
 //    
@@ -730,7 +730,7 @@ void IterateFiveComponents1MOne(run_context_t& ctx) {
 //}
 //
 //void IterateFiveComponentsFullOwningGroup1M(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    registry.group<position, velocity, comp<0>, comp<1>, comp<2>>();
 //
 //    
@@ -757,7 +757,7 @@ void IterateFiveComponents1MOne(run_context_t& ctx) {
 //}
 //
 //void IterateFiveComponentsPartialFourOfFiveOwningGroup1M(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    registry.group<position, velocity, comp<0>, comp<1>>(entt::get<comp<2>>);
 //
 //    
@@ -784,7 +784,7 @@ void IterateFiveComponents1MOne(run_context_t& ctx) {
 //}
 //
 //void IterateFiveComponentsPartialThreeOfFiveOwningGroup1M(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    registry.group<position, velocity, comp<0>>(entt::get<comp<1>, comp<2>>);
 //
 //    
@@ -811,7 +811,7 @@ void IterateFiveComponents1MOne(run_context_t& ctx) {
 //}
 
 void IterateFiveComponentsRuntime1M(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -848,7 +848,7 @@ void IterateFiveComponentsRuntime1M(run_context_t& ctx) {
 }
 
 void IterateFiveComponentsRuntime1MHalf(run_context_t& ctx) {
-    world registry;
+    World registry;
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
         const auto e = registry.create();
@@ -887,7 +887,7 @@ void IterateFiveComponentsRuntime1MHalf(run_context_t& ctx) {
 }
 
 void IterateFiveComponentsRuntime1MOne(run_context_t& ctx) {
-    world registry;
+    World registry;
 
 
     for (std::uint64_t i = 0; i < 1'000'000L; i++) {
@@ -974,7 +974,7 @@ void IteratePathological(run_context_t& ctx) {
 //}
 
 //void SortSingle(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //
 //    
 //
@@ -994,7 +994,7 @@ void IteratePathological(run_context_t& ctx) {
 //}
 
 //void SortMulti(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //
 //    
 //
@@ -1017,7 +1017,7 @@ void IteratePathological(run_context_t& ctx) {
 //}
 
 //void AlmostSortedStdSort(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    entt::e entities[3];
 //
 //    
@@ -1048,7 +1048,7 @@ void IteratePathological(run_context_t& ctx) {
 //}
 
 //void AlmostSortedInsertionSort(run_context_t& ctx) {
-//    world registry;
+//    World registry;
 //    entt::e entities[3];
 //
 //    

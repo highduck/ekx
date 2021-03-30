@@ -40,8 +40,6 @@
 
 namespace ek {
 
-using ecs::world;
-using ecs::entity;
 using namespace ek::app;
 
 // additional insets can be changed manually: l, t, r, b

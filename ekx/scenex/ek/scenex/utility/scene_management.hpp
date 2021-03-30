@@ -6,7 +6,7 @@
 
 namespace ek {
 
-inline ecs::entity createNode2D(const char* name = nullptr) {
+inline ecs::EntityApi createNode2D(const char* name = nullptr) {
     auto e = ecs::create<Node, Transform2D, WorldTransform2D>();
     if (name) {
         e.assign<NodeName>(name);

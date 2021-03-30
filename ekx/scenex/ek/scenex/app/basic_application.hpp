@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
+#include <ecxx/ecxx_fwd.hpp>
 
 #ifdef EK_DEV_TOOLS
 
@@ -41,7 +41,7 @@ public:
     signal_t<> onStartHook{};
 
     /////
-    ecs::entity root;
+    ecs::EntityApi root;
 
     static float2 AppResolution;
 

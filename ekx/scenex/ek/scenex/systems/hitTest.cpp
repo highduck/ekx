@@ -6,7 +6,7 @@
 
 namespace ek {
 
-ecs::Entity hitTest2D(const ecs::world& w, ecs::Entity e, const Node& node, float2 parentPosition) {
+ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, const Node& node, float2 parentPosition) {
     if ((node.flags & Node::VisibleAndTouchable) != Node::VisibleAndTouchable) {
         return 0;
     }
@@ -44,7 +44,7 @@ ecs::Entity hitTest2D(const ecs::world& w, ecs::Entity e, const Node& node, floa
     return 0;
 }
 
-ecs::Entity hitTest2D(const ecs::world& w, ecs::Entity e, float2 parentPosition) {
+ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, float2 parentPosition) {
     return hitTest2D(w, e, w.get<Node>(e), parentPosition);
 }
 

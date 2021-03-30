@@ -41,7 +41,7 @@ const ButtonSkin& get_skin(const Button& btn) {
     return btn.skin ? *btn.skin : basic_skin;
 }
 
-void initialize_events(ecs::entity e) {
+void initialize_events(ecs::EntityApi e) {
     auto& interactive = e.get_or_create<Interactive>();
     interactive.on_over.add([e] {
         const auto& skin = get_skin(e.get<Button>());
@@ -101,7 +101,7 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
     transform.color.offset = btn.baseColor.offset + argb32_t{h, h, h, 0.0f};
 }
 
-void update_movie_frame(ecs::entity entity, const Interactive& interactive) {
+void update_movie_frame(ecs::EntityApi entity, const Interactive& interactive) {
     if (entity.has<MovieClip>()) {
         int frame = 0;
         if (interactive.over || interactive.pushed) {

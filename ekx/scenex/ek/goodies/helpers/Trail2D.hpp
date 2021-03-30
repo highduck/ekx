@@ -92,7 +92,7 @@ public:
 
 class TrailRenderer2D : public Drawable2D<TrailRenderer2D> {
 public:
-    explicit TrailRenderer2D(ecs::entity target_) :
+    explicit TrailRenderer2D(ecs::EntityApi target_) :
             // TODO: inject world context
             w{&ecs::the_world},
             target{target_} {
@@ -110,8 +110,8 @@ public:
     rect_f getBounds() const override { return rect_f{}; }
 
 public:
-    ecs::world* w = nullptr;
-    ecs::entity target{};
+    ecs::World* w = nullptr;
+    ecs::EntityApi target{};
     float width = 20.0f;
     float minWidth = 5.0f;
     Res<Sprite> sprite{"empty"};

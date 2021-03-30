@@ -1,5 +1,6 @@
 #include "InteractionSystem.hpp"
 
+#include <ecxx/ecxx.hpp>
 #include <ek/math/vec.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
@@ -15,7 +16,7 @@ using namespace std;
 
 namespace ek {
 
-InteractionSystem::InteractionSystem(ecs::entity root) :
+InteractionSystem::InteractionSystem(ecs::EntityApi root) :
         root_{root} {
 
 }
@@ -25,7 +26,7 @@ inline bool contains(const vector<T>& vec, const T& value) {
     return find(vec.cbegin(), vec.cend(), value) != vec.cend();
 }
 
-bool dispatch_interactive_event(ecs::entity e, const NodeEventData& data) {
+bool dispatch_interactive_event(ecs::EntityApi e, const NodeEventData& data) {
     if (isTouchable(e)) {
         auto* eh = e.tryGet<NodeEventHandler>();
         if (eh) {
@@ -159,14 +160,14 @@ void InteractionSystem::handle_system_pause() {
     broadcast(root_, interactive_event::system_pause);
 }
 
-mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::entity node,
-                                                         vector<ecs::entity>& list) {
-    ecs::entity it = nullptr;
+mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::EntityApi node,
+                                                         vector<ecs::EntityApi>& list) {
+    ecs::EntityApi it;
     if (dragEntity_.valid()) {
         it = dragEntity_.ent();
     }
     else {
-        it = ecs::entity{hitTest2D(ecs::the_world, node.index, pointer)};
+        it = ecs::EntityApi{hitTest2D(ecs::the_world, node.index, pointer)};
     }
     hitTarget_ = ecs::EntityRef{it};
 
@@ -186,6 +187,14 @@ mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::en
     }
 
     return cursor;
+}
+
+void InteractionSystem::drag(ecs::EntityApi entity) {
+    dragEntity_ = ecs::EntityRef{entity};
+}
+
+ecs::EntityApi InteractionSystem::getHitTarget() const {
+    return hitTarget_.valid() ? hitTarget_.ent() : nullptr;
 }
 
 }

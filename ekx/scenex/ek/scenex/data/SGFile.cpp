@@ -43,7 +43,7 @@ const SGNodeData* SGFile::get(const std::string& library_name) const {
 
 using SGFileRes = Res<SGFile>;
 
-void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
+void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
     entity.get_or_create<NodeName>().name = data->name;
     if (data->movieTargetId >= 0) {
         entity.get_or_create<MovieClipTargetIndex>() = {data->movieTargetId};
@@ -144,7 +144,7 @@ void apply(ecs::entity entity, const SGNodeData* data, SGFileRes asset) {
     }
 }
 
-ecs::entity create_and_merge(const SGFile& sg, SGFileRes asset,
+ecs::EntityApi create_and_merge(const SGFile& sg, SGFileRes asset,
                              const SGNodeData* data,
                              const SGNodeData* over = nullptr) {
     auto entity = ecs::create<Node, Transform2D, WorldTransform2D>();
@@ -176,8 +176,8 @@ void extend_bounds(const SGFile& file, const SGNodeData& data, bounds_builder_2f
     }
 }
 
-ecs::entity sg_create(const std::string& library, const std::string& name) {
-    ecs::entity result;
+ecs::EntityApi sg_create(const std::string& library, const std::string& name) {
+    ecs::EntityApi result;
     SGFileRes file{library};
     if (file) {
         const SGNodeData* data = file->get(name);

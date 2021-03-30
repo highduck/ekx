@@ -4,12 +4,12 @@
 
 namespace ecs {
 
-world the_world;
+World the_world;
 
 /** World **/
 
-void resetEntityPoolArrays(Entity* entities, Generation* generations) {
-    ek::memory::clear(generations, sizeof(Generation) * ENTITIES_MAX_COUNT);
+void resetEntityPoolArrays(EntityIndex* entities, EntityGeneration* generations) {
+    ek::memory::clear(generations, sizeof(EntityGeneration) * ENTITIES_MAX_COUNT);
     {
         auto* it = entities;
         for (uint32_t i = 1; i <= ENTITIES_MAX_COUNT; ++i) {
@@ -18,7 +18,7 @@ void resetEntityPoolArrays(Entity* entities, Generation* generations) {
     }
 }
 
-void world::resetEntityPool() {
+void World::resetEntityPool() {
     resetEntityPoolArrays(entityPool, generations);
 
     // reserve null entity
@@ -27,7 +27,7 @@ void world::resetEntityPool() {
     size = 1;
 }
 
-void world::create(Entity* outEntities, uint32_t count_) {
+void World::create(EntityIndex* outEntities, uint32_t count_) {
     auto* indices = entityPool;
     auto next_ = next;
 
@@ -41,7 +41,7 @@ void world::create(Entity* outEntities, uint32_t count_) {
     size += count_;
 }
 
-void world::destroy(const Entity* entitiesToDestroy, uint32_t count) {
+void World::destroy(const EntityIndex* entitiesToDestroy, uint32_t count) {
     {
         // destroy from POOL
         auto* indices = entityPool;
@@ -77,7 +77,7 @@ void world::destroy(const Entity* entitiesToDestroy, uint32_t count) {
     }
 }
 
-bool world::check(Passport passport) const {
+bool World::check(EntityPassport passport) const {
     const auto index = passport & INDEX_MASK;
     const auto generation = (passport >> INDEX_BITS) & GENERATION_MASK;
     return generation == generations[index];
@@ -85,14 +85,14 @@ bool world::check(Passport passport) const {
 
 // World create / destroy
 
-void world::initialize() {
+void World::initialize() {
     using namespace ek::memory;
     allocator = systemAllocator.create<ek::AlignedAllocator>(systemAllocator, "ecxx");
     resetEntityPool();
     clear(components, COMPONENTS_MAX_COUNT * sizeof(void*));
 }
 
-void world::reset() {
+void World::reset() {
     resetEntityPool();
     auto** components_ = components;
     for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {
@@ -105,7 +105,7 @@ void world::reset() {
     }
 }
 
-void world::shutdown() {
+void World::shutdown() {
     using namespace ek::memory;
 
     // skip clearing entity pool, because we don't need it anymore

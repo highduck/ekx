@@ -17,7 +17,7 @@ struct Tween {
 
     static void updateAll();
 
-    static Tween& reset(ecs::entity e);
+    static Tween& reset(ecs::EntityApi e);
 };
 
 }

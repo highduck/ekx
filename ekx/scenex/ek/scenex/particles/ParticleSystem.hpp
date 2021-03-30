@@ -16,7 +16,7 @@ struct ParticleLayer2D {
 };
 
 struct ParticleEmitter2D {
-    typedef void SpawnCallback(ecs::entity, Particle&);
+    typedef void SpawnCallback(ecs::EntityApi, Particle&);
 
     emitter_data data;
     float2 position = float2::zero;
@@ -34,7 +34,7 @@ public:
 
     explicit ParticleRenderer2D(ecs::EntityRef target_) : target{target_} {}
 
-    explicit ParticleRenderer2D(ecs::entity target_) : target{target_} {}
+    explicit ParticleRenderer2D(ecs::EntityApi target_) : target{target_} {}
 
     void draw() override;
 
@@ -53,15 +53,15 @@ public:
     ecs::EntityRef target{};
 };
 
-void particles_burst(ecs::entity e, int count);
+void particles_burst(ecs::EntityApi e, int count);
 
-Particle* spawn_particle(ecs::entity e, const std::string& particle_id);
+Particle* spawn_particle(ecs::EntityApi e, const std::string& particle_id);
 
 void update_emitters();
 
 void update_particles();
 
-void draw_particle_layer(ecs::entity e);
+void draw_particle_layer(ecs::EntityApi e);
 
 Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl);
 

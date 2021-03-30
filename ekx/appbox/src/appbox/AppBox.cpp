@@ -39,8 +39,8 @@ AppBox::AppBox(AppBoxConfig config_) :
     Localization::instance.setLanguage(lang);
 }
 
-void set_state_by_name(ecs::entity e, const std::string& state) {
-    eachChild(e, [&state](ecs::entity child) {
+void set_state_by_name(ecs::EntityApi e, const std::string& state) {
+    eachChild(e, [&state](ecs::EntityApi child) {
         const auto& name = child.get_or_default<NodeName>().name;
         if (starts_with(name, "state_")) {
             setVisible(child, name == state);
@@ -48,11 +48,11 @@ void set_state_by_name(ecs::entity e, const std::string& state) {
     });
 }
 
-void set_state_on_off(ecs::entity e, bool enabled) {
+void set_state_on_off(ecs::EntityApi e, bool enabled) {
     set_state_by_name(e, enabled ? "state_on" : "state_off");
 }
 
-void AppBox::initDefaultControls(ecs::entity e) {
+void AppBox::initDefaultControls(ecs::EntityApi e) {
     {
         // VERSION
         auto e_version = find(e, "version");
@@ -157,7 +157,7 @@ void AppBox::rateUs() {
 
 /// download app feature
 
-void wrap_button(ecs::entity e, const std::string& name, const std::string& link) {
+void wrap_button(ecs::EntityApi e, const std::string& name, const std::string& link) {
     auto x = find(e, name);
     if (!link.empty()) {
         x.get_or_create<Button>().clicked.add([link] {
@@ -168,7 +168,7 @@ void wrap_button(ecs::entity e, const std::string& name, const std::string& link
     }
 }
 
-void AppBox::initDownloadAppButtons(ecs::entity) {
+void AppBox::initDownloadAppButtons(ecs::EntityApi) {
 //    auto banner = sg_create("gfx", "cross_banner");
 //    setName(banner, "banner");
 //    layout_wrapper{banner}.aligned(0.5f, 0.0f, 1.0f, 0.0f);
@@ -179,7 +179,7 @@ void AppBox::initDownloadAppButtons(ecs::entity) {
 //    append(e, banner);
 }
 
-void AppBox::initLanguageButton(ecs::entity e) {
+void AppBox::initLanguageButton(ecs::EntityApi e) {
     auto btn = find(e, "language");
     if (btn) {
         btn.get<Button>().clicked += [] {

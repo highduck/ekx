@@ -17,7 +17,7 @@ void guiBuildWindow(bool* p_open);
 /** Hierarchy **/
 void guiHierarchyWindow(bool* p_open);
 
-extern std::vector<ecs::entity> hierarchySelectionList;
+extern std::vector<ecs::EntityApi> hierarchySelectionList;
 extern std::string hierarchyFilterText;
 
 void guiInspectorWindow(bool* p_open);

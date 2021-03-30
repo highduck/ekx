@@ -27,7 +27,7 @@ struct GameScreen {
     // do not create/destroy content
     bool persistent = true;
 
-    static GameScreen& init(ecs::entity e, const char* name = nullptr);
+    static GameScreen& init(ecs::EntityApi e, const char* name = nullptr);
 };
 
 struct ScreenTransitionState {
@@ -44,8 +44,8 @@ struct ScreenTransitionState {
     bool nextPlayStarted = false;
     bool nextPlayCompleted = false;
 
-    ecs::entity prev;
-    ecs::entity next;
+    ecs::EntityApi prev;
+    ecs::EntityApi next;
 
     float duration = 0.65f;
     float delay = 0.15f;
@@ -71,20 +71,20 @@ struct ScreenTransitionState {
 
 class GameScreenManager {
 public:
-    ecs::entity layer;
+    ecs::EntityApi layer;
 
-    std::vector<ecs::entity> stack;
+    std::vector<ecs::EntityApi> stack;
 
     ScreenTransitionState transition;
 
     std::function<void(ScreenTransitionState&)> transitionEffect = defaultTransitionEffect;
 
-    explicit GameScreenManager(ecs::entity layer_);
+    explicit GameScreenManager(ecs::EntityApi layer_);
 
     void setScreen(const std::string& name);
 
     [[nodiscard]]
-    ecs::entity findScreen(const std::string& name) const;
+    ecs::EntityApi findScreen(const std::string& name) const;
 
     void changeScreen(const std::string& name);
 

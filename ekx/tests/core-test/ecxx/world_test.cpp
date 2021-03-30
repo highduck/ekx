@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <ecxx/impl/world.hpp>
+#include <ecxx/ecxx.hpp>
 #include "common/components.hpp"
-#include <ecxx/impl/entity.hpp>
 #include <ek/Allocator.hpp>
 
 using namespace ecs;
@@ -11,10 +10,10 @@ using namespace ek;
 TEST(world, basic) {
     memory::initialize();
     // TODO:
-    world w;
+    World w;
     w.initialize();
 
-    Entity e[4] = {0, 1, 2, 3};
+    EntityIndex e[4] = {0, 1, 2, 3};
     w.create(&e[1], 1);
     ASSERT_EQ(e[1], 1);
     ASSERT_EQ(e[2], 2);
@@ -28,7 +27,7 @@ TEST(world, basic) {
 TEST(sparse_vector, basic) {
     memory::initialize();
 
-    world w;
+    World w;
     w.initialize();
 
     // TODO:
@@ -155,13 +154,13 @@ TEST(view, min_to_max) {
 TEST(components, add) {
     memory::initialize();
     {
-        world w;
+        World w;
         w.initialize();
         w.registerComponent<value_t>();
         w.registerComponent<position_t>();
         w.registerComponent<empty_comp_t>();
 
-        Entity e;
+        EntityIndex e;
         w.create(&e, 1);
         auto& v = w.assign<value_t>(e);
         ASSERT_EQ(v.value, 0);
@@ -190,11 +189,11 @@ TEST(components, add) {
 
 TEST(components, remove) {
     memory::initialize();
-    world w;
+    World w;
     w.initialize();
     w.registerComponent<value_t>();
 
-    Entity e;
+    EntityIndex e;
     w.create(&e, 1);
 
     w.assign<value_t>(e, 1);
@@ -210,12 +209,12 @@ TEST(components, remove) {
 
 TEST(components, abstract_clear) {
     memory::initialize();
-    world w;
+    World w;
     w.initialize();
     w.registerComponent<value_t>();
     w.registerComponent<position_t>();
 
-    Entity e;
+    EntityIndex e;
     w.create(&e, 1);
 
     w.assign<value_t>(e, 1);
@@ -231,7 +230,7 @@ TEST(components, abstract_clear) {
     memory::shutdown();
 }
 
-constexpr entity null{};
+constexpr EntityApi null{};
 constexpr EntityRef nullRef{};
 
 TEST(entity_value, basic) {

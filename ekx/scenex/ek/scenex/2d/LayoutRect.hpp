@@ -48,14 +48,14 @@ struct LayoutRect {
     static void updateAll();
 };
 
-rect_f find_parent_layout_rect(ecs::entity e, bool safe);
+rect_f find_parent_layout_rect(ecs::EntityApi e, bool safe);
 
 
 // wrapper
 
 class layout_wrapper {
 public:
-    layout_wrapper(ecs::entity e) :
+    layout_wrapper(ecs::EntityApi e) :
             e_{e},
             l_{e.get_or_create<LayoutRect>()} {
     }
@@ -102,7 +102,7 @@ public:
     }
 
 private:
-    ecs::entity e_;
+    ecs::EntityApi e_;
     LayoutRect& l_;
 };
 }

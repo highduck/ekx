@@ -84,7 +84,7 @@ public:
     int nextFreeNode = 0;
 
     Array<int> objectNext;
-    Array<ecs::entity> objectEntity;
+    Array<ecs::EntityApi> objectEntity;
     Array<rect_i> objectsBoundsArray;
     int nextFreeObject = -1;
 
@@ -147,7 +147,7 @@ public:
         search(0, rect_i{area}, outNodesList, bounds);
     }
 
-    int insert(ecs::entity entity, const rect_f& objectBounds) {
+    int insert(ecs::EntityApi entity, const rect_f& objectBounds) {
         int objectId = allocObject();
         objectNext[objectId] = -1;
         objectEntity[objectId] = entity;
@@ -177,7 +177,7 @@ public:
         }
     }
 
-    void queryEntities(const std::set<int>& nodeIds, Array<ecs::entity>& outEntityList) {
+    void queryEntities(const std::set<int>& nodeIds, Array<ecs::EntityApi>& outEntityList) {
         for (auto nodeId : nodeIds) {
             auto& node = nodes[nodeId];
             // add all entities
