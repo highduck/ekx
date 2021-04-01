@@ -299,5 +299,6 @@ void line_arc(float x, float y, float r,
               abgr32_t color_inner, abgr32_t color_outer);
 
 void strokeRect(const rect_f& rc, abgr32_t color, float lineWidth);
+void strokeCircle(const circle_f& circle, abgr32_t color, float lineWidth, int segments);
 
 }
