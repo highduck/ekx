@@ -813,6 +813,23 @@ void strokeRect(const rect_f& rc, abgr32_t color, float lineWidth) {
     line({rc.x, rc.bottom()}, {rc.x, rc.y}, color, lineWidth);
 }
 
+void strokeCircle(const circle_f& circle, abgr32_t color, float lineWidth, int segments) {
+    const float x = circle.center.x;
+    const float y = circle.center.y;
+    const float r = circle.radius;
+
+    const float da = math::pi2 / segments;
+    float a = 0.0f;
+    float2 pen{x, y - r};
+    while (a < math::pi2) {
+        float2 next{x + r * cosf(a), y + r * sinf(a)};
+        line(pen, next, color, lineWidth);
+        pen = next;
+        a += da;
+    }
+    line(pen, {x, y - r}, color, lineWidth);
+}
+
 void endFrame() {
     state.vertexBuffers_->nextFrame();
     state.indexBuffers_->nextFrame();
