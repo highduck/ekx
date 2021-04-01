@@ -189,6 +189,10 @@ rect_f Text2D::getBounds() const {
     if (hitFullBounds) {
         return rect;
     }
+    return getTextBounds();
+}
+
+rect_f Text2D::getTextBounds() const {
     auto& textDrawer = TextEngine::shared;
     auto& blockInfo = TextEngine::sharedTextBlockInfo;
     textDrawer.format = format;
