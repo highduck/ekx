@@ -3,7 +3,7 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/vec.hpp>
-#include <set>
+#include <ek/ds/Hash.hpp>
 
 namespace ek {
 
@@ -84,7 +84,7 @@ public:
     int nextFreeNode = 0;
 
     Array<int> objectNext;
-    Array<ecs::EntityApi> objectEntity;
+    Array<ecs::EntityIndex> objectEntity;
     Array<rect_i> objectsBoundsArray;
     int nextFreeObject = -1;
 
@@ -143,11 +143,11 @@ public:
         nodes.emplace_back();
     }
 
-    void search(const rect_f& area, std::set<int>& outNodesList) {
+    void search(const rect_f& area, Hash<int>& outNodesList) {
         search(0, rect_i{area}, outNodesList, bounds);
     }
 
-    int insert(ecs::EntityApi entity, const rect_f& objectBounds) {
+    int insert(ecs::EntityIndex entity, const rect_f& objectBounds) {
         int objectId = allocObject();
         objectNext[objectId] = -1;
         objectEntity[objectId] = entity;
@@ -177,9 +177,9 @@ public:
         }
     }
 
-    void queryEntities(const std::set<int>& nodeIds, Array<ecs::EntityApi>& outEntityList) {
-        for (auto nodeId : nodeIds) {
-            auto& node = nodes[nodeId];
+    void queryEntities(const Hash<int>& nodeIds, Array<ecs::EntityIndex>& outEntityList) {
+        for (auto hashEntry : nodeIds._data) {
+            auto& node = nodes[hashEntry.key];
             // add all entities
             auto objectId = node.objects;
             while (objectId >= 0) {
@@ -276,10 +276,10 @@ private:
         }
     }
 
-    void search(int nodeId, const rect_i& area, std::set<int>& outNodesList, rect_i nodeBounds) {
+    void search(int nodeId, const rect_i& area, Hash<int>& outNodesList, rect_i nodeBounds) {
         auto& node = nodes[nodeId];
         if (node.objectsCount) {
-            outNodesList.insert(nodeId);
+            outNodesList.set(nodeId, 1);
         }
         if (node.firstChildNode) {
             const int childWidth = nodeBounds.width >> 1;
