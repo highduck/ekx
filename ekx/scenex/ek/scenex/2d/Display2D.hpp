@@ -230,6 +230,9 @@ public:
     rect_f getBounds() const override;
 
     [[nodiscard]]
+    rect_f getTextBounds() const;
+
+    [[nodiscard]]
     bool hitTest(float2 point) const override;
 };
 
