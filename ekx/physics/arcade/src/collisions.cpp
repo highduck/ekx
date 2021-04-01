@@ -140,16 +140,16 @@ sweep_test_result_t sweep_rects(const rect_f& a0, const rect_f& a1, const rect_f
     }
 
     if (dx == 0.0f) {
-        u0_x = 100000.0f;
-        u1_x = -100000.0f;
+        u0_x = -100000.0f;
+        u1_x = 100000.0f;
     } else {
         u0_x = cx0 / dx;
         u1_x = cx1 / dx;
     }
 
     if (dy == 0.0f) {
-        u0_y = 100000.0f;
-        u1_y = -100000.0f;
+        u0_y = -100000.0f;
+        u1_y = 100000.0f;
     } else {
         u0_y = cy0 / dy;
         u1_y = cy1 / dy;
