@@ -33,7 +33,7 @@ struct Array {
         _data = (T*) _allocator.alloc(sizeof(T) * _capacity, alignof(T));
     }
 
-    explicit Array(Allocator& allocator, unsigned capacity = 64) :
+    explicit Array(Allocator& allocator, unsigned capacity = 4) :
             _allocator{allocator} {
         _size = 0;
         _capacity = capacity;
@@ -108,7 +108,7 @@ struct Array {
     }
 
     void reserve(uint32_t capacity) {
-        if(_capacity < capacity) {
+        if (_capacity < capacity) {
             grow(capacity);
         }
     }
@@ -166,7 +166,7 @@ struct Array {
         if (newSize < _size) {
             reduceSize(newSize);
         } else {
-            if(newSize > _capacity) {
+            if (newSize > _capacity) {
                 // TODO: optimize by nextPowerOfTwo
                 grow(newSize);
             }
@@ -248,6 +248,11 @@ struct Array {
     inline const T& operator[](unsigned i) const {
         EK_ASSERT_R2(i < _size);
         return *(_data + i);
+    }
+
+    [[nodiscard]]
+    inline uint32_t size() const {
+        return _size;
     }
 };
 
