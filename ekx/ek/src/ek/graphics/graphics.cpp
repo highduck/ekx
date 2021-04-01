@@ -129,10 +129,13 @@ static std::string BackendToString[] = {
         "SG_BACKEND_DUMMY"
 };
 
-void initialize() {
+void initialize(sg_context_desc* customContext) {
     gHeapSokolGfx = memory::stdAllocator.create<ProxyAllocator>("sokol_gfx");
     sg_desc desc{};
     desc.buffer_pool_size = 256;
+    if(customContext != nullptr) {
+        desc.context = *customContext;
+    }
     sg_setup(desc);
     auto backend = sg_query_backend();
     EK_INFO << "Sokol Backend: " << BackendToString[backend];
