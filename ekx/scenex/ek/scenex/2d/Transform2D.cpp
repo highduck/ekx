@@ -122,10 +122,10 @@ void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root) {
     ZoneScoped;
 
     SmallArray<ecs::EntityIndex, ecs::ENTITIES_MAX_COUNT> out;
-    out.push(root.index);
+    out.push_back(root.index);
 
     uint32_t begin = 0;
-    uint32_t end = out.size;
+    uint32_t end = out.size();
     const auto* nodes = w->getStorage<Node>();
     const auto* localTransforms = w->getStorage<Transform2D>();
     const auto* worldTransforms = w->getStorage<WorldTransform2D>();
@@ -137,7 +137,7 @@ void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root) {
 
     while (begin < end) {
         for (uint32_t i = begin; i < end; ++i) {
-            const auto parent = out.data[i];
+            const auto parent = out[i];
             const auto& tp = worldTransforms->get(parent);
             const auto& node = nodes->get(parent);
 
@@ -148,12 +148,12 @@ void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root) {
                 matrix_2d::multiply(tp.matrix, tl.matrix, tw.matrix);
                 ColorMod32::multiply(tp.color, tl.color, tw.color);
 
-                out.push(it);
+                out.push_back(it);
                 it = nodes->get(it).sibling_next.index;
             }
         }
         begin = end;
-        end = out.size;
+        end = out.size();
     }
 }
 //
