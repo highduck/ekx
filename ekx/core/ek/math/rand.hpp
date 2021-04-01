@@ -1,10 +1,8 @@
 #pragma once
 
 #include "common.hpp"
-
+#include "../assert.hpp"
 #include <cstdint>
-#include <memory>
-#include <cassert>
 
 namespace ek {
 
@@ -32,9 +30,11 @@ public:
     inline explicit Lcg32(uint32_t seed) : seed_{seed} {}
 
     inline uint32_t next() {
-        return seed_ = (seed_ * A + C) & M;
+        seed_ = (seed_ * A + C) & M;
+        return seed_;
     }
 
+    [[nodiscard]]
     inline uint32_t seed() const {
         return seed_;
     }
@@ -54,18 +54,16 @@ class Random {
 
 public:
 
-    inline explicit Random(Engine& engine) noexcept : engine_{engine} {}
-
     inline uint32_t roll(uint32_t max_exclusive) {
         return next() % max_exclusive;
     }
 
     inline uint32_t next() {
-        return engine_.next();
+        return engine.next();
     }
 
     inline void set_seed(uint32_t seed) {
-        engine_.seed(seed);
+        engine.seed(seed);
     }
 
     inline float random() {
@@ -77,7 +75,7 @@ public:
     }
 
     inline int random_int(int min, int max) {
-        assert(max >= min);
+        EK_ASSERT(max >= min);
         const auto range = static_cast<uint32_t>(max - min);
         return min + roll(range + 1);
     }
@@ -92,17 +90,11 @@ public:
         return size > 0 ? array[roll(size)] : T{};
     }
 
-private:
-    Engine& engine_;
+    Engine engine{};
 };
 
-extern Lcg32 lcg_32_default;
 extern Random<Lcg32> rand_default;
-
-extern Lcg32 lcg_32_game;
 extern Random<Lcg32> rand_game;
-
-extern Lcg32 lcg_32_fx;
 extern Random<Lcg32> rand_fx;
 
 inline float random() {
@@ -125,4 +117,5 @@ template<typename Container, typename T = typename Container::value_type>
 T random_element(const Container& array) {
     return rand_default.random_element(array);
 }
+
 }
