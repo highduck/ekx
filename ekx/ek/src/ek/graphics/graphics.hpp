@@ -135,7 +135,7 @@ public:
     static Texture* createSolid32(int width, int height, uint32_t pixelColor);
 };
 
-void initialize();
+void initialize(sg_context_desc* customContext = nullptr);
 void shutdown();
 
 }
