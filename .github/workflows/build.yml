@@ -57,7 +57,7 @@ jobs:
       - name: Setup CCache
         uses: eliasku/ccache-action@master
         with:
-          key: ccache-${{ runner.os }}
+          key: ${{ runner.os }}
 
       - name: Install dependencies
         run: yarn --frozen-lockfile
