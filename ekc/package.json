@@ -1,6 +1,6 @@
 {
   "name": "@ekx/ekc",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "scripts": {
     "build:native": "node scripts/build.js",
     "postinstall": "npx npm-cmake"
@@ -13,7 +13,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/ekx": "0.1.1",
+    "@ekx/ekx": "0.1.2",
     "npm-cmake": "0.0.5"
   }
 }
