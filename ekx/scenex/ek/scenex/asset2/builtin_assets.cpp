@@ -25,6 +25,7 @@
 #include <ek/scenex/2d/DynamicAtlas.hpp>
 #include <ek/timers.hpp>
 #include <ek/Localization.hpp>
+#include <ek/ds/Array.hpp>
 
 namespace ek {
 
