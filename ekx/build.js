@@ -9,7 +9,7 @@ for (const buildType of buildTypes) {
     if (process.env.USE_CCACHE) {
         args.push("-DCMAKE_C_COMPILER_LAUNCHER=ccache", "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache");
     }
-    spawnSync("cmake", [
+    const result = spawnSync("cmake", [
         ".",
         "-B", `build/${buildType.toLowerCase()}`,
         "-G", "Ninja",
@@ -18,15 +18,21 @@ for (const buildType of buildTypes) {
     ], {
         stdio: 'inherit'
     });
+    if (result.status !== 0) {
+        process.exit(1);
+    }
 }
 
 for (const buildType of buildTypes) {
     console.info("Build", buildType);
-    spawnSync("cmake", [
+    const result = spawnSync("cmake", [
         "--build", `build/${buildType.toLowerCase()}`
     ], {
         stdio: 'inherit'
     });
+    if (result.status !== 0) {
+        process.exit(1);
+    }
 }
 
 fs.rmSync('build', {recursive: true});
