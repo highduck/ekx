@@ -12,19 +12,19 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/cairo": "0.0.5",
-    "@ekx/dev-fonts": "0.0.3",
+    "@ekx/cairo": "0.0.6",
+    "@ekx/dev-fonts": "0.0.4",
     "@ekx/freetype": "0.0.6",
-    "@ekx/google-benchmark": "0.0.4",
+    "@ekx/google-benchmark": "0.0.5",
     "@ekx/google-test": "0.0.5",
-    "@ekx/imgui": "0.0.9",
+    "@ekx/imgui": "0.0.10",
     "@ekx/miniaudio": "0.0.4",
     "@ekx/miniz": "0.0.3",
     "@ekx/pugixml": "0.0.3",
-    "@ekx/sokol": "0.0.5",
+    "@ekx/sokol": "0.0.6",
     "@ekx/stb": "0.0.3",
-    "@ekx/tracy": "0.0.7",
-    "npm-cmake": "0.0.4"
+    "@ekx/tracy": "0.0.8",
+    "npm-cmake": "0.0.5"
   },
   "devDependencies": {
     "@ekx/sokol-shdc": "0.0.2"
