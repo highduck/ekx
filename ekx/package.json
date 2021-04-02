@@ -13,7 +13,6 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/cairo": "0.0.6",
-    "@ekx/dev-fonts": "0.0.4",
     "@ekx/freetype": "0.0.6",
     "@ekx/google-benchmark": "0.0.5",
     "@ekx/google-test": "0.0.5",

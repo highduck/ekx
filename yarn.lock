@@ -219,11 +219,6 @@
   resolved "https://registry.yarnpkg.com/@ekx/cairo/-/cairo-0.0.6.tgz#4ce8f7a7fdafefb7dc73b7ee7449396ce84f956f"
   integrity sha512-Ucq2PD1T9DcAiL4g+iiuyjsvDnK0/iJqNoJ2+Q9PDhVar5xC/5iDOaJ0TCnHAsbZ9DmrA573AmKF5alUXBFbnQ==
 
-"@ekx/dev-fonts@0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@ekx/dev-fonts/-/dev-fonts-0.0.4.tgz#296829b5cd5c8ce48dbdc072c70afb220f383afe"
-  integrity sha512-sQwa7+oZfYNgwsb6cHi3OtQ+ePZBgBeNC4W1Od/auUpMExD/9QVFYcZgUzgkyQyUXSE+zeqks/Xl4XVdN7lE8Q==
-
 "@ekx/freetype@0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@ekx/freetype/-/freetype-0.0.6.tgz#4c3d03f9c19a6ea3253920059c36237ca5c8b9df"
