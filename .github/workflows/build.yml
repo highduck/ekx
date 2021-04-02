@@ -66,9 +66,16 @@ jobs:
         run: yarn run ci:build-native
 
       - uses: actions/upload-artifact@v2
+        if: runner.os == 'Linux'
         with:
-          name: ekc ${{ runner.os }}
-          path: ekc/bin
+          name: ekc-linux
+          path: ekc/bin/linux
+
+      - uses: actions/upload-artifact@v2
+        if: runner.os == 'macOS'
+        with:
+          name: ekc-osx
+          path: ekc/bin/osx
 
   build-js:
     name: Build JS
@@ -95,6 +102,14 @@ jobs:
           fetch-depth: 0
 
       - uses: actions/download-artifact@v2
+        with:
+          name: ekc-osx
+          path: ekc/bin/osx
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: ekc-linux
+          path: ekc/bin/linux
 
       - name: Intall Dependencies
         run: |
