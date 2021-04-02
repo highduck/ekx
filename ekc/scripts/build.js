@@ -10,16 +10,16 @@ for (const buildType of buildTypes) {
         args.push("-DCMAKE_C_COMPILER_LAUNCHER=ccache", "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache");
     }
     const result = spawnSync("cmake", [
-        ".",
-        "-B", `build/${buildType.toLowerCase()}`,
         "-G", "Ninja",
         `-DCMAKE_BUILD_TYPE=${buildType}`,
-        ...args
+        ...args,
+        "-S", ".",
+        "-B", `build/${buildType.toLowerCase()}`,
     ], {
         stdio: 'inherit'
-    }).status;
+    });
     if(result.status !== 0) {
-        process.exit(1);
+        process.exit(result.status);
     }
 }
 
@@ -32,7 +32,7 @@ for (const buildType of buildTypes) {
         stdio: 'inherit'
     });
     if(result.status !== 0) {
-        process.exit(1);
+        process.exit(result.status);
     }
 }
 
