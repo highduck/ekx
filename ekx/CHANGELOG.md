@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 67881dd: ecxx: api changes
+- f14659f: gpgs: fix signin and submitt scores
+- 566016e: update dependencies
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
@@ -81,6 +89,5 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - [admob] initial plugin (ios, android, null)
 - [billing] initial plugin (ios, android, null)
 
-[Unreleased]: https://github.com/eliasku/ekx/compare/0.0.1...HEAD
-
+[unreleased]: https://github.com/eliasku/ekx/compare/0.0.1...HEAD
 [0.0.1]: https://github.com/eliasku/ekx/releases/tag/0.0.1
