@@ -29,6 +29,7 @@ jobs:
     env:
       CC: clang
       CXX: clang++
+      USE_CCACHE: 1
 
     steps:
       - name: Checkout Repository
@@ -50,13 +51,13 @@ jobs:
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
 
-      - name: Check installed versions
-        run: |
-          yarn --version
-          cmake --version
-          ninja --version
-          clang++ --version
-          node --version
+      - name: Install CCache
+        uses: eliasku/install-ccache-action@master
+
+      - name: Setup CCache
+        uses: eliasku/ccache-action@master
+        with:
+          key: ccache-${{ runner.os }}
 
       - name: Install dependencies
         run: yarn --frozen-lockfile

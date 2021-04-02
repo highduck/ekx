@@ -5,11 +5,16 @@ const buildTypes = ["Release"];
 
 for (const buildType of buildTypes) {
     console.info("Generate", buildType);
+    const args = [];
+    if (process.env.USE_CCACHE) {
+        args.push("-DCMAKE_C_COMPILER_LAUNCHER=ccache", "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache");
+    }
     spawnSync("cmake", [
         ".",
         "-B", `build/${buildType.toLowerCase()}`,
         "-G", "Ninja",
-        `-DCMAKE_BUILD_TYPE=${buildType}`
+        `-DCMAKE_BUILD_TYPE=${buildType}`,
+        ...args
     ], {
         stdio: 'inherit'
     });
