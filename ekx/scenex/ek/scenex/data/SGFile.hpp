@@ -10,7 +10,7 @@
 #include <ek/math/color_transform.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/scenex/text/TextFormat.hpp>
-#include <ecxx/ecxx.hpp>
+#include <ecxx/ecxx_fwd.hpp>
 
 namespace ek {
 
