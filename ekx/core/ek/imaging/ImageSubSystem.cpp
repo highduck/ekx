@@ -9,7 +9,7 @@ struct PrivateState {
 };
 
 static StaticStorage<PrivateState> state{};
-Allocator& allocator = state.ptr()->allocator;
+Allocator& allocator = state.ref().allocator;
 
 void initialize() {
     state.initialize();
