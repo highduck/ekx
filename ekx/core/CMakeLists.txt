@@ -75,7 +75,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/Allocator.hpp
         ek/Allocator.cpp
 
-        ek/ds/FreeList.hpp
         ek/ds/StaticRingBuffer.hpp
         ek/ds/StaticHistoryBuffer.hpp
         ek/ds/BitVector.hpp
