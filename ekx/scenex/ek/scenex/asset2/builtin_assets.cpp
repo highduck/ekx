@@ -11,7 +11,6 @@
 #include <ek/imaging/image.hpp>
 #include <ek/graphics/Helpers.hpp>
 
-
 #include <ek/scenex/data/SGFile.hpp>
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/3d/StaticMesh.hpp>
@@ -281,8 +280,8 @@ public:
     }
 
     int counter = 0;
-    std::array<path_t, 6> imagePathList;
-    std::array<image_t*, 6> images{};
+    path_t imagePathList[6];
+    image_t* images[6];
 };
 
 class StringsAsset : public builtin_asset_t {

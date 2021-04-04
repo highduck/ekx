@@ -307,7 +307,7 @@ void basic_application::on_event(const event_t& event) {
 }
 
 void drawPreloader(float progress) {
-    draw2d::state.set_empty_texture();
+    draw2d::state.setEmptyTexture();
     auto pad = 40;
     auto w = g_app.drawable_size.x - pad * 2;
     auto h = 16;

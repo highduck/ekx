@@ -53,7 +53,7 @@ struct RealTimeGraph {
         float x = 0.0f;
         float x0 = 0.0f;
         float prev = calculateY(history.at(0));
-        draw2d::state.set_empty_texture();
+        draw2d::state.setEmptyTexture();
         draw2d::quad(0, 0, width, height, 0x77000000_argb);
         for (int i = 0; i < samples; ++i) {
             float val = history.at(i);
@@ -130,7 +130,7 @@ void Profiler::draw() {
     getScreenInsets(insets.data());
 
     draw2d::state.matrix = matrix_2d{scale, 0, 0, scale, insets.x, insets.y};
-    draw2d::state.set_empty_texture();
+    draw2d::state.setEmptyTexture();
 
     draw2d::state.save_matrix();
     impl->graphFrameTime.drawGraph();

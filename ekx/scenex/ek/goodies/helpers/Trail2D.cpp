@@ -86,7 +86,7 @@ void TrailRenderer2D::draw() {
     const uint32_t quads = columns - 1;
     auto& drawer = draw2d::state;
 
-    drawer.set_texture(texture);
+    drawer.setTexture(texture);
     drawer.allocTriangles(columns * 2, quads * 6);
 
     auto node_idx = trail.nodes.first;

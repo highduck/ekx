@@ -20,7 +20,7 @@ static unsigned short nine_patch_indices[] = {
 
 bool Sprite::select() const {
     if (texture) {
-        draw2d::state.set_texture_region(texture.get(), tex);
+        draw2d::state.setTextureRegion(texture.get(), tex);
         return true;
     }
     return false;
@@ -32,7 +32,7 @@ void Sprite::draw() const {
 
 void Sprite::draw(const rect_f& rc) const {
     if (texture) {
-        draw2d::state.set_texture_region(texture.get(), tex);
+        draw2d::state.setTextureRegion(texture.get(), tex);
         if (rotated) {
             draw2d::quad_rotated(rc.x, rc.y, rc.width, rc.height);
         } else {
@@ -46,7 +46,7 @@ void Sprite::draw_grid(const rect_f& grid, const rect_f& target) const {
         return;
     }
 
-    draw2d::state.set_texture_region(texture.get(), tex);
+    draw2d::state.setTextureRegion(texture.get(), tex);
 
     float x = rect.x;
     float y = rect.y;
