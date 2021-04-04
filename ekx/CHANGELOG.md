@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+### Patch Changes
+
+- f7692d8: support USE_CCACHE
+
 ## 0.1.1
 
 ### Patch Changes

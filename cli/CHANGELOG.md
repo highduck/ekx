@@ -1,5 +1,14 @@
 ## 0.0.4
 
+## 0.1.2
+
+### Patch Changes
+
+- Updated dependencies [f9b7ca4]
+- Updated dependencies [f7692d8]
+  - @ekx/ekc@0.1.2
+  - @ekx/ekx@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
