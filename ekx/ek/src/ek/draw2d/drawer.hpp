@@ -116,22 +116,22 @@ struct Context : private disable_copy_assign_t {
 
     Context& save_texture_coords();
 
-    Context& set_texture_coords(float u0, float v0, float du, float dv);
+    Context& setTextureCoords(float u0, float v0, float du, float dv);
 
-    Context& set_texture_coords(const rect_f& uv_rect);
+    Context& setTextureCoords(const rect_f& uv_rect);
 
     Context& restore_texture_coords();
 
-    Context& save_texture();
+    Context& saveTexture();
 
-    Context& set_empty_texture();
+    Context& setEmptyTexture();
 
-    Context& set_texture(const graphics::Texture* texture);
+    Context& setTexture(const graphics::Texture* texture_);
 
-    Context& set_texture_region(const graphics::Texture* texture = nullptr,
-                                const rect_f& region = rect_f::zero_one);
+    Context& setTextureRegion(const graphics::Texture* texture_ = nullptr,
+                              const rect_f& region = rect_f::zero_one);
 
-    Context& restore_texture();
+    Context& restoreTexture();
 
     Context& pushProgram(const char* id);
 
@@ -155,6 +155,8 @@ struct Context : private disable_copy_assign_t {
     void applyNextState();
 
 public:
+
+    void drawUserBatch(sg_pipeline pip, uint32_t numTextures);
 
     void drawBatch();
 

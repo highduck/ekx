@@ -223,6 +223,50 @@ void Context::shutdown() {
     initialized_ = false;
 }
 
+void Context::drawUserBatch(sg_pipeline pip, uint32_t numTextures) {
+    if (indicesCount_ == 0) {
+        return;
+    }
+
+    const uint32_t vertexDataSize = verticesCount_ * static_cast<uint32_t>(sizeof(Vertex2D));
+    const uint32_t indexDataSize = indicesCount_ << 1u;
+    auto* vb = vertexBuffers_->nextBuffer(vertexDataSize);
+    auto* ib = indexBuffers_->nextBuffer(indexDataSize);
+    vb->update(vertexData_, vertexDataSize);
+    ib->update(indexData_, indexDataSize);
+
+    // reset current pipeline
+    selectedPipeline = pip;
+
+    bind.vertex_buffers[0] = vb->buffer;
+    bind.index_buffer = ib->buffer;
+    bind.fs_images[0].id = numTextures == 1 ? curr.texture.id : SG_INVALID_ID;
+    sg_apply_bindings(bind);
+
+    {
+        const auto rc = curr.scissors;
+        sg_apply_scissor_rect(rc.x, rc.y, rc.width, rc.height, true);
+    }
+
+    sg_draw(0, (int) indicesCount_, 1);
+
+#ifndef NDEBUG
+    stats.fillArea += getTriangleArea(vertexData_, indexData_, indicesCount_);
+#endif
+    stats.triangles += indicesCount_ / 3;
+    ++stats.drawCalls;
+
+    indicesCount_ = 0;
+    verticesCount_ = 0;
+
+    vertexDataNext_ = vertexData_;
+    indexDataNext_ = indexData_;
+
+    // just verify that we alloc before write
+    vertexDataPos_ = nullptr;
+    indexDataPos_ = nullptr;
+}
+
 void Context::drawBatch() {
     if (indicesCount_ == 0) {
         return;
@@ -464,12 +508,12 @@ Context& Context::save_texture_coords() {
     return *this;
 }
 
-Context& Context::set_texture_coords(float u0, float v0, float du, float dv) {
+Context& Context::setTextureCoords(float u0, float v0, float du, float dv) {
     uv.set(u0, v0, du, dv);
     return *this;
 }
 
-Context& Context::set_texture_coords(const rect_f& uv_rect) {
+Context& Context::setTextureCoords(const rect_f& uv_rect) {
     uv = uv_rect;
     return *this;
 }
@@ -480,32 +524,32 @@ Context& Context::restore_texture_coords() {
     return *this;
 }
 
-Context& Context::save_texture() {
+Context& Context::saveTexture() {
     textureStack.push_back(texture);
     return *this;
 }
 
-Context& Context::set_empty_texture() {
+Context& Context::setEmptyTexture() {
     texture = emptyTexture;
     checkFlags |= Check_Texture;
-    set_texture_coords(0, 0, 1, 1);
+    setTextureCoords(0, 0, 1, 1);
     return *this;
 }
 
-Context& Context::set_texture(const graphics::Texture* texture_) {
+Context& Context::setTexture(const graphics::Texture* texture_) {
     texture = texture_;
     checkFlags |= Check_Texture;
     return *this;
 }
 
-Context& Context::set_texture_region(const graphics::Texture* texture_, const rect_f& region) {
+Context& Context::setTextureRegion(const graphics::Texture* texture_, const rect_f& region) {
     texture = texture_ != nullptr ? texture_ : emptyTexture;
     checkFlags |= Check_Texture;
     uv = region;
     return *this;
 }
 
-Context& Context::restore_texture() {
+Context& Context::restoreTexture() {
     texture = textureStack.back();
     checkFlags |= Check_Texture;
     textureStack.pop_back();

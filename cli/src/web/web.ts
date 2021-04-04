@@ -17,7 +17,7 @@ function getEmscriptenSDKPath():string {
 
 function renderCMakeFile(ctx, cmakeListContents: string): string {
     const cppSourceFiles = [];
-    const cppExtensions = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
+    const cppExtensions = ["hpp", "hxx", "h", "cpp", "cxx", "c", "cc", "m", "mm"];
     const cppSourceRoots = collectSourceRootsAll(ctx, "cpp", "web", ".");
     for (const cppSourceRoot of cppSourceRoots) {
         collectSourceFiles(cppSourceRoot, cppExtensions, cppSourceFiles);

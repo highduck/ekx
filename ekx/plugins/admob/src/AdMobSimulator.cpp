@@ -11,7 +11,7 @@ namespace ek {
 void AdMobSimulator::draw() const {
     if (activeInterstitial) {
         auto size = app::g_app.drawable_size;
-        draw2d::state.set_empty_texture();
+        draw2d::state.setEmptyTexture();
         draw2d::quad(0, 0,
                      static_cast<float>(size.x),
                      static_cast<float>(size.y), 0x7700FF00_argb);
@@ -19,7 +19,7 @@ void AdMobSimulator::draw() const {
 
     if (activeRewardedAd) {
         auto size = app::g_app.drawable_size;
-        draw2d::state.set_empty_texture();
+        draw2d::state.setEmptyTexture();
         draw2d::quad(0, 0,
                      static_cast<float>(size.x),
                      static_cast<float>(size.y), 0x77FF00FF_argb);

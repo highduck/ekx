@@ -12,7 +12,7 @@ namespace ek {
 IDrawable2D::~IDrawable2D() = default;
 
 void Quad2D::draw() {
-    draw2d::state.set_empty_texture();
+    draw2d::state.setEmptyTexture();
     draw2d::quad(rect.x, rect.y, rect.width, rect.height, colors[0], colors[1], colors[2], colors[3]);
 }
 
@@ -156,11 +156,11 @@ void Text2D::draw() {
     textDrawer.format = format;
     textDrawer.maxWidth = format.wordWrap ? rect.width : 0.0f;
     if (fillColor.a > 0) {
-        draw2d::state.set_empty_texture();
+        draw2d::state.setEmptyTexture();
         draw2d::quad(rect, fillColor);
     }
     if (borderColor.a > 0) {
-        draw2d::state.set_empty_texture();
+        draw2d::state.setEmptyTexture();
         draw2d::strokeRect(expand(rect, 1.0f), borderColor, 1);
     }
 
@@ -240,7 +240,7 @@ void Arc2D::draw() {
     Res<Sprite> f{sprite};
     if (f && f->texture) {
         auto& tex = f->tex;
-        draw2d::state.set_texture_region(
+        draw2d::state.setTextureRegion(
                 f->texture.get(),
                 {tex.center_x(), tex.y, 0.0f, tex.height}
         );

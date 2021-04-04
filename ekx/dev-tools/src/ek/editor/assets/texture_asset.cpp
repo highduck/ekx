@@ -49,7 +49,7 @@ void texture_asset_t::load() {
         if (images_.size() != 6) {
             EK_ERROR << "Cubemap requires 6 images";
         }
-        std::array<image_t*, 6> images{};
+        image_t* images[6];
         for (size_t i = 0; i < 6; ++i) {
             images[i] = load_image(get_relative_path(path_t{images_[i]}));
         }
