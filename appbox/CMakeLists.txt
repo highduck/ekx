@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
+include(npm.cmake)
 project(appbox)
 
-add_library(${PROJECT_NAME} STATIC ""
-        )
+add_library(${PROJECT_NAME} STATIC "")
+add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 add_subdirectory(src)
 

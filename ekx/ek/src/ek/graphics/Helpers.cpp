@@ -4,8 +4,9 @@
 
 namespace ek::graphics {
 
-Texture* createTexture(const image_t& image) {
+Texture* createTexture(const image_t& image, const char* label) {
     sg_image_desc desc{};
+    desc.label = label;
     desc.type = SG_IMAGETYPE_2D;
     desc.width = (int) image.width();
     desc.height = (int) image.height();
@@ -20,8 +21,9 @@ Texture* createTexture(const image_t& image) {
     return new Texture(desc);
 }
 
-Texture* createTexture(ek::image_t* images[6]) {
+Texture* createTexture(ek::image_t* images[6], const char* label) {
     sg_image_desc desc{};
+    desc.label = label;
     desc.type = SG_IMAGETYPE_CUBE;
     desc.width = (int) images[0]->width();
     desc.height = (int) images[0]->height();
@@ -39,8 +41,9 @@ Texture* createTexture(ek::image_t* images[6]) {
     return new Texture(desc);
 }
 
-Texture* createRenderTarget(int width, int height) {
+Texture* createRenderTarget(int width, int height, const char* label) {
     sg_image_desc desc{};
+    desc.label = label;
     desc.type = SG_IMAGETYPE_2D;
     desc.render_target = true;
     desc.width = width;

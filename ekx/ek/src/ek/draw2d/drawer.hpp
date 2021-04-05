@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <ek/ds/Array.hpp>
 #include <ek/util/common_macro.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/math/mat3x2.hpp>
@@ -24,6 +24,8 @@ struct Vertex2D {
     float2 uv;
     abgr32_t cm;
     abgr32_t co;
+
+    static sg_layout_desc layout();
 };
 
 enum class BlendMode : uint8_t {
@@ -192,12 +194,12 @@ public:
     mat4f mvp{};
 
     // Stacks for save-restore states
-    std::vector<matrix_2d> matrixStack;
-    std::vector<ColorMod32> colorStack;
-    std::vector<rect_f> scissorsStack;
-    std::vector<const graphics::Shader*> programStack;
-    std::vector<const graphics::Texture*> textureStack;
-    std::vector<rect_f> texCoordStack;
+    Array<matrix_2d> matrixStack;
+    Array<ColorMod32> colorStack;
+    Array<rect_f> scissorsStack;
+    Array<const graphics::Shader*> programStack;
+    Array<const graphics::Texture*> textureStack;
+    Array<rect_f> texCoordStack;
 
     // Checking what states could be potentially changed
     enum CheckFlags : uint8_t {
@@ -284,9 +286,9 @@ inline void write_indices_quad(const uint16_t base_index = 0) {
 
 void write_indices(const uint16_t* source, uint16_t count, uint16_t base_vertex = 0);
 
-void draw_indexed_triangles(const std::vector<float2>& positions,
-                            const std::vector<abgr32_t>& colors,
-                            const std::vector<uint16_t>& indices,
+void draw_indexed_triangles(const Array<float2>& positions,
+                            const Array<abgr32_t>& colors,
+                            const Array<uint16_t>& indices,
                             float2 offset, float2 scale);
 
 void line(const float2& start, const float2& end,

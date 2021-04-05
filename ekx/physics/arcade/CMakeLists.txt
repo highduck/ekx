@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.13)
 
 project(ek-physics-arcade)
 
-add_library(${PROJECT_NAME} STATIC "")
-
 add_subdirectory(src)
 
 target_link_libraries(${PROJECT_NAME} ek-core)

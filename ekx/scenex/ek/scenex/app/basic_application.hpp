@@ -85,7 +85,6 @@ inline float2 basic_application::AppResolution{};
 template<typename T>
 inline void run_app(app::window_config cfg) {
     using app::g_app;
-    using app::vec2;
 
     memory::initialize();
     app::initialize();
@@ -97,7 +96,7 @@ inline void run_app(app::window_config cfg) {
 #ifdef EK_DEV_TOOLS
     Editor::settings.load();
     if (length(Editor::settings.windowSize) > 0.0f) {
-        g_app.window_cfg.size = vec2{Editor::settings.windowSize};
+        g_app.window_cfg.size = Editor::settings.windowSize;
         g_app.window_cfg.title = "Ekitor: " + g_app.window_cfg.title;
     }
 #endif

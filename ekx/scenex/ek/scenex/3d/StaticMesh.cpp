@@ -53,7 +53,8 @@ MeshData MeshData::createCube(const float3& position, const float3& size, argb32
     result.vertices[22] = {{-u, u, -u}, n, {1, 1}, color1, color2};
     result.vertices[23] = {{-u, u, u}, n, {1, 0}, color1, color2};
 
-    result.indices = {
+    // 12 * 3 = 36
+    uint16_t indices[36]{
             0, 1, 2,
             2, 3, 0,
             4, 5, 6,
@@ -67,6 +68,7 @@ MeshData MeshData::createCube(const float3& position, const float3& size, argb32
             20, 21, 22,
             22, 23, 20
     };
+    memory::copy(result.indices.data(), indices, 2 * 36);
 
     for (auto& v : result.vertices) {
         v.position = position + v.position * size;
@@ -77,24 +79,25 @@ MeshData MeshData::createCube(const float3& position, const float3& size, argb32
 
 MeshData MeshData::createPlane(const float3& position, const float2& size, argb32_t color) {
     MeshData result;
-    result.vertices.resize(4);
-    result.indices.resize(2 * 3);
-
-    float3 n;
+    
     const float u = 0.5f;
     const auto color1 = color.abgr();
     const abgr32_t color2 = 0x0;
-
-    n = {0, 0, 1};
+    const float3 n{0, 0, 1};
+    
+    result.vertices.resize(4);
     result.vertices[0] = {{-u, -u, 0.0f}, n, {0, 0}, color1, color2};
     result.vertices[1] = {{u, -u, 0.0f}, n, {1, 0}, color1, color2};
     result.vertices[2] = {{u, u, 0.0f}, n, {1, 1}, color1, color2};
     result.vertices[3] = {{-u, u, 0.0f}, n, {0, 1}, color1, color2};
 
-    result.indices = {
-            0, 1, 2,
-            2, 3, 0
-    };
+    result.indices.resize(2 * 3);
+    result.indices[0] = 0;
+    result.indices[1] = 1;
+    result.indices[2] = 2;
+    result.indices[3] = 2;
+    result.indices[4] = 3;
+    result.indices[5] = 0;
 
     for (auto& v : result.vertices) {
         v.position = position + v.position * float3{size.x, size.y, 1.0f};

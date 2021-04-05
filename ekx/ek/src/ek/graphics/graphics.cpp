@@ -11,7 +11,7 @@ static ek::ProxyAllocator* gHeapSokolGfx = nullptr;
 #define SOKOL_ASSERT(x) EK_ASSERT(x)
 #define SOKOL_LOG(s) EK_INFO("SG: %s", s);
 
-#define SOKOL_MALLOC(sz) (::gHeapSokolGfx->alloc(sz, static_cast<uint32_t>(sizeof(void*))))
+#define SOKOL_MALLOC(sz) (::gHeapSokolGfx->alloc(static_cast<uint32_t>(sz), static_cast<uint32_t>(sizeof(void*))))
 #define SOKOL_FREE(p) (::gHeapSokolGfx->dealloc(p))
 
 #include <sokol_gfx.h>

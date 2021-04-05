@@ -8,6 +8,20 @@ using namespace ek::graphics;
 
 namespace ek::draw2d {
 
+sg_layout_desc Vertex2D::layout() {
+    sg_layout_desc layout{};
+    layout.buffers[0].stride = sizeof(Vertex2D);
+    layout.attrs[0].offset = offsetof(Vertex2D, position);
+    layout.attrs[0].format = SG_VERTEXFORMAT_FLOAT2;
+    layout.attrs[1].offset = offsetof(Vertex2D, uv);
+    layout.attrs[1].format = SG_VERTEXFORMAT_FLOAT2;
+    layout.attrs[2].offset = offsetof(Vertex2D, cm);
+    layout.attrs[2].format = SG_VERTEXFORMAT_UBYTE4N;
+    layout.attrs[3].offset = offsetof(Vertex2D, co);
+    layout.attrs[3].format = SG_VERTEXFORMAT_UBYTE4N;
+    return layout;
+}
+
 void Context::setNextScissors(rect_i rc) {
     if (rc != curr.scissors) {
         stateChanged = true;
@@ -46,15 +60,7 @@ void Context::applyNextState() {
 
 sg_pipeline createPipeline(sg_shader shader, bool useRenderTarget) {
     sg_pipeline_desc pip_desc{};
-    pip_desc.layout.buffers[0].stride = sizeof(Vertex2D);
-    pip_desc.layout.attrs[0].offset = offsetof(Vertex2D, position);
-    pip_desc.layout.attrs[0].format = SG_VERTEXFORMAT_FLOAT2;
-    pip_desc.layout.attrs[1].offset = offsetof(Vertex2D, uv);
-    pip_desc.layout.attrs[1].format = SG_VERTEXFORMAT_FLOAT2;
-    pip_desc.layout.attrs[2].offset = offsetof(Vertex2D, cm);
-    pip_desc.layout.attrs[2].format = SG_VERTEXFORMAT_UBYTE4N;
-    pip_desc.layout.attrs[3].offset = offsetof(Vertex2D, co);
-    pip_desc.layout.attrs[3].format = SG_VERTEXFORMAT_UBYTE4N;
+    pip_desc.layout = Vertex2D::layout();
     pip_desc.shader = shader;
     pip_desc.index_type = SG_INDEXTYPE_UINT16;
     pip_desc.colors[0].write_mask = SG_COLORMASK_RGB;
@@ -172,7 +178,7 @@ public:
 
 private:
     BufferType type_;
-    std::vector<Buffer*> buffers_[4]{};
+    Array<Buffer*> buffers_[4]{};
     uint16_t pos[4] = {0, 0, 0, 0};
     // each bucket buffer size
     uint32_t caps[4];
@@ -764,9 +770,8 @@ void write_indices(const uint16_t* source,
 
 /////
 
-void draw_indexed_triangles(
-        const std::vector<float2>& positions, const std::vector<abgr32_t>& colors,
-        const std::vector<uint16_t>& indices, float2 offset, float2 scale) {
+void draw_indexed_triangles(const Array<float2>& positions, const Array<abgr32_t>& colors,
+                            const Array<uint16_t>& indices, float2 offset, float2 scale) {
 
     int verticesTotal = static_cast<int>(positions.size());
     triangles(verticesTotal, indices.size());

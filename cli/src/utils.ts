@@ -74,8 +74,8 @@ export function optimizePng(input: string, output?: string) {
     if (result.status === 0) {
         console.log('Image minified! ' + input);
     } else {
-        console.warn(result.stderr.toString());
-        console.warn(result.status);
+        console.warn(result.stderr != null ? result.stderr.toString() : "null");
+        console.warn("exit code:", result.status);
     }
 }
 

@@ -1,24 +1,16 @@
 cmake_minimum_required(VERSION 3.13)
-project(plugin-admob)
-
+include(npm.cmake)
+project(plugin-billing)
 add_library(${PROJECT_NAME} STATIC
-        src/admob.hpp
-        src/admob.cpp
-
-        src/AdMobWrapper.hpp
-        src/AdMobWrapper.cpp
-        src/AdMobNull.cpp
-        src/AdMobNull.cpp
-        src/AdMobSimulator.hpp
-        src/AdMobSimulator.cpp
-
-        null/admob_null.cpp
+        src/billing.hpp
+        src/billing.cpp
+        sim/billing_sim.cpp
         )
+add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC scenex
-        )
+        PUBLIC ek)
 
 #target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
 set_target_properties(${PROJECT_NAME} PROPERTIES

@@ -26,16 +26,11 @@ endif ()
 
 add_subdirectory(core)
 add_subdirectory(ek)
-add_subdirectory(plugins/admob)
-add_subdirectory(plugins/billing)
-add_subdirectory(plugins/game-services)
 add_subdirectory(scenex)
-add_subdirectory(appbox)
 add_subdirectory(physics)
 
 add_library(ekx INTERFACE)
 target_link_libraries(ekx
-        INTERFACE appbox
         INTERFACE ek-core
         INTERFACE ek
         INTERFACE scenex)

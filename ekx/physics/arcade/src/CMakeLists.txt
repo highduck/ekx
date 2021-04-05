@@ -1,8 +1,6 @@
-target_sources(${PROJECT_NAME} PUBLIC
+add_library(${PROJECT_NAME} STATIC ArcadePhysicsModule.cpp
         collisions.hpp
-        collisions.cpp
         QuadTree.hpp
-        QuadTree.cpp
-        )
+        RegularGrid.hpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)

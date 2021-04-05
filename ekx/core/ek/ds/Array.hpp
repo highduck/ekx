@@ -240,6 +240,14 @@ struct Array {
         return _data + _size;
     }
 
+    inline T* begin() {
+        return _data;
+    }
+
+    inline T* end() {
+        return _data + _size;
+    }
+
     inline T& operator[](unsigned i) {
         EK_ASSERT_R2(i < _size);
         return *(_data + i);
@@ -253,6 +261,16 @@ struct Array {
     [[nodiscard]]
     inline uint32_t size() const {
         return _size;
+    }
+
+    [[nodiscard]]
+    inline T* data() {
+        return _data;
+    }
+
+    [[nodiscard]]
+    inline const T* data() const {
+        return _data;
     }
 };
 

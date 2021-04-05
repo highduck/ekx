@@ -88,11 +88,8 @@ void clear_buffers() {
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backing_width, backing_height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 
-    g_app.drawable_size = {
-            static_cast<double>(backing_width),
-            static_cast<double>(backing_height)
-    };
-
+    g_app.drawable_size.x = static_cast<float>(backing_width);
+    g_app.drawable_size.y = static_cast<float>(backing_height);
     g_app.size_changed = true;
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -258,7 +255,8 @@ void handle_touches(event_type type, UIView* view, NSSet* touches, UIEvent* even
     for (UITouch* touch in [touches allObjects]) {
         const CGPoint location = [touch locationInView:view];
         ev.id = (uint64_t) touch;
-        ev.pos = vec2{location.x, location.y} * scale_factor;
+        ev.pos.x = static_cast<float>(location.x * scale_factor);
+        ev.pos.y = static_cast<float>(location.y * scale_factor);
         dispatch_event(ev);
     }
 }
