@@ -1,5 +1,5 @@
 import {searchFiles} from "./utils";
-import {Project, SourceKind} from "./project";
+import {Project, LegacySourceKind} from "./project";
 import * as path from "path";
 
 export function collectSourceFiles(searchPath: string, extensions: string[], outList: string[] = []) {
@@ -10,7 +10,7 @@ export function collectSourceFiles(searchPath: string, extensions: string[], out
 }
 
 // src_kind - "cpp", "java", "js", etc..
-export function collectSourceRoots(data: any, srcKind: SourceKind) {
+export function collectSourceRoots(data: any, srcKind: LegacySourceKind) {
     const result = [];
     if (data && data[srcKind]) {
         const sources = data[srcKind];
@@ -22,7 +22,7 @@ export function collectSourceRoots(data: any, srcKind: SourceKind) {
 }
 
 // rel_to - optional, for example "." relative to current working directory
-export function collectSourceRootsAll(ctx: Project, srcKind: SourceKind, extraTarget: string, relativeTo: string) {
+export function collectSourceRootsAll(ctx: Project, srcKind: LegacySourceKind, extraTarget: string, relativeTo: string) {
     let result = [];
     for (const data of ctx.modules) {
         result = result.concat(collectSourceRoots(data, srcKind));
