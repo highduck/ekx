@@ -13,11 +13,9 @@ namespace ek {
 
 namespace app {
 
-using vec2 = vec2_t<double>;
-
 struct window_config final {
     std::string title{"ek"};
-    vec2 size{960, 720};
+    float2 size{960, 720};
     bool needDepth = false;
     bool webKeepCanvasAspectRatio = false;
 };
@@ -110,8 +108,8 @@ struct event_t final {
     event_type type;
     // touch-id / pointer-id
     uint64_t id = 0;
-    app::vec2 pos{0.0, 0.0};
-    app::vec2 scroll{0.0, 0.0};
+    float2 pos{0.0f, 0.0f};
+    float2 scroll{0.0f, 0.0f};
     mouse_button button = mouse_button::other;
 
     // TODO: view to internal storage
@@ -129,8 +127,8 @@ struct app_state final {
     window_config window_cfg;
 
     bool fallbackGLES2 = false;
-    vec2 window_size{};
-    vec2 drawable_size{};
+    float2 window_size{};
+    float2 drawable_size{};
 
     // TODO: rename to dpiScale (content misunderstood versus game view scaling)
     double content_scale = 1.0;

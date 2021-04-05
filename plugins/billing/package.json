@@ -1,0 +1,15 @@
+{
+  "name": "@ekx/plugin-billing",
+  "version": "0.0.1",
+  "scripts": {
+    "postinstall": "npm-cmake"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "npm-cmake": "^0.0.5",
+    "@ekx/ekx": "0.1.2"
+  }
+}

@@ -209,7 +209,8 @@ EK_JNI_VOID(sendTouch, jint type, jint id, jfloat x, jfloat y) {
     uint8_t event_type_id = event_map_[type];
     event_t ev{static_cast<event_type>(event_type_id)};
     ev.id = static_cast<uint64_t>(id) + 1;
-    ev.pos = vec2{x, y};
+    ev.pos.x = x;
+    ev.pos.y = y;
     dispatch_event(ev);
 }
 
@@ -221,14 +222,10 @@ EK_JNI_VOID(sendResize, jint width, jint height, jfloat scale) {
         g_app.window_size.y != height) {
 
         g_app.content_scale = scale;
-        g_app.window_size = {
-                static_cast<double>(width),
-                static_cast<double>(height)
-        };
-        g_app.drawable_size = {
-                static_cast<double>(width),
-                static_cast<double>(height)
-        };
+        g_app.window_size.x = width;
+        g_app.window_size.y = height;
+        g_app.drawable_size.x = width;
+        g_app.drawable_size.y = height;
         g_app.size_changed = true;
     }
 }

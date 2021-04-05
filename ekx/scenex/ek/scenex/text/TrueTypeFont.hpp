@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "FontImplBase.hpp"
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>

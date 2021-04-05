@@ -134,17 +134,20 @@ void macos_init_common() {
 }
 
 void handle_mouse_wheel_scroll(const NSEvent* event, event_t& to_event) {
-    to_event.scroll = {event.scrollingDeltaX, event.scrollingDeltaY};
+    to_event.scroll.x = static_cast<float>(event.scrollingDeltaX);
+    to_event.scroll.y = static_cast<float>(event.scrollingDeltaY);
     if (event.hasPreciseScrollingDeltas) {
-        to_event.scroll.x *= 0.1;
-        to_event.scroll.y *= 0.1;
+        to_event.scroll.x *= 0.1f;
+        to_event.scroll.y *= 0.1f;
     }
 }
 
 void handle_mouse_event(NSView* view, NSEvent* event) {
     const auto location = [view convertPoint:event.locationInWindow fromView:nil];
+    const auto scale = view.window.backingScaleFactor;
     event_t ev{};
-    ev.pos = vec2{location.x, location.y} * view.window.backingScaleFactor;
+    ev.pos.x = static_cast<float>(location.x * scale);
+    ev.pos.y = static_cast<float>(location.y * scale);
 
     switch (event.type) {
         case NSEventTypeLeftMouseDown:

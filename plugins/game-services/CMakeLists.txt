@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.13)
+include(npm.cmake)
 project(plugin-game-services)
-
 add_library(${PROJECT_NAME} STATIC
         src/GameServices.hpp
         src/GameServices.cpp
         null/NullGameService.cpp
         )
+add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_link_libraries(${PROJECT_NAME}

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Material3D.hpp"
-#include <vector>
-#include <string>
+#include <ek/ds/Array.hpp>
 #include <ek/graphics/graphics.hpp>
+#include <string>
 
 namespace ek {
 
@@ -16,8 +16,8 @@ struct Vertex3D {
 };
 
 struct MeshData {
-    std::vector<Vertex3D> vertices;
-    std::vector<uint16_t> indices;
+    Array<Vertex3D> vertices;
+    Array<uint16_t> indices;
 
     static MeshData createCube(const float3& position, const float3& size, argb32_t color = argb32_t::one);
 
@@ -27,7 +27,7 @@ struct MeshData {
 struct StaticMesh {
     graphics::Buffer vb;
     graphics::Buffer ib;
-    int32_t indices_count = 0;
+    uint32_t indices_count = 0;
     MeshData origin;
 
     explicit StaticMesh(const MeshData& mesh) :
@@ -42,7 +42,7 @@ struct StaticMesh {
                     (int) (mesh.indices.size() * sizeof(uint16_t))
             },
             origin{mesh} {
-        indices_count = mesh.indices.size();
+        indices_count = static_cast<uint32_t>(mesh.indices.size());
     }
 };
 

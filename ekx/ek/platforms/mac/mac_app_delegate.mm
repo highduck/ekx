@@ -95,7 +95,8 @@ using namespace ek::app;
     //EK_TRACE("[macOS GL] windowDidResize: %lf, %lf", size.width, size.height);
 
     if (size.width != g_app.window_size.x || size.height != g_app.window_size.y) {
-        g_app.window_size = {size.width, size.height};
+        g_app.window_size.x = static_cast<float>(size.width);
+        g_app.window_size.y = static_cast<float>(size.height);
         g_app.size_changed = true;
         EK_TRACE("[macOS GL] windowDidResize APPLIED");
     }
