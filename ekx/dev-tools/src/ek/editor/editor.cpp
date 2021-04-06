@@ -23,12 +23,12 @@ Editor::Editor(basic_application& app) :
     g_app.on_frame_completed += editor_onFrameCompleted;
     g_app.on_event += editor_onEvent;
 
-    app.hook_on_preload.add([this]() {
-        project.update_scale_factor(app_->scale_factor, false);
-        project.populate();
-    });
+//    app.hook_on_preload.add([this]() {
+//        project.update_scale_factor(app_->scale_factor, false);
+//        project.populate();
+//    });
     t2 = app.hook_on_update.add([this](float dt) {
-        project.update_scale_factor(app_->scale_factor, settings.notifyAssetsOnScaleFactorChanged);
+        //project.update_scale_factor(app_->scale_factor, settings.notifyAssetsOnScaleFactorChanged);
         gui_.begin_frame(dt);
         if (settings.showEditor) {
             guiEditor(*this);
@@ -40,8 +40,6 @@ Editor::Editor(basic_application& app) :
     t3 = app.hook_on_render_frame.add([this]() {
 
     });
-
-    app.preloadOnStart = false;
 }
 
 Editor::~Editor() {
@@ -100,8 +98,6 @@ void EditorSettings::save() const {
     node.append_attribute("showInspectorWindow").set_value(showInspectorWindow);
     node.append_attribute("showStatsWindow").set_value(showStatsWindow);
     node.append_attribute("showResourcesView").set_value(showResourcesView);
-    node.append_attribute("showAssetsView").set_value(showAssetsView);
-    node.append_attribute("showBuildWindow").set_value(showBuildWindow);
     auto wnd = node.append_child("window");
     if (windowSize != float2{g_app.window_cfg.size}) {
         wnd.append_attribute("width").set_value(windowSize.x);
@@ -126,8 +122,6 @@ void EditorSettings::load() {
     showInspectorWindow = node.attribute("showInspectorWindow").as_bool(showInspectorWindow);
     showStatsWindow = node.attribute("showStatsWindow").as_bool(showStatsWindow);
     showResourcesView = node.attribute("showResourcesView").as_bool(showResourcesView);
-    showAssetsView = node.attribute("showAssetsView").as_bool(showAssetsView);
-    showBuildWindow = node.attribute("showBuildWindow").as_bool(showBuildWindow);
     auto wnd = node.child("window");
     windowSize.x = wnd.attribute("width").as_float(g_app.window_cfg.size.x);
     windowSize.y = wnd.attribute("height").as_float(g_app.window_cfg.size.y);

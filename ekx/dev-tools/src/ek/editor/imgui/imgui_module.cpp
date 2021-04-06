@@ -6,7 +6,7 @@
 #include <ek/scenex/app/input_controller.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/util/path.hpp>
-#include <ek/system/system.hpp>
+//#include <ek/system/system.hpp>
 
 #include <ek/graphics/graphics.hpp>
 
@@ -119,13 +119,9 @@ void imgui_module_t::setup() {
 void imgui_module_t::initializeFontTexture() {
     ImGuiIO& io = ImGui::GetIO();
     ImFont* font = nullptr;
-    path_t font_path{"../assets/Cousine-Regular.ttf"};
-    auto data = read_file(font_path);
     ImFontConfig fontCfg{};
     fontCfg.FontDataOwnedByAtlas = false;
-    if (!data.empty()) {
-        font = io.Fonts->AddFontFromMemoryTTF(data.data(), data.size(), 16.0f * dpiScale, &fontCfg);
-    }
+    font = io.Fonts->AddFontFromFileTTF("../assets/Cousine-Regular.ttf", 16.0f * dpiScale, &fontCfg);
     font->Scale = 1.0f / dpiScale;
 
     uint8_t* pixels;
@@ -189,17 +185,17 @@ void imgui_module_t::on_event(const event_t& event) {
         }
             break;
         case event_type::mouse_scroll:
-            if (fabs(event.scroll.x) > 0.0) {
-                io.MouseWheelH += static_cast<float>(event.scroll.x * 0.1);
+            if (fabs(event.scroll.x) > 0.0f) {
+                io.MouseWheelH += event.scroll.x * 0.1f;
             }
-            if (fabs(event.scroll.y) > 0.0) {
-                io.MouseWheel += static_cast<float>(event.scroll.y * 0.1);
+            if (fabs(event.scroll.y) > 0.0f) {
+                io.MouseWheel += event.scroll.y * 0.1f;
             }
             break;
 
         case event_type::mouse_move:
-            io.MousePos.x = static_cast<float>(event.pos.x / g_app.content_scale);
-            io.MousePos.y = static_cast<float>(event.pos.y / g_app.content_scale);
+            io.MousePos.x = event.pos.x / g_app.content_scale;
+            io.MousePos.y = event.pos.y / g_app.content_scale;
             break;
 
         default:

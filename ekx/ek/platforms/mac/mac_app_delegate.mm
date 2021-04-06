@@ -104,7 +104,7 @@ using namespace ek::app;
 
 - (void)windowDidChangeBackingProperties:(__unused NSNotification*)notification {
     EK_TRACE("[macOS GL] windowDidChangeBackingProperties: %lf", self.window.backingScaleFactor);
-    const double scale = _window.backingScaleFactor;
+    const auto scale = static_cast<float>(_window.backingScaleFactor);
     if (g_app.content_scale != scale) {
         EK_TRACE("[macOS GL] windowDidChangeBackingProperties APPLIED");
         g_app.content_scale = scale;

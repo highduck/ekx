@@ -27,24 +27,25 @@ endif ()
 add_subdirectory(core)
 add_subdirectory(ek)
 add_subdirectory(scenex)
+add_subdirectory(sg-file)
 add_subdirectory(physics)
 
 add_library(ekx INTERFACE)
 target_link_libraries(ekx
         INTERFACE ek-core
         INTERFACE ek
-        INTERFACE scenex)
+        INTERFACE scenex
+        INTERFACE sg-file)
 
 add_library(ekx::ekx ALIAS ekx)
 
-add_subdirectory(flash)
 add_subdirectory(dev-tools)
 
 if (EKX_BUILD_DEV_TOOLS)
     add_compile_definitions(EK_DEV_TOOLS)
     target_link_libraries(ekx
             INTERFACE ek-dev-tools
-            INTERFACE ek-flash)
+            )
 endif ()
 
 if (EKX_BUILD_TESTS)

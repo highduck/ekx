@@ -3,7 +3,7 @@
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/base/Node.hpp>
-#include <ek/scenex/utility/scene_management.hpp>
+#include <ek/scenex/SceneFactory.hpp>
 #include <ek/math/easing.hpp>
 #include <ek/math/rand.hpp>
 #include <ek/timers.hpp>

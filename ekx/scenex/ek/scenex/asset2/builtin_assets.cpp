@@ -11,10 +11,11 @@
 #include <ek/imaging/image.hpp>
 #include <ek/graphics/Helpers.hpp>
 
+#include <ek/scenex/SceneFactory.hpp>
 #include <ek/scenex/data/SGFile.hpp>
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/3d/StaticMesh.hpp>
-#include <ek/scenex/data/model_data.hpp>
+#include <ek/scenex/data/Model3D.hpp>
 
 #include <ek/scenex/text/Font.hpp>
 #include <ek/scenex/text/TrueTypeFont.hpp>
@@ -348,10 +349,10 @@ public:
 
             input_memory_stream input{buffer.data(), buffer.size()};
             IO io{input};
-            model_data_t data;
-            io(data);
+            Model3D model;
+            io(model);
 
-            Res<StaticMesh>{path_}.reset(new StaticMesh(data.mesh));
+            Res<StaticMesh>{path_}.reset(new StaticMesh(model));
             state = AssetObjectState::Ready;
         });
     }

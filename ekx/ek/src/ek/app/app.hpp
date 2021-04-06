@@ -131,7 +131,7 @@ struct app_state final {
     float2 drawable_size{};
 
     // TODO: rename to dpiScale (content misunderstood versus game view scaling)
-    double content_scale = 1.0;
+    float content_scale = 1.0f;
     bool size_changed = false;
 
     // iOS has manually created FBO for primary surface

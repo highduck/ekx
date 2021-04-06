@@ -17,7 +17,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         3d/Transform3D.cpp
         3d/Transform3D.hpp
-        3d/StaticMesh.cpp
         3d/StaticMesh.hpp
         3d/RenderSystem3D.cpp
         3d/RenderSystem3D.hpp
@@ -64,12 +63,9 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         particles/Particle.cpp
         particles/Particle.hpp
-        particles/ParticleDecl.cpp
         particles/ParticleDecl.hpp
         particles/ParticleSystem.cpp
         particles/ParticleSystem.hpp
-
-        utility/scene_management.hpp
 
         app/basic_application.cpp
         app/basic_application.hpp
@@ -90,9 +86,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         asset2/builtin_assets.cpp
         asset2/builtin_assets.hpp
 
-        data/program_data.hpp
-        data/texture_data.hpp
-        data/model_data.hpp
-        data/SGFile.cpp
-        data/SGFile.hpp
+        SceneFactory.hpp
+        SceneFactory.cpp
         )

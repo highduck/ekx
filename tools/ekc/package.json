@@ -1,0 +1,21 @@
+{
+  "name": "@ekx/ekc",
+  "version": "0.1.2",
+  "scripts": {
+    "build:native": "node scripts/build.js",
+    "cc:build:native": "USE_CCACHE=1 node scripts/build.js",
+    "postinstall": "npx npm-cmake"
+  },
+  "files": [
+    "bin"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@ekx/ekx": "0.1.2",
+    "@ekx/flash-export": "0.0.1",
+    "npm-cmake": "^0.0.5"
+  }
+}

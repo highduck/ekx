@@ -5,8 +5,8 @@
 #include <ek/scenex/3d/StaticMesh.hpp>
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/text/Font.hpp>
-#include <ek/scenex/data/SGFile.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
+#include <ek/scenex/data/SGFile.hpp>
 
 namespace ek {
 

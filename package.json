@@ -16,8 +16,7 @@
   "workspaces": {
     "packages": [
       "ekx",
-      "ekc",
-      "cli",
+      "tools/*",
       "plugins/*",
       "appbox"
     ]

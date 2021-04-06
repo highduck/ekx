@@ -8,7 +8,7 @@
 #include <ek/scenex/2d/Viewport.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
-#include <ek/scenex/utility/scene_management.hpp>
+#include <ek/scenex/SceneFactory.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/app/device.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
@@ -80,7 +80,7 @@ basic_application::~basic_application() {
 
     ecs::the_world.shutdown();
 
-    draw2d::state.shutdown();
+    draw2d::shutdown();
 
     delete asset_manager_;
 
@@ -92,7 +92,7 @@ basic_application::~basic_application() {
 
 void basic_application::initialize() {
     ZoneScopedN("initialize");
-    draw2d::state.initialize();
+    draw2d::initialize();
 
     // init default empty sprite data
     {

@@ -2,6 +2,7 @@
 
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/data/SGFile.hpp>
+#include <ek/scenex/SceneFactory.hpp>
 #include <ek/util/Res.hpp>
 #include <optional>
 #include <ek/timers.hpp>
@@ -18,7 +19,7 @@ struct MovieClip {
     const SGMovieData* get_movie_data() const {
         const SGMovieData* result = data;
         if (!data && library_asset) {
-            auto* symbol_data = library_asset->get(movie_data_symbol);
+            auto* symbol_data = sg_get(*library_asset, movie_data_symbol);
             if (symbol_data && symbol_data->movie) {
                 result = &symbol_data->movie.value();
             }

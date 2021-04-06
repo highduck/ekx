@@ -2,15 +2,6 @@ cmake_minimum_required(VERSION 3.13)
 
 add_library(${PROJECT_NAME} STATIC
 
-        ek/editor/assets/dynamic_atlas_editor_asset.cpp
-        ek/editor/assets/MultiResAtlasEditorAsset.cpp
-        ek/editor/assets/flash_asset.cpp
-        ek/editor/assets/audio_asset.cpp
-        ek/editor/assets/bitmap_font_editor_asset.cpp
-        ek/editor/assets/texture_asset.cpp
-        ek/editor/assets/model_asset.cpp
-        ek/editor/assets/ttf_editor_asset.cpp
-
         ek/editor/gui/gui.hpp
         ek/editor/gui/inspector.cpp
         ek/editor/gui/hierarchy.cpp
@@ -20,9 +11,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/gui/gui_atlas.cpp
         ek/editor/gui/gui_sg_file.cpp
         ek/editor/gui/gui_font.cpp
-        ek/editor/gui/gui_asset_object_controls.cpp
         ek/editor/gui/gui_particles.cpp
-        ek/editor/gui/assets_view.cpp
         ek/editor/gui/resources_view.cpp
         ek/editor/gui/screen_recorder.cpp
         ek/editor/gui/screen_recorder.hpp
@@ -33,28 +22,7 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/editor/editor.cpp
         ek/editor/editor.hpp
-        ek/editor/obj/obj_loader.cpp
-        ek/editor/obj/obj_loader.hpp
 
-        ek/editor/marketing/export_marketing.hpp
-        ek/editor/marketing/export_marketing.cpp
-        ek/editor/gui/gui_build_and_export.cpp
-
-        ek/system/system.cpp
-        ek/system/system.hpp
-        ek/system/working_dir.cpp
-        ek/system/working_dir.hpp
-        ek/system/file_watcher.cpp
-        ek/system/file_watcher.hpp
-
-        ek/editor/assets/editor_project.cpp
-        ek/editor/assets/editor_project.hpp
-        ek/editor/assets/particles_asset.cpp
-        ek/editor/assets/particles_asset.hpp
-        ek/editor/assets/TranslationsAsset.hpp
-        ek/editor/assets/TranslationsAsset.cpp
-        ek/editor/assets/editor_asset.cpp
-        ek/editor/assets/editor_asset.hpp
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -84,8 +52,9 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         )
 
 target_link_libraries(${PROJECT_NAME}
+        PUBLIC scenex
         PUBLIC imgui
-        PUBLIC ek-flash
+        PUBLIC pugixml
         )
 
 #set_target_properties(${PROJECT_NAME} PROPERTIES

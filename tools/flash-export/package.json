@@ -1,0 +1,22 @@
+{
+  "name": "@ekx/flash-export",
+  "version": "0.0.1",
+  "scripts": {
+    "postinstall": "npx npm-cmake"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@ekx/cairo": "0.0.6",
+    "@ekx/freetype": "0.0.6",
+    "@ekx/miniz": "0.0.3",
+    "@ekx/pugixml": "0.0.3",
+    "@ekx/ekx": "0.1.2",
+    "npm-cmake": "^0.0.5"
+  },
+  "devDependencies": {
+    "@ekx/sokol-shdc": "0.0.2"
+  }
+}

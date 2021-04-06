@@ -5,6 +5,7 @@
 #include <ek/math/common.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/base/Node.hpp>
+#include <ek/scenex/data/SGFile.hpp>
 
 namespace ek {
 

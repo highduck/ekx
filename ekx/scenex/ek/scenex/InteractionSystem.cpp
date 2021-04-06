@@ -8,7 +8,7 @@
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/scenex/2d/RenderSystem2D.hpp>
 #include <ek/scenex/base/Node.hpp>
-//#include <ek/scenex/utility/scene_management.hpp>
+//#include <ek/scenex/SceneFactory.hpp>
 
 using namespace ek::app;
 
