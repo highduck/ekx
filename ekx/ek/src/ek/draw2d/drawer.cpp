@@ -1,5 +1,6 @@
 #include "drawer.hpp"
 
+#include <ek/util/detect_platform.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include "draw2d_shader.h"
 #include <ek/Allocator.hpp>
@@ -610,11 +611,15 @@ void begin(rect_f viewport, const matrix_2d& view, const graphics::Texture* rend
     state.stateChanged = true;
 
     state.renderTarget = renderTarget;
+#if EK_IOS || EK_MACOS
+    state.mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;
+#else
     if (renderTarget) {
         state.mvp = ortho_2d<float>(viewport.x, viewport.bottom(), viewport.width, -viewport.height) * view;
     } else {
         state.mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;
     }
+#endif
 }
 
 void end() {

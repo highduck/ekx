@@ -3,6 +3,7 @@
 #include <ek/math/box.hpp>
 #include <ek/Allocator.hpp>
 #include <ek/assert.hpp>
+#include <ek/app/app.hpp>
 
 static ek::ProxyAllocator* gHeapSokolGfx = nullptr;
 
@@ -135,6 +136,16 @@ void initialize(sg_context_desc* customContext) {
     desc.buffer_pool_size = 256;
     if(customContext != nullptr) {
         desc.context = *customContext;
+    }
+    else {
+#if EK_MACOS || EK_IOS
+        desc.context.metal.device = app::getMetalDevice();
+        desc.context.metal.renderpass_descriptor_cb = app::getMetalRenderPass;
+        desc.context.metal.drawable_cb = app::getMetalDrawable;
+        desc.context.sample_count = 1;
+        desc.context.color_format = SG_PIXELFORMAT_BGRA8;
+        desc.context.depth_format = SG_PIXELFORMAT_DEPTH_STENCIL;
+#endif
     }
     sg_setup(desc);
     auto backend = sg_query_backend();

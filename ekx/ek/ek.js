@@ -13,7 +13,14 @@ module.exports = (ctx) => {
             cpp: [
                 path.join(__dirname, "platforms/apple"),
                 path.join(__dirname, "platforms/mac")
-            ]
+            ],
+            cpp_flags: {
+                files: [
+                    path.join(__dirname, "src/ek/graphics/graphics.cpp"),
+                    path.join(__dirname, "src/ek/audio/audio.cpp")
+                ],
+                flags: "-x objective-c++"
+            },
         },
         ios: {
             cpp: [
@@ -22,13 +29,15 @@ module.exports = (ctx) => {
             ],
             cpp_flags: {
                 files: [
+                    path.join(__dirname, "src/ek/graphics/graphics.cpp"),
                     path.join(__dirname, "src/ek/audio/audio.cpp")
                 ],
                 flags: "-x objective-c++"
             },
             xcode: {
                 frameworks: [
-                    "UIKit", "OpenGLES", "QuartzCore", "Foundation",
+                    "Foundation", "UIKit", "Metal", "MetalKit",
+                    "QuartzCore",
                     "AudioToolbox" // CoreAudio for miniaudio
                 ],
                 pods: [

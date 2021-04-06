@@ -56,6 +56,10 @@ int main(int argc, char** argv) {
                 } else if (what == "assets") {
                     editor_project_t project{};
                     project.devMode = false;
+                    if(getenv("DEV_ASSETS") != nullptr) {
+                        EK_WARN << "- DEV_ASSETS detected: export includes development resources";
+                        project.devMode = true;
+                    }
                     project.base_path = path_t{args[3]};
                     project.populate();
                     project.build(path_t{args[4]});
