@@ -10,6 +10,10 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC miniaudio
         )
 
+if (EKX_BUILD_DEV_TOOLS)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE SOKOL_TRACE_HOOKS)
+endif ()
+
 #target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
@@ -21,7 +25,6 @@ if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
     set(EK_COMPILE_WARNINGS
             -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type -Woverloaded-virtual -Wcast-align
             -Wno-deprecated-declarations
-            -DGL_SILENCE_DEPRECATION
             -Wstrict-aliasing)
 
     set(EK_COMPILER_LTO "-flto")

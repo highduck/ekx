@@ -13,8 +13,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/editor/gui/gui_font.cpp
         ek/editor/gui/gui_particles.cpp
         ek/editor/gui/resources_view.cpp
-        ek/editor/gui/screen_recorder.cpp
-        ek/editor/gui/screen_recorder.hpp
 
         ek/editor/imgui/imgui_module.hpp
         ek/editor/imgui/imgui_module.cpp

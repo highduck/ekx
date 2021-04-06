@@ -8,10 +8,17 @@
 #include <ek/util/StaticSignal.hpp>
 #include <ek/math/vec.hpp>
 #include <ek/ds/Array.hpp>
+#include <ek/util/detect_platform.hpp>
 
 namespace ek {
 
 namespace app {
+
+#if EK_MACOS || EK_IOS
+void* getMetalDevice();
+const void* getMetalRenderPass();
+const void* getMetalDrawable();
+#endif
 
 struct window_config final {
     std::string title{"ek"};
@@ -82,7 +89,7 @@ enum class key_code {
     Backspace,
 
     // extra
-            Tab,
+    Tab,
     PageUp,
     PageDown,
     Home,
@@ -177,6 +184,7 @@ void dispatch_init();
 void dispatch_device_ready();
 
 void initialize();
+
 void shutdown();
 
 }
@@ -188,5 +196,6 @@ void start_application();
 void main();
 
 #endif
+
 
 }

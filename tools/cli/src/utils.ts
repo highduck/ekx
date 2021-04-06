@@ -22,7 +22,8 @@ export function executeAsync(bin: string, args: string[], options?: ExecuteOptio
         const child = spawn(bin, args, {
             //detached: true,
             stdio: (options?.verbose ?? UtilityConfig.verbose) ? "inherit" : "ignore",
-            cwd: options?.workingDir
+            cwd: options?.workingDir,
+            env: process.env
         });
         child.on('close', (code) => {
             if (code === 0) {
@@ -42,7 +43,8 @@ export function execute(cmd: string, args: string[], workingDir?: string, additi
 
     const options: SpawnSyncOptionsWithStringEncoding = {
         stdio: 'inherit',
-        encoding: 'utf-8'
+        encoding: 'utf-8',
+        env: Object.assign({}, process.env)
     };
 
     if (workingDir) {
@@ -50,7 +52,7 @@ export function execute(cmd: string, args: string[], workingDir?: string, additi
     }
 
     if (additionalEnvParams) {
-        options.env = Object.assign({}, process.env, additionalEnvParams);
+        Object.assign(options.env, additionalEnvParams);
     }
 
     const child = spawnSync(cmd, args, options);

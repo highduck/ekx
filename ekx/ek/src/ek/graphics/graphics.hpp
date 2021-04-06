@@ -2,14 +2,7 @@
 
 #include <ek/util/detect_platform.hpp>
 
-#if EK_IOS
-
-#define SOKOL_GLES3
-
-#include <OpenGLES/ES3/gl.h>
-#include <OpenGLES/ES3/glext.h>
-
-#elif EK_ANDROID
+#if EK_ANDROID
 
 //#define SOKOL_GLES3
 
@@ -44,15 +37,9 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#elif EK_MACOS
+#elif EK_MACOS || EK_IOS
 
-#define SOKOL_GLCORE33
-
-#ifndef GL_SILENCE_DEPRECATION
-#define GL_SILENCE_DEPRECATION
-#endif
-
-#include <OpenGL/gl3.h>
+#define SOKOL_METAL
 
 #elif EK_LINUX
 

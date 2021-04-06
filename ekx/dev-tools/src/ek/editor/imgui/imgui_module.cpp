@@ -38,7 +38,7 @@ imgui_module_t::imgui_module_t() {
     sg_imgui_init(&sokol_gfx_gui_state);
 
     simgui_desc_t desc{
-            .color_format = SG_PIXELFORMAT_RGBA8,
+            .color_format = _SG_PIXELFORMAT_DEFAULT,
             .depth_format = SG_PIXELFORMAT_DEPTH_STENCIL,
             .sample_count = 0,
             .dpi_scale = dpiScale,

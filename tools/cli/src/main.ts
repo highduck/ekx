@@ -47,6 +47,7 @@ function defaultRun() {
     project.importModule("@ekx/tracy", project.path.EKX_ROOT);
     project.importModule("@ekx/ekx/ek", project.path.EKX_ROOT);
     project.importModule("@ekx/ekx/core", project.path.EKX_ROOT);
+    project.importModule("@ekx/ekx/sg-file", project.path.EKX_ROOT);
     project.importModule("@ekx/ekx/scenex", project.path.EKX_ROOT);
     project.includeProject(process.cwd());
 
