@@ -1,55 +1,67 @@
 package ek.billing;
 
 import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import com.android.vending.billing.IInAppBillingService;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClient.BillingResponseCode;
+import com.android.billingclient.api.BillingClient.SkuType;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
+import com.android.billingclient.api.ConsumeResponseListener;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.Purchase.PurchaseState;
+import com.android.billingclient.api.Purchase.PurchasesResult;
+import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.SkuDetailsResponseListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import ek.EkActivity;
 
 @Keep
-public class GooglePlayBilling extends BillingPlugin {
+public class GooglePlayBilling extends BillingPlugin implements PurchasesUpdatedListener {
 
     final private static String TAG = "GooglePlayBilling";
 
-    IInAppBillingService service;
-
     String pendingPurchase;
-
-    ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            service = null;
-            Log.d(TAG, "Service disconnected");
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder binder) {
-            service = IInAppBillingService.Stub.asInterface(binder);
-            Log.d(TAG, "Service connected");
-        }
-    };
+    final private BillingClient billingClient;
+    private final Map<String, SkuDetails> products = new HashMap<>();
+    boolean autoFinishTransactions = false;
 
     public GooglePlayBilling(Activity activity, String developerKey) {
         super(activity, developerKey);
-        Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
-        serviceIntent.setPackage("com.android.vending");
-        activity.bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
+
+        billingClient = BillingClient.newBuilder(activity).setListener(this).enablePendingPurchases().build();
+        billingClient.startConnection(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
+                if (billingResult.getResponseCode() == BillingResponseCode.OK) {
+                    Log.v(TAG, "Setup finished");
+                    // NOTE: we will not query purchases here. This is done
+                    // when the extension listener is set
+                } else {
+                    Log.wtf(TAG, "Setup error: " + billingResult.getDebugMessage());
+                }
+            }
+
+            @Override
+            public void onBillingServiceDisconnected() {
+                Log.v(TAG, "Service disconnected");
+            }
+        });
     }
 
     @Override
@@ -59,186 +71,226 @@ public class GooglePlayBilling extends BillingPlugin {
 
     @Override
     public void getPurchases() {
-        new Thread(() -> {
-            if (service == null) {
-                return;
-            }
-
-            Log.d(TAG, "getPurchases");
-            try {
-                Bundle purchases = service.getPurchases(3, activity.getPackageName(), "inapp", null);
-                int response = purchases.getInt("RESPONSE_CODE");
-                if (response == 0) {
-                    EkActivity.runGLThread(() -> {
-                        final ArrayList<String> details = purchases.getStringArrayList("INAPP_PURCHASE_DATA_LIST");
-                        final ArrayList<String> signatures = purchases.getStringArrayList("INAPP_DATA_SIGNATURE_LIST");
-
-                        int num = details.size();
-                        if (num > 0) {
-                            for (int i = 0; i < num; ++i) {
-                                try {
-                                    final JSONObject o = new JSONObject(details.get(i));
-                                    final String productId = o.optString("productId");
-                                    final String token = o.optString("token", o.optString("purchaseToken"));
-                                    final int state = o.optInt("purchaseState");
-                                    final String payload = o.optString("developerPayload");
-
-                                    BillingBridge.nativePurchase(productId, token, state, payload, signatures.get(i), 0);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    });
-                }
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-
-        }).start();
+        Log.d(TAG, "processPendingConsumables()");
+        List<Purchase> purchasesList = new ArrayList<>();
+        queryPurchases(SkuType.INAPP, purchasesList);
+        queryPurchases(SkuType.SUBS, purchasesList);
+        for (Purchase purchase : purchasesList) {
+            handlePurchase(purchase);
+        }
     }
 
     @Override
     public void getDetails(String[] skus) {
         final ArrayList<String> skuList = new ArrayList<>();
-        for (String sku : skus) {
-            skuList.add(sku);
-        }
+        Collections.addAll(skuList, skus);
 
-        new Thread(() -> {
-            try {
-                if (service == null) {
-                    Log.d(TAG, "getDetails failed service is null");
-                    return;
-                }
-
-                Log.d(TAG, "getDetails");
-
-                ArrayList<String> details = new ArrayList<>();
-
-                for (int i = 0; i < skuList.size(); i += 20) {
-                    ArrayList<String> items = new ArrayList<>(skuList.subList(i, Math.min(i + 20, skuList.size())));
-
-                    Bundle querySkus = new Bundle();
-                    querySkus.putStringArrayList("ITEM_ID_LIST", items);
-
-                    Bundle skuDetails = service.getSkuDetails(3, activity.getPackageName(), "inapp", querySkus);
-                    int response = skuDetails.getInt("RESPONSE_CODE");
-                    if (response == 0) {
-                        details.addAll(skuDetails.getStringArrayList("DETAILS_LIST"));
-                    }
-                }
-
+        querySkuDetailsAsync(skuList, (billingResult, skuDetails) -> {
+            if (billingResult.getResponseCode() == BillingResponseCode.OK) {
                 EkActivity.runGLThread(() -> {
-                    for (String detailsData : details) {
-                        try {
-                            final JSONObject object = new JSONObject(detailsData);
-                            final String sku = object.getString("productId");
-                            final String price = object.getString("price");
-                            final String currencyCode = object.getString("price_currency_code");
-                            BillingBridge.nativeDetails(sku, price, currencyCode);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                    for (SkuDetails sd : skuDetails) {
+                        BillingBridge.nativeDetails(sd.getSku(), sd.getPrice(), sd.getPriceCurrencyCode());
                     }
                 });
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
-    @Override
-    public void purchase(String sku, String payload) {
-        pendingPurchase = sku;
-        activity.runOnUiThread(() -> {
-            if (service == null) {
-                Log.d(TAG, "purchase failed service is null");
-                return;
-            }
-
-            try {
-                Log.d(TAG, "purchase");
-                //item = "android.test.purchased";
-                Bundle buyIntentBundle = service.getBuyIntent(3, activity.getPackageName(), sku, "inapp", payload);
-                PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
-
-                activity.startIntentSenderForResult(pendingIntent.getIntentSender(),
-                        RC_REQUEST, new Intent(), 0, 0, 0);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } else {
+                Log.e(TAG, "Unable to list products: " + billingResult.getDebugMessage());
             }
         });
     }
 
     @Override
-    public void consume(String token) {
-        new Thread(() -> {
-            if (service == null) {
-                Log.d(TAG, "consume failed service is null");
-                return;
-            }
-
-            try {
-                Log.d(TAG, "consume");
-                int response = service.consumePurchase(3, activity.getPackageName(), token);
-                // TODO: ok
-                //if (response == 0) {
-                //}
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
+    public void purchase(String sku, String developerPayload) {
+        // TODO: remove developerPayload
+        pendingPurchase = sku;
+        SkuDetails skuDetails = this.products.get(sku);
+        if (skuDetails != null) {
+            buyProduct(skuDetails);
+        } else {
+            List<String> skuList = new ArrayList<>();
+            skuList.add(sku);
+            querySkuDetailsAsync(skuList, (billingResult, skuDetailsList) -> {
+                int responseCode = billingResult.getResponseCode();
+                if (responseCode == BillingResponseCode.OK && skuDetailsList != null && !skuDetailsList.isEmpty()) {
+                    buyProduct(skuDetailsList.get(0));
+                } else {
+                    Log.e(TAG, "Unable to get product details before buying: " + billingResult.getDebugMessage());
+                    onPurchaseResult(responseCode, null);
+                }
+            });
+        }
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == RC_REQUEST) {
-            try {
-                int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
-                String productId = pendingPurchase;
-                String token = "";
-                int state = -1;
-                String payload = "";
+    public void consume(String purchaseToken) {
+        Log.d(TAG, "consumePurchase() " + purchaseToken);
+        ConsumeParams consumeParams = ConsumeParams.newBuilder()
+                .setPurchaseToken(purchaseToken)
+                .build();
 
-                String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-                if (purchaseData != null) {
-                    final JSONObject o = new JSONObject(purchaseData);
-                    productId = o.optString("productId");
-                    token = o.optString("token", o.optString("purchaseToken"));
-                    state = o.optInt("purchaseState");
-                    payload = o.optString("developerPayload");
-                }
-
-                String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
-                if (dataSignature == null) {
-                    dataSignature = "";
-                }
-
-                // handle already owned error
-                if (responseCode == 7 /* BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED */) {
-                    state = 0;
-                }
-                BillingBridge.nativePurchase(productId, token, state, payload, dataSignature, responseCode);
-            } catch (Exception e) {
-                e.printStackTrace();
+        billingClient.consumeAsync(consumeParams, (billingResult, purchaseToken1) -> {
+            Log.d(TAG, "finishTransaction() response code " + billingResult.getResponseCode() + " purchaseToken: " + purchaseToken1);
+            // note: we only call the purchase listener if an error happens
+            final int responseCode = billingResult.getResponseCode();
+            if (responseCode != BillingResponseCode.OK) {
+                Log.e(TAG, "Unable to consume purchase: " + billingResult.getDebugMessage());
+                onPurchaseResult(responseCode, null);
             }
-            pendingPurchase = null;
-        }
+        });
     }
 
     @Override
     public void onDestroy() {
         // very important:
         Log.d(TAG, "Destroying helper.");
-        if (service != null) {
-            activity.unbindService(connection);
-            // service = null ?
+        if (billingClient.isReady()) {
+            billingClient.endConnection();
         }
     }
 
-    boolean verify(String data, String signature) {
-        return true;
+    @Override
+    public void onPurchasesUpdated(@NonNull BillingResult billingResult, @Nullable List<Purchase> purchases) {
+        final int responseCode = billingResult.getResponseCode();
+        if (responseCode == BillingResponseCode.OK && purchases != null) {
+            for (Purchase purchase : purchases) {
+                handlePurchase(purchase);
+            }
+        } else {
+            onPurchaseResult(responseCode, null);
+        }
     }
+
+    /**
+     * Handle a purchase. If the extension is configured to automatically
+     * finish transactions the purchase will be immediately consumed. Otherwise
+     * the product will be returned via the listener without being consumed.
+     * NOTE: Billing 3.0 requires purchases to be acknowledged within 3 days of
+     * purchase unless they are consumed.
+     */
+    private void handlePurchase(final Purchase purchase) {
+        if (this.autoFinishTransactions) {
+            consumePurchase(purchase.getPurchaseToken(), (ConsumeResponseListener) (billingResult, purchaseToken) -> {
+                Log.d(TAG, "handlePurchase() response code " + billingResult.getResponseCode() + " purchaseToken: " + purchaseToken);
+                onPurchaseResult(billingResult.getResponseCode(), purchase);
+            });
+        } else {
+            onPurchaseResult(BillingResponseCode.OK, purchase);
+        }
+    }
+
+    /**
+     * Consume a purchase. This will acknowledge the purchase and make it
+     * available to buy again.
+     */
+    private void consumePurchase(final String purchaseToken, final ConsumeResponseListener consumeListener) {
+        Log.d(TAG, "consumePurchase() " + purchaseToken);
+        ConsumeParams consumeParams = ConsumeParams.newBuilder()
+                .setPurchaseToken(purchaseToken)
+                .build();
+
+        billingClient.consumeAsync(consumeParams, consumeListener);
+    }
+
+    private int convertPurchaseState(final int purchaseState) {
+        int state = -1; // by default and unhandled: UNSPECIFIED_STATE
+        switch (purchaseState) {
+            case PurchaseState.PENDING:
+                state = 1;
+                break;
+            case PurchaseState.PURCHASED:
+                state = 0;
+                break;
+        }
+        return state;
+    }
+
+    private void onPurchaseResult(final int responseCode, @Nullable final Purchase purchase) {
+        EkActivity.runGLThread(() -> {
+            try {
+                String productId = pendingPurchase;
+                String token = "";
+                String payload = "";
+                int state = -1;
+                String dataSignature = "";
+
+                if (purchase != null) {
+                    productId = purchase.getSku();
+                    token = purchase.getPurchaseToken();
+                    payload = purchase.getDeveloperPayload();
+                    state = convertPurchaseState(purchase.getPurchaseState());
+                    dataSignature = purchase.getSignature();
+
+                    // handle already owned error
+                    if (responseCode == BillingResponseCode.ITEM_ALREADY_OWNED) {
+                        state = 0;
+                    }
+                }
+                if (dataSignature == null) {
+                    dataSignature = "";
+                }
+                BillingBridge.nativePurchase(productId, token, state, payload, dataSignature, responseCode);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            pendingPurchase = null;
+        });
+    }
+
+    /**
+     * Get details for a list of products. The products can be a mix of
+     * in-app products and subscriptions.
+     */
+    private void querySkuDetailsAsync(final List<String> skuList, final SkuDetailsResponseListener listener) {
+        SkuDetailsResponseListener detailsListener = new SkuDetailsResponseListener() {
+            private final List<SkuDetails> allSkuDetails = new ArrayList<>();
+            private int queries = 2;
+
+            @Override
+            public void onSkuDetailsResponse(@NonNull BillingResult billingResult, List<SkuDetails> skuDetails) {
+                if (skuDetails != null) {
+                    // cache skus (cache will be used to speed up buying)
+                    for (SkuDetails sd : skuDetails) {
+                        products.put(sd.getSku(), sd);
+                    }
+                    // add to list of all sku details
+                    allSkuDetails.addAll(skuDetails);
+                }
+                // we're finished when we have queried for both in-app and subs
+                queries--;
+                if (queries == 0) {
+                    listener.onSkuDetailsResponse(billingResult, allSkuDetails);
+                }
+            }
+        };
+        billingClient.querySkuDetailsAsync(SkuDetailsParams.newBuilder().setSkusList(skuList).setType(SkuType.INAPP).build(), detailsListener);
+        billingClient.querySkuDetailsAsync(SkuDetailsParams.newBuilder().setSkusList(skuList).setType(SkuType.SUBS).build(), detailsListener);
+    }
+
+    /**
+     * Buy a product. This method stores the listener and uses it in the
+     * onPurchasesUpdated() callback.
+     */
+    private void buyProduct(SkuDetails sku) {
+        BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
+                .setSkuDetails(sku)
+                .build();
+
+        BillingResult billingResult = billingClient.launchBillingFlow(this.activity, billingFlowParams);
+        int responseCode = billingResult.getResponseCode();
+        if (responseCode != BillingResponseCode.OK) {
+            Log.e(TAG, "Purchase failed: " + billingResult.getDebugMessage());
+            onPurchaseResult(responseCode, null);
+        }
+    }
+
+    private void queryPurchases(@NonNull final String type, @NonNull List<Purchase> outPurchasesList) {
+        PurchasesResult result = billingClient.queryPurchases(type);
+        List<Purchase> purchases = result.getPurchasesList();
+        if (purchases != null) {
+            outPurchasesList.addAll(purchases);
+        }
+        if (result.getBillingResult().getResponseCode() != BillingResponseCode.OK) {
+            Log.e(TAG, "Unable to query pending purchases: " + result.getBillingResult().getDebugMessage());
+        }
+    }
+
 }
