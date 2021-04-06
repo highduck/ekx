@@ -1,10 +1,11 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
-#include <ek/scenex/data/SGFile.hpp>
+#include <ecxx/ecxx_fwd.hpp>
 #include <vector>
 
 namespace ek {
+
+struct SGFilter;
 
 struct UglyFilter2D {
     bool enabled = true;

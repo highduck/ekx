@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ek/ds/Array.hpp>
+#include <ek/ds/Hash.hpp>
 #include <ek/util/common_macro.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/math/mat3x2.hpp>
@@ -52,13 +53,9 @@ struct BatchState {
 
 struct Context : private disable_copy_assign_t {
 
-//    Context();
-//
-//    ~Context();
+    Context();
 
-    void initialize();
-
-    void shutdown();
+    ~Context();
 
     /** Scissors **/
 
@@ -194,12 +191,12 @@ public:
     mat4f mvp{};
 
     // Stacks for save-restore states
-    Array<matrix_2d> matrixStack;
-    Array<ColorMod32> colorStack;
-    Array<rect_f> scissorsStack;
-    Array<const graphics::Shader*> programStack;
-    Array<const graphics::Texture*> textureStack;
-    Array<rect_f> texCoordStack;
+    Array<matrix_2d> matrixStack{};
+    Array<ColorMod32> colorStack{};
+    Array<rect_f> scissorsStack{};
+    Array<const graphics::Shader*> programStack{};
+    Array<const graphics::Texture*> textureStack{};
+    Array<rect_f> texCoordStack{};
 
     // Checking what states could be potentially changed
     enum CheckFlags : uint8_t {
@@ -235,12 +232,10 @@ public:
     // Batch rendering
     sg_pipeline selectedPipeline{};
     sg_bindings bind{};
-    std::unordered_map<uint64_t, sg_pipeline> pipelines{};
-
-    bool initialized_ = false;
+    Hash<sg_pipeline> pipelines{};
 };
 
-extern Context state;
+extern Context& state;
 
 void beginNewFrame();
 
@@ -303,6 +298,12 @@ void line_arc(float x, float y, float r,
               abgr32_t color_inner, abgr32_t color_outer);
 
 void strokeRect(const rect_f& rc, abgr32_t color, float lineWidth);
+
 void strokeCircle(const circle_f& circle, abgr32_t color, float lineWidth, int segments);
+
+
+void initialize();
+
+void shutdown();
 
 }

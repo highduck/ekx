@@ -2,7 +2,8 @@
 
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/scenex/utility/scene_management.hpp>
+#include <ek/scenex/base/Node.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/util/locator.hpp>
 

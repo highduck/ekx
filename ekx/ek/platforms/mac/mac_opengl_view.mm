@@ -125,20 +125,24 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef, // displayLink
 }
 
 - (void)handleResize {
-    const auto scale = self.window.backingScaleFactor;
+    const auto scale = static_cast<float>(self.window.backingScaleFactor);
     const auto window_size = self.bounds.size;
     const auto drawable_size = [self convertRectToBacking:self.bounds].size;
+    const auto windowWidth = static_cast<float>(window_size.width);
+    const auto windowHeight = static_cast<float>(window_size.height);
+    const auto backingWidth = static_cast<float>(drawable_size.width);
+    const auto backingHeight = static_cast<float>(drawable_size.height);
 
     if (g_app.content_scale != scale ||
-        g_app.window_size.x != window_size.width ||
-        g_app.window_size.y != window_size.height ||
-        g_app.drawable_size.x != drawable_size.width ||
-        g_app.drawable_size.y != drawable_size.height) {
+        g_app.window_size.x != windowWidth ||
+        g_app.window_size.y != windowHeight ||
+        g_app.drawable_size.x != backingWidth ||
+        g_app.drawable_size.y != backingHeight) {
         g_app.content_scale = scale;
-        g_app.window_size.x = window_size.width;
-        g_app.window_size.y = window_size.height;
-        g_app.drawable_size.x = drawable_size.width;
-        g_app.drawable_size.y = drawable_size.height;
+        g_app.window_size.x = windowWidth;
+        g_app.window_size.y = windowHeight;
+        g_app.drawable_size.x = backingWidth;
+        g_app.drawable_size.y = backingHeight;
         g_app.size_changed = true;
     }
 }

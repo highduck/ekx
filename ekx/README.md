@@ -24,10 +24,6 @@
     - Marketing assets export from Flash template
     - Simple Binary serialization
 
-## Tasks
-
-[Trello Board](https://trello.com/b/MW9eYAOA/ekx)
-
 ## Prerequisites for tooling
 
 - `python3` and `pip`

@@ -1,8 +1,9 @@
 #include "target_follow_script.hpp"
 
 #include <ecxx/ecxx.hpp>
-#include <ek/scenex/utility/scene_management.hpp>
 #include <ek/draw2d/drawer.hpp>
+#include <ek/scenex/2d/Transform2D.hpp>
+#include <ek/scenex/base/Node.hpp>
 
 namespace ek {
 

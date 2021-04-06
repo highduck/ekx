@@ -16,14 +16,14 @@ void BitmapFont::load(const std::vector<uint8_t>& buffer) {
         input_memory_stream input{buffer.data(), buffer.size()};
 
         IO io{input};
-        BitmapFontData fontData;
+        BMFont fontData;
         io(fontData);
 
         load(fontData);
     }
 }
 
-void BitmapFont::load(const BitmapFontData& data) {
+void BitmapFont::load(const BMFont& data) {
     unitsPerEM = data.unitsPerEM;
     baseFontSize = data.fontSize;
     ascender = float(data.ascender) / unitsPerEM;

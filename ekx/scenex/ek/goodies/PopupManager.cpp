@@ -1,7 +1,7 @@
 #include "PopupManager.hpp"
 
 #include <ek/scenex/base/DestroyTimer.hpp>
-#include <ek/scenex/utility/scene_management.hpp>
+#include <ek/scenex/SceneFactory.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/2d/Button.hpp>

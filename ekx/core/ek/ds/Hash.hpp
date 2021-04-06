@@ -41,6 +41,8 @@ struct Hash {
     /// does not exist in the hash.
     const T& get(uint64_t key, const T& default_) const;
 
+    const T* tryGet(uint64_t key) const;
+
     /// Sets the value for the key.
     void set(uint64_t key, const T& value);
 
@@ -312,6 +314,12 @@ template<typename T>
 const T& Hash<T>::get(uint64_t key, const T& default_) const {
     const uint32_t i = hash_internal::find_or_fail(*this, key);
     return i == hash_internal::END_OF_LIST ? default_ : _data[i].value;
+}
+
+template<typename T>
+const T* Hash<T>::tryGet(uint64_t key) const {
+    const uint32_t i = hash_internal::find_or_fail(*this, key);
+    return i != hash_internal::END_OF_LIST ? &_data[i].value : nullptr;
 }
 
 template<typename T>

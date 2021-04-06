@@ -19,8 +19,6 @@ void guiEditor(Editor& editor) {
             settings.dirty |= ImGui::MenuItem("Reload Assets on Scale", nullptr,
                                               &settings.notifyAssetsOnScaleFactorChanged);
             settings.dirty |= ImGui::MenuItem("Resources View", nullptr, &settings.showResourcesView);
-            settings.dirty |= ImGui::MenuItem("Project Assets", nullptr, &settings.showAssetsView);
-            settings.dirty |= ImGui::MenuItem("Build & Export", nullptr, &settings.showBuildWindow);
             ImGui::Separator();
             if (ImGui::BeginMenu("Debug")) {
 //                if (ImGui::DragFloat4("Add Insets", LayoutRect::AdditionalInsets.data())) {
@@ -56,9 +54,6 @@ void guiEditor(Editor& editor) {
     if (settings.showInspectorWindow) guiInspectorWindow(&settings.showInspectorWindow);
     if (settings.showStatsWindow) guiStatsWindow(&settings.showStatsWindow);
     if (settings.showResourcesView) guiResourcesViewWindow(&settings.showResourcesView);
-    if (settings.showAssetsView) guiAssetsViewWindow(&settings.showAssetsView, editor.project);
-    if (settings.showBuildWindow) guiBuildWindow(&settings.showBuildWindow);
-
 }
 
 }

@@ -12,8 +12,6 @@ class Editor;
 
 void guiEditor(Editor& inspector);
 
-void guiBuildWindow(bool* p_open);
-
 /** Hierarchy **/
 void guiHierarchyWindow(bool* p_open);
 
@@ -26,10 +24,6 @@ void guiStatsWindow(bool* p_open);
 
 void guiResourcesViewWindow(bool* p_open);
 
-class editor_project_t;
-
-void guiAssetsViewWindow(bool* p_open, editor_project_t& project);
-
 /** Widgets **/
 struct TextLayerEffect;
 
@@ -41,13 +35,9 @@ class Atlas;
 
 class Font;
 
-struct SGFile;
-
-struct editor_project_t;
+class SceneFactory;
 
 struct ParticleDecl;
-
-class editor_asset_t;
 
 void gui_sprite_view(const Sprite* sprite);
 
@@ -55,9 +45,7 @@ void gui_atlas_view(const Atlas* atlas);
 
 void gui_font_view(const Font* font);
 
-void gui_sg_file_view(const SGFile* library);
-
-void gui_asset_object_controls(editor_asset_t* asset);
+void gui_sg_file_view(const SceneFactory* library);
 
 void gui_particles(ParticleDecl* decl);
 }

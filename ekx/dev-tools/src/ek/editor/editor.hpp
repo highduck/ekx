@@ -2,7 +2,6 @@
 
 #include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/editor/imgui/imgui_module.hpp>
-#include <ek/editor/assets/editor_project.hpp>
 
 namespace ek {
 
@@ -14,8 +13,6 @@ struct EditorSettings {
     bool showInspectorWindow = true;
     bool showStatsWindow = false;
     bool showResourcesView = false;
-    bool showAssetsView = false;
-    bool showBuildWindow = false;
     float2 windowSize = float2::zero;
     bool dirty = false;
 
@@ -31,8 +28,6 @@ public:
     explicit Editor(basic_application& app);
 
     ~Editor();
-
-    editor_project_t project;
 
     void onEvent(const app::event_t& event);
     void onFrameCompleted();

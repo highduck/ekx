@@ -28,7 +28,7 @@ struct Array {
     T* _data;
 
     Array() : _allocator{memory::stdAllocator},
-              _capacity{64},
+              _capacity{4},
               _size{0} {
         _data = (T*) _allocator.alloc(sizeof(T) * _capacity, alignof(T));
     }
@@ -48,8 +48,8 @@ struct Array {
     }
 
     Array(const Array& m) noexcept: _allocator{m._allocator},
-                                    _size{m._size},
-                                    _capacity{m._capacity} {
+                                    _capacity{m._capacity},
+                                    _size{m._size} {
         _data = (T*) _allocator.alloc(sizeof(T) * _capacity, alignof(T));
         constructCopy(_data, m._data, _size);
     }

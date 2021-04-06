@@ -13,7 +13,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ek)
+target_link_libraries(${PROJECT_NAME}
+        PUBLIC ek
+        PUBLIC sg-file)
 
 if(EKX_BUILD_DEV_TOOLS)
     target_link_libraries(${PROJECT_NAME} PUBLIC ek-dev-tools)

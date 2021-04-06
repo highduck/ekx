@@ -1,11 +1,12 @@
 #include "fireworks_script.h"
 
-#include <ek/scenex/utility/scene_management.hpp>
+#include <ek/math/box.hpp>
+#include <ek/util/locator.hpp>
+#include <ek/scenex/SceneFactory.hpp>
 #include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
-#include <ek/util/locator.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
-#include <ek/math/box.hpp>
+#include <ek/scenex/base/Node.hpp>
 
 namespace ek {
 

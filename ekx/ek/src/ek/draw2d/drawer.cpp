@@ -3,10 +3,14 @@
 #include <ek/math/matrix_camera.hpp>
 #include "draw2d_shader.h"
 #include <ek/Allocator.hpp>
+#include <ek/util/StaticStorage.hpp>
 
 using namespace ek::graphics;
 
 namespace ek::draw2d {
+
+StaticStorage<Context> context{};
+Context& state = context.ref();
 
 sg_layout_desc Vertex2D::layout() {
     sg_layout_desc layout{};
@@ -81,11 +85,12 @@ sg_pipeline Context::getPipeline(sg_shader shader, bool useRenderTarget) {
     if (useRenderTarget) {
         key = key | (1ull << 32ull);
     }
-    auto it = pipelines.find(key);
-    if (it == pipelines.end()) {
-        pipelines[key] = createPipeline(shader, useRenderTarget);
+    auto pip = pipelines.get(key, {0});
+    if (pip.id == SG_INVALID_ID) {
+        pip = createPipeline(shader, useRenderTarget);
+        pipelines.set(key, pip);
     }
-    return pipelines[key];
+    return pip;
 }
 
 float getTriangleArea(const Vertex2D* vertices, const uint16_t* indices, int count) {
@@ -183,51 +188,6 @@ private:
     // each bucket buffer size
     uint32_t caps[4];
 };
-
-void Context::initialize() {
-    assert(!initialized_);
-
-    using graphics::Texture;
-    using graphics::Shader;
-
-    emptyTexture = Texture::createSolid32(4, 4, 0xFFFFFFFFu);
-    const auto backend = sg_query_backend();
-    defaultShader = new Shader(draw2d_shader_desc(backend));
-    alphaMapShader = new Shader(draw2d_alpha_shader_desc(backend));
-    solidColorShader = new Shader(draw2d_color_shader_desc(backend));
-
-    Res<Texture>{"empty"}.reset(emptyTexture);
-    Res<Shader>{"draw2d"}.reset(defaultShader);
-    Res<Shader>{"draw2d_alpha"}.reset(alphaMapShader);
-    Res<Shader>{"draw2d_color"}.reset(solidColorShader);
-
-    vertexBuffers_ = new BufferChain(BufferType::VertexBuffer, MaxVertex + 1, EK_SIZEOF_U32(Vertex2D));
-    vertexData_ = new Vertex2D[MaxVertex + 1];
-    vertexDataNext_ = vertexData_;
-
-    indexBuffers_ = new BufferChain(BufferType::IndexBuffer, MaxIndex + 1, EK_SIZEOF_U32(uint16_t));
-    indexData_ = new uint16_t[MaxIndex + 1];
-    indexDataNext_ = indexData_;
-
-    initialized_ = true;
-}
-
-void Context::shutdown() {
-    assert(initialized_);
-
-    Res<graphics::Texture>{"empty"}.reset(nullptr);
-    Res<Shader>{"draw2d"}.reset(nullptr);
-    Res<Shader>{"draw2d_alpha"}.reset(nullptr);
-    Res<Shader>{"draw2d_color"}.reset(nullptr);
-
-    delete vertexBuffers_;
-    delete[] vertexData_;
-
-    delete indexBuffers_;
-    delete[] indexData_;
-
-    initialized_ = false;
-}
 
 void Context::drawUserBatch(sg_pipeline pip, uint32_t numTextures) {
     if (indicesCount_ == 0) {
@@ -353,7 +313,43 @@ uint32_t Context::getUsedMemory() const {
     return indexBuffers_->getUsedMemory() + vertexBuffers_->getUsedMemory();
 }
 
-Context state{};
+
+Context::Context() {
+    using graphics::Texture;
+    using graphics::Shader;
+
+    emptyTexture = Texture::createSolid32(4, 4, 0xFFFFFFFFu);
+    const auto backend = sg_query_backend();
+    defaultShader = new Shader(draw2d_shader_desc(backend));
+    alphaMapShader = new Shader(draw2d_alpha_shader_desc(backend));
+    solidColorShader = new Shader(draw2d_color_shader_desc(backend));
+
+    Res<Texture>{"empty"}.reset(emptyTexture);
+    Res<Shader>{"draw2d"}.reset(defaultShader);
+    Res<Shader>{"draw2d_alpha"}.reset(alphaMapShader);
+    Res<Shader>{"draw2d_color"}.reset(solidColorShader);
+
+    vertexBuffers_ = new BufferChain(BufferType::VertexBuffer, MaxVertex + 1, EK_SIZEOF_U32(Vertex2D));
+    vertexData_ = new Vertex2D[MaxVertex + 1];
+    vertexDataNext_ = vertexData_;
+
+    indexBuffers_ = new BufferChain(BufferType::IndexBuffer, MaxIndex + 1, EK_SIZEOF_U32(uint16_t));
+    indexData_ = new uint16_t[MaxIndex + 1];
+    indexDataNext_ = indexData_;
+}
+
+Context::~Context() {
+    Res<graphics::Texture>{"empty"}.reset(nullptr);
+    Res<Shader>{"draw2d"}.reset(nullptr);
+    Res<Shader>{"draw2d_alpha"}.reset(nullptr);
+    Res<Shader>{"draw2d_color"}.reset(nullptr);
+
+    delete vertexBuffers_;
+    delete[] vertexData_;
+
+    delete indexBuffers_;
+    delete[] indexData_;
+}
 
 void Context::finish() {
     // debug checks
@@ -882,6 +878,14 @@ void strokeCircle(const circle_f& circle, abgr32_t color, float lineWidth, int s
 void endFrame() {
     state.vertexBuffers_->nextFrame();
     state.indexBuffers_->nextFrame();
+}
+
+void initialize() {
+    context.initialize();
+}
+
+void shutdown() {
+    context.shutdown();
 }
 
 }
