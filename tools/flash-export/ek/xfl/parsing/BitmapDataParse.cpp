@@ -130,8 +130,7 @@ void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
     // read padding to align
     input.read<uint16_t>();
 
-    std::vector<uint32_t> colorTable;
-    colorTable.reserve(nColors);
+    Array<uint32_t> colorTable{memory::stdAllocator, nColors};
     for (int i = 0; i < nColors; ++i) {
         colorTable.emplace_back(input.read<uint32_t>());
     }
@@ -142,7 +141,7 @@ void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
         // transparent
         colorTable[0] = 0x0;
     }
-    std::vector<uint8_t> buffer;
+    Array<uint8_t> buffer{};
     buffer.resize(desc.stride * desc.height);
     auto written = ekUncompress(input, buffer.data(), buffer.size());
     if (written != buffer.size()) {

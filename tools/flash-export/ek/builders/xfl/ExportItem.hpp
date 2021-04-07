@@ -2,6 +2,8 @@
 
 #include <ek/scenex/data/SGFile.hpp>
 #include <ek/util/common_macro.hpp>
+#include <ek/ds/Array.hpp>
+#include <memory>
 
 namespace ek::xfl {
 
@@ -14,7 +16,7 @@ struct ExportItem : private disable_copy_assign_t {
     float estimated_scale = 0.001f;
     float max_abs_scale = 100000.0f;
     const Element* ref = nullptr;
-    std::vector<ExportItem*> children;
+    Array<ExportItem*> children;
     ExportItem* parent = nullptr;
     int usage = 0;
     int shapes = 0;
@@ -47,7 +49,7 @@ struct ExportItem : private disable_copy_assign_t {
 };
 
 struct processing_bag_t {
-    std::vector<ExportItem*> list;
+    Array<ExportItem*> list;
 };
 
 }

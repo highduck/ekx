@@ -370,10 +370,10 @@ Filter& operator<<(Filter& r, const xml_node& node) {
 /** Shape Edges parsing **/
 
 
-std::vector<std::string> split(const std::string& str, const char separator) {
+Array<std::string> split(const std::string& str, const char separator) {
     using size_type = std::string::size_type;
 
-    std::vector<std::string> result;
+    Array<std::string> result{};
     size_type prevPos = 0;
     size_type pos = 0;
 
@@ -441,7 +441,7 @@ int get_value_length(const char* buf) {
     return ptr - buf;
 }
 
-void parse_edges(const char* data, std::vector<char>& out_commands, std::vector<double>& out_values) {
+void parse_edges(const char* data, Array<char>& out_commands, Array<double>& out_values) {
     if (!data) {
         return;
     }

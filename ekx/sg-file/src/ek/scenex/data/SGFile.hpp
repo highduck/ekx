@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <ek/ds/Array.hpp>
 #include <optional>
 #include <ek/math/serialize_math.hpp>
 #include <ek/math/packed_color.hpp>
@@ -53,7 +53,7 @@ struct SGDynamicTextData {
     float lineSpacing = 0.0f;
     float lineHeight = 0.0f;
 
-    std::vector<SGTextLayerData> layers;
+    Array<SGTextLayerData> layers;
 
     bool wordWrap = false;
 
@@ -67,7 +67,7 @@ struct SGDynamicTextData {
 struct SGEasingData {
     uint8_t attribute = 0;
     float ease = 0.0f;
-    std::vector<float2> curve;
+    Array<float2> curve{};
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -113,7 +113,7 @@ struct SGMovieFrameData {
     int duration = 0;
     int motion_type = 0;
 
-    std::vector<SGEasingData> easing;
+    Array<SGEasingData> easing{};
 
     SGKeyFrameTransform transform;
 
@@ -143,10 +143,10 @@ struct SGMovieFrameData {
 struct SGNodeData;
 
 struct SGMovieLayerData {
-    std::vector<SGMovieFrameData> frames;
+    Array<SGMovieFrameData> frames{};
 
     // temp for restoring target ID
-    std::vector<SGNodeData*> targets;
+    Array<SGNodeData*> targets{};
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -157,7 +157,7 @@ struct SGMovieLayerData {
 struct SGMovieData {
     int frames = 1;
     float fps = 24.0f;
-    std::vector<SGMovieLayerData> layers;
+    Array<SGMovieLayerData> layers{};
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -187,8 +187,8 @@ struct SGNodeData {
     bool boundsEnabled = false;
     rect_f boundingRect;
     rect_f scaleGrid;
-    std::vector<SGNodeData> children;
-    std::vector<SGFilter> filters;
+    Array<SGNodeData> children{};
+    Array<SGFilter> filters{};
     std::optional<SGDynamicTextData> dynamicText;
     std::optional<SGMovieData> movie;
     int32_t movieTargetId = -1;
@@ -230,9 +230,9 @@ struct SGNodeData {
 
 class SGFile {
 public:
-    std::vector<std::string> scenes;
+    Array<std::string> scenes;
     std::unordered_map<std::string, std::string> linkages;
-    std::vector<SGNodeData> library;
+    Array<SGNodeData> library;
 
     template<typename S>
     void serialize(IO<S>& io) {

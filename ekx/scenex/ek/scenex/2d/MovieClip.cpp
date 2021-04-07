@@ -23,7 +23,7 @@ void MovieClip::updateAll() {
     }
 }
 
-int findKeyFrame(const std::vector<SGMovieFrameData>& frames, float t) {
+int findKeyFrame(const Array<SGMovieFrameData>& frames, float t) {
     const int end = int(frames.size());
     for (int i = 0; i < end; ++i) {
         const auto& kf = frames[i];
@@ -45,8 +45,9 @@ struct easing_progress_t {
     }
 };
 
-SGKeyFrameTransform
-lerp(const SGKeyFrameTransform& begin, const SGKeyFrameTransform& end, const easing_progress_t& progress) {
+SGKeyFrameTransform lerp(const SGKeyFrameTransform& begin,
+                         const SGKeyFrameTransform& end,
+                         const easing_progress_t& progress) {
     return {
             lerp(begin.position, end.position, progress.position),
             lerp(begin.scale, end.scale, progress.scale),
@@ -56,7 +57,7 @@ lerp(const SGKeyFrameTransform& begin, const SGKeyFrameTransform& end, const eas
     };
 }
 
-easing_progress_t get_easing_progress(const float t, const std::vector<SGEasingData>& easing) {
+easing_progress_t get_easing_progress(const float t, const Array<SGEasingData>& easing) {
     easing_progress_t progress{};
     if (easing.empty()) {
         progress.fill(t);

@@ -20,8 +20,8 @@ inline void constructCopy(T* dest, const T* src, unsigned count) {
 }
 
 template<typename T>
-struct Array {
-
+class Array {
+public:
     Allocator& _allocator;
     uint32_t _capacity;
     uint32_t _size;
