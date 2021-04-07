@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/app/res.hpp>
-#include <ek/app/internal/res_sys.hpp>
+#include <ek/app/impl/res_sys.hpp>
 
 namespace ek {
 

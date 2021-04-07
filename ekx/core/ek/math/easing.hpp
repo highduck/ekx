@@ -1,5 +1,7 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
+// should be first include for M_PI
 #include <cmath>
 
 namespace ek {

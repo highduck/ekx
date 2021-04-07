@@ -1,5 +1,9 @@
 #pragma once
 
+#define _USE_MATH_DEFINES
+// should be first include for M_PI
+#include <cmath>
+
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/data/SGFile.hpp>
 #include <ek/scenex/SceneFactory.hpp>
