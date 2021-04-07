@@ -224,11 +224,6 @@
   resolved "https://registry.yarnpkg.com/@ekx/freetype/-/freetype-0.0.6.tgz#4c3d03f9c19a6ea3253920059c36237ca5c8b9df"
   integrity sha512-n0ma/izn7xLrNT6VDGwbdU8j2FEjpjSkiu0RV4hgUrgmMJE2QRkBEH7cBHomQwk4qgyKAsUpUsThY6PR62/spw==
 
-"@ekx/google-benchmark@0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@ekx/google-benchmark/-/google-benchmark-0.0.5.tgz#b45984d86e30f76afe1ac42cf19e4bc08c5293f8"
-  integrity sha512-1Ix1g8x+Hxmr06qAQ/51QuJDp9GuDwMMLviPO8oN8RhQKXJMWRk8PtL/WNtHDNGLpijhK1dsbYVQdbG3WGYgiw==
-
 "@ekx/google-test@0.0.5":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@ekx/google-test/-/google-test-0.0.5.tgz#fd0ae62a912b11d7396949173fd0c674d8467b93"
