@@ -69,13 +69,13 @@ jobs:
         if: runner.os == 'Linux'
         with:
           name: ekc-linux
-          path: ekc/bin/linux
+          path: tools/ekc/bin/linux
 
       - uses: actions/upload-artifact@v2
         if: runner.os == 'macOS'
         with:
           name: ekc-osx
-          path: ekc/bin/osx
+          path: tools/ekc/bin/osx
 
   build-js:
     name: Build JS
@@ -104,12 +104,12 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: ekc-osx
-          path: ekc/bin/osx
+          path: tools/ekc/bin/osx
 
       - uses: actions/download-artifact@v2
         with:
           name: ekc-linux
-          path: ekc/bin/linux
+          path: tools/ekc/bin/linux
 
       - name: Intall Dependencies
         run: |
