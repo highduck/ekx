@@ -22,10 +22,12 @@
 namespace ek {
 
 void start_application() {
-    linux_app_run();
-
     dispatch_init();
+    linux_app_create();
     dispatch_device_ready();
+
+    linux_app_loop();
+    linux_app_shutdown()
 }
 
 }
