@@ -20,10 +20,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <dirent.h>
-#include <fnmatch.h>
 
 #endif
+
+#include "xfs.hpp"
 
 #if defined(__APPLE__)
 
@@ -115,7 +115,9 @@ bool is_file(const path_t& path) {
 
 std::string get_executable_path() {
 #if defined(_WIN32)
-    // TODO:
+    TCHAR szFileName[MAX_PATH];
+    GetModuleFileName(NULL, szFileName, MAX_PATH);
+    return std::string{szFileName};
 #elif defined(__APPLE__)
     char path[system_pathMaxSize + 1];
     uint32_t path_len = system_pathMaxSize;
@@ -234,7 +236,7 @@ bool make_dir(const char* path) {
 #ifndef EK_DISABLE_SYSTEM_FS
     int err = 0;
 #if defined(_WIN32)
-    err = _mkdir(path); // can be used on Windows
+    err = mkdir(path); // can be used on Windows
 #else
     mode_t mode = 0733; // UNIX style permissions
     err = mkdir(path, mode); // can be used on non-Windows
@@ -318,7 +320,7 @@ void search_files(const std::string& pattern, const path_t& path, Array<path_t>&
         while ((e = readdir(dir)) != nullptr) {
             if (is_dir_entry_real(e)) {
                 path_t fullname = path / e->d_name;
-                if (fnmatch(pattern.c_str(), fullname.c_str(), 0) == 0) {
+                if (x_fnmatch(fullname.c_str(), pattern.c_str()) != nullptr) {
                     out.emplace_back(fullname);
                 }
                 if ((e->d_type & DT_DIR) != 0) {

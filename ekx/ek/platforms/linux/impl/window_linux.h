@@ -1,5 +1,16 @@
 #pragma once
 
+#include <cstdint>
+#include <cstring>
+#include <cstdlib>
+#include <ek/assert.hpp>
+#include <ek/util/logger.hpp>
+
+void ek_fail(const char* msg) {
+    EK_ERROR << msg;
+    EK_ABORT();
+}
+
 #define X11_XDND_VERSION  5
 
 #define GLX_VENDOR 1
@@ -263,7 +274,7 @@ void glx_init() {
         }
     }
     if (!gAppLinux.glx.libgl) {
-        fail("GLX: failed to load libGL");
+        ek_fail("GLX: failed to load libGL");
     }
     gAppLinux.glx.GetFBConfigs          = (PFNGLXGETFBCONFIGSPROC)          dlsym(gAppLinux.glx.libgl, "glXGetFBConfigs");
     gAppLinux.glx.GetFBConfigAttrib     = (PFNGLXGETFBCONFIGATTRIBPROC)     dlsym(gAppLinux.glx.libgl, "glXGetFBConfigAttrib");
@@ -294,17 +305,17 @@ void glx_init() {
         !gAppLinux.glx.GetProcAddressARB ||
         !gAppLinux.glx.GetVisualFromFBConfig)
     {
-        fail("GLX: failed to load required entry points");
+        ek_fail("GLX: failed to load required entry points");
     }
 
     if (!gAppLinux.glx.QueryExtension(gAppLinux.x11.display, &gAppLinux.glx.error_base, &gAppLinux.glx.event_base)) {
-        fail("GLX: GLX extension not found");
+        ek_fail("GLX: GLX extension not found");
     }
     if (!gAppLinux.glx.QueryVersion(gAppLinux.x11.display, &gAppLinux.glx.major, &gAppLinux.glx.minor)) {
-        fail("GLX: Failed to query GLX version");
+        ek_fail("GLX: Failed to query GLX version");
     }
     if (gAppLinux.glx.major == 1 && gAppLinux.glx.minor < 3) {
-        fail("GLX: GLX version 1.3 is required");
+        ek_fail("GLX: GLX version 1.3 is required");
     }
     const char* exts = gAppLinux.glx.QueryExtensionsString(gAppLinux.x11.display, gAppLinux.x11.screen);
     if (glx_extsupported("GLX_EXT_swap_control", exts)) {
@@ -347,7 +358,7 @@ GLXFBConfig glx_choosefbconfig() {
 
     native_configs = gAppLinux.glx.GetFBConfigs(gAppLinux.x11.display, gAppLinux.x11.screen, &native_count);
     if (!native_configs || !native_count) {
-        fail("GLX: No GLXFBConfigs returned");
+        ek_fail("GLX: No GLXFBConfigs returned");
     }
 
     usable_configs = (gl_fbconfig*) calloc((size_t)native_count, sizeof(gl_fbconfig));
@@ -405,11 +416,11 @@ GLXFBConfig glx_choosefbconfig() {
 void glx_choose_visual(Visual** visual, int* depth) {
     GLXFBConfig native = glx_choosefbconfig();
     if (0 == native) {
-        fail("GLX: Failed to find a suitable GLXFBConfig");
+        ek_fail("GLX: Failed to find a suitable GLXFBConfig");
     }
     XVisualInfo* result = gAppLinux.glx.GetVisualFromFBConfig(gAppLinux.x11.display, native);
     if (!result) {
-        fail("GLX: Failed to retrieve Visual for GLXFBConfig");
+        ek_fail("GLX: Failed to retrieve Visual for GLXFBConfig");
     }
     *visual = result->visual;
     *depth = result->depth;
@@ -419,10 +430,10 @@ void glx_choose_visual(Visual** visual, int* depth) {
 void glx_create_context() {
     GLXFBConfig native = glx_choosefbconfig();
     if (0 == native){
-        fail("GLX: Failed to find a suitable GLXFBConfig (2)");
+        ek_fail("GLX: Failed to find a suitable GLXFBConfig (2)");
     }
     if (!(gAppLinux.glx.ARB_create_context && gAppLinux.glx.ARB_create_context_profile)) {
-        fail("GLX: ARB_create_context and ARB_create_context_profile required");
+        ek_fail("GLX: ARB_create_context and ARB_create_context_profile required");
     }
     x11_grab_error_handler();
     const int attribs[] = {
@@ -434,12 +445,12 @@ void glx_create_context() {
     };
     gAppLinux.glx.ctx = gAppLinux.glx.CreateContextAttribsARB(gAppLinux.x11.display, native, NULL, True, attribs);
     if (!gAppLinux.glx.ctx) {
-        fail("GLX: failed to create GL context");
+        ek_fail("GLX: failed to create GL context");
     }
     x11_release_error_handler();
     gAppLinux.glx.window = gAppLinux.glx.CreateWindow(gAppLinux.x11.display, native, gAppLinux.x11.window, NULL);
     if (!gAppLinux.glx.window) {
-        fail("GLX: failed to create window");
+        ek_fail("GLX: failed to create window");
     }
 }
 
@@ -638,7 +649,7 @@ void x11_create_window(Visual* visual, int depth) {
                                      &wa);
     x11_release_error_handler();
     if (!gAppLinux.x11.window) {
-        fail("X11: Failed to create window");
+        ek_fail("X11: Failed to create window");
     }
     Atom protocols[] = {
             gAppLinux.x11.WM_DELETE_WINDOW
@@ -985,81 +996,83 @@ return -1;
 
 bool x11_parse_dropped_files_list(const char* src) {
     EK_ASSERT(src);
-    EK_ASSERT(_sapp.drop.buffer);
-
-    clear_drop_buffer();
-    _sapp.drop.num_files = 0;
+    return false;
+// TODO:
+//    EK_ASSERT(_sapp.drop.buffer);
+//
+//    clear_drop_buffer();
+//    _sapp.drop.num_files = 0;
 
     /*
         src is (potentially percent-encoded) string made of one or multiple paths
         separated by \r\n, each path starting with 'file://'
     */
-    bool err = false;
-    int src_count = 0;
-    char src_chr = 0;
-    char* dst_ptr = _sapp.drop.buffer;
-    const char* dst_end_ptr = dst_ptr + (_sapp.drop.max_path_length - 1); // room for terminating 0
-    while (0 != (src_chr = *src++)) {
-        src_count++;
-        char dst_chr = 0;
-        /* check leading 'file://' */
-        if (src_count <= 7) {
-            if (((src_count == 1) && (src_chr != 'f')) ||
-                ((src_count == 2) && (src_chr != 'i')) ||
-                ((src_count == 3) && (src_chr != 'l')) ||
-                ((src_count == 4) && (src_chr != 'e')) ||
-                ((src_count == 5) && (src_chr != ':')) ||
-                ((src_count == 6) && (src_chr != '/')) ||
-                ((src_count == 7) && (src_chr != '/')))
-            {
-                EK_INFO("sokol_app.h: dropped file URI doesn't start with file://");
-                err = true;
-                break;
-            }
-        }
-        else if (src_chr == '\r') {
-            // skip
-        }
-        else if (src_chr == '\n') {
-            src_chr = 0;
-            src_count = 0;
-            _sapp.drop.num_files++;
-            // too many files is not an error
-            if (_sapp.drop.num_files >= _sapp.drop.max_files) {
-                break;
-            }
-            dst_ptr = _sapp.drop.buffer + _sapp.drop.num_files * _sapp.drop.max_path_length;
-            dst_end_ptr = dst_ptr + (_sapp.drop.max_path_length - 1);
-        }
-        else if ((src_chr == '%') && src[0] && src[1]) {
-            // a percent-encoded byte (most like UTF-8 multibyte sequence)
-            const char digits[3] = { src[0], src[1], 0 };
-            src += 2;
-            dst_chr = (char) strtol(digits, 0, 16);
-        }
-        else {
-            dst_chr = src_chr;
-        }
-        if (dst_chr) {
-            // dst_end_ptr already has adjustment for terminating zero
-            if (dst_ptr < dst_end_ptr) {
-                *dst_ptr++ = dst_chr;
-            }
-            else {
-                EK_INFO("sokol_app.h: dropped file path too long (sapp_desc.max_dropped_file_path_length)");
-                err = true;
-                break;
-            }
-        }
-    }
-    if (err) {
-        clear_drop_buffer();
-        _sapp.drop.num_files = 0;
-        return false;
-    }
-    else {
-        return true;
-    }
+//    bool err = false;
+//    int src_count = 0;
+//    char src_chr = 0;
+//    char* dst_ptr = _sapp.drop.buffer;
+//    const char* dst_end_ptr = dst_ptr + (_sapp.drop.max_path_length - 1); // room for terminating 0
+//    while (0 != (src_chr = *src++)) {
+//        src_count++;
+//        char dst_chr = 0;
+//        /* check leading 'file://' */
+//        if (src_count <= 7) {
+//            if (((src_count == 1) && (src_chr != 'f')) ||
+//                ((src_count == 2) && (src_chr != 'i')) ||
+//                ((src_count == 3) && (src_chr != 'l')) ||
+//                ((src_count == 4) && (src_chr != 'e')) ||
+//                ((src_count == 5) && (src_chr != ':')) ||
+//                ((src_count == 6) && (src_chr != '/')) ||
+//                ((src_count == 7) && (src_chr != '/')))
+//            {
+//                EK_INFO("sokol_app.h: dropped file URI doesn't start with file://");
+//                err = true;
+//                break;
+//            }
+//        }
+//        else if (src_chr == '\r') {
+//            // skip
+//        }
+//        else if (src_chr == '\n') {
+//            src_chr = 0;
+//            src_count = 0;
+//            _sapp.drop.num_files++;
+//            // too many files is not an error
+//            if (_sapp.drop.num_files >= _sapp.drop.max_files) {
+//                break;
+//            }
+//            dst_ptr = _sapp.drop.buffer + _sapp.drop.num_files * _sapp.drop.max_path_length;
+//            dst_end_ptr = dst_ptr + (_sapp.drop.max_path_length - 1);
+//        }
+//        else if ((src_chr == '%') && src[0] && src[1]) {
+//            // a percent-encoded byte (most like UTF-8 multibyte sequence)
+//            const char digits[3] = { src[0], src[1], 0 };
+//            src += 2;
+//            dst_chr = (char) strtol(digits, 0, 16);
+//        }
+//        else {
+//            dst_chr = src_chr;
+//        }
+//        if (dst_chr) {
+//            // dst_end_ptr already has adjustment for terminating zero
+//            if (dst_ptr < dst_end_ptr) {
+//                *dst_ptr++ = dst_chr;
+//            }
+//            else {
+//                EK_INFO("sokol_app.h: dropped file path too long (sapp_desc.max_dropped_file_path_length)");
+//                err = true;
+//                break;
+//            }
+//        }
+//    }
+//    if (err) {
+//        clear_drop_buffer();
+//        _sapp.drop.num_files = 0;
+//        return false;
+//    }
+//    else {
+//        return true;
+//    }
 }
 
 // XLib manual says keycodes are in the range [8, 255] inclusive.
@@ -1070,89 +1083,96 @@ void x11_process_event(XEvent* event) {
     Bool filtered = XFilterEvent(event, None);
     switch (event->type) {
         case GenericEvent:
-            if (_sapp.mouse.locked && gAppLinux.x11.xi.available) {
-                if (event->xcookie.extension == gAppLinux.x11.xi.major_opcode) {
-                    if (XGetEventData(gAppLinux.x11.display, &event->xcookie)) {
-                        if (event->xcookie.evtype == XI_RawMotion) {
-                            XIRawEvent* re = (XIRawEvent*) event->xcookie.data;
-                            if (re->valuators.mask_len) {
-                                const double* values = re->raw_values;
-                                if (XIMaskIsSet(re->valuators.mask, 0)) {
-                                    _sapp.mouse.dx = (float) *values;
-                                    values++;
-                                }
-                                if (XIMaskIsSet(re->valuators.mask, 1)) {
-                                    _sapp.mouse.dy = (float) *values;
-                                }
-                                x11_mouse_event(SAPP_EVENTTYPE_MOUSE_MOVE, SAPP_MOUSEBUTTON_INVALID, x11_mod(event->xmotion.state));
-                            }
-                        }
-                        XFreeEventData(gAppLinux.x11.display, &event->xcookie);
-                    }
-                }
-            }
+            // TODO:
+//            if (_sapp.mouse.locked && gAppLinux.x11.xi.available) {
+//                if (event->xcookie.extension == gAppLinux.x11.xi.major_opcode) {
+//                    if (XGetEventData(gAppLinux.x11.display, &event->xcookie)) {
+//                        if (event->xcookie.evtype == XI_RawMotion) {
+//                            XIRawEvent* re = (XIRawEvent*) event->xcookie.data;
+//                            if (re->valuators.mask_len) {
+//                                const double* values = re->raw_values;
+//                                if (XIMaskIsSet(re->valuators.mask, 0)) {
+//                                    _sapp.mouse.dx = (float) *values;
+//                                    values++;
+//                                }
+//                                if (XIMaskIsSet(re->valuators.mask, 1)) {
+//                                    _sapp.mouse.dy = (float) *values;
+//                                }
+//                                x11_mouse_event(SAPP_EVENTTYPE_MOUSE_MOVE, SAPP_MOUSEBUTTON_INVALID, x11_mod(event->xmotion.state));
+//                            }
+//                        }
+//                        XFreeEventData(gAppLinux.x11.display, &event->xcookie);
+//                    }
+//                }
+//            }
             break;
         case FocusOut:
+            // TODO:
             /* if focus is lost for any reason, and we're in mouse locked mode, disable mouse lock */
-            if (_sapp.mouse.locked) {
-                x11_lock_mouse(false);
-            }
+//            if (_sapp.mouse.locked) {
+//                x11_lock_mouse(false);
+//            }
             break;
         case KeyPress:
         {
-            int keycode = (int)event->xkey.keycode;
-            const sapp_keycode key = x11_translate_key(keycode);
-            bool repeat = x11_keycodes[keycode & 0xFF];
-            x11_keycodes[keycode & 0xFF] = true;
-            const uint32_t mods = x11_mod(event->xkey.state);
-            if (key != SAPP_KEYCODE_INVALID) {
-                x11_key_event(SAPP_EVENTTYPE_KEY_DOWN, key, repeat, mods);
-            }
-            KeySym keysym;
-            XLookupString(&event->xkey, NULL, 0, &keysym, NULL);
-            int32_t chr = x11_keysym_to_unicode(keysym);
-            if (chr > 0) {
-                x11_char_event((uint32_t)chr, repeat, mods);
-            }
+
+            // TODO:
+//            int keycode = (int)event->xkey.keycode;
+//            const sapp_keycode key = x11_translate_key(keycode);
+//            bool repeat = x11_keycodes[keycode & 0xFF];
+//            x11_keycodes[keycode & 0xFF] = true;
+//            const uint32_t mods = x11_mod(event->xkey.state);
+//            if (key != SAPP_KEYCODE_INVALID) {
+//                x11_key_event(SAPP_EVENTTYPE_KEY_DOWN, key, repeat, mods);
+//            }
+//            KeySym keysym;
+//            XLookupString(&event->xkey, NULL, 0, &keysym, NULL);
+//            int32_t chr = x11_keysym_to_unicode(keysym);
+//            if (chr > 0) {
+//                x11_char_event((uint32_t)chr, repeat, mods);
+//            }
         }
             break;
         case KeyRelease:
         {
-            int keycode = (int)event->xkey.keycode;
-            const sapp_keycode key = x11_translate_key(keycode);
-            x11_keycodes[keycode & 0xFF] = false;
-            if (key != SAPP_KEYCODE_INVALID) {
-                const uint32_t mods = x11_mod(event->xkey.state);
-                x11_key_event(SAPP_EVENTTYPE_KEY_UP, key, false, mods);
-            }
+            // TODO:
+//            int keycode = (int)event->xkey.keycode;
+//            const sapp_keycode key = x11_translate_key(keycode);
+//            x11_keycodes[keycode & 0xFF] = false;
+//            if (key != SAPP_KEYCODE_INVALID) {
+//                const uint32_t mods = x11_mod(event->xkey.state);
+//                x11_key_event(SAPP_EVENTTYPE_KEY_UP, key, false, mods);
+//            }
         }
             break;
         case ButtonPress:
         {
-            const sapp_mousebutton btn = x11_translate_button(event);
-            const uint32_t mods = x11_mod(event->xbutton.state);
-            if (btn != SAPP_MOUSEBUTTON_INVALID) {
-                x11_mouse_event(SAPP_EVENTTYPE_MOUSE_DOWN, btn, mods);
-                gAppLinux.x11.mouse_buttons |= (1 << btn);
-            }
-            else {
-                /* might be a scroll event */
-                switch (event->xbutton.button) {
-                    case 4: x11_scroll_event(0.0f, 1.0f, mods); break;
-                    case 5: x11_scroll_event(0.0f, -1.0f, mods); break;
-                    case 6: x11_scroll_event(1.0f, 0.0f, mods); break;
-                    case 7: x11_scroll_event(-1.0f, 0.0f, mods); break;
-                }
-            }
+            // TODO:
+//            const sapp_mousebutton btn = x11_translate_button(event);
+//            const uint32_t mods = x11_mod(event->xbutton.state);
+//            if (btn != SAPP_MOUSEBUTTON_INVALID) {
+//                x11_mouse_event(SAPP_EVENTTYPE_MOUSE_DOWN, btn, mods);
+//                gAppLinux.x11.mouse_buttons |= (1 << btn);
+//            }
+//            else {
+//                /* might be a scroll event */
+//                switch (event->xbutton.button) {
+//                    case 4: x11_scroll_event(0.0f, 1.0f, mods); break;
+//                    case 5: x11_scroll_event(0.0f, -1.0f, mods); break;
+//                    case 6: x11_scroll_event(1.0f, 0.0f, mods); break;
+//                    case 7: x11_scroll_event(-1.0f, 0.0f, mods); break;
+//                }
+//            }
         }
             break;
         case ButtonRelease:
         {
-            const sapp_mousebutton btn = x11_translate_button(event);
-            if (btn != SAPP_MOUSEBUTTON_INVALID) {
-                x11_mouse_event(SAPP_EVENTTYPE_MOUSE_UP, btn, x11_mod(event->xbutton.state));
-                gAppLinux.x11.mouse_buttons &= ~(1 << btn);
-            }
+            // TODO:
+//            const sapp_mousebutton btn = x11_translate_button(event);
+//            if (btn != SAPP_MOUSEBUTTON_INVALID) {
+//                x11_mouse_event(SAPP_EVENTTYPE_MOUSE_UP, btn, x11_mod(event->xbutton.state));
+//                gAppLinux.x11.mouse_buttons &= ~(1 << btn);
+//            }
         }
             break;
         case EnterNotify:
@@ -1167,41 +1187,44 @@ void x11_process_event(XEvent* event) {
             }
             break;
         case MotionNotify:
-            if (!_sapp.mouse.locked) {
-                const float new_x = (float) event->xmotion.x;
-                const float new_y = (float) event->xmotion.y;
-                if (_sapp.mouse.pos_valid) {
-                    _sapp.mouse.dx = new_x - _sapp.mouse.x;
-                    _sapp.mouse.dy = new_y - _sapp.mouse.y;
-                }
-                _sapp.mouse.x = new_x;
-                _sapp.mouse.y = new_y;
-                _sapp.mouse.pos_valid = true;
-                x11_mouse_event(SAPP_EVENTTYPE_MOUSE_MOVE, SAPP_MOUSEBUTTON_INVALID, x11_mod(event->xmotion.state));
-            }
+            // TODO:
+//            if (!_sapp.mouse.locked) {
+//                const float new_x = (float) event->xmotion.x;
+//                const float new_y = (float) event->xmotion.y;
+//                if (_sapp.mouse.pos_valid) {
+//                    _sapp.mouse.dx = new_x - _sapp.mouse.x;
+//                    _sapp.mouse.dy = new_y - _sapp.mouse.y;
+//                }
+//                _sapp.mouse.x = new_x;
+//                _sapp.mouse.y = new_y;
+//                _sapp.mouse.pos_valid = true;
+//                x11_mouse_event(SAPP_EVENTTYPE_MOUSE_MOVE, SAPP_MOUSEBUTTON_INVALID, x11_mod(event->xmotion.state));
+//            }
             break;
         case ConfigureNotify:
-            if ((event->xconfigure.width != _sapp.window_width) || (event->xconfigure.height != _sapp.window_height)) {
-                _sapp.window_width = event->xconfigure.width;
-                _sapp.window_height = event->xconfigure.height;
-                _sapp.framebuffer_width = _sapp.window_width;
-                _sapp.framebuffer_height = _sapp.window_height;
-                x11_app_event(SAPP_EVENTTYPE_RESIZED);
-            }
+            // TODO:
+//            if ((event->xconfigure.width != _sapp.window_width) || (event->xconfigure.height != _sapp.window_height)) {
+//                _sapp.window_width = event->xconfigure.width;
+//                _sapp.window_height = event->xconfigure.height;
+//                _sapp.framebuffer_width = _sapp.window_width;
+//                _sapp.framebuffer_height = _sapp.window_height;
+//                x11_app_event(SAPP_EVENTTYPE_RESIZED);
+//            }
             break;
         case PropertyNotify:
             if (event->xproperty.state == PropertyNewValue) {
                 if (event->xproperty.atom == gAppLinux.x11.WM_STATE) {
-                    const int state = x11_get_window_state();
-                    if (state != gAppLinux.x11.window_state) {
-                        gAppLinux.x11.window_state = state;
-                        if (state == IconicState) {
-                            x11_app_event(SAPP_EVENTTYPE_ICONIFIED);
-                        }
-                        else if (state == NormalState) {
-                            x11_app_event(SAPP_EVENTTYPE_RESTORED);
-                        }
-                    }
+                    // TODO:
+//                    const int state = x11_get_window_state();
+//                    if (state != gAppLinux.x11.window_state) {
+//                        gAppLinux.x11.window_state = state;
+//                        if (state == IconicState) {
+//                            x11_app_event(SAPP_EVENTTYPE_ICONIFIED);
+//                        }
+//                        else if (state == NormalState) {
+//                            x11_app_event(SAPP_EVENTTYPE_RESTORED);
+//                        }
+//                    }
                 }
             }
             break;
@@ -1212,7 +1235,7 @@ void x11_process_event(XEvent* event) {
             if (event->xclient.message_type == gAppLinux.x11.WM_PROTOCOLS) {
                 const Atom protocol = (Atom)event->xclient.data.l[0];
                 if (protocol == gAppLinux.x11.WM_DELETE_WINDOW) {
-                    _sapp.quit_requested = true;
+                    ek::app::g_app.require_exit = true;
                 }
             }
             else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndEnter) {
@@ -1305,14 +1328,15 @@ void x11_process_event(XEvent* event) {
                                                                 event->xselection.property,
                                                                 event->xselection.target,
                                                                 (unsigned char**) &data);
-                if (_sapp.drop.enabled && result) {
-                    if (x11_parse_dropped_files_list(data)) {
-                        if (_sapp_events_enabled()) {
-                            init_event(SAPP_EVENTTYPE_FILES_DROPPED);
-                            call_event(&_sapp.event);
-                        }
-                    }
-                }
+                // TODO:
+//                if (_sapp.drop.enabled && result) {
+//                    if (x11_parse_dropped_files_list(data)) {
+//                        if (_sapp_events_enabled()) {
+//                            init_event(SAPP_EVENTTYPE_FILES_DROPPED);
+//                            call_event(&_sapp.event);
+//                        }
+//                    }
+//                }
                 if (gAppLinux.x11.xdnd.version >= 2) {
                     XEvent reply;
                     memset(&reply, 0, sizeof(reply));
@@ -1348,13 +1372,13 @@ void linux_app_run() {
     XrmInitialize();
     gAppLinux.x11.display = XOpenDisplay(NULL);
     if (!gAppLinux.x11.display) {
-        fail("XOpenDisplay() failed!\n");
+        ek_fail("XOpenDisplay() failed!\n");
     }
     gAppLinux.x11.screen = DefaultScreen(gAppLinux.x11.display);
     gAppLinux.x11.root = DefaultRootWindow(gAppLinux.x11.display);
     XkbSetDetectableAutoRepeat(gAppLinux.x11.display, true, NULL);
     x11_query_system_dpi();
-    _sapp.dpi_scale = gAppLinux.x11.dpi / 96.0f;
+//    _sapp.dpi_scale = gAppLinux.x11.dpi / 96.0f;
     x11_init_extensions();
     x11_create_hidden_cursor();
     glx_init();
@@ -1363,15 +1387,15 @@ void linux_app_run() {
     glx_choose_visual(&visual, &depth);
     x11_create_window(visual, depth);
     glx_create_context();
-    _sapp.valid = true;
+//    _sapp.valid = true;
     x11_show_window();
-    if (_sapp.fullscreen) {
-        x11_set_fullscreen(true);
-    }
+//    if (_sapp.fullscreen) {
+//        x11_set_fullscreen(true);
+//    }
     x11_query_window_size();
-    glx_swapinterval(_sapp.swap_interval);
+//    glx_swapinterval(_sapp.swap_interval);
     XFlush(gAppLinux.x11.display);
-    while (!_sapp.quit_ordered) {
+    while (!::ek::app.g_app.require_exit) {
         glx_make_current();
         int count = XPending(gAppLinux.x11.display);
         while (count--) {
@@ -1383,12 +1407,12 @@ void linux_app_run() {
         glx_swap_buffers();
         XFlush(gAppLinux.x11.display);
         /* handle quit-requested, either from window or from sapp_request_quit() */
-        if (_sapp.quit_requested && !_sapp.quit_ordered) {
+        if (ek::app::g_app.require_exit) {
             /* give user code a chance to intervene */
             x11_app_event(SAPP_EVENTTYPE_QUIT_REQUESTED);
             /* if user code hasn't intervened, quit the app */
-            if (_sapp.quit_requested) {
-                _sapp.quit_ordered = true;
+            if (ek::app::g_app.quit_require_exit) {
+                ek::app::g_app.quit_require_exit = true;
             }
         }
     }
