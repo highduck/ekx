@@ -179,8 +179,8 @@ const gl_fbconfig* gl_choose_fbconfig(const gl_fbconfig* desired, const gl_fbcon
     int missing, least_missing = 1000000;
     int color_diff, least_color_diff = 10000000;
     int extra_diff, least_extra_diff = 10000000;
-    const _sapp_gl_fbconfig* current;
-    const _sapp_gl_fbconfig* closest = 0;
+    const gl_fbconfig* current;
+    const gl_fbconfig* closest = 0;
     for (int i = 0;  i < count;  i++) {
         current = alternatives + i;
         if (desired->doublebuffer != current->doublebuffer) {
@@ -676,62 +676,65 @@ void x11_show_mouse(bool show) {
 }
 
 void x11_lock_mouse(bool lock) {
-    if (lock == g_app.mouse.locked) {
-        return;
-    }
-    g_app.mouse.dx = 0.0f;
-    g_app.mouse.dy = 0.0f;
-    g_app.mouse.locked = lock;
-    if (g_app.mouse.locked) {
-        if (gAppLinux.x11.xi.available) {
-            XIEventMask em;
-            unsigned char mask[XIMaskLen(XI_RawMotion)] = { 0 }; // XIMaskLen is a macro
-            em.deviceid = XIAllMasterDevices;
-            em.mask_len = sizeof(mask);
-            em.mask = mask;
-            XISetMask(mask, XI_RawMotion);
-            XISelectEvents(gAppLinux.x11.display, gAppLinux.x11.root, &em, 1);
-        }
-        XGrabPointer(gAppLinux.x11.display, // display
-                     gAppLinux.x11.window,           // grab_window
-                     True,                       // owner_events
-                     ButtonPressMask | ButtonReleaseMask | PointerMotionMask,    // event_mask
-                     GrabModeAsync,              // pointer_mode
-                     GrabModeAsync,              // keyboard_mode
-                     gAppLinux.x11.window,           // confine_to
-                     gAppLinux.x11.hidden_cursor,    // cursor
-                     CurrentTime);               // time
-    }
-    else {
-        if (gAppLinux.x11.xi.available) {
-            XIEventMask em;
-            unsigned char mask[] = { 0 };
-            em.deviceid = XIAllMasterDevices;
-            em.mask_len = sizeof(mask);
-            em.mask = mask;
-            XISelectEvents(gAppLinux.x11.display, gAppLinux.x11.root, &em, 1);
-        }
-        XWarpPointer(gAppLinux.x11.display, None, gAppLinux.x11.window, 0, 0, 0, 0, (int) g_app.mouse.x, g_app.mouse.y);
-        XUngrabPointer(gAppLinux.x11.display, CurrentTime);
-    }
-    XFlush(gAppLinux.x11.display);
+//    if (lock == g_app.mouse.locked) {
+//        return;
+//    }
+//    g_app.mouse.dx = 0.0f;
+//    g_app.mouse.dy = 0.0f;
+//    g_app.mouse.locked = lock;
+//    if (g_app.mouse.locked) {
+//        if (gAppLinux.x11.xi.available) {
+//            XIEventMask em;
+//            unsigned char mask[XIMaskLen(XI_RawMotion)] = { 0 }; // XIMaskLen is a macro
+//            em.deviceid = XIAllMasterDevices;
+//            em.mask_len = sizeof(mask);
+//            em.mask = mask;
+//            XISetMask(mask, XI_RawMotion);
+//            XISelectEvents(gAppLinux.x11.display, gAppLinux.x11.root, &em, 1);
+//        }
+//        XGrabPointer(gAppLinux.x11.display, // display
+//                     gAppLinux.x11.window,           // grab_window
+//                     True,                       // owner_events
+//                     ButtonPressMask | ButtonReleaseMask | PointerMotionMask,    // event_mask
+//                     GrabModeAsync,              // pointer_mode
+//                     GrabModeAsync,              // keyboard_mode
+//                     gAppLinux.x11.window,           // confine_to
+//                     gAppLinux.x11.hidden_cursor,    // cursor
+//                     CurrentTime);               // time
+//    }
+//    else {
+//        if (gAppLinux.x11.xi.available) {
+//            XIEventMask em;
+//            unsigned char mask[] = { 0 };
+//            em.deviceid = XIAllMasterDevices;
+//            em.mask_len = sizeof(mask);
+//            em.mask = mask;
+//            XISelectEvents(gAppLinux.x11.display, gAppLinux.x11.root, &em, 1);
+//        }
+//        XWarpPointer(gAppLinux.x11.display, None, gAppLinux.x11.window, 0, 0, 0, 0, (int) g_app.mouse.x, g_app.mouse.y);
+//        XUngrabPointer(gAppLinux.x11.display, CurrentTime);
+//    }
+//    XFlush(gAppLinux.x11.display);
 }
 
 void x11_update_window_title() {
+    const char* title = g_app.window_cfg.title.c_str();
+    size_t titleLen = g_app.window_cfg.title.size();
     Xutf8SetWMProperties(gAppLinux.x11.display,
                          gAppLinux.x11.window,
-                         g_app.window_title, g_app.window_title,
+                         title,
+                         title,
                          NULL, 0, NULL, NULL, NULL);
     XChangeProperty(gAppLinux.x11.display, gAppLinux.x11.window,
                     gAppLinux.x11.NET_WM_NAME, gAppLinux.x11.UTF8_STRING, 8,
                     PropModeReplace,
-                    (unsigned char*)g_app.window_title,
-                    strlen(g_app.window_title));
+                    (unsigned char*)title,
+                    titleLen);
     XChangeProperty(gAppLinux.x11.display, gAppLinux.x11.window,
                     gAppLinux.x11.NET_WM_ICON_NAME, gAppLinux.x11.UTF8_STRING, 8,
                     PropModeReplace,
-                    (unsigned char*)g_app.window_title,
-                    strlen(g_app.window_title));
+                    (unsigned char*)title,
+                    titleLen);
     XFlush(gAppLinux.x11.display);
 }
 
@@ -1019,26 +1022,26 @@ key_code x11_translate_key(int scancode) {
 //        case XK_KP_Enter:       return SAPP_KEYCODE_KP_ENTER;
 
         case XK_a:              return key_code::A;
-        case XK_b:              return key_code::B;
+        //case XK_b:              return key_code::B;
         case XK_c:              return key_code::C;
         case XK_d:              return key_code::D;
-        case XK_e:              return key_code::E;
-        case XK_f:              return key_code::F;
-        case XK_g:              return key_code::G;
-        case XK_h:              return key_code::H;
-        case XK_i:              return key_code::I;
-        case XK_j:              return key_code::J;
-        case XK_k:              return key_code::K;
-        case XK_l:              return key_code::L;
-        case XK_m:              return key_code::M;
-        case XK_n:              return key_code::N;
-        case XK_o:              return key_code::O;
-        case XK_p:              return key_code::P;
-        case XK_q:              return key_code::Q;
-        case XK_r:              return key_code::R;
+//        case XK_e:              return key_code::E;
+//        case XK_f:              return key_code::F;
+//        case XK_g:              return key_code::G;
+//        case XK_h:              return key_code::H;
+//        case XK_i:              return key_code::I;
+//        case XK_j:              return key_code::J;
+//        case XK_k:              return key_code::K;
+//        case XK_l:              return key_code::L;
+//        case XK_m:              return key_code::M;
+//        case XK_n:              return key_code::N;
+//        case XK_o:              return key_code::O;
+//        case XK_p:              return key_code::P;
+//        case XK_q:              return key_code::Q;
+//        case XK_r:              return key_code::R;
         case XK_s:              return key_code::S;
-        case XK_t:              return key_code::T;
-        case XK_u:              return key_code::U;
+//        case XK_t:              return key_code::T;
+//        case XK_u:              return key_code::U;
         case XK_v:              return key_code::V;
         case XK_w:              return key_code::W;
         case XK_x:              return key_code::X;
@@ -1347,7 +1350,7 @@ void x11_process_event(XEvent* event) {
             if (event->xclient.message_type == gAppLinux.x11.WM_PROTOCOLS) {
                 const Atom protocol = (Atom)event->xclient.data.l[0];
                 if (protocol == gAppLinux.x11.WM_DELETE_WINDOW) {
-                    ek::app::g_app.require_exit = true;
+                    g_app.require_exit = true;
                 }
             }
             else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndEnter) {
@@ -1526,8 +1529,8 @@ void linux_app_loop() {
             /* give user code a chance to intervene */
             x11_app_event(SAPP_EVENTTYPE_QUIT_REQUESTED);
             /* if user code hasn't intervened, quit the app */
-            if (g_app.quit_require_exit) {
-                g_app.quit_require_exit = true;
+            if (g_app.require_exit) {
+                g_app.require_exit = true;
             }
         }
     }
