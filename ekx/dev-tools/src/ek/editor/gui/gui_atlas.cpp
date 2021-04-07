@@ -1,6 +1,6 @@
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/graphics/Helpers.hpp>
+#include <ek/graphics/graphics.hpp>
 
 namespace ek {
 

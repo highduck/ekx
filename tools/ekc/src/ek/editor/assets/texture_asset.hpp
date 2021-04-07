@@ -1,7 +1,7 @@
 #pragma once
 
 #include "editor_asset.hpp"
-#include <vector>
+#include <ek/ds/Array.hpp>
 #include <ek/util/path.hpp>
 
 namespace ek {
@@ -18,7 +18,7 @@ public:
 
 private:
     std::string texture_type_;
-    std::vector<std::string> images_;
+    Array<std::string> images_{};
 };
 
 }

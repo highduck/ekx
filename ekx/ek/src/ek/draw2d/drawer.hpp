@@ -10,7 +10,6 @@
 #include <ek/math/circle.hpp>
 #include <ek/math/box.hpp>
 #include <ek/graphics/graphics.hpp>
-#include <ek/graphics/Helpers.hpp>
 
 namespace ek::draw2d {
 

@@ -2,7 +2,6 @@
 
 #include <ek/math/packed_color.hpp>
 
-#include <vector>
 #include <sstream>
 
 // strtok
@@ -18,10 +17,10 @@ namespace ek {
 
 struct obj_model_t {
 
-    std::vector<float3> positions;
-    std::vector<float3> normals;
-    std::vector<float2> uvs;
-    std::vector<int> faces;
+    Array<float3> positions{};
+    Array<float3> normals{};
+    Array<float2> uvs{};
+    Array<int> faces{};
 
     void load(std::istream& inOBJ) {
         char buf[256];
@@ -84,7 +83,7 @@ struct obj_model_t {
     }
 };
 
-Model3D load_obj(const std::vector<uint8_t>& buffer) {
+Model3D load_obj(const Array<uint8_t>& buffer) {
 
     obj_model_t obj_model{};
     {

@@ -1,5 +1,5 @@
 #include "DynamicAtlas.hpp"
-#include <ek/graphics/Helpers.hpp>
+#include <ek/graphics/graphics.hpp>
 #include <ek/math/common.hpp>
 
 namespace ek {

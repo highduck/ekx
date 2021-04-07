@@ -35,8 +35,8 @@ TEST(string_utility, split) {
     ASSERT_EQ(1, nop.size());
     ASSERT_STREQ(nop.back().c_str(), "nop");
 
-    vector<string> expected{"1", "2", "3"};
-    vector<string> actual = split("1;2;3", ';');
+    ek::Array<string> expected{"1", "2", "3"};
+    ek::Array<string> actual = split("1;2;3", ';');
     ASSERT_EQ(actual.size(), expected.size());
     for (size_t i = 0; i < actual.size(); ++i) {
         EXPECT_STREQ(actual[i].c_str(), expected[i].c_str());

@@ -4,6 +4,7 @@
 #include <ek/timers.hpp>
 #include <ek/imaging/ImageSubSystem.hpp>
 #include <ek/Allocator.hpp>
+#include <ek/ds/Array.hpp>
 
 #include <ek/editor/marketing/export_marketing.hpp>
 #include <ek/editor/assets/editor_project.hpp>
@@ -21,14 +22,18 @@ using namespace ek;
 int main(int argc, char** argv) {
     using namespace std;
 
+    memory::initialize();
+    clock::initialize();
+    imaging::initialize();
+
     EK_INFO << "== EKC util ==";
     EK_INFO << "Executable path: " << get_executable_path();
     EK_INFO << "Working dir: " << current_working_directory();
     EK_INFO << "Arguments: ";
 
-    std::vector<std::string> args{};
+    Array<std::string> args{};
     for (int i = 0; i < argc; ++i) {
-        args.emplace_back(argv[i]);
+        args.push_back(argv[i]);
         EK_INFO << "    " << argv[i];
     }
 
@@ -36,10 +41,6 @@ int main(int argc, char** argv) {
         EK_INFO << "version: 0.0.1";
         return 0;
     }
-
-    memory::initialize();
-    clock::initialize();
-    imaging::initialize();
 
     if (argc > 1) {
         if (args[1] == "export") {
@@ -56,7 +57,7 @@ int main(int argc, char** argv) {
                 } else if (what == "assets") {
                     editor_project_t project{};
                     project.devMode = false;
-                    if(getenv("DEV_ASSETS") != nullptr) {
+                    if (getenv("DEV_ASSETS") != nullptr) {
                         EK_WARN << "- DEV_ASSETS detected: export includes development resources";
                         project.devMode = true;
                     }

@@ -175,6 +175,8 @@ struct app_state final {
 
 extern app_state& g_app;
 
+void process_event(const event_t& event);
+
 void dispatch_event(const event_t& event);
 
 void dispatch_draw_frame();

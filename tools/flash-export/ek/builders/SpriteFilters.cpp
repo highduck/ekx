@@ -16,9 +16,8 @@ inline SpriteFilter apply_scale(const SpriteFilter& filter, float scale) {
     return r;
 }
 
-std::vector<SpriteFilter> apply_scale(const std::vector<SpriteFilter>& filters, float scale) {
-    std::vector<SpriteFilter> res;
-    res.reserve(filters.size());
+Array<SpriteFilter> apply_scale(const Array<SpriteFilter>& filters, float scale) {
+    Array<SpriteFilter> res{memory::stdAllocator, filters.size()};
     for (const auto& filter : filters) {
         res.push_back(apply_scale(filter, scale));
     }
@@ -80,7 +79,7 @@ inline rect_f extend_filter_rect(const rect_f& rect, const SpriteFilter& filter)
     return res;
 }
 
-rect_i get_filtered_rect(const rect_i& rc, const std::vector<SpriteFilter>& filters) {
+rect_i get_filtered_rect(const rect_i& rc, const Array<SpriteFilter>& filters) {
     rect_f res{
             static_cast<float>(rc.x),
             static_cast<float>(rc.y),
@@ -348,7 +347,7 @@ void apply(image_t& image, const SpriteFilter& filter, const rect_i& bounds) {
     }
 }
 
-void apply(const std::vector<SpriteFilter>& filters, SpriteData& sprite, float scale) {
+void apply(const Array<SpriteFilter>& filters, SpriteData& sprite, float scale) {
     const rect_i bounds = get_filtered_rect(sprite.source, filters);
     auto res = sprite;
     uint32_t width = bounds.width;

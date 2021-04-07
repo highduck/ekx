@@ -6,7 +6,7 @@
 #include <ek/math/box.hpp>
 #include <ek/math/packed_color.hpp>
 
-#include <vector>
+#include <ek/ds/Array.hpp>
 
 namespace pugi {
 class xml_node;
@@ -40,22 +40,22 @@ struct SpriteFilter {
 };
 
 struct SpriteFilterList {
-    std::vector<SpriteFilter> list;
+    Array<SpriteFilter> list{};
 
     void readFromXML(const pugi::xml_node& node);
 
     void writeToXML(pugi::xml_node& node) const;
 };
 
-rect_i get_filtered_rect(const rect_i& rc, const std::vector<SpriteFilter>& filters);
+rect_i get_filtered_rect(const rect_i& rc, const Array<SpriteFilter>& filters);
 
-std::vector<SpriteFilter> apply_scale(const std::vector<SpriteFilter>& filters, float scale);
+Array<SpriteFilter> apply_scale(const Array<SpriteFilter>& filters, float scale);
 
 void apply(image_t& image, const SpriteFilter& filter, const rect_i& bounds);
 
 struct SpriteData;
 
-void apply(const std::vector<SpriteFilter>& filters, SpriteData& sprite, float scale);
+void apply(const Array<SpriteFilter>& filters, SpriteData& sprite, float scale);
 
 }
 

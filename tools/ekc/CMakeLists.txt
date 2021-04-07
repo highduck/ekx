@@ -32,8 +32,6 @@ add_executable(${PROJECT_NAME}
         src/ek/system/system.hpp
         src/ek/system/working_dir.cpp
         src/ek/system/working_dir.hpp
-        src/ek/system/file_watcher.cpp
-        src/ek/system/file_watcher.hpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ./src)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "editor_asset.hpp"
+#include <ek/ds/Array.hpp>
 
 namespace ek {
 
@@ -17,7 +18,7 @@ public:
 private:
 
     std::unordered_map<std::string, path_t> languages;
-    std::unordered_map<std::string, std::vector<uint8_t>> convertedData;
+    std::unordered_map<std::string, Array<uint8_t>> convertedData;
 };
 
 }

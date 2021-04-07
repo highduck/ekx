@@ -11,7 +11,7 @@ option(EKX_BUILD_DEV_TOOLS "Build EKX in-game development tools" ON)
 
 if ($ENV{CLION_IDE})
 set(EKX_BUILD_TESTS ON)
-#set(EKX_BUILD_BENCHMARKS ON)
+set(EKX_BUILD_BENCHMARKS OFF)
 endif ()
 
 if (EKX_BUILD_TESTS)
@@ -50,7 +50,6 @@ endif ()
 
 if (EKX_BUILD_TESTS)
     add_subdirectory(tests/core-test)
-    add_subdirectory(tests/scenex-test)
 endif ()
 
 if (EKX_BUILD_BENCHMARKS)

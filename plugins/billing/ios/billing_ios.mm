@@ -1,6 +1,6 @@
 #include <billing.hpp>
 #include <ek/util/logger.hpp>
-#include <ios_app_delegate.h>
+#include <app_apple.h>
 
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>

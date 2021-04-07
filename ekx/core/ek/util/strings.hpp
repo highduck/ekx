@@ -2,7 +2,7 @@
 
 #include <cstring>
 #include <string>
-#include <vector>
+#include <ek/ds/Array.hpp>
 #include <cmath>
 
 namespace ek {
@@ -15,9 +15,9 @@ bool starts_with(const std::string& str, char start);
 
 bool starts_with(const std::string& str, const std::string& start);
 
-std::vector<std::string> split(const std::string& str, char separator);
+Array<std::string> split(const std::string& str, char separator);
 
-std::string join(const std::vector<std::string>& strings, const std::string& delimiter);
+std::string join(const Array<std::string>& strings, const std::string& delimiter);
 
 // replace all
 std::string replace(const std::string& str, const std::string& search, const std::string& replace);

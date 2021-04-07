@@ -30,4 +30,10 @@
 
 #define EK_WINDOWS 1
 
+#include <winapifamily.h>
+
+#if defined(WINAPI_FAMILY_PARTITION) && !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#define EK_UWP 1
+#endif
+
 #endif

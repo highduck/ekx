@@ -23,5 +23,5 @@ module.exports = (ctx) => {
         },
     });
 
-    ctx.build.android.dependencies.push(`implementation 'com.android.billingclient:billing:3.0.0'`);
+    ctx.build.android.dependencies.push(`implementation 'com.android.billingclient:billing:3.0.3'`);
 };

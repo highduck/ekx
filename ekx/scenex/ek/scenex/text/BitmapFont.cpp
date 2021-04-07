@@ -1,6 +1,6 @@
 #include "BitmapFont.hpp"
 #include <ek/scenex/2d/Sprite.hpp>
-#include <ek/graphics/Helpers.hpp>
+#include <ek/graphics/graphics.hpp>
 
 namespace ek {
 

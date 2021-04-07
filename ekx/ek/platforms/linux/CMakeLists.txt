@@ -2,15 +2,7 @@ message("Platform: LINUX")
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-target_sources(${PROJECT_NAME} PRIVATE
-        static_resources.cpp
-
-        # MOCKS
-        analytics.cpp
-        sharing.cpp
-        user_preferences.cpp
-        device_linux.cpp
-        )
+target_sources(${PROJECT_NAME} PRIVATE app_linux.cpp)
 
 find_package(OpenGL REQUIRED)
 

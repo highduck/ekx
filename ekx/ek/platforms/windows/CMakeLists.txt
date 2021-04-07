@@ -2,18 +2,7 @@ message("Platform: Windows")
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-target_sources(${PROJECT_NAME} PRIVATE
-        static_resources.cpp
-
-        # MOCKS
-        analytics.cpp
-        sharing.cpp
-        user_preferences.cpp
-        )
-
-target_compile_options(${PROJECT_NAME} PUBLIC
-        #-Wno-dollar-in-identifier-extension
-        )
+target_sources(${PROJECT_NAME} PRIVATE app_windows.cpp)
 
 find_package(OpenGL REQUIRED)
 if (NOT OPENGL_FOUND)

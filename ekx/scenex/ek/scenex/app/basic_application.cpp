@@ -49,13 +49,13 @@ static const float4 DebugAdditionalInsets = float4::zero;
 
 void updateRootViewport(Viewport& vp) {
     const auto screenSize = app::g_app.drawable_size;
-    const auto screenDpiScale = (float)app::g_app.content_scale;
+    const auto screenDpiScale = (float) app::g_app.content_scale;
 
     float4 insets;
     getScreenInsets(insets.data());
     insets += DebugAdditionalInsets;
 
-    vp.input.fullRect = rect_f{0.0f, 0.0f, (float)screenSize.x, (float)screenSize.y};
+    vp.input.fullRect = rect_f{0.0f, 0.0f, (float) screenSize.x, (float) screenSize.y};
     vp.input.dpiScale = screenDpiScale;
     vp.input.safeRect = vp.input.fullRect;
     vp.input.safeRect.x += insets.x;
@@ -213,7 +213,7 @@ void basic_application::on_draw_frame() {
     };
     if (r3d) {
         pass_action.depth.action = SG_ACTION_CLEAR;
-        pass_action.depth.value = 100000.0f;
+        pass_action.depth.value = 1.0f;
     }
 
     if (!started_ && rootAssetObject) {
@@ -222,7 +222,7 @@ void basic_application::on_draw_frame() {
 
     auto fbWidth = static_cast<int>(g_app.drawable_size.x);
     auto fbHeight = static_cast<int>(g_app.drawable_size.y);
-    if(fbWidth > 0 && fbHeight > 0) {
+    if (fbWidth > 0 && fbHeight > 0) {
         sg_begin_default_pass(&pass_action, fbWidth, fbHeight);
 
         if (r3d) {
@@ -231,7 +231,7 @@ void basic_application::on_draw_frame() {
 
         render_frame();
 
-        draw2d::begin({0, 0, (float)fbWidth, (float)fbHeight});
+        draw2d::begin({0, 0, (float) fbWidth, (float) fbHeight});
 
         if (!started_ && rootAssetObject) {
             drawPreloader(rootAssetObject->getProgress());
@@ -273,7 +273,7 @@ void basic_application::on_draw_frame() {
 }
 
 void basic_application::update_frame(float dt) {
-    (void)dt;
+    (void) dt;
 }
 
 void basic_application::render_frame() {
@@ -302,6 +302,10 @@ void basic_application::on_event(const event_t& event) {
     if (event.type == event_type::app_resize) {
         updateRootViewport(root.get<Viewport>());
     }
+    else if (event.type == event_type::app_close) {
+        sg_shutdown();
+    }
+
     profiler.addTime("EVENTS", timer.read_millis());
     profiler.addTime("FRAME", timer.read_millis());
 }

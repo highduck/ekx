@@ -98,7 +98,7 @@ void process_market_asset(const marketing_asset_t& marketing) {
 }
 
 // prerender_flash INPUT SYMBOL [Scale WIDTH HEIGHT ALPHA TRIM OUTPUT_PATH]
-void runFlashFilePrerender(const vector<std::string>& args) {
+void runFlashFilePrerender(const Array<std::string>& args) {
     path_t inputPath{args[2]};
     Doc ff{inputPath};
     SGBuilder exporter{ff};
