@@ -1,8 +1,8 @@
 #pragma once
 
 #include <ek/util/path.hpp>
+#include <ek/ds/Array.hpp>
 
-#include <vector>
 #include <string>
 
 namespace ek {
@@ -42,7 +42,7 @@ public:
     }
 
 private:
-    std::vector<std::string> st_;
+    Array<std::string> st_;
 };
 
 }

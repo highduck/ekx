@@ -2,6 +2,7 @@
 
 #include "../Allocator.hpp"
 #include "../assert.hpp"
+#include <initializer_list>
 
 namespace ek {
 
@@ -31,6 +32,13 @@ public:
               _capacity{4},
               _size{0} {
         _data = (T*) _allocator.alloc(sizeof(T) * _capacity, alignof(T));
+    }
+
+    Array(std::initializer_list<T> list) noexcept : _allocator{memory::stdAllocator},
+                                                 _capacity{static_cast<uint32_t>(list.size())},
+                                                 _size{static_cast<uint32_t>(list.size())} {
+        _data = (T*) _allocator.alloc(sizeof(T) * _capacity, alignof(T));
+        constructCopy(_data, list.begin(), _size);
     }
 
     explicit Array(Allocator& allocator, unsigned capacity = 4) :
@@ -227,9 +235,27 @@ public:
     }
 
     [[nodiscard]]
-    inline T back() const {
-        EK_ASSERT_R2(_size > 0);
+    inline const T& back() const {
+        EK_ASSERT(_size > 0);
         return *(_data + _size - 1);
+    }
+
+    [[nodiscard]]
+    inline T& back() {
+        EK_ASSERT(_size > 0);
+        return *(_data + _size - 1);
+    }
+
+    [[nodiscard]]
+    inline const T& front() const {
+        EK_ASSERT(_size > 0);
+        return *_data;
+    }
+
+    [[nodiscard]]
+    inline T& front() {
+        EK_ASSERT(_size > 0);
+        return *_data;
     }
 
     inline const T* begin() const {

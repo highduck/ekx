@@ -3,7 +3,7 @@
 #include "types.hpp"
 #include <memory>
 #include <map>
-#include <vector>
+#include <ek/ds/Array.hpp>
 
 namespace pugi {
 class xml_document;
@@ -41,8 +41,8 @@ public:
 
 public:
     DocInfo info;
-    std::vector<FolderItem> folders;
-    std::vector<Element> library;
+    Array<FolderItem> folders{};
+    Array<Element> library{};
     // order is important
     std::map<std::string, std::string> scenes;
 private:

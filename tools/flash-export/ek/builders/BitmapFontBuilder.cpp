@@ -1,6 +1,5 @@
 #include "BitmapFontBuilder.hpp"
 
-#include <vector>
 #include <string>
 
 #include <ek/util/strings.hpp>
@@ -38,9 +37,9 @@ struct FontFaceInfo {
     bool hasKerning;
 };
 
-bool check(const std::vector<std::pair<uint32_t, uint32_t>>& ranges, uint32_t codepoint) {
+bool check(const Array<CodepointPair>& ranges, uint32_t codepoint) {
     for (const auto& range : ranges) {
-        if (codepoint >= range.first && codepoint <= range.second) {
+        if (codepoint >= range.a && codepoint <= range.b) {
             return true;
         }
     }
@@ -83,8 +82,8 @@ public:
         return false;
     }
 
-    std::vector<uint32_t> getAvailableCodepoints(const std::vector<std::pair<uint32_t, uint32_t>>& ranges) const {
-        std::vector<uint32_t> ret;
+    Array<uint32_t> getAvailableCodepoints(const Array<CodepointPair>& ranges) const {
+        Array<uint32_t> ret{};
 
         FT_UInt glyphIndex;
         FT_ULong codepoint = FT_Get_First_Char(ftFace, &glyphIndex);
@@ -173,11 +172,11 @@ public:
 void BuildBitmapFontSettings::readFromXML(const pugi::xml_node& node) {
     fontSize = node.attribute("fontSize").as_int(16);
 
-    const std::pair<uint32_t, uint32_t> defaultCodepointRange{0x0020u, 0x007Fu};
+    const CodepointPair defaultCodepointRange{0x0020u, 0x007Fu};
     for (auto& rangeNode: node.children("code_range")) {
         auto cr = defaultCodepointRange;
-        cr.first = std::strtoul(rangeNode.attribute("from").as_string("0x0020"), nullptr, 16);
-        cr.second = std::strtoul(rangeNode.attribute("to").as_string("0x007F"), nullptr, 16);
+        cr.a = std::strtoul(rangeNode.attribute("from").as_string("0x0020"), nullptr, 16);
+        cr.b = std::strtoul(rangeNode.attribute("to").as_string("0x007F"), nullptr, 16);
         ranges.push_back(cr);
     }
 
@@ -194,8 +193,8 @@ void BuildBitmapFontSettings::writeToXML(pugi::xml_node& node) const {
 
     for (const auto& range: ranges) {
         auto range_node = node.append_child("code_range");
-        range_node.append_attribute("from").set_value(("0x" + to_hex(range.first)).c_str());
-        range_node.append_attribute("to").set_value(("0x" + to_hex(range.second)).c_str());
+        range_node.append_attribute("from").set_value(("0x" + to_hex(range.a)).c_str());
+        range_node.append_attribute("to").set_value(("0x" + to_hex(range.b)).c_str());
     }
 
     node.append_attribute("mirror_case").set_value(mirrorCase);
@@ -268,7 +267,7 @@ void glyph_build_sprites(FontFace& fontFace,
                          uint32_t glyph_index,
                          const std::string& name,
                          uint16_t fontSize,
-                         const std::vector<SpriteFilter>& filters,
+                         const Array<SpriteFilter>& filters,
                          MultiResAtlasData& toAtlas) {
     const std::string ref = name + std::to_string(glyph_index);
     for (auto& resolution : toAtlas.resolutions) {

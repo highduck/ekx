@@ -143,8 +143,8 @@ rect_f calc_uv(rect_i source, float2 atlas_size, bool rotated) {
 }
 
 
-std::vector<AtlasPageData> packSprites(std::vector<SpriteData> sprites, const int2 max_size) {
-    std::vector<AtlasPageData> pages;
+Array<AtlasPageData> packSprites(Array<SpriteData> sprites, const int2 max_size) {
+    Array<AtlasPageData> pages;
 
 //    timer timer{};
 //    EK_DEBUG("Packing %lu sprites...", sprites.size());
@@ -201,7 +201,7 @@ std::vector<AtlasPageData> packSprites(std::vector<SpriteData> sprites, const in
                     page.sprites.emplace_back(sprite);
                 }
             }
-            pages.push_back(std::move(page));
+            pages.emplace_back(std::move(page));
         }
     }
 
@@ -213,29 +213,11 @@ std::vector<AtlasPageData> packSprites(std::vector<SpriteData> sprites, const in
     return pages;
 }
 
-//std::vector<SpriteData> unpackSprites(const std::vector<AtlasPageData>& pages) {
-//    std::vector<SpriteData> sprites;
-//    for (auto& page : pages) {
-//        for (auto& sprite : page.sprites) {
-//            SpriteData spr = sprite;
-//            spr.disable(SpriteFlag::Packed);
-//            sprites.push_back(spr);
-//        }
-//    }
-//    return sprites;
-//}
-//
-//std::vector<AtlasPageData> repackSprites(const std::vector<AtlasPageData>& pages, const int2 max_size) {
-//    return packSprites(unpack(pages), max_size);
-//}
-
 // TODO: atlas
 // ++page_index;
 // page.image_path = atlas.name + get_atlas_suffix(atlas.scale, page_index) + ".png";
 
-
 /*** Save Image ***/
-
 
 void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
     image_t img{image};

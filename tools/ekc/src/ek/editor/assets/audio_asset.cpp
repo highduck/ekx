@@ -8,7 +8,7 @@ audio_asset_t::audio_asset_t(path_t path)
         : editor_asset_t{std::move(path), "audio"} {
 }
 
-bool check_filters(const ek::path_t& path, const std::vector<std::string>& filters) {
+bool check_filters(const ek::path_t& path, const Array<std::string>& filters) {
     for (const auto& filter : filters) {
         if (path.str().rfind(filter) != std::string::npos) {
             return true;
@@ -18,7 +18,7 @@ bool check_filters(const ek::path_t& path, const std::vector<std::string>& filte
 }
 
 void audio_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
-    std::vector<std::string> music_filters;
+    Array<std::string> music_filters{};
     music_list_.clear();
     sound_list_.clear();
 

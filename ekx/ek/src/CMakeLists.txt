@@ -5,15 +5,11 @@ target_sources(${PROJECT_NAME} PUBLIC
         ek/app/prefs.hpp
         ek/app/prefs.cpp
         ek/app/res.hpp
-        ek/app/internal/res_sys.hpp
-        ek/app/internal/res_sys.cpp
 
         ek/ext/analytics/analytics.hpp
         ek/ext/sharing/sharing.hpp
 
         ek/audio/audio.cpp
-
-        ek/file_view.cpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "editor_asset.hpp"
-#include <vector>
+#include <ek/ds/Array.hpp>
 
 namespace ek {
 
@@ -19,8 +19,8 @@ private:
 
     std::string getRelativeName(const std::string& filepath) const;
 
-    std::vector<std::string> sound_list_;
-    std::vector<std::string> music_list_;
+    Array<std::string> sound_list_{};
+    Array<std::string> music_list_{};
 };
 
 }

@@ -1,6 +1,5 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/util/Res.hpp>
-#include <ek/graphics/Helpers.hpp>
 #include <ek/scenex/3d/Material3D.hpp>
 #include <ek/scenex/3d/StaticMesh.hpp>
 #include <ek/scenex/2d/Atlas.hpp>

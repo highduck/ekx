@@ -1,8 +1,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
-
+#include <ek/ds/Array.hpp>
 #include <ek/scenex/data/BMFont.hpp>
 #include <ek/builders/MultiResAtlas.hpp>
 #include <ek/builders/SpriteFilters.hpp>
@@ -14,9 +13,14 @@ class xml_node;
 
 namespace ek {
 
+struct CodepointPair {
+    uint32_t a;
+    uint32_t b;
+};
+
 struct BuildBitmapFontSettings {
     uint16_t fontSize;
-    std::vector<std::pair<uint32_t, uint32_t>> ranges;
+    Array<CodepointPair> ranges{};
     bool mirrorCase = true;
     bool useKerning = true;
 

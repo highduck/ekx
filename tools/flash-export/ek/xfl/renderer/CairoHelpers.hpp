@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ek/xfl/types.hpp>
+#include <ek/ds/Array.hpp>
 
 typedef struct _cairo cairo_t;
 typedef struct _cairo_pattern cairo_pattern_t;
@@ -36,7 +37,7 @@ void set_blend_mode(cairo_t* ctx, BlendMode blend_mode);
 void cairo_quadratic_curve_to(cairo_t* context, float x1, float y1, float x2, float y2);
 
 void add_color_stops(cairo_pattern_t* pattern,
-                     const std::vector<GradientEntry>& entries,
+                     const Array<GradientEntry>& entries,
                      const float4& color_multiplier);
 
 // https://github.com/lightspark/lightspark/blob/master/src/backends/graphics.cpp

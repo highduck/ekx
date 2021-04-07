@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-
+#include <ek/ds/Array.hpp>
 #include <ek/util/path.hpp>
 #include <ek/xfl/Doc.hpp>
 
@@ -14,10 +14,10 @@ struct marketing_export_command_t {
 
 struct marketing_asset_t {
     ek::path_t input{"assets/res"};
-    std::vector<marketing_export_command_t> commands;
+    Array<marketing_export_command_t> commands{};
 };
 
 void process_market_asset(const marketing_asset_t& config);
 
-void runFlashFilePrerender(const std::vector<std::string>& args);
+void runFlashFilePrerender(const Array<std::string>& args);
 }

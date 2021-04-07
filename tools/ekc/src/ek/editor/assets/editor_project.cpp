@@ -18,7 +18,7 @@
 
 namespace ek {
 
-std::vector<path_t> search_asset_files(const path_t& path) {
+Array<path_t> search_asset_files(const path_t& path) {
     working_dir_t in{path};
     return search_files("*.asset.xml", path_t{""});
 }
@@ -84,7 +84,7 @@ editor_project_t::~editor_project_t() {
 }
 
 void editor_project_t::build(const path_t& output) const {
-    std::vector<editor_asset_t*> assetsToBuild;
+    Array<editor_asset_t*> assetsToBuild{};
     // read declaration for all populated assets,
     // and add to queue assets that should be packed (dev / platform)
     // platform filter is not implemented yet

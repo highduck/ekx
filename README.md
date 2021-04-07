@@ -1,10 +1,10 @@
 # ekx
 
-<a href="https://github.com/highduck/ekx">
-    <img width="400" height="381" src="pixel-duck.png" alt="ekx">
-</a>
-
 [![Build](https://github.com/highduck/ekx/actions/workflows/build.yml/badge.svg)](https://github.com/highduck/ekx/actions/workflows/build.yml)
+
+<a href="https://github.com/highduck/ekx">
+<img width="400" height="381" src="pixel-duck.png" alt="ekx">
+</a>
 
 ___
 

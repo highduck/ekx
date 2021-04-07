@@ -3,7 +3,7 @@
 #include <ek/math/box.hpp>
 #include <string>
 #include <utility>
-#include <vector>
+#include <ek/ds/Array.hpp>
 #include <ek/imaging/image.hpp>
 #include <ek/math/serialize_math.hpp>
 
@@ -20,7 +20,7 @@ struct MultiResAtlasSettings {
     };
 
     std::string name;
-    std::vector<Resolution> resolutions{};
+    Array<Resolution> resolutions{};
 
     void readFromXML(const pugi::xml_node& node);
 
@@ -82,7 +82,7 @@ struct SpriteData {
 
 struct AtlasPageData {
     vec2_t<uint16_t> size;
-    std::vector<SpriteData> sprites;
+    Array<SpriteData> sprites;
     std::string image_path;
     image_t* image = nullptr;
 
@@ -96,8 +96,8 @@ struct AtlasData {
     float resolution_scale = 1.0f;
     int resolution_index = 0;
     int2 max_size{2048, 2048};
-    std::vector<SpriteData> sprites{};
-    std::vector<AtlasPageData> pages{};
+    Array<SpriteData> sprites{};
+    Array<AtlasPageData> pages{};
 
     AtlasData() = default;
 
@@ -116,7 +116,7 @@ struct AtlasData {
 
 struct MultiResAtlasData {
     std::string name;
-    std::vector<AtlasData> resolutions{};
+    Array<AtlasData> resolutions{};
 
     MultiResAtlasData() {
         resolutions.resize(4);
@@ -153,10 +153,6 @@ struct MultiResAtlasData {
 
 void saveImagePNG(const image_t& image, const std::string& path, bool alpha = true);
 
-std::vector<AtlasPageData> packSprites(std::vector<SpriteData> sprites, int2 max_size);
-
-//std::vector<SpriteData> unpackSprites(const std::vector<AtlasPageData>& pages);
-
-//std::vector<AtlasPageData> repackSprites(const std::vector<AtlasPageData>& pages, int2 max_size);
+Array<AtlasPageData> packSprites(Array<SpriteData> sprites, int2 max_size);
 
 }

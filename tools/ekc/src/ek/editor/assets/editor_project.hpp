@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <ek/ds/Array.hpp>
 #include <ek/util/path.hpp>
 #include <unordered_map>
 #include <functional>
@@ -32,7 +32,7 @@ public:
 
     path_t base_path{"../assets"};
 
-    std::vector<editor_asset_t*> assets;
+    Array<editor_asset_t*> assets{};
     std::unordered_map<std::string, AssetFactory> type_factory;
 
     bool devMode = true;

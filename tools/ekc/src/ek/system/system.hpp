@@ -1,8 +1,8 @@
 #pragma once
 
+#include <ek/ds/Array.hpp>
 #include <ek/util/path.hpp>
 #include <string>
-#include <vector>
 #include <cstdint>
 #include <unordered_map>
 
@@ -18,13 +18,13 @@ void save(const output_memory_stream& stream, const std::string& path);
 
 void save(const output_memory_stream& stream, const char *path);
 
-void save(const std::vector<uint8_t>& buffer, const path_t& path);
+void save(const Array<uint8_t>& buffer, const path_t& path);
 
-void save(const std::vector<uint8_t>& buffer, const char *path);
+void save(const Array<uint8_t>& buffer, const char *path);
 
 void save(const std::string& text, const path_t& path);
 
-std::vector<uint8_t> read_file(const path_t& path);
+Array<uint8_t> read_file(const path_t& path);
 
 bool is_dir(const char *path);
 
@@ -60,7 +60,7 @@ inline bool make_dirs(const std::string& path) {
     return make_dirs(path_t{path});
 }
 
-std::vector<path_t> search_files(const std::string& pattern, const path_t& path);
+Array<path_t> search_files(const std::string& pattern, const path_t& path);
 
 bool remove_dir_rec(const char *path);
 

@@ -7,7 +7,6 @@
 #include <cstdio>
 #include <fstream>
 #include <array>
-#include <vector>
 
 #if defined(__ANDROID__)
 
@@ -54,11 +53,11 @@ void save(const output_memory_stream& stream, const char* path) {
     }
 }
 
-void save(const std::vector<uint8_t>& buffer, const path_t& path) {
+void save(const Array<uint8_t>& buffer, const path_t& path) {
     save(buffer, path.c_str());
 }
 
-void save(const std::vector<uint8_t>& buffer, const char* path) {
+void save(const Array<uint8_t>& buffer, const char* path) {
     auto h = fopen(path, "wb");
     if (h) {
         fwrite(buffer.data(), 1, buffer.size(), h);
@@ -204,7 +203,7 @@ void copy_tree(const ek::path_t& src, const ek::path_t& dest) {
             make_dirs(dest);
         }
 
-        std::vector<std::string> nested_dirs;
+        Array<std::string> nested_dirs{};
         struct dirent* e;
         while ((e = readdir(dir)) != nullptr) {
             if (is_dir_entry_real(e)) {
@@ -252,7 +251,7 @@ bool make_dirs(const path_t& path) {
         return true;
     }
 
-    std::vector<std::string> list = split(path.str(), '/');
+    Array<std::string> list = split(path.str(), '/');
     std::string pit{};
     for (const auto& part : list) {
         if (!part.empty()) {
@@ -308,14 +307,13 @@ void replace_in_file(const path_t& path, const std::unordered_map<std::string, s
     save(res, path);
 }
 
-void search_files(const std::string& pattern, const path_t& path, std::vector<path_t>& out) {
-    using std::vector;
+void search_files(const std::string& pattern, const path_t& path, Array<path_t>& out) {
     using std::string;
 #ifndef EK_DISABLE_SYSTEM_FS
     const char* path_dir = path.empty() ? "." : path.c_str();
     DIR* dir = opendir(path_dir);
     if (dir) {
-        vector<string> nested_dirs;
+        Array<string> nested_dirs{};
         struct dirent* e;
         while ((e = readdir(dir)) != nullptr) {
             if (is_dir_entry_real(e)) {
@@ -337,11 +335,10 @@ void search_files(const std::string& pattern, const path_t& path, std::vector<pa
 #endif
 }
 
-std::vector<path_t> search_files(const std::string& pattern, const path_t& path) {
-    using std::vector;
+Array<path_t> search_files(const std::string& pattern, const path_t& path) {
     using std::string;
 
-    vector<path_t> res;
+    Array<path_t> res{};
 #ifndef EK_DISABLE_SYSTEM_FS
     const char* path_dir = path.empty() ? "." : path.c_str();
     if (!is_dir(path_dir)) {
@@ -353,8 +350,8 @@ std::vector<path_t> search_files(const std::string& pattern, const path_t& path)
     return res;
 }
 
-std::vector<uint8_t> read_file(const path_t& path) {
-    std::vector<uint8_t> buffer;
+Array<uint8_t> read_file(const path_t& path) {
+    Array<uint8_t> buffer{};
     auto* stream = fopen(path.c_str(), "rb");
     if (stream) {
         fseek(stream, 0, SEEK_END);
@@ -364,8 +361,8 @@ std::vector<uint8_t> read_file(const path_t& path) {
         fread(buffer.data(), buffer.size(), 1u, stream);
 
         if (ferror(stream) != 0) {
-            buffer.resize(0);
-            buffer.shrink_to_fit();
+            buffer.clear();
+            // TODO: remove allocated storage (shrink_to_fit)
         }
 
         fclose(stream);

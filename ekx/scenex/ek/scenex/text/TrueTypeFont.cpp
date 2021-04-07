@@ -3,12 +3,11 @@
 #include <unordered_map>
 #include <ek/app/res.hpp>
 #include <ek/app/device.hpp>
-#include <ek/file_view.hpp>
 #include <ek/imaging/fast_blur.hpp>
 
 #ifndef STB_TRUETYPE_IMPLEMENTATION
-#define STBTT_STATIC
 #define STB_TRUETYPE_IMPLEMENTATION
+#define STBTT_STATIC
 
 #include <stb_truetype.h>
 

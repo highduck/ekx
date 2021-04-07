@@ -24,7 +24,7 @@ void TranslationsAsset::build(assets_build_struct_t& build_data) {
     const auto output_path = build_data.output / name_;
     make_dirs(output_path);
 
-    std::vector<std::string> langs;
+    Array<std::string> langs{};
     for (auto& it : languages) {
         auto& lang = it.first;
         langs.push_back(lang);

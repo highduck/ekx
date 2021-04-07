@@ -25,10 +25,10 @@ bool starts_with(const std::string& str, const std::string& start) {
     return str.find(start) == 0;
 }
 
-std::vector<std::string> split(const std::string& str, const char separator) {
+Array<std::string> split(const std::string& str, const char separator) {
     using size_type = std::string::size_type;
 
-    std::vector<std::string> result;
+    Array<std::string> result{};
     size_type prev = 0;
     size_type pos = 0;
 
@@ -43,7 +43,7 @@ std::vector<std::string> split(const std::string& str, const char separator) {
     return result;
 }
 
-std::string join(const std::vector<std::string>& strings, const std::string& delimiter) {
+std::string join(const Array<std::string>& strings, const std::string& delimiter) {
     std::string res{};
     size_t i = 0;
     for (const auto& str : strings) {

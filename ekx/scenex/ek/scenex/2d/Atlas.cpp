@@ -6,7 +6,7 @@
 #include <ek/math/serialize_math.hpp>
 #include <ek/util/path.hpp>
 #include <ek/app/res.hpp>
-#include <ek/graphics/Helpers.hpp>
+#include <ek/graphics/graphics.hpp>
 #include <ek/imaging/decoder.hpp>
 #include <ek/imaging/image.hpp>
 
