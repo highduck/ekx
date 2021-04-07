@@ -183,7 +183,7 @@ void SGBuilder::build_library() {
         }
     }
 
-    std::vector<ExportItem*> chi{};
+    Array<ExportItem*> chi{};
     for (auto& item : library.children) {
         if (item->usage > 0) {
             chi.push_back(item);
@@ -623,7 +623,7 @@ void SGBuilder::processTimeline(const Element& el, ExportItem* item) {
                 }
             }
             if (empty) {
-                it = movieLayers.erase(it);
+                movieLayers.eraseIt(it);
             } else {
                 it++;
             }

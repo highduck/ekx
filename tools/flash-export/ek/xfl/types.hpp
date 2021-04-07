@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <vector>
+#include <ek/ds/Array.hpp>
 #include <memory>
 #include <optional>
 #include <ek/math/box.hpp>
@@ -16,7 +16,7 @@ struct BitmapData {
     int height = 0;
     int bpp = 4;
     bool alpha = true;
-    std::vector<uint8_t> data;
+    Array<uint8_t> data;
 
     static BitmapData* parse(const std::string& data);
 };
@@ -82,8 +82,8 @@ enum class TextLineType {
 };
 
 struct Edge {
-    std::vector<char> commands;
-    std::vector<double> values;
+    Array<char> commands;
+    Array<double> values;
     int fill_style_0 = 0;
     int fill_style_1 = 0;
     int stroke_style = 0;
@@ -178,7 +178,7 @@ struct FillStyle {
 
     FillType type = FillType::solid;
     SpreadMethod spreadMethod = SpreadMethod::repeat;
-    std::vector<GradientEntry> entries;
+    Array<GradientEntry> entries{};
     matrix_2d matrix{};
     std::string bitmapPath;
     std::shared_ptr<BitmapData> bitmap;
@@ -215,7 +215,7 @@ enum class TweenTarget {
 struct TweenObject {
     TweenTarget target = TweenTarget::all;
     int intensity; // <Ease intensity="-100...100" />
-    std::vector<float2> custom_ease;
+    Array<float2> custom_ease;
 };
 
 struct Frame {
@@ -238,10 +238,10 @@ struct Frame {
     int acceleration; // ease -100...100
 
     bool hasCustomEase;
-    std::vector<TweenObject> tweens;
+    Array<TweenObject> tweens{};
 
     std::string script;
-    std::vector<Element> elements;
+    Array<Element> elements{};
     MotionObject motionObject;
 };
 
@@ -260,7 +260,7 @@ struct Layer {
     bool isSelected = false;
     bool locked = false;
 
-    std::vector<Frame> frames;
+    Array<Frame> frames{};
 
     [[nodiscard]]
     int duration() const {
@@ -283,7 +283,7 @@ struct Layer {
 
 struct Timeline {
     std::string name;
-    std::vector<Layer> layers;
+    Array<Layer> layers{};
 
     [[nodiscard]]
     int getTotalFrames() const {
@@ -411,12 +411,12 @@ struct Element {
     std::string libraryItemName;
 
 ////// group
-    std::vector<Element> members;
+    Array<Element> members{};
 
 ///// SHAPE
-    std::vector<Edge> edges;
-    std::vector<FillStyle> fills;
-    std::vector<StrokeStyle> strokes;
+    Array<Edge> edges{};
+    Array<FillStyle> fills{};
+    Array<StrokeStyle> strokes{};
     bool isDrawingObject;
 
     ///// Symbol instance
@@ -434,8 +434,8 @@ struct Element {
     bool isVisible = true;
 
     //// text
-    std::vector<TextRun> textRuns;
-    std::vector<Filter> filters;
+    Array<TextRun> textRuns{};
+    Array<Filter> filters{};
 
     // dynamic text
     bool isSelectable = true;

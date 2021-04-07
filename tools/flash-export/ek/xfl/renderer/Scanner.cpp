@@ -44,9 +44,11 @@ void Scanner::drawShape(const Element& element) {
 
 void Scanner::drawSymbolItem(const Doc& doc, const Element& element) {
     const auto& layers = element.timeline.layers;
-    const auto& end = layers.rend();
-    for (auto it = layers.rbegin(); it != end; ++it) {
-        const auto& layer = *it;
+
+    // go backward
+    const uint32_t count = layers.size();
+    for(uint32_t i = count - 1; i < count; --i) {
+        const auto& layer = layers[i];
         if (layer.layerType == LayerType::normal) {
             if (!layer.frames.empty()) {
                 for (const auto& el : layer.frames[0].elements) {
@@ -89,7 +91,7 @@ void Scanner::popTransform() {
     stack_.pop_back();
 }
 
-rect_f Scanner::getBounds(const Doc& doc, const std::vector<Element>& elements) {
+rect_f Scanner::getBounds(const Doc& doc, const Array<Element>& elements) {
     Scanner scanner{};
     for (auto& el: elements) {
         scanner.draw(doc, el);

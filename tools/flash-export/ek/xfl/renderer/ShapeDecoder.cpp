@@ -59,9 +59,9 @@ void ShapeDecoder::decode(const Element& el) {
     int current_fill_1;
     int current_line = -1;
 
-    std::vector<RenderCommand> edges;
-    std::vector<ShapeEdge> fills;
-    std::vector<ShapeEdge> back_fills;
+    Array<RenderCommand> edges{};
+    Array<ShapeEdge> fills{};
+    Array<ShapeEdge> back_fills{};
 
     for (const auto& edge: el.edges) {
         bool line_started = false;
@@ -166,7 +166,9 @@ void ShapeDecoder::decode(const Element& el) {
                 }
             }
         }
-        fills.insert(fills.end(), back_fills.begin(), back_fills.end());
+        for(auto& fill : back_fills) {
+            fills.push_back(fill);
+        }
     }
     flush_commands(edges, fills);
 }
@@ -200,7 +202,7 @@ void ShapeDecoder::read_line_styles(const Element& el) {
     }
 }
 
-void ShapeDecoder::flush_commands(const std::vector<RenderCommand>& edges, std::vector<ShapeEdge>& fills) {
+void ShapeDecoder::flush_commands(const Array<RenderCommand>& edges, Array<ShapeEdge>& fills) {
     auto left = static_cast<int>(fills.size());
 //        bool init = false;
     int current_fill = 0;
@@ -211,7 +213,7 @@ void ShapeDecoder::flush_commands(const std::vector<RenderCommand>& edges, std::
             for (int i = 0; i < left; ++i) {
                 if (fills[i].fill_style_idx == current_fill) {
                     first = fills[i];
-                    fills.erase(fills.begin() + i);
+                    fills.erase(i);
                     --left;
                     found_fill = true;
                     break;

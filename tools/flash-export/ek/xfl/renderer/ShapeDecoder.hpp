@@ -43,11 +43,11 @@ private:
 
     void read_line_styles(const Element& el);
 
-    void flush_commands(const std::vector<RenderCommand>& edges, std::vector<ShapeEdge>& fills);
+    void flush_commands(const Array<RenderCommand>& edges, Array<ShapeEdge>& fills);
 
-    std::vector<RenderCommand> commands_;
-    std::vector<RenderCommand> fill_styles_;
-    std::vector<RenderCommand> line_styles_;
+    Array<RenderCommand> commands_{};
+    Array<RenderCommand> fill_styles_{};
+    Array<RenderCommand> line_styles_{};
 
     TransformModel transform_;
     bounds_builder_2f bounds_builder_{};

@@ -126,6 +126,10 @@ void handle_touches(event_type type, UIView* view, NSSet* touches, UIEvent* even
     }
 }
 
+- (BOOL)isOpaque {
+    return YES;
+}
+
 - (void)drawRect:(CGRect)rect {
     (void) rect;
 

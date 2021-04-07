@@ -120,7 +120,7 @@ void cairo_quadratic_curve_to(cairo_t* context, float x1, float y1, float x2, fl
 }
 
 void add_color_stops(cairo_pattern_t* pattern,
-                     const std::vector<GradientEntry>& entries,
+                     const Array<GradientEntry>& entries,
                      const color_transform_f& color_transform) {
     for (const auto& entry: entries) {
         const auto& color = color_transform.transform(entry.color);

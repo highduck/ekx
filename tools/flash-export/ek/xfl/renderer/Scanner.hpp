@@ -28,7 +28,7 @@ public:
 
     void drawSymbolItem(const Doc& doc, const Element& element);
 
-    static rect_f getBounds(const Doc& doc, const std::vector<Element>& elements);
+    static rect_f getBounds(const Doc& doc, const Array<Element>& elements);
 
 /** Covert concrete objects to render commands **/
 
@@ -41,11 +41,11 @@ public:
     bool renderShapeObject(const Element& el, const TransformModel& world);
 
 public:
-    std::vector<RenderCommandsBatch> batches;
+    Array<RenderCommandsBatch> batches;
     bounds_builder_2f bounds{};
 
 private:
-    std::vector<TransformModel> stack_;
+    Array<TransformModel> stack_;
 
     void pushTransform(const Element& el);
 

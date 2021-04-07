@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx_fwd.hpp>
-#include <vector>
+#include <ek/ds/Array.hpp>
 
 namespace ek {
 
@@ -10,7 +10,7 @@ struct SGFilter;
 struct UglyFilter2D {
     bool enabled = true;
     bool processing = false;
-    std::vector<SGFilter> filters;
+    Array<SGFilter> filters;
 
     bool pass(const ecs::World& w, ecs::EntityIndex e);
 };

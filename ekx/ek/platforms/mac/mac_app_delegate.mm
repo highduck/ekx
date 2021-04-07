@@ -185,12 +185,6 @@ MacAppDelegate* gAppDelegate = nullptr;
     return YES;
 }
 
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:NSWindowWillCloseNotification
-                                                  object:self.window];
-}
-
 - (void)resetCursorRects {
     [super resetCursorRects];
     set_view_mouse_cursor(self);
@@ -362,4 +356,5 @@ const void* getMetalRenderPass() {
 const void* getMetalDrawable() {
     return (__bridge const void*) [gAppDelegate view].currentDrawable;
 }
+
 }

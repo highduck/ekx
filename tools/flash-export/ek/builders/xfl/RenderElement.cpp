@@ -11,7 +11,7 @@
 namespace ek::xfl {
 
 SpriteData renderMultiSample(const rect_f& bounds,
-                             const std::vector<RenderCommandsBatch>& batches,
+                             const Array<RenderCommandsBatch>& batches,
                              const RenderElementOptions& options) {
     // x4 super-sampling
     const double upscale = 4.0;
@@ -93,7 +93,7 @@ SpriteData renderMultiSample(const rect_f& bounds,
 }
 
 SpriteData renderLowQuality(const rect_f& bounds,
-                            const std::vector<RenderCommandsBatch>& batches,
+                            const Array<RenderCommandsBatch>& batches,
                             const RenderElementOptions& options) {
     const double scale = options.scale;
     const bool fixed = options.width > 0 && options.height > 0;
@@ -153,7 +153,7 @@ SpriteData renderLowQuality(const rect_f& bounds,
     return data;
 }
 
-bool checkContainsOnlyBitmapOperations(const std::vector<RenderCommandsBatch>& batches) {
+bool checkContainsOnlyBitmapOperations(const Array<RenderCommandsBatch>& batches) {
     for (const auto& batch : batches) {
         for (const auto& cmd : batch.commands) {
             if (cmd.op != RenderCommand::Operation::bitmap) {
@@ -165,7 +165,7 @@ bool checkContainsOnlyBitmapOperations(const std::vector<RenderCommandsBatch>& b
 }
 
 SpriteData renderElementBatches(const rect_f& bounds,
-                                const std::vector<RenderCommandsBatch>& batches,
+                                const Array<RenderCommandsBatch>& batches,
                                 const RenderElementOptions& options) {
     if (checkContainsOnlyBitmapOperations(batches)) {
         return renderLowQuality(bounds, batches, options);

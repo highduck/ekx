@@ -49,7 +49,7 @@ struct RenderCommand {
 
 struct RenderCommandsBatch {
     TransformModel transform;
-    std::vector<RenderCommand> commands;
+    Array<RenderCommand> commands;
     bounds_builder_2f bounds{};
     int total = 0;
 
