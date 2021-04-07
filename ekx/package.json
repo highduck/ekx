@@ -12,13 +12,10 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/cairo": "0.0.6",
-    "@ekx/freetype": "0.0.6",
     "@ekx/google-benchmark": "0.0.5",
     "@ekx/google-test": "0.0.5",
     "@ekx/imgui": "0.0.10",
     "@ekx/miniaudio": "0.0.4",
-    "@ekx/miniz": "0.0.3",
     "@ekx/pugixml": "0.0.3",
     "@ekx/sokol": "0.0.6",
     "@ekx/stb": "0.0.3",

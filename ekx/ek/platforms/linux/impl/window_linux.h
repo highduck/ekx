@@ -3,12 +3,13 @@
 #include <cstdint>
 #include <cstring>
 #include <cstdlib>
+#include <ek/app/app.hpp>
 #include <ek/assert.hpp>
 #include <ek/util/logger.hpp>
 
 void ek_fail(const char* msg) {
     EK_ERROR << msg;
-    EK_ABORT();
+    abort();
 }
 
 #define X11_XDND_VERSION  5
@@ -150,6 +151,9 @@ struct AppLinux {
 
 static AppLinux gAppLinux;
 
+using namespace ek;
+using namespace ek::app;
+
 int x11_error_handler(Display* display, XErrorEvent* event) {
     (void)(display);
     gAppLinux.x11.error_code = event->error_code;
@@ -175,18 +179,19 @@ void x11_init_extensions() {
     gAppLinux.x11.NET_WM_ICON_NAME        = XInternAtom(gAppLinux.x11.display, "_NET_WM_ICON_NAME", False);
     gAppLinux.x11.NET_WM_STATE            = XInternAtom(gAppLinux.x11.display, "_NET_WM_STATE", False);
     gAppLinux.x11.NET_WM_STATE_FULLSCREEN = XInternAtom(gAppLinux.x11.display, "_NET_WM_STATE_FULLSCREEN", False);
-    if (_sapp.drop.enabled) {
-        gAppLinux.x11.xdnd.XdndAware        = XInternAtom(gAppLinux.x11.display, "XdndAware", False);
-        gAppLinux.x11.xdnd.XdndEnter        = XInternAtom(gAppLinux.x11.display, "XdndEnter", False);
-        gAppLinux.x11.xdnd.XdndPosition     = XInternAtom(gAppLinux.x11.display, "XdndPosition", False);
-        gAppLinux.x11.xdnd.XdndStatus       = XInternAtom(gAppLinux.x11.display, "XdndStatus", False);
-        gAppLinux.x11.xdnd.XdndActionCopy   = XInternAtom(gAppLinux.x11.display, "XdndActionCopy", False);
-        gAppLinux.x11.xdnd.XdndDrop         = XInternAtom(gAppLinux.x11.display, "XdndDrop", False);
-        gAppLinux.x11.xdnd.XdndFinished     = XInternAtom(gAppLinux.x11.display, "XdndFinished", False);
-        gAppLinux.x11.xdnd.XdndSelection    = XInternAtom(gAppLinux.x11.display, "XdndSelection", False);
-        gAppLinux.x11.xdnd.XdndTypeList     = XInternAtom(gAppLinux.x11.display, "XdndTypeList", False);
-        gAppLinux.x11.xdnd.text_uri_list    = XInternAtom(gAppLinux.x11.display, "text/uri-list", False);
-    }
+    // TODO:
+//    if (_sapp.drop.enabled) {
+//        gAppLinux.x11.xdnd.XdndAware        = XInternAtom(gAppLinux.x11.display, "XdndAware", False);
+//        gAppLinux.x11.xdnd.XdndEnter        = XInternAtom(gAppLinux.x11.display, "XdndEnter", False);
+//        gAppLinux.x11.xdnd.XdndPosition     = XInternAtom(gAppLinux.x11.display, "XdndPosition", False);
+//        gAppLinux.x11.xdnd.XdndStatus       = XInternAtom(gAppLinux.x11.display, "XdndStatus", False);
+//        gAppLinux.x11.xdnd.XdndActionCopy   = XInternAtom(gAppLinux.x11.display, "XdndActionCopy", False);
+//        gAppLinux.x11.xdnd.XdndDrop         = XInternAtom(gAppLinux.x11.display, "XdndDrop", False);
+//        gAppLinux.x11.xdnd.XdndFinished     = XInternAtom(gAppLinux.x11.display, "XdndFinished", False);
+//        gAppLinux.x11.xdnd.XdndSelection    = XInternAtom(gAppLinux.x11.display, "XdndSelection", False);
+//        gAppLinux.x11.xdnd.XdndTypeList     = XInternAtom(gAppLinux.x11.display, "XdndTypeList", False);
+//        gAppLinux.x11.xdnd.text_uri_list    = XInternAtom(gAppLinux.x11.display, "text/uri-list", False);
+//    }
 
     /* check Xi extension for raw mouse input */
     if (XQueryExtension(gAppLinux.x11.display, "XInputExtension", &gAppLinux.x11.xi.major_opcode, &gAppLinux.x11.xi.event_base, &gAppLinux.x11.xi.error_base)) {
@@ -765,197 +770,198 @@ int x11_get_window_state() {
 //    }
 //}
 
-sapp_mousebutton x11_translate_button(const XEvent* event) {
+mouse_button x11_translate_button(const XEvent* event) {
     switch (event->xbutton.button) {
-        case Button1: return SAPP_MOUSEBUTTON_LEFT;
-        case Button2: return SAPP_MOUSEBUTTON_MIDDLE;
-        case Button3: return SAPP_MOUSEBUTTON_RIGHT;
-        default:      return SAPP_MOUSEBUTTON_INVALID;
+        case Button1: return mouse_button::left;
+        //case Button2: return mouse_button::other;
+        case Button3: return mouse_button::right;
+        default:      return mouse_button::other;
     }
 }
 
-void x11_mouse_event(sapp_event_type type, sapp_mousebutton btn, uint32_t mods) {
-    if (_sapp_events_enabled()) {
-        init_event(type);
-        _sapp.event.mouse_button = btn;
-        _sapp.event.modifiers = mods;
-        call_event(&_sapp.event);
-    }
+void x11_mouse_event(event_t type, mouse_button btn, uint32_t mods) {
+//    if (_sapp_events_enabled()) {
+//        init_event(type);
+//        _sapp.event.mouse_button = btn;
+//        _sapp.event.modifiers = mods;
+//        call_event(&_sapp.event);
+//    }
 }
 
 void x11_scroll_event(float x, float y, uint32_t mods) {
-    if (_sapp_events_enabled()) {
-        init_event(SAPP_EVENTTYPE_MOUSE_SCROLL);
-        _sapp.event.modifiers = mods;
-        _sapp.event.scroll_x = x;
-        _sapp.event.scroll_y = y;
-        call_event(&_sapp.event);
-    }
+//    if (_sapp_events_enabled()) {
+//        init_event(SAPP_EVENTTYPE_MOUSE_SCROLL);
+//        _sapp.event.modifiers = mods;
+//        _sapp.event.scroll_x = x;
+//        _sapp.event.scroll_y = y;
+//        call_event(&_sapp.event);
+//    }
 }
 
-void x11_key_event(sapp_event_type type, sapp_keycode key, bool repeat, uint32_t mods) {
-    if (_sapp_events_enabled()) {
-        init_event(type);
-        _sapp.event.key_code = key;
-        _sapp.event.key_repeat = repeat;
-        _sapp.event.modifiers = mods;
-        call_event(&_sapp.event);
-        /* check if a CLIPBOARD_PASTED event must be sent too */
-        if (_sapp.clipboard.enabled &&
-            (type == SAPP_EVENTTYPE_KEY_DOWN) &&
-            (_sapp.event.modifiers == SAPP_MODIFIER_CTRL) &&
-            (_sapp.event.key_code == SAPP_KEYCODE_V))
-        {
-            init_event(SAPP_EVENTTYPE_CLIPBOARD_PASTED);
-            call_event(&_sapp.event);
-        }
-    }
+void x11_key_event(event_t type, key_code key, bool repeat, uint32_t mods) {
+//    if (_sapp_events_enabled()) {
+//        init_event(type);
+//        _sapp.event.key_code = key;
+//        _sapp.event.key_repeat = repeat;
+//        _sapp.event.modifiers = mods;
+//        call_event(&_sapp.event);
+//        /* check if a CLIPBOARD_PASTED event must be sent too */
+//        if (_sapp.clipboard.enabled &&
+//            (type == SAPP_EVENTTYPE_KEY_DOWN) &&
+//            (_sapp.event.modifiers == SAPP_MODIFIER_CTRL) &&
+//            (_sapp.event.key_code == SAPP_KEYCODE_V))
+//        {
+//            init_event(SAPP_EVENTTYPE_CLIPBOARD_PASTED);
+//            call_event(&_sapp.event);
+//        }
+//    }
 }
 
 void x11_char_event(uint32_t chr, bool repeat, uint32_t mods) {
-if (_sapp_events_enabled()) {
-_sapp_init_event(SAPP_EVENTTYPE_CHAR);
-_sapp.event.char_code = chr;
-_sapp.event.key_repeat = repeat;
-_sapp.event.modifiers = mods;
-_sapp_call_event(&_sapp.event);
-}
+//if (_sapp_events_enabled()) {
+//_sapp_init_event(SAPP_EVENTTYPE_CHAR);
+//_sapp.event.char_code = chr;
+//_sapp.event.key_repeat = repeat;
+//_sapp.event.modifiers = mods;
+//_sapp_call_event(&_sapp.event);
+//}
 }
 
-sapp_keycode x11_translate_key(int scancode) {
+key_code x11_translate_key(int scancode) {
     int dummy;
     KeySym* keysyms = XGetKeyboardMapping(gAppLinux.x11.display, scancode, 1, &dummy);
     EK_ASSERT(keysyms);
     KeySym keysym = keysyms[0];
     XFree(keysyms);
     switch (keysym) {
-        case XK_Escape:         return SAPP_KEYCODE_ESCAPE;
-        case XK_Tab:            return SAPP_KEYCODE_TAB;
-        case XK_Shift_L:        return SAPP_KEYCODE_LEFT_SHIFT;
-        case XK_Shift_R:        return SAPP_KEYCODE_RIGHT_SHIFT;
-        case XK_Control_L:      return SAPP_KEYCODE_LEFT_CONTROL;
-        case XK_Control_R:      return SAPP_KEYCODE_RIGHT_CONTROL;
-        case XK_Meta_L:
-        case XK_Alt_L:          return SAPP_KEYCODE_LEFT_ALT;
-        case XK_Mode_switch:    /* Mapped to Alt_R on many keyboards */
-        case XK_ISO_Level3_Shift: /* AltGr on at least some machines */
-        case XK_Meta_R:
-        case XK_Alt_R:          return SAPP_KEYCODE_RIGHT_ALT;
-        case XK_Super_L:        return SAPP_KEYCODE_LEFT_SUPER;
-        case XK_Super_R:        return SAPP_KEYCODE_RIGHT_SUPER;
-        case XK_Menu:           return SAPP_KEYCODE_MENU;
-        case XK_Num_Lock:       return SAPP_KEYCODE_NUM_LOCK;
-        case XK_Caps_Lock:      return SAPP_KEYCODE_CAPS_LOCK;
-        case XK_Print:          return SAPP_KEYCODE_PRINT_SCREEN;
-        case XK_Scroll_Lock:    return SAPP_KEYCODE_SCROLL_LOCK;
-        case XK_Pause:          return SAPP_KEYCODE_PAUSE;
-        case XK_Delete:         return SAPP_KEYCODE_DELETE;
-        case XK_BackSpace:      return SAPP_KEYCODE_BACKSPACE;
-        case XK_Return:         return SAPP_KEYCODE_ENTER;
-        case XK_Home:           return SAPP_KEYCODE_HOME;
-        case XK_End:            return SAPP_KEYCODE_END;
-        case XK_Page_Up:        return SAPP_KEYCODE_PAGE_UP;
-        case XK_Page_Down:      return SAPP_KEYCODE_PAGE_DOWN;
-        case XK_Insert:         return SAPP_KEYCODE_INSERT;
-        case XK_Left:           return SAPP_KEYCODE_LEFT;
-        case XK_Right:          return SAPP_KEYCODE_RIGHT;
-        case XK_Down:           return SAPP_KEYCODE_DOWN;
-        case XK_Up:             return SAPP_KEYCODE_UP;
-        case XK_F1:             return SAPP_KEYCODE_F1;
-        case XK_F2:             return SAPP_KEYCODE_F2;
-        case XK_F3:             return SAPP_KEYCODE_F3;
-        case XK_F4:             return SAPP_KEYCODE_F4;
-        case XK_F5:             return SAPP_KEYCODE_F5;
-        case XK_F6:             return SAPP_KEYCODE_F6;
-        case XK_F7:             return SAPP_KEYCODE_F7;
-        case XK_F8:             return SAPP_KEYCODE_F8;
-        case XK_F9:             return SAPP_KEYCODE_F9;
-        case XK_F10:            return SAPP_KEYCODE_F10;
-        case XK_F11:            return SAPP_KEYCODE_F11;
-        case XK_F12:            return SAPP_KEYCODE_F12;
-        case XK_F13:            return SAPP_KEYCODE_F13;
-        case XK_F14:            return SAPP_KEYCODE_F14;
-        case XK_F15:            return SAPP_KEYCODE_F15;
-        case XK_F16:            return SAPP_KEYCODE_F16;
-        case XK_F17:            return SAPP_KEYCODE_F17;
-        case XK_F18:            return SAPP_KEYCODE_F18;
-        case XK_F19:            return SAPP_KEYCODE_F19;
-        case XK_F20:            return SAPP_KEYCODE_F20;
-        case XK_F21:            return SAPP_KEYCODE_F21;
-        case XK_F22:            return SAPP_KEYCODE_F22;
-        case XK_F23:            return SAPP_KEYCODE_F23;
-        case XK_F24:            return SAPP_KEYCODE_F24;
-        case XK_F25:            return SAPP_KEYCODE_F25;
+        case XK_Escape:         return key_code::Escape;
+        case XK_Tab:            return key_code::Tab;
+//        case XK_Shift_L:        return SAPP_KEYCODE_LEFT_SHIFT;
+//        case XK_Shift_R:        return SAPP_KEYCODE_RIGHT_SHIFT;
+//        case XK_Control_L:      return SAPP_KEYCODE_LEFT_CONTROL;
+//        case XK_Control_R:      return SAPP_KEYCODE_RIGHT_CONTROL;
+//        case XK_Meta_L:
+//        case XK_Alt_L:          return SAPP_KEYCODE_LEFT_ALT;
+//        case XK_Mode_switch:    /* Mapped to Alt_R on many keyboards */
+//        case XK_ISO_Level3_Shift: /* AltGr on at least some machines */
+//        case XK_Meta_R:
+//        case XK_Alt_R:          return SAPP_KEYCODE_RIGHT_ALT;
+//        case XK_Super_L:        return SAPP_KEYCODE_LEFT_SUPER;
+//        case XK_Super_R:        return SAPP_KEYCODE_RIGHT_SUPER;
+//        case XK_Menu:           return SAPP_KEYCODE_MENU;
+//        case XK_Num_Lock:       return SAPP_KEYCODE_NUM_LOCK;
+//        case XK_Caps_Lock:      return SAPP_KEYCODE_CAPS_LOCK;
+//        case XK_Print:          return SAPP_KEYCODE_PRINT_SCREEN;
+//        case XK_Scroll_Lock:    return SAPP_KEYCODE_SCROLL_LOCK;
+//        case XK_Pause:          return SAPP_KEYCODE_PAUSE;
+//        case XK_Delete:         return SAPP_KEYCODE_DELETE;
+//        case XK_BackSpace:      return SAPP_KEYCODE_BACKSPACE;
 
-        case XK_KP_Divide:      return SAPP_KEYCODE_KP_DIVIDE;
-        case XK_KP_Multiply:    return SAPP_KEYCODE_KP_MULTIPLY;
-        case XK_KP_Subtract:    return SAPP_KEYCODE_KP_SUBTRACT;
-        case XK_KP_Add:         return SAPP_KEYCODE_KP_ADD;
+        case XK_Return:         return key_code::Enter;
+        case XK_Home:           return key_code::Home;
+        case XK_End:            return key_code::End;
+        case XK_Page_Up:        return key_code::PageUp;
+        case XK_Page_Down:      return key_code::PageDown;
+        case XK_Insert:         return key_code::Insert;
+        case XK_Left:           return key_code::ArrowLeft;
+        case XK_Right:          return key_code::ArrowRight;
+        case XK_Down:           return key_code::ArrowDown;
+        case XK_Up:             return key_code::ArrowUp;
+//        case XK_F1:             return key_code::F1;
+//        case XK_F2:             return SAPP_KEYCODE_F2;
+//        case XK_F3:             return SAPP_KEYCODE_F3;
+//        case XK_F4:             return SAPP_KEYCODE_F4;
+//        case XK_F5:             return SAPP_KEYCODE_F5;
+//        case XK_F6:             return SAPP_KEYCODE_F6;
+//        case XK_F7:             return SAPP_KEYCODE_F7;
+//        case XK_F8:             return SAPP_KEYCODE_F8;
+//        case XK_F9:             return SAPP_KEYCODE_F9;
+//        case XK_F10:            return SAPP_KEYCODE_F10;
+//        case XK_F11:            return SAPP_KEYCODE_F11;
+//        case XK_F12:            return SAPP_KEYCODE_F12;
+//        case XK_F13:            return SAPP_KEYCODE_F13;
+//        case XK_F14:            return SAPP_KEYCODE_F14;
+//        case XK_F15:            return SAPP_KEYCODE_F15;
+//        case XK_F16:            return SAPP_KEYCODE_F16;
+//        case XK_F17:            return SAPP_KEYCODE_F17;
+//        case XK_F18:            return SAPP_KEYCODE_F18;
+//        case XK_F19:            return SAPP_KEYCODE_F19;
+//        case XK_F20:            return SAPP_KEYCODE_F20;
+//        case XK_F21:            return SAPP_KEYCODE_F21;
+//        case XK_F22:            return SAPP_KEYCODE_F22;
+//        case XK_F23:            return SAPP_KEYCODE_F23;
+//        case XK_F24:            return SAPP_KEYCODE_F24;
+//        case XK_F25:            return SAPP_KEYCODE_F25;
 
-        case XK_KP_Insert:      return SAPP_KEYCODE_KP_0;
-        case XK_KP_End:         return SAPP_KEYCODE_KP_1;
-        case XK_KP_Down:        return SAPP_KEYCODE_KP_2;
-        case XK_KP_Page_Down:   return SAPP_KEYCODE_KP_3;
-        case XK_KP_Left:        return SAPP_KEYCODE_KP_4;
-        case XK_KP_Begin:       return SAPP_KEYCODE_KP_5;
-        case XK_KP_Right:       return SAPP_KEYCODE_KP_6;
-        case XK_KP_Home:        return SAPP_KEYCODE_KP_7;
-        case XK_KP_Up:          return SAPP_KEYCODE_KP_8;
-        case XK_KP_Page_Up:     return SAPP_KEYCODE_KP_9;
-        case XK_KP_Delete:      return SAPP_KEYCODE_KP_DECIMAL;
-        case XK_KP_Equal:       return SAPP_KEYCODE_KP_EQUAL;
-        case XK_KP_Enter:       return SAPP_KEYCODE_KP_ENTER;
+//        case XK_KP_Divide:      return SAPP_KEYCODE_KP_DIVIDE;
+//        case XK_KP_Multiply:    return SAPP_KEYCODE_KP_MULTIPLY;
+//        case XK_KP_Subtract:    return SAPP_KEYCODE_KP_SUBTRACT;
+//        case XK_KP_Add:         return SAPP_KEYCODE_KP_ADD;
 
-        case XK_a:              return SAPP_KEYCODE_A;
-        case XK_b:              return SAPP_KEYCODE_B;
-        case XK_c:              return SAPP_KEYCODE_C;
-        case XK_d:              return SAPP_KEYCODE_D;
-        case XK_e:              return SAPP_KEYCODE_E;
-        case XK_f:              return SAPP_KEYCODE_F;
-        case XK_g:              return SAPP_KEYCODE_G;
-        case XK_h:              return SAPP_KEYCODE_H;
-        case XK_i:              return SAPP_KEYCODE_I;
-        case XK_j:              return SAPP_KEYCODE_J;
-        case XK_k:              return SAPP_KEYCODE_K;
-        case XK_l:              return SAPP_KEYCODE_L;
-        case XK_m:              return SAPP_KEYCODE_M;
-        case XK_n:              return SAPP_KEYCODE_N;
-        case XK_o:              return SAPP_KEYCODE_O;
-        case XK_p:              return SAPP_KEYCODE_P;
-        case XK_q:              return SAPP_KEYCODE_Q;
-        case XK_r:              return SAPP_KEYCODE_R;
-        case XK_s:              return SAPP_KEYCODE_S;
-        case XK_t:              return SAPP_KEYCODE_T;
-        case XK_u:              return SAPP_KEYCODE_U;
-        case XK_v:              return SAPP_KEYCODE_V;
-        case XK_w:              return SAPP_KEYCODE_W;
-        case XK_x:              return SAPP_KEYCODE_X;
-        case XK_y:              return SAPP_KEYCODE_Y;
-        case XK_z:              return SAPP_KEYCODE_Z;
-        case XK_1:              return SAPP_KEYCODE_1;
-        case XK_2:              return SAPP_KEYCODE_2;
-        case XK_3:              return SAPP_KEYCODE_3;
-        case XK_4:              return SAPP_KEYCODE_4;
-        case XK_5:              return SAPP_KEYCODE_5;
-        case XK_6:              return SAPP_KEYCODE_6;
-        case XK_7:              return SAPP_KEYCODE_7;
-        case XK_8:              return SAPP_KEYCODE_8;
-        case XK_9:              return SAPP_KEYCODE_9;
-        case XK_0:              return SAPP_KEYCODE_0;
-        case XK_space:          return SAPP_KEYCODE_SPACE;
-        case XK_minus:          return SAPP_KEYCODE_MINUS;
-        case XK_equal:          return SAPP_KEYCODE_EQUAL;
-        case XK_bracketleft:    return SAPP_KEYCODE_LEFT_BRACKET;
-        case XK_bracketright:   return SAPP_KEYCODE_RIGHT_BRACKET;
-        case XK_backslash:      return SAPP_KEYCODE_BACKSLASH;
-        case XK_semicolon:      return SAPP_KEYCODE_SEMICOLON;
-        case XK_apostrophe:     return SAPP_KEYCODE_APOSTROPHE;
-        case XK_grave:          return SAPP_KEYCODE_GRAVE_ACCENT;
-        case XK_comma:          return SAPP_KEYCODE_COMMA;
-        case XK_period:         return SAPP_KEYCODE_PERIOD;
-        case XK_slash:          return SAPP_KEYCODE_SLASH;
-        case XK_less:           return SAPP_KEYCODE_WORLD_1; /* At least in some layouts... */
-        default:                return SAPP_KEYCODE_INVALID;
+//        case XK_KP_Insert:      return SAPP_KEYCODE_KP_0;
+//        case XK_KP_End:         return SAPP_KEYCODE_KP_1;
+//        case XK_KP_Down:        return SAPP_KEYCODE_KP_2;
+//        case XK_KP_Page_Down:   return SAPP_KEYCODE_KP_3;
+//        case XK_KP_Left:        return SAPP_KEYCODE_KP_4;
+//        case XK_KP_Begin:       return SAPP_KEYCODE_KP_5;
+//        case XK_KP_Right:       return SAPP_KEYCODE_KP_6;
+//        case XK_KP_Home:        return SAPP_KEYCODE_KP_7;
+//        case XK_KP_Up:          return SAPP_KEYCODE_KP_8;
+//        case XK_KP_Page_Up:     return SAPP_KEYCODE_KP_9;
+//        case XK_KP_Delete:      return SAPP_KEYCODE_KP_DECIMAL;
+//        case XK_KP_Equal:       return SAPP_KEYCODE_KP_EQUAL;
+//        case XK_KP_Enter:       return SAPP_KEYCODE_KP_ENTER;
+
+        case XK_a:              return key_code::A;
+        case XK_b:              return key_code::B;
+        case XK_c:              return key_code::C;
+        case XK_d:              return key_code::D;
+        case XK_e:              return key_code::E;
+        case XK_f:              return key_code::F;
+        case XK_g:              return key_code::G;
+        case XK_h:              return key_code::H;
+        case XK_i:              return key_code::I;
+        case XK_j:              return key_code::J;
+        case XK_k:              return key_code::K;
+        case XK_l:              return key_code::L;
+        case XK_m:              return key_code::M;
+        case XK_n:              return key_code::N;
+        case XK_o:              return key_code::O;
+        case XK_p:              return key_code::P;
+        case XK_q:              return key_code::Q;
+        case XK_r:              return key_code::R;
+        case XK_s:              return key_code::S;
+        case XK_t:              return key_code::T;
+        case XK_u:              return key_code::U;
+        case XK_v:              return key_code::V;
+        case XK_w:              return key_code::W;
+        case XK_x:              return key_code::X;
+        case XK_y:              return key_code::Y;
+        case XK_z:              return key_code::Z;
+//        case XK_1:              return key_code::0;
+//        case XK_2:              return key_code::2;
+//        case XK_3:              return key_code::3;
+//        case XK_4:              return key_code::4;
+//        case XK_5:              return key_code::5;
+//        case XK_6:              return key_code::6;
+//        case XK_7:              return key_code::7;
+//        case XK_8:              return key_code::8;
+//        case XK_9:              return key_code::9;
+//        case XK_0:              return key_code::0;
+        case XK_space:          return key_code::Space;
+//        case XK_minus:          return SAPP_KEYCODE_MINUS;
+//        case XK_equal:          return SAPP_KEYCODE_EQUAL;
+//        case XK_bracketleft:    return SAPP_KEYCODE_LEFT_BRACKET;
+//        case XK_bracketright:   return SAPP_KEYCODE_RIGHT_BRACKET;
+//        case XK_backslash:      return SAPP_KEYCODE_BACKSLASH;
+//        case XK_semicolon:      return SAPP_KEYCODE_SEMICOLON;
+//        case XK_apostrophe:     return SAPP_KEYCODE_APOSTROPHE;
+//        case XK_grave:          return SAPP_KEYCODE_GRAVE_ACCENT;
+//        case XK_comma:          return SAPP_KEYCODE_COMMA;
+//        case XK_period:         return SAPP_KEYCODE_PERIOD;
+//        case XK_slash:          return SAPP_KEYCODE_SLASH;
+//        case XK_less:           return SAPP_KEYCODE_WORLD_1; /* At least in some layouts... */
+        default:                return key_code::unknown;
     }
 }
 
@@ -1357,7 +1363,7 @@ void x11_process_event(XEvent* event) {
     }
 }
 
-void linux_app_run() {
+void linux_app_create() {
     /* The following lines are here to trigger a linker error instead of an
         obscure runtime error if the user has forgotten to add -pthread to
         the compiler or linker options. They have no other purpose.
@@ -1395,7 +1401,10 @@ void linux_app_run() {
     x11_query_window_size();
 //    glx_swapinterval(_sapp.swap_interval);
     XFlush(gAppLinux.x11.display);
-    while (!::ek::app.g_app.require_exit) {
+}
+
+void linux_app_loop() {
+    while (!g_app.require_exit) {
         glx_make_current();
         int count = XPending(gAppLinux.x11.display);
         while (count--) {
@@ -1403,22 +1412,25 @@ void linux_app_run() {
             XNextEvent(gAppLinux.x11.display, &event);
             x11_process_event(&event);
         }
-        frame();
+        dispatch_draw_frame();
         glx_swap_buffers();
         XFlush(gAppLinux.x11.display);
         /* handle quit-requested, either from window or from sapp_request_quit() */
-        if (ek::app::g_app.require_exit) {
+        if (g_app.require_exit) {
             /* give user code a chance to intervene */
             x11_app_event(SAPP_EVENTTYPE_QUIT_REQUESTED);
             /* if user code hasn't intervened, quit the app */
-            if (ek::app::g_app.quit_require_exit) {
-                ek::app::g_app.quit_require_exit = true;
+            if (g_app.quit_require_exit) {
+                g_app.quit_require_exit = true;
             }
         }
     }
-    call_cleanup();
+}
+
+void linux_app_shutdown() {
+    //    call_cleanup();
     glx_destroy_context();
     x11_destroy_window();
     XCloseDisplay(gAppLinux.x11.display);
-    discard_state();
+//    discard_state();
 }
