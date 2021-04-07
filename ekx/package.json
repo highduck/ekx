@@ -12,7 +12,6 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/google-benchmark": "0.0.5",
     "@ekx/google-test": "0.0.5",
     "@ekx/imgui": "0.0.10",
     "@ekx/miniaudio": "0.0.4",
