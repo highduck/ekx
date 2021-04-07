@@ -59,6 +59,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         target_link_options(${PROJECT_NAME} PUBLIC -Wl,-dead_strip -Wl,-dead_strip_dylibs)
     endif ()
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE shlwapi
+            )
     set(EKC_OS_PREFIX win32)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(EKC_OS_PREFIX linux)

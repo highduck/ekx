@@ -48,7 +48,11 @@ void working_dir_t::push(const std::string& new_path) {
     }
 
     char resolved_path[PATH_MAX];
+#ifdef _WIN32
+    _fullpath(resolved_path, new_path.c_str(), PATH_MAX);
+#else
     realpath(new_path.c_str(), resolved_path);
+#endif
 
     if (!is_dir(resolved_path)) {
         EK_ERROR << "[working-dir] resolved path is not directory: " << resolved_path;
