@@ -20,4 +20,7 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE ${OPENGL_LIBRARIES}
         PRIVATE pthread
         PRIVATE ${CMAKE_DL_LIBS}
+        PRIVATE X11
+        PRIVATE Xi
+        PRIVATE Xcursor
 )
