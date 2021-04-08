@@ -144,7 +144,6 @@ namespace ek::android {
 namespace ek {
     void start_application() {
         int flags = g_app.window_cfg.needDepth ? 1 : 0;
-        g_app.view_context_ = android::get_activity();
 
         dispatch_init();
         auto *env = android_jni_get_env();
@@ -222,6 +221,8 @@ EK_JNI_VOID(sendTouch, jint type, jint id, jfloat x, jfloat y) {
 }
 
 EK_JNI_VOID(sendResize, jint width, jint height, jfloat scale) {
+    // currently android always in fullscreen mode
+    g_app.fullscreen = true;
     if (g_app.content_scale != scale ||
         g_app.drawable_size.x != width ||
         g_app.drawable_size.y != height ||

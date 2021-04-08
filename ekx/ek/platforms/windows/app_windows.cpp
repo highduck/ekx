@@ -131,13 +131,8 @@ struct AppWindow {
     uint8_t raw_input_data[256];
 };
 
-//namespace {
 static AppWindow wnd{};
 static D3DApp d3dApp{};
-//}
-
-static int cfgSamplesCount = 1;
-static bool cfgAllowHighDPI = true;
 
 using namespace ek;
 using namespace ek::app;
@@ -235,6 +230,8 @@ void d3d11_create_default_render_target() {
     EK_ASSERT(0 == d3dApp.ds);
     EK_ASSERT(0 == d3dApp.dsv);
 
+    const uint32_t sampleCount = static_cast<uint32_t>(g_app.window_cfg.sampleCount);
+
     HRESULT hr;
 
     /* view for the swapchain-created framebuffer */
@@ -252,11 +249,11 @@ void d3d11_create_default_render_target() {
     tex_desc.ArraySize = 1;
     tex_desc.Usage = D3D11_USAGE_DEFAULT;
     tex_desc.BindFlags = D3D11_BIND_RENDER_TARGET;
-    tex_desc.SampleDesc.Count = (UINT) cfgSamplesCount;
-    tex_desc.SampleDesc.Quality = (UINT)(cfgSamplesCount > 1 ? D3D11_STANDARD_MULTISAMPLE_PATTERN : 0);
+    tex_desc.SampleDesc.Count = sampleCount;
+    tex_desc.SampleDesc.Quality = sampleCount > 1 ? D3D11_STANDARD_MULTISAMPLE_PATTERN : 0;
 
     /* create MSAA texture and view if antialiasing requested */
-    if (cfgSamplesCount > 1) {
+    if (sampleCount > 1) {
         tex_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
         hr = d3d11_CreateTexture2D(d3dApp.device, &tex_desc, NULL, &d3dApp.msaa_rt);
         EK_ASSERT(SUCCEEDED(hr) && d3dApp.msaa_rt);
@@ -302,7 +299,7 @@ void d3d11_present(void) {
         d3d11_ResolveSubresource(d3dApp.device_context, (ID3D11Resource*) d3dApp.rt, 0, (ID3D11Resource*) d3dApp.msaa_rt,
                                  0, DXGI_FORMAT_B8G8R8A8_UNORM);
     }
-    dxgi_Present(d3dApp.swap_chain, (UINT)/*swap_interval */ 1, 0);
+    dxgi_Present(d3dApp.swap_chain, (UINT)g_app.window_cfg.swapInterval, 0);
 }
 
 void init_console() {
@@ -489,13 +486,11 @@ void win32_restore_console() {
 }
 
 void win32_init_dpi() {
+    const auto allowHighDpi = g_app.window_cfg.allowHighDpi;
 
-    typedef BOOL(WINAPI
-    *SETPROCESSDPIAWARE_T)(void);
-    typedef HRESULT(WINAPI
-    *SETPROCESSDPIAWARENESS_T)(PROCESS_DPI_AWARENESS);
-    typedef HRESULT(WINAPI
-    *GETDPIFORMONITOR_T)(HMONITOR, MONITOR_DPI_TYPE, UINT *, UINT *);
+    typedef BOOL(WINAPI *SETPROCESSDPIAWARE_T)(void);
+    typedef HRESULT(WINAPI *SETPROCESSDPIAWARENESS_T)(PROCESS_DPI_AWARENESS);
+    typedef HRESULT(WINAPI *GETDPIFORMONITOR_T)(HMONITOR, MONITOR_DPI_TYPE, UINT *, UINT *);
 
     SETPROCESSDPIAWARE_T fn_setprocessdpiaware = 0;
     SETPROCESSDPIAWARENESS_T fn_setprocessdpiawareness = 0;
@@ -516,7 +511,7 @@ void win32_init_dpi() {
         /* if the app didn't request HighDPI rendering, let Windows do the upscaling */
         PROCESS_DPI_AWARENESS process_dpi_awareness = PROCESS_SYSTEM_DPI_AWARE;
         wnd.dpi.aware = true;
-        if (!cfgAllowHighDPI) {
+        if (!allowHighDpi) {
             process_dpi_awareness = PROCESS_DPI_UNAWARE;
             wnd.dpi.aware = false;
         }
@@ -538,7 +533,7 @@ void win32_init_dpi() {
     } else {
         wnd.dpi.window_scale = 1.0f;
     }
-    if (cfgAllowHighDPI) {
+    if (allowHighDpi) {
         wnd.dpi.content_scale = wnd.dpi.window_scale;
         wnd.dpi.mouse_scale = 1.0f;
     } else {
@@ -607,14 +602,13 @@ LRESULT CALLBACK win32_wndproc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
                 switch (wParam & 0xFFF0) {
                     case SC_SCREENSAVE:
                     case SC_MONITORPOWER:
-                        // TODO:
-//if (g_app.fullscreen) {
-///* disable screen saver and blanking in fullscreen mode */
-//return 0;
-//}
+                        if (g_app.fullscreen) {
+// disable screen saver and blanking in fullscreen mode
+                            return 0;
+                        }
                         break;
                     case SC_KEYMENU:
-/* user trying to access menu via ALT */
+// user trying to access menu via ALT
                         return 0;
                 }
                 break;
@@ -862,7 +856,7 @@ void win32_run_loop() {
         dispatch_draw_frame();
         d3d11_present();
         if (IsIconic(wnd.hwnd)) {
-            Sleep((DWORD)(16 * 1/* swap_interval */));
+            Sleep((DWORD)(16 * g_app.window_cfg.swapInterval));
         }
         /* check for window resized, this cannot happen in WM_SIZE as it explodes memory usage */
         if (win32_update_dimensions()) {

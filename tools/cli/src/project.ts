@@ -216,6 +216,9 @@ export class Project {
                         this.options.deploy = second;
                     }
                 }
+                if(this.options.increaseVersion === undefined) {
+                    this.options.increaseVersion = VERSION_INDEX_CODE;
+                }
             }
         }
     }
