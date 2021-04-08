@@ -265,7 +265,7 @@ void cairo_round_rectangle(cairo_t* cr, const double* values) {
 }
 
 void cairo_oval(cairo_t* cr, const double* values) {
-    const double degrees = M_PI / 180.0;
+    const double degrees = math::pi / 180.0;
 
     const double a0 = values[4];
     double a1 = values[5];
