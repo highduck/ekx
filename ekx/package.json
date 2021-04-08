@@ -2,7 +2,7 @@
   "name": "@ekx/ekx",
   "version": "0.1.2",
   "scripts": {
-    "postinstall": "npx -y -p npm-cmake",
+    "postinstall": "npm-cmake || exit 0",
     "build:native": "node build.js",
     "shader:draw2d": "sokol-shdc -i ek/src/ek/draw2d/draw2d.glsl -o ek/src/ek/draw2d/draw2d_shader.h -l glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos",
     "shader:render3d": "sokol-shdc -i scenex/ek/scenex/3d/render3d.glsl -o scenex/ek/scenex/3d/render3d_shader.h -l glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos"
