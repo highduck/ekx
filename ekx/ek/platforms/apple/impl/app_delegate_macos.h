@@ -44,11 +44,10 @@ void handleQuitRequest() {
     _view.device = MTLCreateSystemDefaultDevice();
 
     [_view updateTrackingAreas];
-    _view.preferredFramesPerSecond = 60 / 1/*swap_interval*/;
-    g_app.view_context_ = (__bridge void*) _view;
+    _view.preferredFramesPerSecond = 60 / g_app.window_cfg.swapInterval;
     _view.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     _view.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-    _view.sampleCount = (NSUInteger) 1;//_sapp.sample_count;
+    _view.sampleCount = (NSUInteger) g_app.window_cfg.sampleCount;
     _view.autoResizeDrawable = false;
     _view.layer.magnificationFilter = kCAFilterNearest;
 
@@ -85,12 +84,12 @@ void handleQuitRequest() {
 
 - (void)handleResize {
     const auto scale = static_cast<float>(_window.backingScaleFactor);
-    const auto window_size = _view.bounds.size;
-    const auto drawable_size = [_view convertRectToBacking:_view.bounds].size;
-    const auto windowWidth = static_cast<float>(window_size.width);
-    const auto windowHeight = static_cast<float>(window_size.height);
-    const auto backingWidth = static_cast<float>(drawable_size.width);
-    const auto backingHeight = static_cast<float>(drawable_size.height);
+    const auto windowSize = _view.bounds.size;
+    const auto drawableSize = [_view convertRectToBacking:_view.bounds].size;
+    const auto windowWidth = static_cast<float>(windowSize.width);
+    const auto windowHeight = static_cast<float>(windowSize.height);
+    const auto backingWidth = static_cast<float>(drawableSize.width);
+    const auto backingHeight = static_cast<float>(drawableSize.height);
 
     if (g_app.content_scale != scale ||
         g_app.window_size.x != windowWidth ||
@@ -104,7 +103,7 @@ void handleQuitRequest() {
         g_app.drawable_size.y = backingHeight;
         g_app.size_changed = true;
 
-        _view.drawableSize = {(CGFloat) drawable_size.width, (CGFloat) drawable_size.height};
+        _view.drawableSize = {(CGFloat) drawableSize.width, (CGFloat) drawableSize.height};
     }
 }
 
@@ -162,11 +161,11 @@ void handleQuitRequest() {
 
 - (void)applicationWillTerminate:(__unused NSNotification*)notification {
     process_event({event_type::app_close});
-    if(_view != nil) {
+    if (_view != nil) {
         OBJC_RELEASE(_view.device);
     }
     OBJC_RELEASE(_view);
-    OBJC_RELEASE(_window);
+    //OBJC_RELEASE(_window);
 }
 
 - (void)applicationWillResignActive:(__unused NSNotification*)notification {

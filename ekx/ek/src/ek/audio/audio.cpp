@@ -53,7 +53,8 @@ void initialize() {
     {
         auto config = ma_engine_config_init_default();
         ma_result result = ma_engine_init(&config, &audioSystem.engine);
-        EK_WARN("config channels: %d", audioSystem.engine.pResourceManager->config.decodedChannels);
+        EK_WARN("config channels: %d",
+                audioSystem.engine.pResourceManager->config.decodedChannels);
         if (result != MA_SUCCESS) {
             EK_WARN("Failed to initialize audio engine: %i", result);
             return;
@@ -84,8 +85,7 @@ void shutdown() {
 void muteDeviceBegin() {
     EK_ASSERT(audioSystem.locks >= 0);
     if (audioSystem.locks == 0) {
-        //PauseDevice();
-        ma_engine_set_volume(&audioSystem.engine, 0.0f);
+        ma_engine_stop(&audioSystem.engine);
     }
     ++audioSystem.locks;
 }
@@ -94,9 +94,7 @@ void muteDeviceEnd() {
     --audioSystem.locks;
     EK_ASSERT(audioSystem.locks >= 0);
     if (audioSystem.locks == 0) {
-        // device could be paused during background
-        //ResumeDevice();
-        ma_engine_set_volume(&audioSystem.engine, 1.0f);
+        ma_engine_start(&audioSystem.engine);
     }
 }
 
@@ -115,7 +113,7 @@ void Sound::load(const char* path) {
     get_resource_content_async(path, [this](array_buffer&& buffer) {
         source = std::move(buffer);
 
-        if(source.empty()) {
+        if (source.empty()) {
             EK_WARN("load sound: empty buffer %s", dataSourceFilePath.c_str());
         }
         ma_resource_manager_memory_buffer memoryBuffer{};
@@ -151,7 +149,8 @@ void Sound::unload() {
         }
         sounds.resize(0);
 
-        ma_resource_manager_unregister_data(audioSystem.pResourceManager, dataSourceFilePath.c_str());
+        ma_resource_manager_unregister_data(audioSystem.pResourceManager,
+                                            dataSourceFilePath.c_str());
         ma_resource_manager_data_source_uninit(dataSource);
         delete dataSource;
         dataSource = nullptr;
@@ -195,7 +194,8 @@ ma_sound* Sound::getNextSound() {
                                           MA_SOUND_FLAG_DECODE,
                                           &audioSystem.soundsGroup, sound);
     if (result != MA_SUCCESS) {
-        EK_WARN("cannot init next sound '%s' %s", dataSourceFilePath.c_str(), ma_result_description(result));
+        EK_WARN("cannot init next sound '%s' %s", dataSourceFilePath.c_str(),
+                ma_result_description(result));
         delete sound;
         return nullptr;
     }
@@ -247,7 +247,8 @@ void Music::load(const char* path) {
         }
 
         sound = new ma_sound();
-        result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(), dataSourceFlags,
+        result = ma_sound_init_from_file(&audioSystem.engine, dataSourceFilePath.c_str(),
+                                         dataSourceFlags,
                                          &audioSystem.musicGroup, sound);
         ma_sound_set_looping(sound, true);
         if (result != MA_SUCCESS) {
@@ -262,7 +263,8 @@ void Music::unload() {
         delete sound;
         sound = nullptr;
 
-        ma_resource_manager_unregister_data(audioSystem.pResourceManager, dataSourceFilePath.c_str());
+        ma_resource_manager_unregister_data(audioSystem.pResourceManager,
+                                            dataSourceFilePath.c_str());
         ma_resource_manager_data_source_uninit(dataSource);
         delete dataSource;
         dataSource = nullptr;

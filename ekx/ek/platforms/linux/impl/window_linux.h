@@ -631,7 +631,6 @@ void x11_query_window_size() {
     XWindowAttributes attribs;
     XGetWindowAttributes(gAppLinux.x11.display, gAppLinux.x11.window, &attribs);
 
-    using ::ek::app::g_app;
     g_app.window_size.x = attribs.width;
     g_app.window_size.y = attribs.height;
     g_app.drawable_size.x = g_app.window_size.x;
@@ -673,8 +672,8 @@ void x11_create_hidden_cursor() {
 }
 
 void x11_toggle_fullscreen() {
-//    g_app.fullscreen = !g_app.fullscreen;
-//    x11_set_fullscreen(g_app.fullscreen);
+    g_app.fullscreen = !g_app.fullscreen;
+    x11_set_fullscreen(g_app.fullscreen);
     x11_query_window_size();
 }
 
@@ -1517,7 +1516,7 @@ void linux_app_create() {
     gAppLinux.x11.root = DefaultRootWindow(gAppLinux.x11.display);
     XkbSetDetectableAutoRepeat(gAppLinux.x11.display, true, NULL);
     x11_query_system_dpi();
-//    _sapp.dpi_scale = gAppLinux.x11.dpi / 96.0f;
+    g_app.content_scale = gAppLinux.x11.dpi / 96.0f;
     x11_init_extensions();
     x11_create_hidden_cursor();
     glx_init();
@@ -1526,13 +1525,12 @@ void linux_app_create() {
     glx_choose_visual(&visual, &depth);
     x11_create_window(visual, depth);
     glx_create_context();
-//    _sapp.valid = true;
     x11_show_window();
-//    if (_sapp.fullscreen) {
-//        x11_set_fullscreen(true);
-//    }
+    if (g_app.fullscreen) {
+        x11_set_fullscreen(true);
+    }
     x11_query_window_size();
-//    glx_swapinterval(_sapp.swap_interval);
+    glx_swapinterval(g_app.window_cfg.swapInterval);
     XFlush(gAppLinux.x11.display);
 }
 

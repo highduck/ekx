@@ -5,9 +5,11 @@ target_sources(${PROJECT_NAME} PRIVATE
         app_apple.mm
         )
 
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ObjC -dead_strip -lpthread")
+
 target_compile_options(${PROJECT_NAME}
-        PRIVATE -fobjc-arc
-        PRIVATE -x objective-c++
+        PUBLIC -fobjc-arc
+        PUBLIC -x objective-c++
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

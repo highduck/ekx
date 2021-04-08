@@ -31,13 +31,11 @@ void process_event(const event_t& event) {
             if (g_app.applicationInFocus) {
                 g_app.applicationInFocus = false;
                 g_app.on_event(event);
-                audio::muteDeviceBegin();
             }
             break;
         case event_type::app_resume:
             if (!g_app.applicationInFocus) {
                 g_app.applicationInFocus = true;
-                audio::muteDeviceEnd();
                 g_app.on_event(event);
             }
             break;
@@ -54,14 +52,14 @@ void dispatch_event(const event_t& event) {
         ++g_app.systemPauseCounter;
         if (g_app.systemPauseCounter > 0 && !g_app.systemPaused) {
             g_app.systemPaused = true;
-            //process_event({event_type::app_pause});
+            audio::muteDeviceBegin();
         }
     } else if (event.type == event_type::app_resume) {
         if (g_app.systemPauseCounter > 0) {
             --g_app.systemPauseCounter;
             if (g_app.systemPauseCounter == 0 && g_app.systemPaused) {
                 g_app.systemPaused = false;
-                //process_event({event_type::app_resume});
+                audio::muteDeviceEnd();
             }
         }
     }

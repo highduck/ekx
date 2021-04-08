@@ -22,19 +22,19 @@ using namespace ek::app;
 
     dispatch_init();
 
+    const auto sampleCount = g_app.window_cfg.sampleCount;
+    const auto swapInterval = g_app.window_cfg.swapInterval;
+
     _view = [MetalView new];
-    _view.preferredFramesPerSecond = 60 / 1;/*swap_interval*/
+    _view.preferredFramesPerSecond = 60 / swapInterval;
     _view.device = MTLCreateSystemDefaultDevice();
     _view.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     _view.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-    _view.sampleCount = (NSUInteger) 1; /*sample_count*/
-//    _view.autoResizeDrawable = false;
+    _view.sampleCount = (NSUInteger) sampleCount;
     _view.userInteractionEnabled = YES;
     _view.multipleTouchEnabled = YES;
     _window.rootViewController.modalPresentationStyle = UIModalPresentationFullScreen;
     _window.rootViewController.view = _view;
-
-    g_app.view_context_ = (__bridge void*) _view;
 
     [_window makeKeyAndVisible];
     [_window layoutIfNeeded];
@@ -107,15 +107,19 @@ void handle_touches(event_type type, UIView* view, NSSet* touches, UIEvent* even
 @implementation MetalView
 
 - (void)handleResize {
-//CGRect screen_rect = UIScreen.mainScreen.bounds;
-    float drawableWidth = static_cast<float>(self.drawableSize.width);
-    float drawableHeight = static_cast<float>(self.drawableSize.height);
-    if (drawableWidth != g_app.drawable_size.x || drawableHeight != g_app.drawable_size.y) {
-        g_app.window_size.x = drawableWidth;
-        g_app.window_size.x = drawableHeight;
+    // currently all iOS application in fullscreen mode
+    g_app.fullscreen = true;
+    const float scaleFactor = static_cast<float>(self.contentScaleFactor);
+    const float drawableWidth = static_cast<float>(self.drawableSize.width);
+    const float drawableHeight = static_cast<float>(self.drawableSize.height);
+    if (drawableWidth != g_app.drawable_size.x ||
+        drawableHeight != g_app.drawable_size.y ||
+        scaleFactor != g_app.content_scale) {
+        g_app.content_scale = scaleFactor;
+        g_app.window_size.x = drawableWidth / scaleFactor;
+        g_app.window_size.x = drawableHeight / scaleFactor;
         g_app.drawable_size.x = drawableWidth;
         g_app.drawable_size.y = drawableHeight;
-        g_app.content_scale = 1.0f;
         g_app.size_changed = true;
     }
 }

@@ -25,6 +25,9 @@ struct window_config final {
     float2 size{960, 720};
     bool needDepth = false;
     bool webKeepCanvasAspectRatio = false;
+    int sampleCount = 1;
+    int swapInterval = 1;
+    bool allowHighDpi = true;
 };
 
 struct arguments final {
@@ -44,6 +47,7 @@ enum class mouse_cursor : uint8_t {
 
 enum class event_type : uint8_t {
     app_resume,
+    // sync version of pause callback, don't do any criminal here :)
     app_pause,
     app_resize,
     app_back_button,
@@ -133,19 +137,14 @@ struct app_state final {
     arguments args;
     window_config window_cfg;
 
-    bool fallbackGLES2 = false;
     float2 window_size{};
     float2 drawable_size{};
+    bool fullscreen = false;
 
     // TODO: rename to dpiScale (content misunderstood versus game view scaling)
     float content_scale = 1.0f;
+
     bool size_changed = false;
-
-    // iOS has manually created FBO for primary surface
-    // so it will be set up there
-    uint32_t primary_frame_buffer = 0;
-    void* view_context_ = nullptr;
-
     bool require_exit = false;
     int exit_code = 0;
 

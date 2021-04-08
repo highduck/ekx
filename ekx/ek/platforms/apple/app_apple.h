@@ -1,11 +1,12 @@
-#import <MetalKit/MetalKit.h>
 #include <TargetConditionals.h>
 
-#if __has_feature(objc_arc)
+#import <MetalKit/MetalKit.h>
+
+//#if __has_feature(objc_arc)
 #define OBJC_RELEASE(obj) { obj = nil; }
-#else
-#define OBJC_RELEASE(obj) { [obj release]; obj = nil; }
-#endif
+//#else
+//#define OBJC_RELEASE(obj) { [obj release]; obj = nil; }
+//#endif
 
 // we use common metal view for iOS and macOS
 @interface MetalView : MTKView {}
