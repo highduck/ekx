@@ -2,7 +2,7 @@
   "name": "@ekx/appbox",
   "version": "0.0.1",
   "scripts": {
-    "postinstall": "npx -y -p npm-cmake"
+    "postinstall": "npm-cmake || exit 0"
   },
   "publishConfig": {
     "access": "public"

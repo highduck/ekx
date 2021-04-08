@@ -4,7 +4,7 @@
   "scripts": {
     "build:native": "node scripts/build.js",
     "cc:build:native": "USE_CCACHE=1 node scripts/build.js",
-    "postinstall": "npx -y -p npm-cmake"
+    "postinstall": "npm-cmake || exit 0"
   },
   "files": [
     "bin"
