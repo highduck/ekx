@@ -292,14 +292,16 @@ void d3d11_resize_default_render_target(void) {
 }
 
 void d3d11_present(void) {
+    const auto swapInterval = g_app.window_cfg.swapInterval;
+    const auto sampleCount = g_app.window_cfg.sampleCount;
     /* do MSAA resolve if needed */
-    if (cfgSamplesCount > 1) {
+    if (sampleCount > 1) {
         EK_ASSERT(d3dApp.rt);
         EK_ASSERT(d3dApp.msaa_rt);
         d3d11_ResolveSubresource(d3dApp.device_context, (ID3D11Resource*) d3dApp.rt, 0, (ID3D11Resource*) d3dApp.msaa_rt,
                                  0, DXGI_FORMAT_B8G8R8A8_UNORM);
     }
-    dxgi_Present(d3dApp.swap_chain, (UINT)g_app.window_cfg.swapInterval, 0);
+    dxgi_Present(d3dApp.swap_chain, (UINT)swapInterval, 0);
 }
 
 void init_console() {
