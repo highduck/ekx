@@ -3,7 +3,7 @@
 struct X11_CodePair {
     uint16_t keysym;
     uint16_t ucs;
-}
+};
 
 /* see GLFW's xkb_unicode.c */
 static const X11_CodePair _x11_KeySymTab[] {

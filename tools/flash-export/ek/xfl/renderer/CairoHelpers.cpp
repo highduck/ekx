@@ -1,11 +1,8 @@
-#define _USE_MATH_DEFINES
-// should be first include for M_PI
-#include <cmath>
-
 #include "CairoHelpers.hpp"
+#include <cairo.h>
 
 #include <ek/xfl/types.hpp>
-#include <cairo.h>
+#include <ek/math/common.hpp>
 
 namespace ek::xfl {
 
@@ -239,7 +236,7 @@ void cairo_round_rectangle(cairo_t* cr, const double* values) {
     const double r2 = math::clamp(values[6], -maxRadius, maxRadius);
     const double r3 = math::clamp(values[7], -maxRadius, maxRadius);
 
-    double degrees = M_PI / 180.0;
+    double degrees = math::pi / 180.0;
 
     cairo_new_sub_path(cr);
     if (r1 >= 0) {

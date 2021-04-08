@@ -77,7 +77,7 @@
 #include "impl/sharing_win.h"
 #include "impl/user_prefs_win.h"
 
-struct DXApp {
+struct D3DApp {
     ID3D11Device* device;
     ID3D11DeviceContext* device_context;
     ID3D11Texture2D* rt;
@@ -112,7 +112,7 @@ struct WindowDpiState {
     float content_scale;
     float window_scale;
     float mouse_scale;
-}
+};
 
 struct AppWindow {
     HWND hwnd;
@@ -129,12 +129,12 @@ struct AppWindow {
     LONG raw_input_mousepos_x;
     LONG raw_input_mousepos_y;
     uint8_t raw_input_data[256];
-}
-
-static DXApp
-dxApp{
 };
+
+//namespace {
 static AppWindow wnd{};
+static D3DApp d3dApp{};
+//}
 
 static int cfgSamplesCount = 1;
 static bool cfgAllowHighDPI = true;
@@ -181,7 +181,7 @@ static inline HRESULT dxgi_Present(IDXGISwapChain* self, UINT SyncInterval, UINT
 }
 
 void d3d11_create_device_and_swapchain() {
-    DXGI_SWAP_CHAIN_DESC* sc_desc = &dxApp.d3d11.swap_chain_desc;
+    DXGI_SWAP_CHAIN_DESC* sc_desc = &d3dApp.swap_chain_desc;
     sc_desc->BufferDesc.Width = (UINT) g_app.drawable_size.x;
     sc_desc->BufferDesc.Height = (UINT) g_app.drawable_size.y;
     sc_desc->BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -191,7 +191,7 @@ void d3d11_create_device_and_swapchain() {
     sc_desc->Windowed = true;
     if (wnd.is_win10_or_greater) {
         sc_desc->BufferCount = 2;
-        sc_desc->SwapEffect = (DXGI_SWAP_EFFECT) _SAPP_DXGI_SWAP_EFFECT_FLIP_DISCARD;
+        sc_desc->SwapEffect = (DXGI_SWAP_EFFECT) DXGI_SWAP_EFFECT_FLIP_DISCARD;
     } else {
         sc_desc->BufferCount = 1;
         sc_desc->SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
@@ -213,35 +213,35 @@ void d3d11_create_device_and_swapchain() {
             0,                              /* FeatureLevels */
             D3D11_SDK_VERSION,              /* SDKVersion */
             sc_desc,                        /* pSwapChainDesc */
-            &dxApp.swap_chain,        /* ppSwapChain */
-            &dxApp.device,            /* ppDevice */
+            &d3dApp.swap_chain,        /* ppSwapChain */
+            &d3dApp.device,            /* ppDevice */
             &feature_level,                 /* pFeatureLevel */
-            &dxApp.device_context);   /* ppImmediateContext */
+            &d3dApp.device_context);   /* ppImmediateContext */
     (void) hr;
-    EK_ASSERT(SUCCEEDED(hr) && dxApp.swap_chain && dxApp.device && dxApp.device_context);
+    EK_ASSERT(SUCCEEDED(hr) && d3dApp.swap_chain && d3dApp.device && d3dApp.device_context);
 }
 
 void d3d11_destroy_device_and_swapchain() {
-    SAFE_RELEASE(dxApp.swap_chain);
-    SAFE_RELEASE(dxApp.device_context);
-    SAFE_RELEASE(dxApp.device);
+    SAFE_RELEASE(d3dApp.swap_chain);
+    SAFE_RELEASE(d3dApp.device_context);
+    SAFE_RELEASE(d3dApp.device);
 }
 
 void d3d11_create_default_render_target() {
-    EK_ASSERT(0 == dxApp.rt);
-    EK_ASSERT(0 == dxApp.rtv);
-    EK_ASSERT(0 == dxApp.msaa_rt);
-    EK_ASSERT(0 == dxApp.msaa_rtv);
-    EK_ASSERT(0 == dxApp.ds);
-    EK_ASSERT(0 == dxApp.dsv);
+    EK_ASSERT(0 == d3dApp.rt);
+    EK_ASSERT(0 == d3dApp.rtv);
+    EK_ASSERT(0 == d3dApp.msaa_rt);
+    EK_ASSERT(0 == d3dApp.msaa_rtv);
+    EK_ASSERT(0 == d3dApp.ds);
+    EK_ASSERT(0 == d3dApp.dsv);
 
     HRESULT hr;
 
     /* view for the swapchain-created framebuffer */
-    hr = dxgi_GetBuffer(dxApp.swap_chain, 0, IID_ID3D11Texture2D, (void**) &dxApp.rt);
-    EK_ASSERT(SUCCEEDED(hr) && dxApp.rt);
-    hr = d3d11_CreateRenderTargetView(dxApp.device, (ID3D11Resource*) dxApp.rt, NULL, &dxApp.rtv);
-    EK_ASSERT(SUCCEEDED(hr) && dxApp.rtv);
+    hr = dxgi_GetBuffer(d3dApp.swap_chain, 0, IID_ID3D11Texture2D, (void**) &d3dApp.rt);
+    EK_ASSERT(SUCCEEDED(hr) && d3dApp.rt);
+    hr = d3d11_CreateRenderTargetView(d3dApp.device, (ID3D11Resource*) d3dApp.rt, NULL, &d3dApp.rtv);
+    EK_ASSERT(SUCCEEDED(hr) && d3dApp.rtv);
 
     /* common desc for MSAA and depth-stencil texture */
     D3D11_TEXTURE2D_DESC tex_desc;
@@ -258,35 +258,35 @@ void d3d11_create_default_render_target() {
     /* create MSAA texture and view if antialiasing requested */
     if (cfgSamplesCount > 1) {
         tex_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        hr = d3d11_CreateTexture2D(dxApp.device, &tex_desc, NULL, &dxApp.msaa_rt);
-        EK_ASSERT(SUCCEEDED(hr) && dxApp.msaa_rt);
-        hr = d3d11_CreateRenderTargetView(dxApp.device, (ID3D11Resource*) dxApp.msaa_rt, NULL, &dxApp.msaa_rtv);
-        EK_ASSERT(SUCCEEDED(hr) && dxApp.msaa_rtv);
+        hr = d3d11_CreateTexture2D(d3dApp.device, &tex_desc, NULL, &d3dApp.msaa_rt);
+        EK_ASSERT(SUCCEEDED(hr) && d3dApp.msaa_rt);
+        hr = d3d11_CreateRenderTargetView(d3dApp.device, (ID3D11Resource*) d3dApp.msaa_rt, NULL, &d3dApp.msaa_rtv);
+        EK_ASSERT(SUCCEEDED(hr) && d3dApp.msaa_rtv);
     }
 
     /* texture and view for the depth-stencil-surface */
     tex_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     tex_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-    hr = d3d11_CreateTexture2D(dxApp.device, &tex_desc, NULL, &dxApp.ds);
-    EK_ASSERT(SUCCEEDED(hr) && dxApp.ds);
-    hr = d3d11_CreateDepthStencilView(dxApp.device, (ID3D11Resource*) dxApp.ds, NULL, &dxApp.dsv);
-    EK_ASSERT(SUCCEEDED(hr) && dxApp.dsv);
+    hr = d3d11_CreateTexture2D(d3dApp.device, &tex_desc, NULL, &d3dApp.ds);
+    EK_ASSERT(SUCCEEDED(hr) && d3dApp.ds);
+    hr = d3d11_CreateDepthStencilView(d3dApp.device, (ID3D11Resource*) d3dApp.ds, NULL, &d3dApp.dsv);
+    EK_ASSERT(SUCCEEDED(hr) && d3dApp.dsv);
 }
 
 void d3d11_destroy_default_render_target(void) {
-    SAFE_RELEASE(dxApp.rt);
-    SAFE_RELEASE(dxApp.rtv);
-    SAFE_RELEASE(dxApp.msaa_rt);
-    SAFE_RELEASE(dxApp.msaa_rtv);
-    SAFE_RELEASE(dxApp.ds);
-    SAFE_RELEASE(dxApp.dsv);
+    SAFE_RELEASE(d3dApp.rt);
+    SAFE_RELEASE(d3dApp.rtv);
+    SAFE_RELEASE(d3dApp.msaa_rt);
+    SAFE_RELEASE(d3dApp.msaa_rtv);
+    SAFE_RELEASE(d3dApp.ds);
+    SAFE_RELEASE(d3dApp.dsv);
 }
 
 void d3d11_resize_default_render_target(void) {
-    if (dxApp.swap_chain) {
+    if (d3dApp.swap_chain) {
         d3d11_destroy_default_render_target();
-        dxgi_ResizeBuffers(dxApp.swap_chain,
-                           dxApp.swap_chain_desc.BufferCount,
+        dxgi_ResizeBuffers(d3dApp.swap_chain,
+                           d3dApp.swap_chain_desc.BufferCount,
                            (UINT) g_app.drawable_size.x,
                            (UINT) g_app.drawable_size.y,
                            DXGI_FORMAT_B8G8R8A8_UNORM, 0);
@@ -297,12 +297,12 @@ void d3d11_resize_default_render_target(void) {
 void d3d11_present(void) {
     /* do MSAA resolve if needed */
     if (cfgSamplesCount > 1) {
-        EK_ASSERT(dxApp.rt);
-        EK_ASSERT(dxApp.msaa_rt);
-        d3d11_ResolveSubresource(dxApp.device_context, (ID3D11Resource*) dxApp.rt, 0, (ID3D11Resource*) dxApp.msaa_rt,
+        EK_ASSERT(d3dApp.rt);
+        EK_ASSERT(d3dApp.msaa_rt);
+        d3d11_ResolveSubresource(d3dApp.device_context, (ID3D11Resource*) d3dApp.rt, 0, (ID3D11Resource*) d3dApp.msaa_rt,
                                  0, DXGI_FORMAT_B8G8R8A8_UNORM);
     }
-    dxgi_Present(dxApp.swap_chain, (UINT)/*swap_interval */ 1, 0);
+    dxgi_Present(d3dApp.swap_chain, (UINT)/*swap_interval */ 1, 0);
 }
 
 void init_console() {
@@ -722,9 +722,8 @@ LRESULT CALLBACK win32_wndproc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 //                        _sapp.mouse.dy = (float) raw_mouse_data->data.mouse.lLastY;
 //                    }
 //                    _sapp_win32_mouse_event(SAPP_EVENTTYPE_MOUSE_MOVE, SAPP_MOUSEBUTTON_INVALID);
-                }
+//                }
                 break;
-
             case WM_MOUSELEAVE:
 //                if (!_sapp.mouse.locked) {
 //                    _sapp.win32.mouse_tracked = false;
@@ -930,16 +929,16 @@ char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
 }
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
-(void)hInstance;
-(void)(hPrevInstance);
-(void)(lpCmdLine);
-(void)(nCmdShow);
-int argc_utf8 = 0;
-char** argv_utf8 = win32_command_line_to_utf8_argv(GetCommandLineW(), &argc_utf8);
+    (void)hInstance;
+    (void)(hPrevInstance);
+    (void)(lpCmdLine);
+    (void)(nCmdShow);
+    int argc_utf8 = 0;
+    char** argv_utf8 = command_line_to_utf8_argv(GetCommandLineW(), &argc_utf8);
 
-g_app.args = {argc_utf8, argv_utf8};
-::ek::main();
+    g_app.args = {argc_utf8, argv_utf8};
+    ::ek::main();
 
-free(argv_utf8);
-return 0;
+    free(argv_utf8);
+    return 0;
 }
