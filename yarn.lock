@@ -2008,10 +2008,10 @@ normalize-url@2.0.1:
     query-string "^5.0.1"
     sort-keys "^2.0.0"
 
-npm-cmake@^0.0.8:
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/npm-cmake/-/npm-cmake-0.0.8.tgz#4b52a89e877f118249f076ebd2370314946d2d6e"
-  integrity sha512-e9CaLCe/gbsnaUdibyLuSIfJpDYlMu9eKWoIvZiBZakIccSpjgxBYgPGir/JLTrgrvpBaVkN1Zy/v4a1SNdY9Q==
+npm-cmake@^0.0.9:
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/npm-cmake/-/npm-cmake-0.0.9.tgz#53a2029e3b4844f790ee34b9d9700e808fe16576"
+  integrity sha512-t/J57DtKn5fBOWTpnV3mHXFgkEoeiQdwP0BQmUSHSyCxZ9sP6GFFHXwDR9Wm87xKp2h35ZAM/KzAwrLBrkuh7g==
 
 npm-conf@^1.1.0:
   version "1.1.3"
