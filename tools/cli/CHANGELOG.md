@@ -1,5 +1,19 @@
 ## 0.0.4
 
+## 0.1.3
+
+### Patch Changes
+
+- e79c61c: minor update
+- b985463: change GL to Metal for macOS and iOS
+- d90b3e3: bump version code for any kind of deployment
+- Updated dependencies [e79c61c]
+- Updated dependencies [d90b3e3]
+- Updated dependencies [b985463]
+- Updated dependencies [dee7ff1]
+  - @ekx/ekx@0.1.3
+  - @ekx/ekc@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
