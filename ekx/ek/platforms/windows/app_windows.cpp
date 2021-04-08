@@ -285,8 +285,11 @@ void d3d11_destroy_default_render_target(void) {
 void d3d11_resize_default_render_target(void) {
     if (dxApp.swap_chain) {
         d3d11_destroy_default_render_target();
-        dxgi_ResizeBuffers(dxApp.swap_chain, dxApp.swap_chain_desc.BufferCount, (UINT) _sapp.framebuffer_width,
-                           (UINT) _sapp.framebuffer_height, DXGI_FORMAT_B8G8R8A8_UNORM, 0);
+        dxgi_ResizeBuffers(dxApp.swap_chain,
+                           dxApp.swap_chain_desc.BufferCount,
+                           (UINT) g_app.drawable_size.x,
+                           (UINT) g_app.drawable_size.y,
+                           DXGI_FORMAT_B8G8R8A8_UNORM, 0);
         d3d11_create_default_render_target();
     }
 }
@@ -535,7 +538,7 @@ void win32_init_dpi() {
     } else {
         wnd.dpi.window_scale = 1.0f;
     }
-    if (cfgALlowHighDPI) {
+    if (cfgAllowHighDPI) {
         wnd.dpi.content_scale = wnd.dpi.window_scale;
         wnd.dpi.mouse_scale = 1.0f;
     } else {
@@ -554,9 +557,9 @@ void win32_init_dpi() {
 /* updates current window and framebuffer size from the window's client rect, returns true if size has changed */
 bool win32_update_dimensions() {
     RECT rect;
-    if (GetClientRect(_sapp.win32.hwnd, &rect)) {
-        _sapp.window_width = (int) ((float) (rect.right - rect.left) / _sapp.win32.dpi.window_scale);
-        _sapp.window_height = (int) ((float) (rect.bottom - rect.top) / _sapp.win32.dpi.window_scale);
+    if (GetClientRect(wnd.hwnd, &rect)) {
+        g_app.window_size.x = (int) ((float) (rect.right - rect.left) / wnd.dpi.window_scale);
+        g_app.window_size.y = (int) ((float) (rect.bottom - rect.top) / wnd.dpi.window_scale);
         const int fb_width = (int) ((float) g_app.window_size.x * wnd.dpi.content_scale);
         const int fb_height = (int) ((float) g_app.window_size.y * wnd.dpi.content_scale);
         if ((fb_width != (int) g_app.drawable_size.x) || (fb_height != (int) g_app.drawable_size.y)) {
@@ -584,14 +587,13 @@ LRESULT CALLBACK win32_wndproc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
     if (!wnd.in_create_window) {
         switch (uMsg) {
             case WM_CLOSE:
-/* only give user a chance to intervene when sapp_quit() wasn't already called */
+                // only give user a chance to intervene when sapp_quit() wasn't already called
                 if (!g_app.require_exit) {
-/* if window should be closed and event handling is enabled, give user code
-    a change to intervene via sapp_cancel_quit()
-*/
+                    // if window should be closed and event handling is enabled, give user code
+                    // a change to intervene via sapp_cancel_quit()
                     g_app.require_exit = true;
                     win32_uwp_app_event(event_type::app_close);
-/* if user code hasn't intervened, quit the app */
+                    // if user code hasn't intervened, quit the app
                     if (g_app.require_exit) {
                         // exit ordered
                         g_app.require_exit = true;
@@ -631,12 +633,12 @@ LRESULT CALLBACK win32_wndproc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
             }
                 break;
             case WM_SETCURSOR:
-                if (_sapp.desc.user_cursor) {
-                    if (LOWORD(lParam) == HTCLIENT) {
+//                if (_sapp.desc.user_cursor) {
+//                    if (LOWORD(lParam) == HTCLIENT) {
 //win32_uwp_app_event(SAPP_EVENTTYPE_UPDATE_CURSOR);
-                        return 1;
-                    }
-                }
+//                        return 1;
+//                    }
+//                }
                 break;
             case WM_LBUTTONDOWN:
 //_sapp_win32_mouse_event(SAPP_EVENTTYPE_MOUSE_DOWN, SAPP_MOUSEBUTTON_LEFT);
@@ -747,10 +749,10 @@ LRESULT CALLBACK win32_wndproc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
                 //_sapp_win32_key_event(SAPP_EVENTTYPE_KEY_UP, (int) (HIWORD(lParam) & 0x1FF), false);
                 break;
             case WM_ENTERSIZEMOVE:
-                SetTimer(_sapp.win32.hwnd, 1, USER_TIMER_MINIMUM, NULL);
+                SetTimer(wnd.hwnd, 1, USER_TIMER_MINIMUM, NULL);
                 break;
             case WM_EXITSIZEMOVE:
-                KillTimer(_sapp.win32.hwnd, 1);
+                KillTimer(wnd.hwnd, 1);
                 break;
             case WM_TIMER:
                 dispatch_draw_frame();
