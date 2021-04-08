@@ -224,18 +224,24 @@
   resolved "https://registry.yarnpkg.com/@ekx/freetype/-/freetype-0.0.6.tgz#4c3d03f9c19a6ea3253920059c36237ca5c8b9df"
   integrity sha512-n0ma/izn7xLrNT6VDGwbdU8j2FEjpjSkiu0RV4hgUrgmMJE2QRkBEH7cBHomQwk4qgyKAsUpUsThY6PR62/spw==
 
+"@ekx/freetype@0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@ekx/freetype/-/freetype-0.0.7.tgz#9bfd76366025e126064a804823ba1ff1b4c8742e"
+  integrity sha512-MNyXhb5MgTOC7Egm2H21Fuk3G8ngYgnreoImfh9yNSgkRu3fgU5NKIZSW1hKiDwE/Cq+B9OyXZDuXljsajaX9w==
+
 "@ekx/google-test@0.0.5":
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/@ekx/google-test/-/google-test-0.0.5.tgz#fd0ae62a912b11d7396949173fd0c674d8467b93"
   integrity sha512-ojBHgjncJwMJDjWpo1YwzZ9ezEYpZ64WAvV/BxosoZUczPUuf/5hqfc47hcc9gJ9kigldX7oOUE9HRjB8fxHYQ==
 
-"@ekx/imgui@0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@ekx/imgui/-/imgui-0.0.10.tgz#afdf6e8d8be9357335b13837c3d45e92b0fad1e0"
-  integrity sha512-/k4H8lfki9ED2XHfxkChIusuZT8SzM8tm3qoEltM19t8w9E4sGDI5Da66wzZZ6pzceBn0JtUE4UsZhsdhEWUpQ==
+"@ekx/imgui@0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@ekx/imgui/-/imgui-0.0.12.tgz#0ec12bb41391772afd49b9cc73b77d35cea5724e"
+  integrity sha512-/ydGAWrhpRWZNsGlGxTcG66JpH3FWvTOZFMHZT2mQkQlmY/503rOpykYEsIzNUYgaKvcA2WwVy3yXxCoggfIQg==
   dependencies:
-    "@ekx/freetype" "0.0.6"
+    "@ekx/freetype" "0.0.7"
     "@ekx/stb" "0.0.3"
+    npm-cmake "0.0.10"
 
 "@ekx/miniaudio@0.0.4":
   version "0.0.4"
@@ -2008,10 +2014,10 @@ normalize-url@2.0.1:
     query-string "^5.0.1"
     sort-keys "^2.0.0"
 
-npm-cmake@^0.0.9:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/npm-cmake/-/npm-cmake-0.0.9.tgz#53a2029e3b4844f790ee34b9d9700e808fe16576"
-  integrity sha512-t/J57DtKn5fBOWTpnV3mHXFgkEoeiQdwP0BQmUSHSyCxZ9sP6GFFHXwDR9Wm87xKp2h35ZAM/KzAwrLBrkuh7g==
+npm-cmake@0.0.10, npm-cmake@^0.0.10:
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/npm-cmake/-/npm-cmake-0.0.10.tgz#643c0b04dcfe2560ad4beae343ccd22041e16eec"
+  integrity sha512-xJ60fCGj9erMSAaAMUudROaKaoaqWDCGSqyiZfgwjZnpK0vlUlnPPlMQwjl6KErCP1eLvvg2CHyNvSMHFyPUIw==
 
 npm-conf@^1.1.0:
   version "1.1.3"

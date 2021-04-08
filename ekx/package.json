@@ -13,13 +13,13 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/google-test": "0.0.5",
-    "@ekx/imgui": "0.0.10",
+    "@ekx/imgui": "0.0.12",
     "@ekx/miniaudio": "0.0.4",
     "@ekx/pugixml": "0.0.3",
     "@ekx/sokol": "0.0.6",
     "@ekx/stb": "0.0.3",
     "@ekx/tracy": "0.0.8",
-    "npm-cmake": "^0.0.9"
+    "npm-cmake": "^0.0.10"
   },
   "devDependencies": {
     "@ekx/sokol-shdc": "0.0.2"
