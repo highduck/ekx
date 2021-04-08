@@ -900,7 +900,7 @@ mouse_button x11_translate_button(const XEvent* event) {
     }
 }
 
-void x11_mouse_event(event_t type, mouse_button btn, uint32_t mods) {
+void x11_mouse_event(event_type type, mouse_button btn, uint32_t mods) {
 //    if (_sapp_events_enabled()) {
 //        init_event(type);
 //        _sapp.event.mouse_button = btn;
