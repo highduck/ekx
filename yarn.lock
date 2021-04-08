@@ -219,11 +219,6 @@
   resolved "https://registry.yarnpkg.com/@ekx/cairo/-/cairo-0.0.6.tgz#4ce8f7a7fdafefb7dc73b7ee7449396ce84f956f"
   integrity sha512-Ucq2PD1T9DcAiL4g+iiuyjsvDnK0/iJqNoJ2+Q9PDhVar5xC/5iDOaJ0TCnHAsbZ9DmrA573AmKF5alUXBFbnQ==
 
-"@ekx/freetype@0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@ekx/freetype/-/freetype-0.0.6.tgz#4c3d03f9c19a6ea3253920059c36237ca5c8b9df"
-  integrity sha512-n0ma/izn7xLrNT6VDGwbdU8j2FEjpjSkiu0RV4hgUrgmMJE2QRkBEH7cBHomQwk4qgyKAsUpUsThY6PR62/spw==
-
 "@ekx/freetype@0.0.7":
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/@ekx/freetype/-/freetype-0.0.7.tgz#9bfd76366025e126064a804823ba1ff1b4c8742e"
