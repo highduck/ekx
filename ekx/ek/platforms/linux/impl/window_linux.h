@@ -779,7 +779,7 @@ void x11_create_window(Visual* visual, int depth) {
     /* announce support for drag'n'drop */
     // TODO:
 //    if (g_app.drop.enabled) {
-//        const Atom version = _SAPP_X11_XDND_VERSION;
+//        const Atom version = X11_XDND_VERSION;
 //        XChangeProperty(gAppLinux.x11.display, gAppLinux.x11.window, gAppLinux.x11.xdnd.XdndAware, XA_ATOM, 32, PropModeReplace, (unsigned char*) &version, 1);
 //    }
 
@@ -1293,12 +1293,12 @@ void x11_process_event(XEvent* event) {
         case EnterNotify:
             /* don't send enter/leave events while mouse button held down */
             if (0 == gAppLinux.x11.mouse_buttons) {
-                x11_mouse_event(SAPP_EVENTTYPE_MOUSE_ENTER, SAPP_MOUSEBUTTON_INVALID, x11_mod(event->xcrossing.state));
+                x11_mouse_event(event_type::mouse_enter, mouse_button::other, x11_mod(event->xcrossing.state));
             }
             break;
         case LeaveNotify:
             if (0 == gAppLinux.x11.mouse_buttons) {
-                x11_mouse_event(SAPP_EVENTTYPE_MOUSE_LEAVE, SAPP_MOUSEBUTTON_INVALID, x11_mod(event->xcrossing.state));
+                x11_mouse_event(event_type::mouse_exit, mouse_button::other, x11_mod(event->xcrossing.state));
             }
             break;
         case MotionNotify:
@@ -1358,7 +1358,7 @@ void x11_process_event(XEvent* event) {
                 gAppLinux.x11.xdnd.source  = (Window)event->xclient.data.l[0];
                 gAppLinux.x11.xdnd.version = event->xclient.data.l[1] >> 24;
                 gAppLinux.x11.xdnd.format  = None;
-                if (gAppLinux.x11.xdnd.version > _SAPP_X11_XDND_VERSION) {
+                if (gAppLinux.x11.xdnd.version > X11_XDND_VERSION) {
                     return;
                 }
                 uint32_t count = 0;
@@ -1381,7 +1381,7 @@ void x11_process_event(XEvent* event) {
                 }
             }
             else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndDrop) {
-                if (gAppLinux.x11.xdnd.version > _SAPP_X11_XDND_VERSION) {
+                if (gAppLinux.x11.xdnd.version > X11_XDND_VERSION) {
                     return;
                 }
                 Time time = CurrentTime;
@@ -1415,7 +1415,7 @@ void x11_process_event(XEvent* event) {
                    FIXME: we could track the mouse position here, but
                    this isn't implemented on other platforms either so far
                 */
-                if (gAppLinux.x11.xdnd.version > _SAPP_X11_XDND_VERSION) {
+                if (gAppLinux.x11.xdnd.version > X11_XDND_VERSION) {
                     return;
                 }
                 XEvent reply;
@@ -1527,7 +1527,7 @@ void linux_app_loop() {
         /* handle quit-requested, either from window or from sapp_request_quit() */
         if (g_app.require_exit) {
             /* give user code a chance to intervene */
-            x11_app_event(SAPP_EVENTTYPE_QUIT_REQUESTED);
+            x11_app_event(event_type::app_close);
             /* if user code hasn't intervened, quit the app */
             if (g_app.require_exit) {
                 g_app.require_exit = true;
