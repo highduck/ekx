@@ -6,6 +6,7 @@
 #include <ek/app/app.hpp>
 #include <ek/assert.hpp>
 #include <ek/util/logger.hpp>
+#include "keymap_linux.h"
 
 void ek_fail(const char* msg) {
     EK_ERROR << msg;
@@ -18,7 +19,7 @@ void ek_fail(const char* msg) {
 #define GLX_RGBA_BIT 0x00000001
 #define GLX_WINDOW_BIT 0x00000001
 #define GLX_DRAWABLE_TYPE 0x8010
-#define GLX_RENDER_TYPE	0x8011
+#define GLX_RENDER_TYPE    0x8011
 #define GLX_DOUBLEBUFFER 5
 #define GLX_RED_SIZE 8
 #define GLX_GREEN_SIZE 9
@@ -38,25 +39,40 @@ typedef XID GLXWindow;
 typedef XID GLXDrawable;
 typedef struct __GLXFBConfig* GLXFBConfig;
 typedef struct __GLXcontext* GLXContext;
-typedef void (*__GLXextproc)(void);
 
-typedef int (*PFNGLXGETFBCONFIGATTRIBPROC)(Display*,GLXFBConfig,int,int*);
-typedef const char* (*PFNGLXGETCLIENTSTRINGPROC)(Display*,int);
-typedef Bool (*PFNGLXQUERYEXTENSIONPROC)(Display*,int*,int*);
-typedef Bool (*PFNGLXQUERYVERSIONPROC)(Display*,int*,int*);
-typedef void (*PFNGLXDESTROYCONTEXTPROC)(Display*,GLXContext);
-typedef Bool (*PFNGLXMAKECURRENTPROC)(Display*,GLXDrawable,GLXContext);
-typedef void (*PFNGLXSWAPBUFFERSPROC)(Display*,GLXDrawable);
-typedef const char* (*PFNGLXQUERYEXTENSIONSSTRINGPROC)(Display*,int);
-typedef GLXFBConfig* (*PFNGLXGETFBCONFIGSPROC)(Display*,int,int*);
-typedef __GLXextproc (* PFNGLXGETPROCADDRESSPROC)(const char *procName);
-typedef void (*PFNGLXSWAPINTERVALEXTPROC)(Display*,GLXDrawable,int);
-typedef XVisualInfo* (*PFNGLXGETVISUALFROMFBCONFIGPROC)(Display*,GLXFBConfig);
-typedef GLXWindow (*PFNGLXCREATEWINDOWPROC)(Display*,GLXFBConfig,Window,const int*);
-typedef void (*PFNGLXDESTROYWINDOWPROC)(Display*,GLXWindow);
+typedef void (* __GLXextproc)(void);
 
-typedef int (*PFNGLXSWAPINTERVALMESAPROC)(int);
-typedef GLXContext (*PFNGLXCREATECONTEXTATTRIBSARBPROC)(Display*,GLXFBConfig,GLXContext,Bool,const int*);
+typedef int (* PFNGLXGETFBCONFIGATTRIBPROC)(Display*, GLXFBConfig, int, int*);
+
+typedef const char* (* PFNGLXGETCLIENTSTRINGPROC)(Display*, int);
+
+typedef Bool (* PFNGLXQUERYEXTENSIONPROC)(Display*, int*, int*);
+
+typedef Bool (* PFNGLXQUERYVERSIONPROC)(Display*, int*, int*);
+
+typedef void (* PFNGLXDESTROYCONTEXTPROC)(Display*, GLXContext);
+
+typedef Bool (* PFNGLXMAKECURRENTPROC)(Display*, GLXDrawable, GLXContext);
+
+typedef void (* PFNGLXSWAPBUFFERSPROC)(Display*, GLXDrawable);
+
+typedef const char* (* PFNGLXQUERYEXTENSIONSSTRINGPROC)(Display*, int);
+
+typedef GLXFBConfig* (* PFNGLXGETFBCONFIGSPROC)(Display*, int, int*);
+
+typedef __GLXextproc (* PFNGLXGETPROCADDRESSPROC)(const char* procName);
+
+typedef void (* PFNGLXSWAPINTERVALEXTPROC)(Display*, GLXDrawable, int);
+
+typedef XVisualInfo* (* PFNGLXGETVISUALFROMFBCONFIGPROC)(Display*, GLXFBConfig);
+
+typedef GLXWindow (* PFNGLXCREATEWINDOWPROC)(Display*, GLXFBConfig, Window, const int*);
+
+typedef void (* PFNGLXDESTROYWINDOWPROC)(Display*, GLXWindow);
+
+typedef int (* PFNGLXSWAPINTERVALMESAPROC)(int);
+
+typedef GLXContext (* PFNGLXCREATECONTEXTATTRIBSARBPROC)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
 
 struct AppXi {
     bool available;
@@ -152,15 +168,15 @@ struct AppLinux {
 static AppLinux gAppLinux;
 
 struct gl_fbconfig {
-    int         red_bits;
-    int         green_bits;
-    int         blue_bits;
-    int         alpha_bits;
-    int         depth_bits;
-    int         stencil_bits;
-    int         samples;
-    bool        doublebuffer;
-    uintptr_t   handle;
+    int red_bits;
+    int green_bits;
+    int blue_bits;
+    int alpha_bits;
+    int depth_bits;
+    int stencil_bits;
+    int samples;
+    bool doublebuffer;
+    uintptr_t handle;
 };
 
 void gl_init_fbconfig(gl_fbconfig* fbconfig) {
@@ -181,7 +197,7 @@ const gl_fbconfig* gl_choose_fbconfig(const gl_fbconfig* desired, const gl_fbcon
     int extra_diff, least_extra_diff = 10000000;
     const gl_fbconfig* current;
     const gl_fbconfig* closest = 0;
-    for (int i = 0;  i < count;  i++) {
+    for (int i = 0; i < count; i++) {
         current = alternatives + i;
         if (desired->doublebuffer != current->doublebuffer) {
             continue;
@@ -228,7 +244,8 @@ const gl_fbconfig* gl_choose_fbconfig(const gl_fbconfig* desired, const gl_fbcon
             extra_diff += (desired->depth_bits - current->depth_bits) * (desired->depth_bits - current->depth_bits);
         }
         if (desired->stencil_bits != -1) {
-            extra_diff += (desired->stencil_bits - current->stencil_bits) * (desired->stencil_bits - current->stencil_bits);
+            extra_diff +=
+                    (desired->stencil_bits - current->stencil_bits) * (desired->stencil_bits - current->stencil_bits);
         }
         if (desired->samples != -1) {
             extra_diff += (desired->samples - current->samples) * (desired->samples - current->samples);
@@ -240,11 +257,9 @@ const gl_fbconfig* gl_choose_fbconfig(const gl_fbconfig* desired, const gl_fbcon
         */
         if (missing < least_missing) {
             closest = current;
-        }
-        else if (missing == least_missing) {
+        } else if (missing == least_missing) {
             if ((color_diff < least_color_diff) ||
-                (color_diff == least_color_diff && extra_diff < least_extra_diff))
-            {
+                (color_diff == least_color_diff && extra_diff < least_extra_diff)) {
                 closest = current;
             }
         }
@@ -261,7 +276,7 @@ using namespace ek;
 using namespace ek::app;
 
 int x11_error_handler(Display* display, XErrorEvent* event) {
-    (void)(display);
+    (void) (display);
     gAppLinux.x11.error_code = event->error_code;
     return 0;
 }
@@ -277,13 +292,13 @@ void x11_release_error_handler() {
 }
 
 void x11_init_extensions() {
-    gAppLinux.x11.UTF8_STRING             = XInternAtom(gAppLinux.x11.display, "UTF8_STRING", False);
-    gAppLinux.x11.WM_PROTOCOLS            = XInternAtom(gAppLinux.x11.display, "WM_PROTOCOLS", False);
-    gAppLinux.x11.WM_DELETE_WINDOW        = XInternAtom(gAppLinux.x11.display, "WM_DELETE_WINDOW", False);
-    gAppLinux.x11.WM_STATE                = XInternAtom(gAppLinux.x11.display, "WM_STATE", False);
-    gAppLinux.x11.NET_WM_NAME             = XInternAtom(gAppLinux.x11.display, "_NET_WM_NAME", False);
-    gAppLinux.x11.NET_WM_ICON_NAME        = XInternAtom(gAppLinux.x11.display, "_NET_WM_ICON_NAME", False);
-    gAppLinux.x11.NET_WM_STATE            = XInternAtom(gAppLinux.x11.display, "_NET_WM_STATE", False);
+    gAppLinux.x11.UTF8_STRING = XInternAtom(gAppLinux.x11.display, "UTF8_STRING", False);
+    gAppLinux.x11.WM_PROTOCOLS = XInternAtom(gAppLinux.x11.display, "WM_PROTOCOLS", False);
+    gAppLinux.x11.WM_DELETE_WINDOW = XInternAtom(gAppLinux.x11.display, "WM_DELETE_WINDOW", False);
+    gAppLinux.x11.WM_STATE = XInternAtom(gAppLinux.x11.display, "WM_STATE", False);
+    gAppLinux.x11.NET_WM_NAME = XInternAtom(gAppLinux.x11.display, "_NET_WM_NAME", False);
+    gAppLinux.x11.NET_WM_ICON_NAME = XInternAtom(gAppLinux.x11.display, "_NET_WM_ICON_NAME", False);
+    gAppLinux.x11.NET_WM_STATE = XInternAtom(gAppLinux.x11.display, "_NET_WM_STATE", False);
     gAppLinux.x11.NET_WM_STATE_FULLSCREEN = XInternAtom(gAppLinux.x11.display, "_NET_WM_STATE_FULLSCREEN", False);
     // TODO:
 //    if (_sapp.drop.enabled) {
@@ -300,7 +315,8 @@ void x11_init_extensions() {
 //    }
 
     /* check Xi extension for raw mouse input */
-    if (XQueryExtension(gAppLinux.x11.display, "XInputExtension", &gAppLinux.x11.xi.major_opcode, &gAppLinux.x11.xi.event_base, &gAppLinux.x11.xi.error_base)) {
+    if (XQueryExtension(gAppLinux.x11.display, "XInputExtension", &gAppLinux.x11.xi.major_opcode,
+                        &gAppLinux.x11.xi.event_base, &gAppLinux.x11.xi.error_base)) {
         gAppLinux.x11.xi.major = 2;
         gAppLinux.x11.xi.minor = 0;
         if (XIQueryVersion(gAppLinux.x11.display, &gAppLinux.x11.xi.major, &gAppLinux.x11.xi.minor) == Success) {
@@ -357,29 +373,25 @@ bool glx_has_ext(const char* ext, const char* extensions) {
 bool glx_extsupported(const char* ext, const char* extensions) {
     if (extensions) {
         return glx_has_ext(ext, extensions);
-    }
-    else {
+    } else {
         return false;
     }
 }
 
-void* glx_getprocaddr(const char* procname)
-{
+void* glx_getprocaddr(const char* procname) {
     if (gAppLinux.glx.GetProcAddress) {
         return (void*) gAppLinux.glx.GetProcAddress(procname);
-    }
-    else if (gAppLinux.glx.GetProcAddressARB) {
+    } else if (gAppLinux.glx.GetProcAddressARB) {
         return (void*) gAppLinux.glx.GetProcAddressARB(procname);
-    }
-    else {
+    } else {
         return dlsym(gAppLinux.glx.libgl, procname);
     }
 }
 
 void glx_init() {
-    const char* sonames[] = { "libGL.so.1", "libGL.so", 0 };
+    const char* sonames[] = {"libGL.so.1", "libGL.so", 0};
     for (int i = 0; sonames[i]; i++) {
-        gAppLinux.glx.libgl = dlopen(sonames[i], RTLD_LAZY|RTLD_GLOBAL);
+        gAppLinux.glx.libgl = dlopen(sonames[i], RTLD_LAZY | RTLD_GLOBAL);
         if (gAppLinux.glx.libgl) {
             break;
         }
@@ -387,20 +399,22 @@ void glx_init() {
     if (!gAppLinux.glx.libgl) {
         ek_fail("GLX: failed to load libGL");
     }
-    gAppLinux.glx.GetFBConfigs          = (PFNGLXGETFBCONFIGSPROC)          dlsym(gAppLinux.glx.libgl, "glXGetFBConfigs");
-    gAppLinux.glx.GetFBConfigAttrib     = (PFNGLXGETFBCONFIGATTRIBPROC)     dlsym(gAppLinux.glx.libgl, "glXGetFBConfigAttrib");
-    gAppLinux.glx.GetClientString       = (PFNGLXGETCLIENTSTRINGPROC)       dlsym(gAppLinux.glx.libgl, "glXGetClientString");
-    gAppLinux.glx.QueryExtension        = (PFNGLXQUERYEXTENSIONPROC)        dlsym(gAppLinux.glx.libgl, "glXQueryExtension");
-    gAppLinux.glx.QueryVersion          = (PFNGLXQUERYVERSIONPROC)          dlsym(gAppLinux.glx.libgl, "glXQueryVersion");
-    gAppLinux.glx.DestroyContext        = (PFNGLXDESTROYCONTEXTPROC)        dlsym(gAppLinux.glx.libgl, "glXDestroyContext");
-    gAppLinux.glx.MakeCurrent           = (PFNGLXMAKECURRENTPROC)           dlsym(gAppLinux.glx.libgl, "glXMakeCurrent");
-    gAppLinux.glx.SwapBuffers           = (PFNGLXSWAPBUFFERSPROC)           dlsym(gAppLinux.glx.libgl, "glXSwapBuffers");
-    gAppLinux.glx.QueryExtensionsString = (PFNGLXQUERYEXTENSIONSSTRINGPROC) dlsym(gAppLinux.glx.libgl, "glXQueryExtensionsString");
-    gAppLinux.glx.CreateWindow          = (PFNGLXCREATEWINDOWPROC)          dlsym(gAppLinux.glx.libgl, "glXCreateWindow");
-    gAppLinux.glx.DestroyWindow         = (PFNGLXDESTROYWINDOWPROC)         dlsym(gAppLinux.glx.libgl, "glXDestroyWindow");
-    gAppLinux.glx.GetProcAddress        = (PFNGLXGETPROCADDRESSPROC)        dlsym(gAppLinux.glx.libgl, "glXGetProcAddress");
-    gAppLinux.glx.GetProcAddressARB     = (PFNGLXGETPROCADDRESSPROC)        dlsym(gAppLinux.glx.libgl, "glXGetProcAddressARB");
-    gAppLinux.glx.GetVisualFromFBConfig = (PFNGLXGETVISUALFROMFBCONFIGPROC) dlsym(gAppLinux.glx.libgl, "glXGetVisualFromFBConfig");
+    gAppLinux.glx.GetFBConfigs = (PFNGLXGETFBCONFIGSPROC) dlsym(gAppLinux.glx.libgl, "glXGetFBConfigs");
+    gAppLinux.glx.GetFBConfigAttrib = (PFNGLXGETFBCONFIGATTRIBPROC) dlsym(gAppLinux.glx.libgl, "glXGetFBConfigAttrib");
+    gAppLinux.glx.GetClientString = (PFNGLXGETCLIENTSTRINGPROC) dlsym(gAppLinux.glx.libgl, "glXGetClientString");
+    gAppLinux.glx.QueryExtension = (PFNGLXQUERYEXTENSIONPROC) dlsym(gAppLinux.glx.libgl, "glXQueryExtension");
+    gAppLinux.glx.QueryVersion = (PFNGLXQUERYVERSIONPROC) dlsym(gAppLinux.glx.libgl, "glXQueryVersion");
+    gAppLinux.glx.DestroyContext = (PFNGLXDESTROYCONTEXTPROC) dlsym(gAppLinux.glx.libgl, "glXDestroyContext");
+    gAppLinux.glx.MakeCurrent = (PFNGLXMAKECURRENTPROC) dlsym(gAppLinux.glx.libgl, "glXMakeCurrent");
+    gAppLinux.glx.SwapBuffers = (PFNGLXSWAPBUFFERSPROC) dlsym(gAppLinux.glx.libgl, "glXSwapBuffers");
+    gAppLinux.glx.QueryExtensionsString = (PFNGLXQUERYEXTENSIONSSTRINGPROC) dlsym(gAppLinux.glx.libgl,
+                                                                                  "glXQueryExtensionsString");
+    gAppLinux.glx.CreateWindow = (PFNGLXCREATEWINDOWPROC) dlsym(gAppLinux.glx.libgl, "glXCreateWindow");
+    gAppLinux.glx.DestroyWindow = (PFNGLXDESTROYWINDOWPROC) dlsym(gAppLinux.glx.libgl, "glXDestroyWindow");
+    gAppLinux.glx.GetProcAddress = (PFNGLXGETPROCADDRESSPROC) dlsym(gAppLinux.glx.libgl, "glXGetProcAddress");
+    gAppLinux.glx.GetProcAddressARB = (PFNGLXGETPROCADDRESSPROC) dlsym(gAppLinux.glx.libgl, "glXGetProcAddressARB");
+    gAppLinux.glx.GetVisualFromFBConfig = (PFNGLXGETVISUALFROMFBCONFIGPROC) dlsym(gAppLinux.glx.libgl,
+                                                                                  "glXGetVisualFromFBConfig");
     if (!gAppLinux.glx.GetFBConfigs ||
         !gAppLinux.glx.GetFBConfigAttrib ||
         !gAppLinux.glx.GetClientString ||
@@ -414,8 +428,7 @@ void glx_init() {
         !gAppLinux.glx.DestroyWindow ||
         !gAppLinux.glx.GetProcAddress ||
         !gAppLinux.glx.GetProcAddressARB ||
-        !gAppLinux.glx.GetVisualFromFBConfig)
-    {
+        !gAppLinux.glx.GetVisualFromFBConfig) {
         ek_fail("GLX: failed to load required entry points");
     }
 
@@ -439,7 +452,8 @@ void glx_init() {
     }
     gAppLinux.glx.ARB_multisample = glx_extsupported("GLX_ARB_multisample", exts);
     if (glx_extsupported("GLX_ARB_create_context", exts)) {
-        gAppLinux.glx.CreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC) glx_getprocaddr("glXCreateContextAttribsARB");
+        gAppLinux.glx.CreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC) glx_getprocaddr(
+                "glXCreateContextAttribsARB");
         gAppLinux.glx.ARB_create_context = 0 != gAppLinux.glx.CreateContextAttribsARB;
     }
     gAppLinux.glx.ARB_create_context_profile = glx_extsupported("GLX_ARB_create_context_profile", exts);
@@ -472,9 +486,9 @@ GLXFBConfig glx_choosefbconfig() {
         ek_fail("GLX: No GLXFBConfigs returned");
     }
 
-    usable_configs = (gl_fbconfig*) calloc((size_t)native_count, sizeof(gl_fbconfig));
+    usable_configs = (gl_fbconfig*) calloc((size_t) native_count, sizeof(gl_fbconfig));
     usable_count = 0;
-    for (i = 0;  i < native_count;  i++) {
+    for (i = 0; i < native_count; i++) {
         const GLXFBConfig n = native_configs[i];
         gl_fbconfig* u = usable_configs + usable_count;
         gl_init_fbconfig(u);
@@ -540,7 +554,7 @@ void glx_choose_visual(Visual** visual, int* depth) {
 
 void glx_create_context() {
     GLXFBConfig native = glx_choosefbconfig();
-    if (0 == native){
+    if (0 == native) {
         ek_fail("GLX: Failed to find a suitable GLXFBConfig (2)");
     }
     if (!(gAppLinux.glx.ARB_create_context && gAppLinux.glx.ARB_create_context_profile)) {
@@ -588,8 +602,7 @@ void glx_swapinterval(int interval) {
     glx_make_current();
     if (gAppLinux.glx.EXT_swap_control) {
         gAppLinux.glx.SwapIntervalEXT(gAppLinux.x11.display, gAppLinux.glx.window, interval);
-    }
-    else if (gAppLinux.glx.MESA_swap_control) {
+    } else if (gAppLinux.glx.MESA_swap_control) {
         gAppLinux.glx.SwapIntervalMESA(interval);
     }
 }
@@ -631,16 +644,15 @@ void x11_set_fullscreen(bool enable) {
         if (enable) {
             const int _NET_WM_STATE_ADD = 1;
             x11_send_event(gAppLinux.x11.NET_WM_STATE,
-                                 _NET_WM_STATE_ADD,
-                                 gAppLinux.x11.NET_WM_STATE_FULLSCREEN,
-                                 0, 1, 0);
-        }
-        else {
+                           _NET_WM_STATE_ADD,
+                           gAppLinux.x11.NET_WM_STATE_FULLSCREEN,
+                           0, 1, 0);
+        } else {
             const int _NET_WM_STATE_REMOVE = 0;
             x11_send_event(gAppLinux.x11.NET_WM_STATE,
-                                 _NET_WM_STATE_REMOVE,
-                                 gAppLinux.x11.NET_WM_STATE_FULLSCREEN,
-                                 0, 1, 0);
+                           _NET_WM_STATE_REMOVE,
+                           gAppLinux.x11.NET_WM_STATE_FULLSCREEN,
+                           0, 1, 0);
         }
     }
     XFlush(gAppLinux.x11.display);
@@ -654,7 +666,7 @@ void x11_create_hidden_cursor() {
     EK_ASSERT(img && (img->width == 16) && (img->height == 16) && img->pixels);
     img->xhot = 0;
     img->yhot = 0;
-    const size_t num_bytes = (size_t)(w * h) * sizeof(XcursorPixel);
+    const size_t num_bytes = (size_t) (w * h) * sizeof(XcursorPixel);
     memset(img->pixels, 0, num_bytes);
     gAppLinux.x11.hidden_cursor = XcursorImageLoadCursor(gAppLinux.x11.display, img);
     XcursorImageDestroy(img);
@@ -669,8 +681,7 @@ void x11_toggle_fullscreen() {
 void x11_show_mouse(bool show) {
     if (show) {
         XUndefineCursor(gAppLinux.x11.display, gAppLinux.x11.window);
-    }
-    else {
+    } else {
         XDefineCursor(gAppLinux.x11.display, gAppLinux.x11.window, gAppLinux.x11.hidden_cursor);
     }
 }
@@ -728,12 +739,12 @@ void x11_update_window_title() {
     XChangeProperty(gAppLinux.x11.display, gAppLinux.x11.window,
                     gAppLinux.x11.NET_WM_NAME, gAppLinux.x11.UTF8_STRING, 8,
                     PropModeReplace,
-                    (unsigned char*)title,
+                    (unsigned char*) title,
                     titleLen);
     XChangeProperty(gAppLinux.x11.display, gAppLinux.x11.window,
                     gAppLinux.x11.NET_WM_ICON_NAME, gAppLinux.x11.UTF8_STRING, 8,
                     PropModeReplace,
-                    (unsigned char*)title,
+                    (unsigned char*) title,
                     titleLen);
     XFlush(gAppLinux.x11.display);
 }
@@ -751,16 +762,16 @@ void x11_create_window(Visual* visual, int depth) {
                     EnterWindowMask | LeaveWindowMask | PropertyChangeMask;
     x11_grab_error_handler();
     gAppLinux.x11.window = XCreateWindow(gAppLinux.x11.display,
-                                     gAppLinux.x11.root,
-                                     0, 0,
-                                     (uint32_t)g_app.window_size.x,
-                                     (uint32_t)g_app.window_size.y,
-                                     0,     /* border width */
-                                     depth, /* color depth */
-                                     InputOutput,
-                                     visual,
-                                     wamask,
-                                     &wa);
+                                         gAppLinux.x11.root,
+                                         0, 0,
+                                         (uint32_t) g_app.window_size.x,
+                                         (uint32_t) g_app.window_size.y,
+                                         0,     /* border width */
+                                         depth, /* color depth */
+                                         InputOutput,
+                                         visual,
+                                         wamask,
+                                         &wa);
     x11_release_error_handler();
     if (!gAppLinux.x11.window) {
         ek_fail("X11: Failed to create window");
@@ -842,10 +853,11 @@ int x11_get_window_state() {
     struct {
         CARD32 state;
         Window icon;
-    } *state = NULL;
+    } * state = NULL;
 
-    if (x11_get_window_property(gAppLinux.x11.window, gAppLinux.x11.WM_STATE, gAppLinux.x11.WM_STATE, (unsigned char**)&state) >= 2) {
-        result = (int)state->state;
+    if (x11_get_window_property(gAppLinux.x11.window, gAppLinux.x11.WM_STATE, gAppLinux.x11.WM_STATE,
+                                (unsigned char**) &state) >= 2) {
+        result = (int) state->state;
     }
     if (state) {
         XFree(state);
@@ -854,22 +866,22 @@ int x11_get_window_state() {
 }
 
 // TODO:
-//uint32_t x11_mod(uint32_t x11_mods) {
-//uint32_t mods = 0;
-//if (x11_mods & ShiftMask) {
-//mods |= SAPP_MODIFIER_SHIFT;
-//}
-//if (x11_mods & ControlMask) {
-//mods |= SAPP_MODIFIER_CTRL;
-//}
-//if (x11_mods & Mod1Mask) {
-//mods |= SAPP_MODIFIER_ALT;
-//}
-//if (x11_mods & Mod4Mask) {
-//mods |= SAPP_MODIFIER_SUPER;
-//}
-//return mods;
-//}
+uint32_t x11_mod(uint32_t x11_mods) {
+    uint32_t mods = 0;
+    if (x11_mods & ShiftMask) {
+        //mods |= SAPP_MODIFIER_SHIFT;
+    }
+    if (x11_mods & ControlMask) {
+        //mods |= SAPP_MODIFIER_CTRL;
+    }
+    if (x11_mods & Mod1Mask) {
+        //mods |= SAPP_MODIFIER_ALT;
+    }
+    if (x11_mods & Mod4Mask) {
+        //mods |= SAPP_MODIFIER_SUPER;
+    }
+    return mods;
+}
 
 // TODO:
 //void x11_app_event(sapp_event_type type) {
@@ -881,10 +893,13 @@ int x11_get_window_state() {
 
 mouse_button x11_translate_button(const XEvent* event) {
     switch (event->xbutton.button) {
-        case Button1: return mouse_button::left;
-        //case Button2: return mouse_button::other;
-        case Button3: return mouse_button::right;
-        default:      return mouse_button::other;
+        case Button1:
+            return mouse_button::left;
+            //case Button2: return mouse_button::other;
+        case Button3:
+            return mouse_button::right;
+        default:
+            return mouse_button::other;
     }
 }
 
@@ -943,8 +958,10 @@ key_code x11_translate_key(int scancode) {
     KeySym keysym = keysyms[0];
     XFree(keysyms);
     switch (keysym) {
-        case XK_Escape:         return key_code::Escape;
-        case XK_Tab:            return key_code::Tab;
+        case XK_Escape:
+            return key_code::Escape;
+        case XK_Tab:
+            return key_code::Tab;
 //        case XK_Shift_L:        return SAPP_KEYCODE_LEFT_SHIFT;
 //        case XK_Shift_R:        return SAPP_KEYCODE_RIGHT_SHIFT;
 //        case XK_Control_L:      return SAPP_KEYCODE_LEFT_CONTROL;
@@ -966,16 +983,26 @@ key_code x11_translate_key(int scancode) {
 //        case XK_Delete:         return SAPP_KEYCODE_DELETE;
 //        case XK_BackSpace:      return SAPP_KEYCODE_BACKSPACE;
 
-        case XK_Return:         return key_code::Enter;
-        case XK_Home:           return key_code::Home;
-        case XK_End:            return key_code::End;
-        case XK_Page_Up:        return key_code::PageUp;
-        case XK_Page_Down:      return key_code::PageDown;
-        case XK_Insert:         return key_code::Insert;
-        case XK_Left:           return key_code::ArrowLeft;
-        case XK_Right:          return key_code::ArrowRight;
-        case XK_Down:           return key_code::ArrowDown;
-        case XK_Up:             return key_code::ArrowUp;
+        case XK_Return:
+            return key_code::Enter;
+        case XK_Home:
+            return key_code::Home;
+        case XK_End:
+            return key_code::End;
+        case XK_Page_Up:
+            return key_code::PageUp;
+        case XK_Page_Down:
+            return key_code::PageDown;
+        case XK_Insert:
+            return key_code::Insert;
+        case XK_Left:
+            return key_code::ArrowLeft;
+        case XK_Right:
+            return key_code::ArrowRight;
+        case XK_Down:
+            return key_code::ArrowDown;
+        case XK_Up:
+            return key_code::ArrowUp;
 //        case XK_F1:             return key_code::F1;
 //        case XK_F2:             return SAPP_KEYCODE_F2;
 //        case XK_F3:             return SAPP_KEYCODE_F3;
@@ -1021,10 +1048,13 @@ key_code x11_translate_key(int scancode) {
 //        case XK_KP_Equal:       return SAPP_KEYCODE_KP_EQUAL;
 //        case XK_KP_Enter:       return SAPP_KEYCODE_KP_ENTER;
 
-        case XK_a:              return key_code::A;
-        //case XK_b:              return key_code::B;
-        case XK_c:              return key_code::C;
-        case XK_d:              return key_code::D;
+        case XK_a:
+            return key_code::A;
+            //case XK_b:              return key_code::B;
+        case XK_c:
+            return key_code::C;
+        case XK_d:
+            return key_code::D;
 //        case XK_e:              return key_code::E;
 //        case XK_f:              return key_code::F;
 //        case XK_g:              return key_code::G;
@@ -1039,14 +1069,20 @@ key_code x11_translate_key(int scancode) {
 //        case XK_p:              return key_code::P;
 //        case XK_q:              return key_code::Q;
 //        case XK_r:              return key_code::R;
-        case XK_s:              return key_code::S;
+        case XK_s:
+            return key_code::S;
 //        case XK_t:              return key_code::T;
 //        case XK_u:              return key_code::U;
-        case XK_v:              return key_code::V;
-        case XK_w:              return key_code::W;
-        case XK_x:              return key_code::X;
-        case XK_y:              return key_code::Y;
-        case XK_z:              return key_code::Z;
+        case XK_v:
+            return key_code::V;
+        case XK_w:
+            return key_code::W;
+        case XK_x:
+            return key_code::X;
+        case XK_y:
+            return key_code::Y;
+        case XK_z:
+            return key_code::Z;
 //        case XK_1:              return key_code::0;
 //        case XK_2:              return key_code::2;
 //        case XK_3:              return key_code::3;
@@ -1057,7 +1093,8 @@ key_code x11_translate_key(int scancode) {
 //        case XK_8:              return key_code::8;
 //        case XK_9:              return key_code::9;
 //        case XK_0:              return key_code::0;
-        case XK_space:          return key_code::Space;
+        case XK_space:
+            return key_code::Space;
 //        case XK_minus:          return SAPP_KEYCODE_MINUS;
 //        case XK_equal:          return SAPP_KEYCODE_EQUAL;
 //        case XK_bracketleft:    return SAPP_KEYCODE_LEFT_BRACKET;
@@ -1070,43 +1107,41 @@ key_code x11_translate_key(int scancode) {
 //        case XK_period:         return SAPP_KEYCODE_PERIOD;
 //        case XK_slash:          return SAPP_KEYCODE_SLASH;
 //        case XK_less:           return SAPP_KEYCODE_WORLD_1; /* At least in some layouts... */
-        default:                return key_code::unknown;
+        default:
+            return key_code::unknown;
     }
 }
 
 int32_t x11_keysym_to_unicode(KeySym keysym) {
-int min = 0;
-int max = sizeof(x11_keysymtab) / sizeof(struct x11_codepair) - 1;
-int mid;
+    int min = 0;
+    int max = sizeof(_x11_KeySymTab) / sizeof(struct X11_CodePair) - 1;
+    int mid;
 
 /* First check for Latin-1 characters (1:1 mapping) */
-if ((keysym >= 0x0020 && keysym <= 0x007e) ||
-(keysym >= 0x00a0 && keysym <= 0x00ff))
-{
-return keysym;
-}
+    if ((keysym >= 0x0020 && keysym <= 0x007e) ||
+        (keysym >= 0x00a0 && keysym <= 0x00ff)) {
+        return keysym;
+    }
 
 /* Also check for directly encoded 24-bit UCS characters */
-if ((keysym & 0xff000000) == 0x01000000) {
-return keysym & 0x00ffffff;
-}
+    if ((keysym & 0xff000000) == 0x01000000) {
+        return keysym & 0x00ffffff;
+    }
 
 /* Binary search in table */
-while (max >= min) {
-mid = (min + max) / 2;
-if (x11_keysymtab[mid].keysym < keysym) {
-min = mid + 1;
-}
-else if (x11_keysymtab[mid].keysym > keysym) {
-max = mid - 1;
-}
-else {
-return x11_keysymtab[mid].ucs;
-}
-}
+    while (max >= min) {
+        mid = (min + max) / 2;
+        if (_x11_KeySymTab[mid].keysym < keysym) {
+            min = mid + 1;
+        } else if (_x11_KeySymTab[mid].keysym > keysym) {
+            max = mid - 1;
+        } else {
+            return _x11_KeySymTab[mid].ucs;
+        }
+    }
 
 /* No matching Unicode value found */
-return -1;
+    return -1;
 }
 
 bool x11_parse_dropped_files_list(const char* src) {
@@ -1228,8 +1263,7 @@ void x11_process_event(XEvent* event) {
 //                x11_lock_mouse(false);
 //            }
             break;
-        case KeyPress:
-        {
+        case KeyPress: {
 
             // TODO:
 //            int keycode = (int)event->xkey.keycode;
@@ -1248,8 +1282,7 @@ void x11_process_event(XEvent* event) {
 //            }
         }
             break;
-        case KeyRelease:
-        {
+        case KeyRelease: {
             // TODO:
 //            int keycode = (int)event->xkey.keycode;
 //            const sapp_keycode key = x11_translate_key(keycode);
@@ -1260,8 +1293,7 @@ void x11_process_event(XEvent* event) {
 //            }
         }
             break;
-        case ButtonPress:
-        {
+        case ButtonPress: {
             // TODO:
 //            const sapp_mousebutton btn = x11_translate_button(event);
 //            const uint32_t mods = x11_mod(event->xbutton.state);
@@ -1280,8 +1312,7 @@ void x11_process_event(XEvent* event) {
 //            }
         }
             break;
-        case ButtonRelease:
-        {
+        case ButtonRelease: {
             // TODO:
 //            const sapp_mousebutton btn = x11_translate_button(event);
 //            if (btn != SAPP_MOUSEBUTTON_INVALID) {
@@ -1348,25 +1379,24 @@ void x11_process_event(XEvent* event) {
                 return;
             }
             if (event->xclient.message_type == gAppLinux.x11.WM_PROTOCOLS) {
-                const Atom protocol = (Atom)event->xclient.data.l[0];
+                const Atom protocol = (Atom) event->xclient.data.l[0];
                 if (protocol == gAppLinux.x11.WM_DELETE_WINDOW) {
                     g_app.require_exit = true;
                 }
-            }
-            else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndEnter) {
+            } else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndEnter) {
                 const bool is_list = 0 != (event->xclient.data.l[1] & 1);
-                gAppLinux.x11.xdnd.source  = (Window)event->xclient.data.l[0];
+                gAppLinux.x11.xdnd.source = (Window) event->xclient.data.l[0];
                 gAppLinux.x11.xdnd.version = event->xclient.data.l[1] >> 24;
-                gAppLinux.x11.xdnd.format  = None;
+                gAppLinux.x11.xdnd.format = None;
                 if (gAppLinux.x11.xdnd.version > X11_XDND_VERSION) {
                     return;
                 }
                 uint32_t count = 0;
                 Atom* formats = 0;
                 if (is_list) {
-                    count = x11_get_window_property(gAppLinux.x11.xdnd.source, gAppLinux.x11.xdnd.XdndTypeList, XA_ATOM, (unsigned char**)&formats);
-                }
-                else {
+                    count = x11_get_window_property(gAppLinux.x11.xdnd.source, gAppLinux.x11.xdnd.XdndTypeList, XA_ATOM,
+                                                    (unsigned char**) &formats);
+                } else {
                     count = 3;
                     formats = (Atom*) event->xclient.data.l + 2;
                 }
@@ -1379,15 +1409,14 @@ void x11_process_event(XEvent* event) {
                 if (is_list && formats) {
                     XFree(formats);
                 }
-            }
-            else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndDrop) {
+            } else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndDrop) {
                 if (gAppLinux.x11.xdnd.version > X11_XDND_VERSION) {
                     return;
                 }
                 Time time = CurrentTime;
                 if (gAppLinux.x11.xdnd.format) {
                     if (gAppLinux.x11.xdnd.version >= 1) {
-                        time = (Time)event->xclient.data.l[2];
+                        time = (Time) event->xclient.data.l[2];
                     }
                     XConvertSelection(gAppLinux.x11.display,
                                       gAppLinux.x11.xdnd.XdndSelection,
@@ -1395,22 +1424,20 @@ void x11_process_event(XEvent* event) {
                                       gAppLinux.x11.xdnd.XdndSelection,
                                       gAppLinux.x11.window,
                                       time);
-                }
-                else if (gAppLinux.x11.xdnd.version >= 2) {
+                } else if (gAppLinux.x11.xdnd.version >= 2) {
                     XEvent reply;
                     memset(&reply, 0, sizeof(reply));
                     reply.type = ClientMessage;
                     reply.xclient.window = gAppLinux.x11.window;
                     reply.xclient.message_type = gAppLinux.x11.xdnd.XdndFinished;
                     reply.xclient.format = 32;
-                    reply.xclient.data.l[0] = (long)gAppLinux.x11.window;
+                    reply.xclient.data.l[0] = (long) gAppLinux.x11.window;
                     reply.xclient.data.l[1] = 0;    // drag was rejected
                     reply.xclient.data.l[2] = None;
                     XSendEvent(gAppLinux.x11.display, gAppLinux.x11.xdnd.source, False, NoEventMask, &reply);
                     XFlush(gAppLinux.x11.display);
                 }
-            }
-            else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndPosition) {
+            } else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndPosition) {
                 /* drag operation has moved over the window
                    FIXME: we could track the mouse position here, but
                    this isn't implemented on other platforms either so far
@@ -1424,12 +1451,12 @@ void x11_process_event(XEvent* event) {
                 reply.xclient.window = gAppLinux.x11.xdnd.source;
                 reply.xclient.message_type = gAppLinux.x11.xdnd.XdndStatus;
                 reply.xclient.format = 32;
-                reply.xclient.data.l[0] = (long)gAppLinux.x11.window;
+                reply.xclient.data.l[0] = (long) gAppLinux.x11.window;
                 if (gAppLinux.x11.xdnd.format) {
                     /* reply that we are ready to copy the dragged data */
                     reply.xclient.data.l[1] = 1;    // accept with no rectangle
                     if (gAppLinux.x11.xdnd.version >= 2) {
-                        reply.xclient.data.l[4] = (long)gAppLinux.x11.xdnd.XdndActionCopy;
+                        reply.xclient.data.l[4] = (long) gAppLinux.x11.xdnd.XdndActionCopy;
                     }
                 }
                 XSendEvent(gAppLinux.x11.display, gAppLinux.x11.xdnd.source, False, NoEventMask, &reply);
@@ -1440,9 +1467,9 @@ void x11_process_event(XEvent* event) {
             if (event->xselection.property == gAppLinux.x11.xdnd.XdndSelection) {
                 char* data = 0;
                 uint32_t result = x11_get_window_property(event->xselection.requestor,
-                                                                event->xselection.property,
-                                                                event->xselection.target,
-                                                                (unsigned char**) &data);
+                                                          event->xselection.property,
+                                                          event->xselection.target,
+                                                          (unsigned char**) &data);
                 // TODO:
 //                if (_sapp.drop.enabled && result) {
 //                    if (x11_parse_dropped_files_list(data)) {
@@ -1459,9 +1486,9 @@ void x11_process_event(XEvent* event) {
                     reply.xclient.window = gAppLinux.x11.window;
                     reply.xclient.message_type = gAppLinux.x11.xdnd.XdndFinished;
                     reply.xclient.format = 32;
-                    reply.xclient.data.l[0] = (long)gAppLinux.x11.window;
+                    reply.xclient.data.l[0] = (long) gAppLinux.x11.window;
                     reply.xclient.data.l[1] = result;
-                    reply.xclient.data.l[2] = (long)gAppLinux.x11.xdnd.XdndActionCopy;
+                    reply.xclient.data.l[2] = (long) gAppLinux.x11.xdnd.XdndActionCopy;
                     XSendEvent(gAppLinux.x11.display, gAppLinux.x11.xdnd.source, False, NoEventMask, &reply);
                     XFlush(gAppLinux.x11.display);
                 }
