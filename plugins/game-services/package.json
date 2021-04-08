@@ -9,7 +9,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "npm-cmake": "^0.0.9",
+    "npm-cmake": "^0.0.10",
     "@ekx/ekx": "0.1.2"
   }
 }
