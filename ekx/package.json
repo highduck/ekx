@@ -19,7 +19,7 @@
     "@ekx/sokol": "0.0.6",
     "@ekx/stb": "0.0.3",
     "@ekx/tracy": "0.0.8",
-    "npm-cmake": "0.0.5"
+    "npm-cmake": "^0.0.6"
   },
   "devDependencies": {
     "@ekx/sokol-shdc": "0.0.2"
