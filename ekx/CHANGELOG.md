@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3
+
+### Patch Changes
+
+- e79c61c: minor update
+- d90b3e3: fix audio pause/resume on switching app to background
+- b985463: change GL to Metal for macOS and iOS
+- dee7ff1: update ios/mac app, sg migration to homemade Array
+
 ## 0.1.2
 
 ### Patch Changes

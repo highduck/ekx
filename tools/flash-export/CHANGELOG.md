@@ -1,13 +1,25 @@
 ## 0.0.1
 
+## 0.0.2
+
+### Patch Changes
+
+- dee7ff1: use homemade Array
+- Updated dependencies [e79c61c]
+- Updated dependencies [d90b3e3]
+- Updated dependencies [b985463]
+- Updated dependencies [dee7ff1]
+
+  - @ekx/ekx@0.1.3
+
 - Add 8-bit palette bitmap (CLUT) support
 - Add JPEG bitmap support
 - Remove JSON dump
 - Scene symbols
 - Add Brightness support
 - Redo animation export, support graphic symbol and loop mode
-- Edge-Selection command parsing 
-- Fix Hexadecimal "twips" numbers parsing 
+- Edge-Selection command parsing
+- Fix Hexadecimal "twips" numbers parsing
 - Add Rounded Rectangle negative radius support
 - Add Rounded Rectangle shape support
 - Add Oval shape support
