@@ -52,6 +52,10 @@ inline std::vector<uint8_t> read_file_bytes(const char* path) {
 #endif
 
 #if !defined(_WIN32) && !defined(_WIN64) && !defined(__EMSCRIPTEN__)
+#define EK_HAS_MAP_FILE 1
+#endif
+
+#if EK_HAS_MAP_FILE
 
 #include <cerrno>
 #include <sys/stat.h>
@@ -110,11 +114,12 @@ int MapFile(const char* inPathName, void** outDataPtr, size_t* outDataLength) {
     return outError;
 }
 
-#endif // __EMSCRIPTEN__
+#endif // EK_HAS_MAP_FILE
+
 namespace ek {
 
 FileView::FileView(const char* path) {
-#if !defined(_WINDOWS) && !defined(__EMSCRIPTEN__)
+#if EK_HAS_MAP_FILE
     if (MapFile(path, reinterpret_cast<void**>(&data_), &size_) == 0) {
         mapped_ = true;
     }
@@ -123,7 +128,7 @@ FileView::FileView(const char* path) {
 
 FileView::~FileView() {
     if (mapped_) {
-#if !defined(_WINDOWS) && !defined(__EMSCRIPTEN__)
+#if EK_HAS_MAP_FILE
         munmap(data_, size_);
 #endif
     }

@@ -7,6 +7,10 @@ namespace ek::math {
 constexpr double pi = 3.141592653589793238462643383279502884;
 constexpr double pi2 = pi * 2.0;
 
+constexpr float fPI = 3.141592653589793238462643383279502884f;
+constexpr float fPI2 = fPI * 2.0f;
+constexpr float fPI_2 = fPI / 2.0f;
+
 template<typename T>
 T epsilon();
 

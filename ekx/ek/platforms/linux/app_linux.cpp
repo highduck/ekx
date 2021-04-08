@@ -27,7 +27,7 @@ void start_application() {
     dispatch_device_ready();
 
     linux_app_loop();
-    linux_app_shutdown()
+    linux_app_shutdown();
 }
 
 }

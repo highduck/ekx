@@ -1,8 +1,6 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-// should be first include for M_PI
-#include <cmath>
+#include <ek/math/common.hpp>
 
 namespace ek {
 
@@ -55,10 +53,10 @@ struct Elastic {
             a = 1.0f;
             s = period / 4.0f;
         } else {
-            s = period / (2.0f * M_PI) * asinf(1.0f / a);
+            s = period / (math::fPI2 * asinf(1.0f / a));
         }
         const float tm1 = t - 1.0f;
-        return -(a * powf(2.0f, 10.0f * tm1) * sinf((tm1 - s) * (2.0f * M_PI) / period));
+        return -(a * powf(2.0f, 10.0f * tm1) * sinf((tm1 - s) * math::fPI2 / period));
     }
 };
 
@@ -90,7 +88,7 @@ struct Polynomial {
 struct Sine {
     [[nodiscard]]
     float calculate(float t) const {
-        return t < 1.0f ? (1.0f - ::cos(t * (float)M_PI * 0.5f)) : 1.0f;
+        return t < 1.0f ? (1.0f - ::cos(t * math::fPI_2)) : 1.0f;
     }
 };
 
