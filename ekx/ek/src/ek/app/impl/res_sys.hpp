@@ -51,7 +51,7 @@ inline std::vector<uint8_t> read_file_bytes(const char* path) {
 
 #endif
 
-#if !defined(_WINDOWS) && !defined(__EMSCRIPTEN__)
+#if !defined(_WIN32) && !defined(_WIN64) && !defined(__EMSCRIPTEN__)
 
 #include <cerrno>
 #include <sys/stat.h>

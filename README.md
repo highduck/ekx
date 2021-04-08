@@ -31,3 +31,11 @@ ___
   - [GooglePlay](https://play.google.com/store/apps/details?id=com.eliasku.dice_twice_2048_domino_puzzle)
   - [Web](https://dice-twice-2048.web.app/)
 
+## Status
+
+- Android: app export
+- iOS: app export
+- Web: app export
+- macOS: dev
+- Linux: dev (WIP)
+- Windows: dev (WIP)
