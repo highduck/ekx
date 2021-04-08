@@ -1,6 +1,6 @@
 {
   "name": "@ekx/plugin-billing",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "postinstall": "npm-cmake || exit 0"
   },
@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "npm-cmake": "^0.0.10",
-    "@ekx/ekx": "0.1.2"
+    "@ekx/ekx": "0.1.3"
   }
 }
