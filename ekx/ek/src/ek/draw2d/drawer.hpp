@@ -232,6 +232,8 @@ public:
     sg_pipeline selectedPipeline{};
     sg_bindings bind{};
     Hash<sg_pipeline> pipelines{};
+
+    void createDefaultResources();
 };
 
 extern Context& state;

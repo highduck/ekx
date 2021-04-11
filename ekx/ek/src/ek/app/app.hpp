@@ -15,9 +15,13 @@ namespace ek {
 namespace app {
 
 #if EK_MACOS || EK_IOS
+
 void* getMetalDevice();
+
 const void* getMetalRenderPass();
+
 const void* getMetalDrawable();
+
 #endif
 
 struct window_config final {
@@ -28,6 +32,7 @@ struct window_config final {
     int sampleCount = 1;
     int swapInterval = 1;
     bool allowHighDpi = true;
+    uint32_t backgroundColor = 0xFF000000;
 };
 
 struct arguments final {

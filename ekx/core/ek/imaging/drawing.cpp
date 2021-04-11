@@ -121,7 +121,7 @@ void premultiply_image(image_t& image) {
         const auto alpha = it[3];
         if (alpha == 0) {
             *reinterpret_cast<uint32_t*>(it) = 0u;
-        } else if (alpha < 0xFFu) {
+        } else if ((alpha ^ 0xFFu) != 0) {
             const auto ika = alpha * mult;
             it[0] = static_cast<uint8_t>((ika * it[0]) >> shift);
             it[1] = static_cast<uint8_t>((ika * it[1]) >> shift);

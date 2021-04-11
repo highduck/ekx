@@ -23,6 +23,7 @@ void handleQuitRequest() {
 }
 
 - (void)setupMenuBar {
+    EK_TRACE << "app macOS: setup menu bar";
     id menubar = [NSMenu new];
     id menu_item = [NSMenuItem new];
     [menubar addItem:menu_item];
@@ -40,6 +41,7 @@ void handleQuitRequest() {
 }
 
 - (void)createView {
+    EK_TRACE << "app macOS: create view";
     _view = [MetalView new];
     _view.device = MTLCreateSystemDefaultDevice();
 
@@ -56,6 +58,7 @@ void handleQuitRequest() {
 }
 
 - (void)createWindow {
+    EK_TRACE << "app macOS: create window";
     auto& config = g_app.window_cfg;
     NSRect frame = NSMakeRect(100.0, 100.0, config.size.x, config.size.y);
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled |
@@ -117,7 +120,7 @@ void handleQuitRequest() {
         g_app.window_size.y = static_cast<float>(size.height);
         g_app.size_changed = true;
         [self handleResize];
-        EK_TRACE("[macOS] windowDidResize APPLIED");
+        EK_TRACE << "app macOS: windowDidResize APPLIED";
     }
 }
 
@@ -133,7 +136,7 @@ void handleQuitRequest() {
 }
 
 - (void)applicationWillFinishLaunching:(__unused NSNotification*)notification {
-    EK_TRACE("[macOS] applicationWillFinishLaunching");
+    EK_TRACE << "app macOS: applicationWillFinishLaunching begin";
 
     gAppDelegate = self;
 
@@ -147,11 +150,12 @@ void handleQuitRequest() {
     [self setupMenuBar];
     [self createView];
     [self createWindow];
+    EK_TRACE << "app macOS: applicationWillFinishLaunching end";
 }
 
 - (void)applicationDidFinishLaunching:(__unused NSNotification*)notification {
+    EK_TRACE << "app macOS: applicationDidFinishLaunching begin";
     [_application activateIgnoringOtherApps:YES];
-    //[[[self view] openGLContext] makeCurrentContext];
     dispatch_device_ready();
 }
 
@@ -201,7 +205,12 @@ void handleQuitRequest() {
 - (void)drawRect:(NSRect)rect {
     (void) rect;
 
-    dispatch_draw_frame();
+    if(self.currentDrawable != nil && self.currentRenderPassDescriptor != nil) {
+        // we need to keep ref for default render pass on current frame
+        // it should be checked in RELEASE build to ensure all references are valid
+        self.defaultPass = self.currentRenderPassDescriptor;
+        dispatch_draw_frame();
+    }
 
     if (g_app.cursor_dirty) {
         g_app.cursor_dirty = false;

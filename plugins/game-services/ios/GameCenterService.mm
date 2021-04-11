@@ -1,5 +1,6 @@
 #include <GameServices.hpp>
 #include <app_apple.h>
+#include <ek/util/logger.hpp>
 
 #import <GameKit/GameKit.h>
 #import <Firebase/Firebase.h>
@@ -53,6 +54,7 @@ void GC_authenticateLocalPlayer() {
 
 namespace ek {
 void game_services_init() {
+    EK_TRACE << "game-services initialize";
     GC_authenticateLocalPlayer();
 }
 

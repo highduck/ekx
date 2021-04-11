@@ -2,6 +2,7 @@
 #include "assert.hpp"
 #include "util/StaticStorage.hpp"
 #include <cstdlib>
+#include "util/logger.hpp"
 
 #ifdef EK_ALLOCATION_TRACKER
 
@@ -14,8 +15,8 @@
 #include <Tracy.hpp>
 
 #ifdef TRACY_ENABLE
-#define EK_TRACE_ALLOC(ptr,sz,name) TracyAllocNS(ptr,sz,3,name)
-#define EK_TRACE_FREE(ptr,name)     TracyFreeNS(ptr,3,name)
+#define EK_TRACE_ALLOC(ptr, sz, name) TracyAllocNS(ptr,sz,3,name)
+#define EK_TRACE_FREE(ptr, name)     TracyFreeNS(ptr,3,name)
 #else
 #define EK_TRACE_ALLOC(ptr, sz, name) ((void)0)
 #define EK_TRACE_FREE(ptr, name)     ((void)0)
@@ -76,8 +77,8 @@ inline uint32_t sizeWithPadding(uint32_t size, uint32_t align) {
     return size + align;
 }
 
-void fillMemoryDebug(void* ptr, size_t sz) {
-#ifndef NDEBUG
+inline void fillMemoryDebug(void* ptr, size_t sz) {
+#ifdef EK_INIT_CC_MEMORY
     auto* data = static_cast<uint8_t*>(ptr);
     for (size_t i = 0; i < sz; ++i) {
         data[i] = 0xCC;
@@ -377,10 +378,12 @@ ProxyAllocator& stdAllocator = ssGlobals.ptr()->std;
 AlignedAllocator& alignedAllocator = ssGlobals.ptr()->aligned;
 
 void initialize() {
+    EK_TRACE << "memory initialize";
     ssGlobals.initialize();
 }
 
 void shutdown() {
+    EK_TRACE << "memory shutdown";
     ssGlobals.shutdown();
 }
 

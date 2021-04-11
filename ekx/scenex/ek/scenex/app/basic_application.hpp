@@ -10,6 +10,7 @@
 
 #include <ek/util/locator.hpp>
 #include <ek/app/app.hpp>
+#include <ek/util/logger.hpp>
 #include <ek/util/signals.hpp>
 #include <utility>
 #include <ek/timers.hpp>
@@ -82,6 +83,8 @@ protected:
 
 inline float2 basic_application::AppResolution{};
 
+void initializeSubSystems();
+
 template<typename T>
 inline void run_app(app::window_config cfg) {
     using app::g_app;
@@ -94,30 +97,19 @@ inline void run_app(app::window_config cfg) {
     g_app.window_cfg = std::move(cfg);
 
 #ifdef EK_DEV_TOOLS
+    Editor::inspectorEnabled = true;
     Editor::settings.load();
     if (length(Editor::settings.windowSize) > 0.0f) {
         g_app.window_cfg.size = Editor::settings.windowSize;
-        g_app.window_cfg.title = "Ekitor: " + g_app.window_cfg.title;
     }
 #endif
 
     g_app.on_device_ready << [] {
-        auto& app = service_locator_instance<basic_application>::init<T>();
-#ifdef EK_DEV_TOOLS
-        Editor::initialize();
-#endif
-        app.initialize();
-        app.preload();
-
-        g_app.on_frame_draw += [] {
-            resolve<basic_application>().on_draw_frame();
-        };
-
-        g_app.on_event += [](const auto& event) {
-            resolve<basic_application>().on_event(event);
-        };
+        service_locator_instance<basic_application>::init<T>();
+        g_app.on_frame_draw += initializeSubSystems;
     };
 
+    EK_TRACE << "app: call start_application";
     start_application();
 }
 

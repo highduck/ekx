@@ -128,6 +128,7 @@ void set_view_mouse_cursor(NSView* view) {
 }
 
 void macos_init_common() {
+    EK_TRACE << "app macOS: init commons";
     init_scan_table();
     if (g_app.args.argc > 0) {
         EK_INFO("argv[0] = %s, [argc: %d]", g_app.args.argv[0], g_app.args.argc);

@@ -69,10 +69,6 @@ void drawPreloader(float progress);
 
 basic_application::basic_application() {
     tracy::SetThreadName("Main");
-
-    graphics::initialize();
-    audio::initialize();
-
     asset_manager_ = new asset_manager_t{};
 }
 
@@ -90,30 +86,16 @@ basic_application::~basic_application() {
     service_locator_instance<basic_application>::shutdown();
 }
 
-void basic_application::initialize() {
-    ZoneScopedN("initialize");
-    draw2d::initialize();
-
-    // init default empty sprite data
-    {
-        auto* spr = new Sprite();
-        spr->texture.setID("empty");
-        Res<Sprite>{"empty"}.reset(spr);
-    }
-
+void registerSceneXComponents() {
     //// basic scene
     using ecs::the_world;
-
-    the_world.initialize();
     the_world.registerComponent<Node>(512);
     the_world.registerComponent<NodeName>(512);
-
-    the_world.registerComponent<Camera2D>();
     the_world.registerComponent<Transform2D>(512);
     the_world.registerComponent<WorldTransform2D>(512);
     the_world.registerComponent<Display2D>(256);
+    the_world.registerComponent<Camera2D>();
     the_world.registerComponent<Bounds2D>();
-
     the_world.registerComponent<Transform3D>();
     the_world.registerComponent<Camera3D>();
     the_world.registerComponent<Light3D>();
@@ -139,7 +121,20 @@ void basic_application::initialize() {
     the_world.registerComponent<ParticleEmitter2D>(4);
     the_world.registerComponent<ParticleLayer2D>();
     the_world.registerComponent<UglyFilter2D>();
+}
 
+void basic_application::initialize() {
+    ZoneScopedN("initialize");
+
+    EK_TRACE << "base application: initialize";
+    // init default empty sprite data
+    {
+        auto* spr = new Sprite();
+        spr->texture.setID("empty");
+        Res<Sprite>{"empty"}.reset(spr);
+    }
+
+    EK_TRACE << "base application: initialize scene root";
     root = createNode2D("root");
     root.assign<Viewport>(AppResolution.x, AppResolution.y);
     root.assign<LayoutRect>();
@@ -148,10 +143,14 @@ void basic_application::initialize() {
     Viewport::updateAll();
     scale_factor = root.get<Viewport>().output.scale;
 
+    EK_TRACE << "base application: initialize InteractionSystem";
     auto& im = service_locator_instance<InteractionSystem>::init(root);
+    EK_TRACE << "base application: initialize input_controller";
     service_locator_instance<input_controller>::init(im);
+    EK_TRACE << "base application: initialize AudioManager";
     service_locator_instance<AudioManager>::init();
 
+    EK_TRACE << "base application: initialize Scene";
     auto camera = createNode2D("camera");
     auto& defaultCamera = camera.assign<Camera2D>(root);
     defaultCamera.order = 1;
@@ -163,7 +162,7 @@ void basic_application::initialize() {
 }
 
 void basic_application::preload() {
-    EK_DEBUG("Loading scale: %0.3f", scale_factor);
+    EK_TRACE("base application: preloading, content scale: %0.3f", scale_factor);
     asset_manager_->set_scale_factor(scale_factor);
 
     hook_on_preload();
@@ -175,8 +174,6 @@ void basic_application::preload() {
 }
 
 void basic_application::on_draw_frame() {
-    tracy::SetThreadName("Render");
-    FrameMark;
     ZoneScoped;
     timer_t timer{};
     scale_factor = root.get<Viewport>().output.scale;
@@ -207,10 +204,13 @@ void basic_application::on_draw_frame() {
     }
 
     static sg_pass_action pass_action{};
-    pass_action.colors[0] = {
-            .action = started_ ? SG_ACTION_DONTCARE : SG_ACTION_CLEAR,
-            .value = {0.0f, 0.0f, 0.0f, 1.0f}
-    };
+    pass_action.colors[0].action = started_ ? SG_ACTION_DONTCARE : SG_ACTION_CLEAR;
+    const float4 fillColor{argb32_t{g_app.window_cfg.backgroundColor}};
+    pass_action.colors[0].value.r = fillColor.x;
+    pass_action.colors[0].value.g = fillColor.y;
+    pass_action.colors[0].value.b = fillColor.z;
+    pass_action.colors[0].value.a = fillColor.w;
+
     if (r3d) {
         pass_action.depth.action = SG_ACTION_CLEAR;
         pass_action.depth.value = 1.0f;
@@ -234,7 +234,7 @@ void basic_application::on_draw_frame() {
         draw2d::begin({0, 0, (float) fbWidth, (float) fbHeight});
 
         if (!started_ && rootAssetObject) {
-            drawPreloader(rootAssetObject->getProgress());
+            drawPreloader(0.1f + 0.9f * rootAssetObject->getProgress());
         }
 
         hook_on_render_frame();
@@ -301,8 +301,7 @@ void basic_application::on_event(const event_t& event) {
     timer_t timer{};
     if (event.type == event_type::app_resize) {
         updateRootViewport(root.get<Viewport>());
-    }
-    else if (event.type == event_type::app_close) {
+    } else if (event.type == event_type::app_close) {
         sg_shutdown();
     }
 
@@ -312,16 +311,101 @@ void basic_application::on_event(const event_t& event) {
 
 void drawPreloader(float progress) {
     draw2d::state.setEmptyTexture();
-    auto pad = 40;
-    auto w = g_app.drawable_size.x - pad * 2;
-    auto h = 16;
-    auto y = (g_app.drawable_size.y - h) / 2;
+    auto pad = 40.0f;
+    auto w = g_app.drawable_size.x - pad * 2.0f;
+    auto h = 16.0f;
+    auto y = (g_app.drawable_size.y - h) / 2.0f;
 
-    auto color = 0x00000000_argb;
-    color.af(1.0f - progress);
-    draw2d::quad(0, 0, g_app.drawable_size.x, g_app.drawable_size.y, color);
-    draw2d::quad(pad, y, w, h, 0x77000000_argb);
-    draw2d::quad(pad + 4, y + 4, (w - 8) * progress, h - 8, 0x77FFFFFF_argb);
+    draw2d::quad(pad, y, w, h, 0xFFFFFFFF_argb);
+    draw2d::quad(pad + 2, y + 2, w - 4, h - 4, 0xFF000000_argb);
+    draw2d::quad(pad + 4, y + 4, (w - 8) * progress, h - 8, 0xFFFFFFFF_argb);
 }
 
+void baseApp_drawFrame() {
+    resolve<basic_application>().on_draw_frame();
+}
+
+void baseApp_onEvent(const event_t& event) {
+    resolve<basic_application>().on_event(event);
+}
+
+int _initializeSubSystemsState = 0;
+
+void initializeSubSystems() {
+    const float steps = 8.0f;
+    {
+        EK_PROFILE_SCOPE(INIT_JOB);
+        switch (_initializeSubSystemsState) {
+            case 0:
+                ++_initializeSubSystemsState;
+                graphics::initialize();
+                break;
+            case 1:
+                ++_initializeSubSystemsState;
+                draw2d::initialize();
+                break;
+            case 2:
+                ++_initializeSubSystemsState;
+                draw2d::state.createDefaultResources();
+                break;
+            case 3:
+                ++_initializeSubSystemsState;
+                audio::initialize();
+                break;
+            case 4:
+                ++_initializeSubSystemsState;
+#ifdef EK_DEV_TOOLS
+                if (Editor::inspectorEnabled) {
+                    Editor::initialize();
+                }
+#endif
+                ecs::the_world.initialize();
+                registerSceneXComponents();
+                break;
+            case 5:
+                ++_initializeSubSystemsState;
+                resolve<basic_application>().initialize();
+                break;
+            case 6:
+                ++_initializeSubSystemsState;
+                resolve<basic_application>().preload();
+                break;
+            case 7:
+                ++_initializeSubSystemsState;
+                audio::start();
+            default:
+                g_app.on_frame_draw -= initializeSubSystems;
+                g_app.on_frame_draw += baseApp_drawFrame;
+                g_app.on_event += baseApp_onEvent;
+                break;
+        }
+    }
+
+    if (_initializeSubSystemsState > 0) {
+        auto fbWidth = static_cast<int>(g_app.drawable_size.x);
+        auto fbHeight = static_cast<int>(g_app.drawable_size.y);
+        if (fbWidth > 0 && fbHeight > 0) {
+            //EK_PROFILE_SCOPE("init frame");
+            static sg_pass_action pass_action{};
+            pass_action.colors[0].action = SG_ACTION_CLEAR;
+            const float4 fillColor{argb32_t{g_app.window_cfg.backgroundColor}};
+            pass_action.colors[0].value.r = fillColor.x;
+            pass_action.colors[0].value.g = fillColor.y;
+            pass_action.colors[0].value.b = fillColor.z;
+            pass_action.colors[0].value.a = fillColor.w;
+            sg_begin_default_pass(&pass_action, fbWidth, fbHeight);
+
+            if (_initializeSubSystemsState > 2) {
+                draw2d::beginNewFrame();
+                draw2d::begin({0, 0, (float) fbWidth, (float) fbHeight});
+                drawPreloader(0.1f * (float) _initializeSubSystemsState / steps);
+                draw2d::end();
+                draw2d::endFrame();
+            }
+
+            sg_end_pass();
+            sg_commit();
+        }
+    }
+}
 }

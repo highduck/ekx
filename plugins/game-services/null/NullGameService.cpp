@@ -1,15 +1,26 @@
 #include <GameServices.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek {
 
-void game_services_init() {}
+void game_services_init() {
+    EK_TRACE << "game-services initialize";
+}
 
-void leader_board_show(const char*) {}
+void leader_board_show(const char* id) {
+    EK_TRACE << "game-services: show leaderboard: " << id;
+}
 
-void leader_board_submit(const char*, int) {}
+void leader_board_submit(const char* id, int score) {
+    EK_TRACE << "game-services: submit to leaderboard: " << id << " " << score;
+}
 
-void achievement_update(const char*, int) {}
+void achievement_update(const char* id, int score) {
+    EK_TRACE << "game-services: achievement update: " << id << " " << score;
+}
 
-void achievement_show() {}
+void achievement_show() {
+    EK_TRACE << "game-services: show achievements";
+}
 
 }

@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 #include <utility>
+#include "util/logger.hpp"
 
 namespace ek {
 
@@ -138,6 +139,7 @@ TimeLayer TimeLayer::UI{3};
 namespace clock {
 
 void initialize() {
+    EK_TRACE << "clock initialize";
     stm_setup();
     TimerJobManager::instance = new TimerJobManager();
 }
