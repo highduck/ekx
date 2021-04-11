@@ -9,6 +9,7 @@ struct ma_sound;
 namespace ek::audio {
 
 void initialize();
+void start();
 void shutdown();
 
 void muteDeviceBegin();

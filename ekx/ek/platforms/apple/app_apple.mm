@@ -59,14 +59,14 @@ void* getMetalDevice() {
 
 const void* getMetalRenderPass() {
     if(gAppDelegate.view != nil) {
-        return (__bridge const void*) [gAppDelegate view].currentRenderPassDescriptor;
+        return (__bridge const void*) (gAppDelegate.view.defaultPass);
     }
     return nullptr;
 }
 
 const void* getMetalDrawable() {
     if(gAppDelegate.view != nil) {
-        return (__bridge const void*) [gAppDelegate view].currentDrawable;
+        return (__bridge const void*) (gAppDelegate.view.currentDrawable);
     }
     return nullptr;
 }

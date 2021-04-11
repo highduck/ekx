@@ -1,10 +1,12 @@
 #pragma once
 
 #include <ek/android.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek::analytics {
 
 void init() {
+    EK_TRACE << "analytics initialize";
     auto* env = android::get_jni_env();
 
     auto class_ref = env->FindClass("ek/Analytics");
@@ -15,6 +17,8 @@ void init() {
 }
 
 void screen(const char* name) {
+    EK_TRACE("[analytics] screen: %s", name);
+
     auto* env = android::get_jni_env();
     auto class_ref = env->FindClass("ek/Analytics");
     auto name_ref = env->NewStringUTF(name);
@@ -26,6 +30,8 @@ void screen(const char* name) {
 }
 
 void event(const char* action, const char* target) {
+    EK_TRACE("[analytics] action: %s, target: %s", action, target);
+
     auto* env = android::get_jni_env();
     auto class_ref = env->FindClass("ek/Analytics");
     auto action_ref = env->NewStringUTF(action);

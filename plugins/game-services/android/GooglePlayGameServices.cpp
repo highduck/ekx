@@ -1,10 +1,13 @@
 #include <ek/android.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ek {
 
 #define CLASS_PATH "ek/gpgs/GameServices"
 
 void game_services_init() {
+    EK_TRACE << "game-services initialize";
+
     auto* env = android::get_jni_env();
     auto class_ref = env->FindClass(CLASS_PATH);
 

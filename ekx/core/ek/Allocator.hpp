@@ -6,11 +6,14 @@
 #include "config.hpp"
 
 #define EK_SIZEOF_U32(Type) static_cast<uint32_t>(sizeof(Type))
+#define EK_ALIGNOF_U32(Type) static_cast<uint32_t>(alignof(Type))
 
 namespace ek {
 
 #ifdef EK_ALLOCATION_TRACKER
+
 class AllocationTracker;
+
 #endif
 
 class Allocator {
@@ -32,6 +35,11 @@ public:
     void destroy(T* ptr);
 
     void* reallocate(void* ptr, uint32_t oldSizeToCopy, uint32_t newSize, uint32_t align);
+
+    template<typename T>
+    [[nodiscard]] inline T* allocBufferForArray(uint32_t count) {
+        return static_cast<T*>(alloc(EK_SIZEOF_U32(T) * count, EK_ALIGNOF_U32(T)));
+    }
 };
 
 class SystemAllocator;

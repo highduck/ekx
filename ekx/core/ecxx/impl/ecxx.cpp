@@ -1,6 +1,5 @@
 #include "world.hpp"
-
-#include <Tracy.hpp>
+#include <ek/util/logger.hpp>
 
 namespace ecs {
 
@@ -87,6 +86,7 @@ bool World::check(EntityPassport passport) const {
 
 void World::initialize() {
     using namespace ek::memory;
+    EK_TRACE << "ecs::world initialize";
     allocator = systemAllocator.create<ek::AlignedAllocator>(systemAllocator, "ecxx");
     resetEntityPool();
     clear(components, COMPONENTS_MAX_COUNT * sizeof(void*));
@@ -106,6 +106,7 @@ void World::reset() {
 }
 
 void World::shutdown() {
+    EK_TRACE << "ecs::world shutdown";
     using namespace ek::memory;
 
     // skip clearing entity pool, because we don't need it anymore

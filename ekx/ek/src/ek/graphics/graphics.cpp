@@ -1,9 +1,9 @@
 #include "graphics.hpp"
-#include <ek/util/logger.hpp>
-#include <ek/math/box.hpp>
 #include <ek/Allocator.hpp>
+#include <ek/util/logger.hpp>
 #include <ek/assert.hpp>
 #include <ek/imaging/image.hpp>
+#include <ek/math/box.hpp>
 #include <ek/app/app.hpp>
 
 static ek::ProxyAllocator* gHeapSokolGfx = nullptr;
@@ -132,6 +132,7 @@ static std::string BackendToString[] = {
 };
 
 void initialize(sg_context_desc* customContext) {
+    EK_TRACE << "graphics initialize";
     gHeapSokolGfx = memory::stdAllocator.create<ProxyAllocator>("sokol_gfx");
     sg_desc desc{};
     desc.buffer_pool_size = 256;
@@ -154,6 +155,7 @@ void initialize(sg_context_desc* customContext) {
 }
 
 void shutdown() {
+    EK_TRACE << "graphics shutdown";
     sg_shutdown();
     memory::stdAllocator.destroy(gHeapSokolGfx);
 }

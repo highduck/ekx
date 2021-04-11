@@ -109,6 +109,7 @@ void EditorSettings::save() const {
 }
 
 void EditorSettings::load() {
+    EK_TRACE << "loading editor settings";
     pugi::xml_document doc{};
     if (!doc.load_file(editorSettingsPath)) {
         EK_ERROR << "Can't load editor settings";

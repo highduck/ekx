@@ -7,6 +7,7 @@
 #include <ek/audio/audio.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/StaticStorage.hpp>
+#include <Tracy.hpp>
 
 namespace ek::app {
 
@@ -16,10 +17,13 @@ static StaticStorage<app_state> ssAppState;
 app_state& g_app = *ssAppState.ptr();
 
 void dispatch_init() {
+    EK_TRACE << "app on init";
+    EK_TRACE << "analytics initialize";
     analytics::init(); // analytics before crash reporter on ios
 }
 
 void dispatch_device_ready() {
+    EK_TRACE << "app device ready";
     g_app.on_device_ready();
 }
 
@@ -73,6 +77,10 @@ void dispatch_event(const event_t& event) {
 }
 
 void dispatch_draw_frame() {
+    tracy::SetThreadName("Render");
+    FrameMark;
+    logger::nextFrame();
+
     event_queue_mtx.lock();
     // do not call dispatch_draw_frame recursively
     EK_ASSERT(!g_app.event_queue_locked);
@@ -124,10 +132,12 @@ void app_state::updateMouseCursor(mouse_cursor cursor_) {
 }
 
 void initialize() {
+    EK_TRACE << "app initialize";
     ssAppState.initialize();
 }
 
 void shutdown() {
+    EK_TRACE << "app shutdown";
     ssAppState.shutdown();
 }
 

@@ -132,7 +132,12 @@ void handle_touches(event_type type, UIView* view, NSSet* touches, UIEvent* even
     (void) rect;
 
     [self handleResize];
-    dispatch_draw_frame();
+    if(self.currentDrawable != nil && self.currentRenderPassDescriptor != nil) {
+        // we need to keep ref for default render pass on current frame
+        // it should be checked in RELEASE build to ensure all references are valid
+        self.defaultPass = self.currentRenderPassDescriptor;
+        dispatch_draw_frame();
+    }
 }
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {

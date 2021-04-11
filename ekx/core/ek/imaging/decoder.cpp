@@ -25,8 +25,9 @@
 
 namespace ek {
 
-image_t* decode_image_data(const void* data, size_t size) {
+image_t* decode_image_data(const void* data, size_t size, bool premultiplyAlpha) {
 
+    EK_TRACE << "decode image: begin";
     EK_ASSERT(size > 0);
 
     image_t* result = nullptr;
@@ -37,15 +38,20 @@ image_t* decode_image_data(const void* data, size_t size) {
     auto* image_data = stbi_load_from_memory(static_cast<const uint8_t*>(data),
                                              static_cast<int>(size),
                                              &w, &h, &channels, 4);
+
+
     if (image_data != nullptr) {
         result = new image_t(static_cast<uint32_t>(w),
                              static_cast<uint32_t>(h),
                              image_data);
-        premultiply_image(*result);
+        if (premultiplyAlpha) {
+            EK_TRACE << "decode image: premultiply alpha";
+            premultiply_image(*result);
+        }
     } else {
         EK_ERROR("image decoding error: %s", stbi_failure_reason());
     }
-
+    EK_TRACE << "decode image: end";
     return result;
 }
 

@@ -230,44 +230,19 @@ public:
 
             input_memory_stream input{buffer.data(), buffer.size()};
             IO io{input};
-            texture_data_t data;
             io(data);
+
+            imagesLoaded = 0;
 
             if (data.texture_type == "cubemap") {
                 for (int idx = 0; idx < 6; ++idx) {
                     imagePathList[idx] = project_->base_path / data.images[idx];
                 }
-                counter = 6;
-                for (int idx = 0; idx < 6; ++idx) {
-                    get_resource_content_async(imagePathList[idx].c_str(),
-                                               [this, idx](auto buffer) {
-                                                   images[idx] = decode_image_data(buffer.data(), buffer.size());
-                                                   --counter;
-                                                   EK_DEBUG << "Cube map image loaded: #" << idx << "  counter: "
-                                                            << counter;
-                                                   if (counter == 0) {
-                                                       EK_DEBUG << "Cube map loaded, create and call back";
-                                                       Res<Texture>{path_}.reset(graphics::createTexture(images));
-                                                       state = AssetObjectState::Ready;
-                                                       for (auto* img : images) {
-                                                           delete img;
-                                                       }
-                                                   }
-                                               });
-                }
+                texturesCount = 6;
+                premultiplyAlpha = false;
             } else if (data.texture_type == "2d") {
                 imagePathList[0] = project_->base_path / data.images[0];
-                get_resource_content_async(imagePathList[0].c_str(), [this](auto buffer) {
-                    image_t* image = decode_image_data(buffer.data(), buffer.size());
-                    if (image) {
-                        Texture* tex = graphics::createTexture(*image);
-                        Res<Texture>{path_}.reset(tex);
-                        delete image;
-                    } else {
-                        error = 1;
-                    }
-                    state = AssetObjectState::Ready;
-                });
+                texturesCount = 1;
             } else {
                 EK_ERROR << "unknown Texture Type " << data.texture_type;
                 error = 1;
@@ -276,13 +251,59 @@ public:
         });
     }
 
+    void poll() override {
+        if (texturesStartLoading < texturesCount) {
+            const auto idx = texturesStartLoading++;
+            get_resource_content_async(
+                    imagePathList[idx].c_str(),
+                    [this](auto buffer) {
+                        images[imagesLoaded++] = decode_image_data(buffer.data(), buffer.size(), premultiplyAlpha);
+                        EK_DEBUG << "textures loading: #" << imagesLoaded << " of " << texturesCount;
+                    }
+            );
+        } else if (imagesLoaded == texturesCount) {
+            if (data.texture_type == "cubemap") {
+                EK_DEBUG << "Cube map images loaded, creating cube texture and cleaning up";
+                Res<Texture>{path_}.reset(graphics::createTexture(images));
+                state = AssetObjectState::Ready;
+                for (auto* img : images) {
+                    delete img;
+                }
+            } else if (data.texture_type == "2d") {
+                if (images[0]) {
+                    Texture* tex = graphics::createTexture(*images[0]);
+                    Res<Texture>{path_}.reset(tex);
+                    delete images[0];
+                } else {
+                    error = 1;
+                }
+            }
+            state = AssetObjectState::Ready;
+        }
+    }
+
+    [[nodiscard]]
+    float getProgress() const override {
+        if (state == AssetObjectState::Loading) {
+            return (float) imagesLoaded / (float) (texturesCount + 1);
+        }
+        return asset_object_t::getProgress();
+    }
+
     void do_unload() override {
         Res<Texture>{path_}.reset(nullptr);
     }
 
-    int counter = 0;
+    int texturesStartLoading = 0;
+    int imagesLoaded = 0;
+    int texturesCount = 0;
     path_t imagePathList[6];
     image_t* images[6];
+    texture_data_t data{};
+    // by default always premultiply alpha,
+    // currently for cube maps will be disabled
+    // TODO: export level option
+    bool premultiplyAlpha = true;
 };
 
 class StringsAsset : public builtin_asset_t {
@@ -482,13 +503,13 @@ public:
 };
 
 asset_object_t* builtin_asset_resolver_t::create_from_file(const std::string& path) const {
-    (void)path;
+    (void) path;
     // todo : potentially could be resolved by file extension
     return nullptr;
 }
 
 asset_object_t* builtin_asset_resolver_t::create(const std::string& path) const {
-    (void)path;
+    (void) path;
     return nullptr;
 }
 

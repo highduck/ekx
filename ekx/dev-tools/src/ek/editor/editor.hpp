@@ -34,6 +34,7 @@ public:
 
 public:
     static EditorSettings settings;
+    inline static bool inspectorEnabled = false;
 
     static void invalidateSettings();
 

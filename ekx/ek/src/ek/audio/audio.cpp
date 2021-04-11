@@ -49,9 +49,11 @@ struct AudioSystem {
 static AudioSystem audioSystem{};
 
 void initialize() {
+    EK_TRACE << "audio initialize";
     EK_ASSERT(!audioSystem.initialized);
     {
         auto config = ma_engine_config_init_default();
+        config.noAutoStart = 1;
         ma_result result = ma_engine_init(&config, &audioSystem.engine);
         EK_WARN("config channels: %d",
                 audioSystem.engine.pResourceManager->config.decodedChannels);
@@ -76,7 +78,14 @@ void initialize() {
     audioSystem.initialized = true;
 }
 
+void start() {
+    EK_TRACE << "audio engine first start";
+    ma_engine_start(&audioSystem.engine);
+    EK_TRACE << "audio engine first start called";
+}
+
 void shutdown() {
+    EK_TRACE << "audio shutdown";
     EK_ASSERT(audioSystem.initialized);
     ma_engine_uninit(&audioSystem.engine);
     audioSystem.initialized = false;

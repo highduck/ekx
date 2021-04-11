@@ -9,6 +9,8 @@
 #else
 
 #include <cstdio>
+#include <ctime>
+#include <sys/time.h>
 
 #endif
 
@@ -32,13 +34,18 @@ namespace ek::logger {
 #define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
-const char* log_tag_ = "EK";
-uint8_t log_filter_mask_ = static_cast<uint8_t>(verbosity_t::all);
+const char* _tag = "EK";
+uint8_t _filter = static_cast<uint8_t>(verbosity_t::all);
+uint8_t _frame = 0;
+
+void nextFrame() {
+    ++_frame;
+}
 
 void write(verbosity_t verbosity,
            [[maybe_unused]] source_location_t location,
            const char* message) noexcept {
-    if ((log_filter_mask_ & static_cast<uint32_t>(verbosity)) == 0) {
+    if ((_filter & static_cast<uint32_t>(verbosity)) == 0) {
         return;
     }
 
@@ -63,7 +70,13 @@ void write(verbosity_t verbosity,
         default:
             return;
     }
-    __android_log_write(priority, log_tag_, message);
+
+#ifndef NDEBUG
+    __android_log_print(priority, _tag, "@%02hhX: %s", _frame, message);
+#else
+    // for release reduce allocations for printing
+    __android_log_write(priority, _tag, message);
+#endif
 
 #elif EK_IOS
     const char* prefix = nullptr;
@@ -72,10 +85,10 @@ void write(verbosity_t verbosity,
             prefix = "[i] ";
             break;
         case verbosity_t::warning:
-            prefix = "[WARNING] ";
+            prefix = "[W] ";
             break;
         case verbosity_t::error:
-            prefix = "[ERROR] ";
+            prefix = "[E] ";
             break;
         case verbosity_t::debug:
             prefix = "[d] ";
@@ -86,19 +99,28 @@ void write(verbosity_t verbosity,
         default:
             return;
     }
-    printf("%s%s", prefix, message);
+    printf("%02hhX/%s%s", _frame, prefix, message);
 
 #else
+    char time[24];
+    char usec[8];
+
+    struct timeval tmnow;
+    struct tm *tm;
+    gettimeofday(&tmnow, nullptr);
+    tm = localtime(&tmnow.tv_sec);
+    strftime(time, sizeof(time), "%d/%m/%Y %H:%M:%S", tm);
+    snprintf(usec, sizeof(usec), "%03d/%02hhX", tmnow.tv_usec / 1000, _frame);
     const char* prefix = nullptr;
     switch (verbosity) {
         case verbosity_t::info:
             prefix = BLUE "[i] ";
             break;
         case verbosity_t::warning:
-            prefix = BOLDYELLOW "[WARNING] ";
+            prefix = BOLDYELLOW "[W] ";
             break;
         case verbosity_t::error:
-            prefix = BOLDRED "[ERROR] ";
+            prefix = BOLDRED "[E] ";
             break;
         case verbosity_t::debug:
             prefix = CYAN "[d] ";
@@ -110,7 +132,7 @@ void write(verbosity_t verbosity,
             return;
     }
 
-    printf("%s%s" RESET "\n", prefix, message);
+    printf("%s%s.%s: %s" RESET "\n", prefix, time, usec, message);
     if (location.file) {
         printf("\t%s:%d\n", location.file, location.line);
     }

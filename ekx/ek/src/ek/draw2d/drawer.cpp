@@ -5,6 +5,7 @@
 #include "draw2d_shader.h"
 #include <ek/Allocator.hpp>
 #include <ek/util/StaticStorage.hpp>
+#include <ek/util/logger.hpp>
 
 using namespace ek::graphics;
 
@@ -319,23 +320,14 @@ Context::Context() {
     using graphics::Texture;
     using graphics::Shader;
 
-    emptyTexture = Texture::createSolid32(4, 4, 0xFFFFFFFFu);
-    const auto backend = sg_query_backend();
-    defaultShader = new Shader(draw2d_shader_desc(backend));
-    alphaMapShader = new Shader(draw2d_alpha_shader_desc(backend));
-    solidColorShader = new Shader(draw2d_color_shader_desc(backend));
-
-    Res<Texture>{"empty"}.reset(emptyTexture);
-    Res<Shader>{"draw2d"}.reset(defaultShader);
-    Res<Shader>{"draw2d_alpha"}.reset(alphaMapShader);
-    Res<Shader>{"draw2d_color"}.reset(solidColorShader);
-
     vertexBuffers_ = new BufferChain(BufferType::VertexBuffer, MaxVertex + 1, EK_SIZEOF_U32(Vertex2D));
-    vertexData_ = new Vertex2D[MaxVertex + 1];
-    vertexDataNext_ = vertexData_;
-
     indexBuffers_ = new BufferChain(BufferType::IndexBuffer, MaxIndex + 1, EK_SIZEOF_U32(uint16_t));
-    indexData_ = new uint16_t[MaxIndex + 1];
+
+    EK_TRACE << "draw2d: allocate memory buffers";
+    vertexData_ = memory::systemAllocator.allocBufferForArray<Vertex2D>(MaxVertex + 1);
+    indexData_ = memory::systemAllocator.allocBufferForArray<uint16_t>(MaxIndex + 1);
+
+    vertexDataNext_ = vertexData_;
     indexDataNext_ = indexData_;
 }
 
@@ -354,12 +346,12 @@ Context::~Context() {
 
 void Context::finish() {
     // debug checks
-    assert(scissorsStack.empty());
-    assert(matrixStack.empty());
-    assert(colorStack.empty());
-    assert(programStack.empty());
-    assert(textureStack.empty());
-    assert(texCoordStack.empty());
+    EK_ASSERT(scissorsStack.empty());
+    EK_ASSERT(matrixStack.empty());
+    EK_ASSERT(colorStack.empty());
+    EK_ASSERT(programStack.empty());
+    EK_ASSERT(textureStack.empty());
+    EK_ASSERT(texCoordStack.empty());
 
     scissorsStack.clear();
     matrixStack.clear();
@@ -585,14 +577,27 @@ Context& Context::restoreProgram() {
     return *this;
 }
 
+void Context::createDefaultResources() {
+    EK_TRACE << "draw2d: create default resources";
+    const auto backend = sg_query_backend();
+    emptyTexture = Texture::createSolid32(4, 4, 0xFFFFFFFFu);
+    defaultShader = new Shader(draw2d_shader_desc(backend));
+    alphaMapShader = new Shader(draw2d_alpha_shader_desc(backend));
+    solidColorShader = new Shader(draw2d_color_shader_desc(backend));
+    Res<Texture>{"empty"}.reset(emptyTexture);
+    Res<Shader>{"draw2d"}.reset(defaultShader);
+    Res<Shader>{"draw2d_alpha"}.reset(alphaMapShader);
+    Res<Shader>{"draw2d_color"}.reset(solidColorShader);
+}
+
 void beginNewFrame() {
-    assert(!state.active);
+    EK_ASSERT(!state.active);
     state.stats = {};
 }
 
 /*** drawings ***/
 void begin(rect_f viewport, const matrix_2d& view, const graphics::Texture* renderTarget) {
-    assert(!state.active);
+    EK_ASSERT(!state.active);
     state.texture = state.emptyTexture;
     state.program = state.defaultShader;
     state.scissors = viewport;
@@ -623,7 +628,7 @@ void begin(rect_f viewport, const matrix_2d& view, const graphics::Texture* rend
 }
 
 void end() {
-    assert(state.active);
+    EK_ASSERT(state.active);
     state.drawBatch();
     state.finish();
     state.active = false;
@@ -886,10 +891,13 @@ void endFrame() {
 }
 
 void initialize() {
+    EK_TRACE << "draw2d initialize";
     context.initialize();
+    EK_TRACE << "draw2d initialized";
 }
 
 void shutdown() {
+    EK_TRACE << "draw2d shutdown";
     context.shutdown();
 }
 
