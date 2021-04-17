@@ -17,7 +17,7 @@ public:
 
     void prepare();
     void prerender();
-    void render();
+    void render(float width, float height);
 //    void renderShadowMap(const mat4f& cameraProjection, const mat4f& cameraView);
     void renderObjects(const mat4f& proj, const mat4f& view);
 

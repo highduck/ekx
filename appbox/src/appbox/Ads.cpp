@@ -19,7 +19,7 @@ Ads::Ads(Ads::Config config) :
     billing::context.onPurchaseChanged += [this](auto purchase) { this->onPurchaseChanged(purchase); };
 
 #ifndef NDEBUG
-    setRemoveAdsPurchaseCache(true);
+    setRemoveAdsPurchaseCache(false);
 #endif
 
     removed = checkRemoveAdsPurchase();
@@ -47,9 +47,9 @@ void Ads::purchaseRemoveAds() const {
     billing::purchase(config_.skuRemoveAds, "");
 }
 
-void Ads::setRemoveAdsPurchaseCache(bool reset) const {
-    set_user_preference(config_.key0.c_str(), reset ? 0 : config_.val0);
-    set_user_preference(config_.key1.c_str(), reset ? 1 : config_.val1);
+void Ads::setRemoveAdsPurchaseCache(bool adsRemoved) const {
+    set_user_preference(config_.key0.c_str(), adsRemoved ? config_.val0 : 0);
+    set_user_preference(config_.key1.c_str(), adsRemoved ? config_.val1 : 1);
 }
 
 bool Ads::checkRemoveAdsPurchase() const {
@@ -62,7 +62,7 @@ void Ads::onRemoveAdsPurchased() {
     removed = true;
 
     // save
-    setRemoveAdsPurchaseCache(false);
+    setRemoveAdsPurchaseCache(true);
 
     // dispatch event that ads is removed
     onRemoved();
@@ -80,6 +80,10 @@ void Ads::gameOver(const std::function<void()>& callback) {
 
 void Ads::showRewardVideo(const std::function<void(bool)>& callback) {
     wrapper->showRewardedAd(callback);
+}
+
+void Ads::cheat_RemoveAds() {
+    onRemoveAdsPurchased();
 }
 
 }

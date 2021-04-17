@@ -217,21 +217,26 @@ Billing *_billing = nullptr;
 
 void initialize(const std::string& developerKey)
 {
-    if (_billing) {
+    if (_billing != nil) {
         return;
     }
     _initialize();
     _billing = [Billing new];
 }
 
-void getPurchases()
-{
+void getPurchases() {
+    if(_billing == nil) {
+        return;
+    }
     [_billing ready];
     [_billing restore];
 }
 
-void getDetails(const std::vector<std::string> &items)
-{
+void getDetails(const std::vector<std::string> &items) {
+    if(_billing == nil) {
+        return;
+    }
+
     NSArray *array = [[NSArray alloc] init];
     
     for (const auto& item : items) {
@@ -244,11 +249,19 @@ void getDetails(const std::vector<std::string> &items)
 
 void purchase(const std::string &sku, const std::string& payload)
 {
+    if(_billing == nil) {
+        return;
+    }
+
     [_billing purchase: sku.c_str() : payload.c_str()];
 }
 
 void consume(const std::string &token)
 {
+    if(_billing == nil) {
+        return;
+    }
+
     [_billing consume:token.c_str()];
 }
 

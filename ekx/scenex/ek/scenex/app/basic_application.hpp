@@ -16,6 +16,7 @@
 #include <ek/timers.hpp>
 #include "profiler.hpp"
 #include <ek/imaging/ImageSubSystem.hpp>
+#include "GameDisplay.hpp"
 
 namespace ek {
 
@@ -25,6 +26,10 @@ class asset_object_t;
 
 class basic_application {
 public:
+    static float2 AppResolution;
+    inline static GameDisplayInfo currentDisplayInfo{};
+
+    GameDisplay display{};
     /**** assets ***/
 
     framed_timer_t frame_timer{};
@@ -36,15 +41,13 @@ public:
     // used to render all offscreen passes
     signal_t<> onPreRender{};
 
-    signal_t<> hook_on_draw_frame{};
+    signal_t<> onRenderOverlay{};
     signal_t<> hook_on_render_frame{};
     signal_t<float> hook_on_update{};
     signal_t<> onStartHook{};
 
     /////
     ecs::EntityApi root;
-
-    static float2 AppResolution;
 
     Profiler profiler{};
     asset_manager_t* asset_manager_ = nullptr;

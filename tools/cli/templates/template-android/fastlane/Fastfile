@@ -7,11 +7,13 @@ platform :android do
   lane :beta do
     gradle(task: "clean")
     gradle(task: "bundle", build_type: "Release")
+    gradle(task: "uploadCrashlyticsSymbolFile", build_type: "Release")
     upload_to_play_store(track: 'beta')
   end
   lane :internal do
     gradle(task: "clean")
     gradle(task: "bundle", build_type: "Release")
+    gradle(task: "uploadCrashlyticsSymbolFile", build_type: "Release")
     upload_to_play_store(track: 'internal')
   end
 end

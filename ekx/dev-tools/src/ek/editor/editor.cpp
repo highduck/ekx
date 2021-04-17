@@ -34,7 +34,7 @@ Editor::Editor(basic_application& app) :
             guiEditor(*this);
         }
     });
-    t1 = app.hook_on_draw_frame.add([this]() {
+    t1 = app.onRenderOverlay.add([this]() {
         gui_.end_frame();
     });
     t3 = app.hook_on_render_frame.add([this]() {
@@ -44,7 +44,7 @@ Editor::Editor(basic_application& app) :
 
 Editor::~Editor() {
     app_->hook_on_update.remove(t2);
-    app_->hook_on_draw_frame.remove(t1);
+    app_->onRenderOverlay.remove(t1);
     app_->hook_on_render_frame.remove(t3);
 
     g_app.on_frame_completed -= editor_onFrameCompleted;

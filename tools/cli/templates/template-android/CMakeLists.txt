@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 3.19)
 project(native-lib)
 
 add_library(${PROJECT_NAME} SHARED
-        #-SOURCES-#
+        stub/stub.cpp #-SOURCES-#
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
-        #-SEARCH_ROOTS-#
+        stub #-SEARCH_ROOTS-#
         )
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)

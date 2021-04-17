@@ -39,8 +39,9 @@ using namespace ek::app;
     [_window makeKeyAndVisible];
     [_window layoutIfNeeded];
 
-// Override point for customization after application launch.
     dispatch_device_ready();
+
+    // Override point for customization after application launch.
 
     return YES;
 }

@@ -51,5 +51,5 @@ function defaultRun() {
     project.importModule("@ekx/ekx/scenex", project.path.EKX_ROOT);
     project.includeProject(process.cwd());
 
-    project.runBuildSteps();
+    project.runBuildSteps().then();
 }

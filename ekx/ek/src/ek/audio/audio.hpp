@@ -62,9 +62,6 @@ public:
 
     [[nodiscard]] float getPitch() const;
 
-    // poll audio stream update..
-    void update();
-
 private:
     float volume_ = 1.0f;
     float pitch_ = 1.0f;

@@ -141,6 +141,7 @@ public class AdMobPlugin extends EkPlugin {
 
     private void start() {
         _activity.runOnUiThread(() -> {
+            //UMP.start();
             final RequestConfiguration requestConfig = new RequestConfiguration.Builder()
                     .setTestDeviceIds(Arrays.asList(
                             AdRequest.DEVICE_ID_EMULATOR, // All emulators

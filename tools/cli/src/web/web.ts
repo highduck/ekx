@@ -8,8 +8,8 @@ import {collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {Project} from "../project";
 import {copyFileSync} from "fs";
 
-function getEmscriptenSDKPath():string {
-    if(process.env.EMSDK) {
+function getEmscriptenSDKPath(): string {
+    if (process.env.EMSDK) {
         return process.env.EMSDK;
     }
     return path.join(process.env.HOME, "dev/emsdk");
@@ -94,7 +94,7 @@ async function buildProject(ctx, buildType) {
 }
 
 /*** HTML ***/
-export async function export_web(ctx: Project) {
+export async function export_web(ctx: Project): Promise<void> {
     const timestamp = Date.now();
 
     const output_dir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export/web");
@@ -121,7 +121,7 @@ export async function export_web(ctx: Project) {
     webManifest.short_name = ctx.name;
     webManifest.description = ctx.desc;
     webManifest.start_url = (ctx.pwa_url ?? "") + "/index.html";
-    if(ctx.web?.applications != null) {
+    if (ctx.web?.applications != null) {
         webManifest.related_applications = ctx.web?.applications;
     }
 
@@ -134,8 +134,7 @@ export async function export_web(ctx: Project) {
 
     try {
         await assetsTask;
-    }
-    catch(e) {
+    } catch (e) {
         console.error("assets export failed", e);
         throw e;
     }
@@ -143,8 +142,7 @@ export async function export_web(ctx: Project) {
 
     try {
         await buildTask;
-    }
-    catch(e) {
+    } catch (e) {
         console.error("build failed", e);
         throw e;
     }
@@ -155,8 +153,7 @@ export async function export_web(ctx: Project) {
 
     try {
         await iconsTask;
-    }
-    catch(e) {
+    } catch (e) {
         console.error("icons export failed", e);
         throw e;
     }
@@ -169,23 +166,20 @@ export async function export_web(ctx: Project) {
         console.info("Publish Web beta to Firebase host");
         const args = [];
         let token = process.env.FIREBASE_TOKEN;
-        if(!token && ctx.web.firebaseToken) {
+        if (!token && ctx.web.firebaseToken) {
             try {
-                if(fs.existsSync(ctx.web.firebaseToken)) {
+                if (fs.existsSync(ctx.web.firebaseToken)) {
                     token = fs.readFileSync(ctx.web.firebaseToken, 'utf-8');
-                }
-                else {
+                } else {
                     console.error(`Firebase Token file path not found`);
                 }
-            }
-            catch {
+            } catch {
                 console.error(`Cannot read Firebase Token`);
             }
         }
         if (token) {
             args.push("--token", token);
-        }
-        else {
+        } else {
             console.warn("No Firebase Token. Trying deploy with local firebase auth");
         }
         await executeAsync("firebase", [

@@ -163,7 +163,7 @@ public:
     [[nodiscard]]
     uint32_t getUsedMemory() const;
 
-    sg_pipeline getPipeline(sg_shader shader, bool useRenderTarget);
+    sg_pipeline getPipeline(sg_shader shader, bool useRenderTarget, bool depthStencilPass);
 
 public:
 
@@ -187,6 +187,13 @@ public:
     // Current pass state
     bool active = false;
     const graphics::Texture* renderTarget = nullptr;
+    const graphics::Texture* renderDepthStencil = nullptr;
+
+    //// Offscreen rendering
+    // framebuffer target could be also render target or null as default
+    const graphics::Texture* framebufferColor = nullptr;
+    const graphics::Texture* framebufferDepthStencil = nullptr;
+
     mat4f mvp{};
 
     // Stacks for save-restore states
@@ -240,7 +247,7 @@ extern Context& state;
 
 void beginNewFrame();
 
-void begin(rect_f viewport, const matrix_2d& view = matrix_2d{}, const graphics::Texture* renderTarget = nullptr);
+void begin(rect_f viewport, const matrix_2d& view = matrix_2d{}, const graphics::Texture* renderTarget = nullptr, const graphics::Texture* depthStencilTarget = nullptr);
 
 void end();
 

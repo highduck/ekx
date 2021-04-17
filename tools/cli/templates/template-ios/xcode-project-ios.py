@@ -44,13 +44,14 @@ excludes = [
     "^.*\.sh$"
 ]
 
-project = XcodeProject.load(f"{proj_ios_name}.xcodeproj/project.pbxproj")
+mainTargetName = "app-ios"
 
-project_target = project.get_target_by_name("template-ios")
+project = XcodeProject.load(f"{mainTargetName}.xcodeproj/project.pbxproj")
+
+project_target = project.get_target_by_name(mainTargetName)
 
 # project.set_flags("DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
 
-project_target.name = proj_ios_name
 project_target.productName = proj_ios_name
 project.set_flags("PRODUCT_BUNDLE_IDENTIFIER", application_id)
 project.set_flags("IPHONEOS_DEPLOYMENT_TARGET", "12.0")
@@ -94,8 +95,8 @@ def my_add_folder(path, parent, excludes):
         full_path = os.path.join(path, child)
         if os.path.isfile(full_path):
             # check if the file exists already, if not add it
-            project.add_file(full_path, parent, target_name=None, force=False, tree='<absolute>',
-                                     file_options=file_options)
+            project.add_file(full_path, parent, target_name=mainTargetName, force=False,
+                             tree='<absolute>', file_options=file_options)
         else:
             new_parent = project.add_group(child, child, parent)
             my_add_folder(full_path, new_parent, excludes)

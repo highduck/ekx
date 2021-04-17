@@ -55,7 +55,6 @@ set(EM_COMMON_FLAGS
 # -s ASSERTIONS=1
 # TODO: strange runtime DOM exception error with Release, "-s STRICT=1"
 
-#-s FILESYSTEM=0
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
             "-s ENVIRONMENT=web -s FETCH=1 -s FILESYSTEM=0 -s ALLOW_MEMORY_GROWTH=1"

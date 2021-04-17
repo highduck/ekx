@@ -35,12 +35,21 @@ struct window_config final {
     uint32_t backgroundColor = 0xFF000000;
 };
 
-struct arguments final {
+struct Arguments final {
     int argc = 0;
     char** argv = nullptr;
 
-    [[nodiscard]]
-    std::vector<std::string> to_vector() const;
+    const char* getValue(const char* key, const char* def) const {
+        for(int i = 0; i < argc; ++i) {
+            if(strcmp(key, argv[i]) == 0) {
+                if(i + 1 < argc) {
+                    return argv[i + 1];
+                }
+                return def;
+            }
+        }
+        return def;
+    }
 };
 
 enum class mouse_cursor : uint8_t {
@@ -138,8 +147,9 @@ struct event_t final {
     bool alt = false;
 };
 
+extern Arguments args;
+
 struct app_state final {
-    arguments args;
     window_config window_cfg;
 
     float2 window_size{};
@@ -202,6 +212,5 @@ void start_application();
 void main();
 
 #endif
-
 
 }

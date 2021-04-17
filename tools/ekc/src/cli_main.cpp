@@ -31,10 +31,17 @@ int main(int argc, char** argv) {
     EK_INFO << "Working dir: " << current_working_directory();
     EK_INFO << "Arguments: ";
 
+    bool dev = false;
     Array<std::string> args{};
     for (int i = 0; i < argc; ++i) {
         args.push_back(argv[i]);
-        EK_INFO << "    " << argv[i];
+        if(strcmp("--dev", argv[i]) == 0) {
+            dev = true;
+            EK_WARN << "`--dev` option detected: export includes development resources";
+        }
+        else {
+            EK_INFO << "    " << argv[i];
+        }
     }
 
     if (argc <= 1) {
@@ -56,11 +63,7 @@ int main(int argc, char** argv) {
                     process_market_asset(marketing_data);
                 } else if (what == "assets") {
                     editor_project_t project{};
-                    project.devMode = false;
-                    if (getenv("DEV_ASSETS") != nullptr) {
-                        EK_WARN << "- DEV_ASSETS detected: export includes development resources";
-                        project.devMode = true;
-                    }
+                    project.devMode = dev;
                     project.base_path = path_t{args[3]};
                     project.populate();
                     project.build(path_t{args[4]});

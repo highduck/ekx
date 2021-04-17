@@ -50,7 +50,7 @@ void handleQuitRequest() {
     _view.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     _view.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     _view.sampleCount = (NSUInteger) g_app.window_cfg.sampleCount;
-    _view.autoResizeDrawable = false;
+    _view.autoResizeDrawable = true;
     _view.layer.magnificationFilter = kCAFilterNearest;
 
     _view.allowedTouchTypes = NSTouchTypeMaskIndirect;
@@ -60,12 +60,33 @@ void handleQuitRequest() {
 - (void)createWindow {
     EK_TRACE << "app macOS: create window";
     auto& config = g_app.window_cfg;
-    NSRect frame = NSMakeRect(100.0, 100.0, config.size.x, config.size.y);
+    bool doCenter = true;
+    NSRect frame = NSMakeRect(0.0, 0.0, config.size.x, config.size.y);
+    {
+        const char* wndSettings = app::args.getValue("--window", nullptr);
+        if (wndSettings != nullptr) {
+            sscanf(wndSettings, "%lf,%lf,%lf,%lf",
+                   &frame.origin.x, &frame.origin.y,
+                   &frame.size.width, &frame.size.height);
+            doCenter = false;
+        }
+    }
+    if (!doCenter) {
+        // Window bounds (x, y, width, height)
+        NSRect screenRect = [[NSScreen mainScreen] frame];
+        CGFloat scaleFactor = [[NSScreen mainScreen] backingScaleFactor];
+        frame = NSMakeRect(frame.origin.x,
+                           screenRect.size.height - frame.origin.y - frame.size.height,
+                           frame.size.width,
+                           frame.size.height);
+    }
+
     NSWindowStyleMask styleMask = NSWindowStyleMaskTitled |
                                   NSWindowStyleMaskClosable |
                                   NSWindowStyleMaskResizable |
                                   NSWindowStyleMaskMiniaturizable;
     NSRect rect = [NSWindow contentRectForFrameRect:frame styleMask:styleMask];
+
     _window = [[NSWindow alloc]
             initWithContentRect:rect
                       styleMask:styleMask
@@ -79,7 +100,9 @@ void handleQuitRequest() {
     _window.restorable = YES;
 
     [_window setContentView:_view];
-    [_window center];
+    if (doCenter) {
+        [_window center];
+    }
     [_window makeFirstResponder:_view];
     [_window makeKeyAndOrderFront:nil];
     [self handleResize];
@@ -99,40 +122,23 @@ void handleQuitRequest() {
         g_app.window_size.y != windowHeight ||
         g_app.drawable_size.x != backingWidth ||
         g_app.drawable_size.y != backingHeight) {
+
         g_app.content_scale = scale;
         g_app.window_size.x = windowWidth;
         g_app.window_size.y = windowHeight;
         g_app.drawable_size.x = backingWidth;
         g_app.drawable_size.y = backingHeight;
-        g_app.size_changed = true;
 
-        _view.drawableSize = {(CGFloat) drawableSize.width, (CGFloat) drawableSize.height};
+        g_app.size_changed = true;
     }
 }
 
 - (void)windowDidResize:(__unused NSNotification*)notification {
-    const NSSize size = [NSWindow contentRectForFrameRect:_window.frame
-                                                styleMask:_window.styleMask].size;
-    //EK_TRACE("[macOS] windowDidResize: %lf, %lf", size.width, size.height);
-
-    if (size.width != g_app.window_size.x || size.height != g_app.window_size.y) {
-        g_app.window_size.x = static_cast<float>(size.width);
-        g_app.window_size.y = static_cast<float>(size.height);
-        g_app.size_changed = true;
-        [self handleResize];
-        EK_TRACE << "app macOS: windowDidResize APPLIED";
-    }
+    [self handleResize];
 }
 
 - (void)windowDidChangeBackingProperties:(__unused NSNotification*)notification {
-    EK_TRACE("[macOS] windowDidChangeBackingProperties: %lf", _window.backingScaleFactor);
-    const auto scale = static_cast<float>(_window.backingScaleFactor);
-    if (g_app.content_scale != scale) {
-        EK_TRACE("[macOS] windowDidChangeBackingProperties APPLIED");
-        g_app.content_scale = scale;
-        g_app.size_changed = true;
-        [self handleResize];
-    }
+    [self handleResize];
 }
 
 - (void)applicationWillFinishLaunching:(__unused NSNotification*)notification {
@@ -205,7 +211,7 @@ void handleQuitRequest() {
 - (void)drawRect:(NSRect)rect {
     (void) rect;
 
-    if(self.currentDrawable != nil && self.currentRenderPassDescriptor != nil) {
+    if (self.currentDrawable != nil && self.currentRenderPassDescriptor != nil) {
         // we need to keep ref for default render pass on current frame
         // it should be checked in RELEASE build to ensure all references are valid
         self.defaultPass = self.currentRenderPassDescriptor;

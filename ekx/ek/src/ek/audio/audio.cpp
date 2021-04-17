@@ -241,11 +241,8 @@ void Music::load(const char* path) {
         // MA_DATA_SOURCE_FLAG_STREAM: here means reading directly from File using VFS,
         // MA_DATA_SOURCE_FLAG_DECODE: we decode ahead of time the whole buffer
         // I think we don't need to set any flag to set decoding by blocks on the fly from encoded memory buffer
-        //auto dataSourceFlags = MA_DATA_SOURCE_FLAG_STREAM;
         auto dataSourceFlags = 0;
-//#if EK_WEB
-//        dataSourceFlags = MA_DATA_SOURCE_FLAG_DECODE;
-//#endif
+        //auto dataSourceFlags = MA_SOUND_FLAG_DECODE;
 
         dataSource = new ma_resource_manager_data_source();
         result = ma_resource_manager_data_source_init(
@@ -287,30 +284,27 @@ Music::~Music() {
 }
 
 void Music::play() {
-    if (sound) {
-        if (!ma_sound_is_playing(sound)) {
-            ma_sound_start(sound);
-        }
+    if (!sound) {
+        return;
+    }
+    if (!ma_sound_is_playing(sound)) {
+        ma_sound_start(sound);
     }
 }
 
 void Music::stop() {
-    if (sound) {
-        if (ma_sound_is_playing(sound)) {
-            ma_sound_stop(sound);
-        }
+    if (!sound) {
+        return;
     }
-}
-
-void Music::update() {
-    if (sound) {
-//        ma_sound_update
-//        ::Music music = *ptrHandle;
-//        UpdateMusicStream(music);
+    if (ma_sound_is_playing(sound)) {
+        ma_sound_stop(sound);
     }
 }
 
 void Music::setVolume(float volume) {
+    if(volume_ == volume) {
+        return;
+    }
     volume_ = volume;
     if (sound) {
         ma_sound_set_volume(sound, volume);
@@ -322,6 +316,9 @@ float Music::getVolume() const {
 }
 
 void Music::setPitch(float pitch) {
+    if(pitch_ == pitch) {
+        return;
+    }
     pitch_ = pitch;
     if (sound) {
         ma_sound_set_pitch(sound, pitch);

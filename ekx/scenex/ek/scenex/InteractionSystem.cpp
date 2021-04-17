@@ -12,8 +12,6 @@
 
 using namespace ek::app;
 
-using namespace std;
-
 namespace ek {
 
 InteractionSystem::InteractionSystem(ecs::EntityApi root) :
@@ -22,8 +20,13 @@ InteractionSystem::InteractionSystem(ecs::EntityApi root) :
 }
 
 template<typename T>
-inline bool contains(const vector<T>& vec, const T& value) {
-    return find(vec.cbegin(), vec.cend(), value) != vec.cend();
+inline bool contains(const Array<T>& vec, const T& value) {
+    for(auto e : vec) {
+        if(e == value) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool dispatch_interactive_event(ecs::EntityApi e, const NodeEventData& data) {
@@ -105,15 +108,15 @@ void InteractionSystem::fireInteraction(InteractionEvent event, bool prev, bool 
 void InteractionSystem::handle_mouse_event(const event_t& ev) {
 
     if (ev.type == event_type::mouse_down) {
-        mousePosition0_ = float2{ev.pos};
+        mousePosition0_ = vScale * ev.pos;
         pointerDown_ = true;
         fireInteraction(InteractionEvent::PointerDown);
     } else if (ev.type == event_type::mouse_up) {
-        mousePosition0_ = float2{ev.pos};
+        mousePosition0_ = vScale * ev.pos;
         pointerDown_ = false;
         fireInteraction(InteractionEvent::PointerUp);
     } else if (ev.type == event_type::mouse_move) {
-        mousePosition0_ = float2{ev.pos};
+        mousePosition0_ = vScale * ev.pos;
         mouseActive_ = true;
         process();
     } else if (ev.type == event_type::mouse_exit) {
@@ -128,7 +131,7 @@ void InteractionSystem::handle_touch_event(const event_t& ev) {
     if (ev.type == event_type::touch_begin) {
         if (touchID_ == 0) {
             touchID_ = ev.id;
-            touchPosition0_ = float2{ev.pos};
+            touchPosition0_ = vScale * ev.pos;
             mouseActive_ = false;
             pointerDown_ = true;
             process();
@@ -143,7 +146,7 @@ void InteractionSystem::handle_touch_event(const event_t& ev) {
             pointerDown_ = false;
             fireInteraction(InteractionEvent::PointerUp);
         } else {
-            touchPosition0_ = float2{ev.pos};
+            touchPosition0_ = vScale * ev.pos;
         }
     }
 }
@@ -161,7 +164,7 @@ void InteractionSystem::handle_system_pause() {
 }
 
 mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::EntityApi node,
-                                                         vector<ecs::EntityApi>& list) {
+                                                         Array<ecs::EntityApi>& list) {
     ecs::EntityApi it;
     if (dragEntity_.valid()) {
         it = dragEntity_.ent();

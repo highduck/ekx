@@ -53,9 +53,9 @@ private:
         auto now = clock.read_seconds();
         for (auto& p : jobs) {
             auto& job = p.second;
-            if (job) {
-                if (now >= job->time) {
-                    job->fn();
+            if (job && now >= job->time) {
+                job->fn();
+                if(job) {
                     if (job->repeat > 0.0f) {
                         job->time += job->repeat;
                     } else {

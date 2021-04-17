@@ -5,6 +5,7 @@
 #include <ek/app/app.hpp>
 #include <string>
 #include <ek/scenex/base/Interactive.hpp>
+#include <ek/ds/Array.hpp>
 
 namespace ek {
 
@@ -27,7 +28,7 @@ public:
 
     void process();
 
-    app::mouse_cursor searchInteractiveTargets(float2 pos, ecs::EntityApi node, std::vector<ecs::EntityApi>& out_entities);
+    app::mouse_cursor searchInteractiveTargets(float2 pos, ecs::EntityApi node, Array<ecs::EntityApi>& out_entities);
 
     void sendBackButton();
 
@@ -45,11 +46,11 @@ public:
 private:
     void fireInteraction(InteractionEvent event, bool prev = true, bool onlyIfChanged = false);
 
-    std::vector<ecs::EntityApi>& getPrevTargets() {
+    Array<ecs::EntityApi>& getPrevTargets() {
         return targetLists[targetListIndex];
     }
 
-    std::vector<ecs::EntityApi>& getCurrentTargets() {
+    Array<ecs::EntityApi>& getCurrentTargets() {
         return targetLists[(targetListIndex + 1) & 1];
     }
 
@@ -57,11 +58,15 @@ private:
         targetListIndex = (++targetListIndex) & 1;
     }
 
+public:
+    // virtual viewport scale
+    float vScale = 1.0f;
+
 private:
     ecs::EntityRef hitTarget_;
     ecs::EntityApi root_;
 
-    std::vector<ecs::EntityApi> targetLists[2]{};
+    Array<ecs::EntityApi> targetLists[2]{};
     int targetListIndex = 0;
 
     bool mouseActive_ = false;

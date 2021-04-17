@@ -13,11 +13,11 @@ import {
 } from "../utils";
 import {XmlDocument} from 'xmldoc';
 import * as path from "path";
-import {buildAssets} from "../assets";
+import {buildAssetsAsync} from "../assets";
 import {collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
-import {androidBuildAppIcon} from "./androidAppIcon";
+import {androidBuildAppIconAsync} from "./androidAppIcon";
 import * as fs from "fs";
 import {Project} from "../project";
 import {writeFileSync} from "fs";
@@ -123,16 +123,17 @@ function mod_cmake_lists(ctx) {
     }
 
     replaceInFile(cmake_path, {
-        "#-SOURCES-#": src_files.join("\n\t\t"),
-        "#-SEARCH_ROOTS-#": source_dir_list.join("\n\t\t")
+        "stub/stub.cpp #-SOURCES-#": src_files.join("\n\t\t"),
+        "stub #-SEARCH_ROOTS-#": source_dir_list.join("\n\t\t")
     });
 }
 
+export async function export_android(ctx: Project): Promise<void> {
 
-export function export_android(ctx: Project) {
-
-    buildAssets(ctx);
-    androidBuildAppIcon(ctx, "export/android/res");
+    await Promise.all([
+        buildAssetsAsync(ctx),
+        androidBuildAppIconAsync(ctx, "export/android/res")
+    ]);
 
     const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;
@@ -151,13 +152,13 @@ export function export_android(ctx: Project) {
     let googleServicesConfigDir = ctx.android.googleServicesConfigDir;
     let signingConfigPath = ctx.android.signingConfigPath;
     let serviceAccountKey = ctx.android.serviceAccountKey;
-    if(googleServicesConfigDir) {
+    if (googleServicesConfigDir) {
         googleServicesConfigDir = path.resolve(ctx.path.CURRENT_PROJECT_DIR, googleServicesConfigDir);
     }
-    if(signingConfigPath) {
+    if (signingConfigPath) {
         signingConfigPath = path.resolve(ctx.path.CURRENT_PROJECT_DIR, signingConfigPath);
     }
-    if(serviceAccountKey) {
+    if (serviceAccountKey) {
         serviceAccountKey = path.resolve(ctx.path.CURRENT_PROJECT_DIR, serviceAccountKey);
     }
 
@@ -204,7 +205,7 @@ export function export_android(ctx: Project) {
             'versionName "1.0" // AUTO': `versionName "${ctx.version_name}" // AUTO`,
             '// TEMPLATE_SOURCE_SETS': source_sets.join("\n\t\t"),
             '// TEMPLATE_DEPENDENCIES': ctx.build.android.dependencies.join("\n\t"),
-            '// ${SIGNING_CONFIGS}': printSigningConfigs(signingConfig),
+            'release {} /* ${SIGNING_CONFIGS} */': printSigningConfigs(signingConfig),
         });
 
         replaceInFile('fastlane/Appfile', {
@@ -223,6 +224,7 @@ export function export_android(ctx: Project) {
         copy_google_services_config_android(googleServicesConfigDir);
     }
 
+    // TODO: `build` instead of bundle
     if (ctx.args.indexOf("bundle") >= 0) {
         gradle('bundleRelease');
         process.chdir(cwd);
@@ -238,7 +240,7 @@ export function export_android(ctx: Project) {
         open_android_project(dest_path);
     }
 
-    if(ctx.options.deploy != null) {
+    if (ctx.options.deploy != null) {
         execute("fastlane", [ctx.options.deploy], dest_path);
     }
 }

@@ -12,7 +12,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A952FC5B22FD9B4100546C9A /* template-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "template-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A952FC5B22FD9B4100546C9A /* app-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "app-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A952FC6722FD9B4200546C9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A952FC6A22FD9B4200546C9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A952FC6C22FD9B4200546C9A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -40,7 +40,7 @@
 		A952FC5C22FD9B4100546C9A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A952FC5B22FD9B4100546C9A /* template-ios.app */,
+				A952FC5B22FD9B4100546C9A /* app-ios.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -58,9 +58,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A952FC5A22FD9B4100546C9A /* template-ios */ = {
+		A952FC5A22FD9B4100546C9A /* app-ios */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A952FC7122FD9B4200546C9A /* Build configuration list for PBXNativeTarget "template-ios" */;
+			buildConfigurationList = A952FC7122FD9B4200546C9A /* Build configuration list for PBXNativeTarget "app-ios" */;
 			buildPhases = (
 				A952FC5722FD9B4100546C9A /* Sources */,
 				A952FC5822FD9B4100546C9A /* Frameworks */,
@@ -70,9 +70,9 @@
 			);
 			dependencies = (
 			);
-			name = "template-ios";
+			name = "app-ios";
 			productName = "template-ios";
-			productReference = A952FC5B22FD9B4100546C9A /* template-ios.app */;
+			productReference = A952FC5B22FD9B4100546C9A /* app-ios.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -81,6 +81,7 @@
 		A952FC5322FD9B4100546C9A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1240;
 				LastUpgradeCheck = 1030;
 				ORGANIZATIONNAME = "Ilya Kuzmichev";
 				TargetAttributes = {
@@ -89,7 +90,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A952FC5622FD9B4100546C9A /* Build configuration list for PBXProject "template-ios" */;
+			buildConfigurationList = A952FC5622FD9B4100546C9A /* Build configuration list for PBXProject "app-ios" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -102,7 +103,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A952FC5A22FD9B4100546C9A /* template-ios */,
+				A952FC5A22FD9B4100546C9A /* app-ios */,
 			);
 		};
 /* End PBXProject section */
@@ -292,7 +293,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A952FC5622FD9B4100546C9A /* Build configuration list for PBXProject "template-ios" */ = {
+		A952FC5622FD9B4100546C9A /* Build configuration list for PBXProject "app-ios" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A952FC6F22FD9B4200546C9A /* Debug */,
@@ -301,7 +302,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A952FC7122FD9B4200546C9A /* Build configuration list for PBXNativeTarget "template-ios" */ = {
+		A952FC7122FD9B4200546C9A /* Build configuration list for PBXNativeTarget "app-ios" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A952FC7222FD9B4200546C9A /* Debug */,

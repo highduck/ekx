@@ -35,7 +35,7 @@ export function executeAsync(bin: string, args: string[], options?: ExecuteOptio
     });
 }
 
-export function execute(cmd: string, args: string[], workingDir?: string, additionalEnvParams?: { [key: string]: string }) {
+export function execute(cmd: string, args: string[], workingDir?: string, additionalEnvParams?: { [key: string]: string }):number {
     const time = Date.now();
     console.debug(">>", [cmd].concat(args).join(" "));
     const wd = workingDir ?? process.cwd();
