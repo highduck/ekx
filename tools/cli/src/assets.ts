@@ -4,36 +4,29 @@ import {Project} from "./project";
 import {rmdirSync} from "fs";
 import {ekc, ekcAsync} from "./ekc";
 
-export function buildMarketingAssets(ctx: Project, target_type: string, output: string) {
+export function buildMarketingAssets(ctx: Project, target_type: string, output: string):Promise<number> {
     if (isDir(output)) {
         rmdirSync(output, {recursive: true});
     }
     makeDirs(output);
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
-    ekc(ctx, "export", "market", marketAsset, target_type, output);
-
-    // why optimize market assets? :)
-    //optimizePngGlob(path.join(output, "**/*.png"));
+    return ekcAsync(ctx, "export", "market", marketAsset, target_type, output);
 }
 
-export function buildAssets(ctx: Project, output?: string) {
+export async function buildAssetsAsync(ctx: Project, output?: string, devMode?: boolean) {
+    devMode = devMode ?? false;
     let assetsInput = ctx.getAssetsInput();
     let assetsOutput = output ?? ctx.getAssetsOutput();
     if (isDir(assetsOutput)) {
         rmdirSync(assetsOutput, {recursive: true});
     }
     makeDirs(assetsOutput);
-    ekc(ctx, "export", "assets", assetsInput, assetsOutput);
-    optimizePngGlob(path.join(assetsOutput, "**/*.png"));
-}
-
-export async function buildAssetsAsync(ctx: Project, output?: string) {
-    let assetsInput = ctx.getAssetsInput();
-    let assetsOutput = output ?? ctx.getAssetsOutput();
-    if (isDir(assetsOutput)) {
-        rmdirSync(assetsOutput, {recursive: true});
+    const args = ["export", "assets", assetsInput, assetsOutput];
+    if (devMode) {
+        args.push("--dev");
     }
-    makeDirs(assetsOutput);
-    await ekcAsync(ctx, "export", "assets", assetsInput, assetsOutput);
-    await optimizePngGlobAsync(path.join(assetsOutput, "**/*.png"));
+    await ekcAsync(ctx, ...args);
+    if (!devMode) {
+        await optimizePngGlobAsync(path.join(assetsOutput, "**/*.png"));
+    }
 }

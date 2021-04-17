@@ -3,6 +3,13 @@ project(scenex)
 
 add_library(${PROJECT_NAME} STATIC "")
 
+option(EK_UITEST "Enable features for UI testing" OFF)
+
+if(EK_UITEST)
+    message(STATUS "UI Testing enabled")
+    add_definitions(-DEK_UITEST)
+endif(EK_UITEST)
+
 add_subdirectory(ek/scenex)
 add_subdirectory(ek/goodies)
 

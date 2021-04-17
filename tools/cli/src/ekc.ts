@@ -15,16 +15,16 @@ function getBinaryOS(): string {
     throw new Error(`error: platform ${platform} is not supported`);
 }
 
-function getBinaryPath(ctx:Project) {
+function getBinaryPath(ctx: Project) {
     return path.join(ctx.path.ekc, "bin", getBinaryOS(), "ekc");
 }
 
-export function ekc(ctx: Project, ...args: string[]) {
+export function ekc(ctx: Project, ...args: string[]): number {
     const bin = getBinaryPath(ctx);
-    execute(bin, args);
+    return execute(bin, args);
 }
 
-export function ekcAsync(ctx: Project, ...args: string[]) {
+export function ekcAsync(ctx: Project, ...args: string[]): Promise<number> {
     const bin = getBinaryPath(ctx);
     return executeAsync(bin, args);
 }

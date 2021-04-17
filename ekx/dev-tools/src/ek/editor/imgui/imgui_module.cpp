@@ -121,7 +121,7 @@ void imgui_module_t::initializeFontTexture() {
     ImFont* font = nullptr;
     ImFontConfig fontCfg{};
     fontCfg.FontDataOwnedByAtlas = false;
-    font = io.Fonts->AddFontFromFileTTF("../assets/Cousine-Regular.ttf", 16.0f * dpiScale, &fontCfg);
+    font = io.Fonts->AddFontFromFileTTF("assets/Cousine-Regular.ttf", 16.0f * dpiScale, &fontCfg);
     font->Scale = 1.0f / dpiScale;
 
     uint8_t* pixels;

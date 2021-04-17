@@ -213,6 +213,8 @@ struct Main3DRes {
                 .primitive_type = SG_PRIMITIVETYPE_TRIANGLES,
                 .index_type = SG_INDEXTYPE_UINT16,
         };
+        pipDesc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
+        pipDesc.depth.pixel_format = SG_PIXELFORMAT_DEPTH_STENCIL;
         pipDesc.depth.write_enabled = true;
         pipDesc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
         pipDesc.cull_mode = SG_CULLMODE_BACK;
@@ -252,6 +254,8 @@ struct RenderSkyBoxRes {
                 .primitive_type = SG_PRIMITIVETYPE_TRIANGLES,
                 .index_type = SG_INDEXTYPE_UINT16,
         };
+        pipDesc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
+        pipDesc.depth.pixel_format = SG_PIXELFORMAT_DEPTH_STENCIL;
         pipDesc.depth.write_enabled = false;
         pipDesc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
         pipDesc.cull_mode = SG_CULLMODE_FRONT;
@@ -416,7 +420,7 @@ void RenderSystem3D::prerender() {
     shadows->end();
 }
 
-void RenderSystem3D::render() {
+void RenderSystem3D::render(float width, float height) {
     /////
     // get view camera orientation
     if (!camera || !isVisible(camera)) {
@@ -426,18 +430,14 @@ void RenderSystem3D::render() {
     const auto& cameraData = camera.get<Camera3D>();
     const auto& cameraTransform = camera.get<Transform3D>();
 
-    const int width = (int) app::g_app.drawable_size.x;
-    const int height = (int) app::g_app.drawable_size.y;
-    sg_apply_scissor_rect(0, 0, width, height, true);
-    sg_apply_viewport(0, 0, width, height, true);
+    const auto wi = static_cast<int>(width);
+    const auto hi = static_cast<int>(height);
+    sg_apply_scissor_rect(0, 0, wi, hi, true);
+    sg_apply_viewport(0, 0, wi, hi, true);
 
     static float fc_ = 1.0;
     fc_ += 1.0f;
     auto time = static_cast<float>(clock::now());
-    const float2 res{
-            static_cast<float>(app::g_app.drawable_size.x),
-            static_cast<float>(app::g_app.drawable_size.y)
-    };
 
     sg_apply_pipeline(main->pip);
 
@@ -446,10 +446,10 @@ void RenderSystem3D::render() {
     fs_params.u_time[1] = math::fract(time);
     fs_params.u_time[2] = fc_;
     fs_params.u_time[3] = 0.0f;
-    fs_params.u_resolution[0] = res.x;
-    fs_params.u_resolution[1] = res.y;
-    fs_params.u_resolution[2] = 1.0f / res.x;
-    fs_params.u_resolution[3] = 1.0f / res.y;
+    fs_params.u_resolution[0] = width;
+    fs_params.u_resolution[1] = height;
+    fs_params.u_resolution[2] = 1.0f / width;
+    fs_params.u_resolution[3] = 1.0f / height;
     auto viewPos = extract_translation(cameraTransform.world);
     memcpy(fs_params.uViewPos, viewPos.data(), sizeof(float) * 3);
 

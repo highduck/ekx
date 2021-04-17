@@ -114,16 +114,6 @@ void dispatch_draw_frame() {
 //    }
 }
 
-std::vector<std::string> arguments::to_vector() const {
-    using namespace std;
-    vector<string> result{};
-    result.reserve(argc);
-    for (int i = 0; i < argc; ++i) {
-        result.emplace_back(argv[i]);
-    }
-    return result;
-}
-
 void app_state::updateMouseCursor(mouse_cursor cursor_) {
     if (cursor != cursor_) {
         cursor = cursor_;
@@ -140,5 +130,7 @@ void shutdown() {
     EK_TRACE << "app shutdown";
     ssAppState.shutdown();
 }
+
+Arguments args{};
 
 }

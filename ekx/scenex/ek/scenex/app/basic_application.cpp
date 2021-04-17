@@ -38,6 +38,12 @@
 #include <ek/scenex/base/NodeEvents.hpp>
 #include <Tracy.hpp>
 
+#include "impl/GameDisplay_impl.hpp"
+
+#ifdef EK_UITEST
+#include "impl/uitest_impl.hpp"
+#endif
+
 namespace ek {
 
 using namespace ek::app;
@@ -48,27 +54,50 @@ static const float4 DebugAdditionalInsets = float4::zero;
 //static const float4 DebugAdditionalInsets{10, 20, 30, 40};
 
 void updateRootViewport(Viewport& vp) {
-    const auto screenSize = app::g_app.drawable_size;
-    const auto screenDpiScale = (float) app::g_app.content_scale;
+    auto* baseApp = try_resolve<basic_application>();
+    if (!baseApp) {
+        return;
+    }
 
-    float4 insets;
-    getScreenInsets(insets.data());
-    insets += DebugAdditionalInsets;
+    const auto& info = baseApp->display.info;
+    const rect_f rc{0.0f, 0.0f, info.size.x, info.size.y};
+    const float4 insets = info.insets + DebugAdditionalInsets;
 
-    vp.input.fullRect = rect_f{0.0f, 0.0f, (float) screenSize.x, (float) screenSize.y};
-    vp.input.dpiScale = screenDpiScale;
-    vp.input.safeRect = vp.input.fullRect;
+    vp.input.fullRect = rc;
+    vp.input.dpiScale = info.dpiScale;
+    vp.input.safeRect = rc;
     vp.input.safeRect.x += insets.x;
     vp.input.safeRect.y += insets.y;
     vp.input.safeRect.width -= insets.x + insets.z;
     vp.input.safeRect.height -= insets.y + insets.w;
 }
 
+void logDisplayInfo() {
+#ifndef NDEBUG
+    const auto sz = app::g_app.drawable_size;
+    float insets[4]{};
+    getScreenInsets(insets);
+    EK_INFO << "Display: " << sz.x << " x " << sz.y << " [" << insets[0] << ", " << insets[1] << ", " << insets[2] << ", " << insets[3] << "]";
+#endif
+}
 
-void drawPreloader(float progress);
+void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
+    draw2d::state.setEmptyTexture();
+    auto pad = 40.0f;
+    auto w = zoneWidth - pad * 2.0f;
+    auto h = 16.0f;
+    auto y = (zoneHeight - h) / 2.0f;
+
+    draw2d::quad(pad, y, w, h, 0xFFFFFFFF_argb);
+    draw2d::quad(pad + 2, y + 2, w - 4, h - 4, 0xFF000000_argb);
+    draw2d::quad(pad + 4, y + 4, (w - 8) * progress, h - 8, 0xFFFFFFFF_argb);
+}
 
 basic_application::basic_application() {
     tracy::SetThreadName("Main");
+#ifdef EK_UITEST
+    uitest::initialize(this);
+#endif
     asset_manager_ = new asset_manager_t{};
 }
 
@@ -134,6 +163,9 @@ void basic_application::initialize() {
         Res<Sprite>{"empty"}.reset(spr);
     }
 
+    logDisplayInfo();
+    display.update();
+
     EK_TRACE << "base application: initialize scene root";
     root = createNode2D("root");
     root.assign<Viewport>(AppResolution.x, AppResolution.y);
@@ -176,6 +208,7 @@ void basic_application::preload() {
 void basic_application::on_draw_frame() {
     ZoneScoped;
     timer_t timer{};
+    display.update();
     scale_factor = root.get<Viewport>().output.scale;
     asset_manager_->set_scale_factor(scale_factor);
 
@@ -220,21 +253,17 @@ void basic_application::on_draw_frame() {
         rootAssetObject->poll();
     }
 
-    auto fbWidth = static_cast<int>(g_app.drawable_size.x);
-    auto fbHeight = static_cast<int>(g_app.drawable_size.y);
-    if (fbWidth > 0 && fbHeight > 0) {
-        sg_begin_default_pass(&pass_action, fbWidth, fbHeight);
-
+    if (display.beginGame(pass_action)) {
         if (r3d) {
-            r3d->render();
+            r3d->render(display.info.size.x, display.info.size.y);
         }
 
         render_frame();
 
-        draw2d::begin({0, 0, (float) fbWidth, (float) fbHeight});
+        draw2d::begin({0, 0, display.info.size.x, display.info.size.y});
 
         if (!started_ && rootAssetObject) {
-            drawPreloader(0.1f + 0.9f * rootAssetObject->getProgress());
+            drawPreloader(0.1f + 0.9f * rootAssetObject->getProgress(), display.info.size.x, display.info.size.y);
         }
 
         hook_on_render_frame();
@@ -243,21 +272,29 @@ void basic_application::on_draw_frame() {
         profiler.addTime("FRAME", timer.read_millis());
         timer.reset();
 
-        on_frame_end();
-
-        profiler.addTime("PROFILER", timer.read_millis());
-        profiler.addTime("FRAME", timer.read_millis());
-        timer.reset();
-
         draw2d::end();
+
+        display.endGame(); // beginGame()
+
+        if (display.beginOverlayDev()) {
+
+            onRenderOverlay();
+
+            draw2d::begin({0, 0, g_app.drawable_size.x, g_app.drawable_size.y});
+            on_frame_end();
+            profiler.draw();
+            draw2d::end();
+
+            profiler.addTime("OVERLAY", timer.read_millis());
+            profiler.addTime("FRAME", timer.read_millis());
+            timer.reset();
+
+            display.endOverlayDev(); // display.beginOverlayDev()
+        }
+
         draw2d::endFrame();
-
-        hook_on_draw_frame();
-        /** base app END **/
-        sg_end_pass();
-        sg_commit();
-
     }
+
     if (!started_ && asset_manager_->is_assets_ready()) {
         EK_DEBUG << "Start Game";
         start_game();
@@ -281,8 +318,6 @@ void basic_application::render_frame() {
 }
 
 void basic_application::on_frame_end() {
-    ZoneScoped;
-    profiler.draw();
 }
 
 void basic_application::preload_root_assets_pack() {
@@ -300,6 +335,7 @@ void basic_application::on_event(const event_t& event) {
     ZoneScoped;
     timer_t timer{};
     if (event.type == event_type::app_resize) {
+        display.update();
         updateRootViewport(root.get<Viewport>());
     } else if (event.type == event_type::app_close) {
         sg_shutdown();
@@ -307,18 +343,6 @@ void basic_application::on_event(const event_t& event) {
 
     profiler.addTime("EVENTS", timer.read_millis());
     profiler.addTime("FRAME", timer.read_millis());
-}
-
-void drawPreloader(float progress) {
-    draw2d::state.setEmptyTexture();
-    auto pad = 40.0f;
-    auto w = g_app.drawable_size.x - pad * 2.0f;
-    auto h = 16.0f;
-    auto y = (g_app.drawable_size.y - h) / 2.0f;
-
-    draw2d::quad(pad, y, w, h, 0xFFFFFFFF_argb);
-    draw2d::quad(pad + 2, y + 2, w - 4, h - 4, 0xFF000000_argb);
-    draw2d::quad(pad + 4, y + 4, (w - 8) * progress, h - 8, 0xFFFFFFFF_argb);
 }
 
 void baseApp_drawFrame() {
@@ -396,9 +420,10 @@ void initializeSubSystems() {
             sg_begin_default_pass(&pass_action, fbWidth, fbHeight);
 
             if (_initializeSubSystemsState > 2) {
+                float2 size = g_app.drawable_size;
                 draw2d::beginNewFrame();
-                draw2d::begin({0, 0, (float) fbWidth, (float) fbHeight});
-                drawPreloader(0.1f * (float) _initializeSubSystemsState / steps);
+                draw2d::begin({0, 0, size.x, size.y});
+                drawPreloader(0.1f * (float) _initializeSubSystemsState / steps, size.x, size.y);
                 draw2d::end();
                 draw2d::endFrame();
             }
@@ -408,4 +433,5 @@ void initializeSubSystems() {
         }
     }
 }
+
 }

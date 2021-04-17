@@ -23,7 +23,7 @@ AppDelegate* gAppDelegate = nullptr;
 
 #ifndef EK_NO_MAIN
 int main(int argc, char* argv[]) {
-    g_app.args = {argc, argv};
+    args = {argc, argv};
     ::ek::main();
     return 0;
 }
@@ -33,8 +33,8 @@ namespace ek {
 
 void start_application() {
 #if TARGET_OS_IOS || TARGET_OS_TV
-    int argc = g_app.args.argc;
-    char** argv = g_app.args.argv;
+    int argc = args.argc;
+    char** argv = args.argv;
     @autoreleasepool {
         UIApplicationMain(argc, argv, nil, NSStringFromClass(AppDelegate.class));
     }

@@ -2,9 +2,9 @@ import {Project} from "../project";
 import * as path from "path";
 import {execute, isDir, makeDirs, readText, writeText} from "../utils";
 import {rmdirSync} from "fs";
-import {ekc} from "../ekc";
+import {ekc, ekcAsync} from "../ekc";
 
-export function androidBuildAppIcon(ctx: Project, output: string) {
+export function androidBuildAppIconAsync(ctx: Project, output: string): Promise<number> {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
 
     if (isDir(output)) {
@@ -14,11 +14,11 @@ export function androidBuildAppIcon(ctx: Project, output: string) {
 
     const filename = "ic_launcher.png";
     const resolutionMap = {
-        "ldpi":    36,
-        "mdpi":    48,
-        "hdpi":    72,
-        "xhdpi":   96,
-        "xxhdpi":  144,
+        "ldpi": 36,
+        "mdpi": 48,
+        "hdpi": 72,
+        "xhdpi": 96,
+        "xxhdpi": 144,
         "xxxhdpi": 192,
     };
 
@@ -32,5 +32,5 @@ export function androidBuildAppIcon(ctx: Project, output: string) {
         makeDirs(dir);
         cmd.push(scale.toString(), size.toString(), size.toString(), "0", "1", path.join(dir, filename));
     }
-    ekc(ctx, ...cmd);
+    return ekcAsync(ctx, ...cmd);
 }

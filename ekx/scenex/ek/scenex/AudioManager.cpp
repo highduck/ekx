@@ -50,13 +50,13 @@ void AudioManager::vibrate(int length) const {
 }
 
 void AudioManager::update(float) {
-    if (!music_.empty()) {
-        Res<audio::Music> musicAsset{music_};
-        if (musicAsset) {
-            auto volume = music.enabled() ? musicVolume_ : 0.0f;
-            musicAsset->setVolume(volume);
-            musicAsset->update();
-        }
+    if (music_.empty()) {
+        return;
+    }
+    Res<audio::Music> musicAsset{music_};
+    if (musicAsset) {
+        auto volume = music.enabled() ? musicVolume_ : 0.0f;
+        musicAsset->setVolume(volume);
     }
 }
 
@@ -64,6 +64,17 @@ void AudioManager::disable_all() {
     sound.enabled(false);
     music.enabled(false);
     vibro.enabled(false);
+}
+
+void AudioManager::setMusicParams(float volume, float pitch) {
+    musicVolume_ = volume;
+    musicPitch_ = pitch;
+    Res<audio::Music> musicAsset{music_};
+    if (musicAsset) {
+        auto channelVolume = music.enabled() ? musicVolume_ : 0.0f;
+        musicAsset->setVolume(channelVolume);
+        musicAsset->setPitch(pitch);
+    }
 }
 
 }

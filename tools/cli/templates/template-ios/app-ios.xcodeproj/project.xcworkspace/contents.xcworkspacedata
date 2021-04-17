@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:template-ios.xcodeproj">
+      location = "self:/Users/ilyak/ek/all/ekx/tools/cli/templates/template-ios/app-ios.xcodeproj">
    </FileRef>
 </Workspace>

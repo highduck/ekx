@@ -30,6 +30,8 @@ public:
 
     void purchaseRemoveAds() const;
 
+    void debugSetRemoveAds(bool removed);
+
     // TODO: rename, try start commercial break
     void gameOver(const std::function<void()>& callback);
 
@@ -37,8 +39,10 @@ public:
 
     signal_t<> onRemoved{};
 
+    void cheat_RemoveAds();
+
 private:
-    void setRemoveAdsPurchaseCache(bool reset) const;
+    void setRemoveAdsPurchaseCache(bool adsRemoved) const;
 
     [[nodiscard]] bool checkRemoveAdsPurchase() const;
 

@@ -6,7 +6,7 @@ android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
     signingConfigs {
-        // ${SIGNING_CONFIGS}
+        release {} /* ${SIGNING_CONFIGS} */
     }
     defaultConfig {
         applicationId "com.eliasku.template_android" // AUTO
@@ -15,7 +15,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 30
         multiDexEnabled true
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++17"
@@ -33,11 +33,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
             firebaseCrashlytics {
-              // Enable processing and uploading of native symbols to Crashlytics servers.
-              // By default, this is disabled to improve build speeds.
-              // This flag must be enabled to see properly-symbolicated native
-              // stack traces in the Crashlytics dashboard.
-              nativeSymbolUploadEnabled true
+                // Enable processing and uploading of native symbols to Crashlytics servers.
+                // By default, this is disabled to improve build speeds.
+                // This flag must be enabled to see properly-symbolicated native
+                // stack traces in the Crashlytics dashboard.
+                nativeSymbolUploadEnabled true
             }
             ndk {
                 // SYMBOL_TABLE | FULL
@@ -78,6 +78,7 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
 
     // Import the BoM for the Firebase platform
+    // Check Release Notes for updates: https://firebase.google.com/support/release-notes/android
     implementation platform('com.google.firebase:firebase-bom:26.8.0')
     implementation 'com.google.firebase:firebase-crashlytics-ndk'
     implementation 'com.google.firebase:firebase-analytics'

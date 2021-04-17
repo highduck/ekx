@@ -123,6 +123,7 @@ public:
     ~Texture();
 
     void update(const void* data, uint32_t size) const;
+    bool getPixels(void* pixels) const;
 
     sg_image image{};
     sg_image_desc desc{};

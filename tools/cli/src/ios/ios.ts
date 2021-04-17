@@ -1,18 +1,20 @@
 import {
     copyFile,
     copyFolderRecursiveSync,
-    deleteFolderRecursive, execute,
+    deleteFolderRecursive,
+    execute,
     isDir,
-    readText, replaceInFile,
+    readText,
+    replaceInFile,
     writeText
 } from "../utils";
 import * as path from "path";
 import * as fs from "fs";
-import * as plist from 'plist';
-import {buildAssets} from "../assets";
-import {iosBuildAppIcon} from "./iosAppIcon";
-import {Project} from "../project";
 import {readFileSync} from "fs";
+import * as plist from 'plist';
+import {buildAssetsAsync} from "../assets";
+import {iosBuildAppIconAsync} from "./iosAppIcon";
+import {Project} from "../project";
 
 interface AppStoreCredentials {
     team_id?: string;
@@ -94,7 +96,7 @@ function collect_xcode_props(ctx, prop, target) {
     return list;
 }
 
-export function export_ios(ctx: Project) {
+export async function export_ios(ctx: Project): Promise<void> {
     // setup automation
     let credentials: AppStoreCredentials = {};
     try {
@@ -102,8 +104,10 @@ export function export_ios(ctx: Project) {
     } catch (e) {
     }
 
-    buildAssets(ctx);
-    iosBuildAppIcon(ctx, "export/ios");
+    await Promise.all([
+        buildAssetsAsync(ctx),
+        iosBuildAppIconAsync(ctx, "export/ios")
+    ]);
 
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;
@@ -116,10 +120,10 @@ export function export_ios(ctx: Project) {
         console.assert(!isDir(dest_path));
     }
 
-    copyFolderRecursiveSync(path.join(ctx.path.templates, "template-" + platform_target), dest_path);
+    copyFolderRecursiveSync(path.join(ctx.path.templates, "template-ios"), dest_path);
 
     let googleServicesConfigDir = ctx.ios.googleServicesConfigDir;
-    if(googleServicesConfigDir) {
+    if (googleServicesConfigDir) {
         googleServicesConfigDir = path.resolve(ctx.path.CURRENT_PROJECT_DIR, googleServicesConfigDir);
     }
 
@@ -127,8 +131,8 @@ export function export_ios(ctx: Project) {
     const cwd = process.cwd();
     process.chdir(dest_path);
     {
-        console.info("Rename project");
-        fs.renameSync("template-ios.xcodeproj", platform_proj_name + ".xcodeproj");
+        // console.info("Rename project");
+        // fs.renameSync("app-ios.xcodeproj", platform_proj_name + ".xcodeproj");
 
         copyFolderRecursiveSync(path.join(base_path, ctx.getAssetsOutput()), "assets");
         copyFolderRecursiveSync(path.join(base_path, "export/ios/AppIcon.appiconset"),
@@ -160,7 +164,7 @@ export function export_ios(ctx: Project) {
         console.info("Prepare PodFile");
         const pods = collect_xcode_props(ctx, "pods", "ios").map((v) => `pod '${v}'`).join("\n  ");
         replaceInFile("Podfile", {
-            "template-ios": platform_proj_name,
+            // "app-ios": platform_proj_name,
             "# TEMPLATE DEPENDENCIES": pods
         });
 
@@ -172,7 +176,7 @@ export function export_ios(ctx: Project) {
         });
 
         console.info("Install Pods");
-        execute("pod", ["install"]);
+        execute("pod", ["install", "--repo-update"]);
 
         // POST MOD PROJECT
         execute("python3", ["xcode-project-ios-post.py",
@@ -181,8 +185,7 @@ export function export_ios(ctx: Project) {
     process.chdir(cwd);
 
     if (ctx.options.openProject) {
-        const workspace_path = path.join(dest_path, platform_proj_name + ".xcworkspace");
-        // execute("open", [dest_path]);
+        const workspace_path = path.join(dest_path, "app-ios.xcworkspace");
         execute("open", [workspace_path]);
         // execute("xcodebuild", [
         //     "-workspace", workspace_path,

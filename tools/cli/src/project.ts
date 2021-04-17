@@ -85,7 +85,7 @@ export class Project {
     build_dir?: string; // build
     orientation: "landscape" | "portrait";
 
-    build_steps: (() => void)[] = [];
+    build_steps: (() => void|Promise<any>)[] = [];
     projects: { [name: string]: RegisteredProject } = {};
     modules: ModuleDef[] = [];
 
@@ -173,9 +173,12 @@ export class Project {
         this.includeProject(path.dirname(projectPath));
     }
 
-    runBuildSteps() {
+    async runBuildSteps() {
         for (const step of this.build_steps) {
-            step();
+            const res = step();
+            if(res instanceof Promise) {
+                await res;
+            }
         }
     }
 
@@ -216,7 +219,7 @@ export class Project {
                         this.options.deploy = second;
                     }
                 }
-                if(this.options.increaseVersion === undefined) {
+                if (this.options.increaseVersion === undefined) {
                     this.options.increaseVersion = VERSION_INDEX_CODE;
                 }
             }

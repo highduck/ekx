@@ -109,14 +109,59 @@ Texture* Texture::createSolid32(int width, int height, uint32_t pixelColor) {
     for (int i = 0; i < count; ++i) {
         pixels[i] = pixelColor;
     }
-    desc.data.subimage[0][0] = {
-            .ptr = pixels,
-            .size = (size_t)count * 4
-    };
-
+    desc.data.subimage[0][0].ptr = pixels;
+    desc.data.subimage[0][0].size = (size_t)count * 4;
     auto* tex = new Texture(desc);
     delete[] pixels;
     return tex;
+}
+
+bool Texture::getPixels(void* pixels) const {
+#if EK_MACOS
+    // get the texture from the sokol internals here...
+    _sg_image_t* img = _sg_lookup_image(&_sg.pools, image.id);
+    __unsafe_unretained id<MTLTexture> tex = _sg_mtl_id(img->mtl.tex[img->cmn.active_slot]);
+    const auto width = desc.width;
+    const auto height = desc.height;
+    if (tex) {
+        id<MTLTexture> temp_texture = 0;
+        if (_sg.mtl.cmd_queue && tex) {
+            const MTLPixelFormat format = [tex pixelFormat];
+            MTLTextureDescriptor* textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:format width:(width) height:(height) mipmapped:NO];
+
+            textureDescriptor.storageMode = MTLStorageModeManaged;
+            textureDescriptor.resourceOptions = MTLResourceStorageModeManaged;
+            textureDescriptor.usage = MTLTextureUsageShaderRead + MTLTextureUsageShaderWrite;
+            temp_texture = [_sg.mtl.device newTextureWithDescriptor:textureDescriptor];
+            if (temp_texture)
+            {
+                id<MTLCommandBuffer> cmdbuffer = [_sg.mtl.cmd_queue commandBuffer];
+                id<MTLBlitCommandEncoder> blitcmd = [cmdbuffer blitCommandEncoder];
+
+                [blitcmd copyFromTexture:tex
+                sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(0,0,0) sourceSize:MTLSizeMake(width,height,1)
+                toTexture:temp_texture
+                destinationSlice:0 destinationLevel:0 destinationOrigin:MTLOriginMake(0,0,0)];
+
+                [blitcmd synchronizeTexture:temp_texture slice:0 level:0];
+
+                [blitcmd endEncoding];
+
+                [cmdbuffer commit];
+
+                [cmdbuffer waitUntilCompleted];
+            }
+        }
+        if (temp_texture)
+        {
+            MTLRegion region = MTLRegionMake2D(0, 0, width, height);
+            NSUInteger rowbyte = width * 4;
+            [temp_texture getBytes:pixels bytesPerRow:rowbyte fromRegion:region mipmapLevel:0];
+            return true;
+        }
+    }
+#endif // defined(SOKOL_METAL) && defined(EK_DEV_TOOLS)
+    return false;
 }
 
 static std::string BackendToString[] = {

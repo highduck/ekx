@@ -1,10 +1,10 @@
-import {execute, isDir, makeDirs, readText, writeText} from "../utils";
+import {isDir, makeDirs, readText, writeText} from "../utils";
 import {rmdirSync} from "fs";
 import * as path from "path";
 import {Project} from "../project";
-import {ekc} from "../ekc";
+import {ekcAsync} from "../ekc";
 
-export function iosBuildAppIcon(ctx: Project, output: string) {
+export async function iosBuildAppIconAsync(ctx: Project, output: string): Promise<number> {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
     let iosIcon = JSON.parse(readText(path.join(ctx.path.templates, "template-ios/src/Assets.xcassets/AppIcon.appiconset/Contents.json")));
     const appIconFolder = path.join(output, "AppIcon.appiconset");
@@ -20,7 +20,6 @@ export function iosBuildAppIcon(ctx: Project, output: string) {
     let cmd = ["prerender_flash", marketAsset, "icon"];
     for (const image of iosIcon.images) {
         const scale_factor = parseFloat(image.scale);
-        console.warn(parseFloat(image.scale));
         const sideSize = image.size.substr(0, image.size.indexOf("x"));
         const size = scale_factor * parseFloat(sideSize);
         const sizei = size | 0;
@@ -34,5 +33,5 @@ export function iosBuildAppIcon(ctx: Project, output: string) {
     iosIcon.images = images;
     writeText(path.join(appIconFolder, "Contents.json"), JSON.stringify(iosIcon));
 
-    ekc(ctx, ...cmd);
+    return ekcAsync(ctx, ...cmd);
 }

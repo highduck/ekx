@@ -14,6 +14,10 @@
 
 #endif
 
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+#endif
+
 namespace ek::logger {
 
 #define RESET   "\033[0m"
@@ -78,7 +82,7 @@ void write(verbosity_t verbosity,
     __android_log_write(priority, _tag, message);
 #endif
 
-#elif EK_IOS
+#elif TARGET_OS_IOS
     const char* prefix = nullptr;
     switch (verbosity) {
         case verbosity_t::info:
@@ -99,7 +103,10 @@ void write(verbosity_t verbosity,
         default:
             return;
     }
-    printf("%02hhX/%s%s", _frame, prefix, message);
+    printf("%02hhX/%s%s\n", _frame, prefix, message);
+    if (location.file) {
+        printf("\t%s:%d\n", location.file, location.line);
+    }
 
 #else
     char time[24];

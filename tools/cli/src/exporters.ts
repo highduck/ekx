@@ -1,19 +1,19 @@
 import {export_web} from "./web/web";
 import {export_android} from "./android/android";
 import {export_ios} from "./ios/ios";
-import {buildAssets, buildMarketingAssets} from "./assets";
+import {buildAssetsAsync, buildMarketingAssets} from "./assets";
 import {Project} from "./project";
+import {screenshots} from "./screenshots";
+import {updateGoogleServicesConfig} from "./firebase";
 
 const exporters = {
     web: export_web,
     android: export_android,
     ios: export_ios,
-    market: (project: Project) => {
-        buildMarketingAssets(project, "gen", "export/market");
-    },
-    assets: (project: Project) => {
-        buildAssets(project, "build/assets");
-    }
+    market: (project: Project) => buildMarketingAssets(project, "gen", "export/market"),
+    assets: (project: Project) => buildAssetsAsync(project, "build/assets", true),
+    screenshots,
+    updateGoogleServicesConfig
 };
 
 export function addExportBuildStep(project: Project) {

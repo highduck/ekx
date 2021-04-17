@@ -64,7 +64,7 @@ void Context::applyNextState() {
     }
 }
 
-sg_pipeline createPipeline(sg_shader shader, bool useRenderTarget) {
+sg_pipeline createPipeline(sg_shader shader, bool useRenderTarget, bool depthStencil) {
     sg_pipeline_desc pip_desc{};
     pip_desc.layout = Vertex2D::layout();
     pip_desc.shader = shader;
@@ -76,20 +76,28 @@ sg_pipeline createPipeline(sg_shader shader, bool useRenderTarget) {
     pip_desc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
     if (useRenderTarget) {
         pip_desc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
-        pip_desc.depth.pixel_format = SG_PIXELFORMAT_NONE;
+        if(depthStencil) {
+            pip_desc.depth.pixel_format = SG_PIXELFORMAT_DEPTH_STENCIL;
+        }
+        else {
+            pip_desc.depth.pixel_format = SG_PIXELFORMAT_NONE;
+        }
     }
     pip_desc.label = "draw2d-pipeline";
     return sg_make_pipeline(pip_desc);
 }
 
-sg_pipeline Context::getPipeline(sg_shader shader, bool useRenderTarget) {
+sg_pipeline Context::getPipeline(sg_shader shader, bool useRenderTarget, bool depthStencilPass) {
     uint64_t key{shader.id};
     if (useRenderTarget) {
         key = key | (1ull << 32ull);
     }
+    if (depthStencilPass) {
+        key = key | (1ull << 33ull);
+    }
     auto pip = pipelines.get(key, {0});
     if (pip.id == SG_INVALID_ID) {
-        pip = createPipeline(shader, useRenderTarget);
+        pip = createPipeline(shader, useRenderTarget, depthStencilPass);
         pipelines.set(key, pip);
     }
     return pip;
@@ -247,7 +255,10 @@ void Context::drawBatch() {
     vb->update(vertexData_, vertexDataSize);
     ib->update(indexData_, indexDataSize);
 
-    auto pip = getPipeline(curr.shader, renderTarget != nullptr);
+    const auto* fbColor = renderTarget != nullptr ? renderTarget : framebufferColor;
+    const auto* fbDepthStencil = renderDepthStencil != nullptr ? renderDepthStencil : framebufferDepthStencil;
+
+    auto pip = getPipeline(curr.shader, fbColor != nullptr, fbDepthStencil != nullptr);
     if (pip.id != selectedPipeline.id) {
         selectedPipeline = pip;
         sg_apply_pipeline(pip);
@@ -596,7 +607,7 @@ void beginNewFrame() {
 }
 
 /*** drawings ***/
-void begin(rect_f viewport, const matrix_2d& view, const graphics::Texture* renderTarget) {
+void begin(rect_f viewport, const matrix_2d& view, const graphics::Texture* renderTarget, const graphics::Texture* depthStencilTarget) {
     EK_ASSERT(!state.active);
     state.texture = state.emptyTexture;
     state.program = state.defaultShader;
@@ -616,10 +627,12 @@ void begin(rect_f viewport, const matrix_2d& view, const graphics::Texture* rend
     state.stateChanged = true;
 
     state.renderTarget = renderTarget;
+    state.renderDepthStencil = depthStencilTarget;
+
 #if EK_IOS || EK_MACOS
     state.mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;
 #else
-    if (renderTarget) {
+    if (state.renderTarget) {
         state.mvp = ortho_2d<float>(viewport.x, viewport.bottom(), viewport.width, -viewport.height) * view;
     } else {
         state.mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;
