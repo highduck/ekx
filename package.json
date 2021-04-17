@@ -11,7 +11,7 @@
     "postinstall": "wsrun -m -e -t postinstall"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.14.1",
+    "@changesets/cli": "^2.16.0",
     "wsrun": "^5.2.4"
   },
   "workspaces": {
