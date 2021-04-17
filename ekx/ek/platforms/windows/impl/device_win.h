@@ -2,9 +2,8 @@
 #include <ek/app/device.hpp>
 #include <ek/app/app.hpp>
 
-// entry point
 int main(int argc, char* argv[]) {
-    ::ek::app::g_app.args = {argc, argv};
+    ::ek::app::args = {argc, argv};
     ::ek::main();
     return 0;
 }

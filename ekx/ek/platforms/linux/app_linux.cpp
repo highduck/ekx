@@ -33,7 +33,7 @@ void start_application() {
 }
 
 int main(int argc, char* argv[]) {
-    g_app.args = {argc, argv};
+    ::ek::app::args = {argc, argv};
     ::ek::main();
     return 0;
 }
