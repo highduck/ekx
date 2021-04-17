@@ -97,13 +97,13 @@ void Texture::update(const void* data, uint32_t size) const {
 }
 
 Texture* Texture::createSolid32(int width, int height, uint32_t pixelColor) {
-    sg_image_desc desc{
-            .type = SG_IMAGETYPE_2D,
-            .width = width,
-            .height = height,
-            .usage = SG_USAGE_IMMUTABLE,
-            .pixel_format = SG_PIXELFORMAT_RGBA8,
-    };
+    sg_image_desc desc{};
+    desc.type = SG_IMAGETYPE_2D;
+    desc.width = width;
+    desc.height = height;
+    desc.usage = SG_USAGE_IMMUTABLE;
+    desc.pixel_format = SG_PIXELFORMAT_RGBA8;
+
     int count = width * height;
     auto* pixels = new uint32_t[count];
     for (int i = 0; i < count; ++i) {
@@ -123,42 +123,38 @@ bool Texture::getPixels(void* pixels) const {
     __unsafe_unretained id<MTLTexture> tex = _sg_mtl_id(img->mtl.tex[img->cmn.active_slot]);
     const auto width = desc.width;
     const auto height = desc.height;
-    if (tex) {
-        id<MTLTexture> temp_texture = 0;
-        if (_sg.mtl.cmd_queue && tex) {
-            const MTLPixelFormat format = [tex pixelFormat];
-            MTLTextureDescriptor* textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:format width:(width) height:(height) mipmapped:NO];
+    id<MTLTexture> temp_texture = 0;
+    if (_sg.mtl.cmd_queue && tex) {
+        const MTLPixelFormat format = [tex pixelFormat];
+        MTLTextureDescriptor* textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:format width:(width) height:(height) mipmapped:NO];
 
-            textureDescriptor.storageMode = MTLStorageModeManaged;
-            textureDescriptor.resourceOptions = MTLResourceStorageModeManaged;
-            textureDescriptor.usage = MTLTextureUsageShaderRead + MTLTextureUsageShaderWrite;
-            temp_texture = [_sg.mtl.device newTextureWithDescriptor:textureDescriptor];
-            if (temp_texture)
-            {
-                id<MTLCommandBuffer> cmdbuffer = [_sg.mtl.cmd_queue commandBuffer];
-                id<MTLBlitCommandEncoder> blitcmd = [cmdbuffer blitCommandEncoder];
+        textureDescriptor.storageMode = MTLStorageModeManaged;
+        textureDescriptor.resourceOptions = MTLResourceStorageModeManaged;
+        textureDescriptor.usage = MTLTextureUsageShaderRead + MTLTextureUsageShaderWrite;
+        temp_texture = [_sg.mtl.device newTextureWithDescriptor:textureDescriptor];
+        if (temp_texture) {
+            id<MTLCommandBuffer> cmdbuffer = [_sg.mtl.cmd_queue commandBuffer];
+            id<MTLBlitCommandEncoder> blitcmd = [cmdbuffer blitCommandEncoder];
 
-                [blitcmd copyFromTexture:tex
-                sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(0,0,0) sourceSize:MTLSizeMake(width,height,1)
+            [blitcmd copyFromTexture:tex
+                sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(0,0,0)
+                sourceSize:MTLSizeMake(width,height,1)
                 toTexture:temp_texture
-                destinationSlice:0 destinationLevel:0 destinationOrigin:MTLOriginMake(0,0,0)];
+                destinationSlice:0 destinationLevel:0
+                destinationOrigin:MTLOriginMake(0,0,0)];
 
-                [blitcmd synchronizeTexture:temp_texture slice:0 level:0];
+            [blitcmd synchronizeTexture:temp_texture slice:0 level:0];
+            [blitcmd endEncoding];
 
-                [blitcmd endEncoding];
-
-                [cmdbuffer commit];
-
-                [cmdbuffer waitUntilCompleted];
-            }
+            [cmdbuffer commit];
+            [cmdbuffer waitUntilCompleted];
         }
-        if (temp_texture)
-        {
-            MTLRegion region = MTLRegionMake2D(0, 0, width, height);
-            NSUInteger rowbyte = width * 4;
-            [temp_texture getBytes:pixels bytesPerRow:rowbyte fromRegion:region mipmapLevel:0];
-            return true;
-        }
+    }
+    if (temp_texture) {
+        MTLRegion region = MTLRegionMake2D(0, 0, width, height);
+        NSUInteger rowbyte = width * 4;
+        [temp_texture getBytes:pixels bytesPerRow:rowbyte fromRegion:region mipmapLevel:0];
+        return true;
     }
 #endif // defined(SOKOL_METAL) && defined(EK_DEV_TOOLS)
     return false;
