@@ -1,11 +1,5 @@
 #include "logger.hpp"
 
-#if defined(_WIN32) || defined(_WIN64)
-
-#define _USE_32BIT_TIME_T
-
-#endif
-
 #include <cstdarg>
 
 #if defined(__ANDROID__)
@@ -121,7 +115,11 @@ void write(verbosity_t verbosity,
     struct timeval tmnow;
     struct tm *tm;
     gettimeofday(&tmnow, nullptr);
+#if defined(_WIN32) || defined(_WIN64)
+    tm = _localtime32(&tmnow.tv_sec);
+#else
     tm = localtime(&tmnow.tv_sec);
+#endif
     strftime(time, sizeof(time), "%d/%m/%Y %H:%M:%S", tm);
     snprintf(usec, sizeof(usec), "%03d/%02hhX", static_cast<int32_t>(tmnow.tv_usec / 1000), _frame);
     const char* prefix = nullptr;
