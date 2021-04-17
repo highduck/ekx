@@ -1,6 +1,5 @@
 #include "app.hpp"
 
-#include <cstring>
 #include <ek/ext/analytics/analytics.hpp>
 #include <mutex>
 #include <ek/assert.hpp>
@@ -11,18 +10,6 @@
 #include <Tracy.hpp>
 
 namespace ek::app {
-
-const char* Arguments::getValue(const char* key, const char* def) const {
-    for (int i = 0; i < argc; ++i) {
-        if (strcmp(key, argv[i]) == 0) {
-            if (i + 1 < argc) {
-                return argv[i + 1];
-            }
-            return def;
-        }
-    }
-    return def;
-}
 
 std::mutex event_queue_mtx;
 
@@ -143,7 +130,5 @@ void shutdown() {
     EK_TRACE << "app shutdown";
     ssAppState.shutdown();
 }
-
-Arguments args{};
 
 }

@@ -1,5 +1,6 @@
 #include <ek/app/app.hpp>
 #include <ek/util/logger.hpp>
+#include <ek/Arguments.hpp>
 
 #include <emscripten.h>
 #include <emscripten/html5.h>
@@ -294,7 +295,7 @@ void start_application() {
 }
 
 int main(int argc, char* argv[]) {
-    ::ek::app::args = {argc, argv};
+    ::ek::Arguments::current = {argc, argv};
     ::ek::main();
     return 0;
 }

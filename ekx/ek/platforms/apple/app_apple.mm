@@ -1,5 +1,6 @@
 #include "app_apple.h"
 #include <ek/app/app.hpp>
+#include <ek/Arguments.hpp>
 
 using namespace ek::app;
 
@@ -23,7 +24,7 @@ AppDelegate* gAppDelegate = nullptr;
 
 #ifndef EK_NO_MAIN
 int main(int argc, char* argv[]) {
-    args = {argc, argv};
+    ::ek::Arguments::current = {argc, argv};
     ::ek::main();
     return 0;
 }

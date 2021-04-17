@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 project(ek-core)
 
 add_library(${PROJECT_NAME} STATIC
+        ek/module.cpp
+
         ek/config.hpp
 
         ek/math/internal/compiler_unsafe_begin.h

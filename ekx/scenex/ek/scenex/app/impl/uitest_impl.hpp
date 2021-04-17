@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../uitest.hpp"
+#include <ek/Arguments.hpp>
 
 namespace ek::uitest {
 
@@ -77,14 +78,14 @@ void initialize(basic_application* baseApp) {
     _baseApp = baseApp;
     EK_ASSERT(_baseApp != nullptr);
 
-    _testToRun = app::args.getValue("--uitest", "");
-    lang = app::args.getValue("--lang", "");
+    _testToRun = Arguments::current.getValue("--uitest", "");
+    lang = Arguments::current.getValue("--lang", "");
     {
         float2 size{1, 1};
         float4 insets{0, 0, 0, 0};
         int flags = 0;
         sscanf(
-                app::args.getValue("--display", "9,16,0,0,0,0,1"),
+                Arguments::current.getValue("--display", "9,16,0,0,0,0,1"),
                 "%f,%f,%f,%f,%f,%f,%d",
                 size.data(), size.data() + 1,
                 insets.data(), insets.data() + 1, insets.data() + 2, insets.data() + 3,
@@ -93,7 +94,7 @@ void initialize(basic_application* baseApp) {
         const float2 appSize{480, 640};
         setSimulatorDisplaySettings(size, insets, flags == 1, appSize);
     }
-    screenshotOutputDir = app::args.getValue("--screenshot-output", "");
+    screenshotOutputDir = Arguments::current.getValue("--screenshot-output", "");
 
     _baseApp->onStartHook << runUITest;
 }
