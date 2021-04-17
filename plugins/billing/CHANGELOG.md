@@ -1,6 +1,17 @@
 # @ekx/plugin-billing
 
+## 0.0.3
+
+### Patch Changes
+
+- deebbb2: add guards if billing is not initialized
+- 0c89a5d: add debug logging on subsystems initialization
+- Updated dependencies [0c89a5d]
+- Updated dependencies [0c89a5d]
+  - @ekx/ekx@0.1.4
+
 ## 0.0.2
+
 ### Patch Changes
 
 - c694c12: up billing library 3.0.3
