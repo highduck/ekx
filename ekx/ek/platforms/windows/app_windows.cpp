@@ -1,5 +1,6 @@
 #include <ek/util/detect_platform.hpp>
 #include <ek/app/app.hpp>
+#include <ek/Arguments.hpp>
 
 #if EK_UWP
 
@@ -932,7 +933,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     int argc_utf8 = 0;
     char** argv_utf8 = command_line_to_utf8_argv(GetCommandLineW(), &argc_utf8);
 
-    ::ek::app::args = {argc_utf8, argv_utf8};
+    ::ek::Arguments::current = {argc_utf8, argv_utf8};
     ::ek::main();
 
     free(argv_utf8);

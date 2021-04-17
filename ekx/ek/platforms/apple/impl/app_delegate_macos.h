@@ -63,7 +63,7 @@ void handleQuitRequest() {
     bool doCenter = true;
     NSRect frame = NSMakeRect(0.0, 0.0, config.size.x, config.size.y);
     {
-        const char* wndSettings = app::args.getValue("--window", nullptr);
+        const char* wndSettings = Arguments::current.getValue("--window", nullptr);
         if (wndSettings != nullptr) {
             sscanf(wndSettings, "%lf,%lf,%lf,%lf",
                    &frame.origin.x, &frame.origin.y,

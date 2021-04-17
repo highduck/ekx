@@ -1,9 +1,11 @@
 #pragma once
+
 #include <ek/app/device.hpp>
 #include <ek/app/app.hpp>
+#include <ek/Arguments.hpp>
 
 int main(int argc, char* argv[]) {
-    ::ek::app::args = {argc, argv};
+    ::ek::Arguments::current = {argc, argv};
     ::ek::main();
     return 0;
 }

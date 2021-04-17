@@ -16,3 +16,4 @@
 - graphics: add `Texture::getPixels` method for Metal backend (to make screenshots on macOS)
 - changes for new initialization and preloading flow
 - ios: fix Metal default render pass reference
+- app arguments utility moved to core module

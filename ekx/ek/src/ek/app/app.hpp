@@ -35,13 +35,6 @@ struct window_config final {
     uint32_t backgroundColor = 0xFF000000;
 };
 
-struct Arguments final {
-    int argc = 0;
-    char** argv = nullptr;
-
-    const char* getValue(const char* key, const char* def) const;
-};
-
 enum class mouse_cursor : uint8_t {
     parent = 0,
     arrow,
@@ -136,8 +129,6 @@ struct event_t final {
     bool ctrl = false;
     bool alt = false;
 };
-
-extern Arguments args;
 
 struct app_state final {
     window_config window_cfg;
