@@ -117,7 +117,7 @@ void write(verbosity_t verbosity,
     gettimeofday(&tmnow, nullptr);
     tm = localtime(&tmnow.tv_sec);
     strftime(time, sizeof(time), "%d/%m/%Y %H:%M:%S", tm);
-    snprintf(usec, sizeof(usec), "%03d/%02hhX", tmnow.tv_usec / 1000, _frame);
+    snprintf(usec, sizeof(usec), "%03d/%02hhX", static_cast<int32_t>(tmnow.tv_usec / 1000), _frame);
     const char* prefix = nullptr;
     switch (verbosity) {
         case verbosity_t::info:
