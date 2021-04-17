@@ -1,5 +1,6 @@
 #include "app.hpp"
 
+#include <cstring>
 #include <ek/ext/analytics/analytics.hpp>
 #include <mutex>
 #include <ek/assert.hpp>
