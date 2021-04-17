@@ -1,5 +1,11 @@
 #include "logger.hpp"
 
+#if defined(_WIN32)
+
+#define _USE_32BIT_TIME_T
+
+#endif
+
 #include <cstdarg>
 
 #if defined(__ANDROID__)
