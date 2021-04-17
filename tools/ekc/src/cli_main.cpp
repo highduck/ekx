@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
 #include <ek/util/logger.hpp>
