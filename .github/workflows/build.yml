@@ -121,6 +121,12 @@ jobs:
           name: ekc-win32
           path: tools/ekc/bin/win32
 
+      - name: Set ekc permissions
+        run: |
+          chmod +x tools/ekc/bin/osx/ekc
+          chmod +x tools/ekc/bin/linux/ekc
+          chmod +x tools/ekc/bin/win32/ekc.exe
+
       - name: Intall Dependencies
         run: |
           yarn --version
