@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/ekx": "0.1.4",
-    "npm-cmake": "0.0.10"
+    "npm-cmake": "0.1.0"
   }
 }

@@ -13,6 +13,6 @@
     "@ekx/plugin-admob": "0.0.3",
     "@ekx/plugin-billing": "0.0.3",
     "@ekx/plugin-game-services": "0.0.3",
-    "npm-cmake": "0.0.10"
+    "npm-cmake": "0.1.0"
   }
 }
