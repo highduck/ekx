@@ -36,4 +36,29 @@ for (const buildType of buildTypes) {
     }
 }
 
+/////// cleaning up
+console.info("Remove build folder");
+
 fs.rmSync('build', {recursive: true});
+
+////// permissions
+function getExecutablePath() {
+    switch(process.platform) {
+        case "darwin":
+            return "bin/osx/ekc";
+        case "win32":
+            return "bin/win32/ekc.exe";
+        case "linux":
+            return "bin/linux/ekc";
+    }
+    console.error("Platform is not supported: " + process.platform);
+    throw "Platform is not supported";
+}
+
+const executablePath = getExecutablePath();
+
+console.info("Set executable permissions", executablePath);
+
+fs.chmodSync(executablePath, 0o755);
+
+console.info("Done");
