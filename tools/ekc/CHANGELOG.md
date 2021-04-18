@@ -1,5 +1,15 @@
 # @ekx/ekc
 
+## 0.1.4
+
+### Patch Changes
+
+- deebbb2: add support for `--dev` switch to include development assets during export
+- Updated dependencies [0c89a5d]
+- Updated dependencies [0c89a5d]
+  - @ekx/ekx@0.1.4
+  - @ekx/flash-export@0.0.3
+
 ## 0.1.3
 
 ### Patch Changes

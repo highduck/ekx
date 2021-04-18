@@ -1,6 +1,21 @@
 # @ekx/appbox
 
+## 0.0.3
+
+### Patch Changes
+
+- deebbb2: Add methods for UI testing
+- Updated dependencies [deebbb2]
+- Updated dependencies [0c89a5d]
+- Updated dependencies [0c89a5d]
+- Updated dependencies [deebbb2]
+  - @ekx/plugin-billing@0.0.3
+  - @ekx/ekx@0.1.4
+  - @ekx/plugin-admob@0.0.3
+  - @ekx/plugin-game-services@0.0.3
+
 ## 0.0.2
+
 ### Patch Changes
 
 - Updated dependencies [e79c61c]
