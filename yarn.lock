@@ -2019,7 +2019,7 @@ npm-cmake@0.0.10:
   resolved "https://registry.yarnpkg.com/npm-cmake/-/npm-cmake-0.0.10.tgz#643c0b04dcfe2560ad4beae343ccd22041e16eec"
   integrity sha512-xJ60fCGj9erMSAaAMUudROaKaoaqWDCGSqyiZfgwjZnpK0vlUlnPPlMQwjl6KErCP1eLvvg2CHyNvSMHFyPUIw==
 
-npm-cmake@0.1.0:
+npm-cmake@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/npm-cmake/-/npm-cmake-0.1.0.tgz#f41d06a45514c8116ca9b509fece3d4c108c7d3d"
   integrity sha512-5+KvNIcBoXN5uK0JCW8vURoNHSbapK4+QXLdzo8Eq8VCQyz8FVrboiEDuOZpE3gW9SnHrhhbUtQj3TWFKiZzfA==
