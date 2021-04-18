@@ -10,11 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/cairo": "0.0.6",
+    "@ekx/ekx": "0.1.4",
     "@ekx/freetype": "0.0.7",
     "@ekx/miniz": "0.0.3",
     "@ekx/pugixml": "0.0.3",
-    "@ekx/ekx": "0.1.4",
-    "npm-cmake": "^0.0.10"
+    "npm-cmake": "0.0.10"
   },
   "devDependencies": {
     "@ekx/sokol-shdc": "0.0.2"
