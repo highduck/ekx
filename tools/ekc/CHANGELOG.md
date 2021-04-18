@@ -1,5 +1,11 @@
 # @ekx/ekc
 
+## 0.1.6
+
+### Patch Changes
+
+- f19bfcd: Fix binary permissions
+
 ## 0.1.5
 
 ### Patch Changes
