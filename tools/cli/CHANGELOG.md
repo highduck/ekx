@@ -1,5 +1,20 @@
 ## 0.0.4
 
+## 0.1.4
+
+### Patch Changes
+
+- deebbb2: - add dev assets
+  - add `updateGoogleServicesConfig` command to fetch firebase project configuration changes
+  - add `screenshots` command to build and screenshot run ui test script
+  - add support async command execution
+  - ios template: remove project renaming
+- Updated dependencies [0c89a5d]
+- Updated dependencies [deebbb2]
+- Updated dependencies [0c89a5d]
+  - @ekx/ekx@0.1.4
+  - @ekx/ekc@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
