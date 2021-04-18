@@ -1,5 +1,11 @@
 # @ekx/ekc
 
+## 0.1.5
+
+### Patch Changes
+
+- b113128: Fix executable permissions
+
 ## 0.1.4
 
 ### Patch Changes
