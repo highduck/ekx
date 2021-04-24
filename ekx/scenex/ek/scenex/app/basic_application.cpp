@@ -2,7 +2,6 @@
 
 #include "input_controller.hpp"
 
-#include <ek/imaging/ImageSubSystem.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/2d/Viewport.hpp>
@@ -139,7 +138,9 @@ void registerSceneXComponents() {
     the_world.registerComponent<Interactive>();
     the_world.registerComponent<Tween>();
     the_world.registerComponent<Shake>();
+    the_world.registerComponent<Shaker>();
     the_world.registerComponent<ScriptHolder>();
+    the_world.registerComponent<Updater>();
     the_world.registerComponent<BubbleText>();
     the_world.registerComponent<PopupManager>();
     the_world.registerComponent<close_timeout>();
@@ -190,7 +191,7 @@ void basic_application::initialize() {
     Camera2D::Main = camera;
     append(root, camera);
 
-    layout_wrapper::designCanvasRect = {float2::zero, AppResolution};
+    LayoutRect::DesignCanvasRect = {float2::zero, AppResolution};
 }
 
 void basic_application::preload() {
@@ -217,10 +218,7 @@ void basic_application::on_draw_frame() {
     const float dt = std::min(static_cast<float>(frame_timer.update()), 0.3f);
     // fixed for GIF recorder
     //dt = 1.0f / 60.0f;
-
-    hook_on_update(dt);
-    update_frame(dt);
-
+    doUpdateFrame(dt);
     profiler.addTime("UPDATE", timer.read_millis());
     profiler.addTime("FRAME", timer.read_millis());
     timer.reset();
@@ -258,7 +256,7 @@ void basic_application::on_draw_frame() {
             r3d->render(display.info.size.x, display.info.size.y);
         }
 
-        render_frame();
+        doRenderFrame();
 
         draw2d::begin({0, 0, display.info.size.x, display.info.size.y});
 
@@ -281,7 +279,7 @@ void basic_application::on_draw_frame() {
             onRenderOverlay();
 
             draw2d::begin({0, 0, g_app.drawable_size.x, g_app.drawable_size.y});
-            on_frame_end();
+            onFrameEnd();
             profiler.draw();
             draw2d::end();
 
@@ -297,7 +295,7 @@ void basic_application::on_draw_frame() {
 
     if (!started_ && asset_manager_->is_assets_ready()) {
         EK_DEBUG << "Start Game";
-        start_game();
+        onAppStart();
         onStartHook();
         started_ = true;
     }
@@ -309,26 +307,11 @@ void basic_application::on_draw_frame() {
     profiler.update(frame_timer.delta_time());
 }
 
-void basic_application::update_frame(float dt) {
-    (void) dt;
-}
-
-void basic_application::render_frame() {
-    scene_render(root);
-}
-
-void basic_application::on_frame_end() {
-}
-
 void basic_application::preload_root_assets_pack() {
     rootAssetObject = asset_manager_->add_from_type("pack", "pack_meta");
     if (rootAssetObject) {
         rootAssetObject->load();
     }
-}
-
-void basic_application::start_game() {
-
 }
 
 void basic_application::on_event(const event_t& event) {
@@ -343,6 +326,19 @@ void basic_application::on_event(const event_t& event) {
 
     profiler.addTime("EVENTS", timer.read_millis());
     profiler.addTime("FRAME", timer.read_millis());
+}
+
+void basic_application::doUpdateFrame(float dt) {
+    hook_on_update(dt);
+    scene_pre_update(root, dt);
+    onUpdateFrame(dt);
+    scene_post_update(root);
+}
+
+void basic_application::doRenderFrame() {
+    onRenderSceneBefore();
+    scene_render(root);
+    onRenderSceneAfter();
 }
 
 void baseApp_drawFrame() {

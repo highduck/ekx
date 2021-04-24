@@ -74,6 +74,6 @@ void LayoutRect::updateAll() {
 }
 
 /**** wrapper ****/
-rect_f layout_wrapper::designCanvasRect{0.0f, 0.0f, 1.0f, 1.0f};
+rect_f LayoutRect::DesignCanvasRect{0.0f, 0.0f, 1.0f, 1.0f};
 
 }

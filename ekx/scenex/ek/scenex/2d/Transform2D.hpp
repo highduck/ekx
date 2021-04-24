@@ -185,6 +185,22 @@ struct Transform2D {
         updateMatrix2x2();
     }
 
+    void translate(float2 delta) {
+        setPosition(getPosition() + delta);
+    }
+
+    void lerpScale(float2 target, float t) {
+        setScale(lerp(getScale(), target, t));
+    }
+
+    void lerpPosition(float2 target, float t) {
+        setPosition(lerp(getPosition(), target, t));
+    }
+
+    void lerpRotation(float target, float t) {
+        setRotation(math::lerp(getRotation(), target, t));
+    }
+
     inline void updateMatrix2x2() {
         matrix.a = cosf(cachedSkew.y) * cachedScale.x;
         matrix.b = sinf(cachedSkew.y) * cachedScale.x;

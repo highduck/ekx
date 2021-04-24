@@ -25,11 +25,26 @@ ecs::EntityApi createNode2D(const char* name) {
     return e;
 }
 
-SGFile* sg_load(const std::vector<uint8_t>& buffer) {
+ecs::EntityApi createNode2D(ecs::EntityApi parent, const char* name, int index) {
+    auto e = createNode2D(name);
+    if(index == -1) {
+        append(parent, e);
+    }
+    else if(index == 0) {
+        prepend(parent, e);
+    }
+    else {
+        // not implemented yet
+        append(parent, e);
+    }
+    return e;
+}
+
+SGFile* sg_load(const void* data, uint32_t size) {
     SGFile* sg = nullptr;
 
-    if (!buffer.empty()) {
-        input_memory_stream input{buffer.data(), buffer.size()};
+    if (size > 0) {
+        input_memory_stream input{data, size};
         IO io{input};
 
         sg = new SGFile();
@@ -185,13 +200,16 @@ void extend_bounds(const SGFile& file, const SGNodeData& data, bounds_builder_2f
     }
 }
 
-ecs::EntityApi sg_create(const std::string& library, const std::string& name) {
-    ecs::EntityApi result;
+ecs::EntityApi sg_create(const std::string& library, const std::string& name, ecs::EntityApi parent) {
+    ecs::EntityApi result = nullptr;
     SGFileRes file{library};
     if (file) {
         const SGNodeData* data = sg_get(*file, name);
         if (data) {
             result = create_and_merge(*file, file, data);
+            if(result && parent) {
+                appendStrict(parent, result);
+            }
         } else {
             EK_WARN("SG Object %s not found in library %s", name.c_str(), library.c_str());
         }

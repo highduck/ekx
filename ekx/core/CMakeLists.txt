@@ -37,7 +37,7 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/math/easing.hpp
 
-        ek/math/rand.cpp
+        ek/math/rand_impl.hpp
         ek/math/rand.hpp
 
         ek/math/internal/static_check.hpp
@@ -86,7 +86,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/ds/Hash.hpp
 
         ek/timers.hpp
-        ek/timers.cpp
+        ek/timers_impl.hpp
 
         ecxx/impl/ecxx.cpp
 
@@ -94,6 +94,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/imaging/ImageSubSystem.cpp
         ek/imaging/ImageSubSystem.hpp
 
+        ek/impl/Arguments_impl.hpp
 
         )
 

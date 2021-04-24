@@ -55,6 +55,10 @@ struct SmallArray {
         EK_ASSERT(i < _size);
         return *(_data + i);
     }
+
+    inline void clear() {
+        _size = 0;
+    }
 };
 
 }

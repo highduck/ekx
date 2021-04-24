@@ -6,45 +6,23 @@
 
 namespace ek {
 
-class Lcg32 {
+uint32_t generateRandomSeedFromTime(uint32_t mask);
+
+struct Lcg32 {
     static constexpr uint32_t A = 1103515245u;
     static constexpr uint32_t C = 12345u;
     static constexpr uint32_t M = (1u << 31u) - 1;
 
-public:
+    uint32_t seed;
 
-    inline Lcg32() noexcept {
-        // Kind hack:
-        // 1) seed is uninitialized
-        // 2) normalize seed state
-        // seed_ = seed_ & M;
+    inline Lcg32() noexcept: seed{generateRandomSeedFromTime(M)} {}
 
-        // use this pointer address as initial state:
-        // - kindly undefined
-        // - static memory range could not give us full range...
-        //seed_ = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(this) & M);
-
-        seed_ = static_cast<uint32_t>(seed_ ^ reinterpret_cast<uintptr_t>(this)) & M;
-    }
-
-    inline explicit Lcg32(uint32_t seed) : seed_{seed} {}
+    inline explicit Lcg32(uint32_t initSeed) : seed{initSeed} {}
 
     inline uint32_t next() {
-        seed_ = (seed_ * A + C) & M;
-        return seed_;
+        seed = (seed * A + C) & M;
+        return seed;
     }
-
-    [[nodiscard]]
-    inline uint32_t seed() const {
-        return seed_;
-    }
-
-    inline void seed(uint32_t v) {
-        seed_ = v;
-    }
-
-private:
-    uint32_t seed_;
 };
 
 template<class Engine = Lcg32>
@@ -62,8 +40,13 @@ public:
         return engine.next();
     }
 
-    inline void set_seed(uint32_t seed) {
-        engine.seed(seed);
+    inline void setSeed(uint32_t seed) {
+        engine.seed = seed;
+    }
+
+    [[nodiscard]]
+    inline uint32_t getSeed() const {
+        return engine.seed;
     }
 
     inline float random() {
@@ -88,6 +71,10 @@ public:
     inline T random_element(const Container& array) {
         const auto size = static_cast<uint32_t>(array.size());
         return size > 0 ? array[roll(size)] : T{};
+    }
+
+    inline void randomizeFromTime() {
+        engine.randomizeFromTime();
     }
 
     Engine engine{};

@@ -17,15 +17,15 @@ matrix_2d Camera2D::getMatrix(ecs::EntityApi root_, float scale, const float2& s
     auto screen = screenRect;
     auto m = root_.get<WorldTransform2D>().matrix;
     float invScale = 1.0f / (scale * contentScale);
-    m.scale(invScale, invScale).translate(screen.position - relativeOrigin * screen.size-screenOffset);
+    m.scale(invScale, invScale).translate( -screen.position - relativeOrigin * screen.size - screenOffset);
     return m;
 }
 
-static std::vector<ecs::EntityApi> activeCameras{};
+static SmallArray<ecs::EntityApi, Camera2D::MaxCount> activeCameras{};
 static const Camera2D* currentRenderingCamera = nullptr;
 static int currentLayerMask = 0xFF;
 
-std::vector<ecs::EntityApi>& Camera2D::getCameraQueue() {
+SmallArray<ecs::EntityApi, Camera2D::MaxCount>& Camera2D::getCameraQueue() {
     return activeCameras;
 }
 
@@ -41,7 +41,7 @@ void Camera2D::updateQueue() {
 
         // maybe we need region from not 0,0 started input rect
         camera.screenRect = {
-                vp.input.fullRect.position * camera.viewport.position,
+                vp.input.fullRect.position + vp.input.fullRect.size * camera.viewport.position,
                 vp.input.fullRect.size * camera.viewport.size
         };
 
@@ -66,11 +66,16 @@ void Camera2D::updateQueue() {
 void Camera2D::render() {
     for (auto e : activeCameras) {
         auto& camera = e.get<Camera2D>();
+        if (camera.screenRect.empty()) {
+            continue;
+        }
+
         // set current
         currentRenderingCamera = &camera;
         currentLayerMask = camera.layerMask;
 
         draw2d::begin(camera.screenRect, camera.worldToScreenMatrix);
+        sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.width, camera.screenRect.height, true);
         if (camera.clearColorEnabled) {
             draw2d::state.pushProgram("draw2d_color");
             draw2d::state.color = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};

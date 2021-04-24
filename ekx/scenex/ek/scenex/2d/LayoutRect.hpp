@@ -20,6 +20,12 @@ struct LayoutRect {
     rect_f rect;
     rect_f safeRect;
 
+    LayoutRect& aligned(float relativeX, float absoluteX, float relativeY, float absoluteY) {
+        enableAlignX(relativeX, absoluteX);
+        enableAlignY(relativeY, absoluteY);
+        return *this;
+    }
+
     LayoutRect& enableAlignX(float relative, float absolute = 0.0f) {
         align_x = true;
         x.x = relative;
@@ -45,7 +51,33 @@ struct LayoutRect {
         return *this;
     }
 
+    static void hard(ecs::EntityApi e, float x, float y) {
+        if(e) {
+            const auto pos = e.get_or_create<Transform2D>().getPosition();
+            e.get_or_create<LayoutRect>().aligned(
+                    x, pos.x - (DesignCanvasRect.x + DesignCanvasRect.width * x),
+                    y, pos.y - (DesignCanvasRect.y + DesignCanvasRect.height * y)
+            );
+        }
+    }
+
+    static void hardX(ecs::EntityApi e, float x = 0.0f) {
+        const auto pos = e.get_or_create<Transform2D>().getPosition();
+        e.get_or_create<LayoutRect>().enableAlignX(
+                x, pos.x - (DesignCanvasRect.x + DesignCanvasRect.width * x)
+        );
+    }
+
+    static void hardY(ecs::EntityApi e, float y = 0.0f) {
+        const auto pos = e.get_or_create<Transform2D>().getPosition();
+        e.get_or_create<LayoutRect>().enableAlignY(
+                y, pos.y - (DesignCanvasRect.y + DesignCanvasRect.height * y)
+        );
+    }
+
     static void updateAll();
+
+    static rect_f DesignCanvasRect;
 };
 
 rect_f find_parent_layout_rect(ecs::EntityApi e, bool safe);
@@ -60,8 +92,6 @@ public:
             l_{e.get_or_create<LayoutRect>()} {
     }
 
-    static rect_f designCanvasRect;
-
     layout_wrapper& aligned(float rel_x = 0.0f, float abs_x = 0.0f, float rel_y = 0.0f, float abs_y = 0.0f) {
         horizontal(rel_x, abs_x);
         vertical(rel_y, abs_y);
@@ -69,15 +99,12 @@ public:
     }
 
     layout_wrapper& hard(float x, float y) {
-        const auto pos = e_.get_or_create<Transform2D>().getPosition();
-        horizontal(x, pos.x - (designCanvasRect.x + designCanvasRect.width * x));
-        vertical(y, pos.y - (designCanvasRect.y + designCanvasRect.height * y));
+        LayoutRect::hard(e_, x, y);
         return *this;
     }
 
     layout_wrapper& hard_y(float y = 0.0f) {
-        const auto posY = e_.get_or_create<Transform2D>().getPosition().y;
-        vertical(y, posY - (designCanvasRect.y + designCanvasRect.height * y));
+        LayoutRect::hardY(e_, y);
         return *this;
     }
 

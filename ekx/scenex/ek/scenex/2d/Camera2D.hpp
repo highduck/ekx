@@ -4,11 +4,13 @@
 #include <ek/math/vec.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/mat.hpp>
-#include <vector>
+#include <ek/ds/SmallArray.hpp>
 
 namespace ek {
 
 struct Camera2D {
+    inline static constexpr unsigned MaxCount = 16;
+
     bool enabled = true;
     bool interactive = true;
     bool occlusionEnabled = true;
@@ -58,7 +60,7 @@ public:
 
     static void drawGizmo(Camera2D& camera);
 
-    static std::vector<ecs::EntityApi>& getCameraQueue();
+    static SmallArray<ecs::EntityApi, MaxCount>& getCameraQueue();
 
     static const Camera2D* getCurrentRenderingCamera();
 };

@@ -68,6 +68,10 @@ T reach(T current, T target, T step) {
     return current;
 }
 
+inline void reachValue(float& value, float target, float step) {
+    value = reach(value, target, step);
+}
+
 template<typename T>
 T reach_delta(T current, T target, T delta_up, T delta_down) {
     if (current < target && delta_up > 0) {
@@ -153,5 +157,27 @@ inline unsigned int nextPowerOf2(unsigned int x) {
 //    }.i - magic.i;
 //}
 
+inline float integrateExp(float k, float dt, float fps = 60.0f) {
+    float c = logf(1.0f - k) * fps;
+    return 1.0f - expf(c * dt);
+}
+
+// normalized parameter sin/cos: (0 ... 1) => (-1 ~ 1 ~ -1)
+inline float normSin(float x){
+    return sinf(fPI2 * x);
+}
+
+inline float normCos(float x){
+    return cosf(fPI2 * x);
+}
+
+// unit sin/cos: (0 ... 1) => (0 ~ 1 ~ 0)
+inline float unitSin(float x){
+    return 0.5f + 0.5f * normSin(x);
+}
+
+inline float unitCos(float x){
+    return 0.5f + 0.5f * normCos(x);
+}
 
 }

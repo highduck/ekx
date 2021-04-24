@@ -34,4 +34,25 @@ void Shake::add(ecs::EntityApi e, float time, float strength) {
     state.strength = strength;
 }
 
+inline float2 randomF2(float min, float max) {
+    return float2{random(min, max), random(min, max)};
+}
+
+void Shaker::updateAll() {
+    for (auto e: ecs::view<Shaker>()) {
+        auto& data = e.get<Shaker>();
+        const auto dt = data.timer->dt;
+        data.state = math::reach(data.state, 0.0f, dt);
+        const auto r = math::integrateExp(0.9f, dt);
+
+        const auto posTarget = randomF2(0.0f, 1.0f) * data.maxOffset * data.state;
+        const auto rotTarget = random(-0.5f, 0.5f) * data.maxRotation * data.state;
+        const auto scaleTarget = float2::one + randomF2(-0.5f, 0.5f) * data.maxScale * data.state;
+        auto& pos = e.get<Transform2D>();
+        pos.setRotation(math::lerp(pos.getRotation(), rotTarget, r));
+        pos.setScale(lerp(pos.getScale(), scaleTarget, r));
+        pos.setPosition(lerp(pos.getPosition(), posTarget, r));
+    }
+}
+
 }

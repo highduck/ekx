@@ -125,6 +125,11 @@ struct Display2D {
     }
 
     template<typename T>
+    static T& get(ecs::EntityApi e) {
+        return e.get<Display2D>().get<T>();
+    }
+
+    template<typename T>
     T& makeDrawable() {
         drawable = std::move(std::make_unique<T>());
         return static_cast<T&>(*drawable);
@@ -155,6 +160,11 @@ public:
         colors[0] = colors[1] = colors[2] = colors[3] = color;
         return *this;
     };
+
+    inline Quad2D& setHalfExtents(float hw, float hh) {
+        rect.set(-hw, -hh, 2.0f * hw, 2.0f * hh);
+        return *this;
+    }
 };
 
 // 8 + 1 = 9 bytes

@@ -181,7 +181,7 @@ public:
         get_resource_content_async(
                 (project_->base_path / path_ + ".sg").c_str(),
                 [this](auto buffer) {
-                    Res<SGFile>{path_}.reset(sg_load(buffer));
+                    Res<SGFile>{path_}.reset(sg_load(buffer.data(), static_cast<uint32_t>(buffer.size())));
                     state = AssetObjectState::Ready;
                 });
     }
