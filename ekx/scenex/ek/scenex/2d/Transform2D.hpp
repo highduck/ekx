@@ -81,6 +81,12 @@ struct Transform2D {
         matrix.ty = y + matrix.d * yy + matrix.b * xx;
     }
 
+    void scale(float factor) {
+        cachedScale.x *= factor;
+        cachedScale.y *= factor;
+        updateMatrix2x2();
+    }
+
     void setScale(float value) {
         cachedScale.x = value;
         cachedScale.y = value;
@@ -227,6 +233,7 @@ struct Transform2D {
 /** system to invalidate matrix and color in world space **/
 //void updateWorldTransform2D(ecs::EntityApi root);
 void updateWorldTransformAll(ecs::World* w, ecs::EntityApi root);
+
 void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root);
 
 /** utility functions **/
