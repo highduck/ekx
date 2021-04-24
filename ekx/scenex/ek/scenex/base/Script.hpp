@@ -2,10 +2,17 @@
 
 #include <ecxx/ecxx.hpp>
 #include <ek/util/type_index.hpp>
+#include <ek/timers.hpp>
+#include <ek/util/StaticSignal.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <vector>
 
 namespace ek {
+
+struct Updater {
+    StaticSignal<ecs::EntityApi, TimeLayer> onUpdate{};
+    TimeLayer timeLayer = TimeLayer::Root;
+};
 
 class ScriptBase {
 public:

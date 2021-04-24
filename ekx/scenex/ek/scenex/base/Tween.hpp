@@ -18,6 +18,11 @@ struct Tween {
     static void updateAll();
 
     static Tween& reset(ecs::EntityApi e);
+
+    void setOptions(float duration_ = 1.0f, float delay_ = 0.0f) {
+        duration = duration_;
+        delay = delay_;
+    }
 };
 
 }

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "timers.hpp"
 
 #define SOKOL_TIME_IMPL

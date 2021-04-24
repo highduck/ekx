@@ -23,6 +23,7 @@ inline void constructCopy(T* dest, const T* src, unsigned count) {
 template<typename T>
 class Array {
 public:
+    using value_type = T;
     Allocator& _allocator;
     uint32_t _capacity;
     uint32_t _size;

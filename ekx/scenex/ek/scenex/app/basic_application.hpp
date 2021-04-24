@@ -69,19 +69,25 @@ public:
     asset_object_t* rootAssetObject = nullptr;
 
 protected:
-    //void on_event(const app::event_t& event);
+    void doUpdateFrame(float dt);
 
-    virtual void update_frame(float dt);
-
-    virtual void render_frame();
-
-    void on_frame_end();
+    void doRenderFrame();
 
     virtual void preload_root_assets_pack();
 
-    virtual void start_game();
-
     bool started_ = false;
+
+
+    // after root pack resources are loaded
+    virtual void onAppStart() {}
+
+    virtual void onUpdateFrame(float dt) { (void) dt; }
+
+    virtual void onRenderSceneBefore() {}
+
+    virtual void onRenderSceneAfter() {}
+
+    virtual void onFrameEnd() {}
 };
 
 inline float2 basic_application::AppResolution{};

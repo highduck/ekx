@@ -74,7 +74,7 @@ void handleQuitRequest() {
     if (!doCenter) {
         // Window bounds (x, y, width, height)
         NSRect screenRect = [[NSScreen mainScreen] frame];
-        CGFloat scaleFactor = [[NSScreen mainScreen] backingScaleFactor];
+        //CGFloat scaleFactor = [[NSScreen mainScreen] backingScaleFactor];
         frame = NSMakeRect(frame.origin.x,
                            screenRect.size.height - frame.origin.y - frame.size.height,
                            frame.size.width,

@@ -21,6 +21,11 @@ void updateScripts() {
                     }
                 }
             });
+
+    for(auto e : ecs::view<Updater>()) {
+        auto& updater = e.get<Updater>();
+        updater.onUpdate(e, updater.timeLayer);
+    }
 }
 
 void ScriptHolder::link(ecs::EntityApi owner_) {
