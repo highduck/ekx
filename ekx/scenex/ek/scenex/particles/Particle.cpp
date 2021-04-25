@@ -49,6 +49,22 @@ void Particle::update_current_values() {
         case particle_alpha_mode::LifeSin:
             color.af(alpha * sinf(float(math::pi) * time / time_total));
             break;
+        case particle_alpha_mode::DCBlink: {
+            float a = 0.25f;
+            if (time > 0.75f) {
+                a = 1.0f - time;
+            } else if (time < 0.25f) {
+                a = time;
+            }
+            a *= 4.0f;
+            color.a = alpha * a;
+        }
+            break;
+        case particle_alpha_mode::QuadOut: {
+            float x = 1.0f - time / time_total;
+            color.af(alpha * (1.0f - x * x);
+        }
+            break;
         default:
             color.af(alpha);
             break;

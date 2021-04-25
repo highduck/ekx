@@ -19,7 +19,9 @@ enum class particle_scale_mode {
 enum class particle_alpha_mode {
     None = 0,
     ByScale = 1,
-    LifeSin = 2
+    LifeSin = 2,
+    DCBlink = 3,
+    QuadOut = 4
 };
 
 enum class rand_color_mode {

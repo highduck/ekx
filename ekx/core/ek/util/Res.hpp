@@ -44,6 +44,13 @@ public:
         slot_->content = res;
     }
 
+    // assign value-type via copy
+    inline void assign(const T& res) {
+        T* pRes = new T();
+        *pRes = res;
+        reset(pRes);
+    }
+
     inline const T* get() const {
         return slot_->content;
     }
