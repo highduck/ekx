@@ -39,7 +39,7 @@ Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl) {
     return p;
 }
 
-void particles_burst(ecs::EntityApi e, int count) {
+void particles_burst(ecs::EntityApi e, int count, float2 relativeVelocity) {
     auto& emitter = e.get<ParticleEmitter2D>();
     const auto& data = e.get<ParticleEmitter2D>().data;
     const auto position = e.get_or_default<Transform2D>().getPosition() + emitter.position;
@@ -54,10 +54,9 @@ void particles_burst(ecs::EntityApi e, int count) {
         p.position = pos;
         float speed = data.speed.random();
         float acc = data.acc.random();
-        float dx = cosf(a);
-        float dy = sinf(a);
-        p.velocity = float2(dx * speed, dy * speed);
-        p.acc = float2(p.acc.x + dx * acc, p.acc.y + dy * acc);
+        const float2 dir{cosf(a), sinf(a)};
+        p.velocity = speed * dir + relativeVelocity;
+        p.acc += dir * acc;
         if (emitter.on_spawn) {
             emitter.on_spawn(e, p);
         }
@@ -121,6 +120,32 @@ Particle* spawn_particle(ecs::EntityApi e, const std::string& particle_id) {
         return &produce_particle(to_layer, *decl);
     }
     return nullptr;
+}
+
+void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const ParticleDecl& decl, ParticleEmitter2D& emitter, int count) {
+    if (count <= 0) {
+        return;
+    }
+    const auto& data = emitter.data;
+    auto a = data.dir.random();
+    auto& layerComp = toLayer.get<ParticleLayer2D>();
+    while (count > 0) {
+        auto& p = produce_particle(layerComp, decl);
+        const float2 position = data.offset + data.rect.position + data.rect.size * float2{random(), random()};
+        const float2 dir{cosf(a), sinf(a)};
+        const auto speed = data.speed.random();
+        const auto acc = data.acc.random();
+        p.position = Transform2D::localToLocal(src, toLayer, position);
+        p.velocity = speed * dir + emitter.velocity;
+        p.acc += dir * acc;
+        if (emitter.on_spawn) {
+            // TODO: EMITTER ENTITY!? and not `src` entity or `layer` entity?
+            emitter.on_spawn(src, p);
+        }
+
+        --count;
+        a += data.burst_rotation_delta.random();
+    }
 }
 
 void update_particles() {

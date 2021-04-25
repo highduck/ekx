@@ -117,10 +117,10 @@ struct Display2D {
         return drawable ? drawable->getBounds() : rect_f{};
     }
 
-    template<typename T>
-    static T& make(ecs::EntityApi e) {
+    template<typename T, typename ...Args>
+    inline static T& make(ecs::EntityApi e, Args&& ...args) {
         auto& d = e.get_or_create<Display2D>();
-        d.drawable = std::move(std::make_unique<T>());
+        d.drawable = std::move(std::make_unique<T>(args...));
         return static_cast<T&>(*d.drawable);
     }
 
@@ -140,7 +140,7 @@ struct Display2D {
 class Quad2D : public Drawable2D<Quad2D> {
 public:
     rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
-    argb32_t colors[4]{};
+    argb32_t colors[4]{argb32_t::one, argb32_t::one, argb32_t::one, argb32_t::one};
 
     void draw() override;
 

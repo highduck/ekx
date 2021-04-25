@@ -8,7 +8,8 @@ namespace ek {
 
 void Trail2D::update(const matrix_2d& m) {
     float dt = timer->dt;
-    scale = length(m.scale());
+    auto scale2 = m.scale();
+    scale = fminf(scale2.x, scale2.y);
     update_position(m.transform(offset));
 
     for (uint32_t i = nodes.first; i < nodes.end; ++i) {
@@ -93,9 +94,17 @@ void TrailRenderer2D::draw() {
 
     const auto co = drawer.color.offset;
     const auto cm = drawer.color.scale;
-    const auto texCoordU = spr->tex.center_x();
-    const auto texCoordV0 = spr->tex.y;
-    const auto texCoordV1 = spr->tex.bottom();
+    auto texCoordU0 = spr->tex.center_x();
+    auto texCoordV0 = spr->tex.y;
+    auto texCoordU1 = spr->tex.center_x();
+    auto texCoordV1 = spr->tex.bottom();
+    if(spr->rotated) {
+        texCoordU0 = spr->tex.x;
+        texCoordV0 = spr->tex.center_y();
+        texCoordU1 = spr->tex.right();
+        texCoordV1 = spr->tex.center_y();
+    }
+
     //const auto m = drawer.matrix;
     //drawer.matrix.set
     auto* ptr = drawer.vertexDataPos_;
@@ -115,17 +124,20 @@ void TrailRenderer2D::draw() {
         perp = perpendicular(perp);
 
         const auto energy = nodeArray[node_idx].energy;
-        perp *= nodeArray[node_idx].scale * math::lerp(minWidth, width, easing::P2_OUT.calculate(energy));
+        const auto easedEnergy = easing::P2_OUT.calculate(energy);
+        const auto r = math::lerp(minWidth, width, easedEnergy);
+        const auto nodeScale = nodeArray[node_idx].scale;
+        perp *= nodeScale * r;
 
         const auto cm0 = cm.scaleAlpha(energy);
         ptr->position = p - perp;
-        ptr->uv.x = texCoordU;
+        ptr->uv.x = texCoordU0;
         ptr->uv.y = texCoordV0;
         ptr->cm = cm0;
         ptr->co = co;
         ++ptr;
         ptr->position = p + perp;
-        ptr->uv.x = texCoordU;
+        ptr->uv.x = texCoordU1;
         ptr->uv.y = texCoordV1;
         ptr->cm = cm0;
         ptr->co = co;

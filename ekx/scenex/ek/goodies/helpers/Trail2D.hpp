@@ -69,7 +69,7 @@ struct Trail2D {
 
     TimeLayer timer;
     float2 offset;
-    float drain_speed = 1.0f;
+    float drain_speed = 2.0f;
     float segment_distance_max = 10.0f;
 //    float particles_per_second = 15.0f;
 
@@ -112,6 +112,7 @@ public:
 public:
     ecs::World* w = nullptr;
     ecs::EntityApi target{};
+    // max width
     float width = 20.0f;
     float minWidth = 5.0f;
     Res<Sprite> sprite{"empty"};

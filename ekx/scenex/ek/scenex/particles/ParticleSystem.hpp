@@ -19,6 +19,7 @@ struct ParticleEmitter2D {
 
     emitter_data data;
     float2 position = float2::zero;
+    float2 velocity = float2::zero;
     SpawnCallback* on_spawn = nullptr;
     std::string particle;
     ecs::EntityRef layer;
@@ -52,9 +53,10 @@ public:
     ecs::EntityRef target{};
 };
 
-void particles_burst(ecs::EntityApi e, int count);
+void particles_burst(ecs::EntityApi e, int count, float2 relativeVelocity = float2::zero);
 
 Particle* spawn_particle(ecs::EntityApi e, const std::string& particle_id);
+void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const ParticleDecl& decl, ParticleEmitter2D& emitter, int count);
 
 void update_emitters();
 
@@ -62,6 +64,7 @@ void update_particles();
 
 void draw_particle_layer(ecs::EntityApi e);
 
+ParticleLayer2D& find_particle_layer(ecs::EntityApi e);
 Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl);
 
 }
