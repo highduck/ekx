@@ -130,6 +130,12 @@ struct Display2D {
     }
 
     template<typename T>
+    static T* tryGet(ecs::EntityApi e) {
+        auto* display = e.tryGet<Display2D>();
+        return display ? display->tryGet<T>() : nullptr;
+    }
+
+    template<typename T>
     T& makeDrawable() {
         drawable = std::move(std::make_unique<T>());
         return static_cast<T&>(*drawable);
@@ -139,6 +145,7 @@ struct Display2D {
 // 16 + 16 = 32 bytes
 class Quad2D : public Drawable2D<Quad2D> {
 public:
+    Res<Sprite> src{"empty"};
     rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
     argb32_t colors[4]{argb32_t::one, argb32_t::one, argb32_t::one, argb32_t::one};
 

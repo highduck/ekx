@@ -40,12 +40,16 @@ Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl) {
 }
 
 void particles_burst(ecs::EntityApi e, int count, float2 relativeVelocity) {
-    auto& emitter = e.get<ParticleEmitter2D>();
-    const auto& data = e.get<ParticleEmitter2D>().data;
-    const auto position = e.get_or_default<Transform2D>().getPosition() + emitter.position;
+    if(count < 0) {
+        return;
+    }
+    const auto& emitter = e.get<ParticleEmitter2D>();
+    const auto& data = emitter.data;
+    auto layerEntity = emitter.layer.get();
+    auto& layer = layerEntity.get<ParticleLayer2D>();
+    const auto position = Transform2D::localToLocal(e, layerEntity, emitter.position);
     float a = data.dir.random();
     Res<ParticleDecl> decl{emitter.particle};
-    auto& layer = find_particle_layer(e);
     while (count > 0) {
         auto& p = produce_particle(layer, *decl);
         float2 pos = position;
@@ -72,34 +76,28 @@ void update_emitters() {
         if (!emitter.enabled || emitter.particle.empty()) {
             continue;
         }
-
-        auto& layer = find_particle_layer(e);
-        auto position = e.get_or_default<Transform2D>().getPosition();
-
         emitter.time += dt;
         const auto& data = emitter.data;
         if (emitter.time >= data.interval) {
+            auto layerEntity = emitter.layer.get();
+            auto& layer = layerEntity.get<ParticleLayer2D>();
+            auto position = data.offset;
+            position = Transform2D::localToLocal(e, layerEntity, position);
+
             Res<ParticleDecl> decl{emitter.particle};
             int count = data.burst;
             float a = data.dir.random();
             while (count > 0) {
                 auto& p = produce_particle(layer, *decl);
-                float x = 0.0f;
-                float y = 0.0f;
-                x += position.x;
-                y += position.y;
-                x += data.offset.x;
-                y += data.offset.y;
-                x += random(data.rect.x, data.rect.right());
-                y += random(data.rect.y, data.rect.bottom());
-
-                p.position = float2(x, y);
+                float2 pos = position + data.offset;
+                pos.x += random(data.rect.x, data.rect.right());
+                pos.y += random(data.rect.y, data.rect.bottom());
+                p.position = pos;
                 float speed = data.speed.random();
                 float acc = data.acc.random();
-                float dx = cosf(a);
-                float dy = sinf(a);
-                p.velocity = float2(dx * speed, dy * speed);
-                p.acc = float2(dx * acc, dy * acc);
+                const float2 dir{cosf(a), sinf(a)};
+                p.velocity = speed * dir;
+                p.acc = acc * dir;
 
                 if (emitter.on_spawn) {
                     emitter.on_spawn(e, p);
@@ -122,7 +120,8 @@ Particle* spawn_particle(ecs::EntityApi e, const std::string& particle_id) {
     return nullptr;
 }
 
-void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const ParticleDecl& decl, ParticleEmitter2D& emitter, int count) {
+void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const ParticleDecl& decl, ParticleEmitter2D& emitter,
+                      int count) {
     if (count <= 0) {
         return;
     }

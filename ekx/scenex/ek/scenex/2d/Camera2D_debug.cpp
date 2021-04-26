@@ -4,6 +4,7 @@
 #include <ek/timers.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include "Camera2D.hpp"
+#include "Viewport.hpp"
 #include "Transform2D.hpp"
 #include "Display2D.hpp"
 #include <ek/scenex/base/Script.hpp>
@@ -162,6 +163,15 @@ void debugCameraGizmo(Camera2D& camera) {
     auto rc = expand(camera.worldRect, -10.0f);
     drawBox(rc, matrix_2d{}, 0xFFFFFFFF_argb, 0xFF000000_argb);
 
+    {
+        // it's not correct because:
+        // - viewport's viewport is applied
+        // - viewport's MVP matrix
+        // TODO: make display-space debug drawing for all viewports via inspector
+        const auto& vp = camera.viewportNode.get().get<Viewport>();
+        draw2d::quad(vp.output.safeRect, 0x77FF00FF_argb);
+        draw2d::quad(0.0f, 0.0f, vp.options.baseResolution.x, vp.options.baseResolution.y, 0x7700FFFF_argb);
+    }
     auto v = camera.screenToWorldMatrix.transform(camera.screenRect.relative(camera.relativeOrigin));
 
     draw2d::fill_circle({v, 10.0f}, 0x00FFFFFF_argb, 0x44FFFFFF_argb, 7);
@@ -186,6 +196,8 @@ void Camera2D::drawGizmo(Camera2D& camera) {
         debugDrawPointer(camera);
     }
     if (camera.debugGizmoSelf) {
+        draw2d::state.matrix.set_identity();
+        draw2d::state.color = {};
         debugCameraGizmo(camera);
     }
     if (camera.debugDrawScriptGizmo) {

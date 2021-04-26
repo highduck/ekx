@@ -22,7 +22,6 @@ struct Camera2D {
     ecs::EntityRef root;
     float contentScale = 1;
 
-    rect_f viewport = rect_f::zero_one;
     float2 relativeOrigin{};
 
     bool clearColorEnabled = false;
@@ -51,7 +50,7 @@ public:
 
     explicit Camera2D(ecs::EntityApi root);
 
-    [[nodiscard]] matrix_2d getMatrix(ecs::EntityApi view, float scale, const float2& screenOffset) const;
+    [[nodiscard]] matrix_2d getMatrix(ecs::EntityApi view, float scale, const float2& screenOffset, const float2& screenSize) const;
 
 public:
     static void updateQueue();

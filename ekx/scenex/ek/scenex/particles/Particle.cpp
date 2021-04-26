@@ -62,7 +62,7 @@ void Particle::update_current_values() {
             break;
         case particle_alpha_mode::QuadOut: {
             float x = 1.0f - time / time_total;
-            color.af(alpha * (1.0f - x * x);
+            color.af(alpha * (1.0f - x * x));
         }
             break;
         default:

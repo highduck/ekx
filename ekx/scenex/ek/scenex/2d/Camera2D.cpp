@@ -13,11 +13,13 @@ void drawEntity(ecs::EntityApi e, const Transform2D* transform);
 
 ecs::EntityApi Camera2D::Main{};
 
-matrix_2d Camera2D::getMatrix(ecs::EntityApi root_, float scale, const float2& screenOffset) const {
-    auto screen = screenRect;
+matrix_2d
+Camera2D::getMatrix(ecs::EntityApi root_, float scale, const float2& screenOffset, const float2& screenSize) const {
+//    auto screen = screenRect;
     auto m = root_.get<WorldTransform2D>().matrix;
     float invScale = 1.0f / (scale * contentScale);
-    m.scale(invScale, invScale).translate( -screen.position - relativeOrigin * screen.size - screenOffset);
+//    m.scale(invScale, invScale).translate( -screen.position - relativeOrigin * screen.size - screenOffset);
+    m.translate(-relativeOrigin * screenSize).scale(invScale, invScale).translate( - screenOffset);
     return m;
 }
 
@@ -40,13 +42,8 @@ void Camera2D::updateQueue() {
         }
 
         // maybe we need region from not 0,0 started input rect
-        camera.screenRect = {
-                vp.input.fullRect.position + vp.input.fullRect.size * camera.viewport.position,
-                vp.input.fullRect.size * camera.viewport.size
-        };
-
-        camera.screenToWorldMatrix = camera.getMatrix(e, vp.output.scale, vp.output.offset);
-
+        camera.screenRect = vp.output.screenRect;
+        camera.screenToWorldMatrix = camera.getMatrix(e, vp.output.scale, vp.output.offset, vp.options.baseResolution);
         camera.worldRect = bounds_builder_2f::transform(camera.screenRect, camera.screenToWorldMatrix);
 
         camera.worldToScreenMatrix = camera.screenToWorldMatrix;
@@ -54,7 +51,7 @@ void Camera2D::updateQueue() {
             activeCameras.push_back(e);
         } else {
             // please debug camera setup
-            assert(false);
+            //EK_ASSERT(false);
         }
     }
     std::sort(activeCameras.begin(), activeCameras.end(), [](ecs::EntityApi a, ecs::EntityApi b) -> bool {
@@ -75,7 +72,8 @@ void Camera2D::render() {
         currentLayerMask = camera.layerMask;
 
         draw2d::begin(camera.screenRect, camera.worldToScreenMatrix);
-        sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.width, camera.screenRect.height, true);
+        sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.width, camera.screenRect.height,
+                           true);
         if (camera.clearColorEnabled) {
             draw2d::state.pushProgram("draw2d_color");
             draw2d::state.color = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};
@@ -87,7 +85,9 @@ void Camera2D::render() {
         RenderSystem2D::draw(ecs::the_world, camera.root.index(), camera.root.get().tryGet<WorldTransform2D>());
 
 #ifndef NDEBUG
+//        draw2d::begin(camera.screenRect, camera.worldToScreenMatrix);
         drawGizmo(camera);
+//        sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.width, camera.screenRect.height, true);
 #endif
 
         draw2d::end();

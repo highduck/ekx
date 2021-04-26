@@ -16,6 +16,7 @@
 #include <ek/scenex/2d/UglyFilter2D.hpp>
 #include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
+#include <ek/scenex/2d/Viewport.hpp>
 
 namespace ek {
 
@@ -118,6 +119,24 @@ void guiTransform2D(Transform2D& transform) {
     }
 }
 
+void guiViewport(Viewport& vp) {
+    ImGui::EditRect("Viewport", vp.options.viewport.data());
+    ImGui::DragFloat2("Alignment", vp.options.alignment.data());
+    ImGui::DragFloat2("Base Resolution", vp.options.baseResolution.data());
+    ImGui::DragFloat2("Pixel Ratio", vp.options.pixelRatio.data());
+    ImGui::DragFloat2("Safe Area Fit", vp.options.safeAreaFit.data());
+    ImGui::Checkbox("Scale To Resolution", &vp.options.scaleToResolution);
+    if(ImGui::CollapsingHeader("Debug Output")) {
+        ImGui::Indent();
+        ImGui::EditRect("Screen Rect", vp.output.screenRect.data());
+        ImGui::EditRect("Full Rect", vp.output.fullRect.data());
+        ImGui::EditRect("Safe Rect", vp.output.safeRect.data());
+        ImGui::InputFloat2("Offset", vp.output.offset.data());
+        ImGui::InputFloat("Scale", &vp.output.scale);
+        ImGui::Unindent();
+    }
+}
+
 void guiCamera2D(Camera2D& camera) {
     ImGui::Checkbox("Enabled", &camera.enabled);
     ImGui::Checkbox("interactive", &camera.interactive);
@@ -129,7 +148,7 @@ void guiCamera2D(Camera2D& camera) {
     ImGui::Checkbox("Clear Color", &camera.clearColorEnabled);
     ImGui::ColorEdit4("Clear Color", camera.clearColor.data());
     ImGui::ColorEdit4("Clear Color+", camera.clearColor2.data());
-    ImGui::EditRect("viewport", camera.viewport.data());
+    //ImGui::EditRect("viewport", camera.viewport.data());
     ImGui::DragFloat2("relativeOrigin", camera.relativeOrigin.data());
 
     ImGui::Separator();
@@ -343,9 +362,10 @@ void gui_inspector(ecs::EntityApi e) {
 
     guiComponentPanel<UglyFilter2D>(e, "UglyFilter2D", guiUglyFilter2D);
     guiComponentPanel<Transform2D>(e, "Transform2D", guiTransform2D);
+    guiComponentPanel<Viewport>(e, "Viewport", guiViewport);
+    guiComponentPanel<LayoutRect>(e, "Layout", guiLayout);
     guiComponentPanel<Camera2D>(e, "Camera2D", guiCamera2D);
     guiComponentPanel<Bounds2D>(e, "Bounds2D", guiBounds2D);
-    guiComponentPanel<LayoutRect>(e, "Layout", guiLayout);
 
     guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
     guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
