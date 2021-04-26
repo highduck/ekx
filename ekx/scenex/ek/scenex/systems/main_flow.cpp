@@ -40,7 +40,6 @@ void scene_pre_update(EntityApi root, float dt) {
             screenManager->update();
         }
     }
-    Viewport::updateAll();
     LayoutRect::updateAll();
     Tween::updateAll();
     Shake::updateAll();

@@ -13,6 +13,7 @@ struct ViewportScaleOptions {
     // modes
     float2 pixelRatio = float2::one;
     bool scaleToResolution = true;
+    rect_f viewport = rect_f::zero_one;
 };
 
 struct ViewportScaleInput {
@@ -23,16 +24,18 @@ struct ViewportScaleInput {
 };
 
 struct ViewportScaleOutput {
+    rect_f screenRect;
     rect_f fullRect;
     rect_f safeRect;
     float2 offset;
     float scale;
 };
 
+struct GameDisplayInfo;
+
 struct Viewport {
     ViewportScaleOptions options{};
     ViewportScaleOutput output{};
-    ViewportScaleInput input{};
 
     Viewport() = default;
 
@@ -41,7 +44,7 @@ struct Viewport {
         options.baseResolution.y = height;
     }
 
-    static void updateAll();
+    static void updateAll(const GameDisplayInfo& display0);
 };
 
 

@@ -12,7 +12,16 @@ namespace ek {
 IDrawable2D::~IDrawable2D() = default;
 
 void Quad2D::draw() {
-    draw2d::state.setEmptyTexture();
+    const Sprite* spr = src.get();
+    if(spr) {
+        const auto* texture = spr->texture.get();
+        if(texture) {
+            draw2d::state.setTextureRegion(texture, spr->tex);
+        }
+    }
+    else {
+        draw2d::state.setEmptyTexture();
+    }
     draw2d::quad(rect.x, rect.y, rect.width, rect.height, colors[0], colors[1], colors[2], colors[3]);
 }
 

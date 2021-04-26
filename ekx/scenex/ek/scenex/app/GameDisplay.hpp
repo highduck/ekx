@@ -10,6 +10,8 @@ struct GameDisplayInfo {
     float2 window{1.0f, 1.0f};
     float4 insets{0.0f, 0.0f, 0.0f, 0.0f};
     float dpiScale = 1.0f;
+    float4 userInsetsAbsolute = float4::zero;
+    float4 userInsetsRelative = float4::zero;
 };
 
 class GameDisplay {

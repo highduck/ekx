@@ -47,36 +47,13 @@ namespace ek {
 
 using namespace ek::app;
 
-// additional insets can be changed manually: l, t, r, b
-// to invalidate after change: setScreenRects(basic_application::root);
-static const float4 DebugAdditionalInsets = float4::zero;
-//static const float4 DebugAdditionalInsets{10, 20, 30, 40};
-
-void updateRootViewport(Viewport& vp) {
-    auto* baseApp = try_resolve<basic_application>();
-    if (!baseApp) {
-        return;
-    }
-
-    const auto& info = baseApp->display.info;
-    const rect_f rc{0.0f, 0.0f, info.size.x, info.size.y};
-    const float4 insets = info.insets + DebugAdditionalInsets;
-
-    vp.input.fullRect = rc;
-    vp.input.dpiScale = info.dpiScale;
-    vp.input.safeRect = rc;
-    vp.input.safeRect.x += insets.x;
-    vp.input.safeRect.y += insets.y;
-    vp.input.safeRect.width -= insets.x + insets.z;
-    vp.input.safeRect.height -= insets.y + insets.w;
-}
-
 void logDisplayInfo() {
 #ifndef NDEBUG
     const auto sz = app::g_app.drawable_size;
     float insets[4]{};
     getScreenInsets(insets);
-    EK_INFO << "Display: " << sz.x << " x " << sz.y << " [" << insets[0] << ", " << insets[1] << ", " << insets[2] << ", " << insets[3] << "]";
+    EK_INFO << "Display: " << sz.x << " x " << sz.y << " [" << insets[0] << ", " << insets[1] << ", " << insets[2]
+            << ", " << insets[3] << "]";
 #endif
 }
 
@@ -172,8 +149,7 @@ void basic_application::initialize() {
     root.assign<Viewport>(AppResolution.x, AppResolution.y);
     root.assign<LayoutRect>();
     root.assign<NodeEventHandler>();
-    updateRootViewport(root.get<Viewport>());
-    Viewport::updateAll();
+    Viewport::updateAll(display.info);
     scale_factor = root.get<Viewport>().output.scale;
 
     EK_TRACE << "base application: initialize InteractionSystem";
@@ -319,7 +295,6 @@ void basic_application::on_event(const event_t& event) {
     timer_t timer{};
     if (event.type == event_type::app_resize) {
         display.update();
-        updateRootViewport(root.get<Viewport>());
     } else if (event.type == event_type::app_close) {
         sg_shutdown();
     }
@@ -329,6 +304,7 @@ void basic_application::on_event(const event_t& event) {
 }
 
 void basic_application::doUpdateFrame(float dt) {
+    Viewport::updateAll(display.info);
     hook_on_update(dt);
     scene_pre_update(root, dt);
     onUpdateFrame(dt);
