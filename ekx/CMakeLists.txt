@@ -30,21 +30,14 @@ add_subdirectory(scenex)
 add_subdirectory(sg-file)
 add_subdirectory(physics)
 
-add_library(ekx INTERFACE)
-target_link_libraries(ekx
-        INTERFACE ek-core
-        INTERFACE ek
-        INTERFACE scenex
-        INTERFACE sg-file)
-
-add_library(ekx::ekx ALIAS ekx)
+add_library(ekx::ekx ALIAS scenex)
 
 add_subdirectory(dev-tools)
 
 if (EKX_BUILD_DEV_TOOLS)
     add_compile_definitions(EK_DEV_TOOLS)
-    target_link_libraries(ekx
-            INTERFACE ek-dev-tools
+    target_link_libraries(scenex
+            PUBLIC ek-dev-tools
             )
 endif ()
 

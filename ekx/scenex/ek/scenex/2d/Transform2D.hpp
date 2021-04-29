@@ -50,6 +50,11 @@ struct Transform2D {
         return matrix.ty;
     }
 
+    inline void translate(float x, float y) {
+        matrix.tx += x;
+        matrix.ty += y;
+    }
+
     inline void setPosition(float2 position_) {
         matrix.tx = position_.x;
         matrix.ty = position_.y;
