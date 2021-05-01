@@ -163,15 +163,26 @@ inline float integrateExp(float k, float dt, float fps = 60.0f) {
 }
 
 // normalized parameter sin/cos: (0 ... 1) => (-1 ~ 1 ~ -1)
+// normSin(0.00) = 0
+// normSin(0.25) = 1
+// normSin(0.50) = 0
+// normSin(0.75) = -1
 inline float normSin(float x){
     return sinf(fPI2 * x);
 }
 
+// normCos(0.00) = 1
+// normCos(0.25) = 0
+// normCos(0.50) = -1
+// normCos(0.75) = 0
 inline float normCos(float x){
     return cosf(fPI2 * x);
 }
 
 // unit sin/cos: (0 ... 1) => (0 ~ 1 ~ 0)
+// unitSin(0.00) = 0.5
+// unitSin(0.25) = 1
+// ...
 inline float unitSin(float x){
     return 0.5f + 0.5f * normSin(x);
 }
