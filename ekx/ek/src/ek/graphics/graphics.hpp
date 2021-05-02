@@ -97,23 +97,21 @@ public:
 
 class Buffer : private disable_copy_assign_t {
 public:
-    Buffer(BufferType type, Usage usage, int maxSize);
+    Buffer(BufferType type, Usage usage, uint32_t maxSize);
 
     // immutable init
-    Buffer(BufferType type, const void* data, int dataSize);
+    Buffer(BufferType type, const void* data, uint32_t dataSize);
 
     ~Buffer();
 
     void update(const void* data, uint32_t dataSize);
 
     [[nodiscard]]
-    int getSize() const {
-        return size;
-    }
+    inline uint32_t getSize() const { return size; }
 
     sg_buffer buffer;
 private:
-    int size;
+    uint32_t size;
 };
 
 class Texture : private disable_copy_assign_t {

@@ -21,20 +21,17 @@ static ek::ProxyAllocator* gHeapSokolGfx = nullptr;
 namespace ek::graphics {
 
 /** buffer wrapper **/
-Buffer::Buffer(BufferType type, const void* data, int dataSize) {
-    sg_buffer_desc desc{
-            .type = (sg_buffer_type) type,
-            .usage = SG_USAGE_IMMUTABLE,
-            .data = {
-                    .ptr = data,
-                    .size = (size_t)dataSize
-            }
-    };
+Buffer::Buffer(BufferType type, const void* data, uint32_t dataSize) {
+    sg_buffer_desc desc{};
+    desc.type = (sg_buffer_type) type;
+    desc.usage = SG_USAGE_IMMUTABLE;
+    desc.data.ptr = data;
+    desc.data.size = (size_t)dataSize;
     buffer = sg_make_buffer(&desc);
     size = dataSize;
 }
 
-Buffer::Buffer(BufferType type, Usage usage, int maxSize) {
+Buffer::Buffer(BufferType type, Usage usage, uint32_t maxSize) {
     sg_buffer_desc desc{};
     desc.usage = (sg_usage) usage;
     desc.type = (sg_buffer_type) type;
@@ -176,6 +173,7 @@ void initialize(sg_context_desc* customContext) {
     EK_TRACE << "graphics initialize";
     gHeapSokolGfx = memory::stdAllocator.create<ProxyAllocator>("sokol_gfx");
     sg_desc desc{};
+    // this size is 2x Draw Calls per frame (because of sokol internal double-buffering)
     desc.buffer_pool_size = 256;
     if(customContext != nullptr) {
         desc.context = *customContext;

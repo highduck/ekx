@@ -21,8 +21,8 @@ InteractionSystem::InteractionSystem(ecs::EntityApi root) :
 
 template<typename T>
 inline bool contains(const Array<T>& vec, const T& value) {
-    for(auto e : vec) {
-        if(e == value) {
+    for (auto e : vec) {
+        if (e == value) {
             return true;
         }
     }
@@ -68,19 +68,7 @@ void InteractionSystem::process() {
     }
 
     if (changed) {
-        auto& cameras = Camera2D::getCameraQueue();
-        float2 pointerWorldPosition{};
-        for (int i = static_cast<int>(cameras.size()) - 1; i >= 0; --i) {
-            auto* camera = cameras[i].tryGet<Camera2D>();
-            if (camera && camera->enabled && camera->interactive &&
-                camera->screenRect.contains(pointerScreenPosition_)) {
-                pointerWorldPosition = camera->screenToWorldMatrix.transform(pointerScreenPosition_);
-                cursor = searchInteractiveTargets(pointerWorldPosition, camera->root.ent(), currTargets);
-            }
-        }
-
-//        pointer = global_to_local(entity_, pointerScreenPosition_);
-//        cursor = search_interactive_targets(entity_, targets_);
+        cursor = searchInteractiveTargets(currTargets);
     }
 
     fireInteraction(InteractionEvent::PointerOver, false, true);
@@ -163,14 +151,38 @@ void InteractionSystem::handle_system_pause() {
     broadcast(root_, interactive_event::system_pause);
 }
 
-mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::EntityApi node,
-                                                         Array<ecs::EntityApi>& list) {
+ecs::EntityApi InteractionSystem::globalHitTest(float2& worldSpacePointer, ecs::EntityApi& capturedCamera) {
+    auto& cameras = Camera2D::getCameraQueue();
+    for (int i = static_cast<int>(cameras.size()) - 1; i >= 0; --i) {
+        auto e = cameras[i];
+        auto* camera = e.tryGet<Camera2D>();
+        if (camera && camera->enabled && camera->interactive &&
+            camera->screenRect.contains(pointerScreenPosition_)) {
+            const auto pointerWorldPosition = camera->screenToWorldMatrix.transform(pointerScreenPosition_);
+            auto target = hitTest2D(ecs::the_world, camera->root.index(), pointerWorldPosition);
+            if (target != 0) {
+                worldSpacePointer = pointerWorldPosition;
+                capturedCamera = e;
+                return ecs::EntityApi{target};
+            }
+        }
+    }
+    return nullptr;
+}
+
+mouse_cursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& list) {
+    float2 pointer{};
     ecs::EntityApi it;
+    ecs::EntityApi camera;
     if (dragEntity_.valid()) {
         it = dragEntity_.ent();
-    }
-    else {
-        it = ecs::EntityApi{hitTest2D(ecs::the_world, node.index, pointer)};
+        auto* interactive = it.tryGet<Interactive>();
+        if (interactive && interactive->camera.valid()) {
+            camera = interactive->camera.ent();
+            pointer = camera.get<Camera2D>().screenToWorldMatrix.transform(pointerScreenPosition_);
+        }
+    } else {
+        it = globalHitTest(pointer, camera);
     }
     hitTarget_ = ecs::EntityRef{it};
 
@@ -178,6 +190,8 @@ mouse_cursor InteractionSystem::searchInteractiveTargets(float2 pointer, ecs::En
     while (it) {
         auto* interactive = it.tryGet<Interactive>();
         if (interactive) {
+            interactive->pointer = pointer;
+            interactive->camera = ecs::EntityRef{camera};
             if (cursor == mouse_cursor::parent) {
                 cursor = interactive->cursor;
             }

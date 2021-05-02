@@ -3,6 +3,7 @@
 #include <vector>
 #include <ek/util/signals.hpp>
 #include <ek/app/app.hpp>
+#include <ecxx/ecxx_fwd.hpp>
 
 namespace ek {
 
@@ -28,8 +29,15 @@ struct Interactive {
 
     mouse_cursor cursor{mouse_cursor::parent};
 
+    // TODO: Interactive::pointer is useless
+    // global world space pointer, because of that maybe we don't dispatch this coordinate into components,
+    // just use global pointer from Interaction System
+    float2 pointer{};
+    ecs::EntityRef camera{};
+
     //bool enabled = true;
-    bool bubble = false;
+    // todo: check bubble was false by default
+    bool bubble = true;
     // responsive state
     bool over = false;
     bool pushed = false;

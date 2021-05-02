@@ -1,11 +1,22 @@
 #include "gui.hpp"
 
 #include <ek/scenex/app/basic_application.hpp>
+#include <ek/scenex/base/Node.hpp>
+#include <ek/scenex/InteractionSystem.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/util/locator.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 
 namespace ek {
+
+std::string getDebugNodePath(ecs::EntityApi e) {
+    std::string result{};
+    while(e) {
+        result = e.get_or_default<NodeName>().name + "/" + result;
+        e = e.get<Node>().parent;
+    }
+    return result;
+}
 
 void guiStatsWindow(bool* p_open) {
     if (ImGui::Begin("Stats", p_open)) {
@@ -22,6 +33,11 @@ void guiStatsWindow(bool* p_open) {
         auto entitiesAvailable = ecs::ENTITIES_MAX_COUNT - entitiesCount;
         ImGui::Text("%u entities | %u free", entitiesCount - 1, entitiesAvailable);
         ImGui::Text("Batching buffer objects: %0.2f MB", (draw2d::state.getUsedMemory() / 1000000.0f));
+
+        auto hitTarget = resolve<InteractionSystem>().getHitTarget();
+        if(hitTarget) {
+            ImGui::Text("Hit Target: %u %s", hitTarget.index, getDebugNodePath(hitTarget).c_str());
+        }
     }
     ImGui::End();
 }

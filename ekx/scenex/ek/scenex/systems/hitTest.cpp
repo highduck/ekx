@@ -18,12 +18,8 @@ ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, const Node& 
     }
 
     auto* bounds = w.tryGet<Bounds2D>(e);
-    if (bounds) {
-        if (!bounds->rect.contains(local)) {
-            return 0;
-        } else if (bounds->hitArea) {
-            return e;
-        }
+    if (bounds && !bounds->rect.contains(local)) {
+        return 0;
     }
 
     auto it = node.child_last;
@@ -38,6 +34,10 @@ ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, const Node& 
 
     const auto* display = w.tryGet<Display2D>(e);
     if (display && display->hitTest(local)) {
+        return e;
+    }
+
+    if (bounds && bounds->hitArea && bounds->rect.contains(local)) {
         return e;
     }
 
