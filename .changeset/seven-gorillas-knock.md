@@ -13,3 +13,7 @@
 - scenex: remove Camera2D relative viewport settings, use Viewport setup
 - scenex: update all viewports by base application (display data owner)
 - particles: fix emitter-layer space transform
+- scenex: interactive bubble mode by default
+- interaction system camera order fix, capture camera and world position to Interactive component
+- changed hit test order for Bounds2D hit-area to bottom layer
+- add current hit target path to Stats window

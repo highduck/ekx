@@ -28,7 +28,8 @@ public:
 
     void process();
 
-    app::mouse_cursor searchInteractiveTargets(float2 pos, ecs::EntityApi node, Array<ecs::EntityApi>& out_entities);
+    ecs::EntityApi globalHitTest(float2& worldSpacePointer, ecs::EntityApi& capturedCamera);
+    app::mouse_cursor searchInteractiveTargets(Array<ecs::EntityApi>& out_entities);
 
     void sendBackButton();
 

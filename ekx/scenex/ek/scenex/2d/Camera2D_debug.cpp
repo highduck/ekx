@@ -18,10 +18,11 @@ void debugDrawPointer(Camera2D& camera) {
     auto v = camera.screenToWorldMatrix.transform(ptr.x, ptr.y);
     float t = TimeLayer::Root->total;
     draw2d::state.setEmptyTexture();
-    draw2d::fill_circle({v.x, v.y, 20 + 5 * sinf(t)}, 0x0_argb, 0xFFFFFFFF_argb, 10);
-
     if (im.pointerDown_) {
-        draw2d::fill_circle({v.x, v.y, 40 + 10 * sinf(t * 8)}, 0xFFFFFF00_argb, 0xFFFF0000_argb, 10);
+        draw2d::fill_circle({v.x, v.y, 12 + 2 * sinf(t * 8)}, 0x00FFFF00_argb, 0x77FF0000_argb, 10);
+    }
+    else {
+        draw2d::fill_circle({v.x, v.y, 12 + 2 * sinf(t)}, 0x0_argb, 0x77FFFFFF_argb, 10);
     }
 }
 

@@ -155,6 +155,7 @@ void guiCamera2D(Camera2D& camera) {
     ImGui::Checkbox("Draw Occlusion", &camera.debugOcclusion);
     ImGui::Checkbox("Draw Bounds", &camera.debugVisibleBounds);
     ImGui::Checkbox("Draw Hit Target", &camera.debugGizmoHitTarget);
+
     ImGui::Checkbox("Draw Pointer", &camera.debugGizmoPointer);
     ImGui::Checkbox("Draw Camera Gizmo", &camera.debugGizmoSelf);
     ImGui::Checkbox("Draw Script Gizmo", &camera.debugDrawScriptGizmo);
