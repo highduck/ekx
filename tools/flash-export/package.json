@@ -13,7 +13,7 @@
     "@ekx/ekx": "0.1.4",
     "@ekx/freetype": "0.0.7",
     "@ekx/miniz": "0.0.3",
-    "@ekx/pugixml": "0.0.3",
+    "@ekx/pugixml": "0.0.4",
     "npm-cmake": "^0.1.0"
   },
   "devDependencies": {
