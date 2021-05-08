@@ -1,6 +1,6 @@
 {
   "name": "@ekx/cli",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "bin": {
     "ekx": "bin.js"
   },
@@ -20,8 +20,8 @@
     "templates"
   ],
   "dependencies": {
-    "@ekx/ekc": "0.1.6",
-    "@ekx/ekx": "0.1.4",
+    "@ekx/ekc": "0.1.7",
+    "@ekx/ekx": "0.1.5",
     "glob": "^7.1.7",
     "mustache": "^4.2.0",
     "plist": "^3.0.2",

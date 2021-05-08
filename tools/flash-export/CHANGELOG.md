@@ -1,5 +1,16 @@
 ## 0.0.1
 
+## 0.0.4
+
+### Patch Changes
+
+- 84239f3: minor api renaming
+- 1a74d06: update dependencies
+- Updated dependencies [84239f3]
+- Updated dependencies [29b4dd3]
+- Updated dependencies [1a74d06]
+  - @ekx/ekx@0.1.5
+
 ## 0.0.3
 
 ### Patch Changes

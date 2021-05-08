@@ -1,5 +1,18 @@
 ## 0.0.4
 
+## 0.1.7
+
+### Patch Changes
+
+- 84239f3: minor api renaming
+- 84239f3: Fix web app icons and manifest generation
+- 1a74d06: update dependencies
+- Updated dependencies [84239f3]
+- Updated dependencies [29b4dd3]
+- Updated dependencies [1a74d06]
+  - @ekx/ekx@0.1.5
+  - @ekx/ekc@0.1.7
+
 ## 0.1.6
 
 ### Patch Changes
