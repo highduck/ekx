@@ -1,6 +1,6 @@
 {
   "name": "@ekx/plugin-admob",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "scripts": {
     "postinstall": "npm-cmake || exit 0"
   },
@@ -9,7 +9,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/ekx": "0.1.4",
+    "@ekx/ekx": "0.1.5",
     "npm-cmake": "^0.1.0"
   }
 }
