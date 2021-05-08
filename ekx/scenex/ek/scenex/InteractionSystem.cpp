@@ -93,18 +93,18 @@ void InteractionSystem::fireInteraction(InteractionEvent event, bool prev, bool 
     }
 }
 
-void InteractionSystem::handle_mouse_event(const event_t& ev) {
+void InteractionSystem::handle_mouse_event(const event_t& ev, float2 pos) {
 
     if (ev.type == event_type::mouse_down) {
-        mousePosition0_ = vScale * ev.pos;
+        mousePosition0_ = pos;
         pointerDown_ = true;
         fireInteraction(InteractionEvent::PointerDown);
     } else if (ev.type == event_type::mouse_up) {
-        mousePosition0_ = vScale * ev.pos;
+        mousePosition0_ = pos;
         pointerDown_ = false;
         fireInteraction(InteractionEvent::PointerUp);
     } else if (ev.type == event_type::mouse_move) {
-        mousePosition0_ = vScale * ev.pos;
+        mousePosition0_ = pos;
         mouseActive_ = true;
         process();
     } else if (ev.type == event_type::mouse_exit) {
@@ -115,11 +115,11 @@ void InteractionSystem::handle_mouse_event(const event_t& ev) {
     }
 }
 
-void InteractionSystem::handle_touch_event(const event_t& ev) {
+void InteractionSystem::handle_touch_event(const event_t& ev, float2 pos) {
     if (ev.type == event_type::touch_begin) {
         if (touchID_ == 0) {
             touchID_ = ev.id;
-            touchPosition0_ = vScale * ev.pos;
+            touchPosition0_ = pos;
             mouseActive_ = false;
             pointerDown_ = true;
             process();
@@ -134,7 +134,7 @@ void InteractionSystem::handle_touch_event(const event_t& ev) {
             pointerDown_ = false;
             fireInteraction(InteractionEvent::PointerUp);
         } else {
-            touchPosition0_ = vScale * ev.pos;
+            touchPosition0_ = pos;
         }
     }
 }
@@ -151,19 +151,21 @@ void InteractionSystem::handle_system_pause() {
     broadcast(root_, interactive_event::system_pause);
 }
 
-ecs::EntityApi InteractionSystem::globalHitTest(float2& worldSpacePointer, ecs::EntityApi& capturedCamera) {
+ecs::EntityApi InteractionSystem::globalHitTest(float2& worldSpacePointer, ecs::EntityRef& capturedCamera) {
     auto& cameras = Camera2D::getCameraQueue();
     for (int i = static_cast<int>(cameras.size()) - 1; i >= 0; --i) {
         auto e = cameras[i];
-        auto* camera = e.tryGet<Camera2D>();
-        if (camera && camera->enabled && camera->interactive &&
-            camera->screenRect.contains(pointerScreenPosition_)) {
-            const auto pointerWorldPosition = camera->screenToWorldMatrix.transform(pointerScreenPosition_);
-            auto target = hitTest2D(ecs::the_world, camera->root.index(), pointerWorldPosition);
-            if (target != 0) {
-                worldSpacePointer = pointerWorldPosition;
-                capturedCamera = e;
-                return ecs::EntityApi{target};
+        if (e.valid()) {
+            auto* camera = e.get().tryGet<Camera2D>();
+            if (camera && camera->enabled && camera->interactive &&
+                camera->screenRect.contains(pointerScreenPosition_)) {
+                const auto pointerWorldPosition = camera->screenToWorldMatrix.transform(pointerScreenPosition_);
+                auto target = hitTest2D(ecs::the_world, camera->root.index(), pointerWorldPosition);
+                if (target != 0) {
+                    worldSpacePointer = pointerWorldPosition;
+                    capturedCamera = e;
+                    return ecs::EntityApi{target};
+                }
             }
         }
     }
@@ -173,13 +175,13 @@ ecs::EntityApi InteractionSystem::globalHitTest(float2& worldSpacePointer, ecs::
 mouse_cursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& list) {
     float2 pointer{};
     ecs::EntityApi it;
-    ecs::EntityApi camera;
+    ecs::EntityRef camera;
     if (dragEntity_.valid()) {
         it = dragEntity_.ent();
         auto* interactive = it.tryGet<Interactive>();
         if (interactive && interactive->camera.valid()) {
-            camera = interactive->camera.ent();
-            pointer = camera.get<Camera2D>().screenToWorldMatrix.transform(pointerScreenPosition_);
+            camera = interactive->camera;
+            pointer = camera.get().get<Camera2D>().screenToWorldMatrix.transform(pointerScreenPosition_);
         }
     } else {
         it = globalHitTest(pointer, camera);

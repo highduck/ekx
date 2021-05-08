@@ -97,6 +97,14 @@ async function buildProject(ctx, buildType) {
 export async function export_web(ctx: Project): Promise<void> {
     const timestamp = Date.now();
 
+    if (ctx.html.og) {
+        if (!ctx.html.og.title && ctx.title) {
+            ctx.html.og.title = ctx.title;
+        }
+        if (!ctx.html.og.description && ctx.desc) {
+            ctx.html.og.description = ctx.desc;
+        }
+    }
     const output_dir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export/web");
     makeDirs(output_dir);
 

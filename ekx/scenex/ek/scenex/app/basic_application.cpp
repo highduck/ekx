@@ -87,47 +87,45 @@ basic_application::~basic_application() {
 
     audio::shutdown();
     graphics::shutdown();
-
-    service_locator_instance<basic_application>::shutdown();
 }
 
 void registerSceneXComponents() {
     //// basic scene
     using ecs::the_world;
-    the_world.registerComponent<Node>(512);
-    the_world.registerComponent<NodeName>(512);
-    the_world.registerComponent<Transform2D>(512);
-    the_world.registerComponent<WorldTransform2D>(512);
-    the_world.registerComponent<Display2D>(256);
-    the_world.registerComponent<Camera2D>();
-    the_world.registerComponent<Bounds2D>();
-    the_world.registerComponent<Transform3D>();
-    the_world.registerComponent<Camera3D>();
-    the_world.registerComponent<Light3D>();
-    the_world.registerComponent<MeshRenderer>();
+    ECX_COMPONENT_RESERVE(Node, 512);
+    ECX_COMPONENT_RESERVE(NodeName, 512);
+    ECX_COMPONENT_RESERVE(Transform2D, 512);
+    ECX_COMPONENT_RESERVE(WorldTransform2D, 512);
+    ECX_COMPONENT_RESERVE(Display2D, 256);
+    ECX_COMPONENT(Camera2D);
+    ECX_COMPONENT(Bounds2D);
+    ECX_COMPONENT(Transform3D);
+    ECX_COMPONENT(Camera3D);
+    ECX_COMPONENT(Light3D);
+    ECX_COMPONENT(MeshRenderer);
 
-    the_world.registerComponent<MovieClip>();
-    the_world.registerComponent<MovieClipTargetIndex>();
+    ECX_COMPONENT(MovieClip);
+    ECX_COMPONENT(MovieClipTargetIndex);
 
-    the_world.registerComponent<LayoutRect>();
-    the_world.registerComponent<Viewport>();
-    the_world.registerComponent<Button>();
-    the_world.registerComponent<Interactive>();
-    the_world.registerComponent<Tween>();
-    the_world.registerComponent<Shake>();
-    the_world.registerComponent<Shaker>();
-    the_world.registerComponent<ScriptHolder>();
-    the_world.registerComponent<Updater>();
-    the_world.registerComponent<BubbleText>();
-    the_world.registerComponent<PopupManager>();
-    the_world.registerComponent<close_timeout>();
-    the_world.registerComponent<GameScreen>();
-    the_world.registerComponent<Trail2D>();
-    the_world.registerComponent<DestroyTimer>();
-    the_world.registerComponent<NodeEventHandler>();
-    the_world.registerComponent<ParticleEmitter2D>(4);
-    the_world.registerComponent<ParticleLayer2D>();
-    the_world.registerComponent<UglyFilter2D>();
+    ECX_COMPONENT(LayoutRect);
+    ECX_COMPONENT(Viewport);
+    ECX_COMPONENT(Button);
+    ECX_COMPONENT(Interactive);
+    ECX_COMPONENT(Tween);
+    ECX_COMPONENT(Shake);
+    ECX_COMPONENT(Shaker);
+    ECX_COMPONENT(ScriptHolder);
+    ECX_COMPONENT(Updater);
+    ECX_COMPONENT(BubbleText);
+    ECX_COMPONENT(PopupManager);
+    ECX_COMPONENT(close_timeout);
+    ECX_COMPONENT(GameScreen);
+    ECX_COMPONENT(Trail2D);
+    ECX_COMPONENT(DestroyTimer);
+    ECX_COMPONENT(NodeEventHandler);
+    ECX_COMPONENT(ParticleEmitter2D);
+    ECX_COMPONENT(ParticleLayer2D);
+    ECX_COMPONENT(UglyFilter2D);
 }
 
 void basic_application::initialize() {
@@ -153,11 +151,11 @@ void basic_application::initialize() {
     scale_factor = root.get<Viewport>().output.scale;
 
     EK_TRACE << "base application: initialize InteractionSystem";
-    auto& im = service_locator_instance<InteractionSystem>::init(root);
+    auto& im = Locator::create<InteractionSystem>(root);
     EK_TRACE << "base application: initialize input_controller";
-    service_locator_instance<input_controller>::init(im);
+    Locator::create<input_controller>(im, display);
     EK_TRACE << "base application: initialize AudioManager";
-    service_locator_instance<AudioManager>::init();
+    Locator::create<AudioManager>();
 
     EK_TRACE << "base application: initialize Scene";
     auto camera = createNode2D("camera");
@@ -185,6 +183,7 @@ void basic_application::preload() {
 void basic_application::on_draw_frame() {
     ZoneScoped;
     timer_t timer{};
+    onBeforeFrameBegin();
     display.update();
     scale_factor = root.get<Viewport>().output.scale;
     asset_manager_->set_scale_factor(scale_factor);
@@ -203,7 +202,7 @@ void basic_application::on_draw_frame() {
 
     onPreRender();
 
-    auto* r3d = try_resolve<RenderSystem3D>();
+    auto* r3d = Locator::get<RenderSystem3D>();
     if (r3d) {
         Transform3D::updateAll();
         r3d->prepare();
@@ -212,7 +211,7 @@ void basic_application::on_draw_frame() {
 
     static sg_pass_action pass_action{};
     pass_action.colors[0].action = started_ ? SG_ACTION_DONTCARE : SG_ACTION_CLEAR;
-    const float4 fillColor{argb32_t{g_app.window_cfg.backgroundColor}};
+    const float4 fillColor = static_cast<float4>(argb32_t{g_app.window_cfg.backgroundColor});
     pass_action.colors[0].value.r = fillColor.x;
     pass_action.colors[0].value.g = fillColor.y;
     pass_action.colors[0].value.b = fillColor.z;
@@ -228,6 +227,8 @@ void basic_application::on_draw_frame() {
     }
 
     if (display.beginGame(pass_action)) {
+        profiler.beginRender(display.info.size.x * display.info.size.y);
+
         if (r3d) {
             r3d->render(display.info.size.x, display.info.size.y);
         }
@@ -246,6 +247,9 @@ void basic_application::on_draw_frame() {
         profiler.addTime("FRAME", timer.read_millis());
         timer.reset();
 
+        profiler.endRender();
+        draw(profiler, display.info);
+
         draw2d::end();
 
         display.endGame(); // beginGame()
@@ -256,7 +260,6 @@ void basic_application::on_draw_frame() {
 
             draw2d::begin({0, 0, g_app.drawable_size.x, g_app.drawable_size.y});
             onFrameEnd();
-            profiler.draw();
             draw2d::end();
 
             profiler.addTime("OVERLAY", timer.read_millis());
@@ -268,6 +271,7 @@ void basic_application::on_draw_frame() {
 
         draw2d::endFrame();
     }
+    sg_commit();
 
     if (!started_ && asset_manager_->is_assets_ready()) {
         EK_DEBUG << "Start Game";
@@ -318,11 +322,11 @@ void basic_application::doRenderFrame() {
 }
 
 void baseApp_drawFrame() {
-    resolve<basic_application>().on_draw_frame();
+    Locator::ref<basic_application>().on_draw_frame();
 }
 
 void baseApp_onEvent(const event_t& event) {
-    resolve<basic_application>().on_event(event);
+    Locator::ref<basic_application>().on_event(event);
 }
 
 int _initializeSubSystemsState = 0;
@@ -335,6 +339,11 @@ void initializeSubSystems() {
             case 0:
                 ++_initializeSubSystemsState;
                 graphics::initialize();
+#ifdef EK_DEV_TOOLS
+                if (Editor::inspectorEnabled) {
+                    Editor::initialize();
+                }
+#endif
                 break;
             case 1:
                 ++_initializeSubSystemsState;
@@ -350,21 +359,16 @@ void initializeSubSystems() {
                 break;
             case 4:
                 ++_initializeSubSystemsState;
-#ifdef EK_DEV_TOOLS
-                if (Editor::inspectorEnabled) {
-                    Editor::initialize();
-                }
-#endif
                 ecs::the_world.initialize();
                 registerSceneXComponents();
                 break;
             case 5:
                 ++_initializeSubSystemsState;
-                resolve<basic_application>().initialize();
+                Locator::ref<basic_application>().initialize();
                 break;
             case 6:
                 ++_initializeSubSystemsState;
-                resolve<basic_application>().preload();
+                Locator::ref<basic_application>().preload();
                 break;
             case 7:
                 ++_initializeSubSystemsState;
@@ -384,7 +388,7 @@ void initializeSubSystems() {
             //EK_PROFILE_SCOPE("init frame");
             static sg_pass_action pass_action{};
             pass_action.colors[0].action = SG_ACTION_CLEAR;
-            const float4 fillColor{argb32_t{g_app.window_cfg.backgroundColor}};
+            const float4 fillColor = static_cast<float4>(argb32_t{g_app.window_cfg.backgroundColor});
             pass_action.colors[0].value.r = fillColor.x;
             pass_action.colors[0].value.g = fillColor.y;
             pass_action.colors[0].value.b = fillColor.z;

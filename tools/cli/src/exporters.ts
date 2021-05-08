@@ -5,6 +5,7 @@ import {buildAssetsAsync, buildMarketingAssets} from "./assets";
 import {Project} from "./project";
 import {screenshots} from "./screenshots";
 import {updateGoogleServicesConfig} from "./firebase";
+import {buildDev} from "./dev";
 
 const exporters = {
     web: export_web,
@@ -13,7 +14,8 @@ const exporters = {
     market: (project: Project) => buildMarketingAssets(project, "gen", "export/market"),
     assets: (project: Project) => buildAssetsAsync(project, "build/assets", true),
     screenshots,
-    updateGoogleServicesConfig
+    updateGoogleServicesConfig,
+    dev: buildDev
 };
 
 export function addExportBuildStep(project: Project) {

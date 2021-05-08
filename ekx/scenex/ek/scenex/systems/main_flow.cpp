@@ -1,6 +1,6 @@
 #include "main_flow.hpp"
 
-#include <ek/util/locator.hpp>
+#include <ek/util/ServiceLocator.hpp>
 
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/particles/ParticleSystem.hpp>
@@ -28,14 +28,14 @@ using namespace ecs;
 void scene_pre_update(EntityApi root, float dt) {
     ZoneScoped;
 
-    resolve<InteractionSystem>().process();
+    Locator::ref<InteractionSystem>().process();
 
     TimeLayer::updateTimers(dt);
 
-    resolve<AudioManager>().update(dt);
+    Locator::ref<AudioManager>().update(dt);
 
     {
-        auto* screenManager = try_resolve<GameScreenManager>();
+        auto* screenManager = Locator::get<GameScreenManager>();
         if (screenManager) {
             screenManager->update();
         }

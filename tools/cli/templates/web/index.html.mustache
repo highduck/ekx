@@ -51,17 +51,19 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="Description" content="{{desc}}">
-    <meta property="og:title" content="{{title}}">
-    <meta property="og:description" content="{{desc}}">
-    <meta property="og:image" content="{{html.image_url}}">
-    <meta property="og:url" content="{{html.url}}">
+{{#html.og}}
+    {{#html.og.title}}<meta property="og:title" content="{{{html.og.title}}}">{{/html.og.title}}
+    {{#html.og.description}}<meta property="og:description" content="{{{html.og.description}}}">{{/html.og.description}}
+    {{#html.og.image}}<meta property="og:image" content="{{{html.og.image}}}">{{/html.og.image}}
+    {{#html.og.url}}<meta property="og:url" content="{{{html.og.url}}}">{{/html.og.url}}
+{{/html.og}}
     <script async src="pwacompat.min.js"></script>
 </head>
 <body onload="init()">
 
 <figure style="overflow:visible;color:{{{html.text_color}}};font-size: x-large;" id="spinner">
     <div style="margin-top:1.5em; line-height:300%; text-align: center;">
-        <h1>{{title}}</h1>
+        <h1>{{{title}}}</h1>
         <img src="icons/icon192.png" width=192 height=192 style="display:block;margin-left: auto;margin-right: auto;">
         <div id="status"></div>
         <noscript>JavaScript is disabled. Please enable JavaScript to use this application.</noscript>

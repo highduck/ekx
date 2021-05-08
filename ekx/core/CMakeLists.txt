@@ -58,7 +58,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/util/Res.hpp
         ek/util/logger.hpp
         ek/util/logger.cpp
-        ek/util/locator.hpp
+        ek/util/ServiceLocator.hpp
         ek/util/signals.hpp
         ek/util/base64.hpp
         ek/util/base64.cpp

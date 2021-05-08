@@ -28,16 +28,16 @@ public:
 
     void process();
 
-    ecs::EntityApi globalHitTest(float2& worldSpacePointer, ecs::EntityApi& capturedCamera);
+    ecs::EntityApi globalHitTest(float2& worldSpacePointer, ecs::EntityRef& capturedCamera);
     app::mouse_cursor searchInteractiveTargets(Array<ecs::EntityApi>& out_entities);
 
     void sendBackButton();
 
     void handle_system_pause();
 
-    void handle_mouse_event(const app::event_t& ev);
+    void handle_mouse_event(const app::event_t& ev, float2 pos);
 
-    void handle_touch_event(const app::event_t& ev);
+    void handle_touch_event(const app::event_t& ev, float2 pos);
 
     void drag(ecs::EntityApi entity);
 
@@ -58,10 +58,6 @@ private:
     void swapTargetLists() {
         targetListIndex = (++targetListIndex) & 1;
     }
-
-public:
-    // virtual viewport scale
-    float vScale = 1.0f;
 
 private:
     ecs::EntityRef hitTarget_;

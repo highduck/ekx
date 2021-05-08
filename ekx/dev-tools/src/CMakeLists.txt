@@ -3,16 +3,11 @@ cmake_minimum_required(VERSION 3.13)
 add_library(${PROJECT_NAME} STATIC
 
         ek/editor/gui/gui.hpp
-        ek/editor/gui/inspector.cpp
-        ek/editor/gui/hierarchy.cpp
-        ek/editor/gui/stats.cpp
         ek/editor/gui/gui_editor.cpp
-        ek/editor/gui/utils.cpp
+        ek/editor/gui/Widgets_impl.hpp
         ek/editor/gui/gui_atlas.cpp
-        ek/editor/gui/gui_sg_file.cpp
         ek/editor/gui/gui_font.cpp
         ek/editor/gui/gui_particles.cpp
-        ek/editor/gui/resources_view.cpp
 
         ek/editor/imgui/imgui_module.hpp
         ek/editor/imgui/imgui_module.cpp
@@ -50,6 +45,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         )
 
 target_link_libraries(${PROJECT_NAME}
+        PUBLIC ekx::dev-fonts
         PUBLIC scenex
         PUBLIC imgui
         PUBLIC pugixml

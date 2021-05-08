@@ -16,8 +16,9 @@ void gInputController_onFrameCompleted() {
     gInputController->on_frame_completed();
 }
 
-input_controller::input_controller(InteractionSystem& interactions) :
-        interactions_{interactions} {
+input_controller::input_controller(InteractionSystem& interactions, GameDisplay& display) :
+        interactions_{interactions},
+        display_{display} {
 
     gInputController = this;
     g_app.on_event += gInputController_onEvent;
@@ -30,7 +31,7 @@ input_controller::~input_controller() {
     g_app.on_frame_completed -= gInputController_onFrameCompleted;
 }
 
-void emulate_mouse_as_touch(const event_t& event, touch_state_t& data) {
+void input_controller::emulate_mouse_as_touch(const event_t& event, touch_state_t& data) {
     bool active_prev = data.active;
     if (!data.active && event.type == event_type::mouse_down) {
         data.active = true;
@@ -38,8 +39,7 @@ void emulate_mouse_as_touch(const event_t& event, touch_state_t& data) {
         data.active = false;
     }
 
-    data.position.x = event.pos.x;
-    data.position.y = event.pos.y;
+    data.position = screenCoordToGameDisplay(event.pos);
     data.pressed = data.active;
     data.is_started_event = !active_prev && data.active;//e.type == "touchstart";
     data.is_ended_event = !data.active && active_prev;
@@ -52,12 +52,11 @@ void emulate_mouse_as_touch(const event_t& event, touch_state_t& data) {
     }
 }
 
-void update_touch(const event_t& event, touch_state_t& data) {
+void input_controller::update_touch(const event_t& event, touch_state_t& data) {
     bool active_prev = data.active;
     data.active = event.type != event_type::touch_end;
 
-    data.position.x = event.pos.x;
-    data.position.y = event.pos.y;
+    data.position = screenCoordToGameDisplay(event.pos);
     data.pressed = data.active;
     data.is_started_event = !active_prev && data.active;//e.type == "touchstart";
     data.is_ended_event = !data.active && active_prev;
@@ -76,7 +75,7 @@ void input_controller::on_event(const event_t& event) {
         case event_type::touch_move:
         case event_type::touch_end:
             if (!hovered_by_editor_gui) {
-                interactions_.handle_touch_event(event);
+                interactions_.handle_touch_event(event, screenCoordToGameDisplay(event.pos));
             }
             update_touch(event, get_or_create_touch(event.id));
             break;
@@ -87,7 +86,7 @@ void input_controller::on_event(const event_t& event) {
         case event_type::mouse_enter:
         case event_type::mouse_exit:
             if (!hovered_by_editor_gui) {
-                interactions_.handle_mouse_event(event);
+                interactions_.handle_mouse_event(event, screenCoordToGameDisplay(event.pos));
             }
             if (emulateTouch) {
                 emulate_mouse_as_touch(event, get_or_create_touch(1u));
@@ -158,18 +157,26 @@ void input_controller::on_frame_completed() {
     keyboard_text_.clear();
 
     // update touches info
-    auto it = touches_.begin();
-    while (it != touches_.end()) {
-        if (!it->active) {
-            it = touches_.erase(it);
+    unsigned i = 0;
+    while (i < touches_.size()) {
+        if (touches_[i].active) {
+            ++i;
         } else {
-            ++it;
+            touches_.eraseAt(i);
         }
     }
 }
 
 void input_controller::reset_keyboard() {
     reset_keys_ = true;
+}
+
+float2 input_controller::screenCoordToGameDisplay(float2 screenPos) const {
+    const auto size = display_.info.destinationViewport.size;
+    const auto offset = display_.info.destinationViewport.position;
+    const auto displaySize = display_.info.size;
+    const float invScale = 1.0f / fmin(size.x / displaySize.x, size.y / displaySize.y);
+    return invScale * (screenPos - offset);
 }
 
 }

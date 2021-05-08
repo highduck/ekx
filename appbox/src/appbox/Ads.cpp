@@ -25,7 +25,7 @@ Ads::Ads(Ads::Config config) :
     removed = checkRemoveAdsPurchase();
     if (!removed) {
         // just wait billing service a little, TODO: billing initialized promise
-        resolve<basic_application>().onStartHook << [sku = config_.skuRemoveAds] {
+        Locator::ref<basic_application>().onStartHook << [sku = config_.skuRemoveAds] {
             setTimeout([sku] {
                 billing::getPurchases();
                 billing::getDetails({sku});

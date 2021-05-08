@@ -5,7 +5,7 @@
 #include <ek/util/Res.hpp>
 #include <cstdint>
 #include <string>
-#include <vector>
+#include <ek/ds/Array.hpp>
 #include <unordered_map>
 #include <functional>
 
@@ -19,7 +19,7 @@ public:
     ~Atlas();
 
     std::unordered_map<std::string, Res<Sprite>> sprites;
-    std::vector<Res<graphics::Texture>> pages;
+    Array<Res<graphics::Texture>> pages;
 
     using LoadCallback = std::function<void(Atlas*)>;
     static void load(const char* path, float scaleFactor, const LoadCallback& callback);

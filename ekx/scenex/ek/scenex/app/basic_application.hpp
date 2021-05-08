@@ -8,7 +8,7 @@
 
 #endif
 
-#include <ek/util/locator.hpp>
+#include <ek/util/ServiceLocator.hpp>
 #include <ek/app/app.hpp>
 #include <ek/util/logger.hpp>
 #include <ek/util/signals.hpp>
@@ -35,6 +35,8 @@ public:
     framed_timer_t frame_timer{};
 
     float scale_factor = 1.0f;
+
+    signal_t<> onBeforeFrameBegin{};
 
     signal_t<> hook_on_preload{};
 
@@ -99,6 +101,7 @@ inline void run_app(app::window_config cfg) {
     using app::g_app;
 
     memory::initialize();
+    Locator::setup();
     app::initialize();
     clock::initialize();
     imaging::initialize();
@@ -114,7 +117,7 @@ inline void run_app(app::window_config cfg) {
 #endif
 
     g_app.on_device_ready << [] {
-        service_locator_instance<basic_application>::init<T>();
+        Locator::create<basic_application, T>();
         g_app.on_frame_draw += initializeSubSystems;
     };
 

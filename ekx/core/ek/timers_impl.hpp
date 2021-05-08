@@ -119,7 +119,7 @@ float updateState(TimeLayer::State& layer, float dt_) {
     return dt1;
 }
 
-const auto MAX_DELTA_TIME = 0.3;
+const auto MAX_DELTA_TIME = 0.3f;
 
 void TimeLayer::updateTimers(float raw) {
     if (raw > MAX_DELTA_TIME) {

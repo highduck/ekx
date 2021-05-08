@@ -10,16 +10,27 @@ namespace ek {
 using app::g_app;
 
 void editor_onFrameCompleted() {
-    resolve<Editor>().onFrameCompleted();
+    Locator::ref<Editor>().onFrameCompleted();
 }
 
 void editor_onEvent(const app::event_t& e) {
-    resolve<Editor>().onEvent(e);
+    Locator::ref<Editor>().onEvent(e);
 }
 
 Editor::Editor(basic_application& app) :
         app_{&app} {
 
+    windows.push_back(&scene);
+    windows.push_back(&game);
+    windows.push_back(&inspector);
+    windows.push_back(&hierarchy);
+    // project
+    windows.push_back(&console);
+    windows.push_back(&stats);
+    windows.push_back(&resources);
+    windows.push_back(&memory);
+
+    load();
     g_app.on_frame_completed += editor_onFrameCompleted;
     g_app.on_event += editor_onEvent;
 
@@ -36,10 +47,27 @@ Editor::Editor(basic_application& app) :
     });
     t1 = app.onRenderOverlay.add([this]() {
         gui_.end_frame();
+
+        bool dirty = false;
+        for(auto* wnd : windows) {
+            dirty |= wnd->dirty;
+        }
+        if(dirty) {
+            save();
+        }
     });
     t3 = app.hook_on_render_frame.add([this]() {
 
     });
+
+    app.onBeforeFrameBegin += [] {
+        auto& display = Locator::ref<basic_application>().display;
+        if (settings.showEditor && !display.simulated) {
+            display.simulated = true;
+        } else if (!settings.showEditor && display.simulated) {
+            display.simulated = false;
+        }
+    };
 }
 
 Editor::~Editor() {
@@ -49,6 +77,27 @@ Editor::~Editor() {
 
     g_app.on_frame_completed -= editor_onFrameCompleted;
     g_app.on_event -= editor_onEvent;
+}
+
+void Editor::load() {
+    EK_TRACE("load editor layout state");
+    pugi::xml_document doc{};
+    if (!doc.load_file("EditorLayoutState.xml")) {
+        return;
+    }
+    auto node = doc.first_child();
+    for(auto* wnd : windows) {
+        wnd->load(node);
+    }
+}
+
+void Editor::save() {
+    pugi::xml_document xml;
+    auto node = xml.append_child("EditorLayoutState");
+    for(auto* wnd : windows) {
+        wnd->save(node);
+    }
+    xml.save_file("EditorLayoutState.xml");
 }
 
 void Editor::onFrameCompleted() {
@@ -81,7 +130,7 @@ void Editor::onEvent(const app::event_t& event) {
 }
 
 void Editor::initialize() {
-    service_locator_instance<Editor>::init(resolve<basic_application>());
+    Locator::create<Editor>(Locator::ref<basic_application>());
 }
 
 const char* editorSettingsPath = "editor_settings.xml";
@@ -94,10 +143,6 @@ void EditorSettings::save() const {
     auto node = xml.append_child("editor");
     node.append_attribute("notifyAssetsOnScaleFactorChanged").set_value(notifyAssetsOnScaleFactorChanged);
     node.append_attribute("showEditor").set_value(showEditor);
-    node.append_attribute("showHierarchyWindow").set_value(showHierarchyWindow);
-    node.append_attribute("showInspectorWindow").set_value(showInspectorWindow);
-    node.append_attribute("showStatsWindow").set_value(showStatsWindow);
-    node.append_attribute("showResourcesView").set_value(showResourcesView);
     auto wnd = node.append_child("window");
     if (windowSize != float2{g_app.window_cfg.size}) {
         wnd.append_attribute("width").set_value(windowSize.x);
@@ -119,10 +164,6 @@ void EditorSettings::load() {
     notifyAssetsOnScaleFactorChanged = node.attribute("notifyAssetsOnScaleFactorChanged").as_bool(
             notifyAssetsOnScaleFactorChanged);
     showEditor = node.attribute("showEditor").as_bool(showEditor);
-    showHierarchyWindow = node.attribute("showHierarchyWindow").as_bool(showHierarchyWindow);
-    showInspectorWindow = node.attribute("showInspectorWindow").as_bool(showInspectorWindow);
-    showStatsWindow = node.attribute("showStatsWindow").as_bool(showStatsWindow);
-    showResourcesView = node.attribute("showResourcesView").as_bool(showResourcesView);
     auto wnd = node.child("window");
     windowSize.x = wnd.attribute("width").as_float(g_app.window_cfg.size.x);
     windowSize.y = wnd.attribute("height").as_float(g_app.window_cfg.size.y);

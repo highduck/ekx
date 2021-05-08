@@ -120,7 +120,7 @@ struct ShadowMapRes {
         pipDesc.depth.pixel_format = SG_PIXELFORMAT_DEPTH;
         pipDesc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
         pipDesc.layout = getVertex3DLayout();
-        pipDesc.label = "shadow-map-pip";
+        pipDesc.label = "3d-shadow-map";
         pip = sg_make_pipeline(pipDesc);
 
         clear.colors[0].action = SG_ACTION_CLEAR;
@@ -208,12 +208,11 @@ struct Main3DRes {
     void init() {
         shader = new Shader(render3d_shader_desc(sg_query_backend()));
 
-        sg_pipeline_desc pipDesc{
-                .shader = shader->shader,
-                .primitive_type = SG_PRIMITIVETYPE_TRIANGLES,
-                .index_type = SG_INDEXTYPE_UINT16,
-        };
-        pipDesc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
+        sg_pipeline_desc pipDesc{};
+        pipDesc.label = "3d-main";
+        pipDesc.shader = shader->shader;
+        pipDesc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
+        pipDesc.index_type = SG_INDEXTYPE_UINT16;
         pipDesc.depth.pixel_format = SG_PIXELFORMAT_DEPTH_STENCIL;
         pipDesc.depth.write_enabled = true;
         pipDesc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
@@ -249,12 +248,11 @@ struct RenderSkyBoxRes {
     void init() {
         shader = new Shader(render3d_skybox_shader_desc(sg_query_backend()));
 
-        sg_pipeline_desc pipDesc{
-                .shader = shader->shader,
-                .primitive_type = SG_PRIMITIVETYPE_TRIANGLES,
-                .index_type = SG_INDEXTYPE_UINT16,
-        };
-        pipDesc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
+        sg_pipeline_desc pipDesc{};
+        pipDesc.shader = shader->shader;
+        pipDesc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
+        pipDesc.index_type = SG_INDEXTYPE_UINT16;
+        pipDesc.label = "3d-skybox";
         pipDesc.depth.pixel_format = SG_PIXELFORMAT_DEPTH_STENCIL;
         pipDesc.depth.write_enabled = false;
         pipDesc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
@@ -414,10 +412,12 @@ void RenderSystem3D::prepare() {
 }
 
 void RenderSystem3D::prerender() {
+    sg_push_debug_group("3D shadows");
     shadows->begin();
     shadows->updateLightDirection(cameraProjection, cameraView);
     shadows->renderObjects();
     shadows->end();
+    sg_pop_debug_group();
 }
 
 void RenderSystem3D::render(float width, float height) {

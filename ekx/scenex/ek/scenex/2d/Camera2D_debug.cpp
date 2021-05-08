@@ -1,6 +1,6 @@
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
-#include <ek/util/locator.hpp>
+#include <ek/util/ServiceLocator.hpp>
 #include <ek/timers.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include "Camera2D.hpp"
@@ -13,7 +13,7 @@
 namespace ek {
 
 void debugDrawPointer(Camera2D& camera) {
-    auto& im = resolve<InteractionSystem>();
+    auto& im = Locator::ref<InteractionSystem>();
     auto ptr = im.pointerScreenPosition_;
     auto v = camera.screenToWorldMatrix.transform(ptr.x, ptr.y);
     float t = TimeLayer::Root->total;
@@ -51,7 +51,7 @@ void drawBox(const rect_f& rc, const matrix_2d& m, argb32_t color1, argb32_t col
 }
 
 void debugDrawHitTarget(Camera2D& camera) {
-    auto& im = resolve<InteractionSystem>();
+    auto& im = Locator::ref<InteractionSystem>();
     auto target = im.getHitTarget();
     if (!target) {
         return;

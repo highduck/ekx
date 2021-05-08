@@ -1,7 +1,7 @@
 #include "fireworks_script.h"
 
 #include <ek/math/box.hpp>
-#include <ek/util/locator.hpp>
+#include <ek/util/ServiceLocator.hpp>
 #include <ek/scenex/SceneFactory.hpp>
 #include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
@@ -36,7 +36,7 @@ void fireworks_script::update(float dt) {
                 random(rect.y, rect.bottom())
         };
 
-        resolve<AudioManager>().play_sound("sfx/firework", random(0.5f, 1.0f));
+        Locator::ref<AudioManager>().play_sound("sfx/firework", random(0.5f, 1.0f));
         Res<ParticleDecl> part{"firework_star"};
         switch (random_int(0, 3)) {
             case 0:

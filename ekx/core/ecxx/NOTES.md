@@ -10,3 +10,10 @@ Component Handle ID - not stable because of remove
 Method #2
 - How to check data index is valid? Free list indices could be used
 - Data ID is stable
+
+## base components
+- Allocators: we should track all allocations inside ECXX
+- Assertions: we should be sceptical and guard all places and contracts
+- Array: simple dynamic array
+- SparseArray: to map entity index to component index
+- SmallArray: simple static fixed-capacity array with variable size

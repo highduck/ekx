@@ -137,7 +137,19 @@ export class Project {
         applications?: { platform: string, url: string, id?: string }[]
     } = {};
 
-    html = {};
+    html: {
+        google_analytics_property_id?: string,
+        // css color
+        background_color?: string,
+        text_color?: string,
+        // open-graph object
+        og? : {
+            title?: string,
+            description?: string,
+            url?: string,
+            image?: string
+        },
+    } = {};
 
     addModule(def: ModuleDef) {
         this.modules.push(def);

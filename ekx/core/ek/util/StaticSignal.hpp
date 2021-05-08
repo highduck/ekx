@@ -25,8 +25,8 @@ public:
     bool remove(Function* listener) {
         const unsigned end = _slots._size;
         for (unsigned i = 0; i < end; ++i) {
-            if (_slots.get(i).fn == listener) {
-                _slots.erase(i);
+            if (_slots[i].fn == listener) {
+                _slots.eraseAt(i);
                 return true;
             }
         }
@@ -34,13 +34,13 @@ public:
     }
 
     void emit(Args... args) {
-        uint32_t i = 0;
-        while (i < _slots._size) {
+        unsigned i = 0;
+        while (i < _slots.size()) {
             // copy slot
-            auto slot = _slots.get(i);
+            Slot slot = _slots[i];
             slot.fn(args...);
             if (slot.once) {
-                _slots.erase(i);
+                _slots.eraseAt(i);
             } else {
                 ++i;
             }

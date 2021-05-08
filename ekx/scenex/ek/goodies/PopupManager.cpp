@@ -7,7 +7,7 @@
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/math/easing.hpp>
-#include <ek/util/locator.hpp>
+#include <ek/util/ServiceLocator.hpp>
 #include <ek/scenex/base/Tween.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
@@ -57,9 +57,9 @@ void on_popup_closed(EntityApi e) {
     auto pm = PopupManager::Main;
     auto& state = pm.get<PopupManager>();
 
-    auto it = std::find(state.active.begin(), state.active.end(), e);
+    auto* it = std::find(state.active.begin(), state.active.end(), e);
     if (it != state.active.end()) {
-        state.active.erase(it - state.active.begin());
+        state.active.eraseIterator(it);
     }
 
     if (state.active.empty()) {
@@ -238,7 +238,7 @@ ecs::EntityApi createBackQuad() {
     interactive.on_down += [e] {
         const auto* state = findComponentInParent<PopupManager>(e);
         if (state && !state->active.empty()) {
-            resolve<InteractionSystem>().sendBackButton();
+            Locator::ref<InteractionSystem>().sendBackButton();
         }
     };
 
