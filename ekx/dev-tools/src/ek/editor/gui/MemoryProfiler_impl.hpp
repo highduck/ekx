@@ -17,6 +17,7 @@ inline double toKB(uint64_t bytes) {
 }
 
 void drawAllocatorMemorySpan(Allocator& allocator) {
+
     auto count = readAllocationMap(allocator, MEMORY_PROFILER_BLOCK, 4096);
     uint32_t i = 0;
     uint64_t min = 0xFFFFFFFFFFFFFFFFu;
@@ -33,29 +34,51 @@ void drawAllocatorMemorySpan(Allocator& allocator) {
     }
     i = 0;
     char BB[1024 * 128];
-    memset(BB, '.', 1024 * 128);
+    memset(BB, '_', 1024 * 128);
     uint32_t len = (max - min) / 1024;
     if(len > 1024 * 128) {
         len = 1024 * 128;
     }
+
     while (i < count) {
         uint64_t pos = MEMORY_PROFILER_BLOCK[i++];
         uint64_t end = pos + MEMORY_PROFILER_BLOCK[i++];
         uint32_t i0 = (pos - min) / 1024;
         uint32_t i1 = (end - min) / 1024;
         for(uint32_t x = i0; x < i1; ++x) {
-            BB[x] = '|';
+            BB[x] = '#';
         }
     }
+
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
     i = 0;
+    const uint32_t NumKilosPerLine = 80;
+    uint32_t skipped = 0;
     while(i < len) {
         uint32_t txtLen = 0;
-        while(txtLen < 100 && (i + txtLen) < len) {
+        uint32_t occupied = 0;
+        while(txtLen < NumKilosPerLine && (i + txtLen) < len) {
+            if(BB[i + txtLen] == '#') {
+                ++occupied;
+            }
             ++txtLen;
         }
-        ImGui::TextUnformatted(BB + i, BB + i + txtLen);
+        if(occupied > 0) {
+            if(skipped > 0) {
+                ImGui::Text("-/- Skipped %0.2f MB -/-", (float)(skipped * NumKilosPerLine) / 1024.0f);
+            }
+            skipped = 0;
+            ImGui::TextUnformatted(BB + i, BB + i + txtLen);
+        }
+        else {
+            ++skipped;
+        }
         i += txtLen;
     }
+    if(skipped > 0) {
+        ImGui::Text("-/- Skipped %0.2f MB -/-", (float)(skipped * NumKilosPerLine) / 1024.0f);
+    }
+    ImGui::PopFont();
 }
 
 void DrawMemoryBlock(Allocator& allocator) {

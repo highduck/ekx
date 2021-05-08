@@ -115,7 +115,7 @@ void imgui_module_t::setup() {
     };
 }
 
-void imgui_module_t::initializeFontTexture() {
+void addFontWithIcons(const char* filePath, float dpiScale) {
     ImGuiIO& io = ImGui::GetIO();
     float pxSize = (13.0f * dpiScale) * 96.0f / 72.0f;
     float fontSizeScaled = pxSize;
@@ -130,7 +130,7 @@ void imgui_module_t::initializeFontTexture() {
         fontCfg.OversampleV = 1;
         fontCfg.PixelSnapH = true;
         fontCfg.FontDataOwnedByAtlas = false;
-        ImFont* font = io.Fonts->AddFontFromFileTTF("dev/sf-pro-text-regular.ttf", fontSizeScaled, &fontCfg);
+        ImFont* font = io.Fonts->AddFontFromFileTTF(filePath, fontSizeScaled, &fontCfg);
         font->Scale = fontScale;
     }
 
@@ -151,6 +151,12 @@ void imgui_module_t::initializeFontTexture() {
                                                     iconSizeScaled, &fontCfg, iconsRange);
         font->Scale = fontScale;
     }
+}
+
+void imgui_module_t::initializeFontTexture() {
+    ImGuiIO& io = ImGui::GetIO();
+    addFontWithIcons("dev/sf-pro-text-regular.ttf", dpiScale);
+    addFontWithIcons("dev/sf-mono-text-regular.ttf", dpiScale);
 
     uint8_t* pixels;
     int width;
