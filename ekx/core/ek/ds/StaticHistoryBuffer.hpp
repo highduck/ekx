@@ -37,6 +37,10 @@ public:
         return buf_[(Capacity + idx_write_ - 1 - (index % Capacity)) % Capacity];
     }
 
+    const T* data() const {
+        return buf_;
+    }
+
 private:
     int idx_write_{0};
     T buf_[Capacity]{};

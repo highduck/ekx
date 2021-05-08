@@ -2,6 +2,7 @@
 
 #include <ek/ds/SparseArray.hpp>
 #include <ek/ds/Array.hpp>
+#include <ek/ds/Array.hpp>
 #include <ek/assert.hpp>
 #include "../ecxx_fwd.hpp"
 
@@ -31,6 +32,13 @@ struct ComponentHeader {
     ek::Array<EntityIndex> handleToEntity; // dynamic (8 + 4 + 4 ~ 16 bytes)
 
     void* data; // 8 bytes
+
+    uint32_t storageElementSize = 0;
+    // pointer to data array capacity for Profiling
+    uint32_t* pDebugStorageCapacity = nullptr;
+
+    // Type Name for Debugging
+    const char* name = nullptr;
 
     ComponentHandle (* emplace)(ComponentHeader* component, EntityIndex entity); // 8 bytes
 
@@ -235,7 +243,7 @@ public:
     }
 
     template<typename Component>
-    inline void registerComponent(unsigned initialCapacity = 64);
+    inline void registerComponent(const char* name = nullptr, unsigned initialCapacity = 1);
 
 private:
     void resetEntityPool();
@@ -260,6 +268,8 @@ public:
         component.erase = ComponentStorage<DataType>::s_erase;
         component.clear = ComponentStorage<DataType>::s_clear;
         component.shutdown = ComponentStorage<DataType>::s_shutdown;
+        component.storageElementSize = EK_SIZEOF_U32(DataType);
+        component.pDebugStorageCapacity = &data._capacity;
         data.emplace_back();
     }
 
@@ -487,8 +497,9 @@ inline void World::create(EntityIndex* outEntities, uint32_t count) {
 }
 
 template<typename Component>
-inline void World::registerComponent(unsigned initialCapacity) {
+inline void World::registerComponent(const char* name, unsigned initialCapacity) {
     auto* storage = allocator->create<ComponentStorage<Component>>(*allocator, initialCapacity);
+    storage->component.name = name;
     registerComponent(&storage->component);
 }
 

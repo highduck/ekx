@@ -246,7 +246,7 @@ Texture* createRenderTarget(int width, int height, const char* label) {
     desc.width = width;
     desc.height = height;
     desc.usage = SG_USAGE_IMMUTABLE;
-    desc.pixel_format = SG_PIXELFORMAT_RGBA8;
+    //desc.pixel_format = SG_PIXELFORMAT_RGBA8;
     desc.min_filter = SG_FILTER_LINEAR;
     desc.mag_filter = SG_FILTER_LINEAR;
     desc.wrap_u = SG_WRAP_CLAMP_TO_EDGE;

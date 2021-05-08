@@ -213,7 +213,7 @@ void ShapeDecoder::flush_commands(const Array<RenderCommand>& edges, Array<Shape
             for (int i = 0; i < left; ++i) {
                 if (fills[i].fill_style_idx == current_fill) {
                     first = fills[i];
-                    fills.erase(i);
+                    fills.eraseAt(i);
                     --left;
                     found_fill = true;
                     break;

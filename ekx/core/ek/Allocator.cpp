@@ -87,7 +87,7 @@ inline void fillMemoryDebug(void* ptr, size_t sz) {
 }
 
 SystemAllocator::SystemAllocator(const char* label_) noexcept:
-        label{label_} {
+        Allocator{label_} {
 
 }
 
@@ -113,15 +113,18 @@ void SystemAllocator::dealloc(void* ptr) {
 
 class AllocationTracker {
 public:
-    const char* label;
-
-    size_t currentAllocations = 0;
-    size_t currentSizeRequested = 0; // only for stats
-    size_t currentSizeTotal = 0; // only for stats
-
-    size_t allAllocations = 0;
-    size_t allSizeRequested = 0;
-    size_t allSizeTotal = 0;
+    AllocatorStats stats{};
+//    size_t currentAllocations = 0;
+//    size_t currentSizeRequested = 0; // only for stats
+//    size_t currentSizeTotal = 0; // only for stats
+//
+//    size_t peakAllocations = 0;
+//    size_t peakSizeRequested = 0;
+//    size_t peakSizeTotal = 0;
+//
+//    size_t allAllocations = 0;
+//    size_t allSizeRequested = 0;
+//    size_t allSizeTotal = 0;
 
     int children = 0;
     bool alive = true;
@@ -132,13 +135,14 @@ public:
         uint32_t sizeTotal = 0;
     };
 
-    inline static Rec Invalid{0xFFFFFFFF, 0x0};
+    inline static const Rec Invalid{0xFFFFFFFF, 0x0};
 
     Hash<Rec> _map{memory::systemAllocator};
     Hash<Rec> _freedMap{memory::systemAllocator};
 #endif // EK_ALLOCATION_TRACKER_STATS
 
-    explicit AllocationTracker(const char* label_) : label{label_} {
+    explicit AllocationTracker(const char* label) {
+        stats.label = label;
     }
 
     ~AllocationTracker() {
@@ -148,9 +152,9 @@ public:
         EK_ASSERT(children == 0);
 
         // all allocations should be deallocated first (leak)
-        EK_ASSERT(currentAllocations == 0);
-        EK_ASSERT(currentSizeRequested == 0);
-        EK_ASSERT(currentSizeTotal == 0);
+        EK_ASSERT(stats.allocations[AllocatorStats::Current] == 0);
+        EK_ASSERT(stats.memoryEffective[AllocatorStats::Current] == 0);
+        EK_ASSERT(stats.memoryAllocated[AllocatorStats::Current] == 0);
 
 #ifdef EK_ALLOCATION_TRACKER_STATS
         EK_ASSERT(_map.empty());
@@ -163,14 +167,24 @@ public:
         EK_ASSERT(sizeTotal > 0);
         EK_ASSERT(size <= sizeTotal);
 
-        ++currentAllocations;
-        ++allAllocations;
-        allSizeRequested += size;
-        allSizeTotal += sizeTotal;
+        stats.allocations[AllocatorStats::Current] += 1;
+        stats.allocations[AllocatorStats::AllTime] += 1;
+        stats.memoryEffective[AllocatorStats::AllTime] += size;
+        stats.memoryAllocated[AllocatorStats::AllTime] += sizeTotal;
 
 #ifdef EK_ALLOCATION_TRACKER_STATS
-        currentSizeRequested += size;
-        currentSizeTotal += sizeTotal;
+        stats.memoryEffective[AllocatorStats::Current] += size;
+        stats.memoryAllocated[AllocatorStats::Current] += sizeTotal;
+
+        if (stats.allocations[AllocatorStats::Current] > stats.allocations[AllocatorStats::Peak]) {
+            stats.allocations[AllocatorStats::Peak] = stats.allocations[AllocatorStats::Current];
+        }
+        if (stats.memoryEffective[AllocatorStats::Current] > stats.memoryEffective[AllocatorStats::Peak]) {
+            stats.memoryEffective[AllocatorStats::Peak] = stats.memoryEffective[AllocatorStats::Current];
+        }
+        if (stats.memoryAllocated[AllocatorStats::Current] > stats.memoryAllocated[AllocatorStats::Peak]) {
+            stats.memoryAllocated[AllocatorStats::Peak] = stats.memoryAllocated[AllocatorStats::Current];
+        }
 
         // should not be tracked before
         const auto id = (uint64_t) ptr;
@@ -188,7 +202,7 @@ public:
 
 #endif // EK_ALLOCATION_TRACKER_STATS
 
-        EK_TRACE_ALLOC(ptr, sizeTotal, label);
+        EK_TRACE_ALLOC(ptr, sizeTotal, stats.label);
     }
 
     void onFree(void* ptr) {
@@ -205,8 +219,8 @@ public:
         EK_ASSERT(_map.has(id));
 //        }
         const auto& rec = _map.get(id, Invalid);
-        currentSizeRequested -= rec.sizeUsed;
-        currentSizeTotal -= rec.sizeTotal;
+        stats.memoryEffective[AllocatorStats::Current] -= rec.sizeUsed;
+        stats.memoryAllocated[AllocatorStats::Current] -= rec.sizeTotal;
         _map.remove(id);
         _freedMap.set(id, rec);
         /// something wrong with map implementation
@@ -214,10 +228,10 @@ public:
 
 #endif // EK_ALLOCATION_TRACKER_STATS
 
-        EK_ASSERT_R2(currentAllocations > 0);
-        --currentAllocations;
+        EK_ASSERT_R2(stats.allocations[AllocatorStats::Current] > 0);
+        stats.allocations[AllocatorStats::Current] -= 1;
 
-        EK_TRACE_FREE(ptr, label);
+        EK_TRACE_FREE(ptr, stats.label);
     }
 };
 
@@ -227,15 +241,48 @@ inline uintptr_t align_up(uintptr_t num, uintptr_t align) {
     return (((num) + ((align) - 1)) & ~((align) - 1));
 }
 
+Allocator::Allocator(const char* label_) : label{label_} {
+//#ifdef EK_ALLOCATION_TRACKER
+//    tracker = new AllocationTracker(label_);
+//#endif
+}
+
+Allocator::~Allocator() {
+//#ifdef EK_ALLOCATION_TRACKER
+//    delete tracker;
+//#endif
+}
+
+void Allocator::addChild(Allocator& child) {
+    child.next = children;
+    children = &child;
+}
+
+void Allocator::removeChild(Allocator& child) {
+    auto* it = children;
+    if (it == this) {
+        children = child.next;
+        return;
+    }
+
+    while (it) {
+        if (it->next == &child) {
+            it->next = it->next->next;
+            return;
+        }
+    }
+}
+
 AlignedAllocator::AlignedAllocator(Allocator& allocator_, const char* label_) noexcept:
-        allocator{allocator_},
-        label{label_} {
+        Allocator(label_),
+        allocator{allocator_} {
 #ifdef EK_ALLOCATION_TRACKER
     tracker = new AllocationTracker(label_);
     if (allocator.tracker != nullptr) {
         ++(allocator.tracker->children);
     }
 #endif // EK_ALLOCATION_TRACKER
+    allocator.addChild(*this);
 }
 
 AlignedAllocator::~AlignedAllocator() {
@@ -245,6 +292,7 @@ AlignedAllocator::~AlignedAllocator() {
     }
     delete tracker;
 #endif // EK_ALLOCATION_TRACKER
+    allocator.removeChild(*this);
 }
 
 void* AlignedAllocator::alloc(uint32_t size, uint32_t align) {
@@ -323,8 +371,8 @@ void AlignedAllocator::dealloc(void* ptr) {
 }
 
 ProxyAllocator::ProxyAllocator(Allocator& allocator_, const char* label_) noexcept:
-        allocator{allocator_},
-        label{label_} {
+        Allocator(label_),
+        allocator{allocator_} {
 
 #ifdef EK_ALLOCATION_TRACKER
     tracker = new AllocationTracker(label_);
@@ -332,6 +380,7 @@ ProxyAllocator::ProxyAllocator(Allocator& allocator_, const char* label_) noexce
         ++(allocator.tracker->children);
     }
 #endif // EK_ALLOCATION_TRACKER
+    allocator.addChild(*this);
 }
 
 ProxyAllocator::ProxyAllocator(const char* heapLabel) noexcept:
@@ -346,6 +395,7 @@ ProxyAllocator::~ProxyAllocator() {
     }
     delete tracker;
 #endif // EK_ALLOCATION_TRACKER
+    allocator.removeChild(*this);
 }
 
 void* ProxyAllocator::alloc(uint32_t size, uint32_t align) {
@@ -415,6 +465,44 @@ void* reallocate(Allocator& allocator, void* ptr, uint32_t oldSizeToCopy, uint32
     return ptrNew;
 }
 
+}
+
+uint32_t readAllocationMap(Allocator& allocator, uint64_t* rle, uint32_t blockSize) {
+#ifdef EK_ALLOCATION_TRACKER
+    if (!allocator.tracker) {
+        return 0;
+    }
+    auto& data = allocator.tracker->_map._data;
+    uint32_t p = 0;
+    for (auto& r : data) {
+        rle[p++] = r.key;
+        rle[p++] = r.value.sizeTotal;
+    }
+    return p;
+#else
+    return 0;
+#endif
+}
+
+AllocatorStats Allocator::getStatistics() const {
+    AllocatorStats result{};
+#ifdef EK_ALLOCATION_TRACKER
+    if(tracker) {
+        result = tracker->stats;
+
+        // get span size
+        auto& data = tracker->_map._data;
+        uint64_t min = 0xFFFFFFFFFFFFFFFFllu;
+        uint64_t max = 0x0llu;
+        for (auto& r : data) {
+            const uint64_t ptr = r.key;
+            if (ptr < min) min = ptr;
+            if (ptr > max) max = ptr;
+        }
+        result.span = max - min;
+    }
+#endif
+    return result;
 }
 
 }

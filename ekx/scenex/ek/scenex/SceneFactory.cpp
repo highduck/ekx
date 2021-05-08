@@ -57,6 +57,7 @@ SGFile* sg_load(const void* data, uint32_t size) {
 }
 
 const SGNodeData* sg_get(const SGFile& sg, const std::string& library_name) {
+    // TODO: optimize access!
     for (auto& item : sg.library) {
         if (item.libraryName == library_name) {
             return &item;

@@ -73,11 +73,14 @@ sg_pipeline createPipeline(sg_shader shader, bool useRenderTarget, bool depthSte
     pip_desc.colors[0].blend.enabled = true;
     pip_desc.colors[0].blend.src_factor_rgb = SG_BLENDFACTOR_ONE;
     pip_desc.colors[0].blend.dst_factor_rgb = SG_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+    pip_desc.sample_count = 1;
     pip_desc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
     if (useRenderTarget) {
-        pip_desc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
+        //pip_desc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
         if(depthStencil) {
             pip_desc.depth.pixel_format = SG_PIXELFORMAT_DEPTH_STENCIL;
+//            pip_desc.depth.write_enabled = false;
+//            pip_desc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
         }
         else {
             pip_desc.depth.pixel_format = SG_PIXELFORMAT_NONE;
@@ -95,7 +98,7 @@ sg_pipeline Context::getPipeline(sg_shader shader, bool useRenderTarget, bool de
     if (depthStencilPass) {
         key = key | (1ull << 33ull);
     }
-    auto pip = pipelines.get(key, {0});
+    auto pip = pipelines.get(key, {SG_INVALID_ID});
     if (pip.id == SG_INVALID_ID) {
         pip = createPipeline(shader, useRenderTarget, depthStencilPass);
         pipelines.set(key, pip);
@@ -221,6 +224,7 @@ void Context::drawUserBatch(sg_pipeline pip, uint32_t numTextures) {
 
     {
         const auto rc = curr.scissors;
+        //sg_apply_viewportf(rc.x, rc.y, rc.width, rc.height, true);
         sg_apply_scissor_rect(rc.x, rc.y, rc.width, rc.height, true);
     }
 
@@ -271,6 +275,7 @@ void Context::drawBatch() {
 
     {
         const auto rc = curr.scissors;
+        //sg_apply_viewportf(rc.x, rc.y, rc.width, rc.height, true);
         sg_apply_scissor_rect(rc.x, rc.y, rc.width, rc.height, true);
     }
 
@@ -901,6 +906,8 @@ void strokeCircle(const circle_f& circle, abgr32_t color, float lineWidth, int s
 void endFrame() {
     state.vertexBuffers_->nextFrame();
     state.indexBuffers_->nextFrame();
+
+
 }
 
 void initialize() {

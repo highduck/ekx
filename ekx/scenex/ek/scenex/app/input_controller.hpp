@@ -2,7 +2,8 @@
 
 #include <ek/app/app.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
-#include <vector>
+#include <ek/ds/Array.hpp>
+#include "GameDisplay.hpp"
 
 namespace ek {
 
@@ -18,8 +19,7 @@ struct touch_state_t {
 
     touch_state_t() = default;
 
-    explicit touch_state_t(uint64_t id_)
-            : id{id_} {
+    explicit touch_state_t(uint64_t id_) : id{id_} {
 
     }
 };
@@ -27,7 +27,7 @@ struct touch_state_t {
 class input_controller final {
 public:
 
-    explicit input_controller(InteractionSystem& interactions);
+    input_controller(InteractionSystem& interactions, GameDisplay& display);
 
     ~input_controller();
 
@@ -47,7 +47,7 @@ public:
     void reset_keyboard();
 
     [[nodiscard]]
-    const std::vector<touch_state_t>& touches() const {
+    const Array<touch_state_t>& touches() const {
         return touches_;
     }
 
@@ -63,6 +63,9 @@ public:
     bool hovered_by_editor_gui = false;
     bool emulateTouch = false;
 private:
+    [[nodiscard]] float2 screenCoordToGameDisplay(float2 pos) const;
+    void emulate_mouse_as_touch(const app::event_t& event, touch_state_t& data);
+    void update_touch(const app::event_t& event, touch_state_t& data);
 
     struct key_state_t {
         bool state = false;
@@ -70,6 +73,7 @@ private:
         bool down = false;
     };
 
+    GameDisplay& display_;
     InteractionSystem& interactions_;
     std::string keyboard_text_;
     int keyboard_modifiers_{};
@@ -78,31 +82,7 @@ private:
     constexpr static size_t keys_count = static_cast<size_t>(app::key_code::max_count);
     key_state_t keys_[keys_count];
 
-    std::vector<touch_state_t> touches_;
-
-
-//
-//
-//    public var down(default, null):FastStringMap<Bool> = new FastStringMap();
-//    public var up(default, null):FastStringMap<Bool> = new FastStringMap();
-//    public var state(default, null):FastStringMap<Bool> = new FastStringMap();
-//
-//    public function reset(resetState:Bool = true) {
-//            for (key in down.keys())
-//                down.set(key, false);
-//
-//            if (resetState) {
-//                for (key in state.keys()) {
-//                    state.set(key, false);
-//                }
-//            }
-//
-//            for (key in up.keys()) up.set(key, false);
-//
-//            text = null;
-//        }
-//    };
-
+    Array <touch_state_t> touches_;
 };
 
 }

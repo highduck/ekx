@@ -2,10 +2,13 @@
 
 #include <ek/graphics/graphics.hpp>
 #include <ek/math/vec.hpp>
+#include <ek/math/box.hpp>
 
 namespace ek {
 
 struct GameDisplayInfo {
+    // when game drawing inside window viewport
+    rect_f destinationViewport{};
     float2 size{1.0f, 1.0f};
     float2 window{1.0f, 1.0f};
     float4 insets{0.0f, 0.0f, 0.0f, 0.0f};
@@ -24,10 +27,11 @@ public:
     graphics::Texture* depthStencil = nullptr;
     void* screenshotBuffer = nullptr;
     bool simulated = false;
+    bool colorFirstClearFlag = false;
 
     void update();
 
-    bool beginGame(const sg_pass_action& passAction);
+    bool beginGame(sg_pass_action& passAction);
     void endGame();
 
     bool beginOverlayDev();

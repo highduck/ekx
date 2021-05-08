@@ -27,7 +27,7 @@ void AdMobSimulator::draw() const {
 }
 
 AdMobSimulator::AdMobSimulator() {
-    resolve<basic_application>().hook_on_render_frame +=
+    Locator::ref<basic_application>().hook_on_render_frame +=
             [this] { this->draw(); };
 }
 

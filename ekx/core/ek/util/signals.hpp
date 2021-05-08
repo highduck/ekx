@@ -20,7 +20,7 @@ public:
     };
 
     uint32_t _nextId = 0;
-    Array<Slot> _slots;
+    Array<Slot> _slots{};
 
     template<typename Fn>
     Listener add(Fn listener) {
@@ -39,10 +39,10 @@ public:
     }
 
     bool remove(Listener id) {
-        for(uint32_t i = 0; i < _slots._size; ++i) {
+        for (uint32_t i = 0; i < _slots._size; ++i) {
             auto& slot = _slots[i];
-            if(slot.id == id) {
-                _slots.erase(i);
+            if (slot.id == id) {
+                _slots.eraseAt(i);
                 return true;
             }
         }
@@ -51,15 +51,21 @@ public:
 
     void emit(Args... args) {
         uint32_t i = 0;
-        while (i < _slots._size) {
-            // copy slot
-            auto slot = _slots.get(i);
-            slot.fn(args...);
-            if (slot.once) {
-                _slots.erase(i);
-            } else {
-                ++i;
+        while (i < _slots.size()) {
+            const auto& slot = _slots.get(i);
+            // copy function
+//            slot.fn.
+            //printf("%sz", (uintptr_t)slot.fn.target());
+            std::function<void(Args...)> fn = slot.fn;
+
+
+            bool once = slot.once;
+            fn(args...);
+            if (once) {
+                _slots.eraseAt(i);
+                continue;
             }
+            ++i;
         }
     }
 
@@ -90,13 +96,27 @@ public:
 
     signal_t() = default;
 
-    signal_t(signal_t&& mf) noexcept = default;
+    signal_t(signal_t&& mf) noexcept: _nextId{mf._nextId},
+                                      _slots{std::move(mf._slots)} {
 
-    signal_t(const signal_t& mf) noexcept = default;
+    }
 
-    signal_t& operator=(signal_t&& mf) noexcept = default;
+    signal_t(const signal_t& mf) noexcept :_nextId{mf._nextId},
+                                           _slots{mf._slots} {
 
-    signal_t& operator=(const signal_t& mf) noexcept = default;
+    }
+
+    signal_t& operator=(signal_t&& mf) noexcept {
+        _nextId = mf._nextId;
+        _slots = std::move(mf._slots);
+        return *this;
+    }
+
+    signal_t& operator=(const signal_t& mf) noexcept {
+        _nextId = mf._nextId;
+        _slots = mf._slots;
+        return *this;
+    }
 };
 
 }

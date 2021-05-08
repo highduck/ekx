@@ -4,9 +4,9 @@
 #include <ek/app/app.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include <ek/scenex/app/input_controller.hpp>
-#include <ek/util/locator.hpp>
+#include <ek/util/ServiceLocator.hpp>
 #include <ek/util/path.hpp>
-//#include <ek/system/system.hpp>
+#include <IconsFontAwesome5.h>
 
 #include <ek/graphics/graphics.hpp>
 
@@ -37,20 +37,19 @@ imgui_module_t::imgui_module_t() {
 
     sg_imgui_init(&sokol_gfx_gui_state);
 
-    simgui_desc_t desc{
-            .color_format = _SG_PIXELFORMAT_DEFAULT,
-            .depth_format = SG_PIXELFORMAT_DEPTH_STENCIL,
-            .sample_count = 0,
-            .dpi_scale = dpiScale,
-            .ini_filename = "imgui.ini",
-            .no_default_font = true
-    };
+    simgui_desc_t desc{};
+    desc.depth_format = SG_PIXELFORMAT_DEPTH_STENCIL;
+    desc.sample_count = 0;
+    desc.dpi_scale = dpiScale;
+    desc.ini_filename = "imgui.ini";
+    desc.no_default_font = true;
     simgui_setup(&desc);
 
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableSetMousePos;  // Enable set mouse pos for navigation
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 //    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     setup();
 
@@ -118,11 +117,40 @@ void imgui_module_t::setup() {
 
 void imgui_module_t::initializeFontTexture() {
     ImGuiIO& io = ImGui::GetIO();
-    ImFont* font = nullptr;
-    ImFontConfig fontCfg{};
-    fontCfg.FontDataOwnedByAtlas = false;
-    font = io.Fonts->AddFontFromFileTTF("assets/Cousine-Regular.ttf", 16.0f * dpiScale, &fontCfg);
-    font->Scale = 1.0f / dpiScale;
+    float pxSize = (13.0f * dpiScale) * 96.0f / 72.0f;
+    float fontSizeScaled = pxSize;
+    // MD
+    //float iconSizeScaled = pxSize * 1.1f;
+    // FA
+    float iconSizeScaled = pxSize * 0.75f;
+    float fontScale = 1.0f / dpiScale;
+    {
+        ImFontConfig fontCfg{};
+        fontCfg.OversampleH = 1;
+        fontCfg.OversampleV = 1;
+        fontCfg.PixelSnapH = true;
+        fontCfg.FontDataOwnedByAtlas = false;
+        ImFont* font = io.Fonts->AddFontFromFileTTF("dev/sf-pro-text-regular.ttf", fontSizeScaled, &fontCfg);
+        font->Scale = fontScale;
+    }
+
+    static const ImWchar iconsRange[] = {ICON_MIN_FA, ICON_MAX_FA, 0};
+    {
+        ImFontConfig fontCfg{};
+        fontCfg.OversampleH = 1;
+        fontCfg.OversampleV = 1;
+        fontCfg.PixelSnapH = true;
+        fontCfg.FontDataOwnedByAtlas = false;
+        fontCfg.GlyphMinAdvanceX = fontSizeScaled; // <-- _FONT_SizeScaled!
+        // MD
+        //fontCfg.GlyphOffset.y = floorf(0.27f * iconSizeScaled);
+        // FA
+        fontCfg.GlyphOffset.y = floorf(0.05f * iconSizeScaled);
+        fontCfg.MergeMode = true;
+        ImFont* font = io.Fonts->AddFontFromFileTTF("dev/" FONT_ICON_FILE_NAME_FAS,
+                                                    iconSizeScaled, &fontCfg, iconsRange);
+        font->Scale = fontScale;
+    }
 
     uint8_t* pixels;
     int width;
@@ -168,7 +196,7 @@ void imgui_module_t::on_event(const event_t& event) {
             break;
 
         case event_type::text:
-            if(!event.characters.empty()) {
+            if (!event.characters.empty()) {
                 io.AddInputCharactersUTF8(event.characters.c_str());
             }
             break;
@@ -245,7 +273,7 @@ void update_mouse_cursor() {
 void imgui_module_t::begin_frame(float dt) {
     auto w = static_cast<int>(g_app.drawable_size.x);
     auto h = static_cast<int>(g_app.drawable_size.y);
-    if(w > 0 && h > 0) {
+    if (w > 0 && h > 0) {
         update_mouse_cursor();
         simgui_new_frame(w, h, dt);
     }
@@ -260,11 +288,6 @@ void imgui_module_t::on_frame_completed() {
     auto& io = ImGui::GetIO();
     if (io.KeySuper || io.KeyCtrl) {
         reset_keys();
-    }
-
-    auto* ic = try_resolve<input_controller>();
-    if (ic) {
-        ic->hovered_by_editor_gui = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
     }
 }
 

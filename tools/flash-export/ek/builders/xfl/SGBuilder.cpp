@@ -623,7 +623,7 @@ void SGBuilder::processTimeline(const Element& el, ExportItem* item) {
                 }
             }
             if (empty) {
-                movieLayers.eraseIt(it);
+                movieLayers.eraseIterator(it);
             } else {
                 it++;
             }

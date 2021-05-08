@@ -28,7 +28,7 @@ struct Button {
     ButtonSkin* skin{nullptr};
 
     bool back_button = false;
-    signal_t<> clicked;
+    signal_t<> clicked{};
 
     bool initialized = false;
     float over_time = 0.0f;

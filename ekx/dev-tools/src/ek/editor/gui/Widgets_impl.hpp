@@ -1,8 +1,20 @@
-#include "gui.hpp"
-#include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/text/TextFormat.hpp>
+#include "Widgets.hpp"
+#include "../imgui/imgui.hpp"
 
 namespace ImGui {
+
+void HelpMarker(const char* desc)
+{
+    ImGui::TextDisabled(ICON_FA_QUESTION_CIRCLE);
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
 
 bool Color32Edit(const char* label, ek::argb32_t& argb) {
     ek::float4 v{argb};
@@ -25,6 +37,15 @@ bool EditRect(const char* label, float * xywh, float v_speed, const char* format
 }
 
 namespace ek {
+
+std::string getDebugNodePath(ecs::EntityApi e) {
+    std::string result{};
+    while (e) {
+        result = e.get_or_default<NodeName>().name + "/" + result;
+        e = e.get<Node>().parent;
+    }
+    return result;
+}
 
 const char* getTextLayerTypeName(TextLayerType type) {
     static const char* names[] = {

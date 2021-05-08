@@ -1,0 +1,41 @@
+name: Update
+
+on: workflow_dispatch
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          # enable for changes tracking
+          #fetch-depth: 0
+
+      - name: Update
+        run: |
+          yarn --frozen-lockfile
+          yarn upgrade -L
+          git add -A
+          node auto-update.js
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          commit-message: update packages
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          #branch: update/${{ github.run_number }}
+          branch: update/master
+          delete-branch: true
+          title: 'Packages auto-update'
+          labels: |
+            auto-update
+
+      - name: Check outputs
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

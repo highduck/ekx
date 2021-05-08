@@ -91,7 +91,7 @@ TEST(Array, moveCopy) {
     {
         Array<NonTrivialStruct> a;
         a.push_back(NonTrivialStruct());
-        a.erase(0u);
+        a.eraseAt(0u);
         a.push_back(NonTrivialStruct());
     }
     {

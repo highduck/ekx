@@ -3,7 +3,7 @@
 #include "ParticleDecl.hpp"
 #include "Particle.hpp"
 #include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/util/locator.hpp>
+#include <ek/util/ServiceLocator.hpp>
 
 namespace ek {
 

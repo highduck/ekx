@@ -59,7 +59,7 @@ public:
 
     static void drawGizmo(Camera2D& camera);
 
-    static SmallArray<ecs::EntityApi, MaxCount>& getCameraQueue();
+    static SmallArray<ecs::EntityRef, MaxCount>& getCameraQueue();
 
     static const Camera2D* getCurrentRenderingCamera();
 };

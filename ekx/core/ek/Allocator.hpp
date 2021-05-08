@@ -16,13 +16,38 @@ class AllocationTracker;
 
 #endif
 
+struct AllocatorStats {
+    const char* label = nullptr;
+    uint32_t index = 0;
+    uint64_t span = 0;
+    enum {
+        Current = 0,
+        Peak = 1,
+        AllTime = 2
+    };
+    uint32_t allocations[3]{};
+    uint32_t memoryAllocated[3]{};
+    uint32_t memoryEffective[3]{};
+};
+
 class Allocator {
 public:
 #ifdef EK_ALLOCATION_TRACKER
     AllocationTracker* tracker = nullptr;
 #endif
+    const char* label = nullptr;
+    Allocator* next = nullptr;
+    Allocator* children = nullptr;
 
-    virtual ~Allocator() = default;
+    void addChild(Allocator& child);
+
+    void removeChild(Allocator& child);
+
+    AllocatorStats getStatistics() const;
+
+    explicit Allocator(const char* label_);
+
+    virtual ~Allocator();
 
     virtual void* alloc(uint32_t size, uint32_t align) = 0;
 
@@ -86,8 +111,6 @@ inline void Allocator::destroy(T* ptr) {
 
 class SystemAllocator : public Allocator {
 public:
-    const char* label;
-
     explicit SystemAllocator(const char* label_) noexcept;
 
     ~SystemAllocator() override;
@@ -114,7 +137,6 @@ public:
 class ProxyAllocator : public Allocator {
 public:
     Allocator& allocator;
-    const char* label;
 
     ProxyAllocator(Allocator& allocator, const char* label_) noexcept;
 
@@ -127,5 +149,7 @@ public:
 
     void dealloc(void* ptr) override;
 };
+
+uint32_t readAllocationMap(Allocator& allocator, uint64_t* rle, uint32_t blockSize);
 
 }

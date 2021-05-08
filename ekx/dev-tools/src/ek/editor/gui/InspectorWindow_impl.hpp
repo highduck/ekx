@@ -1,4 +1,7 @@
+#pragma once
+
 #include "gui.hpp"
+#include "Widgets.hpp"
 #include <ecxx/ecxx.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
@@ -21,7 +24,7 @@
 namespace ek {
 
 template<typename T>
-void selectAsset(const char* label, Res<T>& asset) {
+inline void selectAsset(const char* label, Res<T>& asset) {
     if (ImGui::BeginCombo(label, asset.getID().c_str())) {
         for (auto& it : Res<T>::map()) {
             auto& key = it.first;
@@ -33,7 +36,7 @@ void selectAsset(const char* label, Res<T>& asset) {
     }
 }
 
-void guiEntityRef(const char* label, ecs::EntityRef ref) {
+inline void guiEntityRef(const char* label, ecs::EntityRef ref) {
     if (ref == nullptr) {
         ImGui::TextDisabled("%s: null", label);
     } else if (ref.valid()) {
@@ -79,7 +82,7 @@ inline void guiDisplayComponent(ecs::EntityApi e, const char* name, Func fn) {
     }
 }
 
-void guiMovieClip(MovieClip& mc) {
+inline void guiMovieClip(MovieClip& mc) {
     ImGui::LabelText("movie_data_symbol", "%s", mc.movie_data_symbol.c_str());
     const auto* data = mc.get_movie_data();
     if (data) {
@@ -92,17 +95,17 @@ void guiMovieClip(MovieClip& mc) {
     }
 }
 
-void guiTransform2D(Transform2D& transform) {
+inline void guiTransform2D(Transform2D& transform) {
     auto pos = transform.getPosition();
     auto scale = transform.getScale();
     auto skew = transform.getSkew();
-    if(ImGui::DragFloat2("Position", pos.data(), 1.0f, 0.0f, 0.0f, "%.1f")) {
+    if (ImGui::DragFloat2("Position", pos.data(), 1.0f, 0.0f, 0.0f, "%.1f")) {
         transform.setPosition(pos);
     }
-    if(ImGui::DragFloat2("Scale", scale.data(), 0.1f, 0.0f, 0.0f, "%.2f")) {
+    if (ImGui::DragFloat2("Scale", scale.data(), 0.1f, 0.0f, 0.0f, "%.2f")) {
         transform.setScale(scale);
     }
-    if(ImGui::DragFloat2("Skew", skew.data(), 0.1f, 0.0f, 0.0f, "%.2f")) {
+    if (ImGui::DragFloat2("Skew", skew.data(), 0.1f, 0.0f, 0.0f, "%.2f")) {
         transform.setSkew(skew);
     }
 //    ImGui::DragFloat2("Origin", transform.origin.data(), 0.1f, 0.0f, 0.0f, "%.2f");
@@ -119,14 +122,14 @@ void guiTransform2D(Transform2D& transform) {
     }
 }
 
-void guiViewport(Viewport& vp) {
+inline void guiViewport(Viewport& vp) {
     ImGui::EditRect("Viewport", vp.options.viewport.data());
     ImGui::DragFloat2("Alignment", vp.options.alignment.data());
     ImGui::DragFloat2("Base Resolution", vp.options.baseResolution.data());
     ImGui::DragFloat2("Pixel Ratio", vp.options.pixelRatio.data());
     ImGui::DragFloat2("Safe Area Fit", vp.options.safeAreaFit.data());
     ImGui::Checkbox("Scale To Resolution", &vp.options.scaleToResolution);
-    if(ImGui::CollapsingHeader("Debug Output")) {
+    if (ImGui::CollapsingHeader("Debug Output")) {
         ImGui::Indent();
         ImGui::EditRect("Screen Rect", vp.output.screenRect.data());
         ImGui::EditRect("Full Rect", vp.output.fullRect.data());
@@ -137,7 +140,7 @@ void guiViewport(Viewport& vp) {
     }
 }
 
-void guiCamera2D(Camera2D& camera) {
+inline void guiCamera2D(Camera2D& camera) {
     ImGui::Checkbox("Enabled", &camera.enabled);
     ImGui::Checkbox("interactive", &camera.interactive);
     ImGui::Checkbox("occlusionEnabled", &camera.occlusionEnabled);
@@ -162,7 +165,7 @@ void guiCamera2D(Camera2D& camera) {
     ImGui::DragFloat("Debug Scale", &camera.debugDrawScale);
 }
 
-void guiTransform3D(Transform3D& transform) {
+inline void guiTransform3D(Transform3D& transform) {
     ImGui::DragFloat3("Position", transform.position.data(), 1.0f, 0.0f, 0.0f, "%.1f");
     ImGui::DragFloat3("Scale", transform.scale.data(), 0.1f, 0.0f, 0.0f, "%.2f");
     float3 euler_angles = transform.rotation * 180.0f / ek::math::pi;
@@ -171,7 +174,7 @@ void guiTransform3D(Transform3D& transform) {
     }
 }
 
-void guiCamera3D(Camera3D& camera) {
+inline void guiCamera3D(Camera3D& camera) {
     ImGui::DragFloatRange2("Clip Plane", &camera.zNear, &camera.zFar, 1.0f, 0.0f, 0.0f, "%.1f");
     float fov_degree = ek::math::to_degrees(camera.fov);
     if (ImGui::DragFloat("FOV", &fov_degree, 1.0f, 0.0f, 0.0f, "%.1f")) {
@@ -187,12 +190,12 @@ void guiCamera3D(Camera3D& camera) {
     ImGui::DragFloat("Clear Depth", &camera.clearDepth, 1.0f, 0.0f, 0.0f, "%.1f");
 }
 
-void guiMeshRenderer(MeshRenderer& renderer) {
+inline void guiMeshRenderer(MeshRenderer& renderer) {
     ImGui::Checkbox("Cast Shadows", &renderer.castShadows);
     ImGui::Checkbox("Receive Shadows", &renderer.receiveShadows);
 }
 
-void guiLight3D(Light3D& light) {
+inline void guiLight3D(Light3D& light) {
     if (light.type == light_3d_type::directional) {
         ImGui::Text("Directional Light");
     } else if (light.type == light_3d_type::point) {
@@ -208,33 +211,33 @@ void guiLight3D(Light3D& light) {
     ImGui::DragFloat("Falloff", &light.falloff, 0.1f, 0.0f, 0.0f, "%.1f");
 }
 
-void guiBounds2D(Bounds2D& bounds) {
+inline void guiBounds2D(Bounds2D& bounds) {
     ImGui::EditRect("Rect", bounds.rect.data());
     ImGui::Checkbox("Hit Area", &bounds.hitArea);
     ImGui::Checkbox("Scissors", &bounds.scissors);
     ImGui::Checkbox("Culling (WIP)", &bounds.culling);
 }
 
-void guiInteractive(Interactive& inter) {
+inline void guiInteractive(Interactive& inter) {
     ImGui::Checkbox("pushed", &inter.pushed);
     ImGui::Checkbox("over", &inter.over);
     ImGui::Checkbox("bubble", &inter.bubble);
     ImGui::LabelText("cursor", inter.cursor == Interactive::mouse_cursor::button ? "button" : "?");
 }
 
-void editDisplaySprite(Sprite2D& sprite) {
+inline void editDisplaySprite(Sprite2D& sprite) {
     selectAsset<Sprite>("Sprite", sprite.src);
     ImGui::Checkbox("Hit Pixels", &sprite.hit_pixels);
 }
 
-void editDisplayNinePatch(NinePatch2D& ninePatch) {
+inline void editDisplayNinePatch(NinePatch2D& ninePatch) {
     selectAsset<Sprite>("Sprite", ninePatch.src);
     // TODO: scale, size
     //ImGui::Checkbox("Scale Grid", &ninePatch.scale_grid_mode);
     ImGui::Checkbox("Hit Pixels", &ninePatch.hit_pixels);
 }
 
-void editDisplayRectangle(Quad2D& quad) {
+inline void editDisplayRectangle(Quad2D& quad) {
     ImGui::EditRect("Bounds", quad.rect.data());
     ImGui::Color32Edit("Color LT", quad.colors[0]);
     ImGui::Color32Edit("Color RT", quad.colors[1]);
@@ -242,7 +245,7 @@ void editDisplayRectangle(Quad2D& quad) {
     ImGui::Color32Edit("Color LB", quad.colors[3]);
 }
 
-void editDisplayArc(Arc2D& arc) {
+inline void editDisplayArc(Arc2D& arc) {
     selectAsset<Sprite>("Sprite", arc.sprite);
     ImGui::DragFloat("Angle", &arc.angle);
     ImGui::DragFloat("Radius", &arc.radius);
@@ -252,11 +255,11 @@ void editDisplayArc(Arc2D& arc) {
     ImGui::Color32Edit("Color Outer", arc.color_outer);
 }
 
-void editParticleRenderer2D(ParticleRenderer2D& p) {
+inline void editParticleRenderer2D(ParticleRenderer2D& p) {
     guiEntityRef("Target", p.target);
 }
 
-void guiTextFormat(TextFormat& format) {
+inline void guiTextFormat(TextFormat& format) {
     selectAsset<Font>("Font", format.font);
     ImGui::DragFloat("Size", &format.size, 1, 8, 128, "%f");
     ImGui::DragFloat("Leading", &format.leading, 1, 0, 128, "%f");
@@ -282,7 +285,7 @@ void guiTextFormat(TextFormat& format) {
     ImGui::Unindent();
 }
 
-void editDisplayText(Text2D& tf) {
+inline void editDisplayText(Text2D& tf) {
     ImGui::InputTextMultiline("Text", &tf.text);
     ImGui::EditRect("Bounds", tf.rect.data());
     ImGui::Color32Edit("Border Color", tf.borderColor);
@@ -292,7 +295,7 @@ void editDisplayText(Text2D& tf) {
     guiTextFormat(tf.format);
 }
 
-void guiLayout(LayoutRect& layout) {
+inline void guiLayout(LayoutRect& layout) {
     ImGui::Checkbox("Fill X", &layout.fill_x);
     ImGui::Checkbox("Fill Y", &layout.fill_y);
     ImGui::Checkbox("Align X", &layout.align_x);
@@ -306,7 +309,7 @@ void guiLayout(LayoutRect& layout) {
     ImGui::EditRect("Safe Rect", layout.safeRect.data());
 }
 
-void guiUglyFilter2D(UglyFilter2D& filters) {
+inline void guiUglyFilter2D(UglyFilter2D& filters) {
     ImGui::Checkbox("Enabled", &filters.enabled);
     for (int i = 0; i < filters.filters.size(); ++i) {
         auto& filter = filters.filters[i];
@@ -320,7 +323,7 @@ void guiUglyFilter2D(UglyFilter2D& filters) {
     }
 }
 
-void guiParticleEmitter2D(ParticleEmitter2D& emitter) {
+inline void guiParticleEmitter2D(ParticleEmitter2D& emitter) {
     ImGui::Checkbox("Enabled", &emitter.enabled);
     ImGui::Text("_Time: %f", emitter.time);
     guiEntityRef("Layer", emitter.layer);
@@ -341,13 +344,14 @@ void guiParticleEmitter2D(ParticleEmitter2D& emitter) {
     ImGui::DragFloat2("dir", emitter.data.dir.data());
 }
 
-void guiParticleLayer2D(ParticleLayer2D& layer) {
+inline void guiParticleLayer2D(ParticleLayer2D& layer) {
     ImGui::Checkbox("Keep Alive", &layer.keep_alive);
     ImGui::LabelText("Num Particles", "%lu", layer.particles.size());
 }
 
-void gui_inspector(ecs::EntityApi e) {
-    ImGui::PushID(e.index);
+void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
+    ImGui::PushID(reinterpret_cast<const void*>(entity.passport));
+    ecs::EntityApi e = entity.ent();
     ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index, ecs::the_world.generation(e.index));
     if (e.has<NodeName>()) {
         ImGui::InputText("Name", &e.get<NodeName>().name);
@@ -400,18 +404,14 @@ void gui_inspector(ecs::EntityApi e) {
     ImGui::PopID();
 }
 
-void guiInspectorWindow(bool* p_open) {
-    if (ImGui::Begin("Inspector", p_open)) {
-        if (!hierarchySelectionList.empty()) {
-            if (hierarchySelectionList.size() > 1) {
-                ImGui::LabelText("Multiple Selection", "%lu", hierarchySelectionList.size());
-            } else {
-                gui_inspector(hierarchySelectionList[0]);
-            }
+void InspectorWindow::onDraw() {
+    if (!list.empty()) {
+        if (list.size() > 1) {
+            ImGui::LabelText("Multiple Selection", "%u", list.size());
+        } else {
+            gui_inspector(list[0]);
         }
     }
-    ImGui::End();
 }
-
 
 }

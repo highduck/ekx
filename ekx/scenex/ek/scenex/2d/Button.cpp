@@ -1,12 +1,13 @@
 #include "Button.hpp"
 
 #include <ek/scenex/base/Interactive.hpp>
+#include <ek/util/logger.hpp>
 #include <ek/math/common.hpp>
 #include <ek/math/rand.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/AudioManager.hpp>
-#include <ek/util/locator.hpp>
+#include <ek/util/ServiceLocator.hpp>
 #include <ek/ext/analytics/analytics.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
@@ -15,7 +16,7 @@
 namespace ek {
 
 void play_sound(const std::string& id) {
-    resolve<AudioManager>().play_sound(id);
+    Locator::ref<AudioManager>().play_sound(id);
 }
 
 void start_post_tween(Button& btn) {
@@ -60,6 +61,7 @@ void initialize_events(ecs::EntityApi e) {
         play_sound(skin.sfx_down);
     });
     interactive.on_clicked.add([e] {
+        EK_INFO  << e.index;
         auto& btn = e.get<Button>();
         const auto& skin = get_skin(btn);
         play_sound(skin.sfx_click);

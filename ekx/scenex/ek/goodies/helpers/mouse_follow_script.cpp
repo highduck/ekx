@@ -5,7 +5,7 @@
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
-#include <ek/util/locator.hpp>
+#include <ek/util/ServiceLocator.hpp>
 
 namespace ek {
 
@@ -14,7 +14,7 @@ void mouse_follow_script::update(float dt) {
 
     auto parent = entity_.get<Node>().parent;
     if (parent) {
-        auto& im = resolve<InteractionSystem>();
+        auto& im = Locator::ref<InteractionSystem>();
         const auto& camera = Camera2D::Main.get<Camera2D>();
         const auto cameraPointer = camera.screenToWorldMatrix.transform(im.pointerScreenPosition_);
         const auto pos = Transform2D::globalToLocal(parent, cameraPointer);

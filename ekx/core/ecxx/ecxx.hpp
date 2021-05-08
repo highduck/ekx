@@ -139,3 +139,8 @@ template<typename ...Component>
 using view_backward_t = ViewBackward<Component...>;
 
 }
+
+#ifndef ECX_COMPONENT
+#define ECX_COMPONENT(type) ::ecs::the_world.registerComponent<type>(#type)
+#define ECX_COMPONENT_RESERVE(type,cap) ::ecs::the_world.registerComponent<type>(#type, (cap))
+#endif

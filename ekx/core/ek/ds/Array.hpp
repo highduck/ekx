@@ -188,13 +188,13 @@ public:
         }
     }
 
-    inline void eraseIt(T* el) {
+    inline void eraseIterator(T* el) {
         EK_ASSERT_R2(el != nullptr);
         EK_ASSERT_R2(el >= _data);
-        erase(el - _data);
+        eraseAt(el - _data);
     }
 
-    void erase(unsigned i) {
+    void eraseAt(unsigned i) {
         EK_ASSERT(i >= 0);
         EK_ASSERT(i < _size);
 

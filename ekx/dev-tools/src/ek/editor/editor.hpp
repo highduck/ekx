@@ -1,18 +1,21 @@
 #pragma once
 
 #include <ek/scenex/asset2/asset_manager.hpp>
-#include <ek/editor/imgui/imgui_module.hpp>
+#include "imgui/imgui_module.hpp"
+#include "gui/HierarchyWindow.hpp"
+#include "gui/InspectorWindow.hpp"
+#include "gui/StatsWindow.hpp"
+#include "gui/GameWindow.hpp"
+#include "gui/MemoryProfiler.hpp"
+#include "gui/SceneWindow.hpp"
+#include "gui/ConsoleWindow.hpp"
+#include "gui/ResourcesWindow.hpp"
 
 namespace ek {
 
 struct EditorSettings {
     bool notifyAssetsOnScaleFactorChanged = true;
     bool showEditor = true;
-    bool showImGuiDemoWindow = false;
-    bool showHierarchyWindow = true;
-    bool showInspectorWindow = true;
-    bool showStatsWindow = false;
-    bool showResourcesView = false;
     float2 windowSize = float2::zero;
     bool dirty = false;
 
@@ -38,7 +41,20 @@ public:
 
     static void invalidateSettings();
 
+    HierarchyWindow hierarchy{};
+    InspectorWindow inspector{};
+    GameWindow game{};
+    StatsWindow stats{};
+    MemoryProfiler memory{};
+    SceneWindow scene{};
+    ConsoleWindow console{};
+    ResourcesWindow resources{};
+    Array<EditorWindow*> windows{};
+
     imgui_module_t gui_;
+
+    void load();
+    void save();
 
 private:
 

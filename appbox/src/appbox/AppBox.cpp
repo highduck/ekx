@@ -6,7 +6,7 @@
 #include <ek/scenex/base/Interactive.hpp>
 #include <billing.hpp>
 #include <ek/scenex/AudioManager.hpp>
-#include <ek/util/locator.hpp>
+#include <ek/util/ServiceLocator.hpp>
 #include <ek/util/strings.hpp>
 #include <utility>
 #include <GameServices.hpp>
@@ -25,7 +25,7 @@ AppBox::AppBox(AppBoxConfig config_) :
 
     billing::initialize(config.billingKey);
     admob::initialize(config.admob);
-    service_locator_instance<Ads>::init(config.ads);
+    Locator::create<Ads>(config.ads);
     game_services_init();
 
     // initialize translations
@@ -80,7 +80,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
     {
         auto btn = find(e, "remove_ads");
         if (btn) {
-            auto& ads = resolve<Ads>();
+            auto& ads = Locator::ref<Ads>();
             if (ads.isRemoved()) {
                 btn.get<Node>().setVisible(false);
             } else {
@@ -90,7 +90,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
                     }
                 };
                 btn.get<Button>().clicked += [] {
-                    resolve<Ads>().purchaseRemoveAds();
+                    Locator::ref<Ads>().purchaseRemoveAds();
                 };
             }
         }
@@ -106,7 +106,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
 
     // Settings
     {
-        auto& audio = resolve<AudioManager>();
+        auto& audio = Locator::ref<AudioManager>();
         {
             auto btn = find(e, "sound");
             if (btn) {
