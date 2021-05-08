@@ -17,4 +17,5 @@ export async function buildDev(ctx: Project): Promise<any> {
     fs.copyFileSync(materialIconsFont, path.join(exportDir, "dev/MaterialIcons-Regular.ttf"));
     fs.copyFileSync(awesomeIconsFont, path.join(exportDir, "dev/fa-solid-900.ttf"));
     fs.copyFileSync(path.join(ctx.path.EKX_ROOT, "dev-tools/assets/sf-pro-text-regular.ttf"), path.join(exportDir, "dev/sf-pro-text-regular.ttf"));
+    fs.copyFileSync(path.join(ctx.path.EKX_ROOT, "dev-tools/assets/sf-mono-text-regular.ttf"), path.join(exportDir, "dev/sf-mono-text-regular.ttf"));
 }

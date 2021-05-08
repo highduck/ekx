@@ -29,6 +29,12 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
         EK_DEV_TOOLS
         )
 
+if(EKX_BUILD_DEV_TOOLS)
+target_compile_definitions(ek-core
+        PUBLIC EK_ALLOCATION_TRACKER
+        PUBLIC EK_ALLOCATION_TRACKER_STATS)
+endif()
+
 
 if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
 target_compile_options(${PROJECT_NAME} PUBLIC
