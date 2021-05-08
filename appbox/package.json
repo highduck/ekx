@@ -1,6 +1,6 @@
 {
   "name": "@ekx/appbox",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "scripts": {
     "postinstall": "npm-cmake || exit 0"
   },
@@ -9,10 +9,10 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/ekx": "0.1.4",
-    "@ekx/plugin-admob": "0.0.3",
-    "@ekx/plugin-billing": "0.0.3",
-    "@ekx/plugin-game-services": "0.0.3",
+    "@ekx/ekx": "0.1.5",
+    "@ekx/plugin-admob": "0.0.4",
+    "@ekx/plugin-billing": "0.0.4",
+    "@ekx/plugin-game-services": "0.0.4",
     "npm-cmake": "^0.1.0"
   }
 }
