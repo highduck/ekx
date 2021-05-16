@@ -5,28 +5,33 @@
 #include <ek/timers.hpp>
 #include "ParticleDecl.hpp"
 #include "Particle.hpp"
+#include "../base/SxMemory.hpp"
 
 namespace ek {
 
 struct ParticleLayer2D {
-    std::vector<Particle> particles;
-    bool keep_alive = false;
+    Array<Particle> particles{SxMemory.get().particles};
+    bool keepAlive = false;
     TimeLayer timer;
 };
+
+EK_DECLARE_TYPE(ParticleLayer2D);
 
 struct ParticleEmitter2D {
     typedef void SpawnCallback(ecs::EntityApi, Particle&);
 
-    emitter_data data;
+    EmitterData data;
     float2 position = float2::zero;
     float2 velocity = float2::zero;
     SpawnCallback* on_spawn = nullptr;
-    std::string particle;
+    Res<ParticleDecl> particle;
     ecs::EntityRef layer;
     float time = 0.0f;
     TimeLayer timer;
     bool enabled = true;
 };
+
+EK_DECLARE_TYPE(ParticleEmitter2D);
 
 class ParticleRenderer2D : public Drawable2D<ParticleRenderer2D> {
 public:
@@ -52,6 +57,8 @@ public:
 public:
     ecs::EntityRef target{};
 };
+
+EK_DECLARE_TYPE(ParticleRenderer2D);
 
 void particles_burst(ecs::EntityApi e, int count, float2 relativeVelocity = float2::zero);
 

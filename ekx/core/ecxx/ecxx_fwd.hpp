@@ -187,6 +187,9 @@ struct EntityRef final {
     inline bool valid() const;
 
     [[nodiscard]]
+    inline bool check(ecs::EntityApi e) const;
+
+    [[nodiscard]]
     inline EntityApi get() const;
 
     EntityPassport passport;

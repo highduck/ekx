@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <ek/app/app.hpp>
 #include <ek/assert.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include "keymap_linux.h"
 
 void ek_fail(const char* msg) {

@@ -1,6 +1,6 @@
 #include "system.hpp"
 
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/serialize/streams.hpp>
 #include <ek/util/strings.hpp>
 

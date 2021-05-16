@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/util/path.hpp>
 
 using namespace ek;

@@ -31,7 +31,7 @@ public:
 
     void update();
 
-    bool beginGame(sg_pass_action& passAction);
+    bool beginGame(sg_pass_action& passAction, const char* debugLabel = "Game");
     void endGame();
 
     bool beginOverlayDev();

@@ -10,16 +10,102 @@
 
 namespace ek {
 
-#ifdef EK_ALLOCATION_TRACKER
+class Allocator;
 
-class AllocationTracker;
+struct AllocationInfo {
+    uintptr_t id = 0;
+    uint32_t sizeUsed = 0;
+    uint32_t sizeTotal = 0;
+    inline static constexpr unsigned MaxStackDepth = 3;
+    const char* stack[MaxStackDepth]{};
+};
 
-#endif
+class DebugRecords {
+public:
+    constexpr inline static uint32_t MaxCount = 10000;
+    AllocationInfo data[MaxCount];
+    uint32_t size = 0;
+
+    bool add(AllocationInfo rec) {
+        if (size < MaxCount) {
+            data[size++] = rec;
+            return true;
+        }
+        return false;
+    }
+
+    bool remove(uintptr_t id) {
+        return removeAt(findIndex(id));
+    }
+
+    bool removeAt(uint32_t index) {
+        if (index < size) {
+            if (index != size - 1) {
+                data[index] = data[size - 1];
+            }
+            --size;
+            return true;
+        }
+        return false;
+    }
+
+    [[nodiscard]]
+    uint32_t findIndex(uintptr_t id) const {
+        for (uint32_t i = 0; i < size; ++i) {
+            if (data[i].id == id) {
+                return i;
+            }
+        }
+        return 0xFFFFFFFFu;
+    }
+
+    [[nodiscard]]
+    const AllocationInfo* find(uintptr_t id) const {
+        const auto index = findIndex(id);
+        return index < size ? &data[index] : nullptr;
+    }
+
+    constexpr inline static uint32_t LabelStackMaxCount = 100;
+    inline static const char* labelsStack[LabelStackMaxCount]{};
+    inline static uint32_t labelsSize = 0;
+
+    static void pushDebugLabel(const char* label) {
+        if (labelsSize < LabelStackMaxCount) {
+            labelsStack[labelsSize++] = label;
+        }
+    }
+
+    static void popDebugLabel() {
+        if (labelsSize > 0) {
+            --labelsSize;
+        } else {
+            // assert
+        }
+    }
+
+    [[nodiscard]]
+    static const char* getLabel() {
+        const char* result = nullptr;
+        if (labelsSize > 0) {
+            result = labelsStack[labelsSize - 1];
+        }
+        return result;
+    }
+};
+
+struct AllocatorTraceScope {
+    explicit AllocatorTraceScope(const char* label) {
+        DebugRecords::pushDebugLabel(label);
+    }
+
+    ~AllocatorTraceScope() {
+        DebugRecords::popDebugLabel();
+    }
+};
 
 struct AllocatorStats {
     const char* label = nullptr;
     uint32_t index = 0;
-    uint64_t span = 0;
     enum {
         Current = 0,
         Peak = 1,
@@ -28,22 +114,39 @@ struct AllocatorStats {
     uint32_t allocations[3]{};
     uint32_t memoryAllocated[3]{};
     uint32_t memoryEffective[3]{};
+
+    Allocator* next = nullptr;
+    Allocator* children = nullptr;
 };
 
 class Allocator {
 public:
 #ifdef EK_ALLOCATION_TRACKER
-    AllocationTracker* tracker = nullptr;
+    AllocatorStats stats;
+    DebugRecords records{};
 #endif
-    const char* label = nullptr;
-    Allocator* next = nullptr;
-    Allocator* children = nullptr;
 
     void addChild(Allocator& child);
 
     void removeChild(Allocator& child);
 
-    AllocatorStats getStatistics() const;
+    [[nodiscard]]
+    const AllocatorStats* getStats() const {
+#ifdef EK_ALLOCATION_TRACKER
+        return &stats;
+#else
+        return nullptr;
+#endif
+    }
+
+    [[nodiscard]]
+    uint64_t getSpanSize() const;
+
+    static void pushDebugLabel(const char* label);
+
+    static void popDebugLabel();
+
+    uint32_t getAllocationsInfo(uint32_t maxCount, AllocationInfo* outData) const;
 
     explicit Allocator(const char* label_);
 

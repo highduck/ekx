@@ -34,6 +34,17 @@ bool EditRect(const char* label, float * xywh, float v_speed, const char* format
     return changed;
 }
 
+bool ToolbarButton(const char* label, bool active, const char* tooltip) {
+    PushStyleColor(ImGuiCol_Button, active ? 0xFFFF7700 : 0x11111111);
+    PushStyleColor(ImGuiCol_Text, active ? 0xFFFFFFFF : 0xFFCCCCCC);
+    bool res = Button(label);
+    if(tooltip && IsItemHovered()) {
+        SetTooltip("%s", tooltip);
+    }
+    PopStyleColor(2);
+    return res;
+}
+
 }
 
 namespace ek {
@@ -76,6 +87,60 @@ void guiTextLayerEffect(TextLayerEffect& layer) {
         ImGui::Color32Edit("Color", layer.color);
     }
     ImGui::PopID();
+}
+
+
+void guiSprite(const Sprite& sprite) {
+    auto rc = sprite.rect;
+    auto uv0 = sprite.tex.position;
+    auto uv1 = sprite.tex.right_bottom();
+    if (sprite.texture) {
+        void* tex_id = (void*)(uintptr_t)sprite.texture->image.id;
+        if (sprite.rotated) {
+            ImGui::BeginChild("s", ImVec2{rc.width, rc.height});
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            auto pos = ImGui::GetCursorScreenPos();
+            draw_list->AddImageQuad(tex_id,
+                                    pos,
+                                    ImVec2{pos.x + rc.width, pos.y},
+                                    ImVec2{pos.x + rc.width, pos.y + rc.height},
+                                    ImVec2{pos.x, pos.y + rc.height},
+                                    ImVec2{uv0.x, uv1.y},
+                                    ImVec2{uv0.x, uv0.y},
+                                    ImVec2{uv1.x, uv0.y},
+                                    ImVec2{uv1.x, uv1.y},
+                                    IM_COL32_WHITE);
+            ImGui::EndChild();
+        } else {
+            ImGui::Image(
+                    tex_id,
+                    ImVec2{rc.width, rc.height},
+                    ImVec2{uv0.x, uv0.y},
+                    ImVec2{uv1.x, uv1.y}
+            );
+        }
+    } else {
+        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "Sprite Texture is NULL");
+    }
+}
+
+void guiFont(const Font& font) {
+    switch (font.getFontType()) {
+        case FontType::Bitmap: {
+            auto* bm = reinterpret_cast<const BitmapFont*>(font.getImpl());
+            ImGui::Text("Font Type: Bitmap");
+            ImGui::Text("Glyphs: %lu", bm->map.size());
+        }
+            break;
+        case FontType::TrueType: {
+            auto* ttf = reinterpret_cast<const TrueTypeFont*>(font.getImpl());
+            ImGui::Text("Font Type: TrueType");
+            if(ttf->map) {
+                ImGui::Text("Glyphs: %lu", ttf->map->size());
+            }
+        }
+            break;
+    }
 }
 
 }

@@ -129,7 +129,7 @@ public:
     static Texture* createSolid32(int width, int height, uint32_t pixelColor);
 };
 
-void initialize(sg_context_desc* customContext = nullptr);
+void initialize(int maxDrawCalls = 128);
 
 void shutdown();
 

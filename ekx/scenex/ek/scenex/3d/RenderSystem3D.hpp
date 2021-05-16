@@ -2,6 +2,7 @@
 
 #include <ecxx/ecxx.hpp>
 #include "Material3D.hpp"
+#include <ek/util/Type.hpp>
 
 namespace ek {
 
@@ -33,7 +34,7 @@ public:
     ecs::EntityApi camera;
 };
 
-
+EK_DECLARE_TYPE(RenderSystem3D);
 
 }
 

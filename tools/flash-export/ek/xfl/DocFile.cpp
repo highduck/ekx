@@ -2,7 +2,7 @@
 
 #include <pugixml.hpp>
 #include <fstream>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <sys/stat.h>
 #include <miniz.h>
 #include <unordered_map>

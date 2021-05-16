@@ -12,6 +12,8 @@ struct DestroyTimer {
     static void updateAll();
 };
 
+EK_DECLARE_TYPE(DestroyTimer);
+
 void destroyDelay(ecs::EntityApi e, float delay = 0.0f, TimeLayer timer = {});
 
 void destroyChildrenDelay(ecs::EntityApi e, float delay = 0.0f, TimeLayer timer = {});

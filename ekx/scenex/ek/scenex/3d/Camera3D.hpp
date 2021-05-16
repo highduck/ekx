@@ -4,6 +4,7 @@
 #include <ek/math/vec.hpp>
 #include <string>
 #include <ek/util/Res.hpp>
+#include <ek/util/Type.hpp>
 
 #undef near
 #undef far
@@ -37,6 +38,8 @@ struct Camera3D {
 
     Res<graphics::Texture> cubeMap;
 };
+
+EK_DECLARE_TYPE(Camera3D);
 
 }
 

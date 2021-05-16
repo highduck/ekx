@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/scenex/asset2/asset_manager.hpp>
-#include "imgui/imgui_module.hpp"
+#include "imgui/ImGuiIntegration.hpp"
 #include "gui/HierarchyWindow.hpp"
 #include "gui/InspectorWindow.hpp"
 #include "gui/StatsWindow.hpp"
@@ -10,6 +10,8 @@
 #include "gui/SceneWindow.hpp"
 #include "gui/ConsoleWindow.hpp"
 #include "gui/ResourcesWindow.hpp"
+#include <ek/util/Type.hpp>
+#include <ek/scenex/app/GameAppListener.hpp>
 
 namespace ek {
 
@@ -26,16 +28,25 @@ struct EditorSettings {
 
 class basic_application;
 
-class Editor {
+class Editor : public GameAppListener {
 public:
     explicit Editor(basic_application& app);
 
-    ~Editor();
+    ~Editor() override;
 
     void onEvent(const app::event_t& event);
     void onFrameCompleted();
 
 public:
+    // GameApp callbacks
+    void onRenderOverlay() override;
+    void onRenderFrame() override;
+    void onUpdate() override;
+    void onBeforeFrameBegin() override;
+    void onPreRender() override;
+
+    void drawGUI();
+
     static EditorSettings settings;
     inline static bool inspectorEnabled = false;
 
@@ -51,16 +62,12 @@ public:
     ResourcesWindow resources{};
     Array<EditorWindow*> windows{};
 
-    imgui_module_t gui_;
+    ImGuiIntegration gui_;
 
     void load();
     void save();
 
 private:
-
-    signal_t<>::Listener t1;
-    signal_t<float>::Listener t2;
-    signal_t<>::Listener t3;
 
     basic_application* app_;
 
@@ -68,5 +75,7 @@ public:
 
     static void initialize();
 };
+
+EK_DECLARE_TYPE(Editor);
 
 }

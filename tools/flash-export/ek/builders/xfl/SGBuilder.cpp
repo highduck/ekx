@@ -6,7 +6,7 @@
 #include <ek/xfl/Doc.hpp>
 #include <ek/xfl/renderer/Scanner.hpp>
 #include <ek/util/strings.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 namespace ek::xfl {
 

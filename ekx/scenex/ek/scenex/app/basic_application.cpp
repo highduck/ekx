@@ -8,7 +8,7 @@
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
 #include <ek/scenex/SceneFactory.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/app/device.hpp>
 #include <ek/scenex/asset2/asset_manager.hpp>
 #include <ek/scenex/asset2/builtin_assets.hpp>
@@ -172,7 +172,7 @@ void basic_application::preload() {
     EK_TRACE("base application: preloading, content scale: %0.3f", scale_factor);
     asset_manager_->set_scale_factor(scale_factor);
 
-    hook_on_preload();
+    dispatcher.onPreload();
 
     asset_manager_->add_resolver(new builtin_asset_resolver_t());
     if (preloadOnStart) {
@@ -182,25 +182,27 @@ void basic_application::preload() {
 
 void basic_application::on_draw_frame() {
     ZoneScoped;
-    timer_t timer{};
-    onBeforeFrameBegin();
+    Stopwatch timer{};
+    dispatcher.onBeforeFrameBegin();
     display.update();
     scale_factor = root.get<Viewport>().output.scale;
     asset_manager_->set_scale_factor(scale_factor);
 
     /** base app BEGIN **/
 
-    const float dt = std::min(static_cast<float>(frame_timer.update()), 0.3f);
+    const float dt = fmin(frameTimer.update(), 0.3f);
     // fixed for GIF recorder
     //dt = 1.0f / 60.0f;
     doUpdateFrame(dt);
-    profiler.addTime("UPDATE", timer.read_millis());
-    profiler.addTime("FRAME", timer.read_millis());
+    profiler.addTime("UPDATE", timer.readMillis());
+    profiler.addTime("FRAME", timer.readMillis());
     timer.reset();
 
     draw2d::beginNewFrame();
 
+    /// PRE-RENDER
     onPreRender();
+    dispatcher.onPreRender();
 
     auto* r3d = Locator::get<RenderSystem3D>();
     if (r3d) {
@@ -241,10 +243,10 @@ void basic_application::on_draw_frame() {
             drawPreloader(0.1f + 0.9f * rootAssetObject->getProgress(), display.info.size.x, display.info.size.y);
         }
 
-        hook_on_render_frame();
+        dispatcher.onRenderFrame();
 
-        profiler.addTime("RENDER", timer.read_millis());
-        profiler.addTime("FRAME", timer.read_millis());
+        profiler.addTime("RENDER", timer.readMillis());
+        profiler.addTime("FRAME", timer.readMillis());
         timer.reset();
 
         profiler.endRender();
@@ -256,14 +258,14 @@ void basic_application::on_draw_frame() {
 
         if (display.beginOverlayDev()) {
 
-            onRenderOverlay();
+            dispatcher.onRenderOverlay();
 
             draw2d::begin({0, 0, g_app.drawable_size.x, g_app.drawable_size.y});
             onFrameEnd();
             draw2d::end();
 
-            profiler.addTime("OVERLAY", timer.read_millis());
-            profiler.addTime("FRAME", timer.read_millis());
+            profiler.addTime("OVERLAY", timer.readMillis());
+            profiler.addTime("FRAME", timer.readMillis());
             timer.reset();
 
             display.endOverlayDev(); // display.beginOverlayDev()
@@ -276,15 +278,15 @@ void basic_application::on_draw_frame() {
     if (!started_ && asset_manager_->is_assets_ready()) {
         EK_DEBUG << "Start Game";
         onAppStart();
-        onStartHook();
+        dispatcher.onStart();
         started_ = true;
     }
 
-    profiler.addTime("END", timer.read_millis());
-    profiler.addTime("FRAME", timer.read_millis());
+    profiler.addTime("END", timer.readMillis());
+    profiler.addTime("FRAME", timer.readMillis());
     timer.reset();
 
-    profiler.update(frame_timer.delta_time());
+    profiler.update(frameTimer.deltaTime);
 }
 
 void basic_application::preload_root_assets_pack() {
@@ -296,20 +298,20 @@ void basic_application::preload_root_assets_pack() {
 
 void basic_application::on_event(const event_t& event) {
     ZoneScoped;
-    timer_t timer{};
+    Stopwatch timer{};
     if (event.type == event_type::app_resize) {
         display.update();
     } else if (event.type == event_type::app_close) {
         sg_shutdown();
     }
 
-    profiler.addTime("EVENTS", timer.read_millis());
-    profiler.addTime("FRAME", timer.read_millis());
+    profiler.addTime("EVENTS", timer.readMillis());
+    profiler.addTime("FRAME", timer.readMillis());
 }
 
 void basic_application::doUpdateFrame(float dt) {
     Viewport::updateAll(display.info);
-    hook_on_update(dt);
+    dispatcher.onUpdate();
     scene_pre_update(root, dt);
     onUpdateFrame(dt);
     scene_post_update(root);
@@ -338,7 +340,13 @@ void initializeSubSystems() {
         switch (_initializeSubSystemsState) {
             case 0:
                 ++_initializeSubSystemsState;
-                graphics::initialize();
+                {
+                    int drawCalls = 128;
+#ifdef EK_DEV_TOOLS
+                    drawCalls = 1024;
+#endif
+                    graphics::initialize(drawCalls);
+                }
 #ifdef EK_DEV_TOOLS
                 if (Editor::inspectorEnabled) {
                     Editor::initialize();

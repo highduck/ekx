@@ -7,10 +7,8 @@
 #include <ek/math/box.hpp>
 #include <ek/util/common_macro.hpp>
 #include <ek/serialize/serialize.hpp>
+#include <ek/util/Type.hpp>
 
-#include <unordered_map>
-#include <vector>
-#include <array>
 #include <string>
 
 namespace ek {
@@ -50,5 +48,7 @@ private:
     FontImplBase* impl = nullptr;
     Font* fallback = nullptr;
 };
+
+EK_DECLARE_TYPE(Font);
 
 }

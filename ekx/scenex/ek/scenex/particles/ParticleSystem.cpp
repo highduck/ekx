@@ -49,7 +49,7 @@ void particles_burst(ecs::EntityApi e, int count, float2 relativeVelocity) {
     auto& layer = layerEntity.get<ParticleLayer2D>();
     const auto position = Transform2D::localToLocal(e, layerEntity, emitter.position);
     float a = data.dir.random();
-    Res<ParticleDecl> decl{emitter.particle};
+    auto* decl = emitter.particle.get();
     while (count > 0) {
         auto& p = produce_particle(layer, *decl);
         float2 pos = position;
@@ -84,7 +84,7 @@ void update_emitters() {
             auto position = data.offset;
             position = Transform2D::localToLocal(e, layerEntity, position);
 
-            Res<ParticleDecl> decl{emitter.particle};
+            auto* decl = emitter.particle.get();
             int count = data.burst;
             float a = data.dir.random();
             while (count > 0) {
@@ -151,16 +151,15 @@ void update_particles() {
     for (auto e : ecs::view<ParticleLayer2D>()) {
         auto& layer = e.get<ParticleLayer2D>();
         auto dt = layer.timer->dt;
-        auto size = static_cast<int>(layer.particles.size());
-        for (int i = 0; i < size;) {
-            auto& p = layer.particles[i];
+        auto& particles = layer.particles;
+        uint32_t i = 0;
+        while(i < particles.size()) {
+            auto& p = particles[i];
             p.update(dt);
             if (p.is_alive()) {
                 ++i;
             } else {
-                layer.particles[i] = layer.particles.back();
-                layer.particles.pop_back();
-                --size;
+                particles.remove_swap_back(i);
             }
         }
     }

@@ -1,7 +1,7 @@
 #include "parsing.hpp"
 
 #include <ek/xfl/types.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 #include <pugixml.hpp>
 

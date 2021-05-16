@@ -1,6 +1,5 @@
 #pragma once
 
-#include "gui.hpp"
 #include <IconsMaterialDesign.h>
 #include <IconsFontAwesome5.h>
 

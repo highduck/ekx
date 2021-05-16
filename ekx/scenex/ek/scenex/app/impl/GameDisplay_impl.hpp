@@ -13,13 +13,13 @@
 
 namespace ek {
 
-bool GameDisplay::beginGame(sg_pass_action& passAction) {
+bool GameDisplay::beginGame(sg_pass_action& passAction, const char* debugLabel) {
     const auto w = static_cast<int>(info.size.x);
     const auto h = static_cast<int>(info.size.y);
     if (w <= 0 || h <= 0) {
         return false;
     }
-    sg_push_debug_group("Game");
+    sg_push_debug_group(debugLabel);
 
     if (simulated) {
         draw2d::state.framebufferColor = color;
@@ -109,6 +109,10 @@ graphics::Texture* createGameDisplayTexture(int w, int h, bool isColor, const ch
 
 void GameDisplay::update() {
     if (simulated) {
+        // limit min size
+        info.size.x = fmax(16.0f, info.size.x);
+        info.size.y = fmax(16.0f, info.size.y);
+
         const auto w = static_cast<int>(info.size.x);
         const auto h = static_cast<int>(info.size.y);
         if (color == nullptr || color->desc.width != w || color->desc.height != h) {

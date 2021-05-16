@@ -24,14 +24,17 @@ Ads::Ads(Ads::Config config) :
 
     removed = checkRemoveAdsPurchase();
     if (!removed) {
-        // just wait billing service a little, TODO: billing initialized promise
-        Locator::ref<basic_application>().onStartHook << [sku = config_.skuRemoveAds] {
-            setTimeout([sku] {
-                billing::getPurchases();
-                billing::getDetails({sku});
-            }, 3);
-        };
+        Locator::ref<basic_application>().dispatcher.listeners.push_back(this);
     }
+}
+
+void Ads::onStart() {
+    const auto sku = config_.skuRemoveAds;
+    // just wait billing service a little, TODO: billing initialized promise
+    setTimeout([sku] {
+        billing::getPurchases();
+        billing::getDetails({sku});
+    }, 3);
 }
 
 void Ads::onPurchaseChanged(const billing::PurchaseData& purchase) {

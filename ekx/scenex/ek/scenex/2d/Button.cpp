@@ -1,7 +1,7 @@
 #include "Button.hpp"
 
 #include <ek/scenex/base/Interactive.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/math/common.hpp>
 #include <ek/math/rand.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>

@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <utility>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/xfl/Doc.hpp>
 #include <ek/scenex/data/SGFile.hpp>

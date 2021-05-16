@@ -6,6 +6,7 @@
 #include <ek/draw2d/drawer.hpp>
 #include <ek/util/ServiceLocator.hpp>
 #include <ek/editor/imgui/imgui.hpp>
+#include "Widgets.hpp"
 
 namespace ek {
 
@@ -18,8 +19,8 @@ void StatsWindow::onDraw() {
     auto& app = Locator::ref<basic_application>();
     auto stats = draw2d::state.stats;
     auto drawableSize = ek::app::g_app.drawable_size;
-    ImGui::Text("%0.2lf ms | dc: %u | tri: %u | fill: %0.2f",
-                app.frame_timer.delta_time() * 1000.0,
+    ImGui::Text("%0.2f ms | dc: %u | tri: %u | fill: %0.2f",
+                app.frameTimer.deltaTime * 1000.0f,
                 stats.drawCalls,
                 stats.triangles,
                 stats.fillArea / (drawableSize.x * drawableSize.y)

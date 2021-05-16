@@ -2,7 +2,7 @@
 
 #include "image.hpp"
 #include "drawing.hpp"
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include "../assert.hpp"
 #include "../Allocator.hpp"
 #include "ImageSubSystem.hpp"

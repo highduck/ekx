@@ -1,6 +1,6 @@
 #include "ShapeDecoder.hpp"
 
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 namespace ek::xfl {
 

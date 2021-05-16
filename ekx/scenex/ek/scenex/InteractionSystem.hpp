@@ -6,6 +6,7 @@
 #include <string>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/ds/Array.hpp>
+#include <ek/util/Type.hpp>
 
 namespace ek {
 
@@ -73,6 +74,8 @@ private:
 
     ecs::EntityRef dragEntity_;
 };
+
+EK_DECLARE_TYPE(InteractionSystem);
 
 }
 

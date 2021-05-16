@@ -2,11 +2,13 @@
 
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
+#include <ek/debug/LogSystem.hpp>
 #include <ek/timers.hpp>
 #include <ek/imaging/ImageSubSystem.hpp>
 #include <ek/Allocator.hpp>
 #include <ek/ds/Array.hpp>
+#include <ek/core.hpp>
 
 #include <ek/editor/marketing/export_marketing.hpp>
 #include <ek/editor/assets/editor_project.hpp>
@@ -24,9 +26,7 @@ using namespace ek;
 int main(int argc, char** argv) {
     using namespace std;
 
-    memory::initialize();
-    clock::initialize();
-    imaging::initialize();
+    ek::core::setup();
 
     EK_INFO << "== EKC util ==";
     EK_INFO << "Executable path: " << get_executable_path();

@@ -44,6 +44,8 @@ struct Button {
     static void updateAll();
 };
 
+EK_DECLARE_TYPE(Button);
+
 }
 
 

@@ -2,6 +2,8 @@
 
 #include <billing.hpp>
 #include <ek/util/detect_platform.hpp>
+#include <ek/scenex/app/GameAppListener.hpp>
+#include <ek/util/Type.hpp>
 #include <functional>
 #include <memory>
 
@@ -9,7 +11,7 @@ namespace ek {
 
 class AdMobWrapper;
 
-class Ads {
+class Ads : public GameAppListener {
 public:
 
     struct Config {
@@ -20,7 +22,10 @@ public:
         int val1 = 2222;
     };
 
+    void onStart() override;
+
     explicit Ads(Config config);
+    ~Ads() override = default;
 
     void onPurchaseChanged(const billing::PurchaseData& purchase);
 
@@ -54,6 +59,8 @@ private:
 
     std::unique_ptr<AdMobWrapper> wrapper;
 };
+
+EK_DECLARE_TYPE(Ads);
 
 }
 

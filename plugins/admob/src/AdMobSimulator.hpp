@@ -1,18 +1,21 @@
 #pragma once
 
 #include "AdMobWrapper.hpp"
+#include <ek/scenex/app/GameAppListener.hpp>
 
 namespace ek {
 
-class AdMobSimulator : public AdMobWrapper {
+class AdMobSimulator : public AdMobWrapper, public GameAppListener {
 
     bool activeRewardedAd = false;
 
-    void draw() const;
-
 public:
 
+    void onRenderFrame() override;
+
     AdMobSimulator();
+
+    ~AdMobSimulator() override;
 
     void showInterstitial(const std::function<void()>& callback) override;
 

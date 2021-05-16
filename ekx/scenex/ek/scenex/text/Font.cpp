@@ -1,9 +1,10 @@
 #include "Font.hpp"
 
-#include <ek/util/ServiceLocator.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/math/bounds_builder.hpp>
 #include "FontImplBase.hpp"
+//#include <unordered_map>
+//#include <vector>
+//#include <array>
 
 namespace ek {
 

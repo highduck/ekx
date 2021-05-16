@@ -8,27 +8,8 @@
 
 namespace ek {
 
-void AdMobSimulator::draw() const {
-    if (activeInterstitial) {
-        auto size = app::g_app.drawable_size;
-        draw2d::state.setEmptyTexture();
-        draw2d::quad(0, 0,
-                     static_cast<float>(size.x),
-                     static_cast<float>(size.y), 0x7700FF00_argb);
-    }
-
-    if (activeRewardedAd) {
-        auto size = app::g_app.drawable_size;
-        draw2d::state.setEmptyTexture();
-        draw2d::quad(0, 0,
-                     static_cast<float>(size.x),
-                     static_cast<float>(size.y), 0x77FF00FF_argb);
-    }
-}
-
 AdMobSimulator::AdMobSimulator() {
-    Locator::ref<basic_application>().hook_on_render_frame +=
-            [this] { this->draw(); };
+    Locator::ref<basic_application>().dispatcher.listeners.push_back(this);
 }
 
 void AdMobSimulator::showInterstitial(const std::function<void()>& callback) {
@@ -54,4 +35,27 @@ void AdMobSimulator::showRewardedAd(const std::function<void(bool)>& callback) {
         }
     }, 5.0f);
 }
+
+void AdMobSimulator::onRenderFrame() {
+    if (activeInterstitial) {
+        auto size = app::g_app.drawable_size;
+        draw2d::state.setEmptyTexture();
+        draw2d::quad(0, 0,
+                     static_cast<float>(size.x),
+                     static_cast<float>(size.y), 0x7700FF00_argb);
+    }
+
+    if (activeRewardedAd) {
+        auto size = app::g_app.drawable_size;
+        draw2d::state.setEmptyTexture();
+        draw2d::quad(0, 0,
+                     static_cast<float>(size.x),
+                     static_cast<float>(size.y), 0x77FF00FF_argb);
+    }
+}
+
+AdMobSimulator::~AdMobSimulator() {
+    Locator::ref<basic_application>().dispatcher.listeners.remove(this);
+}
+
 }

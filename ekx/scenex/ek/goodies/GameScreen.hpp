@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <ek/util/signals.hpp>
+#include <ek/util/Type.hpp>
 #include <ek/math/box.hpp>
 
 namespace ek {
@@ -94,6 +95,8 @@ public:
 
     static void defaultTransitionEffect(ScreenTransitionState& state);
 };
+
+EK_DECLARE_TYPE(GameScreenManager);
 
 }
 

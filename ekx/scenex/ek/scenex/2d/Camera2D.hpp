@@ -64,6 +64,7 @@ public:
     static const Camera2D* getCurrentRenderingCamera();
 };
 
+EK_DECLARE_TYPE(Camera2D);
 
 }
 

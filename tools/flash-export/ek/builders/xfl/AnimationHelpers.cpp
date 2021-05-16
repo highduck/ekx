@@ -2,7 +2,7 @@
 
 #include <ek/scenex/data/SGFile.hpp>
 #include <ek/xfl/Doc.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 namespace ek::xfl {
 

@@ -1,6 +1,6 @@
 #include <GameServices.hpp>
 #include <app_apple.h>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 #import <GameKit/GameKit.h>
 #import <Firebase/Firebase.h>

@@ -1,11 +1,7 @@
-#include "imgui_module.hpp"
+#include "ImGuiIntegration.hpp"
 
-#include <imgui.h>
+#include <ek/editor/imgui/imgui.hpp>
 #include <ek/app/app.hpp>
-#include <ek/math/matrix_camera.hpp>
-#include <ek/scenex/app/input_controller.hpp>
-#include <ek/util/ServiceLocator.hpp>
-#include <ek/util/path.hpp>
 #include <IconsFontAwesome5.h>
 
 #include <ek/graphics/graphics.hpp>
@@ -31,8 +27,7 @@ void reset_keys() {
     }
 }
 
-
-imgui_module_t::imgui_module_t() {
+ImGuiIntegration::ImGuiIntegration() {
     IMGUI_CHECKVERSION();
 
     sg_imgui_init(&sokol_gfx_gui_state);
@@ -58,14 +53,14 @@ imgui_module_t::imgui_module_t() {
     ImGui::StyleColorsDark();
 }
 
-imgui_module_t::~imgui_module_t() {
+ImGuiIntegration::~ImGuiIntegration() {
     sg_imgui_discard(&sokol_gfx_gui_state);
     simgui_shutdown();
 }
 
 #define MAP_KEY_CODE(from, to) io.KeyMap[(to)] = static_cast<int>((from))
 
-void imgui_module_t::setup() {
+void ImGuiIntegration::setup() {
     auto& io = ImGui::GetIO();
     // Setup back-end capabilities flags
     io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors |// We can honor GetMouseCursor() values (optional)
@@ -96,7 +91,7 @@ void imgui_module_t::setup() {
 
     io.ClipboardUserData = this;
     io.SetClipboardTextFn = [](void* context, const char* text) {
-        auto* c = static_cast<imgui_module_t*>(context);
+        auto* c = static_cast<ImGuiIntegration*>(context);
         if (c) {
             c->clipboard_text_ = text;
             // TODO: platform clipboard
@@ -104,7 +99,7 @@ void imgui_module_t::setup() {
         }
     };
     io.GetClipboardTextFn = [](void* context) -> const char* {
-        auto* c = static_cast<imgui_module_t*>(context);
+        auto* c = static_cast<ImGuiIntegration*>(context);
         const char* result = nullptr;
         if (c) {
             // TODO: platform clipboard
@@ -153,7 +148,7 @@ void addFontWithIcons(const char* filePath, float dpiScale) {
     }
 }
 
-void imgui_module_t::initializeFontTexture() {
+void ImGuiIntegration::initializeFontTexture() {
     ImGuiIO& io = ImGui::GetIO();
     addFontWithIcons("dev/sf-pro-text-regular.ttf", dpiScale);
     addFontWithIcons("dev/sf-mono-text-regular.ttf", dpiScale);
@@ -180,7 +175,7 @@ void imgui_module_t::initializeFontTexture() {
     ImGui::GetIO().Fonts->TexID = (ImTextureID) (uintptr_t) fontTexture.id;
 }
 
-void imgui_module_t::on_event(const event_t& event) {
+void ImGuiIntegration::on_event(const event_t& event) {
     auto& io = ImGui::GetIO();
     switch (event.type) {
         case event_type::key_up:
@@ -276,7 +271,7 @@ void update_mouse_cursor() {
     //g_window.hideCursor()->mouse.show(cursorVisible);
 }
 
-void imgui_module_t::begin_frame(float dt) {
+void ImGuiIntegration::begin_frame(float dt) {
     auto w = static_cast<int>(g_app.drawable_size.x);
     auto h = static_cast<int>(g_app.drawable_size.y);
     if (w > 0 && h > 0) {
@@ -285,12 +280,12 @@ void imgui_module_t::begin_frame(float dt) {
     }
 }
 
-void imgui_module_t::end_frame() {
+void ImGuiIntegration::end_frame() {
     sg_imgui_draw(&sokol_gfx_gui_state);
     simgui_render();
 }
 
-void imgui_module_t::on_frame_completed() {
+void ImGuiIntegration::on_frame_completed() {
     auto& io = ImGui::GetIO();
     if (io.KeySuper || io.KeyCtrl) {
         reset_keys();

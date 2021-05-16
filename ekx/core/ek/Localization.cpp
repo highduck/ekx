@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <vector>
 #include <ek/serialize/streams.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 namespace ek {
 

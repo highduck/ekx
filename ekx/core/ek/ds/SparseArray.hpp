@@ -69,6 +69,7 @@ struct SparseArray {
         if (indices != sInvalidPage.indices) {
             indices[offset] = v;
         } else {
+            AllocatorTraceScope allocatorTrace{"SparseArray::Page"};
             auto* pageData = (Page*) allocator.alloc(PageSize, PageSize);
             memory::clear(pageData, PageSize);
             pageData->indices[offset] = v;

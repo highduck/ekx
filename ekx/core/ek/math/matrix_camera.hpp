@@ -91,4 +91,26 @@ matrix_t<4, 4, T> look_at_rh(const vec_t<3, T>& eye, const vec_t<3, T>& center, 
     result(3, 2) = dot(f, eye);
     return result;
 }
+
+template<typename T>
+matrix_t<4, 4, T> look_at_lh(const vec_t<3, T>& eye, const vec_t<3, T>& center, const vec_t<3, T>& up) {
+    const vec_t<3, T> f(normalize(center - eye));
+    const vec_t<3, T> s(normalize(cross(up, f)));
+    const vec_t<3, T> u(cross(f, s));
+
+    matrix_t<4, 4, T> result(1);
+    result(0, 0) = s.x;
+    result(1, 0) = s.y;
+    result(2, 0) = s.z;
+    result(0, 1) = u.x;
+    result(1, 1) = u.y;
+    result(2, 1) = u.z;
+    result(0, 2) = f.x;
+    result(1, 2) = f.y;
+    result(2, 2) = f.z;
+    result(3, 0) = -dot(s, eye);
+    result(3, 1) = -dot(u, eye);
+    result(3, 2) = -dot(f, eye);
+    return result;
+}
 }

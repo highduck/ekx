@@ -1,4 +1,7 @@
-#include "logger.hpp"
+#pragma once
+
+#include "LogSystem.hpp"
+#include "LogStream.hpp"
 
 #include <cstdarg>
 
@@ -15,10 +18,22 @@
 #endif
 
 #if defined(__APPLE__)
+
 #include <TargetConditionals.h>
+
 #endif
 
-namespace ek::logger {
+std::ostream& operator<<(std::ostream& out, const ek::SourceLocation& location) {
+    if (location.file) {
+        out << location.file;
+        if (location.line) {
+            out << ':' << location.line;
+        }
+    }
+    return out;
+}
+
+namespace ek {
 
 #define RESET   "\033[0m"
 #define BLACK   "\033[30m"      /* Black */
@@ -38,37 +53,40 @@ namespace ek::logger {
 #define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
-const char* _tag = "EK";
-uint8_t _filter = static_cast<uint8_t>(verbosity_t::all);
-uint8_t _frame = 0;
+LogSystem::LogSystem() :
+        allocator{memory::systemAllocator, "log-system"} {
 
-void nextFrame() {
-    ++_frame;
 }
 
-void write(verbosity_t verbosity,
-           [[maybe_unused]] source_location_t location,
-           const char* message) noexcept {
-    if ((_filter & static_cast<uint32_t>(verbosity)) == 0) {
+void LogSystem::setVerbosity(Verbosity filter_) {
+    filter = filter_;
+}
+
+void LogSystem::nextFrame() {
+    ++frameHash;
+}
+
+void LogSystem::write(Verbosity verbosity, SourceLocation location, const char* message) noexcept {
+    if ((static_cast<unsigned>(filter) & static_cast<unsigned>(verbosity)) == 0) {
         return;
     }
 
 #if defined(__ANDROID__)
     int priority = 0;
     switch (verbosity) {
-        case verbosity_t::info:
+        case Verbosity::Info:
             priority = ANDROID_LOG_INFO;
             break;
-        case verbosity_t::warning:
+        case Verbosity::Warning:
             priority = ANDROID_LOG_WARN;
             break;
-        case verbosity_t::error:
+        case Verbosity::Error:
             priority = ANDROID_LOG_ERROR;
             break;
-        case verbosity_t::debug:
+        case Verbosity::Debug:
             priority = ANDROID_LOG_DEBUG;
             break;
-        case verbosity_t::trace:
+        case Verbosity::Trace:
             priority = ANDROID_LOG_VERBOSE;
             break;
         default:
@@ -76,34 +94,34 @@ void write(verbosity_t verbosity,
     }
 
 #ifndef NDEBUG
-    __android_log_print(priority, _tag, "@%02hhX: %s", _frame, message);
+    __android_log_print(priority, tag, "@%02hhX: %s", frameHash, message);
 #else
     // for release reduce allocations for printing
-    __android_log_write(priority, _tag, message);
+    __android_log_write(priority, tag, message);
 #endif
 
 #elif TARGET_OS_IOS
     const char* prefix = nullptr;
     switch (verbosity) {
-        case verbosity_t::info:
+        case Verbosity::info:
             prefix = "[i] ";
             break;
-        case verbosity_t::warning:
+        case Verbosity::Warning:
             prefix = "[W] ";
             break;
-        case verbosity_t::error:
+        case Verbosity::Error:
             prefix = "[E] ";
             break;
-        case verbosity_t::debug:
+        case Verbosity::Debug:
             prefix = "[d] ";
             break;
-        case verbosity_t::trace:
+        case Verbosity::Trace:
             prefix = "[t] ";
             break;
         default:
             return;
     }
-    printf("%02hhX/%s%s\n", _frame, prefix, message);
+    printf("%02hhX/%s%s\n", frameHash, prefix, message);
     if (location.file) {
         printf("\t%s:%d\n", location.file, location.line);
     }
@@ -113,7 +131,7 @@ void write(verbosity_t verbosity,
     char usec[8];
 
     struct timeval tmnow;
-    struct tm *tm;
+    struct tm* tm;
     gettimeofday(&tmnow, nullptr);
 #if defined(_WIN32) || defined(_WIN64)
     tm = _localtime32(&tmnow.tv_sec);
@@ -121,22 +139,22 @@ void write(verbosity_t verbosity,
     tm = localtime(&tmnow.tv_sec);
 #endif
     strftime(time, sizeof(time), "%d/%m/%Y %H:%M:%S", tm);
-    snprintf(usec, sizeof(usec), "%03d/%02hhX", static_cast<int32_t>(tmnow.tv_usec / 1000), _frame);
+    snprintf(usec, sizeof(usec), "%03d/%02hhX", static_cast<int32_t>(tmnow.tv_usec / 1000), frameHash);
     const char* prefix = nullptr;
     switch (verbosity) {
-        case verbosity_t::info:
+        case Verbosity::Info:
             prefix = BLUE "[i] ";
             break;
-        case verbosity_t::warning:
+        case Verbosity::Warning:
             prefix = BOLDYELLOW "[W] ";
             break;
-        case verbosity_t::error:
+        case Verbosity::Error:
             prefix = BOLDRED "[E] ";
             break;
-        case verbosity_t::debug:
+        case Verbosity::Debug:
             prefix = CYAN "[d] ";
             break;
-        case verbosity_t::trace:
+        case Verbosity::Trace:
             prefix = WHITE "[t] ";
             break;
         default:
@@ -148,18 +166,39 @@ void write(verbosity_t verbosity,
         printf("\t%s:%d\n", location.file, location.line);
     }
 #endif
+
+    if (!sinks.empty()) {
+        LogMessage msg;
+        msg.verbosity = verbosity;
+        msg.frameHash = frameHash;
+        msg.location = location;
+        msg.message = message;
+        for (auto* sink : sinks) {
+            sink->onMessageWrite(msg);
+        }
+    }
 }
 
-log_stream_t::log_stream_t(verbosity_t verbosity, source_location_t location) noexcept
-        : verbosity_{verbosity},
-          location_{location} {
+LogSystem* gLogSystem = nullptr;
+
+void LogSystem::setup() {
+    gLogSystem = new LogSystem();
 }
 
-log_stream_t::~log_stream_t() {
-    write(verbosity_, location_, ss_.str().data());
+LogSystem& LogSystem::instance() {
+    return *gLogSystem;
 }
 
-void log_stream_t::operator()(const char* format, ...) noexcept {
+LogStream::LogStream(Verbosity verbosity, SourceLocation location) noexcept:
+        verbosity_{verbosity},
+        location_{location} {
+}
+
+LogStream::~LogStream() {
+    gLogSystem->write(verbosity_, location_, ss_.str().data());
+}
+
+void LogStream::operator()(const char* format, ...) noexcept {
     va_list args;
     va_start(args, format);
     char buf[256];

@@ -1,6 +1,6 @@
 #include "bitmap_font_editor_asset.hpp"
 
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>

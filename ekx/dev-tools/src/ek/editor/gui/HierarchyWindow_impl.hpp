@@ -120,6 +120,7 @@ void HierarchyWindow::drawEntityInTree(ecs::EntityApi e, bool parentedVisible, b
                                | ImGuiTreeNodeFlags_AllowItemOverlap
                                | ImGuiTreeNodeFlags_SpanFullWidth
                                | ImGuiTreeNodeFlags_NavLeftJumpsBackHere;
+
     if (isSelectedInHierarchy(e)) {
         flags |= ImGuiTreeNodeFlags_Selected;
     }
@@ -136,7 +137,18 @@ void HierarchyWindow::drawEntityInTree(ecs::EntityApi e, bool parentedVisible, b
     }
 
     ImGui::PushStyleColor(ImGuiCol_Text, nodeVisible ? 0xFFFFFFFF : 0x77FFFFFF);
+    if(openList.has(e.index)) {
+        ImGui::SetNextItemOpen(true);
+    }
+    if(scrollToList.has(e.index)) {
+        ImGui::SetScrollHereY();
+        scrollToList.remove(e.index);
+    }
     bool opened = ImGui::TreeNodeEx("entity", flags, "%s %s", getEntityIcon(e), getEntityTitle(e));
+    if (!opened) {
+        openList.remove(e.index);
+    }
+
     ImGui::PopStyleColor();
 
     if (ImGui::IsItemClicked()) {
@@ -252,6 +264,26 @@ void HierarchyWindow::validateSelection() {
         } else {
             selection.eraseAt(i);
         }
+    }
+}
+
+void HierarchyWindow::select(ecs::EntityApi e) {
+    selection.clear();
+    if (e) {
+        selection.push_back(ecs::EntityRef{e});
+    }
+}
+
+void HierarchyWindow::focus(ecs::EntityApi e) {
+    if(e) {
+        // open parents in hierarchy
+        auto parent = e.get<Node>().parent;
+        while (parent) {
+            openList.set(parent.index, ecs::EntityRef{parent});
+            parent = parent.get<Node>().parent;
+        }
+
+        scrollToList.set(e.index, ecs::EntityRef{e});
     }
 }
 

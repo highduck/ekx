@@ -290,6 +290,10 @@ inline void set_text(ecs::EntityApi e, const std::string& v) {
     get_drawable<Text2D>(e).text = v;
 }
 
+
+EK_DECLARE_TYPE(Display2D);
+EK_DECLARE_TYPE(IDrawable2D);
+
 }
 
 

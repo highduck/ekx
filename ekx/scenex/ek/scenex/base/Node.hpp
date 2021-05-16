@@ -11,6 +11,8 @@ struct NodeName {
     std::string name;
 };
 
+EK_DECLARE_TYPE(NodeName);
+
 struct Node {
     enum Flags {
         Visible = 1,
@@ -55,6 +57,8 @@ struct Node {
 
     static ecs::EntityApi findLowerCommonAncestor(ecs::EntityApi e1, ecs::EntityApi e2);
 };
+
+EK_DECLARE_TYPE(Node);
 
 template<typename Func>
 inline void eachChild(ecs::EntityApi e, Func func) {

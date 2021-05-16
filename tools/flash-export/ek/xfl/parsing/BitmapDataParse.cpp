@@ -3,7 +3,7 @@
 #include <ek/xfl/types.hpp>
 
 #include <ek/serialize/serialize.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 #include <ek/imaging/decoder.hpp>
 #include <ek/imaging/image.hpp>

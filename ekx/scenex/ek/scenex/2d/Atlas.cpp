@@ -1,7 +1,7 @@
 #include "Atlas.hpp"
 #include "Sprite.hpp"
 
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/math/serialize_math.hpp>
 #include <ek/util/path.hpp>

@@ -4,25 +4,33 @@
 
 #ifdef EK_DEV_TOOLS
 
-#include <ek/editor/editor.hpp>
+#include <ek/editor/Editor.hpp>
 
 #endif
 
 #include <ek/util/ServiceLocator.hpp>
 #include <ek/app/app.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
+#include <ek/debug/LogSystem.hpp>
 #include <ek/util/signals.hpp>
 #include <utility>
-#include <ek/timers.hpp>
+#include <ek/time/FrameTimer.hpp>
+#include <ek/time/Clock.hpp>
+#include <ek/time/Timers.hpp>
 #include "profiler.hpp"
 #include <ek/imaging/ImageSubSystem.hpp>
 #include "GameDisplay.hpp"
+#include "GameAppDispatcher.hpp"
+#include "../base/SxMemory.hpp"
+
+#include "ek/core.hpp"
 
 namespace ek {
 
 class asset_manager_t;
 
 class asset_object_t;
+
 
 class basic_application {
 public:
@@ -32,21 +40,11 @@ public:
     GameDisplay display{};
     /**** assets ***/
 
-    framed_timer_t frame_timer{};
+    FrameTimer frameTimer{};
 
     float scale_factor = 1.0f;
 
-    signal_t<> onBeforeFrameBegin{};
-
-    signal_t<> hook_on_preload{};
-
-    // used to render all offscreen passes
-    signal_t<> onPreRender{};
-
-    signal_t<> onRenderOverlay{};
-    signal_t<> hook_on_render_frame{};
-    signal_t<float> hook_on_update{};
-    signal_t<> onStartHook{};
+    GameAppDispatcher dispatcher{};
 
     /////
     ecs::EntityApi root;
@@ -85,12 +83,16 @@ protected:
 
     virtual void onUpdateFrame(float dt) { (void) dt; }
 
+    virtual void onPreRender() {}
+
     virtual void onRenderSceneBefore() {}
 
     virtual void onRenderSceneAfter() {}
 
     virtual void onFrameEnd() {}
 };
+
+EK_DECLARE_TYPE(basic_application);
 
 inline float2 basic_application::AppResolution{};
 
@@ -100,11 +102,11 @@ template<typename T>
 inline void run_app(app::window_config cfg) {
     using app::g_app;
 
-    memory::initialize();
+    ek::core::setup();
+
+    SxMemory.initialize();
     Locator::setup();
     app::initialize();
-    clock::initialize();
-    imaging::initialize();
     basic_application::AppResolution = float2{cfg.size};
     g_app.window_cfg = std::move(cfg);
 

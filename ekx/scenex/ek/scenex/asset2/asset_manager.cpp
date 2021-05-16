@@ -1,7 +1,7 @@
 #include "asset_manager.hpp"
 #include "asset_object.hpp"
 
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/util/path.hpp>
 #include <ek/math/common.hpp>
 

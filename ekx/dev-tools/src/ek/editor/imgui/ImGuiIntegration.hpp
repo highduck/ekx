@@ -6,18 +6,17 @@
 #include <ek/util/Res.hpp>
 #include <string>
 
-#include <sokol_gfx.h>
 #include <util/sokol_gfx_imgui.h>
 
 struct ImDrawData;
 
 namespace ek {
 
-class imgui_module_t final {
+class ImGuiIntegration final {
 public:
-    imgui_module_t();
+    ImGuiIntegration();
 
-    ~imgui_module_t();
+    ~ImGuiIntegration();
 
     void on_event(const app::event_t& event);
 

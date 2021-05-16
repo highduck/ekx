@@ -4,14 +4,14 @@
 
 namespace ek {
 
-enum class light_3d_type {
-    directional,
-    point,
-    spot
+enum class Light3DType {
+    Directional,
+    Point,
+    Spot
 };
 
 struct Light3D {
-    light_3d_type type = light_3d_type::point;
+    Light3DType type = Light3DType::Point;
 
     float3 ambient = 0.1f * float3::one;
     float3 diffuse = float3::one;
@@ -22,6 +22,8 @@ struct Light3D {
 
     bool cast_shadows = true;
 };
+
+EK_DECLARE_TYPE(Light3D);
 
 }
 
