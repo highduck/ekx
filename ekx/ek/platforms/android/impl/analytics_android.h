@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/android.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 namespace ek::analytics {
 

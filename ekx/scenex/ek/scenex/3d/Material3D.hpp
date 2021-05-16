@@ -2,6 +2,7 @@
 
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
+#include <ek/util/Type.hpp>
 
 namespace ek {
 
@@ -23,6 +24,8 @@ struct Material3D {
         ambient = ao * diffuse;
     }
 };
+
+EK_DECLARE_TYPE(Material3D);
 
 }
 

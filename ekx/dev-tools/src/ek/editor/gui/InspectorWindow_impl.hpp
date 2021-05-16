@@ -1,6 +1,5 @@
 #pragma once
 
-#include "gui.hpp"
 #include "Widgets.hpp"
 #include <ecxx/ecxx.hpp>
 #include <ek/editor/imgui/imgui.hpp>
@@ -196,11 +195,11 @@ inline void guiMeshRenderer(MeshRenderer& renderer) {
 }
 
 inline void guiLight3D(Light3D& light) {
-    if (light.type == light_3d_type::directional) {
+    if (light.type == Light3DType::Directional) {
         ImGui::Text("Directional Light");
-    } else if (light.type == light_3d_type::point) {
+    } else if (light.type == Light3DType::Point) {
         ImGui::Text("Point Light");
-    } else if (light.type == light_3d_type::spot) {
+    } else if (light.type == Light3DType::Spot) {
         ImGui::Text("Spot Light");
     }
     ImGui::ColorEdit3("Ambient", light.ambient.data());
@@ -327,7 +326,7 @@ inline void guiParticleEmitter2D(ParticleEmitter2D& emitter) {
     ImGui::Checkbox("Enabled", &emitter.enabled);
     ImGui::Text("_Time: %f", emitter.time);
     guiEntityRef("Layer", emitter.layer);
-    ImGui::LabelText("Particle ID", "%s", emitter.particle.c_str());
+    ImGui::LabelText("Particle ID", "%s", emitter.particle.getID().c_str());
     ImGui::DragFloat2("Offset", emitter.position.data());
     ImGui::Separator();
 
@@ -345,8 +344,8 @@ inline void guiParticleEmitter2D(ParticleEmitter2D& emitter) {
 }
 
 inline void guiParticleLayer2D(ParticleLayer2D& layer) {
-    ImGui::Checkbox("Keep Alive", &layer.keep_alive);
-    ImGui::LabelText("Num Particles", "%lu", layer.particles.size());
+    ImGui::Checkbox("Keep Alive", &layer.keepAlive);
+    ImGui::LabelText("Num Particles", "%u", layer.particles.size());
 }
 
 void InspectorWindow::gui_inspector(ecs::EntityRef entity) {

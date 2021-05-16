@@ -8,6 +8,7 @@
 #include <ek/math/serialize_math.hpp>
 #include <ek/util/common_macro.hpp>
 #include <ek/scenex/data/BMFont.hpp>
+#include <ek/util/Type.hpp>
 
 namespace ek {
 

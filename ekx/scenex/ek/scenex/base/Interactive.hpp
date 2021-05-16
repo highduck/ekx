@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
 #include <ek/util/signals.hpp>
 #include <ek/app/app.hpp>
 #include <ecxx/ecxx_fwd.hpp>
+#include <ek/util/Type.hpp>
 
 namespace ek {
 
@@ -46,5 +46,7 @@ struct Interactive {
 
     void handle(InteractionEvent event);
 };
+
+EK_DECLARE_TYPE(Interactive);
 
 }

@@ -54,6 +54,7 @@ private:
     std::unordered_map<NodeEventType, Signal> map_;
 };
 
+EK_DECLARE_TYPE(NodeEventHandler);
 
 /*** events functions ***/
 

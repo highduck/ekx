@@ -1,5 +1,5 @@
 #include <billing.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <app_apple.h>
 
 #import <Foundation/Foundation.h>

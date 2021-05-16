@@ -1,8 +1,8 @@
 #include "MultiResAtlas.hpp"
 #include <pugixml.hpp>
-#include <ek/timers.hpp>
+#include <ek/time/Stopwatch.hpp>
 #include <thread>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/util/path.hpp>
 #include <ek/math/max_rects.hpp>
 #include <ek/imaging/drawing.hpp>
@@ -94,20 +94,20 @@ static void packAtlasThread(const std::string& name, AtlasData& resolution) {
     const std::string log_name = name + "-" + std::to_string(resolution.resolution_index);
     {
         EK_INFO("  - Begin Pack %s", log_name.c_str());
-        timer_t timer{};
+        Stopwatch timer{};
         resolution.pages = packSprites(resolution.sprites, resolution.max_size);
-        EK_INFO("  - End Pack %s : %0.3f ms", log_name.c_str(), timer.read_millis());
+        EK_INFO("  - End Pack %s : %0.3f ms", log_name.c_str(), timer.readMillis());
     }
     {
         EK_INFO("  - Begin Save %s", log_name.c_str());
-        timer_t timer{};
+        Stopwatch timer{};
         save_atlas_resolution(resolution, name);
-        EK_INFO("  - End Save %s : %0.3f ms", log_name.c_str(), timer.read_millis());
+        EK_INFO("  - End Save %s : %0.3f ms", log_name.c_str(), timer.readMillis());
     }
 }
 
 void MultiResAtlasData::packAndSaveMultiThreaded() {
-    timer_t timer{};
+    Stopwatch timer{};
 
     std::vector<std::thread> threads;
     threads.reserve(resolutions.size());
@@ -120,7 +120,7 @@ void MultiResAtlasData::packAndSaveMultiThreaded() {
         th.join();
     }
 
-    EK_INFO("ATLAS BUILD %s : %0.3f ms", name.c_str(), timer.read_millis());
+    EK_INFO("ATLAS BUILD %s : %0.3f ms", name.c_str(), timer.readMillis());
 }
 
 /*** Pack Sprites ***/

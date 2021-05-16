@@ -4,6 +4,7 @@
 #include <ek/scenex/local_storage_var_t.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/util/path.hpp>
+#include <ek/util/Type.hpp>
 
 namespace ek {
 
@@ -34,6 +35,8 @@ private:
     float musicVolume_ = 1.0f;
     float musicPitch_ = 1.0f;
 };
+
+EK_DECLARE_TYPE(AudioManager);
 
 }
 

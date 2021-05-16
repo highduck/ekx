@@ -10,7 +10,7 @@
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/2d/UglyFilter2D.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/math/bounds_builder.hpp>
 #include <ek/Localization.hpp>

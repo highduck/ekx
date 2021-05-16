@@ -5,9 +5,10 @@
 #include <ek/assert.hpp>
 #include <ek/timers.hpp>
 #include <ek/audio/audio.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/util/StaticStorage.hpp>
 #include <Tracy.hpp>
+#include <ek/debug/LogSystem.hpp>
 
 namespace ek::app {
 
@@ -79,7 +80,7 @@ void dispatch_event(const event_t& event) {
 void dispatch_draw_frame() {
     tracy::SetThreadName("Render");
     FrameMark;
-    logger::nextFrame();
+    LogSystem::instance().nextFrame();
 
     event_queue_mtx.lock();
     // do not call dispatch_draw_frame recursively

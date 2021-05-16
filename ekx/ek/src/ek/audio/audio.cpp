@@ -33,7 +33,7 @@
 #include <research/miniaudio_engine.h>
 
 #include <ek/app/res.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 namespace ek::audio {
 

@@ -5,6 +5,7 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/timers.hpp>
+#include "../../scenex/base/SxMemory.hpp"
 
 namespace ek {
 
@@ -15,11 +16,15 @@ struct VectorDequeue {
     uint32_t end = 0;
 
     uint32_t first = 0;
-    std::vector<T> data;
+    Array<T> data;
+
+    explicit VectorDequeue(Allocator& allocator) : data{allocator} {
+
+    }
 
     void move() {
         uint32_t dst = 0;
-        for(uint32_t i = first; i < end; ++i) {
+        for (uint32_t i = first; i < end; ++i) {
             data[dst] = data[i];
             ++dst;
         }
@@ -33,13 +38,12 @@ struct VectorDequeue {
     }
 
     void push_back(T el) {
-        if(end == capacity && first > 0) {
+        if (end == capacity && first > 0) {
             move();
         }
-        if(end < capacity) {
+        if (end < capacity) {
             data[end++] = el;
-        }
-        else {
+        } else {
             data.push_back(el);
             ++capacity;
             ++end;
@@ -86,14 +90,14 @@ private:
 public:
     float scale = 1.0f;
     float2 lastPosition;
-    VectorDequeue<Node> nodes;
+    VectorDequeue<Node> nodes{SxMemory.get().trails};
     bool initialized = false;
 };
 
 class TrailRenderer2D : public Drawable2D<TrailRenderer2D> {
 public:
     explicit TrailRenderer2D(ecs::EntityApi target_) :
-            // TODO: inject world context
+    // TODO: inject world context
             w{&ecs::the_world},
             target{target_} {
     }
@@ -102,7 +106,7 @@ public:
 
     [[nodiscard]]
     bool hitTest(float2 point) const override {
-        (void)point;
+        (void) point;
         return false;
     }
 
@@ -115,7 +119,7 @@ public:
     // max width
     float width = 20.0f;
     float minWidth = 5.0f;
-    Res<Sprite> sprite{"empty"};
+    Res <Sprite> sprite{"empty"};
 };
 
 }

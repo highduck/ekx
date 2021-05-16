@@ -6,7 +6,7 @@
 #import <Carbon/Carbon.h>
 //#import <Carbon/HIToolbox/Events.h>
 
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/util/path.hpp>
 
 @interface NSCursor (HelpCursor)

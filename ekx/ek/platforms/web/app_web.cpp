@@ -1,5 +1,5 @@
 #include <ek/app/app.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/Arguments.hpp>
 
 #include <emscripten.h>

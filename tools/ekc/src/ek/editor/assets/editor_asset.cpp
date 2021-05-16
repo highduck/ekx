@@ -1,6 +1,6 @@
 #include "editor_asset.hpp"
 #include <ek/serialize/serialize.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 namespace ek {
 

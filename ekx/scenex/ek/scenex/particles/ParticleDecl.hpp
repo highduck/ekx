@@ -4,19 +4,17 @@
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/math/rand.hpp>
-
-#include <vector>
 #include <functional>
 
 namespace ek {
 
-enum class particle_scale_mode {
+enum class ParticleScaleMode {
     None = 0,
     CosOut = 1,
     Range = 2
 };
 
-enum class particle_alpha_mode {
+enum class ParticleAlphaMode {
     None = 0,
     ByScale = 1,
     LifeSin = 2,
@@ -24,16 +22,16 @@ enum class particle_alpha_mode {
     QuadOut = 4
 };
 
-enum class rand_color_mode {
+enum class RandColorMode {
     Continuous = 0,
     RandLerp = 1,
     RandElement = 2
 };
 
-class rand_color_data {
+class RandColorData {
 public:
-    std::vector<argb32_t> colors = {argb32_t{0xFFFFFFFF}};
-    rand_color_mode mode = rand_color_mode::RandElement;
+    Array<argb32_t> colors{argb32_t{0xFFFFFFFF}};
+    RandColorMode mode = RandColorMode::RandElement;
     mutable int state = 0;
 
     argb32_t next() const {
@@ -44,15 +42,15 @@ public:
         }
         if (colors.size() == 1) return colors[0];
         switch (mode) {
-            case rand_color_mode::RandLerp: {
+            case RandColorMode::RandLerp: {
                 float t = rand_fx.random(0.0f, float(index_max));
                 int i = int(t);
                 t = math::fract(t);
                 return lerp(colors[i], colors[i + 1], t);
             }
-            case rand_color_mode::RandElement:
+            case RandColorMode::RandElement:
                 return colors[rand_fx.random_int(0, index_max)];
-            case rand_color_mode::Continuous:
+            case RandColorMode::Continuous:
                 return colors[state % colors.size()];
         }
         return argb32_t{0xFFFFFFFF};
@@ -60,47 +58,46 @@ public:
 
     void set_gradient(argb32_t color1, argb32_t color2) {
         colors = {color1, color2};
-        mode = rand_color_mode::RandLerp;
+        mode = RandColorMode::RandLerp;
     }
 
     void set_steps(argb32_t color1, argb32_t color2) {
         colors = {color1, color2};
-        mode = rand_color_mode::Continuous;
+        mode = RandColorMode::Continuous;
     }
 
     void set_solid(argb32_t color) {
         colors = {color};
-        mode = rand_color_mode::Continuous;
+        mode = RandColorMode::Continuous;
     }
 };
 
-class float_range_t {
-public:
+struct FloatRange {
     float min;
     float max;
 
-    float_range_t()
+    FloatRange()
             : min{0.0f},
               max{0.0f} {
     }
 
-    explicit float_range_t(float value)
+    explicit FloatRange(float value)
             : min{value},
               max{value} {
     }
 
-    explicit float_range_t(float min_, float max_)
+    explicit FloatRange(float min_, float max_)
             : min{min_},
               max{max_} {
     }
 
-    float_range_t& set(float a_min, float a_max) {
+    FloatRange& set(float a_min, float a_max) {
         min = a_min;
         max = a_max;
         return *this;
     }
 
-    float_range_t& set(float value) {
+    FloatRange& set(float value) {
         min = value;
         max = value;
         return *this;
@@ -121,43 +118,42 @@ public:
 
 struct ParticleDecl {
     Res<Sprite> sprite;
-    particle_scale_mode scale_mode = particle_scale_mode::None;
-    particle_alpha_mode alpha_mode = particle_alpha_mode::None;
-    float_range_t alpha_start{1.0};
+    ParticleScaleMode scale_mode = ParticleScaleMode::None;
+    ParticleAlphaMode alpha_mode = ParticleAlphaMode::None;
+    FloatRange alpha_start{1.0};
     float2 acceleration = float2::zero;
     bool use_reflector = false;
 
-    float_range_t life_time{1.0f};
-    float_range_t acc_x_phase{0.5f * math::pi};
-    float_range_t acc_x_speed{0.0f};
+    FloatRange life_time{1.0f};
+    FloatRange acc_x_phase{0.5f * math::pi};
+    FloatRange acc_x_speed{0.0f};
 
     float scale_off_time = 0.0f;
-    float_range_t scale_start{1.0f};
-    float_range_t scale_end{0.0f};
+    FloatRange scale_start{1.0f};
+    FloatRange scale_end{0.0f};
 
-    rand_color_data color;
+    RandColorData color;
     argb32_t color_offset{0x0};
     float additive = 0.0f;
 
-    float_range_t rotation{0.0f};
+    FloatRange rotation{0.0f};
     float rotation_speed{0.0f};
 
     float angle_velocity_factor = 0.0f;
     float angle_base = 0.0f;
 };
 
-class emitter_data {
-public:
+struct EmitterData {
     float interval = 0.5f;
     int burst = 1;
     rect_f rect;
     float2 offset;
 
-    float_range_t burst_rotation_delta{1.0f, 1.5f};
+    FloatRange burst_rotation_delta{1.0f, 1.5f};
 
-    float_range_t speed{10, 100};
-    float_range_t acc{0.0f};
-    float_range_t dir{0.0f, math::pi2};
+    FloatRange speed{10, 100};
+    FloatRange acc{0.0f};
+    FloatRange dir{0.0f, math::pi2};
 };
 
 }

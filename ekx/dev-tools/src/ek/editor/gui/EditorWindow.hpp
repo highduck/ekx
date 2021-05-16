@@ -1,6 +1,5 @@
 #pragma once
 
-#include "gui.hpp"
 #include "../imgui/imgui.hpp"
 #include <pugixml.hpp>
 

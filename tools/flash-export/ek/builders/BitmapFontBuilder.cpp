@@ -4,7 +4,7 @@
 
 #include <ek/util/strings.hpp>
 #include <ek/math/box.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 #include <pugixml.hpp>
 

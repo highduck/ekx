@@ -1,7 +1,10 @@
 #pragma once
 
 #include "EditorWindow.hpp"
-#include <ek/editor/imgui/imgui.hpp>
+#include <IconsFontAwesome5.h>
+#include <ek/ds/Hash.hpp>
+
+// components
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
@@ -28,6 +31,8 @@ public:
     Array<ecs::EntityRef> selection{};
     ImGuiTextFilter filter{};
     ecs::EntityRef root{};
+    Hash<ecs::EntityRef> openList{};
+    Hash<ecs::EntityRef> scrollToList{};
 
     void onDraw() override;
 
@@ -55,6 +60,9 @@ public:
 
     // remove any invalid refs from selection
     void validateSelection();
+
+    void select(ecs::EntityApi e);
+    void focus(ecs::EntityApi e);
 };
 
 }

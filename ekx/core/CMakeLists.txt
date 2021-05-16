@@ -56,8 +56,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/imaging/fast_blur.cpp
 
         ek/util/Res.hpp
-        ek/util/logger.hpp
-        ek/util/logger.cpp
         ek/util/ServiceLocator.hpp
         ek/util/signals.hpp
         ek/util/base64.hpp
@@ -86,10 +84,8 @@ add_library(${PROJECT_NAME} STATIC
         ek/ds/Hash.hpp
 
         ek/timers.hpp
-        ek/timers_impl.hpp
 
         ecxx/impl/ecxx.cpp
-
 
         ek/imaging/ImageSubSystem.cpp
         ek/imaging/ImageSubSystem.hpp

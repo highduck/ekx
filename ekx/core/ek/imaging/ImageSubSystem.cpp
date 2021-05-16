@@ -1,7 +1,7 @@
 #include "ImageSubSystem.hpp"
 #include "../Allocator.hpp"
 #include "../util/StaticStorage.hpp"
-#include "../util/logger.hpp"
+#include "../debug.hpp"
 
 namespace ek::imaging {
 

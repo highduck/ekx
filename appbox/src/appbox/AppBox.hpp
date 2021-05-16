@@ -3,6 +3,7 @@
 #include <string>
 #include <ecxx/ecxx.hpp>
 #include <admob.hpp>
+#include <ek/util/Type.hpp>
 #include "Ads.hpp"
 
 namespace ek {
@@ -50,6 +51,8 @@ public:
 
 private:
 };
+
+EK_DECLARE_TYPE(AppBox);
 
 class Leaderboard {
 public:

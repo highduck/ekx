@@ -2,20 +2,20 @@ cmake_minimum_required(VERSION 3.13)
 
 add_library(${PROJECT_NAME} STATIC
 
-        ek/editor/gui/gui.hpp
-        ek/editor/gui/gui_editor.cpp
+        ek/editor/gui/EditorGUI.cpp
         ek/editor/gui/Widgets_impl.hpp
-        ek/editor/gui/gui_atlas.cpp
-        ek/editor/gui/gui_font.cpp
-        ek/editor/gui/gui_particles.cpp
 
-        ek/editor/imgui/imgui_module.hpp
-        ek/editor/imgui/imgui_module.cpp
+        ek/editor/imgui/ImGuiIntegration.hpp
+        ek/editor/imgui/ImGuiIntegration.cpp
         ek/editor/imgui/imgui.hpp
 
-        ek/editor/editor.cpp
-        ek/editor/editor.hpp
+        ek/editor/Editor.cpp
+        ek/editor/Editor.hpp
 
+        ImGuizmo/ImCurveEdit.cpp
+        ImGuizmo/ImGradient.cpp
+        ImGuizmo/ImGuizmo.cpp
+        ImGuizmo/ImSequencer.cpp
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

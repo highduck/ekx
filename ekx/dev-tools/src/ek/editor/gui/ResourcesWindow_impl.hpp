@@ -9,9 +9,11 @@
 #include <ek/scenex/text/Font.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
 #include <ek/scenex/data/SGFile.hpp>
+#include <ek/scenex/text/Font.hpp>
+#include <ek/scenex/text/TrueTypeFont.hpp>
+#include <ek/scenex/text/BitmapFont.hpp>
 
 namespace ek {
-
 
 template<typename T>
 void on_editor_debug_asset(const T& asset) {
@@ -65,7 +67,7 @@ void on_editor_debug_asset<Atlas>(const Atlas& asset) {
         const auto* sprite = spr.get();
         if (sprite) {
             ImGui::TextUnformatted(id.c_str());
-            gui_sprite_view(*sprite);
+            guiSprite(*sprite);
         } else {
             ImGui::TextDisabled("Sprite %s is null", id.c_str());
         }
@@ -75,12 +77,12 @@ void on_editor_debug_asset<Atlas>(const Atlas& asset) {
 
 template<>
 void on_editor_debug_asset<Sprite>(const Sprite& asset) {
-    gui_sprite_view(asset);
+    guiSprite(asset);
 }
 
 template<>
 void on_editor_debug_asset<Font>(const Font& asset) {
-    gui_font_view(asset);
+    guiFont(asset);
 }
 
 template<>

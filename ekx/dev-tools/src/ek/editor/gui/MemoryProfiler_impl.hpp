@@ -6,8 +6,6 @@
 
 namespace ek {
 
-static uint64_t MEMORY_PROFILER_BLOCK[4096];
-
 inline double toMB(uint64_t bytes) {
     return static_cast<double>(bytes / 1024) / 1024.0;
 }
@@ -16,8 +14,23 @@ inline double toKB(uint64_t bytes) {
     return static_cast<double>(bytes) / 1024.0;
 }
 
+void drawAllocationsList(Allocator& allocator) {
+    AllocationInfo data[10000];
+    const auto count = allocator.getAllocationsInfo(10000, data);
+    for (uint32_t i = 0; i < count; ++i) {
+        auto& info = data[i];
+        ImGui::Text("%0.2lf %0.2lf", toKB(info.sizeTotal), toKB(info.sizeUsed));
+        for(unsigned j = 0; j < AllocationInfo::MaxStackDepth; ++j) {
+            if(info.stack[j]) {
+                ImGui::BulletText("[%u] %s", j, info.stack[j]);
+            }
+        }
+    }
+}
+
 void drawAllocatorMemorySpan(Allocator& allocator) {
 
+    uint64_t MEMORY_PROFILER_BLOCK[4096];
     auto count = readAllocationMap(allocator, MEMORY_PROFILER_BLOCK, 4096);
     uint32_t i = 0;
     uint64_t min = 0xFFFFFFFFFFFFFFFFu;
@@ -28,16 +41,17 @@ void drawAllocatorMemorySpan(Allocator& allocator) {
         if (pos < min) {
             min = pos;
         }
-        if (pos > max) {
+        if (end > max) {
             max = pos;
         }
     }
     i = 0;
-    char BB[1024 * 128];
-    memset(BB, '_', 1024 * 128);
+    constexpr uint32_t MapSize = 1024 * 128;
+    char BB[MapSize];
+    memset(BB, '_', MapSize);
     uint32_t len = (max - min) / 1024;
-    if(len > 1024 * 128) {
-        len = 1024 * 128;
+    if (len > MapSize) {
+        len = MapSize;
     }
 
     while (i < count) {
@@ -45,7 +59,7 @@ void drawAllocatorMemorySpan(Allocator& allocator) {
         uint64_t end = pos + MEMORY_PROFILER_BLOCK[i++];
         uint32_t i0 = (pos - min) / 1024;
         uint32_t i1 = (end - min) / 1024;
-        for(uint32_t x = i0; x < i1; ++x) {
+        for (uint32_t x = i0; x < i1 && x < MapSize; ++x) {
             BB[x] = '#';
         }
     }
@@ -54,38 +68,45 @@ void drawAllocatorMemorySpan(Allocator& allocator) {
     i = 0;
     const uint32_t NumKilosPerLine = 80;
     uint32_t skipped = 0;
-    while(i < len) {
+    while (i < len) {
         uint32_t txtLen = 0;
         uint32_t occupied = 0;
-        while(txtLen < NumKilosPerLine && (i + txtLen) < len) {
-            if(BB[i + txtLen] == '#') {
+        while (txtLen < NumKilosPerLine && (i + txtLen) < len) {
+            if (BB[i + txtLen] == '#') {
                 ++occupied;
             }
             ++txtLen;
         }
-        if(occupied > 0) {
-            if(skipped > 0) {
-                ImGui::Text("-/- Skipped %0.2f MB -/-", (float)(skipped * NumKilosPerLine) / 1024.0f);
+        if (occupied > 0) {
+            if (skipped > 0) {
+                ImGui::Text("-/- Skipped %0.2f MB -/-", (float) (skipped * NumKilosPerLine) / 1024.0f);
             }
             skipped = 0;
             ImGui::TextUnformatted(BB + i, BB + i + txtLen);
-        }
-        else {
+        } else {
             ++skipped;
         }
         i += txtLen;
     }
-    if(skipped > 0) {
-        ImGui::Text("-/- Skipped %0.2f MB -/-", (float)(skipped * NumKilosPerLine) / 1024.0f);
+    if (skipped > 0) {
+        ImGui::Text("-/- Skipped %0.2f MB -/-", (float) (skipped * NumKilosPerLine) / 1024.0f);
     }
     ImGui::PopFont();
 }
 
 void DrawMemoryBlock(Allocator& allocator) {
-    auto stats = allocator.getStatistics();
+    auto* stats = allocator.getStats();
+    if (!stats) {
+        return;
+    }
+
     static const char* STATS_MODES[3] = {"Current", "Peak", "All Time"};
-    if(ImGui::TreeNode("memory_map", "Memory Span: %0.1lf MB", toMB(stats.span))) {
+    if (ImGui::TreeNode("memory_map", "Memory Span: %0.1lf MB", toMB(allocator.getSpanSize()))) {
         drawAllocatorMemorySpan(allocator);
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("allocations", "Allocations")) {
+        drawAllocationsList(allocator);
         ImGui::TreePop();
     }
     if (ImGui::BeginTable("stats", 4)) {
@@ -100,11 +121,11 @@ void DrawMemoryBlock(Allocator& allocator) {
             ImGui::TableSetColumnIndex(0);
             ImGui::TextUnformatted(STATS_MODES[i]);
             ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", stats.allocations[i]);
+            ImGui::Text("%u", stats->allocations[i]);
             ImGui::TableSetColumnIndex(2);
-            ImGui::Text("%0.2lf", toMB(stats.memoryEffective[i]));
+            ImGui::Text("%0.2lf", toMB(stats->memoryEffective[i]));
             ImGui::TableSetColumnIndex(3);
-            ImGui::Text("%0.2lf", toMB(stats.memoryAllocated[i]));
+            ImGui::Text("%0.2lf", toMB(stats->memoryAllocated[i]));
         }
         ImGui::EndTable();
     }
@@ -114,14 +135,24 @@ void DrawMemoryBlock(Allocator& allocator) {
 
 void DrawAllocatorsTree(Allocator& allocator) {
     ImGui::PushID(&allocator);
-    if (ImGui::TreeNode(allocator.label)) {
-        DrawMemoryBlock(allocator);
-        auto* it = allocator.children;
-        while (it) {
-            DrawAllocatorsTree(*it);
-            it = it->next;
+    auto* info = allocator.getStats();
+    if (info) {
+        if (ImGui::TreeNode(info->label)) {
+            DrawMemoryBlock(allocator);
+            auto* it = info->children;
+            while (it) {
+                auto* childInfo = it->getStats();
+                if (childInfo) {
+                    DrawAllocatorsTree(*it);
+                    it = childInfo->next;
+                } else {
+                    break;
+                }
+            }
+            ImGui::TreePop();
         }
-        ImGui::TreePop();
+    } else {
+        ImGui::Text("Allocator is not debuggable");
     }
     ImGui::PopID();
 }
@@ -167,12 +198,12 @@ void drawECSMemoryStats() {
 }
 
 void MemoryProfiler::onDraw() {
-    if(ImGui::BeginTabBar("Memory Stats")) {
-        if(ImGui::BeginTabItem("Allocators")) {
+    if (ImGui::BeginTabBar("Memory Stats")) {
+        if (ImGui::BeginTabItem("Allocators")) {
             DrawAllocatorsTree(memory::systemAllocator);
             ImGui::EndTabItem();
         }
-        if(ImGui::BeginTabItem("ECS Memory")) {
+        if (ImGui::BeginTabItem("ECS Memory")) {
             drawECSMemoryStats();
             ImGui::EndTabItem();
         }

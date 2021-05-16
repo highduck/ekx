@@ -1,9 +1,8 @@
-#include "editor.hpp"
+#include "Editor.hpp"
 
 #include <ek/scenex/app/basic_application.hpp>
-#include <ek/editor/gui/gui.hpp>
 #include <pugixml.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 namespace ek {
 
@@ -15,6 +14,39 @@ void editor_onFrameCompleted() {
 
 void editor_onEvent(const app::event_t& e) {
     Locator::ref<Editor>().onEvent(e);
+}
+
+void Editor::onRenderOverlay() {
+    gui_.end_frame();
+
+    bool dirty = false;
+    for(auto* wnd : windows) {
+        dirty |= wnd->dirty;
+    }
+    if(dirty) {
+        save();
+    }
+}
+
+void Editor::onRenderFrame() {
+
+}
+
+void Editor::onUpdate() {
+    //project.update_scale_factor(app_->scale_factor, settings.notifyAssetsOnScaleFactorChanged);
+    gui_.begin_frame(app_->frameTimer.deltaTime);
+    if (settings.showEditor) {
+        drawGUI();
+    }
+}
+
+void Editor::onBeforeFrameBegin() {
+    auto& display = Locator::ref<basic_application>().display;
+    if (settings.showEditor && !display.simulated) {
+        display.simulated = true;
+    } else if (!settings.showEditor && display.simulated) {
+        display.simulated = false;
+    }
 }
 
 Editor::Editor(basic_application& app) :
@@ -34,47 +66,11 @@ Editor::Editor(basic_application& app) :
     g_app.on_frame_completed += editor_onFrameCompleted;
     g_app.on_event += editor_onEvent;
 
-//    app.hook_on_preload.add([this]() {
-//        project.update_scale_factor(app_->scale_factor, false);
-//        project.populate();
-//    });
-    t2 = app.hook_on_update.add([this](float dt) {
-        //project.update_scale_factor(app_->scale_factor, settings.notifyAssetsOnScaleFactorChanged);
-        gui_.begin_frame(dt);
-        if (settings.showEditor) {
-            guiEditor(*this);
-        }
-    });
-    t1 = app.onRenderOverlay.add([this]() {
-        gui_.end_frame();
-
-        bool dirty = false;
-        for(auto* wnd : windows) {
-            dirty |= wnd->dirty;
-        }
-        if(dirty) {
-            save();
-        }
-    });
-    t3 = app.hook_on_render_frame.add([this]() {
-
-    });
-
-    app.onBeforeFrameBegin += [] {
-        auto& display = Locator::ref<basic_application>().display;
-        if (settings.showEditor && !display.simulated) {
-            display.simulated = true;
-        } else if (!settings.showEditor && display.simulated) {
-            display.simulated = false;
-        }
-    };
+    app.dispatcher.listeners.push_back(this);
 }
 
 Editor::~Editor() {
-    app_->hook_on_update.remove(t2);
-    app_->onRenderOverlay.remove(t1);
-    app_->hook_on_render_frame.remove(t3);
-
+    app_->dispatcher.listeners.remove(this);
     g_app.on_frame_completed -= editor_onFrameCompleted;
     g_app.on_event -= editor_onEvent;
 }
@@ -180,6 +176,10 @@ void Editor::invalidateSettings() {
             settings.dirty = false;
         }
     }
+}
+
+void Editor::onPreRender() {
+    scene.onPreRender();
 }
 
 }

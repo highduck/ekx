@@ -33,12 +33,12 @@ struct Particle {
     float angle_velocity_factor = 0.0f;
 
     // initial alpha
-    particle_alpha_mode alpha_mode = particle_alpha_mode::None;
+    ParticleAlphaMode alpha_mode = ParticleAlphaMode::None;
     float alpha = 1.0f;
     argb32_t color{0xFFFFFFFF};
     argb32_t offset{0x0};
 
-    particle_scale_mode scale_mode = particle_scale_mode::None;
+    ParticleScaleMode scale_mode = ParticleScaleMode::None;
     float scale_off_time = 0.0f;
     float scale_start = 1.0f;
     float scale_end = 0.0f;

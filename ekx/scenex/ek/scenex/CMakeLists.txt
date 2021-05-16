@@ -20,11 +20,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         3d/StaticMesh.hpp
         3d/RenderSystem3D.cpp
         3d/RenderSystem3D.hpp
-        3d/Camera3D.cpp
         3d/Camera3D.hpp
-        3d/Light3D.cpp
         3d/Light3D.hpp
-        3d/Material3D.cpp
         3d/Material3D.hpp
 
         2d/Atlas.cpp

@@ -80,6 +80,8 @@ struct LayoutRect {
     static rect_f DesignCanvasRect;
 };
 
+EK_DECLARE_TYPE(LayoutRect);
+
 rect_f find_parent_layout_rect(ecs::EntityApi e, bool safe);
 
 

@@ -51,6 +51,8 @@ struct MovieClip {
     static void updateAll();
 };
 
+EK_DECLARE_TYPE(MovieClip);
+
 struct MovieClipTargetIndex {
     int32_t key = 0;
 };

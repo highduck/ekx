@@ -25,4 +25,6 @@ struct Tween {
     }
 };
 
+EK_DECLARE_TYPE(Tween);
+
 }

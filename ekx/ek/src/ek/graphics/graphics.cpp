@@ -1,6 +1,6 @@
 #include "graphics.hpp"
 #include <ek/Allocator.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/assert.hpp>
 #include <ek/imaging/image.hpp>
 #include <ek/math/box.hpp>
@@ -169,25 +169,20 @@ static std::string BackendToString[] = {
         "SG_BACKEND_DUMMY"
 };
 
-void initialize(sg_context_desc* customContext) {
+void initialize(int maxDrawCalls) {
     EK_TRACE << "graphics initialize";
     gHeapSokolGfx = memory::stdAllocator.create<ProxyAllocator>("sokol_gfx");
     sg_desc desc{};
     // this size is 2x Draw Calls per frame (because of sokol internal double-buffering)
-    desc.buffer_pool_size = 256;
-    if(customContext != nullptr) {
-        desc.context = *customContext;
-    }
-    else {
+    desc.buffer_pool_size = maxDrawCalls << 1;
 #if EK_MACOS || EK_IOS
-        desc.context.metal.device = app::getMetalDevice();
-        desc.context.metal.renderpass_descriptor_cb = app::getMetalRenderPass;
-        desc.context.metal.drawable_cb = app::getMetalDrawable;
-        desc.context.sample_count = 1;
-        desc.context.color_format = SG_PIXELFORMAT_BGRA8;
-        desc.context.depth_format = SG_PIXELFORMAT_DEPTH_STENCIL;
+    desc.context.metal.device = app::getMetalDevice();
+    desc.context.metal.renderpass_descriptor_cb = app::getMetalRenderPass;
+    desc.context.metal.drawable_cb = app::getMetalDrawable;
+    desc.context.sample_count = 1;
+    desc.context.color_format = SG_PIXELFORMAT_BGRA8;
+    desc.context.depth_format = SG_PIXELFORMAT_DEPTH_STENCIL;
 #endif
-    }
     sg_setup(desc);
     auto backend = sg_query_backend();
     EK_INFO << "Sokol Backend: " << BackendToString[backend];

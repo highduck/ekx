@@ -1,6 +1,6 @@
 #include "texture_asset.hpp"
 
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/scenex/data/texture_data.hpp>
 #include <ek/system/system.hpp>
 #include <ek/imaging/decoder.hpp>

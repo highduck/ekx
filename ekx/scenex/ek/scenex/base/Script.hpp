@@ -14,6 +14,8 @@ struct Updater {
     TimeLayer timeLayer = TimeLayer::Root;
 };
 
+EK_DECLARE_TYPE(Updater);
+
 class ScriptBase {
 public:
 
@@ -84,6 +86,8 @@ struct ScriptHolder {
         return static_cast<T&>(r);
     }
 };
+
+EK_DECLARE_TYPE(ScriptHolder);
 
 class ScriptDrawable2D : public Drawable2D<ScriptDrawable2D> {
 public:

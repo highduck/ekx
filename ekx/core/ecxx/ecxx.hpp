@@ -125,6 +125,11 @@ inline bool EntityRef::valid() const {
 }
 
 [[nodiscard]]
+inline bool EntityRef::check(ecs::EntityApi e) const {
+    return valid() && e.index == index();
+}
+
+[[nodiscard]]
 inline EntityApi EntityRef::get() const {
     EK_ASSERT(the_world.check(passport));
     return EntityApi{index()};
@@ -141,6 +146,8 @@ using view_backward_t = ViewBackward<Component...>;
 }
 
 #ifndef ECX_COMPONENT
-#define ECX_COMPONENT(type) ::ecs::the_world.registerComponent<type>(#type)
-#define ECX_COMPONENT_RESERVE(type,cap) ::ecs::the_world.registerComponent<type>(#type, (cap))
-#endif
+
+#define ECX_COMPONENT(T) ecs::the_world.registerComponent<T>()
+#define ECX_COMPONENT_RESERVE(T, cap) ecs::the_world.registerComponent<T>(cap)
+
+#endif // #ifndef ECX_COMPONENT

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ek/math/box.hpp>
+#include <ek/util/Type.hpp>
 
 namespace ek {
 
@@ -47,5 +48,6 @@ struct Viewport {
     static void updateAll(const GameDisplayInfo& display0);
 };
 
+EK_DECLARE_TYPE(Viewport);
 
 }

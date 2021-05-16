@@ -151,7 +151,7 @@ struct ShadowMapRes {
         for (auto e : ecs::view<Light3D, Transform3D>()) {
             auto& l = e.get<Light3D>();
             auto& transform = e.get<Transform3D>();
-            if (l.type == light_3d_type::directional) {
+            if (l.type == Light3DType::Directional) {
                 light_data = l;
                 light_position = normalize(extract_translation(transform.world));
             }
@@ -381,10 +381,10 @@ void RenderSystem3D::prepare() {
     for (auto e : ecs::view<Light3D, Transform3D>()) {
         auto& l = e.get<Light3D>();
         auto& transform = e.get<Transform3D>();
-        if (l.type == light_3d_type::point) {
+        if (l.type == Light3DType::Point) {
             point_light = l;
             point_light_pos = extract_translation(transform.world);
-        } else if (l.type == light_3d_type::directional) {
+        } else if (l.type == Light3DType::Directional) {
             directional_light = l;
             directional_light_pos = normalize(extract_translation(transform.world));
         }
@@ -437,7 +437,7 @@ void RenderSystem3D::render(float width, float height) {
 
     static float fc_ = 1.0;
     fc_ += 1.0f;
-    auto time = static_cast<float>(clock::now());
+    auto time = static_cast<float>(Clock::now());
 
     sg_apply_pipeline(main->pip);
 

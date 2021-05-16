@@ -1,15 +1,8 @@
 #pragma once
 
-#include "timers.hpp"
-
-#define SOKOL_TIME_IMPL
-
-#include <sokol_time.h>
-
+#include "Timers.hpp"
 #include <map>
-#include <memory>
-#include <utility>
-#include "util/logger.hpp"
+#include "Stopwatch.hpp"
 
 namespace ek {
 
@@ -30,7 +23,7 @@ public:
         ++nextID;
         auto timer = std::make_unique<TimerJob>();
         timer->fn = std::move(fn);
-        timer->time = clock.read_seconds() + timeout;
+        timer->time = clock.readSeconds() + timeout;
         timer->repeat = interval;
         jobs[nextID] = std::move(timer);
         return nextID;
@@ -52,7 +45,7 @@ public:
 
 private:
     void updateTimers() {
-        auto now = clock.read_seconds();
+        auto now = clock.readSeconds();
         for (auto& p : jobs) {
             auto& job = p.second;
             if (job && now >= job->time) {
@@ -80,7 +73,7 @@ private:
     }
 
     std::map<int, std::unique_ptr<TimerJob>> jobs{};
-    ek::timer_t clock{};
+    ek::Stopwatch clock{};
     int nextID = 0;
 };
 
@@ -110,84 +103,8 @@ void dispatchTimers() {
     TimerJobManager::instance->update();
 }
 
-/** Time Layer system **/
-
-float updateState(TimeLayer::State& layer, float dt_) {
-    auto dt1 = dt_ * layer.scale;
-    layer.dt = dt1;
-    layer.total += dt1;
-    return dt1;
-}
-
-const auto MAX_DELTA_TIME = 0.3f;
-
-void TimeLayer::updateTimers(float raw) {
-    if (raw > MAX_DELTA_TIME) {
-        raw = MAX_DELTA_TIME;
-    }
-    auto dt = updateState(TimeLayer::Layers[0], raw);
-    updateState(TimeLayer::Layers[1], dt);
-    updateState(TimeLayer::Layers[2], dt);
-    updateState(TimeLayer::Layers[3], dt);
-}
-
-TimeLayer::State TimeLayer::Layers[4]{};
-
-TimeLayer TimeLayer::Root{0};
-TimeLayer TimeLayer::Game{1};
-TimeLayer TimeLayer::HUD{2};
-TimeLayer TimeLayer::UI{3};
-
-namespace clock {
-
-void initialize() {
-    EK_TRACE << "clock initialize";
-    stm_setup();
+void setupTimers() {
     TimerJobManager::instance = new TimerJobManager();
 }
 
-double now() {
-    return stm_sec(stm_now());
-}
-
-}
-
-timer_t::timer_t() : initial_{stm_now()} {
-
-}
-
-double timer_t::read_seconds() const {
-    return stm_sec(stm_diff(stm_now(), initial_));
-}
-
-double timer_t::read_millis() const {
-    return stm_ms(stm_diff(stm_now(), initial_));
-}
-
-void timer_t::reset() {
-    initial_ = stm_now();
-}
-
-double framed_timer_t::update() {
-    ++frame_index_;
-    delta_time_ = timer_.read_seconds();
-    timer_.reset();
-    return delta_time_;
-}
-
-void FpsMeter::update(float dt) {
-    if (measurementsPerSeconds > 0.0f) {
-        // estimate average FPS for some period
-        counter_ += 1.0f;
-        accum_ += dt;
-        const auto period = 1.0f / measurementsPerSeconds;
-        if (accum_ >= period) {
-            avgFPS_ = counter_ * measurementsPerSeconds;
-            accum_ -= period;
-            counter_ = 0.0f;
-        }
-    } else {
-        avgFPS_ = dt > 0.0f ? (1.0f / dt) : 0.0f;
-    }
-}
 }

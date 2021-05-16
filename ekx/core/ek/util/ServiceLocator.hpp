@@ -2,6 +2,7 @@
 
 #include "../assert.hpp"
 #include "../Allocator.hpp"
+#include "Type.hpp"
 
 namespace ek::Locator {
 
@@ -54,6 +55,7 @@ T& create(Args&& ...args) {
     using S = ServiceStorage<T>;
     EK_ASSERT(S::value == nullptr);
     EK_ASSERT(allocator != nullptr);
+    const AllocatorTraceScope allocatorTrace(getType<T>().label);
     S::value = allocator->create<Impl>(args...);
     return *S::value;
 }

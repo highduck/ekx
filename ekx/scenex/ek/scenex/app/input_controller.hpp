@@ -85,6 +85,8 @@ private:
     Array <touch_state_t> touches_;
 };
 
+EK_DECLARE_TYPE(input_controller);
+
 }
 
 

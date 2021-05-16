@@ -4,6 +4,7 @@
 #include <ek/ds/Array.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/assert.hpp>
+#include <ek/util/Type.hpp>
 #include "../ecxx_fwd.hpp"
 
 namespace ecs {
@@ -243,7 +244,7 @@ public:
     }
 
     template<typename Component>
-    inline void registerComponent(const char* name = nullptr, unsigned initialCapacity = 1);
+    inline void registerComponent(unsigned initialCapacity = 1);
 
 private:
     void resetEntityPool();
@@ -497,10 +498,15 @@ inline void World::create(EntityIndex* outEntities, uint32_t count) {
 }
 
 template<typename Component>
-inline void World::registerComponent(const char* name, unsigned initialCapacity) {
-    auto* storage = allocator->create<ComponentStorage<Component>>(*allocator, initialCapacity);
-    storage->component.name = name;
-    registerComponent(&storage->component);
+inline void World::registerComponent(unsigned initialCapacity) {
+    const char* label = ek::Type<Component>::Data.label;
+    allocator->pushDebugLabel(label ? label : "component-storage");
+    {
+        auto* storage = allocator->create<ComponentStorage<Component>>(*allocator, initialCapacity);
+        storage->component.name = label;
+        registerComponent(&storage->component);
+    }
+    allocator->popDebugLabel();
 }
 
 }

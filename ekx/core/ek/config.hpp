@@ -15,6 +15,7 @@
 
 #if defined(EK_DEBUG_BUILD) || defined(EK_CONFIG_LOG_ALL)
 #define EK_LOG_DEBUG_OUTPUT
+#define EK_SOURCE_LOCATION_ENABLED
 #endif
 
 #ifdef EK_CONFIG_ASSERT_ALL

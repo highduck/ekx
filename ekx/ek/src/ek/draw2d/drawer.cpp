@@ -5,7 +5,7 @@
 #include "draw2d_shader.h"
 #include <ek/Allocator.hpp>
 #include <ek/util/StaticStorage.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 using namespace ek::graphics;
 

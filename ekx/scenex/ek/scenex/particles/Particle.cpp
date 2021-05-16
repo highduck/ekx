@@ -25,12 +25,12 @@ void Particle::update(float dt) {
 
 void Particle::update_current_values() {
     switch (scale_mode) {
-        case particle_scale_mode::CosOut: {
+        case ParticleScaleMode::CosOut: {
             float s = cosf(0.5f * float(math::pi) * (1.0f - time / time_total));
             scale = float2(s, s);
         }
             break;
-        case particle_scale_mode::Range: {
+        case ParticleScaleMode::Range: {
             float time_max = scale_off_time > 0.0f ? scale_off_time : time_total;
             float ratio = 1.0f - math::clamp(time / time_max);
             float s = math::lerp(scale_start, scale_end, ratio);
@@ -43,13 +43,13 @@ void Particle::update_current_values() {
     }
 
     switch (alpha_mode) {
-        case particle_alpha_mode::ByScale:
+        case ParticleAlphaMode::ByScale:
             color.af(math::clamp(alpha * length(scale)));
             break;
-        case particle_alpha_mode::LifeSin:
+        case ParticleAlphaMode::LifeSin:
             color.af(alpha * sinf(float(math::pi) * time / time_total));
             break;
-        case particle_alpha_mode::DCBlink: {
+        case ParticleAlphaMode::DCBlink: {
             float a = 0.25f;
             if (time > 0.75f) {
                 a = 1.0f - time;
@@ -60,7 +60,7 @@ void Particle::update_current_values() {
             color.a = alpha * a;
         }
             break;
-        case particle_alpha_mode::QuadOut: {
+        case ParticleAlphaMode::QuadOut: {
             float x = 1.0f - time / time_total;
             color.af(alpha * (1.0f - x * x));
         }

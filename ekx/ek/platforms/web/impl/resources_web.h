@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/app/res.hpp>
 #include <ek/app/impl/res_sys.hpp>
 

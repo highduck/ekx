@@ -120,7 +120,7 @@ struct matrix_t<4, 4, T> {
         return m[col * 4 + row];
     }
 
-    void transform_2d(T x, T y, T scale = 1, T rotation_degrees = 0) {
+    void setTransform2D(vec2_t<T> position, T scale = 1, T rotation_degrees = 0) {
         T rotation = math::to_radians(rotation_degrees);
         T cs = std::cos(rotation) * scale;
         T sn = std::sin(rotation) * scale;
@@ -130,8 +130,8 @@ struct matrix_t<4, 4, T> {
         m[1] = -sn;
         m[4] = sn;
         m[5] = cs;
-        m[12] = x;
-        m[13] = y;
+        m[12] = position.x;
+        m[13] = position.y;
     }
 
     inline mat4x4& operator*=(T scalar) {

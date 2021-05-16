@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <cstdint>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/assert.hpp>
 
 namespace ek::internal {

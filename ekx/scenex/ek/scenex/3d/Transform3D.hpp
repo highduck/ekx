@@ -2,6 +2,7 @@
 
 #include <ek/math/mat4x4.hpp>
 #include <ek/math/vec.hpp>
+#include <ek/util/Type.hpp>
 
 namespace ek {
 
@@ -24,6 +25,8 @@ struct Transform3D {
 
     static void updateAll();
 };
+
+EK_DECLARE_TYPE(Transform3D);
 
 }
 

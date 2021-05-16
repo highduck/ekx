@@ -15,7 +15,8 @@ void fireworks_script::start() {
     Display2D::make<ParticleRenderer2D>(entity_).target = ecs::EntityRef{entity_};
     auto& emitter = entity_.assign<ParticleEmitter2D>();
     emitter.data.burst = 0;
-    emitter.particle = "firework_star";
+    emitter.particle.setID("firework_star");
+    emitter.layer = ecs::EntityRef{entity_};
     setTouchable(entity_, false);
 }
 
@@ -55,12 +56,12 @@ void fireworks_script::update(float dt) {
                 break;
         }
 
-        emitter.particle = "firework_spark";
+        emitter.particle.setID("firework_spark");
         emitter.data.acc.set(0, 100);
         emitter.data.speed.set(50, 100);
         particles_burst(entity_, random_int(20, 30));
 
-        emitter.particle = "firework_star";
+        emitter.particle.setID("firework_star");
         emitter.data.speed.set(10, 100);
         emitter.data.acc.set(0, -50);
         particles_burst(entity_, random_int(60, 80));

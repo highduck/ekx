@@ -38,5 +38,7 @@ struct MeshRenderer /* Component */ {
     bool receiveShadows = true;
 };
 
+EK_DECLARE_TYPE(MeshRenderer);
+
 }
 

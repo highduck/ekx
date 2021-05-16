@@ -1,7 +1,7 @@
 #include "builtin_assets.hpp"
 #include "asset_manager.hpp"
 #include <ek/util/path.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/app/res.hpp>
 
@@ -423,7 +423,7 @@ public:
 
     void poll() override {
         if (state == AssetObjectState::Loading && assetsLoaded >= 0) {
-            timer_t timer;
+            Stopwatch timer;
             while (assetsLoaded < assets._size) {
                 auto* asset = assets._data[assetsLoaded];
                 if (asset->state == AssetObjectState::Initial) {
@@ -439,7 +439,7 @@ public:
                         return;
                     }
                 }
-                if (timer.read_millis() >= 2) {
+                if (timer.readMillis() >= 2) {
                     return;
                 }
             }

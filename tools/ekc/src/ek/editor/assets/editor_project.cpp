@@ -13,7 +13,7 @@
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
 #include <ek/serialize/serialize.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 #include <functional>
 
 namespace ek {

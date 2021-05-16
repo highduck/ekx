@@ -1,6 +1,6 @@
 #include "admob.hpp"
 #include <ek/util/StaticStorage.hpp>
-#include <ek/util/logger.hpp>
+#include <ek/debug.hpp>
 
 namespace admob {
 
