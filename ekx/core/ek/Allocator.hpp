@@ -203,7 +203,7 @@ inline void* Allocator::reallocate(void* ptr, uint32_t oldSizeToCopy, uint32_t n
 template<typename T, typename... Args>
 inline T* Allocator::create(Args&& ...args) {
     void* memory = alloc(sizeof(T), alignof(T));
-    return new(memory) T(std::forward<Args&&>(args)...);
+    return new(memory) T(/* forward */static_cast<Args&&>(args)...);
 }
 
 template<typename T>
