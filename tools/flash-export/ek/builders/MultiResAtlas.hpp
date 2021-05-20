@@ -6,6 +6,7 @@
 #include <ek/ds/Array.hpp>
 #include <ek/imaging/image.hpp>
 #include <ek/math/serialize_math.hpp>
+#include <ek/serialize/stl/String.hpp>
 
 namespace pugi {
 class xml_node;

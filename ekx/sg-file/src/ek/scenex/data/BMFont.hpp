@@ -2,15 +2,16 @@
 
 #include <ek/ds/Array.hpp>
 #include <ek/math/box.hpp>
-#include <string>
+
 #include <ek/serialize/serialize.hpp>
+#include <ek/serialize/stl/String.hpp>
 
 namespace ek {
 
 class BMFontGlyph {
 public:
-    Array <uint32_t> codepoints;
-    rect_t <int32_t> box;
+    Array<uint32_t> codepoints;
+    rect_t<int32_t> box;
     int32_t advanceWidth;
     std::string sprite;
 

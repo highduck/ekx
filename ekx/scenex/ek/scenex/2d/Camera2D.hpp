@@ -4,7 +4,7 @@
 #include <ek/math/vec.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/mat.hpp>
-#include <ek/ds/SmallArray.hpp>
+#include <ek/ds/FixedArray.hpp>
 
 namespace ek {
 
@@ -59,7 +59,7 @@ public:
 
     static void drawGizmo(Camera2D& camera);
 
-    static SmallArray<ecs::EntityRef, MaxCount>& getCameraQueue();
+    static FixedArray<ecs::EntityRef, MaxCount>& getCameraQueue();
 
     static const Camera2D* getCurrentRenderingCamera();
 };

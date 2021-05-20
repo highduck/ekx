@@ -1,6 +1,7 @@
 #include "BitmapFontBuilder.hpp"
 
 #include <string>
+#include <unordered_map>
 
 #include <ek/util/StringUtil.hpp>
 #include <ek/math/box.hpp>

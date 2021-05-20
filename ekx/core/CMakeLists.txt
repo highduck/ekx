@@ -75,7 +75,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/ds/StaticRingBuffer.hpp
         ek/ds/StaticHistoryBuffer.hpp
         ek/ds/BitVector.hpp
-        ek/ds/SmallArray.hpp
+        ek/ds/FixedArray.hpp
         ek/ds/Array.hpp
         ek/ds/SparseArray.hpp
         ek/ds/Hash.hpp

@@ -23,11 +23,11 @@ Camera2D::getMatrix(ecs::EntityApi root_, float scale, const float2& screenOffse
     return m;
 }
 
-static SmallArray<ecs::EntityRef, Camera2D::MaxCount> activeCameras{};
+static FixedArray<ecs::EntityRef, Camera2D::MaxCount> activeCameras{};
 static const Camera2D* currentRenderingCamera = nullptr;
 static int currentLayerMask = 0xFF;
 
-SmallArray<ecs::EntityRef, Camera2D::MaxCount>& Camera2D::getCameraQueue() {
+FixedArray<ecs::EntityRef, Camera2D::MaxCount>& Camera2D::getCameraQueue() {
     return activeCameras;
 }
 

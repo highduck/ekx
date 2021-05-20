@@ -321,7 +321,7 @@ public:
 
             input_memory_stream input{buffer.data(), buffer.size()};
             IO io{input};
-            std::vector<std::string> langs;
+            Array<std::string> langs;
             io(langs);
             num = static_cast<int>(langs.size());
             for (auto& lang : langs) {

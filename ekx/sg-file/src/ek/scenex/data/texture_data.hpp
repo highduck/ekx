@@ -2,6 +2,7 @@
 
 #include <string>
 #include <ek/serialize/serialize.hpp>
+#include <ek/serialize/stl/String.hpp>
 #include <ek/ds/Array.hpp>
 
 namespace ek {

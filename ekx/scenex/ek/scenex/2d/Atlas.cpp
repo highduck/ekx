@@ -4,6 +4,7 @@
 #include <ek/debug.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/math/serialize_math.hpp>
+#include <ek/serialize/stl/String.hpp>
 #include <ek/util/Path.hpp>
 #include <ek/app/res.hpp>
 #include <ek/graphics/graphics.hpp>
@@ -46,7 +47,7 @@ struct AtlasPageInfo {
     uint16_t width;
     uint16_t height;
     std::string imagePath;
-    std::vector<SpriteInfo> sprites;
+    Array<SpriteInfo> sprites;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -57,7 +58,7 @@ struct AtlasPageInfo {
 struct AtlasInfo {
 //    std::string tag;
 //    float scale;
-    std::vector<AtlasPageInfo> pages;
+    Array<AtlasPageInfo> pages;
 
     template<typename S>
     void serialize(IO<S>& io) {

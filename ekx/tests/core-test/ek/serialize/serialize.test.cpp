@@ -1,8 +1,9 @@
 #include <ek/serialize/serialize.hpp>
+#include <ek/serialize/stl/Vector.hpp>
+#include <ek/serialize/stl/String.hpp>
+#include <ek/serialize/stl/Array.hpp>
 
 #include <gtest/gtest.h>
-#include <iostream>
-#include <array>
 
 using namespace ek;
 
