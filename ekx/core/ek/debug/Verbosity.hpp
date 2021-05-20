@@ -3,7 +3,7 @@
 namespace ek {
 
 enum class Verbosity : unsigned char {
-    None = 0,
+    Empty = 0,
     Trace = 1,
     Debug = 2,
     Info = 4,
@@ -21,7 +21,7 @@ inline Verbosity operator&(Verbosity a, unsigned b) {
 }
 
 inline bool operator!(Verbosity a) {
-    return a == Verbosity::None;
+    return a == Verbosity::Empty;
 }
 
 }
