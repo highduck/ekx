@@ -2,7 +2,7 @@
 
 #include "editor_project.hpp"
 
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 #include <pugixml.hpp>
 #include <ek/serialize/streams.hpp>
 

@@ -3,7 +3,7 @@
 #include <ek/time/Stopwatch.hpp>
 #include <thread>
 #include <ek/debug.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 #include <ek/math/max_rects.hpp>
 #include <ek/imaging/drawing.hpp>
 #include <ek/imaging/ImageSubSystem.hpp>
@@ -24,7 +24,10 @@
 #define STBIW_REALLOC_SIZED(ptr, oldSize, newSize)   STBIW_ALLOCATOR.reallocate(ptr, oldSize, newSize, sizeof(void**))
 #define STBIW_FREE(ptr)                              STBIW_ALLOCATOR.dealloc(ptr)
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-compare -Wmissing-field-initializers"
 #include <stb_image_write.h>
+#pragma clang diagnostic pop
 
 #endif
 

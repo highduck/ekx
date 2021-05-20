@@ -5,7 +5,7 @@
 #include <ek/scenex/text/TextFormat.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/mat3x2.hpp>
-#include <ek/util/type_index.hpp>
+#include <ek/util/TypeIndex.hpp>
 #include <ecxx/ecxx.hpp>
 #include <ek/graphics/graphics.hpp>
 #include "Sprite.hpp"
@@ -35,7 +35,7 @@ public:
 
     template<typename T>
     [[nodiscard]] inline bool matchType() {
-        return typeID_ == type_index<T, IDrawable2D>::value;
+        return typeID_ == TypeIndex<T, IDrawable2D>::value;
     }
 
 protected:
@@ -47,7 +47,7 @@ template<typename T>
 class Drawable2D : public IDrawable2D {
 public:
     Drawable2D() :
-            IDrawable2D{type_index<T, IDrawable2D>::value} {
+            IDrawable2D{TypeIndex<T, IDrawable2D>::value} {
     }
 };
 

@@ -3,7 +3,7 @@
 #include <ecxx/ecxx.hpp>
 #include <vector>
 #include <string>
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 #include <ek/util/Type.hpp>
 #include <ek/math/box.hpp>
 
@@ -15,10 +15,10 @@ struct GameScreen {
     //inline static const std::string ExitBegin = "game_screen_exit_begin";
     //inline static const std::string Exit = "game_screen_exit";
 
-    signal_t<> onEnter;
-    signal_t<> onEnterBegin;
-    signal_t<> onExit;
-    signal_t<> onExitBegin;
+    Signal<> onEnter;
+    Signal<> onEnterBegin;
+    Signal<> onExit;
+    Signal<> onExitBegin;
 
     std::function<void()> fnCreate;
 

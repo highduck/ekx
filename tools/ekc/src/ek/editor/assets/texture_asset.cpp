@@ -3,7 +3,6 @@
 #include <ek/debug.hpp>
 #include <ek/scenex/data/texture_data.hpp>
 #include <ek/system/system.hpp>
-#include <ek/imaging/decoder.hpp>
 #include <ek/imaging/image.hpp>
 
 namespace ek {

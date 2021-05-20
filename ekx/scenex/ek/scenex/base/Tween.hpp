@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 #include <ek/timers.hpp>
 
 namespace ek {
@@ -10,7 +10,7 @@ struct Tween {
     float delay = 0.0f;
     float time = 0.0f;
     float duration = 1.0f;
-    signal_t<float> advanced;
+    Signal<float> advanced;
     bool auto_destroy = true;
     bool destroyEntity = false;
     TimeLayer timer;

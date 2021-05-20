@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/util/common_macro.hpp>
+#include <ek/util/NoCopyAssign.hpp>
 #include <ek/math/box.hpp>
 #include <ek/util/Res.hpp>
 
@@ -10,7 +10,7 @@ namespace graphics {
 class Texture;
 }
 
-class Sprite : private disable_copy_assign_t {
+class Sprite : private NoCopyAssign {
 public:
     Res<graphics::Texture> texture;
     rect_f rect{0, 0, 1, 1};

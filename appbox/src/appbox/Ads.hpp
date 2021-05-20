@@ -1,7 +1,7 @@
 #pragma once
 
 #include <billing.hpp>
-#include <ek/util/detect_platform.hpp>
+#include <ek/util/Platform.hpp>
 #include <ek/scenex/app/GameAppListener.hpp>
 #include <ek/util/Type.hpp>
 #include <functional>
@@ -42,7 +42,7 @@ public:
 
     void showRewardVideo(const std::function<void(bool)>& callback);
 
-    signal_t<> onRemoved{};
+    Signal<> onRemoved{};
 
     void cheat_RemoveAds();
 

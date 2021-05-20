@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/ds/Array.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 #include <string>
 #include <cstdint>
 #include <unordered_map>

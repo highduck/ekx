@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 #include <ek/debug.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 
 using namespace ek;
 
 TEST(logger_test, simple) {
-    logger::log_stream_t{logger::verbosity_t::debug} << "~Hey! => " << 223;
+    LogStream{Verbosity::Debug} << "~Hey! => " << 223;
 //    logger::print(logger::verbosity_t::debug, {}, "smiple digits: %d", 54);
 
     EK_DEBUG << "macro" << 9;
@@ -13,5 +13,5 @@ TEST(logger_test, simple) {
 
     path_t p{"some/path/to/some/goodies"};
     EK_INFO << p;
-    ::ek::logger::log_stream_t{::ek::logger::verbosity_t::debug,   EK_CURRENT_LOCATION}("%d", 2);
+    LogStream{Verbosity::Debug, EK_CURRENT_LOCATION}("%d", 2);
 }

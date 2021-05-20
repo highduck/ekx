@@ -1,6 +1,6 @@
 #include "drawer.hpp"
 
-#include <ek/util/detect_platform.hpp>
+#include <ek/util/Platform.hpp>
 #include <ek/math/matrix_camera.hpp>
 #include "draw2d_shader.h"
 #include <ek/Allocator.hpp>

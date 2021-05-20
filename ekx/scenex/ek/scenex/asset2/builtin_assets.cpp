@@ -1,13 +1,12 @@
 #include "builtin_assets.hpp"
 #include "asset_manager.hpp"
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 #include <ek/debug.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/app/res.hpp>
 
 // texture loading
 #include <ek/scenex/data/texture_data.hpp>
-#include <ek/imaging/decoder.hpp>
 #include <ek/imaging/image.hpp>
 #include <ek/graphics/graphics.hpp>
 

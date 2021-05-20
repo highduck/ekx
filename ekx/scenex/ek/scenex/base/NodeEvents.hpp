@@ -1,7 +1,7 @@
 #pragma once
 
 #include <unordered_map>
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 #include <ecxx/ecxx.hpp>
 #include <string>
 #include <any>
@@ -21,7 +21,7 @@ struct NodeEventData {
 
 struct NodeEventHandler {
     using Callback = std::function<void(const NodeEventData&)>;
-    using Signal = signal_t<const NodeEventData&>;
+    using Signal = Signal<const NodeEventData&>;
 
     Signal& getSignal(const NodeEventType& type) {
         return map_[type];
@@ -32,7 +32,7 @@ struct NodeEventHandler {
     }
 
     void once(const NodeEventType& type, Callback listener) {
-        getSignal(type).add_once(std::move(listener));
+        getSignal(type).once(std::move(listener));
     }
 
 //    void off(const NodeEventType& type, Callback listener) {

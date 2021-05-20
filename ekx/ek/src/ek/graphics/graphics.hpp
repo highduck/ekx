@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/util/detect_platform.hpp>
+#include <ek/util/Platform.hpp>
 
 #if EK_ANDROID
 
@@ -56,7 +56,7 @@
 
 #include <sokol_gfx.h>
 
-#include <ek/util/common_macro.hpp>
+#include <ek/util/NoCopyAssign.hpp>
 
 namespace ek {
 class image_t;
@@ -85,7 +85,7 @@ enum class BufferType {
     IndexBuffer = SG_BUFFERTYPE_INDEXBUFFER
 };
 
-class Shader : private disable_copy_assign_t {
+class Shader : private NoCopyAssign {
 public:
     sg_shader shader;
     uint8_t numFSImages;
@@ -95,7 +95,7 @@ public:
     ~Shader();
 };
 
-class Buffer : private disable_copy_assign_t {
+class Buffer : private NoCopyAssign {
 public:
     Buffer(BufferType type, Usage usage, uint32_t maxSize);
 
@@ -114,7 +114,7 @@ private:
     uint32_t size;
 };
 
-class Texture : private disable_copy_assign_t {
+class Texture : private NoCopyAssign {
 public:
     explicit Texture(const sg_image_desc& desc);
 

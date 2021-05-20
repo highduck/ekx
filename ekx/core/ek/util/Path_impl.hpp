@@ -1,4 +1,6 @@
-#include "path.hpp"
+#pragma once
+
+#include "Path.hpp"
 #include <sstream>
 
 namespace ek {

@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <ek/app/res.hpp>
 #include <ek/app/device.hpp>
-#include <ek/imaging/fast_blur.hpp>
+#include <ek/imaging/image.hpp>
 
 #ifndef STB_TRUETYPE_IMPLEMENTATION
 #define STB_TRUETYPE_IMPLEMENTATION

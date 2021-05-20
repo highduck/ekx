@@ -6,9 +6,8 @@
 namespace ek {
 
 // inspired by https://github.com/klmr/multifunction
-
 template<typename ...Args>
-class signal_t {
+class Signal {
 public:
 
     using Listener = uint32_t;
@@ -31,7 +30,7 @@ public:
     }
 
     template<typename Fn>
-    Listener add_once(Fn listener) {
+    Listener once(Fn listener) {
 //        assert(!locked_);
         const auto id = _nextId++;
         _slots.emplace_back(Slot{static_cast<Fn&&>(listener), id, true});
@@ -81,7 +80,7 @@ public:
 
     template<typename Fn>
     inline auto& operator<<(Fn invocation) {
-        add_once(invocation);
+        once(invocation);
         return *this;
     }
 
@@ -94,25 +93,25 @@ public:
         emit(args...);
     }
 
-    signal_t() = default;
+    Signal() = default;
 
-    signal_t(signal_t&& mf) noexcept: _nextId{mf._nextId},
-                                      _slots{std::move(mf._slots)} {
-
-    }
-
-    signal_t(const signal_t& mf) noexcept :_nextId{mf._nextId},
-                                           _slots{mf._slots} {
+    Signal(Signal&& mf) noexcept: _nextId{mf._nextId},
+                                  _slots{std::move(mf._slots)} {
 
     }
 
-    signal_t& operator=(signal_t&& mf) noexcept {
+    Signal(const Signal& mf) noexcept : _nextId{mf._nextId},
+                                        _slots{mf._slots} {
+
+    }
+
+    Signal& operator=(Signal&& mf) noexcept {
         _nextId = mf._nextId;
         _slots = std::move(mf._slots);
         return *this;
     }
 
-    signal_t& operator=(const signal_t& mf) noexcept {
+    Signal& operator=(const Signal& mf) noexcept {
         _nextId = mf._nextId;
         _slots = mf._slots;
         return *this;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstring>
-#include "../Arguments.hpp"
+#include "Arguments.hpp"
 
 namespace ek {
 

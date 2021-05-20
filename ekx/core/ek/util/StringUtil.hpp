@@ -5,6 +5,11 @@
 #include <ek/ds/Array.hpp>
 #include <cmath>
 
+// helper for ignore_case comparison
+#if defined(_WIN32) || defined(_WIN64)
+#define strcasecmp stricmp
+#endif
+
 namespace ek {
 
 bool ends_with(const std::string& str, char end);

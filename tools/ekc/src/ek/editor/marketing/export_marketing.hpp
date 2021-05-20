@@ -2,7 +2,7 @@
 
 #include <string>
 #include <ek/ds/Array.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 #include <ek/xfl/Doc.hpp>
 
 namespace ek {

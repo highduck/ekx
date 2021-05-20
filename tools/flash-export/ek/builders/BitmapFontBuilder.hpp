@@ -5,7 +5,7 @@
 #include <ek/scenex/data/BMFont.hpp>
 #include <ek/builders/MultiResAtlas.hpp>
 #include <ek/builders/SpriteFilters.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 
 namespace pugi {
 class xml_node;

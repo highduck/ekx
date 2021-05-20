@@ -40,33 +40,30 @@ add_library(${PROJECT_NAME} STATIC
         ek/math/rand_impl.hpp
         ek/math/rand.hpp
 
-        ek/math/internal/static_check.hpp
-
         ek/serialize/streams.hpp
         ek/serialize/core.hpp
         ek/serialize/types.hpp
         ek/serialize/serialize.hpp
 
-        ek/imaging/image.cpp
+        ek/imaging/Image_impl.hpp
         ek/imaging/image.hpp
-        ek/imaging/drawing.cpp
+        ek/imaging/Image_Drawing.hpp
         ek/imaging/drawing.hpp
-        ek/imaging/decoder.cpp
-        ek/imaging/decoder.hpp
-        ek/imaging/fast_blur.cpp
+        ek/imaging/Image_Decode.hpp
+        ek/imaging/Image_FastBlur.hpp
 
         ek/util/Res.hpp
         ek/util/ServiceLocator.hpp
-        ek/util/signals.hpp
-        ek/util/base64.hpp
-        ek/util/base64.cpp
-        ek/util/detect_platform.hpp
-        ek/util/common_macro.hpp
-        ek/util/strings.hpp
-        ek/util/strings.cpp
-        ek/util/path.cpp
-        ek/util/path.hpp
-        ek/util/type_index.hpp
+        ek/util/Signal.hpp
+        ek/util/Base64.hpp
+        ek/util/Base64_impl.hpp
+        ek/util/Platform.hpp
+        ek/util/NoCopyAssign.hpp
+        ek/util/StringUtil.hpp
+        ek/util/StringUtil_impl.hpp
+        ek/util/Path_impl.hpp
+        ek/util/Path.hpp
+        ek/util/TypeIndex.hpp
 
         ek/Localization.hpp
         ek/Localization.cpp
@@ -89,8 +86,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/imaging/ImageSubSystem.cpp
         ek/imaging/ImageSubSystem.hpp
-
-        ek/impl/Arguments_impl.hpp
 
         )
 

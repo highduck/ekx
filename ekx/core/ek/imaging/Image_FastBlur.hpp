@@ -1,6 +1,5 @@
 #include <cmath>
-#include <cassert>
-#include "fast_blur.hpp"
+#include "../assert.hpp"
 
 // Exponential blur, Jani Huhtanen, 2006
 
@@ -46,7 +45,7 @@ inline void blurRows(uint8_t* data, int width, int height, int stride, int alpha
 }
 
 void expBlurAlpha(uint8_t* data, int width, int height, int stride, float radius, int iterations) {
-    assert(radius >= 1.0f && iterations > 0);
+    EK_ASSERT(radius >= 1.0f && iterations > 0);
     float sigma = radius * (1.0f / sqrtf(iterations)); // 1 / sqrt(3)
     int alpha = (int) ((1 << APREC) * (1.0f - powf(iterations * 5.0f / 255.0f, 1.0f / sigma)));
     for (int i = 0; i < iterations; ++i) {
@@ -74,7 +73,7 @@ void saturateAlpha(uint8_t* data, int width, int height, int stride, int shift) 
 namespace ek {
 
 void fastBlurA8(uint8_t* data, int width, int height, int stride, float radius, int iterations, int strength) {
-    assert(width > 0 && height > 0 && stride > 0);
+    EK_ASSERT(width > 0 && height > 0 && stride > 0);
     if (radius >= 1.0f && iterations > 0) {
         if (iterations > 3) {
             iterations = 3;

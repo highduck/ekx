@@ -7,7 +7,7 @@
 #include <ek/math/box.hpp>
 #include <ek/math/color_transform.hpp>
 #include <ek/math/mat3x2.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 
 namespace ek::xfl {
 

@@ -7,7 +7,7 @@
 #include <billing.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/util/ServiceLocator.hpp>
-#include <ek/util/strings.hpp>
+#include <ek/util/StringUtil.hpp>
 #include <utility>
 #include <GameServices.hpp>
 #include <ek/ext/sharing/sharing.hpp>

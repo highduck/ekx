@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Sprite.hpp"
-#include <ek/util/common_macro.hpp>
+#include <ek/util/NoCopyAssign.hpp>
 #include <ek/util/Res.hpp>
 #include <cstdint>
 #include <string>
@@ -11,7 +11,7 @@
 
 namespace ek {
 
-class Atlas : private disable_copy_assign_t {
+class Atlas : private NoCopyAssign {
 public:
 
     Atlas();

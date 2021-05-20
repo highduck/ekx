@@ -4,10 +4,9 @@
 #include <ek/debug.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/math/serialize_math.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 #include <ek/app/res.hpp>
 #include <ek/graphics/graphics.hpp>
-#include <ek/imaging/decoder.hpp>
 #include <ek/imaging/image.hpp>
 
 #include <vector>

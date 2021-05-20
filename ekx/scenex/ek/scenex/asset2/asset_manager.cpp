@@ -2,7 +2,7 @@
 #include "asset_object.hpp"
 
 #include <ek/debug.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 #include <ek/math/common.hpp>
 
 namespace ek {

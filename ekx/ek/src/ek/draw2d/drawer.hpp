@@ -2,7 +2,7 @@
 
 #include <ek/ds/Array.hpp>
 #include <ek/ds/Hash.hpp>
-#include <ek/util/common_macro.hpp>
+#include <ek/util/NoCopyAssign.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/math/mat3x2.hpp>
 #include <ek/math/mat4x4.hpp>
@@ -50,7 +50,7 @@ struct BatchState {
     }
 };
 
-struct Context : private disable_copy_assign_t {
+struct Context : private NoCopyAssign {
 
     Context();
 

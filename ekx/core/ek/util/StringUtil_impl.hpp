@@ -1,9 +1,6 @@
-#include "strings.hpp"
+#pragma once
 
-// helper for ignore_case comparison
-#if defined(_WIN32) || defined(_WIN64)
-#define strcasecmp stricmp
-#endif
+#include "StringUtil.hpp"
 
 namespace ek {
 

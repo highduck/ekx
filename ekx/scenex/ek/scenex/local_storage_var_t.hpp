@@ -2,14 +2,14 @@
 
 #include <ek/app/prefs.hpp>
 #include <ek/app/app.hpp>
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 #include <string>
 
 namespace ek {
 
 class local_storage_var_t {
 public:
-    signal_t<local_storage_var_t&> changed;
+    Signal<local_storage_var_t&> changed;
 
     local_storage_var_t() = delete;
 

@@ -12,7 +12,7 @@
 #include <ek/app/app.hpp>
 #include <ek/debug.hpp>
 #include <ek/debug/LogSystem.hpp>
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 #include <utility>
 #include <ek/time/FrameTimer.hpp>
 #include <ek/time/Clock.hpp>

@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 
 namespace ek {
 

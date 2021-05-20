@@ -3,7 +3,7 @@
 #include <string>
 #include <ek/scenex/local_storage_var_t.hpp>
 #include <ek/audio/audio.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 #include <ek/util/Type.hpp>
 
 namespace ek {

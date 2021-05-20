@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <ek/util/common_macro.hpp>
+#include <ek/util/NoCopyAssign.hpp>
 #include <ek/math/box.hpp>
 #include <cstring>
 
@@ -16,7 +16,7 @@ struct DynamicAtlasSprite {
     graphics::Texture* texture = nullptr;
 };
 
-class DynamicAtlas : private disable_copy_assign_t {
+class DynamicAtlas : private NoCopyAssign {
 public:
     class Page;
 

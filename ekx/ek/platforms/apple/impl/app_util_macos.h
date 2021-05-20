@@ -7,7 +7,7 @@
 //#import <Carbon/HIToolbox/Events.h>
 
 #include <ek/debug.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 
 @interface NSCursor (HelpCursor)
 + (NSCursor*)_helpCursor;

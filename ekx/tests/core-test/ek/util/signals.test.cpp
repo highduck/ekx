@@ -1,4 +1,4 @@
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 
 #include <gtest/gtest.h>
 
@@ -7,7 +7,7 @@ using namespace ek;
 TEST(signals, basic) {
     memory::initialize();
     {
-        signal_t<> event;
+        Signal<> event;
 
         int r = 0;
 
@@ -30,8 +30,8 @@ TEST(signals, basic) {
 TEST(signals, resize) {
     memory::initialize();
     {
-        auto* event = new signal_t<>;
-        signal_t<> event2;
+        auto* event = new Signal<>;
+        Signal<> event2;
 
         int r = 0;
 
@@ -39,7 +39,7 @@ TEST(signals, resize) {
             r += 3;
             event2 = *event;
             delete event;
-            event = new signal_t<>;
+            event = new Signal<>;
             *event = event2;
         };
 

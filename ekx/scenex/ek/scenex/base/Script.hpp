@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/util/type_index.hpp>
+#include <ek/util/TypeIndex.hpp>
 #include <ek/timers.hpp>
 #include <ek/util/StaticSignal.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
@@ -65,7 +65,7 @@ template<typename T>
 class Script : public ScriptBase {
 public:
     Script() :
-            ScriptBase{type_index<T, ScriptBase>::value} {
+            ScriptBase{TypeIndex<T, ScriptBase>::value} {
 
     }
 
@@ -128,7 +128,7 @@ inline S& assignScript(ecs::EntityApi e) {
 
 template<typename S>
 inline S& findScript(ecs::EntityApi e) {
-    const auto interest_type_id = type_index<S, ScriptBase>::value;
+    const auto interest_type_id = TypeIndex<S, ScriptBase>::value;
     auto& h = e.get<ScriptHolder>();
     for (auto& script : h.list) {
         if (script && script->get_type_id() == interest_type_id) {
