@@ -16,7 +16,10 @@ static ek::ProxyAllocator* gHeapSokolGfx = nullptr;
 #define SOKOL_MALLOC(sz) (::gHeapSokolGfx->alloc(static_cast<uint32_t>(sz), static_cast<uint32_t>(sizeof(void*))))
 #define SOKOL_FREE(p) (::gHeapSokolGfx->dealloc(p))
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wc99-extensions"
 #include <sokol_gfx.h>
+#pragma clang diagnostic pop
 
 namespace ek::graphics {
 
