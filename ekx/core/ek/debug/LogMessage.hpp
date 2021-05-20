@@ -6,7 +6,7 @@
 namespace ek {
 
 struct LogMessage {
-    Verbosity verbosity = Verbosity::None;
+    Verbosity verbosity = Verbosity::Empty;
     SourceLocation location = {};
     const char* message = nullptr;
     unsigned char frameHash = 0;
