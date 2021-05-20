@@ -4,7 +4,7 @@
 #include <ek/builders/xfl/SGBuilder.hpp>
 #include <ek/system/working_dir.hpp>
 #include <ek/system/system.hpp>
-#include <ek/util/strings.hpp>
+#include <ek/util/StringUtil.hpp>
 
 using namespace ek::xfl;
 using namespace std;

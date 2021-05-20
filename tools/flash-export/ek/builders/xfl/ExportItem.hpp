@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/scenex/data/SGFile.hpp>
-#include <ek/util/common_macro.hpp>
+#include <ek/util/NoCopyAssign.hpp>
 #include <ek/ds/Array.hpp>
 #include <memory>
 
@@ -9,7 +9,7 @@ namespace ek::xfl {
 
 struct Element;
 
-struct ExportItem : private disable_copy_assign_t {
+struct ExportItem : private NoCopyAssign {
 
     SGNodeData node;
 

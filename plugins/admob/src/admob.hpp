@@ -2,7 +2,7 @@
 
 #include <functional>
 #include <string>
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 
 namespace admob {
 
@@ -29,8 +29,8 @@ struct config_t {
 };
 
 struct Context {
-    ek::signal_t<event_type> onEvent;
-    ek::signal_t<> onInterstitialClosed;
+    ek::Signal<event_type> onEvent;
+    ek::Signal<> onInterstitialClosed;
     config_t config;
 };
 

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <ek/util/strings.hpp>
+#include <ek/util/StringUtil.hpp>
 #include <ek/math/box.hpp>
 #include <ek/debug.hpp>
 

@@ -1,4 +1,6 @@
-#include "base64.hpp"
+#pragma once
+
+#include "Base64.hpp"
 #include <cstdint>
 
 namespace ek::base64 {

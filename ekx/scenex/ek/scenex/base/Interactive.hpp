@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 #include <ek/app/app.hpp>
 #include <ecxx/ecxx_fwd.hpp>
 #include <ek/util/Type.hpp>
@@ -18,7 +18,7 @@ enum class InteractionEvent {
 struct Interactive {
 
     using mouse_cursor = app::mouse_cursor;
-    using signal = signal_t<>;
+    using signal = Signal<>;
 
     // events
     signal on_over;

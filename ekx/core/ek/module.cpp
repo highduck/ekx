@@ -1,4 +1,4 @@
-#include "impl/Arguments_impl.hpp"
+#include "Arguments_impl.hpp"
 #include "math/rand_impl.hpp"
 
 #include "time/FpsMeter_impl.hpp"
@@ -11,6 +11,10 @@
 #include "debug/LogSystem_impl.hpp"
 
 #include "imaging/ImageSubSystem.hpp"
+
+#include "util/StringUtil_impl.hpp"
+#include "util/Path_impl.hpp"
+#include "util/Base64_impl.hpp"
 
 namespace ek::core {
 

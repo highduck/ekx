@@ -3,7 +3,7 @@
 #include <ek/imaging/drawing.hpp>
 #include <ek/builders/MultiResAtlas.hpp>
 #include <pugixml.hpp>
-#include <ek/util/strings.hpp>
+#include <ek/util/StringUtil.hpp>
 
 namespace ek {
 

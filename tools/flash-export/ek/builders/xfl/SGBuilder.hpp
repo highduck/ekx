@@ -8,7 +8,7 @@ namespace ek::xfl {
 
 class Doc;
 
-class SGBuilder : private disable_copy_assign_t {
+class SGBuilder : private NoCopyAssign {
 public:
     const Doc& doc;
     ExportItem library;

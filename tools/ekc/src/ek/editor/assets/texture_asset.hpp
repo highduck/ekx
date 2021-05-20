@@ -2,7 +2,7 @@
 
 #include "editor_asset.hpp"
 #include <ek/ds/Array.hpp>
-#include <ek/util/path.hpp>
+#include <ek/util/Path.hpp>
 
 namespace ek {
 

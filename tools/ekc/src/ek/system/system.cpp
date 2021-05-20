@@ -2,7 +2,7 @@
 
 #include <ek/debug.hpp>
 #include <ek/serialize/streams.hpp>
-#include <ek/util/strings.hpp>
+#include <ek/util/StringUtil.hpp>
 
 #include <cstdio>
 #include <fstream>

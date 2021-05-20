@@ -1,6 +1,6 @@
 #include "prefs.hpp"
 #include <ek/assert.hpp>
-#include <ek/util/base64.hpp>
+#include <ek/util/Base64.hpp>
 
 namespace ek {
 

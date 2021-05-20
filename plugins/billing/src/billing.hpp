@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 
 namespace billing {
 
@@ -38,8 +38,8 @@ struct ProductDetails {
 };
 
 struct Context {
-    ek::signal_t<const PurchaseData&> onPurchaseChanged;
-    ek::signal_t<const ProductDetails&> onProductDetails;
+    ek::Signal<const PurchaseData&> onPurchaseChanged;
+    ek::Signal<const ProductDetails&> onProductDetails;
 };
 
 extern Context& context;

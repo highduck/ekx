@@ -19,7 +19,7 @@ namespace ek {
 //    }
 //}
 
-class DynamicAtlas::Page : private disable_copy_assign_t {
+class DynamicAtlas::Page : private NoCopyAssign {
 public:
     Page(int width_, int height_, bool alphaMap_, bool mipmaps_) :
             width{width_},

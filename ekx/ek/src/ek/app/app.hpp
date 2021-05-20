@@ -4,11 +4,11 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 #include <ek/util/StaticSignal.hpp>
 #include <ek/math/vec.hpp>
 #include <ek/ds/Array.hpp>
-#include <ek/util/detect_platform.hpp>
+#include <ek/util/Platform.hpp>
 
 namespace ek {
 

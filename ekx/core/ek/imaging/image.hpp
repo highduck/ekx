@@ -1,9 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <ek/math/packed_color.hpp>
-#include <ek/math/box.hpp>
-#include <ek/math/vec.hpp>
+#include "../math/packed_color.hpp"
+#include "../math/box.hpp"
 
 namespace ek {
 
@@ -77,6 +76,9 @@ private:
     uint32_t height_;
     uint8_t* data_;
 };
+
+void fastBlurA8(uint8_t* data, int width, int height, int stride, float radius, int iterations, int strength);
+image_t* decode_image_data(const void* data, size_t size, bool premultiplyAlpha = true);
 
 }
 

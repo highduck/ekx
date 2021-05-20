@@ -1,5 +1,5 @@
 #include <ek/assert.hpp>
-#include <ek/util/detect_platform.hpp>
+#include <ek/util/Platform.hpp>
 
 #include "audio.hpp"
 

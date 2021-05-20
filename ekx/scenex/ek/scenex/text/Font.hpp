@@ -5,7 +5,7 @@
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
 #include <ek/math/box.hpp>
-#include <ek/util/common_macro.hpp>
+#include <ek/util/NoCopyAssign.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/util/Type.hpp>
 
@@ -13,7 +13,7 @@
 
 namespace ek {
 
-class Font : private disable_copy_assign_t {
+class Font : private NoCopyAssign {
 public:
     explicit Font(FontImplBase* impl);
 

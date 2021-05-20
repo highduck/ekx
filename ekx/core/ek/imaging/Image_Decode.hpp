@@ -1,4 +1,4 @@
-#include "decoder.hpp"
+#pragma once
 
 #include "image.hpp"
 #include "drawing.hpp"

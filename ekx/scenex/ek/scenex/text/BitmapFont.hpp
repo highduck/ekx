@@ -6,13 +6,13 @@
 #include <string>
 #include <unordered_map>
 #include <ek/math/serialize_math.hpp>
-#include <ek/util/common_macro.hpp>
+#include <ek/util/NoCopyAssign.hpp>
 #include <ek/scenex/data/BMFont.hpp>
 #include <ek/util/Type.hpp>
 
 namespace ek {
 
-class BitmapFont : public FontImplBase, private disable_copy_assign_t {
+class BitmapFont : public FontImplBase, private NoCopyAssign {
 public:
 
     BitmapFont();

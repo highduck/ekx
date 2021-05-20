@@ -2,7 +2,7 @@
 
 #include <string>
 #include <unordered_map>
-#include <ek/util/common_macro.hpp>
+#include <ek/util/NoCopyAssign.hpp>
 #include <memory>
 #include <utility>
 
@@ -11,7 +11,7 @@ namespace ek {
 template<typename T>
 class Res {
 
-    struct slot : private disable_copy_assign_t {
+    struct slot : private NoCopyAssign {
         explicit slot(std::string key_) : key{std::move(key_)} {}
 
         const T* content = nullptr;

@@ -1,4 +1,4 @@
-#include <ek/util/detect_platform.hpp>
+#include <ek/util/Platform.hpp>
 #include <ek/app/app.hpp>
 #include <ek/Arguments.hpp>
 

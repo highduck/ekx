@@ -18,7 +18,7 @@ AdMobWrapper::AdMobWrapper() {
 void AdMobWrapper::showInterstitial(const std::function<void()>& callback) {
     activeInterstitial = true;
     audio::muteDeviceBegin();
-    admob::context.onInterstitialClosed.add_once([callback, this] {
+    admob::context.onInterstitialClosed.once([callback, this] {
         activeInterstitial = false;
         audio::muteDeviceEnd();
         if (callback) {

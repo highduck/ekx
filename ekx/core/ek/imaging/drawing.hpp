@@ -1,6 +1,9 @@
 #pragma once
 
 #include "image.hpp"
+#include "../math/vec.hpp"
+#include "../math/packed_color.hpp"
+#include "../math/box.hpp"
 #include <cassert>
 
 namespace ek {

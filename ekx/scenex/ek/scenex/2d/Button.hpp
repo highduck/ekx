@@ -2,7 +2,7 @@
 
 #include <string>
 #include <ek/math/easing.hpp>
-#include <ek/util/signals.hpp>
+#include <ek/util/Signal.hpp>
 #include <ek/math/vec.hpp>
 #include <ek/math/packed_color.hpp>
 #include "MovieClip.hpp"
@@ -28,7 +28,7 @@ struct Button {
     ButtonSkin* skin{nullptr};
 
     bool back_button = false;
-    signal_t<> clicked{};
+    Signal<> clicked{};
 
     bool initialized = false;
     float over_time = 0.0f;
