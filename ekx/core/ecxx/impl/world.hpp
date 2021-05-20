@@ -7,6 +7,9 @@
 #include <ek/util/Type.hpp>
 #include "../ecxx_fwd.hpp"
 
+// for `std::is_empty`
+#include <type_traits>
+
 namespace ecs {
 
 /** Component Managers **/
