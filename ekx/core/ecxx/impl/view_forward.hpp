@@ -1,7 +1,7 @@
 #pragma once
 
 #include "world.hpp"
-#include <ek/ds/SmallArray.hpp>
+#include <ek/ds/FixedArray.hpp>
 #include <algorithm>
 
 namespace ecs {

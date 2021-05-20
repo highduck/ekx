@@ -8,7 +8,11 @@
 #include <ek/math/mat3x2.hpp>
 #include <ek/math/box.hpp>
 #include <ek/math/color_transform.hpp>
+
 #include <ek/serialize/serialize.hpp>
+#include <ek/serialize/stl/Optional.hpp>
+#include <ek/serialize/stl/String.hpp>
+#include <ek/serialize/stl/UnorderedMap.hpp>
 
 namespace ek {
 

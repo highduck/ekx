@@ -1,6 +1,8 @@
 #include "editor_asset.hpp"
-#include <ek/serialize/serialize.hpp>
 #include <ek/debug.hpp>
+
+#include <ek/serialize/serialize.hpp>
+#include <ek/serialize/stl/String.hpp>
 
 namespace ek {
 

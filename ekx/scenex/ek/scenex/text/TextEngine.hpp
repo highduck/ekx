@@ -25,7 +25,7 @@ struct TextBlockInfo {
 
     // {max length; total height}
     float2 size{};
-    std::vector<Line> lines{};
+    ek::Array<Line> lines{};
 
     void addLine(Line line);
 

@@ -4,30 +4,25 @@
 
 namespace ek {
 
-template<typename T, unsigned MaxCount>
-struct SmallArray {
+template<typename T, unsigned N>
+struct StaticArray {
 
-    static_assert(MaxCount <= 0x10000);
+    static_assert(N <= 0x10000);
+    static_assert(N > 0);
 
-    unsigned _size = 0;
-    T _data[MaxCount];
-
-    inline void push_back(T el) {
-        EK_ASSERT(_size < MaxCount);
-        _data[_size++] = el;
-    }
+    T _data[N];
 
     inline T* begin() {
         return _data;
     }
 
     inline T* end() {
-        return _data + _size;
+        return _data + N;
     }
 
     [[nodiscard]]
     inline unsigned size() const {
-        return _size;
+        return N;
     }
 
     [[nodiscard]]
@@ -42,22 +37,18 @@ struct SmallArray {
 
     [[nodiscard]]
     inline T back() const {
-        EK_ASSERT(_size > 0);
-        return *(_data + _size - 1);
+        EK_ASSERT(N > 0);
+        return *(_data + N - 1);
     }
 
     inline T& operator[](unsigned i) {
-        EK_ASSERT(i < _size);
+        EK_ASSERT(i < N);
         return *(_data + i);
     }
 
     inline const T& operator[](unsigned i) const {
-        EK_ASSERT(i < _size);
+        EK_ASSERT(i < N);
         return *(_data + i);
-    }
-
-    inline void clear() {
-        _size = 0;
     }
 };
 

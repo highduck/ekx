@@ -1,27 +1,13 @@
 #pragma once
 
-#include "core.hpp"
+#include "../core.hpp"
 
-#include <ek/ds/Array.hpp>
-#include <ek/ds/StaticArray.hpp>
-#include <ek/ds/FixedArray.hpp>
+#include <vector>
 
 namespace ek {
 
-template<typename S>
-inline void serialize(IO<S>& io, bool& value) {
-    if constexpr (is_readable_stream<S>()) {
-        uint8_t v;
-        io.value(v);
-        value = v != 0;
-    } else {
-        uint8_t v = value ? 1u : 0u;
-        io.value(v);
-    }
-}
-
 template<typename S, typename T>
-inline void serialize(IO<S>& io, Array<T>& value) {
+inline void serialize(IO<S>& io, std::vector<T>& value) {
     uint32_t size;
 
     if constexpr (is_readable_stream<S>()) {

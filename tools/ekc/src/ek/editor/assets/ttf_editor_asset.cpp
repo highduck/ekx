@@ -1,13 +1,15 @@
 #include "ttf_editor_asset.hpp"
 
 #include <ek/util/Res.hpp>
-#include <ek/serialize/serialize.hpp>
 #include <ek/system/system.hpp>
+
+#include <ek/serialize/serialize.hpp>
+#include <ek/serialize/stl/String.hpp>
 
 namespace ek {
 
-TTFEditorAsset::TTFEditorAsset(path_t path)
-        : editor_asset_t{std::move(path), "ttf"} {
+TTFEditorAsset::TTFEditorAsset(path_t path) :
+        editor_asset_t{std::move(path), "ttf"} {
 }
 
 void TTFEditorAsset::read_decl_from_xml(const pugi::xml_node& node) {

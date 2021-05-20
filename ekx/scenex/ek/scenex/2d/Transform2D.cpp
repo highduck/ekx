@@ -1,6 +1,6 @@
 #include "Transform2D.hpp"
 
-#include <ek/ds/SmallArray.hpp>
+#include <ek/ds/FixedArray.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <Tracy.hpp>
 
@@ -121,7 +121,7 @@ void updateWorldTransformAll(ecs::World* w, ecs::EntityApi root) {
 void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root) {
     ZoneScoped;
 
-    SmallArray<ecs::EntityIndex, ecs::ENTITIES_MAX_COUNT> out;
+    FixedArray<ecs::EntityIndex, ecs::ENTITIES_MAX_COUNT> out;
     out.push_back(root.index);
 
     uint32_t begin = 0;
