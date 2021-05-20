@@ -2,6 +2,7 @@
 
 #include "Timers.hpp"
 #include <map>
+#include <memory>
 #include "Stopwatch.hpp"
 
 namespace ek {
