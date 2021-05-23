@@ -1,6 +1,6 @@
 module.exports = (ctx) => {
     ctx.addModule({
         name: "core",
-        cpp: [__dirname]
+        cpp: [path.join(__dirname, "src")]
     });
 };
