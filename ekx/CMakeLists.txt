@@ -41,10 +41,6 @@ if (EKX_BUILD_DEV_TOOLS)
             )
 endif ()
 
-if (EKX_BUILD_TESTS)
-    add_subdirectory(tests/core-test)
-endif ()
-
 if (EKX_BUILD_BENCHMARKS)
     add_subdirectory(tests/ecxx/benchmarks)
 endif ()
