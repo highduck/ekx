@@ -2,9 +2,8 @@
 
 #include "BitVector.hpp"
 
-using namespace ek;
-
 TEST_CASE("bit_vector_test, basic") {
+    using namespace ek;
     memory::initialize();
     {
         BitVector vec{100};

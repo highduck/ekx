@@ -22,9 +22,10 @@ static TextFormat devTextFormat{"Cousine-Regular", 10};
 
 void drawText(const Profiler::Track& track) {
     devTextFormat.leading = 1;
-    TextEngine::shared.format = devTextFormat;
-    TextEngine::shared.position = {2.0f, 2.0f + devTextFormat.size};
-    TextEngine::shared.drawFormat(track.titleFormat, track.name, track.value);
+    auto& textEngine = gTextEngine.get().engine;
+    textEngine.format = devTextFormat;
+    textEngine.position = {2.0f, 2.0f + devTextFormat.size};
+    textEngine.drawFormat(track.titleFormat, track.name, track.value);
 }
 
 void drawGraph(const Profiler::Track& track) {

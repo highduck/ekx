@@ -134,7 +134,7 @@ float findTextScale(float2 textSize, rect_f rect) {
 }
 
 void adjustFontSize(TextEngine& engine, const char* text, rect_f bounds) {
-    auto& info = TextEngine::sharedTextBlockInfo;
+    auto& info = gTextEngine.get().textBlockInfo;
     const float minFontSize = 10.0f;
 
     engine.format.allowLetterWrap = false;
@@ -160,8 +160,8 @@ void adjustFontSize(TextEngine& engine, const char* text, rect_f bounds) {
 }
 
 void Text2D::draw() {
-    auto& textDrawer = TextEngine::shared;
-    auto& blockInfo = TextEngine::sharedTextBlockInfo;
+    auto& textDrawer = gTextEngine.get().engine;
+    auto& blockInfo = gTextEngine.get().textBlockInfo;
     textDrawer.format = format;
     textDrawer.maxWidth = format.wordWrap ? rect.width : 0.0f;
     if (fillColor.a > 0) {
@@ -202,8 +202,8 @@ rect_f Text2D::getBounds() const {
 }
 
 rect_f Text2D::getTextBounds() const {
-    auto& textDrawer = TextEngine::shared;
-    auto& blockInfo = TextEngine::sharedTextBlockInfo;
+    auto& textDrawer = gTextEngine.get().engine;
+    auto& blockInfo = gTextEngine.get().textBlockInfo;
     textDrawer.format = format;
 
     const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();

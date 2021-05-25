@@ -32,10 +32,13 @@ export function executeAsync(bin: string, args: string[], options?: ExecuteOptio
                 reject('exit code: ' + code);
             }
         });
+        child.on("error", (err) => {
+            reject(err);
+        });
     });
 }
 
-export function execute(cmd: string, args: string[], workingDir?: string, additionalEnvParams?: { [key: string]: string }):number {
+export function execute(cmd: string, args: string[], workingDir?: string, additionalEnvParams?: { [key: string]: string }): number {
     const time = Date.now();
     console.debug(">>", [cmd].concat(args).join(" "));
     const wd = workingDir ?? process.cwd();
@@ -64,25 +67,8 @@ export function execute(cmd: string, args: string[], workingDir?: string, additi
     return child.status;
 }
 
-export function optimizePng(input: string, output?: string) {
-    const pngquant = require('pngquant-bin');
-    if (!output) output = input;
-    const result = spawnSync(pngquant, [
-        "--strip",
-        "--force",
-        "-o", output,
-        input
-    ]);
-    if (result.status === 0) {
-        console.log('Image minified! ' + input);
-    } else {
-        console.warn(result.stderr != null ? result.stderr.toString() : "null");
-        console.warn("exit code:", result.status);
-    }
-}
-
 export async function optimizePngGlobAsync(input_pattern: string): Promise<any> {
-    const pngquant = require('pngquant-bin');
+    const pngquant = require("pngquant-bin");
     const files = glob.sync(input_pattern);
     const tasks: Promise<number>[] = [];
     for (const file of files) {
@@ -91,16 +77,11 @@ export async function optimizePngGlobAsync(input_pattern: string): Promise<any> 
             "--force",
             "-o", file,
             file
-        ]).catch());
+        ]));
     }
-    return Promise.all(tasks);
-}
-
-export function optimizePngGlob(input_pattern: string) {
-    const files = glob.sync(input_pattern);
-    for (const file of files) {
-        optimizePng(file, file);
-    }
+    return Promise.all(tasks).catch((err) => {
+        console.warn("Can't optimize PNG images:", err);
+    });
 }
 
 export function withPath(dir: string, cb: () => void): void {

@@ -22,6 +22,7 @@
 #include "GameDisplay.hpp"
 #include "GameAppDispatcher.hpp"
 #include "../base/SxMemory.hpp"
+#include "../text/TextEngine.hpp"
 
 #include "ek/core.hpp"
 
@@ -105,6 +106,7 @@ inline void run_app(app::window_config cfg) {
     ek::core::setup();
 
     SxMemory.initialize();
+    gTextEngine.initialize();
     Locator::setup();
     app::initialize();
     basic_application::AppResolution = float2{cfg.size};

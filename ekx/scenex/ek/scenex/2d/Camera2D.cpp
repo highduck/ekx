@@ -6,6 +6,7 @@
 #include <ek/math/bounds_builder.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/app/basic_application.hpp>
+#include <ek/scenex/base/Node.hpp>
 
 namespace ek {
 
