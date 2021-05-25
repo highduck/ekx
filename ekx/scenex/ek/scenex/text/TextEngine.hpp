@@ -3,6 +3,7 @@
 #include <ek/util/Res.hpp>
 #include "Font.hpp"
 #include "TextFormat.hpp"
+#include <ek/util/StaticStorage.hpp>
 
 namespace ek {
 
@@ -65,11 +66,14 @@ public:
 
     // bounds only for text lines (no glyph metrics or effect pixels)
     void getTextSize(const char* text, TextBlockInfo& info) const;
-
-    static TextBlockInfo sharedTextBlockInfo;
-    static TextEngine shared;
 };
 
+struct TextEngineSharedContext {
+    TextEngine engine{};
+    TextBlockInfo textBlockInfo{};
+};
+
+extern StaticStorage<TextEngineSharedContext> gTextEngine;
 
 }
 

@@ -34,8 +34,8 @@ namespace ek {
 
 void start_application() {
 #if TARGET_OS_IOS || TARGET_OS_TV
-    int argc = args.argc;
-    char** argv = args.argv;
+    int argc = Arguments::current.argc;
+    char** argv = Arguments::current.argv;
     @autoreleasepool {
         UIApplicationMain(argc, argv, nil, NSStringFromClass(AppDelegate.class));
     }

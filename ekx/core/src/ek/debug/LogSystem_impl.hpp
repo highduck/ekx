@@ -103,7 +103,7 @@ void LogSystem::write(Verbosity verbosity, SourceLocation location, const char* 
 #elif TARGET_OS_IOS
     const char* prefix = nullptr;
     switch (verbosity) {
-        case Verbosity::info:
+        case Verbosity::Info:
             prefix = "[i] ";
             break;
         case Verbosity::Warning:

@@ -6,7 +6,7 @@
 
 namespace ek {
 
-TextEngine TextEngine::shared{};
+StaticStorage<TextEngineSharedContext> gTextEngine{};
 
 void TextBlockInfo::Line::updateSize(float length, float height) {
     if (size.x < length) {
@@ -25,7 +25,7 @@ void TextBlockInfo::Line::close(float emptyLineHeight, int end_) {
 }
 
 void TextBlockInfo::addLine(TextBlockInfo::Line line) {
-    assert(lines.size() < WarningLinesCount);
+    EK_ASSERT(lines.size() < WarningLinesCount);
     if (size.x < line.size.x) {
         size.x = line.size.x;
     }
@@ -55,15 +55,15 @@ bool TextBlockInfo::checkIsValid() const {
     int pos = 0;
     for (auto& line : lines) {
         if (line.end < line.begin) {
-            assert(false);
+            EK_ASSERT(false);
             return false;
         }
         if (line.begin < pos) {
-            assert(false);
+            EK_ASSERT(false);
             return false;
         }
         if (line.end < pos) {
-            assert(false);
+            EK_ASSERT(false);
             return false;
         }
         pos = line.end;
@@ -71,13 +71,11 @@ bool TextBlockInfo::checkIsValid() const {
     return true;
 }
 
-TextBlockInfo TextEngine::sharedTextBlockInfo{};
-
 void TextEngine::draw(const char* text) {
     if (!format.font) {
         return;
     }
-    auto& info = sharedTextBlockInfo;
+    auto& info = gTextEngine.get().textBlockInfo;
     getTextSize(text, info);
     drawWithBlockInfo(text, info);
 }
@@ -317,7 +315,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
     line.close(size, static_cast<int>(prev - text));
     info.addLine(line);
 
-    assert(info.checkIsValid() == true);
+    EK_ASSERT(info.checkIsValid() == true);
 }
 
 void TextEngine::drawFormat(const char* fmt, ...) {

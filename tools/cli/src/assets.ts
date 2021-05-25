@@ -1,8 +1,8 @@
-import {execute, isDir, makeDirs, optimizePngGlob, optimizePngGlobAsync} from "./utils";
+import {isDir, makeDirs, optimizePngGlobAsync} from "./utils";
 import * as path from "path";
 import {Project} from "./project";
 import {rmdirSync} from "fs";
-import {ekc, ekcAsync} from "./ekc";
+import {ekcAsync} from "./ekc";
 
 export function buildMarketingAssets(ctx: Project, target_type: string, output: string):Promise<number> {
     if (isDir(output)) {
