@@ -29,8 +29,12 @@
 
 #define MINIAUDIO_IMPLEMENTATION
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#pragma clang diagnostic ignored "-Wunused-parameter"
 #include <miniaudio.h>
 #include <research/miniaudio_engine.h>
+#pragma clang diagnostic pop
 
 #include <ek/app/res.hpp>
 #include <ek/debug.hpp>

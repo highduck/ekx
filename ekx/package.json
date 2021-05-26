@@ -13,13 +13,13 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/doctest": "0.0.1",
-    "@ekx/dev-fonts": "0.0.7",
-    "@ekx/imgui": "0.0.14",
-    "@ekx/miniaudio": "0.0.6",
-    "@ekx/pugixml": "0.0.4",
-    "@ekx/sokol": "0.0.8",
+    "@ekx/dev-fonts": "0.0.8",
+    "@ekx/imgui": "0.0.15",
+    "@ekx/miniaudio": "0.0.7",
+    "@ekx/pugixml": "0.0.5",
+    "@ekx/sokol": "0.0.9",
     "@ekx/stb": "0.0.3",
-    "@ekx/tracy": "0.0.10",
+    "@ekx/tracy": "0.0.11",
     "npm-cmake": "^0.1.0"
   },
   "devDependencies": {
