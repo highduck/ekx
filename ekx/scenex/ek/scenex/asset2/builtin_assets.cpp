@@ -236,12 +236,15 @@ public:
             if (data.texture_type == "cubemap") {
                 for (int idx = 0; idx < 6; ++idx) {
                     imagePathList[idx] = project_->base_path / data.images[idx];
+                    EK_TRACE << "add to loading queue cube-map image #" << idx << ": " << imagePathList[idx];
                 }
                 texturesCount = 6;
                 premultiplyAlpha = false;
+                state = AssetObjectState::Loading;
             } else if (data.texture_type == "2d") {
                 imagePathList[0] = project_->base_path / data.images[0];
                 texturesCount = 1;
+                state = AssetObjectState::Loading;
             } else {
                 EK_ERROR << "unknown Texture Type " << data.texture_type;
                 error = 1;
@@ -251,13 +254,18 @@ public:
     }
 
     void poll() override {
+        if (texturesCount <= 0) {
+            return;
+        }
         if (texturesStartLoading < texturesCount) {
             const auto idx = texturesStartLoading++;
+            EK_TRACE << "poll loading image #" << idx << " / " << texturesCount;
             get_resource_content_async(
                     imagePathList[idx].c_str(),
-                    [this](auto buffer) {
-                        images[imagesLoaded++] = decode_image_data(buffer.data(), buffer.size(), premultiplyAlpha);
-                        EK_DEBUG << "textures loading: #" << imagesLoaded << " of " << texturesCount;
+                    [this, idx](auto buffer) {
+                        ++imagesLoaded;
+                        images[idx] = decode_image_data(buffer.data(), buffer.size(), premultiplyAlpha);
+                        EK_DEBUG << "texture #" << idx << " loaded " << imagesLoaded << " of " << texturesCount;
                     }
             );
         } else if (imagesLoaded == texturesCount) {

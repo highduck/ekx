@@ -8,9 +8,9 @@ namespace ek {
 class asset_manager_t;
 
 enum class AssetObjectState {
-    Initial,
-    Loading,
-    Ready
+    Initial = 0,
+    Loading = 1,
+    Ready = 2
 };
 
 class asset_object_t {
