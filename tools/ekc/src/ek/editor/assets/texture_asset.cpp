@@ -18,11 +18,11 @@ image_t* load_image(const path_t& path) {
     return image;
 }
 
-texture_asset_t::texture_asset_t(path_t path)
+TextureAsset::TextureAsset(path_t path)
         : editor_asset_t{std::move(path), "texture"} {
 }
 
-void texture_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
+void TextureAsset::read_decl_from_xml(const pugi::xml_node& node) {
     images_.clear();
     texture_type_ = node.attribute("texture_type").as_string("2d");
     for (auto image_node : node.children("image")) {
@@ -30,7 +30,7 @@ void texture_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
     }
 }
 
-void texture_asset_t::build(assets_build_struct_t& build_data) {
+void TextureAsset::build(assets_build_struct_t& build_data) {
     read_decl();
 
     const auto output_path = build_data.output / name_;

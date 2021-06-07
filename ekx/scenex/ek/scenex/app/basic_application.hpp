@@ -28,10 +28,9 @@
 
 namespace ek {
 
-class asset_manager_t;
+class AssetManager;
 
-class asset_object_t;
-
+class Asset;
 
 class basic_application {
 public:
@@ -51,7 +50,7 @@ public:
     ecs::EntityApi root;
 
     Profiler profiler{};
-    asset_manager_t* asset_manager_ = nullptr;
+    AssetManager* asset_manager_ = nullptr;
 
     basic_application();
 
@@ -67,7 +66,7 @@ public:
 
 public:
     bool preloadOnStart = true;
-    asset_object_t* rootAssetObject = nullptr;
+    Asset* rootAssetObject = nullptr;
 
 protected:
     void doUpdateFrame(float dt);

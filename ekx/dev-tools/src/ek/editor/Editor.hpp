@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/scenex/asset2/asset_manager.hpp>
+#include <ek/scenex/asset2/Asset.hpp>
 #include "imgui/ImGuiIntegration.hpp"
 #include "gui/HierarchyWindow.hpp"
 #include "gui/InspectorWindow.hpp"

@@ -10,8 +10,7 @@
 #include <ek/scenex/SceneFactory.hpp>
 #include <ek/debug.hpp>
 #include <ek/app/device.hpp>
-#include <ek/scenex/asset2/asset_manager.hpp>
-#include <ek/scenex/asset2/builtin_assets.hpp>
+#include <ek/scenex/asset2/Asset.hpp>
 #include <ek/graphics/graphics.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
@@ -74,7 +73,7 @@ basic_application::basic_application() {
 #ifdef EK_UITEST
     uitest::initialize(this);
 #endif
-    asset_manager_ = new asset_manager_t{};
+    asset_manager_ = new AssetManager{};
 }
 
 basic_application::~basic_application() {
@@ -174,7 +173,7 @@ void basic_application::preload() {
 
     dispatcher.onPreload();
 
-    asset_manager_->add_resolver(new builtin_asset_resolver_t());
+    asset_manager_->add_resolver(new DefaultAssetsResolver());
     if (preloadOnStart) {
         preload_root_assets_pack();
     }

@@ -1,5 +1,6 @@
-#include "asset_manager.hpp"
-#include "asset_object.hpp"
+#pragma once
+
+#include "Asset.hpp"
 
 #include <ek/debug.hpp>
 #include <ek/util/Path.hpp>
@@ -18,28 +19,31 @@ inline uint8_t get_scale_uid(float scale) {
     return 1;
 }
 
-asset_manager_t::asset_manager_t() = default;
+AssetManager::AssetManager() : assets{memory::stdAllocator},
+                               resolvers{memory::stdAllocator} {
 
-asset_manager_t::~asset_manager_t() {
+}
+
+AssetManager::~AssetManager() {
     clear();
     for (auto* res : resolvers) {
         delete res;
     }
 }
 
-void asset_manager_t::load_all() {
+void AssetManager::load_all() {
     for (auto asset : assets) {
         asset->load();
     }
 }
 
-void asset_manager_t::unload_all() {
+void AssetManager::unload_all() {
     for (auto asset : assets) {
         asset->unload();
     }
 }
 
-void asset_manager_t::clear() {
+void AssetManager::clear() {
     for (auto* asset : assets) {
         asset->unload();
         delete asset;
@@ -47,7 +51,7 @@ void asset_manager_t::clear() {
     assets.clear();
 }
 
-void asset_manager_t::set_scale_factor(float scale) {
+void AssetManager::set_scale_factor(float scale) {
     auto new_uid = get_scale_uid(scale);
     scale_factor = math::clamp(scale, 1.0f, 4.0f);
     if (scale_uid != new_uid) {
@@ -57,14 +61,14 @@ void asset_manager_t::set_scale_factor(float scale) {
     }
 }
 
-void asset_manager_t::add_resolver(asset_type_resolver_t* resolver) {
-    resolver->project_ = this;
+void AssetManager::add_resolver(AssetTypeResolver* resolver) {
+    resolver->manager = this;
     resolvers.push_back(resolver);
 }
 
-asset_object_t* asset_manager_t::add_from_type(const std::string& type, const std::string& path) {
+Asset* AssetManager::add_from_type(const std::string& type, const std::string& path) {
     for (const auto* resolver : resolvers) {
-        asset_object_t* asset = resolver->create_for_type(type, path);
+        Asset* asset = resolver->create_for_type(type, path);
         if (asset) {
             asset->project_ = this;
             assets.push_back(asset);
@@ -75,9 +79,9 @@ asset_object_t* asset_manager_t::add_from_type(const std::string& type, const st
     return nullptr;
 }
 
-void asset_manager_t::add_file(const std::string& path) {
+void AssetManager::add_file(const std::string& path) {
     for (const auto* resolver : resolvers) {
-        asset_object_t* asset = resolver->create_from_file(path);
+        Asset* asset = resolver->create_from_file(path);
         if (asset) {
             asset->project_ = this;
             assets.push_back(asset);
@@ -87,9 +91,9 @@ void asset_manager_t::add_file(const std::string& path) {
     EK_WARN("Can't resolve asset for file %s", path.c_str());
 }
 
-bool asset_manager_t::is_assets_ready() const {
+bool AssetManager::is_assets_ready() const {
     for (auto* asset : assets) {
-        if (asset->state != AssetObjectState::Ready) {
+        if (asset->state != AssetState::Ready) {
             return false;
         }
     }

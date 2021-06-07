@@ -6,11 +6,11 @@
 
 namespace ek {
 
-class texture_asset_t : public editor_asset_t {
+class TextureAsset : public editor_asset_t {
 public:
     inline static const char* type_name = "texture";
     
-    explicit texture_asset_t(path_t path);
+    explicit TextureAsset(path_t path);
 
     void read_decl_from_xml(const pugi::xml_node& node) override;
 

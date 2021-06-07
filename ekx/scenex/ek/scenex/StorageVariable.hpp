@@ -7,14 +7,14 @@
 
 namespace ek {
 
-class local_storage_var_t {
+class StorageVariable {
 public:
-    Signal<local_storage_var_t&> changed;
+    Signal<StorageVariable&> changed;
 
-    local_storage_var_t() = delete;
+    StorageVariable() = delete;
 
-    explicit local_storage_var_t(std::string key, int default_value = 0)
-            : key_{std::move(key)} {
+    explicit StorageVariable(std::string key, int default_value = 0) :
+            key_{std::move(key)} {
         value_ = get_user_preference(key_.c_str(), default_value);
     }
 
