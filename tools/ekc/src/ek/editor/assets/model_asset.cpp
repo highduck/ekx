@@ -7,15 +7,15 @@
 
 namespace ek {
 
-model_asset_t::model_asset_t(path_t path)
+ModelAsset::ModelAsset(path_t path)
         : editor_asset_t{std::move(path), "model"} {
 }
 
-void model_asset_t::read_decl_from_xml(const pugi::xml_node& node) {
+void ModelAsset::read_decl_from_xml(const pugi::xml_node& node) {
 
 }
 
-void model_asset_t::build(assets_build_struct_t& build_data) {
+void ModelAsset::build(assets_build_struct_t& build_data) {
     read_decl();
 
     const auto output_path = build_data.output / name_;

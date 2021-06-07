@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <ek/scenex/local_storage_var_t.hpp>
+#include <ek/scenex/StorageVariable.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/util/Path.hpp>
 #include <ek/util/Type.hpp>
@@ -10,9 +10,9 @@ namespace ek {
 
 class AudioManager {
 public:
-    local_storage_var_t sound{"sound", 1};
-    local_storage_var_t music{"music", 1};
-    local_storage_var_t vibro{"vibro", 1};
+    StorageVariable sound{"sound", 1};
+    StorageVariable music{"music", 1};
+    StorageVariable vibro{"vibro", 1};
 
     AudioManager();
 

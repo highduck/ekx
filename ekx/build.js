@@ -1,4 +1,4 @@
-const fs = require("fs");
+const path = require("path");
 const {spawnSync} = require("child_process");
 
 const buildTypes = ["Release"];
@@ -14,6 +14,7 @@ for (const buildType of buildTypes) {
         "-B", `build/${buildType.toLowerCase()}`,
         "-G", "Ninja",
         `-DCMAKE_BUILD_TYPE=${buildType}`,
+        "-DEKX_BUILD_TESTS=ON",
         ...args
     ], {
         stdio: 'inherit'
@@ -23,6 +24,7 @@ for (const buildType of buildTypes) {
     }
 }
 
+// build
 for (const buildType of buildTypes) {
     console.info("Build", buildType);
     const result = spawnSync("cmake", [
@@ -35,4 +37,16 @@ for (const buildType of buildTypes) {
     }
 }
 
-fs.rmSync('build', {recursive: true});
+// run test
+for (const buildType of buildTypes) {
+    console.info("Test", buildType);
+    const result = spawnSync("ninja", ["test",], {
+        stdio: 'inherit',
+        cwd: path.resolve(process.cwd(), "build", buildType.toLowerCase())
+    });
+    if (result.status !== 0) {
+        process.exit(result.status);
+    }
+}
+
+//fs.rmSync('build', {recursive: true});

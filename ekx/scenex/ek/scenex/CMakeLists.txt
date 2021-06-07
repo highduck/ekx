@@ -70,18 +70,14 @@ target_sources(${PROJECT_NAME} PRIVATE
         app/input_controller.cpp
         app/profiler.cpp
 
-        local_storage_var_t.hpp
+        StorageVariable.hpp
 
         systems/hitTest.hpp
         systems/hitTest.cpp
         systems/main_flow.hpp
         systems/main_flow.cpp
 
-        asset2/asset_object.hpp
-        asset2/asset_manager.cpp
-        asset2/asset_manager.hpp
-        asset2/builtin_assets.cpp
-        asset2/builtin_assets.hpp
+        asset2/Assets.cpp
 
         SceneFactory.hpp
         SceneFactory.cpp

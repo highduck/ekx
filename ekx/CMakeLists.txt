@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 include(npm.cmake)
 project(ekx)
 
-set(EKX_BUILD_TESTS OFF CACHE BOOL "Build EKX unit tests" FORCE)
+option(EKX_BUILD_TESTS "Build EKX unit tests" OFF)
 mark_as_advanced(EKX_BUILD_TESTS)
 
 option(EKX_BUILD_COVERAGE "Build EKX coverage check" OFF)

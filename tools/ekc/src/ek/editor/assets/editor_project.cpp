@@ -68,10 +68,10 @@ void editor_project_t::clear() {
 }
 
 editor_project_t::editor_project_t() {
-    register_asset_factory<texture_asset_t>();
+    register_asset_factory<TextureAsset>();
     register_asset_factory<BitmapFontEditorAsset>();
     register_asset_factory<flash_asset_t>();
-    register_asset_factory<model_asset_t>();
+    register_asset_factory<ModelAsset>();
     register_asset_factory<audio_asset_t>();
     register_asset_factory<TTFEditorAsset>();
     register_asset_factory<MultiResAtlasEditorAsset>();
