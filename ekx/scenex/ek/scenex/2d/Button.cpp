@@ -61,7 +61,6 @@ void initialize_events(ecs::EntityApi e) {
         play_sound(skin.sfx_down);
     });
     interactive.on_clicked.add([e] {
-        EK_INFO  << e.index;
         auto& btn = e.get<Button>();
         const auto& skin = get_skin(btn);
         play_sound(skin.sfx_click);
