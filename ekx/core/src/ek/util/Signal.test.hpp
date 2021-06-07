@@ -30,29 +30,31 @@ TEST_CASE("signals basic") {
 TEST_CASE("signals resize") {
     memory::initialize();
     {
-        auto* event = new Signal<>;
-        Signal<> event2;
+        auto* event = new Signal<>();
+        auto* event2 = new Signal<>();
 
         int r = 0;
 
         *event += [&]() {
             r += 3;
-            event2 = *event;
+            *event2 = *event;
             delete event;
-            event = new Signal<>;
-            *event = event2;
+            event = event2;
+            event2 = new Signal<>();
         };
 
+        // this callback will miss, because source signal list will be deleted
         *event += [&r]() {
             r += 1;
         };
 
-        (*event)();
-        (*event)();
+        event->emit();
+        event->emit();
 
-        REQUIRE_EQ(r, 8);
+        REQUIRE_EQ(r, 6);
 
         delete event;
+        delete event2;
     }
     memory::shutdown();
 }
