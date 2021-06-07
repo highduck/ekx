@@ -40,9 +40,10 @@ for (const buildType of buildTypes) {
 // run test
 for (const buildType of buildTypes) {
     console.info("Test", buildType);
-    const result = spawnSync("ninja", ["test",], {
+    const result = spawnSync("ninja", ["test"], {
         stdio: 'inherit',
-        cwd: path.resolve(process.cwd(), "build", buildType.toLowerCase())
+        cwd: path.resolve(process.cwd(), "build", buildType.toLowerCase()),
+        env: Object.assign({}, process.env, {CTEST_OUTPUT_ON_FAILURE: "TRUE"})
     });
     if (result.status !== 0) {
         process.exit(result.status);
