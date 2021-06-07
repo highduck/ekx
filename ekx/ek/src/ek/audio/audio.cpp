@@ -33,6 +33,8 @@
 #pragma clang diagnostic ignored "-Wunused-function"
 #pragma clang diagnostic ignored "-Wunused-parameter"
 #pragma clang diagnostic ignored "-Watomic-alignment"
+#pragma clang diagnostic ignored "-Wnested-anon-types"
+#pragma clang diagnostic ignored "-Wcast-align"
 #include <miniaudio.h>
 #include <research/miniaudio_engine.h>
 #pragma clang diagnostic pop

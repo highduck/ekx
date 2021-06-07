@@ -9,7 +9,8 @@ platform :ios do
     # sync_code_signing(type: "appstore")
     build_app(
       configuration: "Release",
-      clean: true
+      clean: true,
+      xcargs: "-allowProvisioningUpdates"
     )
     upload_to_testflight
   end
