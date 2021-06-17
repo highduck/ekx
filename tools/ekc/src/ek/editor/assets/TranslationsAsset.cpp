@@ -1,14 +1,13 @@
 #include <ek/system/system.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/serialize/stl/String.hpp>
-#include <ek/Localization.hpp>
 #include "TranslationsAsset.hpp"
 
 namespace ek {
 
 
-TranslationsAsset::TranslationsAsset(path_t path)
-        : editor_asset_t{std::move(path), "strings"} {
+TranslationsAsset::TranslationsAsset(path_t path) :
+        editor_asset_t{std::move(path), "strings"} {
 }
 
 void TranslationsAsset::read_decl_from_xml(const pugi::xml_node& node) {

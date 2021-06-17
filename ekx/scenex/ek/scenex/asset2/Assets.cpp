@@ -6,7 +6,7 @@
 #include <ek/app/res.hpp>
 
 // texture loading
-#include <ek/scenex/data/texture_data.hpp>
+#include <ek/scenex/data/TextureData.hpp>
 #include <ek/imaging/image.hpp>
 #include <ek/graphics/graphics.hpp>
 
@@ -22,7 +22,6 @@
 
 #include <utility>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
-#include <ek/timers.hpp>
 #include <ek/Localization.hpp>
 #include <ek/ds/Array.hpp>
 
@@ -233,7 +232,11 @@ public:
 
             imagesLoaded = 0;
 
-            if (data.texture_type == "cubemap") {
+            if (data.type == TextureDataType::Normal) {
+                imagePathList[0] = project_->base_path / data.images[0];
+                texturesCount = 1;
+                state = AssetState::Loading;
+            } else if (data.type == TextureDataType::CubeMap) {
                 for (int idx = 0; idx < 6; ++idx) {
                     imagePathList[idx] = project_->base_path / data.images[idx];
                     EK_TRACE << "add to loading queue cube-map image #" << idx << ": " << imagePathList[idx];
@@ -241,12 +244,8 @@ public:
                 texturesCount = 6;
                 premultiplyAlpha = false;
                 state = AssetState::Loading;
-            } else if (data.texture_type == "2d") {
-                imagePathList[0] = project_->base_path / data.images[0];
-                texturesCount = 1;
-                state = AssetState::Loading;
             } else {
-                EK_ERROR << "unknown Texture Type " << data.texture_type;
+                EK_ERROR << "unknown Texture Type " << (uint32_t) data.type;
                 error = 1;
                 state = AssetState::Ready;
             }
@@ -269,20 +268,20 @@ public:
                     }
             );
         } else if (imagesLoaded == texturesCount) {
-            if (data.texture_type == "cubemap") {
-                EK_DEBUG << "Cube map images loaded, creating cube texture and cleaning up";
-                Res<Texture>{path_}.reset(graphics::createTexture(images));
-                state = AssetState::Ready;
-                for (auto* img : images) {
-                    delete img;
-                }
-            } else if (data.texture_type == "2d") {
+            if (data.type == TextureDataType::Normal) {
                 if (images[0]) {
                     Texture* tex = graphics::createTexture(*images[0]);
                     Res<Texture>{path_}.reset(tex);
                     delete images[0];
                 } else {
                     error = 1;
+                }
+            } else if (data.type == TextureDataType::CubeMap) {
+                EK_DEBUG << "Cube map images loaded, creating cube texture and cleaning up";
+                Res<Texture>{path_}.reset(graphics::createTexture(images));
+                state = AssetState::Ready;
+                for (auto* img : images) {
+                    delete img;
                 }
             }
             state = AssetState::Ready;
@@ -306,7 +305,7 @@ public:
     int texturesCount = 0;
     path_t imagePathList[6];
     image_t* images[6];
-    texture_data_t data{};
+    TextureData data{};
     // by default always premultiply alpha,
     // currently for cube maps will be disabled
     // TODO: export level option

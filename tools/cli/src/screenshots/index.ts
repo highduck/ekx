@@ -3,6 +3,7 @@ import * as path from "path";
 import {executeAsync, makeDirs} from "../utils";
 import {buildAssetsAsync} from "../assets";
 import {rmSync} from "fs";
+import {cmake} from "../cmake";
 
 const exportDir = "export/uitest";
 
@@ -52,21 +53,11 @@ const displays: { [key: string]: DisplayInfo } = {
 };
 
 async function build() {
-    const buildDir = path.join(exportDir, "cmake-build-release");
-    const args = [
-        "-S", ".",
-        "-B", buildDir,
-        "-G", "Ninja",
-        `-DCMAKE_BUILD_TYPE=Release`,
-        "-DEK_UITEST=ON"
-    ];
-
-    args.push("-DCMAKE_C_COMPILER_LAUNCHER=ccache", "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache");
-
-    await executeAsync("cmake", args);
-    await executeAsync("cmake", [
-        "--build", buildDir
-    ]);
+    await cmake(path.join(exportDir, "cmake-build"), {
+        definitions: {
+            EK_UITEST:"ON"
+        }
+    });
 }
 
 function doScreenshots(ctx: Project): Promise<any> {
@@ -74,7 +65,6 @@ function doScreenshots(ctx: Project): Promise<any> {
     const jobs = [];
     const screenshotsDir = path.join(exportDir, "screenshots");
     rmSync(screenshotsDir, {recursive: true, force: true});
-    let wndi = 0;
 
     for (const sim of Object.keys(displays)) {
         const display = displays[sim];

@@ -72,10 +72,10 @@ void particles_burst(ecs::EntityApi e, int count, float2 relativeVelocity) {
 void update_emitters() {
     for (auto e : ecs::view<ParticleEmitter2D>()) {
         auto& emitter = e.get<ParticleEmitter2D>();
-        auto dt = emitter.timer->dt;
-        if (!emitter.enabled || emitter.particle.empty()) {
+        if (!emitter.enabled || emitter.particle.empty() || !emitter.layer.invalidate()) {
             continue;
         }
+        const auto dt = emitter.timer->dt;
         emitter.time += dt;
         const auto& data = emitter.data;
         if (emitter.time >= data.interval) {

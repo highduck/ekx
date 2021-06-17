@@ -193,6 +193,8 @@ struct EntityRef final {
     inline EntityApi get() const;
 
     EntityPassport passport;
+
+    inline bool invalidate();
 };
 
 #pragma pack()

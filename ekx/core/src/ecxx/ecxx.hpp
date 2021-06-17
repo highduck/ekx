@@ -135,6 +135,17 @@ inline EntityApi EntityRef::get() const {
     return EntityApi{index()};
 }
 
+inline bool EntityRef::invalidate() {
+    if (passport) {
+        if (the_world.generation(index()) == version()) {
+            return true;
+        } else {
+            passport = 0;
+        }
+    }
+    return false;
+}
+
 // compat
 
 template<typename ...Component>

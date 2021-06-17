@@ -1,6 +1,6 @@
 #include "editor_project.hpp"
 #include "editor_asset.hpp"
-#include "texture_asset.hpp"
+#include "TextureAsset.hpp"
 #include "bitmap_font_editor_asset.hpp"
 #include "flash_asset.hpp"
 #include "model_asset.hpp"

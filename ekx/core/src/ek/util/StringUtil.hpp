@@ -30,11 +30,16 @@ std::string replace(const std::string& str, char search, char replace);
 
 bool equals_ignore_case(const std::string& a, const char* b);
 
-// Game utilities
-std::string format_time_mm_ss(int seconds);
+enum TimeFormatFlags {
+    TimeFormat_None = 0,
+    TimeFormat_KeepHours = 1
+};
 
-inline std::string format_time_mm_ss(float seconds) {
-    return format_time_mm_ss(static_cast<int>(std::ceil(seconds)));
+// Game utilities
+std::string format_time_mm_ss(int seconds, TimeFormatFlags flags = TimeFormat_None);
+
+inline std::string format_time_mm_ss(float seconds, TimeFormatFlags flags = TimeFormat_None) {
+    return format_time_mm_ss(static_cast<int>(std::ceil(seconds)), flags);
 }
 
 // conversion

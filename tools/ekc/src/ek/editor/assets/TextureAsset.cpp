@@ -1,7 +1,7 @@
-#include "texture_asset.hpp"
+#include "TextureAsset.hpp"
 
 #include <ek/debug.hpp>
-#include <ek/scenex/data/texture_data.hpp>
+#include <ek/scenex/data/TextureData.hpp>
 #include <ek/system/system.hpp>
 #include <ek/imaging/image.hpp>
 
@@ -11,22 +11,31 @@ image_t* load_image(const path_t& path) {
     image_t* image = nullptr;
     auto buffer = read_file(path);
     if (buffer.empty()) {
-        EK_WARN("IMAGE resource not found: %s", path.c_str());
+        EK_WARN << "IMAGE resource not found: " << path;
     } else {
         image = decode_image_data(buffer.data(), buffer.size());
     }
     return image;
 }
 
-TextureAsset::TextureAsset(path_t path)
-        : editor_asset_t{std::move(path), "texture"} {
+TextureAsset::TextureAsset(path_t path) :
+        editor_asset_t{std::move(path), "texture"} {
 }
 
 void TextureAsset::read_decl_from_xml(const pugi::xml_node& node) {
-    images_.clear();
-    texture_type_ = node.attribute("texture_type").as_string("2d");
+    data.images.clear();
+    std::string type = node.attribute("texture_type").as_string("2d");
+    data.type = TextureDataType::Normal;
+    if (type == "2d") {
+        data.type = TextureDataType::Normal;
+    } else if (type == "cubemap") {
+        data.type = TextureDataType::CubeMap;
+    } else {
+        EK_WARN << "Unknown texture type " << type;
+    }
+
     for (auto image_node : node.children("image")) {
-        images_.emplace_back(image_node.attribute("path").as_string());
+        data.images.emplace_back(image_node.attribute("path").as_string());
     }
 }
 
@@ -34,13 +43,10 @@ void TextureAsset::build(assets_build_struct_t& build_data) {
     read_decl();
 
     const auto output_path = build_data.output / name_;
-    texture_data_t data{};
-    data.texture_type = texture_type_;
-    data.images = images_;
 
     make_dirs(output_path.dir());
 
-    for (const auto& image_path : images_) {
+    for (const auto& image_path : data.images) {
         copy_file(get_relative_path(path_t{image_path}), build_data.output / image_path);
     }
 

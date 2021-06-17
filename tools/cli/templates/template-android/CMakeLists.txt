@@ -10,6 +10,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         stub #-SEARCH_ROOTS-#
         )
 
+#-CPP_DEFINES-#
+
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_options(${PROJECT_NAME} PUBLIC -g)
 else ()

@@ -30,7 +30,7 @@ enum class RandColorMode {
 
 class RandColorData {
 public:
-    Array<argb32_t> colors{argb32_t{0xFFFFFFFF}};
+    Array <argb32_t> colors{argb32_t{0xFFFFFFFF}};
     RandColorMode mode = RandColorMode::RandElement;
     mutable int state = 0;
 
@@ -76,19 +76,19 @@ struct FloatRange {
     float min;
     float max;
 
-    FloatRange()
-            : min{0.0f},
-              max{0.0f} {
+    FloatRange() :
+            min{0.0f},
+            max{0.0f} {
     }
 
-    explicit FloatRange(float value)
-            : min{value},
-              max{value} {
+    explicit FloatRange(float value) :
+            min{value},
+            max{value} {
     }
 
-    explicit FloatRange(float min_, float max_)
-            : min{min_},
-              max{max_} {
+    explicit FloatRange(float min_, float max_) :
+            min{min_},
+            max{max_} {
     }
 
     FloatRange& set(float a_min, float a_max) {
@@ -117,7 +117,7 @@ struct FloatRange {
 };
 
 struct ParticleDecl {
-    Res<Sprite> sprite;
+    Res <Sprite> sprite;
     ParticleScaleMode scale_mode = ParticleScaleMode::None;
     ParticleAlphaMode alpha_mode = ParticleAlphaMode::None;
     FloatRange alpha_start{1.0};
