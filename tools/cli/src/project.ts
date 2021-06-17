@@ -20,24 +20,28 @@ class ProjectPath {
 
 type RegisteredProject = any;
 
-export type LegacySourceKind = "cpp" | "js" | "java" | "aidl" | "assets";
+export type LegacySourceKind = "cpp" | "js" | "java" | "aidl" | "assets" | "cppDefines";
 export type LegacySources = string[];
 
 interface ModuleDef {
     name?: string;
     cpp?: LegacySources;
+    cppDefines?: string[];
     assets?: string[];
     android?: {
         cpp?: LegacySources;
+        cppDefines?: string[];
         java?: LegacySources;
         aidl?: LegacySources;
         xmlStrings?: { [name: string]: string };
     };
     macos?: {
         cpp?: LegacySources;
+        cppDefines?: string[];
     };
     ios?: {
         cpp?: LegacySources;
+        cppDefines?: string[];
         cpp_flags?: {
             files?: string[];
             flags?: string;
@@ -51,12 +55,15 @@ interface ModuleDef {
     };
     web?: {
         cpp?: LegacySources;
+        cppDefines?: string[];
     };
     windows?: {
         cpp?: LegacySources;
+        cppDefines?: string[];
     };
     linux?: {
         cpp?: LegacySources;
+        cppDefines?: string[];
     };
 }
 

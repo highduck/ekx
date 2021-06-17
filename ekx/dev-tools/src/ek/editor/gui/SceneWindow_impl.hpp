@@ -207,6 +207,10 @@ void drawBox2(const rect_f& rc, const matrix_2d& m, argb32_t color1, argb32_t co
 }
 
 void SceneWindow::drawSceneNode(ecs::EntityApi e) {
+    if(!e.get<Node>().visible()) {
+        return;
+    }
+
     auto* disp = e.tryGet<Display2D>();
     if (disp && disp->drawable) {
         auto* transform = e.tryGet<WorldTransform2D>();
@@ -227,10 +231,15 @@ void SceneWindow::drawSceneNode(ecs::EntityApi e) {
 }
 
 void SceneWindow::drawSceneNodeBounds(ecs::EntityApi e) {
+    if(!e.get<Node>().visible()) {
+        return;
+    }
+
     auto* disp = e.tryGet<Display2D>();
-    draw2d::state.matrix = matrix_2d{};
-    draw2d::state.color = ColorMod32{};
     if (disp) {
+        draw2d::state.matrix = matrix_2d{};
+        draw2d::state.color = ColorMod32{};
+
         matrix_2d m = view.view2.matrix;
         auto* transform = e.tryGet<WorldTransform2D>();
         if (transform) {
@@ -287,7 +296,11 @@ void SceneWindow::drawScene() {
 }
 
 ecs::EntityApi SceneWindow::hitTest(ecs::EntityApi e, float2 worldPos) {
-    auto it = e.get<Node>().child_last;
+    const auto& node = e.get<Node>();
+    if(!node.visible() || !node.touchable()) {
+        return nullptr;
+    }
+    auto it = node.child_last;
     while (it) {
         auto t = hitTest(it, worldPos);
         if (t) {

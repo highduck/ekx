@@ -16,7 +16,7 @@ add_executable(${PROJECT_NAME}
         src/ek/editor/assets/flash_asset.cpp
         src/ek/editor/assets/audio_asset.cpp
         src/ek/editor/assets/bitmap_font_editor_asset.cpp
-        src/ek/editor/assets/texture_asset.cpp
+        src/ek/editor/assets/TextureAsset.cpp
         src/ek/editor/assets/model_asset.cpp
         src/ek/editor/assets/ttf_editor_asset.cpp
         src/ek/editor/assets/editor_project.cpp

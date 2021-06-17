@@ -1,12 +1,22 @@
 import * as fs from "fs";
+import {copyFileSync} from "fs";
 import * as path from "path";
-import {copyFolderRecursiveSync, executeAsync, isDir, isFile, makeDirs, substituteAll, withPath} from "../utils";
+import {
+    copyFolderRecursiveSync,
+    executeAsync,
+    isDir,
+    isFile,
+    makeDirs,
+    replaceInFile,
+    substituteAll,
+    withPath
+} from "../utils";
 import {buildAssetsAsync} from "../assets";
 import * as Mustache from 'mustache';
 import {webBuildAppIconAsync} from "./webAppIcon";
-import {collectSourceFiles, collectSourceRootsAll} from "../collectSources";
+import {collectCompileDefines, collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {Project} from "../project";
-import {copyFileSync} from "fs";
+import {cmake} from "../cmake";
 
 function getEmscriptenSDKPath(): string {
     if (process.env.EMSDK) {
@@ -39,12 +49,17 @@ function renderCMakeFile(ctx, cmakeListContents: string): string {
         // add_dependencies(\${PROJECT_NAME} ${jsDepsTargetName})`;
     }
 
+    const compileDefines = collectCompileDefines(ctx, "cppDefines", "android");
+    const cmakeCompileDefines = "target_compile_definitions(${PROJECT_NAME}\n" +
+        compileDefines.map((x) => `\t\tPUBLIC ${x}`).join("\n") + "\n)";
+
     return substituteAll(cmakeListContents, {
         "TEMPLATE_PROJECT_NAME": ctx.name,
         "#-SOURCES-#": cppSourceFiles.join("\n\t\t"),
         "#-SEARCH_ROOTS-#": cppSourceRoots.join("\n\t\t"),
         "#-LINK_OPTIONS-#": jsSourceFiles.map(s => `--js-library \${CMAKE_CURRENT_SOURCE_DIR}/${s}`).join("\n\t\t"),
-        "#{{{CMAKE_CODE}}}": cmakeAdditionalDependencies
+        "#{{{CMAKE_CODE}}}": cmakeAdditionalDependencies,
+        "#-CPP_DEFINES-#": cmakeCompileDefines
     });
 }
 
@@ -79,17 +94,12 @@ async function buildProject(ctx, buildType) {
     {
         const EMSDK_PATH = getEmscriptenSDKPath();
         const EMSDK_CMAKE_TOOLCHAIN = path.join(EMSDK_PATH, "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake");
-        // -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-        await executeAsync("cmake", [
-            ".",
-            "-B", cmakeBuildDir,
-            "-G", "Ninja",
-            `-DCMAKE_TOOLCHAIN_FILE=${EMSDK_CMAKE_TOOLCHAIN}`,
-            `-DCMAKE_BUILD_TYPE=${buildType}`
-        ], {workingDir: output_path});
-        await executeAsync("cmake", [
-            "--build", cmakeBuildDir
-        ], {workingDir: output_path});
+        await cmake(cmakeBuildDir, {
+            toolchain: EMSDK_CMAKE_TOOLCHAIN,
+            buildType: buildType,
+            ccache: false,
+            workingDir: output_path
+        });
     }
 }
 

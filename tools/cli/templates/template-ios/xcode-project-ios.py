@@ -58,6 +58,8 @@ project.set_flags("IPHONEOS_DEPLOYMENT_TARGET", "12.0")
 
 header_search_paths = ["$(inherited)"]
 caps = []
+compileDefines = ["$(inherited)"]
+#"-DGLES_SILENCE_DEPRECATION"
 
 def apply_module_settings(decl, group):
     if "assets" in decl:
@@ -123,10 +125,16 @@ if caps:
 project.add_other_ldflags("$(inherited) -Os -flto -fno-exceptions -fno-rtti")
 project.add_library_search_paths("$(inherited)")
 
-project.add_other_cflags([
-    "$(inherited)",
-    "-DGLES_SILENCE_DEPRECATION"
-])
+for module in config_data["modules"]:
+    if "cppDefines" in module:
+        for define in module["cppDefines"]:
+            compileDefines.append("-D" + define)
+    if "ios" in module:
+        if "cppDefines" in module["ios"]:
+            for define in module["ios"]["cppDefines"]:
+                compileDefines.append("-D" + define)
+
+project.add_other_cflags(compileDefines)
 
 project.add_file("GoogleService-Info.plist")
 

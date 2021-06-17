@@ -12,6 +12,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 #{{{CMAKE_CODE}}}
 
+#-CPP_DEFINES-#
+
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES

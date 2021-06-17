@@ -7,13 +7,18 @@
 
 namespace ek {
 
-struct texture_data_t {
-    std::string texture_type;
+enum class TextureDataType : uint32_t {
+    Normal = 0,
+    CubeMap = 1
+};
+
+struct TextureData {
+    TextureDataType type;
     Array<std::string> images;
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(texture_type, images);
+        io(type, images);
     }
 };
 

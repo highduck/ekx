@@ -18,6 +18,16 @@ void set_user_data(const char* key, const uint8_t* data, uint32_t size);
 
 std::vector<uint8_t> get_user_data(const char* key);
 
+namespace UserPreferences {
+
+uint32_t read(const char* key, uint8_t* buffer, uint32_t bufferSize);
+
+void set(const char* key, int64_t value);
+
+bool get(const char* key, int64_t* value);
+
+}
+
 }
 
 

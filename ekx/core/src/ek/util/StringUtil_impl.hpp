@@ -79,12 +79,12 @@ inline void append_itoa_fixed_pad_2(int v, std::string& out) {
     out += std::to_string(v);
 }
 
-std::string format_time_mm_ss(int seconds) {
+std::string format_time_mm_ss(int seconds, TimeFormatFlags flags) {
     std::string result;
     int hours = seconds / 3600;
     int minutes = (seconds / 60) % 60;
     int secs = seconds % 60;
-    if (hours > 0) {
+    if (hours > 0 || (flags & TimeFormat_KeepHours) != 0) {
         append_itoa_fixed_pad_2(hours, result);
         result += ':';
     }

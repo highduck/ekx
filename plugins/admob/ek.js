@@ -67,7 +67,7 @@ module.exports = (ctx) => {
     });
 
     ctx.build.android.dependencies.push(
-        `implementation 'com.google.android.gms:play-services-ads:20.1.0'`
+        `implementation 'com.google.android.gms:play-services-ads:20.2.0'`
         //`implementation 'com.google.android.ump:user-messaging-platform:1.0.0'`,
     );
 

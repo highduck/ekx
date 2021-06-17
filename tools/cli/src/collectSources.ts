@@ -35,3 +35,15 @@ export function collectSourceRootsAll(ctx: Project, srcKind: LegacySourceKind, e
     }
     return result;
 }
+
+// TODO: duplicated
+export function collectCompileDefines(ctx: Project, srcKind: LegacySourceKind, extraTarget: string):string[] {
+    let result:string[] = [];
+    for (const data of ctx.modules) {
+        result = result.concat(collectSourceRoots(data, srcKind));
+        if (extraTarget) {
+            result = result.concat(collectSourceRoots(data[extraTarget], srcKind));
+        }
+    }
+    return result;
+}

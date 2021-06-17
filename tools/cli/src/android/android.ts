@@ -14,7 +14,7 @@ import {
 import {XmlDocument} from 'xmldoc';
 import * as path from "path";
 import {buildAssetsAsync} from "../assets";
-import {collectSourceFiles, collectSourceRootsAll} from "../collectSources";
+import {collectCompileDefines, collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
 import {androidBuildAppIconAsync} from "./androidAppIcon";
@@ -117,14 +117,19 @@ function mod_cmake_lists(ctx) {
     const ext_list = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
 
     const source_dir_list = collectSourceRootsAll(ctx, "cpp", "android", ".");
-
     for (const source_dir of source_dir_list) {
         collectSourceFiles(source_dir, ext_list, src_files);
     }
 
+    const compileDefines = collectCompileDefines(ctx, "cppDefines", "android");
+
+    const cmakeCompileDefines = "target_compile_definitions(${PROJECT_NAME}\n" +
+        compileDefines.map((x) => `\t\tPUBLIC ${x}`).join("\n") + "\n)";
+
     replaceInFile(cmake_path, {
         "stub/stub.cpp #-SOURCES-#": src_files.join("\n\t\t"),
-        "stub #-SEARCH_ROOTS-#": source_dir_list.join("\n\t\t")
+        "stub #-SEARCH_ROOTS-#": source_dir_list.join("\n\t\t"),
+        "#-CPP_DEFINES-#": cmakeCompileDefines
     });
 }
 

@@ -282,12 +282,12 @@ inline void set_color_quad(ecs::EntityApi e, const rect_f& rc, argb32_t color) {
 }
 
 template<typename T>
-inline T& get_drawable(ecs::EntityApi e) {
-    return *static_cast<T*>(e.get<Display2D>().drawable.get());
+inline T& getDrawable(ecs::EntityApi e) {
+    return e.get<Display2D>().get<T>();
 }
 
-inline void set_text(ecs::EntityApi e, const std::string& v) {
-    get_drawable<Text2D>(e).text = v;
+inline void setText(ecs::EntityApi e, const std::string& v) {
+    e.get<Display2D>().get<Text2D>().text = v;
 }
 
 

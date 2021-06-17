@@ -29,4 +29,47 @@ std::vector<uint8_t> get_user_data(const char* key) {
     return decoded;
 }
 
+namespace UserPreferences {
+
+uint32_t read(const char* key, uint8_t* buffer, uint32_t bufferSize) {
+    EK_ASSERT(key != nullptr);
+
+    const auto str = get_user_string(key);
+    const auto inputData = str.data();
+    const auto inputSize = str.size();
+
+    auto decodedSize = base64::getDecodedMaxSize(inputSize);
+    if (buffer && decodedSize <= bufferSize) {
+        return base64::decode(buffer, inputData, inputSize);
+    }
+    return 0;
+}
+
+void set(const char* key, int64_t value) {
+    EK_ASSERT(key != nullptr);
+    union {
+        int64_t value;
+        uint8_t bytes[8];
+    } bc{value};
+    set_user_data(key, bc.bytes, 8);
+}
+
+bool get(const char* key, int64_t* value) {
+    EK_ASSERT(key != nullptr);
+    union {
+        int64_t value;
+        uint8_t bytes[8];
+    } bc{};
+    const auto n = read(key, bc.bytes, 8);
+    if (n != 8) {
+        return false;
+    }
+    if (value) {
+        *value = bc.value;
+    }
+    return true;
+}
+
+}
+
 }
