@@ -9,6 +9,7 @@ const char *class_path = "ek/admob/AdMobPlugin";
 
 void initialize(const config_t &config) {
     _initialize();
+    context.config = config;
 
     auto *env = android::get_jni_env();
 

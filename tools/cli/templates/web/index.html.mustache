@@ -23,6 +23,12 @@
     <link rel="icon" type="image/png" href="icons/icon192.png" sizes="192x192"/>
     <link rel="manifest" href="manifest.json">
 
+    {{#html.firebaseAutoSetup}}
+    <script src="/__/firebase/8.6.7/firebase-app.js"></script>
+    <script src="/__/firebase/8.6.7/firebase-analytics.js"></script>
+    <script src="/__/firebase/init.js"></script>
+    {{/html.firebaseAutoSetup}}
+
     {{#html.google_analytics_property_id}}
     <script async src="https://www.googletagmanager.com/gtag/js?id={{{html.google_analytics_property_id}}}"></script>
     <script>
