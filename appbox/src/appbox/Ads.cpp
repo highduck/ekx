@@ -97,4 +97,12 @@ void Ads::cheat_RemoveAds() {
     onRemoveAdsPurchased();
 }
 
+bool Ads::hasVideoRewardSupport() const {
+    return admob::hasSupport() && !admob::context.config.video.empty();
+}
+
+bool Ads::isSupported() const {
+    return admob::hasSupport();
+}
+
 }

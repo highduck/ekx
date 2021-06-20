@@ -145,6 +145,7 @@ export class Project {
     } = {};
 
     html: {
+        firebaseAutoSetup?: boolean,
         google_analytics_property_id?: string,
         // css color
         background_color?: string,
@@ -224,6 +225,8 @@ export class Project {
                         this.options.increaseVersion = VERSION_INDEX_MINOR;
                     } else if (second == "major") {
                         this.options.increaseVersion = VERSION_INDEX_MAJOR;
+                    } else if (second == "build") {
+                        this.options.increaseVersion = VERSION_INDEX_CODE;
                     }
                 }
             }

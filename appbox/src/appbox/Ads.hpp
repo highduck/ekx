@@ -45,9 +45,9 @@ public:
 
     void cheat_RemoveAds();
 
-    [[nodiscard]] bool hasVideoRewardSupport() const {
-        return true;
-    }
+    [[nodiscard]] bool hasVideoRewardSupport() const;
+
+    [[nodiscard]] bool isSupported() const;
 
     std::string price{};
 

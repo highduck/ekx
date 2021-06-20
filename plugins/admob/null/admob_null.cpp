@@ -7,8 +7,8 @@ bool hasSupport() {
 }
 
 void initialize(const config_t& config) {
-    (void) config;
     _initialize();
+    context.config = config;
 }
 
 void show_banner(int flags) {
