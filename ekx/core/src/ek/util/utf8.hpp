@@ -30,7 +30,7 @@ inline uint32_t decodeUTF8(uint32_t& state, uint32_t& codepoint, uint32_t byte) 
             1, 3, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // s7..s8
     };
 
-    uint32_t type = utf8d[byte];
+    const uint32_t type = utf8d[byte];
     codepoint = (state != UTF8State_ACCEPT) ?
                 (byte & 0x3fu) | (codepoint << 6) :
                 (0xff >> type) & (byte);

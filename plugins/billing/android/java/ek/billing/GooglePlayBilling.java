@@ -17,7 +17,6 @@ import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.Purchase.PurchaseState;
-import com.android.billingclient.api.Purchase.PurchasesResult;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
@@ -72,12 +71,8 @@ public class GooglePlayBilling extends BillingPlugin implements PurchasesUpdated
     @Override
     public void getPurchases() {
         Log.d(TAG, "processPendingConsumables()");
-        List<Purchase> purchasesList = new ArrayList<>();
-        queryPurchases(SkuType.INAPP, purchasesList);
-        queryPurchases(SkuType.SUBS, purchasesList);
-        for (Purchase purchase : purchasesList) {
-            handlePurchase(purchase);
-        }
+        queryPurchases(SkuType.INAPP);
+        queryPurchases(SkuType.SUBS);
     }
 
     @Override
@@ -87,11 +82,13 @@ public class GooglePlayBilling extends BillingPlugin implements PurchasesUpdated
 
         querySkuDetailsAsync(skuList, (billingResult, skuDetails) -> {
             if (billingResult.getResponseCode() == BillingResponseCode.OK) {
-                EkActivity.runGLThread(() -> {
-                    for (SkuDetails sd : skuDetails) {
-                        BillingBridge.nativeDetails(sd.getSku(), sd.getPrice(), sd.getPriceCurrencyCode());
-                    }
-                });
+                if (skuDetails != null) {
+                    EkActivity.runGLThread(() -> {
+                        for (SkuDetails sd : skuDetails) {
+                            BillingBridge.nativeDetails(sd.getSku(), sd.getPrice(), sd.getPriceCurrencyCode());
+                        }
+                    });
+                }
             } else {
                 Log.e(TAG, "Unable to list products: " + billingResult.getDebugMessage());
             }
@@ -213,7 +210,6 @@ public class GooglePlayBilling extends BillingPlugin implements PurchasesUpdated
                 String dataSignature = "";
 
                 if (purchase != null) {
-                    productId = purchase.getSku();
                     token = purchase.getPurchaseToken();
                     payload = purchase.getDeveloperPayload();
                     state = convertPurchaseState(purchase.getPurchaseState());
@@ -223,9 +219,14 @@ public class GooglePlayBilling extends BillingPlugin implements PurchasesUpdated
                     if (responseCode == BillingResponseCode.ITEM_ALREADY_OWNED) {
                         state = 0;
                     }
-                }
-                if (dataSignature == null) {
-                    dataSignature = "";
+
+                    // TODO: change protocol
+                    ArrayList<String> skus = purchase.getSkus();
+                    if (skus.size() > 0) {
+                        productId = skus.get(0);
+                    }
+                    //for(String sku : purchase.getSkus()) {
+                    //}
                 }
                 BillingBridge.nativePurchase(productId, token, state, payload, dataSignature, responseCode);
             } catch (Exception e) {
@@ -282,15 +283,14 @@ public class GooglePlayBilling extends BillingPlugin implements PurchasesUpdated
         }
     }
 
-    private void queryPurchases(@NonNull final String type, @NonNull List<Purchase> outPurchasesList) {
-        PurchasesResult result = billingClient.queryPurchases(type);
-        List<Purchase> purchases = result.getPurchasesList();
-        if (purchases != null) {
-            outPurchasesList.addAll(purchases);
-        }
-        if (result.getBillingResult().getResponseCode() != BillingResponseCode.OK) {
-            Log.e(TAG, "Unable to query pending purchases: " + result.getBillingResult().getDebugMessage());
-        }
+    private void queryPurchases(@NonNull final String type) {
+        billingClient.queryPurchasesAsync(type, (billingResult, purchases) -> {
+            for (Purchase purchase : purchases) {
+                handlePurchase(purchase);
+            }
+            if (billingResult.getResponseCode() != BillingResponseCode.OK) {
+                Log.e(TAG, "Unable to query pending purchases: " + billingResult.getDebugMessage());
+            }
+        });
     }
-
 }
