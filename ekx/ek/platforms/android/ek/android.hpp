@@ -17,6 +17,8 @@ void set_asset_manager(jobject asset_manager);
 
 AAssetManager* get_asset_manager();
 
+jobject assetManagerRef();
+
 }
 
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "ek", __VA_ARGS__))

@@ -7,7 +7,7 @@ add_subdirectory(src)
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC ek-core
-        PUBLIC miniaudio
+        PUBLIC auph
         )
 
 if (EKX_BUILD_DEV_TOOLS)

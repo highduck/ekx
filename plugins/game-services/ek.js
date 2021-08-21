@@ -26,7 +26,7 @@ module.exports = (ctx) => {
     ctx.build.android.dependencies.push(
         "implementation 'com.google.android.gms:play-services-base:17.6.0'",
         "implementation 'com.google.android.gms:play-services-games:21.0.0'",
-        "implementation 'com.google.android.gms:play-services-auth:19.0.0'",
+        "implementation 'com.google.android.gms:play-services-auth:19.2.0'",
     );
 
     ctx.build.android.add_manifest_application.push(`

@@ -1,7 +1,7 @@
 const path = require('path');
 
-module.exports = (ctx) => {
-    ctx.addModule({
+module.exports = (project) => {
+    project.addModule({
         name: "ek",
         path: __dirname,
         cpp: [path.join(__dirname, "src")],
@@ -37,8 +37,7 @@ module.exports = (ctx) => {
             xcode: {
                 frameworks: [
                     "Foundation", "UIKit", "Metal", "MetalKit",
-                    "QuartzCore",
-                    "AudioToolbox" // CoreAudio for miniaudio
+                    "QuartzCore"
                 ],
                 pods: [
                     "Firebase/Crashlytics",
@@ -57,5 +56,5 @@ module.exports = (ctx) => {
             cpp: [path.join(__dirname, "platforms/linux")]
         }
     });
-
+    project.importModule("auph", __dirname);
 };

@@ -29,6 +29,7 @@ struct android_context {
     jmethodID get_activity;
 
     AAssetManager *assets;
+    jobject assetsRef;
 
     /* pthread key for proper JVM thread handling */
     pthread_key_t thread_key;
@@ -131,6 +132,10 @@ namespace ek::android {
 
     AAssetManager *get_asset_manager() {
         return ctx_.assets;
+    }
+
+    jobject assetManagerRef() {
+        return ctx_.assetsRef;
     }
 
     void exit_activity(int code) {
@@ -239,5 +244,7 @@ EK_JNI_VOID(sendResize, jint width, jint height, jfloat scale) {
 }
 
 EK_JNI_VOID(initAssets, jobject assets) {
-    ctx_.assets = AAssetManager_fromJava(android_jni_get_env(), assets);
+    //auto* env = android_jni_get_env();
+    ctx_.assetsRef = env->NewGlobalRef(assets);
+    ctx_.assets = AAssetManager_fromJava(env, ctx_.assetsRef);
 }

@@ -54,17 +54,19 @@ void dispatch_event(const event_t& event) {
     EK_ASSERT(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
 //    EK_INFO("EVENT: %i", event.type);
     if (event.type == event_type::app_pause) {
+        auph::pause();
         ++g_app.systemPauseCounter;
         if (g_app.systemPauseCounter > 0 && !g_app.systemPaused) {
             g_app.systemPaused = true;
-            audio::muteDeviceBegin();
+            //audio::muteDeviceBegin();
         }
     } else if (event.type == event_type::app_resume) {
+        auph::resume();
         if (g_app.systemPauseCounter > 0) {
             --g_app.systemPauseCounter;
             if (g_app.systemPauseCounter == 0 && g_app.systemPaused) {
                 g_app.systemPaused = false;
-                audio::muteDeviceEnd();
+                // audio::muteDeviceEnd();
             }
         }
     }

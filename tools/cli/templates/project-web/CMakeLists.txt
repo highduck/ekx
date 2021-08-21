@@ -10,19 +10,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         #-SEARCH_ROOTS-#
         )
 
-#{{{CMAKE_CODE}}}
-
-#-CPP_DEFINES-#
-
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO
         )
 
-target_link_options(${PROJECT_NAME} PUBLIC
-        #-LINK_OPTIONS-#
-        )
+#{{{CMAKE_CODE}}}
 
 target_link_libraries(${PROJECT_NAME} GLESv2)
 
@@ -58,6 +52,7 @@ set(EM_COMMON_FLAGS
 # TODO: strange runtime DOM exception error with Release, "-s STRICT=1"
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
+    # -s INITIAL_MEMORY=128MB
     set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
             "-s ENVIRONMENT=web -s FETCH=1 -s FILESYSTEM=0 -s ALLOW_MEMORY_GROWTH=1"
             )

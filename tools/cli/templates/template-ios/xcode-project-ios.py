@@ -70,6 +70,11 @@ def apply_module_settings(decl, group):
         for src in decl["cpp"]:
             my_add_folder(src, parent=group, excludes=excludes)
             header_search_paths.append(src)
+
+    if "cpp_include_path" in decl:
+        for src in decl["cpp_include_path"]:
+            header_search_paths.append(src)
+
     if "cpp_flags" in decl and "files" in decl["cpp_flags"]:
         set_cpp_flags_for_files(project, decl["cpp_flags"]["files"], decl["cpp_flags"]["flags"])
     if "xcode" in decl:

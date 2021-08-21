@@ -116,19 +116,24 @@ function mod_cmake_lists(ctx) {
     const src_files = [];
     const ext_list = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
 
-    const source_dir_list = collectSourceRootsAll(ctx, "cpp", "android", ".");
-    for (const source_dir of source_dir_list) {
-        collectSourceFiles(source_dir, ext_list, src_files);
+    const cpp_roots_list = collectSourceRootsAll(ctx, "cpp", "android", ".");
+    for (const cpp_dir of cpp_roots_list) {
+        collectSourceFiles(cpp_dir, ext_list, src_files);
     }
+
+    const cpp_include_path_list = collectSourceRootsAll(ctx, "cpp_include_path", "android", ".");
 
     const compileDefines = collectCompileDefines(ctx, "cppDefines", "android");
 
-    const cmakeCompileDefines = "target_compile_definitions(${PROJECT_NAME}\n" +
-        compileDefines.map((x) => `\t\tPUBLIC ${x}`).join("\n") + "\n)";
+    let cmakeCompileDefines = "";
+    if (compileDefines.length > 0) {
+        cmakeCompileDefines = "target_compile_definitions(${PROJECT_NAME}\n" +
+            compileDefines.map((x) => `\t\tPUBLIC ${x}`).join("\n") + "\n)";
+    }
 
     replaceInFile(cmake_path, {
         "stub/stub.cpp #-SOURCES-#": src_files.join("\n\t\t"),
-        "stub #-SEARCH_ROOTS-#": source_dir_list.join("\n\t\t"),
+        "stub #-SEARCH_ROOTS-#": cpp_roots_list.concat(cpp_include_path_list).join("\n\t\t"),
         "#-CPP_DEFINES-#": cmakeCompileDefines
     });
 }

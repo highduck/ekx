@@ -20,7 +20,7 @@ class ProjectPath {
 
 type RegisteredProject = any;
 
-export type LegacySourceKind = "cpp" | "js" | "java" | "aidl" | "assets" | "cppDefines";
+export type LegacySourceKind = "cpp" | "cpp_include_path" | "js" | "pre_js" | "java" | "aidl" | "assets" | "cppDefines";
 export type LegacySources = string[];
 
 interface ModuleDef {
@@ -78,6 +78,7 @@ export class Project {
         clean?: boolean,
         openProject?: boolean,
         deploy?: string,
+        run?: string,
         increaseVersion?: number,
     } = {};
 
@@ -92,7 +93,7 @@ export class Project {
     build_dir?: string; // build
     orientation: "landscape" | "portrait";
 
-    build_steps: (() => void|Promise<any>)[] = [];
+    build_steps: (() => void | Promise<any>)[] = [];
     projects: { [name: string]: RegisteredProject } = {};
     modules: ModuleDef[] = [];
 
@@ -151,7 +152,7 @@ export class Project {
         background_color?: string,
         text_color?: string,
         // open-graph object
-        og? : {
+        og?: {
             title?: string,
             description?: string,
             url?: string,
@@ -196,7 +197,7 @@ export class Project {
     async runBuildSteps() {
         for (const step of this.build_steps) {
             const res = step();
-            if(res instanceof Promise) {
+            if (res instanceof Promise) {
                 await res;
             }
         }
@@ -244,6 +245,13 @@ export class Project {
                 if (this.options.increaseVersion === undefined) {
                     this.options.increaseVersion = VERSION_INDEX_CODE;
                 }
+            }
+        }
+
+        {
+            const i = this.args.indexOf("--run");
+            if (i >= 0) {
+                this.options.run = "wip";
             }
         }
     }
