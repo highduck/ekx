@@ -73,7 +73,21 @@ public:
         filePath_ = project_->base_path / path_;
         music->load(filePath_.c_str());
         Res<audio::Music>{name_}.reset(music);
-        state = AssetState::Ready;
+    }
+
+    void poll() override {
+        auto buffer = Res<audio::Music>{name_}->buffer;
+        if(!auph::isActive(buffer.id) || auph::isBufferLoaded(buffer)) {
+            state = AssetState::Ready;
+        }
+    }
+
+    void do_unload() override {
+        Res<audio::Music> asset{name_};
+        if(!asset.empty()) {
+            auph::unload(asset->buffer);
+            asset.reset(nullptr);
+        }
     }
 
     std::string name_;
@@ -93,15 +107,24 @@ public:
 
     void do_load() override {
         auto* sound = new audio::Sound();
-        // TODO: async
         filePath_ = project_->base_path / path_;
         sound->load(filePath_.c_str());
         Res<audio::Sound>{name_}.reset(sound);
-        state = AssetState::Ready;
+    }
+
+    void poll() override {
+        auto buffer = Res<audio::Sound>{name_}->buffer;
+        if(!auph::isActive(buffer.id) || auph::isBufferLoaded(buffer)) {
+            state = AssetState::Ready;
+        }
     }
 
     void do_unload() override {
-        Res<Atlas>{path_}.reset(nullptr);
+        Res<audio::Sound> asset{name_};
+        if(!asset.empty()) {
+            auph::unload(asset->buffer);
+            asset.reset(nullptr);
+        }
     }
 
     std::string name_;

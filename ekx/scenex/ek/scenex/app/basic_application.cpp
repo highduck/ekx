@@ -379,7 +379,6 @@ void initializeSubSystems() {
                 break;
             case 7:
                 ++_initializeSubSystemsState;
-                audio::start();
             default:
                 g_app.on_frame_draw -= initializeSubSystems;
                 g_app.on_frame_draw += baseApp_drawFrame;

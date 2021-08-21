@@ -2,9 +2,7 @@
 
 #include <vector>
 #include <string>
-
-struct ma_resource_manager_data_source;
-struct ma_sound;
+#include <auph/auph.hpp>
 
 namespace ek::audio {
 
@@ -30,12 +28,9 @@ public:
 
     void play(float volume = 1.0f, float pitch = 1.0f);
 
-    ma_sound* getNextSound();
+    auph::Buffer buffer{};
 private:
-    std::vector<uint8_t> source{};
-    ma_resource_manager_data_source* dataSource = nullptr;
     std::string dataSourceFilePath{};
-    std::vector<ma_sound*> sounds{};
 };
 
 class Music {
@@ -50,7 +45,7 @@ public:
 
     void unload();
 
-    void play();
+    void play(float volume, float pitch);
 
     void stop();
 
@@ -62,13 +57,11 @@ public:
 
     [[nodiscard]] float getPitch() const;
 
+    auph::Buffer buffer{};
+    auph::Voice voice{};
+
 private:
-    float volume_ = 1.0f;
-    float pitch_ = 1.0f;
-    std::vector<uint8_t> source{};
     std::string dataSourceFilePath{};
-    ma_sound* sound = nullptr;
-    ma_resource_manager_data_source* dataSource = nullptr;
 };
 
 }

@@ -17,15 +17,13 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             PRIVATE "-framework Cocoa"
             PRIVATE "-framework Metal"
             PRIVATE "-framework MetalKit"
-            PRIVATE "-framework QuartzCore"
-            PRIVATE "-framework AudioToolbox")
+            PRIVATE "-framework QuartzCore")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     target_link_libraries(${PROJECT_NAME}
             PRIVATE "-framework Foundation"
             PRIVATE "-framework UIKit"
             PRIVATE "-framework Metal"
             PRIVATE "-framework MetalKit"
-            PRIVATE "-framework QuartzCore"
-            PRIVATE "-framework AudioToolbox")
+            PRIVATE "-framework QuartzCore")
 endif ()
 

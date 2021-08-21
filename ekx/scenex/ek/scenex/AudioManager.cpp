@@ -18,9 +18,7 @@ void AudioManager::play_music(const std::string& name) {
         musicAsset.setID(name);
         if (musicAsset) {
             auto volume = music.enabled() ? musicVolume_ : 0.0f;
-            musicAsset->setPitch(musicPitch_);
-            musicAsset->setVolume(volume);
-            musicAsset->play();
+            musicAsset->play(volume, musicPitch_);
         }
         music_ = name;
     }
@@ -56,7 +54,7 @@ void AudioManager::update(float) {
     Res<audio::Music> musicAsset{music_};
     if (musicAsset) {
         auto volume = music.enabled() ? musicVolume_ : 0.0f;
-        musicAsset->setVolume(volume);
+        musicAsset->play(volume, musicPitch_);
     }
 }
 

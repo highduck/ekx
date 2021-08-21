@@ -1,22 +1,14 @@
 import * as fs from "fs";
 import {copyFileSync} from "fs";
 import * as path from "path";
-import {
-    copyFolderRecursiveSync,
-    executeAsync,
-    isDir,
-    isFile,
-    makeDirs,
-    replaceInFile,
-    substituteAll,
-    withPath
-} from "../utils";
+import {copyFolderRecursiveSync, executeAsync, isDir, isFile, makeDirs, substituteAll, withPath} from "../utils";
 import {buildAssetsAsync} from "../assets";
 import * as Mustache from 'mustache';
 import {webBuildAppIconAsync} from "./webAppIcon";
 import {collectCompileDefines, collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {Project} from "../project";
 import {cmake} from "../cmake";
+import {serve} from "./serve";
 
 function getEmscriptenSDKPath(): string {
     if (process.env.EMSDK) {
@@ -32,34 +24,46 @@ function renderCMakeFile(ctx, cmakeListContents: string): string {
     for (const cppSourceRoot of cppSourceRoots) {
         collectSourceFiles(cppSourceRoot, cppExtensions, cppSourceFiles);
     }
+    const cpp_include_path_list = collectSourceRootsAll(ctx, "cpp_include_path", "web", ".");
 
-    const jsSourceFiles = [];
     const jsExtensions = ["js"];
-    const jsSourceRoots = collectSourceRootsAll(ctx, "js", "web", ".");
-    for (const jsSourceRoot of jsSourceRoots) {
-        collectSourceFiles(jsSourceRoot, jsExtensions, jsSourceFiles);
+
+    const jsLibraryFiles = [];
+    const jsLibraryRoots = collectSourceRootsAll(ctx, "js", "web", ".");
+    for (const jsLibraryRoot of jsLibraryRoots) {
+        collectSourceFiles(jsLibraryRoot, jsExtensions, jsLibraryFiles);
+    }
+
+    const jsPreFiles = [];
+    const jsPreRoots = collectSourceRootsAll(ctx, "pre_js", "web", ".");
+    for (const jsPreRoot of jsPreRoots) {
+        collectSourceFiles(jsPreRoot, jsExtensions, jsPreFiles);
     }
 
     let cmakeAdditionalDependencies = "";
-    if (jsSourceFiles.length > 0) {
-        // const jsDepsTargetName = "main-js-deps";
-        // cmakeAdditionalDependencies = `
-        // add_custom_target(${jsDepsTargetName} DEPENDS ${jsSourceFiles.join(" ")})
-        // set_source_files_properties(${jsSourceFiles.join(" ")} PROPERTIES GENERATED TRUE)
-        // add_dependencies(\${PROJECT_NAME} ${jsDepsTargetName})`;
+    if (jsLibraryFiles.length > 0) {
+        const jsLibs = jsLibraryFiles.map(s => `target_link_options($\{PROJECT_NAME\} PUBLIC --js-library \${CMAKE_CURRENT_SOURCE_DIR}/${s})`).join("\n")
+        cmakeAdditionalDependencies += jsLibs + "\n\n";
+    }
+    if (jsPreFiles.length > 0) {
+        const jsLibs = jsPreFiles.map(s => `target_link_options($\{PROJECT_NAME\} PUBLIC --pre-js \${CMAKE_CURRENT_SOURCE_DIR}/${s})`).join("\n")
+        cmakeAdditionalDependencies += jsLibs + "\n\n";
     }
 
-    const compileDefines = collectCompileDefines(ctx, "cppDefines", "android");
-    const cmakeCompileDefines = "target_compile_definitions(${PROJECT_NAME}\n" +
-        compileDefines.map((x) => `\t\tPUBLIC ${x}`).join("\n") + "\n)";
-
+    const compileDefines = collectCompileDefines(ctx, "cppDefines", "web");
+    if (compileDefines.length > 0) {
+        const defines = compileDefines.map((x) => `\t\tPUBLIC ${x}`).join("\n") + "\n)";
+        cmakeAdditionalDependencies += `
+        target_compile_definitions($\{PROJECT_NAME\}
+${defines}       
+        )
+        `;
+    }
     return substituteAll(cmakeListContents, {
         "TEMPLATE_PROJECT_NAME": ctx.name,
         "#-SOURCES-#": cppSourceFiles.join("\n\t\t"),
-        "#-SEARCH_ROOTS-#": cppSourceRoots.join("\n\t\t"),
-        "#-LINK_OPTIONS-#": jsSourceFiles.map(s => `--js-library \${CMAKE_CURRENT_SOURCE_DIR}/${s}`).join("\n\t\t"),
+        "#-SEARCH_ROOTS-#": cppSourceRoots.concat(cpp_include_path_list).join("\n\t\t"),
         "#{{{CMAKE_CODE}}}": cmakeAdditionalDependencies,
-        "#-CPP_DEFINES-#": cmakeCompileDefines
     });
 }
 
@@ -115,18 +119,18 @@ export async function export_web(ctx: Project): Promise<void> {
             ctx.html.og.description = ctx.desc;
         }
     }
-    const output_dir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export/web");
-    makeDirs(output_dir);
+    const outputDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export/web");
+    makeDirs(outputDir);
 
     function tpl(from, to) {
         const tpl_text = fs.readFileSync(path.join(ctx.path.templates, from), "utf8");
-        fs.writeFileSync(path.join(output_dir, to), Mustache.render(tpl_text, ctx), "utf8");
+        fs.writeFileSync(path.join(outputDir, to), Mustache.render(tpl_text, ctx), "utf8");
     }
 
     function file(from, to) {
         fs.copyFileSync(
             path.join(ctx.path.templates, from),
-            path.join(output_dir, to)
+            path.join(outputDir, to)
         );
     }
 
@@ -143,8 +147,8 @@ export async function export_web(ctx: Project): Promise<void> {
         webManifest.related_applications = ctx.web?.applications;
     }
 
-    fs.writeFileSync(path.join(output_dir, "manifest.json"), JSON.stringify(webManifest), "utf8");
-    const iconsTask = webBuildAppIconAsync(ctx, webManifest.icons, output_dir);
+    fs.writeFileSync(path.join(outputDir, "manifest.json"), JSON.stringify(webManifest), "utf8");
+    const iconsTask = webBuildAppIconAsync(ctx, webManifest.icons, outputDir);
 
     tpl("web/index.html.mustache", "index.html");
     tpl("web/sw.js", "sw.js");
@@ -166,8 +170,8 @@ export async function export_web(ctx: Project): Promise<void> {
     }
     const cmakeBuildDir = getCMakeBuildDir(buildType);
     const projectDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export", ctx.name + "-" + ctx.current_target);
-    copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".js"), path.join(output_dir, ctx.name + ".js"));
-    copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm"), path.join(output_dir, ctx.name + ".wasm"));
+    copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".js"), path.join(outputDir, ctx.name + ".js"));
+    copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm"), path.join(outputDir, ctx.name + ".wasm"));
 
     try {
         await iconsTask;
@@ -205,5 +209,9 @@ export async function export_web(ctx: Project): Promise<void> {
             "--only", "hosting",
             ...args
         ]);
+    }
+
+    if (ctx.options.run != null) {
+       await serve(outputDir);
     }
 }
