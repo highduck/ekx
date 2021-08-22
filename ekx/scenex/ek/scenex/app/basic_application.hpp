@@ -11,6 +11,7 @@
 #include <ek/util/ServiceLocator.hpp>
 #include <ek/app/app.hpp>
 #include <ek/debug.hpp>
+#include <ek/audio/audio.hpp>
 #include <ek/debug/LogSystem.hpp>
 #include <ek/util/Signal.hpp>
 #include <utility>
@@ -120,6 +121,9 @@ inline void run_app(app::window_config cfg) {
 #endif
 
     g_app.on_device_ready << [] {
+        // audio should be initialized before "Resume" event, so the best place is "On Create" event
+        audio::initialize();
+
         Locator::create<basic_application, T>();
         g_app.on_frame_draw += initializeSubSystems;
     };

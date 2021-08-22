@@ -67,90 +67,19 @@ void vibrate(int duration_millis) {
 
 /** Sound **/
 
-void Sound::load(const char* path) {
-    dataSourceFilePath = path;
-    buffer = auph::load(path, 0);
-    if (!buffer.id) {
-        EK_WARN("Error load sound: %s", dataSourceFilePath.c_str());
-        unload();
-    }
+void AudioResource::load(const char* filepath, bool streaming) {
+    buffer = auph::load(filepath, streaming ? auph::Flag_Stream : 0);
 }
 
-void Sound::unload() {
+void AudioResource::unload() {
     if (auph::isActive(buffer.id)) {
         auph::unload(buffer);
         buffer = {};
     }
 }
 
-Sound::~Sound() {
+AudioResource::~AudioResource() {
     unload();
-}
-
-void Sound::play(float volume, float pitch) {
-    if (auph::isActive(buffer.id) && volume > 0.0f) {
-        auph::play(buffer, volume, 0.0f, pitch, false, false, auph::Bus_Sound);
-    }
-}
-
-Sound::Sound(const char* path) {
-    load(path);
-}
-
-/** Music **/
-
-void Music::load(const char* path) {
-    dataSourceFilePath = path;
-    buffer = auph::load(path, auph::Flag_Stream);
-    if (!buffer.id) {
-        EK_WARN("Error load music stream: %s", dataSourceFilePath.c_str());
-        unload();
-    }
-}
-
-void Music::unload() {
-    if (auph::isActive(buffer.id)) {
-        auph::unload(buffer);
-        buffer = {};
-    }
-    voice = {};
-}
-
-Music::~Music() {
-    unload();
-}
-
-void Music::play(float volume, float pitch) {
-    if (!auph::isActive(voice.id)) {
-        voice = auph::play(buffer, volume, 0.0f, pitch, true, false, auph::Bus_Music);
-    }
-}
-
-void Music::stop() {
-    if (auph::isActive(voice.id)) {
-        auph::stop(voice.id);
-        voice = {};
-    }
-}
-
-void Music::setVolume(float volume) {
-    auph::setGain(voice.id, volume);
-}
-
-float Music::getVolume() const {
-    return auph::getGain(voice.id);
-}
-
-void Music::setPitch(float pitch) {
-    auph::setRate(voice, pitch);
-}
-
-float Music::getPitch() const {
-    return auph::getRate(voice);
-}
-
-Music::Music(const char* path) {
-    load(path);
 }
 
 }

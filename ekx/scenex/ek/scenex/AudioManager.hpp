@@ -32,6 +32,7 @@ public:
 
 private:
     std::string music_;
+    auph::Voice musicVoice_{};
     float musicVolume_ = 1.0f;
     float musicPitch_ = 1.0f;
 };
