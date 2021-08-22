@@ -30,8 +30,6 @@ namespace ek {
 using graphics::Texture;
 using graphics::Shader;
 
-
-
 class BuiltinAsset : public Asset {
 public:
     explicit BuiltinAsset(std::string path) : path_(std::move(path)) {
@@ -244,7 +242,7 @@ public:
     }
 
     void poll() override {
-        if (texturesCount <= 0) {
+        if (texturesCount <= 0 || state != AssetState::Loading) {
             return;
         }
         if (texturesStartLoading < texturesCount) {
@@ -380,13 +378,22 @@ public:
     }
 };
 
+bool isTimeBudgetAllowStartNextJob(const Stopwatch& timer) {
+    return timer.readMillis() < 8.0f;
+}
+
 class PackAsset : public BuiltinAsset {
 public:
+
+    bool assetListLoaded = false;
+
     explicit PackAsset(std::string path) :
             BuiltinAsset(std::move(path)) {
     }
 
     void do_load() override {
+        assetListLoaded = false;
+        assetsLoaded = 0;
         get_resource_content_async((project_->base_path / path_).c_str(), [this](auto buffer) {
             input_memory_stream input{buffer.data(), buffer.size()};
             IO io{input};
@@ -406,7 +413,7 @@ public:
                 }
             }
             // ready for loading
-            assetsLoaded = 0;
+            assetListLoaded = true;
         });
     }
 
@@ -416,30 +423,45 @@ public:
         }
         assets.clear();
         assetsLoaded = 0;
+        assetListLoaded = false;
     }
 
     void poll() override {
-        if (state == AssetState::Loading && assetsLoaded >= 0) {
-            Stopwatch timer;
-            while (assetsLoaded < assets._size) {
-                auto* asset = assets._data[assetsLoaded];
-                if (asset->state == AssetState::Initial) {
+        if (state != AssetState::Loading || !assetListLoaded) {
+            return;
+        }
+
+        Stopwatch timer;
+        int numAssetsLoaded = 0;
+        for (int i = 0; i < assets._size; ++i) {
+            auto* asset = assets._data[i];
+            const auto initialState = asset->state;
+            if (asset->state == AssetState::Initial) {
+                if (isTimeBudgetAllowStartNextJob(timer)) {
                     EK_DEBUG << "Loading BEGIN: " << ((BuiltinAsset*) asset)->path_;
                     asset->load();
-                } else if (asset->state == AssetState::Loading) {
-                    asset->poll();
-                } else if (asset->state == AssetState::Ready) {
-                    EK_DEBUG << "Loading END: " << ((BuiltinAsset*) asset)->path_;
-                    ++assetsLoaded;
-                    if (assetsLoaded >= assets._size) {
-                        state = AssetState::Ready;
-                        return;
-                    }
-                }
-                if (timer.readMillis() >= 2) {
-                    return;
                 }
             }
+            if (asset->state == AssetState::Loading) {
+                if (isTimeBudgetAllowStartNextJob(timer)) {
+                    asset->poll();
+                }
+            }
+            if (asset->state == AssetState::Ready) {
+                if (initialState != AssetState::Ready) {
+                    EK_DEBUG << "Loading END: " << ((BuiltinAsset*) asset)->path_;
+                }
+                ++numAssetsLoaded;
+            }
+        }
+
+        if (!isTimeBudgetAllowStartNextJob(timer)) {
+            EK_WARN("Assets loading jobs spend %f ms", timer.readMillis());
+        }
+
+        assetsLoaded = numAssetsLoaded;
+        if (numAssetsLoaded >= assets._size) {
+            state = AssetState::Ready;
         }
     }
 
@@ -467,7 +489,6 @@ public:
     unsigned assetsLoaded = 0;
     Array<Asset*> assets;
 };
-
 
 class TrueTypeFontAsset : public BuiltinAsset {
 public:

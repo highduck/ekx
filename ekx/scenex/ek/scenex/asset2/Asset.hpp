@@ -15,15 +15,6 @@ enum class AssetState {
     Ready = 2
 };
 
-class Asset;
-
-class PollingTask {
-public:
-    bool finished = false;
-    bool failed = false;
-    Asset* asset = nullptr;
-};
-
 class Asset {
     friend class AssetManager;
 
@@ -38,7 +29,7 @@ public:
 
     virtual void unload() = 0;
 
-    AssetState state{AssetState::Initial};
+    AssetState state = AssetState::Initial;
     int error = 0;
 
     [[nodiscard]]
