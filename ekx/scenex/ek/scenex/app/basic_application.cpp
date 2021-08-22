@@ -333,7 +333,7 @@ void baseApp_onEvent(const event_t& event) {
 int _initializeSubSystemsState = 0;
 
 void initializeSubSystems() {
-    const float steps = 8.0f;
+    const float steps = 6.0f;
     {
         EK_PROFILE_SCOPE(INIT_JOB);
         switch (_initializeSubSystemsState) {
@@ -362,23 +362,17 @@ void initializeSubSystems() {
                 break;
             case 3:
                 ++_initializeSubSystemsState;
-                audio::initialize();
-                break;
-            case 4:
-                ++_initializeSubSystemsState;
                 ecs::the_world.initialize();
                 registerSceneXComponents();
                 break;
-            case 5:
+            case 4:
                 ++_initializeSubSystemsState;
                 Locator::ref<basic_application>().initialize();
                 break;
-            case 6:
+            case 5:
                 ++_initializeSubSystemsState;
                 Locator::ref<basic_application>().preload();
                 break;
-            case 7:
-                ++_initializeSubSystemsState;
             default:
                 g_app.on_frame_draw -= initializeSubSystems;
                 g_app.on_frame_draw += baseApp_drawFrame;

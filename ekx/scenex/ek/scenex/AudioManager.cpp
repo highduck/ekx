@@ -11,14 +11,18 @@ AudioManager::~AudioManager() = default;
 
 void AudioManager::play_music(const std::string& name) {
     if (name != music_) {
-        Res<audio::Music> musicAsset{music_};
-        if (musicAsset) {
-            musicAsset->stop();
+        if (auph::isActive(musicVoice_.id)) {
+            auph::stop(musicVoice_.id);
+            musicVoice_ = {};
         }
-        musicAsset.setID(name);
-        if (musicAsset) {
-            auto volume = music.enabled() ? musicVolume_ : 0.0f;
-            musicAsset->play(volume, musicPitch_);
+
+        Res<audio::AudioResource> audioRes{music_};
+        audioRes.setID(name);
+        if (audioRes) {
+            if (auph::isBufferLoaded(audioRes->buffer) && !auph::isActive(musicVoice_.id)) {
+                const auto volume = music.enabled() ? musicVolume_ : 0.0f;
+                musicVoice_ = auph::play(audioRes->buffer, volume, 0.0f, musicPitch_, true, false, auph::Bus_Music);
+            }
         }
         music_ = name;
     }
@@ -26,9 +30,9 @@ void AudioManager::play_music(const std::string& name) {
 
 void AudioManager::play_sound(const std::string& name, float vol, float pitch) const {
     if (sound.enabled()) {
-        Res<audio::Sound> soundAsset{name};
-        if (soundAsset) {
-            soundAsset->play(vol, pitch);
+        Res<audio::AudioResource> snd{name};
+        if (snd) {
+            auph::play(snd->buffer, vol, 0.0f, pitch);
         }
     }
 }
@@ -51,10 +55,12 @@ void AudioManager::update(float) {
     if (music_.empty()) {
         return;
     }
-    Res<audio::Music> musicAsset{music_};
-    if (musicAsset) {
+    Res<audio::AudioResource> audioRes{music_};
+    if (audioRes) {
         auto volume = music.enabled() ? musicVolume_ : 0.0f;
-        musicAsset->play(volume, musicPitch_);
+        if (auph::isBufferLoaded(audioRes->buffer) && !auph::isActive(musicVoice_.id)) {
+            musicVoice_ = auph::play(audioRes->buffer, volume, 0.0f, musicPitch_, true, false, auph::Bus_Music);
+        }
     }
 }
 
@@ -67,11 +73,10 @@ void AudioManager::disable_all() {
 void AudioManager::setMusicParams(float volume, float pitch) {
     musicVolume_ = volume;
     musicPitch_ = pitch;
-    Res<audio::Music> musicAsset{music_};
-    if (musicAsset) {
-        auto channelVolume = music.enabled() ? musicVolume_ : 0.0f;
-        musicAsset->setVolume(channelVolume);
-        musicAsset->setPitch(pitch);
+    if (auph::isActive(musicVoice_.id)) {
+        const auto channelVolume = music.enabled() ? musicVolume_ : 0.0f;
+        auph::setGain(musicVoice_.id, channelVolume);
+        auph::setRate(musicVoice_, pitch);
     }
 }
 

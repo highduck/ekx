@@ -30,6 +30,8 @@ namespace ek {
 using graphics::Texture;
 using graphics::Shader;
 
+
+
 class BuiltinAsset : public Asset {
 public:
     explicit BuiltinAsset(std::string path) : path_(std::move(path)) {
@@ -56,11 +58,11 @@ public:
     std::string path_;
 };
 
-class MusicAsset : public BuiltinAsset {
+class AudioAsset : public BuiltinAsset {
 public:
-    explicit MusicAsset(std::string path)
-            : BuiltinAsset(std::move(path)) {
-
+    explicit AudioAsset(std::string path, bool streaming_) :
+            BuiltinAsset(std::move(path)),
+            streaming{streaming_} {
         name_ = path_;
         // remove extension
         if (name_.size() > 4) {
@@ -69,66 +71,32 @@ public:
     }
 
     void do_load() override {
-        auto* music = new audio::Music();
+        auto* audio = new audio::AudioResource();
         filePath_ = project_->base_path / path_;
-        music->load(filePath_.c_str());
-        Res<audio::Music>{name_}.reset(music);
+        audio->load(filePath_.c_str(), streaming);
+        Res<audio::AudioResource>{name_}.reset(audio);
     }
 
     void poll() override {
-        auto buffer = Res<audio::Music>{name_}->buffer;
-        if(!auph::isActive(buffer.id) || auph::isBufferLoaded(buffer)) {
+        auto buffer = Res<audio::AudioResource>{name_}->buffer;
+        auto failed = !auph::isActive(buffer.id);
+        auto completed = auph::isBufferLoaded(buffer);
+        if (failed || completed) {
             state = AssetState::Ready;
         }
     }
 
     void do_unload() override {
-        Res<audio::Music> asset{name_};
-        if(!asset.empty()) {
-            auph::unload(asset->buffer);
+        Res<audio::AudioResource> asset{name_};
+        if (!asset.empty()) {
+            asset->unload();
             asset.reset(nullptr);
         }
     }
 
     std::string name_;
     path_t filePath_;
-};
-
-class SoundAsset : public BuiltinAsset {
-public:
-    explicit SoundAsset(std::string path) :
-            BuiltinAsset(std::move(path)) {
-        name_ = path_;
-        // remove extension
-        if (name_.size() > 4) {
-            name_.erase(name_.size() - 4, 4);
-        }
-    }
-
-    void do_load() override {
-        auto* sound = new audio::Sound();
-        filePath_ = project_->base_path / path_;
-        sound->load(filePath_.c_str());
-        Res<audio::Sound>{name_}.reset(sound);
-    }
-
-    void poll() override {
-        auto buffer = Res<audio::Sound>{name_}->buffer;
-        if(!auph::isActive(buffer.id) || auph::isBufferLoaded(buffer)) {
-            state = AssetState::Ready;
-        }
-    }
-
-    void do_unload() override {
-        Res<audio::Sound> asset{name_};
-        if(!asset.empty()) {
-            auph::unload(asset->buffer);
-            asset.reset(nullptr);
-        }
-    }
-
-    std::string name_;
-    path_t filePath_;
+    bool streaming = false;
 };
 
 class AtlasAsset : public BuiltinAsset {
@@ -544,9 +512,9 @@ Asset* DefaultAssetsResolver::create(const std::string& path) const {
 
 Asset* DefaultAssetsResolver::create_for_type(const std::string& type, const std::string& path) const {
     if (type == "sound") {
-        return new SoundAsset(path);
+        return new AudioAsset(path, false);
     } else if (type == "music") {
-        return new MusicAsset(path);
+        return new AudioAsset(path, true);
     } else if (type == "scene") {
         return new SceneAsset(path);
     } else if (type == "bmfont") {

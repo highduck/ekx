@@ -15,6 +15,15 @@ enum class AssetState {
     Ready = 2
 };
 
+class Asset;
+
+class PollingTask {
+public:
+    bool finished = false;
+    bool failed = false;
+    Asset* asset = nullptr;
+};
+
 class Asset {
     friend class AssetManager;
 
