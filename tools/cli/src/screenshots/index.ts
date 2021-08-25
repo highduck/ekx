@@ -3,7 +3,7 @@ import * as path from "path";
 import {executeAsync, makeDirs} from "../utils";
 import {buildAssetsAsync} from "../assets";
 import {rmSync} from "fs";
-import {cmake} from "../cmake";
+import {cmake} from "../cmake/build";
 
 const exportDir = "export/uitest";
 

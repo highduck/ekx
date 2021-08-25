@@ -84,11 +84,12 @@ export async function optimizePngGlobAsync(input_pattern: string): Promise<any> 
     });
 }
 
-export function withPath(dir: string, cb: () => void): void {
+export function withPath<T>(dir: string, cb: () => T): T {
     const p = process.cwd();
     process.chdir(dir);
-    cb();
+    const result = cb();
     process.chdir(p);
+    return result;
 }
 
 export function replaceAll(str: string, search: string, replacement: string) {

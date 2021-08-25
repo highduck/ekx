@@ -7,12 +7,18 @@ module.exports = (project) => {
         cpp: [path.join(__dirname, "src")],
         android: {
             cpp: [path.join(__dirname, "platforms/android")],
-            java: [path.join(__dirname, "platforms/android/java")]
+            java: [path.join(__dirname, "platforms/android/java")],
+            cppLibs: [
+                // basic Android libraries
+                "log",
+                "android",
+                // for graphics module (sokol_gfx)
+                "GLESv2"
+            ]
         },
         macos: {
             cpp: [
-                path.join(__dirname, "platforms/apple"),
-                path.join(__dirname, "platforms/mac")
+                path.join(__dirname, "platforms/apple")
             ],
             cpp_flags: {
                 files: [
@@ -24,8 +30,7 @@ module.exports = (project) => {
         },
         ios: {
             cpp: [
-                path.join(__dirname, "platforms/apple"),
-                path.join(__dirname, "platforms/ios")
+                path.join(__dirname, "platforms/apple")
             ],
             cpp_flags: {
                 files: [
@@ -47,7 +52,10 @@ module.exports = (project) => {
         },
         web: {
             cpp: [path.join(__dirname, "platforms/web")],
-            js: [path.join(__dirname, "platforms/web")]
+            js: [path.join(__dirname, "platforms/web")],
+            cppLibs: [
+                "GLESv2"
+            ]
         },
         windows: {
             cpp: [path.join(__dirname, "platforms/windows")]

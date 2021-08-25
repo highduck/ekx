@@ -14,13 +14,14 @@ import {
 import {XmlDocument} from 'xmldoc';
 import * as path from "path";
 import {buildAssetsAsync} from "../assets";
-import {collectCompileDefines, collectSourceFiles, collectSourceRootsAll} from "../collectSources";
+import {collectLists, collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
 import {androidBuildAppIconAsync} from "./androidAppIcon";
 import * as fs from "fs";
 import {Project} from "../project";
 import {writeFileSync} from "fs";
+import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../cmake/generate";
 
 function getAndroidSdkRoot() {
     return process.env.ANDROID_SDK_ROOT ?? path.join(process.env.HOME, 'Library/Android/sdk');
@@ -112,30 +113,70 @@ function createStringsXML(ctx) {
 }
 
 function mod_cmake_lists(ctx) {
-    const cmake_path = "CMakeLists.txt";
-    const src_files = [];
-    const ext_list = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
+    const cppSources = [];
+    const cppExtensions = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
 
-    const cpp_roots_list = collectSourceRootsAll(ctx, "cpp", "android", ".");
-    for (const cpp_dir of cpp_roots_list) {
-        collectSourceFiles(cpp_dir, ext_list, src_files);
+    const cppRoots = collectSourceRootsAll(ctx, "cpp", "android", ".");
+    for (const cpp_dir of cppRoots) {
+        collectSourceFiles(cpp_dir, cppExtensions, cppSources);
     }
 
-    const cpp_include_path_list = collectSourceRootsAll(ctx, "cpp_include_path", "android", ".");
+    const cppIncludeDirectories = collectSourceRootsAll(ctx, "cpp_include_path", "android", ".");
+    const cppDefines = collectLists(ctx, "cppDefines", "android");
+    const cppLibs = collectLists(ctx, "cppLibs", "android");
 
-    const compileDefines = collectCompileDefines(ctx, "cppDefines", "android");
+    const cmakeName = "native-lib";
+    const cmakeTarget: CMakeGenerateTarget = {
+        type: "library",
+        libraryType: "shared",
+        name: cmakeName,
+        sources: cppSources,
+        includeDirectories: cppRoots.concat(cppIncludeDirectories),
+        linkLibraries: cppLibs,
+        linkOptions: [],
+        compileOptions: [
+            "-ffor-scope",
+            "-pipe",
+            "-ffunction-sections", //+
+            "-fdata-sections", //+
+            "-fvisibility=hidden",//+
+            "-fvisibility-inlines-hidden",
+            //"-funroll-all-loops",
+            //"-fpeel-loops",
+            "-ftree-vectorize",
 
-    let cmakeCompileDefines = "";
-    if (compileDefines.length > 0) {
-        cmakeCompileDefines = "target_compile_definitions(${PROJECT_NAME}\n" +
-            compileDefines.map((x) => `\t\tPUBLIC ${x}`).join("\n") + "\n)";
-    }
+            "-ffast-math",
+            "-fno-exceptions",
+            "-fno-rtti",
 
-    replaceInFile(cmake_path, {
-        "stub/stub.cpp #-SOURCES-#": src_files.join("\n\t\t"),
-        "stub #-SEARCH_ROOTS-#": cpp_roots_list.concat(cpp_include_path_list).join("\n\t\t"),
-        "#-CPP_DEFINES-#": cmakeCompileDefines
-    });
+            "-Wall",
+            "-Wextra",
+
+            //"-Werror",
+            "-Wnon-virtual-dtor",
+            "-Wsign-promo",
+            //"-Wstrict-null-sentinel"
+        ],
+        compileDefinitions: cppDefines
+    };
+
+    const cmakeProject: CMakeGenerateProject = {
+        cmakeVersion: "3.19",
+        project: cmakeName,
+        targets: [cmakeTarget],
+        compileOptions: [],
+        compileDefinitions: []
+    };
+
+    cmakeTarget.compileOptions.push("-g");
+    cmakeTarget.linkOptions.push("LINKER:--gc-sections")
+    //cmakeTarget.linkOptions.push("-Wl,--gc-sections")
+
+    cmakeTarget.compileDefinitions.push("$<$<NOT:$<CONFIG:Debug>>:NDEBUG>");
+    cmakeTarget.compileOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
+    cmakeTarget.linkOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
+
+    fs.writeFileSync("CMakeLists.txt", cmakeLists(cmakeProject), "utf8");
 }
 
 export async function export_android(ctx: Project): Promise<void> {

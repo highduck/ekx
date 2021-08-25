@@ -44,7 +44,7 @@ void shutdown() {
 void muteDeviceBegin() {
     EK_ASSERT(audioSystem.locks >= 0);
     if (audioSystem.locks == 0) {
-        auph::setGain(auph::hMixer, 0.0f);
+        auph::setGain(auph::Bus_Master.id, 0.0f);
     }
     ++audioSystem.locks;
 }
@@ -53,7 +53,7 @@ void muteDeviceEnd() {
     --audioSystem.locks;
     EK_ASSERT(audioSystem.locks >= 0);
     if (audioSystem.locks == 0) {
-        auph::setGain(auph::hMixer, 1.0f);
+        auph::setGain(auph::Bus_Master.id, 1.0f);
     }
 }
 

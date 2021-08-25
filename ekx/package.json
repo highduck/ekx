@@ -4,6 +4,7 @@
   "scripts": {
     "postinstall": "npx npm-cmake || exit 0",
     "build:native": "node build.js",
+    "clean": "rimraf ./build",
     "shader:draw2d": "sokol-shdc -i ek/src/ek/draw2d/draw2d.glsl -o ek/src/ek/draw2d/draw2d_shader.h -l glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos",
     "shader:render3d": "sokol-shdc -i scenex/ek/scenex/3d/render3d.glsl -o scenex/ek/scenex/3d/render3d_shader.h -l glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos"
   },
@@ -14,15 +15,16 @@
   "dependencies": {
     "@ekx/doctest": "0.0.1",
     "@ekx/dev-fonts": "0.0.8",
-    "@ekx/imgui": "0.0.16",
-    "auph": "0.0.9",
+    "@ekx/imgui": "0.0.17",
+    "auph": "0.0.11",
     "@ekx/pugixml": "0.0.5",
-    "@ekx/sokol": "0.0.10",
-    "@ekx/stb": "0.0.3",
+    "@ekx/sokol": "0.0.11",
+    "@ekx/stb": "0.0.4",
     "@ekx/tracy": "0.0.12",
     "npm-cmake": "^0.1.0"
   },
   "devDependencies": {
-    "@ekx/sokol-shdc": "0.0.2"
+    "@ekx/sokol-shdc": "0.0.3",
+    "rimraf": "^3.0.2"
   }
 }
