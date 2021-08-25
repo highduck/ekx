@@ -2,11 +2,9 @@ package ek.gpgs;
 
 import ek.EkActivity;
 import ek.AppUtils;
-import ek.Analytics;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
@@ -23,7 +21,6 @@ import com.google.android.gms.games.AchievementsClient;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.LeaderboardsClient;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 @Keep
 public class GameServices {
@@ -156,11 +153,12 @@ public class GameServices {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 tryConnectWithAccount(account);
             } catch (ApiException apiException) {
-                String message = apiException.getMessage();
-                if (message == null || message.isEmpty()) {
-                    message = "Sign in failed";
-                } else if (message.length() < 5) {
-                    message = "Sign in failed (" + message + ")";
+                String message = "Google Play Services: failed to sign in";
+                if (AppUtils.isDebugBuild()) {
+                    String err = apiException.getMessage();
+                    if (err != null) {
+                        message += "\n" + err;
+                    }
                 }
 
                 onDisconnected();
@@ -173,10 +171,9 @@ public class GameServices {
     }
 
     private static void tryConnectWithAccount(@Nullable GoogleSignInAccount account) {
-        if(account != null) {
+        if (account != null) {
             onConnected(account);
-        }
-        else {
+        } else {
             Log.d(TAG, "null account: set state to disconnected");
             onDisconnected();
         }

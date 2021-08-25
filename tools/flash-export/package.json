@@ -17,6 +17,6 @@
     "npm-cmake": "^0.1.0"
   },
   "devDependencies": {
-    "@ekx/sokol-shdc": "0.0.2"
+    "@ekx/sokol-shdc": "0.0.3"
   }
 }

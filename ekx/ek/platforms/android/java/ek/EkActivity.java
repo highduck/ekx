@@ -19,6 +19,8 @@ import android.widget.RelativeLayout;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
+import com.getkeepsafe.relinker.ReLinker;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -53,7 +55,7 @@ public class EkActivity extends Activity {
 
     protected void onLoadNativeLibraries() {
         try {
-            System.loadLibrary("native-lib");
+            ReLinker.loadLibrary(EkActivity.this, "native-lib");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -21,9 +21,9 @@ jobject assetManagerRef();
 
 }
 
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "ek", __VA_ARGS__))
-#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "ek", __VA_ARGS__))
-#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "ek", __VA_ARGS__))
+#define EK_ALOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "ek", __VA_ARGS__))
+#define EK_ALOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "ek", __VA_ARGS__))
+#define EK_ALOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "ek", __VA_ARGS__))
 
 #define EK_JNI_VOID(x, ...) \
     extern "C" JNIEXPORT void JNICALL Java_ek_EkPlatform_##x(JNIEnv *env, jclass cls, __VA_ARGS__)

@@ -23,9 +23,9 @@ android {
                 // ANDROID_STL is c++_static by default
             }
         }
-        ndk {
-            abiFilters 'armeabi-v7a', 'x86', 'arm64-v8a', 'x86_64'
-        }
+        //ndk {
+        //    abiFilters 'armeabi-v7a', 'x86', 'arm64-v8a', 'x86_64'
+        //}
     }
     buildTypes {
         release {
@@ -76,10 +76,11 @@ dependencies {
 
     implementation 'androidx.annotation:annotation:1.2.0'
     implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'com.getkeepsafe.relinker:relinker:1.4.4'
 
     // Import the BoM for the Firebase platform
     // Check Release Notes for updates: https://firebase.google.com/support/release-notes/android
-    implementation platform('com.google.firebase:firebase-bom:28.2.1')
+    implementation platform('com.google.firebase:firebase-bom:28.4.0')
     implementation 'com.google.firebase:firebase-crashlytics-ndk'
     implementation 'com.google.firebase:firebase-analytics'
 

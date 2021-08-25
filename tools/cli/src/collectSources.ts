@@ -10,40 +10,33 @@ export function collectSourceFiles(searchPath: string, extensions: string[], out
 }
 
 // src_kind - "cpp", "java", "js", etc..
-export function collectSourceRoots(data: any, srcKind: LegacySourceKind) {
-    const result = [];
-    if (data && data[srcKind]) {
-        const sources = data[srcKind];
-        if(sources instanceof Array) {
-            result.push(...sources);
+export function _collectLists(data: any, variableName: LegacySourceKind, out:Set<string>) {
+    if (data && data[variableName]) {
+        const list = data[variableName];
+        if (list instanceof Array) {
+            for(let v of list) {
+                out.add(v);
+            }
         }
     }
-    return result;
+}
+
+export function collectLists(ctx: Project, variableName: LegacySourceKind, extraTarget: string): string[] {
+    let result = new Set<string>()
+    for (const data of ctx.modules) {
+        _collectLists(data, variableName, result);
+        if (extraTarget) {
+            _collectLists(data[extraTarget], variableName, result);
+        }
+    }
+    return [...result];
 }
 
 // rel_to - optional, for example "." relative to current working directory
 export function collectSourceRootsAll(ctx: Project, srcKind: LegacySourceKind, extraTarget: string, relativeTo: string) {
-    let result = [];
-    for (const data of ctx.modules) {
-        result = result.concat(collectSourceRoots(data, srcKind));
-        if (extraTarget) {
-            result = result.concat(collectSourceRoots(data[extraTarget], srcKind));
-        }
-    }
+    let result = collectLists(ctx, srcKind, extraTarget);
     if (relativeTo) {
         result = result.map((p) => path.relative(relativeTo, p));
-    }
-    return result;
-}
-
-// TODO: duplicated
-export function collectCompileDefines(ctx: Project, srcKind: LegacySourceKind, extraTarget: string):string[] {
-    let result:string[] = [];
-    for (const data of ctx.modules) {
-        result = result.concat(collectSourceRoots(data, srcKind));
-        if (extraTarget) {
-            result = result.concat(collectSourceRoots(data[extraTarget], srcKind));
-        }
     }
     return result;
 }

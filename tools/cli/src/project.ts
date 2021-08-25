@@ -20,17 +20,19 @@ class ProjectPath {
 
 type RegisteredProject = any;
 
-export type LegacySourceKind = "cpp" | "cpp_include_path" | "js" | "pre_js" | "java" | "aidl" | "assets" | "cppDefines";
+export type LegacySourceKind = "cpp" | "cpp_include_path" | "js" | "pre_js" | "java" | "aidl" | "assets" | "cppDefines" | "cppLibs";
 export type LegacySources = string[];
 
 interface ModuleDef {
     name?: string;
     cpp?: LegacySources;
     cppDefines?: string[];
+    cppLibs?: string[];
     assets?: string[];
     android?: {
         cpp?: LegacySources;
         cppDefines?: string[];
+        cppLibs?: string[];
         java?: LegacySources;
         aidl?: LegacySources;
         xmlStrings?: { [name: string]: string };
@@ -56,14 +58,17 @@ interface ModuleDef {
     web?: {
         cpp?: LegacySources;
         cppDefines?: string[];
+        cppLibs?: string[];
     };
     windows?: {
         cpp?: LegacySources;
         cppDefines?: string[];
+        cppLibs?: string[];
     };
     linux?: {
         cpp?: LegacySources;
         cppDefines?: string[];
+        cppLibs?: string[];
     };
 }
 
@@ -189,7 +194,7 @@ export class Project {
         fromDir = fromDir ?? process.cwd();
         const projectPath = resolveFrom(fromDir, moduleId + "/ek.js");
         if (projectPath == null) {
-            console.warn("ek.js module not found")
+            console.warn(`ek.js module not found for "${moduleId}" from dir "${fromDir}"`);
         }
         this.includeProject(path.dirname(projectPath));
     }

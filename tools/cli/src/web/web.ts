@@ -1,14 +1,15 @@
 import * as fs from "fs";
 import {copyFileSync} from "fs";
 import * as path from "path";
-import {copyFolderRecursiveSync, executeAsync, isDir, isFile, makeDirs, substituteAll, withPath} from "../utils";
+import {copyFolderRecursiveSync, executeAsync, isDir, isFile, makeDirs, withPath} from "../utils";
 import {buildAssetsAsync} from "../assets";
 import * as Mustache from 'mustache';
 import {webBuildAppIconAsync} from "./webAppIcon";
-import {collectCompileDefines, collectSourceFiles, collectSourceRootsAll} from "../collectSources";
+import {collectLists, collectSourceFiles, collectSourceRootsAll} from "../collectSources";
 import {Project} from "../project";
-import {cmake} from "../cmake";
+import {cmake} from "../cmake/build";
 import {serve} from "./serve";
+import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../cmake/generate";
 
 function getEmscriptenSDKPath(): string {
     if (process.env.EMSDK) {
@@ -17,7 +18,7 @@ function getEmscriptenSDKPath(): string {
     return path.join(process.env.HOME, "dev/emsdk");
 }
 
-function renderCMakeFile(ctx, cmakeListContents: string): string {
+function renderCMakeFile(ctx, buildType): string {
     const cppSourceFiles = [];
     const cppExtensions = ["hpp", "hxx", "h", "cpp", "cxx", "c", "cc", "m", "mm"];
     const cppSourceRoots = collectSourceRootsAll(ctx, "cpp", "web", ".");
@@ -40,31 +41,79 @@ function renderCMakeFile(ctx, cmakeListContents: string): string {
         collectSourceFiles(jsPreRoot, jsExtensions, jsPreFiles);
     }
 
-    let cmakeAdditionalDependencies = "";
-    if (jsLibraryFiles.length > 0) {
-        const jsLibs = jsLibraryFiles.map(s => `target_link_options($\{PROJECT_NAME\} PUBLIC --js-library \${CMAKE_CURRENT_SOURCE_DIR}/${s})`).join("\n")
-        cmakeAdditionalDependencies += jsLibs + "\n\n";
-    }
-    if (jsPreFiles.length > 0) {
-        const jsLibs = jsPreFiles.map(s => `target_link_options($\{PROJECT_NAME\} PUBLIC --pre-js \${CMAKE_CURRENT_SOURCE_DIR}/${s})`).join("\n")
-        cmakeAdditionalDependencies += jsLibs + "\n\n";
+    const cppDefines = collectLists(ctx, "cppDefines", "web");
+    const cppLibs = collectLists(ctx, "cppLibs", "web");
+
+    const cmakeTarget: CMakeGenerateTarget = {
+        type: "executable",
+        libraryType: "static",
+        name: ctx.name,
+        sources: cppSourceFiles,
+        includeDirectories: cppSourceRoots.concat(cpp_include_path_list),
+        linkLibraries: cppLibs,
+        linkOptions: [],
+        compileOptions: ["-ffast-math", "-fno-exceptions", "-fno-rtti", "-Wall", "-Wextra"],
+        compileDefinitions: cppDefines
+    };
+
+    const cmakeProject: CMakeGenerateProject = {
+        cmakeVersion: "3.19",
+        project: ctx.name,
+        targets: [cmakeTarget],
+        compileOptions: [],
+        compileDefinitions: []
+    };
+
+    if (buildType === "Release") {
+        cmakeTarget.linkOptions.push("-Oz", "-flto", "-g0");
+        cmakeTarget.compileOptions.push("-Oz", "-flto", "-g0");
+        cmakeTarget.compileDefinitions.push("NDEBUG");
     }
 
-    const compileDefines = collectCompileDefines(ctx, "cppDefines", "web");
-    if (compileDefines.length > 0) {
-        const defines = compileDefines.map((x) => `\t\tPUBLIC ${x}`).join("\n") + "\n)";
-        cmakeAdditionalDependencies += `
-        target_compile_definitions($\{PROJECT_NAME\}
-${defines}       
-        )
-        `;
+    for (let jsLibraryFile of jsLibraryFiles) {
+        cmakeTarget.linkOptions.push(`SHELL:--js-library \${CMAKE_CURRENT_SOURCE_DIR}/${jsLibraryFile}`);
     }
-    return substituteAll(cmakeListContents, {
-        "TEMPLATE_PROJECT_NAME": ctx.name,
-        "#-SOURCES-#": cppSourceFiles.join("\n\t\t"),
-        "#-SEARCH_ROOTS-#": cppSourceRoots.concat(cpp_include_path_list).join("\n\t\t"),
-        "#{{{CMAKE_CODE}}}": cmakeAdditionalDependencies,
-    });
+    for (let jsPreFile of jsPreFiles) {
+        cmakeProject.targets[0].linkOptions.push(`SHELL:--pre-js \${CMAKE_CURRENT_SOURCE_DIR}/${jsPreFile}`);
+    }
+
+    const emOptions: any = {
+        ASSERTIONS: buildType === "Debug" ? 1 : 0,
+        // SAFE_HEAP: 1,
+        // STACK_OVERFLOW_CHECK: 2,
+        // ALIASING_FUNCTION_POINTERS: 0,
+        // MODULARIZE: 1,
+        FETCH: 1,
+        // WASM: 1,
+        // WASM_ASYNC_COMPILATION: 1,
+        DISABLE_EXCEPTION_CATCHING: 1,
+
+        ALLOW_MEMORY_GROWTH: 1,
+
+        // INITIAL_MEMORY: "128MB",
+        // ALLOW_MEMORY_GROWTH: 0,
+
+        FILESYSTEM: 0,
+        INLINING_LIMIT: 1,
+        //WASM_OBJECT_FILES: 0,
+
+        // TODO: strange runtime DOM exception error with Release
+        //STRICT: 1,
+        ENVIRONMENT: "web",
+
+        DYNAMIC_EXECUTION: 0,
+        // AUTO_JS_LIBRARIES: 0,
+        // AUTO_NATIVE_LIBRARIES: 0,
+        AUTOLOAD_DYLIBS: 0,
+        ALLOW_UNIMPLEMENTED_SYSCALLS: 0
+    };
+
+    cmakeTarget.linkOptions.push("--closure 1");
+
+    for (let opt of Object.keys(emOptions)) {
+        cmakeTarget.linkOptions.push(`-s${opt}=${emOptions[opt]}`);
+    }
+    return cmakeLists(cmakeProject);
 }
 
 function getCMakeBuildDir(buildType: string) {
@@ -88,10 +137,7 @@ async function buildProject(ctx, buildType) {
     }
 
     {
-        let cmakeFile = await fs.promises.readFile(path.join(ctx.path.templates, "project-web/CMakeLists.txt"), "utf8");
-        withPath(output_path, () => {
-            cmakeFile = renderCMakeFile(ctx, cmakeFile);
-        });
+        const cmakeFile = withPath(output_path, () => renderCMakeFile(ctx, buildType));
         await fs.promises.writeFile(path.join(output_path, "CMakeLists.txt"), cmakeFile);
     }
 
@@ -212,6 +258,6 @@ export async function export_web(ctx: Project): Promise<void> {
     }
 
     if (ctx.options.run != null) {
-       await serve(outputDir);
+        await serve(outputDir);
     }
 }

@@ -1,4 +1,4 @@
-import {executeAsync} from "./utils";
+import {executeAsync} from "../utils";
 
 export interface CMakeExportOptions {
     debug?: boolean;

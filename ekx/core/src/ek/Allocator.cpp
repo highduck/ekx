@@ -76,16 +76,6 @@ inline uint32_t sizeWithPadding(uint32_t size, uint32_t align) {
     return size + align;
 }
 
-inline void fillMemoryDebug(void* ptr, size_t sz) {
-#ifdef EK_INIT_CC_MEMORY
-    auto* data = static_cast<uint8_t*>(ptr);
-    for (size_t i = 0; i < sz; ++i) {
-        data[i] = 0xCC;
-    }
-#endif
-}
-
-
 #ifdef EK_ALLOCATION_TRACKER
 
 void onDebugAllocatorDestroy(Allocator& allocator) {
@@ -196,12 +186,19 @@ SystemAllocator::SystemAllocator(const char* label_) noexcept:
 SystemAllocator::~SystemAllocator() = default;
 
 void* SystemAllocator::alloc(uint32_t size, uint32_t align) {
+    // TODO:
+    (void)(align);
+
     void* ptr = std::malloc(size);
 #ifdef EK_ALLOCATION_TRACKER
     EK_TRACE_ALLOC(ptr, size, stats.label);
     onDebugAllocation(*this, ptr, size, size);
 #endif // EK_ALLOCATION_TRACKER
-    ek::fillMemoryDebug(ptr, size);
+
+#ifdef EK_INIT_CC_MEMORY
+    memset(ptr, 0xCC, size);
+#endif // EK_INIT_CC_MEMORY
+
     return ptr;
 }
 
@@ -338,7 +335,7 @@ void* AlignedAllocator::alloc(uint32_t size, uint32_t align) {
 
         if (p) {
 #ifdef EK_ALLOCATION_TRACKER
-            ek::fillMemoryDebug(p, sizeTotal);
+            memset(p, 0xCC, sizeTotal);
             onDebugAllocation(*this, p, size, sizeTotal);
 #endif // EK_ALLOCATION_TRACKER
 
@@ -448,11 +445,7 @@ void copy(void* dest, const void* src, uint32_t size) {
 
 void clear(void* ptr, uint32_t size) {
     EK_ASSERT_R2(ptr != nullptr);
-    char* it = static_cast<char*>(ptr);
-    const char* end = it + size;
-    while (it != end) {
-        *(it++) = 0;
-    }
+    memset(ptr, 0, size);
 }
 
 void* reallocate(Allocator& allocator, void* ptr, uint32_t oldSizeToCopy, uint32_t newSize, uint32_t align) {
@@ -491,7 +484,7 @@ void* operator new(size_t sz) {
 
     if (void* ptr = std::malloc(sz)) {
         EK_TRACE_ALLOC(ptr, sz, "c++ new");
-        ek::fillMemoryDebug(ptr, sz);
+        memset(ptr, 0xCC, sz);
         return ptr;
     }
 

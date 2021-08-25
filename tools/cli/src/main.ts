@@ -41,7 +41,6 @@ function defaultRun() {
 
     addExportBuildStep(project);
 
-    project.importModule("@ekx/miniaudio", project.path.EKX_ROOT);
     project.importModule("@ekx/stb", project.path.EKX_ROOT);
     project.importModule("@ekx/sokol", project.path.EKX_ROOT);
     project.importModule("@ekx/tracy", project.path.EKX_ROOT);
