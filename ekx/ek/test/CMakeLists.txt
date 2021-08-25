@@ -6,7 +6,8 @@ add_executable(${PROJECT_NAME}
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
-target_compile_options(${PROJECT_NAME} PRIVATE -fno-rtti)
+target_compile_options(${PROJECT_NAME} PRIVATE -fno-rtti -fno-exceptions)
+target_compile_definitions(${PROJECT_NAME} PUBLIC DOCTEST_CONFIG_NO_EXCEPTIONS)
 target_link_libraries(${PROJECT_NAME}
         PUBLIC doctest
         PUBLIC ek)
