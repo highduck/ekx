@@ -1,6 +1,7 @@
 #include "Allocator.hpp"
 #include "util/StaticStorage.hpp"
 #include <cstdlib>
+#include <cstring>
 #include "debug.hpp"
 
 #ifdef EK_ALLOCATION_TRACKER
