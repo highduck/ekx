@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import {logger} from "./logger";
 
 const BUILD_INFO_HEADER_FILE = "src/config/BuildInfo.h";
 
@@ -35,10 +36,10 @@ export function increaseProjectVersion(p: string, versionIndex: number = VERSION
     let config = fs.readFileSync(path.join(p, "ek.js"), "utf-8");
     let reVersion = /version_name\s*=\s*"(\d+\.\d+\.\d+)";/g
     let versionMatch = reVersion.exec(config);
-    console.info("version string:", versionMatch[0]);
+    logger.info("version string:", versionMatch[0]);
     const oldVersion = versionMatch[1];
     const ver = parseVersion(versionMatch[1]);
-    console.info("version:", ver);
+    logger.info("version:", ver);
     let reCode = /version_code\s*=\s*"(\d+)";/g
     let codeMatch = reCode.exec(config);
     let code = parseInt(codeMatch[1]);

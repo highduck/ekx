@@ -1,6 +1,10 @@
 package ek.admob;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -23,8 +27,11 @@ import com.google.android.gms.ads.rewarded.RewardItem;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
-import java.util.Arrays;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
+import ek.AppUtils;
 import ek.EkActivity;
 import ek.EkPlugin;
 import ek.EkPluginManager;
@@ -64,6 +71,7 @@ public class AdMobPlugin extends EkPlugin {
                        final String interstitial,
                        final int tagForChildDirectedTreatment) {
         _activity = EkActivity.getInstance();
+
         _context = _activity;
         _layout = _activity.mainLayout;
 
@@ -143,11 +151,7 @@ public class AdMobPlugin extends EkPlugin {
         _activity.runOnUiThread(() -> {
             //UMP.start();
             final RequestConfiguration requestConfig = new RequestConfiguration.Builder()
-                    .setTestDeviceIds(Arrays.asList(
-                            AdRequest.DEVICE_ID_EMULATOR, // All emulators
-                            "2AB46EC73CC840F948630EA11ECB6A3F",  // Galaxy A7
-                            "3BA93F7574A4ECCF84878025F0B5F9D6"  // Galaxy S2
-                    ))
+                    .setTestDeviceIds(getTestDeviceIds(_activity))
                     .setTagForChildDirectedTreatment(tagForChildDirectedTreatment)
                     .build();
             MobileAds.setRequestConfiguration(requestConfig);
@@ -252,7 +256,7 @@ public class AdMobPlugin extends EkPlugin {
                 instance._interstitialAd.show(instance._activity);
             } else {
                 postGLEvent(EVENT_INTERSTITIAL_CLOSED);
-                if(!instance._interstitialAdLoading) {
+                if (!instance._interstitialAdLoading) {
                     instance.loadInterstitialAd();
                 }
             }
@@ -332,5 +336,56 @@ public class AdMobPlugin extends EkPlugin {
 
     public static void postGLEvent(final int event) {
         EkActivity.runGLThread(() -> eventCallback(event));
+    }
+
+    /**
+     * For Test devices, TestLab, debugging
+     **/
+
+    static ArrayList<String> getTestDeviceIds(final Activity activity) {
+        final ArrayList<String> ids = new ArrayList<>();
+
+        ids.add(AdRequest.DEVICE_ID_EMULATOR); // All emulators
+        // TODO: configuration
+        ids.add("2AB46EC73CC840F948630EA11ECB6A3F"); // Galaxy A7
+        ids.add("3BA93F7574A4ECCF84878025F0B5F9D6"); // Galaxy S2
+
+        if (AppUtils.isTestLab() || AppUtils.isDebugBuild()) {
+            final String deviceID = getCurrentDeviceID(activity);
+            if (!deviceID.isEmpty()) {
+                ids.add(deviceID);
+            }
+        }
+        return ids;
+    }
+
+    private static String getCurrentDeviceID(final Activity activity) {
+        final ContentResolver resolver = activity.getContentResolver();
+        @SuppressLint("HardwareIds") final String androidID = Settings.Secure.getString(resolver, Settings.Secure.ANDROID_ID);
+        if (androidID != null && androidID.length() > 0) {
+            return md5(androidID);
+        }
+        return "";
+    }
+
+    private static String md5(@NonNull final String s) {
+        try {
+            final MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+            digest.update(s.getBytes());
+            return hex(digest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            //Logger.logStackTrace(TAG, e);
+        }
+        return "";
+    }
+
+    private static String hex(@NonNull final byte[] bytes) {
+        StringBuilder builder = new StringBuilder(32 + 16);
+        final char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+        for (byte b : bytes) {
+            builder.append(hexDigits[(b >>> 4) & 0xF]);
+            builder.append(hexDigits[b & 0xF]);
+        }
+        return builder.toString();
     }
 }

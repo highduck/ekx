@@ -98,7 +98,7 @@ template<typename T>
 inline const ComponentTypeId ComponentTypeIdGenerator<T>::value = ComponentTypeIdCounter::next();
 
 template<typename Component>
-constexpr static inline ComponentTypeId type() noexcept {
+inline constexpr static ComponentTypeId type() noexcept {
     return ComponentTypeIdGenerator<Component>::value;
 }
 
@@ -331,7 +331,7 @@ public:
         component.handleToEntity.set(handle, last);
         component.handleToEntity.pop_back();
         if constexpr (!EmptyData) {
-            data.remove_swap_back(handle);
+            data.swapRemoveFromMiddle(handle);
         }
     }
 

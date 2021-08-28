@@ -14,14 +14,17 @@ import {
 import {XmlDocument} from 'xmldoc';
 import * as path from "path";
 import {buildAssetsAsync} from "../assets";
-import {collectLists, collectSourceFiles, collectSourceRootsAll} from "../collectSources";
+import {collectObjects, collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources";
 import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
 import {androidBuildAppIconAsync} from "./androidAppIcon";
 import * as fs from "fs";
-import {Project} from "../project";
 import {writeFileSync} from "fs";
+import {Project} from "../project";
 import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../cmake/generate";
+import {logger} from "../logger";
+
+const platforms = ["android"];
 
 function getAndroidSdkRoot() {
     return process.env.ANDROID_SDK_ROOT ?? path.join(process.env.HOME, 'Library/Android/sdk');
@@ -60,7 +63,7 @@ function copy_google_services_config_android(dir: string) {
     if (isFile(config_path)) {
         copyFile(config_path, path.join("app", config_file));
     } else {
-        console.warn("missing google-services.json", config_file);
+        logger.warn("missing google-services.json", config_file);
     }
 }
 
@@ -81,13 +84,16 @@ function mod_main_class(app_package_java) {
 }
 
 function mod_android_manifest(ctx) {
+    const android_manifest = collectStrings(ctx, "android_manifest", ["android"], false);
+    const android_manifestApplication = collectStrings(ctx, "android_manifestApplication", ["android"], false);
+
     let orientation = "sensorPortrait";
     if (ctx.orientation === "landscape") {
         orientation = "sensorLandscape";
     } else if (ctx.orientation === "portrait") {
         orientation = "sensorPortrait";
     } else {
-        console.warn("unknown orientation", ctx.orientation);
+        logger.warn("unknown orientation", ctx.orientation);
     }
     const configChanges = "keyboardHidden|keyboard|orientation|screenSize|layoutDirection|locale|uiMode|screenLayout|smallestScreenSize|navigation";
 
@@ -95,18 +101,25 @@ function mod_android_manifest(ctx) {
         'android:configChanges="PLACEHOLDER"': `android:configChanges="${configChanges}"`,
         "com.eliasku.template_android": ctx.android.package_id,
         'screenOrientation="sensorPortrait"': `screenOrientation="${orientation}"`,
-        "<!-- TEMPLATE ROOT -->": ctx.build.android.add_manifest.join("\n"),
-        "<!-- TEMPLATE APPLICATION -->": ctx.build.android.add_manifest_application.join("\n")
+        "<!-- TEMPLATE ROOT -->": android_manifest.join("\n"),
+        "<!-- TEMPLATE APPLICATION -->": android_manifestApplication.join("\n")
     });
 }
 
 function createStringsXML(ctx) {
+    const contents: any = {};
+    const android_strings = collectObjects(ctx, "android_strings", platforms);
+    for (const strings of android_strings) {
+        for (const key of Object.keys(strings)) {
+            contents[key] = strings[key];
+        }
+    }
+    contents.app_name = ctx.title;
+    contents.package_name = ctx.android.application_id;
+
     const doc = new XmlDocument(`<resources></resources>`);
-    const xmlStrings = ctx.build.android.xmlStrings;
-    xmlStrings.app_name = ctx.title;
-    xmlStrings.package_name = ctx.android.application_id;
-    for (let key of Object.keys(xmlStrings)) {
-        const val = xmlStrings[key];
+    for (let key of Object.keys(contents)) {
+        const val = contents[key];
         doc.children.push(new XmlDocument(`<string name="${key}" translatable="false">${val}</string>`));
     }
     writeText("app/src/main/res/values/strings.xml", doc.toString());
@@ -116,14 +129,14 @@ function mod_cmake_lists(ctx) {
     const cppSources = [];
     const cppExtensions = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
 
-    const cppRoots = collectSourceRootsAll(ctx, "cpp", "android", ".");
+    const cppRoots = collectSourceRootsAll(ctx, "cpp", platforms, ".");
     for (const cpp_dir of cppRoots) {
         collectSourceFiles(cpp_dir, cppExtensions, cppSources);
     }
 
-    const cppIncludeDirectories = collectSourceRootsAll(ctx, "cpp_include_path", "android", ".");
-    const cppDefines = collectLists(ctx, "cppDefines", "android");
-    const cppLibs = collectLists(ctx, "cppLibs", "android");
+    const cpp_include = collectSourceRootsAll(ctx, "cpp_include", platforms, ".");
+    const cpp_define = collectStrings(ctx, "cpp_define", platforms, false);
+    const cpp_lib = collectStrings(ctx, "cpp_lib", platforms, false);
 
     const cmakeName = "native-lib";
     const cmakeTarget: CMakeGenerateTarget = {
@@ -131,19 +144,20 @@ function mod_cmake_lists(ctx) {
         libraryType: "shared",
         name: cmakeName,
         sources: cppSources,
-        includeDirectories: cppRoots.concat(cppIncludeDirectories),
-        linkLibraries: cppLibs,
-        linkOptions: [],
+        includeDirectories: cppRoots.concat(cpp_include),
+        linkLibraries: cpp_lib,
+        linkOptions: ["-g"],
         compileOptions: [
-            "-ffor-scope",
-            "-pipe",
-            "-ffunction-sections", //+
-            "-fdata-sections", //+
+            "-g",
+
+            // "-ffunction-sections", //+
+            // "-fdata-sections", //+
             "-fvisibility=hidden",//+
-            "-fvisibility-inlines-hidden",
-            //"-funroll-all-loops",
-            //"-fpeel-loops",
-            "-ftree-vectorize",
+
+            // "-fvisibility-inlines-hidden",
+            // "-ftree-vectorize",
+            // "-ffor-scope",
+            // "-pipe",
 
             "-ffast-math",
             "-fno-exceptions",
@@ -157,8 +171,14 @@ function mod_cmake_lists(ctx) {
             "-Wsign-promo",
             //"-Wstrict-null-sentinel"
         ],
-        compileDefinitions: cppDefines
+        compileDefinitions: cpp_define
     };
+
+    // -fno-exceptions
+    // -fno-rtti
+    // -ffunction-sections
+    // -fdata-sections
+    // -fvisibility=hidden
 
     const cmakeProject: CMakeGenerateProject = {
         cmakeVersion: "3.19",
@@ -168,13 +188,13 @@ function mod_cmake_lists(ctx) {
         compileDefinitions: []
     };
 
-    cmakeTarget.compileOptions.push("-g");
-    cmakeTarget.linkOptions.push("LINKER:--gc-sections")
+    //cmakeTarget.linkOptions.push("$<$<CONFIG:Release>:LINKER:--gc-sections>");
+    cmakeTarget.linkOptions.push("-Wl,--build-id");
     //cmakeTarget.linkOptions.push("-Wl,--gc-sections")
 
-    cmakeTarget.compileDefinitions.push("$<$<NOT:$<CONFIG:Debug>>:NDEBUG>");
-    cmakeTarget.compileOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
-    cmakeTarget.linkOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
+    // cmakeTarget.compileDefinitions.push("$<$<NOT:$<CONFIG:Debug>>:NDEBUG>");
+    // cmakeTarget.compileOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
+    // cmakeTarget.linkOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
 
     fs.writeFileSync("CMakeLists.txt", cmakeLists(cmakeProject), "utf8");
 }
@@ -192,9 +212,9 @@ export async function export_android(ctx: Project): Promise<void> {
     const dest_path = path.join(dest_dir, platform_proj_name);
 
     if (isDir(dest_path)) {
-        console.info("Remove old project", dest_path);
+        logger.info("Remove old project", dest_path);
         deleteFolderRecursive(dest_path);
-        console.assert(!isDir(dest_path));
+        logger.assert(!isDir(dest_path));
     } else {
 
     }
@@ -219,22 +239,19 @@ export async function export_android(ctx: Project): Promise<void> {
     const cwd = process.cwd();
     process.chdir(dest_path);
     {
-        const java_roots =
-            collectSourceRootsAll(ctx, "java", "android", "app")
-                .map((p) => `'${p}'`);
+        const assets = collectSourceRootsAll(ctx, "assets", platforms, "app");
+        const android_java = collectSourceRootsAll(ctx, "android_java", platforms, "app");
+        const android_aidl = collectSourceRootsAll(ctx, "android_aidl", platforms, "app");
+        const android_dependency = collectStrings(ctx, "android_dependency", platforms, false);
 
-        const aidl_roots =
-            collectSourceRootsAll(ctx, "aidl", "android", "app")
-                .map((p) => `'${p}'`);
-
-        const assets_roots =
-            collectSourceRootsAll(ctx, "assets", "android", "app")
-                .map((p) => `'${p}'`);
+        function getGradleStringArrayExpr(arr: string[]): string {
+            return "[" + arr.map(p => `'${p}'`).join(", ") + "]";
+        }
 
         const source_sets = [
-            `main.java.srcDirs += [${java_roots.join(", ")}]`,
-            `main.aidl.srcDirs += [${aidl_roots.join(", ")}]`,
-            `main.assets.srcDirs += [${assets_roots.join(", ")}]`
+            `main.java.srcDirs += ${getGradleStringArrayExpr(android_java)}`,
+            `main.aidl.srcDirs += ${getGradleStringArrayExpr(android_aidl)}`,
+            `main.assets.srcDirs += ${getGradleStringArrayExpr(assets)}`
         ];
 
         let signingConfig = {};
@@ -246,7 +263,7 @@ export async function export_android(ctx: Project): Promise<void> {
             signingConfigBasePath = path.dirname(signingConfigPath);
             copySigningKeys(signingConfig, signingConfigBasePath);
         } else {
-            console.error("signing file not found (todo: default signing config)");
+            logger.error("signing file not found (todo: default signing config)");
             return;
         }
 
@@ -255,7 +272,7 @@ export async function export_android(ctx: Project): Promise<void> {
             'versionCode 1 // AUTO': `versionCode ${ctx.version_code} // AUTO`,
             'versionName "1.0" // AUTO': `versionName "${ctx.version_name}" // AUTO`,
             '// TEMPLATE_SOURCE_SETS': source_sets.join("\n\t\t"),
-            '// TEMPLATE_DEPENDENCIES': ctx.build.android.dependencies.join("\n\t"),
+            '// TEMPLATE_DEPENDENCIES': android_dependency.join("\n\t"),
             'release {} /* ${SIGNING_CONFIGS} */': printSigningConfigs(signingConfig),
         });
 

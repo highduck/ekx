@@ -19,9 +19,11 @@ if (EKX_BUILD_TESTS)
 endif ()
 
 if (EKX_BUILD_TESTS AND BUILD_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -g -fno-inline -fprofile-arcs -ftest-coverage -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+    # NDEBUG - ignore assertation coverage
+    set(EK_COVERAGE_BUILD_COMPILE_FLAGS "-O0 -g -fno-inline -fprofile-arcs -ftest-coverage -fno-omit-frame-pointer -fno-optimize-sibling-calls -DNDEBUG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EK_COVERAGE_BUILD_COMPILE_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EK_COVERAGE_BUILD_COMPILE_FLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
-    add_definitions(-DNDEBUG) # ignore assertation coverage
 endif ()
 
 add_subdirectory(core)

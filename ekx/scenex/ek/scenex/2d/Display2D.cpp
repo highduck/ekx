@@ -12,14 +12,13 @@ namespace ek {
 IDrawable2D::~IDrawable2D() = default;
 
 void Quad2D::draw() {
-    const Sprite* spr = src.get();
-    if(spr) {
-        const auto* texture = spr->texture.get();
-        if(texture) {
+    const Sprite *spr = src.get();
+    if (spr) {
+        const auto *texture = spr->texture.get();
+        if (texture) {
             draw2d::state.setTextureRegion(texture, spr->tex);
         }
-    }
-    else {
+    } else {
         draw2d::state.setEmptyTexture();
     }
     draw2d::quad(rect.x, rect.y, rect.width, rect.height, colors[0], colors[1], colors[2], colors[3]);
@@ -36,7 +35,7 @@ bool Quad2D::hitTest(float2 point) const {
 /** Sprite2D **/
 Sprite2D::Sprite2D() = default;
 
-Sprite2D::Sprite2D(const std::string& spriteId) :
+Sprite2D::Sprite2D(const std::string &spriteId) :
         src{spriteId} {
 }
 
@@ -44,7 +43,7 @@ void Sprite2D::draw() {
     if (!src) {
         return;
     }
-    auto& spr = *src;
+    auto &spr = *src;
     spr.draw();
 }
 
@@ -52,7 +51,7 @@ rect_f Sprite2D::getBounds() const {
     if (!src) {
         return rect_f::zero;
     }
-    auto& spr = *src;
+    auto &spr = *src;
     return spr.rect;
 }
 
@@ -70,7 +69,7 @@ bool Sprite2D::hitTest(float2 point) const {
 
 NinePatch2D::NinePatch2D() = default;
 
-NinePatch2D::NinePatch2D(const std::string& spriteId, rect_f aScaleGrid) :
+NinePatch2D::NinePatch2D(const std::string &spriteId, rect_f aScaleGrid) :
         src{spriteId},
         scale_grid{aScaleGrid} {
 }
@@ -79,7 +78,7 @@ void NinePatch2D::draw() {
     if (!src) {
         return;
     }
-    auto& spr = *src;
+    auto &spr = *src;
     draw2d::state.save_matrix().scale(1.0f / scale.x, 1.0f / scale.y);
     // TODO: rotated
     rect_f target{manual_target};
@@ -95,7 +94,7 @@ rect_f NinePatch2D::getBounds() const {
     if (!src) {
         return rect_f::zero;
     }
-    auto& spr = *src;
+    auto &spr = *src;
     return spr.rect;
 }
 
@@ -111,15 +110,15 @@ bool NinePatch2D::hitTest(float2 point) const {
 
 /** Text2D **/
 
-Text2D::Text2D()
-        : text{},
-          format{"mini", 16.0f} {
+Text2D::Text2D() : Drawable2D<Text2D>(),
+                   text{},
+                   format{"mini", 16.0f} {
 
 }
 
-Text2D::Text2D(std::string text, TextFormat format)
-        : text{std::move(text)},
-          format{format} {
+Text2D::Text2D(std::string text, TextFormat format) : Drawable2D<Text2D>(),
+                                                      text{std::move(text)},
+                                                      format{format} {
 }
 
 float findTextScale(float2 textSize, rect_f rect) {
@@ -133,8 +132,8 @@ float findTextScale(float2 textSize, rect_f rect) {
     return textScale;
 }
 
-void adjustFontSize(TextEngine& engine, const char* text, rect_f bounds) {
-    auto& info = gTextEngine.get().textBlockInfo;
+void adjustFontSize(TextEngine &engine, const char *text, rect_f bounds) {
+    auto &info = gTextEngine.get().textBlockInfo;
     const float minFontSize = 10.0f;
 
     engine.format.allowLetterWrap = false;
@@ -160,8 +159,8 @@ void adjustFontSize(TextEngine& engine, const char* text, rect_f bounds) {
 }
 
 void Text2D::draw() {
-    auto& textDrawer = gTextEngine.get().engine;
-    auto& blockInfo = gTextEngine.get().textBlockInfo;
+    auto &textDrawer = gTextEngine.get().engine;
+    auto &blockInfo = gTextEngine.get().textBlockInfo;
     textDrawer.format = format;
     textDrawer.maxWidth = format.wordWrap ? rect.width : 0.0f;
     if (fillColor.a > 0) {
@@ -173,7 +172,7 @@ void Text2D::draw() {
         draw2d::strokeRect(expand(rect, 1.0f), borderColor, 1);
     }
 
-    const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
+    const char *str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
     if (str == nullptr || *str == '\0') {
         return;
     }
@@ -202,11 +201,11 @@ rect_f Text2D::getBounds() const {
 }
 
 rect_f Text2D::getTextBounds() const {
-    auto& textDrawer = gTextEngine.get().engine;
-    auto& blockInfo = gTextEngine.get().textBlockInfo;
+    auto &textDrawer = gTextEngine.get().engine;
+    auto &blockInfo = gTextEngine.get().textBlockInfo;
     textDrawer.format = format;
 
-    const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
+    const char *str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
 
     if (adjustsFontSizeToFitBounds) {
         adjustFontSize(textDrawer, str, rect);
@@ -227,7 +226,7 @@ bool Text2D::hitTest(float2 point) const {
     return getBounds().contains(point);
 }
 
-rect_f Bounds2D::getWorldRect(const matrix_2d& world_matrix) const {
+rect_f Bounds2D::getWorldRect(const matrix_2d &world_matrix) const {
     bounds_builder_2f bb{};
     bb.add(rect, world_matrix);
     return bb.rect();
@@ -248,7 +247,7 @@ rect_f Bounds2D::getScreenRect(matrix_2d viewMatrix, matrix_2d worldMatrix) cons
 void Arc2D::draw() {
     Res<Sprite> f{sprite};
     if (f && f->texture) {
-        auto& tex = f->tex;
+        auto &tex = f->tex;
         draw2d::state.setTextureRegion(
                 f->texture.get(),
                 {tex.center_x(), tex.y, 0.0f, tex.height}
@@ -270,7 +269,7 @@ bool Arc2D::hitTest(float2 point) const {
 }
 
 /** utilities **/
-void set_gradient_quad(ecs::EntityApi e, const rect_f& rc, argb32_t top, argb32_t bottom) {
+void set_gradient_quad(ecs::EntityApi e, const rect_f &rc, argb32_t top, argb32_t bottom) {
     auto q = std::make_unique<Quad2D>();
     q->rect = rc;
     q->colors[0] = top;

@@ -159,7 +159,7 @@ void update_particles() {
             if (p.is_alive()) {
                 ++i;
             } else {
-                particles.remove_swap_back(i);
+                particles.swapRemove(i);
             }
         }
     }

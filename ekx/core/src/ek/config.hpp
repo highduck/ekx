@@ -1,6 +1,7 @@
 #pragma once
 
 //#define EK_CONFIG_PARANOIA
+
 /// Log trace and debug levels even for Release build
 #ifdef EK_CONFIG_PARANOIA
 #define EK_CONFIG_PROFILING
@@ -36,7 +37,11 @@
  * If one allocator used by multiple threads - code should be disabled
  *
  */
+#ifndef EK_ALLOCATION_TRACKER
 #define EK_ALLOCATION_TRACKER
+#endif
+#ifndef EK_ALLOCATION_TRACKER_STATS
 #define EK_ALLOCATION_TRACKER_STATS
+#endif
 
 #endif

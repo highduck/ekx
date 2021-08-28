@@ -1,6 +1,8 @@
 import * as path from "path";
 import {VERSION_INDEX_CODE, VERSION_INDEX_MAJOR, VERSION_INDEX_MINOR, VERSION_INDEX_PATCH} from "./version";
 import {resolveFrom} from "./utility/resolveFrom";
+import {ModuleDef, validateModuleDef} from "./module";
+import {logger} from "./logger";
 
 class ProjectPath {
     ekc = path.dirname(resolveFrom(__dirname, "@ekx/ekc/package.json"));
@@ -10,67 +12,9 @@ class ProjectPath {
 
     cli = path.resolve(__dirname, '..');
     templates = path.resolve(__dirname, '../templates');
-
-    dump() {
-        for (const [k, v] of Object.entries(this)) {
-            console.info(`${k}: ${v}`);
-        }
-    }
 }
 
 type RegisteredProject = any;
-
-export type LegacySourceKind = "cpp" | "cpp_include_path" | "js" | "pre_js" | "java" | "aidl" | "assets" | "cppDefines" | "cppLibs";
-export type LegacySources = string[];
-
-interface ModuleDef {
-    name?: string;
-    cpp?: LegacySources;
-    cppDefines?: string[];
-    cppLibs?: string[];
-    assets?: string[];
-    android?: {
-        cpp?: LegacySources;
-        cppDefines?: string[];
-        cppLibs?: string[];
-        java?: LegacySources;
-        aidl?: LegacySources;
-        xmlStrings?: { [name: string]: string };
-    };
-    macos?: {
-        cpp?: LegacySources;
-        cppDefines?: string[];
-    };
-    ios?: {
-        cpp?: LegacySources;
-        cppDefines?: string[];
-        cpp_flags?: {
-            files?: string[];
-            flags?: string;
-        };
-        xcode?: {
-            capabilities?: string[];
-            frameworks?: string[];
-            pods?: string[];
-            plist?: any[];
-        };
-    };
-    web?: {
-        cpp?: LegacySources;
-        cppDefines?: string[];
-        cppLibs?: string[];
-    };
-    windows?: {
-        cpp?: LegacySources;
-        cppDefines?: string[];
-        cppLibs?: string[];
-    };
-    linux?: {
-        cpp?: LegacySources;
-        cppDefines?: string[];
-        cppLibs?: string[];
-    };
-}
 
 export class Project {
     readonly path = new ProjectPath();
@@ -117,16 +61,6 @@ export class Project {
 
     market_asset?: string;
 
-    build = {
-        android: {
-            dependencies: [],
-            add_manifest: [],
-            add_manifest_application: [],
-            source_dirs: [],
-            xmlStrings: {}
-        }
-    };
-
     android: {
         // android application package name
         application_id?: string,
@@ -135,14 +69,19 @@ export class Project {
         googleServicesConfigDir?: string,
         signingConfigPath?: string,
         // path to service account api key json file, used for fastlane automation
-        serviceAccountKey?: string
+        serviceAccountKey?: string,
+
+        admob_app_id?: string,
+        game_services_id?: string
     };
 
     ios: {
         application_id?: string,
         googleServicesConfigDir?: string,
         // path to JSON with app-store credentials, used for fastlane automation
-        appStoreCredentials?: string
+        appStoreCredentials?: string,
+
+        admob_app_id?: string
     } = {};
 
     web: {
@@ -166,37 +105,34 @@ export class Project {
     } = {};
 
     addModule(def: ModuleDef) {
+        validateModuleDef(def);
         this.modules.push(def);
-        if (def && def.name) {
-            console.info("Module:", def.name);
-        }
     }
 
-    includeProject(projectPath: string) {
-        if (this.projects[projectPath]) {
+    loadModule(configPath: string) {
+        if (this.projects[configPath]) {
             return;
         }
-
-        const project_js = path.join(projectPath, "ek.js");
-        let projectConfigurator = null;
         try {
-            projectConfigurator = require(project_js);
+            logger.log(`Loading module from "${configPath}"`);
+            const configurator = require(configPath);
+            if (configurator) {
+                this.projects[configPath] = configurator(this);
+            }
         } catch {
-            console.error("Project not included", project_js);
-        }
-
-        if (projectConfigurator) {
-            this.projects[projectPath] = projectConfigurator(this);
+            logger.error("Module is not resolved", configPath);
         }
     }
 
     importModule(moduleId: string, fromDir?: string) {
         fromDir = fromDir ?? process.cwd();
-        const projectPath = resolveFrom(fromDir, moduleId + "/ek.js");
-        if (projectPath == null) {
-            console.warn(`ek.js module not found for "${moduleId}" from dir "${fromDir}"`);
+        const moduleConfigPath = resolveFrom(fromDir, moduleId + "/ek.js");
+        if (moduleConfigPath != null) {
+            this.loadModule(moduleConfigPath);
         }
-        this.includeProject(path.dirname(projectPath));
+        else {
+            logger.warn(`ek.js module not found for "${moduleId}" from dir "${fromDir}"`);
+        }
     }
 
     async runBuildSteps() {

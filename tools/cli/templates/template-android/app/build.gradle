@@ -5,6 +5,7 @@ apply plugin: 'com.google.firebase.crashlytics'
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
+    ndkVersion "23.0.7599858"
     signingConfigs {
         release {} /* ${SIGNING_CONFIGS} */
     }
@@ -31,6 +32,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            multiDexKeepProguard file('multidex-config.pro')
             signingConfig signingConfigs.release
             firebaseCrashlytics {
                 // Enable processing and uploading of native symbols to Crashlytics servers.

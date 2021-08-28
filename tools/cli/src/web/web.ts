@@ -5,11 +5,12 @@ import {copyFolderRecursiveSync, executeAsync, isDir, isFile, makeDirs, withPath
 import {buildAssetsAsync} from "../assets";
 import * as Mustache from 'mustache';
 import {webBuildAppIconAsync} from "./webAppIcon";
-import {collectLists, collectSourceFiles, collectSourceRootsAll} from "../collectSources";
+import {collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources";
 import {Project} from "../project";
 import {cmake} from "../cmake/build";
 import {serve} from "./serve";
 import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../cmake/generate";
+import {logger} from "../logger";
 
 function getEmscriptenSDKPath(): string {
     if (process.env.EMSDK) {
@@ -19,41 +20,42 @@ function getEmscriptenSDKPath(): string {
 }
 
 function renderCMakeFile(ctx, buildType): string {
+    const platforms = ["web"];
     const cppSourceFiles = [];
     const cppExtensions = ["hpp", "hxx", "h", "cpp", "cxx", "c", "cc", "m", "mm"];
-    const cppSourceRoots = collectSourceRootsAll(ctx, "cpp", "web", ".");
+    const cppSourceRoots = collectSourceRootsAll(ctx, "cpp", platforms, ".");
     for (const cppSourceRoot of cppSourceRoots) {
         collectSourceFiles(cppSourceRoot, cppExtensions, cppSourceFiles);
     }
-    const cpp_include_path_list = collectSourceRootsAll(ctx, "cpp_include_path", "web", ".");
+    const cpp_include = collectSourceRootsAll(ctx, "cpp_include", platforms, ".");
 
     const jsExtensions = ["js"];
 
     const jsLibraryFiles = [];
-    const jsLibraryRoots = collectSourceRootsAll(ctx, "js", "web", ".");
-    for (const jsLibraryRoot of jsLibraryRoots) {
+    const js = collectSourceRootsAll(ctx, "js", platforms, ".");
+    for (const jsLibraryRoot of js) {
         collectSourceFiles(jsLibraryRoot, jsExtensions, jsLibraryFiles);
     }
 
     const jsPreFiles = [];
-    const jsPreRoots = collectSourceRootsAll(ctx, "pre_js", "web", ".");
-    for (const jsPreRoot of jsPreRoots) {
+    const js_pre = collectSourceRootsAll(ctx, "js_pre", platforms, ".");
+    for (const jsPreRoot of js_pre) {
         collectSourceFiles(jsPreRoot, jsExtensions, jsPreFiles);
     }
 
-    const cppDefines = collectLists(ctx, "cppDefines", "web");
-    const cppLibs = collectLists(ctx, "cppLibs", "web");
+    const cpp_define = collectStrings(ctx, "cpp_define", platforms, false);
+    const cpp_lib = collectStrings(ctx, "cpp_lib", platforms, false);
 
     const cmakeTarget: CMakeGenerateTarget = {
         type: "executable",
         libraryType: "static",
         name: ctx.name,
         sources: cppSourceFiles,
-        includeDirectories: cppSourceRoots.concat(cpp_include_path_list),
-        linkLibraries: cppLibs,
+        includeDirectories: cppSourceRoots.concat(cpp_include),
+        linkLibraries: cpp_lib,
         linkOptions: [],
         compileOptions: ["-ffast-math", "-fno-exceptions", "-fno-rtti", "-Wall", "-Wextra"],
-        compileDefinitions: cppDefines
+        compileDefinitions: cpp_define
     };
 
     const cmakeProject: CMakeGenerateProject = {
@@ -67,7 +69,19 @@ function renderCMakeFile(ctx, buildType): string {
     if (buildType === "Release") {
         cmakeTarget.linkOptions.push("-Oz", "-flto", "-g0");
         cmakeTarget.compileOptions.push("-Oz", "-flto", "-g0");
+        if (1) {
+            cmakeTarget.linkOptions.push("-g0");
+            cmakeTarget.compileOptions.push("-g0");
+        } else {
+            cmakeTarget.linkOptions.push("-gsource-map");
+            cmakeTarget.compileOptions.push("-g");
+        }
         cmakeTarget.compileDefinitions.push("NDEBUG");
+    }
+
+    if (buildType === "Debug") {
+        cmakeTarget.linkOptions.push("-Oz", "-gsource-map");
+        cmakeTarget.compileOptions.push("-Oz", "-g");
     }
 
     for (let jsLibraryFile of jsLibraryFiles) {
@@ -78,8 +92,9 @@ function renderCMakeFile(ctx, buildType): string {
     }
 
     const emOptions: any = {
-        ASSERTIONS: buildType === "Debug" ? 1 : 0,
-        // SAFE_HEAP: 1,
+        ASSERTIONS: buildType === "Debug" ? 2 : 0,
+        SAFE_HEAP: buildType === "Debug" ? 1 : 0,
+        DEMANGLE_SUPPORT: buildType === "Debug" ? 1 : 0,
         // STACK_OVERFLOW_CHECK: 2,
         // ALIASING_FUNCTION_POINTERS: 0,
         // MODULARIZE: 1,
@@ -108,7 +123,9 @@ function renderCMakeFile(ctx, buildType): string {
         ALLOW_UNIMPLEMENTED_SYSCALLS: 0
     };
 
-    cmakeTarget.linkOptions.push("--closure 1");
+    if (buildType === "Release") {
+        cmakeTarget.linkOptions.push("--closure 1");
+    }
 
     for (let opt of Object.keys(emOptions)) {
         cmakeTarget.linkOptions.push(`-s${opt}=${emOptions[opt]}`);
@@ -203,7 +220,7 @@ export async function export_web(ctx: Project): Promise<void> {
     try {
         await assetsTask;
     } catch (e) {
-        console.error("assets export failed", e);
+        logger.error("assets export failed", e);
         throw e;
     }
     copyFolderRecursiveSync("export/contents/assets", "export/web/assets");
@@ -211,27 +228,33 @@ export async function export_web(ctx: Project): Promise<void> {
     try {
         await buildTask;
     } catch (e) {
-        console.error("build failed", e);
+        logger.error("build failed", e);
         throw e;
     }
     const cmakeBuildDir = getCMakeBuildDir(buildType);
     const projectDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export", ctx.name + "-" + ctx.current_target);
     copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".js"), path.join(outputDir, ctx.name + ".js"));
     copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm"), path.join(outputDir, ctx.name + ".wasm"));
+    //if (buildType === "Debug") {
+    try {
+        copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm.map"), path.join(outputDir, ctx.name + ".wasm.map"));
+    } catch {
+    }
+    //}
 
     try {
         await iconsTask;
     } catch (e) {
-        console.error("icons export failed", e);
+        logger.error("icons export failed", e);
         throw e;
     }
 
-    console.info("Web export completed");
-    console.info("Time:", (Date.now() - timestamp) / 1000, "sec");
+    logger.info("Web export completed");
+    logger.info("Time:", (Date.now() - timestamp) / 1000, "sec");
 
     if (ctx.options.deploy != null) {
         // always deploy just to the default firebase hosting
-        console.info("Publish Web beta to Firebase host");
+        logger.info("Publish Web beta to Firebase host");
         const args = [];
         let token = process.env.FIREBASE_TOKEN;
         if (!token && ctx.web.firebaseToken) {
@@ -239,16 +262,16 @@ export async function export_web(ctx: Project): Promise<void> {
                 if (fs.existsSync(ctx.web.firebaseToken)) {
                     token = fs.readFileSync(ctx.web.firebaseToken, 'utf-8');
                 } else {
-                    console.error(`Firebase Token file path not found`);
+                    logger.error(`Firebase Token file path not found`);
                 }
             } catch {
-                console.error(`Cannot read Firebase Token`);
+                logger.error(`Cannot read Firebase Token`);
             }
         }
         if (token) {
             args.push("--token", token);
         } else {
-            console.warn("No Firebase Token. Trying deploy with local firebase auth");
+            logger.warn("No Firebase Token. Trying deploy with local firebase auth");
         }
         await executeAsync("firebase", [
             "deploy",

@@ -1,5 +1,6 @@
 import * as path from "path";
 import {copyFile, isFile} from "../utils";
+import {logger} from "../logger";
 
 interface SigningConfig {
     key_alias: string;
@@ -13,13 +14,12 @@ type SigningConfigs = { [flavor: string]: SigningConfig };
 function printSigningConfig(flavor: string, config: SigningConfig) {
     let str = "";
     if (flavor && config) {
-        str = `
-    ${flavor} {
-        storeFile file('${path.basename(config.store_keystore)}')
-        storePassword '${config.store_password}'
-        keyAlias '${config.key_alias}'
-        keyPassword '${config.key_password}'
-    }`;
+        str = `\t\t${flavor} {
+\t\t    storeFile file('${path.basename(config.store_keystore)}')
+\t\t    storePassword '${config.store_password}'
+\t\t    keyAlias '${config.key_alias}'
+\t\t    keyPassword '${config.key_password}'
+\t\t}`;
     }
     return str;
 }
@@ -44,7 +44,7 @@ export function copySigningKeys(configs: SigningConfigs, basePath: string) {
                 if (!isFile(filepath)) {
                     src = path.resolve(basePath, filepath);
                     if (!isFile(src)) {
-                        console.warn("missing keystore", filepath);
+                        logger.warn("missing keystore", filepath);
                         continue;
                     }
                 }
