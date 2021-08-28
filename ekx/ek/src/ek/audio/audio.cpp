@@ -25,10 +25,9 @@ void initialize() {
     EK_TRACE << "audio initialize";
     EK_ASSERT(!audioSystem.initialized);
 #if defined(__ANDROID__)
-    auto* env = ek::android::get_jni_env();
     auto activity = ek::android::get_activity();
     auto assets = ek::android::assetManagerRef();
-    auph::setAndroidActivity(env, activity, assets);
+    auph::setAndroidActivity(ek::android::get_jni_env, activity, assets);
 #endif
     auph::init();
     audioSystem.initialized = true;

@@ -1,68 +1,55 @@
-const path = require('path');
-
-module.exports = (project) => {
+/**
+ *
+ * @param {Project} project
+ */
+function setup(project) {
     project.addModule({
         name: "ek",
         path: __dirname,
-        cpp: [path.join(__dirname, "src")],
+        cpp: ["src"],
         android: {
-            cpp: [path.join(__dirname, "platforms/android")],
-            java: [path.join(__dirname, "platforms/android/java")],
-            cppLibs: [
+            cpp: "platforms/android",
+            cpp_lib: [
                 // basic Android libraries
                 "log",
                 "android",
                 // for graphics module (sokol_gfx)
                 "GLESv2"
-            ]
-        },
-        macos: {
-            cpp: [
-                path.join(__dirname, "platforms/apple")
             ],
+            android_java: "platforms/android/java"
+        },
+        apple: {
+            cpp: "platforms/apple",
             cpp_flags: {
                 files: [
-                    path.join(__dirname, "src/ek/graphics/graphics.cpp"),
-                    path.join(__dirname, "src/ek/audio/audio.cpp")
+                    "src/ek/graphics/graphics.cpp",
+                    "src/ek/audio/audio.cpp"
                 ],
                 flags: "-x objective-c++"
             },
         },
         ios: {
-            cpp: [
-                path.join(__dirname, "platforms/apple")
+            xcode_framework: [
+                "Foundation", "UIKit", "Metal", "MetalKit", "QuartzCore"
             ],
-            cpp_flags: {
-                files: [
-                    path.join(__dirname, "src/ek/graphics/graphics.cpp"),
-                    path.join(__dirname, "src/ek/audio/audio.cpp")
-                ],
-                flags: "-x objective-c++"
-            },
-            xcode: {
-                frameworks: [
-                    "Foundation", "UIKit", "Metal", "MetalKit",
-                    "QuartzCore"
-                ],
-                pods: [
-                    "Firebase/Crashlytics",
-                    "Firebase/Analytics"
-                ]
-            }
-        },
-        web: {
-            cpp: [path.join(__dirname, "platforms/web")],
-            js: [path.join(__dirname, "platforms/web")],
-            cppLibs: [
-                "GLESv2"
+            xcode_pod: [
+                "Firebase/Crashlytics",
+                "Firebase/Analytics"
             ]
         },
+        web: {
+            cpp: "platforms/web",
+            cpp_lib: "GLESv2",
+            js: "platforms/web"
+        },
         windows: {
-            cpp: [path.join(__dirname, "platforms/windows")]
+            cpp: "platforms/windows"
         },
         linux: {
-            cpp: [path.join(__dirname, "platforms/linux")]
+            cpp: "platforms/linux"
         }
     });
     project.importModule("auph", __dirname);
-};
+}
+
+module.exports = setup;

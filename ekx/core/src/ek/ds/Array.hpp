@@ -250,8 +250,19 @@ public:
         return false;
     }
 
-    inline void remove_swap_back(unsigned i) {
-        EK_ASSERT_R2(i != _size - 1);
+    inline void swapRemove(unsigned i) {
+        EK_ASSERT_R2(i < _size);
+        (_data + i)->~T();
+        --_size;
+        if(i < _size) {
+            constructMove(_data + i, _data + _size, 1);
+        }
+    }
+
+    inline void swapRemoveFromMiddle(unsigned i) {
+        // element to remove SHOULD NOT be at the end of the list,
+        // to remove from the end you need another function!
+        EK_ASSERT_R2(i < (_size - 1));
         (_data + i)->~T();
         --_size;
         constructMove(_data + i, _data + _size, 1);

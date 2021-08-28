@@ -117,6 +117,7 @@ Texture* Texture::createSolid32(int width, int height, uint32_t pixelColor) {
 }
 
 bool Texture::getPixels(void* pixels) const {
+    (void)pixels;
 #if EK_MACOS
     // get the texture from the sokol internals here...
     _sg_image_t* img = _sg_lookup_image(&_sg.pools, image.id);

@@ -1,48 +1,46 @@
-const path = require("path");
-
-module.exports = (ctx) => {
-    ctx.addModule({
-        name: "plugin-game-services",
-        cpp: [path.join(__dirname, "src")],
-        android: {
-            cpp: [path.join(__dirname, "android")],
-            java: [path.join(__dirname, "android/java")]
-        },
-        ios: {
-            cpp: [path.join(__dirname, "ios")],
-            xcode: {
-                capabilities: ["com.apple.GameCenter"],
-                frameworks: ["GameKit"]
-            }
-        },
-        web: {
-            cpp: [path.join(__dirname, "null")]
-        },
-        macos: {
-            cpp: [path.join(__dirname, "null")]
-        },
-    });
-
-    ctx.build.android.dependencies.push(
-        "implementation 'com.google.android.gms:play-services-base:17.6.0'",
-        "implementation 'com.google.android.gms:play-services-games:21.0.0'",
-        "implementation 'com.google.android.gms:play-services-auth:19.2.0'",
-    );
-
-    ctx.build.android.add_manifest_application.push(`
-        <meta-data
-            android:name="com.google.android.gms.games.APP_ID"
-            android:value="@string/gs_app_id" />
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />`);
-
-    if (ctx.current_target === "android") {
-        if (ctx.android.game_services_id) {
-            ctx.build.android.xmlStrings.gs_app_id = ctx.android.game_services_id;
-        }
-        else {
-            console.error("please set android.game_services_id");
+/**
+ *
+ * @param {Project} project
+ */
+function setup(project) {
+    if (project.current_target === "android") {
+        if (!project.android.game_services_id) {
+            console.error("please set android.game_services_id !!!");
         }
     }
-};
+
+    project.addModule({
+        name: "plugin-game-services",
+        path: __dirname,
+        cpp: "src",
+        android: {
+            cpp: "android",
+            android_java: "android/java",
+            android_dependency: [
+                "implementation 'com.google.android.gms:play-services-base:17.6.0'",
+                "implementation 'com.google.android.gms:play-services-games:21.0.0'",
+                "implementation 'com.google.android.gms:play-services-auth:19.2.0'"
+            ],
+            android_manifestApplication: [
+                `<meta-data android:name="com.google.android.gms.games.APP_ID" android:value="@string/gs_app_id" />`,
+                `<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />`
+            ],
+            android_strings: {
+                gs_app_id: project.android.game_services_id
+            }
+        },
+        ios: {
+            cpp: "ios",
+            xcode_capability: "com.apple.GameCenter",
+            xcode_framework: "GameKit"
+        },
+        web: {
+            cpp: "null"
+        },
+        macos: {
+            cpp: "null"
+        },
+    });
+}
+
+module.exports = setup;

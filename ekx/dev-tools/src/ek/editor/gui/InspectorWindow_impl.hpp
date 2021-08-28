@@ -71,10 +71,8 @@ inline void guiDisplayComponent(ecs::EntityApi e, const char* name, Func fn) {
         if (d.is<C>()) {
             auto data = d.tryGet<C>();
             if (data) {
-#ifndef NDEBUG
                 ImGui::Separator();
-                ImGui::Checkbox("Debug Bounds", &d.drawBounds);
-#endif
+                ImGui::CheckboxFlags("Debug Bounds", &d.flags, 1);
                 guiComponentPanel(name, *data, fn);
             }
         }

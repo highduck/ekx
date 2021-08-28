@@ -3,30 +3,25 @@
 #include <cstdint>
 
 namespace ek {
-namespace details {
 
-template<typename Kind>
-struct TypeIndexCounter {
-    static uint32_t value;
-
-    inline static uint32_t next() {
-        return value++;
-    }
-};
-
-template<typename Kind>
-uint32_t TypeIndexCounter<Kind>::value{0};
-
+template<typename Kind = void>
+inline uint32_t nextTypeIndex() {
+    static uint32_t g = 0;
+    return g++;
 }
 
-// 1. match between TU
-// 2. starts from 0 for each Kind types family
+template<typename T, typename Kind = void>
+inline uint32_t typeIndex() {
+    static uint32_t index = nextTypeIndex<Kind>();
+    return index;
+}
+
 template<typename T, typename Kind = void>
 struct TypeIndex {
     static const uint32_t value;
 };
 
 template<typename T, typename Kind>
-const uint32_t TypeIndex<T, Kind>::value = details::TypeIndexCounter<Kind>::next();
+inline const uint32_t TypeIndex<T, Kind>::value = typeIndex<T, Kind>();
 
 }

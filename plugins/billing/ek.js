@@ -1,27 +1,29 @@
-const path = require("path");
-
-module.exports = (ctx) => {
-    ctx.addModule({
+/**
+ *
+ * @param {Project} project
+ */
+function setup(project) {
+    project.addModule({
         name: "plugin-billing",
-        cpp: [path.join(__dirname, "src")],
+        path: __dirname,
+        cpp: "src",
         android: {
-            cpp: [path.join(__dirname, "android")],
-            java: [path.join(__dirname, "android/java")]
+            cpp: "android",
+            android_java: "android/java",
+            android_dependency: `implementation 'com.android.billingclient:billing:4.0.0'`
         },
         ios: {
-            cpp: [path.join(__dirname, "ios")],
-            xcode: {
-                capabilities: ["com.apple.InAppPurchase"],
-                frameworks: ["StoreKit"]
-            }
+            cpp: "ios",
+            xcode_capability: "com.apple.InAppPurchase",
+            xcode_framework: "StoreKit"
         },
         web: {
-            cpp: [path.join(__dirname, "sim")]
+            cpp: "sim"
         },
         macos: {
-            cpp: [path.join(__dirname, "sim")]
+            cpp: "sim"
         },
     });
+}
 
-    ctx.build.android.dependencies.push(`implementation 'com.android.billingclient:billing:4.0.0'`);
-};
+module.exports = setup;

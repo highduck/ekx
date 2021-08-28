@@ -182,11 +182,13 @@ const uint8_t event_map_[17] = {
         event_nop, // 5
         event_nop, // 6
         event_nop, // 7
-        event_nop, // 8
-        event_nop, // 9
+        static_cast<uint8_t>(event_type::key_down), // 8
+        static_cast<uint8_t>(event_type::key_up), // 9
+
         static_cast<uint8_t>(event_type::app_resume), // 10
         static_cast<uint8_t>(event_type::app_pause),
         static_cast<uint8_t>(event_type::app_back_button),
+
         static_cast<uint8_t>(event_type::touch_begin), // 13
         static_cast<uint8_t>(event_type::touch_move),
         static_cast<uint8_t>(event_type::touch_end), // 15
@@ -222,6 +224,17 @@ EK_JNI_VOID(sendTouch, jint type, jint id, jfloat x, jfloat y) {
     ev.id = static_cast<uint64_t>(id) + 1;
     ev.pos.x = x;
     ev.pos.y = y;
+    dispatch_event(ev);
+}
+
+EK_JNI_VOID(sendKeyEvent, jint type, jint code, jint modifiers) {
+    assert(type >= 0 && type < 17);
+
+    uint8_t event_type_id = event_map_[type];
+    event_t ev{static_cast<event_type>(event_type_id)};
+    ev.code = static_cast<key_code>(code);
+    // TODO: modifiers
+
     dispatch_event(ev);
 }
 

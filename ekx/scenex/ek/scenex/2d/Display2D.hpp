@@ -9,6 +9,7 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/graphics/graphics.hpp>
 #include "Sprite.hpp"
+#include <ek/debug/LogStream.hpp>
 
 namespace ek {
 
@@ -46,9 +47,10 @@ protected:
 template<typename T>
 class Drawable2D : public IDrawable2D {
 public:
-    Drawable2D() :
-            IDrawable2D{TypeIndex<T, IDrawable2D>::value} {
+    Drawable2D() : IDrawable2D{TypeIndex<T, IDrawable2D>::value} {
     }
+
+    ~Drawable2D() override = default;
 };
 
 struct Bounds2D {
@@ -64,7 +66,7 @@ struct Bounds2D {
     bool culling = false;
 
     [[nodiscard]]
-    rect_f getWorldRect(const matrix_2d& worldMatrix) const;
+    rect_f getWorldRect(const matrix_2d &worldMatrix) const;
 
     [[nodiscard]]
     rect_f getScreenRect(matrix_2d viewMatrix, matrix_2d worldMatrix) const;
@@ -76,27 +78,35 @@ struct Display2D {
     // state management
     Res<graphics::Shader> program;
 
-#ifndef NDEBUG
-    bool drawBounds = false;
-#endif
+    // 1 - draw debug bounds
+    int flags = 0;
 
     Display2D() = default;
 
-    explicit Display2D(IDrawable2D* ptr) :
+    explicit Display2D(IDrawable2D *ptr) :
             drawable(ptr) {
     }
 
     template<typename T>
     [[nodiscard]]
-    inline T& get() const {
-        return *static_cast<T*>(drawable.get());
+    inline T &get() const {
+        if (!drawable) {
+            EK_WARN("Drawable2D required");
+        }
+        if (!drawable->matchType<T>()) {
+            EK_WARN("Drawable2D TypeID mismatch: required %u, got %u", TypeIndex<T, IDrawable2D>::value,
+                    drawable->getTypeID());
+        }
+        EK_ASSERT(!!drawable);
+        EK_ASSERT(drawable->matchType<T>());
+        return *static_cast<T *>(drawable.get());
     }
 
     template<typename T>
     [[nodiscard]]
-    inline T* tryGet() const {
+    inline T *tryGet() const {
         if (drawable && drawable->matchType<T>()) {
-            return static_cast<T*>(drawable.get());
+            return static_cast<T *>(drawable.get());
         }
         return nullptr;
     }
@@ -118,27 +128,31 @@ struct Display2D {
     }
 
     template<typename T, typename ...Args>
-    inline static T& make(ecs::EntityApi e, Args&& ...args) {
-        auto& d = e.get_or_create<Display2D>();
+    inline static T &make(ecs::EntityApi e, Args &&...args) {
+        auto &d = e.get_or_create<Display2D>();
         d.drawable = std::move(std::make_unique<T>(args...));
-        return static_cast<T&>(*d.drawable);
+        return static_cast<T &>(*d.drawable);
     }
 
     template<typename T>
-    static T& get(ecs::EntityApi e) {
-        return e.get<Display2D>().get<T>();
+    static T &get(ecs::EntityApi e) {
+        auto *display = e.tryGet<Display2D>();
+        if (!display) {
+            EK_WARN("Display2D required");
+        }
+        return display->get<T>();
     }
 
     template<typename T>
-    static T* tryGet(ecs::EntityApi e) {
-        auto* display = e.tryGet<Display2D>();
+    static T *tryGet(ecs::EntityApi e) {
+        auto *display = e.tryGet<Display2D>();
         return display ? display->tryGet<T>() : nullptr;
     }
 
     template<typename T>
-    T& makeDrawable() {
+    T &makeDrawable() {
         drawable = std::move(std::make_unique<T>());
-        return static_cast<T&>(*drawable);
+        return static_cast<T &>(*drawable);
     }
 };
 
@@ -157,18 +171,18 @@ public:
     [[nodiscard]]
     bool hitTest(float2 point) const override;
 
-    inline Quad2D& setGradientVertical(argb32_t top, argb32_t bottom) {
+    inline Quad2D &setGradientVertical(argb32_t top, argb32_t bottom) {
         colors[0] = colors[1] = top;
         colors[2] = colors[3] = bottom;
         return *this;
     };
 
-    inline Quad2D& setColor(argb32_t color) {
+    inline Quad2D &setColor(argb32_t color) {
         colors[0] = colors[1] = colors[2] = colors[3] = color;
         return *this;
     };
 
-    inline Quad2D& setHalfExtents(float hw, float hh) {
+    inline Quad2D &setHalfExtents(float hw, float hh) {
         rect.set(-hw, -hh, 2.0f * hw, 2.0f * hh);
         return *this;
     }
@@ -182,7 +196,7 @@ public:
 
     Sprite2D();
 
-    explicit Sprite2D(const std::string& spriteId);
+    explicit Sprite2D(const std::string &spriteId);
 
     void draw() override;
 
@@ -205,7 +219,7 @@ public:
 
     NinePatch2D();
 
-    explicit NinePatch2D(const std::string& spriteId, rect_f aScaleGrid = rect_f::zero);
+    explicit NinePatch2D(const std::string &spriteId, rect_f aScaleGrid = rect_f::zero);
 
     void draw() override;
 
@@ -275,19 +289,25 @@ public:
 
 
 /** utilities **/
-void set_gradient_quad(ecs::EntityApi e, const rect_f& rc, argb32_t top, argb32_t bottom);
+void set_gradient_quad(ecs::EntityApi e, const rect_f &rc, argb32_t top, argb32_t bottom);
 
-inline void set_color_quad(ecs::EntityApi e, const rect_f& rc, argb32_t color) {
+inline void set_color_quad(ecs::EntityApi e, const rect_f &rc, argb32_t color) {
     set_gradient_quad(e, rc, color, color);
 }
 
 template<typename T>
-inline T& getDrawable(ecs::EntityApi e) {
+inline T &getDrawable(ecs::EntityApi e) {
     return e.get<Display2D>().get<T>();
 }
 
-inline void setText(ecs::EntityApi e, const std::string& v) {
-    e.get<Display2D>().get<Text2D>().text = v;
+inline void setText(ecs::EntityApi e, const std::string &v) {
+    auto *d = e.tryGet<Display2D>();
+    if (d) {
+        auto *txt = d->tryGet<Text2D>();
+        if (txt) {
+            txt->text = v;
+        }
+    }
 }
 
 

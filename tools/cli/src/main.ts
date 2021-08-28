@@ -6,32 +6,50 @@ import {Project} from "./project";
 import {increaseProjectVersion} from "./version";
 import {UtilityConfig} from "./utils";
 import * as fs from "fs";
+import {fixMP3} from "./utility/fix-mp3";
+import * as process from "process";
+import {logger} from "./logger";
 
-console.debug("Arguments:", process.argv);
-console.debug("Working directory:", process.cwd());
+logger.info("📺 EKX 📺");
 
-if(process.argv.indexOf("--verbose") >= 0 || process.argv.indexOf("-v") >= 0) {
+if (process.argv.indexOf("help") >= 0) {
+    logger.info("--verbose : enable verbose mode");
+    logger.info("--diag : enable special debug output");
+}
+
+if (process.argv.indexOf("--verbose") >= 0 || process.argv.indexOf("-v") >= 0) {
     UtilityConfig.verbose = true;
 }
+
+if (process.argv.indexOf("--diag") >= 0) {
+    logger._diag = true;
+}
+
+logger.log("process.argv:", process.argv);
+logger.log("process.cwd:", process.cwd());
 
 defaultRun();
 
 function defaultRun() {
-    const project = new Project();
-    project.path.dump();
 
-    console.log("=== EK PROJECT ===");
-    console.log("Current Target:", project.current_target);
-    console.log("Arguments:", project.args);
+    const project = new Project();
+
+    logger.log(project.path);
+    logger.log("- current target:", project.current_target);
+    logger.log("- arguments:", project.args);
+
+    if (project.args.indexOf("fix-mp3") >= 0) {
+        fixMP3(path.join(project.getAssetsInput(), "**/*.mp3")).catch(err => process.exit(-1));
+        return;
+    }
 
     if (project.options.clean) {
         const dir = path.join(process.cwd(), "export");
-        if(fs.existsSync(dir)) {
-            console.info("Clean: remove EXPORT directory", dir)
+        if (fs.existsSync(dir)) {
+            logger.info("🗑 Remove EXPORT directory", dir)
             fs.rmSync(dir, {recursive: true});
-        }
-        else {
-            console.log("Clean: nothing to remove", dir)
+        } else {
+            logger.log("🗑 Nothing to remove", dir)
         }
     }
 
@@ -48,7 +66,7 @@ function defaultRun() {
     project.importModule("@ekx/ekx/core", project.path.EKX_ROOT);
     project.importModule("@ekx/ekx/sg-file", project.path.EKX_ROOT);
     project.importModule("@ekx/ekx/scenex", project.path.EKX_ROOT);
-    project.includeProject(process.cwd());
+    project.loadModule(path.resolve(process.cwd(), "ek.js"));
 
     project.runBuildSteps().then();
 }

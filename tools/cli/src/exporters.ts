@@ -25,7 +25,7 @@ export function addExportBuildStep(project: Project) {
 
         // project.build_steps.push(() => {
         //     const roots = get_source_roots(project);
-        //     console.log(roots);
+        //     logger.log(roots);
         // });
     }
 }

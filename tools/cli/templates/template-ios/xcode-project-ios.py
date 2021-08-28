@@ -59,7 +59,6 @@ project.set_flags("IPHONEOS_DEPLOYMENT_TARGET", "12.0")
 header_search_paths = ["$(inherited)"]
 caps = []
 compileDefines = ["$(inherited)"]
-#"-DGLES_SILENCE_DEPRECATION"
 
 def apply_module_settings(decl, group):
     if "assets" in decl:
@@ -71,21 +70,27 @@ def apply_module_settings(decl, group):
             my_add_folder(src, parent=group, excludes=excludes)
             header_search_paths.append(src)
 
-    if "cpp_include_path" in decl:
-        for src in decl["cpp_include_path"]:
+    if "cpp_include" in decl:
+        for src in decl["cpp_include"]:
             header_search_paths.append(src)
 
-    if "cpp_flags" in decl and "files" in decl["cpp_flags"]:
-        set_cpp_flags_for_files(project, decl["cpp_flags"]["files"], decl["cpp_flags"]["flags"])
-    if "xcode" in decl:
-        if "frameworks" in decl["xcode"]:
-            for fr in decl["xcode"]["frameworks"]:
-                project.add_file("System/Library/Frameworks/" + fr + ".framework",
-                                 tree='SDKROOT', force=False,
-                                 file_options=FileOptions(weak=False, embed_framework=False))
-        if "capabilities" in decl["xcode"]:
-            for cap in decl["xcode"]["capabilities"]:
-                caps.append(cap)
+    if "cpp_define" in decl:
+        for define in decl["cpp_define"]:
+            compileDefines.append("-D" + define)
+
+    if "cpp_flags" in decl:
+        for flags in decl["cpp_flags"]:
+            if "files" in flags and "flags" in flags:
+                set_cpp_flags_for_files(project, flags["files"], flags["flags"])
+
+    if "xcode_framework" in decl:
+        for framework in decl["xcode_framework"]:
+            project.add_file("System/Library/Frameworks/" + framework + ".framework",
+                             tree='SDKROOT', force=False,
+                             file_options=FileOptions(weak=False, embed_framework=False))
+    if "xcode_capability" in decl:
+        for capability in decl["xcode_capability"]:
+            caps.append(capability)
 
 def my_add_folder(path, parent, excludes):
     file_options = FileOptions()
@@ -108,11 +113,9 @@ def my_add_folder(path, parent, excludes):
             new_parent = project.add_group(child, child, parent)
             my_add_folder(full_path, new_parent, excludes)
 
-for module in config_data["modules"]:
-    group = project.add_group(module["name"])
-    apply_module_settings(module, group)
-    if "ios" in module:
-        apply_module_settings(module["ios"], group)
+#for module in config_data["modules"]:
+    #group = project.add_group(module["name"])
+apply_module_settings(config_data, project.add_group("modules"))
 
 project.add_header_search_paths(header_search_paths)
 
@@ -129,15 +132,6 @@ if caps:
 
 project.add_other_ldflags("$(inherited) -Os -flto -fno-exceptions -fno-rtti")
 project.add_library_search_paths("$(inherited)")
-
-for module in config_data["modules"]:
-    if "cppDefines" in module:
-        for define in module["cppDefines"]:
-            compileDefines.append("-D" + define)
-    if "ios" in module:
-        if "cppDefines" in module["ios"]:
-            for define in module["ios"]["cppDefines"]:
-                compileDefines.append("-D" + define)
 
 project.add_other_cflags(compileDefines)
 

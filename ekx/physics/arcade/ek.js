@@ -1,8 +1,13 @@
-const path = require('path');
-
-module.exports = (ctx) => {
-    ctx.addModule({
+/**
+ *
+ * @param {Project} project
+ */
+function setup(project) {
+    project.addModule({
         name: "physics-arcade",
-        cpp: [path.join(__dirname, "src")]
+        path: __dirname,
+        cpp: ["src"]
     });
-};
+}
+
+module.exports = setup;

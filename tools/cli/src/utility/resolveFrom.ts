@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Module from 'module';
+import {logger} from "../logger";
 
 // want to not have any dependencies, so just copy approach from `resolve-from` package
 export function resolveFrom(fromDirectory: string, moduleId: string): string | null {
@@ -17,7 +18,7 @@ export function resolveFrom(fromDirectory: string, moduleId: string): string | n
     try {
         return resolveFileName(fromDirectory, moduleId);
     } catch (error) {
-        console.warn(`Cannot resolve module '${moduleId}' from '${fromDirectory}'`, error);
+        logger.warn(`Cannot resolve module '${moduleId}' from '${fromDirectory}'`, error);
     }
     return null;
 }

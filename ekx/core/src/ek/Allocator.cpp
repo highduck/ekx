@@ -216,6 +216,7 @@ inline uintptr_t align_up(uintptr_t num, uintptr_t align) {
 }
 
 Allocator::Allocator(const char* label_) {
+    (void)label_;
 #ifdef EK_ALLOCATION_TRACKER
     stats.label = label_;
 #endif
@@ -224,6 +225,7 @@ Allocator::Allocator(const char* label_) {
 Allocator::~Allocator() = default;
 
 void Allocator::addChild(Allocator& child) {
+    (void)child;
 #ifdef EK_ALLOCATION_TRACKER
     child.stats.next = stats.children;
     stats.children = &child;
@@ -231,6 +233,7 @@ void Allocator::addChild(Allocator& child) {
 }
 
 void Allocator::removeChild(Allocator& child) {
+    (void)child;
 #ifdef EK_ALLOCATION_TRACKER
     auto* it = stats.children;
     if (it == &child) {
@@ -248,6 +251,7 @@ void Allocator::removeChild(Allocator& child) {
 }
 
 uint32_t Allocator::getAllocationsInfo(uint32_t maxCount, AllocationInfo* outData) const {
+    (void)maxCount;
     if (!outData) {
         return 0;
     }
@@ -262,6 +266,7 @@ uint32_t Allocator::getAllocationsInfo(uint32_t maxCount, AllocationInfo* outDat
 }
 
 void Allocator::pushDebugLabel(const char* label) {
+    (void)label;
 #ifdef EK_ALLOCATION_TRACKER
     DebugRecords::pushDebugLabel(label);
 #endif
@@ -274,7 +279,6 @@ void Allocator::popDebugLabel() {
 }
 
 uint64_t Allocator::getSpanSize() const {
-    uint64_t result = 0;
 #ifdef EK_ALLOCATION_TRACKER
     // update span
     uint64_t min = 0xFFFFFFFFFFFFFFFFllu;
@@ -286,9 +290,10 @@ uint64_t Allocator::getSpanSize() const {
         if (ptr < min) min = ptr;
         if (ptr > max) max = ptr;
     }
-    result = max - min;
+    return max - min;
+#else
+    return 0;
 #endif
-    return result;
 }
 
 AlignedAllocator::AlignedAllocator(Allocator& allocator_, const char* label_) noexcept:
@@ -461,6 +466,9 @@ void* reallocate(Allocator& allocator, void* ptr, uint32_t oldSizeToCopy, uint32
 }
 
 uint32_t readAllocationMap(Allocator& allocator, uint64_t* rle, uint32_t blockSize) {
+    (void)blockSize;
+    (void)rle;
+    (void)allocator;
     uint32_t p = 0;
 #ifdef EK_ALLOCATION_TRACKER
     auto& records = allocator.records;

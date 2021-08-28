@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as glob from 'glob';
 import rimraf = require("rimraf");
+import {logger} from "./logger";
 
 export type UtilityConfig = {
     verbose?: boolean
@@ -40,9 +41,9 @@ export function executeAsync(bin: string, args: string[], options?: ExecuteOptio
 
 export function execute(cmd: string, args: string[], workingDir?: string, additionalEnvParams?: { [key: string]: string }): number {
     const time = Date.now();
-    console.debug(">>", [cmd].concat(args).join(" "));
+    logger.debug(">>", [cmd].concat(args).join(" "));
     const wd = workingDir ?? process.cwd();
-    console.debug(" | cwd:", wd);
+    logger.debug(" | cwd:", wd);
 
     const options: SpawnSyncOptionsWithStringEncoding = {
         stdio: 'inherit',
@@ -59,10 +60,10 @@ export function execute(cmd: string, args: string[], workingDir?: string, additi
     }
 
     const child = spawnSync(cmd, args, options);
-    console.log(" | time:", (Date.now() - time) / 1000, "ms");
-    console.log(" | exit code:", child.status);
+    logger.log(" | time:", (Date.now() - time) / 1000, "ms");
+    logger.log(" | exit code:", child.status);
     if (child.error) {
-        console.error(child.error);
+        logger.error(child.error);
     }
     return child.status;
 }
@@ -80,7 +81,7 @@ export async function optimizePngGlobAsync(input_pattern: string): Promise<any> 
         ]));
     }
     return Promise.all(tasks).catch((err) => {
-        console.warn("Can't optimize PNG images:", err);
+        logger.warn("Can't optimize PNG images:", err);
     });
 }
 

@@ -15,6 +15,10 @@ import * as plist from 'plist';
 import {buildAssetsAsync} from "../assets";
 import {iosBuildAppIconAsync} from "./iosAppIcon";
 import {Project} from "../project";
+import {collectCppFlags, collectObjects, collectStrings} from "../collectSources";
+import {logger} from "../logger";
+
+const iosPlatforms = ["apple", "ios"];
 
 interface AppStoreCredentials {
     team_id?: string;
@@ -52,48 +56,13 @@ function mod_plist(ctx, filepath) {
         ];
     }
 
-    const extra_data = collect_xcode_props(ctx, "plist", "ios");
+    const extra_data = collectObjects(ctx, "xcode_plist", iosPlatforms);
     for (const extra of extra_data) {
         for (const [k, v] of Object.entries(extra)) {
             dict[k] = v;
         }
     }
     writeText(filepath, plist.build(dict));
-}
-
-function get_pods(data) {
-    let pods = [];
-    if (data.xcode && data.xcode.pods) {
-        pods = data.xcode.pods;
-    }
-    return pods;
-}
-
-function collect_pods(ctx) {
-    let pods = [];
-    for (const data of ctx.modules) {
-        pods = pods.concat(get_pods(data));
-        if (data.ios) {
-            pods = pods.concat(get_pods(data.ios));
-        }
-        if (data.macos) {
-            pods = pods.concat(get_pods(data.macos));
-        }
-    }
-    return pods;
-}
-
-function get_module_data_prop(data, kind, prop) {
-    return (data && data[kind] && data[kind][prop]) ? data[kind][prop] : [];
-}
-
-function collect_xcode_props(ctx, prop, target) {
-    let list = [];
-    for (const data of ctx.modules) {
-        list = list.concat(get_module_data_prop(data, "xcode", prop));
-        list = list.concat(get_module_data_prop(data[target], "xcode", prop));
-    }
-    return list;
 }
 
 export async function export_ios(ctx: Project): Promise<void> {
@@ -115,9 +84,9 @@ export async function export_ios(ctx: Project): Promise<void> {
     const dest_path = path.join(dest_dir, platform_proj_name);
 
     if (isDir(dest_path)) {
-        console.info("Remove XCode project", dest_path);
+        logger.info("Remove XCode project", dest_path);
         deleteFolderRecursive(dest_path);
-        console.assert(!isDir(dest_path));
+        logger.assert(!isDir(dest_path));
     }
 
     copyFolderRecursiveSync(path.join(ctx.path.templates, "template-ios"), dest_path);
@@ -131,7 +100,7 @@ export async function export_ios(ctx: Project): Promise<void> {
     const cwd = process.cwd();
     process.chdir(dest_path);
     {
-        // console.info("Rename project");
+        // logger.info("Rename project");
         // fs.renameSync("app-ios.xcodeproj", platform_proj_name + ".xcodeproj");
 
         copyFolderRecursiveSync(path.join(base_path, ctx.getAssetsOutput()), "assets");
@@ -149,8 +118,20 @@ export async function export_ios(ctx: Project): Promise<void> {
             path.join(dest_launch_logo_path, "iphone_120.png"));
 
         mod_plist(ctx, "src/Info.plist");
+
         fs.writeFileSync("ek-ios-build.json", JSON.stringify({
-            modules: ctx.modules
+            assets: collectStrings(ctx, "assets", iosPlatforms, true),
+
+            cpp: collectStrings(ctx, "cpp", iosPlatforms, true),
+            cpp_include: collectStrings(ctx, "cpp_include", iosPlatforms, true),
+            cpp_lib: collectStrings(ctx, "cpp_lib", iosPlatforms, false),
+            cpp_define: collectStrings(ctx, "cpp_define", iosPlatforms, false),
+            cpp_flags: collectCppFlags(ctx, iosPlatforms),
+
+            xcode_framework: collectStrings(ctx, "xcode_framework", iosPlatforms, false),
+            xcode_capability: collectStrings(ctx, "xcode_capability", iosPlatforms, false),
+            xcode_plist: collectObjects(ctx, "xcode_plist", iosPlatforms),
+            xcode_pod: collectStrings(ctx, "xcode_pod", iosPlatforms, false)
         }));
 
         if (googleServicesConfigDir) {
@@ -161,8 +142,9 @@ export async function export_ios(ctx: Project): Promise<void> {
         //xcode_patch(ctx, platform_proj_name);
         execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id]);
 
-        console.info("Prepare PodFile");
-        const pods = collect_xcode_props(ctx, "pods", "ios").map((v) => `pod '${v}'`).join("\n  ");
+        logger.info("Prepare PodFile");
+        const pods = collectStrings(ctx, "xcode_pod", iosPlatforms, false)
+            .map((v) => `pod '${v}'`).join("\n  ");
         replaceInFile("Podfile", {
             // "app-ios": platform_proj_name,
             "# TEMPLATE DEPENDENCIES": pods
@@ -175,7 +157,7 @@ export async function export_ios(ctx: Project): Promise<void> {
             "[[ITC_TEAM_ID]]": credentials.itc_team_id ?? "",
         });
 
-        console.info("Install Pods");
+        logger.info("Install Pods");
         execute("pod", ["install", "--repo-update"]);
 
         // POST MOD PROJECT

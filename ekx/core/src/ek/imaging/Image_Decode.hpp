@@ -10,14 +10,12 @@
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 
-// check arm64-v8a or armv7
-#if defined(__APPLE__) && (defined(__aarch64__) || defined(__arm__))
+// enable NEON for all ARM targets on Android and iOS
+#if defined(__aarch64__) || defined(__arm__)
+#if defined(__APPLE__) || defined(__ANDROID__)
 #define STBI_NEON
 #endif
-
-#if defined(__ANDROID__) && defined(__aarch64__)
-#define STBI_NEON
-#endif
+#endif // arm
 
 #define STBI_NO_STDIO
 #define STBI_ONLY_JPEG
