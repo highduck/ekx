@@ -1,6 +1,6 @@
 {
   "name": "@ekx/ekc",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "scripts": {
     "build:native": "node scripts/build.js",
     "cc:build:native": "USE_CCACHE=1 node scripts/build.js",
@@ -14,8 +14,8 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/ekx": "0.1.5",
-    "@ekx/flash-export": "0.0.4",
+    "@ekx/ekx": "0.1.6",
+    "@ekx/flash-export": "0.0.5",
     "npm-cmake": "^0.1.0"
   }
 }
