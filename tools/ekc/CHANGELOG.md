@@ -1,5 +1,19 @@
 # @ekx/ekc
 
+## 0.1.8
+
+### Patch Changes
+
+- 93b2ab4: assets: change texture asset type format
+- Updated dependencies [f23d368]
+- Updated dependencies [a70fd7c]
+- Updated dependencies [4bcbd1e]
+- Updated dependencies [d4b6523]
+- Updated dependencies [4bcbd1e]
+- Updated dependencies [5db3c48]
+  - @ekx/ekx@0.1.6
+  - @ekx/flash-export@0.0.5
+
 ## 0.1.7
 
 ### Patch Changes
