@@ -1,5 +1,19 @@
 # @ekx/plugin-billing
 
+## 0.0.5
+
+### Patch Changes
+
+- 4bcbd1e: update dependencies and modules configuration
+- d85d67b: android: update billing client to 4.0.0
+- Updated dependencies [f23d368]
+- Updated dependencies [a70fd7c]
+- Updated dependencies [4bcbd1e]
+- Updated dependencies [d4b6523]
+- Updated dependencies [4bcbd1e]
+- Updated dependencies [5db3c48]
+  - @ekx/ekx@0.1.6
+
 ## 0.0.4
 
 ### Patch Changes

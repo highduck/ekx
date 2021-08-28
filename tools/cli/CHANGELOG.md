@@ -1,5 +1,23 @@
 ## 0.0.4
 
+## 0.1.8
+
+### Patch Changes
+
+- a70fd7c: dev: add SF-Mono font to development tools
+- 5db3c48: web: add --run option
+- 4bcbd1e: update dependencies and modules configuration
+- aa06a67: cli: ignore missing pngquant
+- Updated dependencies [93b2ab4]
+- Updated dependencies [f23d368]
+- Updated dependencies [a70fd7c]
+- Updated dependencies [4bcbd1e]
+- Updated dependencies [d4b6523]
+- Updated dependencies [4bcbd1e]
+- Updated dependencies [5db3c48]
+  - @ekx/ekc@0.1.8
+  - @ekx/ekx@0.1.6
+
 ## 0.1.7
 
 ### Patch Changes
