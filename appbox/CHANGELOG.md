@@ -1,5 +1,23 @@
 # @ekx/appbox
 
+## 0.0.5
+
+### Patch Changes
+
+- 4bcbd1e: update dependencies and modules configuration
+- Updated dependencies [f23d368]
+- Updated dependencies [4bcbd1e]
+- Updated dependencies [a70fd7c]
+- Updated dependencies [4bcbd1e]
+- Updated dependencies [d4b6523]
+- Updated dependencies [4bcbd1e]
+- Updated dependencies [5db3c48]
+- Updated dependencies [d85d67b]
+  - @ekx/ekx@0.1.6
+  - @ekx/plugin-admob@0.0.5
+  - @ekx/plugin-billing@0.0.5
+  - @ekx/plugin-game-services@0.0.5
+
 ## 0.0.4
 
 ### Patch Changes

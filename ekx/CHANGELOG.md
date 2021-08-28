@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.6
+
+### Patch Changes
+
+- f23d368: test: change `gtest` to `doctest`
+- a70fd7c: dev: add SF-Mono font to development tools
+- 4bcbd1e: android: initial hw keyboard support
+- d4b6523: web: improve parallel loading
+- 4bcbd1e: update dependencies and modules configuration
+- 5db3c48: audio: replace `miniaudio` to `auph`
+
 ## 0.1.5
 
 ### Patch Changes
