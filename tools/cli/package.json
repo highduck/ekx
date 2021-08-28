@@ -28,7 +28,7 @@
     "http-server": "^13.0.1",
     "mustache": "^4.2.0",
     "node-emoji": "^1.11.0",
-    "plist": "^3.0.3",
+    "plist": "^3.0.4",
     "pngquant-bin": "^6.0.0",
     "rimraf": "^3.0.2",
     "terminal-link": "^2.1.1",
