@@ -26,7 +26,7 @@
 #define STBI_REALLOC_SIZED(ptr, oldSize, newSize)   ::ek::imaging::allocator.reallocate(ptr, oldSize, newSize, sizeof(void*))
 #define STBI_FREE(ptr)                              ::ek::imaging::allocator.dealloc(ptr)
 
-#include <stb_image.h>
+#include <stb/stb_image.h>
 
 #endif
 

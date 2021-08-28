@@ -11,7 +11,7 @@
   "dependencies": {
     "@ekx/cairo": "0.0.6",
     "@ekx/ekx": "0.1.5",
-    "@ekx/freetype": "0.0.7",
+    "@ekx/freetype": "0.0.8",
     "@ekx/miniz": "0.0.3",
     "@ekx/pugixml": "0.0.5",
     "npm-cmake": "^0.1.0"

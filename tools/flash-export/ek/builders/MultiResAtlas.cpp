@@ -27,7 +27,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-compare"
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
-#include <stb_image_write.h>
+#include <stb/stb_image_write.h>
 #pragma clang diagnostic pop
 
 #endif
