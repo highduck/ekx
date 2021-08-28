@@ -2,4 +2,4 @@
 "@ekx/ekx": patch
 ---
 
-replace miniaudio to auph
+audio: replace `miniaudio` to `auph`

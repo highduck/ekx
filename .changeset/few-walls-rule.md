@@ -2,4 +2,4 @@
 "@ekx/ekx": patch
 ---
 
-Change gtest to doctest for testing
+test: change `gtest` to `doctest`

@@ -2,4 +2,4 @@
 "@ekx/plugin-billing": patch
 ---
 
-Update android billing client to 4.0.0
+android: update billing client to 4.0.0

@@ -2,4 +2,4 @@
 "@ekx/cli": patch
 ---
 
-Ignore missing pngquant, update android templates
+cli: ignore missing pngquant
