@@ -2,4 +2,4 @@
 "@ekx/ekx": patch
 ---
 
-improve parallel loading
+web: improve parallel loading

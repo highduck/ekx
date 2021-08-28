@@ -2,4 +2,4 @@
 "@ekx/ekc": patch
 ---
 
-change texture asset type format
+assets: change texture asset type format

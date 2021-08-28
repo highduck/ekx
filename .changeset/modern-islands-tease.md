@@ -5,6 +5,7 @@
 "@ekx/plugin-billing": patch
 "@ekx/plugin-game-services": patch
 "@ekx/cli": patch
+"@ekx/flash-export": patch
 ---
 
-update module config
+update dependencies and modules configuration

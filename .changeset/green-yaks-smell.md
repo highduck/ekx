@@ -3,4 +3,4 @@
 "@ekx/cli": patch
 ---
 
-Add SF-Mono font to development tools
+dev: add SF-Mono font to development tools

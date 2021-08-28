@@ -2,4 +2,4 @@
 "@ekx/cli": patch
 ---
 
-cmake fixes, add --run option for web target
+web: add --run option
