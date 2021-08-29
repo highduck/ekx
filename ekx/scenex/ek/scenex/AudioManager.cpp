@@ -20,8 +20,10 @@ void AudioManager::play_music(const std::string& name) {
         audioRes.setID(name);
         if (audioRes) {
             if (auph::isBufferLoaded(audioRes->buffer) && !auph::isActive(musicVoice_.id)) {
-                const auto volume = music.enabled() ? musicVolume_ : 0.0f;
-                musicVoice_ = auph::play(audioRes->buffer, volume, 0.0f, musicPitch_, true, false, auph::Bus_Music);
+                musicVoice_ = auph::play(audioRes->buffer,
+                                         musicVolume_, 0.0f, musicPitch_,
+                                         true, false,
+                                         auph::Bus_Music);
             }
         }
         music_ = name;
@@ -52,15 +54,15 @@ void AudioManager::vibrate(int length) const {
 }
 
 void AudioManager::update(float) {
+    auph::setGain(auph::Bus_Music.id, music.enabled() ? 1.0f : 0.0f);
+    auph::setGain(auph::Bus_Sound.id, sound.enabled() ? 1.0f : 0.0f);
+
     if (music_.empty()) {
         return;
     }
     Res<audio::AudioResource> audioRes{music_};
-    if (audioRes) {
-        auto volume = music.enabled() ? musicVolume_ : 0.0f;
-        if (auph::isBufferLoaded(audioRes->buffer) && !auph::isActive(musicVoice_.id)) {
-            musicVoice_ = auph::play(audioRes->buffer, volume, 0.0f, musicPitch_, true, false, auph::Bus_Music);
-        }
+    if (audioRes && auph::isBufferLoaded(audioRes->buffer) && !auph::isActive(musicVoice_.id)) {
+        musicVoice_ = auph::play(audioRes->buffer, musicVolume_, 0.0f, musicPitch_, true, false, auph::Bus_Music);
     }
 }
 
@@ -74,8 +76,7 @@ void AudioManager::setMusicParams(float volume, float pitch) {
     musicVolume_ = volume;
     musicPitch_ = pitch;
     if (auph::isActive(musicVoice_.id)) {
-        const auto channelVolume = music.enabled() ? musicVolume_ : 0.0f;
-        auph::setGain(musicVoice_.id, channelVolume);
+        auph::setGain(musicVoice_.id, musicVolume_);
         auph::setRate(musicVoice_, pitch);
     }
 }
