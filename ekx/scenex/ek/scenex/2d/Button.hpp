@@ -10,15 +10,16 @@
 namespace ek {
 
 struct ButtonSkin {
-    std::string sfx_over = "sfx/btn_over";
-    std::string sfx_out = "sfx/btn_out";
-    std::string sfx_down = "sfx/btn_down";
-    std::string sfx_click = "sfx/btn_click";
+    const char* sfxOver = "sfx/btn_over";
+    const char* sfxDown = "sfx/btn_down";
+    const char* sfxClick = "sfx/btn_click";
+    const char* sfxOut = "sfx/btn_out";
+    const char* sfxCancel = "sfx/btn_cancel";
 
-    float over_speed_forward = 8.0f;
-    float over_speed_backward = 8.0f;
-    float push_speed_forward = 8.0f;
-    float push_speed_backward = 8.0f;
+    float overSpeedForward = 8.0f;
+    float overSpeedBackward = 8.0f;
+    float pushSpeedForward = 8.0f;
+    float pushSpeedBackward = 8.0f;
 
     //const basic_ease_t& over_ease{easing::P3_OUT};
     //const basic_ease_t& push_ease{easing::P3_OUT};
@@ -31,9 +32,9 @@ struct Button {
     Signal<> clicked{};
 
     bool initialized = false;
-    float over_time = 0.0f;
-    float push_time = 0.0f;
-    float post_time = 0.0f;
+    float timeOver = 0.0f;
+    float timePush = 0.0f;
+    float timePost = 0.0f;
 
     float2 baseSkew{};
     float2 baseScale = float2::one;
