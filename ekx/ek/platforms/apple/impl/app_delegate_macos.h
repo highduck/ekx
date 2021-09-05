@@ -288,7 +288,7 @@ void handleQuitRequest() {
 
 /**** HANDLE TOUCH *****/
 
-//void handle_touch(AppEventType event_type, double scale_factor, NSTouch* touch) {
+//void handle_touch(Event::Type event_type, double scale_factor, NSTouch* touch) {
 //    const CGPoint location = touch.normalizedPosition;
 //    Event ev{event_type};
 //    ev.id = uint64_t(touch.identity) + 1u;
