@@ -888,7 +888,7 @@ uint32_t x11_mod(uint32_t x11_mods) {
     return mods;
 }
 
-void x11_app_event(AppEventType type) {
+void x11_app_event(Event::Type type) {
     Event ev{type};
     dispatch_event(ev);
 }
@@ -905,7 +905,7 @@ MouseButton x11_translate_button(const XEvent* event) {
     }
 }
 
-void x11_mouse_event(AppEventType type, MouseButton btn, uint32_t mods) {
+void x11_mouse_event(Event::Type type, MouseButton btn, uint32_t mods) {
 //    if (_sapp_events_enabled()) {
 //        init_event(type);
 //        _sapp.event.mouse_button = btn;

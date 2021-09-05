@@ -93,7 +93,7 @@ using namespace ek::app;
 
 @end
 
-void handle_touches(AppEventType type, UIView* view, NSSet* touches, UIEvent* event) {
+void handle_touches(Event::Type type, UIView* view, NSSet* touches, UIEvent* event) {
     Event ev{type};
     const auto scale_factor = view.contentScaleFactor;
     for (UITouch* touch in [touches allObjects]) {
