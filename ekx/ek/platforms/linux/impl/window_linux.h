@@ -893,7 +893,7 @@ void x11_app_event(AppEventType type) {
     dispatch_event(ev);
 }
 
-mouse_button x11_translate_button(const XEvent* event) {
+MouseButton x11_translate_button(const XEvent* event) {
     switch (event->xbutton.button) {
         case Button1:
             return MouseButton::Left;
@@ -905,7 +905,7 @@ mouse_button x11_translate_button(const XEvent* event) {
     }
 }
 
-void x11_mouse_event(AppEventType type, mouse_button btn, uint32_t mods) {
+void x11_mouse_event(AppEventType type, MouseButton btn, uint32_t mods) {
 //    if (_sapp_events_enabled()) {
 //        init_event(type);
 //        _sapp.event.mouse_button = btn;
@@ -924,7 +924,7 @@ void x11_scroll_event(float x, float y, uint32_t mods) {
 //    }
 }
 
-void x11_key_event(Event type, key_code key, bool repeat, uint32_t mods) {
+void x11_key_event(Event type, KeyCode key, bool repeat, uint32_t mods) {
 //    if (_sapp_events_enabled()) {
 //        init_event(type);
 //        _sapp.event.key_code = key;
@@ -953,7 +953,7 @@ void x11_char_event(uint32_t chr, bool repeat, uint32_t mods) {
 //}
 }
 
-key_code x11_translate_key(int scancode) {
+KeyCode x11_translate_key(int scancode) {
     int dummy;
     KeySym* keysyms = XGetKeyboardMapping(gAppLinux.x11.display, scancode, 1, &dummy);
     EK_ASSERT(keysyms);
@@ -961,9 +961,9 @@ key_code x11_translate_key(int scancode) {
     XFree(keysyms);
     switch (keysym) {
         case XK_Escape:
-            return key_code::Escape;
+            return KeyCode::Escape;
         case XK_Tab:
-            return key_code::Tab;
+            return KeyCode::Tab;
 //        case XK_Shift_L:        return SAPP_KEYCODE_LEFT_SHIFT;
 //        case XK_Shift_R:        return SAPP_KEYCODE_RIGHT_SHIFT;
 //        case XK_Control_L:      return SAPP_KEYCODE_LEFT_CONTROL;
@@ -986,26 +986,26 @@ key_code x11_translate_key(int scancode) {
 //        case XK_BackSpace:      return SAPP_KEYCODE_BACKSPACE;
 
         case XK_Return:
-            return key_code::Enter;
+            return KeyCode::Enter;
         case XK_Home:
-            return key_code::Home;
+            return KeyCode::Home;
         case XK_End:
-            return key_code::End;
+            return KeyCode::End;
         case XK_Page_Up:
-            return key_code::PageUp;
+            return KeyCode::PageUp;
         case XK_Page_Down:
-            return key_code::PageDown;
+            return KeyCode::PageDown;
         case XK_Insert:
-            return key_code::Insert;
+            return KeyCode::Insert;
         case XK_Left:
-            return key_code::ArrowLeft;
+            return KeyCode::ArrowLeft;
         case XK_Right:
-            return key_code::ArrowRight;
+            return KeyCode::ArrowRight;
         case XK_Down:
-            return key_code::ArrowDown;
+            return KeyCode::ArrowDown;
         case XK_Up:
-            return key_code::ArrowUp;
-//        case XK_F1:             return key_code::F1;
+            return KeyCode::ArrowUp;
+//        case XK_F1:             return KeyCode::F1;
 //        case XK_F2:             return SAPP_KEYCODE_F2;
 //        case XK_F3:             return SAPP_KEYCODE_F3;
 //        case XK_F4:             return SAPP_KEYCODE_F4;
@@ -1051,52 +1051,52 @@ key_code x11_translate_key(int scancode) {
 //        case XK_KP_Enter:       return SAPP_KEYCODE_KP_ENTER;
 
         case XK_a:
-            return key_code::A;
-            //case XK_b:              return key_code::B;
+            return KeyCode::A;
+            //case XK_b:              return KeyCode::B;
         case XK_c:
-            return key_code::C;
+            return KeyCode::C;
         case XK_d:
-            return key_code::D;
-//        case XK_e:              return key_code::E;
-//        case XK_f:              return key_code::F;
-//        case XK_g:              return key_code::G;
-//        case XK_h:              return key_code::H;
-//        case XK_i:              return key_code::I;
-//        case XK_j:              return key_code::J;
-//        case XK_k:              return key_code::K;
-//        case XK_l:              return key_code::L;
-//        case XK_m:              return key_code::M;
-//        case XK_n:              return key_code::N;
-//        case XK_o:              return key_code::O;
-//        case XK_p:              return key_code::P;
-//        case XK_q:              return key_code::Q;
-//        case XK_r:              return key_code::R;
+            return KeyCode::D;
+//        case XK_e:              return KeyCode::E;
+//        case XK_f:              return KeyCode::F;
+//        case XK_g:              return KeyCode::G;
+//        case XK_h:              return KeyCode::H;
+//        case XK_i:              return KeyCode::I;
+//        case XK_j:              return KeyCode::J;
+//        case XK_k:              return KeyCode::K;
+//        case XK_l:              return KeyCode::L;
+//        case XK_m:              return KeyCode::M;
+//        case XK_n:              return KeyCode::N;
+//        case XK_o:              return KeyCode::O;
+//        case XK_p:              return KeyCode::P;
+//        case XK_q:              return KeyCode::Q;
+//        case XK_r:              return KeyCode::R;
         case XK_s:
-            return key_code::S;
-//        case XK_t:              return key_code::T;
-//        case XK_u:              return key_code::U;
+            return KeyCode::S;
+//        case XK_t:              return KeyCode::T;
+//        case XK_u:              return KeyCode::U;
         case XK_v:
-            return key_code::V;
+            return KeyCode::V;
         case XK_w:
-            return key_code::W;
+            return KeyCode::W;
         case XK_x:
-            return key_code::X;
+            return KeyCode::X;
         case XK_y:
-            return key_code::Y;
+            return KeyCode::Y;
         case XK_z:
-            return key_code::Z;
-//        case XK_1:              return key_code::0;
-//        case XK_2:              return key_code::2;
-//        case XK_3:              return key_code::3;
-//        case XK_4:              return key_code::4;
-//        case XK_5:              return key_code::5;
-//        case XK_6:              return key_code::6;
-//        case XK_7:              return key_code::7;
-//        case XK_8:              return key_code::8;
-//        case XK_9:              return key_code::9;
-//        case XK_0:              return key_code::0;
+            return KeyCode::Z;
+//        case XK_1:              return KeyCode::0;
+//        case XK_2:              return KeyCode::2;
+//        case XK_3:              return KeyCode::3;
+//        case XK_4:              return KeyCode::4;
+//        case XK_5:              return KeyCode::5;
+//        case XK_6:              return KeyCode::6;
+//        case XK_7:              return KeyCode::7;
+//        case XK_8:              return KeyCode::8;
+//        case XK_9:              return KeyCode::9;
+//        case XK_0:              return KeyCode::0;
         case XK_space:
-            return key_code::Space;
+            return KeyCode::Space;
 //        case XK_minus:          return SAPP_KEYCODE_MINUS;
 //        case XK_equal:          return SAPP_KEYCODE_EQUAL;
 //        case XK_bracketleft:    return SAPP_KEYCODE_LEFT_BRACKET;
@@ -1110,7 +1110,7 @@ key_code x11_translate_key(int scancode) {
 //        case XK_slash:          return SAPP_KEYCODE_SLASH;
 //        case XK_less:           return SAPP_KEYCODE_WORLD_1; /* At least in some layouts... */
         default:
-            return key_code::unknown;
+            return KeyCode::Unknown;
     }
 }
 
