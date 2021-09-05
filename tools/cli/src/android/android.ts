@@ -13,7 +13,7 @@ import {
 } from "../utils";
 import {XmlDocument} from 'xmldoc';
 import * as path from "path";
-import {buildAssetsAsync} from "../assets";
+import {buildAssetPackAsync} from "../assets";
 import {collectObjects, collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources";
 import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
@@ -201,10 +201,16 @@ function mod_cmake_lists(ctx) {
 
 export async function export_android(ctx: Project): Promise<void> {
 
+    const exportResPath = "export/android/res";
+    const exportAssetsPath = "export/android/assets";
+    const assetPackName = "assets";
+
     await Promise.all([
-        buildAssetsAsync(ctx),
-        androidBuildAppIconAsync(ctx, "export/android/res")
+        buildAssetPackAsync(ctx, path.join(exportAssetsPath, assetPackName)),
+        androidBuildAppIconAsync(ctx, exportResPath)
     ]);
+
+    const embeddedAssets = fs.realpathSync(exportAssetsPath);
 
     const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;
@@ -243,6 +249,8 @@ export async function export_android(ctx: Project): Promise<void> {
         const android_java = collectSourceRootsAll(ctx, "android_java", platforms, "app");
         const android_aidl = collectSourceRootsAll(ctx, "android_aidl", platforms, "app");
         const android_dependency = collectStrings(ctx, "android_dependency", platforms, false);
+
+        assets.push(embeddedAssets);
 
         function getGradleStringArrayExpr(arr: string[]): string {
             return "[" + arr.map(p => `'${p}'`).join(", ") + "]";

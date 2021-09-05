@@ -119,6 +119,7 @@ int MapFile(const char* inPathName, void** outDataPtr, size_t* outDataLength) {
 namespace ek {
 
 FileView::FileView(const char* path) {
+    (void)path;
 #if EK_HAS_MAP_FILE
     if (MapFile(path, reinterpret_cast<void**>(&data_), &size_) == 0) {
         mapped_ = true;

@@ -354,8 +354,8 @@ bool win32_uwp_utf8_to_wide(const char* src, wchar_t* dst, int dst_num_bytes) {
     return false;
 }
 
-void win32_uwp_app_event(event_type type) {
-    event_t ev{type};
+void win32_uwp_app_event(AppEventType type) {
+    Event ev{type};
     dispatch_event(ev);
 }
 
@@ -590,7 +590,7 @@ LRESULT CALLBACK win32_wndproc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
                     // if window should be closed and event handling is enabled, give user code
                     // a change to intervene via sapp_cancel_quit()
                     g_app.require_exit = true;
-                    win32_uwp_app_event(event_type::app_close);
+                    win32_uwp_app_event(Event::Close);
                     // if user code hasn't intervened, quit the app
                     if (g_app.require_exit) {
                         // exit ordered
@@ -864,7 +864,7 @@ void win32_run_loop() {
         /* check for window resized, this cannot happen in WM_SIZE as it explodes memory usage */
         if (win32_update_dimensions()) {
             d3d11_resize_default_render_target();
-            win32_uwp_app_event(event_type::app_resize);
+            win32_uwp_app_event(Event::app_resize);
         }
         if (g_app.require_exit) {
             PostMessage(wnd.hwnd, WM_CLOSE, 0, 0);

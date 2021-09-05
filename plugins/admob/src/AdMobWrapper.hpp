@@ -25,7 +25,7 @@ public:
 
     void completeRewardedAd(bool rewarded);
 
-    void onAdmobEvent(admob::event_type event);
+    void onAdmobEvent(admob::EventType event);
 
     [[nodiscard]]
     bool isAvailable() const {

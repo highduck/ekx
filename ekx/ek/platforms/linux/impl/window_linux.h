@@ -728,8 +728,14 @@ void x11_lock_mouse(bool lock) {
 }
 
 void x11_update_window_title() {
-    const char* title = g_app.window_cfg.title.c_str();
-    size_t titleLen = g_app.window_cfg.title.size();
+    const char* title = g_app.window_cfg.title;
+    size_t titleLen = 0;
+    if(title) {
+        titleLen = strlen(title);
+    }
+    else {
+        title = "";
+    }
     Xutf8SetWMProperties(gAppLinux.x11.display,
                          gAppLinux.x11.window,
                          title,
@@ -882,24 +888,24 @@ uint32_t x11_mod(uint32_t x11_mods) {
     return mods;
 }
 
-void x11_app_event(event_type type) {
-    event_t ev{type};
+void x11_app_event(AppEventType type) {
+    Event ev{type};
     dispatch_event(ev);
 }
 
 mouse_button x11_translate_button(const XEvent* event) {
     switch (event->xbutton.button) {
         case Button1:
-            return mouse_button::left;
-            //case Button2: return mouse_button::other;
+            return MouseButton::Left;
+            //case Button2: return MouseButton::Other;
         case Button3:
-            return mouse_button::right;
+            return MouseButton::Right;
         default:
-            return mouse_button::other;
+            return MouseButton::Other;
     }
 }
 
-void x11_mouse_event(event_type type, mouse_button btn, uint32_t mods) {
+void x11_mouse_event(AppEventType type, mouse_button btn, uint32_t mods) {
 //    if (_sapp_events_enabled()) {
 //        init_event(type);
 //        _sapp.event.mouse_button = btn;
@@ -918,7 +924,7 @@ void x11_scroll_event(float x, float y, uint32_t mods) {
 //    }
 }
 
-void x11_key_event(event_t type, key_code key, bool repeat, uint32_t mods) {
+void x11_key_event(Event type, key_code key, bool repeat, uint32_t mods) {
 //    if (_sapp_events_enabled()) {
 //        init_event(type);
 //        _sapp.event.key_code = key;
@@ -1320,12 +1326,12 @@ void x11_process_event(XEvent* event) {
         case EnterNotify:
             /* don't send enter/leave events while mouse button held down */
             if (0 == gAppLinux.x11.mouse_buttons) {
-                x11_mouse_event(event_type::mouse_enter, mouse_button::other, x11_mod(event->xcrossing.state));
+                x11_mouse_event(Event::mouse_enter, MouseButton::Other, x11_mod(event->xcrossing.state));
             }
             break;
         case LeaveNotify:
             if (0 == gAppLinux.x11.mouse_buttons) {
-                x11_mouse_event(event_type::mouse_exit, mouse_button::other, x11_mod(event->xcrossing.state));
+                x11_mouse_event(Event::mouse_exit, MouseButton::Other, x11_mod(event->xcrossing.state));
             }
             break;
         case MotionNotify:
@@ -1549,7 +1555,7 @@ void linux_app_loop() {
         /* handle quit-requested, either from window or from sapp_request_quit() */
         if (g_app.require_exit) {
             /* give user code a chance to intervene */
-            x11_app_event(event_type::app_close);
+            x11_app_event(Event::Close);
             /* if user code hasn't intervened, quit the app */
             if (g_app.require_exit) {
                 g_app.require_exit = true;

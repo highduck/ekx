@@ -12,7 +12,7 @@ struct AppBoxConfig {
     std::string version{"1.0.0"};
     std::string privacyPolicyURL{"https://eliasku.gitlab.io/privacy-policy/"};
     Ads::Config ads{};
-    ::admob::config_t admob{};
+    ::admob::Config admob{};
     std::string billingKey{};
 
     // used for sharing results or app for link in the end of the message

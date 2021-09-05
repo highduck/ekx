@@ -18,48 +18,50 @@ namespace ek {
 using namespace ek::app;
 
 /****** KEYBOARD ****/
-key_code SCAN_CODE_TABLE[0xFF] = {};
+KeyCode SCAN_CODE_TABLE[0xFF] = {};
 
 void init_scan_table() {
-    SCAN_CODE_TABLE[kVK_LeftArrow] = key_code::ArrowLeft;
-    SCAN_CODE_TABLE[kVK_LeftArrow] = key_code::ArrowLeft;
-    SCAN_CODE_TABLE[kVK_RightArrow] = key_code::ArrowRight;
-    SCAN_CODE_TABLE[kVK_DownArrow] = key_code::ArrowDown;
-    SCAN_CODE_TABLE[kVK_UpArrow] = key_code::ArrowUp;
-    SCAN_CODE_TABLE[kVK_Escape] = key_code::Escape;
-    SCAN_CODE_TABLE[kVK_Delete] = key_code::Backspace;
-    SCAN_CODE_TABLE[kVK_Space] = key_code::Space;
-    SCAN_CODE_TABLE[kVK_Return] = key_code::Enter;
-    SCAN_CODE_TABLE[kVK_Tab] = key_code::Tab;
-    SCAN_CODE_TABLE[kVK_PageUp] = key_code::PageUp;
-    SCAN_CODE_TABLE[kVK_PageDown] = key_code::PageDown;
-    SCAN_CODE_TABLE[kVK_Home] = key_code::Home;
-    SCAN_CODE_TABLE[kVK_End] = key_code::End;
-    SCAN_CODE_TABLE[kVK_ANSI_KeypadDivide] = key_code::Insert;
-    SCAN_CODE_TABLE[kVK_ForwardDelete] = key_code::Delete;
-    SCAN_CODE_TABLE[kVK_ANSI_A] = key_code::A;
-    SCAN_CODE_TABLE[kVK_ANSI_C] = key_code::C;
-    SCAN_CODE_TABLE[kVK_ANSI_V] = key_code::V;
-    SCAN_CODE_TABLE[kVK_ANSI_X] = key_code::X;
-    SCAN_CODE_TABLE[kVK_ANSI_Y] = key_code::Y;
-    SCAN_CODE_TABLE[kVK_ANSI_Z] = key_code::Z;
-    SCAN_CODE_TABLE[kVK_ANSI_W] = key_code::W;
-    SCAN_CODE_TABLE[kVK_ANSI_S] = key_code::S;
-    SCAN_CODE_TABLE[kVK_ANSI_D] = key_code::D;
+    SCAN_CODE_TABLE[kVK_LeftArrow] = KeyCode::ArrowLeft;
+    SCAN_CODE_TABLE[kVK_LeftArrow] = KeyCode::ArrowLeft;
+    SCAN_CODE_TABLE[kVK_RightArrow] = KeyCode::ArrowRight;
+    SCAN_CODE_TABLE[kVK_DownArrow] = KeyCode::ArrowDown;
+    SCAN_CODE_TABLE[kVK_UpArrow] = KeyCode::ArrowUp;
+    SCAN_CODE_TABLE[kVK_Escape] = KeyCode::Escape;
+    SCAN_CODE_TABLE[kVK_Delete] = KeyCode::Backspace;
+    SCAN_CODE_TABLE[kVK_Space] = KeyCode::Space;
+    SCAN_CODE_TABLE[kVK_Return] = KeyCode::Enter;
+    SCAN_CODE_TABLE[kVK_Tab] = KeyCode::Tab;
+    SCAN_CODE_TABLE[kVK_PageUp] = KeyCode::PageUp;
+    SCAN_CODE_TABLE[kVK_PageDown] = KeyCode::PageDown;
+    SCAN_CODE_TABLE[kVK_Home] = KeyCode::Home;
+    SCAN_CODE_TABLE[kVK_End] = KeyCode::End;
+    SCAN_CODE_TABLE[kVK_ANSI_KeypadDivide] = KeyCode::Insert;
+    SCAN_CODE_TABLE[kVK_ForwardDelete] = KeyCode::Delete;
+    SCAN_CODE_TABLE[kVK_ANSI_A] = KeyCode::A;
+    SCAN_CODE_TABLE[kVK_ANSI_C] = KeyCode::C;
+    SCAN_CODE_TABLE[kVK_ANSI_V] = KeyCode::V;
+    SCAN_CODE_TABLE[kVK_ANSI_X] = KeyCode::X;
+    SCAN_CODE_TABLE[kVK_ANSI_Y] = KeyCode::Y;
+    SCAN_CODE_TABLE[kVK_ANSI_Z] = KeyCode::Z;
+    SCAN_CODE_TABLE[kVK_ANSI_W] = KeyCode::W;
+    SCAN_CODE_TABLE[kVK_ANSI_S] = KeyCode::S;
+    SCAN_CODE_TABLE[kVK_ANSI_D] = KeyCode::D;
 }
 
-key_code convert_key_code(uint16_t key_code) {
+KeyCode convert_key_code(uint16_t key_code) {
     if (key_code < 0xFF) {
         return SCAN_CODE_TABLE[key_code];
     }
-    return key_code::unknown;
+    return KeyCode::Unknown;
 }
 
-void setup_modifiers(NSUInteger flags, event_t& to_event) {
-    to_event.alt = (flags & NSEventModifierFlagOption) != 0;
-    to_event.shift = (flags & NSEventModifierFlagShift) != 0;
-    to_event.ctrl = (flags & NSEventModifierFlagControl) != 0;
-    to_event.super = (flags & NSEventModifierFlagCommand) != 0;
+void setup_modifiers(NSUInteger flags, Event& to_event) {
+    int mod = 0;
+    if (flags & NSEventModifierFlagOption) mod |= (int) app::KeyModifier::Alt;
+    if (flags & NSEventModifierFlagShift) mod |= (int) app::KeyModifier::Shift;
+    if (flags & NSEventModifierFlagControl) mod |= (int) app::KeyModifier::Control;
+    if (flags & NSEventModifierFlagCommand) mod |= (int) app::KeyModifier::Super;
+    to_event.keyModifiers = (app::KeyModifier) mod;
 }
 
 bool is_special_character(unichar ch) {
@@ -109,14 +111,14 @@ void set_view_mouse_cursor(NSView* view) {
     NSCursor* cursor = nil;
 
     switch (g_app.cursor) {
-        case mouse_cursor::button:
+        case MouseCursor::Button:
             cursor = NSCursor.pointingHandCursor;
             break;
-        case mouse_cursor::help:
+        case MouseCursor::Help:
             cursor = NSCursor._helpCursor;
             break;
-        case mouse_cursor::arrow:
-        case mouse_cursor::parent:
+        case MouseCursor::Arrow:
+        case MouseCursor::Parent:
             cursor = NSCursor.arrowCursor;
             break;
     }
@@ -132,7 +134,7 @@ void macos_init_common() {
     init_scan_table();
 }
 
-void handle_mouse_wheel_scroll(const NSEvent* event, event_t& to_event) {
+void handle_mouse_wheel_scroll(const NSEvent* event, Event& to_event) {
     to_event.scroll.x = static_cast<float>(event.scrollingDeltaX);
     to_event.scroll.y = static_cast<float>(event.scrollingDeltaY);
     if (event.hasPreciseScrollingDeltas) {
@@ -144,7 +146,7 @@ void handle_mouse_wheel_scroll(const NSEvent* event, event_t& to_event) {
 void handle_mouse_event(NSView* view, NSEvent* event) {
     const auto location = [view convertPoint:event.locationInWindow fromView:nil];
     const auto scale = view.window.backingScaleFactor;
-    event_t ev{};
+    Event ev{};
     ev.pos.x = static_cast<float>(location.x * scale);
     ev.pos.y = static_cast<float>(location.y * scale);
 
@@ -152,17 +154,17 @@ void handle_mouse_event(NSView* view, NSEvent* event) {
         case NSEventTypeLeftMouseDown:
         case NSEventTypeLeftMouseDragged:
         case NSEventTypeLeftMouseUp:
-            ev.button = mouse_button::left;
+            ev.button = MouseButton::Left;
             break;
         case NSEventTypeRightMouseDown:
         case NSEventTypeRightMouseDragged:
         case NSEventTypeRightMouseUp:
-            ev.button = mouse_button::right;
+            ev.button = MouseButton::Right;
             break;
         case NSEventTypeOtherMouseDown:
         case NSEventTypeOtherMouseDragged:
         case NSEventTypeOtherMouseUp:
-            ev.button = mouse_button::other;
+            ev.button = MouseButton::Other;
             break;
         default:
             break;
@@ -172,27 +174,27 @@ void handle_mouse_event(NSView* view, NSEvent* event) {
         case NSEventTypeLeftMouseDown:
         case NSEventTypeRightMouseDown:
         case NSEventTypeOtherMouseDown:
-            ev.type = event_type::mouse_down;
+            ev.type = Event::MouseDown;
             break;
         case NSEventTypeLeftMouseUp:
         case NSEventTypeRightMouseUp:
         case NSEventTypeOtherMouseUp:
-            ev.type = event_type::mouse_up;
+            ev.type = Event::MouseUp;
             break;
         case NSEventTypeLeftMouseDragged:
         case NSEventTypeRightMouseDragged:
         case NSEventTypeOtherMouseDragged:
         case NSEventTypeMouseMoved:
-            ev.type = event_type::mouse_move;
+            ev.type = Event::MouseMove;
             break;
         case NSEventTypeMouseEntered:
-            ev.type = event_type::mouse_enter;
+            ev.type = Event::MouseEnter;
             break;
         case NSEventTypeMouseExited:
-            ev.type = event_type::mouse_exit;
+            ev.type = Event::MouseExit;
             break;
         case NSEventTypeScrollWheel:
-            ev.type = event_type::mouse_scroll;
+            ev.type = Event::MouseScroll;
             handle_mouse_wheel_scroll(event, ev);
             break;
         default:

@@ -49,7 +49,7 @@ using namespace ek::app;
 - (void)applicationWillResignActive:(UIApplication*)application {
 // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
 // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
-    dispatch_event({event_type::app_pause});
+    dispatch_event({Event::Pause});
 }
 
 
@@ -67,11 +67,11 @@ using namespace ek::app;
 
 - (void)applicationDidBecomeActive:(UIApplication*)application {
 // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    dispatch_event({event_type::app_resume});
+    dispatch_event({Event::Resume});
 }
 
 - (void)applicationWillTerminate:(UIApplication*)application {
-    dispatch_event({event_type::app_close});
+    dispatch_event({Event::Close});
 // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 
     if (_window != nil) {
@@ -93,8 +93,8 @@ using namespace ek::app;
 
 @end
 
-void handle_touches(event_type type, UIView* view, NSSet* touches, UIEvent* event) {
-    event_t ev{type};
+void handle_touches(AppEventType type, UIView* view, NSSet* touches, UIEvent* event) {
+    Event ev{type};
     const auto scale_factor = view.contentScaleFactor;
     for (UITouch* touch in [touches allObjects]) {
         const CGPoint location = [touch locationInView:view];
@@ -143,22 +143,22 @@ void handle_touches(event_type type, UIView* view, NSSet* touches, UIEvent* even
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesBegan:touches withEvent:event];
-    handle_touches(event_type::touch_begin, self, touches, event);
+    handle_touches(Event::TouchBegin, self, touches, event);
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesMoved:touches withEvent:event];
-    handle_touches(event_type::touch_move, self, touches, event);
+    handle_touches(Event::TouchMove, self, touches, event);
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesEnded:touches withEvent:event];
-    handle_touches(event_type::touch_end, self, touches, event);
+    handle_touches(Event::TouchEnd, self, touches, event);
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesCancelled:touches withEvent:event];
-    handle_touches(event_type::touch_end, self, touches, event);
+    handle_touches(Event::TouchEnd, self, touches, event);
 }
 
 @end

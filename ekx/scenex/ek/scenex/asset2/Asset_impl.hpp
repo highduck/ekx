@@ -66,29 +66,30 @@ void AssetManager::add_resolver(AssetTypeResolver* resolver) {
     resolvers.push_back(resolver);
 }
 
-Asset* AssetManager::add_from_type(const std::string& type, const std::string& path) {
+Asset* AssetManager::add_from_type(const void* data, int size) {
     for (const auto* resolver : resolvers) {
-        Asset* asset = resolver->create_for_type(type, path);
+        Asset* asset = resolver->create_for_type(data, size);
         if (asset) {
-            asset->project_ = this;
+            asset->manager_ = this;
             assets.push_back(asset);
             return asset;
         }
     }
-    EK_ERROR("Can't resolve asset for file: %s", path.c_str());
+    EK_ERROR("Can't resolve asset from buffer...");
     return nullptr;
 }
 
-void AssetManager::add_file(const std::string& path) {
+Asset* AssetManager::add_file(const std::string& path, const std::string& type) {
     for (const auto* resolver : resolvers) {
-        Asset* asset = resolver->create_from_file(path);
+        Asset* asset = resolver->create_from_file(path, type);
         if (asset) {
-            asset->project_ = this;
+            asset->manager_ = this;
             assets.push_back(asset);
-            return;
+            return asset;
         }
     }
-    EK_WARN("Can't resolve asset for file %s", path.c_str());
+    EK_WARN("Can't resolve asset [%s] from file: %s", type.c_str(), path.c_str());
+    return nullptr;
 }
 
 bool AssetManager::is_assets_ready() const {

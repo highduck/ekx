@@ -16,18 +16,14 @@ enum class InteractionEvent {
 };
 
 struct Interactive {
-
-    using mouse_cursor = app::mouse_cursor;
-    using signal = Signal<>;
-
     // events
-    signal on_over;
-    signal on_out;
-    signal on_down;
-    signal on_up;
-    signal on_clicked;
+    Signal<> on_over;
+    Signal<> on_out;
+    Signal<> on_down;
+    Signal<> on_up;
+    Signal<> on_clicked;
 
-    mouse_cursor cursor{mouse_cursor::parent};
+    app::MouseCursor cursor{app::MouseCursor::Parent};
 
     // TODO: Interactive::pointer is useless
     // global world space pointer, because of that maybe we don't dispatch this coordinate into components,

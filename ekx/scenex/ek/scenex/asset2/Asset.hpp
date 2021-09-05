@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <ek/serialize/core.hpp>
 #include <ek/serialize/streams.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/util/Path.hpp>
@@ -21,24 +22,44 @@ class Asset {
 public:
     Asset() = default;
 
+    explicit Asset(std::string name) :
+            name_{std::move(name)} {
+    }
+
     virtual ~Asset() = default;
 
-    virtual void load() = 0;
+    virtual void load() {
+        if (state == AssetState::Initial) {
+            state = AssetState::Loading;
+            this->do_load();
+        }
+    }
+
+    virtual void unload() {
+        if (state == AssetState::Ready) {
+            this->do_unload();
+            state = AssetState::Initial;
+        }
+    }
 
     virtual void poll() {}
 
-    virtual void unload() = 0;
+    virtual void do_load() {}
 
-    AssetState state = AssetState::Initial;
-    int error = 0;
+    virtual void do_unload() {}
 
     [[nodiscard]]
     virtual float getProgress() const {
         return state == AssetState::Ready ? 1.0f : 0.0f;
     }
 
+    AssetState state = AssetState::Initial;
+    int error = 0;
+    float weight_ = 1.0f;
+    std::string name_;
+
 protected:
-    AssetManager* project_ = nullptr;
+    AssetManager* manager_ = nullptr;
 };
 
 class AssetTypeResolver {
@@ -48,13 +69,13 @@ public:
     virtual ~AssetTypeResolver() = default;
 
     [[nodiscard]]
-    virtual Asset* create_from_file(const std::string& path) const = 0;
+    virtual Asset* create_from_file(const std::string& path, const std::string& type) const = 0;
 
     [[nodiscard]]
     virtual Asset* create(const std::string& path) const = 0;
 
     [[nodiscard]]
-    virtual Asset* create_for_type(const std::string& type, const std::string& path) const = 0;
+    virtual Asset* create_for_type(const void* data, int size) const = 0;
 
     AssetManager* manager = nullptr;
 };
@@ -65,9 +86,9 @@ public:
 
     ~AssetManager();
 
-    void add_file(const std::string& path);
+    Asset* add_file(const std::string& path, const std::string& type);
 
-    Asset* add_from_type(const std::string& type, const std::string& path);
+    Asset* add_from_type(const void* data, int size);
 
     void add_resolver(AssetTypeResolver* resolver);
 
@@ -92,13 +113,13 @@ class DefaultAssetsResolver : public AssetTypeResolver {
 public:
 
     [[nodiscard]]
-    Asset* create_from_file(const std::string& path) const override;
+    Asset* create_from_file(const std::string& path, const std::string& type) const override;
 
     [[nodiscard]]
     Asset* create(const std::string& path) const override;
 
     [[nodiscard]]
-    Asset* create_for_type(const std::string& type, const std::string& path) const override;
+    Asset* create_for_type(const void* data, int size) const override;
 };
 
 }

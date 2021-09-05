@@ -219,7 +219,7 @@ inline void guiInteractive(Interactive& inter) {
     ImGui::Checkbox("pushed", &inter.pushed);
     ImGui::Checkbox("over", &inter.over);
     ImGui::Checkbox("bubble", &inter.bubble);
-    ImGui::LabelText("cursor", inter.cursor == Interactive::mouse_cursor::button ? "button" : "?");
+    ImGui::LabelText("cursor", inter.cursor == app::MouseCursor::Button ? "button" : "?");
 }
 
 inline void editDisplaySprite(Sprite2D& sprite) {

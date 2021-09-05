@@ -12,7 +12,7 @@ import * as path from "path";
 import * as fs from "fs";
 import {readFileSync} from "fs";
 import * as plist from 'plist';
-import {buildAssetsAsync} from "../assets";
+import {buildAssetPackAsync} from "../assets";
 import {iosBuildAppIconAsync} from "./iosAppIcon";
 import {Project} from "../project";
 import {collectCppFlags, collectObjects, collectStrings} from "../collectSources";
@@ -74,7 +74,7 @@ export async function export_ios(ctx: Project): Promise<void> {
     }
 
     await Promise.all([
-        buildAssetsAsync(ctx),
+        buildAssetPackAsync(ctx),
         iosBuildAppIconAsync(ctx, "export/ios")
     ]);
 

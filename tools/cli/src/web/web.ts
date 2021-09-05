@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import {copyFileSync} from "fs";
 import * as path from "path";
-import {copyFolderRecursiveSync, executeAsync, isDir, isFile, makeDirs, withPath} from "../utils";
-import {buildAssetsAsync} from "../assets";
+import {executeAsync, isDir, isFile, makeDirs, replaceInFile, withPath} from "../utils";
+import {buildAssetPackAsync} from "../assets";
 import * as Mustache from 'mustache';
 import {webBuildAppIconAsync} from "./webAppIcon";
 import {collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources";
@@ -11,6 +11,7 @@ import {cmake} from "../cmake/build";
 import {serve} from "./serve";
 import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../cmake/generate";
 import {logger} from "../logger";
+import * as glob from "glob";
 
 function getEmscriptenSDKPath(): string {
     if (process.env.EMSDK) {
@@ -161,6 +162,9 @@ async function buildProject(ctx, buildType) {
     {
         const EMSDK_PATH = getEmscriptenSDKPath();
         const EMSDK_CMAKE_TOOLCHAIN = path.join(EMSDK_PATH, "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake");
+        if (!process.env.EM_NODE_JS && process.env.NODE) {
+            process.env.EM_NODE_JS = process.env.NODE;
+        }
         await cmake(cmakeBuildDir, {
             toolchain: EMSDK_CMAKE_TOOLCHAIN,
             buildType: buildType,
@@ -199,13 +203,15 @@ export async function export_web(ctx: Project): Promise<void> {
 
     const buildType = ctx.args.indexOf("--debug") >= 0 ? "Debug" : "Release";
     const buildTask = buildProject(ctx, buildType);
-    const assetsTask = buildAssetsAsync(ctx);
+    const assetsTask = buildAssetPackAsync(ctx, path.join(outputDir, "assets"));
 
     const webManifest = JSON.parse(fs.readFileSync(path.join(ctx.path.templates, "web/manifest.json"), "utf8"));
     webManifest.name = ctx.title;
     webManifest.short_name = ctx.name;
+    webManifest.version = ctx.version_name;
+    webManifest.version_code = ctx.version_code;
     webManifest.description = ctx.desc;
-    webManifest.start_url = (ctx.pwa_url ?? "") + "/index.html";
+    webManifest.start_url = "./index.html";
     if (ctx.web?.applications != null) {
         webManifest.related_applications = ctx.web?.applications;
     }
@@ -214,8 +220,8 @@ export async function export_web(ctx: Project): Promise<void> {
     const iconsTask = webBuildAppIconAsync(ctx, webManifest.icons, outputDir);
 
     tpl("web/index.html.mustache", "index.html");
-    tpl("web/sw.js", "sw.js");
     file("web/pwacompat.min.js", "pwacompat.min.js");
+    tpl("web/sw.js", "sw.js");
 
     try {
         await assetsTask;
@@ -223,7 +229,18 @@ export async function export_web(ctx: Project): Promise<void> {
         logger.error("assets export failed", e);
         throw e;
     }
-    copyFolderRecursiveSync("export/contents/assets", "export/web/assets");
+
+    const assetDirFiles = glob.sync(path.join(outputDir, "assets/**/*"));
+    const assetsList = assetDirFiles.map(p => `"${path.relative(outputDir, p)}"`).join(",\n");
+    replaceInFile(path.join(outputDir, "sw.js"), {
+        "var contentToCache = [];": `var contentToCache = [
+        'index.html',
+        'pwacompat.min.js',
+        '${ctx.name}.js',
+        '${ctx.name}.wasm',
+        ${assetsList}
+];`
+    });
 
     try {
         await buildTask;

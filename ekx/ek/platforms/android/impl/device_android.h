@@ -54,6 +54,7 @@ void vibrate(int duration_millis) {
 }
 
 std::string getDeviceFontPath(const char* fontName) {
+    (void)fontName;
     // TODO:
 //    return "/system/fonts/Roboto-Regular.ttf";
     return "/system/fonts/DroidSansFallback.ttf";

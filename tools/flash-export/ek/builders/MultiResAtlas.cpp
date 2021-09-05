@@ -27,7 +27,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-compare"
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
+
 #include <stb/stb_image_write.h>
+
 #pragma clang diagnostic pop
 
 #endif
@@ -40,8 +42,8 @@ void MultiResAtlasSettings::readFromXML(const pugi::xml_node& node) {
     for (auto& resolution_node: node.children("resolution")) {
         Resolution res{};
         res.scale = resolution_node.attribute("scale").as_float(res.scale);
-        res.max_size.x = resolution_node.attribute("max_width").as_float(res.max_size.x);
-        res.max_size.y = resolution_node.attribute("max_height").as_float(res.max_size.y);
+        res.max_size.x = resolution_node.attribute("max_width").as_int(res.max_size.x);
+        res.max_size.y = resolution_node.attribute("max_height").as_int(res.max_size.y);
         resolutions.push_back(res);
     }
 }
@@ -63,9 +65,15 @@ inline std::string get_atlas_suffix(float scale, int page_index = 0) {
         suffix += "_" + std::to_string(page_index);
     }
 
-    if (scale > 3) suffix += "@4x";
-    else if (scale > 2) suffix += "@3x";
-    else if (scale > 1) suffix += "@2x";
+    if (scale <= 1) suffix += "@1x";
+    else if (scale <= 2) suffix += "@2x";
+    else if (scale <= 3) suffix += "@3x";
+    else if (scale <= 4) suffix += "@4x";
+    else {
+        EK_WARN << "atlas more than 4x scale-factor!";
+        // to support bigger density
+        suffix += "@4x";
+    }
     return suffix;
 }
 
@@ -226,7 +234,7 @@ Array<AtlasPageData> packSprites(Array<SpriteData> sprites, const int2 max_size)
 void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
     image_t img{image};
     // require RGBA non-premultiplied alpha
-    undo_premultiply_image(img);
+    //undo_premultiply_image(img);
 
     if (alpha) {
         stbi_write_png(path.c_str(),

@@ -63,85 +63,85 @@ void init_webgl_context(bool needDepth) {
     }
 }
 
-mouse_button convert_mouse_button(unsigned short btn) {
+MouseButton toMouseButton(unsigned short btn) {
     switch (btn) {
         case 0:
-            return mouse_button::left;
+            return MouseButton::Left;
         case 2:
-            return mouse_button::right;
+            return MouseButton::Right;
         default:
             break;
     }
-    return mouse_button::other;
+    return MouseButton::Other;
 }
 
-static EM_BOOL em_mouse_callback(int type, const EmscriptenMouseEvent* mouse_event, void*) {
-    event_t event{};
-    event.button = convert_mouse_button(mouse_event->button);
+static EM_BOOL em_mouse_callback(int type, const EmscriptenMouseEvent* mouseEvent, void*) {
+    Event event{};
+    event.button = toMouseButton(mouseEvent->button);
 
     switch (type) {
         case EMSCRIPTEN_EVENT_MOUSEDOWN:
-            event.type = event_type::mouse_down;
+            event.type = Event::MouseDown;
             break;
         case EMSCRIPTEN_EVENT_MOUSEUP:
-            event.type = event_type::mouse_up;
+            event.type = Event::MouseUp;
             break;
         case EMSCRIPTEN_EVENT_MOUSEMOVE:
-            event.type = event_type::mouse_move;
+            event.type = Event::MouseMove;
             break;
         default:
             return EM_FALSE;
     }
 
     const auto dpr = g_app.content_scale;
-    event.pos.x = dpr * static_cast<float>(mouse_event->targetX);
-    event.pos.y = dpr * static_cast<float>(mouse_event->targetY);
+    event.pos.x = dpr * static_cast<float>(mouseEvent->targetX);
+    event.pos.y = dpr * static_cast<float>(mouseEvent->targetY);
     dispatch_event(event);
     return EM_TRUE;
 }
 
 /****** KEYBOARD ****/
-static std::unordered_map<std::string, key_code> scancode_table = {
-        {"ArrowLeft",  key_code::ArrowLeft},
-        {"ArrowRight", key_code::ArrowRight},
-        {"ArrowDown",  key_code::ArrowDown},
-        {"ArrowUp",    key_code::ArrowUp},
-        {"Escape",     key_code::Escape},
-        {"Backspace",  key_code::Backspace},
-        {"Space",      key_code::Space},
-        {"Enter",      key_code::Enter},
-        {"A",          key_code::A},
-        {"C",          key_code::C},
-        {"V",          key_code::V},
-        {"X",          key_code::X},
-        {"Y",          key_code::Y},
-        {"Z",          key_code::Z},
-        {"W",          key_code::W},
-        {"S",          key_code::S},
-        {"D",          key_code::D}
+static std::unordered_map<std::string, KeyCode> scancodeTable = {
+        {"ArrowLeft",  KeyCode::ArrowLeft},
+        {"ArrowRight", KeyCode::ArrowRight},
+        {"ArrowDown",  KeyCode::ArrowDown},
+        {"ArrowUp",    KeyCode::ArrowUp},
+        {"Escape",     KeyCode::Escape},
+        {"Backspace",  KeyCode::Backspace},
+        {"Space",      KeyCode::Space},
+        {"Enter",      KeyCode::Enter},
+        {"A",          KeyCode::A},
+        {"C",          KeyCode::C},
+        {"V",          KeyCode::V},
+        {"X",          KeyCode::X},
+        {"Y",          KeyCode::Y},
+        {"Z",          KeyCode::Z},
+        {"W",          KeyCode::W},
+        {"S",          KeyCode::S},
+        {"D",          KeyCode::D}
 };
 
-static key_code convert_key_code(const EM_UTF8 key_code[EM_HTML5_SHORT_STRING_LEN_BYTES]) {
-    const auto i = scancode_table.find(key_code);
-    return i != scancode_table.end() ? i->second : key_code::unknown;
+static KeyCode toKeyCode(const EM_UTF8 key[EM_HTML5_SHORT_STRING_LEN_BYTES]) {
+    const auto i = scancodeTable.find(key);
+    return i != scancodeTable.end() ? i->second : KeyCode::Unknown;
 }
 
 static EM_BOOL em_keyboard_callback(int type, const EmscriptenKeyboardEvent* event, void*) {
-    event_t ev{};
+    Event ev{};
     switch (type) {
         case EMSCRIPTEN_EVENT_KEYPRESS:
-            ev.type = event_type::key_press;
-            ev.code = convert_key_code(event->code);
+            ev.type = Event::KeyPress;
+            ev.keyCode = toKeyCode(event->code);
             dispatch_event(ev);
             return EM_TRUE;
         case EMSCRIPTEN_EVENT_KEYDOWN:
-            ev.type = event_type::key_down;
-            ev.code = convert_key_code(event->code);
+            ev.type = Event::KeyDown;
+            ev.keyCode = toKeyCode(event->code);
             dispatch_event(ev);
             return EM_TRUE;
         case EMSCRIPTEN_EVENT_KEYUP:
-            ev.type = event_type::key_up;
-            ev.code = convert_key_code(event->code);
+            ev.type = Event::KeyUp;
+            ev.keyCode = toKeyCode(event->code);
             dispatch_event(ev);
             return EM_TRUE;
         default:
@@ -153,7 +153,7 @@ static EM_BOOL em_keyboard_callback(int type, const EmscriptenKeyboardEvent* eve
 
 static EM_BOOL em_wheel_callback(int type, const EmscriptenWheelEvent* event, void*) {
     if (type == EMSCRIPTEN_EVENT_WHEEL) {
-        event_t ev{event_type::mouse_scroll};
+        Event ev{Event::MouseScroll};
         const auto dpr = g_app.content_scale;
         ev.pos.x = dpr * static_cast<float>(event->mouse.targetX);
         ev.pos.y = dpr * static_cast<float>(event->mouse.targetY);
@@ -166,7 +166,7 @@ static EM_BOOL em_wheel_callback(int type, const EmscriptenWheelEvent* event, vo
 
 
 static EM_BOOL em_touch_callback(int type, const EmscriptenTouchEvent* event, void*) {
-    event_t ev{};
+    Event ev{};
     const float dpr = g_app.content_scale;
     for (int i = 0; i < event->numTouches; ++i) {
         const EmscriptenTouchPoint& touch = event->touches[i];
@@ -176,16 +176,16 @@ static EM_BOOL em_touch_callback(int type, const EmscriptenTouchEvent* event, vo
             ev.pos.y = dpr * static_cast<float>(touch.targetY);
             switch (type) {
                 case EMSCRIPTEN_EVENT_TOUCHSTART:
-                    ev.type = event_type::touch_begin;
+                    ev.type = Event::TouchBegin;
                     dispatch_event(ev);
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHMOVE:
-                    ev.type = event_type::touch_move;
+                    ev.type = Event::TouchMove;
                     dispatch_event(ev);
                     break;
                 case EMSCRIPTEN_EVENT_TOUCHEND:
                 case EMSCRIPTEN_EVENT_TOUCHCANCEL:
-                    ev.type = event_type::touch_end;
+                    ev.type = Event::TouchEnd;
                     dispatch_event(ev);
                     break;
                 default:

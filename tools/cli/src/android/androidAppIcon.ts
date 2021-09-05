@@ -1,8 +1,8 @@
 import {Project} from "../project";
 import * as path from "path";
-import {execute, isDir, makeDirs, readText, writeText} from "../utils";
+import {isDir, makeDirs} from "../utils";
 import {rmdirSync} from "fs";
-import {ekc, ekcAsync} from "../ekc";
+import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/renderFlashSymbol";
 
 export function androidBuildAppIconAsync(ctx: Project, output: string): Promise<number> {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
@@ -23,14 +23,17 @@ export function androidBuildAppIconAsync(ctx: Project, output: string): Promise<
     };
 
     const originalSize = 64.0;
-
-    let cmd = ["prerender_flash", marketAsset, "icon"];
+    const outputs: RenderFlashSymbolOutputOptions[] = [];
     for (const resolution of Object.keys(resolutionMap)) {
         const size = resolutionMap[resolution];
-        const scale = size / originalSize;
-        const dir = path.join(output, `mipmap-${resolution}`);
-        makeDirs(dir);
-        cmd.push(scale.toString(), size.toString(), size.toString(), "0", "1", path.join(dir, filename));
+        outputs.push({
+            scale: size / originalSize,
+            width: size,
+            height: size,
+            alpha: false,
+            trim: true,
+            outFilePath: path.join(output, `mipmap-${resolution}`, filename)
+        });
     }
-    return ekcAsync(ctx, ...cmd);
+    return renderFlashSymbol(marketAsset, "icon", outputs);
 }

@@ -2,6 +2,27 @@
 #include <ek/util/StaticStorage.hpp>
 #include <ek/debug.hpp>
 
+// implementation
+#if defined(__APPLE__)
+
+#include <TargetConditionals.h>
+
+#endif
+
+#if defined(__ANDROID__)
+
+#include "admob_android.hpp"
+
+#elif TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
+
+#include "admob_ios.hpp"
+
+#else
+
+#include "admob_null.hpp"
+
+#endif
+
 namespace admob {
 
 static ek::StaticStorage<Context> _context;

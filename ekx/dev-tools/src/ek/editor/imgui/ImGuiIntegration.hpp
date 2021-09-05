@@ -18,7 +18,7 @@ public:
 
     ~ImGuiIntegration();
 
-    void on_event(const app::event_t& event);
+    void on_event(const app::Event& event);
 
     void on_frame_completed();
 
