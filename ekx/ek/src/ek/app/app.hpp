@@ -85,7 +85,7 @@ enum class KeyCode {
 };
 
 enum class KeyModifier {
-    None = 0,
+    Empty = 0,
     // Super is "command" or "windows" key
     Super = 1,
     Shift = 2,
@@ -133,7 +133,7 @@ struct Event final {
     std::string characters{};
 
     KeyCode keyCode = KeyCode::Unknown;
-    KeyModifier keyModifiers = KeyModifier::None;
+    KeyModifier keyModifiers = KeyModifier::Empty;
 };
 
 struct app_state final {
