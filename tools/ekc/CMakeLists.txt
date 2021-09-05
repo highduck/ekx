@@ -5,34 +5,15 @@ project(ekc)
 add_executable(${PROJECT_NAME}
         src/cli_main.cpp
 
-        src/ek/editor/marketing/export_marketing.hpp
-        src/ek/editor/marketing/export_marketing.cpp
-
-        src/ek/editor/obj/obj_loader.cpp
-        src/ek/editor/obj/obj_loader.hpp
-
-        src/ek/editor/assets/dynamic_atlas_editor_asset.cpp
-        src/ek/editor/assets/MultiResAtlasEditorAsset.cpp
-        src/ek/editor/assets/flash_asset.cpp
-        src/ek/editor/assets/audio_asset.cpp
-        src/ek/editor/assets/bitmap_font_editor_asset.cpp
-        src/ek/editor/assets/TextureAsset.cpp
-        src/ek/editor/assets/model_asset.cpp
-        src/ek/editor/assets/ttf_editor_asset.cpp
-        src/ek/editor/assets/editor_project.cpp
-        src/ek/editor/assets/editor_project.hpp
-        src/ek/editor/assets/particles_asset.cpp
-        src/ek/editor/assets/particles_asset.hpp
-        src/ek/editor/assets/TranslationsAsset.hpp
-        src/ek/editor/assets/TranslationsAsset.cpp
-        src/ek/editor/assets/editor_asset.cpp
-        src/ek/editor/assets/editor_asset.hpp
-
         src/ek/system/system.cpp
         src/ek/system/system.hpp
         src/ek/system/working_dir.cpp
         src/ek/system/working_dir.hpp
-        )
+        src/ek/bmfont.hpp
+        src/ek/flash.hpp
+        src/ek/atlas.hpp
+        src/ek/obj.hpp
+        src/fast_obj.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ./src)
 
@@ -43,6 +24,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_EXTENSIONS NO
         )
 
+target_compile_definitions(${PROJECT_NAME} PUBLIC EK_TOOLS)
+target_compile_definitions(ek-core PUBLIC EK_TOOLS)
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_options(${PROJECT_NAME} PRIVATE -g -Os)
 endif ()
@@ -53,10 +36,15 @@ target_link_libraries(${PROJECT_NAME}
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(EKC_OS_PREFIX osx)
+
     if (CMAKE_BUILD_TYPE MATCHES Debug)
     else ()
-        target_compile_options(${PROJECT_NAME} PUBLIC -Oz -flto)
-        target_link_options(${PROJECT_NAME} PUBLIC -Wl,-dead_strip -Wl,-dead_strip_dylibs)
+        set(EKC_COMPILE_FLAGS "-Oz -flto -DNDEBUG -fno-exceptions -fno-rtti")
+        set(EKC_LINK_FLAGS "-Oz -flto -Wl,-dead_strip -Wl,-dead_strip_dylibs")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EKC_COMPILE_FLAGS}")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EKC_COMPILE_FLAGS}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EKC_LINK_FLAGS}")
+
     endif ()
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(${PROJECT_NAME}

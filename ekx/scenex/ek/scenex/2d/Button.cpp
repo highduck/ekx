@@ -129,7 +129,7 @@ void Button::updateAll() {
 
         if (!btn.initialized) {
             btn.initialized = true;
-            interactive.cursor = Interactive::mouse_cursor::button;
+            interactive.cursor = app::MouseCursor::Button;
             initialize_base_transform(btn, transform);
             initialize_events(e);
         }

@@ -30,15 +30,15 @@ public:
     void process();
 
     ecs::EntityApi globalHitTest(float2& worldSpacePointer, ecs::EntityRef& capturedCamera);
-    app::mouse_cursor searchInteractiveTargets(Array<ecs::EntityApi>& out_entities);
+    app::MouseCursor searchInteractiveTargets(Array<ecs::EntityApi>& out_entities);
 
     void sendBackButton();
 
     void handle_system_pause();
 
-    void handle_mouse_event(const app::event_t& ev, float2 pos);
+    void handle_mouse_event(const app::Event& ev, float2 pos);
 
-    void handle_touch_event(const app::event_t& ev, float2 pos);
+    void handle_touch_event(const app::Event& ev, float2 pos);
 
     void drag(ecs::EntityApi entity);
 

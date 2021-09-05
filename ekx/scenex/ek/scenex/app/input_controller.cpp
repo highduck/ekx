@@ -6,7 +6,7 @@ using namespace ek::app;
 
 static input_controller* gInputController = nullptr;
 
-void gInputController_onEvent(const event_t& e) {
+void gInputController_onEvent(const Event& e) {
     EK_ASSERT(gInputController != nullptr);
     gInputController->on_event(e);
 }
@@ -31,11 +31,11 @@ input_controller::~input_controller() {
     g_app.on_frame_completed -= gInputController_onFrameCompleted;
 }
 
-void input_controller::emulate_mouse_as_touch(const event_t& event, touch_state_t& data) {
+void input_controller::emulate_mouse_as_touch(const Event& event, touch_state_t& data) {
     bool active_prev = data.active;
-    if (!data.active && event.type == event_type::mouse_down) {
+    if (!data.active && event.type == Event::MouseDown) {
         data.active = true;
-    } else if (data.active && (event.type == event_type::mouse_up || event.type == event_type::mouse_exit)) {
+    } else if (data.active && (event.type == Event::MouseUp || event.type == Event::MouseExit)) {
         data.active = false;
     }
 
@@ -52,9 +52,9 @@ void input_controller::emulate_mouse_as_touch(const event_t& event, touch_state_
     }
 }
 
-void input_controller::update_touch(const event_t& event, touch_state_t& data) {
+void input_controller::update_touch(const Event& event, touch_state_t& data) {
     bool active_prev = data.active;
-    data.active = event.type != event_type::touch_end;
+    data.active = event.type != Event::TouchEnd;
 
     data.position = screenCoordToGameDisplay(event.pos);
     data.pressed = data.active;
@@ -69,22 +69,22 @@ void input_controller::update_touch(const event_t& event, touch_state_t& data) {
     }
 }
 
-void input_controller::on_event(const event_t& event) {
+void input_controller::on_event(const Event& event) {
     switch (event.type) {
-        case event_type::touch_begin:
-        case event_type::touch_move:
-        case event_type::touch_end:
+        case Event::TouchBegin:
+        case Event::TouchMove:
+        case Event::TouchEnd:
             if (!hovered_by_editor_gui) {
                 interactions_.handle_touch_event(event, screenCoordToGameDisplay(event.pos));
             }
             update_touch(event, get_or_create_touch(event.id));
             break;
-        case event_type::mouse_down:
-        case event_type::mouse_up:
-        case event_type::mouse_move:
-        case event_type::mouse_scroll:
-        case event_type::mouse_enter:
-        case event_type::mouse_exit:
+        case Event::MouseDown:
+        case Event::MouseUp:
+        case Event::MouseMove:
+        case Event::MouseScroll:
+        case Event::MouseEnter:
+        case Event::MouseExit:
             if (!hovered_by_editor_gui) {
                 interactions_.handle_mouse_event(event, screenCoordToGameDisplay(event.pos));
             }
@@ -92,18 +92,18 @@ void input_controller::on_event(const event_t& event) {
                 emulate_mouse_as_touch(event, get_or_create_touch(1u));
             }
             break;
-        case event_type::key_up:
-        case event_type::key_down:
-            if (event.type == event_type::key_down && event.code == key_code::Escape) {
+        case Event::KeyUp:
+        case Event::KeyDown:
+            if (event.type == Event::KeyDown && event.keyCode == KeyCode::Escape) {
                 interactions_.sendBackButton();
             }
-            if (event.code != key_code::unknown) {
-                auto& key = keys_[static_cast<size_t>(event.code)];
-                if (event.type == event_type::key_down) {
+            if (event.keyCode != KeyCode::Unknown) {
+                auto& key = keys_[static_cast<size_t>(event.keyCode)];
+                if (event.type == Event::KeyDown) {
                     key.down = !key.state;
                     key.state = true;//!keyboard_modifiers.ctrlKey;
                     key.up = false;
-                } else if (event.type == event_type::key_up) {
+                } else if (event.type == Event::KeyUp) {
                     key.down = false;
                     key.state = false;
                     key.up = true;
@@ -111,10 +111,10 @@ void input_controller::on_event(const event_t& event) {
                 }
             }
             break;
-        case event_type::app_back_button:
+        case Event::BackButton:
             interactions_.sendBackButton();
             break;
-        case event_type::app_pause:
+        case Event::Pause:
             interactions_.handle_system_pause();
             break;
         default:
@@ -122,22 +122,22 @@ void input_controller::on_event(const event_t& event) {
     }
 }
 
-bool input_controller::is_key(key_code code) const {
-    if (code != key_code::unknown) {
+bool input_controller::is_key(KeyCode code) const {
+    if (code != KeyCode::Unknown) {
         return keys_[static_cast<size_t>(code)].state;
     }
     return false;
 }
 
-bool input_controller::is_key_down(key_code code) const {
-    if (code != key_code::unknown) {
+bool input_controller::is_key_down(KeyCode code) const {
+    if (code != KeyCode::Unknown) {
         return keys_[static_cast<size_t>(code)].down;
     }
     return false;
 }
 
-bool input_controller::is_key_up(key_code code) const {
-    if (code != key_code::unknown) {
+bool input_controller::is_key_up(KeyCode code) const {
+    if (code != KeyCode::Unknown) {
         return keys_[static_cast<size_t>(code)].up;
     }
     return false;

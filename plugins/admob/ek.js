@@ -14,7 +14,6 @@ function setup(project) {
         path: __dirname,
         cpp: "src",
         android: {
-            cpp: "android",
             android_java: "android/java",
             android_dependency: `implementation 'com.google.android.gms:play-services-ads:20.3.0'`,
             android_manifestApplication: [
@@ -26,9 +25,14 @@ function setup(project) {
             }
         },
         ios: {
-            cpp: "ios",
             xcode_framework: "AppTrackingTransparency",
             xcode_pod: "Google-Mobile-Ads-SDK",
+            cpp_flags: {
+                files: [
+                    "src/admob.cpp"
+                ],
+                flags: "-x objective-c++"
+            },
             xcode_plist: [
                 {
                     NSUserTrackingUsageDescription: "This identifier will be used to deliver personalized ads to you.",
@@ -72,13 +76,7 @@ function setup(project) {
                     ],
                 }
             ]
-        },
-        web: {
-            cpp: "null"
-        },
-        macos: {
-            cpp: "null"
-        },
+        }
     });
 }
 

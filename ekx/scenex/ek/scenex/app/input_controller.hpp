@@ -31,18 +31,18 @@ public:
 
     ~input_controller();
 
-    void on_event(const app::event_t& event);
+    void on_event(const app::Event& event);
 
     void on_frame_completed();
 
     [[nodiscard]]
-    bool is_key(app::key_code code) const;
+    bool is_key(app::KeyCode code) const;
 
     [[nodiscard]]
-    bool is_key_down(app::key_code code) const;
+    bool is_key_down(app::KeyCode code) const;
 
     [[nodiscard]]
-    bool is_key_up(app::key_code code) const;
+    bool is_key_up(app::KeyCode code) const;
 
     void reset_keyboard();
 
@@ -64,8 +64,10 @@ public:
     bool emulateTouch = false;
 private:
     [[nodiscard]] float2 screenCoordToGameDisplay(float2 pos) const;
-    void emulate_mouse_as_touch(const app::event_t& event, touch_state_t& data);
-    void update_touch(const app::event_t& event, touch_state_t& data);
+
+    void emulate_mouse_as_touch(const app::Event& event, touch_state_t& data);
+
+    void update_touch(const app::Event& event, touch_state_t& data);
 
     struct key_state_t {
         bool state = false;
@@ -79,10 +81,10 @@ private:
     int keyboard_modifiers_{};
     bool reset_keys_ = false;
 
-    constexpr static size_t keys_count = static_cast<size_t>(app::key_code::max_count);
+    constexpr static size_t keys_count = static_cast<size_t>(app::KeyCode::MaxCount);
     key_state_t keys_[keys_count];
 
-    Array <touch_state_t> touches_;
+    Array<touch_state_t> touches_;
 };
 
 EK_DECLARE_TYPE(input_controller);

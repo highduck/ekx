@@ -1,7 +1,7 @@
 import {Project} from "../project";
 import * as path from "path";
 import {executeAsync, makeDirs} from "../utils";
-import {buildAssetsAsync} from "../assets";
+import {buildAssetPackAsync} from "../assets";
 import {rmSync} from "fs";
 import {cmake} from "../cmake/build";
 
@@ -61,7 +61,7 @@ async function build() {
 }
 
 function doScreenshots(ctx: Project): Promise<any> {
-    const bin = path.join(exportDir, ctx.binary_name);
+    const bin = path.join(exportDir, ctx.name);
     const jobs = [];
     const screenshotsDir = path.join(exportDir, "screenshots");
     rmSync(screenshotsDir, {recursive: true, force: true});
@@ -95,7 +95,7 @@ function doScreenshots(ctx: Project): Promise<any> {
 
 export async function screenshots(ctx: Project): Promise<any> {
     await Promise.all([
-        buildAssetsAsync(ctx, path.join(exportDir, "assets"), true),
+        buildAssetPackAsync(ctx, path.join(exportDir, "assets"), true),
         build()
     ]);
     await doScreenshots(ctx);

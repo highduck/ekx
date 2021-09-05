@@ -1,11 +1,27 @@
 #include "AdMobWrapper.hpp"
-
-#include "AdMobSimulator.hpp"
+#include <ek/audio/audio.hpp>
 #include "AdMobNull.hpp"
 
-#include <ek/audio/audio.hpp>
-
 #include <memory>
+
+// implementation
+#if defined(__APPLE__)
+
+#include <TargetConditionals.h>
+
+#endif
+
+#if defined(__ANDROID__) || TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
+#define EK_ADMOB_SIMULATOR 0
+#else
+#define EK_ADMOB_SIMULATOR 1
+#endif
+
+#if EK_ADMOB_SIMULATOR
+
+#include "AdMobSimulator.hpp"
+
+#endif
 
 namespace ek {
 
@@ -43,17 +59,17 @@ void AdMobWrapper::completeRewardedAd(bool rewarded) {
     }
 }
 
-void AdMobWrapper::onAdmobEvent(admob::event_type event) {
+void AdMobWrapper::onAdmobEvent(admob::EventType event) {
     using namespace admob;
     switch (event) {
-        case event_type::video_rewarded:
+        case EventType::VideoRewarded:
             userRewarded = true;
             break;
-        case event_type::video_failed:
-        case event_type::video_closed:
+            case EventType::VideoFailed:
+                case EventType::VideoClosed:
             completeRewardedAd(userRewarded);
             break;
-        case event_type::video_loaded:
+            case EventType::VideoLoaded:
             if (rewardedAdCompletedCallback) {
                 show_rewarded_ad();
             }
@@ -64,10 +80,13 @@ void AdMobWrapper::onAdmobEvent(admob::event_type event) {
 }
 
 std::unique_ptr<AdMobWrapper> AdMobWrapper::create(bool devMode) {
-    if(devMode) {
+#if EK_ADMOB_SIMULATOR
+    if (devMode) {
         return std::make_unique<AdMobSimulator>();
     }
-    else if(admob::hasSupport()) {
+#endif
+
+    if (admob::hasSupport()) {
         return std::make_unique<AdMobWrapper>();
     }
     return std::make_unique<AdMobNull>();

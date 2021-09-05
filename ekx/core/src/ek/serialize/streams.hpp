@@ -98,6 +98,10 @@ public:
         return data_;
     }
 
+    inline const void* dataAtPosition() const {
+        return data_ + pos_;
+    }
+
 private:
     const std::byte* data_;
     const uint32_t size_;

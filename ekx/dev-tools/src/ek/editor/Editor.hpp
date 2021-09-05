@@ -34,7 +34,7 @@ public:
 
     ~Editor() override;
 
-    void onEvent(const app::event_t& event);
+    void onEvent(const app::Event& event);
     void onFrameCompleted();
 
 public:

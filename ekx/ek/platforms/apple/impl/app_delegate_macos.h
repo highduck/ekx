@@ -93,7 +93,7 @@ void handleQuitRequest() {
                         backing:NSBackingStoreBuffered
                           defer:NO];
 
-    [_window setTitle:[NSString stringWithUTF8String:config.title.c_str()]];
+    [_window setTitle:[NSString stringWithUTF8String:config.title]];
 
     _window.delegate = self;
     _window.acceptsMouseMovedEvents = YES;
@@ -170,7 +170,7 @@ void handleQuitRequest() {
 }
 
 - (void)applicationWillTerminate:(__unused NSNotification*)notification {
-    process_event({event_type::app_close});
+    process_event({Event::Close});
     if (_view != nil) {
         OBJC_RELEASE(_view.device);
     }
@@ -179,11 +179,11 @@ void handleQuitRequest() {
 }
 
 - (void)applicationWillResignActive:(__unused NSNotification*)notification {
-    dispatch_event({event_type::app_pause});
+    dispatch_event({Event::Pause});
 }
 
 - (void)applicationDidBecomeActive:(__unused NSNotification*)notification {
-    dispatch_event({event_type::app_resume});
+    dispatch_event({Event::Resume});
 }
 
 @end
@@ -288,9 +288,9 @@ void handleQuitRequest() {
 
 /**** HANDLE TOUCH *****/
 
-//void handle_touch(event_type event_type, double scale_factor, NSTouch* touch) {
+//void handle_touch(AppEventType event_type, double scale_factor, NSTouch* touch) {
 //    const CGPoint location = touch.normalizedPosition;
-//    event_t ev{event_type};
+//    Event ev{event_type};
 //    ev.id = uint64_t(touch.identity) + 1u;
 //    ev.set_position(location.x, location.y, scale_factor);
 //    g_app.dispatch(ev);
@@ -299,28 +299,28 @@ void handleQuitRequest() {
 //- (void)touchesBeganWithEvent: (NSEvent*)event {
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseBegan inView: self];
 //    for (NSTouch* touch in touches) {
-//        handle_touch(event_type::touch_begin, self.window.backingScaleFactor, touch);
+//        handle_touch(Event::TouchBegin, self.window.backingScaleFactor, touch);
 //    }
 //}
 //
 //- (void)touchesMovedWithEvent: (NSEvent*)event {
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseMoved inView: self];
 //    for (NSTouch* touch in touches) {
-//        handle_touch(event_type::touch_move, self.window.backingScaleFactor, touch);
+//        handle_touch(Event::TouchMove, self.window.backingScaleFactor, touch);
 //    }
 //}
 //
 //- (void)touchesEndedWithEvent: (NSEvent*)event {
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseEnded inView: self];
 //    for (NSTouch* touch in touches) {
-//        handle_touch(event_type::touch_end, self.window.backingScaleFactor, touch);
+//        handle_touch(Event::TouchEnd, self.window.backingScaleFactor, touch);
 //    }
 //}
 //
 //- (void)touchesCancelledWithEvent: (NSEvent*)event {
 //    NSSet* touches = [event touchesMatchingPhase: NSTouchPhaseCancelled inView: self];
 //    for (NSTouch* touch in touches) {
-//        handle_touch(event_type::touch_end, self.window.backingScaleFactor, touch);
+//        handle_touch(Event::TouchEnd, self.window.backingScaleFactor, touch);
 //    }
 //}
 
@@ -331,20 +331,20 @@ void handleQuitRequest() {
 
 - (void)magnifyWithEvent:(__unused NSEvent*)event {}
 
-void handle_key(NSEvent* event, event_type type) {
-    event_t ev{type};
-    ev.code = convert_key_code(event.keyCode);
+void handle_key(NSEvent* event, Event::Type type) {
+    Event ev{type};
+    ev.keyCode = convert_key_code(event.keyCode);
     setup_modifiers(event.modifierFlags, ev);
     dispatch_event(ev);
 }
 
 - (void)keyDown:(NSEvent*)event {
     if (!event.ARepeat) {
-        handle_key(event, event_type::key_down);
+        handle_key(event, Event::KeyDown);
     }
 
     if (is_text_event(event)) {
-        event_t ev{event_type::text};
+        Event ev{Event::Text};
         ev.characters = event.characters.UTF8String;
         dispatch_event(ev);
     }
@@ -352,16 +352,14 @@ void handle_key(NSEvent* event, event_type type) {
 
 - (void)keyUp:(NSEvent*)event {
     if (!event.ARepeat) {
-        handle_key(event, event_type::key_up);
+        handle_key(event, Event::KeyUp);
     }
 }
 
 - (void)flagsChanged:(NSEvent*)event {
     NSUInteger mask = convert_key_code_to_modifier_mask(event.keyCode);
     if (mask) {
-        handle_key(event, (event.modifierFlags & mask)
-                          ? event_type::key_down
-                          : event_type::key_up);
+        handle_key(event, (event.modifierFlags & mask) ? Event::KeyDown : Event::KeyUp);
     }
 }
 

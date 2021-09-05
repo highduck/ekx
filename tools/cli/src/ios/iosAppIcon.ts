@@ -2,7 +2,7 @@ import {isDir, makeDirs, readText, writeText} from "../utils";
 import {rmdirSync} from "fs";
 import * as path from "path";
 import {Project} from "../project";
-import {ekcAsync} from "../ekc";
+import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/renderFlashSymbol";
 
 export async function iosBuildAppIconAsync(ctx: Project, output: string): Promise<number> {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
@@ -15,23 +15,29 @@ export async function iosBuildAppIconAsync(ctx: Project, output: string): Promis
     makeDirs(appIconFolder);
 
     const images = [];
-    const original_size = 64.0;
+    const originalSize = 64.0;
 
-    let cmd = ["prerender_flash", marketAsset, "icon"];
+    const outputs:RenderFlashSymbolOutputOptions[] = [];
     for (const image of iosIcon.images) {
-        const scale_factor = parseFloat(image.scale);
+        const scaleFactor = parseFloat(image.scale);
         const sideSize = image.size.substr(0, image.size.indexOf("x"));
-        const size = scale_factor * parseFloat(sideSize);
+        const size = scaleFactor * parseFloat(sideSize);
         const sizei = size | 0;
-        let filename = `${image.idiom}_${sizei}.png`;
-        const scale = size / original_size;
-
-        cmd.push(scale.toString(), sizei.toString(), sizei.toString(), "0", "1", path.join(appIconFolder, filename));
+        const filename = `${image.idiom}_${sizei}.png`;
         image.filename = filename;
         images.push(image);
+
+        outputs.push({
+            scale: size / originalSize,
+            width: sizei,
+            height: sizei,
+            alpha: false,
+            trim: true,
+            outFilePath: path.join(appIconFolder, filename)
+        });
     }
     iosIcon.images = images;
     writeText(path.join(appIconFolder, "Contents.json"), JSON.stringify(iosIcon));
 
-    return ekcAsync(ctx, ...cmd);
+    return renderFlashSymbol(marketAsset, "icon", outputs);
 }

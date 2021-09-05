@@ -1,10 +1,5 @@
 var cacheName = "{{name}}_{{version_name}}_{{version_code}}";
-var contentToCache = [
-    '{{pwa_url}}/index.html',
-    '{{pwa_url}}/pwacompat.min.js',
-    '{{pwa_url}}/{{binary_name}}.js',
-    '{{pwa_url}}/{{binary_name}}.wasm'
-];
+var contentToCache = [];
 
 self.addEventListener('install', function (event) {
     event.waitUntil(
@@ -33,6 +28,8 @@ self.addEventListener('fetch', function (event) {
     var request = event.request;
     if (request.method !== 'GET') return;
     if (request.url.indexOf(self.location.origin) !== 0) return;
+    if (request.url.indexOf("/manifest.json") >= 0) return;
+    if (request.url.indexOf("/sw.js") >= 0) return;
 
     // TODO:
     // - we able to do partial responses from cache
@@ -44,6 +41,7 @@ self.addEventListener('fetch', function (event) {
         if (response) {
             return response;
         }
+        request.cache = "no-cache";
         return fetch(request).then(function (resp) {
             var respClone = resp.clone();
             caches.open(cacheName).then(function (cache) {
@@ -52,4 +50,10 @@ self.addEventListener('fetch', function (event) {
             return resp;
         });
     }));
+});
+
+self.addEventListener('message', function(event) {
+    if (event.data === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });

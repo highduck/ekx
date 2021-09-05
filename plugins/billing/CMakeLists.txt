@@ -4,8 +4,8 @@ project(plugin-billing)
 add_library(${PROJECT_NAME} STATIC
         src/billing.hpp
         src/billing.cpp
-        sim/billing_sim.cpp
         )
+
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
@@ -18,3 +18,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO)
+
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+target_compile_options(${PROJECT_NAME}
+        PUBLIC -x objective-c++
+        )
+
+endif()

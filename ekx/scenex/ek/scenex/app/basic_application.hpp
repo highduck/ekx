@@ -63,7 +63,7 @@ public:
 
     void on_draw_frame();
 
-    void on_event(const app::event_t&);
+    void on_event(const app::Event&);
 
 public:
     bool preloadOnStart = true;
@@ -100,7 +100,7 @@ inline float2 basic_application::AppResolution{};
 void initializeSubSystems();
 
 template<typename T>
-inline void run_app(app::window_config cfg) {
+inline void run_app(app::WindowConfig cfg) {
     using app::g_app;
 
     ek::core::setup();

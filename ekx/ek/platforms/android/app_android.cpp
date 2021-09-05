@@ -168,77 +168,46 @@ void handle_enter_frame() {
     }
 }
 
-constexpr uint8_t event_nop = 0xFF;
-constexpr uint8_t call_dispatch_frame = 0x70;
-constexpr uint8_t call_start = 0x71;
-constexpr uint8_t call_ready = 0x72;
-
-const uint8_t event_map_[17] = {
-        call_dispatch_frame, // 0 - dispatch frame
-        call_start, // 1
-        call_ready, // 2
-        event_nop, // 3
-        event_nop, // 4
-        event_nop, // 5
-        event_nop, // 6
-        event_nop, // 7
-        static_cast<uint8_t>(event_type::key_down), // 8
-        static_cast<uint8_t>(event_type::key_up), // 9
-
-        static_cast<uint8_t>(event_type::app_resume), // 10
-        static_cast<uint8_t>(event_type::app_pause),
-        static_cast<uint8_t>(event_type::app_back_button),
-
-        static_cast<uint8_t>(event_type::touch_begin), // 13
-        static_cast<uint8_t>(event_type::touch_move),
-        static_cast<uint8_t>(event_type::touch_end), // 15
-        event_nop // 16
+enum CommandType {
+    Command_DispatchFrame = 0x100,
+    Command_Start = 0x101,
+    Command_Ready = 0x102
 };
 
-EK_JNI_VOID(sendEvent, jint type) {
-    assert(type >= 0 && type < 17);
-    const uint8_t event_type_id = event_map_[type];
-    switch (event_type_id) {
-        case call_dispatch_frame:
+extern "C" JNIEXPORT void JNICALL Java_ek_EkPlatform_sendEvent(JNIEnv*, jclass, jint eventType) {
+    switch (eventType) {
+        case Command_DispatchFrame:
             handle_enter_frame();
             break;
-        case call_start:
+        case Command_Start:
             ::ek::main();
             break;
-        case call_ready:
+        case Command_Ready:
             dispatch_device_ready();
             break;
-        case event_nop:
-            break;
         default:
-            dispatch_event({static_cast<event_type>(event_type_id)});
+            dispatch_event({static_cast<Event::Type>(eventType)});
             break;
     }
 }
 
-EK_JNI_VOID(sendTouch, jint type, jint id, jfloat x, jfloat y) {
-    assert(type >= 0 && type < 17);
-
-    uint8_t event_type_id = event_map_[type];
-    event_t ev{static_cast<event_type>(event_type_id)};
-    ev.id = static_cast<uint64_t>(id) + 1;
+extern "C" JNIEXPORT void JNICALL Java_ek_EkPlatform_sendTouch(JNIEnv *, jclass, jint type, jint id, jfloat x, jfloat y) {
+    Event ev{static_cast<Event::Type>(type)};
+    ev.id = id;
     ev.pos.x = x;
     ev.pos.y = y;
     dispatch_event(ev);
 }
 
-EK_JNI_VOID(sendKeyEvent, jint type, jint code, jint modifiers) {
-    assert(type >= 0 && type < 17);
-
-    uint8_t event_type_id = event_map_[type];
-    event_t ev{static_cast<event_type>(event_type_id)};
-    ev.code = static_cast<key_code>(code);
-    // TODO: modifiers
+extern "C" JNIEXPORT void JNICALL Java_ek_EkPlatform_sendKeyEvent(JNIEnv *, jclass, jint type, jint code, jint modifiers) {
+    Event ev{static_cast<Event::Type>(type)};
+    ev.keyCode = static_cast<KeyCode>(code);
+    ev.keyModifiers = (KeyModifier)modifiers;
 
     dispatch_event(ev);
 }
 
-EK_JNI_VOID(sendResize, jint width, jint height, jfloat scale) {
+extern "C" JNIEXPORT void JNICALL Java_ek_EkPlatform_sendResize(JNIEnv *, jclass, jint width, jint height, jfloat scale) {
     // currently android always in fullscreen mode
     g_app.fullscreen = true;
     if (g_app.content_scale != scale ||
@@ -256,7 +225,7 @@ EK_JNI_VOID(sendResize, jint width, jint height, jfloat scale) {
     }
 }
 
-EK_JNI_VOID(initAssets, jobject assets) {
+extern "C" JNIEXPORT void JNICALL Java_ek_EkPlatform_initAssets(JNIEnv *, jclass, jobject assets) {
     auto* env_ = android_jni_get_env();
     ctx_.assetsRef = env_->NewGlobalRef(assets);
     ctx_.assets = AAssetManager_fromJava(env_, ctx_.assetsRef);

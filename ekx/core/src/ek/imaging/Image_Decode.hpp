@@ -17,9 +17,11 @@
 #endif
 #endif // arm
 
+#ifndef EK_TOOLS
 #define STBI_NO_STDIO
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
+#endif
 
 #define STBI_ASSERT(e)   EK_ASSERT(e)
 #define STBI_MALLOC(size)                           ::ek::imaging::allocator.alloc(size, sizeof(void*))

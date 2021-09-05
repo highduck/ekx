@@ -36,9 +36,6 @@ export class Project {
     version_code: string;
     title?: string;
     desc?: string;
-    binary_name?: string;
-    pwa_url?: string; // empty string by defualt
-    cmake_target?: string;
     build_dir?: string; // build
     orientation: "landscape" | "portrait";
 
@@ -56,7 +53,7 @@ export class Project {
     }
 
     getAssetsOutput(): string {
-        return this.assets?.output ?? "export/contents/assets";
+        return this.assets?.output ?? "export/content/assets";
     }
 
     market_asset?: string;

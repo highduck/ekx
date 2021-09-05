@@ -12,7 +12,7 @@ void editor_onFrameCompleted() {
     Locator::ref<Editor>().onFrameCompleted();
 }
 
-void editor_onEvent(const app::event_t& e) {
+void editor_onEvent(const app::Event& e) {
     Locator::ref<Editor>().onEvent(e);
 }
 
@@ -20,10 +20,10 @@ void Editor::onRenderOverlay() {
     gui_.end_frame();
 
     bool dirty = false;
-    for(auto* wnd : windows) {
+    for (auto* wnd : windows) {
         dirty |= wnd->dirty;
     }
-    if(dirty) {
+    if (dirty) {
         save();
     }
 }
@@ -82,7 +82,7 @@ void Editor::load() {
         return;
     }
     auto node = doc.first_child();
-    for(auto* wnd : windows) {
+    for (auto* wnd : windows) {
         wnd->load(node);
     }
 }
@@ -90,7 +90,7 @@ void Editor::load() {
 void Editor::save() {
     pugi::xml_document xml;
     auto node = xml.append_child("EditorLayoutState");
-    for(auto* wnd : windows) {
+    for (auto* wnd : windows) {
         wnd->save(node);
     }
     xml.save_file("EditorLayoutState.xml");
@@ -101,17 +101,17 @@ void Editor::onFrameCompleted() {
     invalidateSettings();
 }
 
-void Editor::onEvent(const app::event_t& event) {
-    using app::event_type;
-    using app::key_code;
+void Editor::onEvent(const app::Event& event) {
     switch (event.type) {
-        case event_type::key_down:
-            if (event.code == key_code::A && event.ctrl && event.shift) {
+        case app::Event::KeyDown:
+            if (event.keyCode == app::KeyCode::A &&
+                ((int) event.keyModifiers & (int) app::KeyModifier::Control) &&
+                ((int) event.keyModifiers & (int) app::KeyModifier::Shift)) {
                 settings.showEditor = !settings.showEditor;
                 settings.dirty = true;
             }
             break;
-        case event_type::app_resize: {
+        case app::Event::Resize: {
             const float2 windowSize{g_app.window_size};
             if (windowSize != settings.windowSize) {
                 settings.windowSize = windowSize;

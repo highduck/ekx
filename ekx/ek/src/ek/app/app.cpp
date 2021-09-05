@@ -28,17 +28,17 @@ void dispatch_device_ready() {
     g_app.on_device_ready();
 }
 
-void process_event(const event_t& event) {
-    EK_ASSERT(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
+void process_event(const Event& event) {
+    EK_ASSERT(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(Event::Count));
 
     switch (event.type) {
-        case event_type::app_pause:
+        case Event::Pause:
             if (g_app.applicationInFocus) {
                 g_app.applicationInFocus = false;
                 g_app.on_event(event);
             }
             break;
-        case event_type::app_resume:
+        case Event::Resume:
             if (!g_app.applicationInFocus) {
                 g_app.applicationInFocus = true;
                 g_app.on_event(event);
@@ -50,17 +50,17 @@ void process_event(const event_t& event) {
     }
 }
 
-void dispatch_event(const event_t& event) {
-    EK_ASSERT(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(event_type::max_count));
+void dispatch_event(const Event& event) {
+    EK_ASSERT(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(Event::Count));
 //    EK_INFO("EVENT: %i", event.type);
-    if (event.type == event_type::app_pause) {
+if (event.type == Event::Pause) {
         auph::pause();
         ++g_app.systemPauseCounter;
         if (g_app.systemPauseCounter > 0 && !g_app.systemPaused) {
             g_app.systemPaused = true;
             //audio::muteDeviceBegin();
         }
-    } else if (event.type == event_type::app_resume) {
+} else if (event.type == Event::Resume) {
         auph::resume();
         if (g_app.systemPauseCounter > 0) {
             --g_app.systemPauseCounter;
@@ -95,7 +95,7 @@ void dispatch_draw_frame() {
 
     if (g_app.size_changed) {
         g_app.size_changed = false;
-        process_event({event_type::app_resize});
+        process_event({Event::Resize});
     }
 
     for (const auto& event : g_app.pool_queue) {
@@ -109,15 +109,15 @@ void dispatch_draw_frame() {
 
 //    if (g_app.systemPauseCounter > 0 && !g_app.systemPaused) {
 //        g_app.systemPaused = true;
-//        process_event({event_type::app_pause});
+//        process_event({Event::Pause});
 //    }
 //    else if(g_app.systemPauseCounter == 0 && g_app.systemPaused) {
 //        g_app.systemPaused = false;
-//        process_event({event_type::app_resume});
+//        process_event({Event::Resume});
 //    }
 }
 
-void app_state::updateMouseCursor(mouse_cursor cursor_) {
+void app_state::updateMouseCursor(MouseCursor cursor_) {
     if (cursor != cursor_) {
         cursor = cursor_;
         cursor_dirty = true;

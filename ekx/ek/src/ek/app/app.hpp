@@ -24,60 +24,32 @@ const void* getMetalDrawable();
 
 #endif
 
-struct window_config final {
-    std::string title{"ek"};
+struct WindowConfig final {
+    const char* title = nullptr;
     float2 size{960, 720};
     bool needDepth = false;
     bool webKeepCanvasAspectRatio = false;
     int sampleCount = 1;
     int swapInterval = 1;
     bool allowHighDpi = true;
-    uint32_t backgroundColor = 0xFF000000;
+    uint32_t backgroundColor = 0xFF000000u;
 };
 
-enum class mouse_cursor : uint8_t {
-    parent = 0,
-    arrow,
-    button,
-    help
+enum class MouseCursor {
+    Parent = 0,
+    Arrow,
+    Button,
+    Help
 };
 
-enum class event_type : uint8_t {
-    app_resume,
-    // sync version of pause callback, don't do any criminal here :)
-    app_pause,
-    app_resize,
-    app_back_button,
-    app_close,
-
-    touch_begin,
-    touch_move,
-    touch_end,
-
-    mouse_move,
-    mouse_down,
-    mouse_up,
-    mouse_enter,
-    mouse_exit,
-    mouse_scroll,
-
-    key_down,
-    key_up,
-    key_press,
-
-    text,
-
-    max_count
+enum class MouseButton {
+    Left,
+    Right,
+    Other
 };
 
-enum class mouse_button {
-    left,
-    right,
-    other
-};
-
-enum class key_code {
-    unknown = 0,
+enum class KeyCode {
+    Unknown = 0,
 
     ArrowUp,
     ArrowDown,
@@ -109,29 +81,63 @@ enum class key_code {
     S,
     D,
 
-    max_count
+    MaxCount
 };
 
-struct event_t final {
-    event_type type;
+enum class KeyModifier {
+    None = 0,
+    // Super is "command" or "windows" key
+    Super = 1,
+    Shift = 2,
+    Control = 4,
+    Alt = 8
+};
+
+struct Event final {
+    enum Type {
+        Resume = 0,
+        // sync version of pause callback, don't do any criminal here :)
+        Pause,
+        Resize,
+        BackButton,
+        Close,
+
+        TouchBegin,
+        TouchMove,
+        TouchEnd,
+
+        MouseMove,
+        MouseDown,
+        MouseUp,
+        MouseEnter,
+        MouseExit,
+        MouseScroll,
+
+        KeyDown,
+        KeyUp,
+        KeyPress,
+
+        Text,
+
+        Count
+    };
+    Type type;
+
     // touch-id / pointer-id
     uint64_t id = 0;
     float2 pos{0.0f, 0.0f};
     float2 scroll{0.0f, 0.0f};
-    mouse_button button = mouse_button::other;
+    MouseButton button = MouseButton::Other;
 
     // TODO: view to internal storage
     std::string characters{};
 
-    key_code code = key_code::unknown;
-    bool super = false; // cmd/win/..
-    bool shift = false;
-    bool ctrl = false;
-    bool alt = false;
+    KeyCode keyCode = KeyCode::Unknown;
+    KeyModifier keyModifiers = KeyModifier::None;
 };
 
 struct app_state final {
-    window_config window_cfg;
+    WindowConfig window_cfg;
 
     float2 window_size{};
     float2 drawable_size{};
@@ -144,16 +150,16 @@ struct app_state final {
     bool require_exit = false;
     int exit_code = 0;
 
-    mouse_cursor cursor = mouse_cursor::parent;
+    MouseCursor cursor = MouseCursor::Parent;
     bool cursor_dirty = false;
 
     StaticSignal<> on_device_ready;
-    StaticSignal<const event_t&> on_event;
+    StaticSignal<const Event&> on_event;
     StaticSignal<> on_frame_draw;
     StaticSignal<> on_frame_completed;
 
-    Array<event_t> event_queue_;
-    Array<event_t> pool_queue;
+    Array<Event> event_queue_;
+    Array<Event> pool_queue;
     bool event_queue_locked = false;
 
     // we change counter from posted native events queue
@@ -165,14 +171,14 @@ struct app_state final {
     // we update `applicationInFocus`
     bool applicationInFocus = true;
 
-    void updateMouseCursor(mouse_cursor cursor_);
+    void updateMouseCursor(MouseCursor cursor_);
 };
 
 extern app_state& g_app;
 
-void process_event(const event_t& event);
+void process_event(const Event& event);
 
-void dispatch_event(const event_t& event);
+void dispatch_event(const Event& event);
 
 void dispatch_draw_frame();
 

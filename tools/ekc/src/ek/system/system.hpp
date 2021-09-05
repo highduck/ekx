@@ -38,15 +38,15 @@ bool is_file(const std::string& path);
 
 bool is_file(const path_t& path);
 
-std::string get_executable_path();
+//std::string get_executable_path();
 
-int execute(const std::string& cmd);
+//int execute(const std::string& cmd);
 
 std::string read_text(const path_t& path);
 
-void copy_file(const ek::path_t& src, const ek::path_t& dest);
+//void copy_file(const ek::path_t& src, const ek::path_t& dest);
 
-void copy_tree(const ek::path_t& src, const ek::path_t& dest);
+//void copy_tree(const ek::path_t& src, const ek::path_t& dest);
 
 bool make_dir(const char *path);
 
@@ -60,21 +60,21 @@ inline bool make_dirs(const std::string& path) {
     return make_dirs(path_t{path});
 }
 
-Array<path_t> search_files(const std::string& pattern, const path_t& path);
+//Array<path_t> search_files(const std::string& pattern, const path_t& path);
 
-bool remove_dir_rec(const char *path);
+//bool remove_dir_rec(const char *path);
 
-inline bool remove_dir_rec(const path_t& path) {
-    return remove_dir_rec(path.c_str());
-}
+//inline bool remove_dir_rec(const path_t& path) {
+//    return remove_dir_rec(path.c_str());
+//}
 
-void replace_in_file(const path_t& path, const std::unordered_map<std::string, std::string>& substitutions);
+//void replace_in_file(const path_t& path, const std::unordered_map<std::string, std::string>& substitutions);
 
-#ifndef EK_DISABLE_SYSTEM_FS
-
-bool is_dir_entry_real(const dirent *e);
-
-#endif
+//#ifndef EK_DISABLE_SYSTEM_FS
+//
+//bool is_dir_entry_real(const dirent *e);
+//
+//#endif
 
 }
 

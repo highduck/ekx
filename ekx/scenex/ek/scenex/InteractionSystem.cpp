@@ -57,7 +57,7 @@ void InteractionSystem::process() {
     currTargets.clear();
 
     //pointer_global_space = float2::zero;
-    auto cursor = Interactive::mouse_cursor::parent;
+    auto cursor = MouseCursor::Parent;
     bool changed = false;
     if (mouseActive_) {
         pointerScreenPosition_ = mousePosition0_;
@@ -93,21 +93,21 @@ void InteractionSystem::fireInteraction(InteractionEvent event, bool prev, bool 
     }
 }
 
-void InteractionSystem::handle_mouse_event(const event_t& ev, float2 pos) {
+void InteractionSystem::handle_mouse_event(const Event& ev, float2 pos) {
 
-    if (ev.type == event_type::mouse_down) {
+    if (ev.type == Event::MouseDown) {
         mousePosition0_ = pos;
         pointerDown_ = true;
         fireInteraction(InteractionEvent::PointerDown);
-    } else if (ev.type == event_type::mouse_up) {
+    } else if (ev.type == Event::MouseUp) {
         mousePosition0_ = pos;
         pointerDown_ = false;
         fireInteraction(InteractionEvent::PointerUp);
-    } else if (ev.type == event_type::mouse_move) {
+    } else if (ev.type == Event::MouseMove) {
         mousePosition0_ = pos;
         mouseActive_ = true;
         process();
-    } else if (ev.type == event_type::mouse_exit) {
+    } else if (ev.type == Event::MouseExit) {
         pointerDown_ = false;
         mouseActive_ = false;
         //update();
@@ -115,8 +115,8 @@ void InteractionSystem::handle_mouse_event(const event_t& ev, float2 pos) {
     }
 }
 
-void InteractionSystem::handle_touch_event(const event_t& ev, float2 pos) {
-    if (ev.type == event_type::touch_begin) {
+void InteractionSystem::handle_touch_event(const Event& ev, float2 pos) {
+    if (ev.type == Event::TouchBegin) {
         if (touchID_ == 0) {
             touchID_ = ev.id;
             touchPosition0_ = pos;
@@ -128,7 +128,7 @@ void InteractionSystem::handle_touch_event(const event_t& ev, float2 pos) {
     }
 
     if (touchID_ == ev.id) {
-        if (ev.type == event_type::touch_end) {
+        if (ev.type == Event::TouchEnd) {
             touchID_ = 0;
             touchPosition0_ = float2::zero;
             pointerDown_ = false;
@@ -172,7 +172,7 @@ ecs::EntityApi InteractionSystem::globalHitTest(float2& worldSpacePointer, ecs::
     return nullptr;
 }
 
-mouse_cursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& list) {
+MouseCursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& list) {
     float2 pointer{};
     ecs::EntityApi it;
     ecs::EntityRef camera;
@@ -188,13 +188,13 @@ mouse_cursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& 
     }
     hitTarget_ = ecs::EntityRef{it};
 
-    auto cursor = mouse_cursor::parent;
+    auto cursor = MouseCursor::Parent;
     while (it) {
         auto* interactive = it.tryGet<Interactive>();
         if (interactive) {
             interactive->pointer = pointer;
             interactive->camera = ecs::EntityRef{camera};
-            if (cursor == mouse_cursor::parent) {
+            if (cursor == MouseCursor::Parent) {
                 cursor = interactive->cursor;
             }
             list.push_back(it);

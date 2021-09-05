@@ -5,15 +5,14 @@ project(plugin-admob)
 add_library(${PROJECT_NAME} STATIC
         src/admob.hpp
         src/admob.cpp
+        src/admob_android.hpp
+        src/admob_null.hpp
+        src/admob_ios.hpp
 
         src/AdMobWrapper.hpp
         src/AdMobWrapper.cpp
-        src/AdMobNull.cpp
-        src/AdMobNull.cpp
         src/AdMobSimulator.hpp
-        src/AdMobSimulator.cpp
-
-        null/admob_null.cpp
+        src/AdMobNull.hpp
         )
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
@@ -28,3 +27,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+    target_compile_options(${PROJECT_NAME}
+            PUBLIC -x objective-c++
+            )
+
+endif()

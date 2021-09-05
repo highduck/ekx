@@ -6,13 +6,13 @@
 
 namespace admob {
 
-enum class event_type {
-    initialized = 0,
-    video_rewarded = 1,
-    video_loaded = 2,
-    video_failed = 3,
-    video_loading = 4,
-    video_closed = 5
+enum class EventType {
+    Initialized = 0,
+    VideoRewarded = 1,
+    VideoLoaded = 2,
+    VideoFailed = 3,
+    VideoLoading = 4,
+    VideoClosed = 5
 };
 
 enum class ChildDirected {
@@ -21,7 +21,7 @@ enum class ChildDirected {
     True = 1
 };
 
-struct config_t {
+struct Config {
     std::string banner;
     std::string video;
     std::string inters;
@@ -29,14 +29,14 @@ struct config_t {
 };
 
 struct Context {
-    ek::Signal<event_type> onEvent;
+    ek::Signal<EventType> onEvent;
     ek::Signal<> onInterstitialClosed;
-    config_t config;
+    Config config;
 };
 
 extern Context& context;
 
-void initialize(const config_t& config);
+void initialize(const Config& config);
 
 void _initialize();
 void shutdown();

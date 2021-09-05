@@ -16,7 +16,7 @@
     "@ekx/doctest": "0.0.2",
     "@ekx/dev-fonts": "0.0.9",
     "@ekx/imgui": "0.0.19",
-    "auph": "0.0.15",
+    "auph": "0.0.16",
     "@ekx/pugixml": "0.0.5",
     "@ekx/sokol": "0.0.12",
     "@ekx/stb": "0.0.6",

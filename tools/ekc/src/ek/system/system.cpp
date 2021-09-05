@@ -23,7 +23,7 @@
 
 #endif
 
-#include "xfs.hpp"
+//#include "xfs.hpp"
 
 #if defined(__APPLE__)
 
@@ -112,125 +112,125 @@ bool is_file(const std::string& path) {
 bool is_file(const path_t& path) {
     return is_file(path.c_str());
 }
-
-std::string get_executable_path() {
-#if defined(_WIN32)
-    TCHAR szFileName[MAX_PATH];
-    GetModuleFileName(NULL, szFileName, MAX_PATH);
-    return std::string{szFileName};
-#elif defined(__APPLE__)
-    char path[system_pathMaxSize + 1];
-    uint32_t path_len = system_pathMaxSize;
-    if (_NSGetExecutablePath(path, &path_len)) {
-        return {};
-    }
-    return path;
-#elif defined(__ANDROID__)
-    return "";
-#elif defined(__linux__)
-    char path[system_pathMaxSize];
-    const auto length = readlink("/proc/self/exe", path, system_pathMaxSize);
-    return length < 0 ? "" : std::string{path, static_cast<size_t>(length)};
-#endif
-}
-
-int execute(const std::string& cmd) {
-#ifndef EK_DISABLE_SYSTEM_FS
-//    return system(cmd.c_str());
-    std::array<char, 128> buffer{};
-//    std::string result;
-
-    auto pipe = popen(cmd.c_str(), "r");
-
-    if (!pipe) {
-//        throw std::runtime_error("popen() failed!");
-
-        return -1;
-    }
-
-    while (!feof(pipe)) {
-        auto* ret = fgets(buffer.data(), buffer.size(), pipe);
-        if (ret != nullptr) {
-            puts(buffer.data());
-        }
-    }
-
-    return pclose(pipe);
-#else
-    return -1;
-#endif
-}
+//
+//std::string get_executable_path() {
+//#if defined(_WIN32)
+//    TCHAR szFileName[MAX_PATH];
+//    GetModuleFileName(NULL, szFileName, MAX_PATH);
+//    return std::string{szFileName};
+//#elif defined(__APPLE__)
+//    char path[system_pathMaxSize + 1];
+//    uint32_t path_len = system_pathMaxSize;
+//    if (_NSGetExecutablePath(path, &path_len)) {
+//        return {};
+//    }
+//    return path;
+//#elif defined(__ANDROID__)
+//    return "";
+//#elif defined(__linux__)
+//    char path[system_pathMaxSize];
+//    const auto length = readlink("/proc/self/exe", path, system_pathMaxSize);
+//    return length < 0 ? "" : std::string{path, static_cast<size_t>(length)};
+//#endif
+//}
+//
+//int execute(const std::string& cmd) {
+//#ifndef EK_DISABLE_SYSTEM_FS
+////    return system(cmd.c_str());
+//    std::array<char, 128> buffer{};
+////    std::string result;
+//
+//    auto pipe = popen(cmd.c_str(), "r");
+//
+//    if (!pipe) {
+////        throw std::runtime_error("popen() failed!");
+//
+//        return -1;
+//    }
+//
+//    while (!feof(pipe)) {
+//        auto* ret = fgets(buffer.data(), buffer.size(), pipe);
+//        if (ret != nullptr) {
+//            puts(buffer.data());
+//        }
+//    }
+//
+//    return pclose(pipe);
+//#else
+//    return -1;
+//#endif
+//}
 
 // continue utilities
 
-void copy_file(const path_t& src, const path_t& dest) {
-    std::ifstream stream_src(src.str(), std::ios::binary);
-    std::ofstream stream_dest(dest.str(), std::ios::binary);
-    stream_dest << stream_src.rdbuf();
-}
+//void copy_file(const path_t& src, const path_t& dest) {
+//    std::ifstream stream_src(src.str(), std::ios::binary);
+//    std::ofstream stream_dest(dest.str(), std::ios::binary);
+//    stream_dest << stream_src.rdbuf();
+//}
 
-#ifndef EK_DISABLE_SYSTEM_FS
-
-bool is_dir_entry_real(const dirent* e) {
-    // empty
-    if (!e || e->d_name[0] == 0) {
-        return false;
-    }
-    if (e->d_name[0] == '.') {
-        // "."
-        if (e->d_name[1] == 0) {
-            return false;
-        }
-        // ".."
-        if (e->d_name[1] == '.' && e->d_name[2] == 0) {
-            return false;
-        }
-    }
-    return true;
-}
-
-#endif
-
-void copy_tree(const ek::path_t& src, const ek::path_t& dest) {
-    if (!is_dir(src)) {
-        EK_WARN << "IS NOT DIR: " << src.str();
-        return;
-    }
-#ifndef EK_DISABLE_SYSTEM_FS
-
-    DIR* dir = opendir(src.c_str());
-    if (dir) {
-        if (!is_dir(dest)) {
-            EK_INFO("MAKE DIR: %s \n", dest.c_str());
-            make_dirs(dest);
-        }
-
-        Array<std::string> nested_dirs{};
-        struct dirent* e;
-        while ((e = readdir(dir)) != nullptr) {
-            if (is_dir_entry_real(e)) {
-                if ((e->d_type & DT_DIR) != 0) {
-                    nested_dirs.emplace_back(e->d_name);
-                } else if ((e->d_type & DT_REG) != 0) {
-                    const auto c_src = src / e->d_name;
-                    const auto c_dst = dest / e->d_name;
-                    EK_TRACE("COPY FILE: %s -> %s", c_src.c_str(), c_dst.c_str());
-                    if (is_file(c_src)) {
-                        copy_file(c_src, c_dst);
-                    } else {
-                        EK_WARN("NO FILE: %s", c_src.c_str());
-                    }
-                }
-            }
-        }
-        closedir(dir);
-
-        for (const auto& nested_dir : nested_dirs) {
-            copy_tree(src / nested_dir, dest / nested_dir);
-        }
-    }
-#endif
-}
+//#ifndef EK_DISABLE_SYSTEM_FS
+//
+//bool is_dir_entry_real(const dirent* e) {
+//    // empty
+//    if (!e || e->d_name[0] == 0) {
+//        return false;
+//    }
+//    if (e->d_name[0] == '.') {
+//        // "."
+//        if (e->d_name[1] == 0) {
+//            return false;
+//        }
+//        // ".."
+//        if (e->d_name[1] == '.' && e->d_name[2] == 0) {
+//            return false;
+//        }
+//    }
+//    return true;
+//}
+//
+//#endif
+//
+//void copy_tree(const ek::path_t& src, const ek::path_t& dest) {
+//    if (!is_dir(src)) {
+//        EK_WARN << "IS NOT DIR: " << src.str();
+//        return;
+//    }
+//#ifndef EK_DISABLE_SYSTEM_FS
+//
+//    DIR* dir = opendir(src.c_str());
+//    if (dir) {
+//        if (!is_dir(dest)) {
+//            EK_INFO("MAKE DIR: %s \n", dest.c_str());
+//            make_dirs(dest);
+//        }
+//
+//        Array<std::string> nested_dirs{};
+//        struct dirent* e;
+//        while ((e = readdir(dir)) != nullptr) {
+//            if (is_dir_entry_real(e)) {
+//                if ((e->d_type & DT_DIR) != 0) {
+//                    nested_dirs.emplace_back(e->d_name);
+//                } else if ((e->d_type & DT_REG) != 0) {
+//                    const auto c_src = src / e->d_name;
+//                    const auto c_dst = dest / e->d_name;
+//                    EK_TRACE("COPY FILE: %s -> %s", c_src.c_str(), c_dst.c_str());
+//                    if (is_file(c_src)) {
+//                        copy_file(c_src, c_dst);
+//                    } else {
+//                        EK_WARN("NO FILE: %s", c_src.c_str());
+//                    }
+//                }
+//            }
+//        }
+//        closedir(dir);
+//
+//        for (const auto& nested_dir : nested_dirs) {
+//            copy_tree(src / nested_dir, dest / nested_dir);
+//        }
+//    }
+//#endif
+//}
 
 bool make_dir(const char* path) {
 #ifndef EK_DISABLE_SYSTEM_FS
@@ -280,77 +280,77 @@ std::string read_text(const path_t& path) {
     };
 }
 
-#ifndef EK_DISABLE_SYSTEM_FS
-
-static int remove_dir_rec_cb(const char* path, const struct stat*, int, struct FTW*) {
-    auto ret = remove(path);
-    if (ret != 0) {
-        EK_ERROR("ERROR rmdir_cb : %i", ret);
-    }
-    return ret;
-}
-
-#endif
-
-bool remove_dir_rec(const char* path) {
-#ifndef EK_DISABLE_SYSTEM_FS
-    if (is_dir(path)) {
-        return nftw(path, remove_dir_rec_cb, 20, FTW_DEPTH) == 0;
-    }
-#endif
-    return false;
-}
-
-void replace_in_file(const path_t& path, const std::unordered_map<std::string, std::string>& substitutions) {
-    auto res = read_text(path);
-    for (const auto& kv : substitutions) {
-        res = ek::replace(res, kv.first, kv.second);
-    }
-    save(res, path);
-}
-
-void search_files(const std::string& pattern, const path_t& path, Array<path_t>& out) {
-    using std::string;
-#ifndef EK_DISABLE_SYSTEM_FS
-    const char* path_dir = path.empty() ? "." : path.c_str();
-    DIR* dir = opendir(path_dir);
-    if (dir) {
-        Array<string> nested_dirs{};
-        struct dirent* e;
-        while ((e = readdir(dir)) != nullptr) {
-            if (is_dir_entry_real(e)) {
-                path_t fullname = path / e->d_name;
-                if (x_fnmatch(fullname.c_str(), pattern.c_str()) != nullptr) {
-                    out.emplace_back(fullname);
-                }
-                if ((e->d_type & DT_DIR) != 0) {
-                    nested_dirs.emplace_back(e->d_name);
-                }
-            }
-        }
-        closedir(dir);
-
-        for (const auto& nested_dir : nested_dirs) {
-            search_files(pattern, path / nested_dir, out);
-        }
-    }
-#endif
-}
-
-Array<path_t> search_files(const std::string& pattern, const path_t& path) {
-    using std::string;
-
-    Array<path_t> res{};
-#ifndef EK_DISABLE_SYSTEM_FS
-    const char* path_dir = path.empty() ? "." : path.c_str();
-    if (!is_dir(path_dir)) {
-        EK_WARN << "IS NOT DIR: " << path_dir;
-        return res;
-    }
-    search_files(pattern, path, res);
-#endif
-    return res;
-}
+//#ifndef EK_DISABLE_SYSTEM_FS
+//
+//static int remove_dir_rec_cb(const char* path, const struct stat*, int, struct FTW*) {
+//    auto ret = remove(path);
+//    if (ret != 0) {
+//        EK_ERROR("ERROR rmdir_cb : %i", ret);
+//    }
+//    return ret;
+//}
+//
+//#endif
+//
+//bool remove_dir_rec(const char* path) {
+//#ifndef EK_DISABLE_SYSTEM_FS
+//    if (is_dir(path)) {
+//        return nftw(path, remove_dir_rec_cb, 20, FTW_DEPTH) == 0;
+//    }
+//#endif
+//    return false;
+//}
+//
+//void replace_in_file(const path_t& path, const std::unordered_map<std::string, std::string>& substitutions) {
+//    auto res = read_text(path);
+//    for (const auto& kv : substitutions) {
+//        res = ek::replace(res, kv.first, kv.second);
+//    }
+//    save(res, path);
+//}
+//
+//void search_files(const std::string& pattern, const path_t& path, Array<path_t>& out) {
+//    using std::string;
+//#ifndef EK_DISABLE_SYSTEM_FS
+//    const char* path_dir = path.empty() ? "." : path.c_str();
+//    DIR* dir = opendir(path_dir);
+//    if (dir) {
+//        Array<string> nested_dirs{};
+//        struct dirent* e;
+//        while ((e = readdir(dir)) != nullptr) {
+//            if (is_dir_entry_real(e)) {
+//                path_t fullname = path / e->d_name;
+//                if (x_fnmatch(fullname.c_str(), pattern.c_str()) != nullptr) {
+//                    out.emplace_back(fullname);
+//                }
+//                if ((e->d_type & DT_DIR) != 0) {
+//                    nested_dirs.emplace_back(e->d_name);
+//                }
+//            }
+//        }
+//        closedir(dir);
+//
+//        for (const auto& nested_dir : nested_dirs) {
+//            search_files(pattern, path / nested_dir, out);
+//        }
+//    }
+//#endif
+//}
+//
+//Array<path_t> search_files(const std::string& pattern, const path_t& path) {
+//    using std::string;
+//
+//    Array<path_t> res{};
+//#ifndef EK_DISABLE_SYSTEM_FS
+//    const char* path_dir = path.empty() ? "." : path.c_str();
+//    if (!is_dir(path_dir)) {
+//        EK_WARN << "IS NOT DIR: " << path_dir;
+//        return res;
+//    }
+//    search_files(pattern, path, res);
+//#endif
+//    return res;
+//}
 
 Array<uint8_t> read_file(const path_t& path) {
     Array<uint8_t> buffer{};

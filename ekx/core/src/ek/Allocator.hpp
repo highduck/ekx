@@ -70,17 +70,22 @@ public:
     inline static uint32_t labelsSize = 0;
 
     static void pushDebugLabel(const char* label) {
+        (void)label;
+#ifdef EK_CONFIG_MEMORY_DEBUG
         if (labelsSize < LabelStackMaxCount) {
             labelsStack[labelsSize++] = label;
         }
+#endif
     }
 
     static void popDebugLabel() {
+#ifdef EK_CONFIG_MEMORY_DEBUG
         if (labelsSize > 0) {
             --labelsSize;
         } else {
             // assert
         }
+#endif
     }
 
     [[nodiscard]]

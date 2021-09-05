@@ -14,12 +14,12 @@ type SigningConfigs = { [flavor: string]: SigningConfig };
 function printSigningConfig(flavor: string, config: SigningConfig) {
     let str = "";
     if (flavor && config) {
-        str = `\t\t${flavor} {
+        str = `${flavor} {
 \t\t    storeFile file('${path.basename(config.store_keystore)}')
 \t\t    storePassword '${config.store_password}'
 \t\t    keyAlias '${config.key_alias}'
 \t\t    keyPassword '${config.key_password}'
-\t\t}`;
+\t\t}\n\t\t`;
     }
     return str;
 }

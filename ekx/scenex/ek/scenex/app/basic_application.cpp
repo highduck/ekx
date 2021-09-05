@@ -289,18 +289,18 @@ void basic_application::on_draw_frame() {
 }
 
 void basic_application::preload_root_assets_pack() {
-    rootAssetObject = asset_manager_->add_from_type("pack", "pack_meta");
+    rootAssetObject = asset_manager_->add_file("pack.bin", "pack");
     if (rootAssetObject) {
         rootAssetObject->load();
     }
 }
 
-void basic_application::on_event(const event_t& event) {
+void basic_application::on_event(const Event& event) {
     ZoneScoped;
     Stopwatch timer{};
-    if (event.type == event_type::app_resize) {
+    if (event.type == Event::Resize) {
         display.update();
-    } else if (event.type == event_type::app_close) {
+    } else if (event.type == Event::Close) {
         sg_shutdown();
     }
 
@@ -326,7 +326,7 @@ void baseApp_drawFrame() {
     Locator::ref<basic_application>().on_draw_frame();
 }
 
-void baseApp_onEvent(const event_t& event) {
+void baseApp_onEvent(const Event& event) {
     Locator::ref<basic_application>().on_event(event);
 }
 

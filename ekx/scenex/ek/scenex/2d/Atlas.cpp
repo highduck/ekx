@@ -66,17 +66,17 @@ struct AtlasInfo {
     }
 };
 
-static const char* kSuffixes[] = {"", "@2x", "@3x", "@4x"};
+static const char* kSuffixes[] = {"@1x", "@2x", "@3x", "@4x"};
 
 const char* get_scale_suffix(float scale) {
-    if (scale > 3.0f) {
-        return kSuffixes[3];
-    } else if (scale > 2.0f) {
-        return kSuffixes[2];
-    } else if (scale > 1.0f) {
+    if (scale <= 1.0f) {
+        return kSuffixes[0];
+    } else if (scale <= 2.0f) {
         return kSuffixes[1];
+    } else if (scale <= 3.0f) {
+        return kSuffixes[2];
     }
-    return kSuffixes[0];
+    return kSuffixes[3];
 }
 
 Atlas::Atlas() = default;

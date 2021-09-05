@@ -1,14 +1,14 @@
 import {Project} from "../project";
 import * as path from "path";
 import * as fs from "fs";
-import {buildAssetsAsync} from "../assets";
+import {buildAssetPackAsync} from "../assets";
 import {resolveFrom} from "../utility/resolveFrom";
 import {makeDirs} from "../utils";
 
 const exportDir = "build";
 
 export async function buildDev(ctx: Project): Promise<any> {
-    await buildAssetsAsync(ctx, path.join(exportDir, "assets"), true);
+    await buildAssetPackAsync(ctx, path.join(exportDir, "assets"), true);
 
     makeDirs(path.join(exportDir, "dev"));
     // dev-fonts as @ekx/ekx dependency

@@ -56,7 +56,7 @@ public class EkSurfaceView extends GLSurfaceView {
 
             final int i = event.getActionIndex();
             final int act = event.getActionMasked();
-            final int id = event.getPointerId(i);
+            final int id = event.getPointerId(i) + 1;
             final float x = event.getX(i);
             final float y = event.getY(i);
 
@@ -85,41 +85,12 @@ public class EkSurfaceView extends GLSurfaceView {
         queueEvent(() -> EkPlatform.sendTouch(type, id, x, y));
     }
 
-    private static int convertKeyCode(final int keyCode) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_UP: return 1;
-            case KeyEvent.KEYCODE_DPAD_DOWN: return 2;
-            case KeyEvent.KEYCODE_DPAD_LEFT: return 3;
-            case KeyEvent.KEYCODE_DPAD_RIGHT: return 4;
-            case KeyEvent.KEYCODE_ESCAPE: return 5;
-            case KeyEvent.KEYCODE_SPACE: return 6;
-            case KeyEvent.KEYCODE_ENTER: return 7;
-            case KeyEvent.KEYCODE_FORWARD_DEL: return 8;
-            case KeyEvent.KEYCODE_TAB: return 9;
-            case KeyEvent.KEYCODE_PAGE_UP: return 10;
-            case KeyEvent.KEYCODE_PAGE_DOWN: return 11;
-            case KeyEvent.KEYCODE_HOME: return 12;
-            case KeyEvent.KEYCODE_MOVE_END: return 13;
-            case KeyEvent.KEYCODE_INSERT: return 14;
-            case KeyEvent.KEYCODE_DEL: return 15;
-            case KeyEvent.KEYCODE_A: return 16;
-            case KeyEvent.KEYCODE_C: return 17;
-            case KeyEvent.KEYCODE_V: return 18;
-            case KeyEvent.KEYCODE_X: return 19;
-            case KeyEvent.KEYCODE_Y: return 20;
-            case KeyEvent.KEYCODE_Z: return 21;
-            case KeyEvent.KEYCODE_W: return 22;
-            case KeyEvent.KEYCODE_S: return 23;
-            case KeyEvent.KEYCODE_D: return 24;
-        }
-        return 0;
-    }
-
     @Override
     public boolean onKeyDown(final int keyCode, final KeyEvent keyEvent) {
-        int code = convertKeyCode(keyCode);
-        if(code > 0) {
-            handleKeyEvent(EkPlatform.KEY_DOWN, code, 0);
+        final int _keyCode = EkPlatform._KeyCode(keyCode);
+        if(_keyCode > 0) {
+            final int modifiers = EkPlatform._KeyModifiers(keyEvent);
+            handleKeyEvent(EkPlatform.KEY_DOWN, _keyCode, modifiers);
             return true;
         }
         return super.onKeyDown(keyCode, keyEvent);
@@ -127,9 +98,10 @@ public class EkSurfaceView extends GLSurfaceView {
 
     @Override
     public boolean onKeyUp(final int keyCode, final KeyEvent keyEvent) {
-        int code = convertKeyCode(keyCode);
-        if(code > 0) {
-            handleKeyEvent(EkPlatform.KEY_UP, code, 0);
+        final int _keyCode = EkPlatform._KeyCode(keyCode);
+        if(_keyCode > 0) {
+            final int modifiers = EkPlatform._KeyModifiers(keyEvent);
+            handleKeyEvent(EkPlatform.KEY_UP, _keyCode, modifiers);
             return true;
         }
         return super.onKeyDown(keyCode, keyEvent);
