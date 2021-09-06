@@ -115,7 +115,9 @@ struct Event final {
 
         KeyDown,
         KeyUp,
-        KeyPress,
+        // TODO: since keypress deprecated on web, check if we need it
+        // TODO: `KeyPress` macro pollution from X11 headers
+        KeyPress_,
 
         Text,
 
@@ -129,11 +131,12 @@ struct Event final {
     float2 scroll{0.0f, 0.0f};
     MouseButton button = MouseButton::Other;
 
-    // TODO: view to internal storage
-    std::string characters{};
+    char characters[8] = "";
 
     KeyCode keyCode = KeyCode::Unknown;
     KeyModifier keyModifiers = KeyModifier::Empty;
+
+    void setCharacters(const char* source);
 };
 
 struct app_state final {

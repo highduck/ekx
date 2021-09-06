@@ -345,7 +345,7 @@ void handle_key(NSEvent* event, Event::Type type) {
 
     if (is_text_event(event)) {
         Event ev{Event::Text};
-        ev.characters = event.characters.UTF8String;
+        ev.setCharacters(event.characters.UTF8String);
         dispatch_event(ev);
     }
 }

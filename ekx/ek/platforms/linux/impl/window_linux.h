@@ -625,6 +625,8 @@ void x11_send_event(Atom type, int a, int b, int c, int d, int e) {
 }
 
 void x11_query_window_size() {
+    using ek::app::g_app;
+
     XWindowAttributes attribs;
     XGetWindowAttributes(gAppLinux.x11.display, gAppLinux.x11.window, &attribs);
 
@@ -669,6 +671,7 @@ void x11_create_hidden_cursor() {
 }
 
 void x11_toggle_fullscreen() {
+    using ek::app::g_app;
     g_app.fullscreen = !g_app.fullscreen;
     x11_set_fullscreen(g_app.fullscreen);
     x11_query_window_size();
@@ -725,6 +728,7 @@ void x11_lock_mouse(bool lock) {
 }
 
 void x11_update_window_title() {
+    using ek::app::g_app;
     const char* title = g_app.window_cfg.title;
     size_t titleLen = 0;
     if(title) {
@@ -752,6 +756,8 @@ void x11_update_window_title() {
 }
 
 void x11_create_window(Visual* visual, int depth) {
+    using ek::app::g_app;
+
     gAppLinux.x11.colormap = XCreateColormap(gAppLinux.x11.display, gAppLinux.x11.root, visual, AllocNone);
     XSetWindowAttributes wa;
     memset(&wa, 0, sizeof(wa));
@@ -885,20 +891,20 @@ uint32_t x11_mod(uint32_t x11_mods) {
     return mods;
 }
 
-void x11_app_event(Event::Type type) {
-    Event ev{type};
-    dispatch_event(ev);
+void x11_app_event(ek::app::Event::Type type) {
+    ek::app::Event ev{type};
+    ek::app::dispatch_event(ev);
 }
 
-MouseButton x11_translate_button(const XEvent* event) {
+ek::app::MouseButton x11_translate_button(const XEvent* event) {
     switch (event->xbutton.button) {
         case Button1:
-            return MouseButton::Left;
+            return ek::app::MouseButton::Left;
             //case Button2: return MouseButton::Other;
         case Button3:
-            return MouseButton::Right;
+            return ek::app::MouseButton::Right;
         default:
-            return MouseButton::Other;
+            return ek::app::MouseButton::Other;
     }
 }
 

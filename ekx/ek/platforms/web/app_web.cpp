@@ -130,7 +130,7 @@ static EM_BOOL em_keyboard_callback(int type, const EmscriptenKeyboardEvent* eve
     Event ev{};
     switch (type) {
         case EMSCRIPTEN_EVENT_KEYPRESS:
-            ev.type = Event::KeyPress;
+            ev.type = Event::KeyPress_;
             ev.keyCode = toKeyCode(event->code);
             dispatch_event(ev);
             return EM_TRUE;

@@ -9,6 +9,7 @@
 #include <ek/util/StaticStorage.hpp>
 #include <Tracy.hpp>
 #include <ek/debug/LogSystem.hpp>
+#include <cstring>
 
 namespace ek::app {
 
@@ -132,6 +133,11 @@ void initialize() {
 void shutdown() {
     EK_TRACE << "app shutdown";
     ssAppState.shutdown();
+}
+
+void Event::setCharacters(const char* source) {
+    strncpy(characters, source, 8);
+    characters[7] = '\0';
 }
 
 }

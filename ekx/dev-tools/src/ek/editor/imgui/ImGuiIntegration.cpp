@@ -180,7 +180,7 @@ void ImGuiIntegration::on_event(const Event& event) {
     switch (event.type) {
         case Event::KeyUp:
         case Event::KeyDown:
-        case Event::KeyPress: {
+        case Event::KeyPress_: {
             int key = static_cast<int>(event.keyCode);
             if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown)) {
                 io.KeysDown[key] = (event.type == Event::KeyDown);
@@ -204,8 +204,8 @@ void ImGuiIntegration::on_event(const Event& event) {
             break;
 
         case Event::Text:
-            if (!event.characters.empty()) {
-                io.AddInputCharactersUTF8(event.characters.c_str());
+            if (event.characters[0] != '\0') {
+                io.AddInputCharactersUTF8(event.characters);
             }
             break;
 
