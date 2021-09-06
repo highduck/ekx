@@ -118,7 +118,7 @@ void InteractionSystem::handle_mouse_event(const Event& ev, float2 pos) {
 void InteractionSystem::handle_touch_event(const Event& ev, float2 pos) {
     if (ev.type == Event::TouchBegin) {
         if (touchID_ == 0) {
-            touchID_ = ev.id;
+            touchID_ = ev.touch.id;
             touchPosition0_ = pos;
             mouseActive_ = false;
             pointerDown_ = true;
@@ -127,7 +127,7 @@ void InteractionSystem::handle_touch_event(const Event& ev, float2 pos) {
         }
     }
 
-    if (touchID_ == ev.id) {
+    if (touchID_ == ev.touch.id) {
         if (ev.type == Event::TouchEnd) {
             touchID_ = 0;
             touchPosition0_ = float2::zero;

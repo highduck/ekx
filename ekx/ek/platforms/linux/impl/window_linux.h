@@ -892,8 +892,7 @@ uint32_t x11_mod(uint32_t x11_mods) {
 }
 
 void x11_app_event(ek::app::Event::Type type) {
-    ek::app::Event ev{type};
-    ek::app::dispatch_event(ev);
+    ek::app::dispatch_event(ek::app::Event::App(type));
 }
 
 ek::app::MouseButton x11_translate_button(const XEvent* event) {

@@ -355,8 +355,7 @@ bool win32_uwp_utf8_to_wide(const char* src, wchar_t* dst, int dst_num_bytes) {
 }
 
 void win32_uwp_app_event(Event::Type type) {
-    Event ev{type};
-    dispatch_event(ev);
+    dispatch_event(Event::App(type));
 }
 
 void win32_uwp_init_keytable() {

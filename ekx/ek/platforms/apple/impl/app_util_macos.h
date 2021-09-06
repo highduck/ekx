@@ -48,20 +48,20 @@ void init_scan_table() {
     SCAN_CODE_TABLE[kVK_ANSI_D] = KeyCode::D;
 }
 
-KeyCode convert_key_code(uint16_t key_code) {
-    if (key_code < 0xFF) {
-        return SCAN_CODE_TABLE[key_code];
+KeyCode convertKeyCode(uint16_t code) {
+    if (code < 0xFF) {
+        return SCAN_CODE_TABLE[code];
     }
     return KeyCode::Unknown;
 }
 
-void setup_modifiers(NSUInteger flags, Event& to_event) {
+KeyModifier convertKeyModifiers(NSUInteger flags) {
     int mod = 0;
     if (flags & NSEventModifierFlagOption) mod |= (int) app::KeyModifier::Alt;
     if (flags & NSEventModifierFlagShift) mod |= (int) app::KeyModifier::Shift;
     if (flags & NSEventModifierFlagControl) mod |= (int) app::KeyModifier::Control;
     if (flags & NSEventModifierFlagCommand) mod |= (int) app::KeyModifier::Super;
-    to_event.keyModifiers = (app::KeyModifier) mod;
+    return (app::KeyModifier) mod;
 }
 
 bool is_special_character(unichar ch) {
@@ -134,21 +134,26 @@ void macos_init_common() {
     init_scan_table();
 }
 
-void handle_mouse_wheel_scroll(const NSEvent* event, Event& to_event) {
-    to_event.scroll.x = static_cast<float>(event.scrollingDeltaX);
-    to_event.scroll.y = static_cast<float>(event.scrollingDeltaY);
+void handleMouseWheelScroll(const NSEvent* event, MouseEvent& mouseEvent) {
+    mouseEvent.scrollX = static_cast<float>(event.scrollingDeltaX);
+    mouseEvent.scrollY = static_cast<float>(event.scrollingDeltaY);
     if (event.hasPreciseScrollingDeltas) {
-        to_event.scroll.x *= 0.1f;
-        to_event.scroll.y *= 0.1f;
+        mouseEvent.scrollX *= 0.1f;
+        mouseEvent.scrollY *= 0.1f;
     }
 }
 
-void handle_mouse_event(NSView* view, NSEvent* event) {
+void handleMouseEvent(NSView* view, NSEvent* event) {
     const auto location = [view convertPoint:event.locationInWindow fromView:nil];
     const auto scale = view.window.backingScaleFactor;
-    Event ev{};
-    ev.pos.x = static_cast<float>(location.x * scale);
-    ev.pos.y = static_cast<float>(location.y * scale);
+
+    Event::Type type;
+    MouseEvent ev{};
+    ev.button = MouseButton::Other;
+    ev.x = static_cast<float>(location.x * scale);
+    ev.y = static_cast<float>(location.y * scale);
+    ev.scrollX = 0.0f;
+    ev.scrollY = 0.0f;
 
     switch (event.type) {
         case NSEventTypeLeftMouseDown:
@@ -174,33 +179,33 @@ void handle_mouse_event(NSView* view, NSEvent* event) {
         case NSEventTypeLeftMouseDown:
         case NSEventTypeRightMouseDown:
         case NSEventTypeOtherMouseDown:
-            ev.type = Event::MouseDown;
+            type = Event::MouseDown;
             break;
         case NSEventTypeLeftMouseUp:
         case NSEventTypeRightMouseUp:
         case NSEventTypeOtherMouseUp:
-            ev.type = Event::MouseUp;
+            type = Event::MouseUp;
             break;
         case NSEventTypeLeftMouseDragged:
         case NSEventTypeRightMouseDragged:
         case NSEventTypeOtherMouseDragged:
         case NSEventTypeMouseMoved:
-            ev.type = Event::MouseMove;
+            type = Event::MouseMove;
             break;
         case NSEventTypeMouseEntered:
-            ev.type = Event::MouseEnter;
+            type = Event::MouseEnter;
             break;
         case NSEventTypeMouseExited:
-            ev.type = Event::MouseExit;
+            type = Event::MouseExit;
             break;
         case NSEventTypeScrollWheel:
-            ev.type = Event::MouseScroll;
-            handle_mouse_wheel_scroll(event, ev);
+            type = Event::MouseScroll;
+            handleMouseWheelScroll(event, ev);
             break;
         default:
-            break;
+            return;
     }
-    dispatch_event(ev);
+    dispatch_event(Event::Mouse(type, ev));
 }
 
 }

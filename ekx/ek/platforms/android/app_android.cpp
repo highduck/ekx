@@ -186,24 +186,23 @@ extern "C" JNIEXPORT void JNICALL Java_ek_EkPlatform_sendEvent(JNIEnv*, jclass, 
             dispatch_device_ready();
             break;
         default:
-            dispatch_event({static_cast<Event::Type>(eventType)});
+            dispatch_event(Event::App((Event::Type)eventType));
             break;
     }
 }
 
 extern "C" JNIEXPORT void JNICALL Java_ek_EkPlatform_sendTouch(JNIEnv *, jclass, jint type, jint id, jfloat x, jfloat y) {
-    Event ev{static_cast<Event::Type>(type)};
-    ev.id = id;
-    ev.pos.x = x;
-    ev.pos.y = y;
+    const auto eventType = static_cast<Event::Type>(type);
+    const Event ev = Event::Touch(eventType,{(uint64_t)id,x,y});
     dispatch_event(ev);
 }
 
 extern "C" JNIEXPORT void JNICALL Java_ek_EkPlatform_sendKeyEvent(JNIEnv *, jclass, jint type, jint code, jint modifiers) {
-    Event ev{static_cast<Event::Type>(type)};
-    ev.keyCode = static_cast<KeyCode>(code);
-    ev.keyModifiers = (KeyModifier)modifiers;
-
+    const auto eventType = static_cast<Event::Type>(type);
+    const Event ev = Event::Key(eventType, {
+            (KeyCode)code,
+            (KeyModifier)modifiers
+    });
     dispatch_event(ev);
 }
 

@@ -181,16 +181,16 @@ void ImGuiIntegration::on_event(const Event& event) {
         case Event::KeyUp:
         case Event::KeyDown:
         case Event::KeyPress_: {
-            int key = static_cast<int>(event.keyCode);
+            int key = static_cast<int>(event.key.code);
             if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown)) {
                 io.KeysDown[key] = (event.type == Event::KeyDown);
             }
 
             // update modifier keys
-            const bool isShift = (int) event.keyModifiers & (int) app::KeyModifier::Shift;
-            const bool isControl = (int) event.keyModifiers & (int) app::KeyModifier::Control;
-            const bool isAlt = (int) event.keyModifiers & (int) app::KeyModifier::Alt;
-            const bool isSuper = (int) event.keyModifiers & (int) app::KeyModifier::Super;
+            const bool isShift = (int) event.key.modifiers & (int) app::KeyModifier::Shift;
+            const bool isControl = (int) event.key.modifiers & (int) app::KeyModifier::Control;
+            const bool isAlt = (int) event.key.modifiers & (int) app::KeyModifier::Alt;
+            const bool isSuper = (int) event.key.modifiers & (int) app::KeyModifier::Super;
             if ((io.KeyShift && !isShift) || (io.KeyCtrl && !isControl) || (io.KeyAlt && !isAlt) ||
                 (io.KeySuper && !isSuper)) {
                 // need to reset key states when any of meta keys disabled
@@ -204,34 +204,34 @@ void ImGuiIntegration::on_event(const Event& event) {
             break;
 
         case Event::Text:
-            if (event.characters[0] != '\0') {
-                io.AddInputCharactersUTF8(event.characters);
+            if (!event.text.empty()) {
+                io.AddInputCharactersUTF8(event.text.data);
             }
             break;
 
         case Event::MouseDown:
         case Event::MouseUp: {
             int button = 0;
-            if (event.button == MouseButton::Right) {
+            if (event.mouse.button == MouseButton::Right) {
                 button = 1;
-            } else if (event.button == MouseButton::Other) {
+            } else if (event.mouse.button == MouseButton::Other) {
                 button = 2;
             }
             io.MouseDown[button] = (event.type == Event::MouseDown);
         }
             break;
         case Event::MouseScroll:
-            if (fabs(event.scroll.x) > 0.0f) {
-                io.MouseWheelH += event.scroll.x * 0.1f;
+            if (fabs(event.mouse.scrollX) > 0.0f) {
+                io.MouseWheelH += event.mouse.scrollX * 0.1f;
             }
-            if (fabs(event.scroll.y) > 0.0f) {
-                io.MouseWheel += event.scroll.y * 0.1f;
+            if (fabs(event.mouse.scrollY) > 0.0f) {
+                io.MouseWheel += event.mouse.scrollY * 0.1f;
             }
             break;
 
         case Event::MouseMove:
-            io.MousePos.x = event.pos.x / g_app.content_scale;
-            io.MousePos.y = event.pos.y / g_app.content_scale;
+            io.MousePos.x = event.mouse.x / g_app.content_scale;
+            io.MousePos.y = event.mouse.y / g_app.content_scale;
             break;
 
         default:
