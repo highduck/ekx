@@ -23,9 +23,9 @@
 namespace ek {
 
 void start_application() {
-    dispatch_init();
+    app::dispatch_init();
     linux_app_create();
-    dispatch_device_ready();
+    app::dispatch_device_ready();
 
     linux_app_loop();
     linux_app_shutdown();
