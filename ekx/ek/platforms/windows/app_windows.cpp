@@ -803,7 +803,7 @@ void win32_create_window() {
     wnd.in_create_window = true;
 
     static wchar_t wide_title[128];
-    win32_uwp_utf8_to_wide(g_app.window_cfg.title.c_str(), wide_title, sizeof(wide_title));
+    win32_uwp_utf8_to_wide(g_app.window_cfg.title, wide_title, sizeof(wide_title));
 
     wnd.hwnd = CreateWindowExW(
             win_ex_style,               /* dwExStyle */
@@ -864,7 +864,7 @@ void win32_run_loop() {
         /* check for window resized, this cannot happen in WM_SIZE as it explodes memory usage */
         if (win32_update_dimensions()) {
             d3d11_resize_default_render_target();
-            win32_uwp_app_event(Event::app_resize);
+            win32_uwp_app_event(Event::Resize);
         }
         if (g_app.require_exit) {
             PostMessage(wnd.hwnd, WM_CLOSE, 0, 0);
