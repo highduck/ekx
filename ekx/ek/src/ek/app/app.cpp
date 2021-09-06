@@ -54,14 +54,14 @@ void process_event(const Event& event) {
 void dispatch_event(const Event& event) {
     EK_ASSERT(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(Event::Count));
 //    EK_INFO("EVENT: %i", event.type);
-if (event.type == Event::Pause) {
+    if (event.type == Event::Pause) {
         auph::pause();
         ++g_app.systemPauseCounter;
         if (g_app.systemPauseCounter > 0 && !g_app.systemPaused) {
             g_app.systemPaused = true;
             //audio::muteDeviceBegin();
         }
-} else if (event.type == Event::Resume) {
+    } else if (event.type == Event::Resume) {
         auph::resume();
         if (g_app.systemPauseCounter > 0) {
             --g_app.systemPauseCounter;
@@ -96,7 +96,9 @@ void dispatch_draw_frame() {
 
     if (g_app.size_changed) {
         g_app.size_changed = false;
-        process_event({Event::Resize});
+        Event ev{};
+        ev.type = Event::Resize;
+        process_event(ev);
     }
 
     for (const auto& event : g_app.pool_queue) {
@@ -135,9 +137,13 @@ void shutdown() {
     ssAppState.shutdown();
 }
 
-void Event::setCharacters(const char* source) {
-    strncpy(characters, source, 8);
-    characters[7] = '\0';
+void TextEvent::set(const char* source) {
+    strncpy(data, source, 8);
+    data[7] = '\0';
+}
+
+bool TextEvent::empty() const {
+    return data[0] != '\0';
 }
 
 }

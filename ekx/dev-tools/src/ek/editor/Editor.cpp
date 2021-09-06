@@ -104,9 +104,9 @@ void Editor::onFrameCompleted() {
 void Editor::onEvent(const app::Event& event) {
     switch (event.type) {
         case app::Event::KeyDown:
-            if (event.keyCode == app::KeyCode::A &&
-                ((int) event.keyModifiers & (int) app::KeyModifier::Control) &&
-                ((int) event.keyModifiers & (int) app::KeyModifier::Shift)) {
+            if (event.key.code == app::KeyCode::A &&
+                ((int) event.key.modifiers & (int) app::KeyModifier::Control) &&
+                ((int) event.key.modifiers & (int) app::KeyModifier::Shift)) {
                 settings.showEditor = !settings.showEditor;
                 settings.dirty = true;
             }

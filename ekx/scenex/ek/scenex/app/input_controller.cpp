@@ -39,7 +39,7 @@ void input_controller::emulate_mouse_as_touch(const Event& event, touch_state_t&
         data.active = false;
     }
 
-    data.position = screenCoordToGameDisplay(event.pos);
+    data.position = screenCoordToGameDisplay({event.mouse.x, event.mouse.y});
     data.pressed = data.active;
     data.is_started_event = !active_prev && data.active;//e.type == "touchstart";
     data.is_ended_event = !data.active && active_prev;
@@ -56,7 +56,7 @@ void input_controller::update_touch(const Event& event, touch_state_t& data) {
     bool active_prev = data.active;
     data.active = event.type != Event::TouchEnd;
 
-    data.position = screenCoordToGameDisplay(event.pos);
+    data.position = screenCoordToGameDisplay({event.touch.x, event.touch.y});
     data.pressed = data.active;
     data.is_started_event = !active_prev && data.active;//e.type == "touchstart";
     data.is_ended_event = !data.active && active_prev;
@@ -75,9 +75,9 @@ void input_controller::on_event(const Event& event) {
         case Event::TouchMove:
         case Event::TouchEnd:
             if (!hovered_by_editor_gui) {
-                interactions_.handle_touch_event(event, screenCoordToGameDisplay(event.pos));
+                interactions_.handle_touch_event(event, screenCoordToGameDisplay({event.touch.x, event.touch.y}));
             }
-            update_touch(event, get_or_create_touch(event.id));
+            update_touch(event, get_or_create_touch(event.touch.id));
             break;
         case Event::MouseDown:
         case Event::MouseUp:
@@ -86,7 +86,7 @@ void input_controller::on_event(const Event& event) {
         case Event::MouseEnter:
         case Event::MouseExit:
             if (!hovered_by_editor_gui) {
-                interactions_.handle_mouse_event(event, screenCoordToGameDisplay(event.pos));
+                interactions_.handle_mouse_event(event, screenCoordToGameDisplay({event.mouse.x, event.mouse.y}));
             }
             if (emulateTouch) {
                 emulate_mouse_as_touch(event, get_or_create_touch(1u));
@@ -94,11 +94,11 @@ void input_controller::on_event(const Event& event) {
             break;
         case Event::KeyUp:
         case Event::KeyDown:
-            if (event.type == Event::KeyDown && event.keyCode == KeyCode::Escape) {
+            if (event.type == Event::KeyDown && event.key.code == KeyCode::Escape) {
                 interactions_.sendBackButton();
             }
-            if (event.keyCode != KeyCode::Unknown) {
-                auto& key = keys_[static_cast<size_t>(event.keyCode)];
+            if (event.key.code != KeyCode::Unknown) {
+                auto& key = keys_[static_cast<size_t>(event.key.code)];
                 if (event.type == Event::KeyDown) {
                     key.down = !key.state;
                     key.state = true;//!keyboard_modifiers.ctrlKey;

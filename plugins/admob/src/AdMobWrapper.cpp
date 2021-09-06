@@ -80,6 +80,8 @@ void AdMobWrapper::onAdmobEvent(admob::EventType event) {
 }
 
 std::unique_ptr<AdMobWrapper> AdMobWrapper::create(bool devMode) {
+    (void)devMode;
+
 #if EK_ADMOB_SIMULATOR
     if (devMode) {
         return std::make_unique<AdMobSimulator>();

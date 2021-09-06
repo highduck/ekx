@@ -170,7 +170,7 @@ void handleQuitRequest() {
 }
 
 - (void)applicationWillTerminate:(__unused NSNotification*)notification {
-    process_event({Event::Close});
+    process_event(Event::App(Event::Close));
     if (_view != nil) {
         OBJC_RELEASE(_view.device);
     }
@@ -179,11 +179,11 @@ void handleQuitRequest() {
 }
 
 - (void)applicationWillResignActive:(__unused NSNotification*)notification {
-    dispatch_event({Event::Pause});
+    dispatch_event(Event::App(Event::Pause));
 }
 
 - (void)applicationDidBecomeActive:(__unused NSNotification*)notification {
-    dispatch_event({Event::Resume});
+    dispatch_event(Event::App(Event::Resume));
 }
 
 @end
@@ -235,55 +235,55 @@ void handleQuitRequest() {
 }
 
 - (void)mouseDown:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)mouseUp:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)rightMouseDown:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)rightMouseUp:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)otherMouseDown:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)otherMouseUp:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)mouseMoved:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)mouseDragged:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)rightMouseDragged:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)otherMouseDragged:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)mouseEntered:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)mouseExited:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 - (void)scrollWheel:(NSEvent*)event {
-    handle_mouse_event(self, event);
+    handleMouseEvent(self, event);
 }
 
 /**** HANDLE TOUCH *****/
@@ -331,35 +331,33 @@ void handleQuitRequest() {
 
 - (void)magnifyWithEvent:(__unused NSEvent*)event {}
 
-void handle_key(NSEvent* event, Event::Type type) {
-    Event ev{type};
-    ev.keyCode = convert_key_code(event.keyCode);
-    setup_modifiers(event.modifierFlags, ev);
-    dispatch_event(ev);
+void handleKeyEvent(NSEvent* event, Event::Type type) {
+    dispatch_event(Event::Key(type, {
+        convertKeyCode(event.keyCode),
+        convertKeyModifiers(event.modifierFlags)
+    }));
 }
 
 - (void)keyDown:(NSEvent*)event {
     if (!event.ARepeat) {
-        handle_key(event, Event::KeyDown);
+        handleKeyEvent(event, Event::KeyDown);
     }
 
     if (is_text_event(event)) {
-        Event ev{Event::Text};
-        ev.setCharacters(event.characters.UTF8String);
-        dispatch_event(ev);
+        dispatch_event(Event::TextEvent(event.characters.UTF8String));
     }
 }
 
 - (void)keyUp:(NSEvent*)event {
     if (!event.ARepeat) {
-        handle_key(event, Event::KeyUp);
+        handleKeyEvent(event, Event::KeyUp);
     }
 }
 
 - (void)flagsChanged:(NSEvent*)event {
     NSUInteger mask = convert_key_code_to_modifier_mask(event.keyCode);
     if (mask) {
-        handle_key(event, (event.modifierFlags & mask) ? Event::KeyDown : Event::KeyUp);
+        handleKeyEvent(event, (event.modifierFlags & mask) ? Event::KeyDown : Event::KeyUp);
     }
 }
 

@@ -93,6 +93,31 @@ enum class KeyModifier {
     Alt = 8
 };
 
+struct TextEvent final {
+    char data[8];
+    void set(const char* source);
+    [[nodiscard]] bool empty() const;
+};
+
+struct KeyEvent final {
+    KeyCode code;
+    KeyModifier modifiers;
+};
+
+struct TouchEvent final {
+    uint64_t id;
+    float x;
+    float y;
+};
+
+struct MouseEvent final {
+    MouseButton button;
+    float x;
+    float y;
+    float scrollX;
+    float scrollY;
+};
+
 struct Event final {
     enum Type {
         Resume = 0,
@@ -125,18 +150,46 @@ struct Event final {
     };
     Type type;
 
-    // touch-id / pointer-id
-    uint64_t id = 0;
-    float2 pos{0.0f, 0.0f};
-    float2 scroll{0.0f, 0.0f};
-    MouseButton button = MouseButton::Other;
+    union {
+        KeyEvent key;
+        TextEvent text;
+        TouchEvent touch;
+        MouseEvent mouse;
+    };
 
-    char characters[8] = "";
+    static Event App(Type type) {
+        Event ev{};
+        ev.type = type;
+        return ev;
+    }
 
-    KeyCode keyCode = KeyCode::Unknown;
-    KeyModifier keyModifiers = KeyModifier::Empty;
+    static Event Key(Type type, KeyEvent key) {
+        Event ev{};
+        ev.type = type;
+        ev.key = key;
+        return ev;
+    }
 
-    void setCharacters(const char* source);
+    static Event Touch(Type type, TouchEvent touch) {
+        Event ev{};
+        ev.type = type;
+        ev.touch = touch;
+        return ev;
+    }
+
+    static Event Mouse(Type type, MouseEvent mouse) {
+        Event ev{};
+        ev.type = type;
+        ev.mouse = mouse;
+        return ev;
+    }
+
+    static Event TextEvent(const char* data) {
+        Event ev{};
+        ev.type = Event::Text;
+        ev.text.set(data);
+        return ev;
+    }
 };
 
 struct app_state final {
