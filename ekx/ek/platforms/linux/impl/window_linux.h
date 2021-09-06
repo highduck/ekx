@@ -272,9 +272,6 @@ const gl_fbconfig* gl_choose_fbconfig(const gl_fbconfig* desired, const gl_fbcon
     return closest;
 }
 
-using namespace ek;
-using namespace ek::app;
-
 int x11_error_handler(Display* display, XErrorEvent* event) {
     (void) (display);
     gAppLinux.x11.error_code = event->error_code;
@@ -905,7 +902,7 @@ MouseButton x11_translate_button(const XEvent* event) {
     }
 }
 
-void x11_mouse_event(Event::Type type, MouseButton btn, uint32_t mods) {
+void x11_mouse_event(ek::app::Event::Type type, ek::app::MouseButton btn, uint32_t mods) {
 //    if (_sapp_events_enabled()) {
 //        init_event(type);
 //        _sapp.event.mouse_button = btn;
@@ -924,7 +921,7 @@ void x11_scroll_event(float x, float y, uint32_t mods) {
 //    }
 }
 
-void x11_key_event(Event type, KeyCode key, bool repeat, uint32_t mods) {
+void x11_key_event(ek::app::Event type, ek::app::KeyCode key, bool repeat, uint32_t mods) {
 //    if (_sapp_events_enabled()) {
 //        init_event(type);
 //        _sapp.event.key_code = key;
@@ -953,7 +950,8 @@ void x11_char_event(uint32_t chr, bool repeat, uint32_t mods) {
 //}
 }
 
-KeyCode x11_translate_key(int scancode) {
+ek::app::KeyCode x11_translate_key(int scancode) {
+    using namespace ek;
     int dummy;
     KeySym* keysyms = XGetKeyboardMapping(gAppLinux.x11.display, scancode, 1, &dummy);
     EK_ASSERT(keysyms);
@@ -961,9 +959,9 @@ KeyCode x11_translate_key(int scancode) {
     XFree(keysyms);
     switch (keysym) {
         case XK_Escape:
-            return KeyCode::Escape;
+            return app::KeyCode::Escape;
         case XK_Tab:
-            return KeyCode::Tab;
+            return app::KeyCode::Tab;
 //        case XK_Shift_L:        return SAPP_KEYCODE_LEFT_SHIFT;
 //        case XK_Shift_R:        return SAPP_KEYCODE_RIGHT_SHIFT;
 //        case XK_Control_L:      return SAPP_KEYCODE_LEFT_CONTROL;
@@ -986,25 +984,25 @@ KeyCode x11_translate_key(int scancode) {
 //        case XK_BackSpace:      return SAPP_KEYCODE_BACKSPACE;
 
         case XK_Return:
-            return KeyCode::Enter;
+            return app::KeyCode::Enter;
         case XK_Home:
-            return KeyCode::Home;
+            return app::KeyCode::Home;
         case XK_End:
-            return KeyCode::End;
+            return app::KeyCode::End;
         case XK_Page_Up:
-            return KeyCode::PageUp;
+            return app::KeyCode::PageUp;
         case XK_Page_Down:
-            return KeyCode::PageDown;
+            return app::KeyCode::PageDown;
         case XK_Insert:
-            return KeyCode::Insert;
+            return app::KeyCode::Insert;
         case XK_Left:
-            return KeyCode::ArrowLeft;
+            return app::KeyCode::ArrowLeft;
         case XK_Right:
-            return KeyCode::ArrowRight;
+            return app::KeyCode::ArrowRight;
         case XK_Down:
-            return KeyCode::ArrowDown;
+            return app::KeyCode::ArrowDown;
         case XK_Up:
-            return KeyCode::ArrowUp;
+            return app::KeyCode::ArrowUp;
 //        case XK_F1:             return KeyCode::F1;
 //        case XK_F2:             return SAPP_KEYCODE_F2;
 //        case XK_F3:             return SAPP_KEYCODE_F3;
@@ -1051,52 +1049,52 @@ KeyCode x11_translate_key(int scancode) {
 //        case XK_KP_Enter:       return SAPP_KEYCODE_KP_ENTER;
 
         case XK_a:
-            return KeyCode::A;
-            //case XK_b:              return KeyCode::B;
+            return app::KeyCode::A;
+            //case XK_b:              return app::KeyCode::B;
         case XK_c:
-            return KeyCode::C;
+            return app::KeyCode::C;
         case XK_d:
-            return KeyCode::D;
-//        case XK_e:              return KeyCode::E;
-//        case XK_f:              return KeyCode::F;
-//        case XK_g:              return KeyCode::G;
-//        case XK_h:              return KeyCode::H;
-//        case XK_i:              return KeyCode::I;
-//        case XK_j:              return KeyCode::J;
-//        case XK_k:              return KeyCode::K;
-//        case XK_l:              return KeyCode::L;
-//        case XK_m:              return KeyCode::M;
-//        case XK_n:              return KeyCode::N;
-//        case XK_o:              return KeyCode::O;
-//        case XK_p:              return KeyCode::P;
-//        case XK_q:              return KeyCode::Q;
-//        case XK_r:              return KeyCode::R;
+            return app::KeyCode::D;
+//        case XK_e:              return app::KeyCode::E;
+//        case XK_f:              return app::KeyCode::F;
+//        case XK_g:              return app::KeyCode::G;
+//        case XK_h:              return app::KeyCode::H;
+//        case XK_i:              return app::KeyCode::I;
+//        case XK_j:              return app::KeyCode::J;
+//        case XK_k:              return app::KeyCode::K;
+//        case XK_l:              return app::KeyCode::L;
+//        case XK_m:              return app::KeyCode::M;
+//        case XK_n:              return app::KeyCode::N;
+//        case XK_o:              return app::KeyCode::O;
+//        case XK_p:              return app::KeyCode::P;
+//        case XK_q:              return app::KeyCode::Q;
+//        case XK_r:              return app::KeyCode::R;
         case XK_s:
-            return KeyCode::S;
-//        case XK_t:              return KeyCode::T;
-//        case XK_u:              return KeyCode::U;
+            return app::KeyCode::S;
+//        case XK_t:              return app::KeyCode::T;
+//        case XK_u:              return app::KeyCode::U;
         case XK_v:
-            return KeyCode::V;
+            return app::KeyCode::V;
         case XK_w:
-            return KeyCode::W;
+            return app::KeyCode::W;
         case XK_x:
-            return KeyCode::X;
+            return app::KeyCode::X;
         case XK_y:
-            return KeyCode::Y;
+            return app::KeyCode::Y;
         case XK_z:
-            return KeyCode::Z;
-//        case XK_1:              return KeyCode::0;
-//        case XK_2:              return KeyCode::2;
-//        case XK_3:              return KeyCode::3;
-//        case XK_4:              return KeyCode::4;
-//        case XK_5:              return KeyCode::5;
-//        case XK_6:              return KeyCode::6;
-//        case XK_7:              return KeyCode::7;
-//        case XK_8:              return KeyCode::8;
-//        case XK_9:              return KeyCode::9;
-//        case XK_0:              return KeyCode::0;
+            return app::KeyCode::Z;
+//        case XK_1:              return app::KeyCode::0;
+//        case XK_2:              return app::KeyCode::2;
+//        case XK_3:              return app::KeyCode::3;
+//        case XK_4:              return app::KeyCode::4;
+//        case XK_5:              return app::KeyCode::5;
+//        case XK_6:              return app::KeyCode::6;
+//        case XK_7:              return app::KeyCode::7;
+//        case XK_8:              return app::KeyCode::8;
+//        case XK_9:              return app::KeyCode::9;
+//        case XK_0:              return app::KeyCode::0;
         case XK_space:
-            return KeyCode::Space;
+            return app::KeyCode::Space;
 //        case XK_minus:          return SAPP_KEYCODE_MINUS;
 //        case XK_equal:          return SAPP_KEYCODE_EQUAL;
 //        case XK_bracketleft:    return SAPP_KEYCODE_LEFT_BRACKET;
@@ -1110,7 +1108,7 @@ KeyCode x11_translate_key(int scancode) {
 //        case XK_slash:          return SAPP_KEYCODE_SLASH;
 //        case XK_less:           return SAPP_KEYCODE_WORLD_1; /* At least in some layouts... */
         default:
-            return KeyCode::Unknown;
+            return app::KeyCode::Unknown;
     }
 }
 
@@ -1326,12 +1324,12 @@ void x11_process_event(XEvent* event) {
         case EnterNotify:
             /* don't send enter/leave events while mouse button held down */
             if (0 == gAppLinux.x11.mouse_buttons) {
-                x11_mouse_event(Event::mouse_enter, MouseButton::Other, x11_mod(event->xcrossing.state));
+                x11_mouse_event(ek::app::Event::MouseEnter, ek::app::MouseButton::Other, x11_mod(event->xcrossing.state));
             }
             break;
         case LeaveNotify:
             if (0 == gAppLinux.x11.mouse_buttons) {
-                x11_mouse_event(Event::mouse_exit, MouseButton::Other, x11_mod(event->xcrossing.state));
+                x11_mouse_event(ek::app::Event::MouseExit, ek::app::MouseButton::Other, x11_mod(event->xcrossing.state));
             }
             break;
         case MotionNotify:
@@ -1383,7 +1381,7 @@ void x11_process_event(XEvent* event) {
             if (event->xclient.message_type == gAppLinux.x11.WM_PROTOCOLS) {
                 const Atom protocol = (Atom) event->xclient.data.l[0];
                 if (protocol == gAppLinux.x11.WM_DELETE_WINDOW) {
-                    g_app.require_exit = true;
+                    ek::app::g_app.require_exit = true;
                 }
             } else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndEnter) {
                 const bool is_list = 0 != (event->xclient.data.l[1] & 1);
@@ -1502,6 +1500,7 @@ void x11_process_event(XEvent* event) {
 }
 
 void linux_app_create() {
+    using ek::app::g_app;
     /* The following lines are here to trigger a linker error instead of an
         obscure runtime error if the user has forgotten to add -pthread to
         the compiler or linker options. They have no other purpose.
@@ -1541,6 +1540,8 @@ void linux_app_create() {
 }
 
 void linux_app_loop() {
+    using ek::app::g_app;
+
     while (!g_app.require_exit) {
         glx_make_current();
         int count = XPending(gAppLinux.x11.display);
@@ -1549,13 +1550,13 @@ void linux_app_loop() {
             XNextEvent(gAppLinux.x11.display, &event);
             x11_process_event(&event);
         }
-        dispatch_draw_frame();
+        ek::app::dispatch_draw_frame();
         glx_swap_buffers();
         XFlush(gAppLinux.x11.display);
         /* handle quit-requested, either from window or from sapp_request_quit() */
         if (g_app.require_exit) {
             /* give user code a chance to intervene */
-            x11_app_event(Event::Close);
+            x11_app_event(ek::app::Event::Close);
             /* if user code hasn't intervened, quit the app */
             if (g_app.require_exit) {
                 g_app.require_exit = true;
