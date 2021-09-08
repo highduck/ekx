@@ -409,10 +409,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.12.tgz#fd9c1c2cfab536a2383ed1ef70f94adea743a226"
   integrity sha512-KQZ1al2hKOONAs2MFv+yTQP1LkDWMrRJ9YCVRalXltOfXsBmH5IownLxQaiq0lnAHwAViLnh2aTYqrPcRGEbgg==
 
-"@types/node@^16.7.1":
-  version "16.7.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.7.1.tgz#c6b9198178da504dfca1fd0be9b2e1002f1586f0"
-  integrity sha512-ncRdc45SoYJ2H4eWU9ReDfp3vtFqDYhjOsKlFFUDEn8V1Bgr2RjYal8YT5byfadWIRluhPFU6JiDOl0H6Sl87A==
+"@types/node@^16.7.5":
+  version "16.7.13"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.7.13.tgz#86fae356b03b5a12f2506c6cf6cd9287b205973f"
+  integrity sha512-pLUPDn+YG3FYEt/pHI74HmnJOWzeR+tOIQzUx93pi9M7D8OE7PSLr97HboXwk5F+JS+TLtWuzCOW97AHjmOXXA==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
@@ -556,10 +556,10 @@ async@^2.6.2:
   dependencies:
     lodash "^4.17.14"
 
-auph@0.0.15:
-  version "0.0.15"
-  resolved "https://registry.yarnpkg.com/auph/-/auph-0.0.15.tgz#1e522298f3b6912d2b496492be98a9fa40d072ad"
-  integrity sha512-miXzgxBQZ9PH9OasgQDyHsx8yaDmww3QfQVFnf0Q5r5ywf8qexIJVcLyupPx3dZBW2Ehv+69D7Cc2EHWgbhd+A==
+auph@0.0.16:
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/auph/-/auph-0.0.16.tgz#e69ed05539a11ac3234783499d4675bf1e323a2f"
+  integrity sha512-ZTdl71jJ2HW08ht5oyWUDBJPopSg3YeMd1FfssX+2BSlXF3PmU5i82p5ifnLYRsIVl/qlVOqLqYuHGzKvopieQ==
   dependencies:
     "@ekx/dr-libs" "^0.0.2"
     "@ekx/stb" "^0.0.6"
@@ -885,6 +885,11 @@ clone@^1.0.2:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/clone/-/clone-1.0.4.tgz#da309cc263df15994c688ca902179ca3c7cd7c7e"
   integrity sha1-2jCcwmPfFZlMaIypAheco8fNfH4=
+
+cmake-build@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/cmake-build/-/cmake-build-0.0.1.tgz#06059fabe10d0df0d1ff9ba92e2ed7e5bc26c259"
+  integrity sha512-L1QpjYrAL5yx3M9xdshnswWp4smv05+J+pkE8xFaG3Zy88VxX9KFXOnzpelsCiOYl1b+Wrl5alZvw4ONHStEpQ==
 
 color-convert@^1.9.0:
   version "1.9.3"
