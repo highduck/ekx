@@ -21,6 +21,7 @@
     "templates"
   ],
   "dependencies": {
+    "cmake-build": "0.0.1",
     "@ekx/ekc": "0.1.8",
     "@ekx/ekx": "0.1.6",
     "chalk": "^4.1.2",

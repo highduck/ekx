@@ -21,7 +21,7 @@ import {androidBuildAppIconAsync} from "./androidAppIcon";
 import * as fs from "fs";
 import {writeFileSync} from "fs";
 import {Project} from "../project";
-import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../cmake/generate";
+import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "cmake-build";
 import {logger} from "../logger";
 
 const platforms = ["android"];

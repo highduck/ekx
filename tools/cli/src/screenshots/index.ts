@@ -3,7 +3,7 @@ import * as path from "path";
 import {executeAsync, makeDirs} from "../utils";
 import {buildAssetPackAsync} from "../assets";
 import {rmSync} from "fs";
-import {cmake} from "../cmake/build";
+import {build as buildCMake} from "cmake-build";
 
 const exportDir = "export/uitest";
 
@@ -53,7 +53,8 @@ const displays: { [key: string]: DisplayInfo } = {
 };
 
 async function build() {
-    await cmake(path.join(exportDir, "cmake-build"), {
+    await buildCMake({
+        workingDir: path.join(exportDir, "build"),
         definitions: {
             EK_UITEST:"ON"
         }

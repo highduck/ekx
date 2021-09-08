@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ExportItem.hpp"
+#include <ek/util/NoCopyAssign.hpp>
 #include <ek/builders/MultiResAtlas.hpp>
 #include <unordered_map>
 

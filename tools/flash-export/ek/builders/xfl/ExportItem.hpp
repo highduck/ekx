@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ek/scenex/data/SGFile.hpp>
-#include <ek/util/NoCopyAssign.hpp>
 #include <ek/ds/Array.hpp>
 #include <memory>
 
@@ -9,7 +8,7 @@ namespace ek::xfl {
 
 struct Element;
 
-struct ExportItem : private NoCopyAssign {
+struct ExportItem {
 
     SGNodeData node;
 
@@ -34,6 +33,15 @@ struct ExportItem : private NoCopyAssign {
     ExportItem() = default;
 
     ~ExportItem();
+
+    // delete copy-move
+    ExportItem(const ExportItem& v) = delete;
+
+    ExportItem& operator=(const ExportItem& v) = delete;
+
+    ExportItem(ExportItem&& v) = delete;
+
+    ExportItem& operator=(ExportItem&& v) = delete;
 
     void add(ExportItem* item);
 

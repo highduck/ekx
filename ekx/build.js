@@ -1,57 +1,16 @@
-const path = require("path");
+const {build} = require("cmake-build");
 const {spawnSync} = require("child_process");
 
 const buildTypes = ["Release"];
+const osTypes = [process.platform];
 
-for (const buildType of buildTypes) {
-    console.info("Generate", buildType);
-    const args = [];
-    if (0 | process.env.USE_CCACHE) {
-        args.push("-DCMAKE_C_COMPILER_LAUNCHER=ccache", "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache");
-    }
-    else {
-        if (process.env.CC) {
-            args.push(`-DCMAKE_C_COMPILER_LAUNCHER=${process.env.CC}`);
-        }
-        if (process.env.CXX) {
-            args.push(`-DCMAKE_CXX_COMPILER_LAUNCHER=${process.env.CXX}`);
-        }
-    }
+// const osTypes = ["darwin", "windows", "ios", "android", "web"];
 
-    const result = spawnSync("cmake", [
-        "-S", ".",
-        "-B", `build/${buildType.toLowerCase()}`,
-        "-G", "Ninja",
-        `-DCMAKE_BUILD_TYPE=${buildType}`,
-        "-DEKX_BUILD_TESTS=ON",
-        ...args
-    ], {
-        stdio: 'inherit'
-    });
-    if (result.status !== 0) {
-        process.exit(result.status);
-    }
-}
-
-// build
-for (const buildType of buildTypes) {
-    console.info("Build", buildType);
-    const result = spawnSync("cmake", [
-        "--build", `build/${buildType.toLowerCase()}`
-    ], {
-        stdio: 'inherit'
-    });
-    if (result.status !== 0) {
-        process.exit(result.status);
-    }
-}
-
-// run test
-for (const buildType of buildTypes) {
-    console.info("Test", buildType);
+function runTest(dir) {
+    console.info("Test", dir);
     const result = spawnSync("ninja", ["test"], {
         stdio: 'inherit',
-        cwd: path.resolve(process.cwd(), "build", buildType.toLowerCase()),
+        cwd: dir,
         env: Object.assign({}, process.env, {CTEST_OUTPUT_ON_FAILURE: "TRUE"})
     });
     if (result.status !== 0) {
@@ -59,4 +18,22 @@ for (const buildType of buildTypes) {
     }
 }
 
-//fs.rmSync('build', {recursive: true});
+async function run() {
+    for (const os of osTypes) {
+        for (const buildType of buildTypes) {
+            const result = await build({
+                os,
+                definitions: {
+                    EKX_BUILD_TESTS: "ON"
+                },
+                ninja: true,
+                clean: true
+            });
+            if (os === process.platform || os === "web") {
+                runTest(result.buildDir);
+            }
+        }
+    }
+}
+
+run().catch(() => process.exit(-1));

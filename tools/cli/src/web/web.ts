@@ -1,24 +1,16 @@
 import * as fs from "fs";
 import {copyFileSync} from "fs";
 import * as path from "path";
-import {executeAsync, isDir, isFile, makeDirs, replaceInFile, withPath} from "../utils";
+import {executeAsync, isDir, makeDirs, replaceInFile, withPath} from "../utils";
 import {buildAssetPackAsync} from "../assets";
 import * as Mustache from 'mustache';
 import {webBuildAppIconAsync} from "./webAppIcon";
 import {collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources";
 import {Project} from "../project";
-import {cmake} from "../cmake/build";
+import {build as buildCMake, BuildResult, CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "cmake-build";
 import {serve} from "./serve";
-import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../cmake/generate";
 import {logger} from "../logger";
 import * as glob from "glob";
-
-function getEmscriptenSDKPath(): string {
-    if (process.env.EMSDK) {
-        return process.env.EMSDK;
-    }
-    return path.join(process.env.HOME, "dev/emsdk");
-}
 
 function renderCMakeFile(ctx, buildType): string {
     const platforms = ["web"];
@@ -134,44 +126,23 @@ function renderCMakeFile(ctx, buildType): string {
     return cmakeLists(cmakeProject);
 }
 
-function getCMakeBuildDir(buildType: string) {
-    return "cmake-build-" + buildType.toLowerCase();
-}
-
 async function buildProject(ctx, buildType) {
     const platform_proj_name = ctx.name + "-" + ctx.current_target; // "projectName-web"
     const dest_dir = path.resolve(process.cwd(), "export");
     const output_path = path.join(dest_dir, platform_proj_name);
-    const cmakeBuildDir = getCMakeBuildDir(buildType);
 
     if (!isDir(output_path)) {
         await fs.promises.mkdir(output_path, {recursive: true});
-    } else {
-        const outputJsPath = path.join(output_path, cmakeBuildDir, ctx.name + ".js");
-        if (isFile(outputJsPath)) {
-            // just in case of changed any js linking dependencies :(
-            await fs.promises.rm(outputJsPath);
-        }
     }
 
-    {
-        const cmakeFile = withPath(output_path, () => renderCMakeFile(ctx, buildType));
-        await fs.promises.writeFile(path.join(output_path, "CMakeLists.txt"), cmakeFile);
-    }
+    const cmakeFile = withPath(output_path, () => renderCMakeFile(ctx, buildType));
+    await fs.promises.writeFile(path.join(output_path, "CMakeLists.txt"), cmakeFile);
 
-    {
-        const EMSDK_PATH = getEmscriptenSDKPath();
-        const EMSDK_CMAKE_TOOLCHAIN = path.join(EMSDK_PATH, "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake");
-        if (!process.env.EM_NODE_JS && process.env.NODE) {
-            process.env.EM_NODE_JS = process.env.NODE;
-        }
-        await cmake(cmakeBuildDir, {
-            toolchain: EMSDK_CMAKE_TOOLCHAIN,
-            buildType: buildType,
-            ccache: false,
-            workingDir: output_path
-        });
-    }
+    return await buildCMake({
+        os: "web",
+        buildType: buildType,
+        workingDir: output_path
+    });
 }
 
 /*** HTML ***/
@@ -242,19 +213,19 @@ export async function export_web(ctx: Project): Promise<void> {
 ];`
     });
 
+    let buildResult!: BuildResult;
     try {
-        await buildTask;
+        buildResult = await buildTask;
     } catch (e) {
         logger.error("build failed", e);
         throw e;
     }
-    const cmakeBuildDir = getCMakeBuildDir(buildType);
-    const projectDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export", ctx.name + "-" + ctx.current_target);
-    copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".js"), path.join(outputDir, ctx.name + ".js"));
-    copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm"), path.join(outputDir, ctx.name + ".wasm"));
+    //const projectDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export", ctx.name + "-" + ctx.current_target);
+    copyFileSync(path.join(buildResult.buildDir, ctx.name + ".js"), path.join(outputDir, ctx.name + ".js"));
+    copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm"), path.join(outputDir, ctx.name + ".wasm"));
     //if (buildType === "Debug") {
     try {
-        copyFileSync(path.join(projectDir, cmakeBuildDir, ctx.name + ".wasm.map"), path.join(outputDir, ctx.name + ".wasm.map"));
+        copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm.map"), path.join(outputDir, ctx.name + ".wasm.map"));
     } catch {
     }
     //}
