@@ -4,6 +4,7 @@
 #include <ek/app/app.hpp>
 #include <ecxx/ecxx_fwd.hpp>
 #include <ek/util/Type.hpp>
+#include <ek/math/vec.hpp>
 
 namespace ek {
 

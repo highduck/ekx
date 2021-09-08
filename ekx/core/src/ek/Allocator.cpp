@@ -12,13 +12,13 @@
 
 #endif // EK_ALLOCATION_TRACKER_STATS
 
+// !defined(_WIN32) - who knows maybe it works on Windows host
+#if defined(TRACY_ENABLE) && !defined(__EMSCRIPTEN__) && !defined(__MINGW64__)
 #include <Tracy.hpp>
-
-#ifdef TRACY_ENABLE
-#define EK_TRACE_ALLOC(ptr, sz, name) TracyAllocNS(ptr,sz,3,name)
+#define EK_TRACE_ALLOC(ptr, sz, name)    TracyAllocNS(ptr,sz,3,name)
 #define EK_TRACE_FREE(ptr, name)     TracyFreeNS(ptr,3,name)
 #else
-#define EK_TRACE_ALLOC(ptr, sz, name) ((void)0)
+#define EK_TRACE_ALLOC(ptr, sz, name)    ((void)0)
 #define EK_TRACE_FREE(ptr, name)     ((void)0)
 #endif // TRACY_ENABLE
 

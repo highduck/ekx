@@ -8,14 +8,6 @@ namespace ek {
 
 using app::g_app;
 
-void editor_onFrameCompleted() {
-    Locator::ref<Editor>().onFrameCompleted();
-}
-
-void editor_onEvent(const app::Event& e) {
-    Locator::ref<Editor>().onEvent(e);
-}
-
 void Editor::onRenderOverlay() {
     gui_.end_frame();
 
@@ -34,7 +26,7 @@ void Editor::onRenderFrame() {
 
 void Editor::onUpdate() {
     //project.update_scale_factor(app_->scale_factor, settings.notifyAssetsOnScaleFactorChanged);
-    gui_.begin_frame(app_->frameTimer.deltaTime);
+    gui_.begin_frame(app.frameTimer.deltaTime);
     if (settings.showEditor) {
         drawGUI();
     }
@@ -49,8 +41,8 @@ void Editor::onBeforeFrameBegin() {
     }
 }
 
-Editor::Editor(basic_application& app) :
-        app_{&app} {
+Editor::Editor(basic_application& app_) :
+        app{app_} {
 
     windows.push_back(&scene);
     windows.push_back(&game);
@@ -63,16 +55,11 @@ Editor::Editor(basic_application& app) :
     windows.push_back(&memory);
 
     load();
-    g_app.on_frame_completed += editor_onFrameCompleted;
-    g_app.on_event += editor_onEvent;
-
     app.dispatcher.listeners.push_back(this);
 }
 
 Editor::~Editor() {
-    app_->dispatcher.listeners.remove(this);
-    g_app.on_frame_completed -= editor_onFrameCompleted;
-    g_app.on_event -= editor_onEvent;
+    app.dispatcher.listeners.remove(this);
 }
 
 void Editor::load() {
@@ -96,7 +83,7 @@ void Editor::save() {
     xml.save_file("EditorLayoutState.xml");
 }
 
-void Editor::onFrameCompleted() {
+void Editor::onPostFrame() {
     gui_.on_frame_completed();
     invalidateSettings();
 }
@@ -105,16 +92,18 @@ void Editor::onEvent(const app::Event& event) {
     switch (event.type) {
         case app::Event::KeyDown:
             if (event.key.code == app::KeyCode::A &&
-                ((int) event.key.modifiers & (int) app::KeyModifier::Control) &&
-                ((int) event.key.modifiers & (int) app::KeyModifier::Shift)) {
+                event.key.isControl() &&
+                event.key.isShift()) {
                 settings.showEditor = !settings.showEditor;
                 settings.dirty = true;
             }
             break;
         case app::Event::Resize: {
-            const float2 windowSize{g_app.window_size};
-            if (windowSize != settings.windowSize) {
-                settings.windowSize = windowSize;
+            const float width = g_app.windowWidth;
+            const float height = g_app.windowHeight;
+            if (width != settings.width || height != settings.height) {
+                settings.width = width;
+                settings.height = height;
                 settings.dirty = true;
             }
         }
@@ -140,9 +129,9 @@ void EditorSettings::save() const {
     node.append_attribute("notifyAssetsOnScaleFactorChanged").set_value(notifyAssetsOnScaleFactorChanged);
     node.append_attribute("showEditor").set_value(showEditor);
     auto wnd = node.append_child("window");
-    if (windowSize != float2{g_app.window_cfg.size}) {
-        wnd.append_attribute("width").set_value(windowSize.x);
-        wnd.append_attribute("height").set_value(windowSize.y);
+    if (width != g_app.config.width || height != g_app.config.height) {
+        wnd.append_attribute("width").set_value(width);
+        wnd.append_attribute("height").set_value(height);
     }
     if (!xml.save_file(editorSettingsPath)) {
         EK_ERROR << "Can't save editor settings";
@@ -161,8 +150,8 @@ void EditorSettings::load() {
             notifyAssetsOnScaleFactorChanged);
     showEditor = node.attribute("showEditor").as_bool(showEditor);
     auto wnd = node.child("window");
-    windowSize.x = wnd.attribute("width").as_float(g_app.window_cfg.size.x);
-    windowSize.y = wnd.attribute("height").as_float(g_app.window_cfg.size.y);
+    width = wnd.attribute("width").as_float(g_app.config.width);
+    height = wnd.attribute("height").as_float(g_app.config.height);
 }
 
 void Editor::invalidateSettings() {

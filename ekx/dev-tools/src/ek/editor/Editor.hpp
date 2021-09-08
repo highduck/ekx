@@ -18,7 +18,8 @@ namespace ek {
 struct EditorSettings {
     bool notifyAssetsOnScaleFactorChanged = true;
     bool showEditor = true;
-    float2 windowSize = float2::zero;
+    float width = 0.0f;
+    float height = 0.0f;
     bool dirty = false;
 
     void save() const;
@@ -34,8 +35,8 @@ public:
 
     ~Editor() override;
 
-    void onEvent(const app::Event& event);
-    void onFrameCompleted();
+    void onEvent(const app::Event& event) override;
+    void onPostFrame() override;
 
 public:
     // GameApp callbacks
@@ -67,9 +68,7 @@ public:
     void load();
     void save();
 
-private:
-
-    basic_application* app_;
+    basic_application& app;
 
 public:
 

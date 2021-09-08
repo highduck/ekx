@@ -178,8 +178,8 @@ static inline HRESULT dxgi_Present(IDXGISwapChain* self, UINT SyncInterval, UINT
 
 void d3d11_create_device_and_swapchain() {
     DXGI_SWAP_CHAIN_DESC* sc_desc = &d3dApp.swap_chain_desc;
-    sc_desc->BufferDesc.Width = (UINT) g_app.drawable_size.x;
-    sc_desc->BufferDesc.Height = (UINT) g_app.drawable_size.y;
+    sc_desc->BufferDesc.Width = (UINT) g_app.drawableWidth;
+    sc_desc->BufferDesc.Height = (UINT) g_app.drawableHeight;
     sc_desc->BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     sc_desc->BufferDesc.RefreshRate.Numerator = 60;
     sc_desc->BufferDesc.RefreshRate.Denominator = 1;
@@ -231,7 +231,7 @@ void d3d11_create_default_render_target() {
     EK_ASSERT(0 == d3dApp.ds);
     EK_ASSERT(0 == d3dApp.dsv);
 
-    const uint32_t sampleCount = static_cast<uint32_t>(g_app.window_cfg.sampleCount);
+    const uint32_t sampleCount = static_cast<uint32_t>(g_app.config.sampleCount);
 
     HRESULT hr;
 
@@ -244,8 +244,8 @@ void d3d11_create_default_render_target() {
     /* common desc for MSAA and depth-stencil texture */
     D3D11_TEXTURE2D_DESC tex_desc;
     memset(&tex_desc, 0, sizeof(tex_desc));
-    tex_desc.Width = (UINT) g_app.drawable_size.x;
-    tex_desc.Height = (UINT) g_app.drawable_size.y;
+    tex_desc.Width = (UINT) g_app.drawableWidth;
+    tex_desc.Height = (UINT) g_app.drawableHeight;
     tex_desc.MipLevels = 1;
     tex_desc.ArraySize = 1;
     tex_desc.Usage = D3D11_USAGE_DEFAULT;
@@ -285,16 +285,16 @@ void d3d11_resize_default_render_target(void) {
         d3d11_destroy_default_render_target();
         dxgi_ResizeBuffers(d3dApp.swap_chain,
                            d3dApp.swap_chain_desc.BufferCount,
-                           (UINT) g_app.drawable_size.x,
-                           (UINT) g_app.drawable_size.y,
+                           (UINT) g_app.drawableWidth,
+                           (UINT) g_app.drawableHeight,
                            DXGI_FORMAT_B8G8R8A8_UNORM, 0);
         d3d11_create_default_render_target();
     }
 }
 
 void d3d11_present(void) {
-    const auto swapInterval = g_app.window_cfg.swapInterval;
-    const auto sampleCount = g_app.window_cfg.sampleCount;
+    const auto swapInterval = g_app.config.swapInterval;
+    const auto sampleCount = g_app.config.sampleCount;
     /* do MSAA resolve if needed */
     if (sampleCount > 1) {
         EK_ASSERT(d3dApp.rt);
@@ -488,7 +488,7 @@ void win32_restore_console() {
 }
 
 void win32_init_dpi() {
-    const auto allowHighDpi = g_app.window_cfg.allowHighDpi;
+    const auto allowHighDpi = g_app.config.allowHighDpi;
 
     typedef BOOL(WINAPI *SETPROCESSDPIAWARE_T)(void);
     typedef HRESULT(WINAPI *SETPROCESSDPIAWARENESS_T)(PROCESS_DPI_AWARENESS);
@@ -542,7 +542,7 @@ void win32_init_dpi() {
         wnd.dpi.content_scale = 1.0f;
         wnd.dpi.mouse_scale = 1.0f / wnd.dpi.window_scale;
     }
-    g_app.content_scale = wnd.dpi.content_scale;
+    g_app.dpiScale = wnd.dpi.content_scale;
     if (user32) {
         FreeLibrary(user32);
     }
@@ -555,27 +555,27 @@ void win32_init_dpi() {
 bool win32_update_dimensions() {
     RECT rect;
     if (GetClientRect(wnd.hwnd, &rect)) {
-        g_app.window_size.x = (int) ((float) (rect.right - rect.left) / wnd.dpi.window_scale);
-        g_app.window_size.y = (int) ((float) (rect.bottom - rect.top) / wnd.dpi.window_scale);
-        const int fb_width = (int) ((float) g_app.window_size.x * wnd.dpi.content_scale);
-        const int fb_height = (int) ((float) g_app.window_size.y * wnd.dpi.content_scale);
-        if ((fb_width != (int) g_app.drawable_size.x) || (fb_height != (int) g_app.drawable_size.y)) {
-            g_app.drawable_size.x = fb_width;
-            g_app.drawable_size.y = fb_height;
+        g_app.windowWidth = (int) ((float) (rect.right - rect.left) / wnd.dpi.window_scale);
+        g_app.windowHeight = (int) ((float) (rect.bottom - rect.top) / wnd.dpi.window_scale);
+        const int fb_width = (int) ((float) g_app.windowWidth * wnd.dpi.content_scale);
+        const int fb_height = (int) ((float) g_app.windowHeight * wnd.dpi.content_scale);
+        if ((fb_width != (int) g_app.drawableWidth) || (fb_height != (int) g_app.drawableHeight)) {
+            g_app.drawableWidth = fb_width;
+            g_app.drawableHeight = fb_height;
             /* prevent a framebuffer size of 0 when window is minimized */
-            if (g_app.drawable_size.x < 1) {
-                g_app.drawable_size.x = 1;
+            if (g_app.drawableWidth < 1) {
+                g_app.drawableWidth = 1;
             }
-            if (g_app.drawable_size.y < 0) {
-                g_app.drawable_size.y = 1;
+            if (g_app.drawableHeight < 0) {
+                g_app.drawableHeight = 1;
             }
             return true;
         }
     } else {
-        g_app.window_size.x = 1;
-        g_app.window_size.y = 1;
-        g_app.drawable_size.x = 1;
-        g_app.drawable_size.y = 1;
+        g_app.windowWidth = 1;
+        g_app.windowHeight = 1;
+        g_app.drawableWidth = 1;
+        g_app.drawableHeight = 1;
     }
     return false;
 }
@@ -585,18 +585,18 @@ LRESULT CALLBACK win32_wndproc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
         switch (uMsg) {
             case WM_CLOSE:
                 // only give user a chance to intervene when sapp_quit() wasn't already called
-                if (!g_app.require_exit) {
+                if (!g_app.exitRequired) {
                     // if window should be closed and event handling is enabled, give user code
                     // a change to intervene via sapp_cancel_quit()
-                    g_app.require_exit = true;
+                    g_app.exitRequired = true;
                     win32_uwp_app_event(Event::Close);
                     // if user code hasn't intervened, quit the app
-                    if (g_app.require_exit) {
+                    if (g_app.exitRequired) {
                         // exit ordered
-                        g_app.require_exit = true;
+                        g_app.exitRequired = true;
                     }
                 }
-                if (g_app.require_exit /* exit ordered */) {
+                if (g_app.exitRequired /* exit ordered */) {
                     PostQuitMessage(0);
                 }
                 return 0;
@@ -793,8 +793,8 @@ void win32_create_window() {
 //    } else {
         win_style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX |
                     WS_SIZEBOX;
-        rect.right = (int) ((float) g_app.window_cfg.size.x * wnd.dpi.window_scale);
-        rect.bottom = (int) ((float) g_app.window_cfg.size.x * wnd.dpi.window_scale);
+        rect.right = (int) ((float) g_app.config.width * wnd.dpi.window_scale);
+        rect.bottom = (int) ((float) g_app.config.height * wnd.dpi.window_scale);
 //    }
     AdjustWindowRectEx(&rect, win_style, FALSE, win_ex_style);
     const int win_width = rect.right - rect.left;
@@ -802,7 +802,7 @@ void win32_create_window() {
     wnd.in_create_window = true;
 
     static wchar_t wide_title[128];
-    win32_uwp_utf8_to_wide(g_app.window_cfg.title, wide_title, sizeof(wide_title));
+    win32_uwp_utf8_to_wide(g_app.config.title, wide_title, sizeof(wide_title));
 
     wnd.hwnd = CreateWindowExW(
             win_ex_style,               /* dwExStyle */
@@ -844,7 +844,7 @@ void win32_create() {
 
 void win32_run_loop() {
     bool done = false;
-    while (!(done || g_app.require_exit)) {
+    while (!(done || g_app.exitRequired)) {
         MSG msg;
         while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
             if (WM_QUIT == msg.message) {
@@ -858,14 +858,14 @@ void win32_run_loop() {
         dispatch_draw_frame();
         d3d11_present();
         if (IsIconic(wnd.hwnd)) {
-            Sleep((DWORD)(16 * g_app.window_cfg.swapInterval));
+            Sleep((DWORD)(16 * g_app.config.swapInterval));
         }
         /* check for window resized, this cannot happen in WM_SIZE as it explodes memory usage */
         if (win32_update_dimensions()) {
             d3d11_resize_default_render_target();
             win32_uwp_app_event(Event::Resize);
         }
-        if (g_app.require_exit) {
+        if (g_app.exitRequired) {
             PostMessage(wnd.hwnd, WM_CLOSE, 0, 0);
         }
     }

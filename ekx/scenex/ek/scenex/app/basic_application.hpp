@@ -33,7 +33,7 @@ class AssetManager;
 
 class Asset;
 
-class basic_application {
+class basic_application : public app::AppListener {
 public:
     static float2 AppResolution;
     inline static GameDisplayInfo currentDisplayInfo{};
@@ -55,15 +55,17 @@ public:
 
     basic_application();
 
-    virtual ~basic_application();
+    ~basic_application() override;
 
     virtual void initialize();
 
     virtual void preload();
 
-    void on_draw_frame();
+    void onFrame() override;
 
-    void on_event(const app::Event&);
+    void onPostFrame() override;
+
+    void onEvent(const app::Event&) override;
 
 public:
     bool preloadOnStart = true;
@@ -97,7 +99,20 @@ EK_DECLARE_TYPE(basic_application);
 
 inline float2 basic_application::AppResolution{};
 
-void initializeSubSystems();
+class Initializer : public app::AppListener {
+public:
+    void (* creator)() = nullptr;
+
+    int _initializeSubSystemsState = 0;
+
+    ~Initializer() override = default;
+
+    void onPreStart() override;
+
+    void onDeviceReady() override;
+
+    void onFrame() override;
+};
 
 template<typename T>
 inline void run_app(app::WindowConfig cfg) {
@@ -109,24 +124,21 @@ inline void run_app(app::WindowConfig cfg) {
     gTextEngine.initialize();
     Locator::setup();
     app::initialize();
-    basic_application::AppResolution = float2{cfg.size};
-    g_app.window_cfg = std::move(cfg);
+    basic_application::AppResolution = float2{cfg.width, cfg.height};
+    g_app.config = cfg;
 
 #ifdef EK_DEV_TOOLS
     Editor::inspectorEnabled = true;
     Editor::settings.load();
-    if (length(Editor::settings.windowSize) > 0.0f) {
-        g_app.window_cfg.size = Editor::settings.windowSize;
+    if (Editor::settings.width > 0.0f && Editor::settings.height > 0.0f) {
+        g_app.config.width = Editor::settings.width;
+        g_app.config.height = Editor::settings.height;
     }
 #endif
 
-    g_app.on_device_ready << [] {
-        // audio should be initialized before "Resume" event, so the best place is "On Create" event
-        audio::initialize();
-
-        Locator::create<basic_application, T>();
-        g_app.on_frame_draw += initializeSubSystems;
-    };
+    static Initializer initializer;
+    initializer.creator = []{Locator::create<basic_application, T>();};
+    g_app.listener = &initializer;
 
     EK_TRACE << "app: call start_application";
     start_application();

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ek/app/events.hpp>
+
 namespace ek {
 
 class GameAppListener {
@@ -20,6 +22,10 @@ public:
     virtual void onUpdate() {}
 
     virtual void onStart() {}
+
+    virtual void onEvent(const app::Event&) {}
+
+    virtual void onPostFrame() {}
 };
 
 }

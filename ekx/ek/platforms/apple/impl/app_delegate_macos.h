@@ -5,12 +5,9 @@
 
 #include <ek/app/app.hpp>
 
-using namespace ek;
-using namespace ek::app;
-
 void handleQuitRequest() {
-    if (g_app.require_exit) {
-        g_app.require_exit = false;
+    if (g_app.exitRequired) {
+        g_app.exitRequired = false;
         [gAppDelegate.window performClose:nil];
     }
 }
@@ -46,10 +43,10 @@ void handleQuitRequest() {
     _view.device = MTLCreateSystemDefaultDevice();
 
     [_view updateTrackingAreas];
-    _view.preferredFramesPerSecond = 60 / g_app.window_cfg.swapInterval;
+    _view.preferredFramesPerSecond = 60 / g_app.config.swapInterval;
     _view.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
     _view.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-    _view.sampleCount = (NSUInteger) g_app.window_cfg.sampleCount;
+    _view.sampleCount = (NSUInteger) g_app.config.sampleCount;
     _view.autoResizeDrawable = true;
     _view.layer.magnificationFilter = kCAFilterNearest;
 
@@ -59,11 +56,11 @@ void handleQuitRequest() {
 
 - (void)createWindow {
     EK_TRACE << "app macOS: create window";
-    auto& config = g_app.window_cfg;
+    auto& config = g_app.config;
     bool doCenter = true;
-    NSRect frame = NSMakeRect(0.0, 0.0, config.size.x, config.size.y);
+    NSRect frame = NSMakeRect(0.0, 0.0, config.width, config.height);
     {
-        const char* wndSettings = Arguments::current.getValue("--window", nullptr);
+        const char* wndSettings = ek::Arguments::current.getValue("--window", nullptr);
         if (wndSettings != nullptr) {
             sscanf(wndSettings, "%lf,%lf,%lf,%lf",
                    &frame.origin.x, &frame.origin.y,
@@ -117,19 +114,19 @@ void handleQuitRequest() {
     const auto backingWidth = static_cast<float>(drawableSize.width);
     const auto backingHeight = static_cast<float>(drawableSize.height);
 
-    if (g_app.content_scale != scale ||
-        g_app.window_size.x != windowWidth ||
-        g_app.window_size.y != windowHeight ||
-        g_app.drawable_size.x != backingWidth ||
-        g_app.drawable_size.y != backingHeight) {
+    if (g_app.dpiScale != scale ||
+        g_app.windowWidth != windowWidth ||
+        g_app.windowHeight != windowHeight ||
+        g_app.drawableWidth != backingWidth ||
+        g_app.drawableHeight != backingHeight) {
 
-        g_app.content_scale = scale;
-        g_app.window_size.x = windowWidth;
-        g_app.window_size.y = windowHeight;
-        g_app.drawable_size.x = backingWidth;
-        g_app.drawable_size.y = backingHeight;
+        g_app.dpiScale = scale;
+        g_app.windowWidth = windowWidth;
+        g_app.windowHeight = windowHeight;
+        g_app.drawableWidth = backingWidth;
+        g_app.drawableHeight = backingHeight;
 
-        g_app.size_changed = true;
+        g_app.dirtySize = true;
     }
 }
 
@@ -149,9 +146,9 @@ void handleQuitRequest() {
     _application = NSApplication.sharedApplication;
     [_application setActivationPolicy:NSApplicationActivationPolicyRegular];
 
-    macos_init_common();
-
     dispatch_init();
+
+    ek::initScanCodeTableApple();
 
     [self setupMenuBar];
     [self createView];
@@ -205,7 +202,7 @@ void handleQuitRequest() {
 
 - (void)resetCursorRects {
     [super resetCursorRects];
-    set_view_mouse_cursor(self);
+    ek::set_view_mouse_cursor(self);
 }
 
 - (void)drawRect:(NSRect)rect {
@@ -218,8 +215,8 @@ void handleQuitRequest() {
         dispatch_draw_frame();
     }
 
-    if (g_app.cursor_dirty) {
-        g_app.cursor_dirty = false;
+    if (g_app.dirtyCursor) {
+        g_app.dirtyCursor = false;
         [self.window performSelectorOnMainThread:@selector(invalidateCursorRectsForView:)
                                       withObject:self
                                    waitUntilDone:NO];
@@ -235,55 +232,55 @@ void handleQuitRequest() {
 }
 
 - (void)mouseDown:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)mouseUp:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)rightMouseDown:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)rightMouseUp:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)otherMouseDown:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)otherMouseUp:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)mouseMoved:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)mouseDragged:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)rightMouseDragged:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)otherMouseDragged:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)mouseEntered:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)mouseExited:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 - (void)scrollWheel:(NSEvent*)event {
-    handleMouseEvent(self, event);
+    ek::handleMouseEvent(self, event);
 }
 
 /**** HANDLE TOUCH *****/
@@ -333,8 +330,8 @@ void handleQuitRequest() {
 
 void handleKeyEvent(NSEvent* event, Event::Type type) {
     dispatch_event(Event::Key(type, {
-        convertKeyCode(event.keyCode),
-        convertKeyModifiers(event.modifierFlags)
+            ek::convertKeyCode(event.keyCode),
+            ek::convertKeyModifiers(event.modifierFlags)
     }));
 }
 
@@ -343,7 +340,7 @@ void handleKeyEvent(NSEvent* event, Event::Type type) {
         handleKeyEvent(event, Event::KeyDown);
     }
 
-    if (is_text_event(event)) {
+    if (ek::is_text_event(event)) {
         dispatch_event(Event::TextEvent(event.characters.UTF8String));
     }
 }
@@ -355,7 +352,7 @@ void handleKeyEvent(NSEvent* event, Event::Type type) {
 }
 
 - (void)flagsChanged:(NSEvent*)event {
-    NSUInteger mask = convert_key_code_to_modifier_mask(event.keyCode);
+    NSUInteger mask = ek::convert_key_code_to_modifier_mask(event.keyCode);
     if (mask) {
         handleKeyEvent(event, (event.modifierFlags & mask) ? Event::KeyDown : Event::KeyUp);
     }

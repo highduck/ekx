@@ -5,8 +5,6 @@
 
 #include <ek/app/app.hpp>
 
-using namespace ek::app;
-
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
@@ -22,8 +20,8 @@ using namespace ek::app;
 
     dispatch_init();
 
-    const auto sampleCount = g_app.window_cfg.sampleCount;
-    const auto swapInterval = g_app.window_cfg.swapInterval;
+    const auto sampleCount = g_app.config.sampleCount;
+    const auto swapInterval = g_app.config.swapInterval;
 
     _view = [MetalView new];
     _view.preferredFramesPerSecond = 60 / swapInterval;
@@ -93,16 +91,15 @@ using namespace ek::app;
 
 @end
 
-void handle_touches(Event::Type type, UIView* view, NSSet* touches, UIEvent* event) {
-    Event ev{type};
-    const auto scale_factor = view.contentScaleFactor;
+void handleTouches(ek::app::Event::Type type, UIView* view, NSSet* touches, UIEvent*) {
+    const auto scaleFactor = view.contentScaleFactor;
     for (UITouch* touch in [touches allObjects]) {
         const CGPoint location = [touch locationInView:view];
-        TouchEvent touchEvent;
+        ek::app::TouchEvent touchEvent;
         touchEvent.id = (uint64_t) touch;
-        touchEvent.x = static_cast<float>(location.x * scale_factor);
-        touchEvent.y = static_cast<float>(location.y * scale_factor);
-        dispatch_event(Event::Touch(type, touchEvent));
+        touchEvent.x = static_cast<float>(location.x * scaleFactor);
+        touchEvent.y = static_cast<float>(location.y * scaleFactor);
+        dispatch_event(ek::app::Event::Touch(type, touchEvent));
     }
 }
 
@@ -110,19 +107,20 @@ void handle_touches(Event::Type type, UIView* view, NSSet* touches, UIEvent* eve
 
 - (void)handleResize {
     // currently all iOS application in fullscreen mode
-    g_app.fullscreen = true;
+    auto& app = ek::app::g_app;
+    app.fullscreen = true;
     const float scaleFactor = static_cast<float>(self.contentScaleFactor);
     const float drawableWidth = static_cast<float>(self.drawableSize.width);
     const float drawableHeight = static_cast<float>(self.drawableSize.height);
-    if (drawableWidth != g_app.drawable_size.x ||
-        drawableHeight != g_app.drawable_size.y ||
-        scaleFactor != g_app.content_scale) {
-        g_app.content_scale = scaleFactor;
-        g_app.window_size.x = drawableWidth / scaleFactor;
-        g_app.window_size.x = drawableHeight / scaleFactor;
-        g_app.drawable_size.x = drawableWidth;
-        g_app.drawable_size.y = drawableHeight;
-        g_app.size_changed = true;
+    if (drawableWidth != app.drawableWidth ||
+        drawableHeight != app.drawableHeight ||
+        scaleFactor != app.dpiScale) {
+        app.dpiScale = scaleFactor;
+        app.windowWidth = drawableWidth / scaleFactor;
+        app.windowHeight = drawableHeight / scaleFactor;
+        app.drawableWidth = drawableWidth;
+        app.drawableHeight = drawableHeight;
+        app.dirtySize = true;
     }
 }
 
@@ -144,22 +142,22 @@ void handle_touches(Event::Type type, UIView* view, NSSet* touches, UIEvent* eve
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesBegan:touches withEvent:event];
-    handle_touches(Event::TouchBegin, self, touches, event);
+    handleTouches(ek::app::Event::TouchBegin, self, touches, event);
 }
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesMoved:touches withEvent:event];
-    handle_touches(Event::TouchMove, self, touches, event);
+    handleTouches(ek::app::Event::TouchMove, self, touches, event);
 }
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesEnded:touches withEvent:event];
-    handle_touches(Event::TouchEnd, self, touches, event);
+    handleTouches(ek::app::Event::TouchEnd, self, touches, event);
 }
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
     [super touchesCancelled:touches withEvent:event];
-    handle_touches(Event::TouchEnd, self, touches, event);
+    handleTouches(ek::app::Event::TouchEnd, self, touches, event);
 }
 
 @end

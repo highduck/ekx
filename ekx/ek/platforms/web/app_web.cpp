@@ -22,8 +22,8 @@ extern void web_update_gameview_size(double width, double height, double dpr, do
 using namespace ek::app;
 
 void update_mouse_cursor() {
-    if (g_app.cursor_dirty) {
-        g_app.cursor_dirty = false;
+    if (g_app.dirtyCursor) {
+        g_app.dirtyCursor = false;
         web_set_mouse_cursor(static_cast<int>(g_app.cursor));
     }
 }
@@ -31,8 +31,8 @@ void update_mouse_cursor() {
 void loop() {
     dispatch_draw_frame();
     update_mouse_cursor();
-    if (g_app.require_exit) {
-        EM_ASM({window.close()}, 0);
+    if (g_app.exitRequired) {
+        EM_ASM(window.close());
     }
 }
 
@@ -94,7 +94,7 @@ static EM_BOOL em_mouse_callback(int type, const EmscriptenMouseEvent* event, vo
             return EM_FALSE;
     }
 
-    const auto dpr = g_app.content_scale;
+    const auto dpr = g_app.dpiScale;
     mouseEvent.x = dpr * static_cast<float>(event->targetX);
     mouseEvent.y = dpr * static_cast<float>(event->targetY);
     dispatch_event(Event::Mouse(eventType, mouseEvent));
@@ -153,7 +153,7 @@ static EM_BOOL em_keyboard_callback(int type, const EmscriptenKeyboardEvent* eve
 
 static EM_BOOL em_wheel_callback(int type, const EmscriptenWheelEvent* event, void*) {
     if (type == EMSCRIPTEN_EVENT_WHEEL) {
-        const auto dpr = g_app.content_scale;
+        const auto dpr = g_app.dpiScale;
         MouseEvent mouseEvent{};
         mouseEvent.button = MouseButton::Other;
         mouseEvent.x = dpr * static_cast<float>(event->mouse.targetX);
@@ -167,7 +167,7 @@ static EM_BOOL em_wheel_callback(int type, const EmscriptenWheelEvent* event, vo
 
 
 static EM_BOOL em_touch_callback(int type, const EmscriptenTouchEvent* event, void*) {
-    const float dpr = g_app.content_scale;
+    const float dpr = g_app.dpiScale;
     for (int i = 0; i < event->numTouches; ++i) {
         const EmscriptenTouchPoint& touch = event->touches[i];
         if (touch.isChanged) {
@@ -227,8 +227,8 @@ void handle_resize() {
     double h = css_h;
     double offset_x = 0;
     double offset_y = 0;
-    if (g_app.window_cfg.webKeepCanvasAspectRatio) {
-        const double aspect = g_app.window_cfg.size.x / g_app.window_cfg.size.y;
+    if (g_app.config.webKeepCanvasAspectRatio) {
+        const double aspect = g_app.config.width / g_app.config.height;
         if (aspect > 1.0) {
             if (w / aspect < h) {
                 h = w / aspect;
@@ -245,18 +245,18 @@ void handle_resize() {
     css_w = w;
     css_h = h;
 
-    if (g_app.content_scale != dpr ||
-        g_app.window_size.x != w ||
-        g_app.window_size.y != h ||
-        g_app.drawable_size.x != w * dpr ||
-        g_app.drawable_size.y != h * dpr) {
-        g_app.size_changed = true;
+    if (g_app.dpiScale != dpr ||
+        g_app.windowWidth != w ||
+        g_app.windowHeight != h ||
+        g_app.drawableWidth != w * dpr ||
+        g_app.drawableHeight != h * dpr) {
+        g_app.dirtySize = true;
 
-        g_app.content_scale = dpr;
-        g_app.window_size.x = w;
-        g_app.window_size.y = h;
-        g_app.drawable_size.x = w * dpr;
-        g_app.drawable_size.y = h * dpr;
+        g_app.dpiScale = dpr;
+        g_app.windowWidth = w;
+        g_app.windowHeight = h;
+        g_app.drawableWidth = w * dpr;
+        g_app.drawableHeight = h * dpr;
     }
 
     web_update_gameview_size(w, h, dpr, offset_x, offset_y);
@@ -281,7 +281,7 @@ namespace ek {
 void start_application() {
     init_canvas();
     subscribe_input();
-    init_webgl_context(g_app.window_cfg.needDepth);
+    init_webgl_context(g_app.config.needDepth);
 
     dispatch_init();
     dispatch_device_ready();

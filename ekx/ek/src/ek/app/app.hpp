@@ -1,20 +1,21 @@
 #pragma once
 
 #include <cstdint>
-#include <utility>
-#include <vector>
-#include <string>
-#include <ek/util/Signal.hpp>
-#include <ek/util/StaticSignal.hpp>
-#include <ek/math/vec.hpp>
 #include <ek/ds/Array.hpp>
-#include <ek/util/Platform.hpp>
+
+#include "events.hpp"
+
+#if defined(__APPLE__)
+
+#include <TargetConditionals.h>
+
+#endif
 
 namespace ek {
 
 namespace app {
 
-#if EK_MACOS || EK_IOS
+#if TARGET_OS_MAC
 
 void* getMetalDevice();
 
@@ -26,211 +27,46 @@ const void* getMetalDrawable();
 
 struct WindowConfig final {
     const char* title = nullptr;
-    float2 size{960, 720};
+    float width = 960;
+    float height = 720;
     bool needDepth = false;
     bool webKeepCanvasAspectRatio = false;
+    bool allowHighDpi = true;
     int sampleCount = 1;
     int swapInterval = 1;
-    bool allowHighDpi = true;
     uint32_t backgroundColor = 0xFF000000u;
 };
 
-enum class MouseCursor {
-    Parent = 0,
-    Arrow,
-    Button,
-    Help
-};
+struct App final {
+    WindowConfig config;
 
-enum class MouseButton {
-    Left,
-    Right,
-    Other
-};
+    float windowWidth = 1.0f;
+    float windowHeight = 1.0f;
+    float drawableWidth = 1.0f;
+    float drawableHeight = 1.0f;
+    float dpiScale = 1.0f;
 
-enum class KeyCode {
-    Unknown = 0,
-
-    ArrowUp,
-    ArrowDown,
-    ArrowLeft,
-    ArrowRight,
-
-    Escape,
-    Space,
-    Enter,
-    Backspace,
-
-    // extra
-    Tab,
-    PageUp,
-    PageDown,
-    Home,
-    End,
-    Insert,
-    Delete,
-
-    A,
-    C,
-    V,
-    X,
-    Y,
-    Z,
-
-    W,
-    S,
-    D,
-
-    MaxCount
-};
-
-enum class KeyModifier {
-    Empty = 0,
-    // Super is "command" or "windows" key
-    Super = 1,
-    Shift = 2,
-    Control = 4,
-    Alt = 8
-};
-
-struct TextEvent final {
-    char data[8];
-    void set(const char* source);
-    [[nodiscard]] bool empty() const;
-};
-
-struct KeyEvent final {
-    KeyCode code;
-    KeyModifier modifiers;
-};
-
-struct TouchEvent final {
-    uint64_t id;
-    float x;
-    float y;
-};
-
-struct MouseEvent final {
-    MouseButton button;
-    float x;
-    float y;
-    float scrollX;
-    float scrollY;
-};
-
-struct Event final {
-    enum Type {
-        Resume = 0,
-        // sync version of pause callback, don't do any criminal here :)
-        Pause,
-        Resize,
-        BackButton,
-        Close,
-
-        TouchBegin,
-        TouchMove,
-        TouchEnd,
-
-        MouseMove,
-        MouseDown,
-        MouseUp,
-        MouseEnter,
-        MouseExit,
-        MouseScroll,
-
-        KeyDown,
-        KeyUp,
-        // TODO: since keypress deprecated on web, check if we need it
-        // TODO: `KeyPress` macro pollution from X11 headers
-        KeyPress_,
-
-        Text,
-
-        Count
-    };
-    Type type;
-
-    union {
-        KeyEvent key;
-        TextEvent text;
-        TouchEvent touch;
-        MouseEvent mouse;
-    };
-
-    static Event App(Type type) {
-        Event ev{};
-        ev.type = type;
-        return ev;
-    }
-
-    static Event Key(Type type, KeyEvent key) {
-        Event ev{};
-        ev.type = type;
-        ev.key = key;
-        return ev;
-    }
-
-    static Event Touch(Type type, TouchEvent touch) {
-        Event ev{};
-        ev.type = type;
-        ev.touch = touch;
-        return ev;
-    }
-
-    static Event Mouse(Type type, MouseEvent mouse) {
-        Event ev{};
-        ev.type = type;
-        ev.mouse = mouse;
-        return ev;
-    }
-
-    static Event TextEvent(const char* data) {
-        Event ev{};
-        ev.type = Event::Text;
-        ev.text.set(data);
-        return ev;
-    }
-};
-
-struct app_state final {
-    WindowConfig window_cfg;
-
-    float2 window_size{};
-    float2 drawable_size{};
-    bool fullscreen = false;
-
-    // TODO: rename to dpiScale (content misunderstood versus game view scaling)
-    float content_scale = 1.0f;
-
-    bool size_changed = false;
-    bool require_exit = false;
-    int exit_code = 0;
+    int exitCode = 0;
 
     MouseCursor cursor = MouseCursor::Parent;
-    bool cursor_dirty = false;
+    AppListener* listener = nullptr;
 
-    StaticSignal<> on_device_ready;
-    StaticSignal<const Event&> on_event;
-    StaticSignal<> on_frame_draw;
-    StaticSignal<> on_frame_completed;
+    Array<Event> eventQueue;
+    Array<Event> eventQueuePool;
 
-    Array<Event> event_queue_;
-    Array<Event> pool_queue;
-    bool event_queue_locked = false;
-
-    // we change counter from posted native events queue
-    int systemPauseCounter = 0;
-    // we decide if system should be paused or resumed
-    bool systemPaused = false;
-
-    // as we handle application pause event after `systemPaused`
-    // we update `applicationInFocus`
-    bool applicationInFocus = true;
+    bool running = false;
+    bool preStarted = false;
+    bool ready = false;
+    bool fullscreen = false;
+    bool exitRequired = false;
+    bool dirtySize = false;
+    bool dirtyCursor = false;
+    bool eventQueueLocked = false;
 
     void updateMouseCursor(MouseCursor cursor_);
 };
 
-extern app_state& g_app;
+extern App& g_app;
 
 void process_event(const Event& event);
 
