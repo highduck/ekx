@@ -15,12 +15,12 @@
 
 namespace ek {
 
-using namespace ek::app;
-
 /****** KEYBOARD ****/
 KeyCode SCAN_CODE_TABLE[0xFF] = {};
 
-void init_scan_table() {
+void initScanCodeTableApple() {
+    using ek::app::KeyCode;
+
     SCAN_CODE_TABLE[kVK_LeftArrow] = KeyCode::ArrowLeft;
     SCAN_CODE_TABLE[kVK_LeftArrow] = KeyCode::ArrowLeft;
     SCAN_CODE_TABLE[kVK_RightArrow] = KeyCode::ArrowRight;
@@ -55,12 +55,13 @@ KeyCode convertKeyCode(uint16_t code) {
     return KeyCode::Unknown;
 }
 
-KeyModifier convertKeyModifiers(NSUInteger flags) {
+app::KeyModifier convertKeyModifiers(NSUInteger flags) {
+    using ek::app::KeyModifier;
     int mod = 0;
-    if (flags & NSEventModifierFlagOption) mod |= (int) app::KeyModifier::Alt;
-    if (flags & NSEventModifierFlagShift) mod |= (int) app::KeyModifier::Shift;
-    if (flags & NSEventModifierFlagControl) mod |= (int) app::KeyModifier::Control;
-    if (flags & NSEventModifierFlagCommand) mod |= (int) app::KeyModifier::Super;
+    if (flags & NSEventModifierFlagOption) mod |= (int) KeyModifier::Alt;
+    if (flags & NSEventModifierFlagShift) mod |= (int) KeyModifier::Shift;
+    if (flags & NSEventModifierFlagControl) mod |= (int) KeyModifier::Control;
+    if (flags & NSEventModifierFlagCommand) mod |= (int) KeyModifier::Super;
     return (app::KeyModifier) mod;
 }
 
@@ -108,6 +109,8 @@ NSUInteger convert_key_code_to_modifier_mask(uint16_t key_code) {
 }
 
 void set_view_mouse_cursor(NSView* view) {
+    using ek::app::MouseCursor;
+
     NSCursor* cursor = nil;
 
     switch (g_app.cursor) {
@@ -129,12 +132,7 @@ void set_view_mouse_cursor(NSView* view) {
     }
 }
 
-void macos_init_common() {
-    EK_TRACE << "app macOS: init commons";
-    init_scan_table();
-}
-
-void handleMouseWheelScroll(const NSEvent* event, MouseEvent& mouseEvent) {
+void handleMouseWheelScroll(const NSEvent* event, app::MouseEvent& mouseEvent) {
     mouseEvent.scrollX = static_cast<float>(event.scrollingDeltaX);
     mouseEvent.scrollY = static_cast<float>(event.scrollingDeltaY);
     if (event.hasPreciseScrollingDeltas) {
@@ -144,6 +142,10 @@ void handleMouseWheelScroll(const NSEvent* event, MouseEvent& mouseEvent) {
 }
 
 void handleMouseEvent(NSView* view, NSEvent* event) {
+    using ek::app::Event;
+    using ek::app::MouseEvent;
+    using ek::app::MouseButton;
+
     const auto location = [view convertPoint:event.locationInWindow fromView:nil];
     const auto scale = view.window.backingScaleFactor;
 
@@ -205,7 +207,7 @@ void handleMouseEvent(NSView* view, NSEvent* event) {
         default:
             return;
     }
-    dispatch_event(Event::Mouse(type, ev));
+    app::dispatch_event(Event::Mouse(type, ev));
 }
 
 }

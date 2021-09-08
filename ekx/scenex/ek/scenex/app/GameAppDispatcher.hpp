@@ -52,6 +52,18 @@ public:
             listener->onStart();
         }
     }
+
+    void onEvent(const app::Event& event) override {
+        for (auto* listener : listeners) {
+            listener->onEvent(event);
+        }
+    }
+
+    void onPostFrame() override {
+        for (auto* listener : listeners) {
+            listener->onPostFrame();
+        }
+    }
 };
 
 }

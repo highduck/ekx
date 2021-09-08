@@ -630,10 +630,10 @@ void x11_query_window_size() {
     XWindowAttributes attribs;
     XGetWindowAttributes(gAppLinux.x11.display, gAppLinux.x11.window, &attribs);
 
-    g_app.window_size.x = attribs.width;
-    g_app.window_size.y = attribs.height;
-    g_app.drawable_size.x = g_app.window_size.x;
-    g_app.drawable_size.y = g_app.window_size.y;
+    g_app.windowWidth = attribs.width;
+    g_app.windowHeight = attribs.height;
+    g_app.drawableWidth = g_app.windowWidth;
+    g_app.drawableHeight = g_app.windowHeight;
 }
 
 void x11_set_fullscreen(bool enable) {
@@ -729,7 +729,7 @@ void x11_lock_mouse(bool lock) {
 
 void x11_update_window_title() {
     using ek::app::g_app;
-    const char* title = g_app.window_cfg.title;
+    const char* title = g_app.config.title;
     size_t titleLen = 0;
     if(title) {
         titleLen = strlen(title);
@@ -772,8 +772,8 @@ void x11_create_window(Visual* visual, int depth) {
     gAppLinux.x11.window = XCreateWindow(gAppLinux.x11.display,
                                          gAppLinux.x11.root,
                                          0, 0,
-                                         (uint32_t) g_app.window_size.x,
-                                         (uint32_t) g_app.window_size.y,
+                                         (uint32_t) g_app.windowWidth,
+                                         (uint32_t) g_app.windowHeight,
                                          0,     /* border width */
                                          depth, /* color depth */
                                          InputOutput,
@@ -1386,7 +1386,7 @@ void x11_process_event(XEvent* event) {
             if (event->xclient.message_type == gAppLinux.x11.WM_PROTOCOLS) {
                 const Atom protocol = (Atom) event->xclient.data.l[0];
                 if (protocol == gAppLinux.x11.WM_DELETE_WINDOW) {
-                    ek::app::g_app.require_exit = true;
+                    ek::app::g_app.exitRequired = true;
                 }
             } else if (event->xclient.message_type == gAppLinux.x11.xdnd.XdndEnter) {
                 const bool is_list = 0 != (event->xclient.data.l[1] & 1);
@@ -1526,7 +1526,7 @@ void linux_app_create() {
     gAppLinux.x11.root = DefaultRootWindow(gAppLinux.x11.display);
     XkbSetDetectableAutoRepeat(gAppLinux.x11.display, true, NULL);
     x11_query_system_dpi();
-    g_app.content_scale = gAppLinux.x11.dpi / 96.0f;
+    g_app.dpiScale = gAppLinux.x11.dpi / 96.0f;
     x11_init_extensions();
     x11_create_hidden_cursor();
     glx_init();
@@ -1540,14 +1540,14 @@ void linux_app_create() {
         x11_set_fullscreen(true);
     }
     x11_query_window_size();
-    glx_swapinterval(g_app.window_cfg.swapInterval);
+    glx_swapinterval(g_app.config.swapInterval);
     XFlush(gAppLinux.x11.display);
 }
 
 void linux_app_loop() {
     using ek::app::g_app;
 
-    while (!g_app.require_exit) {
+    while (!g_app.exitRequired) {
         glx_make_current();
         int count = XPending(gAppLinux.x11.display);
         while (count--) {
@@ -1559,12 +1559,12 @@ void linux_app_loop() {
         glx_swap_buffers();
         XFlush(gAppLinux.x11.display);
         /* handle quit-requested, either from window or from sapp_request_quit() */
-        if (g_app.require_exit) {
+        if (g_app.exitRequired) {
             /* give user code a chance to intervene */
             x11_app_event(ek::app::Event::Close);
             /* if user code hasn't intervened, quit the app */
-            if (g_app.require_exit) {
-                g_app.require_exit = true;
+            if (g_app.exitRequired) {
+                g_app.exitRequired = true;
             }
         }
     }

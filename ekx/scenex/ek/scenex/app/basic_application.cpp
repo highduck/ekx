@@ -2,6 +2,7 @@
 
 #include "input_controller.hpp"
 
+#include <ek/ext/analytics/analytics.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/2d/Viewport.hpp>
@@ -48,10 +49,10 @@ using namespace ek::app;
 
 void logDisplayInfo() {
 #ifndef NDEBUG
-    const auto sz = app::g_app.drawable_size;
     float insets[4]{};
     getScreenInsets(insets);
-    EK_INFO << "Display: " << sz.x << " x " << sz.y << " [" << insets[0] << ", " << insets[1] << ", " << insets[2]
+    EK_INFO << "Display: " << g_app.drawableWidth << " x " << g_app.drawableHeight << " [" << insets[0] << ", "
+            << insets[1] << ", " << insets[2]
             << ", " << insets[3] << "]";
 #endif
 }
@@ -179,7 +180,12 @@ void basic_application::preload() {
     }
 }
 
-void basic_application::on_draw_frame() {
+void basic_application::onPostFrame() {
+    Locator::ref<input_controller>().onPostFrame();
+    dispatcher.onPostFrame();
+}
+
+void basic_application::onFrame() {
     ZoneScoped;
     Stopwatch timer{};
     dispatcher.onBeforeFrameBegin();
@@ -212,7 +218,7 @@ void basic_application::on_draw_frame() {
 
     static sg_pass_action pass_action{};
     pass_action.colors[0].action = started_ ? SG_ACTION_DONTCARE : SG_ACTION_CLEAR;
-    const float4 fillColor = static_cast<float4>(argb32_t{g_app.window_cfg.backgroundColor});
+    const float4 fillColor = static_cast<float4>(argb32_t{g_app.config.backgroundColor});
     pass_action.colors[0].value.r = fillColor.x;
     pass_action.colors[0].value.g = fillColor.y;
     pass_action.colors[0].value.b = fillColor.z;
@@ -259,7 +265,7 @@ void basic_application::on_draw_frame() {
 
             dispatcher.onRenderOverlay();
 
-            draw2d::begin({0, 0, g_app.drawable_size.x, g_app.drawable_size.y});
+            draw2d::begin({0, 0, g_app.drawableWidth, g_app.drawableHeight});
             onFrameEnd();
             draw2d::end();
 
@@ -295,7 +301,7 @@ void basic_application::preload_root_assets_pack() {
     }
 }
 
-void basic_application::on_event(const Event& event) {
+void basic_application::onEvent(const Event& event) {
     ZoneScoped;
     Stopwatch timer{};
     if (event.type == Event::Resize) {
@@ -303,6 +309,10 @@ void basic_application::on_event(const Event& event) {
     } else if (event.type == Event::Close) {
         sg_shutdown();
     }
+
+    Locator::ref<input_controller>().onEvent(event);
+
+    dispatcher.onEvent(event);
 
     profiler.addTime("EVENTS", timer.readMillis());
     profiler.addTime("FRAME", timer.readMillis());
@@ -322,17 +332,20 @@ void basic_application::doRenderFrame() {
     onRenderSceneAfter();
 }
 
-void baseApp_drawFrame() {
-    Locator::ref<basic_application>().on_draw_frame();
+void Initializer::onPreStart() {
+    EK_TRACE << "analytics initialize";
+    analytics::init(); // analytics before crash reporter on ios
 }
 
-void baseApp_onEvent(const Event& event) {
-    Locator::ref<basic_application>().on_event(event);
+void Initializer::onDeviceReady() {
+    // audio should be initialized before "Resume" event, so the best place is "On Create" event
+    audio::initialize();
+    if (creator != nullptr) {
+        creator();
+    }
 }
 
-int _initializeSubSystemsState = 0;
-
-void initializeSubSystems() {
+void Initializer::onFrame() {
     const float steps = 6.0f;
     {
         EK_PROFILE_SCOPE(INIT_JOB);
@@ -340,9 +353,10 @@ void initializeSubSystems() {
             case 0:
                 ++_initializeSubSystemsState;
                 {
-                    int drawCalls = 128;
 #ifdef EK_DEV_TOOLS
-                    drawCalls = 1024;
+                    const int drawCalls = 1024;
+#else
+                    const int drawCalls = 128;
 #endif
                     graphics::initialize(drawCalls);
                 }
@@ -374,32 +388,29 @@ void initializeSubSystems() {
                 Locator::ref<basic_application>().preload();
                 break;
             default:
-                g_app.on_frame_draw -= initializeSubSystems;
-                g_app.on_frame_draw += baseApp_drawFrame;
-                g_app.on_event += baseApp_onEvent;
+                g_app.listener = Locator::get<basic_application>();
                 break;
         }
     }
 
     if (_initializeSubSystemsState > 0) {
-        auto fbWidth = static_cast<int>(g_app.drawable_size.x);
-        auto fbHeight = static_cast<int>(g_app.drawable_size.y);
-        if (fbWidth > 0 && fbHeight > 0) {
+        const auto width = g_app.drawableWidth;
+        const auto height = g_app.drawableHeight;
+        if (width > 0 && height > 0) {
             //EK_PROFILE_SCOPE("init frame");
             static sg_pass_action pass_action{};
             pass_action.colors[0].action = SG_ACTION_CLEAR;
-            const float4 fillColor = static_cast<float4>(argb32_t{g_app.window_cfg.backgroundColor});
+            const float4 fillColor = static_cast<float4>(argb32_t{g_app.config.backgroundColor});
             pass_action.colors[0].value.r = fillColor.x;
             pass_action.colors[0].value.g = fillColor.y;
             pass_action.colors[0].value.b = fillColor.z;
             pass_action.colors[0].value.a = fillColor.w;
-            sg_begin_default_pass(&pass_action, fbWidth, fbHeight);
+            sg_begin_default_pass(&pass_action, (int) width, (int) height);
 
             if (_initializeSubSystemsState > 2) {
-                float2 size = g_app.drawable_size;
                 draw2d::beginNewFrame();
-                draw2d::begin({0, 0, size.x, size.y});
-                drawPreloader(0.1f * (float) _initializeSubSystemsState / steps, size.x, size.y);
+                draw2d::begin({0, 0, width, height});
+                drawPreloader(0.1f * (float) _initializeSubSystemsState / steps, width, height);
                 draw2d::end();
                 draw2d::endFrame();
             }

@@ -392,8 +392,8 @@ void RenderSystem3D::prepare() {
 
     mat4f view = inverse(cameraTransform.world);
 
-    const float width = app::g_app.drawable_size.x;
-    const float height = app::g_app.drawable_size.y;
+    const float width = app::g_app.drawableWidth;
+    const float height = app::g_app.drawableHeight;
     mat4f proj{};
     const auto aspect = (float) width / height;
     if (cameraData.orthogonal) {

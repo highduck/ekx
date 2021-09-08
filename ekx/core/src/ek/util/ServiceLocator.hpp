@@ -20,6 +20,9 @@ T& ref();
 template<typename T, typename Impl = T, typename... Args>
 T& create(Args&& ...args);
 
+template<typename T, typename Impl = T>
+void reset(Impl* value);
+
 // noop assert if it's was not initialized before (it's totally fine)
 template<typename T>
 void destroy();
@@ -58,6 +61,14 @@ T& create(Args&& ...args) {
     const AllocatorTraceScope allocatorTrace(getType<T>().label);
     S::value = allocator->create<Impl>(args...);
     return *S::value;
+}
+
+template<typename T, typename Impl>
+void reset(Impl* value) {
+    using S = ServiceStorage<T>;
+    EK_ASSERT(S::value == nullptr);
+    EK_ASSERT(allocator != nullptr);
+    S::value = value;
 }
 
 // noop assert if it's was not initialized before (it's totally fine)

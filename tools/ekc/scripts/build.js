@@ -6,8 +6,16 @@ const buildTypes = ["Release"];
 for (const buildType of buildTypes) {
     console.info("Generate", buildType);
     const args = [];
-    if (process.env.USE_CCACHE) {
+    if (0 | process.env.USE_CCACHE) {
         args.push("-DCMAKE_C_COMPILER_LAUNCHER=ccache", "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache");
+    }
+    else {
+        if (process.env.CC) {
+            args.push(`-DCMAKE_C_COMPILER_LAUNCHER=${process.env.CC}`);
+        }
+        if (process.env.CXX) {
+            args.push(`-DCMAKE_CXX_COMPILER_LAUNCHER=${process.env.CXX}`);
+        }
     }
     const result = spawnSync("cmake", [
         "-G", "Ninja",

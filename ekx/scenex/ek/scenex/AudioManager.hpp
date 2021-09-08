@@ -5,6 +5,7 @@
 #include <ek/audio/audio.hpp>
 #include <ek/util/Path.hpp>
 #include <ek/util/Type.hpp>
+#include <ek/math/vec.hpp>
 
 namespace ek {
 

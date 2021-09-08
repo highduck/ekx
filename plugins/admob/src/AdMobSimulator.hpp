@@ -17,20 +17,14 @@ class AdMobSimulator : public AdMobWrapper, public GameAppListener {
 public:
 
     void onRenderFrame() override {
-        if (activeInterstitial) {
-            auto size = app::g_app.drawable_size;
-            draw2d::state.setEmptyTexture();
-            draw2d::quad(0, 0,
-                         static_cast<float>(size.x),
-                         static_cast<float>(size.y), 0x7700FF00_argb);
-        }
+        using ek::app::g_app;
 
-        if (activeRewardedAd) {
-            auto size = app::g_app.drawable_size;
+        const bool splash = activeInterstitial || activeRewardedAd;
+        const argb32_t color = activeRewardedAd ? 0x77FF00FF_argb : 0x7700FF00_argb;
+
+        if (splash) {
             draw2d::state.setEmptyTexture();
-            draw2d::quad(0, 0,
-                         static_cast<float>(size.x),
-                         static_cast<float>(size.y), 0x77FF00FF_argb);
+            draw2d::quad(0, 0, g_app.drawableWidth, g_app.drawableHeight, color);
         }
     }
 
@@ -51,7 +45,7 @@ public:
             if (callback) {
                 callback();
             }
-            }, 3.0f);
+        }, 3.0f);
     }
 
     void showRewardedAd(const std::function<void(bool)>& callback) override {
@@ -63,7 +57,7 @@ public:
             if (callback) {
                 callback(true);
             }
-            }, 5.0f);
+        }, 5.0f);
     }
 };
 

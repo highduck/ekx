@@ -49,13 +49,13 @@ void GameDisplay::endGame() {
 
 bool GameDisplay::beginOverlayDev() {
     using app::g_app;
-    const float2 size = g_app.drawable_size;
-    const auto w = static_cast<int>(size.x);
-    const auto h = static_cast<int>(size.y);
+    const auto fw = g_app.drawableWidth;
+    const auto fh = g_app.drawableHeight;
+    const auto w = static_cast<int>(fw);
+    const auto h = static_cast<int>(fh);
     if (w <= 0 || h <= 0) {
         return false;
     }
-
 
     if (simulated) {
 
@@ -64,12 +64,12 @@ bool GameDisplay::beginOverlayDev() {
 
         sg_begin_default_pass(pass_action, w, h);
 
-        const float scale = std::min(size.x / info.size.x, size.y / info.size.y);
+        const float scale = std::min(fw / info.size.x, fh / info.size.y);
         // draw offscreen
 
         sg_push_debug_group("Game viewport");
 // todo: temp disable
-        draw2d::begin({0, 0, size.x, size.y});
+        draw2d::begin({0, 0, fw, fh});
         draw2d::state.setTextureRegion(color, rect_f::zero_one);
         draw2d::quad(0, 0, scale * info.size.x, scale * info.size.y);
         draw2d::end();
@@ -120,7 +120,7 @@ void GameDisplay::update() {
             color = createGameDisplayTexture(w, h, true, "game-display-color");
             colorFirstClearFlag = true;
 
-            if (app::g_app.window_cfg.needDepth) {
+            if (app::g_app.config.needDepth) {
                 delete depthStencil;
                 depthStencil = createGameDisplayTexture(w, h, false, "game-display-depth");
             }
@@ -138,13 +138,16 @@ void GameDisplay::update() {
         }
     } else {
         using app::g_app;
-        info.size = g_app.drawable_size;
-        info.window = g_app.window_size;
+        info.size.x = g_app.drawableWidth;
+        info.size.y = g_app.drawableHeight;
+        info.window.x = g_app.windowWidth;
+        info.window.y = g_app.windowHeight;
         getScreenInsets(info.insets.data());
-        info.dpiScale = g_app.content_scale;
+        info.dpiScale = g_app.dpiScale;
 
         info.destinationViewport.position = float2::zero;
-        info.destinationViewport.size = g_app.drawable_size;
+        info.destinationViewport.size.x = g_app.drawableWidth;
+        info.destinationViewport.size.y = g_app.drawableHeight;
     }
 }
 

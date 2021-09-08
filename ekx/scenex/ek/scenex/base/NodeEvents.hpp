@@ -21,9 +21,9 @@ struct NodeEventData {
 
 struct NodeEventHandler {
     using Callback = std::function<void(const NodeEventData&)>;
-    using Signal = Signal<const NodeEventData&>;
+    using SignalType = Signal<const NodeEventData&>;
 
-    Signal& getSignal(const NodeEventType& type) {
+    SignalType& getSignal(const NodeEventType& type) {
         return map_[type];
     }
 
@@ -51,7 +51,7 @@ struct NodeEventHandler {
     }
 
 private:
-    std::unordered_map<NodeEventType, Signal> map_;
+    std::unordered_map<NodeEventType, SignalType> map_;
 };
 
 EK_DECLARE_TYPE(NodeEventHandler);

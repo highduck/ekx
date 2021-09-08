@@ -4,32 +4,12 @@ namespace ek {
 
 using namespace ek::app;
 
-static input_controller* gInputController = nullptr;
-
-void gInputController_onEvent(const Event& e) {
-    EK_ASSERT(gInputController != nullptr);
-    gInputController->on_event(e);
-}
-
-void gInputController_onFrameCompleted() {
-    EK_ASSERT(gInputController != nullptr);
-    gInputController->on_frame_completed();
-}
-
 input_controller::input_controller(InteractionSystem& interactions, GameDisplay& display) :
         interactions_{interactions},
         display_{display} {
-
-    gInputController = this;
-    g_app.on_event += gInputController_onEvent;
-    g_app.on_frame_completed += gInputController_onFrameCompleted;
 }
 
-input_controller::~input_controller() {
-    gInputController = nullptr;
-    g_app.on_event -= gInputController_onEvent;
-    g_app.on_frame_completed -= gInputController_onFrameCompleted;
-}
+input_controller::~input_controller() = default;
 
 void input_controller::emulate_mouse_as_touch(const Event& event, touch_state_t& data) {
     bool active_prev = data.active;
@@ -69,7 +49,7 @@ void input_controller::update_touch(const Event& event, touch_state_t& data) {
     }
 }
 
-void input_controller::on_event(const Event& event) {
+void input_controller::onEvent(const Event& event) {
     switch (event.type) {
         case Event::TouchBegin:
         case Event::TouchMove:
@@ -143,7 +123,7 @@ bool input_controller::is_key_up(KeyCode code) const {
     return false;
 }
 
-void input_controller::on_frame_completed() {
+void input_controller::onPostFrame() {
     // update keyboard state
     for (auto& key : keys_) {
         key.down = false;

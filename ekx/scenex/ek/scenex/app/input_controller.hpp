@@ -3,6 +3,7 @@
 #include <ek/app/app.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/ds/Array.hpp>
+#include "GameAppListener.hpp"
 #include "GameDisplay.hpp"
 
 namespace ek {
@@ -31,9 +32,9 @@ public:
 
     ~input_controller();
 
-    void on_event(const app::Event& event);
+    void onEvent(const app::Event& event);
 
-    void on_frame_completed();
+    void onPostFrame();
 
     [[nodiscard]]
     bool is_key(app::KeyCode code) const;

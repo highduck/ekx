@@ -187,10 +187,10 @@ void ImGuiIntegration::on_event(const Event& event) {
             }
 
             // update modifier keys
-            const bool isShift = (int) event.key.modifiers & (int) app::KeyModifier::Shift;
-            const bool isControl = (int) event.key.modifiers & (int) app::KeyModifier::Control;
-            const bool isAlt = (int) event.key.modifiers & (int) app::KeyModifier::Alt;
-            const bool isSuper = (int) event.key.modifiers & (int) app::KeyModifier::Super;
+            const bool isShift = event.key.isShift();
+            const bool isControl = event.key.isControl();
+            const bool isAlt = event.key.isAlt();
+            const bool isSuper = event.key.isSuper();
             if ((io.KeyShift && !isShift) || (io.KeyCtrl && !isControl) || (io.KeyAlt && !isAlt) ||
                 (io.KeySuper && !isSuper)) {
                 // need to reset key states when any of meta keys disabled
@@ -230,8 +230,8 @@ void ImGuiIntegration::on_event(const Event& event) {
             break;
 
         case Event::MouseMove:
-            io.MousePos.x = event.mouse.x / g_app.content_scale;
-            io.MousePos.y = event.mouse.y / g_app.content_scale;
+            io.MousePos.x = event.mouse.x / g_app.dpiScale;
+            io.MousePos.y = event.mouse.y / g_app.dpiScale;
             break;
 
         default:
@@ -279,8 +279,8 @@ void update_mouse_cursor() {
 }
 
 void ImGuiIntegration::begin_frame(float dt) {
-    auto w = static_cast<int>(g_app.drawable_size.x);
-    auto h = static_cast<int>(g_app.drawable_size.y);
+    auto w = static_cast<int>(g_app.drawableWidth);
+    auto h = static_cast<int>(g_app.drawableHeight);
     if (w > 0 && h > 0) {
         update_mouse_cursor();
         simgui_new_frame(w, h, dt);
