@@ -1,6 +1,6 @@
 {
   "name": "@ekx/ekx",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "scripts": {
     "postinstall": "npx cmake-build || exit 0",
     "build:native": "node build.js",

@@ -1,5 +1,20 @@
 # @ekx/ekc
 
+## 0.1.9
+
+### Patch Changes
+
+- de912c6: app module update
+- 55ddf9a: remove asset pack building
+- 7accc61: switch to cmake-build
+- Updated dependencies [de912c6]
+- Updated dependencies [7accc61]
+- Updated dependencies [55ddf9a]
+- Updated dependencies [55ddf9a]
+- Updated dependencies [55ddf9a]
+  - @ekx/ekx@0.1.7
+  - @ekx/flash-export@0.0.6
+
 ## 0.1.8
 
 ### Patch Changes
