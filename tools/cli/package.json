@@ -21,10 +21,10 @@
     "templates"
   ],
   "dependencies": {
-    "cmake-build": "0.0.1",
     "@ekx/ekc": "0.1.8",
     "@ekx/ekx": "0.1.6",
     "chalk": "^4.1.2",
+    "cmake-build": "0.0.3",
     "glob": "^7.1.7",
     "http-server": "^13.0.1",
     "mustache": "^4.2.0",
@@ -32,7 +32,6 @@
     "plist": "^3.0.4",
     "pngquant-bin": "^6.0.0",
     "rimraf": "^3.0.2",
-    "terminal-link": "^2.1.1",
     "xcode": "^3.0.1",
     "xmldoc": "^1.1.2"
   },
@@ -40,7 +39,7 @@
     "@types/glob": "^7.1.4",
     "@types/http-server": "^0.12.1",
     "@types/mustache": "^4.1.2",
-    "@types/node": "^16.7.5",
+    "@types/node": "^16.9.1",
     "@types/plist": "^3.0.2",
     "@types/rimraf": "^3.0.2",
     "@types/xmldoc": "^1.1.6",

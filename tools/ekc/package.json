@@ -4,7 +4,7 @@
   "scripts": {
     "build:native": "node scripts/build.js",
     "cc:build:native": "USE_CCACHE=1 node scripts/build.js",
-    "postinstall": "npm-cmake || exit 0"
+    "postinstall": "cmake-build || exit 0"
   },
   "files": [
     "bin"
@@ -16,6 +16,6 @@
   "dependencies": {
     "@ekx/ekx": "0.1.6",
     "@ekx/flash-export": "0.0.5",
-    "npm-cmake": "^0.1.0"
+    "cmake-build": "0.0.3"
   }
 }

@@ -39,7 +39,7 @@ function defaultRun() {
     logger.log("- arguments:", project.args);
 
     if (project.args.indexOf("fix-mp3") >= 0) {
-        fixMP3(path.join(project.getAssetsInput(), "**/*.mp3")).catch(err => process.exit(-1));
+        fixMP3(path.join(project.getAssetsInput(), "**/*.mp3")).catch(_ => process.exit(1));
         return;
     }
 
