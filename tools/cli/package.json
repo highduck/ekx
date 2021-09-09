@@ -1,6 +1,6 @@
 {
   "name": "@ekx/cli",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "bin": {
     "ekx": "bin.js"
   },
@@ -21,8 +21,8 @@
     "templates"
   ],
   "dependencies": {
-    "@ekx/ekc": "0.1.8",
-    "@ekx/ekx": "0.1.6",
+    "@ekx/ekc": "0.1.9",
+    "@ekx/ekx": "0.1.7",
     "chalk": "^4.1.2",
     "cmake-build": "0.0.3",
     "glob": "^7.1.7",

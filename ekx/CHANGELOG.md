@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.7
+
+### Patch Changes
+
+- de912c6: app module update
+- 7accc61: switch to cmake-build
+- 55ddf9a: asset pack refactoring
+- 55ddf9a: app refactoring
+
 ## 0.1.6
 
 ### Patch Changes

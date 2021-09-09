@@ -1,6 +1,6 @@
 {
   "name": "@ekx/flash-export",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "scripts": {
     "postinstall": "cmake-build || exit 0"
   },
@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/cairo": "0.0.7",
-    "@ekx/ekx": "0.1.6",
+    "@ekx/ekx": "0.1.7",
     "@ekx/freetype": "0.0.9",
     "@ekx/miniz": "0.0.4",
     "@ekx/pugixml": "0.0.6",

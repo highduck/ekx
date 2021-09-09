@@ -1,5 +1,21 @@
 ## 0.0.4
 
+## 0.1.9
+
+### Patch Changes
+
+- 55ddf9a: move assets packing to js
+- 7accc61: switch to cmake-build
+- 55ddf9a: update android deps
+- 55ddf9a: fix web service worker to update app
+- Updated dependencies [de912c6]
+- Updated dependencies [55ddf9a]
+- Updated dependencies [7accc61]
+- Updated dependencies [55ddf9a]
+- Updated dependencies [55ddf9a]
+  - @ekx/ekx@0.1.7
+  - @ekx/ekc@0.1.9
+
 ## 0.1.8
 
 ### Patch Changes
