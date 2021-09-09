@@ -1,5 +1,17 @@
 ## 0.0.1
 
+## 0.0.6
+
+### Patch Changes
+
+- 7accc61: switch to cmake-build
+- 55ddf9a: fix settings parsing
+- Updated dependencies [de912c6]
+- Updated dependencies [7accc61]
+- Updated dependencies [55ddf9a]
+- Updated dependencies [55ddf9a]
+  - @ekx/ekx@0.1.7
+
 ## 0.0.5
 
 ### Patch Changes
