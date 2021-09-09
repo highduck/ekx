@@ -41,4 +41,4 @@ async function run() {
     console.info("Done");
 }
 
-run().catch(_ => process.exit(-1));
+run().catch(_ => process.exit(1));

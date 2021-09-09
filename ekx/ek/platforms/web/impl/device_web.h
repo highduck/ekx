@@ -31,6 +31,7 @@ std::string get_device_lang() {
 }
 
 std::string getDeviceFontPath(const char* fontName) {
+    (void)fontName;
     return "baseline.ttf";
 }
 

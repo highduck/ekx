@@ -2,21 +2,21 @@
   "name": "@ekx/flash-export",
   "version": "0.0.5",
   "scripts": {
-    "postinstall": "npm-cmake || exit 0"
+    "postinstall": "cmake-build || exit 0"
   },
   "publishConfig": {
     "access": "public"
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/cairo": "0.0.6",
+    "@ekx/cairo": "0.0.7",
     "@ekx/ekx": "0.1.6",
-    "@ekx/freetype": "0.0.8",
-    "@ekx/miniz": "0.0.3",
-    "@ekx/pugixml": "0.0.5",
-    "npm-cmake": "^0.1.0"
+    "@ekx/freetype": "0.0.9",
+    "@ekx/miniz": "0.0.4",
+    "@ekx/pugixml": "0.0.6",
+    "cmake-build": "0.0.3"
   },
   "devDependencies": {
-    "@ekx/sokol-shdc": "0.0.3"
+    "@ekx/sokol-shdc": "0.0.4"
   }
 }

@@ -1,5 +1,4 @@
 import {logger} from "./logger";
-import * as terminalLink from "terminal-link";
 import * as path from "path";
 
 export type UserArray<T> = undefined | T | T[];
@@ -163,7 +162,7 @@ function validateFields(module: ModuleDef, data: any, scope: string, ...sets: st
             }
         }
         if (errors.length > 0) {
-            logger.error(`Module ${terminalLink(module.name, "file://" + path.join(module.path, "ek.js"))} has invalid keys for "${scope}" scope:\n` +
+            logger.error(`Module ${module.name} (file://${path.join(module.path, "ek.js")}) has invalid keys for "${scope}" scope:\n` +
                 errors.join("\n"));
             logger.warn("Allowed keys:\n\t" + sets.map(p => "[" + p.join(", ") + "]").join("\n\t"));
         }
