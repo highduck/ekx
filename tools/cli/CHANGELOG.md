@@ -1,5 +1,11 @@
 ## 0.0.4
 
+## 0.1.10
+
+### Patch Changes
+
+- 42f3ca4: Bump typescript from 4.3.5 to 4.4.2
+
 ## 0.1.9
 
 ### Patch Changes
