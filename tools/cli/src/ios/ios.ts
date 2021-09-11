@@ -103,7 +103,8 @@ export async function export_ios(ctx: Project): Promise<void> {
         // logger.info("Rename project");
         // fs.renameSync("app-ios.xcodeproj", platform_proj_name + ".xcodeproj");
 
-        copyFolderRecursiveSync(path.join(base_path, ctx.getAssetsOutput()), "assets");
+        const embeddedAssetsDir = "assets";
+        copyFolderRecursiveSync(path.join(base_path, ctx.getAssetsOutput()), embeddedAssetsDir);
         copyFolderRecursiveSync(path.join(base_path, "export/ios/AppIcon.appiconset"),
             "src/Assets.xcassets/AppIcon.appiconset");
 
@@ -120,7 +121,7 @@ export async function export_ios(ctx: Project): Promise<void> {
         mod_plist(ctx, "src/Info.plist");
 
         fs.writeFileSync("ek-ios-build.json", JSON.stringify({
-            assets: collectStrings(ctx, "assets", iosPlatforms, true),
+            assets: collectStrings(ctx, "assets", iosPlatforms, true).concat([embeddedAssetsDir]),
 
             cpp: collectStrings(ctx, "cpp", iosPlatforms, true),
             cpp_include: collectStrings(ctx, "cpp_include", iosPlatforms, true),

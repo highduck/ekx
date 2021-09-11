@@ -59,13 +59,6 @@ function defaultRun() {
 
     addExportBuildStep(project);
 
-    project.importModule("@ekx/stb", project.path.EKX_ROOT);
-    project.importModule("@ekx/sokol", project.path.EKX_ROOT);
-    project.importModule("@ekx/tracy", project.path.EKX_ROOT);
-    project.importModule("@ekx/ekx/ek", project.path.EKX_ROOT);
-    project.importModule("@ekx/ekx/core", project.path.EKX_ROOT);
-    project.importModule("@ekx/ekx/sg-file", project.path.EKX_ROOT);
-    project.importModule("@ekx/ekx/scenex", project.path.EKX_ROOT);
     project.loadModule(path.resolve(process.cwd(), "ek.js"));
 
     project.runBuildSteps().then();
