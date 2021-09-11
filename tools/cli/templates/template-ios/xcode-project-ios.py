@@ -50,7 +50,8 @@ project = XcodeProject.load(f"{mainTargetName}.xcodeproj/project.pbxproj")
 
 project_target = project.get_target_by_name(mainTargetName)
 
-# project.set_flags("DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
+# required by Crashlytics
+project.set_flags("DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
 
 project_target.productName = proj_ios_name
 project.set_flags("PRODUCT_BUNDLE_IDENTIFIER", application_id)
