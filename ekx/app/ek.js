@@ -19,9 +19,23 @@ function setup(project) {
         apple: {
             cpp: "platforms/apple"
         },
+        macos: {
+            xcode_framework: [
+                "Cocoa",
+                "Metal",
+                "MetalKit",
+                "QuartzCore",
+                "AudioToolbox",
+            ]
+        },
         ios: {
             xcode_framework: [
-                "Foundation", "UIKit", "Metal", "MetalKit", "QuartzCore"
+                "Foundation",
+                "UIKit",
+                "Metal",
+                "MetalKit",
+                "QuartzCore",
+                "AudioToolbox"
             ],
             xcode_pod: [
                 "Firebase/Crashlytics",
