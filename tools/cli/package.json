@@ -26,7 +26,7 @@
     "chalk": "^4.1.2",
     "cmake-build": "0.0.3",
     "glob": "^7.1.7",
-    "http-server": "^13.0.1",
+    "http-server": "^13.0.2",
     "mustache": "^4.2.0",
     "node-emoji": "^1.11.0",
     "plist": "^3.0.4",
