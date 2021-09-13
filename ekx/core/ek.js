@@ -8,6 +8,8 @@ function setup(project) {
         path: __dirname,
         cpp: ["src"]
     });
+    project.importModule("@ekx/stb", __dirname);
+    project.importModule("@ekx/tracy", __dirname);
 }
 
 module.exports = setup;

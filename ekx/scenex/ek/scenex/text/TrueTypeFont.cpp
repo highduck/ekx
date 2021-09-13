@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 #include <ek/app/res.hpp>
-#include <ek/app/device.hpp>
+#include <ek/app/app.hpp>
 #include <ek/imaging/image.hpp>
 
 #ifndef STB_TRUETYPE_IMPLEMENTATION
@@ -11,7 +11,9 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
+
 #include <stb/stb_truetype.h>
+
 #pragma clang diagnostic pop
 
 #endif
@@ -183,12 +185,12 @@ bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
 void TrueTypeFont::loadDeviceFont(const char* fontName) {
     assert(!loaded_);
 
-    auto path = getDeviceFontPath(fontName);
-    if (!path.empty()) {
+    const char* filePath = app::getSystemFontPath(fontName);
+    if (filePath) {
 //        get_resource_content_async(path.c_str(), [this](auto buffer) {
 //            loadFromMemory(std::move(buffer));
 //        });
-        auto* file = new FileView(path.c_str());
+        auto* file = new FileView(filePath);
         if (file->size() > 0 && initFromMemory(file->data(), file->size())) {
             loaded_ = true;
             mappedSourceFile_ = file;
@@ -253,7 +255,7 @@ float TrueTypeFont::getKerning(uint32_t codepoint1, uint32_t codepoint2) {
 }
 
 void TrueTypeFont::resetGlyphs() {
-    for (auto& it : mapByEffect) {
+    for (auto& it: mapByEffect) {
         it.second->clear();
     }
     if (atlas) {

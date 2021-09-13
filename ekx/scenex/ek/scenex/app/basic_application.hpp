@@ -24,6 +24,7 @@
 #include "GameAppDispatcher.hpp"
 #include "../base/SxMemory.hpp"
 #include "../text/TextEngine.hpp"
+#include "RootAppListener.hpp"
 
 #include "ek/core.hpp"
 
@@ -33,7 +34,7 @@ class AssetManager;
 
 class Asset;
 
-class basic_application : public app::AppListener {
+class basic_application : public RootAppListener {
 public:
     static float2 AppResolution;
     inline static GameDisplayInfo currentDisplayInfo{};
@@ -62,8 +63,6 @@ public:
     virtual void preload();
 
     void onFrame() override;
-
-    void onPostFrame() override;
 
     void onEvent(const app::Event&) override;
 
@@ -99,7 +98,7 @@ EK_DECLARE_TYPE(basic_application);
 
 inline float2 basic_application::AppResolution{};
 
-class Initializer : public app::AppListener {
+class Initializer : public RootAppListener {
 public:
     void (* creator)() = nullptr;
 
@@ -107,15 +106,15 @@ public:
 
     ~Initializer() override = default;
 
-    void onPreStart() override;
+    void onInitialize() override;
 
-    void onDeviceReady() override;
+    void onReady() override;
 
     void onFrame() override;
 };
 
 template<typename T>
-inline void run_app(app::WindowConfig cfg) {
+inline void run_app(app::AppConfig cfg) {
     using app::g_app;
 
     ek::core::setup();
@@ -123,7 +122,6 @@ inline void run_app(app::WindowConfig cfg) {
     SxMemory.initialize();
     gTextEngine.initialize();
     Locator::setup();
-    app::initialize();
     basic_application::AppResolution = float2{cfg.width, cfg.height};
     g_app.config = cfg;
 
@@ -140,8 +138,8 @@ inline void run_app(app::WindowConfig cfg) {
     initializer.creator = []{Locator::create<basic_application, T>();};
     g_app.listener = &initializer;
 
-    EK_TRACE << "app: call start_application";
-    start_application();
+    EK_TRACE << "app start";
+    app::start();
 }
 
 }

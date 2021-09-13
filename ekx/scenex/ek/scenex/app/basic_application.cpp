@@ -10,7 +10,6 @@
 #include <ek/scenex/systems/main_flow.hpp>
 #include <ek/scenex/SceneFactory.hpp>
 #include <ek/debug.hpp>
-#include <ek/app/device.hpp>
 #include <ek/scenex/asset2/Asset.hpp>
 #include <ek/graphics/graphics.hpp>
 #include <ek/draw2d/drawer.hpp>
@@ -49,11 +48,11 @@ using namespace ek::app;
 
 void logDisplayInfo() {
 #ifndef NDEBUG
-    float insets[4]{};
-    getScreenInsets(insets);
-    EK_INFO << "Display: " << g_app.drawableWidth << " x " << g_app.drawableHeight << " [" << insets[0] << ", "
-            << insets[1] << ", " << insets[2]
-            << ", " << insets[3] << "]";
+    EK_INFO << "Display: " << g_app.drawableWidth << " x " << g_app.drawableHeight;
+    const float* insets = app::getScreenInsets();
+    if (insets) {
+        EK_INFO << "Insets: " << insets[0] << ", " << insets[1] << ", " << insets[2] << ", " << insets[3];
+    }
 #endif
 }
 
@@ -180,14 +179,12 @@ void basic_application::preload() {
     }
 }
 
-void basic_application::onPostFrame() {
-    Locator::ref<input_controller>().onPostFrame();
-    dispatcher.onPostFrame();
-}
-
 void basic_application::onFrame() {
     ZoneScoped;
     Stopwatch timer{};
+
+    RootAppListener::onFrame();
+
     dispatcher.onBeforeFrameBegin();
     display.update();
     scale_factor = root.get<Viewport>().output.scale;
@@ -287,6 +284,9 @@ void basic_application::onFrame() {
         started_ = true;
     }
 
+    Locator::ref<input_controller>().onPostFrame();
+    dispatcher.onPostFrame();
+
     profiler.addTime("END", timer.readMillis());
     profiler.addTime("FRAME", timer.readMillis());
     timer.reset();
@@ -304,10 +304,10 @@ void basic_application::preload_root_assets_pack() {
 void basic_application::onEvent(const Event& event) {
     ZoneScoped;
     Stopwatch timer{};
-    if (event.type == Event::Resize) {
+
+    RootAppListener::onEvent(event);
+    if (event.type == EventType::Resize) {
         display.update();
-    } else if (event.type == Event::Close) {
-        sg_shutdown();
     }
 
     Locator::ref<input_controller>().onEvent(event);
@@ -332,12 +332,12 @@ void basic_application::doRenderFrame() {
     onRenderSceneAfter();
 }
 
-void Initializer::onPreStart() {
+void Initializer::onInitialize() {
     EK_TRACE << "analytics initialize";
     analytics::init(); // analytics before crash reporter on ios
 }
 
-void Initializer::onDeviceReady() {
+void Initializer::onReady() {
     // audio should be initialized before "Resume" event, so the best place is "On Create" event
     audio::initialize();
     if (creator != nullptr) {
@@ -346,6 +346,8 @@ void Initializer::onDeviceReady() {
 }
 
 void Initializer::onFrame() {
+    RootAppListener::onFrame();
+
     const float steps = 6.0f;
     {
         EK_PROFILE_SCOPE(INIT_JOB);

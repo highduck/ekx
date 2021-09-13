@@ -1,6 +1,6 @@
 #include "AudioManager.hpp"
 
-#include <ek/app/device.hpp>
+#include <ek/app/app.hpp>
 #include <ek/util/Res.hpp>
 
 namespace ek {
@@ -49,7 +49,7 @@ void AudioManager::play_sound_at(const std::string& name, const float2& position
 
 void AudioManager::vibrate(int length) const {
     if (vibro.enabled() && length > 0) {
-        ek::vibrate(length);
+        app::vibrate(length);
     }
 }
 

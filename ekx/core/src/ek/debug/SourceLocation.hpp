@@ -9,6 +9,8 @@ struct SourceLocation {
     unsigned line = 0;
 };
 
+}
+
 #ifdef EK_SOURCE_LOCATION_ENABLED
 
 #define EK_CURRENT_LOCATION ek::SourceLocation{__FILE__, __LINE__}
@@ -18,5 +20,3 @@ struct SourceLocation {
 #define EK_CURRENT_LOCATION ek::SourceLocation{}
 
 #endif
-
-}

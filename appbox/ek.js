@@ -7,8 +7,10 @@ function setup(project) {
     project.addModule({
         name: "appbox",
         path: __dirname,
-        cpp: ["src"]
+        cpp: "src"
     });
+
+    project.importModule("@ekx/ekx/scenex", __dirname);
 
     project.importModule("@ekx/plugin-admob", __dirname);
     project.importModule("@ekx/plugin-billing", __dirname);

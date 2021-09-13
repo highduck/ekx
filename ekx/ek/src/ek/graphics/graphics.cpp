@@ -5,6 +5,7 @@
 #include <ek/imaging/image.hpp>
 #include <ek/math/box.hpp>
 #include <ek/app/app.hpp>
+#include <ek/app/Platform.h>
 
 static ek::ProxyAllocator* gHeapSokolGfx = nullptr;
 

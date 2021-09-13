@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.19)
 project(scenex)
 
-add_library(${PROJECT_NAME} STATIC "")
+add_library(${PROJECT_NAME} STATIC "" ek/scenex/app/RootAppListener.hpp)
 
 option(EK_UITEST "Enable features for UI testing" OFF)
 
