@@ -4,13 +4,11 @@
 #include <ek/app/app.hpp>
 #include <ek/Arguments.hpp>
 
-using namespace ek::app;
-
 TEST_CASE("dummy_test, pass") {
 
 }
 
-namespace ek {
+namespace ek::app {
 
 void main() {
     doctest::Context context;
