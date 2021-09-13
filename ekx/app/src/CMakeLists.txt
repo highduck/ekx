@@ -5,8 +5,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         ek/app/prefs.hpp
         ek/app/prefs.cpp
         ek/app/res.hpp
-
-        ek/ext/analytics/analytics.hpp
         ek/ext/sharing/sharing.hpp
         )
 

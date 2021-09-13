@@ -136,7 +136,6 @@ void handleMouseEvent(NSView* view, NSEvent* event) {
     const auto location = [view convertPoint:event.locationInWindow fromView:nil];
     const auto scale = view.window.backingScaleFactor;
 
-    EventType type;
     MouseEvent ev{};
     ev.button = MouseButton::Other;
     ev.x = static_cast<float>(location.x * scale);
@@ -168,33 +167,33 @@ void handleMouseEvent(NSView* view, NSEvent* event) {
         case NSEventTypeLeftMouseDown:
         case NSEventTypeRightMouseDown:
         case NSEventTypeOtherMouseDown:
-            type = EventType::MouseDown;
+            ev.type = EventType::MouseDown;
             break;
         case NSEventTypeLeftMouseUp:
         case NSEventTypeRightMouseUp:
         case NSEventTypeOtherMouseUp:
-            type = EventType::MouseUp;
+            ev.type = EventType::MouseUp;
             break;
         case NSEventTypeLeftMouseDragged:
         case NSEventTypeRightMouseDragged:
         case NSEventTypeOtherMouseDragged:
         case NSEventTypeMouseMoved:
-            type = EventType::MouseMove;
+            ev.type = EventType::MouseMove;
             break;
         case NSEventTypeMouseEntered:
-            type = EventType::MouseEnter;
+            ev.type = EventType::MouseEnter;
             break;
         case NSEventTypeMouseExited:
-            type = EventType::MouseExit;
+            ev.type = EventType::MouseExit;
             break;
         case NSEventTypeScrollWheel:
-            type = EventType::MouseScroll;
+            ev.type = EventType::MouseScroll;
             handleMouseWheelScroll(event, ev);
             break;
         default:
             return;
     }
-    processEvent(Event::Mouse(type, ev));
+    processEvent(ev);
 }
 
 }

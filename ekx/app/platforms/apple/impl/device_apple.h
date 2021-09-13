@@ -8,6 +8,24 @@
 
 namespace ek::app {
 
+int openURL(const char* url) {
+    NSString* str = [NSString stringWithUTF8String:url];
+    NSURL* URL = [NSURL URLWithString:str];
+#if TARGET_OS_IOS || TARGET_OS_TV
+    UIApplication* application = [UIApplication sharedApplication];
+    if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+        [application openURL:URL options:@{} completionHandler:^(BOOL success) {
+            //NSLog(@"Open %@: %d", URL, success);
+        }];
+        return 0;
+    } else {
+        return [application openURL:URL] ? 0 : -1;
+    }
+#else
+    return [[NSWorkspace sharedWorkspace] openURL:URL] ? 0 : -1;
+#endif
+}
+
 const char* getPreferredLang() {
     NSString* language = [NSLocale preferredLanguages][0];
     if (language != nil) {
@@ -36,9 +54,10 @@ const float* getScreenInsets() {
     return nullptr;
 }
 
-void vibrate(int millis) {
+int vibrate(int millis) {
     (void) (millis);
     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
+    return true;
 }
 
 const char* getSystemFontPath(const char* fontName) {

@@ -11,13 +11,17 @@ int main(int argc, char* argv[]) {
 
 namespace ek::app {
 
+int openURL(const char*) {
+    return -1;
+}
+
 const float* getScreenInsets() {
     return nullptr;
 }
 
-void vibrate(int millis) {
-    // TODO:
+int vibrate(int millis) {
     (void)millis;
+    return -1;
 }
 
 const char* getPreferredLang() {

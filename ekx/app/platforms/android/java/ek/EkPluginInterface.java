@@ -8,7 +8,7 @@ public interface EkPluginInterface {
 
     void onResume(boolean inFocus);
 
-    void onActivityResult(int requestCode, int resultCode, Intent intent);
+    boolean onActivityResult(int requestCode, int resultCode, Intent intent);
 
     void onPause();
 

@@ -93,6 +93,10 @@ def apply_module_settings(decl, group):
         for capability in decl["xcode_capability"]:
             caps.append(capability)
 
+    if "xcode_file" in decl:
+        for file in decl["xcode_file"]:
+            project.add_file(file)
+
 def my_add_folder(path, parent, excludes):
     file_options = FileOptions()
 
@@ -135,7 +139,5 @@ project.add_other_ldflags("$(inherited) -Os -flto -fno-exceptions -fno-rtti")
 project.add_library_search_paths("$(inherited)")
 
 project.add_other_cflags(compileDefines)
-
-project.add_file("GoogleService-Info.plist")
 
 project.save()

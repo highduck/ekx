@@ -1,6 +1,6 @@
 {
-  "name": "@ekx/plugin-admob",
-  "version": "0.0.6",
+  "name": "@ekx/plugin-firebase",
+  "version": "0.0.1",
   "scripts": {
     "postinstall": "cmake-build || exit 0"
   },
@@ -10,7 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/ekx": "0.1.7",
-    "@ekx/plugin-firebase": "0.0.1",
     "cmake-build": "0.0.3"
   }
 }

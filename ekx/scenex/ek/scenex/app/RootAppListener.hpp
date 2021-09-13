@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/app/events.hpp>
+#include <ek/app/app.hpp>
 #include <ek/timers.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/debug/LogSystem.hpp>

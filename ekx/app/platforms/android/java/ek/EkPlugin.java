@@ -11,7 +11,8 @@ public class EkPlugin implements EkPluginInterface {
     public void onResume(boolean inFocus) {
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    public boolean onActivityResult(int requestCode, int resultCode, Intent intent) {
+        return false;
     }
 
     public void onPause() {

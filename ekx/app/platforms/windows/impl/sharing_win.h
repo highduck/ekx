@@ -4,9 +4,6 @@
 
 namespace ek {
 
-void sharing_navigate(const char*) {
-}
-
 void sharing_rate_us(const char*) {
 }
 

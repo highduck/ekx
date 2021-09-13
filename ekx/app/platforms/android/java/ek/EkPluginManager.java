@@ -22,10 +22,13 @@ public final class EkPluginManager implements EkPluginInterface {
         }
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    public boolean onActivityResult(int requestCode, int resultCode, Intent intent) {
         for (EkPluginInterface extension : extensions) {
-            extension.onActivityResult(requestCode, resultCode, intent);
+            if (extension.onActivityResult(requestCode, resultCode, intent)) {
+                return true;
+            }
         }
+        return false;
     }
 
     public void onPause() {

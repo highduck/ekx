@@ -1,10 +1,196 @@
 #pragma once
 
 #include <cstdint>
-
-#include "events.hpp"
+#include <cstring>
 
 namespace ek::app {
+
+enum EventType {
+    Resume = 0,
+    Pause,
+    Resize,
+    BackButton,
+    Close,
+
+    TouchStart,
+    TouchMove,
+    TouchEnd,
+
+    MouseMove,
+    MouseDown,
+    MouseUp,
+    MouseEnter,
+    MouseExit,
+    MouseScroll,
+
+    KeyDown,
+    KeyUp,
+    // TODO: since keypress deprecated on web, check if we need it
+    // TODO: `KeyPress` macro pollution from X11 headers
+    KeyPress_,
+
+    Text,
+
+    Count
+};
+
+enum class MouseCursor {
+    Parent = 0,
+    Arrow,
+    Button,
+    Help
+};
+
+enum class MouseButton {
+    Left,
+    Right,
+    Other
+};
+
+enum class KeyCode {
+    Unknown = 0,
+
+    ArrowUp,
+    ArrowDown,
+    ArrowLeft,
+    ArrowRight,
+
+    Escape,
+    Space,
+    Enter,
+    Backspace,
+
+    // extra
+    Tab,
+    PageUp,
+    PageDown,
+    Home,
+    End,
+    Insert,
+    Delete,
+
+    A,
+    C,
+    V,
+    X,
+    Y,
+    Z,
+
+    W,
+    S,
+    D,
+
+    MaxCount
+};
+
+enum class KeyModifier {
+    Empty = 0,
+    // Super is "command" or "windows" key
+    Super = 1,
+    Shift = 2,
+    Control = 4,
+    Alt = 8
+};
+
+struct TextEvent final {
+    EventType type;
+    char data[8];
+
+    explicit TextEvent(const char* text) : type{EventType::Text},
+                                           data{""} {
+        set(text);
+    }
+
+    void set(const char* text) {
+        data[0] = '\0';
+        strncat(data, text, 7);
+    }
+
+    [[nodiscard]]
+    bool empty() const {
+        return data[0] == '\0';
+    }
+};
+
+struct KeyEvent final {
+    EventType type;
+    KeyCode code;
+    KeyModifier modifiers;
+
+    [[nodiscard]]
+    inline bool isControl() const {
+        return ((int) modifiers & (int) KeyModifier::Control) != 0;
+    }
+
+    [[nodiscard]]
+    inline bool isShift() const {
+        return ((int) modifiers & (int) KeyModifier::Shift) != 0;
+    }
+
+    [[nodiscard]]
+    inline bool isAlt() const {
+        return ((int) modifiers & (int) KeyModifier::Alt) != 0;
+    }
+
+    [[nodiscard]]
+    inline bool isSuper() const {
+        return ((int) modifiers & (int) KeyModifier::Super) != 0;
+    }
+};
+
+struct TouchEvent final {
+    EventType type;
+    uint64_t id;
+    float x;
+    float y;
+};
+
+struct MouseEvent final {
+    EventType type;
+    MouseButton button;
+    float x;
+    float y;
+    float scrollX;
+    float scrollY;
+};
+
+union Event final {
+    EventType type;
+    KeyEvent key;
+    TextEvent text;
+    TouchEvent touch;
+    MouseEvent mouse;
+
+    Event(EventType eventType) : type{eventType} {
+    }
+
+    Event(KeyEvent keyEvent) : key{keyEvent} {
+    }
+
+    Event(TouchEvent touchEvent) : touch{touchEvent} {
+    }
+
+    Event(MouseEvent mouseEvent) : mouse{mouseEvent} {
+    }
+
+    Event(TextEvent textEvent) : text{textEvent} {
+    }
+};
+
+class AppListener {
+public:
+    virtual ~AppListener();
+
+    virtual void onInitialize() {}
+
+    virtual void onReady() {}
+
+    virtual void onFrame() {}
+
+    virtual void onEvent(const Event&) {}
+};
+
+inline AppListener::~AppListener() = default;
 
 struct AppConfig final {
     const char* title = nullptr;
@@ -64,7 +250,9 @@ const char* getPreferredLang();
  */
 const float* getScreenInsets();
 
-void vibrate(int durationMillis);
+int vibrate(int durationMillis);
+
+int openURL(const char* url);
 
 const char* getSystemFontPath(const char* fontName);
 
@@ -84,3 +272,18 @@ void notifyInit();
 void notifyReady();
 
 }
+
+#if 1 || defined(EKAPP_DEBUG)
+
+#include <cstdio>
+#include <cassert>
+
+#define EKAPP_LOG(s) puts(s)
+#define EKAPP_ASSERT(s) assert(s)
+
+#else
+
+#define EKAPP_LOG(s) ((void)(0))
+#define EKAPP_ASSERT(s) ((void)(0))
+
+#endif

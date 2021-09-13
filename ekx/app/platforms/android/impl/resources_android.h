@@ -14,7 +14,8 @@ void get_resource_content_async(const char* path, const get_content_callback_fun
         buffer.assign(data, data + AAsset_getLength(asset));
         AAsset_close(asset);
     } else {
-        EKAPP_LOG_ERROR("Asset file not found: %s", path);
+        // TODO: better return error code
+        //EKAPP_LOG("Asset file not found: %s", path);
     }
     callback(buffer);
 }

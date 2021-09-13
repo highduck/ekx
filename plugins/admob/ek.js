@@ -78,6 +78,8 @@ function setup(project) {
             ]
         }
     });
+
+    project.importModule("@ekx/plugin-firebase", __dirname);
 }
 
 module.exports = setup;

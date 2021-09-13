@@ -1,14 +1,10 @@
 #include "app.hpp"
 
-#include <ek/assert.hpp>
-#include <ek/debug.hpp>
-#include <ek/debug/LogSystem.hpp>
-
 namespace ek::app {
 
 void notifyInit() {
-    EK_TRACE << "App: initialize";
-    EK_ASSERT(!g_app.initialized);
+    EKAPP_LOG("ekapp initialize\n");
+    EKAPP_ASSERT(!g_app.initialized);
     g_app.initialized = true;
     if (g_app.listener) {
         g_app.listener->onInitialize();
@@ -16,8 +12,8 @@ void notifyInit() {
 }
 
 void notifyReady() {
-    EK_TRACE << "App: device ready";
-    EK_ASSERT(!g_app.ready);
+    EKAPP_LOG("ekapp ready\n");
+    EKAPP_ASSERT(!g_app.ready);
     g_app.ready = true;
     if (g_app.listener) {
         g_app.listener->onReady();
@@ -25,7 +21,7 @@ void notifyReady() {
 }
 
 void processEvent(const Event& event) {
-    EK_ASSERT(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(EventType::Count));
+    EKAPP_ASSERT(static_cast<uint8_t>(event.type) < static_cast<uint8_t>(EventType::Count));
 
     // filter pause/resume events according to application focus state
     if (event.type == EventType::Pause) {
@@ -49,9 +45,7 @@ void processFrame() {
     if (g_app.listener) {
         if (g_app.dirtySize) {
             g_app.dirtySize = false;
-            Event ev{};
-            ev.type = EventType::Resize;
-            processEvent(ev);
+            processEvent(EventType::Resize);
         }
         g_app.listener->onFrame();
     }

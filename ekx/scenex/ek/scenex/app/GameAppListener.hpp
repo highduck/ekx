@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/app/events.hpp>
+#include <ek/app/app.hpp>
 
 namespace ek {
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ek/debug.hpp>
 #include <ek/app/res.hpp>
 #include <ek/app/impl/res_sys.hpp>
 
@@ -23,7 +22,7 @@ void get_resource_content_async(const char* path, const get_content_callback_fun
     attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
     attr.userData = reinterpret_cast<void*>(callback_id);
     attr.onerror = [](emscripten_fetch_t* fetch) {
-        EK_ERROR("Downloading %s failed, HTTP failure status code: %d", fetch->url, fetch->status);
+        //EK_ERROR("Downloading %s failed, HTTP failure status code: %d", fetch->url, fetch->status);
         const auto user_callback_id = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(fetch->userData));
         const auto& user_callback = fetch_callbacks_[user_callback_id];
         emscripten_fetch_close(fetch);
@@ -31,7 +30,7 @@ void get_resource_content_async(const char* path, const get_content_callback_fun
         fetch_callbacks_.erase(user_callback_id);
     };
     attr.onsuccess = [](emscripten_fetch_t* fetch) {
-        EK_TRACE("Finished downloading %llu bytes from URL %s", fetch->numBytes, fetch->url);
+        //EK_TRACE("Finished downloading %llu bytes from URL %s", fetch->numBytes, fetch->url);
         const auto user_callback_id = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(fetch->userData));
         const auto& user_callback = fetch_callbacks_[user_callback_id];
         array_buffer buffer{fetch->data, fetch->data + fetch->numBytes};

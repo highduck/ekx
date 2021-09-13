@@ -1,7 +1,9 @@
 package ek;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -15,6 +17,26 @@ import java.util.Locale;
 
 @Keep
 public final class EkDevice {
+
+    @Keep
+    public static int openURL(final String url) {
+        final EkActivity activity = EkActivity.getInstance();
+        activity.runOnUiThread(() -> {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                int flags = Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+                if (Build.VERSION.SDK_INT >= 21) {
+                    flags |= Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+                } else {
+                    flags |= Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET;
+                }
+                intent.addFlags(flags);
+                activity.startActivity(intent);
+            } catch (Exception ignored) {
+            }
+        });
+        return 0;
+    }
 
     @Keep
     public static String getLanguage() {
@@ -45,7 +67,7 @@ public final class EkDevice {
     private static Vibrator _vibrator;
 
     @Keep
-    public static void vibrate(long durationMillis) {
+    public static int vibrate(long durationMillis) {
         if (_vibrator == null) {
             _vibrator = (Vibrator) EkActivity.getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         }
@@ -56,6 +78,9 @@ public final class EkDevice {
             } else {
                 _vibrator.vibrate(durationMillis);
             }
+            return 0;
         }
+
+        return -1;
     }
 }

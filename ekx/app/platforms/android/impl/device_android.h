@@ -2,15 +2,21 @@
 
 #include <ek/app/Platform.h>
 
-#include <jni.h>
-#include <pthread.h>
-#include <string>
-#include <array>
-#include <vector>
-#include <ek/math/vec.hpp>
-#include <ek/assert.hpp>
-
 namespace ek::app {
+
+int openURL(const char* url) {
+    auto* env = app::getJNIEnv();
+    auto jURL = env->NewStringUTF(url);
+    auto cls = env->FindClass("ek/EkDevice");
+
+    auto method = env->GetStaticMethodID(cls, "openURL", "(Ljava/lang/String;)I");
+    int result = env->CallStaticIntMethod(cls, method, jURL);
+
+    env->DeleteLocalRef(cls);
+    env->DeleteLocalRef(jURL);
+
+    return result;
+}
 
 const char* getPreferredLang() {
     auto* env = getJNIEnv();
@@ -32,9 +38,9 @@ const float* getScreenInsets() {
     auto rv = (jintArray) env->CallStaticObjectMethod(class_ref, method);
 
     const jsize len = env->GetArrayLength(rv);
-    if(len >= 4) {
+    if (len >= 4) {
         jint* arr = env->GetIntArrayElements(rv, nullptr);
-        EK_ASSERT(arr);
+        EKAPP_ASSERT(arr);
 
         static float insets[4];
         insets[0] = static_cast<float>(arr[0]);
@@ -49,18 +55,17 @@ const float* getScreenInsets() {
     return nullptr;
 }
 
-void vibrate(int duration_millis) {
-    if (duration_millis <= 0) {
-        return;
-    }
+int vibrate(int millis) {
     auto* env = getJNIEnv();
-    auto clazz = env->FindClass("ek/EkDevice");
-    auto method = env->GetStaticMethodID(clazz, "vibrate", "(J)V");
-    env->CallStaticVoidMethod(clazz, method, (jlong) duration_millis);
+    auto cls = env->FindClass("ek/EkDevice");
+    auto method = env->GetStaticMethodID(cls, "vibrate", "(J)I");
+    auto result = env->CallStaticIntMethod(cls, method, (jlong) millis);
+    env->DeleteLocalRef(cls);
+    return result;
 }
 
 const char* getSystemFontPath(const char* fontName) {
-    (void)fontName;
+    (void) fontName;
     // TODO:
     return "/system/fonts/DroidSansFallback.ttf";
     // return "/system/fonts/Roboto-Regular.ttf";

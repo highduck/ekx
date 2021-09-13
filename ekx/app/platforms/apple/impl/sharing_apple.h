@@ -5,39 +5,16 @@
 #import <Firebase/Firebase.h>
 #endif
 
-#include <string>
+#include <ek/app/app.hpp>
 
 namespace ek {
 
-static void ios_navigate(NSString* ns_url) {
-    (void)ns_url;
-#if TARGET_OS_IOS || TARGET_OS_TV
-    NSURL* URL = [NSURL URLWithString:ns_url];
-    UIApplication* application = [UIApplication sharedApplication];
-    if ([application respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-        [application openURL:URL options:@{}
-        completionHandler:^(BOOL success) {
-        NSLog(@"Open %@: %d", ns_url, success);
-    }];
-    } else {
-        BOOL success = [application openURL:URL];
-        NSLog(@"Open %@: %d", ns_url, success);
-    }
-#endif
-}
-
-void sharing_navigate(const char* url) {
-    NSString* ns_url = [NSString stringWithUTF8String:url];
-    ios_navigate(ns_url);
-}
-
-void sharing_rate_us(const char* app_id) {
+void sharing_rate_us(const char* appID) {
     //action=write-review
     // 1435111697
-    NSString* ns_app_id = app_id != NULL ? [NSString stringWithUTF8String:app_id] : @"1435111697";
-    NSString* url = [NSString stringWithFormat:@"itms-apps://itunes.apple.com/us/app/apple-store/id%@?mt=8&action=write-review", ns_app_id];
-
-    ios_navigate(url);
+    char buffer[4096];
+    snprintf(buffer, 4096, "itms-apps://itunes.apple.com/us/app/apple-store/id%s?mt=8&action=write-review", appID);
+    app::openURL(buffer);
 
 #if TARGET_OS_IOS || TARGET_OS_TV
     [FIRAnalytics logEventWithName:kFIREventViewItem
@@ -46,7 +23,7 @@ void sharing_rate_us(const char* app_id) {
 }
 
 void sharing_send_message(const char* text) {
-    (void)text;
+    (void) text;
 #if TARGET_OS_IOS || TARGET_OS_TV
     NSString* ns_text = [NSString stringWithUTF8String:text];
     //NSURL *myWebsite = [NSURL URLWithString:@"itms://itunes.apple.com/us/app/apple-store/id375380948?mt=8"];

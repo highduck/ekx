@@ -1,6 +1,6 @@
 #pragma once
 
-#include <app_apple.h>
+#include <ek/app/Platform.h>
 
 #import <GoogleMobileAds/GoogleMobileAds.h>
 

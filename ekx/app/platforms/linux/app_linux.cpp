@@ -14,7 +14,6 @@
 
 #include <ek/Arguments.hpp>
 #include "impl/window_linux.h"
-#include "impl/analytics_linux.h"
 #include "impl/device_linux.h"
 #include "impl/resources_linux.h"
 #include "impl/sharing_linux.h"
