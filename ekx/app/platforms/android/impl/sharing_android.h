@@ -4,18 +4,6 @@
 
 namespace ek {
 
-void sharing_navigate(const char* url) {
-    auto* env = app::getJNIEnv();
-    auto url_ref = env->NewStringUTF(url);
-    auto class_ref = env->FindClass("ek/Sharing");
-
-    auto method = env->GetStaticMethodID(class_ref, "navigate", "(Ljava/lang/String;)V");
-    env->CallStaticVoidMethod(class_ref, method, url_ref);
-
-    env->DeleteLocalRef(class_ref);
-    env->DeleteLocalRef(url_ref);
-}
-
 void sharing_rate_us(const char* app_id) {
     auto* env = app::getJNIEnv();
     auto app_id_ref = env->NewStringUTF(app_id);

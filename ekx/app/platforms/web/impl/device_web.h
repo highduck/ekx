@@ -3,7 +3,9 @@
 #include <ek/app/app.hpp>
 
 extern "C" {
-extern void web_vibrate(int cur);
+
+extern int ekapp_openURL(const char* url);
+extern int ekapp_vibrate(int durationMillis);
 
 /**
  *
@@ -16,12 +18,16 @@ extern const char* web_get_lang(char* dest, int max);
 
 namespace ek::app {
 
-const float* getScreenInsets() {
-    return nullptr;
+int openURL(const char* url) {
+    return ekapp_openURL(url);
 }
 
-void vibrate(int duration_millis) {
-    web_vibrate(duration_millis);
+int vibrate(int duration_millis) {
+    return ekapp_vibrate(duration_millis);
+}
+
+const float* getScreenInsets() {
+    return nullptr;
 }
 
 const char* getPreferredLang() {
@@ -30,7 +36,7 @@ const char* getPreferredLang() {
 }
 
 const char* getSystemFontPath(const char* fontName) {
-    (void)fontName;
+    (void) fontName;
     // TODO:
     return nullptr;
 }

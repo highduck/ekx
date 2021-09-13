@@ -10,7 +10,7 @@ namespace ek {
 
 struct AppBoxConfig {
     std::string version{"1.0.0"};
-    std::string privacyPolicyURL{"https://eliasku.gitlab.io/privacy-policy/"};
+    std::string privacyPolicyURL{"https://eliasku-games.web.app/privacy-policy/"};
     Ads::Config ads{};
     ::admob::Config admob{};
     std::string billingKey{};

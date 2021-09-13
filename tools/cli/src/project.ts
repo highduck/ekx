@@ -69,8 +69,8 @@ export class Project {
         serviceAccountKey?: string,
 
         admob_app_id?: string,
-        game_services_id?: string
-    };
+        game_services_id?: string,
+    } = {};
 
     ios: {
         application_id?: string,
@@ -78,9 +78,11 @@ export class Project {
         // path to JSON with app-store credentials, used for fastlane automation
         appStoreCredentials?: string,
 
-        admob_app_id?: string
-    } = {};
+        admob_app_id?: string,
 
+
+    } = {};
+    onProjectGenerated: (()=>void)[] = [];
     web: {
         firebaseToken?: string,
         applications?: { platform: string, url: string, id?: string }[]
@@ -116,8 +118,9 @@ export class Project {
             if (configurator) {
                 this.projects[configPath] = configurator(this);
             }
-        } catch {
+        } catch(err) {
             logger.error("Module is not resolved", configPath);
+            logger.error(err);
         }
     }
 

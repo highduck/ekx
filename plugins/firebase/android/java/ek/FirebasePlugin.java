@@ -7,9 +7,9 @@ import androidx.annotation.Keep;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 @Keep
-public class Analytics {
+public class FirebasePlugin {
 
-    final private static String TAG = "Analytics";
+    final private static String TAG = "FirebasePlugin";
 
     private static FirebaseAnalytics _analytics;
 

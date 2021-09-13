@@ -4,6 +4,16 @@
 
 namespace ek::app {
 
+int openURL(const char*) {
+    return -1;
+}
+
+int vibrate(int millis) {
+    (void)millis;
+    // unsupported
+    return -1;
+}
+
 const float* getScreenInsets() {
     static float pads[4];
     pads[0] = 0.0f;
@@ -11,11 +21,6 @@ const float* getScreenInsets() {
     pads[2] = 0.0f;
     pads[3] = 0.0f;
     return pads;
-}
-
-void vibrate(int millis) {
-    // TODO:
-    (void)millis;
 }
 
 const char* getPreferredLang() {

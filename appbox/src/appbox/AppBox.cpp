@@ -77,7 +77,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
             }
             e_pp.get_or_create<Interactive>();
             e_pp.get_or_create<Button>().clicked += [this] {
-                sharing_navigate(config.privacyPolicyURL.c_str());
+                app::openURL(config.privacyPolicyURL.c_str());
             };
         }
     }
@@ -167,7 +167,7 @@ void wrap_button(ecs::EntityApi e, const std::string &name, const std::string &l
     auto x = find(e, name);
     if (!link.empty()) {
         x.get_or_create<Button>().clicked.add([link] {
-            sharing_navigate(link.c_str());
+            app::openURL(link.c_str());
         });
     } else {
         setVisible(e, false);

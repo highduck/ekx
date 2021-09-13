@@ -24,8 +24,6 @@ import com.getkeepsafe.relinker.ReLinker;
 import java.util.List;
 import java.util.Locale;
 
-import ek.gpgs.GameServices;
-
 @SuppressLint("Registered")
 @Keep
 public class EkActivity extends Activity {
@@ -91,7 +89,6 @@ public class EkActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        GameServices.onResume();
     }
 
 //    @Override
@@ -170,11 +167,6 @@ public class EkActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-
-        if (GameServices.onActivityResult(requestCode, resultCode, intent)) {
-            return;
-        }
-
         EkPluginManager.instance.onActivityResult(requestCode, resultCode, intent);
     }
 
@@ -200,6 +192,7 @@ public class EkActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        EkPluginManager.instance.onDestroy();
         super.onDestroy();
 //        System.exit(0);
     }

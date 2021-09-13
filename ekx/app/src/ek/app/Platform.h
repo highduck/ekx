@@ -9,10 +9,6 @@
 #include <android/asset_manager_jni.h>
 #include <jni.h>
 
-#define EKAPP_LOG_INFO(...) ((void)__android_log_print(ANDROID_LOG_INFO, "ekapp", __VA_ARGS__))
-#define EKAPP_LOG_WARN(...) ((void)__android_log_print(ANDROID_LOG_WARN, "ekapp", __VA_ARGS__))
-#define EKAPP_LOG_ERROR(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "ekapp", __VA_ARGS__))
-
 #elif defined(__APPLE__)
 
 #define EKAPP_APPLE  1

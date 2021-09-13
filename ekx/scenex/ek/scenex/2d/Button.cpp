@@ -7,10 +7,9 @@
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/util/ServiceLocator.hpp>
-#include <ek/ext/analytics/analytics.hpp>
+//#include <ek/firebase/Firebase.h>
 #include <ek/scenex/base/NodeEvents.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
-#include <ek/scenex/base/Node.hpp>
 
 namespace ek {
 
@@ -53,8 +52,7 @@ void initialize_events(ecs::EntityApi e) {
         if (e.get<Interactive>().pushed) {
             start_post_tween(btn);
             play_sound(skin.sfxCancel);
-        }
-        else {
+        } else {
             play_sound(skin.sfxOut);
         }
     });
@@ -70,10 +68,11 @@ void initialize_events(ecs::EntityApi e) {
         play_sound(skin.sfxClick);
         start_post_tween(btn);
 
-        auto name = e.get_or_default<NodeName>().name;
-        if (!name.empty()) {
-            analytics::event("click", name.c_str());
-        }
+        // TODO:
+        //auto name = e.get_or_default<NodeName>().name;
+        //if (!name.empty()) {
+        //    analytics::event("click", name.c_str());
+        //}
     });
 
     e.get_or_create<NodeEventHandler>().on(
@@ -121,7 +120,7 @@ void update_movie_frame(ecs::EntityApi entity, const Interactive& interactive) {
 }
 
 void Button::updateAll() {
-    for (auto e : ecs::view<Button, Interactive, Transform2D>()) {
+    for (auto e: ecs::view<Button, Interactive, Transform2D>()) {
         auto& btn = e.get<Button>();
         auto& interactive = e.get<Interactive>();
         auto& transform = e.get<Transform2D>();
@@ -137,14 +136,14 @@ void Button::updateAll() {
         const auto& skin = get_skin(btn);
 
         btn.timeOver = math::reach_delta(btn.timeOver,
-                                          interactive.over ? 1.0f : 0.0f,
-                                          dt * skin.overSpeedForward,
-                                          -dt * skin.overSpeedBackward);
+                                         interactive.over ? 1.0f : 0.0f,
+                                         dt * skin.overSpeedForward,
+                                         -dt * skin.overSpeedBackward);
 
         btn.timePush = math::reach_delta(btn.timePush,
-                                          interactive.pushed ? 1.0f : 0.0f,
-                                          dt * skin.pushSpeedForward,
-                                          -dt * skin.pushSpeedBackward);
+                                         interactive.pushed ? 1.0f : 0.0f,
+                                         dt * skin.pushSpeedForward,
+                                         -dt * skin.pushSpeedBackward);
 
         btn.timePost = math::reach(btn.timePost, 0.0f, 2.0f * dt);
 

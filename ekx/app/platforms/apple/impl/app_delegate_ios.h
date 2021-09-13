@@ -8,11 +8,13 @@ void handleTouches(EventType type, UIView* view, NSSet* touches, UIEvent*) {
     const auto scaleFactor = view.contentScaleFactor;
     for (UITouch* touch in [touches allObjects]) {
         const CGPoint location = [touch locationInView:view];
-        TouchEvent touchEvent{};
-        touchEvent.id = (uint64_t) touch;
-        touchEvent.x = static_cast<float>(location.x * scaleFactor);
-        touchEvent.y = static_cast<float>(location.y * scaleFactor);
-        processEvent(Event::Touch(type, touchEvent));
+        TouchEvent ev{
+                type,
+                (uint64_t) touch,
+                static_cast<float>(location.x * scaleFactor),
+                static_cast<float>(location.y * scaleFactor)
+        };
+        processEvent(ev);
     }
 }
 
@@ -63,7 +65,7 @@ void handleTouches(EventType type, UIView* view, NSSet* touches, UIEvent*) {
 // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
 // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
     using namespace ek::app;
-    processEvent(Event::App(EventType::Pause));
+    processEvent(EventType::Pause);
 }
 
 
@@ -82,12 +84,12 @@ void handleTouches(EventType type, UIView* view, NSSet* touches, UIEvent*) {
 - (void)applicationDidBecomeActive:(UIApplication*)application {
 // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     using namespace ek::app;
-    processEvent(Event::App(EventType::Resume));
+    processEvent(EventType::Resume);
 }
 
 - (void)applicationWillTerminate:(UIApplication*)application {
     using namespace ek::app;
-    processEvent(Event::App(EventType::Close));
+    processEvent(EventType::Close);
 // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 
     if (_window != nil) {
@@ -135,15 +137,13 @@ void handleTouches(EventType type, UIView* view, NSSet* touches, UIEvent*) {
 }
 
 - (void)drawRect:(CGRect)rect {
-    using namespace ek::app;
     (void) rect;
-
     [self handleResize];
-    if(self.currentDrawable != nil && self.currentRenderPassDescriptor != nil) {
+    if (self.currentDrawable != nil && self.currentRenderPassDescriptor != nil) {
         // we need to keep ref for default render pass on current frame
         // it should be checked in RELEASE build to ensure all references are valid
         self.defaultPass = self.currentRenderPassDescriptor;
-        processFrame();
+        ek::app::processFrame();
     }
 }
 

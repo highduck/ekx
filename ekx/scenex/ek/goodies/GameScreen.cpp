@@ -3,7 +3,6 @@
 #include <ek/math/easing.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/base/Node.hpp>
-#include <ek/ext/analytics/analytics.hpp>
 #include <ek/debug.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/timers.hpp>
@@ -130,7 +129,8 @@ void GameScreenManager::setScreen(const std::string& name) {
         e.get<GameScreen>().onEnterBegin();
         //broadcast(layer, GameScreen::EnterBegin);
 
-        analytics::screen(name.c_str());
+        // TODO:
+        //analytics::screen(name.c_str());
     }
 }
 
@@ -176,7 +176,8 @@ void GameScreenManager::changeScreen(const std::string& name) {
     transition.checkStates();
     applyTransitionEffect(transition);
 
-    analytics::screen(name.c_str());
+    // TODO:
+    //analytics::screen(name.c_str());
 }
 
 void GameScreenManager::update() {

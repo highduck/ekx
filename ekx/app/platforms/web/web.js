@@ -1,29 +1,68 @@
 mergeInto(LibraryManager.library, {
-    web_prefs_set_number: function (key, n) {
-        window.localStorage.setItem(UTF8ToString(key), n);
+    web_ls_set_f64: function (pKey, value) {
+        var ls = window.localStorage;
+        if(ls && pKey) {
+            ls.setItem(UTF8ToString(pKey), value);
+            return true;
+        }
+        return false;
     },
-    web_prefs_get_number: function (key, def) {
-        var item = window.localStorage.getItem(UTF8ToString(key));
-        if (item) {
-            var val = parseFloat(item);
-            if (val != null) {
-                return val;
+    web_ls_get_f64: function (pKey, pValue) {
+        var ls = window.localStorage;
+        if(ls && pKey) {
+            var item = ls.getItem(UTF8ToString(key));
+            if(item != null) {
+                var value = parseFloat(item);
+                if (value != null) {
+                    if(pValue) {
+                        HEAPF64[pValue >>> 3] = value;
+                    }
+                    return true;
+                }
             }
         }
-        return def;
+        return false;
     },
-    web_prefs_set_string: function (key, str) {
-        window.localStorage.setItem(UTF8ToString(key), UTF8ToString(str));
-    },
-    web_prefs_get_string: function (key) {
-        var item = window.localStorage.getItem(UTF8ToString(key));
-        if (item != null) {
-            var lengthBytes = lengthBytesUTF8(item) + 1;
-            var stringOnWasmHeap = _malloc(lengthBytes);
-            stringToUTF8(item, stringOnWasmHeap, lengthBytes);
-            return stringOnWasmHeap;
+    /**
+     *
+     * @param pKey - NULL-terminated c-string
+     * @param pValue - NULL-terminated c-string, if 0 - delete key,
+     * @returns {boolean} - true if operation is completed, false if not supported or invalid arguments
+     */
+    web_ls_set: function (pKey, pValue) {
+        var ls = window.localStorage;
+        if(ls && pKey) {
+            var key = UTF8ToString(pKey);
+            if(pValue) {
+                ls.setItem(key, UTF8ToString(pValue));
+            }
+            else {
+                ls.removeItem(key);
+            }
+            return true;
         }
-        return 0;
+        return false;
+    },
+    /**
+     * You can read or check key existence in user's LocalStorage
+     *
+     * @param pKey - CString or 0
+     * @param pDest - Buffer to write the value (or 0 if you don't need read the value)
+     * @param maxLength - Max buffer length
+     * @returns {boolean} - true if key is valid and exists in storage, false otherwise
+     */
+    web_ls_get: function (pKey, pDest, maxLength) {
+        var ls = window.localStorage;
+        if(ls && pKey) {
+            var value = ls.getItem(UTF8ToString(pKey));
+            if (value != null) {
+                if (pDest && maxLength > 0) {
+                    stringToUTF8(value, pDest, maxLength);
+                }
+                return true;
+            }
+        }
+        return false;
     },
     web_set_mouse_cursor: function (cursor) {
         var PARENT = 0;
@@ -68,9 +107,20 @@ mergeInto(LibraryManager.library, {
         }
         return 0;
     },
-    web_vibrate: function (duration) {
-        if (typeof window.navigator.vibrate === "function") {
-            window.navigator.vibrate(duration);
+    ekapp_vibrate: function (duration) {
+        var vibrate = window.navigator.vibrate;
+        if(vibrate) {
+            vibrate(duration);
+            return 0;
         }
+        return 1;
+    },
+    ekapp_openURL: function(url) {
+        try {
+            window.open(UTF8ToString(url), "_blank");
+            return 0;
+        }
+        catch {}
+        return 1;
     }
 });

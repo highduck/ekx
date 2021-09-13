@@ -65,18 +65,28 @@ export interface AppleConfig extends CxxConfig {
     xcode_framework: UserArray<string>;
     xcode_pod: UserArray<string>;
     xcode_plist: UserArray<any>;
+    /**
+     * files copied in Project which sould be added to project (path relative to xcode project's root)
+     */
+    xcode_file: UserArray<string>;
+
+    xcode_projectPythonPostScript: UserArray<string>;
 }
 
 type AppleName =
     "xcode_capability"
     | "xcode_framework"
     | "xcode_pod"
-    | "xcode_plist";
+    | "xcode_plist"
+    | "xcode_file"
+    | "xcode_projectPythonPostScript";
 const apple_names: AppleName[] = [
     "xcode_capability",
     "xcode_framework",
     "xcode_pod",
     "xcode_plist",
+    "xcode_file",
+    "xcode_projectPythonPostScript"
 ];
 
 export interface AndroidConfig extends CxxConfig {
@@ -88,6 +98,16 @@ export interface AndroidConfig extends CxxConfig {
     // app module gradle dependency string
     // TODO: should be more declarative object
     android_dependency: UserArray<string>;
+
+    /**
+     * root build.gradle buildScript dependencies
+     */
+    android_buildScriptDependency: UserArray<string>;
+
+    /**
+     * Patch :app build.gradle with `apply plugin: '{}'`
+     */
+    android_gradleApplyPlugin: UserArray<string>;
 
     // add to the root of AndroidManifest.xml
     android_manifest: UserArray<string>;
@@ -106,13 +126,20 @@ type AndroidName =
     "android_java"
     | "android_aidl"
     | "android_dependency"
+    | "android_buildScriptDependency"
+    | "android_gradleApplyPlugin"
+    | "android_gradleConfigRelease"
     | "android_manifest"
     | "android_manifestApplication"
     | "android_strings";
+
 const android_names: AndroidName[] = [
     "android_java",
     "android_aidl",
     "android_dependency",
+    "android_buildScriptDependency",
+    "android_gradleApplyPlugin",
+    "android_gradleConfigRelease",
     "android_manifest",
     "android_manifestApplication",
     "android_strings",

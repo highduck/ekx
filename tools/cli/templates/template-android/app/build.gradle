@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
+
+// GRADLE_APPLY_PLUGIN
 
 android {
     compileSdkVersion 30
@@ -34,17 +35,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             multiDexKeepProguard file('multidex-config.pro')
             signingConfig signingConfigs.release
-            firebaseCrashlytics {
-                // Enable processing and uploading of native symbols to Crashlytics servers.
-                // By default, this is disabled to improve build speeds.
-                // This flag must be enabled to see properly-symbolicated native
-                // stack traces in the Crashlytics dashboard.
-                nativeSymbolUploadEnabled true
-            }
             ndk {
-                // SYMBOL_TABLE | FULL
-                debugSymbolLevel "SYMBOL_TABLE"
+                debugSymbolLevel "SYMBOL_TABLE" // SYMBOL_TABLE | FULL
             }
+            // ADD_CONFIG_RELEASE
         }
     }
     externalNativeBuild {
@@ -79,12 +73,6 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.2.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.getkeepsafe.relinker:relinker:1.4.4'
-
-    // Import the BoM for the Firebase platform
-    // Check Release Notes for updates: https://firebase.google.com/support/release-notes/android
-    implementation platform('com.google.firebase:firebase-bom:28.4.0')
-    implementation 'com.google.firebase:firebase-crashlytics-ndk'
-    implementation 'com.google.firebase:firebase-analytics'
 
     // TEMPLATE_DEPENDENCIES
 }

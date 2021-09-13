@@ -11,6 +11,7 @@
 
     <!-- TEMPLATE ROOT -->
 
+    <!-- NOTE: Crashlytics NDK requires allowNativeHeapPointerTagging="false" -->
     <application
         android:allowNativeHeapPointerTagging="false"
         android:name="androidx.multidex.MultiDexApplication"

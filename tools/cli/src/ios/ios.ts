@@ -91,11 +91,6 @@ export async function export_ios(ctx: Project): Promise<void> {
 
     copyFolderRecursiveSync(path.join(ctx.path.templates, "template-ios"), dest_path);
 
-    let googleServicesConfigDir = ctx.ios.googleServicesConfigDir;
-    if (googleServicesConfigDir) {
-        googleServicesConfigDir = path.resolve(ctx.path.CURRENT_PROJECT_DIR, googleServicesConfigDir);
-    }
-
     const base_path = "../..";
     const cwd = process.cwd();
     process.chdir(dest_path);
@@ -120,6 +115,11 @@ export async function export_ios(ctx: Project): Promise<void> {
 
         mod_plist(ctx, "src/Info.plist");
 
+        for(const fn of ctx.onProjectGenerated) {
+            fn();
+        }
+
+        const xcode_projectPythonPostScript = collectStrings(ctx, "xcode_projectPythonPostScript", iosPlatforms, false);
         fs.writeFileSync("ek-ios-build.json", JSON.stringify({
             assets: collectStrings(ctx, "assets", iosPlatforms, true).concat([embeddedAssetsDir]),
 
@@ -132,12 +132,9 @@ export async function export_ios(ctx: Project): Promise<void> {
             xcode_framework: collectStrings(ctx, "xcode_framework", iosPlatforms, false),
             xcode_capability: collectStrings(ctx, "xcode_capability", iosPlatforms, false),
             xcode_plist: collectObjects(ctx, "xcode_plist", iosPlatforms),
-            xcode_pod: collectStrings(ctx, "xcode_pod", iosPlatforms, false)
+            xcode_pod: collectStrings(ctx, "xcode_pod", iosPlatforms, false),
+            xcode_file: collectStrings(ctx, "xcode_file", iosPlatforms, false)
         }));
-
-        if (googleServicesConfigDir) {
-            copyFile(path.join(googleServicesConfigDir, "GoogleService-Info.plist"), "GoogleService-Info.plist");
-        }
 
         /// PRE MOD PROJECT
         //xcode_patch(ctx, platform_proj_name);
@@ -162,6 +159,10 @@ export async function export_ios(ctx: Project): Promise<void> {
         execute("pod", ["install", "--repo-update"]);
 
         // POST MOD PROJECT
+        replaceInFile("xcode-project-ios-post.py", {
+            "# XCODE_POST_PROJECT": xcode_projectPythonPostScript.join("\n")
+        });
+
         execute("python3", ["xcode-project-ios-post.py",
             platform_proj_name, ctx.ios.application_id]);
     }

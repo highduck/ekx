@@ -2,7 +2,6 @@
 
 #include "input_controller.hpp"
 
-#include <ek/ext/analytics/analytics.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/2d/Viewport.hpp>
@@ -333,8 +332,8 @@ void basic_application::doRenderFrame() {
 }
 
 void Initializer::onInitialize() {
-    EK_TRACE << "analytics initialize";
-    analytics::init(); // analytics before crash reporter on ios
+    //EK_TRACE << "analytics initialize";
+    //analytics::init(); // analytics before crash reporter on ios
 }
 
 void Initializer::onReady() {

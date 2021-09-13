@@ -72,7 +72,6 @@
 
 /// end windows headers
 
-#include "impl/analytics_win.h"
 #include "impl/device_win.h"
 #include "impl/resources_win.h"
 #include "impl/sharing_win.h"
@@ -355,7 +354,7 @@ bool win32_uwp_utf8_to_wide(const char* src, wchar_t* dst, int dst_num_bytes) {
 }
 
 void win32_uwp_app_event(EventType type) {
-    processEvent(Event::App(type));
+    processEvent(type);
 }
 
 void win32_uwp_init_keytable() {

@@ -2,6 +2,8 @@ package ek.gpgs;
 
 import ek.EkActivity;
 import ek.AppUtils;
+import ek.EkPlugin;
+import ek.EkPluginManager;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -23,10 +25,11 @@ import com.google.android.gms.games.LeaderboardsClient;
 import com.google.android.gms.tasks.Task;
 
 @Keep
-public class GameServices {
+public class GameServices extends EkPlugin {
 
     private static final String TAG = "GameServices";
-    private static Activity _activity;
+    private static GameServices _instance;
+    private final Activity _activity;
 
     // Request code we use when invoking other Activities to complete the sign-in flow
     final static int RC_RESOLVE = 9001;
@@ -34,16 +37,15 @@ public class GameServices {
     final static int RC_LEADERBOARD_UI = 9002;
     final static int RC_ACHIEVEMENTS_UI = 9003;
 
-    private static GoogleSignInOptions _signInOptions;
-    private static GoogleSignInClient _googleSignInClient;
-    private static AchievementsClient _achievements;
-    private static LeaderboardsClient _leaderboards;
-    private static View _layout;
-    private static boolean _isConnecting = false;
-    private static boolean _isConnected = false;
+    private final GoogleSignInOptions _signInOptions;
+    private final GoogleSignInClient _googleSignInClient;
+    private AchievementsClient _achievements;
+    private LeaderboardsClient _leaderboards;
+    private final View _layout;
+    private boolean _isConnecting = false;
+    private boolean _isConnected = false;
 
-    @Keep
-    public static void init() {
+    GameServices() {
         Log.d(TAG, "register");
         _activity = EkActivity.getInstance();
         _layout = EkActivity.getInstance().mainLayout;
@@ -53,17 +55,18 @@ public class GameServices {
         silentSignIn();
     }
 
-    public static void onResume() {
+    @Override
+    public void onResume(boolean inFocus) {
         if (_googleSignInClient != null) {
             silentSignIn();
         }
     }
 
-    private static void signIn() {
+    private void signIn() {
         _activity.startActivityForResult(_googleSignInClient.getSignInIntent(), RC_SIGN_IN);
     }
 
-    private static void silentSignIn() {
+    private void silentSignIn() {
         if (AppUtils.isTestLab()) {
             return;
         }
@@ -87,66 +90,8 @@ public class GameServices {
         });
     }
 
-    @Keep
-    public static void leader_board_show(String leaderboard_id) {
-        if (_leaderboards != null) {
-            Log.d(TAG, "load leaderboard");
-            _leaderboards
-                    .getLeaderboardIntent(leaderboard_id)
-                    .addOnSuccessListener(intent -> {
-                        Log.d(TAG, "start leaderboard");
-                        _activity.startActivityForResult(intent, RC_LEADERBOARD_UI);
-                    });
-        } else {
-            Log.d(TAG, "[leaderboard_show] not ready");
-            if (!_isConnecting && !_isConnected) {
-                signIn();
-            }
-        }
-    }
-
-    @Keep
-    public static void leader_board_submit(final String leaderboard_id, final int score) {
-        if (_leaderboards != null) {
-            Log.d(TAG, "submit leaderboard: " + leaderboard_id + " " + score);
-            _leaderboards.submitScore(leaderboard_id, score);
-        } else {
-            Log.d(TAG, "[leaderboard_submit] not ready");
-        }
-    }
-
-    @Keep
-    public static void achievement_update(final String achievement_id, final int increment) {
-        if (_achievements != null) {
-            if (increment > 0) {
-                Log.d(TAG, "increment achievement");
-                _achievements.increment(achievement_id, increment);
-            } else {
-                Log.d(TAG, "unlock achievement");
-                _achievements.unlock(achievement_id);
-            }
-        } else {
-            Log.d(TAG, "[achievement_update] not ready");
-        }
-    }
-
-    @Keep
-    public static void achievement_show() {
-        if (_achievements != null) {
-            Log.d(TAG, "load achievements");
-            _achievements.getAchievementsIntent().addOnSuccessListener(intent -> {
-                Log.d(TAG, "show achievements");
-                _activity.startActivityForResult(intent, RC_ACHIEVEMENTS_UI);
-            });
-        } else {
-            Log.d(TAG, "[achievement_show] not ready");
-            if (!_isConnecting && !_isConnected) {
-                signIn();
-            }
-        }
-    }
-
-    public static boolean onActivityResult(int requestCode, int resultCode, Intent intent) {
+    @Override
+    public boolean onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intent);
             try {
@@ -170,7 +115,7 @@ public class GameServices {
         return false;
     }
 
-    private static void tryConnectWithAccount(@Nullable GoogleSignInAccount account) {
+    private void tryConnectWithAccount(@Nullable GoogleSignInAccount account) {
         if (account != null) {
             onConnected(account);
         } else {
@@ -179,7 +124,7 @@ public class GameServices {
         }
     }
 
-    private static void onConnected(@NonNull GoogleSignInAccount account) {
+    private void onConnected(@NonNull GoogleSignInAccount account) {
         Games.getGamesClient(_activity, account).setViewForPopups(_layout);
         _achievements = Games.getAchievementsClient(_activity, account);
         _leaderboards = Games.getLeaderboardsClient(_activity, account);
@@ -187,10 +132,77 @@ public class GameServices {
         _isConnected = true;
     }
 
-    private static void onDisconnected() {
+    private void onDisconnected() {
         _isConnecting = false;
         _isConnected = false;
         _achievements = null;
         _leaderboards = null;
+    }
+
+    /// region - methods called from C++
+
+    @Keep
+    public static void init() {
+        _instance = new GameServices();
+        EkPluginManager.instance.extensions.add(_instance);
+    }
+
+    @Keep
+    public static void leader_board_show(String leaderboard_id) {
+        if (_instance._leaderboards != null) {
+            Log.d(TAG, "load leaderboard");
+            _instance._leaderboards
+                    .getLeaderboardIntent(leaderboard_id)
+                    .addOnSuccessListener(intent -> {
+                        Log.d(TAG, "start leaderboard");
+                        _instance._activity.startActivityForResult(intent, RC_LEADERBOARD_UI);
+                    });
+        } else {
+            Log.d(TAG, "[leaderboard_show] not ready");
+            if (!_instance._isConnecting && !_instance._isConnected) {
+                _instance.signIn();
+            }
+        }
+    }
+
+    @Keep
+    public static void leader_board_submit(final String leaderboard_id, final int score) {
+        if (_instance._leaderboards != null) {
+            Log.d(TAG, "submit leaderboard: " + leaderboard_id + " " + score);
+            _instance._leaderboards.submitScore(leaderboard_id, score);
+        } else {
+            Log.d(TAG, "[leaderboard_submit] not ready");
+        }
+    }
+
+    @Keep
+    public static void achievement_update(final String achievement_id, final int increment) {
+        if (_instance._achievements != null) {
+            if (increment > 0) {
+                Log.d(TAG, "increment achievement");
+                _instance._achievements.increment(achievement_id, increment);
+            } else {
+                Log.d(TAG, "unlock achievement");
+                _instance._achievements.unlock(achievement_id);
+            }
+        } else {
+            Log.d(TAG, "[achievement_update] not ready");
+        }
+    }
+
+    @Keep
+    public static void achievement_show() {
+        if (_instance._achievements != null) {
+            Log.d(TAG, "load achievements");
+            _instance._achievements.getAchievementsIntent().addOnSuccessListener(intent -> {
+                Log.d(TAG, "show achievements");
+                _instance._activity.startActivityForResult(intent, RC_ACHIEVEMENTS_UI);
+            });
+        } else {
+            Log.d(TAG, "[achievement_show] not ready");
+            if (!_instance._isConnecting && !_instance._isConnected) {
+                _instance.signIn();
+            }
+        }
     }
 }

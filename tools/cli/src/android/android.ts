@@ -57,16 +57,6 @@ function open_android_project(android_project_path) {
     execute("open", ["-a", "/Applications/Android Studio.app", android_project_path]);
 }
 
-function copy_google_services_config_android(dir: string) {
-    const config_file = "google-services.json";
-    const config_path = path.join(dir, config_file);
-    if (isFile(config_path)) {
-        copyFile(config_path, path.join("app", config_file));
-    } else {
-        logger.warn("missing google-services.json", config_file);
-    }
-}
-
 function mod_main_class(app_package_java) {
     const template_main_activity_java =
         "app/src/main/java/com/eliasku/template_android/MainActivity.java";
@@ -249,6 +239,9 @@ export async function export_android(ctx: Project): Promise<void> {
         const android_java = collectSourceRootsAll(ctx, "android_java", platforms, "app");
         const android_aidl = collectSourceRootsAll(ctx, "android_aidl", platforms, "app");
         const android_dependency = collectStrings(ctx, "android_dependency", platforms, false);
+        const android_gradleApplyPlugin = collectStrings(ctx, "android_gradleApplyPlugin", platforms, false);
+        const android_buildScriptDependency = collectStrings(ctx, "android_buildScriptDependency", platforms, false);
+        const android_gradleConfigRelease = collectStrings(ctx, "android_gradleConfigRelease", platforms, false);
 
         assets.push(embeddedAssets);
 
@@ -275,10 +268,16 @@ export async function export_android(ctx: Project): Promise<void> {
             return;
         }
 
+        replaceInFile("build.gradle", {
+            '// BUILDSCRIPT_DEPENDENCY': android_buildScriptDependency.join("\n\t\t")
+        });
+
         replaceInFile("app/build.gradle", {
+            '// GRADLE_APPLY_PLUGIN': android_gradleApplyPlugin.map(s => `apply plugin: '${s}'`).join("\n"),
             'com.eliasku.template_android': ctx.android.application_id,
             'versionCode 1 // AUTO': `versionCode ${ctx.version_code} // AUTO`,
             'versionName "1.0" // AUTO': `versionName "${ctx.version_name}" // AUTO`,
+            '// ADD_CONFIG_RELEASE': android_gradleConfigRelease.join("\n\t\t\t"),
             '// TEMPLATE_SOURCE_SETS': source_sets.join("\n\t\t"),
             '// TEMPLATE_DEPENDENCIES': android_dependency.join("\n\t"),
             'release {} /* ${SIGNING_CONFIGS} */': printSigningConfigs(signingConfig),
@@ -297,7 +296,10 @@ export async function export_android(ctx: Project): Promise<void> {
         mod_android_manifest(ctx);
         createStringsXML(ctx);
         mod_cmake_lists(ctx);
-        copy_google_services_config_android(googleServicesConfigDir);
+
+        for (const fn of ctx.onProjectGenerated) {
+            fn();
+        }
     }
 
     // TODO: `build` instead of bundle

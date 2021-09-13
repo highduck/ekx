@@ -173,7 +173,7 @@ void handleQuitRequest() {
 - (void)applicationWillTerminate:(__unused NSNotification*)notification {
     using ek::app::EventType;
     using namespace ek::app;
-    processEvent(Event::App(EventType::Close));
+    processEvent(EventType::Close);
     if (_view != nil) {
         EKAPP_RELEASE(_view.device);
     }
@@ -184,13 +184,13 @@ void handleQuitRequest() {
 - (void)applicationWillResignActive:(__unused NSNotification*)notification {
     using ek::app::EventType;
     using namespace ek::app;
-    processEvent(Event::App(EventType::Pause));
+    processEvent(EventType::Pause);
 }
 
 - (void)applicationDidBecomeActive:(__unused NSNotification*)notification {
     using ek::app::EventType;
     using namespace ek::app;
-    processEvent(Event::App(EventType::Resume));
+    processEvent(EventType::Resume);
 }
 
 @end
@@ -339,12 +339,15 @@ void handleQuitRequest() {
 
 - (void)magnifyWithEvent:(__unused NSEvent*)event {}
 
-void handleKeyEvent(NSEvent* event, ek::app::EventType type) {
+void handleKeyEvent(NSEvent* event, bool keyDown) {
     using namespace ek::app;
-    processEvent(Event::Key(type, {
+    using ek::app::EventType;
+    const auto type = keyDown ? EventType::KeyDown : EventType::KeyUp;
+    processEvent(KeyEvent{
+            type,
             toKeyCode(event.keyCode),
             toKeyModifiers(event.modifierFlags)
-    }));
+    });
 }
 
 - (void)keyDown:(NSEvent*)event {
@@ -352,20 +355,17 @@ void handleKeyEvent(NSEvent* event, ek::app::EventType type) {
     using namespace ek::app;
 
     if (!event.ARepeat) {
-        handleKeyEvent(event, EventType::KeyDown);
+        handleKeyEvent(event, true);
     }
 
     if (isTextEvent(event)) {
-        processEvent(Event::TextEvent(event.characters.UTF8String));
+        processEvent(TextEvent{event.characters.UTF8String});
     }
 }
 
 - (void)keyUp:(NSEvent*)event {
-    using ek::app::EventType;
-    using namespace ek::app;
-
     if (!event.ARepeat) {
-        handleKeyEvent(event, EventType::KeyUp);
+        handleKeyEvent(event, false);
     }
 }
 
@@ -375,7 +375,7 @@ void handleKeyEvent(NSEvent* event, ek::app::EventType type) {
 
     NSUInteger mask = extractKeyModifiers(event.keyCode);
     if (mask) {
-        handleKeyEvent(event, (event.modifierFlags & mask) ? EventType::KeyDown : EventType::KeyUp);
+        handleKeyEvent(event, !!(event.modifierFlags & mask));
     }
 }
 

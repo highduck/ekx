@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/debug.hpp>
-#include <app_apple.h>
+#include <ek/app/Platform.h>
 
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>
