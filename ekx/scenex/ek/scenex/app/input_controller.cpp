@@ -13,9 +13,9 @@ input_controller::~input_controller() = default;
 
 void input_controller::emulate_mouse_as_touch(const Event& event, touch_state_t& data) {
     bool active_prev = data.active;
-    if (!data.active && event.type == Event::MouseDown) {
+    if (!data.active && event.type == EventType::MouseDown) {
         data.active = true;
-    } else if (data.active && (event.type == Event::MouseUp || event.type == Event::MouseExit)) {
+    } else if (data.active && (event.type == EventType::MouseUp || event.type == EventType::MouseExit)) {
         data.active = false;
     }
 
@@ -34,7 +34,7 @@ void input_controller::emulate_mouse_as_touch(const Event& event, touch_state_t&
 
 void input_controller::update_touch(const Event& event, touch_state_t& data) {
     bool active_prev = data.active;
-    data.active = event.type != Event::TouchEnd;
+    data.active = event.type != EventType::TouchEnd;
 
     data.position = screenCoordToGameDisplay({event.touch.x, event.touch.y});
     data.pressed = data.active;
@@ -51,20 +51,20 @@ void input_controller::update_touch(const Event& event, touch_state_t& data) {
 
 void input_controller::onEvent(const Event& event) {
     switch (event.type) {
-        case Event::TouchBegin:
-        case Event::TouchMove:
-        case Event::TouchEnd:
+        case EventType::TouchStart:
+        case EventType::TouchMove:
+        case EventType::TouchEnd:
             if (!hovered_by_editor_gui) {
                 interactions_.handle_touch_event(event, screenCoordToGameDisplay({event.touch.x, event.touch.y}));
             }
             update_touch(event, get_or_create_touch(event.touch.id));
             break;
-        case Event::MouseDown:
-        case Event::MouseUp:
-        case Event::MouseMove:
-        case Event::MouseScroll:
-        case Event::MouseEnter:
-        case Event::MouseExit:
+        case EventType::MouseDown:
+        case EventType::MouseUp:
+        case EventType::MouseMove:
+        case EventType::MouseScroll:
+        case EventType::MouseEnter:
+        case EventType::MouseExit:
             if (!hovered_by_editor_gui) {
                 interactions_.handle_mouse_event(event, screenCoordToGameDisplay({event.mouse.x, event.mouse.y}));
             }
@@ -72,18 +72,18 @@ void input_controller::onEvent(const Event& event) {
                 emulate_mouse_as_touch(event, get_or_create_touch(1u));
             }
             break;
-        case Event::KeyUp:
-        case Event::KeyDown:
-            if (event.type == Event::KeyDown && event.key.code == KeyCode::Escape) {
+        case EventType::KeyUp:
+        case EventType::KeyDown:
+            if (event.type == EventType::KeyDown && event.key.code == KeyCode::Escape) {
                 interactions_.sendBackButton();
             }
             if (event.key.code != KeyCode::Unknown) {
                 auto& key = keys_[static_cast<size_t>(event.key.code)];
-                if (event.type == Event::KeyDown) {
+                if (event.type == EventType::KeyDown) {
                     key.down = !key.state;
                     key.state = true;//!keyboard_modifiers.ctrlKey;
                     key.up = false;
-                } else if (event.type == Event::KeyUp) {
+                } else if (event.type == EventType::KeyUp) {
                     key.down = false;
                     key.state = false;
                     key.up = true;
@@ -91,10 +91,10 @@ void input_controller::onEvent(const Event& event) {
                 }
             }
             break;
-        case Event::BackButton:
+        case EventType::BackButton:
             interactions_.sendBackButton();
             break;
-        case Event::Pause:
+        case EventType::Pause:
             interactions_.handle_system_pause();
             break;
         default:

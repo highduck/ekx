@@ -9,7 +9,9 @@
 #include <auph/auph_impl.hpp>
 
 #if defined(__ANDROID__)
-#include <ek/android.hpp>
+
+#include <ek/app/Platform.h>
+
 #endif
 
 namespace ek::audio {
@@ -25,9 +27,9 @@ void initialize() {
     EK_TRACE << "audio initialize";
     EK_ASSERT(!audioSystem.initialized);
 #if defined(__ANDROID__)
-    auto activity = ek::android::get_activity();
-    auto assets = ek::android::assetManagerRef();
-    auph::setAndroidActivity(ek::android::get_jni_env, activity, assets);
+    auto activity = app::get_activity();
+    auto assets = app::assetManagerRef();
+    auph::setAndroidActivity(app::getJNIEnv, activity, assets);
 #endif
     auph::init();
     audioSystem.initialized = true;

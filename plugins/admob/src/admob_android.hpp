@@ -1,19 +1,19 @@
 #pragma once
 
-#include <ek/android.hpp>
+#include <ek/app/Platform.h>
 
 namespace admob {
 
-const char *class_path = "ek/admob/AdMobPlugin";
+const char* class_path = "ek/admob/AdMobPlugin";
 
 void initialize(const Config& config) {
     _initialize();
     context.config = config;
 
-    auto *env = ek::android::get_jni_env();
+    auto* env = ek::app::getJNIEnv();
 
-    const char *method_name = "initialize";
-    const char *method_sig = "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V";
+    const char* method_name = "initialize";
+    const char* method_sig = "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V";
 
     auto class_ref = env->FindClass(class_path);
     auto banner_ref = env->NewStringUTF(config.banner.c_str());
@@ -34,10 +34,10 @@ void initialize(const Config& config) {
 }
 
 void show_banner(int flags) {
-    auto *env = ek::android::get_jni_env();
+    auto* env = ek::app::getJNIEnv();
 
-    const char *method_name = "show_banner";
-    const char *method_sig = "(I)V";
+    const char* method_name = "show_banner";
+    const char* method_sig = "(I)V";
 
     auto class_ref = env->FindClass(class_path);
 
@@ -48,10 +48,10 @@ void show_banner(int flags) {
 }
 
 void show_rewarded_ad() {
-    auto *env = ek::android::get_jni_env();
+    auto* env = ek::app::getJNIEnv();
 
-    const char *method_name = "show_rewarded_ad";
-    const char *method_sig = "()V";
+    const char* method_name = "show_rewarded_ad";
+    const char* method_sig = "()V";
 
     auto class_ref = env->FindClass(class_path);
 
@@ -62,10 +62,10 @@ void show_rewarded_ad() {
 }
 
 void show_interstitial_ad() {
-    auto *env = ek::android::get_jni_env();
+    auto* env = ek::app::getJNIEnv();
 
-    const char *method_name = "show_interstitial_ad";
-    const char *method_sig = "()V";
+    const char* method_name = "show_interstitial_ad";
+    const char* method_sig = "()V";
 
     auto class_ref = env->FindClass(class_path);
 
@@ -81,13 +81,13 @@ bool hasSupport() {
 
 }
 
-extern "C"
-JNIEXPORT void JNICALL Java_ek_admob_AdMobPlugin_eventCallback(JNIEnv *, jclass , jint event) {
+extern "C" {
+JNIEXPORT void JNICALL Java_ek_admob_AdMobPlugin_eventCallback(JNIEnv*, jclass, jint event) {
     using namespace admob;
-    if(event == 6) {
+    if (event == 6) {
         context.onInterstitialClosed();
-    }
-    else {
+    } else {
         context.onEvent(static_cast<EventType>(event));
     }
+}
 }

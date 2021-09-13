@@ -74,6 +74,8 @@ public:
     }
 };
 
+}
+
 #ifdef EK_LOG_DEBUG_OUTPUT
 
 #define EK_TRACE ek::LogStream{ek::Verbosity::Trace,   EK_CURRENT_LOCATION}
@@ -95,6 +97,3 @@ public:
 #else
 #define EK_PROFILE_SCOPE(label) ((void)0)
 #endif
-
-
-}

@@ -178,12 +178,12 @@ void ImGuiIntegration::initializeFontTexture() {
 void ImGuiIntegration::on_event(const Event& event) {
     auto& io = ImGui::GetIO();
     switch (event.type) {
-        case Event::KeyUp:
-        case Event::KeyDown:
-        case Event::KeyPress_: {
+        case EventType::KeyUp:
+        case EventType::KeyDown:
+        case EventType::KeyPress_: {
             int key = static_cast<int>(event.key.code);
             if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown)) {
-                io.KeysDown[key] = (event.type == Event::KeyDown);
+                io.KeysDown[key] = (event.type == EventType::KeyDown);
             }
 
             // update modifier keys
@@ -203,24 +203,24 @@ void ImGuiIntegration::on_event(const Event& event) {
         }
             break;
 
-        case Event::Text:
+        case EventType::Text:
             if (!event.text.empty()) {
                 io.AddInputCharactersUTF8(event.text.data);
             }
             break;
 
-        case Event::MouseDown:
-        case Event::MouseUp: {
+        case EventType::MouseDown:
+        case EventType::MouseUp: {
             int button = 0;
             if (event.mouse.button == MouseButton::Right) {
                 button = 1;
             } else if (event.mouse.button == MouseButton::Other) {
                 button = 2;
             }
-            io.MouseDown[button] = (event.type == Event::MouseDown);
+            io.MouseDown[button] = (event.type == EventType::MouseDown);
         }
             break;
-        case Event::MouseScroll:
+        case EventType::MouseScroll:
             if (fabs(event.mouse.scrollX) > 0.0f) {
                 io.MouseWheelH += event.mouse.scrollX * 0.1f;
             }
@@ -229,7 +229,7 @@ void ImGuiIntegration::on_event(const Event& event) {
             }
             break;
 
-        case Event::MouseMove:
+        case EventType::MouseMove:
             io.MousePos.x = event.mouse.x / g_app.dpiScale;
             io.MousePos.y = event.mouse.y / g_app.dpiScale;
             break;
@@ -270,7 +270,7 @@ void update_mouse_cursor() {
             default:
                 break;
         }
-        g_app.updateMouseCursor(cursor);
+        app::setMouseCursor(cursor);
         cursor_visible = true;
     }
 

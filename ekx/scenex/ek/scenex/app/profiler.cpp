@@ -2,7 +2,7 @@
 
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/app/device.hpp>
+#include <ek/app/app.hpp>
 #include <ek/scenex/text/TextEngine.hpp>
 
 // TODO: EK_DEV_BUILD

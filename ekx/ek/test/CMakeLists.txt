@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
-project(ek-tests)
+project(ek-test)
 
 add_executable(${PROJECT_NAME}
-        tests.cpp
+        test.cpp
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)

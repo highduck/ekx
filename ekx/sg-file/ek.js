@@ -6,8 +6,9 @@ function setup(project) {
     project.addModule({
         name: "sg-file",
         path: __dirname,
-        cpp: ["src"]
+        cpp: "src"
     });
+    project.importModule("@ekx/ekx/core", __dirname);
 }
 
 module.exports = setup;

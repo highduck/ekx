@@ -76,7 +76,7 @@ void InteractionSystem::process() {
 
     swapTargetLists();
 
-    g_app.updateMouseCursor(cursor);
+    app::setMouseCursor(cursor);
 }
 
 void InteractionSystem::fireInteraction(InteractionEvent event, bool prev, bool onlyIfChanged) {
@@ -95,19 +95,19 @@ void InteractionSystem::fireInteraction(InteractionEvent event, bool prev, bool 
 
 void InteractionSystem::handle_mouse_event(const Event& ev, float2 pos) {
 
-    if (ev.type == Event::MouseDown) {
+    if (ev.type == EventType::MouseDown) {
         mousePosition0_ = pos;
         pointerDown_ = true;
         fireInteraction(InteractionEvent::PointerDown);
-    } else if (ev.type == Event::MouseUp) {
+    } else if (ev.type == EventType::MouseUp) {
         mousePosition0_ = pos;
         pointerDown_ = false;
         fireInteraction(InteractionEvent::PointerUp);
-    } else if (ev.type == Event::MouseMove) {
+    } else if (ev.type == EventType::MouseMove) {
         mousePosition0_ = pos;
         mouseActive_ = true;
         process();
-    } else if (ev.type == Event::MouseExit) {
+    } else if (ev.type == EventType::MouseExit) {
         pointerDown_ = false;
         mouseActive_ = false;
         //update();
@@ -116,7 +116,7 @@ void InteractionSystem::handle_mouse_event(const Event& ev, float2 pos) {
 }
 
 void InteractionSystem::handle_touch_event(const Event& ev, float2 pos) {
-    if (ev.type == Event::TouchBegin) {
+    if (ev.type == EventType::TouchStart) {
         if (touchID_ == 0) {
             touchID_ = ev.touch.id;
             touchPosition0_ = pos;
@@ -128,7 +128,7 @@ void InteractionSystem::handle_touch_event(const Event& ev, float2 pos) {
     }
 
     if (touchID_ == ev.touch.id) {
-        if (ev.type == Event::TouchEnd) {
+        if (ev.type == EventType::TouchEnd) {
             touchID_ = 0;
             touchPosition0_ = float2::zero;
             pointerDown_ = false;

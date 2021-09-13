@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.19)
 project(ecxx-benchmarks)
 
 add_executable(${PROJECT_NAME}

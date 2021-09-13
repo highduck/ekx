@@ -1,7 +1,6 @@
 #include "LayoutRect.hpp"
 #include "Display2D.hpp"
 #include <ek/scenex/base/Node.hpp>
-#include <ek/app/device.hpp>
 #include <ek/app/app.hpp>
 
 namespace ek {

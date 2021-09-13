@@ -50,6 +50,8 @@ function setup(project) {
         }
     });
     project.importModule("auph", __dirname);
+    project.importModule("@ekx/ekx/app", __dirname);
+    project.importModule("@ekx/sokol", __dirname);
 }
 
 module.exports = setup;

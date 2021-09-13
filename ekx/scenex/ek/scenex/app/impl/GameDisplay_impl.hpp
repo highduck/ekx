@@ -3,7 +3,6 @@
 #include "../GameDisplay.hpp"
 
 #include <ek/draw2d/drawer.hpp>
-#include <ek/app/device.hpp>
 #include <ek/app/app.hpp>
 
 #ifdef EK_UITEST
@@ -108,6 +107,7 @@ graphics::Texture* createGameDisplayTexture(int w, int h, bool isColor, const ch
 }
 
 void GameDisplay::update() {
+    using app::g_app;
     if (simulated) {
         // limit min size
         info.size.x = fmax(16.0f, info.size.x);
@@ -120,7 +120,7 @@ void GameDisplay::update() {
             color = createGameDisplayTexture(w, h, true, "game-display-color");
             colorFirstClearFlag = true;
 
-            if (app::g_app.config.needDepth) {
+            if (g_app.config.needDepth) {
                 delete depthStencil;
                 depthStencil = createGameDisplayTexture(w, h, false, "game-display-depth");
             }
@@ -137,12 +137,17 @@ void GameDisplay::update() {
             screenshotBuffer = malloc(w * h * 4);
         }
     } else {
-        using app::g_app;
         info.size.x = g_app.drawableWidth;
         info.size.y = g_app.drawableHeight;
         info.window.x = g_app.windowWidth;
         info.window.y = g_app.windowHeight;
-        getScreenInsets(info.insets.data());
+        const float* insets = app::getScreenInsets();
+        if(insets) {
+            info.insets = *(const float4*)insets;
+        }
+        else {
+            info.insets = float4::zero;
+        }
         info.dpiScale = g_app.dpiScale;
 
         info.destinationViewport.position = float2::zero;

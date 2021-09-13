@@ -1,22 +1,20 @@
 #pragma once
 
-#include <ek/android.hpp>
+#include <ek/app/Platform.h>
 #include <vector>
 #include <string>
 
-using namespace ek;
-
-std::string jniGetString(JNIEnv *env, jstring jstr) {
+std::string jniGetString(JNIEnv* env, jstring jstr) {
     if (!jstr) {
         return "";
     }
-    const char *cstr = env->GetStringUTFChars(jstr, nullptr);
+    const char* cstr = env->GetStringUTFChars(jstr, nullptr);
     std::string str = cstr;
     env->ReleaseStringUTFChars(jstr, cstr);
     return str;
 }
 
-jobjectArray jniGetObjectStringArray(const std::vector<std::string> &src, JNIEnv *env) {
+jobjectArray jniGetObjectStringArray(const std::vector<std::string>& src, JNIEnv* env) {
     jobjectArray res = env->NewObjectArray(src.size(), env->FindClass("java/lang/String"), nullptr);
 
     for (size_t i = 0; i < src.size(); ++i) {
@@ -30,15 +28,15 @@ jobjectArray jniGetObjectStringArray(const std::vector<std::string> &src, JNIEnv
 
 namespace billing {
 
-const char *class_path = "ek/billing/BillingBridge";
+const char* class_path = "ek/billing/BillingBridge";
 
-void initialize(const std::string &key) {
+void initialize(const std::string& key) {
     _initialize();
 
-    auto *env = android::get_jni_env();
+    auto* env = ek::app::getJNIEnv();
 
-    const char *method_name = "initialize";
-    const char *method_sig = "(Ljava/lang/String;)V";
+    const char* method_name = "initialize";
+    const char* method_sig = "(Ljava/lang/String;)V";
 
     auto class_ref = env->FindClass(class_path);
     auto key_ref = env->NewStringUTF(key.c_str());
@@ -51,10 +49,10 @@ void initialize(const std::string &key) {
 }
 
 void getPurchases() {
-    auto *env = android::get_jni_env();
+    auto* env = ek::app::getJNIEnv();
 
-    const char *method_name = "getPurchases";
-    const char *method_sig = "()V";
+    const char* method_name = "getPurchases";
+    const char* method_sig = "()V";
 
     auto class_ref = env->FindClass(class_path);
     auto method = env->GetStaticMethodID(class_ref, method_name, method_sig);
@@ -63,11 +61,11 @@ void getPurchases() {
     env->DeleteLocalRef(class_ref);
 }
 
-void getDetails(const std::vector<std::string> &skus) {
-    auto *env = android::get_jni_env();
+void getDetails(const std::vector<std::string>& skus) {
+    auto* env = ek::app::getJNIEnv();
 
-    const char *method_name = "getDetails";
-    const char *method_sig = "([Ljava/lang/String;)V";
+    const char* method_name = "getDetails";
+    const char* method_sig = "([Ljava/lang/String;)V";
 
     auto class_ref = env->FindClass(class_path);
     auto skuList_ref = jniGetObjectStringArray(skus, env);
@@ -79,11 +77,11 @@ void getDetails(const std::vector<std::string> &skus) {
     env->DeleteLocalRef(skuList_ref);
 }
 
-void purchase(const std::string &sku, const std::string &payload) {
-    auto *env = android::get_jni_env();
+void purchase(const std::string& sku, const std::string& payload) {
+    auto* env = ek::app::getJNIEnv();
 
-    const char *method_name = "purchase";
-    const char *method_sig = "(Ljava/lang/String;Ljava/lang/String;)V";
+    const char* method_name = "purchase";
+    const char* method_sig = "(Ljava/lang/String;Ljava/lang/String;)V";
 
     auto class_ref = env->FindClass(class_path);
     auto sku_ref = env->NewStringUTF(sku.c_str());
@@ -97,11 +95,11 @@ void purchase(const std::string &sku, const std::string &payload) {
     env->DeleteLocalRef(payload_ref);
 }
 
-void consume(const std::string &token) {
-    auto *env = android::get_jni_env();
+void consume(const std::string& token) {
+    auto* env = ek::app::getJNIEnv();
 
-    const char *method_name = "consume";
-    const char *method_sig = "(Ljava/lang/String;)V";
+    const char* method_name = "consume";
+    const char* method_sig = "(Ljava/lang/String;)V";
 
     auto class_ref = env->FindClass(class_path);
     auto token_ref = env->NewStringUTF(token.c_str());
@@ -114,15 +112,15 @@ void consume(const std::string &token) {
 }
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_ek_billing_BillingBridge_nativePurchase(JNIEnv *env, jclass ,
-                                             jstring productID,
-                                             jstring token,
-                                             jint state,
-                                             jstring payload,
-                                             jstring signature,
-                                             jint responseCode) {
+extern "C" {
+
+JNIEXPORT void JNICALL Java_ek_billing_BillingBridge_nativePurchase(JNIEnv* env, jclass,
+                                                                    jstring productID,
+                                                                    jstring token,
+                                                                    jint state,
+                                                                    jstring payload,
+                                                                    jstring signature,
+                                                                    jint responseCode) {
     using namespace billing;
     PurchaseData data;
     data.productID = jniGetString(env, productID);
@@ -134,16 +132,16 @@ Java_ek_billing_BillingBridge_nativePurchase(JNIEnv *env, jclass ,
     context.onPurchaseChanged(data);
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_ek_billing_BillingBridge_nativeDetails(JNIEnv *env, jclass ,
-                                            jstring sku,
-                                            jstring price,
-                                            jstring currencyCode) {
+JNIEXPORT void JNICALL Java_ek_billing_BillingBridge_nativeDetails(JNIEnv* env, jclass,
+                                                                   jstring sku,
+                                                                   jstring price,
+                                                                   jstring currencyCode) {
     using namespace billing;
     ProductDetails data;
     data.sku = jniGetString(env, sku);
     data.price = jniGetString(env, price);
     data.currencyCode = jniGetString(env, currencyCode);
     context.onProductDetails(data);
+}
+
 }

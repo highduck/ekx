@@ -89,8 +89,10 @@ void Editor::onPostFrame() {
 }
 
 void Editor::onEvent(const app::Event& event) {
+    using ek::app::EventType;
+
     switch (event.type) {
-        case app::Event::KeyDown:
+        case EventType::KeyDown:
             if (event.key.code == app::KeyCode::A &&
                 event.key.isControl() &&
                 event.key.isShift()) {
@@ -98,7 +100,7 @@ void Editor::onEvent(const app::Event& event) {
                 settings.dirty = true;
             }
             break;
-        case app::Event::Resize: {
+        case EventType::Resize: {
             const float width = g_app.windowWidth;
             const float height = g_app.windowHeight;
             if (width != settings.width || height != settings.height) {

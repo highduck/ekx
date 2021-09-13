@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.19)
 include(npm.cmake)
 project(ekx)
 
@@ -27,6 +27,7 @@ if (EKX_BUILD_TESTS AND BUILD_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Cl
 endif ()
 
 add_subdirectory(core)
+add_subdirectory(app)
 add_subdirectory(ek)
 add_subdirectory(scenex)
 add_subdirectory(sg-file)

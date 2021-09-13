@@ -12,7 +12,7 @@
 #include <GameServices.hpp>
 #include <ek/ext/sharing/sharing.hpp>
 #include <ek/goodies/GameScreen.hpp>
-#include <ek/app/device.hpp>
+#include <ek/app/app.hpp>
 #include <ek/Localization.hpp>
 #include "Ads.hpp"
 
@@ -31,7 +31,8 @@ AppBox::AppBox(AppBoxConfig config_) :
     // initialize translations
     auto lang = get_user_string("selected_lang", "");
     if (lang.empty()) {
-        lang = get_device_lang();
+        const char* l = app::getPreferredLang();
+        lang = l != nullptr ? l : "en";
     }
     if (lang.size() > 2) {
         lang.resize(2);
