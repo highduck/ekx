@@ -891,8 +891,8 @@ uint32_t x11_mod(uint32_t x11_mods) {
     return mods;
 }
 
-void x11_app_event(ek::app::Event::Type type) {
-    ek::app::processEvent(ek::app::Event::App(type));
+void x11_app_event(ek::app::EventType type) {
+    ek::app::processEvent(type);
 }
 
 ek::app::MouseButton x11_translate_button(const XEvent* event) {
@@ -907,7 +907,7 @@ ek::app::MouseButton x11_translate_button(const XEvent* event) {
     }
 }
 
-void x11_mouse_event(ek::app::Event::Type type, ek::app::MouseButton btn, uint32_t mods) {
+void x11_mouse_event(ek::app::EventType type, ek::app::MouseButton btn, uint32_t mods) {
 //    if (_sapp_events_enabled()) {
 //        init_event(type);
 //        _sapp.event.mouse_button = btn;
@@ -926,7 +926,7 @@ void x11_scroll_event(float x, float y, uint32_t mods) {
 //    }
 }
 
-void x11_key_event(ek::app::Event type, ek::app::KeyCode key, bool repeat, uint32_t mods) {
+void x11_key_event(ek::app::EventType type, ek::app::KeyCode key, bool repeat, uint32_t mods) {
 //    if (_sapp_events_enabled()) {
 //        init_event(type);
 //        _sapp.event.key_code = key;
@@ -1329,12 +1329,12 @@ void x11_processEvent(XEvent* event) {
         case EnterNotify:
             /* don't send enter/leave events while mouse button held down */
             if (0 == gAppLinux.x11.mouse_buttons) {
-                x11_mouse_event(ek::app::Event::MouseEnter, ek::app::MouseButton::Other, x11_mod(event->xcrossing.state));
+                x11_mouse_event(ek::app::EventType::MouseEnter, ek::app::MouseButton::Other, x11_mod(event->xcrossing.state));
             }
             break;
         case LeaveNotify:
             if (0 == gAppLinux.x11.mouse_buttons) {
-                x11_mouse_event(ek::app::Event::MouseExit, ek::app::MouseButton::Other, x11_mod(event->xcrossing.state));
+                x11_mouse_event(ek::app::EventType::MouseExit, ek::app::MouseButton::Other, x11_mod(event->xcrossing.state));
             }
             break;
         case MotionNotify:

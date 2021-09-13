@@ -16,7 +16,6 @@
 #import "impl/resources_apple.h"
 #import "impl/user_prefs_apple.h"
 #import "impl/sharing_apple.h"
-#import "impl/analytics_apple.h"
 
 AppDelegate* gAppDelegate = nullptr;
 
