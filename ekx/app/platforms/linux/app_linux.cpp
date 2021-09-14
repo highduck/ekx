@@ -12,7 +12,6 @@
 #include <limits.h> /* LONG_MAX */
 #include <pthread.h> /* only used a linker-guard, search for _sapp_linux_run() and see first comment */
 
-#include <ek/Arguments.hpp>
 #include "impl/window_linux.h"
 #include "impl/device_linux.h"
 #include "impl/resources_linux.h"
@@ -33,7 +32,8 @@ void start() {
 }
 
 int main(int argc, char* argv[]) {
-    ::ek::Arguments::current = {argc, argv};
+    ::ek::app::g_app.argc = argc;
+    ::ek::app::g_app.argv = argv;
     ::ek::app::main();
     return 0;
 }

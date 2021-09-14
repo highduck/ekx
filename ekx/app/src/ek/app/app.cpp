@@ -67,4 +67,20 @@ void cancelQuit() {
     g_app.exitRequired = false;
 }
 
+const char* findArgumentValue(const char* key, const char* defaultValue) {
+    const int argc = g_app.argc;
+    char** argv = g_app.argv;
+    int keySize = (int) strlen(key);
+    for (int i = 0; i < argc; ++i) {
+        if (strncmp(key, argv[i], keySize) == 0) {
+            ++i;
+            if (i < argc) {
+                return argv[i];
+            }
+            return defaultValue;
+        }
+    }
+    return defaultValue;
+}
+
 }

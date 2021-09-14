@@ -123,16 +123,17 @@ void setViewMouseCursor(NSView* view) {
     }
 }
 
-void handleMouseWheelScroll(const NSEvent* event, MouseEvent& mouseEvent) {
-    mouseEvent.scrollX = static_cast<float>(event.scrollingDeltaX);
-    mouseEvent.scrollY = static_cast<float>(event.scrollingDeltaY);
+void handleWheelEvent(NSView*, const NSEvent* event) {
+    auto x = event.scrollingDeltaX;
+    auto y = event.scrollingDeltaY;
     if (event.hasPreciseScrollingDeltas) {
-        mouseEvent.scrollX *= 0.1f;
-        mouseEvent.scrollY *= 0.1f;
+        x *= 0.1;
+        y *= 0.1;
     }
+    processEvent(WheelEvent{(float)x, (float)y});
 }
 
-void handleMouseEvent(NSView* view, NSEvent* event) {
+void handleMouseEvent(NSView* view, const NSEvent* event) {
     const auto location = [view convertPoint:event.locationInWindow fromView:nil];
     const auto scale = view.window.backingScaleFactor;
 
@@ -140,8 +141,6 @@ void handleMouseEvent(NSView* view, NSEvent* event) {
     ev.button = MouseButton::Other;
     ev.x = static_cast<float>(location.x * scale);
     ev.y = static_cast<float>(location.y * scale);
-    ev.scrollX = 0.0f;
-    ev.scrollY = 0.0f;
 
     switch (event.type) {
         case NSEventTypeLeftMouseDown:
@@ -185,10 +184,6 @@ void handleMouseEvent(NSView* view, NSEvent* event) {
             break;
         case NSEventTypeMouseExited:
             ev.type = EventType::MouseExit;
-            break;
-        case NSEventTypeScrollWheel:
-            ev.type = EventType::MouseScroll;
-            handleMouseWheelScroll(event, ev);
             break;
         default:
             return;

@@ -99,9 +99,9 @@ void start() {
 }
 
 enum CommandType {
-    Command_DispatchFrame = 0x100,
-    Command_Start = 0x101,
-    Command_Ready = 0x102
+    Command_Main = 0x100,
+    Command_Ready = 0x101,
+    Command_Frame = 0x102
 };
 
 extern "C" {
@@ -109,13 +109,13 @@ extern "C" {
 JNIEXPORT void JNICALL Java_ek_EkPlatform_sendEvent(JNIEnv*, jclass, jint eventType) {
     using namespace ek::app;
     switch (eventType) {
-        case Command_DispatchFrame:
+        case Command_Frame:
             processFrame();
             if (g_app.exitRequired) {
                 ek::app::exitActivity(g_app.exitCode);
             }
             break;
-        case Command_Start:
+        case Command_Main:
             ::ek::app::main();
             break;
         case Command_Ready:

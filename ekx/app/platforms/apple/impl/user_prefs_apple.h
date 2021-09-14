@@ -1,10 +1,10 @@
 #pragma once
 
-#include <ek/assert.hpp>
+#include <ek/app/app.hpp>
 #import <Foundation/Foundation.h>
 
 #define C_STRING_NOT_NULL_OR_EMPTY(x) ((x) != nullptr && *(x) != '\0')
-#define ASSERT_KEY_IS_VALID(x) EK_ASSERT(C_STRING_NOT_NULL_OR_EMPTY(x))
+#define ASSERT_KEY_IS_VALID(x) EKAPP_ASSERT(C_STRING_NOT_NULL_OR_EMPTY(x))
 
 namespace ek {
 
@@ -17,7 +17,7 @@ void set_user_preference(const char* key, int value) {
     [user_defaults synchronize];
 }
 
-int get_user_preference(const char* key, int default_value) {
+int get_user_preference(const char* key, int defaultValue) {
     ASSERT_KEY_IS_VALID(key);
 
     NSString* ns_key = [NSString stringWithUTF8String:key];
@@ -26,7 +26,7 @@ int get_user_preference(const char* key, int default_value) {
         return static_cast<int>([user_defaults integerForKey:ns_key]);
     }
 
-    return default_value;
+    return defaultValue;
 }
 
 void set_user_string(const char* key, const char* str) {
@@ -39,7 +39,7 @@ void set_user_string(const char* key, const char* str) {
     [user_defaults synchronize];
 }
 
-std::string get_user_string(const char* key, const char* default_value) {
+std::string get_user_string(const char* key, const char* defaultValue) {
     ASSERT_KEY_IS_VALID(key);
 
     NSString* ns_key = [NSString stringWithUTF8String:key];
@@ -49,7 +49,7 @@ std::string get_user_string(const char* key, const char* default_value) {
         return std::string{[ns_result UTF8String]};
     }
 
-    return std::string{default_value};
+    return defaultValue;
 }
 
 }
