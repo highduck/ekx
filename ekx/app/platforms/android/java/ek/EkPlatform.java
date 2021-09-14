@@ -15,9 +15,9 @@ public class EkPlatform {
     static final int KEY_MODIFIER_ALT = 8;
 
     // Special commands to native app
-    static final int CALL_DISPATCH_FRAME = 0x100;
-    static final int CALL_START = 0x101;
-    static final int CALL_DEVICE_READY = 0x102;
+    static final int CALL_MAIN = 0x100;
+    static final int CALL_READY = 0x101;
+    static final int CALL_FRAME = 0x102;
 
     // Event::Type
     static final int RESUME = 0;

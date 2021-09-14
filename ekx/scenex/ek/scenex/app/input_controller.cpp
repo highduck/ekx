@@ -62,7 +62,6 @@ void input_controller::onEvent(const Event& event) {
         case EventType::MouseDown:
         case EventType::MouseUp:
         case EventType::MouseMove:
-        case EventType::MouseScroll:
         case EventType::MouseEnter:
         case EventType::MouseExit:
             if (!hovered_by_editor_gui) {
@@ -71,6 +70,8 @@ void input_controller::onEvent(const Event& event) {
             if (emulateTouch) {
                 emulate_mouse_as_touch(event, get_or_create_touch(1u));
             }
+            break;
+        case EventType::Wheel:
             break;
         case EventType::KeyUp:
         case EventType::KeyDown:

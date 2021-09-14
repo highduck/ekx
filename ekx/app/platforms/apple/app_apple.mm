@@ -1,6 +1,5 @@
 #include <ek/app/Platform.h>
 #include <ek/app/app.hpp>
-#include <ek/Arguments.hpp>
 
 #if TARGET_OS_IOS || TARGET_OS_TV
 
@@ -21,7 +20,8 @@ AppDelegate* gAppDelegate = nullptr;
 
 #ifndef EK_NO_MAIN
 int main(int argc, char* argv[]) {
-    ::ek::Arguments::current = {argc, argv};
+    ::ek::app::g_app.argc = argc;
+    ::ek::app::g_app.argv = argv;
     ::ek::app::main();
     return 0;
 }
@@ -31,10 +31,8 @@ namespace ek::app {
 
 void start() {
 #if TARGET_OS_IOS || TARGET_OS_TV
-    int argc = Arguments::current.argc;
-    char** argv = Arguments::current.argv;
     @autoreleasepool {
-        UIApplicationMain(argc, argv, nil, NSStringFromClass(AppDelegate.class));
+        UIApplicationMain(g_app.argc, g_app.argv, nil, NSStringFromClass(AppDelegate.class));
     }
 #else
     @autoreleasepool {

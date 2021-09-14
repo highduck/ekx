@@ -73,7 +73,7 @@ public class EkActivity extends Activity {
         mainLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         setContentView(mainLayout);
 
-        EkPlatform.sendEvent(EkPlatform.CALL_START);
+        EkPlatform.sendEvent(EkPlatform.CALL_MAIN);
     }
 
     @Keep

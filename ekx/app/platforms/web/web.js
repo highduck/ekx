@@ -1,7 +1,7 @@
 mergeInto(LibraryManager.library, {
     web_ls_set_f64: function (pKey, value) {
         var ls = window.localStorage;
-        if(ls && pKey) {
+        if (ls && pKey) {
             ls.setItem(UTF8ToString(pKey), value);
             return true;
         }
@@ -9,12 +9,12 @@ mergeInto(LibraryManager.library, {
     },
     web_ls_get_f64: function (pKey, pValue) {
         var ls = window.localStorage;
-        if(ls && pKey) {
-            var item = ls.getItem(UTF8ToString(key));
-            if(item != null) {
+        if (ls && pKey) {
+            var item = ls.getItem(UTF8ToString(pKey));
+            if (item != null) {
                 var value = parseFloat(item);
                 if (value != null) {
-                    if(pValue) {
+                    if (pValue) {
                         HEAPF64[pValue >>> 3] = value;
                     }
                     return true;
@@ -31,12 +31,11 @@ mergeInto(LibraryManager.library, {
      */
     web_ls_set: function (pKey, pValue) {
         var ls = window.localStorage;
-        if(ls && pKey) {
+        if (ls && pKey) {
             var key = UTF8ToString(pKey);
-            if(pValue) {
+            if (pValue) {
                 ls.setItem(key, UTF8ToString(pValue));
-            }
-            else {
+            } else {
                 ls.removeItem(key);
             }
             return true;
@@ -53,7 +52,7 @@ mergeInto(LibraryManager.library, {
      */
     web_ls_get: function (pKey, pDest, maxLength) {
         var ls = window.localStorage;
-        if(ls && pKey) {
+        if (ls && pKey) {
             var value = ls.getItem(UTF8ToString(pKey));
             if (value != null) {
                 if (pDest && maxLength > 0) {
@@ -64,7 +63,7 @@ mergeInto(LibraryManager.library, {
         }
         return false;
     },
-    web_set_mouse_cursor: function (cursor) {
+    ekapp_setMouseCursor: function (cursor) {
         var PARENT = 0;
         var ARROW = 1;
         var BUTTON = 2;
@@ -83,24 +82,9 @@ mergeInto(LibraryManager.library, {
             }
         }
     },
-    web_update_gameview_size: function (width, height, dpr, offsetX, offsetY) {
-        var gameview = document.getElementById("gameview");
-        if (gameview) {
-            var drawableWidth = (width * dpr) | 0;
-            var drawableHeight = (height * dpr) | 0;
-            if (gameview.width !== drawableWidth ||
-                gameview.height !== drawableHeight) {
-                gameview.width = (width * dpr) | 0;
-                gameview.height = (height * dpr) | 0;
-            }
-            gameview.style.width = width + "px";
-            gameview.style.height = height + "px";
-            gameview.style.transform = "translateX(" + offsetX + "px) translateY(" + offsetY + "px)";
-        }
-    },
-    web_get_lang: function (dest, max) {
+    ekapp_getLang: function (dest, max) {
         var lang = window.navigator.language;
-        if(lang != null && lang.length >= 2) {
+        if (lang != null && lang.length >= 2) {
             lang = lang.substr(0, 2);
             stringToUTF8(lang, dest, max);
             return dest;
@@ -108,19 +92,220 @@ mergeInto(LibraryManager.library, {
         return 0;
     },
     ekapp_vibrate: function (duration) {
-        var vibrate = window.navigator.vibrate;
-        if(vibrate) {
-            vibrate(duration);
-            return 0;
+        try {
+            var vib = window.navigator.vibrate;
+            return (vib && vib() && vib(duration)) ? 0 : 1;
+        } catch {
         }
         return 1;
     },
-    ekapp_openURL: function(url) {
+    ekapp_openURL: function (url) {
         try {
             window.open(UTF8ToString(url), "_blank");
             return 0;
+        } catch {
         }
-        catch {}
         return 1;
+    },
+
+    ekapp_init: function (flags) {
+        var BUTTONS = [0, 2, 1, 2, 2];
+
+        var TYPES = {
+            "keydown": 14,
+            "keyup": 15,
+            "keypress": 16,
+
+            "mousemove": 8,
+            "mousedown": 9,
+            "mouseup": 10,
+            "wheel": 13,
+            "touchstart": 5,
+            "touchend": 7,
+            "touchcancel": 7,
+            "touchmove": 6,
+        };
+        var KEY_CODES = {
+            "ArrowUp": 1,
+            "ArrowDown": 2,
+            "ArrowLeft": 3,
+            "ArrowRight": 4,
+            "Escape": 5,
+            "Space": 6,
+            "Enter": 7,
+            "Backspace": 8,
+            "A": 16,
+            "C": 17,
+            "V": 18,
+            "X": 19,
+            "Y": 20,
+            "Z": 21,
+            "W": 22,
+            "S": 23,
+            "D": 24,
+        };
+
+        var onKey = function (event) {
+            var type = TYPES[event.type];
+            if (type) {
+                var code = KEY_CODES[event.code];
+                if (code) {
+                    if (__ekapp_onKey(type, code, 0)) {
+                        event.preventDefault();
+                    }
+                }
+            }
+        };
+
+        var wnd = window;
+        wnd.addEventListener("keypress", onKey, true);
+        wnd.addEventListener("keydown", onKey, true);
+        wnd.addEventListener("keyup", onKey, true);
+
+        var onResize = function () {
+            var dpr = window.devicePixelRatio;
+
+            var div = document.getElementById("gamecontainer");
+            var rc = div.getBoundingClientRect();
+            var css_w = rc.width;
+            var css_h = rc.height;
+
+            // TODO: configurable min aspect (70/100)
+            // TODO: landscape and different modes, native letterbox
+            var w = css_w;
+            var h = css_h;
+            var offset_x = 0;
+            var offset_y = 0;
+
+            // TODO:
+            //if (webKeepCanvasAspectRatio) {
+            //var aspect = g_app.config.width / g_app.config.height;
+            //if (aspect > 1.0) {
+            //    if (w / aspect < h) {
+            //        h = w / aspect;
+            //    }
+            //    offset_y = (css_h - h) / 2;
+            //} else {
+            //    if (h * aspect < w) {
+            //        w = h * aspect;
+            //    }
+            //    offset_x = (css_w - w) / 2;
+            //}
+            //}
+
+            __ekapp_onResize(dpr, w, h, w * dpr, h * dpr);
+
+            var gameview = document.getElementById("gameview");
+            if (gameview) {
+                var drawableWidth = (w * dpr) | 0;
+                var drawableHeight = (h * dpr) | 0;
+                if (gameview.width !== drawableWidth ||
+                    gameview.height !== drawableHeight) {
+                    gameview.width = drawableWidth;
+                    gameview.height = drawableHeight;
+                }
+                gameview.style.width = w + "px";
+                gameview.style.height = h + "px";
+                gameview.style.transform = "translateX(" + offset_x + "px) translateY(" + offset_y + "px)";
+            }
+        };
+
+        wnd.addEventListener("resize", onResize, true);
+        onResize();
+
+        /**
+         *
+         * @param e {TouchEvent}
+         */
+        var onTouch = function (e) {
+            var type = TYPES[e.type];
+            if (type) {
+                // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
+                var rect = e.target.getBoundingClientRect();
+                var cancelDefault = false;
+                for (var i = 0; i < e.changedTouches.length; ++i) {
+                    const touch = e.changedTouches[i];
+                    var id = touch.identifier + 1;
+                    var x = touch.clientX - rect.left;
+                    var y = touch.clientY - rect.top;
+                    cancelDefault = cancelDefault || __ekapp_onTouch(type, id, x, y);
+                }
+                if (cancelDefault) {
+                    e.preventDefault();
+                }
+            }
+        };
+
+        /**
+         *
+         * @param event {MouseEvent}
+         */
+        var onMouse = function (event) {
+            var type = TYPES[event.type];
+            // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
+            var rect = event.target.getBoundingClientRect();
+            var x = event.clientX - rect.left;
+            var y = event.clientY - rect.top;
+            if (type && __ekapp_onMouse(type, BUTTONS[event.button], x, y)) {
+                event.preventDefault();
+            }
+        };
+
+        /**
+         *
+         * @param event {WheelEvent}
+         */
+        var onWheel = function (event) {
+            if (__ekapp_onWheel(event.deltaX, event.deltaY)) {
+                event.preventDefault();
+            }
+        };
+
+        /** {CanvasElement} */
+        var canvas = document.getElementById("gameview");
+        canvas.addEventListener("mousedown", onMouse, false);
+        canvas.addEventListener("mouseup", onMouse, false);
+        canvas.addEventListener("mousemove", onMouse, false);
+        canvas.addEventListener("wheel", onWheel, false);
+        canvas.addEventListener("touchstart", onTouch, false);
+        canvas.addEventListener("touchend", onTouch, false);
+        canvas.addEventListener("touchmove", onTouch, false);
+        canvas.addEventListener("touchcancel", onTouch, false);
+
+        var webgl_list = ["webgl", "experimental-webgl"]; // 'webgl2'
+        var webgl_attributes = {
+            alpha: false,
+            depth: !!(flags & 1),
+            stencil: false,
+            antialias: false
+        };
+        var gl = undefined;
+        for (var i = 0; i < webgl_list.length; ++i) {
+            gl = canvas.getContext(webgl_list[i], webgl_attributes);
+            if (gl) {
+                break;
+            }
+        }
+        if (!gl) {
+            console.error("Failed to create WebGL context");
+            return false;
+        }
+        webgl_attributes.majorVersion = 1;
+        // extensions required for sokol by default
+        webgl_attributes.enableExtensionsByDefault = true;
+        var handle = GL.registerContext(gl, webgl_attributes);
+        if (!GL.makeContextCurrent(handle)) {
+            console.error("Failed to set current WebGL context");
+            return false;
+        }
+
+        return true;
+    },
+    ekapp_run: function () {
+        var loop = function () {
+            requestAnimationFrame(loop);
+            __ekapp_loop();
+        };
+        loop();
     }
 });

@@ -62,7 +62,7 @@ void handleQuitRequest() {
     bool doCenter = true;
     NSRect frame = NSMakeRect(0.0, 0.0, config.width, config.height);
     {
-        const char* wndSettings = ek::Arguments::current.getValue("--window", nullptr);
+        const char* wndSettings = findArgumentValue("--window", nullptr);
         if (wndSettings != nullptr) {
             sscanf(wndSettings, "%lf,%lf,%lf,%lf",
                    &frame.origin.x, &frame.origin.y,
@@ -291,7 +291,7 @@ void handleQuitRequest() {
 }
 
 - (void)scrollWheel:(NSEvent*)event {
-    ek::app::handleMouseEvent(self, event);
+    ek::app::handleWheelEvent(self, event);
 }
 
 /**** HANDLE TOUCH *****/

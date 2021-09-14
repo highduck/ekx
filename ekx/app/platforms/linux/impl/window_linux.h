@@ -4,12 +4,10 @@
 #include <cstring>
 #include <cstdlib>
 #include <ek/app/app.hpp>
-#include <ek/assert.hpp>
-#include <ek/debug.hpp>
 #include "keymap_linux.h"
 
 void ek_fail(const char* msg) {
-    EK_ERROR << msg;
+    EKAPP_LOG(msg);
     abort();
 }
 
@@ -349,7 +347,7 @@ void x11_query_system_dpi() {
 }
 
 bool glx_has_ext(const char* ext, const char* extensions) {
-    EK_ASSERT(ext);
+    EKAPP_ASSERT(ext);
     const char* start = extensions;
     while (true) {
         const char* where = strstr(start, ext);
@@ -657,11 +655,11 @@ void x11_set_fullscreen(bool enable) {
 }
 
 void x11_create_hidden_cursor() {
-    EK_ASSERT(0 == gAppLinux.x11.hidden_cursor);
+    EKAPP_ASSERT(0 == gAppLinux.x11.hidden_cursor);
     const int w = 16;
     const int h = 16;
     XcursorImage* img = XcursorImageCreate(w, h);
-    EK_ASSERT(img && (img->width == 16) && (img->height == 16) && img->pixels);
+    EKAPP_ASSERT(img && (img->width == 16) && (img->height == 16) && img->pixels);
     img->xhot = 0;
     img->yhot = 0;
     const size_t num_bytes = (size_t) (w * h) * sizeof(XcursorPixel);
@@ -959,7 +957,7 @@ ek::app::KeyCode x11_translate_key(int scancode) {
     using namespace ek;
     int dummy;
     KeySym* keysyms = XGetKeyboardMapping(gAppLinux.x11.display, scancode, 1, &dummy);
-    EK_ASSERT(keysyms);
+    EKAPP_ASSERT(keysyms);
     KeySym keysym = keysyms[0];
     XFree(keysyms);
     switch (keysym) {
@@ -1150,10 +1148,10 @@ int32_t x11_keysym_to_unicode(KeySym keysym) {
 }
 
 bool x11_parse_dropped_files_list(const char* src) {
-    EK_ASSERT(src);
+    EKAPP_ASSERT(src);
     return false;
 // TODO:
-//    EK_ASSERT(_sapp.drop.buffer);
+//    EKAPP_ASSERT(_sapp.drop.buffer);
 //
 //    clear_drop_buffer();
 //    _sapp.drop.num_files = 0;
@@ -1180,7 +1178,7 @@ bool x11_parse_dropped_files_list(const char* src) {
 //                ((src_count == 6) && (src_chr != '/')) ||
 //                ((src_count == 7) && (src_chr != '/')))
 //            {
-//                EK_INFO("sokol_app.h: dropped file URI doesn't start with file://");
+//                EK_INFO("dropped file URI doesn't start with file://");
 //                err = true;
 //                break;
 //            }

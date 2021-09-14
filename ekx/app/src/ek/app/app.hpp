@@ -12,24 +12,25 @@ enum EventType {
     BackButton,
     Close,
 
-    TouchStart,
+    TouchStart = 5,
     TouchMove,
     TouchEnd,
 
-    MouseMove,
+    MouseMove = 8,
     MouseDown,
     MouseUp,
     MouseEnter,
     MouseExit,
-    MouseScroll,
 
-    KeyDown,
+    Wheel = 13,
+
+    KeyDown = 14,
     KeyUp,
     // TODO: since keypress deprecated on web, check if we need it
     // TODO: `KeyPress` macro pollution from X11 headers
     KeyPress_,
 
-    Text,
+    Text = 17,
 
     Count
 };
@@ -150,8 +151,15 @@ struct MouseEvent final {
     MouseButton button;
     float x;
     float y;
-    float scrollX;
-    float scrollY;
+};
+
+struct WheelEvent final {
+    EventType type;
+    float x;
+    float y;
+
+    WheelEvent(float deltaX, float deltaY) : type{EventType::Wheel}, x{deltaX}, y{deltaY} {
+    }
 };
 
 union Event final {
@@ -160,6 +168,7 @@ union Event final {
     TextEvent text;
     TouchEvent touch;
     MouseEvent mouse;
+    WheelEvent wheel;
 
     Event(EventType eventType) : type{eventType} {
     }
@@ -171,6 +180,9 @@ union Event final {
     }
 
     Event(MouseEvent mouseEvent) : mouse{mouseEvent} {
+    }
+
+    Event(WheelEvent wheelEvent) : wheel{wheelEvent} {
     }
 
     Event(TextEvent textEvent) : text{textEvent} {
@@ -205,6 +217,9 @@ struct AppConfig final {
 };
 
 struct AppContext {
+    int argc = 0;
+    char** argv = {nullptr};
+
     AppConfig config;
 
     float windowWidth = 1.0f;
@@ -255,6 +270,8 @@ int vibrate(int durationMillis);
 int openURL(const char* url);
 
 const char* getSystemFontPath(const char* fontName);
+
+const char* findArgumentValue(const char* key, const char* defaultValue);
 
 #ifndef EK_NO_MAIN
 

@@ -13,7 +13,8 @@ extern int ekapp_vibrate(int durationMillis);
  * @param max - buffer size
  * @return destination chars pointer, or nullptr in case of error
  */
-extern const char* web_get_lang(char* dest, int max);
+extern const char* ekapp_getLang(char* dest, int max);
+
 }
 
 namespace ek::app {
@@ -32,7 +33,7 @@ const float* getScreenInsets() {
 
 const char* getPreferredLang() {
     static char lang[8];
-    return web_get_lang(lang, 8);
+    return ekapp_getLang(lang, 8);
 }
 
 const char* getSystemFontPath(const char* fontName) {

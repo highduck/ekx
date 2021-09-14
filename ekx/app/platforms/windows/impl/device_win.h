@@ -1,10 +1,10 @@
 #pragma once
 
 #include <ek/app/app.hpp>
-#include <ek/Arguments.hpp>
 
 int main(int argc, char* argv[]) {
-    ::ek::Arguments::current = {argc, argv};
+    ::ek::app::g_app.argc = argc;
+    ::ek::app::g_app.argv = argv;
     ::ek::app::main();
     return 0;
 }

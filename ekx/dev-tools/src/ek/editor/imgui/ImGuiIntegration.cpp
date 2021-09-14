@@ -220,12 +220,12 @@ void ImGuiIntegration::on_event(const Event& event) {
             io.MouseDown[button] = (event.type == EventType::MouseDown);
         }
             break;
-        case EventType::MouseScroll:
-            if (fabs(event.mouse.scrollX) > 0.0f) {
-                io.MouseWheelH += event.mouse.scrollX * 0.1f;
+        case EventType::Wheel:
+            if (fabs(event.wheel.x) > 0.0f) {
+                io.MouseWheelH += event.wheel.x * 0.1f;
             }
-            if (fabs(event.mouse.scrollY) > 0.0f) {
-                io.MouseWheel += event.mouse.scrollY * 0.1f;
+            if (fabs(event.wheel.y) > 0.0f) {
+                io.MouseWheel += event.wheel.y * 0.1f;
             }
             break;
 

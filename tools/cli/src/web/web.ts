@@ -88,9 +88,16 @@ function renderCMakeFile(ctx, buildType): string {
         ASSERTIONS: buildType === "Debug" ? 2 : 0,
         SAFE_HEAP: buildType === "Debug" ? 1 : 0,
         DEMANGLE_SUPPORT: buildType === "Debug" ? 1 : 0,
+
+        // TODO: strange runtime DOM exception error with Release
+        STRICT: 1,
+        // MINIMAL_RUNTIME: 1,
+        // MODULARIZE: 1,
+        SUPPORT_ERRNO: 0,
+
         // STACK_OVERFLOW_CHECK: 2,
         // ALIASING_FUNCTION_POINTERS: 0,
-        // MODULARIZE: 1,
+
         FETCH: 1,
         // WASM: 1,
         // WASM_ASYNC_COMPILATION: 1,
@@ -105,8 +112,6 @@ function renderCMakeFile(ctx, buildType): string {
         INLINING_LIMIT: 1,
         //WASM_OBJECT_FILES: 0,
 
-        // TODO: strange runtime DOM exception error with Release
-        //STRICT: 1,
         ENVIRONMENT: "web",
 
         DYNAMIC_EXECUTION: 0,
