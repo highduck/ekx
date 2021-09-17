@@ -93,6 +93,9 @@ int main(int argc, char* argv[]) {
     g_app.argc = argc;
     g_app.argv = argv;
     ::ek::app::main();
+    if(g_app.exitRequired) {
+        return g_app.exitCode;
+    }
 
     int flags = 0;
     if(g_app.config.needDepth) {

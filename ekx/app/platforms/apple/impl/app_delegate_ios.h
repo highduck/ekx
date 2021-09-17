@@ -36,6 +36,9 @@ void handleTouches(EventType type, UIView* view, NSSet* touches, UIEvent*) {
     }
 
     ek::app::main();
+    if (g_app.exitRequired) {
+        return NO;
+    }
 
     const auto sampleCount = g_app.config.sampleCount;
     const auto swapInterval = g_app.config.swapInterval;

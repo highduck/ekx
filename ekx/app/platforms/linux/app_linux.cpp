@@ -24,12 +24,13 @@ int main(int argc, char* argv[]) {
     g_app.argv = argv;
 
     ::ek::app::main();
+    if (!g_app.exitRequired) {
+        linux_app_create();
+        notifyReady();
 
-    linux_app_create();
-    notifyReady();
+        linux_app_loop();
 
-    linux_app_loop();
-
-    linux_app_shutdown();
-    return 0;
+        linux_app_shutdown();
+    }
+    return g_app.exitCode;
 }

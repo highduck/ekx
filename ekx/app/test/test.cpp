@@ -12,6 +12,6 @@ void ek::app::main() {
     context.applyCommandLine(g_app.argc, g_app.argv);
 
     int res = context.run(); // run
-    if(context.shouldExit()) // important - query flags (and --exit) rely on the user doing this
-        exit(res);          // propagate the result of the tests
+    //if(context.shouldExit()) // important - query flags (and --exit) rely on the user doing this
+        quit(res);          // propagate the result of the tests
 }
