@@ -544,16 +544,16 @@ async@^2.6.2:
   dependencies:
     lodash "^4.17.14"
 
-auph@0.0.17:
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/auph/-/auph-0.0.17.tgz#fe9a83eb4620bf0136f715d1906af158b25622f1"
-  integrity sha512-ApXWOTamSS0O132EJubNXujZvkF90cLm26qPZJZakBTqiS1TKjYlY+R2JmOBvYHGYwB9vxdAI4Daero+5V1mwg==
+auph@0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/auph/-/auph-0.1.0.tgz#1fb7f745004f5888010594d39ef8f00ee6cbd052"
+  integrity sha512-/pHS9rizL1snlI/Kmw8N47HV0OdGR6KGBZxXYWJhD/wS1S6MtnRHZl3YcGZMT+ftAO+m7ee2bYNbtZT/bA6EEA==
   dependencies:
     "@ekx/dr-libs" "^0.0.3"
     "@ekx/stb" "^0.0.7"
     bindings "^1.5.0"
     cmake-build "0.0.3"
-    node-addon-api "^4.0.0"
+    node-addon-api "^4.1.0"
 
 balanced-match@^1.0.0:
   version "1.0.2"
@@ -2163,10 +2163,10 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-node-addon-api@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-4.0.0.tgz#ac128f43eff7fac4b5f5ef2f39d6d7c2709efead"
-  integrity sha512-ALmRVBFzfwldBfk3SbKfl6+PVMXiCPKZBEfsJqB/EjXAMAI+MfFrEHR+GMRBuI162DihZ1QjEZ8ieYKuRCJ8Hg==
+node-addon-api@^4.1.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-4.2.0.tgz#117cbb5a959dff0992e1c586ae0393573e4d2a87"
+  integrity sha512-eazsqzwG2lskuzBqCGPi7Ac2UgOoMz8JVOXVhTvvPDYhthvNpefx8jWD8Np7Gv+2Sz0FlPWZk0nJV0z598Wn8Q==
 
 node-emoji@^1.11.0:
   version "1.11.0"
