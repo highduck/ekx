@@ -1,5 +1,8 @@
 #pragma once
 
+//#include <ek/debug.hpp>
+//#define IM_ASSERT_USER_ERROR(_EXP,_MSG) EK_WARN(_MSG)
+
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>

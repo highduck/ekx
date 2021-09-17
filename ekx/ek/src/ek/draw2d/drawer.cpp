@@ -339,7 +339,7 @@ Context::Context() {
     vertexBuffers_ = new BufferChain(BufferType::VertexBuffer, MaxVertex + 1, EK_SIZEOF_U32(Vertex2D));
     indexBuffers_ = new BufferChain(BufferType::IndexBuffer, MaxIndex + 1, EK_SIZEOF_U32(uint16_t));
 
-    EK_TRACE << "draw2d: allocate memory buffers";
+    EK_TRACE("draw2d: allocate memory buffers");
     vertexData_ = memory::systemAllocator.allocBufferForArray<Vertex2D>(MaxVertex + 1);
     indexData_ = memory::systemAllocator.allocBufferForArray<uint16_t>(MaxIndex + 1);
 
@@ -594,7 +594,7 @@ Context& Context::restoreProgram() {
 }
 
 void Context::createDefaultResources() {
-    EK_TRACE << "draw2d: create default resources";
+    EK_TRACE("draw2d: create default resources");
     const auto backend = sg_query_backend();
     emptyTexture = Texture::createSolid32(4, 4, 0xFFFFFFFFu);
     defaultShader = new Shader(draw2d_shader_desc(backend));
@@ -911,13 +911,13 @@ void endFrame() {
 }
 
 void initialize() {
-    EK_TRACE << "draw2d initialize";
+    EK_TRACE("draw2d initialize");
     context.initialize();
-    EK_TRACE << "draw2d initialized";
+    EK_TRACE("draw2d initialized");
 }
 
 void shutdown() {
-    EK_TRACE << "draw2d shutdown";
+    EK_TRACE("draw2d shutdown");
     context.shutdown();
 }
 

@@ -6,9 +6,6 @@
     <uses-feature android:name="android.hardware.screen.landscape" android:required="false"/>
     <uses-feature android:name="android.hardware.screen.portrait" android:required="false"/>
 
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <!-- TEMPLATE ROOT -->
 
     <!-- NOTE: Crashlytics NDK requires allowNativeHeapPointerTagging="false" -->

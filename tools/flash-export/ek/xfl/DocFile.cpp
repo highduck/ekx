@@ -1,7 +1,6 @@
 #include "Doc.hpp"
 
 #include <pugixml.hpp>
-#include <fstream>
 #include <ek/debug.hpp>
 #include <sys/stat.h>
 #include <miniz.h>
@@ -25,7 +24,7 @@ public:
     ~FileNode() override {
         delete xml_doc_;
         if (root_ == this) {
-            for (const auto& it : children_) {
+            for (const auto& it: children_) {
                 delete it.second;
             }
         }
@@ -36,7 +35,7 @@ public:
             xml_doc_ = new pugi::xml_document();
             auto res = xml_doc_->load(this->content().c_str());
             if (!res) {
-                EK_ERROR << "XML PARSE ERROR: " << res.description();
+                EK_ERROR_F("XML PARSE ERROR: %s", res.description());
                 delete xml_doc_;
                 xml_doc_ = nullptr;
             }
@@ -80,11 +79,22 @@ public:
 
     const std::string& content() const override {
         if (contents_.empty()) {
-            std::ifstream t(path_.c_str());
-            if (t.good()) {
-                std::stringstream buffer;
-                buffer << t.rdbuf();
-                contents_ = buffer.str();
+            auto* stream = fopen(path_.c_str(), "r");
+            if (stream) {
+                fseek(stream, 0, SEEK_END);
+                contents_.resize(static_cast<size_t>(ftell(stream)));
+                fseek(stream, 0, SEEK_SET);
+
+                fread(contents_.data(), contents_.size(), 1u, stream);
+
+                if (ferror(stream) != 0) {
+                    contents_.resize(0);
+                    contents_.shrink_to_fit();
+                }
+
+                fclose(stream);
+            } else {
+                EK_ERROR_F("Error read XFL node: %s", path_.c_str());
             }
         }
         return contents_;
@@ -108,7 +118,7 @@ public:
         // MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY
         auto status = mz_zip_reader_init_file(zip_, zip_file_path.c_str(), 0);
         if (!status) {
-            EK_WARN << "Error reading FLA zip archive";
+            EK_WARN("Error reading FLA zip archive");
         }
     }
 
@@ -162,12 +172,12 @@ std::unique_ptr<File> File::load(const path_t& path) {
             if (is_dir(dir)) {
                 return std::make_unique<XFLNode>(dir, nullptr);
             } else {
-                EK_ERROR("Import Flash: loading %s XFL file, but %s is not a dir", path.c_str(), dir.c_str());
+                EK_ERROR_F("Import Flash: loading %s XFL file, but %s is not a dir", path.c_str(), dir.c_str());
             }
         } else if (ext == ".fla" || ext == ".zip") {
             return std::make_unique<FLANode>(path);
         } else {
-            EK_ERROR << "Import Flash: file is not xfl or fla: " << path;
+            EK_ERROR_F("Import Flash: file is not xfl or fla: %s", path.c_str());
         }
     }
 
@@ -179,11 +189,11 @@ std::unique_ptr<File> File::load(const path_t& path) {
         if (is_file(path / path.basename() + ".xfl")) {
             return std::make_unique<XFLNode>(path, nullptr);
         } else {
-            EK_WARN << "Import Flash: given dir doesn't contain .xfl file: " << path;
+            EK_WARN_F("Import Flash: given dir doesn't contain .xfl file: %s", path.c_str());
         }
     }
 
-    EK_ERROR << "Import Flash: file not found: " << path;
+    EK_ERROR_F("Import Flash: file not found: %s", path.c_str());
     return nullptr;
 }
 

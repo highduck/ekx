@@ -29,12 +29,12 @@ inline void set_pixel(image_t& image, const int2& pos, const abgr32_t pixel) {
 }
 
 inline abgr32_t get_pixel_unsafe(const image_t& image, const int2& pos) {
-    assert(pixel_in_bounds(image, pos));
+    EK_ASSERT(pixel_in_bounds(image, pos));
     return *reinterpret_cast<const abgr32_t*>(image.data() + pos.y * image.stride() + pos.x * 4u);
 }
 
 inline void set_pixel_unsafe(image_t& image, const int2& pos, const abgr32_t pixel) {
-    assert(pixel_in_bounds(image, pos));
+    EK_ASSERT(pixel_in_bounds(image, pos));
     *reinterpret_cast<abgr32_t*>(image.data() + pos.y * image.stride() + pos.x * 4u) = pixel;
 }
 

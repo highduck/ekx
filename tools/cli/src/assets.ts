@@ -40,6 +40,6 @@ export async function buildAssetPackAsync(ctx: Project, output?: string, devMode
     await builder.build(assetsOutput, "export/content/.cache");
 
     if (!devMode) {
-        await optimizePngGlobAsync(path.join(assetsOutput, "**/*.png"));
+        //await optimizePngGlobAsync(path.join(assetsOutput, "**/*.png"));
     }
 }

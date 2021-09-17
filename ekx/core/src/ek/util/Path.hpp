@@ -2,7 +2,6 @@
 
 #include <string>
 #include <utility>
-#include <iosfwd>
 
 namespace ek {
 
@@ -20,15 +19,11 @@ class path_t {
 public:
     path_t() noexcept = default;
 
-    explicit path_t(const char* c_str) noexcept
-            : path_{c_str} {
+    explicit path_t(const char* c_str) noexcept : path_{c_str} {
     }
 
-    explicit path_t(std::string str) noexcept
-            : path_{std::move(str)} {
+    explicit path_t(std::string str) noexcept : path_{std::move(str)} {
     }
-
-    friend std::ostringstream& operator<<(std::ostringstream& ss, const path_t& path) noexcept;
 
     path_t operator+(const std::string& str) const noexcept {
         return path_t{path_ + str};

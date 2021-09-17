@@ -74,9 +74,11 @@ function mod_main_class(app_package_java) {
 }
 
 function mod_android_manifest(ctx) {
-    const android_manifest = collectStrings(ctx, "android_manifest", ["android"], false);
+    let android_manifest = collectStrings(ctx, "android_manifest", ["android"], false);
+    const android_permission = collectStrings(ctx, "android_permission", ["android"], false);
     const android_manifestApplication = collectStrings(ctx, "android_manifestApplication", ["android"], false);
 
+    android_manifest = android_manifest.concat(android_permission.map(permission => `<uses-permission android:name="${permission}" />`));
     let orientation = "sensorPortrait";
     if (ctx.orientation === "landscape") {
         orientation = "sensorLandscape";

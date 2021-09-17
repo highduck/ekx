@@ -4,6 +4,7 @@
 #include <ek/math/box.hpp>
 #include <ek/math/vec.hpp>
 #include <ek/ds/Hash.hpp>
+#include <ek/assert.hpp>
 
 namespace ek {
 
@@ -101,12 +102,12 @@ public:
             nodes.emplace_back();
             nodes.emplace_back();
         }
-        assert(freeID > 0);
+        EK_ASSERT(freeID > 0);
         return freeID;
     }
 
     void releaseNode(int nodeId) {
-        assert(nodeId > 0);
+        EK_ASSERT(nodeId > 0);
         nodes[nodeId].firstChildNode = nextFreeNode;
         nextFreeNode = nodeId;
     }

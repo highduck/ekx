@@ -193,8 +193,6 @@ class AppListener {
 public:
     virtual ~AppListener();
 
-    virtual void onInitialize() {}
-
     virtual void onReady() {}
 
     virtual void onFrame() {}
@@ -233,7 +231,6 @@ struct AppContext {
     MouseCursor cursor = MouseCursor::Parent;
     AppListener* listener = nullptr;
 
-    bool initialized = false;
     bool ready = false;
     bool running = false;
 
@@ -244,8 +241,6 @@ struct AppContext {
 };
 
 inline AppContext g_app{};
-
-void start();
 
 void quit(int status);
 
@@ -265,8 +260,6 @@ const char* getPreferredLang();
  */
 const float* getScreenInsets();
 
-int vibrate(int durationMillis);
-
 int openURL(const char* url);
 
 const char* getSystemFontPath(const char* fontName);
@@ -284,19 +277,41 @@ void processEvent(const Event& event);
 
 void processFrame();
 
-void notifyInit();
-
 void notifyReady();
 
 }
 
 #if 1 || defined(EKAPP_DEBUG)
 
-#include <cstdio>
 #include <cassert>
 
-#define EKAPP_LOG(s) puts(s)
 #define EKAPP_ASSERT(s) assert(s)
+
+#if defined(__EMSCRIPTEN__)
+
+#include <emscripten.h>
+extern "C" void ekapp_log(const char* pStr);
+
+#define EKAPP_LOG(s) ekapp_log(s);
+
+//#elif defined(__APPLE__)
+
+//#include <CoreFoundation/CoreFoundation.h>
+//#if __cplusplus
+//extern "C" {
+//#endif
+//    extern void NSLog(CFStringRef format, ...);
+//#if __cplusplus
+//}
+//#endif
+//#define EKAPP_LOG(s) NSLog(CFSTR(s));
+
+#else
+
+#include <cstdio>
+#define EKAPP_LOG(s) puts(s)
+
+#endif
 
 #else
 

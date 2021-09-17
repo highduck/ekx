@@ -20,7 +20,7 @@ void handleQuitRequest() {
 }
 
 - (void)setupMenuBar {
-    EKAPP_LOG_INFO("setup menu bar");
+    EKAPP_LOG("setup menu bar");
     id menubar = [NSMenu new];
     id menu_item = [NSMenuItem new];
     [menubar addItem:menu_item];
@@ -39,7 +39,7 @@ void handleQuitRequest() {
 
 - (void)createView {
     using namespace ek::app;
-    EKAPP_LOG_INFO("create view");
+    EKAPP_LOG("create view");
     _view = [MetalView new];
     _view.device = MTLCreateSystemDefaultDevice();
 
@@ -57,7 +57,7 @@ void handleQuitRequest() {
 
 - (void)createWindow {
     using namespace ek::app;
-    EKAPP_LOG_INFO("create window");
+    EKAPP_LOG("create window");
     auto& config = g_app.config;
     bool doCenter = true;
     NSRect frame = NSMakeRect(0.0, 0.0, config.width, config.height);
@@ -143,7 +143,7 @@ void handleQuitRequest() {
 }
 
 - (void)applicationWillFinishLaunching:(__unused NSNotification*)notification {
-    EKAPP_LOG_INFO("applicationWillFinishLaunching begin");
+    EKAPP_LOG("applicationWillFinishLaunching begin");
 
     gAppDelegate = self;
 
@@ -151,17 +151,17 @@ void handleQuitRequest() {
     [_application setActivationPolicy:NSApplicationActivationPolicyRegular];
 
     ek::app::initScanCodeTableApple();
-    ek::app::notifyInit();
+    ek::app::main();
 
     [self setupMenuBar];
     [self createView];
     [self createWindow];
-    EKAPP_LOG_INFO("app macOS: applicationWillFinishLaunching end");
+    EKAPP_LOG("app macOS: applicationWillFinishLaunching end");
 }
 
 - (void)applicationDidFinishLaunching:(__unused NSNotification*)notification {
     using namespace ek::app;
-    EKAPP_LOG_INFO("app macOS: applicationDidFinishLaunching begin");
+    EKAPP_LOG("app macOS: applicationDidFinishLaunching begin");
     [_application activateIgnoringOtherApps:YES];
     notifyReady();
 }

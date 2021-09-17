@@ -876,20 +876,6 @@ void win32_shutdown() {
     win32_restore_console();
 }
 
-namespace ek::app {
-
-void start() {
-    win32_create();
-
-    notifyInit();
-    notifyReady();
-
-    win32_run_loop();
-    win32_shutdown();
-}
-
-}
-
 char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
     int argc = 0;
     char** argv = 0;
@@ -897,7 +883,7 @@ char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
 
     LPWSTR* w_argv = CommandLineToArgvW(w_command_line, &argc);
     if (w_argv == NULL) {
-        EK_ERROR << "Win32: failed to parse command line";
+        EK_ERROR("Win32: failed to parse command line");
         abort();
     } else {
         size_t size = wcslen(w_command_line) * 4;
@@ -908,7 +894,7 @@ char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
         for (int i = 0; i < argc; ++i) {
             n = WideCharToMultiByte(CP_UTF8, 0, w_argv[i], -1, args, (int) size, NULL, NULL);
             if (n == 0) {
-                EK_ERROR << "Win32: failed to convert all arguments to utf8";
+                EK_ERROR("Win32: failed to convert all arguments to utf8");
                 abort();
                 break;
             }
@@ -923,6 +909,9 @@ char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
 }
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
+
+    using namespace ek::app;
+
     (void)hInstance;
     (void)(hPrevInstance);
     (void)(lpCmdLine);
@@ -930,9 +919,16 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     int argc_utf8 = 0;
     char** argv_utf8 = command_line_to_utf8_argv(GetCommandLineW(), &argc_utf8);
 
-    ::ek::app::g_app.argc = argc_utf8;
-    ::ek::app::g_app.argv = argv_utf8;
-    ::ek::app::main();
+    g_app.argc = argc_utf8;
+    g_app.argv = argv_utf8;
+
+    win32_create();
+
+    ek::app::main();
+    notifyReady();
+
+    win32_run_loop();
+    win32_shutdown();
 
     free(argv_utf8);
     return 0;

@@ -87,7 +87,7 @@ struct color_transform_t {
 };
 
 template<typename T>
-inline static color_transform_t<T> operator*(T scalar, const color_transform_t<T>& v) {
+inline color_transform_t<T> operator*(T scalar, const color_transform_t<T>& v) {
     return color_transform_t{scalar * v.scale, scalar * v.offset};
 }
 

@@ -3,11 +3,11 @@
 
 #if TARGET_OS_IOS || TARGET_OS_TV
 
-#import "impl/app_delegate_ios.h"
+#include "impl/app_delegate_ios.h"
 
 #else
 
-#import "impl/app_delegate_macos.h"
+#include "impl/app_delegate_macos.h"
 
 #endif
 
@@ -20,19 +20,13 @@ AppDelegate* gAppDelegate = nullptr;
 
 #ifndef EK_NO_MAIN
 int main(int argc, char* argv[]) {
-    ::ek::app::g_app.argc = argc;
-    ::ek::app::g_app.argv = argv;
-    ::ek::app::main();
-    return 0;
-}
-#endif
+    using namespace ek::app;
+    g_app.argc = argc;
+    g_app.argv = argv;
 
-namespace ek::app {
-
-void start() {
 #if TARGET_OS_IOS || TARGET_OS_TV
     @autoreleasepool {
-        UIApplicationMain(g_app.argc, g_app.argv, nil, NSStringFromClass(AppDelegate.class));
+        UIApplicationMain(argc, argv, nil, NSStringFromClass(AppDelegate.class));
     }
 #else
     @autoreleasepool {
@@ -40,7 +34,11 @@ void start() {
         [NSApplication.sharedApplication run];
     }
 #endif
+    return 0;
 }
+#endif
+
+namespace ek::app {
 
 void* getMetalDevice() {
     if(gAppDelegate.view != nil) {

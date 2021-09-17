@@ -35,7 +35,7 @@ void handleTouches(EventType type, UIView* view, NSSet* touches, UIEvent*) {
         self.window.rootViewController = [UIViewController new];
     }
 
-    notifyInit();
+    ek::app::main();
 
     const auto sampleCount = g_app.config.sampleCount;
     const auto swapInterval = g_app.config.swapInterval;

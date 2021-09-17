@@ -94,8 +94,8 @@ void readBitmapARGB(input_memory_stream& input, BitmapData& bitmap) {
     IO io{input};
     io(desc);
     const auto compressed = input.read<uint8_t>();
-    assert(desc.width_tw == desc.width * 20u);
-    assert(desc.height_tw == desc.height * 20u);
+    EK_ASSERT(desc.width_tw == desc.width * 20u);
+    EK_ASSERT(desc.height_tw == desc.height * 20u);
     bitmap.width = desc.width;
     bitmap.height = desc.height;
     bitmap.bpp = desc.stride / bitmap.width;
@@ -106,7 +106,7 @@ void readBitmapARGB(input_memory_stream& input, BitmapData& bitmap) {
     if ((compressed & 1) != 0) {
         auto written = ekUncompress(input, bm_data, bm_size);
         if (written != bm_size) {
-            EK_ERROR << "bitmap decompress error";
+            EK_ERROR("bitmap decompress error");
         }
     } else {
         input.read(bm_data, bm_size);
@@ -119,8 +119,8 @@ void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
     BitmapItemHeader desc{};
     IO io{input};
     io(desc);
-    assert(desc.width_tw == desc.width * 20u);
-    assert(desc.height_tw == desc.height * 20u);
+    EK_ASSERT(desc.width_tw == desc.width * 20u);
+    EK_ASSERT(desc.height_tw == desc.height * 20u);
     auto nColors = input.read<uint8_t>();
     if (nColors == 0) {
         nColors = 0xFF;
@@ -144,7 +144,7 @@ void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
     buffer.resize(desc.stride * desc.height);
     auto written = ekUncompress(input, buffer.data(), buffer.size());
     if (written != buffer.size()) {
-        EK_ERROR << "bitmap decompress error";
+        EK_ERROR("bitmap decompress error");
     }
     bitmap.width = desc.width;
     bitmap.height = desc.height;
@@ -185,7 +185,7 @@ BitmapData* BitmapData::parse(const std::string& data) {
     } else if (sig == SIGNATURE_JPEG) {
         readBitmapJPEG(data, bitmap);
     } else {
-        EK_ERROR << "unsupported dat";
+        EK_ERROR("unsupported dat");
     }
 
     return bitmap_ptr;

@@ -237,13 +237,13 @@ public:
         } else if (data_.type == TextureDataType::CubeMap) {
             for (int idx = 0; idx < 6; ++idx) {
                 imagePathList[idx] = manager_->base_path / data_.images[idx];
-                EK_TRACE << "add to loading queue cube-map image #" << idx << ": " << imagePathList[idx];
+                EK_TRACE_F("add to loading queue cube-map image #%d: %s", idx, imagePathList[idx].c_str());
             }
             texturesCount = 6;
             premultiplyAlpha = false;
             state = AssetState::Loading;
         } else {
-            EK_ERROR << "unknown Texture Type " << (uint32_t) data_.type;
+            EK_ERROR_F("unknown Texture Type %u", (uint32_t)data_.type);
             error = 1;
             state = AssetState::Ready;
         }
@@ -255,13 +255,13 @@ public:
         }
         if (texturesStartLoading < texturesCount) {
             const auto idx = texturesStartLoading++;
-            EK_TRACE << "poll loading image #" << idx << " / " << texturesCount;
+            EK_TRACE_F("poll loading image #%d / %d", idx, texturesCount);
             get_resource_content_async(
                     imagePathList[idx].c_str(),
                     [this, idx](auto buffer) {
                         ++imagesLoaded;
                         images[idx] = decode_image_data(buffer.data(), buffer.size(), premultiplyAlpha);
-                        EK_DEBUG << "texture #" << idx << " loaded " << imagesLoaded << " of " << texturesCount;
+                        EK_DEBUG_F("texture #%d loaded %d of %d", idx, imagesLoaded, texturesCount);
                     }
             );
         } else if (imagesLoaded == texturesCount) {
@@ -274,7 +274,7 @@ public:
                     error = 1;
                 }
             } else if (data_.type == TextureDataType::CubeMap) {
-                EK_DEBUG << "Cube map images loaded, creating cube texture and cleaning up";
+                EK_DEBUG("Cube map images loaded, creating cube texture and cleaning up");
                 Res<Texture>{name_}.reset(graphics::createTexture(images));
                 state = AssetState::Ready;
                 for (auto* img : images) {
@@ -324,7 +324,7 @@ public:
             get_resource_content_async(langPath.c_str(),
                                        [this, lang](std::vector<uint8_t> buffer) {
                                            if (buffer.empty()) {
-                                               EK_ERROR << "Strings resource not found: " << lang;
+                                               EK_ERROR_F("Strings resource not found: %s", lang.c_str());
                                                error = 1;
                                            } else {
                                                Localization::instance.load(lang, std::move(buffer));
@@ -355,7 +355,7 @@ public:
         fullPath_ = manager_->base_path / name_ + ".model";
         get_resource_content_async(fullPath_.c_str(), [this](auto buffer) {
             if (buffer.empty()) {
-                EK_ERROR << "MODEL resource not found: " << fullPath_;
+                EK_ERROR_F("MODEL resource not found: %s", fullPath_.c_str());
                 error = 1;
             }
 
@@ -436,7 +436,7 @@ public:
             const auto initialState = asset->state;
             if (asset->state == AssetState::Initial) {
                 if (isTimeBudgetAllowStartNextJob(timer)) {
-                    EK_DEBUG << "Loading BEGIN: " << asset->name_;
+                    EK_DEBUG_F("Loading BEGIN: %s", asset->name_.c_str());
                     asset->load();
                 }
             }
@@ -447,14 +447,14 @@ public:
             }
             if (asset->state == AssetState::Ready) {
                 if (initialState != AssetState::Ready) {
-                    EK_DEBUG << "Loading END: " << asset->name_;
+                    EK_DEBUG_F("Loading END: %s", asset->name_.c_str());
                 }
                 ++numAssetsLoaded;
             }
         }
 
         if (!isTimeBudgetAllowStartNextJob(timer)) {
-            EK_WARN("Assets loading jobs spend %f ms", timer.readMillis());
+            EK_INFO_F("Assets loading jobs spend %d ms", (int)timer.readMillis());
         }
 
         assetsLoaded = numAssetsLoaded;

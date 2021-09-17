@@ -136,15 +136,15 @@ void EditorSettings::save() const {
         wnd.append_attribute("height").set_value(height);
     }
     if (!xml.save_file(editorSettingsPath)) {
-        EK_ERROR << "Can't save editor settings";
+        EK_ERROR("Can't save editor settings");
     }
 }
 
 void EditorSettings::load() {
-    EK_TRACE << "loading editor settings";
+    EK_TRACE("loading editor settings");
     pugi::xml_document doc{};
     if (!doc.load_file(editorSettingsPath)) {
-        EK_ERROR << "Can't load editor settings";
+        EK_ERROR("Can't load editor settings");
         return;
     }
     auto node = doc.first_child();

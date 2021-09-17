@@ -112,6 +112,13 @@ export interface AndroidConfig extends CxxConfig {
     // add to the root of AndroidManifest.xml
     android_manifest: UserArray<string>;
 
+    /**
+     * Add <uses-permission> to the AndroidManifest.xml
+     * `<uses-permission android:name="VALUE" />`
+     * for example: `android.permission.VIBRATE`
+     */
+    android_permission: UserArray<string>;
+
     // add to the <application> xml node of AndroidManifest.xml
     android_manifestApplication: UserArray<string>;
 
@@ -130,6 +137,7 @@ type AndroidName =
     | "android_gradleApplyPlugin"
     | "android_gradleConfigRelease"
     | "android_manifest"
+    | "android_permission"
     | "android_manifestApplication"
     | "android_strings";
 
@@ -141,6 +149,7 @@ const android_names: AndroidName[] = [
     "android_gradleApplyPlugin",
     "android_gradleConfigRelease",
     "android_manifest",
+    "android_permission",
     "android_manifestApplication",
     "android_strings",
 ];

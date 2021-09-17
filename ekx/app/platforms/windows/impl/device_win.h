@@ -19,11 +19,6 @@ const float* getScreenInsets() {
     return nullptr;
 }
 
-int vibrate(int millis) {
-    (void)millis;
-    return -1;
-}
-
 const char* getPreferredLang() {
     // TODO:
     return nullptr;

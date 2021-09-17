@@ -11,7 +11,7 @@ namespace ek {
 void exportBitmapFont(const char* xmlPath) {
     pugi::xml_document xml;
     if (!xml.load_file(xmlPath)) {
-        EK_ERROR("error parse xml %s", xmlPath);
+        EK_ERROR_F("error parse xml %s", xmlPath);
         return;
     }
     auto node = xml.first_child();
@@ -29,7 +29,7 @@ void exportBitmapFont(const char* xmlPath) {
 
     MultiResAtlasData atlas{atlasSettings};
 
-    EK_DEBUG << "Export Bitmap Font asset";
+    EK_DEBUG("Export Bitmap Font asset");
 
     auto fontData = buildBitmapFont(path_t{path}, name, font, filters, atlas);
     ek::output_memory_stream out{100};

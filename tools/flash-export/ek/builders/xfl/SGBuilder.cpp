@@ -402,7 +402,7 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
             child->drawingLayerItem &&
             child->animationSpan0 == _animationSpan0 &&
             child->animationSpan1 == _animationSpan1) {
-            // EK_DEBUG << "Found drawing layer " << child->ref->item.name;
+            // EK_DEBUG_F("Found drawing layer " << child->ref->item.name);
             auto& timeline = child->drawingLayerItem->timeline;
             assert(!timeline.layers.empty());
             assert(!timeline.layers[0].frames.empty());
@@ -440,7 +440,7 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
     drawingLayerInstance->drawingLayerItem = std::move(shapeItem);
     item->drawingLayerChild = drawingLayerInstance;
     item->shapes++;
-    // EK_DEBUG << "Created drawing layer " << newElement->item.name;
+    // EK_DEBUG_F("Created drawing layer " << newElement->item.name);
     return drawingLayerInstance;
 }
 
@@ -475,11 +475,11 @@ void SGBuilder::process(const Element& el, ExportItem* parent, processing_bag_t*
         case ElementType::font_item:
         case ElementType::sound_item:
         case ElementType::static_text:
-            EK_WARN << "element type is not supported yet:" << static_cast<int>(type);
+            EK_WARN_F("element type is not supported yet: %d", static_cast<int>(type));
             break;
 
         case ElementType::unknown:
-            EK_WARN << "unknown element type:" << static_cast<int>(type);
+            EK_WARN_F("unknown element type: %d", static_cast<int>(type));
             break;
     }
 }

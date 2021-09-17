@@ -14,11 +14,6 @@ public class EkPlatform {
     static final int KEY_MODIFIER_CONTROL = 4;
     static final int KEY_MODIFIER_ALT = 8;
 
-    // Special commands to native app
-    static final int CALL_MAIN = 0x100;
-    static final int CALL_READY = 0x101;
-    static final int CALL_FRAME = 0x102;
-
     // Event::Type
     static final int RESUME = 0;
     static final int PAUSE = 1;
@@ -40,6 +35,15 @@ public class EkPlatform {
     static final int TEXT = 17;
 
     @Keep
+    public static native int main(AssetManager assets);
+
+    @Keep
+    public static native void notifyReady();
+
+    @Keep
+    public static native void processFrame();
+
+    @Keep
     public static native void sendEvent(int type);
 
     @Keep
@@ -50,9 +54,6 @@ public class EkPlatform {
 
     @Keep
     public static native void sendResize(int width, int height, float scaleFactor);
-
-    @Keep
-    public static native void initAssets(AssetManager assets);
 
     /** converters **/
     public static int _KeyCode(final int keyCode) {

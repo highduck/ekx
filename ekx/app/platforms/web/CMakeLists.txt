@@ -9,13 +9,13 @@ target_compile_options(${PROJECT_NAME}
 
 target_link_options(${PROJECT_NAME}
         PUBLIC SHELL:--js-library ${CMAKE_CURRENT_SOURCE_DIR}/web.js
-        PUBLIC -sFETCH=1
+        PUBLIC -sFETCH=0
         )
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC GLESv2
         )
 
-add_custom_target(ek-web-js DEPENDS web.js)
+add_custom_target(ekapp-js DEPENDS ekapp.js)
 
-add_dependencies(${PROJECT_NAME} ek-web-js)
+add_dependencies(${PROJECT_NAME} ekapp-js)

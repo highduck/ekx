@@ -53,7 +53,7 @@ updatedTransactions:(NSArray *)transactions
 
         const char *trID = transaction.transactionIdentifier ? transaction.transactionIdentifier.UTF8String : "";
         const char *prodID = transaction.payment.productIdentifier.UTF8String;
-        EK_INFO("transaction %li '%s' '%s'", transaction.transactionState, trID, prodID);
+        EK_INFO_F("transaction %li '%s' '%s'", transaction.transactionState, trID, prodID);
 
         switch (transaction.transactionState)
         {

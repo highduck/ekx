@@ -1,14 +1,8 @@
 #pragma once
 
 #include "Path.hpp"
-#include <sstream>
 
 namespace ek {
-
-std::ostringstream& operator<<(std::ostringstream& ss, const path_t& path) noexcept {
-    ss << path.str();
-    return ss;
-}
 
 std::string path_join(const std::string& p1, const std::string& p2) {
     if (p1.empty()) {

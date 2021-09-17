@@ -54,7 +54,7 @@ void GC_authenticateLocalPlayer() {
 
 namespace ek {
 void game_services_init() {
-    EK_TRACE << "game-services initialize";
+    EK_TRACE_F("game-services initialize");
     GC_authenticateLocalPlayer();
 }
 

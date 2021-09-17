@@ -19,7 +19,7 @@ struct FreeType2 {
     FreeType2() {
         auto err = FT_Init_FreeType(&ft);
         if (err != 0) {
-            EK_ERROR("FreeType2 init error: %d", err);
+            EK_ERROR_F("FreeType2 init error: %d", err);
         }
     }
 
@@ -52,7 +52,7 @@ public:
     FontFace(const FreeType2& lib, const std::string& path) {
         int err = FT_New_Face(lib.ft, path.c_str(), 0, &ftFace);
         if (err != 0) {
-            EK_ERROR("FT2 new face error: %d (%s)", err, FT_Error_String(err));
+            EK_ERROR_F("FT2 new face error: %d (%s)", err, FT_Error_String(err));
         }
     }
 

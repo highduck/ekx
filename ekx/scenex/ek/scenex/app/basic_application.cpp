@@ -47,10 +47,10 @@ using namespace ek::app;
 
 void logDisplayInfo() {
 #ifndef NDEBUG
-    EK_INFO << "Display: " << g_app.drawableWidth << " x " << g_app.drawableHeight;
+    EK_INFO_F("Display: %f x %f", g_app.drawableWidth, g_app.drawableHeight);
     const float* insets = app::getScreenInsets();
     if (insets) {
-        EK_INFO << "Insets: " << insets[0] << ", " << insets[1] << ", " << insets[2] << ", " << insets[3];
+        EK_INFO_F("Insets: %f, %f, %f, %f", insets[0], insets[1], insets[2], insets[3]);
     }
 #endif
 }
@@ -129,7 +129,7 @@ void registerSceneXComponents() {
 void basic_application::initialize() {
     ZoneScopedN("initialize");
 
-    EK_TRACE << "base application: initialize";
+    EK_TRACE("base application: initialize");
     // init default empty sprite data
     {
         auto* spr = new Sprite();
@@ -140,7 +140,7 @@ void basic_application::initialize() {
     logDisplayInfo();
     display.update();
 
-    EK_TRACE << "base application: initialize scene root";
+    EK_TRACE("base application: initialize scene root");
     root = createNode2D("root");
     root.assign<Viewport>(AppResolution.x, AppResolution.y);
     root.assign<LayoutRect>();
@@ -148,14 +148,14 @@ void basic_application::initialize() {
     Viewport::updateAll(display.info);
     scale_factor = root.get<Viewport>().output.scale;
 
-    EK_TRACE << "base application: initialize InteractionSystem";
+    EK_TRACE("base application: initialize InteractionSystem");
     auto& im = Locator::create<InteractionSystem>(root);
-    EK_TRACE << "base application: initialize input_controller";
+    EK_TRACE("base application: initialize input_controller");
     Locator::create<input_controller>(im, display);
-    EK_TRACE << "base application: initialize AudioManager";
+    EK_TRACE("base application: initialize AudioManager");
     Locator::create<AudioManager>();
 
-    EK_TRACE << "base application: initialize Scene";
+    EK_TRACE("base application: initialize Scene");
     auto camera = createNode2D("camera");
     auto& defaultCamera = camera.assign<Camera2D>(root);
     defaultCamera.order = 1;
@@ -167,7 +167,7 @@ void basic_application::initialize() {
 }
 
 void basic_application::preload() {
-    EK_TRACE("base application: preloading, content scale: %0.3f", scale_factor);
+    EK_TRACE_F("base application: preloading, content scale: %0.3f", scale_factor);
     asset_manager_->set_scale_factor(scale_factor);
 
     dispatcher.onPreload();
@@ -277,7 +277,7 @@ void basic_application::onFrame() {
     sg_commit();
 
     if (!started_ && asset_manager_->is_assets_ready()) {
-        EK_DEBUG << "Start Game";
+        EK_DEBUG("Start Game");
         onAppStart();
         dispatcher.onStart();
         started_ = true;
@@ -331,14 +331,7 @@ void basic_application::doRenderFrame() {
     onRenderSceneAfter();
 }
 
-void Initializer::onInitialize() {
-    //EK_TRACE << "analytics initialize";
-    //analytics::init(); // analytics before crash reporter on ios
-}
-
 void Initializer::onReady() {
-    // audio should be initialized before "Resume" event, so the best place is "On Create" event
-    audio::initialize();
     if (creator != nullptr) {
         creator();
     }

@@ -73,15 +73,13 @@ public class EkActivity extends Activity {
         mainLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         setContentView(mainLayout);
 
-        EkPlatform.sendEvent(EkPlatform.CALL_MAIN);
-    }
+        // configurate app
+        final int flags = EkPlatform.main();
 
-    @Keep
-    public static void startApp(int flags) {
-        EkActivity activity = EkActivity.getInstance();
-        EkPlatform.initAssets(activity.getAssets());
-        activity.glView = new EkSurfaceView(activity, (flags & 1) != 0);
-        activity.mainLayout.addView(activity.glView);
+        // start
+        EkPlatform.initAssets(this);
+        glView = new EkSurfaceView(this, (flags & 1) != 0);
+        mainLayout.addView(glView);
 
         EkPluginManager.instance.onStart();
     }

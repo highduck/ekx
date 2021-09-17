@@ -51,7 +51,7 @@ typedef uint16_t offset_t;
 
 namespace ek {
 
-inline static uint32_t upperPowerOfTwo(uint32_t v) {
+inline uint32_t upperPowerOfTwo(uint32_t v) {
     --v;
     v |= v >> 1;
     v |= v >> 2;

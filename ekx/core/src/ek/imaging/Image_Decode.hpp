@@ -21,6 +21,13 @@
 #define STBI_NO_STDIO
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
+
+#ifndef NDEBUG
+#define STBI_NO_FAILURE_STRINGS
+#else
+#define STBI_FAILURE_USERMSG
+#endif // DEBUG
+
 #endif
 
 #define STBI_ASSERT(e)   EK_ASSERT(e)
@@ -58,7 +65,9 @@ namespace ek {
                 premultiply_image(*result);
             }
         } else {
-            EK_ERROR("image decoding error: %s", stbi_failure_reason());
+#ifndef NDEBUG
+            EK_ERROR_F("image decoding error: %s", stbi_failure_reason());
+#endif
         }
         EK_TRACE("decode image: end");
         return result;

@@ -212,10 +212,10 @@ ecs::EntityApi sg_create(const std::string& library, const std::string& name, ec
                 appendStrict(parent, result);
             }
         } else {
-            EK_WARN("SG Object %s not found in library %s", name.c_str(), library.c_str());
+            EK_WARN_F("SG Object %s not found in library %s", name.c_str(), library.c_str());
         }
     } else {
-        EK_WARN("SG not found: %s", library.c_str());
+        EK_WARN_F("SG not found: %s", library.c_str());
     }
     return result;
 }

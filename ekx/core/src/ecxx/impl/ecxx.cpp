@@ -85,7 +85,7 @@ bool World::check(EntityPassport passport) const {
 // World create / destroy
 
 void World::initialize() {
-    EK_TRACE << "ecs::world initialize";
+    EK_TRACE("ecs::world initialize");
     auto& systemAllocator = ek::memory::systemAllocator;
     allocator = systemAllocator.create<ek::AlignedAllocator>(systemAllocator, "ecxx");
     resetEntityPool();
@@ -106,7 +106,7 @@ void World::reset() {
 }
 
 void World::shutdown() {
-    EK_TRACE << "ecs::world shutdown";
+    EK_TRACE("ecs::world shutdown");
     // skip clearing entity pool, because we don't need it anymore
     auto** components_ = components;
     for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {

@@ -5,10 +5,11 @@
 #if defined(__EMSCRIPTEN__) || defined(__ANDROID__)
 
 // not optimized for reading app content with stdio
+#define EK_STATIC_RESOURCES_READ_FILE  (0)
 
 #elif defined(_WIN32) || defined(_WIN64) || defined(__APPLE__) || defined(__linux__)
 
-#define EK_STATIC_RESOURCES_READ_FILE 1
+#define EK_STATIC_RESOURCES_READ_FILE  (1)
 
 #else // other platforms
 
@@ -18,13 +19,12 @@
 
 #include <vector>
 #include <cstdint>
-#include <ek/debug.hpp>
-#include <ek/assert.hpp>
+#include <ek/app/app.hpp>
 
 namespace ek::internal {
 
 inline std::vector<uint8_t> read_file_bytes(const char* path) {
-    EK_ASSERT(path != nullptr);
+    EKAPP_ASSERT(path != nullptr);
     std::vector<uint8_t> buffer;
     auto* stream = fopen(path, "rb");
     if (stream) {
@@ -42,7 +42,7 @@ inline std::vector<uint8_t> read_file_bytes(const char* path) {
         fclose(stream);
     }
     else {
-        EK_WARN << "Path " << path << " not found";
+        EKAPP_LOG("Read file bytes error: file not found");
     }
     return buffer;
 }
@@ -52,7 +52,9 @@ inline std::vector<uint8_t> read_file_bytes(const char* path) {
 #endif
 
 #if !defined(_WIN32) && !defined(_WIN64) && !defined(__EMSCRIPTEN__)
-#define EK_HAS_MAP_FILE 1
+#define EK_HAS_MAP_FILE  (1)
+#else
+#define EK_HAS_MAP_FILE  (0)
 #endif
 
 #if EK_HAS_MAP_FILE

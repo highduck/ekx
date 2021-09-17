@@ -12,8 +12,8 @@ namespace ek {
 
 namespace interactive_event {
 
-static constexpr auto back_button = "back_button";
-static constexpr auto system_pause = "system_pause";
+inline constexpr auto back_button = "back_button";
+inline constexpr auto system_pause = "system_pause";
 
 }
 

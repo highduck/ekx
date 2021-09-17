@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EditorWindow.hpp"
-#include <ek/debug/LogSink.hpp>
+#include <ek/debug/LogMessage.hpp>
 
 namespace ek {
 
@@ -23,7 +23,7 @@ struct VerbosityFilterInfo {
     const char* icon = "!";
 };
 
-class ConsoleWindow : public EditorWindow, public LogSink {
+class ConsoleWindow : public EditorWindow {
 public:
 
     ConsoleWindow();
@@ -32,12 +32,13 @@ public:
 
     void onDraw() override;
 
-    void onMessageWrite(const LogMessage& message) override;
+    void onMessageWrite(const LogMessage& message);
 
     void execute(const char* cmd);
 
     void clear();
 
+    ProxyAllocator allocator;
     Array<ConsoleMsg> messages;
     Array<const char*> commands;
     Array<const char*> candidates;
@@ -45,7 +46,7 @@ public:
     // -1: new line, 0..History.Size-1 browsing history
     int historyPos = 0;
 
-    Verbosity filter = Verbosity::All;
+    uint8_t filterMask = 0xFF;
     ImGuiTextFilter textFilter{};
     bool autoScroll = true;
     bool scrollDownRequired = false;

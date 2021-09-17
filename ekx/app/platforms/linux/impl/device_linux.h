@@ -8,12 +8,6 @@ int openURL(const char*) {
     return -1;
 }
 
-int vibrate(int millis) {
-    (void)millis;
-    // unsupported
-    return -1;
-}
-
 const float* getScreenInsets() {
     static float pads[4];
     pads[0] = 0.0f;

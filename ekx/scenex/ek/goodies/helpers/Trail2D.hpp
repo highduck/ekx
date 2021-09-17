@@ -33,7 +33,7 @@ struct VectorDequeue {
     }
 
     inline T& back() {
-        assert(first < end);
+        EK_ASSERT(first < end);
         return data[end - 1];
     }
 

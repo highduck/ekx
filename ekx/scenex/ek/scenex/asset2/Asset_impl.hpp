@@ -88,7 +88,7 @@ Asset* AssetManager::add_file(const std::string& path, const std::string& type) 
             return asset;
         }
     }
-    EK_WARN("Can't resolve asset [%s] from file: %s", type.c_str(), path.c_str());
+    EK_WARN_F("Can't resolve asset [%s] from file: %s", type.c_str(), path.c_str());
     return nullptr;
 }
 

@@ -1,8 +1,6 @@
 #pragma once
 
-#include <ek/util/Platform.hpp>
-
-#if EK_ANDROID
+#if defined(__ANDROID__)
 
 //#define SOKOL_GLES3
 
@@ -23,7 +21,7 @@
 #undef GL_ANGLE_instanced_arrays
 #undef GL_EXT_draw_instanced
 
-#elif EK_WEB
+#elif defined(__EMSCRIPTEN__)
 
 //#define SOKOL_GLES3
 
@@ -37,11 +35,11 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-#elif EK_MACOS || EK_IOS
+#elif defined (__APPLE__)
 
 #define SOKOL_METAL
 
-#elif EK_LINUX
+#elif defined(__linux__)
 
 #define SOKOL_GLCORE33
 
