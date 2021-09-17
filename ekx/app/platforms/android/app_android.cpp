@@ -153,7 +153,11 @@ JNIEXPORT void JNICALL Java_ek_EkPlatform_notifyReady(JNIEnv*, jclass) {
 }
 
 JNIEXPORT void JNICALL Java_ek_EkPlatform_processFrame(JNIEnv*, jclass) {
-    ek::app::processFrame();
+    using namespace ek::app;
+    processFrame();
+    if (g_app.exitRequired) {
+        exitActivity(g_app.exitCode);
+    }
 }
 
 /* JNI_OnLoad is automatically called when loading shared library through System.loadLibrary() Java call */
