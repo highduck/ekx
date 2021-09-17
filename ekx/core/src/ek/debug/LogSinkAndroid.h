@@ -28,11 +28,12 @@ inline void logSinkAndroid(const LogMessage& message) {
         default:
             return;
     }
+    const char* tag = "ekx";
 #ifndef NDEBUG
-    __android_log_print(priority, "EKX", "@%02hhX: %s", message.frameHash, message);
+    __android_log_print(priority, tag, "@%02hhX: %s", message.frameHash, message.message);
 #else
     // for release reduce allocations for printing
-    __android_log_write(priority, tag, message);
+    __android_log_write(priority, tag, message.message);
 #endif
 }
 
