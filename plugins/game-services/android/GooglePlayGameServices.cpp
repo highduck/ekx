@@ -6,7 +6,7 @@ namespace ek {
 #define CLASS_PATH "ek/gpgs/GameServices"
 
 void game_services_init() {
-    EK_TRACE_F("game-services initialize");
+    EK_TRACE("game-services initialize");
 
     auto* env = app::getJNIEnv();
     auto class_ref = env->FindClass(CLASS_PATH);
