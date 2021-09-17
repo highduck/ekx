@@ -74,10 +74,9 @@ public class EkActivity extends Activity {
         setContentView(mainLayout);
 
         // configurate app
-        final int flags = EkPlatform.main();
+        final int flags = EkPlatform.main(getAssets());
 
         // start
-        EkPlatform.initAssets(this);
         glView = new EkSurfaceView(this, (flags & 1) != 0);
         mainLayout.addView(glView);
 
