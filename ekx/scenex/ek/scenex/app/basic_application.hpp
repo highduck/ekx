@@ -106,8 +106,6 @@ public:
 
     ~Initializer() override = default;
 
-    void onInitialize() override;
-
     void onReady() override;
 
     void onFrame() override;
@@ -134,12 +132,12 @@ inline void run_app(app::AppConfig cfg) {
     }
 #endif
 
+    // audio should be initialized before "Resume" event, so the best place is "On Create" event
+    audio::initialize();
+
     static Initializer initializer;
     initializer.creator = []{Locator::create<basic_application, T>();};
     g_app.listener = &initializer;
-
-    EK_TRACE << "app start";
-    app::start();
 }
 
 }

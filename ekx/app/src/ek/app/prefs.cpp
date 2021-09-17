@@ -1,11 +1,11 @@
 #include "prefs.hpp"
-#include <ek/assert.hpp>
+#include <ek/app/app.hpp>
 #include <ek/util/Base64.hpp>
 
 namespace ek {
 
 void set_user_data(const char* key, const uint8_t* data, uint32_t size) {
-    EK_ASSERT(key != nullptr && data != nullptr);
+    EKAPP_ASSERT(key != nullptr && data != nullptr);
 
     auto encodedSize = base64::getEncodedMaxSize(size);
     std::string encoded;
@@ -17,7 +17,7 @@ void set_user_data(const char* key, const uint8_t* data, uint32_t size) {
 }
 
 std::vector<uint8_t> get_user_data(const char* key) {
-    EK_ASSERT(key != nullptr);
+    EKAPP_ASSERT(key != nullptr);
 
     const std::string str = get_user_string(key);
 
@@ -32,7 +32,7 @@ std::vector<uint8_t> get_user_data(const char* key) {
 namespace UserPreferences {
 
 uint32_t read(const char* key, uint8_t* buffer, uint32_t bufferSize) {
-    EK_ASSERT(key != nullptr);
+    EKAPP_ASSERT(key != nullptr);
 
     const auto str = get_user_string(key);
     const auto inputData = str.data();
@@ -46,7 +46,7 @@ uint32_t read(const char* key, uint8_t* buffer, uint32_t bufferSize) {
 }
 
 void set(const char* key, int64_t value) {
-    EK_ASSERT(key != nullptr);
+    EKAPP_ASSERT(key != nullptr);
     union {
         int64_t value;
         uint8_t bytes[8];
@@ -55,7 +55,7 @@ void set(const char* key, int64_t value) {
 }
 
 bool get(const char* key, int64_t* value) {
-    EK_ASSERT(key != nullptr);
+    EKAPP_ASSERT(key != nullptr);
     union {
         int64_t value;
         uint8_t bytes[8];

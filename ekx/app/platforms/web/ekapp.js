@@ -91,23 +91,16 @@ mergeInto(LibraryManager.library, {
         }
         return 0;
     },
-    ekapp_vibrate: function (duration) {
+    ekapp_openURL: function (pURL) {
         try {
-            var vib = window.navigator.vibrate;
-            return (vib && vib() && vib(duration)) ? 0 : 1;
-        } catch {
-        }
-        return 1;
-    },
-    ekapp_openURL: function (url) {
-        try {
-            window.open(UTF8ToString(url), "_blank");
+            window.open(UTF8ToString(pURL), "_blank");
             return 0;
         } catch {
         }
         return 1;
     },
 
+    ekapp_init__deps: ['$GL'],
     ekapp_init: function (flags) {
         var BUTTONS = [0, 2, 1, 2, 2];
 
@@ -193,12 +186,13 @@ mergeInto(LibraryManager.library, {
             //}
             //}
 
-            __ekapp_onResize(dpr, w, h, w * dpr, h * dpr);
+            var drawableWidth = (w * dpr) | 0;
+            var drawableHeight = (h * dpr) | 0;
+
+            __ekapp_onResize(dpr, w, h, drawableWidth, drawableHeight);
 
             var gameview = document.getElementById("gameview");
             if (gameview) {
-                var drawableWidth = (w * dpr) | 0;
-                var drawableHeight = (h * dpr) | 0;
                 if (gameview.width !== drawableWidth ||
                     gameview.height !== drawableHeight) {
                     gameview.width = drawableWidth;
@@ -261,16 +255,25 @@ mergeInto(LibraryManager.library, {
             }
         };
 
+        var nonPassiveOpt = false;
+        try {
+            window.addEventListener("test", null, Object.defineProperty({}, 'passive', {
+                get: function () {
+                    nonPassiveOpt = {passive: false};
+                }
+            }));
+        } catch (e) {
+        }
         /** {CanvasElement} */
         var canvas = document.getElementById("gameview");
-        canvas.addEventListener("mousedown", onMouse, false);
-        canvas.addEventListener("mouseup", onMouse, false);
-        canvas.addEventListener("mousemove", onMouse, false);
-        canvas.addEventListener("wheel", onWheel, false);
-        canvas.addEventListener("touchstart", onTouch, false);
-        canvas.addEventListener("touchend", onTouch, false);
-        canvas.addEventListener("touchmove", onTouch, false);
-        canvas.addEventListener("touchcancel", onTouch, false);
+        canvas.addEventListener("mousedown", onMouse, nonPassiveOpt);
+        canvas.addEventListener("mouseup", onMouse, nonPassiveOpt);
+        canvas.addEventListener("mousemove", onMouse, nonPassiveOpt);
+        canvas.addEventListener("wheel", onWheel, nonPassiveOpt);
+        canvas.addEventListener("touchstart", onTouch, nonPassiveOpt);
+        canvas.addEventListener("touchend", onTouch, nonPassiveOpt);
+        canvas.addEventListener("touchmove", onTouch, nonPassiveOpt);
+        canvas.addEventListener("touchcancel", onTouch, nonPassiveOpt);
 
         var webgl_list = ["webgl", "experimental-webgl"]; // 'webgl2'
         var webgl_attributes = {
@@ -290,6 +293,11 @@ mergeInto(LibraryManager.library, {
             console.error("Failed to create WebGL context");
             return false;
         }
+        canvas.addEventListener("webglcontextlost", function (e) {
+            alert("WebGL context lost. You will need to reload the page.");
+            e.preventDefault();
+        }, false);
+
         webgl_attributes.majorVersion = 1;
         // extensions required for sokol by default
         webgl_attributes.enableExtensionsByDefault = true;
@@ -307,5 +315,96 @@ mergeInto(LibraryManager.library, {
             __ekapp_loop();
         };
         loop();
+    },
+
+
+    ////// Fetch
+    ek_fetch_open: function (pURL) {
+        var getNext = function () {
+            var next = table.length;
+            for (var i = 1; i < next; ++i) {
+                if (table[i] == null) {
+                    return i;
+                }
+            }
+            return next < 256 ? next : 0;
+        };
+        var table = window.EK_FETCH_OBJECTS;
+        if (!table) {
+            window.EK_FETCH_OBJECTS = table = [null];
+        }
+        var id = getNext();
+        if (id) {
+            table[id] = {url: UTF8ToString(pURL)};
+        }
+        return id;
+    },
+    ek_fetch_load: function (id) {
+        var table = window.EK_FETCH_OBJECTS;
+        if (!table) {
+            return 1;
+        }
+        var obj = table[id];
+        if (!obj || !obj.url) {
+            return 2;
+        }
+        fetch(new Request(obj.url)).then(function (response) {
+            return response.arrayBuffer();
+        }).then(function (buffer) {
+            var obj = table[id];
+            if (obj) {
+                obj.buffer = buffer;
+                __ekfs_onComplete(id, 0, buffer.byteLength);
+            }
+        }).catch(function (reason) {
+            var obj = table[id];
+            if (obj) {
+                obj.error = reason;
+                __ekfs_onComplete(id, 1, 0);
+            }
+        });
+        return 0;
+    },
+    ek_fetch_close: function (id) {
+        var table = window.EK_FETCH_OBJECTS;
+        if (table && table[id]) {
+            table[id] = null;
+            return 0;
+        }
+        return 1;
+    },
+    /**
+     *
+     * @param id {number}
+     * @param pBuffer {number} - destination buffer pointer from C++, to set destination offset you just pass (buff + offset) pointer
+     * @param toRead {number} - bytes to read from loaded buffer
+     * @param offset {number} - source buffer offset from start
+     */
+    ek_fetch_read: function (id, pBuffer, toRead, offset) {
+        var table = window.EK_FETCH_OBJECTS;
+        if (!table) {
+            return 0;
+        }
+        var obj = table[id];
+        if (!obj) {
+            return 0;
+        }
+        var buf = obj.buffer;
+        if (!buf) {
+            return 0;
+        }
+        {
+            // DEBUG
+            if (offset + toRead > buf.byteLength) {
+                toRead = buf.byteLength - offset;
+            }
+        }
+        var bytes = new Uint8Array(buf, offset, toRead);
+        HEAPU8.set(bytes, pBuffer);
+        return toRead;
+    },
+
+    ekapp_log: function (pStr) {
+        console.log(UTF8ToString(pStr));
     }
 });

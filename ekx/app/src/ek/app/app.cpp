@@ -2,17 +2,8 @@
 
 namespace ek::app {
 
-void notifyInit() {
-    EKAPP_LOG("ekapp initialize\n");
-    EKAPP_ASSERT(!g_app.initialized);
-    g_app.initialized = true;
-    if (g_app.listener) {
-        g_app.listener->onInitialize();
-    }
-}
-
 void notifyReady() {
-    EKAPP_LOG("ekapp ready\n");
+    EKAPP_LOG("ekapp ready");
     EKAPP_ASSERT(!g_app.ready);
     g_app.ready = true;
     if (g_app.listener) {

@@ -7,14 +7,15 @@ namespace ek {
 
 namespace details {
 
-inline uint8_t* init_clamp_255() noexcept {
+inline const uint8_t* init_clamp_255() noexcept {
     static uint8_t arr[512];
     for (int i = 0; i < 256; ++i) arr[i] = (uint8_t) i;
     for (int i = 256; i < 512; ++i) arr[i] = 0xFF;
     return arr;
 }
 
-static const uint8_t* clamp_255 = init_clamp_255();
+inline const uint8_t* clamp_255 = init_clamp_255();
+
 }
 
 struct abgr32_t final {

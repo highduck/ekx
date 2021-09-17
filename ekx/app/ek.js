@@ -12,7 +12,8 @@ function setup(project) {
             cpp_lib: [
                 // basic Android libraries
                 "log",
-                "android"
+                "android",
+                "GLESv2"
             ],
             android_java: "platforms/android/java"
         },
@@ -25,7 +26,6 @@ function setup(project) {
                 "Metal",
                 "MetalKit",
                 "QuartzCore",
-                "AudioToolbox",
             ]
         },
         ios: {
@@ -35,7 +35,6 @@ function setup(project) {
                 "Metal",
                 "MetalKit",
                 "QuartzCore",
-                "AudioToolbox"
             ],
             xcode_pod: [
                 "Firebase/Crashlytics",
@@ -44,7 +43,8 @@ function setup(project) {
         },
         web: {
             cpp: "platforms/web",
-            js: "platforms/web"
+            js: "platforms/web",
+            cpp_lib: ["GLESv2", "GL"]
         },
         windows: {
             cpp: "platforms/windows"

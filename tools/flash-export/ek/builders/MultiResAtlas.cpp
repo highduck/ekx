@@ -10,6 +10,8 @@
 #include <ek/Allocator.hpp>
 #include <ek/assert.hpp>
 
+#include <miniz.h>
+
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
@@ -23,6 +25,23 @@
 #define STBIW_MALLOC(size)                           STBIW_ALLOCATOR.alloc(size, sizeof(void**))
 #define STBIW_REALLOC_SIZED(ptr, oldSize, newSize)   STBIW_ALLOCATOR.reallocate(ptr, oldSize, newSize, sizeof(void**))
 #define STBIW_FREE(ptr)                              STBIW_ALLOCATOR.dealloc(ptr)
+
+namespace {
+inline unsigned char* iwcompress(unsigned char* data, int data_len, int* out_len, int quality) {
+    // uber compression
+    quality = 10;
+    mz_ulong buflen = mz_compressBound(data_len);
+    auto* buf = (unsigned char*) STBIW_MALLOC(buflen);
+    if (mz_compress2(buf, &buflen, data, data_len, quality)) {
+        STBIW_FREE(buf);
+        return nullptr;
+    }
+    *out_len = (int)buflen;
+    return buf;
+}
+}
+
+#define STBIW_ZLIB_COMPRESS(a, b, c, d)  ::iwcompress(a,b,c,d)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-compare"
@@ -70,7 +89,7 @@ inline std::string get_atlas_suffix(float scale, int page_index = 0) {
     else if (scale <= 3) suffix += "@3x";
     else if (scale <= 4) suffix += "@4x";
     else {
-        EK_WARN << "atlas more than 4x scale-factor!";
+        EK_WARN("atlas more than 4x scale-factor!");
         // to support bigger density
         suffix += "@4x";
     }
@@ -83,16 +102,17 @@ void save_stream(const output_memory_stream& stream, const path_t& path) {
         fwrite(stream.data(), 1, stream.size(), h);
         fclose(h);
     } else {
-        EK_WARN << "fopen error: " << path;
+        EK_WARN_F("fopen error: %s", path.c_str());
     }
 }
 
 void save_atlas_resolution(AtlasData& resolution, const std::string& name) {
     int page_index = 0;
-    for (auto& page : resolution.pages) {
-        assert(page.image != nullptr);
+    for (auto& page: resolution.pages) {
+        EK_ASSERT(page.image != nullptr);
         page.image_path = name + get_atlas_suffix(resolution.resolution_scale, page_index) + ".png";
         saveImagePNG(*page.image, page.image_path);
+       // saveImageJPG(*page.image, name + get_atlas_suffix(resolution.resolution_scale, page_index));
         ++page_index;
     }
 
@@ -105,16 +125,14 @@ void save_atlas_resolution(AtlasData& resolution, const std::string& name) {
 static void packAtlasThread(const std::string& name, AtlasData& resolution) {
     const std::string log_name = name + "-" + std::to_string(resolution.resolution_index);
     {
-        EK_INFO("  - Begin Pack %s", log_name.c_str());
         Stopwatch timer{};
         resolution.pages = packSprites(resolution.sprites, resolution.max_size);
-        EK_INFO("  - End Pack %s : %0.3f ms", log_name.c_str(), timer.readMillis());
+        EK_INFO_F("  - '%s' packed in %d ms", log_name.c_str(), (int) timer.readMillis());
     }
     {
-        EK_INFO("  - Begin Save %s", log_name.c_str());
         Stopwatch timer{};
         save_atlas_resolution(resolution, name);
-        EK_INFO("  - End Save %s : %0.3f ms", log_name.c_str(), timer.readMillis());
+        EK_INFO_F("  - '%s' encoded in %d ms", log_name.c_str(), (int) timer.readMillis());
     }
 }
 
@@ -124,19 +142,18 @@ void MultiResAtlasData::packAndSaveMultiThreaded() {
     std::vector<std::thread> threads;
     threads.reserve(resolutions.size());
 
-    for (auto& resolution : resolutions) {
+    for (auto& resolution: resolutions) {
         threads.emplace_back(&packAtlasThread, name, std::ref(resolution));
     }
 
-    for (auto& th : threads) {
+    for (auto& th: threads) {
         th.join();
     }
 
-    EK_INFO("ATLAS BUILD %s : %0.3f ms", name.c_str(), timer.readMillis());
+    EK_INFO_F("'%s' atlas build in %d ms", name.c_str(), (int) timer.readMillis());
 }
 
 /*** Pack Sprites ***/
-
 
 rect_i no_pack_padding(binpack::rect_t rect, int pad) {
     return {
@@ -159,7 +176,7 @@ Array<AtlasPageData> packSprites(Array<SpriteData> sprites, const int2 max_size)
     Array<AtlasPageData> pages;
 
 //    timer timer{};
-//    EK_DEBUG("Packing %lu sprites...", sprites.size());
+//    EK_DEBUG_F("Packing %lu sprites...", sprites.size());
 
     bool need_to_pack = true;
     while (need_to_pack) {
@@ -236,6 +253,9 @@ void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
     // require RGBA non-premultiplied alpha
     //undo_premultiply_image(img);
 
+    stbi_write_png_compression_level = 10;
+    stbi_write_force_png_filter = 0;
+
     if (alpha) {
         stbi_write_png(path.c_str(),
                        img.width(),
@@ -259,6 +279,71 @@ void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
         }
 
         stbi_write_png(path.c_str(),
+                       img.width(),
+                       img.height(),
+                       3,
+                       buffer,
+                       3 * static_cast<int>(img.width()));
+
+        imaging::allocator.dealloc(buffer);
+    }
+}
+
+void saveImageJPG(const image_t& image, const std::string& path, bool alpha) {
+    image_t img{image};
+    // require RGBA non-premultiplied alpha
+    //undo_premultiply_image(img);
+
+    if (alpha) {
+        size_t pixels_count = img.width() * img.height();
+        auto* buffer_rgb = (uint8_t*) imaging::allocator.alloc(pixels_count * 3, sizeof(void*));
+        auto* buffer_alpha = (uint8_t*) imaging::allocator.alloc(pixels_count, sizeof(void*));
+        auto* buffer_rgba = img.data();
+
+        auto* rgb = buffer_rgb;
+        auto* alphaMask = buffer_alpha;
+        for (size_t i = 0; i < pixels_count; ++i) {
+            rgb[0] = buffer_rgba[0];
+            rgb[1] = buffer_rgba[1];
+            rgb[2] = buffer_rgba[2];
+            alphaMask[0] = buffer_rgba[3];
+            buffer_rgba += 4;
+            rgb += 3;
+            alphaMask += 1;
+        }
+
+        stbi_write_jpg((path + ".jpg").c_str(),
+                       img.width(),
+                       img.height(),
+                       3,
+                       buffer_rgb,
+                       90);
+
+        stbi_write_jpg((path + "a.jpg").c_str(),
+                       img.width(),
+                       img.height(),
+                       1,
+                       buffer_alpha,
+                       90);
+
+        imaging::allocator.dealloc(buffer_rgb);
+        imaging::allocator.dealloc(buffer_alpha);
+    } else {
+
+        size_t pixels_count = img.width() * img.height();
+        auto* buffer = (uint8_t*) imaging::allocator.alloc(pixels_count * 3, sizeof(void*));
+        auto* buffer_rgb = buffer;
+        auto* buffer_rgba = img.data();
+
+        for (size_t i = 0; i < pixels_count; ++i) {
+            buffer_rgb[0] = buffer_rgba[0];
+            buffer_rgb[1] = buffer_rgba[1];
+            buffer_rgb[2] = buffer_rgba[2];
+            buffer_rgba += 4;
+            buffer_rgb += 3;
+        }
+
+        stbi_write_jpg(path.c_str(),
                        img.width(),
                        img.height(),
                        3,

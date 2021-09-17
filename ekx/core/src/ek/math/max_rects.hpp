@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <cstdio>
 #include <cstdint>
 #include <numeric>
 #include <limits>
@@ -133,7 +132,7 @@ inline void push_free_node(rect_list& free, const rect_t& rect) {
     free.push_back(rect);
 }
 
-inline static void split_free_node(rect_list& out_vec, const rect_t& free_node, const rect_t& used) {
+inline void split_free_node(rect_list& out_vec, const rect_t& free_node, const rect_t& used) {
     // Test with SAT if the rectangles even intersect.
     if (!test_separated_axis(used, free_node)) {
         push_free_node(out_vec, free_node);
@@ -441,7 +440,7 @@ struct packer_state_t {
 // input sizes
 // output: rects & indices to original
 template<typename Method, bool AllowFlip>
-static bool try_pack(max_rects_t& max_rects,
+inline bool try_pack(max_rects_t& max_rects,
                      rect_list& rects,
                      flags_list& flags_list) {
 

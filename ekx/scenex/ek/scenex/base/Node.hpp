@@ -83,7 +83,7 @@ inline void eachChildBackward(ecs::EntityApi e, Func func) {
 ecs::EntityApi getRoot(ecs::EntityApi e);
 
 inline ecs::EntityApi getFirstChild(ecs::EntityApi e) {
-    assert(e.has<Node>());
+    EK_ASSERT(e.has<Node>());
     return e.get<Node>().child_first;
 }
 

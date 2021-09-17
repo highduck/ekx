@@ -4,6 +4,8 @@
 #include <ek/util/utf8.hpp>
 #include <cstdarg>
 
+#include <stb/stb_sprintf.h>
+
 namespace ek {
 
 StaticStorage<TextEngineSharedContext> gTextEngine{};
@@ -324,7 +326,7 @@ void TextEngine::drawFormat(const char* fmt, ...) {
     // TODO: TextBuffer with dynamic growing memory for text?
     const int bufferSize = 1024;
     static char BUFFER[1024];
-    int w = vsnprintf(BUFFER, bufferSize, fmt, args);
+    int w = stbsp_vsnprintf(BUFFER, bufferSize, fmt, args);
 //    if (buf == NULL)
 //        return w;
     if (w == -1 || w >= (int) bufferSize) {

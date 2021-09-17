@@ -142,7 +142,7 @@ ecs::EntityApi GameScreenManager::findScreen(const std::string& name) const {
         }
         it = it.get<Node>().sibling_next;
     }
-    EK_DEBUG << "could not find screen: " << name;
+    EK_DEBUG_F("could not find screen: %s", name.c_str());
     return nullptr;
 }
 

@@ -5,7 +5,6 @@
 extern "C" {
 
 extern int ekapp_openURL(const char* url);
-extern int ekapp_vibrate(int durationMillis);
 
 /**
  *
@@ -21,10 +20,6 @@ namespace ek::app {
 
 int openURL(const char* url) {
     return ekapp_openURL(url);
-}
-
-int vibrate(int duration_millis) {
-    return ekapp_vibrate(duration_millis);
 }
 
 const float* getScreenInsets() {

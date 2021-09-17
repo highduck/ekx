@@ -1,6 +1,6 @@
-#include "ImGuiIntegration.hpp"
-
 #include <ek/editor/imgui/imgui.hpp>
+
+#include "ImGuiIntegration.hpp"
 #include <ek/app/app.hpp>
 #include <IconsFontAwesome5.h>
 

@@ -91,14 +91,15 @@ function renderCMakeFile(ctx, buildType): string {
 
         // TODO: strange runtime DOM exception error with Release
         STRICT: 1,
-        // MINIMAL_RUNTIME: 1,
+        MINIMAL_RUNTIME: 1,
+        //MINIMAL_RUNTIME_STREAMING_WASM_COMPILATION: 1,
         // MODULARIZE: 1,
         SUPPORT_ERRNO: 0,
 
         // STACK_OVERFLOW_CHECK: 2,
         // ALIASING_FUNCTION_POINTERS: 0,
 
-        FETCH: 1,
+        FETCH: 0,
         // WASM: 1,
         // WASM_ASYNC_COMPILATION: 1,
         DISABLE_EXCEPTION_CATCHING: 1,
@@ -141,6 +142,10 @@ async function buildProject(ctx, buildType) {
     }
 
     const cmakeFile = withPath(output_path, () => renderCMakeFile(ctx, buildType));
+
+    // if you need to look into generated html by Emscripten
+    // cmakeFile += "\n\n" + `set(CMAKE_EXECUTABLE_SUFFIX ".html")`
+
     await fs.promises.writeFile(path.join(output_path, "CMakeLists.txt"), cmakeFile);
 
     return await buildCMake({

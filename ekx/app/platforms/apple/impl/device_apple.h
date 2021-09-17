@@ -4,7 +4,6 @@
 
 #import <CoreFoundation/CoreFoundation.h>
 #import <CoreText/CoreText.h>
-#import <AudioToolbox/AudioToolbox.h>
 
 namespace ek::app {
 
@@ -52,12 +51,6 @@ const float* getScreenInsets() {
     }
 #endif
     return nullptr;
-}
-
-int vibrate(int millis) {
-    (void) (millis);
-    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
-    return true;
 }
 
 const char* getSystemFontPath(const char* fontName) {

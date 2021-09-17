@@ -23,26 +23,6 @@ void update_mouse_cursor() {
     }
 }
 
-namespace ek::app {
-
-void start() {
-    notifyInit();
-
-    int flags = 0;
-    if(g_app.config.needDepth) {
-        flags |= 1;
-    }
-    if(!ekapp_init(flags)) {
-        abort();
-    }
-
-    notifyReady();
-
-    ekapp_run();
-}
-
-}
-
 extern "C" {
 
 EMSCRIPTEN_KEEPALIVE bool _ekapp_onKey(int type, int code, int modifiers) {
@@ -85,15 +65,15 @@ EMSCRIPTEN_KEEPALIVE bool _ekapp_onResize(float dpr, float w, float h, float dw,
     if (g_app.dpiScale != dpr ||
         g_app.windowWidth != w ||
         g_app.windowHeight != h ||
-        g_app.drawableWidth != w * dpr ||
-        g_app.drawableHeight != h * dpr) {
+        g_app.drawableWidth != dw ||
+        g_app.drawableHeight != dh) {
         g_app.dirtySize = true;
 
         g_app.dpiScale = dpr;
         g_app.windowWidth = w;
         g_app.windowHeight = h;
-        g_app.drawableWidth = w * dpr;
-        g_app.drawableHeight = h * dpr;
+        g_app.drawableWidth = dw;
+        g_app.drawableHeight = dh;
     }
     return true;
 }
@@ -109,8 +89,20 @@ EMSCRIPTEN_KEEPALIVE void _ekapp_loop() {
 }
 
 int main(int argc, char* argv[]) {
-    ::ek::app::g_app.argc = argc;
-    ::ek::app::g_app.argv = argv;
+    using namespace ek::app;
+    g_app.argc = argc;
+    g_app.argv = argv;
     ::ek::app::main();
+
+    int flags = 0;
+    if(g_app.config.needDepth) {
+        flags |= 1;
+    }
+    if(!ekapp_init(flags)) {
+        return 1;
+    }
+
+    notifyReady();
+    ekapp_run();
     return 0;
 }

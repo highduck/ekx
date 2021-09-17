@@ -28,7 +28,7 @@ public class EkRenderer implements GLSurfaceView.Renderer {
 
         GLES20.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        EkPlatform.sendEvent(EkPlatform.CALL_READY);
+        EkPlatform.notifyReady();
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
@@ -40,7 +40,7 @@ public class EkRenderer implements GLSurfaceView.Renderer {
 
     public void onDrawFrame(GL10 unused) {
         try {
-            EkPlatform.sendEvent(EkPlatform.CALL_FRAME);
+            EkPlatform.processFrame();
 
             // since it solves v-sync stalling (dequeBuffer issue)
             GLES20.glFinish();

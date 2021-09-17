@@ -9,7 +9,7 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/graphics/graphics.hpp>
 #include "Sprite.hpp"
-#include <ek/debug/LogStream.hpp>
+#include <ek/debug/LogSystem.hpp>
 
 namespace ek {
 
@@ -94,7 +94,7 @@ struct Display2D {
             EK_WARN("Drawable2D required");
         }
         if (!drawable->matchType<T>()) {
-            EK_WARN("Drawable2D TypeID mismatch: required %u, got %u", TypeIndex<T, IDrawable2D>::value,
+            EK_WARN_F("Drawable2D TypeID mismatch: required %u, got %u", TypeIndex<T, IDrawable2D>::value,
                     drawable->getTypeID());
         }
         EK_ASSERT(!!drawable);

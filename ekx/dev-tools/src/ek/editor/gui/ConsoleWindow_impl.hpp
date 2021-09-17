@@ -6,6 +6,7 @@
 #include <cstdlib>
 // `getcwd` function
 //#include <libc.h>
+#include <stb/stb_sprintf.h>
 
 namespace ek {
 
@@ -39,7 +40,7 @@ int onConsoleInputCommandCallback(ImGuiInputTextCallbackData* data) {
 
             // Build a list of candidates
             candidates.clear();
-            for (auto& command : commands) {
+            for (auto& command: commands) {
                 if (strncasecmp(command, word_start, (int) (word_end - word_start)) == 0) {
                     candidates.push_back(command);
                 }
@@ -47,7 +48,7 @@ int onConsoleInputCommandCallback(ImGuiInputTextCallbackData* data) {
 
             if (candidates.empty()) {
                 // No match
-                EK_INFO("No match for \"%.*s\"!\n", (int) (word_end - word_start), word_start);
+                EK_INFO_F("No match for \"%.*s\"!\n", (int) (word_end - word_start), word_start);
             } else if (candidates.size() == 1) {
                 // Single match. Delete the beginning of the word and replace it entirely so we've got nice casing.
                 data->DeleteChars((int) (word_start - data->Buf), (int) (word_end - word_start));
@@ -76,9 +77,9 @@ int onConsoleInputCommandCallback(ImGuiInputTextCallbackData* data) {
                 }
 
                 // List matches
-                EK_INFO("Possible matches:\n");
-                for (auto& candidate : candidates) {
-                    EK_INFO("- %s\n", candidate);
+                EK_INFO("Possible matches:");
+                for (auto& candidate: candidates) {
+                    EK_INFO_F("- %s", candidate);
                 }
             }
 
@@ -118,8 +119,8 @@ void ConsoleWindow::onDraw() {
     for (int i = 0; i < 5; ++i) {
         auto& info = infos[i];
         unsigned count = 0;
-        for (auto& msg : messages) {
-            if (!!(msg.verbosity & info.verbosity)) {
+        for (auto& msg: messages) {
+            if (msg.verbosity == info.verbosity) {
                 ++count;
             }
         }
@@ -160,7 +161,7 @@ void ConsoleWindow::onDraw() {
 
     ImGui::TextUnformatted(ICON_FA_SEARCH);
     ImGui::SameLine();
-    textFilter.Draw( "##logs_filter", 100.0f);
+    textFilter.Draw("##logs_filter", 100.0f);
     if (textFilter.IsActive()) {
         ImGui::SameLine(0, 0);
         if (ImGui::ToolbarButton(ICON_FA_TIMES_CIRCLE, false, "Clear Filter")) {
@@ -171,18 +172,18 @@ void ConsoleWindow::onDraw() {
     auto logListSize = ImGui::GetContentRegionAvail();
     logListSize.y -= 30;
     ImGui::BeginChild("log_lines", logListSize);
-    for (auto& msg : messages) {
+    for (auto& msg: messages) {
         const auto* text = msg.text.data();
         if (textFilter.IsActive() && !textFilter.PassFilter(text)) {
             continue;
         }
-        if (!!(msg.verbosity & filterMask) && textFilter.PassFilter(text)) {
+        if (!!((1 << (int) msg.verbosity) & filterMask) && textFilter.PassFilter(text)) {
             ImGui::PushStyleColor(ImGuiCol_Text, msg.iconColor);
             ImGui::PushID(&msg);
             if (ImGui::Selectable(msg.icon)) {
                 // Tools -> Create Command-line Launcher...
                 char buf[512];
-                sprintf(buf, "clion --line %u ../%s", msg.location.line, msg.location.file);
+                stbsp_sprintf(buf, "clion --line %u ../%s", msg.location.line, msg.location.file);
                 system(buf);
             }
             ImGui::PopID();
@@ -234,14 +235,14 @@ void ConsoleWindow::onMessageWrite(const LogMessage& message) {
     const char* icon = "";
     ImU32 iconColor = 0xFFFFFFFF;
     for (int i = 0; i < 5; ++i) {
-        if (!!(infos[i].verbosity & message.verbosity)) {
+        if (infos[i].verbosity == message.verbosity) {
             icon = infos[i].icon;
             iconColor = infos[i].iconColor;
         }
     }
 
     ConsoleMsg msg{
-            Array<char>{LogSystem::instance().allocator, len + 1},
+            Array<char>{allocator, len + 1},
             message.verbosity,
             message.location,
             message.frameHash,
@@ -258,16 +259,26 @@ void ConsoleWindow::onMessageWrite(const LogMessage& message) {
     }
 }
 
+inline ConsoleWindow* _consoleWindow = nullptr;
+
+inline void logToConsoleWindow(const LogMessage& msg) {
+    if (_consoleWindow) {
+        _consoleWindow->onMessageWrite(msg);
+    }
+}
+
 ConsoleWindow::ConsoleWindow() :
-        messages{LogSystem::instance().allocator},
-        commands{LogSystem::instance().allocator},
-        candidates{LogSystem::instance().allocator},
-        history{LogSystem::instance().allocator} {
+        allocator{memory::stdAllocator, "console"},
+        messages{allocator},
+        commands{allocator},
+        candidates{allocator},
+        history{allocator} {
 
     name = "ConsoleWindow";
     title = ICON_FA_LAPTOP_CODE " Console###ConsoleWindow";
 
-    LogSystem::instance().sinks.push_back(this);
+    _consoleWindow = this;
+    LogSystem::addLogSink(logToConsoleWindow);
 
     infos[0].verbosity = Verbosity::Trace;
     infos[0].icon = ICON_FA_GLASSES;
@@ -300,9 +311,8 @@ ConsoleWindow::ConsoleWindow() :
 }
 
 void ConsoleWindow::execute(const char* cmd) {
-    EK_INFO << "$ " << cmd;
+    EK_INFO_F("$ %s", cmd);
 
-    auto& allocator = LogSystem::instance().allocator;
     // Insert into history. First find match and delete it so it can be pushed to the back.
     // This isn't trying to be smart or optimal.
     historyPos = -1;
@@ -321,17 +331,17 @@ void ConsoleWindow::execute(const char* cmd) {
     if (strcasecmp(cmd, "CLEAR") == 0) {
         clear();
     } else if (strcasecmp(cmd, "HELP") == 0) {
-        EK_INFO << "Commands:";
-        for (auto* command : commands) {
-            EK_INFO << "- " << command;
+        EK_INFO("Commands:");
+        for (auto* command: commands) {
+            EK_INFO_F("- %s", command);
         }
     } else if (strcasecmp(cmd, "HISTORY") == 0) {
         int first = static_cast<int>(history.size()) - 10;
         for (int i = first > 0 ? first : 0; i < history.size(); ++i) {
-            EK_INFO("%3d: %s\n", i, history[i]);
+            EK_INFO_F("%3d: %s", i, history[i]);
         }
     } else {
-        EK_INFO << "Unknown command: " << cmd;
+        EK_INFO_F("Unknown command: %s", cmd);
     }
 
     // On command input, we scroll to bottom even if AutoScroll==false

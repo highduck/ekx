@@ -97,8 +97,8 @@ Atlas::~Atlas() {
 }
 
 void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<uint8_t>& buffer) {
-    EK_DEBUG << "Decoding Atlas META";
-    EK_DEBUG << "Atlas Base Path: " << base_path;
+    EK_DEBUG("Decoding Atlas META");
+    EK_DEBUG_F("Atlas Base Path: %s", base_path.c_str());
 
     input_memory_stream input{buffer.data(), buffer.size()};
     IO io{input};
@@ -126,14 +126,14 @@ void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<ui
         const auto& page_image_path = page.imagePath;
         Res<graphics::Texture> resTexture{page_image_path};
         if (resTexture) {
-            EK_DEBUG << "Destroy old page texture " << page_image_path;
+            EK_DEBUG_F("Destroy old page texture %s", page_image_path.c_str());
             resTexture.reset(nullptr);
         }
 
-        EK_DEBUG << "Load atlas page " << (base_path / page_image_path);
+        EK_DEBUG_F("Load atlas page %s", (base_path / page_image_path).c_str());
         get_resource_content_async((base_path / page_image_path).c_str(), [page_image_path](auto image_buffer) {
             if (image_buffer.empty()) {
-                EK_DEBUG << "Image not found";
+                EK_DEBUG("Image not found");
             } else {
                 auto* image = decode_image_data(image_buffer.data(), image_buffer.size());
                 if (image) {
@@ -142,7 +142,7 @@ void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<ui
                     res.reset(texture);
                     delete image;
                 } else {
-                    EK_DEBUG << "Image decode error";
+                    EK_DEBUG("Image decode error");
                 }
             }
         });
@@ -157,7 +157,7 @@ void Atlas::load(const char* path, float scale_factor, const Atlas::LoadCallback
     get_resource_content_async(file_meta.c_str(), [callback, file_meta, base_path](auto buffer) {
         Atlas* atlas = nullptr;
         if (buffer.empty()) {
-            EK_DEBUG("ATLAS META resource not found: %s", file_meta.c_str());
+            EK_DEBUG_F("ATLAS META resource not found: %s", file_meta.c_str());
         } else {
             atlas = new Atlas;
             load_atlas_meta(base_path, atlas, buffer);

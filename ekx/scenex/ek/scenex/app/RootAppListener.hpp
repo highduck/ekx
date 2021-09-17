@@ -25,7 +25,7 @@ public:
         tracy::SetThreadName("Render");
         FrameMark;
 #endif
-        LogSystem::instance().nextFrame();
+        LogSystem::nextFrame();
         dispatchTimers();
     }
 

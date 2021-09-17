@@ -24,7 +24,7 @@ struct AudioSystem {
 static AudioSystem audioSystem{};
 
 void initialize() {
-    EK_TRACE << "audio initialize";
+    EK_TRACE("audio initialize");
     EK_ASSERT(!audioSystem.initialized);
 #if defined(__ANDROID__)
     auto activity = app::get_activity();
@@ -36,7 +36,7 @@ void initialize() {
 }
 
 void shutdown() {
-    EK_TRACE << "audio shutdown";
+    EK_TRACE("audio shutdown");
     EK_ASSERT(audioSystem.initialized);
     auph::shutdown();
     audioSystem.initialized = false;
@@ -57,14 +57,6 @@ void muteDeviceEnd() {
         auph::setGain(auph::Bus_Master.id, 1.0f);
     }
 }
-
-#if !defined(__APPLE__) && !defined(__ANDROID__)
-
-void vibrate(int duration_millis) {
-
-}
-
-#endif
 
 /** Sound **/
 

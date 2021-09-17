@@ -55,15 +55,6 @@ const float* getScreenInsets() {
     return nullptr;
 }
 
-int vibrate(int millis) {
-    auto* env = getJNIEnv();
-    auto cls = env->FindClass("ek/EkDevice");
-    auto method = env->GetStaticMethodID(cls, "vibrate", "(J)I");
-    auto result = env->CallStaticIntMethod(cls, method, (jlong) millis);
-    env->DeleteLocalRef(cls);
-    return result;
-}
-
 const char* getSystemFontPath(const char* fontName) {
     (void) fontName;
     // TODO:

@@ -9,20 +9,20 @@ namespace ek {
 bool StringCatalog::init(std::vector<uint8_t>&& sourceData) {
     data = std::move(sourceData);
     if (data.empty()) {
-        EK_ERROR << "mo-file has no data";
+        EK_ERROR("mo-file has no data");
         return false;
     }
 
     input_memory_stream input{data.data(), data.size()};
     const auto magic = input.read<uint32_t>();
     if (magic != 0x950412DE) {
-        EK_ERROR << "mo-file should be little-endian (or we are running on big-endian?)";
+        EK_ERROR("mo-file should be little-endian (or we are running on big-endian?)");
         return false;
     }
 
     const auto revision = input.read<uint32_t>();
     if (revision != 0) {
-        EK_ERROR << "mo-file invalid revision: " << revision;
+        EK_ERROR_F("mo-file invalid revision: %u", revision);
         return false;
     }
 
@@ -40,7 +40,7 @@ bool StringCatalog::init(std::vector<uint8_t>&& sourceData) {
     const auto offsetTranslatedStrings = input.read<uint32_t>();
 
     if (data.size() < offsetOriginalStrings + 2 * sizeof(std::uint32_t) * stringsCount) {
-        EK_ERROR << "mo-file: not enough data for original strings";
+        EK_ERROR("mo-file: not enough data for original strings");
         return false;
     }
 
@@ -51,7 +51,7 @@ bool StringCatalog::init(std::vector<uint8_t>&& sourceData) {
     }
 
     if (data.size() < offsetTranslatedStrings + 2 * 4 * stringsCount) {
-        EK_ERROR << "mo-file: not enough data for translated strings";
+        EK_ERROR("mo-file: not enough data for translated strings");
         return false;
     }
 
@@ -65,7 +65,7 @@ bool StringCatalog::init(std::vector<uint8_t>&& sourceData) {
         auto& translationInfo = translations[i];
         if (data.size() < translationInfo.stringOffset + translationInfo.stringLength ||
             data.size() < translationInfo.translationOffset + translationInfo.translationLength) {
-            EK_ERROR << "mo-file: not enough data for strings repository";
+            EK_ERROR("mo-file: not enough data for strings repository");
             return false;
         }
 

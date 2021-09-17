@@ -21,7 +21,7 @@ std::string current_working_directory() {
 
 working_dir_t::working_dir_t() {
     st_.emplace_back(current_working_directory());
-    //EK_DEBUG << "BEGIN working dir: " << st_.front();
+    //EK_DEBUG_F("BEGIN working dir: " << st_.front());
 }
 
 working_dir_t::working_dir_t(const std::string& new_path)
@@ -36,15 +36,15 @@ working_dir_t::working_dir_t(const path_t& new_path)
 working_dir_t::~working_dir_t() {
     if (!st_.empty()) {
         ::chdir(st_.front().c_str());
-//        EK_DEBUG << "END working dir: " << st_.front();
+//        EK_DEBUG_F("END working dir: " << st_.front());
     } else {
-//        EK_ERROR << "END working dir EMPTY!";
+//        EK_ERROR_F("END working dir EMPTY!");
     }
 }
 
 void working_dir_t::push(const std::string& new_path) {
     if (!is_dir(new_path)) {
-        EK_ERROR << "[working-dir] cannot change cwd to non-existed directory: " << new_path;
+        EK_ERROR_F("[working-dir] cannot change cwd to non-existed directory: %s", new_path.c_str());
     }
 
     char resolved_path[PATH_MAX];
@@ -55,12 +55,12 @@ void working_dir_t::push(const std::string& new_path) {
 #endif
 
     if (!is_dir(resolved_path)) {
-        EK_ERROR << "[working-dir] resolved path is not directory: " << resolved_path;
+        EK_ERROR_F("[working-dir] resolved path is not directory: %s", resolved_path);
     }
 
     st_.emplace_back(resolved_path);
     ::chdir(resolved_path);
-//    EK_DEBUG << "   PUSH working dir: " << new_path;
+//    EK_DEBUG_F("   PUSH working dir: " << new_path);
 }
 
 void working_dir_t::push(const path_t& new_path) {
@@ -72,7 +72,7 @@ std::string working_dir_t::pop() {
     st_.pop_back();
     if (!st_.empty()) {
         ::chdir(st_.back().c_str());
-//        EK_DEBUG << "   POP working dir to " << st_.back();
+//        EK_DEBUG_F("   POP working dir to " << st_.back());
     }
     return back;
 }

@@ -224,7 +224,7 @@ void ShapeDecoder::flush_commands(const Array<RenderCommand>& edges, Array<Shape
             fills[0] = fills[--left];
         }
         if (first.fill_style_idx >= static_cast<int>(fill_styles_.size())) {
-            EK_WARN("Fill Style %d not found", first.fill_style_idx);
+            EK_WARN_F("Fill Style %d not found", first.fill_style_idx);
             continue;
         }
 

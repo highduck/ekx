@@ -12,7 +12,7 @@ static ek::ProxyAllocator* gHeapSokolGfx = nullptr;
 #define SOKOL_GFX_IMPL
 
 #define SOKOL_ASSERT(x) EK_ASSERT(x)
-#define SOKOL_LOG(s) EK_INFO("SG: %s", s);
+#define SOKOL_LOG(s) EK_DEBUG(s);
 
 #define SOKOL_MALLOC(sz) (::gHeapSokolGfx->alloc(static_cast<uint32_t>(sz), static_cast<uint32_t>(sizeof(void*))))
 #define SOKOL_FREE(p) (::gHeapSokolGfx->dealloc(p))
@@ -119,7 +119,7 @@ Texture* Texture::createSolid32(int width, int height, uint32_t pixelColor) {
 
 bool Texture::getPixels(void* pixels) const {
     (void)pixels;
-#if EK_MACOS
+#if TARGET_OS_OSX
     // get the texture from the sokol internals here...
     _sg_image_t* img = _sg_lookup_image(&_sg.pools, image.id);
     __unsafe_unretained id<MTLTexture> tex = _sg_mtl_id(img->mtl.tex[img->cmn.active_slot]);
@@ -158,11 +158,11 @@ bool Texture::getPixels(void* pixels) const {
         [temp_texture getBytes:pixels bytesPerRow:rowbyte fromRegion:region mipmapLevel:0];
         return true;
     }
-#endif // defined(SOKOL_METAL) && defined(EK_DEV_TOOLS)
+#endif // OSX
     return false;
 }
 
-static std::string BackendToString[] = {
+inline const char* BackendToString[] = {
         "SG_BACKEND_GLCORE33",
         "SG_BACKEND_GLES2",
         "SG_BACKEND_GLES3",
@@ -175,12 +175,12 @@ static std::string BackendToString[] = {
 };
 
 void initialize(int maxDrawCalls) {
-    EK_TRACE << "graphics initialize";
+    EK_TRACE("graphics initialize");
     gHeapSokolGfx = memory::stdAllocator.create<ProxyAllocator>("sokol_gfx");
     sg_desc desc{};
     // this size is 2x Draw Calls per frame (because of sokol internal double-buffering)
     desc.buffer_pool_size = maxDrawCalls << 1;
-#if EK_MACOS || EK_IOS
+#if defined(__APPLE__)
     desc.context.metal.device = app::getMetalDevice();
     desc.context.metal.renderpass_descriptor_cb = app::getMetalRenderPass;
     desc.context.metal.drawable_cb = app::getMetalDrawable;
@@ -190,11 +190,11 @@ void initialize(int maxDrawCalls) {
 #endif
     sg_setup(desc);
     auto backend = sg_query_backend();
-    EK_INFO << "Sokol Backend: " << BackendToString[backend];
+    EK_INFO_F("Sokol Backend: %s", BackendToString[backend]);
 }
 
 void shutdown() {
-    EK_TRACE << "graphics shutdown";
+    EK_TRACE("graphics shutdown");
     sg_shutdown();
     memory::stdAllocator.destroy(gHeapSokolGfx);
 }

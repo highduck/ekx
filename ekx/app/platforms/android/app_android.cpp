@@ -46,7 +46,7 @@ JNIEnv* getJNIEnv() {
     /* Always try to attach if calling from a non-attached thread */
     JNIEnv* env = nullptr;
     if (androidApp.jvm->AttachCurrentThread(&env, nullptr) < 0) {
-        EKAPP_LOG("failed to attach current thread\n");
+        EKAPP_LOG("failed to attach current thread");
         return nullptr;
     }
     pthread_setspecific(androidApp.threadKey, (void*) env);
@@ -56,7 +56,7 @@ JNIEnv* getJNIEnv() {
 jobject get_activity() {
     jobject object = getJNIEnv()->CallStaticObjectMethod(androidApp.cls, androidApp.getActivity);
     if (!object) {
-        EKAPP_LOG("failed get_activity\n");
+        EKAPP_LOG("failed get_activity");
     }
     return object;
 }
@@ -64,7 +64,7 @@ jobject get_activity() {
 jobject get_context() {
     jobject object = getJNIEnv()->CallStaticObjectMethod(androidApp.cls, androidApp.getContext);
     if (!object) {
-        EKAPP_LOG("failed get_context\n");
+        EKAPP_LOG("failed get_context");
     }
     return object;
 }
@@ -84,47 +84,13 @@ void exitActivity(int code) {
     env->CallStaticVoidMethod(cls, method, code);
 }
 
-void start() {
-    int flags = g_app.config.needDepth ? 1 : 0;
-
-    notifyInit();
-    auto* env = getJNIEnv();
-
-    auto cls = env->FindClass("ek/EkActivity");
-    auto method = env->GetStaticMethodID(cls, "startApp", "(I)V");
-    env->CallStaticVoidMethod(cls, method, flags);
-    env->DeleteLocalRef(cls);
 }
-
-}
-
-enum CommandType {
-    Command_Main = 0x100,
-    Command_Ready = 0x101,
-    Command_Frame = 0x102
-};
 
 extern "C" {
 
 JNIEXPORT void JNICALL Java_ek_EkPlatform_sendEvent(JNIEnv*, jclass, jint eventType) {
     using namespace ek::app;
-    switch (eventType) {
-        case Command_Frame:
-            processFrame();
-            if (g_app.exitRequired) {
-                ek::app::exitActivity(g_app.exitCode);
-            }
-            break;
-        case Command_Main:
-            ::ek::app::main();
-            break;
-        case Command_Ready:
-            notifyReady();
-            break;
-        default:
-            processEvent((EventType) eventType);
-            break;
-    }
+    processEvent((EventType) eventType);
 }
 
 JNIEXPORT void JNICALL
@@ -170,13 +136,25 @@ Java_ek_EkPlatform_sendResize(JNIEnv*, jclass, jint width, jint height, jfloat s
     }
 }
 
-JNIEXPORT void JNICALL Java_ek_EkPlatform_initAssets(JNIEnv*, jclass, jobject assets) {
+JNIEXPORT int JNICALL Java_ek_EkPlatform_main(JNIEnv*, jclass, jobject assets) {
     using namespace ek::app;
     auto* env = getJNIEnv();
     androidApp.assetsObject = env->NewGlobalRef(assets);
     androidApp.assets = AAssetManager_fromJava(env, androidApp.assetsObject);
+
+    ::ek::app::main();
+
+    // return configuration flags
+    return g_app.config.needDepth ? 1 : 0;
 }
 
+JNIEXPORT void JNICALL Java_ek_EkPlatform_notifyReady(JNIEnv*, jclass) {
+    ek::app::notifyReady();
+}
+
+JNIEXPORT void JNICALL Java_ek_EkPlatform_processFrame(JNIEnv*, jclass) {
+    ek::app::processFrame();
+}
 
 /* JNI_OnLoad is automatically called when loading shared library through System.loadLibrary() Java call */
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
@@ -184,17 +162,17 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
     JNIEnv* env;
     jclass cls;
 
-    EKAPP_LOG("JNI_OnLoad BEGIN\n");
+    EKAPP_LOG("JNI_OnLoad BEGIN");
 
     androidApp.jvm = vm;
     if (androidApp.jvm->GetEnv((void**) &env, JNI_VERSION_1_6) != JNI_OK) {
-        EKAPP_LOG("Failed to get the environment using GetEnv()\n");
+        EKAPP_LOG("Failed to get the environment using GetEnv()");
         return -1;
     }
 
     /* Create pthread "destructor" pthread key to detach properly all threads */
     if (pthread_key_create(&androidApp.threadKey, jniThreadDestructor) != 0) {
-        EKAPP_LOG("Error initializing pthread key\n");
+        EKAPP_LOG("Error initializing pthread key");
     }
 
     /* Make sure we are attached (we should) and setup pthread destructor */
@@ -203,7 +181,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
     /* Try to retrieve local reference to our Activity class */
     cls = env->FindClass("ek/EkActivity");
     if (!cls) {
-        EKAPP_LOG("Error cannot find Activity class\n");
+        EKAPP_LOG("Error cannot find Activity class");
     }
 
     /* Create a global reference for our Activity class */
@@ -213,16 +191,16 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
     androidApp.getContext = env->GetStaticMethodID(androidApp.cls, "getContext",
                                                    "()Landroid/content/Context;");
     if (!androidApp.getContext) {
-        EKAPP_LOG("Error cannot get getContext() method on specified Activity class (not an Activity?)\n");
+        EKAPP_LOG("Error cannot get getContext() method on specified Activity class (not an Activity?)");
     }
 
     /* Retrieve the getActivity() method id */
     androidApp.getActivity = env->GetStaticMethodID(androidApp.cls, "getActivity", "()Landroid/app/Activity;");
     if (!androidApp.getActivity) {
-        EKAPP_LOG("Error cannot get getActivity() method on specified Activity class (not an Activity?)\n");
+        EKAPP_LOG("Error cannot get getActivity() method on specified Activity class (not an Activity?)");
     }
 
-    EKAPP_LOG("JNI_OnLoad END\n");
+    EKAPP_LOG("JNI_OnLoad END");
 
     return JNI_VERSION_1_6;
 }

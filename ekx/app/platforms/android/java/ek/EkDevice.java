@@ -1,12 +1,9 @@
 package ek;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.view.DisplayCutout;
 import android.view.Window;
 
@@ -62,25 +59,5 @@ public final class EkDevice {
             }
         }
         return safeInsets;
-    }
-
-    private static Vibrator _vibrator;
-
-    @Keep
-    public static int vibrate(long durationMillis) {
-        if (_vibrator == null) {
-            _vibrator = (Vibrator) EkActivity.getActivity().getSystemService(Context.VIBRATOR_SERVICE);
-        }
-
-        if (_vibrator != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                _vibrator.vibrate(VibrationEffect.createOneShot(durationMillis, VibrationEffect.DEFAULT_AMPLITUDE));
-            } else {
-                _vibrator.vibrate(durationMillis);
-            }
-            return 0;
-        }
-
-        return -1;
     }
 }

@@ -11,14 +11,12 @@ target_compile_options(${PROJECT_NAME}
         PUBLIC -x objective-c++
         )
 
-# NOTE: AudioToolbox used for vibrate function. Maybe it should be moved to `auph` library
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries(${PROJECT_NAME}
             PRIVATE "-framework Cocoa"
             PRIVATE "-framework Metal"
             PRIVATE "-framework MetalKit"
             PRIVATE "-framework QuartzCore"
-            PRIVATE "-framework AudioToolbox"
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     target_link_libraries(${PROJECT_NAME}
@@ -27,7 +25,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
             PRIVATE "-framework Metal"
             PRIVATE "-framework MetalKit"
             PRIVATE "-framework QuartzCore"
-            PRIVATE "-framework AudioToolbox"
             )
 endif ()
 

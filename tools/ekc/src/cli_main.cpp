@@ -26,27 +26,28 @@ int main(int argc, char** argv) {
 
     ek::core::setup();
 
-    EK_INFO << "== EKC: 0.1.8 ==";
+    EK_INFO("== EKC: 0.1.8 ==");
 
     Array<std::string> args{};
     for (int i = 0; i < argc; ++i) {
-        args.push_back(argv[i]);
+        EK_INFO_F(" - %d : %s", i, argv[i]);
     }
 
     if (argc > 1) {
-        EK_INFO << "Command: " << args[1];
-        if (args[1] == "prerender_flash") {
-            runFlashFilePrerender(args);
-        } else if (args[1] == "obj") {
-            const std::string& input = args[2];
-            const std::string& output = args[3];
-            ek::convertObjModel(input.c_str(), output.c_str());
-        } else if (args[1] == "bmfont") {
-            ek::exportBitmapFont(args[2].c_str());
-        } else if (args[1] == "flash") {
-            ek::exportFlash(args[2].c_str());
-        } else if (args[1] == "atlas") {
-            ek::exportAtlas(args[2].c_str());
+        std::string cmd = argv[1];
+        EK_INFO_F("Command: %s", argv[1]);
+        if (cmd == "prerender_flash") {
+            runFlashFilePrerender(argc - 2, argv + 2);
+        } else if (cmd == "obj") {
+            const char* input = argv[2];
+            const char* output = argv[3];
+            ek::convertObjModel(input, output);
+        } else if (cmd == "bmfont") {
+            ek::exportBitmapFont(argv[2]);
+        } else if (cmd == "flash") {
+            ek::exportFlash(argv[2]);
+        } else if (cmd == "atlas") {
+            ek::exportAtlas(argv[2]);
         }
     }
 

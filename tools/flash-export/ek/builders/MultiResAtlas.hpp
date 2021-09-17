@@ -153,6 +153,7 @@ struct MultiResAtlasData {
 
 
 void saveImagePNG(const image_t& image, const std::string& path, bool alpha = true);
+void saveImageJPG(const image_t& image, const std::string& path, bool alpha = true);
 
 Array<AtlasPageData> packSprites(Array<SpriteData> sprites, int2 max_size);
 

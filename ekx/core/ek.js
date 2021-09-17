@@ -9,6 +9,7 @@ function setup(project) {
         cpp: ["src"]
     });
     project.importModule("@ekx/stb", __dirname);
+    project.importModule("@ekx/sokol", __dirname);
     project.importModule("@ekx/tracy", __dirname);
 }
 

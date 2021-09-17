@@ -13,10 +13,10 @@ void saveImages(MultiResAtlasData& atlas, const char* output) {
     const path_t outputPath{output};
     pugi::xml_document doc{};
     auto nodeAtlas = doc.append_child("atlas");
-    for (auto& resolution : atlas.resolutions) {
+    for (auto& resolution: atlas.resolutions) {
         auto nodeResolution = nodeAtlas.append_child("resolution");
         const path_t dir = outputPath / std::to_string(resolution.resolution_index);
-        for (auto& sprite : resolution.sprites) {
+        for (auto& sprite: resolution.sprites) {
             auto nodeSprite = nodeResolution.append_child("sprite");
             if (sprite.image) {
                 // require RGBA non-premultiplied alpha
@@ -25,8 +25,10 @@ void saveImages(MultiResAtlasData& atlas, const char* output) {
                 const int w = (int) sprite.image->width();
                 const int h = (int) sprite.image->height();
                 const auto nn = dir / sprite.name + ".bmp";
+//                const auto nn = dir / sprite.name + ".png";
                 make_dirs(nn.dir());
                 stbi_write_bmp(nn.c_str(), w, h, 4, data);
+//                stbi_write_png(nn.c_str(), w, h, 4, data, 4 * w);
 
                 nodeSprite.append_attribute("path").set_value(nn.c_str());
                 nodeSprite.append_attribute("name").set_value(sprite.name.c_str());
@@ -44,7 +46,7 @@ void saveImages(MultiResAtlasData& atlas, const char* output) {
 void exportAtlas(const char* xmlPath) {
     pugi::xml_document xml;
     if (!xml.load_file(xmlPath)) {
-        EK_ERROR("error parse xml %s", xmlPath);
+        EK_ERROR_F("error parse xml %s", xmlPath);
         return;
     }
     auto node = xml.first_child();
@@ -57,9 +59,9 @@ void exportAtlas(const char* xmlPath) {
         pugi::xml_document inputDoc;
         if (inputDoc.load_file(nodeInput.attribute("path").as_string())) {
             int resIndex = 0;
-            for (auto& nodeInputRes : inputDoc.first_child().children("resolution")) {
+            for (auto& nodeInputRes: inputDoc.first_child().children("resolution")) {
                 auto& res = atlas.resolutions[resIndex];
-                for (auto& nodeSprite : nodeInputRes.children("sprite")) {
+                for (auto& nodeSprite: nodeInputRes.children("sprite")) {
                     SpriteData sprite{};
                     sprite.name = nodeSprite.attribute("name").as_string();
                     auto imagePath = nodeSprite.attribute("path").as_string();

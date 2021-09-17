@@ -49,7 +49,7 @@ void save(const output_memory_stream& stream, const char* path) {
         fwrite(stream.data(), 1, stream.size(), h);
         fclose(h);
     } else {
-        EK_WARN << "fopen error: " << path;
+        EK_WARN_F("fopen error: %s", path);
     }
 }
 
@@ -63,7 +63,7 @@ void save(const Array<uint8_t>& buffer, const char* path) {
         fwrite(buffer.data(), 1, buffer.size(), h);
         fclose(h);
     } else {
-        EK_WARN << "fopen error: " << path;
+        EK_WARN_F("fopen error: %s", path);
     }
 }
 
@@ -73,7 +73,7 @@ void save(const std::string& text, const path_t& path) {
         s << text;
         s.flush();
     } else {
-        EK_WARN << "fstream open error: " << path;
+        EK_WARN_F("fstream open error: %s", path.c_str());
     }
 }
 
@@ -193,7 +193,7 @@ bool is_file(const path_t& path) {
 //
 //void copy_tree(const ek::path_t& src, const ek::path_t& dest) {
 //    if (!is_dir(src)) {
-//        EK_WARN << "IS NOT DIR: " << src.str();
+//        EK_WARN_F("IS NOT DIR: " << src.str());
 //        return;
 //    }
 //#ifndef EK_DISABLE_SYSTEM_FS
@@ -259,7 +259,7 @@ bool make_dirs(const path_t& path) {
         if (!part.empty()) {
             pit += part + '/';
             if (is_file(pit.c_str())) {
-                EK_ERROR << "can't create dir because already file: " << pit;
+                EK_ERROR_F("can't create dir because already file: %s", pit.c_str());
                 return false;
             }
             if (!is_dir(pit.c_str())) {
@@ -344,7 +344,7 @@ std::string read_text(const path_t& path) {
 //#ifndef EK_DISABLE_SYSTEM_FS
 //    const char* path_dir = path.empty() ? "." : path.c_str();
 //    if (!is_dir(path_dir)) {
-//        EK_WARN << "IS NOT DIR: " << path_dir;
+//        EK_WARN_F("IS NOT DIR: " << path_dir);
 //        return res;
 //    }
 //    search_files(pattern, path, res);

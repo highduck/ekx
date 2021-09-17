@@ -18,22 +18,18 @@
 #include "impl/sharing_linux.h"
 #include "impl/user_prefs_linux.h"
 
-namespace ek::app {
+int main(int argc, char* argv[]) {
+    using namespace ek::app;
+    g_app.argc = argc;
+    g_app.argv = argv;
 
-void start() {
-    notifyInit();
+    ::ek::app::main();
+
     linux_app_create();
     notifyReady();
 
     linux_app_loop();
+
     linux_app_shutdown();
-}
-
-}
-
-int main(int argc, char* argv[]) {
-    ::ek::app::g_app.argc = argc;
-    ::ek::app::g_app.argv = argv;
-    ::ek::app::main();
     return 0;
 }

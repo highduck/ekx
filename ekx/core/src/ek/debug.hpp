@@ -1,4 +1,4 @@
 #pragma once
 
-#include "debug/LogStream.hpp"
+#include "debug/LogSystem.hpp"
 #include "assert.hpp"

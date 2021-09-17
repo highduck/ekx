@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../uitest.hpp"
-#include <ek/Arguments.hpp>
 
 namespace ek::uitest {
 
@@ -13,7 +12,7 @@ std::string screenshotOutputDir;
 std::string lang{};
 
 void setSimulatorDisplaySettings(float2 size, float4 insets, bool relative, float2 applicationBaseSize) {
-    if(relative) {
+    if (relative) {
         const float scale = 4.0f;
         const float2 aspect = size;
         size.x = applicationBaseSize.x * scale;
@@ -52,21 +51,21 @@ void click(const std::vector<std::string>& path) {
 }
 
 void runUITest() {
-    if(!lang.empty()) {
+    if (!lang.empty()) {
         Localization::instance.setLanguage(lang);
     }
 
-    if(_testToRun.empty()) {
+    if (_testToRun.empty()) {
         // bypass for debugging
         return;
     }
     auto it = _tests.find(_testToRun);
-    if(it != _tests.end()) {
-        EK_INFO << "UI test run: " << _testToRun;
+    if (it != _tests.end()) {
+        EK_INFO_F("UI test run: %s", _testToRun.c_str());
         it->second();
         return;
     }
-    EK_ERROR << "UI test " << _testToRun << " not found";
+    EK_ERROR_F("UI test %s not found", _testToRun.c_str());
     fail();
 }
 
@@ -74,18 +73,27 @@ void UITest(const char* name, const std::function<void()>& run) {
     _tests[name] = run;
 }
 
+class UITestStartListener : public GameAppListener {
+public:
+    ~UITestStartListener() override = default;
+
+    void onStart() override {
+        runUITest();
+    }
+};
+
 void initialize(basic_application* baseApp) {
     _baseApp = baseApp;
     EK_ASSERT(_baseApp != nullptr);
 
-    _testToRun = Arguments::current.getValue("--uitest", "");
-    lang = Arguments::current.getValue("--lang", "");
+    _testToRun = app::findArgumentValue("--uitest", "");
+    lang = app::findArgumentValue("--lang", "");
     {
         float2 size{1, 1};
         float4 insets{0, 0, 0, 0};
         int flags = 0;
         sscanf(
-                Arguments::current.getValue("--display", "9,16,0,0,0,0,1"),
+                app::findArgumentValue("--display", "9,16,0,0,0,0,1"),
                 "%f,%f,%f,%f,%f,%f,%d",
                 size.data(), size.data() + 1,
                 insets.data(), insets.data() + 1, insets.data() + 2, insets.data() + 3,
@@ -94,9 +102,10 @@ void initialize(basic_application* baseApp) {
         const float2 appSize{480, 640};
         setSimulatorDisplaySettings(size, insets, flags == 1, appSize);
     }
-    screenshotOutputDir = Arguments::current.getValue("--screenshot-output", "");
+    screenshotOutputDir = app::findArgumentValue("--screenshot-output", "");
 
-    _baseApp->onStartHook << runUITest;
+    static UITestStartListener uiTestStarter{};
+    _baseApp->dispatcher.listeners.push_back(&uiTestStarter);
 }
 
 }

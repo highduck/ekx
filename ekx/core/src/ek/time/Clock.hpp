@@ -6,13 +6,13 @@ namespace ek {
 
 struct Clock final {
 
-static void setup();
+    static void setup();
 
-static double now();
+    static double now();
 
-static uint64_t now64();
+    static uint64_t now64();
 
-static int64_t unixTimeSeconds();
+    static int64_t unixTimeSeconds();
 
 };
 
