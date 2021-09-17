@@ -925,11 +925,14 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
     win32_create();
 
     ek::app::main();
+    if(g_app.exitRequired) {
+        return g_app.exitCode;
+    }
     notifyReady();
 
     win32_run_loop();
     win32_shutdown();
 
     free(argv_utf8);
-    return 0;
+    return g_app.exitCode;
 }

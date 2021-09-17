@@ -152,6 +152,9 @@ void handleQuitRequest() {
 
     ek::app::initScanCodeTableApple();
     ek::app::main();
+    if (ek::app::g_app.exitRequired) {
+        exit(ek::app::g_app.exitCode);
+    }
 
     [self setupMenuBar];
     [self createView];

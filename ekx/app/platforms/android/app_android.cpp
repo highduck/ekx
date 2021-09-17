@@ -143,6 +143,9 @@ JNIEXPORT int JNICALL Java_ek_EkPlatform_main(JNIEnv*, jclass, jobject assets) {
     androidApp.assets = AAssetManager_fromJava(env, androidApp.assetsObject);
 
     ::ek::app::main();
+    if (g_app.exitRequired) {
+        exitActivity(g_app.exitCode);
+    }
 
     // return configuration flags
     return g_app.config.needDepth ? 1 : 0;
