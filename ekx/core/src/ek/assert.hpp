@@ -15,16 +15,24 @@
 
 #if defined(EK_ASSERTION_PEDANTIC) || defined(EK_ASSERTION_DEFAULT)
 
+#if defined(__EMSCRIPTEN__)
+#include <emscripten.h>
+
+inline void ek_assertion_handler(const char* e, const char* file, int line) {
+    EM_ASM({console.assert(false, "%s from %s:%d", UTF8ToString($0), UTF8ToString($1), $2)}, e, file, line);
+}
+
+#else
+
 #include <csignal>
 #define EK_ABORT raise(SIGABRT)
-//#include <stdlib.h>
-//#define EK_ABORT abort()
 
 #include <cstdio>
 #define EK_LOG_EXCEPTION printf
-//#define EK_LOG_EXCEPTION ((void)0)
 
 #define ek_assertion_handler(e, file, line) ((void)EK_LOG_EXCEPTION("%s:%d: failed assertion '%s'\n", file, line, e), (void)EK_ABORT)
+#endif
+
 #define ek_assert(e) (!(e) ? ek_assertion_handler(#e, __FILE__, __LINE__) : ((void)0))
 
 #endif

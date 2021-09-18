@@ -77,7 +77,7 @@ public:
     StaticSignal& operator=(StaticSignal&& mf) noexcept = default;
 
 private:
-    Array<Slot> _slots{memory::stdAllocator};
+    Array<Slot> _slots;
 };
 
 }

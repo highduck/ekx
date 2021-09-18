@@ -5,7 +5,6 @@
 using namespace ek;
 
 TEST_CASE("logger_test simple") {
-    memory::initialize();
     LogSystem::initialize();
     {
         LogSystem::write(Verbosity::Debug, {}, "hello");
@@ -20,5 +19,4 @@ TEST_CASE("logger_test simple") {
         EK_DEBUG_F("%d", 2);
     }
     LogSystem::shutdown();
-    memory::shutdown();
 }

@@ -60,8 +60,8 @@ struct ComponentHeader {
         return handleToEntity._size;
     }
 
-    ComponentHeader(ek::Allocator& allocator, unsigned initialCapacity, ComponentTypeId typeId_, void* manager) :
-            handleToEntity{allocator, initialCapacity} {
+    ComponentHeader(unsigned initialCapacity, ComponentTypeId typeId_, void* manager) : handleToEntity(
+            initialCapacity) {
         typeId = typeId_;
         lockCounter = 0;
         data = manager;
@@ -115,8 +115,6 @@ class ComponentStorage;
 /** World **/
 class World {
 public:
-
-    ek::Allocator* allocator;
     // entity pool data, indices and generations
     // SIZE: 200 kb
 
@@ -259,20 +257,17 @@ template<typename DataType>
 class ComponentStorage final {
 public:
     ComponentHeader component;
-    ek::Allocator& allocator;
     ek::Array<DataType> data;
 
     static constexpr bool EmptyData = std::is_empty_v<DataType>;
 
-    ComponentStorage(ek::Allocator& allocator_, unsigned initialCapacity) :
-            component{allocator_, initialCapacity, type<DataType>(), this},
-            allocator{allocator_},
-            data{allocator_, initialCapacity} {
+    explicit ComponentStorage(unsigned initialCapacity) : component{initialCapacity, type<DataType>(), this},
+                                                          data(initialCapacity) {
         component.emplace = ComponentStorage<DataType>::s_emplace;
         component.erase = ComponentStorage<DataType>::s_erase;
         component.clear = ComponentStorage<DataType>::s_clear;
         component.shutdown = ComponentStorage<DataType>::s_shutdown;
-        component.storageElementSize = EK_SIZEOF_U32(DataType);
+        component.storageElementSize = (uint32_t) sizeof(DataType);
         component.pDebugStorageCapacity = &data._capacity;
         data.emplace_back();
     }
@@ -285,7 +280,7 @@ public:
         EK_ASSERT(component.lockCounter == 0);
         EK_ASSERT(entityToHandle.get(entity) == 0);
 
-        entityToHandle.insert(entity, handle, allocator);
+        entityToHandle.insert(entity, handle);
         handleToEntity.push_back(entity);
         if constexpr (EmptyData) {
             return data.get(0);
@@ -305,7 +300,7 @@ public:
         EK_ASSERT(component.lockCounter == 0);
         EK_ASSERT(entityToHandle.get(entity) == 0);
 
-        entityToHandle.insert(entity, handle, allocator);
+        entityToHandle.insert(entity, handle);
         handleToEntity.push_back(entity);
         if constexpr (EmptyData) {
             return 0;
@@ -503,13 +498,11 @@ inline void World::create(EntityIndex* outEntities, uint32_t count) {
 template<typename Component>
 inline void World::registerComponent(unsigned initialCapacity) {
     const char* label = ek::Type<Component>::Data.label;
-    allocator->pushDebugLabel(label ? label : "component-storage");
     {
-        auto* storage = allocator->create<ComponentStorage<Component>>(*allocator, initialCapacity);
+        auto* storage = new ComponentStorage<Component>(initialCapacity);
         storage->component.name = label;
         registerComponent(&storage->component);
     }
-    allocator->popDebugLabel();
 }
 
 }

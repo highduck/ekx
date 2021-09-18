@@ -214,7 +214,7 @@ bool is_file(const path_t& path) {
 //                } else if ((e->d_type & DT_REG) != 0) {
 //                    const auto c_src = src / e->d_name;
 //                    const auto c_dst = dest / e->d_name;
-//                    EK_TRACE("COPY FILE: %s -> %s", c_src.c_str(), c_dst.c_str());
+//                    EK_DEBUG("COPY FILE: %s -> %s", c_src.c_str(), c_dst.c_str());
 //                    if (is_file(c_src)) {
 //                        copy_file(c_src, c_dst);
 //                    } else {

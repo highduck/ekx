@@ -27,8 +27,6 @@ struct NonTrivialStruct {
 
 TEST_CASE("Array moveCopy") {
     using namespace ek;
-
-    memory::initialize();
     {
         Array<int> a;
         a.push_back(1);
@@ -53,7 +51,6 @@ TEST_CASE("Array moveCopy") {
         REQUIRE(movedA[0] == 1);
         REQUIRE(movedA[1] == 3);
     }
-
     {
         Array<int> a;
         a.push_back(1);
@@ -78,5 +75,4 @@ TEST_CASE("Array moveCopy") {
         REQUIRE(a[0] == 1);
         REQUIRE(a[1] == 2);
     }
-    memory::shutdown();
 }

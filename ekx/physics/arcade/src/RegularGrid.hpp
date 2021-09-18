@@ -3,7 +3,6 @@
 #include <ecxx/ecxx_fwd.hpp>
 #include <cstdint>
 #include <ek/math/box.hpp>
-#include <ek/Allocator.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/Hash.hpp>
 
@@ -32,20 +31,18 @@ public:
             columns{(bounds_.width + cellSize - 1) / cellSize},
             rows{(bounds_.height + cellSize - 1) / cellSize},
             count{columns * rows} {
-        const auto size = EK_SIZEOF_U32(uint16_t) * count;
-        grid = (uint16_t*)memory::stdAllocator.alloc(size, 2);
-        memory::clear(grid, size);
+        grid = (uint16_t*)calloc(count, sizeof(uint16_t));
         refs.push_back(0);
         next.push_back(0);
     }
 
     ~RegularGrid() {
-        memory::stdAllocator.dealloc(grid);
+        free(grid);
     }
 
     void reset() {
-        const auto size = EK_SIZEOF_U32(uint16_t) * count;
-        memory::clear(grid, size);
+        const auto size = (uint32_t)sizeof(uint16_t) * count;
+        memset(grid, 0, size);
         refs.resize(1);
         next.resize(1);
     }
@@ -69,8 +66,6 @@ public:
         uint32_t y0 = (clamped.y - bounds.y) >> power;
         uint32_t x1 = (clamped.right() - bounds.x) >> power;
         uint32_t y1 = (clamped.bottom() - bounds.y) >> power;
-
-
 
         for (uint32_t cy = y0; cy <= y1; ++cy) {
             for (uint32_t cx = x0; cx <= x1; ++cx) {

@@ -51,6 +51,7 @@ add_library(${PROJECT_NAME} STATIC
         ek/imaging/drawing.hpp
         ek/imaging/Image_Decode.hpp
         ek/imaging/Image_FastBlur.hpp
+        ek/imaging/ImageSubSystem.cpp
 
         ek/util/Res.hpp
         ek/util/ServiceLocator.hpp
@@ -69,8 +70,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/Localization.cpp
 
         ek/util/StaticStorage.hpp
-        ek/Allocator.hpp
-        ek/Allocator.cpp
 
         ek/ds/StaticRingBuffer.hpp
         ek/ds/StaticHistoryBuffer.hpp
@@ -83,9 +82,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/timers.hpp
 
         ecxx/impl/ecxx.cpp
-
-        ek/imaging/ImageSubSystem.cpp
-        ek/imaging/ImageSubSystem.hpp
 
         )
 

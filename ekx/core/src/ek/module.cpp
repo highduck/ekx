@@ -9,8 +9,6 @@
 
 #include "debug/LogSystem_impl.hpp"
 
-#include "imaging/ImageSubSystem.hpp"
-
 #include "util/StringUtil_impl.hpp"
 #include "util/Path_impl.hpp"
 #include "util/Base64_impl.hpp"
@@ -18,11 +16,9 @@
 namespace ek::core {
 
 void setup() {
-    memory::initialize();
     LogSystem::initialize();
     Clock::setup();
     setupTimers();
-    imaging::initialize();
 }
 
 }

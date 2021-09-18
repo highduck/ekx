@@ -84,14 +84,15 @@ void LogSystem::log(Verbosity verbosity, SourceLocation location, const char* me
 }
 
 void LogSystem::format(Verbosity verbosity, SourceLocation location, const char* format, ...) {
-    if (filter(verbosity)) {
-        va_list args;
-        va_start(args, format);
-        char buf[256];
-        stbsp_vsnprintf(buf, 256, format, args);
-        va_end(args);
-        write(verbosity, location, buf);
+    if (!filter(verbosity)) {
+        return;
     }
+    char buf[256];
+    va_list args;
+    va_start(args, format);
+    stbsp_vsnprintf(buf, 256, format, args);
+    va_end(args);
+    write(verbosity, location, buf);
 }
 
 }

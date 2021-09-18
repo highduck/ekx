@@ -31,8 +31,6 @@ struct Hash {
 
     Hash();
 
-    explicit Hash(Allocator& a);
-
     /// Returns true if the specified key exists in the hash.
     [[nodiscard]]
     bool has(uint64_t key) const;
@@ -83,14 +81,8 @@ struct Hash {
 };
 
 template<typename T>
-Hash<T>::Hash() : _hash{memory::stdAllocator},
-                  _data{memory::stdAllocator} {
-
-}
-
-template<typename T>
-Hash<T>::Hash(Allocator& a) : _hash{a},
-                              _data{a} {
+Hash<T>::Hash() : _hash(4),
+                  _data(4) {
 
 }
 
@@ -265,7 +257,7 @@ void insertMulti(Hash<T>& h, uint64_t key, const T& value);
 
 template<typename T>
 void rehash(Hash<T>& h, uint32_t new_size) {
-    Hash<T> nh(h._hash._allocator);
+    Hash<T> nh{};
     nh._hash.resize(new_size);
     nh._data.reserve(h._data._size);
     for (uint32_t i = 0; i < new_size; ++i) {

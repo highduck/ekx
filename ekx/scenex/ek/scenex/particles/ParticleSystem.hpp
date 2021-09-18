@@ -5,12 +5,11 @@
 #include <ek/timers.hpp>
 #include "ParticleDecl.hpp"
 #include "Particle.hpp"
-#include "../base/SxMemory.hpp"
 
 namespace ek {
 
 struct ParticleLayer2D {
-    Array<Particle> particles{SxMemory.get().particles};
+    Array<Particle> particles;
     bool keepAlive = false;
     TimeLayer timer;
 };

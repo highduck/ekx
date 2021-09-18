@@ -38,7 +38,6 @@ public:
 
     void clear();
 
-    ProxyAllocator allocator;
     Array<ConsoleMsg> messages;
     Array<const char*> commands;
     Array<const char*> candidates;

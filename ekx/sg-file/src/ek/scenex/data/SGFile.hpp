@@ -147,10 +147,10 @@ struct SGMovieFrameData {
 struct SGNodeData;
 
 struct SGMovieLayerData {
-    Array<SGMovieFrameData> frames{};
+    Array<SGMovieFrameData> frames;
 
     // temp for restoring target ID
-    Array<SGNodeData*> targets{};
+    Array<SGNodeData*> targets;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -161,7 +161,7 @@ struct SGMovieLayerData {
 struct SGMovieData {
     int frames = 1;
     float fps = 24.0f;
-    Array<SGMovieLayerData> layers{};
+    Array<SGMovieLayerData> layers;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -191,8 +191,8 @@ struct SGNodeData {
     bool boundsEnabled = false;
     rect_f boundingRect;
     rect_f scaleGrid;
-    Array<SGNodeData> children{};
-    Array<SGFilter> filters{};
+    Array<SGNodeData> children;
+    Array<SGFilter> filters;
     std::optional<SGDynamicTextData> dynamicText;
     std::optional<SGMovieData> movie;
     int32_t movieTargetId = -1;

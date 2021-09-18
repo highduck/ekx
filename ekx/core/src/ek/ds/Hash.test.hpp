@@ -4,8 +4,6 @@
 
 TEST_CASE("Hash general") {
     using namespace ek;
-
-    memory::initialize();
     {
         Hash<int> h{};
         REQUIRE(h.get(0, 99) == 99);
@@ -33,13 +31,10 @@ TEST_CASE("Hash general") {
             REQUIRE(!h.has(i));
         }
     }
-    memory::shutdown();
 }
 
 TEST_CASE("Hash stress") {
     using namespace ek;
-
-    memory::initialize();
     {
         const size_t i0 = 0xFFFFFFFF00000000;
         //const size_t i1 = i0 + 10000000;
@@ -75,5 +70,4 @@ TEST_CASE("Hash stress") {
         }
         h.clear();
     }
-    memory::shutdown();
 }

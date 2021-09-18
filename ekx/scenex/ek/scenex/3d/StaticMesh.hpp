@@ -18,12 +18,12 @@ struct StaticMesh {
             vb{
                     graphics::BufferType::VertexBuffer,
                     model.vertices.data(),
-                    model.vertices.size() * EK_SIZEOF_U32(ModelVertex3D)
+                    model.vertices.size() * (uint32_t) sizeof(ModelVertex3D)
             },
             ib{
                     graphics::BufferType::IndexBuffer,
                     model.indices.data(),
-                    model.indices.size() * EK_SIZEOF_U32(uint16_t)
+                    model.indices.size() * (uint32_t) sizeof(uint16_t)
             },
             origin{model} {
         indices_count = static_cast<uint32_t>(model.indices.size());

@@ -1,12 +1,9 @@
 #pragma once
 
 #include "../assert.hpp"
-#include "../Allocator.hpp"
 #include "Type.hpp"
 
 namespace ek::Locator {
-
-void setup();
 
 // note: recommended to delete copy/move on all Service types used in Locator api
 
@@ -29,8 +26,6 @@ void destroy();
 
 /** templated implementation **/
 
-inline Allocator* allocator = nullptr;
-
 template<typename T>
 struct ServiceStorage {
     ServiceStorage() = delete;
@@ -41,7 +36,7 @@ struct ServiceStorage {
 };
 
 template<typename T>
-T* ServiceStorage<T>::value = nullptr;
+inline T* ServiceStorage<T>::value = nullptr;
 
 template<typename T>
 T* get() {
@@ -57,9 +52,7 @@ template<typename T, typename Impl, typename... Args>
 T& create(Args&& ...args) {
     using S = ServiceStorage<T>;
     EK_ASSERT(S::value == nullptr);
-    EK_ASSERT(allocator != nullptr);
-    const AllocatorTraceScope allocatorTrace(getType<T>().label);
-    S::value = allocator->create<Impl>(args...);
+    S::value = new Impl(args...);
     return *S::value;
 }
 
@@ -67,7 +60,6 @@ template<typename T, typename Impl>
 void reset(Impl* value) {
     using S = ServiceStorage<T>;
     EK_ASSERT(S::value == nullptr);
-    EK_ASSERT(allocator != nullptr);
     S::value = value;
 }
 
@@ -75,16 +67,10 @@ void reset(Impl* value) {
 template<typename T>
 void destroy() {
     using S = ServiceStorage<T>;
-    if (S::value && allocator) {
-        allocator->destroy(S::value);
+    if (S::value) {
+        delete S::value;
     }
     S::value = nullptr;
-}
-
-inline void setup() {
-    if (!allocator) {
-        allocator = memory::systemAllocator.create<ProxyAllocator>(memory::systemAllocator, "Locator");
-    }
 }
 
 }

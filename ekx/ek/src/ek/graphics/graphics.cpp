@@ -1,5 +1,4 @@
 #include "graphics.hpp"
-#include <ek/Allocator.hpp>
 #include <ek/debug.hpp>
 #include <ek/assert.hpp>
 #include <ek/imaging/image.hpp>
@@ -7,15 +6,10 @@
 #include <ek/app/app.hpp>
 #include <ek/app/Platform.h>
 
-static ek::ProxyAllocator* gHeapSokolGfx = nullptr;
-
 #define SOKOL_GFX_IMPL
 
 #define SOKOL_ASSERT(x) EK_ASSERT(x)
 #define SOKOL_LOG(s) EK_DEBUG(s);
-
-#define SOKOL_MALLOC(sz) (::gHeapSokolGfx->alloc(static_cast<uint32_t>(sz), static_cast<uint32_t>(sizeof(void*))))
-#define SOKOL_FREE(p) (::gHeapSokolGfx->dealloc(p))
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc99-extensions"
@@ -175,8 +169,7 @@ inline const char* BackendToString[] = {
 };
 
 void initialize(int maxDrawCalls) {
-    EK_TRACE("graphics initialize");
-    gHeapSokolGfx = memory::stdAllocator.create<ProxyAllocator>("sokol_gfx");
+    EK_DEBUG("graphics initialize");
     sg_desc desc{};
     // this size is 2x Draw Calls per frame (because of sokol internal double-buffering)
     desc.buffer_pool_size = maxDrawCalls << 1;
@@ -194,9 +187,8 @@ void initialize(int maxDrawCalls) {
 }
 
 void shutdown() {
-    EK_TRACE("graphics shutdown");
+    EK_DEBUG("graphics shutdown");
     sg_shutdown();
-    memory::stdAllocator.destroy(gHeapSokolGfx);
 }
 
 /** Helpers **/

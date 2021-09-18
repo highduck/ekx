@@ -29,12 +29,12 @@ static ek::StaticStorage<Context> _context;
 Context& context = *_context.ptr();
 
 void _initialize() {
-    EK_TRACE("admob initialize");
+    EK_DEBUG("admob initialize");
     _context.initialize();
 }
 
 void shutdown() {
-    EK_TRACE("admob shutdown");
+    EK_DEBUG("admob shutdown");
     _context.shutdown();
 }
 
