@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include "../assert.hpp"
-#include "../Allocator.hpp"
 
 namespace ek {
 
@@ -38,16 +37,14 @@ public:
         data_type mask_;
     };
 
-    explicit BitVector(size_type size, Allocator& allocator = memory::stdAllocator) :
-            _allocator{allocator},
+    explicit BitVector(size_type size) :
             _size{size},
             _len{(size >> bit_shift) + 1u} {
-        _data = (uint8_t*) _allocator.alloc(_len, sizeof(void*));
-        memory::clear(_data, _len);
+        _data = (uint8_t*) calloc(1, _len);
     }
 
     ~BitVector() {
-        _allocator.dealloc(_data);
+        free(_data);
     }
 
     inline void enable(size_type index) {
@@ -115,8 +112,6 @@ public:
     }
 
 private:
-
-    Allocator& _allocator;
     uint8_t* _data;
     size_type _size;
     size_type _len;

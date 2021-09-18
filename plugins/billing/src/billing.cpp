@@ -29,12 +29,12 @@ static ek::StaticStorage<Context> _context{};
 Context& context = *_context.ptr();
 
 void _initialize() {
-    EK_TRACE("billing initialize");
+    EK_DEBUG("billing initialize");
     _context.initialize();
 }
 
 void shutdown() {
-    EK_TRACE("billing shutdown");
+    EK_DEBUG("billing shutdown");
     _context.shutdown();
 }
 

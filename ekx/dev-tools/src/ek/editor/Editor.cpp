@@ -63,7 +63,7 @@ Editor::~Editor() {
 }
 
 void Editor::load() {
-    EK_TRACE("load editor layout state");
+    EK_DEBUG("load editor layout state");
     pugi::xml_document doc{};
     if (!doc.load_file("EditorLayoutState.xml")) {
         return;
@@ -141,7 +141,7 @@ void EditorSettings::save() const {
 }
 
 void EditorSettings::load() {
-    EK_TRACE("loading editor settings");
+    EK_DEBUG("loading editor settings");
     pugi::xml_document doc{};
     if (!doc.load_file(editorSettingsPath)) {
         EK_ERROR("Can't load editor settings");

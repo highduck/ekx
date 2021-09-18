@@ -27,13 +27,11 @@ ecs::EntityApi createNode2D(const char* name) {
 
 ecs::EntityApi createNode2D(ecs::EntityApi parent, const char* name, int index) {
     auto e = createNode2D(name);
-    if(index == -1) {
+    if (index == -1) {
         append(parent, e);
-    }
-    else if(index == 0) {
+    } else if (index == 0) {
         prepend(parent, e);
-    }
-    else {
+    } else {
         // not implemented yet
         append(parent, e);
     }
@@ -58,7 +56,7 @@ SGFile* sg_load(const void* data, uint32_t size) {
 
 const SGNodeData* sg_get(const SGFile& sg, const std::string& library_name) {
     // TODO: optimize access!
-    for (auto& item : sg.library) {
+    for (auto& item: sg.library) {
         if (item.libraryName == library_name) {
             return &item;
         }
@@ -69,7 +67,10 @@ const SGNodeData* sg_get(const SGFile& sg, const std::string& library_name) {
 using SGFileRes = Res<SGFile>;
 
 void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
-    entity.get_or_create<NodeName>().name = data->name;
+    if (!data->name.empty()) {
+        entity.get_or_create<NodeName>().name = data->name;
+    }
+
     if (data->movieTargetId >= 0) {
         entity.get_or_create<MovieClipTargetIndex>() = {data->movieTargetId};
     }
@@ -180,7 +181,7 @@ ecs::EntityApi create_and_merge(const SGFile& sg, SGFileRes asset,
         apply(entity, over, asset);
     }
     if (data) {
-        for (const auto& child : data->children) {
+        for (const auto& child: data->children) {
             auto child_entity = create_and_merge(sg, asset, sg_get(sg, child.libraryName), &child);
             appendStrict(entity, child_entity);
         }
@@ -195,7 +196,7 @@ void extend_bounds(const SGFile& file, const SGNodeData& data, bounds_builder_2f
     if (spr) {
         boundsBuilder.add(spr->rect, matrix);
     }
-    for (const auto& child : data.children) {
+    for (const auto& child: data.children) {
         const auto& symbol = child.libraryName.empty() ? child : *sg_get(file, child.libraryName);
         extend_bounds(file, symbol, boundsBuilder, matrix * child.matrix);
     }
@@ -208,7 +209,7 @@ ecs::EntityApi sg_create(const std::string& library, const std::string& name, ec
         const SGNodeData* data = sg_get(*file, name);
         if (data) {
             result = create_and_merge(*file, file, data);
-            if(result && parent) {
+            if (result && parent) {
                 appendStrict(parent, result);
             }
         } else {

@@ -177,14 +177,17 @@ void Profiler::addTime(const char* name, float time) {
 }
 
 void Profiler::beginRender(float drawableArea_) {
+#ifdef ENABLE_PROFILER
     auto stats = draw2d::getDrawStats();
     drawableArea = drawableArea_;
     FR = stats.fillArea;
     DC = stats.drawCalls;
     TR = stats.triangles;
+#endif
 }
 
 void Profiler::endRender() {
+#ifdef ENABLE_PROFILER
     const auto stats = draw2d::getDrawStats();
     DC = stats.drawCalls - DC;
     FR = stats.fillArea - FR;
@@ -199,6 +202,7 @@ void Profiler::endRender() {
         tracks[Track_FillRate].history.write(fillRate);
         tracks[Track_FillRate].value = fillRate;
     }
+#endif
 }
 
 }

@@ -242,7 +242,7 @@ void ConsoleWindow::onMessageWrite(const LogMessage& message) {
     }
 
     ConsoleMsg msg{
-            Array<char>{allocator, len + 1},
+            Array<char>(len + 1),
             message.verbosity,
             message.location,
             message.frameHash,
@@ -267,12 +267,7 @@ inline void logToConsoleWindow(const LogMessage& msg) {
     }
 }
 
-ConsoleWindow::ConsoleWindow() :
-        allocator{memory::stdAllocator, "console"},
-        messages{allocator},
-        commands{allocator},
-        candidates{allocator},
-        history{allocator} {
+ConsoleWindow::ConsoleWindow() {
 
     name = "ConsoleWindow";
     title = ICON_FA_LAPTOP_CODE " Console###ConsoleWindow";
@@ -318,13 +313,13 @@ void ConsoleWindow::execute(const char* cmd) {
     historyPos = -1;
     for (int i = static_cast<int>(history.size()) - 1; i >= 0; --i) {
         if (strcasecmp(history[i], cmd) == 0) {
-            allocator.dealloc(history[i]);
+            free(history[i]);
             history.eraseAt(i);
             break;
         }
     }
     auto cmdLen = strlen(cmd);
-    auto* cmdCopy = static_cast<char*>(allocator.alloc(cmdLen + 1, 1));
+    auto* cmdCopy = (char*)malloc(cmdLen + 1);
     memcpy(cmdCopy, cmd, cmdLen + 1);
     history.push_back(cmdCopy);
     // Process command

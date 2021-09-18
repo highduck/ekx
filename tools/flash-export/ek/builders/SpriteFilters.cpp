@@ -17,7 +17,7 @@ inline SpriteFilter apply_scale(const SpriteFilter& filter, float scale) {
 }
 
 Array<SpriteFilter> apply_scale(const Array<SpriteFilter>& filters, float scale) {
-    Array<SpriteFilter> res{memory::stdAllocator};
+    Array<SpriteFilter> res(filters.size());
     for (const auto& filter : filters) {
         res.push_back(apply_scale(filter, scale));
     }

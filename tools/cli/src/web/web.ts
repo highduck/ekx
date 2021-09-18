@@ -88,6 +88,8 @@ function renderCMakeFile(ctx, buildType): string {
         ASSERTIONS: buildType === "Debug" ? 2 : 0,
         SAFE_HEAP: buildType === "Debug" ? 1 : 0,
         DEMANGLE_SUPPORT: buildType === "Debug" ? 1 : 0,
+        // ASSERTIONS: 1,
+        // DEMANGLE_SUPPORT: 1,
 
         // TODO: strange runtime DOM exception error with Release
         STRICT: 1,

@@ -129,14 +129,14 @@ void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
     // read padding to align
     input.read<uint16_t>();
 
-    Array<uint32_t> colorTable{memory::stdAllocator, nColors};
+    uint32_t colorTable[256];
     for (int i = 0; i < nColors; ++i) {
-        colorTable.emplace_back(input.read<uint32_t>());
+        colorTable[i] = input.read<uint32_t>();
     }
     // convert color table to our cairo format
-    convert_rgba_to_bgra(reinterpret_cast<uint8_t*>(colorTable.data()), colorTable.size() * 4);
+    convert_rgba_to_bgra(reinterpret_cast<uint8_t*>(colorTable), nColors * 4);
 
-    if (!colorTable.empty() && (desc.flags & 0x1) != 0) {
+    if ((desc.flags & 0x1) != 0) {
         // transparent
         colorTable[0] = 0x0;
     }

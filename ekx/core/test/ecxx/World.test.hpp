@@ -2,13 +2,11 @@
 
 #include <ecxx/ecxx.hpp>
 #include "common/components.hpp"
-#include <ek/Allocator.hpp>
 
 using namespace ecs;
 using namespace ek;
 
 TEST_CASE("world, basic") {
-    memory::initialize();
     // TODO:
     World w;
     w.initialize();
@@ -20,13 +18,9 @@ TEST_CASE("world, basic") {
     REQUIRE_EQ(e[3], 3);
 
     w.shutdown();
-
-    memory::shutdown();
 }
 
 TEST_CASE("sparse_vector, basic") {
-    memory::initialize();
-
     World w;
     w.initialize();
 
@@ -62,7 +56,6 @@ TEST_CASE("sparse_vector, basic") {
 //    REQUIRE_EQ(sparse_array_get(eth, 5), 0);
 
     w.shutdown();
-    memory::shutdown();
 }
 
 
@@ -152,8 +145,6 @@ TEST_CASE("view, min_to_max") {
 
 
 TEST_CASE("components, add") {
-    memory::initialize();
-    {
         World w;
         w.initialize();
         w.registerComponent<value_t>();
@@ -183,12 +174,9 @@ TEST_CASE("components, add") {
         REQUIRE(w.has<position_t>(e));
 
         w.shutdown();
-    }
-    memory::shutdown();
 }
 
 TEST_CASE("components, remove") {
-    memory::initialize();
     World w;
     w.initialize();
     w.registerComponent<value_t>();
@@ -204,11 +192,9 @@ TEST_CASE("components, remove") {
     w.destroy(&e, 1);
 
     w.shutdown();
-    memory::shutdown();
 }
 
 TEST_CASE("components, abstract_clear") {
-    memory::initialize();
     World w;
     w.initialize();
     w.registerComponent<value_t>();
@@ -227,7 +213,6 @@ TEST_CASE("components, abstract_clear") {
     REQUIRE_FALSE(w.has<position_t>(e));
 
     w.shutdown();
-    memory::shutdown();
 }
 
 constexpr EntityApi null{};

@@ -99,7 +99,7 @@ inline Model3D Model3D::createCube(const float3& position, const float3& size, a
             20, 21, 22,
             22, 23, 20
     };
-    memory::copy(result.indices.data(), indices, 2 * 36);
+    memcpy(result.indices.data(), indices, sizeof(uint16_t) * 36);
 
     for (auto& v : result.vertices) {
         v.position = position + v.position * size;

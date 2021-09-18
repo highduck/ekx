@@ -1,5 +1,6 @@
 #include "world.hpp"
 #include <ek/debug.hpp>
+#include <cstring>
 
 namespace ecs {
 
@@ -8,7 +9,7 @@ World the_world;
 /** World **/
 
 void resetEntityPoolArrays(EntityIndex* entities, EntityGeneration* generations) {
-    ek::memory::clear(generations, sizeof(EntityGeneration) * ENTITIES_MAX_COUNT);
+    memset(generations, 0, sizeof(EntityGeneration) * ENTITIES_MAX_COUNT);
     {
         auto* it = entities;
         for (uint32_t i = 1; i <= ENTITIES_MAX_COUNT; ++i) {
@@ -85,11 +86,9 @@ bool World::check(EntityPassport passport) const {
 // World create / destroy
 
 void World::initialize() {
-    EK_TRACE("ecs::world initialize");
-    auto& systemAllocator = ek::memory::systemAllocator;
-    allocator = systemAllocator.create<ek::AlignedAllocator>(systemAllocator, "ecxx");
+    EK_DEBUG("ecs::world initialize");
     resetEntityPool();
-    ek::memory::clear(components, COMPONENTS_MAX_COUNT * sizeof(void*));
+    memset(components, 0, COMPONENTS_MAX_COUNT * sizeof(void*));
 }
 
 void World::reset() {
@@ -99,25 +98,24 @@ void World::reset() {
         auto* component = components_[i];
         if (component) {
             component->clear(component);
-            component->entityToHandle.clear(*allocator);
+            component->entityToHandle.clear();
             component->handleToEntity._size = 1;
         }
     }
 }
 
 void World::shutdown() {
-    EK_TRACE("ecs::world shutdown");
+    EK_DEBUG("ecs::world shutdown");
     // skip clearing entity pool, because we don't need it anymore
     auto** components_ = components;
     for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {
         auto* component = components_[i];
         if (component) {
-            component->entityToHandle.clear(*allocator);
+            component->entityToHandle.clear();
             component->shutdown(component->data);
-            allocator->dealloc(component->data);
+            free(component->data);
         }
     }
-    ek::memory::systemAllocator.destroy(allocator);
 }
 
 }

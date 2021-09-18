@@ -4,13 +4,14 @@
 
 namespace ek {
 
+// TODO: move & copy constructor and assignment
 template<typename T, unsigned MaxCount>
 struct FixedArray {
 
     static_assert(MaxCount <= 0x10000);
 
-    unsigned _size = 0;
     T _data[MaxCount];
+    unsigned _size = 0;
 
     inline void push_back(T el) {
         EK_ASSERT(_size < MaxCount);

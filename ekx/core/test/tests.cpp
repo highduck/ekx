@@ -14,5 +14,4 @@
 #include <ek/debug/Logger.test.hpp>
 #include <ek/util/Signal.test.hpp>
 #include <ek/util/StringUtil.test.hpp>
-#include <ek/Allocator.test.hpp>
 

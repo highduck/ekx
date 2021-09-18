@@ -24,7 +24,7 @@ struct AudioSystem {
 static AudioSystem audioSystem{};
 
 void initialize() {
-    EK_TRACE("audio initialize");
+    EK_DEBUG("audio initialize");
     EK_ASSERT(!audioSystem.initialized);
 #if defined(__ANDROID__)
     auto activity = app::get_activity();
@@ -36,7 +36,7 @@ void initialize() {
 }
 
 void shutdown() {
-    EK_TRACE("audio shutdown");
+    EK_DEBUG("audio shutdown");
     EK_ASSERT(audioSystem.initialized);
     auph::shutdown();
     audioSystem.initialized = false;

@@ -19,10 +19,7 @@ inline uint8_t get_scale_uid(float scale) {
     return 1;
 }
 
-AssetManager::AssetManager() : assets{memory::stdAllocator},
-                               resolvers{memory::stdAllocator} {
-
-}
+AssetManager::AssetManager() = default;
 
 AssetManager::~AssetManager() {
     clear();

@@ -1,9 +1,11 @@
 #pragma once
 
-#include "../Allocator.hpp"
 #include "../assert.hpp"
-#include <initializer_list>
 #include "../util/Type.hpp"
+#include <initializer_list>
+#include <cstdlib>
+#include <new>
+#include <cstdint>
 
 namespace ek {
 
@@ -25,57 +27,53 @@ template<typename T>
 class Array {
 public:
     using value_type = T;
-    Allocator& _allocator;
     uint32_t _capacity;
     uint32_t _size;
     T* _data;
 
-    Array() : _allocator{memory::stdAllocator},
-              _capacity{4},
-              _size{0} {
-        const AllocatorTraceScope allocatorTrace{"Array"};
+//    Array() : _capacity{0},
+//              _size{0},
+//              _data{nullptr} {
+//    }
 
-        _data = (T*) _allocator.alloc(sizeof(T) * _capacity, alignof(T));
+    Array(std::initializer_list<T> list) noexcept: _capacity{static_cast<uint32_t>(list.size())},
+                                                   _size{static_cast<uint32_t>(list.size())},
+                                                   _data{nullptr} {
+        if (_capacity != 0) {
+            _data = (T*) malloc(sizeof(T) * _capacity);
+            constructCopy(_data, list.begin(), _size);
+        }
     }
 
-    Array(std::initializer_list<T> list) noexcept: _allocator{memory::stdAllocator},
-                                                   _capacity{static_cast<uint32_t>(list.size())},
-                                                   _size{static_cast<uint32_t>(list.size())} {
-        const AllocatorTraceScope allocatorTrace{"Array"};
-
-        _data = (T*) _allocator.alloc(sizeof(T) * _capacity, alignof(T));
-        constructCopy(_data, list.begin(), _size);
+    explicit Array(unsigned capacity) : _capacity{capacity},
+                                        _size{0},
+                                        _data{nullptr} {
+        if (_capacity != 0) {
+            _data = (T*) malloc(sizeof(T) * capacity);
+        }
     }
 
-    explicit Array(Allocator& allocator, unsigned capacity = 4) :
-            _allocator{allocator} {
-        const AllocatorTraceScope allocatorTrace{"Array"};
-
-        _size = 0;
-        _capacity = capacity;
-        _data = (T*) _allocator.alloc(sizeof(T) * capacity, alignof(T));
+    Array() : Array(0) {
     }
 
-    Array(Array&& m) noexcept: _allocator{m._allocator},
-                               _capacity{m._capacity},
+    Array(Array&& m) noexcept: _capacity{m._capacity},
                                _size{m._size},
                                _data{m._data} {
         m._data = nullptr;
     }
 
-    Array(const Array& m) noexcept: _allocator{m._allocator},
-                                    _capacity{m._capacity},
-                                    _size{m._size} {
-        const AllocatorTraceScope allocatorTrace{"Array"};
-
-        _data = (T*) _allocator.alloc(sizeof(T) * _capacity, alignof(T));
-        constructCopy(_data, m._data, _size);
+    Array(const Array& m) noexcept: _capacity{m._capacity},
+                                    _size{m._size},
+                                    _data{nullptr} {
+        if (_capacity != 0) {
+            _data = (T*) malloc(sizeof(T) * _capacity);
+            constructCopy(_data, m._data, _size);
+        }
     }
 
     Array& operator=(Array&& m) noexcept {
-        EK_ASSERT_R2(_data != nullptr);
-        _allocator.dealloc(_data);
-        _allocator = m._allocator;
+        clear();
+        free(_data);
         _capacity = m._capacity;
         _size = m._size;
         _data = m._data;
@@ -87,13 +85,15 @@ public:
         if (&m == this) {
             return *this;
         }
-        const AllocatorTraceScope allocatorTrace{"Array"};
+        clear();
         if (_capacity < m._size) {
-            _allocator.dealloc(_data);
             _capacity = m._capacity;
             _size = m._size;
-            _data = (T*) _allocator.alloc(sizeof(T) * _capacity, alignof(T));
+            _data = (T*) realloc(_data, sizeof(T) * _capacity);
         } else {
+            if(_size > m._size) {
+                reduceSize(m._size);
+            }
             // will just copy
             _size = m._size;
         }
@@ -104,7 +104,7 @@ public:
     ~Array() {
         if (_data != nullptr) {
             clear();
-            _allocator.dealloc(_data);
+            free(_data);
         }
     }
 
@@ -118,13 +118,13 @@ public:
     }
 
     void grow(uint32_t capacity) {
-        const AllocatorTraceScope allocatorTrace{"Array"};
-
-        EK_ASSERT_R2(_data != nullptr);
+        EK_ASSERT_R2(capacity != 0);
         _capacity = capacity;
-        T* newPtr = (T*) _allocator.alloc(sizeof(T) * capacity, alignof(T));
-        constructMove(newPtr, _data, _size);
-        _allocator.dealloc(_data);
+        T* newPtr = (T*) malloc(sizeof(T) * capacity);
+        if (_data) {
+            constructMove(newPtr, _data, _size);
+            free(_data);
+        }
         _data = newPtr;
     }
 
@@ -135,7 +135,7 @@ public:
     }
 
     inline void growPow2() {
-        grow(_capacity << 1);
+        grow(_capacity == 0 ? 4 : (_capacity << 1));
     }
 
     inline void push_back(const T& el) {
@@ -254,7 +254,7 @@ public:
         EK_ASSERT_R2(i < _size);
         (_data + i)->~T();
         --_size;
-        if(i < _size) {
+        if (i < _size) {
             constructMove(_data + i, _data + _size, 1);
         }
     }

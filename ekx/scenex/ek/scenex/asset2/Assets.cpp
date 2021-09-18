@@ -237,7 +237,7 @@ public:
         } else if (data_.type == TextureDataType::CubeMap) {
             for (int idx = 0; idx < 6; ++idx) {
                 imagePathList[idx] = manager_->base_path / data_.images[idx];
-                EK_TRACE_F("add to loading queue cube-map image #%d: %s", idx, imagePathList[idx].c_str());
+                EK_DEBUG_F("add to loading queue cube-map image #%d: %s", idx, imagePathList[idx].c_str());
             }
             texturesCount = 6;
             premultiplyAlpha = false;
@@ -255,7 +255,7 @@ public:
         }
         if (texturesStartLoading < texturesCount) {
             const auto idx = texturesStartLoading++;
-            EK_TRACE_F("poll loading image #%d / %d", idx, texturesCount);
+            EK_DEBUG_F("poll loading image #%d / %d", idx, texturesCount);
             get_resource_content_async(
                     imagePathList[idx].c_str(),
                     [this, idx](auto buffer) {

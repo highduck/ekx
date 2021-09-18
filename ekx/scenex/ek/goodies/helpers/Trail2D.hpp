@@ -5,7 +5,6 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/timers.hpp>
-#include "../../scenex/base/SxMemory.hpp"
 
 namespace ek {
 
@@ -17,10 +16,6 @@ struct VectorDequeue {
 
     uint32_t first = 0;
     Array<T> data;
-
-    explicit VectorDequeue(Allocator& allocator) : data{allocator} {
-
-    }
 
     void move() {
         uint32_t dst = 0;
@@ -90,7 +85,7 @@ private:
 public:
     float scale = 1.0f;
     float2 lastPosition;
-    VectorDequeue<Node> nodes{SxMemory.get().trails};
+    VectorDequeue<Node> nodes;
     bool initialized = false;
 };
 

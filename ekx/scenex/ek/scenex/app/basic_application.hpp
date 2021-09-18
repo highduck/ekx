@@ -19,10 +19,8 @@
 #include <ek/time/Clock.hpp>
 #include <ek/time/Timers.hpp>
 #include "profiler.hpp"
-#include <ek/imaging/ImageSubSystem.hpp>
 #include "GameDisplay.hpp"
 #include "GameAppDispatcher.hpp"
-#include "../base/SxMemory.hpp"
 #include "../text/TextEngine.hpp"
 #include "RootAppListener.hpp"
 
@@ -116,10 +114,7 @@ inline void run_app(app::AppConfig cfg) {
     using app::g_app;
 
     ek::core::setup();
-
-    SxMemory.initialize();
     gTextEngine.initialize();
-    Locator::setup();
     basic_application::AppResolution = float2{cfg.width, cfg.height};
     g_app.config = cfg;
 

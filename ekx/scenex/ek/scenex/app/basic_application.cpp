@@ -129,7 +129,7 @@ void registerSceneXComponents() {
 void basic_application::initialize() {
     ZoneScopedN("initialize");
 
-    EK_TRACE("base application: initialize");
+    EK_DEBUG("base application: initialize");
     // init default empty sprite data
     {
         auto* spr = new Sprite();
@@ -140,7 +140,7 @@ void basic_application::initialize() {
     logDisplayInfo();
     display.update();
 
-    EK_TRACE("base application: initialize scene root");
+    EK_DEBUG("base application: initialize scene root");
     root = createNode2D("root");
     root.assign<Viewport>(AppResolution.x, AppResolution.y);
     root.assign<LayoutRect>();
@@ -148,14 +148,14 @@ void basic_application::initialize() {
     Viewport::updateAll(display.info);
     scale_factor = root.get<Viewport>().output.scale;
 
-    EK_TRACE("base application: initialize InteractionSystem");
+    EK_DEBUG("base application: initialize InteractionSystem");
     auto& im = Locator::create<InteractionSystem>(root);
-    EK_TRACE("base application: initialize input_controller");
+    EK_DEBUG("base application: initialize input_controller");
     Locator::create<input_controller>(im, display);
-    EK_TRACE("base application: initialize AudioManager");
+    EK_DEBUG("base application: initialize AudioManager");
     Locator::create<AudioManager>();
 
-    EK_TRACE("base application: initialize Scene");
+    EK_DEBUG("base application: initialize Scene");
     auto camera = createNode2D("camera");
     auto& defaultCamera = camera.assign<Camera2D>(root);
     defaultCamera.order = 1;
@@ -167,7 +167,7 @@ void basic_application::initialize() {
 }
 
 void basic_application::preload() {
-    EK_TRACE_F("base application: preloading, content scale: %0.3f", scale_factor);
+    EK_DEBUG_F("base application: preloading, content scale: %d perc.", (int) (100 * scale_factor));
     asset_manager_->set_scale_factor(scale_factor);
 
     dispatcher.onPreload();
@@ -342,7 +342,7 @@ void Initializer::onFrame() {
 
     const float steps = 6.0f;
     {
-        EK_PROFILE_SCOPE(INIT_JOB);
+        //EK_PROFILE_SCOPE(INIT_JOB);
         switch (_initializeSubSystemsState) {
             case 0:
                 ++_initializeSubSystemsState;

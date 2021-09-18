@@ -6,8 +6,6 @@
 #include <ek/util/Path.hpp>
 #include <ek/math/max_rects.hpp>
 #include <ek/imaging/drawing.hpp>
-#include <ek/imaging/ImageSubSystem.hpp>
-#include <ek/Allocator.hpp>
 #include <ek/assert.hpp>
 
 #include <miniz.h>
@@ -17,26 +15,17 @@
 
 #define STBIW_ASSERT(e)   EK_ASSERT(e)
 
-// TODO: enable allocation tracking for multi-threaded tasks
-//#define STBIW_ALLOCATOR  ::ek::imaging::allocator
-// we are using multi-threading there!
-#define STBIW_ALLOCATOR  ::ek::memory::systemAllocator
-
-#define STBIW_MALLOC(size)                           STBIW_ALLOCATOR.alloc(size, sizeof(void**))
-#define STBIW_REALLOC_SIZED(ptr, oldSize, newSize)   STBIW_ALLOCATOR.reallocate(ptr, oldSize, newSize, sizeof(void**))
-#define STBIW_FREE(ptr)                              STBIW_ALLOCATOR.dealloc(ptr)
-
 namespace {
 inline unsigned char* iwcompress(unsigned char* data, int data_len, int* out_len, int quality) {
     // uber compression
     quality = 10;
     mz_ulong buflen = mz_compressBound(data_len);
-    auto* buf = (unsigned char*) STBIW_MALLOC(buflen);
+    auto* buf = (unsigned char*) malloc(buflen);
     if (mz_compress2(buf, &buflen, data, data_len, quality)) {
-        STBIW_FREE(buf);
+        free(buf);
         return nullptr;
     }
-    *out_len = (int)buflen;
+    *out_len = (int) buflen;
     return buf;
 }
 }
@@ -112,7 +101,7 @@ void save_atlas_resolution(AtlasData& resolution, const std::string& name) {
         EK_ASSERT(page.image != nullptr);
         page.image_path = name + get_atlas_suffix(resolution.resolution_scale, page_index) + ".png";
         saveImagePNG(*page.image, page.image_path);
-       // saveImageJPG(*page.image, name + get_atlas_suffix(resolution.resolution_scale, page_index));
+        // saveImageJPG(*page.image, name + get_atlas_suffix(resolution.resolution_scale, page_index));
         ++page_index;
     }
 
@@ -266,7 +255,7 @@ void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
     } else {
 
         size_t pixels_count = img.width() * img.height();
-        auto* buffer = (uint8_t*) imaging::allocator.alloc(pixels_count * 3, sizeof(void*));
+        auto* buffer = (uint8_t*) malloc(pixels_count * 3);
         auto* buffer_rgb = buffer;
         auto* buffer_rgba = img.data();
 
@@ -285,7 +274,7 @@ void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
                        buffer,
                        3 * static_cast<int>(img.width()));
 
-        imaging::allocator.dealloc(buffer);
+        free(buffer);
     }
 }
 
@@ -296,8 +285,8 @@ void saveImageJPG(const image_t& image, const std::string& path, bool alpha) {
 
     if (alpha) {
         size_t pixels_count = img.width() * img.height();
-        auto* buffer_rgb = (uint8_t*) imaging::allocator.alloc(pixels_count * 3, sizeof(void*));
-        auto* buffer_alpha = (uint8_t*) imaging::allocator.alloc(pixels_count, sizeof(void*));
+        auto* buffer_rgb = (uint8_t*) malloc(pixels_count * 3);
+        auto* buffer_alpha = (uint8_t*) malloc(pixels_count);
         auto* buffer_rgba = img.data();
 
         auto* rgb = buffer_rgb;
@@ -326,12 +315,12 @@ void saveImageJPG(const image_t& image, const std::string& path, bool alpha) {
                        buffer_alpha,
                        90);
 
-        imaging::allocator.dealloc(buffer_rgb);
-        imaging::allocator.dealloc(buffer_alpha);
+        free(buffer_rgb);
+        free(buffer_alpha);
     } else {
 
         size_t pixels_count = img.width() * img.height();
-        auto* buffer = (uint8_t*) imaging::allocator.alloc(pixels_count * 3, sizeof(void*));
+        auto* buffer = (uint8_t*) malloc(pixels_count * 3);
         auto* buffer_rgb = buffer;
         auto* buffer_rgba = img.data();
 
@@ -350,7 +339,7 @@ void saveImageJPG(const image_t& image, const std::string& path, bool alpha) {
                        buffer,
                        3 * static_cast<int>(img.width()));
 
-        imaging::allocator.dealloc(buffer);
+        free(buffer);
     }
 }
 

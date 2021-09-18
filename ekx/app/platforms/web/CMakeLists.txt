@@ -8,8 +8,7 @@ target_compile_options(${PROJECT_NAME}
         PUBLIC -Wno-dollar-in-identifier-extension)
 
 target_link_options(${PROJECT_NAME}
-        PUBLIC SHELL:--js-library ${CMAKE_CURRENT_SOURCE_DIR}/web.js
-        PUBLIC -sFETCH=0
+        PUBLIC SHELL:--js-library ${CMAKE_CURRENT_SOURCE_DIR}/ekapp.js
         )
 
 target_link_libraries(${PROJECT_NAME}

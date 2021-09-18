@@ -4,7 +4,6 @@
 
 TEST_CASE("bit_vector_test, basic") {
     using namespace ek;
-    memory::initialize();
     {
         BitVector vec{100};
 
@@ -33,5 +32,4 @@ TEST_CASE("bit_vector_test, basic") {
         vec.enable_if_not(99);
         REQUIRE_EQ(vec[99], true);
     }
-    memory::shutdown();
 }
