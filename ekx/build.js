@@ -1,8 +1,7 @@
 const {build} = require("cmake-build");
 
 const buildTypes = ["Release"];
-//const osTypes = [process.platform];
-const osTypes = ["web"];
+const osTypes = [process.platform];
 // const osTypes = ["darwin", "windows", "ios", "android", "web"];
 
 async function run() {
