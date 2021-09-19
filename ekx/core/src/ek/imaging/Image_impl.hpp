@@ -1,4 +1,5 @@
 #include "image.hpp"
+#include <cstring>
 
 namespace ek {
 
