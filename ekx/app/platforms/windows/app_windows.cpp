@@ -883,7 +883,7 @@ char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
 
     LPWSTR* w_argv = CommandLineToArgvW(w_command_line, &argc);
     if (w_argv == NULL) {
-        EK_ERROR("Win32: failed to parse command line");
+        EKAPP_LOG("Win32: failed to parse command line");
         abort();
     } else {
         size_t size = wcslen(w_command_line) * 4;
@@ -894,7 +894,7 @@ char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
         for (int i = 0; i < argc; ++i) {
             n = WideCharToMultiByte(CP_UTF8, 0, w_argv[i], -1, args, (int) size, NULL, NULL);
             if (n == 0) {
-                EK_ERROR("Win32: failed to convert all arguments to utf8");
+                EKAPP_LOG("Win32: failed to convert all arguments to utf8");
                 abort();
                 break;
             }
