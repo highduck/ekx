@@ -909,29 +909,26 @@ char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
 }
 
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow) {
-
-    using namespace ek::app;
-
     (void)hInstance;
     (void)(hPrevInstance);
     (void)(lpCmdLine);
     (void)(nCmdShow);
+
+    using namespace ek::app;
+
     int argc_utf8 = 0;
     char** argv_utf8 = command_line_to_utf8_argv(GetCommandLineW(), &argc_utf8);
 
     g_app.argc = argc_utf8;
     g_app.argv = argv_utf8;
 
-    win32_create();
-
     ek::app::main();
-    if(g_app.exitRequired) {
-        return g_app.exitCode;
+    if(!g_app.exitRequired) {
+        win32_create();
+        notifyReady();
+        win32_run_loop();
+        win32_shutdown();
     }
-    notifyReady();
-
-    win32_run_loop();
-    win32_shutdown();
 
     free(argv_utf8);
     return g_app.exitCode;
