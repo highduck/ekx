@@ -1,7 +1,8 @@
 #pragma once
 
-#include <ecxx/ecxx_fwd.hpp>
+#include <cstring>
 #include <cstdint>
+#include <ecxx/ecxx_fwd.hpp>
 #include <ek/math/box.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/Hash.hpp>
