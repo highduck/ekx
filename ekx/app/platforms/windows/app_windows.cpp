@@ -878,8 +878,7 @@ void win32_shutdown() {
 
 char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
     int argc = 0;
-    char** argv = 0;
-    char* args;
+    char** argv;
 
     LPWSTR* w_argv = CommandLineToArgvW(w_command_line, &argc);
     if (w_argv == NULL) {
@@ -888,11 +887,10 @@ char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
     } else {
         size_t size = wcslen(w_command_line) * 4;
         argv = (char**) calloc(1, ((size_t) argc + 1) * sizeof(char*) + size);
-        EK_ASSERT(argv);
-        args = (char*) &argv[argc + 1];
-        int n;
+        EKAPP_ASSERT(argv);
+        char* args = (char*) &argv[argc + 1];
         for (int i = 0; i < argc; ++i) {
-            n = WideCharToMultiByte(CP_UTF8, 0, w_argv[i], -1, args, (int) size, NULL, NULL);
+            int n = WideCharToMultiByte(CP_UTF8, 0, w_argv[i], -1, args, (int) size, NULL, NULL);
             if (n == 0) {
                 EKAPP_LOG("Win32: failed to convert all arguments to utf8");
                 abort();
@@ -902,7 +900,7 @@ char** command_line_to_utf8_argv(LPWSTR w_command_line, int* o_argc) {
             size -= (size_t) n;
             args += n;
         }
-        free(w_argv);
+        LocalFree(w_argv);
     }
     *o_argc = argc;
     return argv;
