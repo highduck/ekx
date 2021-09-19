@@ -46,7 +46,7 @@
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 
-#elif EK_WINDOWS
+#elif defined(_WIN32) || defined(_WIN64)
 
 #define SOKOL_D3D11
 
