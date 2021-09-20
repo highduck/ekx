@@ -60,7 +60,9 @@ void handleQuitRequest() {
     EKAPP_LOG("create window");
     auto& config = g_app.config;
     bool doCenter = true;
-    NSRect frame = NSMakeRect(0.0, 0.0, config.width, config.height);
+    const auto initWidth = config.windowWidth > 0 ? (float)config.windowWidth : config.width;
+    const auto initHeight = config.windowHeight > 0 ? (float)config.windowHeight : config.height;
+    NSRect frame = NSMakeRect(0.0, 0.0, initWidth, initHeight);
     {
         const char* wndSettings = findArgumentValue("--window", nullptr);
         if (wndSettings != nullptr) {

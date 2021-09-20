@@ -101,8 +101,8 @@ void Editor::onEvent(const app::Event& event) {
             }
             break;
         case EventType::Resize: {
-            const float width = g_app.windowWidth;
-            const float height = g_app.windowHeight;
+            const auto width = (int)g_app.windowWidth;
+            const auto height = (int)g_app.windowHeight;
             if (width != settings.width || height != settings.height) {
                 settings.width = width;
                 settings.height = height;
@@ -131,10 +131,8 @@ void EditorSettings::save() const {
     node.append_attribute("notifyAssetsOnScaleFactorChanged").set_value(notifyAssetsOnScaleFactorChanged);
     node.append_attribute("showEditor").set_value(showEditor);
     auto wnd = node.append_child("window");
-    if (width != g_app.config.width || height != g_app.config.height) {
-        wnd.append_attribute("width").set_value(width);
-        wnd.append_attribute("height").set_value(height);
-    }
+    wnd.append_attribute("width").set_value(width);
+    wnd.append_attribute("height").set_value(height);
     if (!xml.save_file(editorSettingsPath)) {
         EK_ERROR("Can't save editor settings");
     }
@@ -152,8 +150,8 @@ void EditorSettings::load() {
             notifyAssetsOnScaleFactorChanged);
     showEditor = node.attribute("showEditor").as_bool(showEditor);
     auto wnd = node.child("window");
-    width = wnd.attribute("width").as_float(g_app.config.width);
-    height = wnd.attribute("height").as_float(g_app.config.height);
+    width = wnd.attribute("width").as_int((int)g_app.config.width);
+    height = wnd.attribute("height").as_int((int)g_app.config.height);
 }
 
 void Editor::invalidateSettings() {

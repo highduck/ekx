@@ -34,7 +34,6 @@ class Asset;
 
 class basic_application : public RootAppListener {
 public:
-    static float2 AppResolution;
     inline static GameDisplayInfo currentDisplayInfo{};
 
     GameDisplay display{};
@@ -94,8 +93,6 @@ protected:
 
 EK_DECLARE_TYPE(basic_application);
 
-inline float2 basic_application::AppResolution{};
-
 class Initializer : public RootAppListener {
 public:
     void (* creator)() = nullptr;
@@ -115,15 +112,14 @@ inline void run_app(app::AppConfig cfg) {
 
     ek::core::setup();
     gTextEngine.initialize();
-    basic_application::AppResolution = float2{cfg.width, cfg.height};
     g_app.config = cfg;
 
 #ifdef EK_DEV_TOOLS
     Editor::inspectorEnabled = true;
     Editor::settings.load();
     if (Editor::settings.width > 0.0f && Editor::settings.height > 0.0f) {
-        g_app.config.width = Editor::settings.width;
-        g_app.config.height = Editor::settings.height;
+        g_app.config.windowWidth = Editor::settings.width;
+        g_app.config.windowHeight = Editor::settings.height;
     }
 #endif
 

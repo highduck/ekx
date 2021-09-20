@@ -41,7 +41,7 @@ const char* HierarchyWindow::getEntityIcon(ecs::EntityApi e) {
         return ICON_FA_PAINT_BRUSH;
     }
 
-    if (e.has<Transform3D>()) return ICON_FA_DICE_D20;
+    if (ecs::the_world.hasComponent<Transform3D>() && e.has<Transform3D>()) return ICON_FA_DICE_D20;
     if (e.has<Transform2D>()) return ICON_FA_DICE_D6;
     if (e.has<Node>()) return ICON_FA_BOX;
 
