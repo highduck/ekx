@@ -212,6 +212,10 @@ struct AppConfig final {
     int sampleCount = 1;
     int swapInterval = 1;
     uint32_t backgroundColor = 0xFF000000u;
+
+    // for windowed systems, currently only macOS
+    int windowWidth = 0;
+    int windowHeight = 0;
 };
 
 struct AppContext {

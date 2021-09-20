@@ -18,8 +18,8 @@ namespace ek {
 struct EditorSettings {
     bool notifyAssetsOnScaleFactorChanged = true;
     bool showEditor = true;
-    float width = 0.0f;
-    float height = 0.0f;
+    int width = 0;
+    int height = 0;
     bool dirty = false;
 
     void save() const;

@@ -247,6 +247,9 @@ public:
     template<typename Component>
     inline void registerComponent(unsigned initialCapacity = 1);
 
+    template<typename Component>
+    inline bool hasComponent();
+
 private:
     void resetEntityPool();
 };
@@ -503,6 +506,12 @@ inline void World::registerComponent(unsigned initialCapacity) {
         storage->component.name = label;
         registerComponent(&storage->component);
     }
+}
+
+template<typename Component>
+inline bool World::hasComponent() {
+    const auto tid = type<Component>();
+    return tid < COMPONENTS_MAX_COUNT && components[tid] != nullptr;
 }
 
 }

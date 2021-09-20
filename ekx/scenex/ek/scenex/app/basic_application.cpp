@@ -13,11 +13,6 @@
 #include <ek/graphics/graphics.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
-#include <ek/scenex/3d/RenderSystem3D.hpp>
-#include <ek/scenex/3d/Transform3D.hpp>
-#include <ek/scenex/3d/Camera3D.hpp>
-#include <ek/scenex/3d/Light3D.hpp>
-#include <ek/scenex/3d/StaticMesh.hpp>
 
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
@@ -97,11 +92,6 @@ void registerSceneXComponents() {
     ECX_COMPONENT_RESERVE(Display2D, 256);
     ECX_COMPONENT(Camera2D);
     ECX_COMPONENT(Bounds2D);
-    ECX_COMPONENT(Transform3D);
-    ECX_COMPONENT(Camera3D);
-    ECX_COMPONENT(Light3D);
-    ECX_COMPONENT(MeshRenderer);
-
     ECX_COMPONENT(MovieClip);
     ECX_COMPONENT(MovieClipTargetIndex);
 
@@ -142,7 +132,10 @@ void basic_application::initialize() {
 
     EK_DEBUG("base application: initialize scene root");
     root = createNode2D("root");
-    root.assign<Viewport>(AppResolution.x, AppResolution.y);
+
+    const float2 baseResolution{app::g_app.config.width, app::g_app.config.height};
+    root.assign<Viewport>(baseResolution.x, baseResolution.y);
+
     root.assign<LayoutRect>();
     root.assign<NodeEventHandler>();
     Viewport::updateAll(display.info);
@@ -163,7 +156,7 @@ void basic_application::initialize() {
     Camera2D::Main = camera;
     append(root, camera);
 
-    LayoutRect::DesignCanvasRect = {float2::zero, AppResolution};
+    LayoutRect::DesignCanvasRect = {float2::zero, baseResolution};
 }
 
 void basic_application::preload() {
@@ -205,13 +198,6 @@ void basic_application::onFrame() {
     onPreRender();
     dispatcher.onPreRender();
 
-    auto* r3d = Locator::get<RenderSystem3D>();
-    if (r3d) {
-        Transform3D::updateAll();
-        r3d->prepare();
-        r3d->prerender();
-    }
-
     static sg_pass_action pass_action{};
     pass_action.colors[0].action = started_ ? SG_ACTION_DONTCARE : SG_ACTION_CLEAR;
     const float4 fillColor = static_cast<float4>(argb32_t{g_app.config.backgroundColor});
@@ -219,8 +205,7 @@ void basic_application::onFrame() {
     pass_action.colors[0].value.g = fillColor.y;
     pass_action.colors[0].value.b = fillColor.z;
     pass_action.colors[0].value.a = fillColor.w;
-
-    if (r3d) {
+    if(app::g_app.config.needDepth) {
         pass_action.depth.action = SG_ACTION_CLEAR;
         pass_action.depth.value = 1.0f;
     }
@@ -231,10 +216,6 @@ void basic_application::onFrame() {
 
     if (display.beginGame(pass_action)) {
         profiler.beginRender(display.info.size.x * display.info.size.y);
-
-        if (r3d) {
-            r3d->render(display.info.size.x, display.info.size.y);
-        }
 
         doRenderFrame();
 
@@ -340,7 +321,7 @@ void Initializer::onReady() {
 void Initializer::onFrame() {
     RootAppListener::onFrame();
 
-    const float steps = 6.0f;
+    const float steps = 5.0f;
     {
         //EK_PROFILE_SCOPE(INIT_JOB);
         switch (_initializeSubSystemsState) {
@@ -366,18 +347,14 @@ void Initializer::onFrame() {
                 break;
             case 2:
                 ++_initializeSubSystemsState;
-                draw2d::state.createDefaultResources();
-                break;
-            case 3:
-                ++_initializeSubSystemsState;
                 ecs::the_world.initialize();
                 registerSceneXComponents();
                 break;
-            case 4:
+            case 3:
                 ++_initializeSubSystemsState;
                 Locator::ref<basic_application>().initialize();
                 break;
-            case 5:
+            case 4:
                 ++_initializeSubSystemsState;
                 Locator::ref<basic_application>().preload();
                 break;

@@ -332,9 +332,6 @@ uint32_t Context::getUsedMemory() const {
 
 
 Context::Context() {
-    using graphics::Texture;
-    using graphics::Shader;
-
     vertexBuffers_ = new BufferChain(BufferType::VertexBuffer, MaxVertex + 1, (uint32_t)sizeof(Vertex2D));
     indexBuffers_ = new BufferChain(BufferType::IndexBuffer, MaxIndex + 1, (uint32_t)sizeof(uint16_t));
 
@@ -912,6 +909,7 @@ void endFrame() {
 void initialize() {
     EK_DEBUG("draw2d initialize");
     context.initialize();
+    state.createDefaultResources();
     EK_DEBUG("draw2d initialized");
 }
 

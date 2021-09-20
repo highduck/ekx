@@ -369,10 +369,12 @@ void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
     guiComponentPanel<Camera2D>(e, "Camera2D", guiCamera2D);
     guiComponentPanel<Bounds2D>(e, "Bounds2D", guiBounds2D);
 
-    guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
-    guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
-    guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);
-    guiComponentPanel<MeshRenderer>(e, "Mesh Renderer", guiMeshRenderer);
+    if(ecs::the_world.hasComponent<Transform3D>()) {
+        guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
+        guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
+        guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);
+        guiComponentPanel<MeshRenderer>(e, "Mesh Renderer", guiMeshRenderer);
+    }
 
     guiComponentPanel<Interactive>(e, "Interactive", guiInteractive);
     guiComponentPanel<NodeEventHandler>(e, "Event Handler", [](auto& c) {});
