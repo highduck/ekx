@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Bitmap.h"
+#include <cstring>
 
 namespace bmfont_export {
 

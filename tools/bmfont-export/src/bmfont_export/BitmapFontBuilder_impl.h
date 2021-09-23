@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include "types.h"
 
 #include <ft2build.h>

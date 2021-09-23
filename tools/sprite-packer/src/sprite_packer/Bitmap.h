@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include <cstdlib>
+#include <cstring>
 
 namespace sprite_packer {
 
