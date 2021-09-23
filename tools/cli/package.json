@@ -22,10 +22,10 @@
   ],
   "dependencies": {
     "@ekx/bmfont-export": "0.0.1",
-    "@ekx/sprite-packer": "0.0.1",
+    "@ekx/ekx": "0.1.7",
     "@ekx/flash-export": "0.0.6",
     "@ekx/obj-export": "0.0.1",
-    "@ekx/ekx": "0.1.7",
+    "@ekx/sprite-packer": "0.0.1",
     "chalk": "^4.1.2",
     "cmake-build": "0.0.3",
     "glob": "^7.1.7",

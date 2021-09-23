@@ -2,6 +2,7 @@
 
 #include "types.h"
 #include <cstdio>
+#include <cstring>
 #include <pugixml.hpp>
 
 namespace bmfont_export {
