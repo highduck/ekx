@@ -1,7 +1,9 @@
 #pragma once
 
-#include "types.h"
+#define _USE_MATH_DEFINES
 #include <cmath>
+
+#include "types.h"
 
 namespace bmfont_export {
 
