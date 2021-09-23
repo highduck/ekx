@@ -8,6 +8,7 @@
 #include <ek/ds/Array.hpp>
 #include <unordered_map>
 #include <functional>
+#include <ek/graphics/TextureLoader.h>
 
 namespace ek {
 
@@ -20,6 +21,7 @@ public:
 
     std::unordered_map<std::string, Res<Sprite>> sprites;
     Array<Res<graphics::Texture>> pages;
+    Array<graphics::TextureLoader*> loaders;
 
     using LoadCallback = std::function<void(Atlas*)>;
     static void load(const char* path, float scaleFactor, const LoadCallback& callback);

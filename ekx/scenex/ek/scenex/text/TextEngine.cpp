@@ -325,10 +325,8 @@ void TextEngine::drawFormat(const char* fmt, ...) {
     va_start(args, fmt);
     // TODO: TextBuffer with dynamic growing memory for text?
     const int bufferSize = 1024;
-    static char BUFFER[1024];
+    char BUFFER[1024];
     int w = stbsp_vsnprintf(BUFFER, bufferSize, fmt, args);
-//    if (buf == NULL)
-//        return w;
     if (w == -1 || w >= (int) bufferSize) {
         w = (int) bufferSize - 1;
     }

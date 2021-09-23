@@ -1,4 +1,4 @@
-import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "./renderFlashSymbol";
+import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "./flashExport";
 import * as path from "path";
 import {isDir, makeDirs} from "../utils";
 import {rmdirSync} from "fs";

@@ -6,6 +6,8 @@
 #include <ek/app/res.hpp>
 
 // texture loading
+#include <ek/graphics/TextureLoader.h>
+
 #include <ek/scenex/data/TextureData.hpp>
 #include <ek/imaging/image.hpp>
 #include <ek/graphics/graphics.hpp>
@@ -94,13 +96,30 @@ public:
         if (state == AssetState::Loading) {
             Res<Atlas> atlas{name_};
             if (!atlas.empty()) {
-                int toLoad = (int) atlas->pages.size();
-                for (auto& page : atlas->pages) {
-                    if (!page.empty()) {
+                int toLoad = (int) atlas->loaders.size();
+                for (uint32_t i = 0; i < atlas->loaders.size(); ++i) {
+                    auto* loader = atlas->loaders[i];
+                    if(loader) {
+                        loader->update();
+                        if (!loader->loading) {
+                            if(loader->status == 0) {
+                                Res<graphics::Texture> res{loader->urls[0]};
+                                res.reset(loader->texture);
+                                delete loader;
+                                atlas->loaders[i] = nullptr;
+                            }
+                            --toLoad;
+                        }
+                    }
+                    else {
                         --toLoad;
                     }
                 }
                 if (toLoad == 0) {
+                    for(auto* loader : atlas->loaders) {
+                        delete loader;
+                    }
+                    atlas->loaders.clear();
                     state = AssetState::Ready;
                 }
             }
@@ -116,7 +135,7 @@ public:
                 progress = 1.0f;
                 const auto totalPages = (float) atlas->pages.size();
                 float loadedPages = 0.0f;
-                for (auto& page : atlas->pages) {
+                for (auto& page: atlas->pages) {
                     if (!page.empty()) {
                         loadedPages += 1.0f;
                     }
@@ -228,67 +247,43 @@ public:
     }
 
     void do_load() override {
-        imagesLoaded = 0;
-
-        if (data_.type == TextureDataType::Normal) {
-            imagePathList[0] = manager_->base_path / data_.images[0];
-            texturesCount = 1;
-            state = AssetState::Loading;
-        } else if (data_.type == TextureDataType::CubeMap) {
-            for (int idx = 0; idx < 6; ++idx) {
-                imagePathList[idx] = manager_->base_path / data_.images[idx];
-                EK_DEBUG_F("add to loading queue cube-map image #%d: %s", idx, imagePathList[idx].c_str());
-            }
-            texturesCount = 6;
-            premultiplyAlpha = false;
-            state = AssetState::Loading;
-        } else {
-            EK_ERROR_F("unknown Texture Type %u", (uint32_t)data_.type);
-            error = 1;
-            state = AssetState::Ready;
+        loader = new graphics::TextureLoader();
+        loader->basePath = manager_->base_path.c_str();
+        EK_ASSERT(data_.images.size() <= graphics::TextureLoader::IMAGES_MAX_COUNT);
+        for (int i = 0; i < data_.images.size(); ++i) {
+            loader->urls[i] = data_.images[i];
         }
+        loader->imagesToLoad = (int) data_.images.size();
+        if (data_.type == TextureDataType::CubeMap) {
+            loader->isCubeMap = true;
+            loader->premultiplyAlpha = false;
+        }
+        loader->load();
+        state = AssetState::Loading;
     }
 
     void poll() override {
-        if (texturesCount <= 0 || state != AssetState::Loading) {
-            return;
-        }
-        if (texturesStartLoading < texturesCount) {
-            const auto idx = texturesStartLoading++;
-            EK_DEBUG_F("poll loading image #%d / %d", idx, texturesCount);
-            get_resource_content_async(
-                    imagePathList[idx].c_str(),
-                    [this, idx](auto buffer) {
-                        ++imagesLoaded;
-                        images[idx] = decode_image_data(buffer.data(), buffer.size(), premultiplyAlpha);
-                        EK_DEBUG_F("texture #%d loaded %d of %d", idx, imagesLoaded, texturesCount);
-                    }
-            );
-        } else if (imagesLoaded == texturesCount) {
-            if (data_.type == TextureDataType::Normal) {
-                if (images[0]) {
-                    Texture* tex = graphics::createTexture(*images[0]);
-                    Res<Texture>{name_}.reset(tex);
-                    delete images[0];
-                } else {
-                    error = 1;
-                }
-            } else if (data_.type == TextureDataType::CubeMap) {
-                EK_DEBUG("Cube map images loaded, creating cube texture and cleaning up");
-                Res<Texture>{name_}.reset(graphics::createTexture(images));
-                state = AssetState::Ready;
-                for (auto* img : images) {
-                    delete img;
-                }
+        if (loader) {
+            if (loader->loading) {
+                loader->update();
             }
-            state = AssetState::Ready;
+
+            if (!loader->loading) {
+                error = loader->status;
+                if (error == 0) {
+                    Res<Texture>{name_}.reset(loader->texture);
+                }
+                state = AssetState::Ready;
+                delete loader;
+                loader = nullptr;
+            }
         }
     }
 
     [[nodiscard]]
     float getProgress() const override {
         if (state == AssetState::Loading) {
-            return (float) imagesLoaded / (float) texturesCount;
+            return loader ? loader->progress : 0.0f;
         }
         return Asset::getProgress();
     }
@@ -297,11 +292,7 @@ public:
         Res<Texture>{name_}.reset(nullptr);
     }
 
-    int texturesStartLoading = 0;
-    int imagesLoaded = 0;
-    int texturesCount = 0;
-    path_t imagePathList[6];
-    image_t* images[6]{};
+    graphics::TextureLoader* loader = nullptr;
     TextureData data_{};
     // by default always premultiply alpha,
     // currently for cube maps will be disabled
@@ -319,7 +310,7 @@ public:
 
     void do_load() override {
         loaded = 0;
-        for (const auto& lang : langs_) {
+        for (const auto& lang: langs_) {
             auto langPath = manager_->base_path / name_ / lang + ".mo";
             get_resource_content_async(langPath.c_str(),
                                        [this, lang](std::vector<uint8_t> buffer) {
@@ -454,7 +445,7 @@ public:
         }
 
         if (!isTimeBudgetAllowStartNextJob(timer)) {
-            EK_INFO_F("Assets loading jobs spend %d ms", (int)timer.readMillis());
+            EK_INFO_F("Assets loading jobs spend %d ms", (int) timer.readMillis());
         }
 
         assetsLoaded = numAssetsLoaded;

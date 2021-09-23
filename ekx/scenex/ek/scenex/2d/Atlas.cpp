@@ -107,8 +107,14 @@ void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<ui
     AtlasInfo atlasInfo{};
     io(atlasInfo);
 
+    for(auto* loader : atlas->loaders) {
+        delete loader;
+    }
+    atlas->loaders.clear();
+
     for (const auto& page : atlasInfo.pages) {
         auto& texture_asset = atlas->pages.emplace_back(page.imagePath);
+        atlas->loaders.emplace_back(new graphics::TextureLoader);
         for (auto& spr_data : page.sprites) {
             auto sprite = new Sprite();
             sprite->rotated = spr_data.isRotated();
@@ -122,30 +128,22 @@ void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<ui
         }
     }
 
-    for (auto& page : atlasInfo.pages) {
-        const auto& page_image_path = page.imagePath;
-        Res<graphics::Texture> resTexture{page_image_path};
+    for (uint32_t i = 0; i < atlasInfo.pages.size(); ++i) {
+        const auto& pageInfo = atlasInfo.pages[i];
+        const auto& pageImagePath = pageInfo.imagePath;
+        Res<graphics::Texture> resTexture{pageImagePath};
         if (resTexture) {
-            EK_DEBUG_F("Destroy old page texture %s", page_image_path.c_str());
+            EK_DEBUG_F("Destroy old page texture %s", pageImagePath.c_str());
             resTexture.reset(nullptr);
         }
 
-        EK_DEBUG_F("Load atlas page %s", (base_path / page_image_path).c_str());
-        get_resource_content_async((base_path / page_image_path).c_str(), [page_image_path](auto image_buffer) {
-            if (image_buffer.empty()) {
-                EK_DEBUG("Image not found");
-            } else {
-                auto* image = decode_image_data(image_buffer.data(), image_buffer.size());
-                if (image) {
-                    Res<graphics::Texture> res{page_image_path};
-                    auto* texture = graphics::createTexture(*image);
-                    res.reset(texture);
-                    delete image;
-                } else {
-                    EK_DEBUG("Image decode error");
-                }
-            }
-        });
+        EK_DEBUG_F("Load atlas page %s", (base_path / pageImagePath).c_str());
+
+        auto* loader = atlas->loaders[i];
+        loader->basePath = base_path.c_str();
+        loader->imagesToLoad = 1;
+        loader->urls[0] = pageImagePath;
+        loader->load();
     }
 }
 

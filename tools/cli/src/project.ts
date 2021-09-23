@@ -5,7 +5,6 @@ import {ModuleDef, validateModuleDef} from "./module";
 import {logger} from "./logger";
 
 class ProjectPath {
-    ekc = path.dirname(resolveFrom(__dirname, "@ekx/ekc/package.json"));
     EKX_ROOT = path.dirname(resolveFrom(__dirname, "@ekx/ekx/package.json"));
     CURRENT_PROJECT_DIR = process.cwd();
     OUTPUT = path.join(process.cwd(), "build");
