@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.8
+
+### Patch Changes
+
+- 194fa0c: image: remove error messages from stb-image in Release build
+- 194fa0c: change vibrate implementation to auph library
+- 194fa0c: gfx: wrap shaders output
+- 194fa0c: remove Arguments class
+- 194fa0c: sync @ekx api changes
+- ab3ff12: app module refactoring
+- 194fa0c: update auph for audio
+
 ## 0.1.7
 
 ### Patch Changes
