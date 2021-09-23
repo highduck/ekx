@@ -12,8 +12,7 @@ class Profiler {
 public:
     struct Track {
         const char* name = "";
-        const char* titleFormat = "%s: %0.0f";
-        const char* markerFormat = "%0.0f";
+        const char* titleFormat = "%s: %d";
         float thMin = 1.0f / 60.0f;
         float thMax = 1.0f / 30.0f;
         float accum{};

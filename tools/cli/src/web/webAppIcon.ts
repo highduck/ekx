@@ -1,7 +1,7 @@
 import {Project} from "../project";
 import * as path from "path";
 import {WebManifestIcon} from "./webMeta";
-import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/renderFlashSymbol";
+import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/flashExport";
 
 export async function webBuildAppIconAsync(ctx: Project, list: WebManifestIcon[], output: string) {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";

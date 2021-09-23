@@ -66,28 +66,31 @@ function renderCMakeFile(ctx, buildType): string {
             cmakeTarget.linkOptions.push("-g0");
             cmakeTarget.compileOptions.push("-g0");
         } else {
-            cmakeTarget.linkOptions.push("-gsource-map");
+            cmakeTarget.linkOptions.push("-g");
+            //cmakeTarget.linkOptions.push("-gsource-map");
             cmakeTarget.compileOptions.push("-g");
         }
         cmakeTarget.compileDefinitions.push("NDEBUG");
     }
 
     if (buildType === "Debug") {
-        cmakeTarget.linkOptions.push("-Oz", "-gsource-map");
+        cmakeTarget.linkOptions.push("-Oz", "-g");
+        //cmakeTarget.linkOptions.push("-Oz", "-gsource-map");
         cmakeTarget.compileOptions.push("-Oz", "-g");
     }
 
     for (let jsLibraryFile of jsLibraryFiles) {
-        cmakeTarget.linkOptions.push(`SHELL:--js-library \${CMAKE_CURRENT_SOURCE_DIR}/${jsLibraryFile}`);
+        cmakeTarget.linkOptions.push(`"SHELL:--js-library \${CMAKE_CURRENT_SOURCE_DIR}/${jsLibraryFile}"`);
     }
     for (let jsPreFile of jsPreFiles) {
-        cmakeProject.targets[0].linkOptions.push(`SHELL:--pre-js \${CMAKE_CURRENT_SOURCE_DIR}/${jsPreFile}`);
+        cmakeTarget.linkOptions.push(`"SHELL:--pre-js \${CMAKE_CURRENT_SOURCE_DIR}/${jsPreFile}"`);
     }
 
     const emOptions: any = {
         ASSERTIONS: buildType === "Debug" ? 2 : 0,
-        SAFE_HEAP: buildType === "Debug" ? 1 : 0,
         DEMANGLE_SUPPORT: buildType === "Debug" ? 1 : 0,
+        SAFE_HEAP: buildType === "Debug" ? 1 : 0,
+        // SAFE_HEAP_LOG: buildType === "Debug" ? 1 : 0,
         // ASSERTIONS: 1,
         // DEMANGLE_SUPPORT: 1,
 

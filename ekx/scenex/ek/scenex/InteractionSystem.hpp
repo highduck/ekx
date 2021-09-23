@@ -49,7 +49,7 @@ private:
     void fireInteraction(InteractionEvent event, bool prev = true, bool onlyIfChanged = false);
 
     Array<ecs::EntityApi>& getPrevTargets() {
-        return targetLists[targetListIndex];
+        return targetLists[targetListIndex & 1];
     }
 
     Array<ecs::EntityApi>& getCurrentTargets() {
@@ -61,11 +61,11 @@ private:
     }
 
 private:
-    ecs::EntityRef hitTarget_;
-    ecs::EntityApi root_;
-
     Array<ecs::EntityApi> targetLists[2]{};
     int targetListIndex = 0;
+
+    ecs::EntityRef hitTarget_;
+    ecs::EntityApi root_;
 
     bool mouseActive_ = false;
     uint64_t touchID_ = 0ull;

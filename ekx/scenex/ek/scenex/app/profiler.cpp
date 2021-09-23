@@ -25,7 +25,7 @@ void drawText(const Profiler::Track& track) {
     auto& textEngine = gTextEngine.get().engine;
     textEngine.format = devTextFormat;
     textEngine.position = {2.0f, 2.0f + devTextFormat.size};
-    textEngine.drawFormat(track.titleFormat, track.name, track.value);
+    textEngine.drawFormat(track.titleFormat, track.name, (int)track.value);
 }
 
 void drawGraph(const Profiler::Track& track) {
@@ -102,8 +102,7 @@ Profiler::Profiler() {
     {
         auto& track = tracks[Track_FPS];
         track.name = "FPS";
-        track.titleFormat = "%s: %0.0f";
-        track.markerFormat = "%0.2f ms";
+        track.titleFormat = "%s: %d";
         track.thMin = 1000.0f / 60.0f;
         track.thMax = 1000.0f / 30.0f;
         track.min = 16.0f;
@@ -112,8 +111,7 @@ Profiler::Profiler() {
     {
         auto& track = tracks[Track_Triangles];
         track.name = "TRIS";
-        track.titleFormat = "%s: %0.0f";
-        track.markerFormat = "";
+        track.titleFormat = "%s: %d";
         track.thMin = 1000;
         track.thMax = 2000;
         track.min = 0;
@@ -123,8 +121,7 @@ Profiler::Profiler() {
     {
         auto& track = tracks[Track_DrawCalls];
         track.name = "DC";
-        track.titleFormat = "%s: %0.0f";
-        track.markerFormat = "";
+        track.titleFormat = "%s: %d";
         track.thMin = 20;
         track.thMax = 50;
         track.min = 0;
@@ -134,8 +131,7 @@ Profiler::Profiler() {
     {
         auto& track = tracks[Track_FillRate];
         track.name = "FR";
-        track.titleFormat = "%s: %0.2f";
-        track.markerFormat = "";
+        track.titleFormat = "%s: %d";
         track.thMin = 1;
         track.thMax = 3;
         track.min = 0;
@@ -161,8 +157,7 @@ void Profiler::addTime(const char* name, float time) {
         if (!track) {
             Track t{};
             t.name = name;
-            t.titleFormat = "%s: %0.2f";
-            t.markerFormat = "";
+            t.titleFormat = "%s: %d";
             t.thMin = 4;
             t.thMax = 8;
             t.min = 0;

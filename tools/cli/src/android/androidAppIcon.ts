@@ -2,7 +2,7 @@ import {Project} from "../project";
 import * as path from "path";
 import {isDir, makeDirs} from "../utils";
 import {rmdirSync} from "fs";
-import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/renderFlashSymbol";
+import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/flashExport";
 
 export function androidBuildAppIconAsync(ctx: Project, output: string): Promise<number> {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";

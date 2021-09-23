@@ -4,6 +4,7 @@
 
 #define STB_SPRINTF_IMPLEMENTATION
 #define STB_SPRINTF_NOFLOAT
+#define STB_SPRINTF_NOUNALIGNED
 
 #include <stb/stb_sprintf.h>
 
@@ -87,12 +88,14 @@ void LogSystem::format(Verbosity verbosity, SourceLocation location, const char*
     if (!filter(verbosity)) {
         return;
     }
-    char buf[256];
+    //EK_ASSERT(((uint64_t)format & 0x3) == 0);
+    char string[256];
+    //EK_ASSERT(((uint64_t)string & 0x3) == 0);
     va_list args;
     va_start(args, format);
-    stbsp_vsnprintf(buf, 256, format, args);
+    stbsp_vsnprintf(string, sizeof(string), format, args);
     va_end(args);
-    write(verbosity, location, buf);
+    write(verbosity, location, string);
 }
 
 }

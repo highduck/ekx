@@ -67,20 +67,20 @@ jobs:
       - uses: actions/upload-artifact@v2
         if: runner.os == 'Linux'
         with:
-          name: ekc-linux
-          path: tools/ekc/bin/linux
+          name: bin-linux
+          path: tools/*/bin/linux
 
       - uses: actions/upload-artifact@v2
         if: runner.os == 'macOS'
         with:
-          name: ekc-osx
-          path: tools/ekc/bin/osx
+          name: bin-osx
+          path: tools/*/bin/osx
 
       - uses: actions/upload-artifact@v2
         if: runner.os == 'Windows'
         with:
-          name: ekc-win32
-          path: tools/ekc/bin/win32
+          name: bin-win32
+          path: tools/*/bin/win32
 
   build-js:
     name: Build JS
@@ -108,24 +108,33 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: ekc-osx
-          path: tools/ekc/bin/osx
+          name: bin-osx
+          path: tools
 
       - uses: actions/download-artifact@v2
         with:
-          name: ekc-linux
-          path: tools/ekc/bin/linux
+          name: bin-linux
+          path: tools
 
       - uses: actions/download-artifact@v2
         with:
-          name: ekc-win32
-          path: tools/ekc/bin/win32
+          name: bin-win32
+          path: tools
 
-      - name: Set ekc permissions
+      - name: Setup execute permission
         run: |
-          chmod +x tools/ekc/bin/osx/ekc
-          chmod +x tools/ekc/bin/linux/ekc
-          chmod +x tools/ekc/bin/win32/ekc.exe
+          chmod +x tools/bmfont-export/bin/osx/bmfont-export
+          chmod +x tools/bmfont-export/bin/linux/bmfont-export
+          chmod +x tools/bmfont-export/bin/win32/bmfont-export.exe
+          chmod +x tools/flash-export/bin/osx/flash-export
+          chmod +x tools/flash-export/bin/linux/flash-export
+          chmod +x tools/flash-export/bin/win32/flash-export.exe
+          chmod +x tools/obj-export/bin/osx/obj-export
+          chmod +x tools/obj-export/bin/linux/obj-export
+          chmod +x tools/obj-export/bin/win32/obj-export.exe
+          chmod +x tools/sprite-packer/bin/osx/sprite-packer
+          chmod +x tools/sprite-packer/bin/linux/sprite-packer
+          chmod +x tools/sprite-packer/bin/win32/sprite-packer.exe
 
       - name: Intall Dependencies
         run: |

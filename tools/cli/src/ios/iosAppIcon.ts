@@ -2,7 +2,7 @@ import {isDir, makeDirs, readText, writeText} from "../utils";
 import {rmdirSync} from "fs";
 import * as path from "path";
 import {Project} from "../project";
-import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/renderFlashSymbol";
+import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/flashExport";
 
 export async function iosBuildAppIconAsync(ctx: Project, output: string): Promise<number> {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";

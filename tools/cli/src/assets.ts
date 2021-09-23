@@ -1,8 +1,6 @@
 import {isDir, makeDirs, optimizePngGlobAsync} from "./utils";
-import * as path from "path";
 import {Project} from "./project";
 import {rmdirSync} from "fs";
-import {ekcAsync} from "./assets/ekc";
 import {AssetBuilder} from "./assets/ap";
 import {
     AudioAsset,

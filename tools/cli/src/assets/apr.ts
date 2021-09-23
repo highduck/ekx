@@ -6,8 +6,11 @@ import {BytesWriter} from "./BytesWriter";
 import * as glob from "glob";
 import {logger} from "../logger";
 import {parseBoolean, readFloat} from "./parse";
-import {ekcAsync} from "./ekc";
 import * as fs from "fs";
+import {bmfontAsync} from "./bmfont";
+import {spritePackerAsync} from "./spritePacker";
+import {flashExportAsync} from "./flashExport";
+import {objExportAsync} from "./objExport";
 
 export class TTFAsset extends Asset {
     static typeName = "ttf";
@@ -111,6 +114,7 @@ export class TextureAsset extends Asset {
             logger.warn(`Unknown texture type "${type}"`);
         }
 
+        this.images = [];
         for (const imageNode of node.childrenNamed("image")) {
             this.images.push(imageNode.attr.path);
         }
@@ -185,8 +189,7 @@ export class MultiResAtlasAsset extends Asset {
 
     async afterBuild() {
         makeDirs(path.join(this.owner.cache, this.name));
-        const configPath = path.join(this.owner.cache, this.name, "config.xml");
-
+        const configPath = path.join(this.owner.cache, this.name, "_config.xml");
 
         const resolutionNodes = [];
         for (const r of this.settings.resolutions) {
@@ -194,14 +197,14 @@ export class MultiResAtlasAsset extends Asset {
         }
         const inputNodes = [];
         for (const i of this.inputs) {
-            inputNodes.push(`<input path="${i}"/>`);
+            inputNodes.push(`<images path="${i}"/>`);
         }
         const xml = `<atlas path="${path.resolve(this.owner.basePath, this.resourcePath)}" name="${this.name}" output="${this.owner.output}">
     ${resolutionNodes.join("\n")}
     ${inputNodes.join("\n")}
 </atlas>`;
         fs.writeFileSync(configPath, xml, "utf8");
-        await ekcAsync("atlas", configPath);
+        await spritePackerAsync(configPath);
 
         this.owner.meta("atlas", this.name);
     }
@@ -224,7 +227,7 @@ export class ModelAsset extends Asset {
 
         makeDirs(path.dirname(outputPath));
 
-        await ekcAsync("obj", inputPath, outputPath);
+        await objExportAsync(inputPath, outputPath);
 
         this.owner.meta(this.typeName, this.name);
     }
@@ -246,7 +249,7 @@ export class FlashAsset extends Asset {
 
     async build() {
         makeDirs(path.join(this.owner.cache, this.name));
-        const configPath = path.join(this.owner.cache, this.name, "config.xml");
+        const configPath = path.join(this.owner.cache, this.name, "_config.xml");
         const sgOutput = path.join(this.owner.output, this.name + ".sg");
         const imagesOutput = path.join(this.owner.cache, this.name, this.targetAtlas);
         const atlasAsset = this.owner.find(MultiResAtlasAsset.typeName, this.targetAtlas) as MultiResAtlasAsset;
@@ -258,8 +261,9 @@ export class FlashAsset extends Asset {
 </atlas>
 </flash>`);
         fs.writeFileSync(configPath, xml.toString(), "utf-8");
-        await ekcAsync("flash", configPath);
-        atlasAsset.inputs.push(path.join(imagesOutput, "sprites.xml"));
+        makeDirs(imagesOutput);
+        await flashExportAsync(configPath);
+        atlasAsset.inputs.push(path.join(imagesOutput, "_images.xml"));
 
         // header for .sg file
         const sceneHeader = new BytesWriter();
@@ -323,7 +327,7 @@ export class BitmapFontAsset extends Asset {
     async build() {
         makeDirs(path.join(this.owner.cache, this.name));
         const outputFont = path.join(this.owner.output, this.name + ".font");
-        const configPath = path.join(this.owner.cache, this.name, "config.xml");
+        const configPath = path.join(this.owner.cache, this.name, "_config.xml");
         const imagesOutput = path.join(this.owner.cache, this.name, this.targetAtlas);
         const atlasAsset = this.owner.find(MultiResAtlasAsset.typeName, this.targetAtlas) as MultiResAtlasAsset;
         const xml = new XmlDocument(`<bmfont path="${path.resolve(this.owner.basePath, this.resourcePath)}" name="${this.name}"
@@ -336,9 +340,12 @@ ${this.font}
 </atlas>
 </bmfont>`);
         fs.writeFileSync(configPath, xml.toString(), "utf-8");
-        await ekcAsync("bmfont", configPath);
 
-        atlasAsset.inputs.push(path.join(imagesOutput, "sprites.xml"));
+        // prepare required folder for images collection
+        makeDirs(imagesOutput);
+        await bmfontAsync(configPath);
+
+        atlasAsset.inputs.push(path.join(imagesOutput, "_images.xml"));
 
         const header = new BytesWriter();
         header.writeString(BitmapFontAsset.typeName);

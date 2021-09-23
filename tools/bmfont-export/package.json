@@ -1,0 +1,19 @@
+{
+  "name": "@ekx/bmfont-export",
+  "version": "0.0.1",
+  "scripts": {
+    "build:native": "node scripts/build.js",
+    "cc:build:native": "USE_CCACHE=1 node scripts/build.js",
+    "postinstall": "cmake-build || exit 0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@ekx/freetype": "0.0.9",
+    "@ekx/pugixml": "0.0.6",
+    "@ekx/stb": "0.0.7",
+    "cmake-build": "0.0.3"
+  }
+}

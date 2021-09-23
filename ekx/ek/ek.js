@@ -22,6 +22,7 @@ function setup(project) {
         ios: {
         },
         web: {
+            js: "src/ek/graphics"
         },
         windows: {
         },
