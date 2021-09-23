@@ -1,9 +1,9 @@
-#include "types_impl.h"
-#include "filters_impl.h"
-#include "Bitmap_impl.h"
-#include "BitmapFontBuilder_impl.h"
-#include "Images.h"
-#include "Writer.h"
+#include "bmfont_export/types_impl.h"
+#include "bmfont_export/filters_impl.h"
+#include "bmfont_export/Bitmap_impl.h"
+#include "bmfont_export/BitmapFontBuilder_impl.h"
+#include "bmfont_export/Images.h"
+#include "bmfont_export/Writer.h"
 
 int main(int argc, char** argv) {
 

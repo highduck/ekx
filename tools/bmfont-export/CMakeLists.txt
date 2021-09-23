@@ -4,7 +4,7 @@ project(bmfont-export)
 
 add_executable(${PROJECT_NAME}
         # Common general builders:
-        src/bmfont_export/bmfont_export.cpp
+        src/bmfont_export.cpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
