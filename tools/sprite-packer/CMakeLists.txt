@@ -57,6 +57,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(SPRITE_PACKER_OS_PREFIX win32)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     set(SPRITE_PACKER_OS_PREFIX linux)
+    target_link_libraries(${PROJECT_NAME}
+            PUBLIC pthread)
     if (CMAKE_BUILD_TYPE MATCHES Debug)
     else ()
         target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
