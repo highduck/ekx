@@ -20,6 +20,7 @@
 #include <ek/goodies/GameScreen.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
 #include <Tracy.hpp>
+#include <ek/scenex/2d/Atlas.hpp>
 
 namespace ek {
 
@@ -68,10 +69,17 @@ void scene_post_update(ecs::EntityApi root) {
 void scene_render(ecs::EntityApi root) {
     ZoneScoped;
 
-    for (auto& it : Res<DynamicAtlas>::map()) {
+    for (auto& it: Res<DynamicAtlas>::map()) {
         auto* atlas = const_cast<DynamicAtlas*>(it.second->content);
         if (atlas) {
             atlas->invalidate();
+        }
+    }
+
+    for (auto& it: Res<Atlas>::map()) {
+        auto* atlas = const_cast<Atlas*>(it.second->content);
+        if (atlas) {
+            atlas->pollLoading();
         }
     }
 

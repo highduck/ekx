@@ -56,7 +56,8 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
             writer.writeF32(spr.uv.y);
             writer.writeF32(spr.uv.w);
             writer.writeF32(spr.uv.h);
-            writer.writeU8(spr.flags);
+            // ignore `packed` flag in output
+            writer.writeU8(spr.flags & 1);
         }
 
         char absImagePath[1024];
