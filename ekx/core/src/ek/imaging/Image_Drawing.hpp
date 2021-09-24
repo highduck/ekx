@@ -110,24 +110,33 @@ void fill_image(image_t& image, abgr32_t color) {
 //    return ((temp + (temp >> 8)) >> 8);
 //}
 
+union Pix {
+    uint32_t u32;
+
+    struct {
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+        uint8_t a;
+    } rgba;
+};
+
 void premultiply_image(image_t& image) {
-    constexpr auto mult = 258u;
-    constexpr auto shift = 16u;
+    Pix* it = (Pix*)image.data();
+    const uint32_t len = image.width() * image.height();
 
-    auto* it = image.data();
-    const auto* end = it + image.width() * image.height() * 4u;
-
-    while (it < end) {
-        const auto alpha = it[3];
-        if (alpha == 0) {
-            *reinterpret_cast<uint32_t*>(it) = 0u;
-        } else if ((alpha ^ 0xFFu) != 0) {
-            const auto ika = alpha * mult;
-            it[0] = static_cast<uint8_t>((ika * it[0]) >> shift);
-            it[1] = static_cast<uint8_t>((ika * it[1]) >> shift);
-            it[2] = static_cast<uint8_t>((ika * it[2]) >> shift);
+    for(uint32_t i = 0; i < len; ++i) {
+        Pix p = it[i];
+        const uint8_t a = p.rgba.a;
+        if (!a) {
+            it[i].u32 = 0;
         }
-        it += 4u;
+        else if(a ^ 0xFF) {
+            p.rgba.r = p.rgba.r * a / 0xFF;
+            p.rgba.g = p.rgba.g * a / 0xFF;
+            p.rgba.b = p.rgba.b * a / 0xFF;
+            it[i] = p;
+        }
     }
 }
 

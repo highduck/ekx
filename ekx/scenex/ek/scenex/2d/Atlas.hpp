@@ -19,12 +19,16 @@ public:
 
     ~Atlas();
 
+    void clear();
+
     std::unordered_map<std::string, Res<Sprite>> sprites;
     Array<Res<graphics::Texture>> pages;
     Array<graphics::TextureLoader*> loaders;
 
-    using LoadCallback = std::function<void(Atlas*)>;
-    static void load(const char* path, float scaleFactor, const LoadCallback& callback);
+    [[nodiscard]] int getLoadingTexturesCount() const;
+    int pollLoading();
+
+    void load(const char* path, float scaleFactor);
 };
 
 }

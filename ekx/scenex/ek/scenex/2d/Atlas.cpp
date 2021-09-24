@@ -82,18 +82,7 @@ const char* get_scale_suffix(float scale) {
 Atlas::Atlas() = default;
 
 Atlas::~Atlas() {
-    // TODO: idea with ref counting and when we can unload - just delete all unreferenced resources
-//    for (const auto& texture : mPrivate->textures) {
-//        asset_t<texture_t>::unload(texture);
-//    }
-
-    for (auto& page : pages) {
-        page.reset(nullptr);
-    }
-
-    for (auto& pair : sprites) {
-        pair.second.reset(nullptr);
-    }
+    clear();
 }
 
 void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<uint8_t>& buffer) {
@@ -140,28 +129,85 @@ void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<ui
         EK_DEBUG_F("Load atlas page %s", (base_path / pageImagePath).c_str());
 
         auto* loader = atlas->loaders[i];
-        loader->basePath = base_path.c_str();
+        loader->basePath = base_path.str();
         loader->imagesToLoad = 1;
         loader->urls[0] = pageImagePath;
         loader->load();
     }
 }
 
-void Atlas::load(const char* path, float scale_factor, const Atlas::LoadCallback& callback) {
+void Atlas::load(const char* path, float scaleFactor) {
     const path_t uid{path};
     const path_t base_path = uid.dir();
-    const path_t file_meta = uid + get_scale_suffix(scale_factor) + ".atlas";
+    const path_t file_meta = uid + get_scale_suffix(scaleFactor) + ".atlas";
 
-    get_resource_content_async(file_meta.c_str(), [callback, file_meta, base_path](auto buffer) {
-        Atlas* atlas = nullptr;
+    get_resource_content_async(file_meta.c_str(), [this, file_meta, base_path](auto buffer) {
         if (buffer.empty()) {
             EK_DEBUG_F("ATLAS META resource not found: %s", file_meta.c_str());
         } else {
-            atlas = new Atlas;
-            load_atlas_meta(base_path, atlas, buffer);
+            load_atlas_meta(base_path, this, buffer);
         }
-        callback(atlas);
     });
+}
+
+int Atlas::pollLoading() {
+    int toLoad = (int) loaders.size();
+    if(toLoad > 0) {
+        for (uint32_t i = 0; i < loaders.size(); ++i) {
+            auto* loader = loaders[i];
+            if (loader) {
+                loader->update();
+                if (!loader->loading) {
+                    if (loader->status == 0) {
+                        Res<graphics::Texture> res{loader->urls[0]};
+                        res.reset(loader->texture);
+                        delete loader;
+                        loaders[i] = nullptr;
+                    }
+                    --toLoad;
+                }
+            } else {
+                --toLoad;
+            }
+        }
+        if (toLoad == 0) {
+            for (auto* loader: loaders) {
+                delete loader;
+            }
+            loaders.clear();
+            return 0;
+        }
+        else {
+            return toLoad;
+        }
+    }
+    return 0;
+}
+
+int Atlas::getLoadingTexturesCount() const {
+    int loading = 0;
+    for (uint32_t i = 0; i < loaders.size(); ++i) {
+        auto* loader = loaders[i];
+        if (loader) {
+            ++loading;
+        }
+    }
+    return loading;
+}
+
+void Atlas::clear() {
+    // TODO: idea with ref counting and when we can unload - just delete all unreferenced resources
+//    for (const auto& texture : mPrivate->textures) {
+//        asset_t<texture_t>::unload(texture);
+//    }
+
+    for (auto& page : pages) {
+        page.reset(nullptr);
+    }
+
+    for (auto& pair : sprites) {
+        pair.second.reset(nullptr);
+    }
 }
 
 }

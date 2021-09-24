@@ -9,7 +9,6 @@
 #include <ek/graphics/TextureLoader.h>
 
 #include <ek/scenex/data/TextureData.hpp>
-#include <ek/imaging/image.hpp>
 #include <ek/graphics/graphics.hpp>
 
 #include <ek/scenex/SceneFactory.hpp>
@@ -86,9 +85,12 @@ public:
             state = AssetState::Loading;
 
             fullPath_ = manager_->base_path / name_;
-            Atlas::load(fullPath_.c_str(), manager_->scale_factor, [this](auto* atlas) {
-                Res<Atlas>{name_}.reset(atlas);
-            });
+
+            Res<Atlas> resAtlas{name_};
+            if(!resAtlas) {
+                resAtlas.reset(new Atlas);
+            }
+            resAtlas->load(fullPath_.c_str(), manager_->scale_factor);
         }
     }
 
@@ -96,30 +98,9 @@ public:
         if (state == AssetState::Loading) {
             Res<Atlas> atlas{name_};
             if (!atlas.empty()) {
-                int toLoad = (int) atlas->loaders.size();
-                for (uint32_t i = 0; i < atlas->loaders.size(); ++i) {
-                    auto* loader = atlas->loaders[i];
-                    if(loader) {
-                        loader->update();
-                        if (!loader->loading) {
-                            if(loader->status == 0) {
-                                Res<graphics::Texture> res{loader->urls[0]};
-                                res.reset(loader->texture);
-                                delete loader;
-                                atlas->loaders[i] = nullptr;
-                            }
-                            --toLoad;
-                        }
-                    }
-                    else {
-                        --toLoad;
-                    }
-                }
-                if (toLoad == 0) {
-                    for(auto* loader : atlas->loaders) {
-                        delete loader;
-                    }
-                    atlas->loaders.clear();
+                // we poll atlas loading / reloading in separated process with Atlas::pollLoading for each Res<Atlas>
+                int loading = atlas->getLoadingTexturesCount();
+                if(loading == 0) {
                     state = AssetState::Ready;
                 }
             }

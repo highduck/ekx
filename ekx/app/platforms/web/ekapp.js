@@ -155,7 +155,7 @@ mergeInto(LibraryManager.library, {
         wnd.addEventListener("keydown", onKey, true);
         wnd.addEventListener("keyup", onKey, true);
 
-        var onResize = function () {
+        var handleResize = function () {
             var dpr = window.devicePixelRatio;
 
             var div = document.getElementById("gamecontainer");
@@ -195,17 +195,34 @@ mergeInto(LibraryManager.library, {
             if (gameview) {
                 if (gameview.width !== drawableWidth ||
                     gameview.height !== drawableHeight) {
+
                     gameview.width = drawableWidth;
                     gameview.height = drawableHeight;
+
+                    gameview.style.width = w + "px";
+                    gameview.style.height = h + "px";
                 }
-                gameview.style.width = w + "px";
-                gameview.style.height = h + "px";
                 gameview.style.transform = "translateX(" + offset_x + "px) translateY(" + offset_y + "px)";
             }
         };
 
-        wnd.addEventListener("resize", onResize, true);
-        onResize();
+        // callback call after timeout after last call (if call again before timeout,
+        // planned callback is cancelled and re-scheduled to be called after timeout)
+        function throttle(callback, millisecondsLimit) {
+            var timer = -1;
+            return function () {
+                if (timer >= 0) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(function () {
+                    timer = -1;
+                    callback();
+                }, millisecondsLimit);
+            }
+        }
+
+        wnd.addEventListener("resize", throttle(handleResize, 100), true);
+        handleResize();
 
         /**
          *
