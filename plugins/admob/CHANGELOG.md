@@ -1,5 +1,21 @@
 # @ekx/plugin-admob
 
+## 0.0.7
+
+### Patch Changes
+
+- 194fa0c: sync @ekx api changes
+- ab3ff12: app module refactoring
+- Updated dependencies [194fa0c]
+- Updated dependencies [194fa0c]
+- Updated dependencies [194fa0c]
+- Updated dependencies [194fa0c]
+- Updated dependencies [194fa0c]
+- Updated dependencies [ab3ff12]
+- Updated dependencies [194fa0c]
+  - @ekx/ekx@0.1.8
+  - @ekx/plugin-firebase@0.0.2
+
 ## 0.0.6
 
 ### Patch Changes

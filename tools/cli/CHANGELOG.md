@@ -1,5 +1,28 @@
 ## 0.0.4
 
+## 0.1.11
+
+### Patch Changes
+
+- b1c4e7c: Bump http-server from 13.0.1 to 13.0.2
+- 194fa0c: change vibrate implementation to auph library
+- 194fa0c: web: update html template for MINIMAL_RUNTIME
+- d33d643: ios: fix default assets, add debug symbols for Crashlytics
+- 9091df4: Bump typescript from 4.4.2 to 4.4.3
+- 194fa0c: sync @ekx api changes
+- 960472a: Bump @types/node from 16.9.1 to 16.9.2
+- ab3ff12: app module refactoring
+- Updated dependencies [194fa0c]
+- Updated dependencies [194fa0c]
+- Updated dependencies [194fa0c]
+- Updated dependencies [194fa0c]
+- Updated dependencies [194fa0c]
+- Updated dependencies [ab3ff12]
+- Updated dependencies [194fa0c]
+  - @ekx/ekx@0.1.8
+  - @ekx/flash-export@0.0.7
+  - @ekx/obj-export@0.0.2
+
 ## 0.1.10
 
 ### Patch Changes
