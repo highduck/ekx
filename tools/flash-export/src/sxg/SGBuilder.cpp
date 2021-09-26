@@ -486,14 +486,14 @@ void SGBuilder::process(const Element& el, ExportItem* parent, processing_bag_t*
 
 /*** rendering ***/
 
-void SGBuilder::render(const ExportItem& item, MultiResAtlasData& toAtlas) const {
+void SGBuilder::render(const ExportItem& item, ImageSet& toImageSet) const {
     const Element& el = *item.ref;
     const auto spriteID = el.item.name;
     RenderElementOptions options;
-    for (auto& resolution : toAtlas.resolutions) {
+    for (auto& resolution : toImageSet.resolutions) {
         options.scale = std::min(
                 item.max_abs_scale,
-                resolution.resolution_scale * std::min(1.0f, item.estimated_scale)
+                resolution.scale * std::min(1.0f, item.estimated_scale)
         );
         auto res = renderElement(doc, el, options);
         res.name = spriteID;
@@ -502,11 +502,11 @@ void SGBuilder::render(const ExportItem& item, MultiResAtlasData& toAtlas) const
     }
 }
 
-void SGBuilder::build_sprites(MultiResAtlasData& to_atlas) const {
+void SGBuilder::build_sprites(ImageSet& toImageSet) const {
     for (auto* item : library.children) {
         if (item->renderThis) {
             item->node.sprite = item->ref->item.name;
-            render(*item, to_atlas);
+            render(*item, toImageSet);
         }
         if (!item->node.scaleGrid.empty()) {
 

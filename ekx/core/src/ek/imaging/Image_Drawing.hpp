@@ -121,7 +121,7 @@ union Pix {
     } rgba;
 };
 
-void premultiply_image(image_t& image) {
+void premultiplyAlpha(image_t& image) {
     Pix* it = (Pix*)image.data();
     const uint32_t len = image.width() * image.height();
 
@@ -132,28 +132,27 @@ void premultiply_image(image_t& image) {
             it[i].u32 = 0;
         }
         else if(a ^ 0xFF) {
-            p.rgba.r = p.rgba.r * a / 0xFF;
-            p.rgba.g = p.rgba.g * a / 0xFF;
-            p.rgba.b = p.rgba.b * a / 0xFF;
+            p.rgba.r = (p.rgba.r * a) / 0xFF;
+            p.rgba.g = (p.rgba.g * a) / 0xFF;
+            p.rgba.b = (p.rgba.b * a) / 0xFF;
             it[i] = p;
         }
     }
 }
 
-void undo_premultiply_image(image_t& image) {
-    auto* it = image.data();
-    const auto* end = it + image.width() * image.height() * 4u;
+void undoPremultiplyAlpha(image_t& bitmap) {
+    auto* it = (abgr32_t*) bitmap.data();
+    const auto* end = it + (bitmap.width() * bitmap.height());
 
     while (it < end) {
-        const auto alpha = it[3];
-        if (alpha == 0) {
-            *reinterpret_cast<uint32_t*>(it) = 0u;
-        } else if (alpha < 0xFFu) {
-            it[0] = static_cast<uint8_t>((0xFFu * it[0]) / alpha);
-            it[1] = static_cast<uint8_t>((0xFFu * it[1]) / alpha);
-            it[2] = static_cast<uint8_t>((0xFFu * it[2]) / alpha);
+        const uint8_t a = it->a;
+        if (a && (a ^ 0xFF)) {
+            const uint8_t half = a / 2;
+            it->r = std::min(255, (it->r * 0xFF + half) / a);
+            it->g = std::min(255, (it->g * 0xFF + half) / a);
+            it->b = std::min(255, (it->b * 0xFF + half) / a);
         }
-        it += 4u;
+        ++it;
     }
 }
 

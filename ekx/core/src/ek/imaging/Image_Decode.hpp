@@ -35,7 +35,7 @@
 
 namespace ek {
 
-image_t* decode_image_data(const void* data, size_t size, bool premultiplyAlpha) {
+image_t* decode_image_data(const void* data, size_t size, bool pma) {
 
     EK_DEBUG("decode image: begin");
     EK_ASSERT(size > 0);
@@ -54,10 +54,10 @@ image_t* decode_image_data(const void* data, size_t size, bool premultiplyAlpha)
         result = new image_t(static_cast<uint32_t>(w),
                              static_cast<uint32_t>(h),
                              image_data);
-        if (premultiplyAlpha) {
+        if (pma) {
             EK_DEBUG("decode image: premultiply alpha");
             EK_PROFILE_SCOPE("pma");
-            premultiply_image(*result);
+            premultiplyAlpha(*result);
         }
     } else {
 #ifndef NDEBUG

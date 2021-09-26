@@ -5,7 +5,7 @@ project(flash-export)
 add_executable(${PROJECT_NAME}
         src/flash_export.cpp
 
-        src/MultiResAtlas.cpp
+        src/ImageSet.cpp
 
         # XFL Builder
         src/sxg/SGBuilder.cpp

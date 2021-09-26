@@ -53,11 +53,11 @@ void fill_image(image_t& image, abgr32_t color = 0x0u);
 
 // multiply all color components by alpha:
 // r' = r * a
-void premultiply_image(image_t& image);
+void premultiplyAlpha(image_t& image);
 
 // convert back all color components using alpha:
 // r = r' / a
-void undo_premultiply_image(image_t& image);
+void undoPremultiplyAlpha(image_t& image);
 
 }
 
