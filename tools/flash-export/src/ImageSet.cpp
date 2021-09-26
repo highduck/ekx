@@ -149,22 +149,22 @@ void saveImageJPG(const image_t& image, const std::string& path, bool alpha) {
     }
 }
 
-
-void undoPremultiplyAlpha(image_t& bitmap) {
-    auto* it = (abgr32_t*) bitmap.data();
-    const auto* end = it + bitmap.width() * bitmap.height();
-
-    while (it < end) {
-        const uint8_t a = it->a;
-        if (a && (a ^ 0xFF)) {
-            const uint8_t half = a / 2;
-            it->r = std::min(255, (it->r * 0xFF + half) / a);
-            it->g = std::min(255, (it->g * 0xFF + half) / a);
-            it->b = std::min(255, (it->b * 0xFF + half) / a);
-        }
-        ++it;
-    }
-}
+//
+//void undoPremultiplyAlpha(image_t& bitmap) {
+//    auto* it = (abgr32_t*) bitmap.data();
+//    const auto* end = it + bitmap.width() * bitmap.height();
+//
+//    while (it < end) {
+//        const uint8_t a = it->a;
+//        if (a && (a ^ 0xFF)) {
+//            const uint8_t half = a / 2;
+//            it->r = std::min(255, (it->r * 0xFF + half) / a);
+//            it->g = std::min(255, (it->g * 0xFF + half) / a);
+//            it->b = std::min(255, (it->b * 0xFF + half) / a);
+//        }
+//        ++it;
+//    }
+//}
 
 void save(ImageSet& images, const char* output) {
     pugi::xml_document doc{};
