@@ -1,10 +1,9 @@
-#include "MultiResAtlas.hpp"
+#include "ImageSet.hpp"
 #include <pugixml.hpp>
 #include <ek/debug.hpp>
 #include <ek/util/Path.hpp>
 #include <ek/math/max_rects.hpp>
 #include <ek/imaging/drawing.hpp>
-#include <ek/assert.hpp>
 
 #include <miniz.h>
 
@@ -41,21 +40,6 @@ inline unsigned char* iwcompress(unsigned char* data, int data_len, int* out_len
 #endif
 
 namespace ek {
-
-void MultiResAtlasSettings::readFromXML(const pugi::xml_node& node) {
-    name = node.attribute("name").as_string();
-    for (auto& resolution_node: node.children("resolution")) {
-        Resolution res{};
-        res.scale = resolution_node.attribute("scale").as_float(res.scale);
-        res.max_size.x = resolution_node.attribute("max_width").as_int(res.max_size.x);
-        res.max_size.y = resolution_node.attribute("max_height").as_int(res.max_size.y);
-        resolutions.push_back(res);
-    }
-}
-
-// TODO: atlas
-// ++page_index;
-// page.image_path = atlas.name + get_atlas_suffix(atlas.scale, page_index) + ".png";
 
 /*** Save Image ***/
 
@@ -163,6 +147,57 @@ void saveImageJPG(const image_t& image, const std::string& path, bool alpha) {
 
         free(buffer);
     }
+}
+
+
+void undoPremultiplyAlpha(image_t& bitmap) {
+    auto* it = (abgr32_t*) bitmap.data();
+    const auto* end = it + bitmap.width() * bitmap.height();
+
+    while (it < end) {
+        const uint8_t a = it->a;
+        if (a && (a ^ 0xFF)) {
+            const uint8_t half = a / 2;
+            it->r = std::min(255, (it->r * 0xFF + half) / a);
+            it->g = std::min(255, (it->g * 0xFF + half) / a);
+            it->b = std::min(255, (it->b * 0xFF + half) / a);
+        }
+        ++it;
+    }
+}
+
+void save(ImageSet& images, const char* output) {
+    pugi::xml_document doc{};
+    auto nodeAtlas = doc.append_child("images");
+    int idx = 0;
+    char path[1024];
+
+    for (auto& resolution: images.resolutions) {
+        auto nodeResolution = nodeAtlas.append_child("resolution");
+        for (auto& image: resolution.sprites) {
+            if (image.image) {
+                auto& bitmap = *image.image;
+                // require RGBA non-premultiplied alpha
+                undoPremultiplyAlpha(bitmap);
+
+                auto nodeSprite = nodeResolution.append_child("image");
+//                snprintf(path, 1024, "%s/%d.png", output, idx++);
+//                stbi_write_png(path, (int) bitmap.width(), (int) bitmap.height(), 4, bitmap.data(), (int)bitmap.width() * 4);
+                snprintf(path, 1024, "%s/%d.bmp", output, idx++);
+                stbi_write_bmp(path, (int) bitmap.width(), (int) bitmap.height(), 4, bitmap.data());
+
+                nodeSprite.append_attribute("path").set_value(path);
+                nodeSprite.append_attribute("name").set_value(image.name.c_str());
+                nodeSprite.append_attribute("x").set_value(image.rc.x);
+                nodeSprite.append_attribute("y").set_value(image.rc.y);
+                nodeSprite.append_attribute("w").set_value(image.rc.width);
+                nodeSprite.append_attribute("h").set_value(image.rc.height);
+                nodeSprite.append_attribute("p").set_value(image.padding);
+            }
+        }
+    }
+    snprintf(path, 1024, "%s/_images.xml", output);
+    doc.save_file(path);
 }
 
 }

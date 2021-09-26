@@ -127,13 +127,12 @@ void undoPremultiplyAlpha(Bitmap& bitmap) {
     const auto* end = it + bitmap.w * bitmap.h;
 
     while (it < end) {
-        const auto alpha = it->a;
-        if (alpha == 0) {
-            *(uint32_t*) it = 0u;
-        } else if (alpha < 0xFFu) {
-            it->r = static_cast<uint8_t>((0xFFu * it->r) / alpha);
-            it->g = static_cast<uint8_t>((0xFFu * it->g) / alpha);
-            it->b = static_cast<uint8_t>((0xFFu * it->b) / alpha);
+        const uint8_t a = it->a;
+        if (a && (a ^ 0xFF)) {
+            const uint8_t half = a / 2;
+            it->r = std::min(255, (it->r * 0xFF + half) / a);
+            it->g = std::min(255, (it->g * 0xFF + half) / a);
+            it->b = std::min(255, (it->b * 0xFF + half) / a);
         }
         ++it;
     }

@@ -2,7 +2,7 @@
 
 #include "ExportItem.hpp"
 #include <ek/util/NoCopyAssign.hpp>
-#include "../MultiResAtlas.hpp"
+#include "../ImageSet.hpp"
 #include <unordered_map>
 
 namespace ek::xfl {
@@ -26,7 +26,7 @@ public:
 
     void build_library();
 
-    void build_sprites(MultiResAtlasData& toAtlas) const;
+    void build_sprites(ImageSet& toImageSet) const;
 
     void process(const Element& el, ExportItem* parent, processing_bag_t* bag = nullptr);
 
@@ -44,7 +44,7 @@ public:
 
     void process_shape(const Element& el, ExportItem* parent, processing_bag_t* bag = nullptr);
 
-    void render(const ExportItem& item, MultiResAtlasData& toAtlas) const;
+    void render(const ExportItem& item, ImageSet& toImageSet) const;
 
     [[nodiscard]]
     SGFile export_library();

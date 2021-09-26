@@ -1,6 +1,6 @@
 #include "RenderElement.hpp"
 
-#include "../MultiResAtlas.hpp"
+#include "../ImageSet.hpp"
 #include "../xfl/renderer/Scanner.hpp"
 #include "../xfl/renderer/CairoRenderer.hpp"
 #include "../xfl/renderer/CairoHelpers.hpp"
