@@ -34,7 +34,8 @@ struct AtlasConfig {
 enum class SpriteFlag {
     None = 0u,
     Rotated = 1u,
-    Packed = 2u
+    Packed = 2u,
+    Trim = 4u
 };
 
 struct SpriteData {
@@ -57,8 +58,6 @@ struct SpriteData {
 
     // reference image;
     Bitmap* bitmap = nullptr;
-
-    bool trim = false;
 
     [[nodiscard]]
     bool is_packed() const {
