@@ -30,8 +30,8 @@ interface AppStoreCredentials {
 function mod_plist(ctx, filepath) {
     const dict = plist.parse(readText(filepath));
     dict["CFBundleDisplayName"] = ctx.title;
-    dict["CFBundleShortVersionString"] = ctx.version_name;
-    dict["CFBundleVersion"] = ctx.version_code;
+    dict["CFBundleShortVersionString"] = ctx.version.name();
+    dict["CFBundleVersion"] = "" + ctx.version.buildNumber();
     dict["UIRequiresFullScreen"] = true;
     dict["UIStatusBarHidden"] = true;
     dict["UIStatusBarStyle"] = "UIStatusBarStyleDefault";
@@ -66,6 +66,9 @@ function mod_plist(ctx, filepath) {
 }
 
 export async function export_ios(ctx: Project): Promise<void> {
+
+    ctx.generateNativeBuildInfo();
+
     // setup automation
     let credentials: AppStoreCredentials = {};
     try {
@@ -89,7 +92,7 @@ export async function export_ios(ctx: Project): Promise<void> {
         logger.assert(!isDir(dest_path));
     }
 
-    copyFolderRecursiveSync(path.join(ctx.path.templates, "template-ios"), dest_path);
+    copyFolderRecursiveSync(path.join(ctx.sdk.templates, "template-ios"), dest_path);
 
     const base_path = "../..";
     const cwd = process.cwd();
@@ -115,7 +118,7 @@ export async function export_ios(ctx: Project): Promise<void> {
 
         mod_plist(ctx, "src/Info.plist");
 
-        for(const fn of ctx.onProjectGenerated) {
+        for (const fn of ctx.onProjectGenerated) {
             fn();
         }
 

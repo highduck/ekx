@@ -7,7 +7,7 @@ async function updateGS(ctx: Project, configDir: string, name: string, platform:
     if (!configDir) {
         return;
     }
-    const baseDir = path.resolve(ctx.path.CURRENT_PROJECT_DIR, configDir);
+    const baseDir = path.resolve(ctx.projectPath, configDir);
     const fileNew = path.join(baseDir, "new_" + name);
     const file = path.join(baseDir, name);
 
