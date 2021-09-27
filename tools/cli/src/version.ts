@@ -2,68 +2,126 @@ import * as fs from "fs";
 import * as path from "path";
 import {logger} from "./logger";
 
-const BUILD_INFO_HEADER_FILE = "src/config/BuildInfo.h";
-
-export const VERSION_INDEX_MAJOR = 0;
-export const VERSION_INDEX_MINOR = 1;
-export const VERSION_INDEX_PATCH = 2;
-export const VERSION_INDEX_CODE = 3;
-
-export type VersionTuple = [number, number, number];
-
-function parseVersion(str: string): VersionTuple {
-    const v = /(\d+)\.(\d+)\.(\d+)/.exec(str);
-    if (v.length < 4) {
-        throw "Error parse version string";
-    }
-    return [parseInt(v[1]), parseInt(v[2]), parseInt(v[3])];
+export const enum BumpVersionFlag {
+    Major = 1,
+    Minor = 2,
+    Patch = 3,
+    BuildNumber = 4
 }
 
-function incVersion(kind: number, versionInOut: VersionTuple) {
-    if (kind == 2) {
-        ++versionInOut[2];
-    } else if (kind == 1) {
-        ++versionInOut[1];
-        versionInOut[2] = 0;
-    } else if (kind == 0) {
-        ++versionInOut[0];
-        versionInOut[1] = 0;
-        versionInOut[2] = 0;
+const semVerRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+
+export class SemVer {
+    constructor(public major: number,
+                public minor: number,
+                public patch: number,
+                public prerelease?: string,
+                // timestamp, build number, etc
+                public metadata?: string) {
+
+    }
+
+    static parseBump(str?: string, def?: BumpVersionFlag): BumpVersionFlag | undefined {
+        if (str) {
+            const lcs = str.toLowerCase();
+            switch (lcs) {
+                case "major":
+                    return BumpVersionFlag.Major | BumpVersionFlag.BuildNumber;
+                case "minor":
+                    return BumpVersionFlag.Minor | BumpVersionFlag.BuildNumber;
+                case "patch":
+                    return BumpVersionFlag.Patch | BumpVersionFlag.BuildNumber;
+                case "build":
+                    return BumpVersionFlag.BuildNumber;
+            }
+        }
+        return def;
+    }
+
+    static parse(str: string): SemVer {
+        const v = semVerRegex.exec(str);
+        if (v == null) {
+            throw new Error("invalid sem-ver: " + str);
+        }
+        return new SemVer(
+            parseInt(v[1]),
+            parseInt(v[2]),
+            parseInt(v[3]),
+            v[4], v[5]
+        );
+    }
+
+    toString(): string {
+        let result = `${this.major}.${this.minor}.${this.patch}`;
+        if (this.prerelease) {
+            result += "-" + this.prerelease;
+        }
+        if (this.metadata) {
+            result += "+" + this.metadata;
+        }
+        return result;
+    }
+
+    buildNumber(): number {
+        if (this.metadata) {
+            return parseInt(this.metadata);
+        }
+        return 1;
+    }
+
+    bump(bumpMask: BumpVersionFlag): void {
+        const verMask = bumpMask & 0x3;
+        switch (verMask) {
+            case BumpVersionFlag.Patch:
+                ++this.patch;
+                break;
+            case BumpVersionFlag.Minor:
+                ++this.minor;
+                this.patch = 0;
+                break;
+            case BumpVersionFlag.Major:
+                ++this.major;
+                this.minor = 0;
+                this.patch = 0;
+                break;
+        }
+        if (bumpMask & BumpVersionFlag.BuildNumber) {
+            this.metadata = "" + (this.buildNumber() + 1);
+        }
+    }
+
+    shortName() {
+        let result = "" + this.major;
+        if (this.patch || this.minor) {
+            result += "." + this.minor;
+            if (this.patch) {
+                result += "." + this.patch;
+            }
+        }
+        return result;
+    }
+
+    name() {
+        return `${this.major}.${this.minor}.${this.patch}`;
     }
 }
 
-export function increaseProjectVersion(p: string, versionIndex: number = VERSION_INDEX_CODE) {
-    let config = fs.readFileSync(path.join(p, "ek.js"), "utf-8");
-    let reVersion = /version_name\s*=\s*"(\d+\.\d+\.\d+)";/g
-    let versionMatch = reVersion.exec(config);
+export function bumpProjectVersion(p: string, bumpMask = BumpVersionFlag.BuildNumber) {
+    const pkgFilePath = path.join(p, "package.json");
+    let pkg = fs.readFileSync(pkgFilePath, "utf-8");
+    let reVersion = /"version"\s*:\s*"([^"]*)"/g
+    let versionMatch = reVersion.exec(pkg);
+    if (versionMatch == null) {
+        throw new Error(`can't find "version" in package.json`);
+    }
     logger.info("version string:", versionMatch[0]);
     const oldVersion = versionMatch[1];
-    const ver = parseVersion(versionMatch[1]);
+    const ver = SemVer.parse(versionMatch[1]);
     logger.info("version:", ver);
-    let reCode = /version_code\s*=\s*"(\d+)";/g
-    let codeMatch = reCode.exec(config);
-    let code = parseInt(codeMatch[1]);
 
-    incVersion(versionIndex, ver);
-    code++;
-
-    config = config.replace(versionMatch[0], `version_name = "${ver[0]}.${ver[1]}.${ver[2]}";`);
-    config = config.replace(codeMatch[0], `version_code = "${code}";`);
+    ver.bump(bumpMask);
 
     // rewrite version config header
-    fs.writeFileSync(path.join(p, "ek.js"), config);
-
-    // TODO: maybe we could update build info header on project export!
-    const newVersion = `${ver[0]}.${ver[1]}.${ver[2]}`;
-    let appVersionHeader = fs.readFileSync(path.join(p, BUILD_INFO_HEADER_FILE), "utf-8");
-    appVersionHeader = appVersionHeader.replace(/Name\s*=\s*"(\d+).(\d+).(\d+)";/g, `Name = "${newVersion}";`);
-    appVersionHeader = appVersionHeader.replace(/Code\s*=\s*"(\d+)";/g, `Code = "${code}";`);
-    fs.writeFileSync(path.join(p, BUILD_INFO_HEADER_FILE), appVersionHeader);
-
-    if (newVersion !== oldVersion) {
-        const pkgPath = path.join(p, "package.json");
-        let pkg = fs.readFileSync(pkgPath, "utf8");
-        pkg = pkg.replace(/"version"\s*:\s*"([\d.]+)"/, `"version": "${newVersion}"`);
-        fs.writeFileSync(pkgPath, pkg, "utf8");
-    }
+    pkg = pkg.replace(versionMatch[0], `"version": "${ver.toString()}"`);
+    fs.writeFileSync(pkgFilePath, pkg);
 }

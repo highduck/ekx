@@ -193,6 +193,8 @@ function mod_cmake_lists(ctx) {
 
 export async function export_android(ctx: Project): Promise<void> {
 
+    ctx.generateNativeBuildInfo();
+
     const exportResPath = "export/android/res";
     const exportAssetsPath = "export/android/assets";
     const assetPackName = "assets";
@@ -222,16 +224,16 @@ export async function export_android(ctx: Project): Promise<void> {
     let signingConfigPath = ctx.android.signingConfigPath;
     let serviceAccountKey = ctx.android.serviceAccountKey;
     if (googleServicesConfigDir) {
-        googleServicesConfigDir = path.resolve(ctx.path.CURRENT_PROJECT_DIR, googleServicesConfigDir);
+        googleServicesConfigDir = path.resolve(ctx.projectPath, googleServicesConfigDir);
     }
     if (signingConfigPath) {
-        signingConfigPath = path.resolve(ctx.path.CURRENT_PROJECT_DIR, signingConfigPath);
+        signingConfigPath = path.resolve(ctx.projectPath, signingConfigPath);
     }
     if (serviceAccountKey) {
-        serviceAccountKey = path.resolve(ctx.path.CURRENT_PROJECT_DIR, serviceAccountKey);
+        serviceAccountKey = path.resolve(ctx.projectPath, serviceAccountKey);
     }
 
-    copyFolderRecursiveSync(path.join(ctx.path.templates, `template-${platform_target}`), dest_path);
+    copyFolderRecursiveSync(path.join(ctx.sdk.templates, `template-${platform_target}`), dest_path);
     const base_path = "../..";
 
     const cwd = process.cwd();
@@ -277,8 +279,8 @@ export async function export_android(ctx: Project): Promise<void> {
         replaceInFile("app/build.gradle", {
             '// GRADLE_APPLY_PLUGIN': android_gradleApplyPlugin.map(s => `apply plugin: '${s}'`).join("\n"),
             'com.eliasku.template_android': ctx.android.application_id,
-            'versionCode 1 // AUTO': `versionCode ${ctx.version_code} // AUTO`,
-            'versionName "1.0" // AUTO': `versionName "${ctx.version_name}" // AUTO`,
+            'versionCode 1 // AUTO': `versionCode ${ctx.version.buildNumber()} // AUTO`,
+            'versionName "1.0" // AUTO': `versionName "${ctx.version.name()}" // AUTO`,
             '// ADD_CONFIG_RELEASE': android_gradleConfigRelease.join("\n\t\t\t"),
             '// TEMPLATE_SOURCE_SETS': source_sets.join("\n\t\t"),
             '// TEMPLATE_DEPENDENCIES': android_dependency.join("\n\t"),
@@ -311,7 +313,7 @@ export async function export_android(ctx: Project): Promise<void> {
         const aabPath = path.join(dest_path, 'app/build/outputs/bundle/release/app-release.aab');
         if (isFile(aabPath)) {
             copyFile(path.join(dest_path, 'app/build/outputs/bundle/release/app-release.aab'),
-                path.join(dest_dir, ctx.name + '_' + ctx.version_name + '.aab'));
+                path.join(dest_dir, `${ctx.name}_${ctx.version.toString()}.aab`));
         }
     }
 

@@ -6,7 +6,7 @@ import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/flash
 
 export async function iosBuildAppIconAsync(ctx: Project, output: string): Promise<number> {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
-    let iosIcon = JSON.parse(readText(path.join(ctx.path.templates, "template-ios/src/Assets.xcassets/AppIcon.appiconset/Contents.json")));
+    let iosIcon = JSON.parse(readText(path.join(ctx.sdk.templates, "template-ios/src/Assets.xcassets/AppIcon.appiconset/Contents.json")));
     const appIconFolder = path.join(output, "AppIcon.appiconset");
 
     if (isDir(output)) {
