@@ -42,7 +42,7 @@
     "@types/glob": "^7.1.4",
     "@types/http-server": "^0.12.1",
     "@types/mustache": "^4.1.2",
-    "@types/node": "^16.9.2",
+    "@types/node": "^16.10.1",
     "@types/plist": "^3.0.2",
     "@types/rimraf": "^3.0.2",
     "@types/xmldoc": "^1.1.6",
