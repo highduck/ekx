@@ -8,7 +8,7 @@ android {
     buildToolsVersion "30.0.3"
     ndkVersion "23.0.7599858"
     signingConfigs {
-        release {} /* ${SIGNING_CONFIGS} */
+        // SIGNING_CONFIGS
     }
     defaultConfig {
         applicationId "com.eliasku.template_android" // AUTO
@@ -34,7 +34,6 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             multiDexKeepProguard file('multidex-config.pro')
-            signingConfig signingConfigs.release
             ndk {
                 debugSymbolLevel "SYMBOL_TABLE" // SYMBOL_TABLE | FULL
             }
