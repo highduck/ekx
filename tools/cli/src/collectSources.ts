@@ -90,7 +90,7 @@ export function collectStrings(ctx: Project, variableName: VariableName, platfor
 }
 
 // rel_to - optional, for example "." relative to current working directory
-export function collectSourceRootsAll(ctx: Project, srcKind: VariableName, platforms: string[], relativeTo: string) {
+export function collectSourceRootsAll(ctx: Project, srcKind: VariableName, platforms: string[], relativeTo: string): string[] {
     let result = collectStrings(ctx, srcKind, platforms, true);
     if (relativeTo) {
         result = result.map(p => path.relative(relativeTo, p));

@@ -7,7 +7,6 @@ import * as fs from "fs";
 import {makeDirs} from "./utils";
 
 class ProjectSDK {
-    EKX_ROOT = path.dirname(resolveFrom(__dirname, "@ekx/ekx/package.json"));
     templates = path.resolve(__dirname, '../templates');
 }
 
@@ -41,7 +40,6 @@ export class Project {
 
     title?: string;
     desc?: string;
-    build_dir?: string; // build
     orientation: "landscape" | "portrait" = "portrait";
 
     build_steps: (() => void | Promise<any>)[] = [];

@@ -7,11 +7,17 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
+#include FT_STROKER_H
 
 namespace bmfont_export {
 
 struct FreeType2 {
-    FreeType2() {
+    inline static FreeType2& instance() {
+        static FreeType2 lib{};
+        return lib;
+    }
+
+    FreeType2() noexcept {
         auto err = FT_Init_FreeType(&ft);
         if (err != 0) {
             BMFE_LOG_F("FreeType2 init error: %d", err);
@@ -34,7 +40,7 @@ struct FontFaceInfo {
 };
 
 bool check(const std::vector<CodepointPair>& ranges, uint32_t codepoint) {
-    for (const auto& range : ranges) {
+    for (const auto& range: ranges) {
         if (codepoint >= range.a && codepoint <= range.b) {
             return true;
         }
@@ -78,6 +84,7 @@ public:
         return false;
     }
 
+    [[nodiscard]]
     std::vector<uint32_t> getAvailableCodepoints(const std::vector<CodepointPair>& ranges) const {
         std::vector<uint32_t> ret{};
 
@@ -109,9 +116,35 @@ public:
     }
 
     bool renderGlyph(uint8_t** buffer, uint32_t* width, uint32_t* height) const {
-        auto err = FT_Render_Glyph(ftFace->glyph, FT_RENDER_MODE_NORMAL);
-        if (err == 0) {
-            auto bitmap = ftFace->glyph->bitmap;
+        FT_Stroker stroker;
+        FT_BitmapGlyph ft_bitmap_glyph;
+
+        auto& ft2 = FreeType2::instance();
+        FT_Error error = FT_Stroker_New(ft2.ft, &stroker);
+
+        if (error) {
+            //freetype_error( error );
+            //goto cleanup_stroker;
+        }
+
+        FT_Stroker_Set(stroker,
+                       (int) (0 * 64),
+                       FT_STROKER_LINECAP_ROUND,
+                       FT_STROKER_LINEJOIN_ROUND,
+                       0);
+        FT_Glyph glyph = nullptr;
+        FT_Get_Glyph(ftFace->glyph, &glyph);
+        //error = FT_Glyph_Stroke(&glyph, stroker, 1);
+        error = FT_Glyph_StrokeBorder(&glyph, stroker, 0, 1);
+
+        error = FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 1);
+        //auto err = FT_Render_Glyph(ftFace->glyph, FT_RENDER_MODE_NORMAL);
+
+        FT_Stroker_Done(stroker);
+
+        if (error == 0) {
+//            auto bitmap = ftFace->glyph->bitmap;
+            auto bitmap = ((FT_BitmapGlyph) glyph)->bitmap;
             if (bitmap.buffer) {
                 assert(bitmap.width != 0 && bitmap.rows != 0);
                 if (buffer) {
@@ -164,8 +197,6 @@ public:
 
     FT_Face ftFace{};
 };
-
-static FreeType2 ft2{};
 
 template<typename K, typename V>
 inline V* try_get(std::unordered_map<K, V*>& map, const K& key) {
@@ -220,7 +251,7 @@ void glyph_build_sprites(FontFace& fontFace,
                          const std::vector<Filter>& filters,
                          ImageCollection& toAtlas) {
     const auto ref = std::string{name} + std::to_string(glyph_index);
-    for (auto& resolution : toAtlas.resolutions) {
+    for (auto& resolution: toAtlas.resolutions) {
         const float scale = resolution.scale;
         fontFace.setGlyphSize(fontSize, scale);
         const auto filter_scale = scale;
@@ -233,10 +264,10 @@ void glyph_build_sprites(FontFace& fontFace,
             image.name = ref;
             image.bitmap = data;
             image.rc = {
-                    (float)rect.x / scale,
-                    (float)rect.y / scale,
-                    (float)rect.w / scale,
-                    (float)rect.h / scale,
+                    (float) rect.x / scale,
+                    (float) rect.y / scale,
+                    (float) rect.w / scale,
+                    (float) rect.h / scale,
             };
 
             // TODO: preserve RC / SOURCE
@@ -262,6 +293,7 @@ void glyph_build_sprites(FontFace& fontFace,
 Font buildBitmapFont(const BuildBitmapFontSettings& decl,
                      ImageCollection& imageCollection) {
 
+    auto& ft2 = FreeType2::instance();
     FontFace fontFace{ft2, decl.ttfPath};
     const auto info = fontFace.getInfo();
 
@@ -270,7 +302,7 @@ Font buildBitmapFont(const BuildBitmapFontSettings& decl,
 
     auto codepoints = fontFace.getAvailableCodepoints(decl.ranges);
 
-    for (auto codepoint : codepoints) {
+    for (auto codepoint: codepoints) {
         auto glyphIndex = fontFace.getGlyphIndex(codepoint);
         auto it = dataByGlyphIndex.find(glyphIndex);
         if (it == dataByGlyphIndex.end()) {
@@ -287,9 +319,9 @@ Font buildBitmapFont(const BuildBitmapFontSettings& decl,
     }
 
     if (info.hasKerning && decl.useKerning && false) {
-        for (auto& id_glyph : dataByGlyphIndex) {
+        for (auto& id_glyph: dataByGlyphIndex) {
             auto glyph_left = id_glyph.first;
-            for (auto& glyph_p2 : dataByGlyphIndex) {
+            for (auto& glyph_p2: dataByGlyphIndex) {
                 auto glyph_right = glyph_p2.first;
                 if (glyph_left != glyph_right) {
                     int x = 0;
@@ -302,8 +334,8 @@ Font buildBitmapFont(const BuildBitmapFontSettings& decl,
     }
 
     if (decl.mirrorCase) {
-        for (auto& id_glyph : dataByGlyphIndex) {
-            for (auto code : id_glyph.second.codepoints) {
+        for (auto& id_glyph: dataByGlyphIndex) {
+            for (auto code: id_glyph.second.codepoints) {
                 auto upper = (uint32_t) toupper(code);
                 auto lower = (uint32_t) tolower(code);
                 if (lower != upper) {
@@ -323,7 +355,7 @@ Font buildBitmapFont(const BuildBitmapFontSettings& decl,
     result.descender = info.descender;
     result.lineHeight = info.lineHeight;
     result.fontSize = decl.fontSize;
-    for (auto& pair : dataByGlyphIndex) {
+    for (auto& pair: dataByGlyphIndex) {
         result.glyphs.push_back(pair.second);
     }
     return result;
