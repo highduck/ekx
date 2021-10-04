@@ -452,6 +452,13 @@
   dependencies:
     "@types/yargs-parser" "*"
 
+android-proj-gen@0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/android-proj-gen/-/android-proj-gen-0.0.1.tgz#d0d120c2e50c031c49ec2b583290b352e73a0f13"
+  integrity sha512-oxvhVOjNAQHeUYtj7gLvAmW0wTj4gJ8eUimNuub49x/yoeqBax8KWSG9oUfq1gO0sO/kqTltW8bpeRPRoOoGxg==
+  dependencies:
+    xmldoc "^1.1.2"
+
 ansi-align@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ansi-align/-/ansi-align-2.0.0.tgz#c36aeccba563b89ceb556f3690f0b1d9e3547f7f"

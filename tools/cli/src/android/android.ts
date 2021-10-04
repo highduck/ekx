@@ -1,43 +1,28 @@
 import {
     copyFile,
-    copyFolderRecursiveSync,
     deleteFolderRecursive,
     execute,
     isDir,
     isFile,
     makeDirs,
-    readText,
     replaceAll,
     replaceInFile,
     writeText
 } from "../utils";
-import {XmlDocument} from 'xmldoc';
 import * as path from "path";
 import {buildAssetPackAsync} from "../assets";
 import {collectObjects, collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources";
-import {copySigningKeys, printSigningConfigs} from "./signing";
 import {execSync} from "child_process";
 import {androidBuildAppIconAsync} from "./androidAppIcon";
 import * as fs from "fs";
-import {writeFileSync} from "fs";
 import {Project} from "../project";
 import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "cmake-build";
 import {logger} from "../logger";
+import {AndroidProjGen, openAndroidStudioProject} from "android-proj-gen";
 
 const platforms = ["android"];
 
-function getAndroidSdkRoot() {
-    return process.env.ANDROID_SDK_ROOT ?? path.join(process.env.HOME, 'Library/Android/sdk');
-}
-
-function getJavaHome() {
-    // -v 1.8 ?
-    return execSync('/usr/libexec/java_home -v 1.8', {
-        encoding: 'utf-8'
-    });
-}
-
-function gradle(...args: string[]) {
+function gradle(dir: string, ...args: string[]) {
     // const ANDROID_SDK_ROOT = getAndroidSdkRoot();
     //
     // let env = Object.create(process.env);
@@ -50,83 +35,94 @@ function gradle(...args: string[]) {
         stdio: 'inherit',
         encoding: 'utf-8',
         // env
+        cwd: dir
     });
 }
 
-function open_android_project(android_project_path) {
-    execute("open", ["-a", "/Applications/Android Studio.app", android_project_path]);
-}
+function createMainClass(javaPackage, appModulePath) {
+    const javaPackagePath = replaceAll(javaPackage, ".", "/");
+    const baseActivityClassName = "ek.EkActivity";
+    const activityClassName = "MainActivity";
 
-function mod_main_class(app_package_java) {
-    const template_main_activity_java =
-        "app/src/main/java/com/eliasku/template_android/MainActivity.java";
-    const java_package_path = replaceAll(app_package_java, ".", "/");
+    let file = `package ${javaPackage};
 
-    let text = readText(template_main_activity_java);
-    text = replaceAll(text,
-        "package com.eliasku.template_android;",
-        `package ${app_package_java};`
-    );
-    deleteFolderRecursive("app/src/main/java/com");
-    const main_activity_path = path.join("app/src/main/java", java_package_path);
-    makeDirs(main_activity_path);
-    writeText(path.join(main_activity_path, "MainActivity.java"), text);
-}
+import android.os.Bundle;
 
-function mod_android_manifest(ctx) {
-    let android_manifest = collectStrings(ctx, "android_manifest", ["android"], false);
-    const android_permission = collectStrings(ctx, "android_permission", ["android"], false);
-    const android_manifestApplication = collectStrings(ctx, "android_manifestApplication", ["android"], false);
-
-    android_manifest = android_manifest.concat(android_permission.map(permission => `<uses-permission android:name="${permission}" />`));
-    let orientation = "sensorPortrait";
-    if (ctx.orientation === "landscape") {
-        orientation = "sensorLandscape";
-    } else if (ctx.orientation === "portrait") {
-        orientation = "sensorPortrait";
-    } else {
-        logger.warn("unknown orientation", ctx.orientation);
+public class ${activityClassName} extends ${baseActivityClassName} {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        ek.AppUtils.setDebugBuild(BuildConfig.DEBUG);
+        super.onCreate(savedInstanceState);
     }
-    const configChanges = "keyboardHidden|keyboard|orientation|screenSize|layoutDirection|locale|uiMode|screenLayout|smallestScreenSize|navigation";
+}`;
 
-    replaceInFile("app/src/main/AndroidManifest.xml", {
-        'android:configChanges="PLACEHOLDER"': `android:configChanges="${configChanges}"`,
-        "com.eliasku.template_android": ctx.android.package_id,
-        'screenOrientation="sensorPortrait"': `screenOrientation="${orientation}"`,
-        "<!-- TEMPLATE ROOT -->": android_manifest.join("\n"),
-        "<!-- TEMPLATE APPLICATION -->": android_manifestApplication.join("\n")
-    });
+    const classFilePath = path.join(appModulePath, "src/main/java", javaPackagePath, `${activityClassName}.java`);
+    makeDirs(path.dirname(classFilePath));
+    writeText(classFilePath, file);
 }
 
-function createStringsXML(ctx) {
-    const contents: any = {};
+function getAndroidScreenOrientation(orientation: string): string {
+    if (orientation === "landscape") {
+        return "sensorLandscape";
+    } else if (orientation === "portrait") {
+        return "sensorPortrait";
+    } else {
+        logger.warn("unknown orientation", orientation);
+    }
+    return "sensorPortrait";
+}
+
+function setupAndroidManifest(ctx: Project, proj: AndroidProjGen) {
+    proj.androidManifest.package = ctx.android.package_id;
+    proj.androidManifest._root.push(...collectStrings(ctx, "android_manifest", ["android"], false));
+    proj.androidManifest.permissions.push(...collectStrings(ctx, "android_permission", ["android"], false));
+    proj.androidManifest._application.push(...collectStrings(ctx, "android_manifestApplication", ["android"], false));
+    proj.androidManifest.screenOrientation = getAndroidScreenOrientation(ctx.orientation);
+    proj.androidManifest.configChanges = [
+        "keyboardHidden",
+        "keyboard",
+        "orientation",
+        "screenSize",
+        "layoutDirection",
+        "locale",
+        "uiMode",
+        "screenLayout",
+        "smallestScreenSize",
+        "navigation"
+    ];
+}
+
+function setupStringsXML(ctx, proj) {
     const android_strings = collectObjects(ctx, "android_strings", platforms);
     for (const strings of android_strings) {
         for (const key of Object.keys(strings)) {
-            contents[key] = strings[key];
+            proj.strings[key] = strings[key];
         }
     }
-    contents.app_name = ctx.title;
-    contents.package_name = ctx.android.application_id;
-
-    const doc = new XmlDocument(`<resources></resources>`);
-    for (let key of Object.keys(contents)) {
-        const val = contents[key];
-        doc.children.push(new XmlDocument(`<string name="${key}" translatable="false">${val}</string>`));
-    }
-    writeText("app/src/main/res/values/strings.xml", doc.toString());
+    proj.strings.app_name = ctx.title;
+    proj.strings.package_name = ctx.android.application_id;
 }
 
-function mod_cmake_lists(ctx) {
+function globSourceFiles(ctx: Project, cmakeDir: string) {
     const cppSources = [];
     const cppExtensions = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
 
+    const cwd = process.cwd();
+    process.chdir(cmakeDir);
     const cppRoots = collectSourceRootsAll(ctx, "cpp", platforms, ".");
-    for (const cpp_dir of cppRoots) {
-        collectSourceFiles(cpp_dir, cppExtensions, cppSources);
+    for (const cppRoot of cppRoots) {
+        collectSourceFiles(cppRoot, cppExtensions, cppSources);
     }
+    process.chdir(cwd);
 
-    const cpp_include = collectSourceRootsAll(ctx, "cpp_include", platforms, ".");
+    return cppSources;
+}
+
+function createCMakeLists(dir: string, ctx: Project) {
+
+    const cpp_sources = globSourceFiles(ctx, dir);
+    const cpp_roots = collectSourceRootsAll(ctx, "cpp", platforms, dir);
+    const cpp_include = collectSourceRootsAll(ctx, "cpp_include", platforms, dir);
     const cpp_define = collectStrings(ctx, "cpp_define", platforms, false);
     const cpp_lib = collectStrings(ctx, "cpp_lib", platforms, false);
 
@@ -135,8 +131,8 @@ function mod_cmake_lists(ctx) {
         type: "library",
         libraryType: "shared",
         name: cmakeName,
-        sources: cppSources,
-        includeDirectories: cppRoots.concat(cpp_include),
+        sources: cpp_sources,
+        includeDirectories: cpp_roots.concat(cpp_include),
         linkLibraries: cpp_lib,
         linkOptions: ["-g"],
         compileOptions: [
@@ -188,58 +184,65 @@ function mod_cmake_lists(ctx) {
     // cmakeTarget.compileOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
     // cmakeTarget.linkOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
 
-    fs.writeFileSync("CMakeLists.txt", cmakeLists(cmakeProject), "utf8");
+    fs.writeFileSync(path.join(dir, "CMakeLists.txt"), cmakeLists(cmakeProject), "utf8");
+}
+
+/**
+ * Check signing config file and warning if Legacy Names are found
+ * @param config - signing config object to change
+ */
+function checkSigningConfigNames(config: any) {
+    if (config.store_keystore != null || config.store_password != null || config.key_alias != null || config.key_password) {
+        logger.warn("Android signing configs file has Legacy names, please check and update");
+    }
 }
 
 export async function export_android(ctx: Project): Promise<void> {
 
-    const exportResPath = "export/android/res";
-    const exportAssetsPath = "export/android/assets";
-    const assetPackName = "assets";
+    // generate project
+    const defaultPackageName = ("ek." + ctx.name).replace(/-/g, "_");
+    if (!ctx.android.application_id) {
+        ctx.android.application_id = defaultPackageName;
+        logger.warn("android.application_id property not found, using default:", ctx.android.application_id);
+    }
 
-    await Promise.all([
-        buildAssetPackAsync(ctx, path.join(exportAssetsPath, assetPackName)),
-        androidBuildAppIconAsync(ctx, exportResPath)
-    ]);
+    if (!ctx.android.package_id) {
+        ctx.android.package_id = defaultPackageName;
+        logger.warn("android.package_id property not found, using default:", ctx.android.package_id);
+    }
 
-    const embeddedAssets = fs.realpathSync(exportAssetsPath);
 
-    const platform_target = ctx.current_target; // "android"
     const platform_proj_name = ctx.name + "-" + ctx.current_target;
     const dest_dir = path.resolve(process.cwd(), "export");
-    const dest_path = path.join(dest_dir, platform_proj_name);
+    const projectPath = path.join(dest_dir, platform_proj_name);
+    const appModulePath = path.join(projectPath, "app");
+    const embeddedAssets = path.join(appModulePath, "src/main/assets");
 
-    if (isDir(dest_path)) {
-        logger.info("Remove old project", dest_path);
-        deleteFolderRecursive(dest_path);
-        logger.assert(!isDir(dest_path));
-    } else {
-
+    if (isDir(projectPath)) {
+        logger.info("Remove old project", projectPath);
+        deleteFolderRecursive(projectPath);
     }
 
     // resolve absolute path to configs
-    let googleServicesConfigDir = ctx.android.googleServicesConfigDir;
-    let signingConfigPath = ctx.android.signingConfigPath;
+    let signingConfigsPath = ctx.android.signingConfigPath;
+    if (signingConfigsPath) {
+        signingConfigsPath = path.resolve(ctx.projectPath, signingConfigsPath);
+    }
+
     let serviceAccountKey = ctx.android.serviceAccountKey;
-    if (googleServicesConfigDir) {
-        googleServicesConfigDir = path.resolve(ctx.path.CURRENT_PROJECT_DIR, googleServicesConfigDir);
-    }
-    if (signingConfigPath) {
-        signingConfigPath = path.resolve(ctx.path.CURRENT_PROJECT_DIR, signingConfigPath);
-    }
     if (serviceAccountKey) {
-        serviceAccountKey = path.resolve(ctx.path.CURRENT_PROJECT_DIR, serviceAccountKey);
+        serviceAccountKey = path.resolve(ctx.projectPath, serviceAccountKey);
     }
 
-    copyFolderRecursiveSync(path.join(ctx.path.templates, `template-${platform_target}`), dest_path);
-    const base_path = "../..";
+    makeDirs(projectPath);
 
-    const cwd = process.cwd();
-    process.chdir(dest_path);
     {
-        const assets = collectSourceRootsAll(ctx, "assets", platforms, "app");
-        const android_java = collectSourceRootsAll(ctx, "android_java", platforms, "app");
-        const android_aidl = collectSourceRootsAll(ctx, "android_aidl", platforms, "app");
+        const proj = new AndroidProjGen();
+        proj.name = ctx.name;
+
+        const assets = collectSourceRootsAll(ctx, "assets", platforms, appModulePath);
+        const android_java = collectSourceRootsAll(ctx, "android_java", platforms, appModulePath);
+        const android_aidl = collectSourceRootsAll(ctx, "android_aidl", platforms, appModulePath);
         const android_dependency = collectStrings(ctx, "android_dependency", platforms, false);
         const android_gradleApplyPlugin = collectStrings(ctx, "android_gradleApplyPlugin", platforms, false);
         const android_buildScriptDependency = collectStrings(ctx, "android_buildScriptDependency", platforms, false);
@@ -247,80 +250,91 @@ export async function export_android(ctx: Project): Promise<void> {
 
         assets.push(embeddedAssets);
 
-        function getGradleStringArrayExpr(arr: string[]): string {
-            return "[" + arr.map(p => `'${p}'`).join(", ") + "]";
-        }
+        proj.app.android.sourceSets.main.java.srcDirs = android_java;
+        proj.app.android.sourceSets.main.aidl.srcDirs = android_aidl;
+        proj.app.android.sourceSets.main.assets.srcDirs = assets;
 
-        const source_sets = [
-            `main.java.srcDirs += ${getGradleStringArrayExpr(android_java)}`,
-            `main.aidl.srcDirs += ${getGradleStringArrayExpr(android_aidl)}`,
-            `main.assets.srcDirs += ${getGradleStringArrayExpr(assets)}`
-        ];
+        proj.app.android.defaultConfig.versionCode = ctx.version.buildNumber();
+        proj.app.android.defaultConfig.versionName = ctx.version.name();
+        proj.app.android.defaultConfig.applicationId = ctx.android.application_id;
+        proj.app.plugins.push(...android_gradleApplyPlugin);
 
-        let signingConfig = {};
-        let signingConfigBasePath = "";
+        proj.top.buildscript.dependencies.push(...android_buildScriptDependency);
+        proj.app.dependencies.push(...android_dependency);
 
-        if (signingConfigPath) {
-            const signingConfigJson = fs.readFileSync(signingConfigPath, "utf-8");
-            signingConfig = JSON.parse(signingConfigJson);
-            signingConfigBasePath = path.dirname(signingConfigPath);
-            copySigningKeys(signingConfig, signingConfigBasePath);
+        proj.app.android.buildTypes.release._extraCode = android_gradleConfigRelease;
+
+
+        if (signingConfigsPath) {
+            const signingConfigsJson = fs.readFileSync(signingConfigsPath, "utf-8");
+            let signingConfigs = JSON.parse(signingConfigsJson) as { [name: string]: any };
+            for (const name of Object.keys(signingConfigs)) {
+                const config = signingConfigs[name];
+                if (config) {
+                    checkSigningConfigNames(config);
+                    // resolve relative path to store file
+                    config.storeFile = path.relative(appModulePath, path.resolve(path.dirname(signingConfigsPath), config.storeFile));
+                }
+            }
+            proj.app.android.signingConfigs = signingConfigs;
+            if (signingConfigs.release) {
+                proj.app.android.buildTypes.release.signingConfig = "release";
+            }
         } else {
-            logger.error("signing file not found (todo: default signing config)");
-            return;
+            logger.warn("Android signing configs file not found");
         }
 
-        replaceInFile("build.gradle", {
-            '// BUILDSCRIPT_DEPENDENCY': android_buildScriptDependency.join("\n\t\t")
-        });
+        setupAndroidManifest(ctx, proj);
+        setupStringsXML(ctx, proj);
 
-        replaceInFile("app/build.gradle", {
-            '// GRADLE_APPLY_PLUGIN': android_gradleApplyPlugin.map(s => `apply plugin: '${s}'`).join("\n"),
-            'com.eliasku.template_android': ctx.android.application_id,
-            'versionCode 1 // AUTO': `versionCode ${ctx.version_code} // AUTO`,
-            'versionName "1.0" // AUTO': `versionName "${ctx.version_name}" // AUTO`,
-            '// ADD_CONFIG_RELEASE': android_gradleConfigRelease.join("\n\t\t\t"),
-            '// TEMPLATE_SOURCE_SETS': source_sets.join("\n\t\t"),
-            '// TEMPLATE_DEPENDENCIES': android_dependency.join("\n\t"),
-            'release {} /* ${SIGNING_CONFIGS} */': printSigningConfigs(signingConfig),
-        });
+        proj.save(projectPath);
 
-        replaceInFile('fastlane/Appfile', {
+        replaceInFile(path.resolve(projectPath, "fastlane/Appfile"), {
             "__PACKAGE_NAME__": ctx.android.application_id,
             "__SERVICE_ACCOUNT_KEY_PATH__": serviceAccountKey,
         });
+        createMainClass(ctx.android.package_id, appModulePath);
+        createCMakeLists(appModulePath, ctx);
+    }
 
-        writeFileSync('local.properties', `sdk.dir=${getAndroidSdkRoot()}`);
+    logger.info("Update native build info header");
+    ctx.generateNativeBuildInfo();
 
-        copyFolderRecursiveSync(path.join(base_path, "export/android/res"), "app/src/main/res");
+    logger.info("Export assets");
+    const embeddedAssetsPackName = "assets";
+    const embeddedAssetsPackPath = path.join(embeddedAssets, embeddedAssetsPackName);
 
-        mod_main_class(ctx.android.package_id);
-        mod_android_manifest(ctx);
-        createStringsXML(ctx);
-        mod_cmake_lists(ctx);
+    await Promise.all([
+        buildAssetPackAsync(ctx, embeddedAssetsPackPath),
+        androidBuildAppIconAsync(ctx, path.join(appModulePath, "src/main/res"))
+    ]);
 
+    logger.info("Do project post-setup..");
+    {
+        // evaluate post-scripts in with current working dir
+        const cwd = process.cwd();
+        process.chdir(projectPath);
         for (const fn of ctx.onProjectGenerated) {
             fn();
         }
+        process.chdir(cwd);
     }
 
     // TODO: `build` instead of bundle
     if (ctx.args.indexOf("bundle") >= 0) {
-        gradle('bundleRelease');
-        process.chdir(cwd);
-        const aabPath = path.join(dest_path, 'app/build/outputs/bundle/release/app-release.aab');
+        gradle(projectPath, 'bundleRelease');
+        const aabPath = path.join(projectPath, 'app/build/outputs/bundle/release/app-release.aab');
         if (isFile(aabPath)) {
-            copyFile(path.join(dest_path, 'app/build/outputs/bundle/release/app-release.aab'),
-                path.join(dest_dir, ctx.name + '_' + ctx.version_name + '.aab'));
+            copyFile(path.join(projectPath, 'app/build/outputs/bundle/release/app-release.aab'),
+                path.join(dest_dir, `${ctx.name}_${ctx.version.toString()}.aab`));
         }
     }
 
     if (ctx.options?.openProject) {
-        process.chdir(cwd);
-        open_android_project(dest_path);
+        openAndroidStudioProject(projectPath);
     }
 
     if (ctx.options.deploy != null) {
-        execute("fastlane", [ctx.options.deploy], dest_path);
+        execute("fastlane", [ctx.options.deploy], projectPath);
     }
 }

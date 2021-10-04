@@ -164,6 +164,8 @@ async function buildProject(ctx, buildType) {
 export async function export_web(ctx: Project): Promise<void> {
     const timestamp = Date.now();
 
+    ctx.generateNativeBuildInfo();
+
     if (ctx.html.og) {
         if (!ctx.html.og.title && ctx.title) {
             ctx.html.og.title = ctx.title;
@@ -172,17 +174,25 @@ export async function export_web(ctx: Project): Promise<void> {
             ctx.html.og.description = ctx.desc;
         }
     }
-    const outputDir = path.join(ctx.path.CURRENT_PROJECT_DIR, "export/web");
+    const outputDir = path.join(ctx.projectPath, "export/web");
     makeDirs(outputDir);
 
     function tpl(from, to) {
-        const tpl_text = fs.readFileSync(path.join(ctx.path.templates, from), "utf8");
-        fs.writeFileSync(path.join(outputDir, to), Mustache.render(tpl_text, ctx), "utf8");
+        const tplContent = fs.readFileSync(path.join(ctx.sdk.templates, from), "utf8");
+        const renderParameters = {
+            name: ctx.name,
+            title: ctx.title,
+            desc: ctx.desc,
+            version_code: ctx.version.buildNumber(),
+            version_name: ctx.version.name(),
+            html: ctx.html
+        };
+        fs.writeFileSync(path.join(outputDir, to), Mustache.render(tplContent, renderParameters), "utf8");
     }
 
     function file(from, to) {
         fs.copyFileSync(
-            path.join(ctx.path.templates, from),
+            path.join(ctx.sdk.templates, from),
             path.join(outputDir, to)
         );
     }
@@ -191,12 +201,12 @@ export async function export_web(ctx: Project): Promise<void> {
     const buildTask = buildProject(ctx, buildType);
     const assetsTask = buildAssetPackAsync(ctx, path.join(outputDir, "assets"));
 
-    const webManifest = JSON.parse(fs.readFileSync(path.join(ctx.path.templates, "web/manifest.json"), "utf8"));
-    webManifest.name = ctx.title;
-    webManifest.short_name = ctx.name;
-    webManifest.version = ctx.version_name;
-    webManifest.version_code = ctx.version_code;
+    const webManifest = JSON.parse(fs.readFileSync(path.join(ctx.sdk.templates, "web/manifest.json"), "utf8"));
+    webManifest.name = ctx.title ?? ctx.name;
+    webManifest.short_name = ctx.title ?? ctx.name;
     webManifest.description = ctx.desc;
+    webManifest.version = ctx.version.shortName();
+    webManifest.version_code = ctx.version.buildNumber();
     webManifest.start_url = "./index.html";
     if (ctx.web?.applications != null) {
         webManifest.related_applications = ctx.web?.applications;

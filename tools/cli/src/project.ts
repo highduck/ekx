@@ -1,24 +1,32 @@
 import * as path from "path";
-import {VERSION_INDEX_CODE, VERSION_INDEX_MAJOR, VERSION_INDEX_MINOR, VERSION_INDEX_PATCH} from "./version";
+import {BumpVersionFlag, SemVer} from "./version";
 import {resolveFrom} from "./utility/resolveFrom";
 import {ModuleDef, validateModuleDef} from "./module";
 import {logger} from "./logger";
+import * as fs from "fs";
+import {makeDirs} from "./utils";
 
-class ProjectPath {
-    EKX_ROOT = path.dirname(resolveFrom(__dirname, "@ekx/ekx/package.json"));
-    CURRENT_PROJECT_DIR = process.cwd();
-    OUTPUT = path.join(process.cwd(), "build");
-
-    cli = path.resolve(__dirname, '..');
+class ProjectSDK {
     templates = path.resolve(__dirname, '../templates');
 }
 
 type RegisteredProject = any;
 
 export class Project {
-    readonly path = new ProjectPath();
-    current_target = process.argv[2];
-    args = process.argv.slice(3);
+    readonly sdk = new ProjectSDK();
+    // current project's path, default is cwd()
+    projectPath: string = process.cwd();
+    projectPkg: any = undefined;
+
+    // code-name for project, initially initialized from project's package.json,
+    // if not available, "unnamed", you can change it in app project config: project.name = "my-project"
+    name: string;
+
+    // loaded from project's path package.json
+    version: SemVer;
+
+    current_target: string = process.argv[2];
+    args: string[] = process.argv.slice(3);
 
     // options evaluated from arguments
     options: {
@@ -27,16 +35,12 @@ export class Project {
         openProject?: boolean,
         deploy?: string,
         run?: string,
-        increaseVersion?: number,
+        bumpVersion?: BumpVersionFlag,
     } = {};
 
-    name: string;
-    version_name: string;
-    version_code: string;
     title?: string;
     desc?: string;
-    build_dir?: string; // build
-    orientation: "landscape" | "portrait";
+    orientation: "landscape" | "portrait" = "portrait";
 
     build_steps: (() => void | Promise<any>)[] = [];
     projects: { [name: string]: RegisteredProject } = {};
@@ -78,21 +82,21 @@ export class Project {
         appStoreCredentials?: string,
 
         admob_app_id?: string,
-
-
     } = {};
-    onProjectGenerated: (()=>void)[] = [];
+
+    onProjectGenerated: (() => void)[] = [];
     web: {
         firebaseToken?: string,
         applications?: { platform: string, url: string, id?: string }[]
     } = {};
 
     html: {
-        firebaseAutoSetup?: boolean,
-        google_analytics_property_id?: string,
         // css color
         background_color?: string,
         text_color?: string,
+        // firebase analytics
+        firebaseAutoSetup?: boolean,
+        google_analytics_property_id?: string,
         // open-graph object
         og?: {
             title?: string,
@@ -100,7 +104,10 @@ export class Project {
             url?: string,
             image?: string
         },
-    } = {};
+    } = {
+        background_color: "#222222",
+        text_color: "#CCCCCC",
+    };
 
     addModule(def: ModuleDef) {
         validateModuleDef(def);
@@ -117,7 +124,7 @@ export class Project {
             if (configurator) {
                 this.projects[configPath] = configurator(this);
             }
-        } catch(err) {
+        } catch (err) {
             logger.error("Module is not resolved", configPath);
             logger.error(err);
         }
@@ -128,8 +135,7 @@ export class Project {
         const moduleConfigPath = resolveFrom(fromDir, moduleId + "/ek.js");
         if (moduleConfigPath != null) {
             this.loadModule(moduleConfigPath);
-        }
-        else {
+        } else {
             logger.warn(`ek.js module not found for "${moduleId}" from dir "${fromDir}"`);
         }
     }
@@ -144,6 +150,21 @@ export class Project {
     }
 
     constructor() {
+        try {
+            this.projectPkg = JSON.parse(fs.readFileSync(path.join(this.projectPath, "package.json"), "utf8"));
+        } catch (e) {
+            logger.warn("Unable to read project's package.json file");
+            this.projectPkg = {};
+        }
+
+        this.name = this.projectPkg.name ?? "unnamed";
+        try {
+            this.version = SemVer.parse(this.projectPkg.version);
+        } catch (e) {
+            logger.warn("Unable to parse version from project's package.json");
+            this.version = new SemVer(1, 0, 0);
+        }
+
         if (this.args.indexOf("clean") >= 0) {
             this.options.clean = true;
         }
@@ -157,19 +178,7 @@ export class Project {
         {
             const i = this.args.indexOf("--bump");
             if (i >= 0) {
-                this.options.increaseVersion = VERSION_INDEX_CODE;
-                if (i + 1 < this.args.length) {
-                    const second = this.args[i + 1];
-                    if (second == "patch") {
-                        this.options.increaseVersion = VERSION_INDEX_PATCH;
-                    } else if (second == "minor") {
-                        this.options.increaseVersion = VERSION_INDEX_MINOR;
-                    } else if (second == "major") {
-                        this.options.increaseVersion = VERSION_INDEX_MAJOR;
-                    } else if (second == "build") {
-                        this.options.increaseVersion = VERSION_INDEX_CODE;
-                    }
-                }
+                this.options.bumpVersion = SemVer.parseBump(this.args[i + 1], BumpVersionFlag.BuildNumber);
             }
         }
         {
@@ -182,8 +191,8 @@ export class Project {
                         this.options.deploy = second;
                     }
                 }
-                if (this.options.increaseVersion === undefined) {
-                    this.options.increaseVersion = VERSION_INDEX_CODE;
+                if (this.options.bumpVersion === undefined) {
+                    this.options.bumpVersion = BumpVersionFlag.BuildNumber;
                 }
             }
         }
@@ -194,5 +203,19 @@ export class Project {
                 this.options.run = "wip";
             }
         }
+    }
+
+    generateNativeBuildInfo() {
+        const headerFile = "src/config/BuildInfo.h";
+        const content = `
+#pragma once
+namespace AppVersion {
+const char* Name = "${this.version.shortName()}";
+const char* Code = "${this.version.buildNumber()}";
+}
+`;
+        const filepath = path.join(this.projectPath, headerFile);
+        makeDirs(path.dirname(filepath));
+        fs.writeFileSync(filepath, content);
     }
 }

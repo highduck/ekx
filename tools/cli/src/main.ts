@@ -3,7 +3,7 @@
 import * as path from 'path';
 import {addExportBuildStep} from "./exporters";
 import {Project} from "./project";
-import {increaseProjectVersion} from "./version";
+import {bumpProjectVersion} from "./version";
 import {UtilityConfig} from "./utils";
 import * as fs from "fs";
 import {fixMP3} from "./utility/fix-mp3";
@@ -34,7 +34,7 @@ function defaultRun() {
 
     const project = new Project();
 
-    logger.log(project.path);
+    logger.log(project.sdk);
     logger.log("- current target:", project.current_target);
     logger.log("- arguments:", project.args);
 
@@ -53,8 +53,8 @@ function defaultRun() {
         }
     }
 
-    if (project.options.increaseVersion !== undefined) {
-        increaseProjectVersion(process.cwd(), project.options.increaseVersion);
+    if (project.options.bumpVersion !== undefined) {
+        bumpProjectVersion(project.projectPath, project.options.bumpVersion);
     }
 
     addExportBuildStep(project);
