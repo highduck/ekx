@@ -38,6 +38,9 @@ int exportAtlas(const char* xmlPath) {
                     sprite.rc.w = nodeSprite.attribute("w").as_float(0.0f);
                     sprite.rc.h = nodeSprite.attribute("h").as_float(0.0f);
                     sprite.padding = nodeSprite.attribute("p").as_uint(1);
+                    if(nodeSprite.attribute("trim").as_bool(true)) {
+                        sprite.flags |= (uint8_t)SpriteFlag::Trim;
+                    }
 
                     res.sprites.push_back(sprite);
                 }

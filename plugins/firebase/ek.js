@@ -12,7 +12,7 @@ function setup(project) {
                 console.error("please set `android.googleServicesConfigDir` !!!");
             }
             const configFile = "google-services.json";
-            const configPath = path.join(path.resolve(project.path.CURRENT_PROJECT_DIR, project.android.googleServicesConfigDir), configFile);
+            const configPath = path.join(path.resolve(project.projectPath, project.android.googleServicesConfigDir), configFile);
             try {
                 // CWD is project generated path here
                 fs.copyFileSync(configPath, path.join("app", configFile))
@@ -24,7 +24,7 @@ function setup(project) {
                 console.error("please set `ios.googleServicesConfigDir` !!!");
             }
             const configFile = "GoogleService-Info.plist";
-            const configPath = path.join(path.resolve(project.path.CURRENT_PROJECT_DIR, project.android.googleServicesConfigDir), configFile);
+            const configPath = path.join(path.resolve(project.projectPath, project.android.googleServicesConfigDir), configFile);
             try {
                 // CWD is project generated path here
                 fs.copyFileSync(configPath, configFile)
@@ -45,8 +45,11 @@ function setup(project) {
             android_java: "android/java",
             // Import the BoM for the Firebase platform
             // Check Release Notes for updates: https://firebase.google.com/support/release-notes/android
-            android_buildScriptDependency: `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.7.1'`,
-            android_gradleApplyPlugin: 'com.google.firebase.crashlytics',
+            android_buildScriptDependency: [
+                `classpath 'com.google.gms:google-services:4.3.10'`,
+                `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.7.1'`
+            ],
+            android_gradleApplyPlugin: ['com.google.gms.google-services', 'com.google.firebase.crashlytics'],
             android_gradleConfigRelease: `firebaseCrashlytics {
                 nativeSymbolUploadEnabled true
                 symbolGenerator {

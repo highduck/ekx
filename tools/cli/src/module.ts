@@ -106,6 +106,7 @@ export interface AndroidConfig extends CxxConfig {
 
     /**
      * Patch :app build.gradle with `apply plugin: '{}'`
+     * TODO: rename to android_gradlePlugin
      */
     android_gradleApplyPlugin: UserArray<string>;
 
