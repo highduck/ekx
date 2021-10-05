@@ -39,11 +39,11 @@ function gradle(dir: string, ...args: string[]) {
     });
 }
 
+const baseActivityClassName = "ek.EkActivity";
+const activityClassName = "MainActivity";
+
 function createMainClass(javaPackage, appModulePath) {
     const javaPackagePath = replaceAll(javaPackage, ".", "/");
-    const baseActivityClassName = "ek.EkActivity";
-    const activityClassName = "MainActivity";
-
     let file = `package ${javaPackage};
 
 import android.os.Bundle;
@@ -74,6 +74,7 @@ function getAndroidScreenOrientation(orientation: string): string {
 
 function setupAndroidManifest(ctx: Project, proj: AndroidProjGen) {
     proj.androidManifest.package = ctx.android.package_id;
+    proj.androidManifest.activityName = ctx.android.package_id + "." + activityClassName;
     proj.androidManifest._root.push(...collectStrings(ctx, "android_manifest", ["android"], false));
     proj.androidManifest.permissions.push(...collectStrings(ctx, "android_permission", ["android"], false));
     proj.androidManifest._application.push(...collectStrings(ctx, "android_manifestApplication", ["android"], false));
@@ -137,9 +138,8 @@ function createCMakeLists(dir: string, ctx: Project) {
         linkOptions: ["-g"],
         compileOptions: [
             "-g",
-
-            // "-ffunction-sections", //+
-            // "-fdata-sections", //+
+            "-ffunction-sections", //+
+            "-fdata-sections", //+
             "-fvisibility=hidden",//+
 
             // "-fvisibility-inlines-hidden",
@@ -147,6 +147,7 @@ function createCMakeLists(dir: string, ctx: Project) {
             // "-ffor-scope",
             // "-pipe",
 
+            "-Oz",
             "-ffast-math",
             "-fno-exceptions",
             "-fno-rtti",
@@ -178,7 +179,8 @@ function createCMakeLists(dir: string, ctx: Project) {
 
     //cmakeTarget.linkOptions.push("$<$<CONFIG:Release>:LINKER:--gc-sections>");
     cmakeTarget.linkOptions.push("-Wl,--build-id");
-    //cmakeTarget.linkOptions.push("-Wl,--gc-sections")
+    cmakeTarget.linkOptions.push("-Wl,--gc-sections")
+    cmakeTarget.linkOptions.push("-flto")
 
     // cmakeTarget.compileDefinitions.push("$<$<NOT:$<CONFIG:Debug>>:NDEBUG>");
     // cmakeTarget.compileOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
@@ -299,6 +301,13 @@ export async function export_android(ctx: Project): Promise<void> {
 
     logger.info("Update native build info header");
     ctx.generateNativeBuildInfo();
+
+    // Splash screen
+    {
+        makeDirs(path.join(appModulePath, "src/main/res/drawable"));
+        copyFile(path.resolve(ctx.sdk.templates, "android-splash/launch_splash.xml"), path.join(appModulePath, "src/main/res/drawable/launch_splash.xml"));
+        copyFile(path.resolve(ctx.sdk.templates, "android-splash/splash.png"), path.join(appModulePath, "src/main/res/drawable/splash.png"));
+    }
 
     logger.info("Export assets");
     const embeddedAssetsPackName = "assets";

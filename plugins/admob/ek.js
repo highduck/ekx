@@ -15,7 +15,8 @@ function setup(project) {
         cpp: "src",
         android: {
             android_java: "android/java",
-            android_dependency: `implementation 'com.google.android.gms:play-services-ads:20.3.0'`,
+            // android_dependency: `implementation 'com.google.android.gms:play-services-ads:20.4.0'`,
+            android_dependency: `implementation 'com.google.android.gms:play-services-ads-lite:20.4.0'`,
             android_manifestApplication: [
                 `<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id"/>`,
                 //`<meta-data android:name="com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT" android:value="true"/>`

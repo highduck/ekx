@@ -1,17 +1,10 @@
 import {Project} from "../project";
 import * as path from "path";
-import {isDir, makeDirs} from "../utils";
-import {rmdirSync} from "fs";
 import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/flashExport";
 
 export function androidBuildAppIconAsync(ctx: Project, output: string): Promise<number> {
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
-
-    if (isDir(output)) {
-        rmdirSync(output, {recursive: true});
-    }
-    makeDirs(output);
-
+    
     const filename = "ic_launcher.png";
     const resolutionMap = {
         "ldpi": 36,
