@@ -57,7 +57,7 @@ function setup(project) {
                 }
             }`,
             android_dependency: [
-                `implementation platform('com.google.firebase:firebase-bom:28.4.0')`,
+                `implementation platform('com.google.firebase:firebase-bom:28.4.1')`,
                 `implementation 'com.google.firebase:firebase-crashlytics-ndk'`,
                 `implementation 'com.google.firebase:firebase-analytics'`,
             ]

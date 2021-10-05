@@ -37,7 +37,7 @@
     "rimraf": "^3.0.2",
     "xcode": "^3.0.1",
     "xmldoc": "^1.1.2",
-    "android-proj-gen": "0.0.1"
+    "android-proj-gen": "0.0.2"
   },
   "devDependencies": {
     "@types/glob": "^7.1.4",

@@ -1,2 +1,0 @@
-json_key_file("__SERVICE_ACCOUNT_KEY_PATH__")
-package_name("__PACKAGE_NAME__")

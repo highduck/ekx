@@ -106,7 +106,7 @@ export class SemVer {
     }
 }
 
-export function bumpProjectVersion(p: string, bumpMask = BumpVersionFlag.BuildNumber) {
+export function bumpProjectVersion(p: string, bumpMask = BumpVersionFlag.BuildNumber):SemVer {
     const pkgFilePath = path.join(p, "package.json");
     let pkg = fs.readFileSync(pkgFilePath, "utf-8");
     let reVersion = /"version"\s*:\s*"([^"]*)"/g
@@ -114,14 +114,11 @@ export function bumpProjectVersion(p: string, bumpMask = BumpVersionFlag.BuildNu
     if (versionMatch == null) {
         throw new Error(`can't find "version" in package.json`);
     }
-    logger.info("version string:", versionMatch[0]);
-    const oldVersion = versionMatch[1];
     const ver = SemVer.parse(versionMatch[1]);
-    logger.info("version:", ver);
-
     ver.bump(bumpMask);
-
     // rewrite version config header
     pkg = pkg.replace(versionMatch[0], `"version": "${ver.toString()}"`);
     fs.writeFileSync(pkgFilePath, pkg);
+
+    return ver;
 }

@@ -54,7 +54,7 @@ function defaultRun() {
     }
 
     if (project.options.bumpVersion !== undefined) {
-        bumpProjectVersion(project.projectPath, project.options.bumpVersion);
+        project.version = bumpProjectVersion(project.projectPath, project.options.bumpVersion);
     }
 
     addExportBuildStep(project);
