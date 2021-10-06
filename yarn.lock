@@ -234,17 +234,17 @@
   resolved "https://registry.yarnpkg.com/@ekx/dr-libs/-/dr-libs-0.0.3.tgz#c78f72dd9d7de1170485aecfd5a79b698a7153a2"
   integrity sha512-IZreaeywyfrTczeme6L85g/3sqB9Vb7YgdqfjKNkhBkyhPGF1ni9BaWYbwKZSy6Vt22obguew8iDAgGztJJ4Eg==
 
-"@ekx/freetype@0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@ekx/freetype/-/freetype-0.0.9.tgz#9a4425d95d001887a32e262740780175fee7a136"
-  integrity sha512-hD4tdHeUOdCAtVFS7iB2EmZsIH4VPx1Aq0zv8sC1LukuZBavjBbsrgKWVUUKqrYfONMXXfywXVRK6VITE3pbBg==
+"@ekx/freetype@0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@ekx/freetype/-/freetype-0.0.10.tgz#5b37b00402eca10f4ee79d60f3714e4a9545df23"
+  integrity sha512-naJzYwSVTdpICO24MuxKcpnKH3uP0ClkvBC+QonezmVNAS0VFYA2/eQ6ii+l0+K7g4HQk3QgacYv1tqovV1B6Q==
 
-"@ekx/imgui@0.0.20":
-  version "0.0.20"
-  resolved "https://registry.yarnpkg.com/@ekx/imgui/-/imgui-0.0.20.tgz#0dad430d2771755c2c6bbccfd4df69ca26065a48"
-  integrity sha512-1kGH2bJQwj4+m19PEExYZUlEcO+9sebbU4gPBbij3iZmRi9TjjjZq8nOXkvMIRmI8ikkt5yr1GP1/JNlnJusIA==
+"@ekx/imgui@0.0.21":
+  version "0.0.21"
+  resolved "https://registry.yarnpkg.com/@ekx/imgui/-/imgui-0.0.21.tgz#869ea6ab3e58c155096109e1f7eb086fc3814c2f"
+  integrity sha512-xoH9hRrBfILldRxXAxRsDp/kbpgbgR5KcL0qetizRabsXcU7kNLx2rMH8VMSP4nsTw3vOYcY7w78qW4dQqRL9Q==
   dependencies:
-    "@ekx/freetype" "0.0.9"
+    "@ekx/freetype" "0.0.10"
     "@ekx/stb" "0.0.7"
     cmake-build "0.0.3"
 
@@ -452,10 +452,10 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-android-proj-gen@0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/android-proj-gen/-/android-proj-gen-0.0.1.tgz#d0d120c2e50c031c49ec2b583290b352e73a0f13"
-  integrity sha512-oxvhVOjNAQHeUYtj7gLvAmW0wTj4gJ8eUimNuub49x/yoeqBax8KWSG9oUfq1gO0sO/kqTltW8bpeRPRoOoGxg==
+android-proj-gen@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/android-proj-gen/-/android-proj-gen-0.0.3.tgz#42550202c9b7fef39267d271594cf0264bf7e490"
+  integrity sha512-Mo//o544qUvIly3idoqe1xD5t9yi/KkGrQcOUbUr9vDxENW0K7Xqo/ZirLdZ1CooHbsB10apFBOvvYULu7S5jA==
   dependencies:
     xmldoc "^1.1.2"
 
