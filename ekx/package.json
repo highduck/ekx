@@ -15,7 +15,7 @@
   "dependencies": {
     "@ekx/dev-fonts": "0.0.10",
     "@ekx/doctest": "0.0.3",
-    "@ekx/imgui": "0.0.20",
+    "@ekx/imgui": "0.0.21",
     "@ekx/pugixml": "0.0.6",
     "@ekx/sokol": "0.0.13",
     "@ekx/stb": "0.0.7",
