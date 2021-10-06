@@ -11,7 +11,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/freetype": "0.0.9",
+    "@ekx/freetype": "0.0.10",
     "@ekx/pugixml": "0.0.6",
     "@ekx/stb": "0.0.7",
     "cmake-build": "0.0.3"

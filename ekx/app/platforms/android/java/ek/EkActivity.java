@@ -122,10 +122,8 @@ public class EkActivity extends Activity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 // Hide the nav bar and status bar
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            flags |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        }
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         View decorView = window.getDecorView();
         decorView.setSystemUiVisibility(flags);
 

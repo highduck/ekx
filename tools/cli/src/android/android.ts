@@ -177,10 +177,10 @@ function createCMakeLists(dir: string, ctx: Project) {
         compileDefinitions: []
     };
 
-    //cmakeTarget.linkOptions.push("$<$<CONFIG:Release>:LINKER:--gc-sections>");
     cmakeTarget.linkOptions.push("-Wl,--build-id");
-    cmakeTarget.linkOptions.push("-Wl,--gc-sections")
-    cmakeTarget.linkOptions.push("-flto")
+    cmakeTarget.linkOptions.push("-Wl,--gc-sections");
+    cmakeTarget.linkOptions.push("-flto");
+    cmakeTarget.compileOptions.push("-flto");
 
     // cmakeTarget.compileDefinitions.push("$<$<NOT:$<CONFIG:Debug>>:NDEBUG>");
     // cmakeTarget.compileOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
