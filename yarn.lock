@@ -452,10 +452,10 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-android-proj-gen@0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/android-proj-gen/-/android-proj-gen-0.0.3.tgz#42550202c9b7fef39267d271594cf0264bf7e490"
-  integrity sha512-Mo//o544qUvIly3idoqe1xD5t9yi/KkGrQcOUbUr9vDxENW0K7Xqo/ZirLdZ1CooHbsB10apFBOvvYULu7S5jA==
+android-proj-gen@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/android-proj-gen/-/android-proj-gen-0.0.5.tgz#56ecbe5cf848aa87c6308d5b601436060fcecbfd"
+  integrity sha512-OXbqIaH/Kr5gigkioQ2qWNhDhiXBSmRPEYvwdpkJSvj5+JH6MS3wmpWV3qVayjKITIIroYk/qaA5u/z5Xkvqwg==
   dependencies:
     xmldoc "^1.1.2"
 
