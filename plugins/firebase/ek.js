@@ -31,6 +31,17 @@ function setup(project) {
             } catch (err) {
                 console.error("missing google-service config", configPath);
             }
+        } else if (project.current_target === "web") {
+            if (!project.web.firebaseConfig) {
+                console.error("please set `web.firebaseConfig` !!!");
+            }
+            project.web.headCode.push(`<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.2/firebase-analytics.js";
+  var firebaseConfig = ${JSON.stringify(project.web.firebaseConfig)};
+  var app = initializeApp(firebaseConfig);
+  var analytics = getAnalytics(app);
+</script>`);
         }
     });
 
@@ -57,7 +68,7 @@ function setup(project) {
                 }
             }`,
             android_dependency: [
-                `implementation platform('com.google.firebase:firebase-bom:28.4.1')`,
+                `implementation platform('com.google.firebase:firebase-bom:28.4.2')`,
                 `implementation 'com.google.firebase:firebase-crashlytics-ndk'`,
                 `implementation 'com.google.firebase:firebase-analytics'`,
             ]
@@ -84,6 +95,9 @@ shell = PBXShellScriptBuildPhase.create(
 )
 project.objects[shell.get_id()] = shell
 app_target.add_build_phase(shell)`
+        },
+        web: {
+         //   js: "web/dist"
         }
     });
 }

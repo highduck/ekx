@@ -13,8 +13,12 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc99-extensions"
+
 #include <sokol_gfx.h>
+
 #pragma clang diagnostic pop
+
+#include "../texture_loader/TextureLoader_impl.h"
 
 namespace ek::graphics {
 
@@ -24,7 +28,7 @@ Buffer::Buffer(BufferType type, const void* data, uint32_t dataSize) {
     desc.type = (sg_buffer_type) type;
     desc.usage = SG_USAGE_IMMUTABLE;
     desc.data.ptr = data;
-    desc.data.size = (size_t)dataSize;
+    desc.data.size = (size_t) dataSize;
     buffer = sg_make_buffer(&desc);
     size = dataSize;
 }
@@ -80,6 +84,9 @@ Texture::Texture(const sg_image_desc& desc_) {
     image = sg_make_image(desc_);
 }
 
+Texture::Texture(sg_image image_, const sg_image_desc& desc_) : image{image_}, desc{desc_} {
+}
+
 Texture::~Texture() {
     sg_destroy_image(image);
 }
@@ -105,51 +112,92 @@ Texture* Texture::createSolid32(int width, int height, uint32_t pixelColor) {
         pixels[i] = pixelColor;
     }
     desc.data.subimage[0][0].ptr = pixels;
-    desc.data.subimage[0][0].size = (size_t)count * 4;
+    desc.data.subimage[0][0].size = (size_t) count * 4;
     auto* tex = new Texture(desc);
     delete[] pixels;
     return tex;
 }
 
 bool Texture::getPixels(void* pixels) const {
-    (void)pixels;
+    (void) pixels;
 #if TARGET_OS_OSX
     // get the texture from the sokol internals here...
     _sg_image_t* img = _sg_lookup_image(&_sg.pools, image.id);
     __unsafe_unretained id<MTLTexture> tex = _sg_mtl_id(img->mtl.tex[img->cmn.active_slot]);
     const auto width = desc.width;
     const auto height = desc.height;
-    id<MTLTexture> temp_texture = 0;
+    id < MTLTexture > temp_texture = 0;
     if (_sg.mtl.cmd_queue && tex) {
-        const MTLPixelFormat format = [tex pixelFormat];
-        MTLTextureDescriptor* textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:format width:(width) height:(height) mipmapped:NO];
+        const MTLPixelFormat format = [tex
+        pixelFormat];
+        MTLTextureDescriptor* textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:format
+        width:
+        (width)
+        height:
+        (height)
+        mipmapped:
+        NO];
 
         textureDescriptor.storageMode = MTLStorageModeManaged;
         textureDescriptor.resourceOptions = MTLResourceStorageModeManaged;
         textureDescriptor.usage = MTLTextureUsageShaderRead + MTLTextureUsageShaderWrite;
-        temp_texture = [_sg.mtl.device newTextureWithDescriptor:textureDescriptor];
+        temp_texture = [_sg.mtl.device
+        newTextureWithDescriptor:
+        textureDescriptor];
         if (temp_texture) {
-            id<MTLCommandBuffer> cmdbuffer = [_sg.mtl.cmd_queue commandBuffer];
-            id<MTLBlitCommandEncoder> blitcmd = [cmdbuffer blitCommandEncoder];
+            id<MTLCommandBuffer> cmdbuffer = [_sg.mtl.cmd_queue
+            commandBuffer];
+            id<MTLBlitCommandEncoder> blitcmd = [cmdbuffer
+            blitCommandEncoder];
 
-            [blitcmd copyFromTexture:tex
-                sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(0,0,0)
-                sourceSize:MTLSizeMake(width,height,1)
-                toTexture:temp_texture
-                destinationSlice:0 destinationLevel:0
-                destinationOrigin:MTLOriginMake(0,0,0)];
+            [blitcmd
+            copyFromTexture:
+            tex
+            sourceSlice:
+            0
+            sourceLevel:
+            0
+            sourceOrigin:
+            MTLOriginMake(0, 0, 0)
+            sourceSize:
+            MTLSizeMake(width, height, 1)
+            toTexture:
+            temp_texture
+            destinationSlice:
+            0
+            destinationLevel:
+            0
+            destinationOrigin:
+            MTLOriginMake(0, 0, 0)];
 
-            [blitcmd synchronizeTexture:temp_texture slice:0 level:0];
-            [blitcmd endEncoding];
+            [blitcmd
+            synchronizeTexture:
+            temp_texture
+            slice:
+            0
+            level:
+            0];
+            [blitcmd
+            endEncoding];
 
-            [cmdbuffer commit];
-            [cmdbuffer waitUntilCompleted];
+            [cmdbuffer
+            commit];
+            [cmdbuffer
+            waitUntilCompleted];
         }
     }
     if (temp_texture) {
         MTLRegion region = MTLRegionMake2D(0, 0, width, height);
         NSUInteger rowbyte = width * 4;
-        [temp_texture getBytes:pixels bytesPerRow:rowbyte fromRegion:region mipmapLevel:0];
+        [temp_texture
+        getBytes:
+        pixels
+        bytesPerRow:
+        rowbyte
+        fromRegion:
+        region
+        mipmapLevel:
+        0];
         return true;
     }
 #endif // OSX

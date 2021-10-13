@@ -103,7 +103,7 @@ void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<ui
 
     for (const auto& page : atlasInfo.pages) {
         auto& texture_asset = atlas->pages.emplace_back(page.imagePath);
-        atlas->loaders.emplace_back(new graphics::TextureLoader);
+        atlas->loaders.emplace_back(new TextureLoader);
         for (auto& spr_data : page.sprites) {
             auto sprite = new Sprite();
             sprite->rotated = spr_data.isRotated();
@@ -129,6 +129,7 @@ void load_atlas_meta(const path_t& base_path, Atlas* atlas, const std::vector<ui
         EK_DEBUG_F("Load atlas page %s", (base_path / pageImagePath).c_str());
 
         auto* loader = atlas->loaders[i];
+        loader->formatMask = atlas->formatMask;
         loader->basePath = base_path.str();
         loader->imagesToLoad = 1;
         loader->urls[0] = pageImagePath;
@@ -160,7 +161,7 @@ int Atlas::pollLoading() {
                 if (!loader->loading) {
                     if (loader->status == 0) {
                         Res<graphics::Texture> res{loader->urls[0]};
-                        res.reset(loader->texture);
+                        res.reset(new graphics::Texture{loader->image, loader->desc});
                         delete loader;
                         loaders[i] = nullptr;
                     }

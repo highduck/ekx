@@ -60,6 +60,25 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
     draw2d::quad(pad, y, w, h, 0xFFFFFFFF_argb);
     draw2d::quad(pad + 2, y + 2, w - 4, h - 4, 0xFF000000_argb);
     draw2d::quad(pad + 4, y + 4, (w - 8) * progress, h - 8, 0xFFFFFFFF_argb);
+
+    {
+        static Stopwatch timer{};
+        float sz = zoneWidth < zoneHeight ? zoneWidth : zoneHeight;
+        float cx = zoneWidth / 2.0f;
+        float cy = zoneHeight / 2.0f;
+        float sh = sz / 16.0f;
+        float sw = sh * 3;
+        for (int i = 0; i < 7; ++i) {
+            float r = ((float) i / 7) * 1.5f + timer.readSeconds();
+            float speed = (0.5f + 0.5f * sinf(r * 2 + 1));
+            r = r + 0.5f * speed;
+            float ox = sinf(r * 3.14f);
+            float oy = sinf(r * 3.14f * 2 + 3.14f);
+            float R = (sh / 10.0f) *
+                      (1.8f - 0.33f * speed - 0.33f * ((cosf(r * 3.14f) + 2.0f * cosf(r * 3.14f * 2 + 3.14f))));
+            draw2d::fill_circle({cx + ox * sw, cy - 2.0f * sh + oy * sh, R}, 0xFFFFFFFF_argb, 0xFFFFFFFF_argb, 16);
+        }
+    }
 }
 
 basic_application::basic_application() {
@@ -205,7 +224,7 @@ void basic_application::onFrame() {
     pass_action.colors[0].value.g = fillColor.y;
     pass_action.colors[0].value.b = fillColor.z;
     pass_action.colors[0].value.a = fillColor.w;
-    if(app::g_app.config.needDepth) {
+    if (app::g_app.config.needDepth) {
         pass_action.depth.action = SG_ACTION_CLEAR;
         pass_action.depth.value = 1.0f;
     }

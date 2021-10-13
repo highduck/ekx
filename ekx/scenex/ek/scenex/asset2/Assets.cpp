@@ -6,7 +6,7 @@
 #include <ek/app/res.hpp>
 
 // texture loading
-#include <ek/graphics/TextureLoader.h>
+#include <ek/texture_loader/TextureLoader.h>
 
 #include <ek/scenex/data/TextureData.hpp>
 #include <ek/graphics/graphics.hpp>
@@ -71,10 +71,11 @@ public:
 
 class AtlasAsset : public Asset {
 public:
-    explicit AtlasAsset(std::string name) :
+    AtlasAsset(std::string name, uint32_t formatMask_) :
             Asset(std::move(name)) {
         // we need to load atlas image and atlas meta
         weight_ = 2;
+        formatMask = formatMask_;
     }
 
     void load() override {
@@ -87,9 +88,10 @@ public:
             fullPath_ = manager_->base_path / name_;
 
             Res<Atlas> resAtlas{name_};
-            if(!resAtlas) {
+            if (!resAtlas) {
                 resAtlas.reset(new Atlas);
             }
+            resAtlas->formatMask = formatMask;
             resAtlas->load(fullPath_.c_str(), manager_->scale_factor);
         }
     }
@@ -100,7 +102,7 @@ public:
             if (!atlas.empty()) {
                 // we poll atlas loading / reloading in separated process with Atlas::pollLoading for each Res<Atlas>
                 int loading = atlas->getLoadingTexturesCount();
-                if(loading == 0) {
+                if (loading == 0) {
                     state = AssetState::Ready;
                 }
             }
@@ -138,6 +140,7 @@ public:
 
     uint8_t loaded_scale_ = 0;
     path_t fullPath_;
+    uint32_t formatMask = 1;
 };
 
 class DynamicAtlasAsset : public Asset {
@@ -228,9 +231,9 @@ public:
     }
 
     void do_load() override {
-        loader = new graphics::TextureLoader();
+        loader = new TextureLoader();
         loader->basePath = manager_->base_path.c_str();
-        EK_ASSERT(data_.images.size() <= graphics::TextureLoader::IMAGES_MAX_COUNT);
+        EK_ASSERT(data_.images.size() <= TextureLoader::IMAGES_MAX_COUNT);
         for (int i = 0; i < data_.images.size(); ++i) {
             loader->urls[i] = data_.images[i];
         }
@@ -238,6 +241,7 @@ public:
         if (data_.type == TextureDataType::CubeMap) {
             loader->isCubeMap = true;
             loader->premultiplyAlpha = false;
+            loader->formatMask = data_.formatMask;
         }
         loader->load();
         state = AssetState::Loading;
@@ -252,7 +256,7 @@ public:
             if (!loader->loading) {
                 error = loader->status;
                 if (error == 0) {
-                    Res<Texture>{name_}.reset(loader->texture);
+                    Res<Texture>{name_}.reset(new graphics::Texture{loader->image, loader->desc});
                 }
                 state = AssetState::Ready;
                 delete loader;
@@ -273,7 +277,7 @@ public:
         Res<Texture>{name_}.reset(nullptr);
     }
 
-    graphics::TextureLoader* loader = nullptr;
+    TextureLoader* loader = nullptr;
     TextureData data_{};
     // by default always premultiply alpha,
     // currently for cube maps will be disabled
@@ -538,8 +542,9 @@ Asset* DefaultAssetsResolver::create_for_type(const void* data, int size) const 
         return new TrueTypeFontAsset(name, path, glyphCache, baseFontSize);
     } else if (type == "atlas") {
         std::string name;
-        io(name);
-        return new AtlasAsset(name);
+        uint32_t formatMask = 1;
+        io(name, formatMask);
+        return new AtlasAsset(name, formatMask);
     } else if (type == "dynamic_atlas") {
         std::string name;
         uint32_t flags;

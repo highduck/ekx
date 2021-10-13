@@ -250,6 +250,7 @@ export async function export_android(ctx: Project): Promise<void> {
         const android_buildScriptDependency = collectStrings(ctx, "android_buildScriptDependency", platforms, false);
         const android_gradleConfigRelease = collectStrings(ctx, "android_gradleConfigRelease", platforms, false);
 
+        android_java.push("src/main/java");
         assets.push(embeddedAssets);
 
         proj.app.android.sourceSets.main.java.srcDirs = android_java;

@@ -6,3 +6,4 @@ target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 add_subdirectory(ek/graphics)
 add_subdirectory(ek/draw2d)
+add_subdirectory(ek/texture_loader)

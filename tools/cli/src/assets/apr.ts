@@ -11,6 +11,7 @@ import {bmfontAsync} from "./bmfont";
 import {spritePackerAsync} from "./spritePacker";
 import {flashExportAsync} from "./flashExport";
 import {objExportAsync} from "./objExport";
+import {compress, WebpConfig} from "./webp";
 
 export class TTFAsset extends Asset {
     static typeName = "ttf";
@@ -27,7 +28,7 @@ export class TTFAsset extends Asset {
         this.baseFontSize = node.attr.fontSize ? parseFloat(node.attr.fontSize) : 48;
     }
 
-    build() {
+    async build() {
         this.readDecl();
 
         const outputPath = path.join(this.owner.output, this.name);
@@ -93,11 +94,15 @@ const enum TextureDataType {
     CubeMap = 1
 }
 
+// const WEBP_OPTIONS = ["-near_lossless", "60"];
+const WEBP_OPTIONS = ["-preset", "icon"];
+
 export class TextureAsset extends Asset {
     static typeName = "texture";
 
     type = TextureDataType.Normal;
     images: string[] = [];
+    webpConfig?: WebpConfig;
 
     constructor(filepath: string) {
         super(filepath, TextureAsset.typeName);
@@ -113,6 +118,11 @@ export class TextureAsset extends Asset {
         } else {
             logger.warn(`Unknown texture type "${type}"`);
         }
+        const webp = node.childNamed("webp");
+        if (webp) {
+            this.webpConfig = new WebpConfig();
+            this.webpConfig.lossless = webp.attr.lossless ? (webp.attr.lossless.toLowerCase() == "true") : false;
+        }
 
         this.images = [];
         for (const imageNode of node.childrenNamed("image")) {
@@ -120,14 +130,34 @@ export class TextureAsset extends Asset {
         }
     }
 
-    build() {
+    async build() {
         this.readDecl();
 
         const outputPath = path.join(this.owner.output, this.name);
         makeDirs(path.dirname(outputPath));
 
+        if (this.owner.project.current_target === "ios") {
+            this.webpConfig = undefined;
+        }
+
         for (const imagePath of this.images) {
-            copyFile(this.getRelativePath(imagePath), path.join(this.owner.output, imagePath));
+            const srcFilePath = this.getRelativePath(imagePath);
+            const destFilepath = path.join(this.owner.output, imagePath);
+            copyFile(srcFilePath, destFilepath);
+        }
+        if (this.webpConfig) {
+            const promises = [];
+            for (const imagePath of this.images) {
+                const filepath = path.join(this.owner.output, imagePath);
+                promises.push(compress(filepath, this.webpConfig));
+            }
+            await Promise.all(promises);
+            if (this.owner.project.current_target === "android") {
+                for (const imagePath of this.images) {
+                    const filepath = path.join(this.owner.output, imagePath);
+                    fs.rmSync(filepath);
+                }
+            }
         }
 
         const header = new BytesWriter();
@@ -138,6 +168,17 @@ export class TextureAsset extends Asset {
 
         // texture data
         header.writeU32(this.type);
+
+        // variants
+        let formatMask = 1;
+        if (this.webpConfig) {
+            if (this.owner.project.current_target === "android") {
+                formatMask = 0;
+            }
+            formatMask |= 2;
+        }
+        header.writeU32(formatMask);
+
         header.writeU32(this.images.length);
         for (const image of this.images) {
             header.writeString(image);
@@ -158,6 +199,7 @@ class MRAResolution {
 export class MultiResAtlasSettings {
     name: string;
     resolutions: MRAResolution[] = [];
+    webpConfig?: WebpConfig;
 
     readFromXML(node: XmlElement) {
         this.name = node.attr.name;
@@ -167,6 +209,11 @@ export class MultiResAtlasSettings {
             res.maxWidth = readFloat(resolutionNode.attr.max_width, res.maxWidth);
             res.maxHeight = readFloat(resolutionNode.attr.max_height, res.maxHeight);
             this.resolutions.push(res);
+        }
+        const webp = node.childNamed("webp");
+        if (webp) {
+            this.webpConfig = new WebpConfig();
+            this.webpConfig.lossless = webp.attr.lossless ? (webp.attr.lossless.toLowerCase() == "true") : true;
         }
     }
 }
@@ -206,9 +253,39 @@ export class MultiResAtlasAsset extends Asset {
         fs.writeFileSync(configPath, xml, "utf8");
         await spritePackerAsync(configPath);
 
-        this.owner.meta("atlas", this.name);
-    }
+        if (this.owner.project.current_target === "ios") {
+            this.settings.webpConfig = undefined;
+        }
 
+        if (this.settings.webpConfig) {
+            const files = glob.sync(path.join(this.owner.output, `**/${this.name}*.png`));
+            const promises = [];
+            for (const filepath of files) {
+                promises.push(compress(filepath, this.settings.webpConfig));
+            }
+            await Promise.all(promises);
+
+            if (this.owner.project.current_target === "android") {
+                for (const filepath of files) {
+                    fs.rmSync(filepath);
+                }
+            }
+        }
+
+        const header = new BytesWriter();
+        header.writeString("atlas");
+        header.writeString(this.name);
+        // variants
+        let formatMask = 1;
+        if (this.settings.webpConfig) {
+            if (this.owner.project.current_target === "android") {
+                formatMask = 0;
+            }
+            formatMask |= 2;
+        }
+        header.writeU32(formatMask);
+        this.owner.writer.writeSection(header);
+    }
 }
 
 export class ModelAsset extends Asset {
@@ -290,7 +367,7 @@ export class DynamicAtlasAsset extends Asset {
         this.mipmaps = parseBoolean(node.attr.mipmaps);
     }
 
-    build() {
+    async build() {
         let flags = 0;
         if (this.alphaMap) flags |= 1;
         if (this.mipmaps) flags |= 2;
@@ -394,7 +471,7 @@ export class AudioAsset extends Asset {
         }
     }
 
-    build() {
+    async build() {
         // `name`\ folder for all sounds
         const outputPath = path.join(this.owner.output, this.name);
         makeDirs(outputPath);

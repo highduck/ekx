@@ -19,7 +19,7 @@ using namespace ek::app;
 void update_mouse_cursor() {
     if (g_app.dirtyCursor) {
         g_app.dirtyCursor = false;
-        ekapp_setMouseCursor((int)g_app.cursor);
+        ekapp_setMouseCursor((int) g_app.cursor);
     }
 }
 
@@ -78,6 +78,16 @@ EMSCRIPTEN_KEEPALIVE bool _ekapp_onResize(float dpr, float w, float h, float dw,
     return true;
 }
 
+EMSCRIPTEN_KEEPALIVE void _ekapp_onFocus(int flags) {
+    EventType type;
+    if ((flags & 3) == 3) {
+        type = EventType::Resume;
+    } else {
+        type = EventType::Pause;
+    }
+    processEvent(Event{type});
+}
+
 EMSCRIPTEN_KEEPALIVE void _ekapp_loop() {
     processFrame();
     update_mouse_cursor();
@@ -93,15 +103,15 @@ int main(int argc, char* argv[]) {
     g_app.argc = argc;
     g_app.argv = argv;
     ::ek::app::main();
-    if(g_app.exitRequired) {
+    if (g_app.exitRequired) {
         return g_app.exitCode;
     }
 
     int flags = 0;
-    if(g_app.config.needDepth) {
+    if (g_app.config.needDepth) {
         flags |= 1;
     }
-    if(!ekapp_init(flags)) {
+    if (!ekapp_init(flags)) {
         return 1;
     }
 

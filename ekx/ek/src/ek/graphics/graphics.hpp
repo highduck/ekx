@@ -54,6 +54,8 @@
 
 #include <sokol_gfx.h>
 
+#include "../texture_loader/TextureLoader.h"
+
 #include <ek/util/NoCopyAssign.hpp>
 
 namespace ek {
@@ -115,6 +117,8 @@ private:
 class Texture : private NoCopyAssign {
 public:
     explicit Texture(const sg_image_desc& desc);
+
+    Texture(sg_image image, const sg_image_desc& desc);
 
     ~Texture();
 

@@ -23,7 +23,7 @@ export async function buildAssetPackAsync(ctx: Project, output?: string, devMode
         rmdirSync(assetsOutput, {recursive: true});
     }
 
-    const builder = new AssetBuilder(assetsInput);
+    const builder = new AssetBuilder(ctx, assetsInput);
     builder.factory.set("ttf", p => new TTFAsset(p));
     builder.factory.set("audio", p => new AudioAsset(p));
     builder.factory.set("model", p => new ModelAsset(p));
