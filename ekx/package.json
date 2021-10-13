@@ -20,7 +20,7 @@
     "@ekx/sokol": "0.0.13",
     "@ekx/stb": "0.0.7",
     "@ekx/tracy": "0.0.14",
-    "auph": "0.1.0",
+    "auph": "0.1.1",
     "cmake-build": "0.0.3"
   },
   "devDependencies": {

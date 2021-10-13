@@ -20,6 +20,7 @@
       "ekx",
       "tools/*",
       "plugins/*",
+      "packages/*",
       "appbox"
     ]
   }

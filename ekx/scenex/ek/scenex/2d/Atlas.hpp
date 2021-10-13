@@ -8,7 +8,7 @@
 #include <ek/ds/Array.hpp>
 #include <unordered_map>
 #include <functional>
-#include <ek/graphics/TextureLoader.h>
+#include <ek/texture_loader/TextureLoader.h>
 
 namespace ek {
 
@@ -23,7 +23,8 @@ public:
 
     std::unordered_map<std::string, Res<Sprite>> sprites;
     Array<Res<graphics::Texture>> pages;
-    Array<graphics::TextureLoader*> loaders;
+    Array<TextureLoader*> loaders;
+    uint32_t formatMask = 1;
 
     [[nodiscard]] int getLoadingTexturesCount() const;
     int pollLoading();

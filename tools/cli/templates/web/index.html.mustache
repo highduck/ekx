@@ -23,38 +23,6 @@
     <link rel="icon" type="image/png" href="icons/icon192.png" sizes="192x192"/>
     <link rel="apple-touch-icon" type="image/png" href="icons/icon192.png" sizes="192x192"/>
     <link rel="manifest" href="manifest.json">
-
-    {{#html.firebaseAutoSetup}}
-    <script src="/__/firebase/8.6.7/firebase-app.js"></script>
-    <script src="/__/firebase/8.6.7/firebase-analytics.js"></script>
-    <script src="/__/firebase/init.js"></script>
-    {{/html.firebaseAutoSetup}}
-
-    {{#html.google_analytics_property_id}}
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{{html.google_analytics_property_id}}}"></script>
-    <script>
-    window.dataLayer=window.dataLayer||[];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js',new Date());
-    gtag('config','{{{html.google_analytics_property_id}}}');
-    var errorHandlerPrev = window.onerror;
-    window.onerror = function logError(msg, url, line, col, err) {
-        var desc = msg;
-        if (typeof err !== 'undefined' && typeof err.message !== 'undefined') {
-            desc = err.message;
-        }
-        desc += ' @ ' + url + ':' + line + ':' + col;
-        gtag('event', 'exception', {
-            'description': desc,
-            'fatal': false
-        });
-        if (typeof errorHandlerPrev === 'function') {
-            return errorHandlerPrev(msg, url, line, col, err);
-        }
-        return false;
-    };
-    </script>
-    {{/html.google_analytics_property_id}}
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="Description" content="{{desc}}">
@@ -64,7 +32,9 @@
     {{#html.og.image}}<meta property="og:image" content="{{{html.og.image}}}">{{/html.og.image}}
     {{#html.og.url}}<meta property="og:url" content="{{{html.og.url}}}">{{/html.og.url}}
 {{/html.og}}
-    <script async src="pwacompat.min.js"></script>
+
+    {{{headCode}}}
+
 </head>
 <body onload="init()">
 
@@ -82,152 +52,6 @@
 
     </canvas>
 </div>
-<script>
-
-    var Module = {
-        loaders: [],
-        started: false,
-        globalErrorCapture: null
-    };
-
-function binary(e, i) {
-    return new Promise((n, r) => {
-        var t = new XMLHttpRequest();
-        t.open("GET", e, !0);
-        t.responseType = "arraybuffer";
-        t.onload = () => {
-            Module.loaders[i] = 1.0;
-            updateStatus();
-            n(t.response);
-        };
-        t.onprogress = function(pr) {
-            if(pr.total > 0) {
-                Module.loaders[i] = pr.loaded / pr.total;
-                updateStatus();
-            }
-        };
-        t.send();
-    })
-}
-
-function script(e) {
-    return new Promise((n, r) => {
-        var t = document.createElement("script");
-        t.src = e;
-        t.onload = () => {
-            n();
-        };
-        document.body.appendChild(t);
-    })
-}
-
-Promise.all([binary("{{name}}.js?v={{{version_code}}}", 0), binary("{{name}}.wasm?v={{{version_code}}}", 1)]).then(e => {
-    Module.wasm = e[1];
-    var n = URL.createObjectURL(new Blob([e[0]], {type: "application/javascript"}));
-    script(n).then(() => {
-        URL.revokeObjectURL(n);
-        Module.started = true;
-        updateStatus();
-    })
-})
-
-function updateStatus() {
-    var spinner = document.getElementById('spinner');
-    var game = document.getElementById('gameview');
-    var status = document.getElementById('status');
-    if(game) {
-        if(Module.globalErrorCapture) {
-            status.innerHTML = Module.globalErrorCapture;
-            spinner.style.display = 'block';
-            game.style.display = 'none';
-            return;
-        }
-        if(Module.started) {
-            if (game.style.display !== 'block') {
-                spinner.style.display = 'none';
-                game.style.display = 'block';
-            }
-        } else {
-            var progress = ((Module.loaders[0]|0) + (Module.loaders[1]|0)) / 2;
-            spinner.style.display = 'block';
-            game.style.display = 'none';
-            status.innerHTML = ((progress * 100) | 0) + "%";
-        }
-    }
-}
-
-function init() {
-    updateStatus();
-    window.onerror = function (e) {
-        Module.globalErrorCapture = e;
-    };
-}
-
-</script>
-<script>
-    if (typeof navigator.serviceWorker === "undefined") {
-        console.log('Service worker is not supported');
-    }
-    else {
-       if(navigator.serviceWorker.controller) {
-           navigator.serviceWorker.getRegistration().then(function(reg) {
-               if(reg) {
-                   function confirmUpdate(reg) {
-                       navigator.serviceWorker.addEventListener('controllerchange', function() {
-                           if (this.refreshing) {
-                               return;
-                           }
-                           this.refreshing = true;
-                           window.location.reload();
-                       });
-
-                       // our new instance is now waiting for activation (its state is 'installed')
-                       // we now may invoke our update UX safely
-
-                       // this is for update flow manually
-                       if (confirm("Game is updated! Do you want to restart now?")) {
-                           reg.waiting.postMessage('SKIP_WAITING');
-                       } else {
-                           // do nothing
-                       }
-                   }
-                   if(reg.waiting) {
-                       confirmUpdate(reg);
-                   }
-                   else {
-                       reg.addEventListener('updatefound', function () {
-                           reg.installing.addEventListener('statechange', () => {
-                               if (reg.waiting) {
-                                   // our new instance is now waiting for activation (its state is 'installed')
-                                   // we now may invoke our update UX safely
-                                   confirmUpdate(reg);
-                               } else {
-                                   // apparently installation must have failed (SW state is 'redundant')
-                                   // it makes no sense to think about this update any more
-                               }
-                           });
-                       });
-                   }
-               }
-           });
-       }
-        else {
-            navigator.serviceWorker.register('sw.js', {
-                scope: './'
-            }).then(function(reg) {
-                if(reg.installing) {
-                    console.log('Service worker installing');
-                } else if(reg.waiting) {
-                    console.log('Service worker installed');
-                } else if(reg.active) {
-                    console.log('Service worker active');
-                }
-            }).catch(function(e) {
-                // registration failed
-                console.log('Registration failed with', e);
-            });
-        }
-    }
-</script>
+    {{{bodyCode}}}
 </body>
 </html>

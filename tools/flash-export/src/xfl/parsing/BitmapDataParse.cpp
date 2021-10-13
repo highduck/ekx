@@ -7,6 +7,7 @@
 
 #include <ek/imaging/image.hpp>
 #include <miniz.h>
+#include <stb/stb_image.h>
 
 namespace ek::xfl {
 
@@ -158,15 +159,20 @@ void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
 }
 
 void readBitmapJPEG(const std::string& data, BitmapData& bitmap) {
-    auto* image = decode_image_data(data.data(), data.size());
-    if (image != nullptr) {
-        bitmap.width = image->width();
-        bitmap.height = image->height();
+    int w = 0;
+    int h = 0;
+    int channels = 0;
+    auto* imageData = stbi_load_from_memory((const uint8_t*)data.data(), (int)data.size(),
+                                             &w, &h, &channels, 4);
+
+    if (imageData != nullptr) {
+        bitmap.width = w;
+        bitmap.height = h;
         bitmap.bpp = 4;
         bitmap.alpha = false;
         bitmap.data.resize(bitmap.width * bitmap.height * bitmap.bpp);
-        memcpy(bitmap.data.data(), image->data(), bitmap.data.size());
-        delete image;
+        memcpy(bitmap.data.data(), imageData, bitmap.data.size());
+        free(imageData);
         convert_rgba_to_bgra(bitmap.data.data(), bitmap.data.size());
     }
 }

@@ -8,7 +8,8 @@ function setup(project) {
         path: __dirname,
         cpp: "src",
         android: {
-            android_permission: "android.permission.INTERNET"
+            android_permission: "android.permission.INTERNET",
+            android_java: "android/java"
         },
         apple: {
             cpp_flags: {
@@ -22,7 +23,8 @@ function setup(project) {
         ios: {
         },
         web: {
-            js: "src/ek/graphics"
+            js: "src/ek/texture_loader",
+            js_pre: "web"
         },
         windows: {
         },

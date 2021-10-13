@@ -85,18 +85,13 @@ export class Project {
     } = {};
 
     onProjectGenerated: (() => void)[] = [];
-    web: {
+    readonly web: {
+        firebaseConfig?: object,
         firebaseToken?: string,
-        applications?: { platform: string, url: string, id?: string }[]
-    } = {};
-
-    html: {
-        // css color
+        applications?: { platform: string, url: string, id?: string }[],
+        // html colors
         background_color?: string,
         text_color?: string,
-        // firebase analytics
-        firebaseAutoSetup?: boolean,
-        google_analytics_property_id?: string,
         // open-graph object
         og?: {
             title?: string,
@@ -104,9 +99,13 @@ export class Project {
             url?: string,
             image?: string
         },
+        headCode: string[],
+        bodyCode: string[],
     } = {
         background_color: "#222222",
         text_color: "#CCCCCC",
+        headCode: [],
+        bodyCode: []
     };
 
     addModule(def: ModuleDef) {
@@ -122,7 +121,7 @@ export class Project {
             logger.log(`Loading module from "${configPath}"`);
             const configurator = require(configPath);
             if (configurator) {
-                this.projects[configPath] = configurator(this);
+                this.projects[configPath] = configurator(this) ?? true;
             }
         } catch (err) {
             logger.error("Module is not resolved", configPath);

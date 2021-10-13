@@ -6,6 +6,7 @@ import {XmlDocument, XmlElement} from "xmldoc";
 import {BytesWriter} from "./BytesWriter";
 import {parseBoolean} from "./parse";
 import * as fs from "fs";
+import {Project} from "../project";
 
 interface AssetInfoHeader {
     type: string;
@@ -96,7 +97,7 @@ export class AssetBuilder {
 
     readonly factory = new Map<string, (path: string) => Asset>();
 
-    constructor(public basePath: string = "../assets") {
+    constructor(readonly project: Project, public basePath: string = "../assets") {
 
     }
 

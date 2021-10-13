@@ -8,6 +8,12 @@
 #import <Firebase/Firebase.h>
 #endif
 
+#elif defined(__EMSCRIPTEN__)
+
+#include <emscripten.h>
+
+//extern "C" void firebase_init(void);
+
 #endif
 
 namespace ek::analytics {
@@ -72,6 +78,21 @@ void event(const char* action, const char* target) {
     parameters: @{
         kFIRParameterItemName: nsTarget,
     }];
+}
+
+#elif defined(__EMSCRIPTEN__)
+
+void init() {
+    //firebase_init();
+}
+
+void screen(const char* name) {
+    (void) name;
+}
+
+void event(const char* action, const char* target) {
+    (void) action;
+    (void) target;
 }
 
 #else

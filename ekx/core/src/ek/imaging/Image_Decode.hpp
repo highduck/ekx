@@ -2,36 +2,7 @@
 
 #include "image.hpp"
 #include "drawing.hpp"
-#include <ek/debug.hpp>
-#include "../assert.hpp"
-
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-
-// enable NEON for all ARM targets on Android and iOS
-#if defined(__aarch64__) || defined(__arm__)
-#if defined(__APPLE__) || defined(__ANDROID__)
-#define STBI_NEON
-#endif
-#endif // arm
-
-#ifndef EK_TOOLS
-#define STBI_NO_STDIO
-#define STBI_ONLY_JPEG
-#define STBI_ONLY_PNG
-#endif
-
-#ifndef NDEBUG
-#define STBI_NO_FAILURE_STRINGS
-#else
-#define STBI_FAILURE_USERMSG
-#endif // DEBUG
-
-#define STBI_ASSERT(e)   EK_ASSERT(e)
-
-#include <stb/stb_image.h>
-
-#endif
+#include "stbimage_impl.h"
 
 namespace ek {
 

@@ -14,11 +14,12 @@ enum class TextureDataType : uint32_t {
 
 struct TextureData {
     TextureDataType type;
+    uint32_t formatMask = 1;
     Array<std::string> images;
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(type, images);
+        io(type, formatMask, images);
     }
 };
 

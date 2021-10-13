@@ -324,6 +324,44 @@ mergeInto(LibraryManager.library, {
             return false;
         }
 
+        // check visibility,
+        // TODO: bind this with running loop and set after ready event
+        var hidden, visibilityChange;
+        if (typeof document.hidden !== "undefined") {
+            // Opera 12.10 and Firefox 18 and later support
+            hidden = "hidden";
+            visibilityChange = "visibilitychange";
+        } else if (typeof document.msHidden !== "undefined") {
+            hidden = "msHidden";
+            visibilityChange = "msvisibilitychange";
+        } else if (typeof document.webkitHidden !== "undefined") {
+            hidden = "webkitHidden";
+            visibilityChange = "webkitvisibilitychange";
+        }
+
+        // Handle page visibility change
+        var focused = true;
+        var handleFocus = function(_) {
+            var flags = 0;
+            if(hidden !== undefined && !document[hidden]) {
+                flags |= 1;
+            }
+            if(document.hasFocus()) {
+                flags |= 2;
+            }
+            __ekapp_onFocus(flags);
+        }
+
+        if (typeof document.addEventListener === "undefined" || hidden === undefined) {
+            console.warn("No Page Visibility API");
+        } else {
+            document.addEventListener(visibilityChange, handleFocus, false);
+        }
+        wnd.addEventListener("blur", handleFocus, false);
+        wnd.addEventListener("focus", handleFocus, false);
+
+        handleFocus();
+
         return true;
     },
     ekapp_run: function () {

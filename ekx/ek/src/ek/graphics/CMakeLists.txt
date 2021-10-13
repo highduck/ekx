@@ -1,7 +1,6 @@
 target_sources(${PROJECT_NAME} PRIVATE
         graphics.cpp
         graphics.hpp
-        TextureLoader.h
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
