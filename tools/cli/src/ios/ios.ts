@@ -13,10 +13,10 @@ import * as fs from "fs";
 import {readFileSync} from "fs";
 import * as plist from 'plist';
 import {buildAssetPackAsync} from "../assets";
-import {iosBuildAppIconAsync} from "./iosAppIcon";
 import {Project} from "../project";
 import {collectCppFlags, collectObjects, collectStrings} from "../collectSources";
 import {logger} from "../logger";
+import {buildAppIconAsync} from "../appicon/appicon";
 
 const iosPlatforms = ["apple", "ios"];
 
@@ -76,9 +76,14 @@ export async function export_ios(ctx: Project): Promise<void> {
     } catch (e) {
     }
 
+    const iconsContents = JSON.parse(readText(path.join(ctx.sdk.templates, "template-ios/src/Assets.xcassets/AppIcon.appiconset/Contents.json")));
     await Promise.all([
         buildAssetPackAsync(ctx),
-        iosBuildAppIconAsync(ctx, "export/ios")
+        buildAppIconAsync({
+            projectType: "ios",
+            iosAppIconContents: iconsContents,
+            output: "export/ios"
+        })
     ]);
 
     const platform_target = ctx.current_target; // "ios"
@@ -98,9 +103,6 @@ export async function export_ios(ctx: Project): Promise<void> {
     const cwd = process.cwd();
     process.chdir(dest_path);
     {
-        // logger.info("Rename project");
-        // fs.renameSync("app-ios.xcodeproj", platform_proj_name + ".xcodeproj");
-
         const embeddedAssetsDir = "assets";
         copyFolderRecursiveSync(path.join(base_path, ctx.getAssetsOutput()), embeddedAssetsDir);
         copyFolderRecursiveSync(path.join(base_path, "export/ios/AppIcon.appiconset"),

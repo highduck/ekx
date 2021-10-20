@@ -183,6 +183,7 @@ void show_banner(int flags) {
 
 void reloadRewardedAd() {
     if(GAD_video == nil || GAD_video.length == 0) {
+        context.onEvent(EventType::VideoFailed);
         return;
     }
     [GADRewardedAd loadWithAdUnitID: GAD_video

@@ -83,14 +83,16 @@ public:
             loaded_scale_ = manager_->scale_uid;
 
             Res<Atlas>{name_}.reset(nullptr);
-            state = AssetState::Loading;
 
             fullPath_ = manager_->base_path / name_;
 
             Res<Atlas> resAtlas{name_};
             if (!resAtlas) {
                 resAtlas.reset(new Atlas);
+                // do not switch to loading state, because after first load system does not poll pack's Asset objects
+                state = AssetState::Loading;
             }
+
             resAtlas->formatMask = formatMask;
             resAtlas->load(fullPath_.c_str(), manager_->scale_factor);
         }

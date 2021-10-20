@@ -53,6 +53,12 @@ project_target = project.get_target_by_name(mainTargetName)
 # required by Crashlytics
 project.set_flags("DEBUG_INFORMATION_FORMAT", "dwarf-with-dsym")
 
+project.set_flags("GCC_ENABLE_CPP_EXCEPTIONS", "NO")
+project.set_flags("GCC_ENABLE_CPP_RTTI", "NO")
+project.set_flags("GCC_ENABLE_OBJC_EXCEPTIONS", "NO")
+project.set_flags("GCC_OPTIMIZATION_LEVEL", "z", configuration_name='Release')
+project.set_flags("LLVM_LTO", "YES", configuration_name='Release')
+
 project_target.productName = proj_ios_name
 project.set_flags("PRODUCT_BUNDLE_IDENTIFIER", application_id)
 project.set_flags("IPHONEOS_DEPLOYMENT_TARGET", "12.0")
@@ -133,10 +139,8 @@ if caps:
     project.objects[project.rootObject].attributes.TargetAttributes[project_target.get_id()][
         'SystemCapabilities'] = sys_caps
 
-# self.cpp_info.cxxflags.append("-fno-aligned-allocation")
-
-project.add_other_ldflags("$(inherited) -Os -flto -fno-exceptions -fno-rtti")
-project.add_library_search_paths("$(inherited)")
+#project.add_other_ldflags("$(inherited)")
+#project.add_library_search_paths("$(inherited)")
 
 project.add_other_cflags(compileDefines)
 

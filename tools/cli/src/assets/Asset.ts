@@ -1,12 +1,12 @@
 import {makeDirs, readText} from "../utils";
-import * as path from "path";
 import {logger} from "../logger";
-import * as glob from "glob";
+import * as path from "path";
+import {parseBoolean} from "./helpers/parse";
 import {XmlDocument, XmlElement} from "xmldoc";
-import {BytesWriter} from "./BytesWriter";
-import {parseBoolean} from "./parse";
-import * as fs from "fs";
+import {BytesWriter} from "./helpers/BytesWriter";
 import {Project} from "../project";
+import * as fs from "fs";
+import * as glob from "glob";
 
 interface AssetInfoHeader {
     type: string;
@@ -78,6 +78,7 @@ export class Asset {
         return path.join(path.dirname(this.declarationPath), filepath);
     }
 }
+
 
 export class AssetBuilder {
     readonly writer = new BytesWriter();

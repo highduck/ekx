@@ -1,8 +1,8 @@
 import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "./flashExport";
 import * as path from "path";
-import {isDir, makeDirs} from "../utils";
+import {isDir, makeDirs} from "../../utils";
 import {rmdirSync} from "fs";
-import {Project} from "../project";
+import {Project} from "../../project";
 
 function getIconOutputs(outPrefix: string, sizes: number[]) {
     const originalSize = 64.0;

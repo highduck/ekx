@@ -4,7 +4,6 @@ import * as path from "path";
 import {makeDirs, replaceInFile} from "../utils";
 import {buildAssetPackAsync} from "../assets";
 import * as Mustache from 'mustache';
-import {webBuildAppIconAsync} from "./webAppIcon";
 import {Project} from "../project";
 import {BuildResult} from "cmake-build";
 import {serve} from "./serve";
@@ -12,6 +11,7 @@ import {logger} from "../logger";
 import * as glob from "glob";
 import {buildWasm} from "./buildWasm";
 import {deployFirebaseHosting} from "./deployFirebaseHosting";
+import {buildAppIconAsync} from "../appicon/appicon";
 
 /*** HTML ***/
 export async function export_web(ctx: Project): Promise<void> {
@@ -77,7 +77,11 @@ export async function export_web(ctx: Project): Promise<void> {
     }
 
     fs.writeFileSync(path.join(outputDir, "manifest.json"), JSON.stringify(webManifest), "utf8");
-    const iconsTask = webBuildAppIconAsync(ctx, webManifest.icons, outputDir);
+    const iconsTask = buildAppIconAsync({
+        output: outputDir,
+        webManifestIcons: webManifest.icons,
+        projectType: "web"
+    });
 
     try {
         await assetsTask;
