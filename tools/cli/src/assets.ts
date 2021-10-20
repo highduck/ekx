@@ -1,18 +1,16 @@
-import {isDir, makeDirs, optimizePngGlobAsync} from "./utils";
+import {isDir} from "./utils";
 import {Project} from "./project";
 import {rmdirSync} from "fs";
-import {AssetBuilder} from "./assets/ap";
-import {
-    AudioAsset,
-    BitmapFontAsset,
-    DynamicAtlasAsset,
-    FlashAsset,
-    ModelAsset,
-    MultiResAtlasAsset,
-    TextureAsset,
-    TranslationsAsset,
-    TTFAsset
-} from "./assets/apr";
+import {AssetBuilder} from "./assets/Asset";
+import {TTFAsset} from "./assets/TTF";
+import {AudioAsset} from "./assets/Audio";
+import {ModelAsset} from "./assets/Model";
+import {TextureAsset} from "./assets/Texture";
+import {FlashAsset} from "./assets/Flash";
+import {BitmapFontAsset} from "./assets/BitmapFont";
+import {MultiResAtlasAsset} from "./assets/Atlas";
+import {DynamicAtlasAsset} from "./assets/DynamicAtlas";
+import {TranslationsAsset} from "./assets/Translations";
 
 // asset pack name
 export async function buildAssetPackAsync(ctx: Project, output?: string, devMode?: boolean) {

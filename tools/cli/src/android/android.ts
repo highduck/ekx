@@ -13,12 +13,12 @@ import * as path from "path";
 import {buildAssetPackAsync} from "../assets";
 import {collectObjects, collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources";
 import {execSync} from "child_process";
-import {androidBuildAppIconAsync} from "./androidAppIcon";
 import * as fs from "fs";
 import {Project} from "../project";
 import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "cmake-build";
 import {logger} from "../logger";
 import {AndroidProjGen, openAndroidStudioProject} from "android-proj-gen";
+import {buildAppIconAsync} from "../appicon/appicon";
 
 const platforms = ["android"];
 
@@ -316,7 +316,10 @@ export async function export_android(ctx: Project): Promise<void> {
 
     await Promise.all([
         buildAssetPackAsync(ctx, embeddedAssetsPackPath),
-        androidBuildAppIconAsync(ctx, path.join(appModulePath, "src/main/res"))
+        buildAppIconAsync({
+            projectType: "android",
+            output: path.join(appModulePath, "src/main/res")
+        })
     ]);
 
     logger.info("Do project post-setup..");

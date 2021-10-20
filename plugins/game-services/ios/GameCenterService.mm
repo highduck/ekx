@@ -1,5 +1,5 @@
 #include <GameServices.hpp>
-#include <app_apple.h>
+#include <ek/app/Platform.h>
 #include <ek/debug.hpp>
 
 #import <GameKit/GameKit.h>

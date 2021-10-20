@@ -1,5 +1,5 @@
-import {executeAsync, makeDirs} from "../utils";
-import {getBinaryPath} from "../utility/bin";
+import {executeAsync, makeDirs} from "../../utils";
+import {getBinaryPath} from "../../utility/bin";
 import * as path from "path";
 
 export function flashExportAsync(configPath: string): Promise<number> {

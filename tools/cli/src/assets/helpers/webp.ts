@@ -1,6 +1,6 @@
 import * as path from "path";
-import {executeAsync} from "../utils";
-import {logger} from "../logger";
+import {executeAsync} from "../../utils";
+import {logger} from "../../logger";
 
 export class WebpConfig {
     lossless = true;
@@ -15,9 +15,9 @@ export async function compress(filepath: string, config?: WebpConfig) {
         const options = [];
         if (config) {
             if (config.lossless) {
-                options.push("-q", config.losslessQuality|0, "-m", "6", "-lossless");
+                options.push("-q", config.losslessQuality | 0, "-m", "6", "-lossless");
             } else {
-                options.push("-q", config.lossyQuality|0);
+                options.push("-q", config.lossyQuality | 0);
             }
         }
         logger.info([...options, filepath, "-o", dest].join(" "));
