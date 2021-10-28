@@ -3,6 +3,7 @@
 #include <ek/app/Platform.h>
 
 #import <GoogleMobileAds/GoogleMobileAds.h>
+#import <AppTrackingTransparency/AppTrackingTransparency.h>
 
 namespace admob {
 
@@ -159,13 +160,19 @@ void initialize(const Config& config) {
         addBannerViewToView(bannerView);
         bannerView.hidden = YES;
 
-        // interstitial
-        loadNextInterstitialAd();
-
-        // video
-        reloadRewardedAd();
-
-        context.onEvent(EventType::Initialized);
+        if (@available(iOS 14.0, *))
+        {
+            [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
+                loadNextInterstitialAd();
+                reloadRewardedAd();
+                context.onEvent(EventType::Initialized);
+            }];
+        }
+        else {
+            loadNextInterstitialAd();
+            reloadRewardedAd();
+            context.onEvent(EventType::Initialized);
+        }
     }];
 }
 
