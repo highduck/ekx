@@ -318,7 +318,8 @@ export async function export_android(ctx: Project): Promise<void> {
         buildAssetPackAsync(ctx, embeddedAssetsPackPath),
         buildAppIconAsync({
             projectType: "android",
-            output: path.join(appModulePath, "src/main/res")
+            output: path.join(appModulePath, "src/main/res"),
+            iconPath: ctx.appIcon
         })
     ]);
 

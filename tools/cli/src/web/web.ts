@@ -80,7 +80,8 @@ export async function export_web(ctx: Project): Promise<void> {
     const iconsTask = buildAppIconAsync({
         output: outputDir,
         webManifestIcons: webManifest.icons,
-        projectType: "web"
+        projectType: "web",
+        iconPath: ctx.appIcon
     });
 
     try {

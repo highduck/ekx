@@ -60,6 +60,7 @@ export class Project {
     }
 
     market_asset?: string;
+    appIcon?: string;
 
     android: {
         // android application package name

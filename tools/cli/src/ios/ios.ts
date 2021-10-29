@@ -82,7 +82,8 @@ export async function export_ios(ctx: Project): Promise<void> {
         buildAppIconAsync({
             projectType: "ios",
             iosAppIconContents: iconsContents,
-            output: "export/ios"
+            output: "export/ios",
+            iconPath: ctx.appIcon
         })
     ]);
 

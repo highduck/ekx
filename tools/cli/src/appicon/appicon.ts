@@ -1,9 +1,8 @@
 import * as path from "path";
+import * as fs from "fs";
 import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/helpers/flashExport";
 import {logger} from "../logger";
 import {isDir, makeDirs} from "../utils";
-import * as fs from "fs";
-import {rmdirSync} from "fs";
 
 export interface WebManifestIcon {
     src: string; // icons/icon36.png
@@ -26,7 +25,7 @@ export interface GenAppIconConfig {
 }
 
 export async function buildAppIconAsync(config: GenAppIconConfig) {
-    config.iconPath = config.iconPath ?? "assets/res#icon";
+    config.iconPath = config.iconPath ?? path.resolve(__dirname, "../../templates/default-icon#icon");
     const parts = config.iconPath.split("#");
     if (parts.length < 2) {
         logger.warn("appicon: missing symbol ref");
@@ -107,7 +106,7 @@ function exportIOSIcons(flashPath: string, iconSymbol: string, appIconContents: 
     const appIconFolder = path.join(output, "AppIcon.appiconset");
 
     if (isDir(output)) {
-        rmdirSync(output, {recursive: true});
+        fs.rmdirSync(output, {recursive: true});
     }
     makeDirs(appIconFolder);
 

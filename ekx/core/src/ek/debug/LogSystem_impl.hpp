@@ -88,9 +88,7 @@ void LogSystem::format(Verbosity verbosity, SourceLocation location, const char*
     if (!filter(verbosity)) {
         return;
     }
-    //EK_ASSERT(((uint64_t)format & 0x3) == 0);
     char string[256];
-    //EK_ASSERT(((uint64_t)string & 0x3) == 0);
     va_list args;
     va_start(args, format);
     stbsp_vsnprintf(string, sizeof(string), format, args);
