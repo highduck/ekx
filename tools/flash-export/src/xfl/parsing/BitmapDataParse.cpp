@@ -7,9 +7,7 @@
 
 #include <ek/imaging/image.hpp>
 #include <ek/imaging/stbimage_impl.h>
-
 #include <miniz.h>
-#include <stb/stb_image.h>
 
 namespace ek::xfl {
 
