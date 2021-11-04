@@ -19,9 +19,9 @@ public:
 
     [[nodiscard]] virtual const std::string& content() const = 0;
 
-    [[nodiscard]] virtual const File* open(const path_t& rpath) const = 0;
+    [[nodiscard]] virtual const File* open(const char* rpath) const = 0;
 
-    static std::unique_ptr<File> load(const path_t& path);
+    static std::unique_ptr<File> load(const char* path);
 };
 
 class Doc {
@@ -30,7 +30,7 @@ public:
 
     explicit Doc(std::unique_ptr<File> root);
 
-    explicit Doc(const path_t& path);
+    explicit Doc(const char* path);
 
     [[nodiscard]] const Element* find(const std::string& name,
                                       ElementType type = ElementType::unknown,

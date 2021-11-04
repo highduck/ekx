@@ -7,7 +7,7 @@
 
 namespace ek::xfl {
 
-xml_document* load_xml(const File& root, const path_t& path) {
+xml_document* load_xml(const File& root, const char* path) {
     return root.open(path)->xml();
 }
 
@@ -123,7 +123,7 @@ void DocParser::parse(const xml_node& node, Element& r) const {
 }
 
 void DocParser::load() {
-    auto* xml = load_xml(*root, path_t{"DOMDocument.xml"});
+    auto* xml = load_xml(*root, "DOMDocument.xml");
     auto node = xml->child("DOMDocument");
 
     doc.info << node;
@@ -139,7 +139,10 @@ void DocParser::load() {
     for (const auto& item: node.child("media").children("DOMBitmapItem")) {
         Element bi;
         parse(item, bi);
-        auto* file = root->open(path_t{"bin"} / bi.bitmapDataHRef);
+
+        std::string path = "bin";
+        path_t::append(path, bi.bitmapDataHRef.c_str());
+        auto* file = root->open(path.c_str());
         bi.bitmap.reset(BitmapData::parse(file->content()));
         doc.library.push_back(std::move(bi));
     }
@@ -149,7 +152,9 @@ void DocParser::load() {
     }
 
     for (const auto& item: node.child("symbols").children("Include")) {
-        auto library_doc = load_xml(*root, path_t{"LIBRARY"} / item.attribute("href").value());
+        std::string path = "LIBRARY";
+        path_t::append(path, item.attribute("href").value());
+        auto library_doc = load_xml(*root, path.c_str());
         auto symbol = read<Element>(library_doc->child("DOMSymbolItem"));
         doc.library.push_back(std::move(symbol));
     }
@@ -192,7 +197,7 @@ void DocParser::parse(const xml_node& node, ShapeObject& r) {
 
 void DocParser::parse(const xml_node& node, FillStyle& r) const {
     r.index = node.attribute("index").as_int();
-    for (const auto& el : node.children()) {
+    for (const auto& el: node.children()) {
         r.type << el.name();
         switch (r.type) {
             case FillType::solid:
@@ -270,13 +275,13 @@ void DocParser::parse(const xml_node& node, Frame& r) const {
 
     r.script = node.child("Actionscript").child_value("script");
 
-    for (const auto& item : node.child("elements").children()) {
+    for (const auto& item: node.child("elements").children()) {
         r.elements.push_back(read<Element>(item));
     }
 
     if (!r.script.empty()) {
         if (r.script.find("valign=middle") != std::string::npos) {
-            for (auto& el : r.elements) {
+            for (auto& el: r.elements) {
                 if (el.elementType == ElementType::dynamic_text) {
                     el.textRuns[0].attributes.alignment.y = 0.5;
                 }
@@ -284,11 +289,11 @@ void DocParser::parse(const xml_node& node, Frame& r) const {
         }
     }
 
-    for (const auto& item : node.child("tweens").children()) {
+    for (const auto& item: node.child("tweens").children()) {
         TweenTarget target;
         target << item.attribute("target").as_string();
         TweenObject* tween_ptr = nullptr;
-        for (auto& t : r.tweens) {
+        for (auto& t: r.tweens) {
             if (t.target == target) {
                 tween_ptr = &t;
                 break;
@@ -299,7 +304,7 @@ void DocParser::parse(const xml_node& node, Frame& r) const {
         }
 
         if (strcmp(item.name(), "CustomEase") == 0) {
-            for (const auto& point_node : item.children("Point")) {
+            for (const auto& point_node: item.children("Point")) {
                 tween_ptr->custom_ease.push_back(read_point(point_node));
             }
         } else if (strcmp(item.name(), "Ease") == 0) {
@@ -319,7 +324,7 @@ void DocParser::parse(const xml_node& node, Layer& r) const {
 
 void DocParser::parse(const xml_node& node, Timeline& r) const {
     r.name = node.attribute("name").value();
-    for (const auto& item : node.child("layers").children("DOMLayer")) {
+    for (const auto& item: node.child("layers").children("DOMLayer")) {
         r.layers.push_back(read<Layer>(item));
     }
 }

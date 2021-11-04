@@ -170,7 +170,7 @@ export type VariableName = "assets" | CppName | AppleName | AndroidName | JSName
 export interface ModuleDef extends CxxConfig {
     name?: string;
     path?: string;
-    assets: UserArray<string>;
+    assets?: UserArray<string>;
 
     android?: AndroidConfig;
 

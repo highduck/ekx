@@ -14,7 +14,8 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/ekx": "0.1.7",
+    "@ekx/core": "0.1.7",
+    "@ekx/sg-file": "0.1.7",
     "cmake-build": "0.0.3"
   }
 }

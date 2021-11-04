@@ -18,7 +18,7 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
 endif ()
 
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC sg-file
+        PUBLIC ekx::sg-file
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

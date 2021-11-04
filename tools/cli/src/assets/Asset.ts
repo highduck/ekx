@@ -179,10 +179,15 @@ export class AssetBuilder {
     }
 
     populate() {
-        const bp = fs.realpathSync(this.basePath);
-        const files = glob.sync(path.join(bp, "**/*.asset.xml"));
-        for (const file of files) {
-            this.add(file);
+        try {
+            const bp = fs.realpathSync(this.basePath);
+            const files = glob.sync(path.join(bp, "**/*.asset.xml"));
+            for (const file of files) {
+                this.add(file);
+            }
+        }
+        catch(err:any) {
+            logger.warn(`Cannot search asset files in ${this.basePath} path ⬇ \n`, err);
         }
     }
 

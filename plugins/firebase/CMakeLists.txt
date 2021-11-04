@@ -11,7 +11,7 @@ add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC ek-app
+        PUBLIC ekx::app
         )
 
 #target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)

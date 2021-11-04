@@ -21,13 +21,14 @@ enum BoundsMode {
 
 int getBoundingRectFlags(const string& str) {
     int flags = 0;
-    if (equals_ignore_case(str, "hitrect")) {
+    const char* cstr = str.c_str();
+    if (equals_ignore_case(cstr, "hitrect")) {
         flags |= Bounds_HitArea;
     }
-    if (equals_ignore_case(str, "bbrect")) {
+    if (equals_ignore_case(cstr, "bbrect")) {
         flags |= Bounds_Bounds;
     }
-    if (equals_ignore_case(str, "cliprect")) {
+    if (equals_ignore_case(cstr, "cliprect")) {
         flags |= Bounds_Scissors;
     }
     return flags;
@@ -56,11 +57,11 @@ void collectFramesMetaInfo(const Doc& doc, ExportItem& item) {
         return;
     }
     auto& layers = item.ref->timeline.layers;
-    for (auto& layer : layers) {
+    for (auto& layer: layers) {
         if (setupSpecialLayer(doc, layer, item)) {
             continue;
         }
-        for (auto& frame : layer.frames) {
+        for (auto& frame: layer.frames) {
             if (!frame.script.empty()) {
                 item.node.scripts[frame.index] = frame.script;
             }
@@ -91,7 +92,7 @@ void process_transform(const Element& el, ExportItem& item) {
 }
 
 void process_filters(const Element& el, ExportItem& item) {
-    for (auto& filter : el.filters) {
+    for (auto& filter: el.filters) {
         SGFilter fd;
         fd.type = SGFilterType::None;
         fd.color = argb32_t{filter.color};
@@ -130,7 +131,8 @@ void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
     }
     // animate exports as CR line-ending (legacy MacOS),
     // we need only LF to not check twice when drawing the text
-    tf.text = replace(textRun.characters, '\r', '\n');
+    tf.text = textRun.characters;
+    replace(tf.text.data(), '\r', '\n');
     tf.font = faceName;
     tf.size = textRun.attributes.size;
     if (el.lineType == TextLineType::Multiline) {
@@ -146,7 +148,7 @@ void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
     layer.color = argb32_t{textRun.attributes.color};
     tf.layers.push_back(layer);
 
-    for (auto& filter : el.filters) {
+    for (auto& filter: el.filters) {
         layer.color = argb32_t{filter.color};
         layer.blurRadius = std::fmin(filter.blur.x, filter.blur.y);
         layer.blurIterations = filter.quality;
@@ -172,7 +174,7 @@ void SGBuilder::build_library() {
         process(item, &library);
     }
 
-    for (auto* item : library.children) {
+    for (auto* item: library.children) {
         if (item->ref && item->ref->item.linkageExportForAS) {
             auto& linkageName = item->ref->item.linkageClassName;
             if (!linkageName.empty()) {
@@ -184,7 +186,7 @@ void SGBuilder::build_library() {
     }
 
     Array<ExportItem*> chi{};
-    for (auto& item : library.children) {
+    for (auto& item: library.children) {
         if (item->usage > 0) {
             chi.push_back(item);
         } else {
@@ -196,13 +198,13 @@ void SGBuilder::build_library() {
 
 SGFile SGBuilder::export_library() {
 
-    for (auto* item : library.children) {
+    for (auto* item: library.children) {
         // CHANGE: we disable sprite assignment here
 //        if (item->ref && (item->shapes > 0 || item->ref->bitmap)) {
 //            item->node.sprite = item->node.libraryName;
 //        }
 
-        for (auto* child : item->children) {
+        for (auto* child: item->children) {
             item->node.children.push_back(child->node);
         }
 
@@ -213,8 +215,8 @@ SGFile SGBuilder::export_library() {
         }
     }
 
-    for (auto& item : library.node.children) {
-        for (auto& child : item.children) {
+    for (auto& item: library.node.children) {
+        for (auto& child: item.children) {
             const auto* ref = library.find_library_item(child.libraryName);
             if (ref &&
                 ref->node.sprite == ref->node.libraryName &&
@@ -238,11 +240,11 @@ SGFile SGBuilder::export_library() {
 
     SGFile sg;
     sg.linkages = linkages;
-    for (auto& pair : doc.scenes) {
+    for (auto& pair: doc.scenes) {
         sg.scenes.push_back(pair.second);
     }
 
-    for (auto& item : library.node.children) {
+    for (auto& item: library.node.children) {
         if (item.sprite == item.libraryName
             && item.scaleGrid.empty()
             && !isInLinkages(item.libraryName)) {
@@ -347,8 +349,8 @@ void SGBuilder::process_symbol_item(const Element& el, ExportItem* parent, proce
             for (int layerIndex = int(layers.size()) - 1; layerIndex >= 0; --layerIndex) {
                 const auto& layer = layers[layerIndex];
                 if (layer.layerType == LayerType::normal) {
-                    for (auto& frame : layer.frames) {
-                        for (auto& frameElement : frame.elements) {
+                    for (auto& frame: layer.frames) {
+                        for (auto& frameElement: frame.elements) {
                             _animationSpan0 = 0;
                             _animationSpan1 = 0;
                             process(frameElement, item);
@@ -373,7 +375,7 @@ void SGBuilder::process_symbol_item(const Element& el, ExportItem* parent, proce
 
 void SGBuilder::process_group(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     assert(el.elementType == ElementType::group);
-    for (const auto& member : el.members) {
+    for (const auto& member: el.members) {
         process(member, parent, bag);
     }
 }
@@ -490,7 +492,7 @@ void SGBuilder::render(const ExportItem& item, ImageSet& toImageSet) const {
     const Element& el = *item.ref;
     const auto spriteID = el.item.name;
     RenderElementOptions options;
-    for (auto& resolution : toImageSet.resolutions) {
+    for (auto& resolution: toImageSet.resolutions) {
         options.scale = std::min(
                 item.max_abs_scale,
                 resolution.scale * std::min(1.0f, item.estimated_scale)
@@ -503,7 +505,7 @@ void SGBuilder::render(const ExportItem& item, ImageSet& toImageSet) const {
 }
 
 void SGBuilder::build_sprites(ImageSet& toImageSet) const {
-    for (auto* item : library.children) {
+    for (auto* item: library.children) {
         if (item->renderThis) {
             item->node.sprite = item->ref->item.name;
             render(*item, toImageSet);
@@ -515,7 +517,7 @@ void SGBuilder::build_sprites(ImageSet& toImageSet) const {
 }
 
 bool SGBuilder::isInLinkages(const string& id) const {
-    for (const auto& pair : linkages) {
+    for (const auto& pair: linkages) {
         if (pair.second == id) {
             return true;
         }
@@ -524,8 +526,8 @@ bool SGBuilder::isInLinkages(const string& id) const {
 }
 
 SGMovieLayerData* findTargetLayer(SGMovieData& movie, const SGNodeData* item) {
-    for (auto& layer : movie.layers) {
-        for (const auto* t : layer.targets) {
+    for (auto& layer: movie.layers) {
+        for (const auto* t: layer.targets) {
             if (t == item) {
                 return &layer;
             }
@@ -551,9 +553,9 @@ void SGBuilder::processTimeline(const Element& el, ExportItem* item) {
         for (int frameIndex = 0; frameIndex < framesTotal; ++frameIndex) {
             auto& frame = layer.frames[frameIndex];
             processing_bag_t targets;
-            for (const auto& frameElement : frame.elements) {
+            for (const auto& frameElement: frame.elements) {
                 bool found = false;
-                for (auto* prevItem : item->children) {
+                for (auto* prevItem: item->children) {
                     if (prevItem->ref &&
                         prevItem->ref->libraryItemName == frameElement.libraryItemName &&
                         prevItem->ref->item.name == frameElement.item.name &&
@@ -584,7 +586,7 @@ void SGBuilder::processTimeline(const Element& el, ExportItem* item) {
                     delta.emplace(extractTweenDelta(frame, el0, el1));
                 }
             }
-            for (auto* target : targets.list) {
+            for (auto* target: targets.list) {
                 if (target->ref) {
                     auto* targetNodeRef = &target->node;
                     SGMovieLayerData* targetLayer = nullptr;
@@ -631,7 +633,7 @@ void SGBuilder::processTimeline(const Element& el, ExportItem* item) {
 
         if (movie.frames > 1 && !movieLayers.empty()) {
             for (size_t i = 0; i < movieLayers.size(); ++i) {
-                for (auto* target : movieLayers[i].targets) {
+                for (auto* target: movieLayers[i].targets) {
                     target->movieTargetId = static_cast<int>(i);
                 }
             }

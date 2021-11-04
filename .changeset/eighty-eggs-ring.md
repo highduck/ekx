@@ -1,5 +1,5 @@
 ---
-"@ekx/ekx": patch
+"@ekx/graphics": patch
 ---
 
 gfx: wrap shaders output

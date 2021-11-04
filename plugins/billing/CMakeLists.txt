@@ -10,7 +10,7 @@ add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC ek)
+        PUBLIC ekx::scenex)
 
 #target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -18,7 +18,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO)
-
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 

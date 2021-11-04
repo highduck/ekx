@@ -4,24 +4,27 @@
  */
 function setup(project) {
     project.addModule({
-        name: "ekx-texture-loader",
+        name: "texture-loader",
         path: __dirname,
         cpp: "src",
         android: {
+            android_java: "platform/android/java"
         },
         apple: {
-        },
-        ios: {
+            cpp_flags: {
+                files: [
+                    "src/ek/TextureLoader.cpp"
+                ],
+                flags: "-x objective-c++"
+            },
         },
         web: {
-            js_pre: "web/dist/emscripten/texture-loader.js",
-            js: "src/texture_loader"
-        },
-        windows: {
-        },
-        linux: {
+            js: "platform/web/lib",
+            js_pre: "platform/web/pre"
         }
     });
+    project.importModule("@ekx/core", __dirname);
+    project.importModule("@ekx/app", __dirname);
     project.importModule("@ekx/sokol", __dirname);
 }
 

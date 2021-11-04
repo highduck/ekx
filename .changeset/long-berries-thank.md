@@ -1,5 +1,5 @@
 ---
-"@ekx/ekx": patch
+"@ekx/app": patch
 ---
 
 remove Arguments class

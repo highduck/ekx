@@ -5,6 +5,8 @@
 #include <sys/stat.h>
 #include <miniz.h>
 #include <unordered_map>
+#include <utility>
+#include <stb/stb_sprintf.h>
 
 using pugi::xml_document;
 
@@ -15,8 +17,8 @@ File::~File() = default;
 class FileNode : public File {
 public:
 
-    FileNode(path_t path, FileNode* root) :
-            path_{std::move(path)},
+    FileNode(const char* path, FileNode* root) :
+            path_{path},
             root_{root ? root : this} {
 
     }
@@ -43,25 +45,25 @@ public:
         return xml_doc_;
     }
 
-    const path_t& path() const {
+    const std::string& path() const {
         return path_;
     }
 
-    const File* open(const path_t& relPath) const override {
-        auto childPath = path_ / relPath;
+    const File* open(const char* relPath) const override {
+        auto childPath = path_;
+        path_t::append(childPath, relPath);
         auto& children = root_->children_;
-        const auto& key = childPath.str();
-        auto it = children.find(key);
+        auto it = children.find(childPath);
         if (it == children.end()) {
-            children[key] = create(childPath, root_);
+            children[childPath] = create(childPath.c_str(), root_);
         }
-        return children[key];
+        return children[childPath];
     }
 
 protected:
-    virtual FileNode* create(const path_t& path, FileNode* root) const = 0;
+    virtual FileNode* create(const char* path, FileNode* root) const = 0;
 
-    path_t path_;
+    std::string path_;
     FileNode* root_ = nullptr;
     std::unordered_map<std::string, FileNode*> children_;
 
@@ -71,7 +73,7 @@ protected:
 
 class XFLNode final : public FileNode {
 public:
-    XFLNode(const path_t& path, FileNode* root) :
+    XFLNode(const char* path, FileNode* root) :
             FileNode{path, root} {
     }
 
@@ -102,7 +104,7 @@ public:
 
 protected:
 
-    FileNode* create(const path_t& path, FileNode* root) const override {
+    FileNode* create(const char* path, FileNode* root) const override {
         return new XFLNode(path, root);
     }
 };
@@ -111,29 +113,30 @@ protected:
 class FLANode final : public FileNode {
 public:
 
-    explicit FLANode(const path_t& zip_file_path) : FileNode{{}, this} {
-        zip_ = new mz_zip_archive;
+    explicit FLANode(const char* zip_file_path) :
+            FileNode{"", this} {
+        zip_ = (mz_zip_archive*) malloc(sizeof(mz_zip_archive));
         memset(zip_, 0, sizeof(mz_zip_archive));
 
         // MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY
-        auto status = mz_zip_reader_init_file(zip_, zip_file_path.c_str(), 0);
+        auto status = mz_zip_reader_init_file(zip_, zip_file_path, 0);
         if (!status) {
-            EK_WARN("Error reading FLA zip archive");
+            EK_WARN_F("Error reading FLA zip archive: %s", zip_file_path);
         }
     }
 
-    FLANode(const path_t& path, FileNode* root) :
+    FLANode(const char* path, FileNode* root) :
             FileNode{path, root} {
     }
 
     ~FLANode() override {
-        delete zip_;
+        free(zip_);
     }
 
     const std::string& content() const override {
         auto* zip = static_cast<FLANode*>(root_)->zip_;
         if (contents_.empty()) {
-            std::size_t size;
+            size_t size = 0;
             char* data = (char*) mz_zip_reader_extract_file_to_heap(zip, path_.c_str(), &size, 0);
             if (data != nullptr) {
                 contents_.assign(data, data + size);
@@ -145,7 +148,7 @@ public:
 
 protected:
 
-    FileNode* create(const path_t& path, FileNode* root) const override {
+    FileNode* create(const char* path, FileNode* root) const override {
         return new FLANode(path, root);
     }
 
@@ -153,47 +156,50 @@ private:
     mz_zip_archive* zip_ = nullptr;
 };
 
-bool is_dir(const path_t& path) {
+bool is_dir(const char* path) {
     struct stat sb{};
-    return stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode);
+    return stat(path, &sb) == 0 && S_ISDIR(sb.st_mode);
 }
 
-bool is_file(const path_t& path) {
+bool is_file(const char* path) {
     struct stat sb{};
-    return stat(path.c_str(), &sb) == 0 && S_ISREG(sb.st_mode);
+    return stat(path, &sb) == 0 && S_ISREG(sb.st_mode);
 }
 
-std::unique_ptr<File> File::load(const path_t& path) {
+std::unique_ptr<File> File::load(const char* path) {
+    char tmp[1024] = "";
+
     if (is_file(path)) {
-        const auto ext = path.ext();
+        const char* ext = path_ext(path);
         // dir/FILE/FILE.xfl
-        if (ext == ".xfl") {
-            auto dir = path.dir();
-            if (is_dir(dir)) {
-                return std::make_unique<XFLNode>(dir, nullptr);
+        if (strncmp(ext, "xfl", 3) == 0) {
+            path_extract_dir(tmp, 1024, path);
+            if (is_dir(tmp)) {
+                return std::make_unique<XFLNode>(tmp, nullptr);
             } else {
-                EK_ERROR_F("Import Flash: loading %s XFL file, but %s is not a dir", path.c_str(), dir.c_str());
+                EK_ERROR_F("Import Flash: loading %s XFL file, but %s is not a dir", path, tmp);
             }
-        } else if (ext == ".fla" || ext == ".zip") {
+        } else if (strncmp(ext, "fla", 3) == 0 || strncmp(ext, "zip", 3) == 0) {
             return std::make_unique<FLANode>(path);
         } else {
-            EK_ERROR_F("Import Flash: file is not xfl or fla: %s", path.c_str());
+            EK_ERROR_F("Import Flash: file is not xfl or fla: %s", path);
         }
     }
 
     // dir/FILE.fla
-    const auto fla_file = path + ".fla";
-    if (is_file(fla_file)) {
-        return std::make_unique<FLANode>(fla_file);
+    stbsp_snprintf(tmp, 1024, "%s.fla", path);
+    if (is_file(tmp)) {
+        return std::make_unique<FLANode>(tmp);
     } else if (is_dir(path)) {
-        if (is_file(path / path.basename() + ".xfl")) {
+        stbsp_snprintf(tmp, 1024, "%s/%s.xfl", path, path_name(path));
+        if (is_file(tmp)) {
             return std::make_unique<XFLNode>(path, nullptr);
         } else {
-            EK_WARN_F("Import Flash: given dir doesn't contain .xfl file: %s", path.c_str());
+            EK_WARN_F("Import Flash: given dir doesn't contain .xfl file: %s", path);
         }
     }
 
-    EK_ERROR_F("Import Flash: file not found: %s", path.c_str());
+    EK_ERROR_F("Import Flash: file not found: %s", path);
     return nullptr;
 }
 

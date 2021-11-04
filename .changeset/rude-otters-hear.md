@@ -1,5 +1,5 @@
 ---
-"@ekx/ekx": patch
+"@ekx/core": patch
 "@ekx/bmfont-export": patch
 "@ekx/flash-export": patch
 ---

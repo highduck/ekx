@@ -35,7 +35,7 @@ void exportFlash(const char* xmlPath) {
         }
     }
 
-    xfl::Doc ff{path_t{path}};
+    xfl::Doc ff{path};
     xfl::SGBuilder fe{ff};
     fe.build_library();
     fe.build_sprites(imageSet);
@@ -59,8 +59,7 @@ void exportFlash(const char* xmlPath) {
 void runFlashFilePrerender(int argc, char** argv) {
     using namespace ek;
 
-    path_t inputPath{argv[0]};
-    xfl::Doc ff{inputPath};
+    xfl::Doc ff{argv[0]};
     xfl::SGBuilder exporter{ff};
     auto& doc = exporter.doc;
 
@@ -73,11 +72,11 @@ void runFlashFilePrerender(int argc, char** argv) {
             const int height = atoi(argv[i + 2]);
             const bool alpha = atoi(argv[i + 3]) != 0;
             const bool trim = atoi(argv[i + 4]) != 0;
-            const path_t output{argv[i + 5]};
+            const char* output = argv[i + 5];
 
             xfl::RenderElementOptions opts{scale, width, height, alpha, trim};
             auto spr = renderElement(doc, *item, opts);
-            saveImagePNG(*spr.image, output.str(), alpha);
+            saveImagePNG(*spr.image, output, alpha);
             if (spr.image) {
                 delete spr.image;
                 spr.image = nullptr;

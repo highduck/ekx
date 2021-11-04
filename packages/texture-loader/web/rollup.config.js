@@ -14,15 +14,27 @@ function createGlobalPlugins(release) {
 
 export default [
     {
+        input: "./web/dist/module/lib.js",
+        output: {
+            file: "./platform/web/lib/lib-texture-loader.js",
+            format: "es",
+            compact: true,
+            module: false,
+            //plugins: [terser()],
+            sourcemap: true
+        },
+        plugins: createGlobalPlugins(true)
+    },
+    {
         input: "./web/dist/module/index.js",
         output: {
-            file: "./web/dist/emscripten/texture-loader.js",
+            file: "./platform/web/pre/texture-loader.js",
             format: "iife",
-            name: "EKXTextureLoader",
+            name: "TextureLoader",
             compact: true,
             plugins: [terser()],
             sourcemap: true
         },
         plugins: createGlobalPlugins(true)
-    }
+    },
 ];

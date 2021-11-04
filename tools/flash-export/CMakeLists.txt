@@ -68,7 +68,7 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC pugixml
         PUBLIC cairo
         PUBLIC miniz
-        PUBLIC sg-file
+        PUBLIC ekx::sg-file
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
