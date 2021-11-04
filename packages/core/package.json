@@ -1,0 +1,17 @@
+{
+  "name": "@ekx/core",
+  "version": "0.1.7",
+  "scripts": {
+    "postinstall": "cmake-build || exit 0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@ekx/doctest": "0.0.3",
+    "@ekx/sokol": "0.0.13",
+    "@ekx/stb": "0.0.7",
+    "cmake-build": "0.0.3"
+  }
+}

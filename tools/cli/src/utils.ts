@@ -20,6 +20,7 @@ export type ExecuteOptions = {
 
 export function executeAsync(bin: string, args: string[], options?: ExecuteOptions): Promise<number> {
     return new Promise((resolve, reject) => {
+
         const child = spawn(bin, args, {
             //detached: true,
             stdio: (options?.verbose ?? UtilityConfig.verbose) ? "inherit" : "ignore",
@@ -30,10 +31,12 @@ export function executeAsync(bin: string, args: string[], options?: ExecuteOptio
             if (code === 0) {
                 resolve(code);
             } else {
+                logger.warn("CAN't execute: " + bin + " " + args.join(" "));
                 reject('exit code: ' + code);
             }
         });
         child.on("error", (err) => {
+            logger.warn("ERROR: " + bin + " " + args.join(" "));
             reject(err);
         });
     });

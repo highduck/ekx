@@ -37,8 +37,8 @@ struct ImageSet {
     std::vector<Resolution> resolutions;
 };
 
-void saveImagePNG(const image_t& image, const std::string& path, bool alpha = true);
-void saveImageJPG(const image_t& image, const std::string& path, bool alpha = true);
+void saveImagePNG(const image_t& image, const char* path, bool alpha = true);
+void saveImageJPG(const image_t& image, const char* path, bool alpha = true);
 void save(ImageSet& images, const char* output);
 
 }

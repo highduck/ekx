@@ -34,6 +34,7 @@ inline unsigned char* iwcompress(unsigned char* data, int data_len, int* out_len
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
 
 #include <stb/stb_image_write.h>
+#include <stb/stb_sprintf.h>
 
 #pragma clang diagnostic pop
 
@@ -43,7 +44,7 @@ namespace ek {
 
 /*** Save Image ***/
 
-void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
+void saveImagePNG(const image_t& image, const char* path, bool alpha) {
     image_t img{image};
     // require RGBA non-premultiplied alpha
     //undo_premultiply_image(img);
@@ -52,7 +53,7 @@ void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
     stbi_write_force_png_filter = 0;
 
     if (alpha) {
-        stbi_write_png(path.c_str(),
+        stbi_write_png(path,
                        img.width(),
                        img.height(),
                        4,
@@ -73,7 +74,7 @@ void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
             buffer_rgb += 3;
         }
 
-        stbi_write_png(path.c_str(),
+        stbi_write_png(path,
                        img.width(),
                        img.height(),
                        3,
@@ -84,16 +85,18 @@ void saveImagePNG(const image_t& image, const std::string& path, bool alpha) {
     }
 }
 
-void saveImageJPG(const image_t& image, const std::string& path, bool alpha) {
+void saveImageJPG(const image_t& image, const char* path, bool alpha) {
     image_t img{image};
     // require RGBA non-premultiplied alpha
     //undo_premultiply_image(img);
+    const int w = (int) img.width();
+    const int h = (int) img.height();
+    const size_t pixels_count = w * h;
+    const auto* buffer_rgba = img.data();
 
     if (alpha) {
-        size_t pixels_count = img.width() * img.height();
         auto* buffer_rgb = (uint8_t*) malloc(pixels_count * 3);
         auto* buffer_alpha = (uint8_t*) malloc(pixels_count);
-        auto* buffer_rgba = img.data();
 
         auto* rgb = buffer_rgb;
         auto* alphaMask = buffer_alpha;
@@ -107,28 +110,18 @@ void saveImageJPG(const image_t& image, const std::string& path, bool alpha) {
             alphaMask += 1;
         }
 
-        stbi_write_jpg((path + ".jpg").c_str(),
-                       img.width(),
-                       img.height(),
-                       3,
-                       buffer_rgb,
-                       90);
+        char outputPath[1024];
+        stbsp_snprintf(outputPath, 1024, "%s.jpg", path);
+        stbi_write_jpg(outputPath, w, h, 3, buffer_rgb, 90);
 
-        stbi_write_jpg((path + "a.jpg").c_str(),
-                       img.width(),
-                       img.height(),
-                       1,
-                       buffer_alpha,
-                       90);
+        stbsp_snprintf(outputPath, 1024, "%s_a.jpg", path);
+        stbi_write_jpg(outputPath, w, h, 1, buffer_alpha, 90);
 
         free(buffer_rgb);
         free(buffer_alpha);
     } else {
-
-        size_t pixels_count = img.width() * img.height();
         auto* buffer = (uint8_t*) malloc(pixels_count * 3);
         auto* buffer_rgb = buffer;
-        auto* buffer_rgba = img.data();
 
         for (size_t i = 0; i < pixels_count; ++i) {
             buffer_rgb[0] = buffer_rgba[0];
@@ -138,12 +131,7 @@ void saveImageJPG(const image_t& image, const std::string& path, bool alpha) {
             buffer_rgb += 3;
         }
 
-        stbi_write_jpg(path.c_str(),
-                       img.width(),
-                       img.height(),
-                       3,
-                       buffer,
-                       3 * static_cast<int>(img.width()));
+        stbi_write_jpg(path, w, h, 3, buffer, 90);
 
         free(buffer);
     }

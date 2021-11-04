@@ -22,10 +22,11 @@
   ],
   "dependencies": {
     "@ekx/bmfont-export": "0.0.1",
-    "@ekx/ekx": "0.1.7",
     "@ekx/flash-export": "0.0.6",
     "@ekx/obj-export": "0.0.1",
+    "@ekx/scenex": "0.1.7",
     "@ekx/sprite-packer": "0.0.1",
+    "android-proj-gen": "0.0.5",
     "chalk": "^4.1.2",
     "cmake-build": "0.0.3",
     "glob": "^7.1.7",
@@ -36,8 +37,7 @@
     "pngquant-bin": "^6.0.0",
     "rimraf": "^3.0.2",
     "xcode": "^3.0.1",
-    "xmldoc": "^1.1.2",
-    "android-proj-gen": "0.0.5"
+    "xmldoc": "^1.1.2"
   },
   "devDependencies": {
     "@types/glob": "^7.1.4",

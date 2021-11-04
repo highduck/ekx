@@ -1,0 +1,21 @@
+{
+  "name": "@ekx/audio",
+  "version": "0.1.7",
+  "scripts": {
+    "postinstall": "cmake-build || exit 0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "auph": "^0.1.1",
+    "@ekx/app": "0.1.7",
+    "cmake-build": "0.0.3"
+  },
+  "files": [
+    "CMakeLists.txt",
+    "src",
+    "ek.js"
+  ]
+}

@@ -11,8 +11,8 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@ekx/sg-file": "0.1.7",
     "@ekx/cairo": "0.0.7",
-    "@ekx/ekx": "0.1.7",
     "@ekx/miniz": "0.0.4",
     "@ekx/pugixml": "0.0.6",
     "cmake-build": "0.0.3"

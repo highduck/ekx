@@ -1,5 +1,5 @@
 ---
-"@ekx/ekx": patch
+"@ekx/audio": patch
 "@ekx/cli": patch
 "@ekx/appbox": patch
 ---

@@ -1,0 +1,20 @@
+{
+  "name": "@ekx/appbox",
+  "version": "0.0.6",
+  "scripts": {
+    "postinstall": "cmake-build || exit 0",
+    "build:native": "node build.js",
+    "clean": "rimraf ./build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@ekx/scenex": "0.1.7",
+    "@ekx/plugin-admob": "0.0.6",
+    "@ekx/plugin-billing": "0.0.6",
+    "@ekx/plugin-game-services": "0.0.6",
+    "cmake-build": "0.0.3"
+  }
+}

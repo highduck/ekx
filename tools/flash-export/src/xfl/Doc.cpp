@@ -19,7 +19,7 @@ Doc::Doc(std::unique_ptr<File> root) {
     parser.load();
 }
 
-Doc::Doc(const path_t& path) : Doc{File::load(path)} {
+Doc::Doc(const char* path) : Doc{File::load(path)} {
 }
 
 const Element* Doc::find(const std::string& name,
