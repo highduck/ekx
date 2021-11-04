@@ -209,7 +209,7 @@ void d3d11_create_device_and_swapchain() {
             &feature_level,                 /* pFeatureLevel */
             &d3dApp.device_context);   /* ppImmediateContext */
     (void) hr;
-    EK_ASSERT(SUCCEEDED(hr) && d3dApp.swap_chain && d3dApp.device && d3dApp.device_context);
+    EKAPP_ASSERT(SUCCEEDED(hr) && d3dApp.swap_chain && d3dApp.device && d3dApp.device_context);
 }
 
 void d3d11_destroy_device_and_swapchain() {
@@ -219,12 +219,12 @@ void d3d11_destroy_device_and_swapchain() {
 }
 
 void d3d11_create_default_render_target() {
-    EK_ASSERT(0 == d3dApp.rt);
-    EK_ASSERT(0 == d3dApp.rtv);
-    EK_ASSERT(0 == d3dApp.msaa_rt);
-    EK_ASSERT(0 == d3dApp.msaa_rtv);
-    EK_ASSERT(0 == d3dApp.ds);
-    EK_ASSERT(0 == d3dApp.dsv);
+    EKAPP_ASSERT(0 == d3dApp.rt);
+    EKAPP_ASSERT(0 == d3dApp.rtv);
+    EKAPP_ASSERT(0 == d3dApp.msaa_rt);
+    EKAPP_ASSERT(0 == d3dApp.msaa_rtv);
+    EKAPP_ASSERT(0 == d3dApp.ds);
+    EKAPP_ASSERT(0 == d3dApp.dsv);
 
     const uint32_t sampleCount = static_cast<uint32_t>(g_app.config.sampleCount);
 
@@ -232,9 +232,9 @@ void d3d11_create_default_render_target() {
 
     /* view for the swapchain-created framebuffer */
     hr = dxgi_GetBuffer(d3dApp.swap_chain, 0, IID_ID3D11Texture2D, (void**) &d3dApp.rt);
-    EK_ASSERT(SUCCEEDED(hr) && d3dApp.rt);
+    EKAPP_ASSERT(SUCCEEDED(hr) && d3dApp.rt);
     hr = d3d11_CreateRenderTargetView(d3dApp.device, (ID3D11Resource*) d3dApp.rt, NULL, &d3dApp.rtv);
-    EK_ASSERT(SUCCEEDED(hr) && d3dApp.rtv);
+    EKAPP_ASSERT(SUCCEEDED(hr) && d3dApp.rtv);
 
     /* common desc for MSAA and depth-stencil texture */
     D3D11_TEXTURE2D_DESC tex_desc;
@@ -252,18 +252,18 @@ void d3d11_create_default_render_target() {
     if (sampleCount > 1) {
         tex_desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
         hr = d3d11_CreateTexture2D(d3dApp.device, &tex_desc, NULL, &d3dApp.msaa_rt);
-        EK_ASSERT(SUCCEEDED(hr) && d3dApp.msaa_rt);
+        EKAPP_ASSERT(SUCCEEDED(hr) && d3dApp.msaa_rt);
         hr = d3d11_CreateRenderTargetView(d3dApp.device, (ID3D11Resource*) d3dApp.msaa_rt, NULL, &d3dApp.msaa_rtv);
-        EK_ASSERT(SUCCEEDED(hr) && d3dApp.msaa_rtv);
+        EKAPP_ASSERT(SUCCEEDED(hr) && d3dApp.msaa_rtv);
     }
 
     /* texture and view for the depth-stencil-surface */
     tex_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     tex_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
     hr = d3d11_CreateTexture2D(d3dApp.device, &tex_desc, NULL, &d3dApp.ds);
-    EK_ASSERT(SUCCEEDED(hr) && d3dApp.ds);
+    EKAPP_ASSERT(SUCCEEDED(hr) && d3dApp.ds);
     hr = d3d11_CreateDepthStencilView(d3dApp.device, (ID3D11Resource*) d3dApp.ds, NULL, &d3dApp.dsv);
-    EK_ASSERT(SUCCEEDED(hr) && d3dApp.dsv);
+    EKAPP_ASSERT(SUCCEEDED(hr) && d3dApp.dsv);
 }
 
 void d3d11_destroy_default_render_target(void) {
@@ -292,8 +292,8 @@ void d3d11_present(void) {
     const auto sampleCount = g_app.config.sampleCount;
     /* do MSAA resolve if needed */
     if (sampleCount > 1) {
-        EK_ASSERT(d3dApp.rt);
-        EK_ASSERT(d3dApp.msaa_rt);
+        EKAPP_ASSERT(d3dApp.rt);
+        EKAPP_ASSERT(d3dApp.msaa_rt);
         d3d11_ResolveSubresource(d3dApp.device_context, (ID3D11Resource*) d3dApp.rt, 0, (ID3D11Resource*) d3dApp.msaa_rt,
                                  0, DXGI_FORMAT_B8G8R8A8_UNORM);
     }
@@ -337,7 +337,7 @@ bool win32_is_win10_or_greater() {
 }
 
 bool win32_uwp_utf8_to_wide(const char* src, wchar_t* dst, int dst_num_bytes) {
-    EK_ASSERT(src && dst && (dst_num_bytes > 1));
+    EKAPP_ASSERT(src && dst && (dst_num_bytes > 1));
     memset(dst, 0, (size_t)dst_num_bytes);
     const int dst_chars = dst_num_bytes / (int)sizeof(wchar_t);
     const int dst_needed = MultiByteToWideChar(CP_UTF8, 0, src, -1, 0, 0);
@@ -524,7 +524,7 @@ void win32_init_dpi() {
         UINT dpix, dpiy;
         HRESULT hr = fn_getdpiformonitor(hm, MDT_EFFECTIVE_DPI, &dpix, &dpiy);
         (void) (hr);
-        EK_ASSERT(SUCCEEDED(hr));
+        EKAPP_ASSERT(SUCCEEDED(hr));
         /* clamp window scale to an integer factor */
         wnd.dpi.window_scale = (float) dpix / 96.0f;
     } else {
@@ -815,7 +815,7 @@ void win32_create_window() {
     ShowWindow(wnd.hwnd, SW_SHOW);
     wnd.in_create_window = false;
     wnd.dc = GetDC(wnd.hwnd);
-    EK_ASSERT(wnd.dc);
+    EKAPP_ASSERT(wnd.dc);
     win32_update_dimensions();
 
     DragAcceptFiles(wnd.hwnd, 1);
