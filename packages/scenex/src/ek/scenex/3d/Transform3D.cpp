@@ -1,12 +1,12 @@
 #include "Transform3D.hpp"
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/base/Node.hpp>
-#include <ek/math/quaternion.hpp>
-#include <ek/math/matrix_transform.hpp>
+#include <ek/math/Quaternion.hpp>
+#include <ek/math/MatrixTransform.hpp>
 
 namespace ek {
 
-void updateWorldMatrix3D(ecs::EntityApi e, const mat4f* parent) {
+void updateWorldMatrix3D(ecs::EntityApi e, const Matrix4f* parent) {
     auto* tr = e.tryGet<Transform3D>();
     if (tr) {
         tr->world = tr->local * (*parent);
@@ -27,10 +27,10 @@ void Transform3D::updateAll() {
     for (auto e: ecs::view<Transform3D>()) {
         auto& tr = e.get<Transform3D>();
         tr.local = translate_transform(tr.position)
-                   * rotation_transform(quat_t<float>(tr.rotation))
+                   * rotation_transform(Quaternion<float>(tr.rotation))
                    * scale_transform(tr.scale);
     }
-    static mat4f identity{};
+    static Matrix4f identity{};
     for (auto e: ecs::view<Transform3D>()) {
         auto* node = e.tryGet<Node>();
         if (!node || !node->parent) {

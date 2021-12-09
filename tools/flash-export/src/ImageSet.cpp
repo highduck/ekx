@@ -1,8 +1,6 @@
 #include "ImageSet.hpp"
 #include <pugixml.hpp>
-#include <ek/debug.hpp>
-#include <ek/util/Path.hpp>
-#include <ek/math/max_rects.hpp>
+#include <ek_assert.h>
 #include <ek/imaging/drawing.hpp>
 
 #include <miniz.h>

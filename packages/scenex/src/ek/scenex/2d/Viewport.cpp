@@ -12,7 +12,7 @@ void doScale(const ViewportScaleInput& input, const ViewportScaleOptions& option
 
     if (options.scaleToResolution) {
         // interpolate between full and safe area
-        const rect_f rc{
+        const Rect2f rc{
                 fullRect.position + (safeRect.position - fullRect.position) * options.safeAreaFit,
                 fullRect.size + (safeRect.size - fullRect.size) * options.safeAreaFit
         };
@@ -23,7 +23,7 @@ void doScale(const ViewportScaleInput& input, const ViewportScaleOptions& option
         output.scale = scale;
     } else {
         output.scale = length(options.pixelRatio);
-        const rect_f rc{
+        const Rect2f rc{
                 fullRect.position + (safeRect.position - fullRect.position) * options.safeAreaFit,
                 fullRect.size + (safeRect.size - fullRect.size) * options.safeAreaFit
         };
@@ -53,7 +53,7 @@ void updateViewport(ecs::EntityApi e, const ViewportScaleInput& input) {
 void Viewport::updateAll(const GameDisplayInfo& display0) {
     const float w = display0.size.x;
     const float h = display0.size.y;
-    const float4 insets = display0.insets + display0.userInsetsAbsolute + float4{w, h, w, h} * display0.userInsetsRelative;
+    const Vec4f insets = display0.insets + display0.userInsetsAbsolute + Vec4f{w, h, w, h} * display0.userInsetsRelative;
     ViewportScaleInput input;
     input.fullRect = {0.0f, 0.0f, display0.size.x, display0.size.y};
     input.safeRect = {insets.x, insets.y,w - insets.x - insets.z,h - insets.y - insets.w};

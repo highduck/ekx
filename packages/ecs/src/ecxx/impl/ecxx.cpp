@@ -1,5 +1,6 @@
 #include "world.hpp"
-#include <ek/debug.hpp>
+#include <ek/log.h>
+#include <ek/assert.h>
 #include <cstring>
 
 namespace ecs {
@@ -63,13 +64,13 @@ void World::destroy(const EntityIndex* entitiesToDestroy, uint32_t count) {
             auto* component = components_[i];
             // TODO: we can know all components ahead of time and register/init them and not check every case...
             if (component) {
-                auto* erase = component->erase;
+                auto* run = component->run;
                 const auto& entityToHandle = component->entityToHandle;
                 for (uint32_t j = 0; j < count; ++j) {
                     const auto entity = entitiesToDestroy[j];
                     const auto handle = entityToHandle.get(entity);
                     if (handle != 0) {
-                        erase(component, entity);
+                        run(StorageCommand::Erase, component, entity);
                     }
                 }
             }
@@ -88,6 +89,10 @@ bool World::check(EntityPassport passport) const {
 void World::initialize() {
     EK_DEBUG("ecs::world initialize");
     resetEntityPool();
+    if(EntityLookup::pInvalidPage == nullptr) {
+        EntityLookup::pInvalidPage = (EntityLookup::Page*)malloc(EntityLookup::PageSize);
+        memset(EntityLookup::pInvalidPage, 0, EntityLookup::PageSize);
+    }
     memset(components, 0, COMPONENTS_MAX_COUNT * sizeof(void*));
 }
 
@@ -97,9 +102,9 @@ void World::reset() {
     for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {
         auto* component = components_[i];
         if (component) {
-            component->clear(component);
+            component->run(StorageCommand::Clear, component, 0);
             component->entityToHandle.clear();
-            component->handleToEntity._size = 1;
+            component->handleToEntity.reduceSize(1);
         }
     }
 }
@@ -112,7 +117,7 @@ void World::shutdown() {
         auto* component = components_[i];
         if (component) {
             component->entityToHandle.clear();
-            component->shutdown(component->data);
+            component->run(StorageCommand::Shutdown, component, 0);
             free(component->data);
         }
     }

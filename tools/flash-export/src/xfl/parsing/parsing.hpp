@@ -2,10 +2,10 @@
 
 #include <cstdint>
 #include <string>
-#include <ek/math/vec.hpp>
-#include <ek/math/box.hpp>
-#include <ek/math/mat3x2.hpp>
-#include <ek/math/color_transform.hpp>
+#include <ek/math/Vec.hpp>
+#include <ek/math/Rect.hpp>
+#include <ek/math/Matrix3x2.hpp>
+#include <ek/math/ColorTransform.hpp>
 
 namespace pugi {
 
@@ -27,17 +27,17 @@ T parse_xml_node(const xml_node& node) {
     return r;
 }
 
-rect_f read_rect(const xml_node& node);
+Rect2f read_rect(const xml_node& node);
 
-rect_f read_scale_grid(const xml_node& node);
+Rect2f read_scale_grid(const xml_node& node);
 
-float2 read_point(const xml_node& node);
+Vec2f read_point(const xml_node& node);
 
-float2 read_transformation_point(const xml_node& node);
+Vec2f read_transformation_point(const xml_node& node);
 
-matrix_2d& operator<<(matrix_2d& r, const xml_node& node);
+Matrix3x2f& operator<<(Matrix3x2f& r, const xml_node& node);
 
-color_transform_f& operator<<(color_transform_f& color, const xml_node& node);
+ColorTransformF& operator<<(ColorTransformF& color, const xml_node& node);
 
 enum class BlendMode;
 enum class ScaleMode;
@@ -126,8 +126,6 @@ FolderItem& operator<<(FolderItem& r, const xml_node& node);
 DocInfo& operator<<(DocInfo& r, const xml_node& node);
 
 Edge& operator<<(Edge& r, const xml_node& node);
-
-BitmapData* parseBitmapData(const std::string& data);
 
 }
 

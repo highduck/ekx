@@ -1,8 +1,8 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/timers.hpp>
-#include <ek/math/vec.hpp>
+#include <ek/math/Vec.hpp>
+#include <ek/scenex/base/TimeLayer.hpp>
 
 namespace ek {
 
@@ -20,8 +20,8 @@ struct Shaker {
     TimeLayer timer;
     float state = 0.0f;
     float maxRotation = 0.25f;
-    float2 maxOffset{8.0f, 8.0f};
-    float2 maxScale{0.25f, 0.25f};
+    Vec2f maxOffset{8.0f, 8.0f};
+    Vec2f maxScale{0.25f, 0.25f};
 
     void start(float v = 1.0f) {
         state = std::max(v, state);
@@ -30,6 +30,8 @@ struct Shaker {
     static void updateAll();
 };
 
+ECX_TYPE(24, Shake);
+ECX_TYPE(25, Shaker);
 }
 
 

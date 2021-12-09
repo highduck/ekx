@@ -25,7 +25,7 @@ if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
             -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type -Woverloaded-virtual -Wcast-align
             -Wno-deprecated-declarations
             -DGL_SILENCE_DEPRECATION
-            -Wstrict-aliasing)
+            -Wstrict-aliasing=2)
 
     set(EK_COMPILER_LTO "-flto")
 endif ()
@@ -45,7 +45,8 @@ endif ()
 target_compile_options(${PROJECT_NAME} PRIVATE
         -fno-exceptions
         -fno-rtti
-        -fstrict-aliasing
+        -fno-strict-aliasing
+        -Wstrict-aliasing=2
         ${EK_COMPILE_WARNINGS}
         )
 

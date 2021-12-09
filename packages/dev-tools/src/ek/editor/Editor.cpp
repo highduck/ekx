@@ -2,7 +2,8 @@
 
 #include <ek/scenex/app/basic_application.hpp>
 #include <pugixml.hpp>
-#include <ek/debug.hpp>
+#include <ek/log.h>
+#include <ek/assert.h>
 
 namespace ek {
 

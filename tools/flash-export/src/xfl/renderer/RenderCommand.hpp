@@ -1,8 +1,8 @@
 #pragma once
 
-#include <ek/math/vec.hpp>
+#include <ek/math/Vec.hpp>
 #include "../types.hpp"
-#include <ek/math/bounds_builder.hpp>
+#include <ek/math/BoundsBuilder.hpp>
 
 namespace ek::xfl {
 
@@ -41,7 +41,7 @@ struct RenderCommand {
             stroke{aStroke} {
     }
 
-    RenderCommand(Operation operation, const float2& p0, const float2& p1 = float2()) :
+    RenderCommand(Operation operation, const Vec2f& p0, const Vec2f& p1 = Vec2f()) :
             op{operation},
             v{p0.x, p0.y, p1.x, p1.y} {
     }
@@ -50,7 +50,7 @@ struct RenderCommand {
 struct RenderCommandsBatch {
     TransformModel transform;
     Array<RenderCommand> commands;
-    bounds_builder_2f bounds{};
+    BoundsBuilder2f bounds{};
     int total = 0;
 
     [[nodiscard]] bool empty() const {

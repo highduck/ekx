@@ -3,7 +3,7 @@
 #include <ek/LocalStorage.hpp>
 #include <ek/app/app.hpp>
 #include <ek/util/Signal.hpp>
-#include <string>
+#include <ek/ds/String.hpp>
 
 namespace ek {
 
@@ -13,11 +13,12 @@ public:
 
     StorageVariable() = delete;
 
-    explicit StorageVariable(std::string key, int default_value = 0) :
-            key_{std::move(key)} {
-        value_ = get_user_preference(key_.c_str(), default_value);
+    explicit StorageVariable(const char* key, int default_value = 0) :
+            key_{key} {
+        value_ = get_user_preference(key, default_value);
     }
 
+    [[nodiscard]]
     int value() const {
         return value_;
     }
@@ -30,6 +31,7 @@ public:
         }
     }
 
+    [[nodiscard]]
     bool enabled() const {
         return value() != 0;
     }
@@ -45,7 +47,7 @@ public:
     }
 
 private:
-    std::string key_;
+    String key_;
     int value_;
 };
 

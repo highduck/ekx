@@ -22,7 +22,7 @@ void ExportItem::append_to(ExportItem* parent_) {
     }
 }
 
-ExportItem* ExportItem::find_library_item(const std::string& libraryName) const {
+ExportItem* ExportItem::find_library_item(const String& libraryName) const {
     for (auto& child : children) {
         if (child->node.libraryName == libraryName) {
             return child;
@@ -48,7 +48,7 @@ void ExportItem::inc_ref(ExportItem& lib) {
     }
 }
 
-void ExportItem::update_scale(ExportItem& lib, const matrix_2d& parent_matrix) {
+void ExportItem::update_scale(ExportItem& lib, const Matrix3x2f& parent_matrix) {
     if (!node.scaleGrid.empty()) {
         estimated_scale = 1.0f;
         return;

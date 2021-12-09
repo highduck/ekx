@@ -2,7 +2,9 @@
 
 #include "Signal.hpp"
 
-TEST_CASE("signals basic") {
+TEST_SUITE_BEGIN("c++ signals");
+
+TEST_CASE("basic") {
     using namespace ek;
     Signal<> event;
 
@@ -22,7 +24,7 @@ TEST_CASE("signals basic") {
     REQUIRE_EQ(r, 5);
 }
 
-TEST_CASE("signals resize") {
+TEST_CASE("resize") {
     using namespace ek;
     auto* event = new Signal<>();
     auto* event2 = new Signal<>();
@@ -50,3 +52,5 @@ TEST_CASE("signals resize") {
     delete event;
     delete event2;
 }
+
+TEST_SUITE_END();

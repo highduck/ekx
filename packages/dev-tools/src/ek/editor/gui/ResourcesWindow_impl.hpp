@@ -29,7 +29,7 @@ template<>
 void drawAssetItem<DynamicAtlas>(const DynamicAtlas& asset) {
     auto pagesCount = asset.pages_.size();
     ImGui::Text("Page Size: %d x %d", asset.pageWidth, asset.pageHeight);
-    ImGui::Text("Page Count: %lu", pagesCount);
+    ImGui::Text("Page Count: %u", pagesCount);
     static float pageScale = 0.25f;
     ImGui::SliderFloat("Scale", &pageScale, 0.0f, 1.0f);
     for (int i = 0; i < pagesCount; ++i) {
@@ -63,13 +63,14 @@ void drawAssetItem<Atlas>(const Atlas& asset) {
         }
     }
 
-    for (const auto&[id, spr] : asset.sprites) {
+    for (const auto& spr : asset.sprites) {
         const auto* sprite = spr.get();
+        const auto* id = spr.getID();
         if (sprite) {
-            ImGui::TextUnformatted(id.c_str());
+            ImGui::TextUnformatted(id);
             guiSprite(*sprite);
         } else {
-            ImGui::TextDisabled("Sprite %s is null", id.c_str());
+            ImGui::TextDisabled("Sprite %s is null", id);
         }
         ImGui::Separator();
     }
@@ -105,16 +106,16 @@ void drawAssetItem<SGFile>(const SGFile& asset) {
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("##linkages-list", "Linkages (%u)", static_cast<uint32_t>(asset.linkages.size()))) {
-        for (auto[k, v] : asset.linkages) {
-            auto* node = sg_get(asset, v);
+        for (auto& info : asset.linkages) {
+            auto* node = sg_get(asset, info.linkage.c_str());
             if(node) {
-                if (ImGui::TreeNode(node, "%s -> %s", k.c_str(), v.c_str())) {
+                if (ImGui::TreeNode(node, "%s -> %s", info.name.c_str(), info.linkage.c_str())) {
                     ImGui::TextDisabled("todo:");
                     ImGui::TreePop();
                 }
             }
             else {
-                ImGui::TextDisabled("%s -> %s (not found)", k.c_str(), v.c_str());
+                ImGui::TextDisabled("%s -> %s (not found)", info.name.c_str(), info.linkage.c_str());
             }
         }
         ImGui::TreePop();
@@ -122,21 +123,28 @@ void drawAssetItem<SGFile>(const SGFile& asset) {
 }
 
 template<typename T>
-void drawAssetsListByType(const char* typeName) {
-    auto count = static_cast<uint32_t>(Res<T>::map().size());
+void drawAssetsListByType() {
+    FixedArray<ResourceDB::Slot*, 1024> list;
+    for(auto& it : ResourceDB::instance.get().map) {
+        if(it.second.key.type == TypeIndex<T>::value) {
+            list.push_back(&it.second);
+        }
+    }
+
+    const char* typeName = TypeName<T>::value;
+    const auto count = list.size();
     char buff[128];
     sprintf(buff, "%s (%u)###%s", typeName, count, typeName);
     if (ImGui::BeginTabItem(buff)) {
-        for (const auto&[key, value]: Res<T>::map()) {
-            Res<T> asset{key};
-            const T* content = asset.get();
+        for (const auto& slot: list) {
+            const T* content = (const T*)slot->content;
             if (content) {
-                if (ImGui::TreeNode(key.c_str())) {
+                if (ImGui::TreeNode(slot->key.name.c_str())) {
                     drawAssetItem<T>(*content);
                     ImGui::TreePop();
                 }
             } else {
-                ImGui::TextDisabled("%s", key.c_str());
+                ImGui::TextDisabled("%s", slot->key.name.c_str());
             }
         }
         ImGui::EndTabItem();
@@ -145,14 +153,18 @@ void drawAssetsListByType(const char* typeName) {
 
 void ResourcesWindow::onDraw() {
     if (ImGui::BeginTabBar("res_by_type", 0)) {
-        drawAssetsListByType<Material3D>("Material");
-        drawAssetsListByType<StaticMesh>("Mesh");
-        drawAssetsListByType<Atlas>("Atlas");
-        drawAssetsListByType<Sprite>("Sprite");
-        drawAssetsListByType<Font>("Font");
-        drawAssetsListByType<SGFile>("Scenes 2D");
-        drawAssetsListByType<DynamicAtlas>("Dynamic Atlas");
-        drawAssetsListByType<ParticleDecl>("Particle");
+        drawAssetsListByType<graphics::Shader>();
+        drawAssetsListByType<graphics::Texture>();
+        drawAssetsListByType<Sprite>();
+        drawAssetsListByType<Atlas>();
+        drawAssetsListByType<DynamicAtlas>();
+        drawAssetsListByType<Font>();
+        drawAssetsListByType<SGFile>();
+        drawAssetsListByType<audio::AudioResource>();
+        drawAssetsListByType<ParticleDecl>();
+        drawAssetsListByType<Material3D>();
+        drawAssetsListByType<StaticMesh>();
+
         ImGui::EndTabBar();
     }
 }

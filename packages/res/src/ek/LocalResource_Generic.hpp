@@ -5,8 +5,8 @@
 
 namespace ek {
 
-void get_resource_content_async(const char* path, const get_content_callback_func& callback) {
-    callback(internal::read_file_bytes(path));
+int getFile_platform(const char* path, LocalResource* lr) {
+    return getFile(path, lr);
 }
 
 }

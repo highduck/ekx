@@ -2,11 +2,10 @@
 
 #include "core.hpp"
 
+#include <ek/assert.h>
 #include <cstdint>
-#include <cassert>
 #include <cstdlib>
 #include <cstring>
-//#include <utility>
 
 namespace ek {
 
@@ -19,7 +18,7 @@ public:
             data_{static_cast<const uint8_t*>(data)},
             size_{static_cast<uint32_t>(size)},
             pos_{0u} {
-        assert(size < 0x1FFFFFFF);
+        EK_ASSERT(size < 0x1FFFFFFF);
     }
 
     input_memory_stream(const input_memory_stream&) = delete;
@@ -36,7 +35,7 @@ public:
     }
 
     void position(uint32_t value) {
-        assert(value <= size_);
+        EK_ASSERT(value <= size_);
         pos_ = value;
     }
 
@@ -47,13 +46,13 @@ public:
     }
 
     uint32_t seek(const int32_t offset) {
-        assert(pos_ + offset <= size_);
+        EK_ASSERT(pos_ + offset <= size_);
         return pos_ += offset;
     }
 
     inline void read(void* dest, const uint32_t size) noexcept {
-        assert(pos_ + size <= size_);
-        assert(pos_ + size >= pos_); // check overflow
+        EK_ASSERT(pos_ + size <= size_);
+        EK_ASSERT(pos_ + size >= pos_); // check overflow
         memcpy(dest, data_ + pos_, size);
         pos_ += size;
     }
@@ -61,7 +60,7 @@ public:
     template<typename T>
     inline void read(T& to_value) noexcept {
         constexpr uint32_t size = sizeof(T);
-        assert(pos_ + size <= size_);
+        EK_ASSERT(pos_ + size <= size_);
         memcpy(&to_value, data_ + pos_, size);
         pos_ += size;
     }
@@ -103,7 +102,7 @@ public:
             data_{(uint8_t*) malloc(capacity)},
             pos_{0u},
             cap_{(uint32_t)capacity} {
-        assert(capacity < 0x7FFFFFFF);
+        EK_ASSERT(capacity < 0x7FFFFFFF);
     }
 
     ~output_memory_stream() {
@@ -134,7 +133,7 @@ public:
     }
 
     inline void position(uint32_t pos) {
-        assert(pos <= cap_);
+        EK_ASSERT(pos <= cap_);
         pos_ = pos;
     }
 

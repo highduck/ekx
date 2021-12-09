@@ -1,10 +1,11 @@
 #include "drawer.hpp"
 
 #include <ek/util/Platform.hpp>
-#include <ek/math/matrix_camera.hpp>
-#include "draw2d_shader.h"
 #include <ek/util/StaticStorage.hpp>
-#include <ek/debug.hpp>
+#include <ek/math/MatrixCamera.hpp>
+#include "draw2d_shader.h"
+#include <ek/log.h>
+#include <ek/assert.h>
 
 using namespace ek::graphics;
 
@@ -27,7 +28,7 @@ sg_layout_desc Vertex2D::layout() {
     return layout;
 }
 
-void Context::setNextScissors(rect_i rc) {
+void Context::setNextScissors(Rect2i rc) {
     if (rc != curr.scissors) {
         stateChanged = true;
     }
@@ -76,12 +77,11 @@ sg_pipeline createPipeline(sg_shader shader, bool useRenderTarget, bool depthSte
     pip_desc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
     if (useRenderTarget) {
         //pip_desc.colors[0].pixel_format = SG_PIXELFORMAT_RGBA8;
-        if(depthStencil) {
+        if (depthStencil) {
             pip_desc.depth.pixel_format = SG_PIXELFORMAT_DEPTH_STENCIL;
 //            pip_desc.depth.write_enabled = false;
 //            pip_desc.depth.compare = SG_COMPAREFUNC_LESS_EQUAL;
-        }
-        else {
+        } else {
             pip_desc.depth.pixel_format = SG_PIXELFORMAT_NONE;
         }
     }
@@ -108,9 +108,9 @@ sg_pipeline Context::getPipeline(sg_shader shader, bool useRenderTarget, bool de
 float getTriangleArea(const Vertex2D* vertices, const uint16_t* indices, int count) {
     float sum = 0.0f;
     for (int i = 0; i < count;) {
-        const float2 a = vertices[indices[i++]].position;
-        const float2 b = vertices[indices[i++]].position;
-        const float2 c = vertices[indices[i++]].position;
+        const Vec2f a = vertices[indices[i++]].position;
+        const Vec2f b = vertices[indices[i++]].position;
+        const Vec2f c = vertices[indices[i++]].position;
         sum += (a.x * b.y + b.x * c.y + c.x * a.y - a.x * c.y - b.x * a.y - c.x * b.y) / 2.0f;
     }
     return sum;
@@ -156,8 +156,8 @@ public:
     [[nodiscard]]
     uint32_t getUsedMemory() const {
         uint32_t mem = 0u;
-        for (auto& v : buffers_) {
-            for (const auto* buffer : v) {
+        for (auto& v: buffers_) {
+            for (const auto* buffer: v) {
                 mem += buffer->getSize();
             }
         }
@@ -176,8 +176,8 @@ public:
     }
 
     void disposeBuffers() {
-        for (auto& v : buffers_) {
-            for (auto* b : v) {
+        for (auto& v: buffers_) {
+            for (auto* b: v) {
                 delete b;
             }
             v.resize(0);
@@ -306,7 +306,7 @@ void Context::allocTriangles(uint32_t vertex_count, uint32_t index_count) {
             setNextShader(program->shader, program->numFSImages);
         }
         if (checkFlags & Context::Check_Scissors) {
-            setNextScissors(rect_i{scissors});
+            setNextScissors(Rect2i{scissors});
         }
         checkFlags = 0;
     }
@@ -332,8 +332,8 @@ uint32_t Context::getUsedMemory() const {
 
 
 Context::Context() {
-    vertexBuffers_ = new BufferChain(BufferType::VertexBuffer, MaxVertex + 1, (uint32_t)sizeof(Vertex2D));
-    indexBuffers_ = new BufferChain(BufferType::IndexBuffer, MaxIndex + 1, (uint32_t)sizeof(uint16_t));
+    vertexBuffers_ = new BufferChain(BufferType::VertexBuffer, MaxVertex + 1, (uint32_t) sizeof(Vertex2D));
+    indexBuffers_ = new BufferChain(BufferType::IndexBuffer, MaxIndex + 1, (uint32_t) sizeof(uint16_t));
 
     EK_DEBUG("draw2d: allocate memory buffers");
     vertexData_ = new Vertex2D[MaxVertex + 1];
@@ -380,12 +380,12 @@ Context& Context::saveScissors() {
     return *this;
 }
 
-void Context::setScissors(const rect_f& rc) {
+void Context::setScissors(const Rect2f& rc) {
     scissors = rc;
     checkFlags |= Check_Scissors;
 }
 
-void Context::pushClipRect(const rect_f& rc) {
+void Context::pushClipRect(const Rect2f& rc) {
     saveScissors();
     setScissors(clamp_bounds(scissors, rc));
 }
@@ -421,7 +421,7 @@ Context& Context::translate(float tx, float ty) {
     return *this;
 }
 
-Context& Context::translate(const float2& v) {
+Context& Context::translate(const Vec2f& v) {
     matrix.translate(v);
     return *this;
 }
@@ -431,7 +431,7 @@ Context& Context::scale(float sx, float sy) {
     return *this;
 }
 
-Context& Context::scale(const float2& v) {
+Context& Context::scale(const Vec2f& v) {
     matrix.scale(v);
     return *this;
 }
@@ -441,7 +441,7 @@ Context& Context::rotate(float radians) {
     return *this;
 }
 
-Context& Context::concat(const matrix_2d& r) {
+Context& Context::concat(const Matrix3x2f& r) {
     matrix = matrix * r;
     return *this;
 }
@@ -477,13 +477,11 @@ Context& Context::scaleColor(abgr32_t multiplier) {
 }
 
 Context& Context::concat(abgr32_t scale, abgr32_t offset) {
-    using details::clamp_255;
-
     if (offset.abgr != 0) {
-        color.offset = abgr32_t{clamp_255[color.offset.r + ((offset.r * color.scale.r * 258u) >> 16u)],
-                                clamp_255[color.offset.g + ((offset.g * color.scale.g * 258u) >> 16u)],
-                                clamp_255[color.offset.b + ((offset.b * color.scale.b * 258u) >> 16u)],
-                                clamp_255[color.offset.a + offset.a]};
+        color.offset = abgr32_t{sat_add_u8(color.offset.r, ((offset.r * color.scale.r * 258u) >> 16u)),
+                                sat_add_u8(color.offset.g, ((offset.g * color.scale.g * 258u) >> 16u)),
+                                sat_add_u8(color.offset.b, ((offset.b * color.scale.b * 258u) >> 16u)),
+                                sat_add_u8(color.offset.a, offset.a)};
     }
 
     if (scale.abgr != 0xFFFFFFFF) {
@@ -498,12 +496,11 @@ Context& Context::concat(ColorMod32 colorMod) {
 }
 
 Context& Context::offset_color(abgr32_t offset) {
-    using details::clamp_255;
     if (offset.abgr != 0) {
-        color.offset = abgr32_t{clamp_255[color.offset.r + ((offset.r * color.scale.r * 258u) >> 16u)],
-                                clamp_255[color.offset.g + ((offset.g * color.scale.g * 258u) >> 16u)],
-                                clamp_255[color.offset.b + ((offset.b * color.scale.b * 258u) >> 16u)],
-                                clamp_255[color.offset.a + offset.a]};
+        color.offset = abgr32_t{sat_add_u8(color.offset.r, ((offset.r * color.scale.r * 258u) >> 16u)),
+                                sat_add_u8(color.offset.g, ((offset.g * color.scale.g * 258u) >> 16u)),
+                                sat_add_u8(color.offset.b, ((offset.b * color.scale.b * 258u) >> 16u)),
+                                sat_add_u8(color.offset.a, offset.a)};
     }
     return *this;
 }
@@ -520,7 +517,7 @@ Context& Context::setTextureCoords(float u0, float v0, float du, float dv) {
     return *this;
 }
 
-Context& Context::setTextureCoords(const rect_f& uv_rect) {
+Context& Context::setTextureCoords(const Rect2f& uv_rect) {
     uv = uv_rect;
     return *this;
 }
@@ -549,7 +546,7 @@ Context& Context::setTexture(const graphics::Texture* texture_) {
     return *this;
 }
 
-Context& Context::setTextureRegion(const graphics::Texture* texture_, const rect_f& region) {
+Context& Context::setTextureRegion(const graphics::Texture* texture_, const Rect2f& region) {
     texture = texture_ != nullptr ? texture_ : emptyTexture;
     checkFlags |= Check_Texture;
     uv = region;
@@ -608,7 +605,8 @@ void beginNewFrame() {
 }
 
 /*** drawings ***/
-void begin(rect_f viewport, const matrix_2d& view, const graphics::Texture* renderTarget, const graphics::Texture* depthStencilTarget) {
+void begin(Rect2f viewport, const Matrix3x2f& view, const graphics::Texture* renderTarget,
+           const graphics::Texture* depthStencilTarget) {
     EK_ASSERT(!state.active);
     state.texture = state.emptyTexture;
     state.program = state.defaultShader;
@@ -623,7 +621,7 @@ void begin(rect_f viewport, const matrix_2d& view, const graphics::Texture* rend
     state.next.shader = state.program->shader;
     state.next.shaderTexturesCount = 1;
     state.next.texture = state.texture->image;
-    state.next.scissors = rect_i{viewport};
+    state.next.scissors = Rect2i{viewport};
     state.selectedPipeline.id = SG_INVALID_ID;
     state.stateChanged = true;
 
@@ -713,7 +711,7 @@ void quad_rotated(float x, float y, float w, float h) {
 }
 
 // This function should be moved to the dedicated `indexed draw` mode
-void fill_circle(const circle_f& circle, abgr32_t inner_color, abgr32_t outer_color, int segments) {
+void fill_circle(const CircleF& circle, abgr32_t inner_color, abgr32_t outer_color, int segments) {
     triangles(1 + segments, 3 * segments);
 
     const float x = circle.center.x;
@@ -725,9 +723,9 @@ void fill_circle(const circle_f& circle, abgr32_t inner_color, abgr32_t outer_co
     auto outer_cm = state.color.scale * outer_color;
     write_vertex(x, y, 0.0f, 0.0f, inner_cm, co);
 
-    const float da = math::pi2 / segments;
+    const float da = Math::fPI2 / segments;
     float a = 0.0f;
-    while (a < math::pi2) {
+    while (a < Math::pi2) {
         write_vertex(x + r * cosf(a), y + r * sinf(a), 1, 1, outer_cm, co);
         a += da;
     }
@@ -757,7 +755,7 @@ void write_vertex(float x, float y, float u, float v, abgr32_t cm, abgr32_t co) 
     ptr->co = co;
 }
 
-void write_raw_vertex(const float2& pos, const float2& tex_coord, abgr32_t cm, abgr32_t co) {
+void write_raw_vertex(const Vec2f& pos, const Vec2f& tex_coord, abgr32_t cm, abgr32_t co) {
     auto* ptr = state.vertexDataPos_++;
     ptr->position = pos;
     ptr->uv = tex_coord;
@@ -790,15 +788,15 @@ void write_indices(const uint16_t* source,
 
 /////
 
-void draw_indexed_triangles(const Array<float2>& positions, const Array<abgr32_t>& colors,
-                            const Array<uint16_t>& indices, float2 offset, float2 scale) {
+void draw_indexed_triangles(const Array<Vec2f>& positions, const Array<abgr32_t>& colors,
+                            const Array<uint16_t>& indices, Vec2f offset, Vec2f scale) {
 
     int verticesTotal = static_cast<int>(positions.size());
     triangles(verticesTotal, indices.size());
-    float2 loc_uv;
+    Vec2f loc_uv;
 
     for (int i = 0; i < verticesTotal; ++i) {
-        float2 local_position = positions[i] * scale + offset;
+        Vec2f local_position = positions[i] * scale + offset;
         write_vertex(
                 local_position.x,
                 local_position.y,
@@ -811,7 +809,7 @@ void draw_indexed_triangles(const Array<float2>& positions, const Array<abgr32_t
     write_indices(indices.data(), indices.size());
 }
 
-void line(const float2& start, const float2& end, abgr32_t color1, abgr32_t color2, float lineWidth1,
+void line(const Vec2f& start, const Vec2f& end, abgr32_t color1, abgr32_t color2, float lineWidth1,
           float lineWidth2) {
     float angle = atan2f(end.y - start.y, end.x - start.x);
     float sn = 0.5f * sinf(angle);
@@ -835,8 +833,8 @@ void line(const float2& start, const float2& end, abgr32_t color1, abgr32_t colo
     write_indices_quad();
 }
 
-void line(const float2& start,
-          const float2& end,
+void line(const Vec2f& start,
+          const Vec2f& end,
           abgr32_t color,
           float lineWidth) {
     line(start, end, color, color, lineWidth, lineWidth);
@@ -846,7 +844,7 @@ void line_arc(float x, float y, float r,
               float angle_from, float angle_to,
               float line_width, int segments,
               abgr32_t color_inner, abgr32_t color_outer) {
-    auto pi2 = static_cast<float>(math::pi2);
+    auto pi2 = static_cast<float>(Math::pi2);
     float da = pi2 / float(segments);
     float a0 = angle_from;
     auto m1 = state.color.scale * color_inner;
@@ -875,23 +873,23 @@ void line_arc(float x, float y, float r,
     }
 }
 
-void strokeRect(const rect_f& rc, abgr32_t color, float lineWidth) {
+void strokeRect(const Rect2f& rc, abgr32_t color, float lineWidth) {
     line({rc.x, rc.y}, {rc.right(), rc.y}, color, lineWidth);
     line({rc.right(), rc.y}, {rc.right(), rc.bottom()}, color, lineWidth);
     line({rc.right(), rc.bottom()}, {rc.x, rc.bottom()}, color, lineWidth);
     line({rc.x, rc.bottom()}, {rc.x, rc.y}, color, lineWidth);
 }
 
-void strokeCircle(const circle_f& circle, abgr32_t color, float lineWidth, int segments) {
+void strokeCircle(const CircleF& circle, abgr32_t color, float lineWidth, int segments) {
     const float x = circle.center.x;
     const float y = circle.center.y;
     const float r = circle.radius;
 
-    const float da = math::pi2 / segments;
+    const float da = Math::fPI2 / (float)segments;
     float a = 0.0f;
-    float2 pen{x, y - r};
-    while (a < math::pi2) {
-        float2 next{x + r * cosf(a), y + r * sinf(a)};
+    Vec2f pen{x, y - r};
+    while (a < Math::fPI2) {
+        Vec2f next{x + r * cosf(a), y + r * sinf(a)};
         line(pen, next, color, lineWidth);
         pen = next;
         a += da;

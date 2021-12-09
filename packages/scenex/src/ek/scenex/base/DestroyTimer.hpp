@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/timers.hpp>
+#include "TimeLayer.hpp"
 
 namespace ek {
 
@@ -12,7 +12,7 @@ struct DestroyTimer {
     static void updateAll();
 };
 
-EK_DECLARE_TYPE(DestroyTimer);
+ECX_TYPE(8, DestroyTimer);
 
 void destroyDelay(ecs::EntityApi e, float delay = 0.0f, TimeLayer timer = {});
 

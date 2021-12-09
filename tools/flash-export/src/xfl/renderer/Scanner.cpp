@@ -91,7 +91,7 @@ void Scanner::popTransform() {
     stack_.pop_back();
 }
 
-rect_f Scanner::getBounds(const Doc& doc, const Array<Element>& elements) {
+Rect2f Scanner::getBounds(const Doc& doc, const Array<Element>& elements) {
     Scanner scanner{};
     for (auto& el: elements) {
         scanner.draw(doc, el);
@@ -116,8 +116,8 @@ bool Scanner::render(const Element& el, const TransformModel& world) {
     return !decoder.empty() && render(decoder.result());
 }
 
-rect_f transform(const matrix_2d& m, const rect_f& rc) {
-    const float2 corners[4] = {
+Rect2f transform(const Matrix3x2f& m, const Rect2f& rc) {
+    const Vec2f corners[4] = {
             m.transform(rc.x, rc.y),
             m.transform(rc.right(), rc.y),
             m.transform(rc.right(), rc.bottom()),
@@ -143,7 +143,7 @@ bool Scanner::render(const BitmapData* bitmap, const TransformModel& world) {
     cmd.bitmap = bitmap;
     batch.commands.push_back(cmd);
 
-    const rect_f rc{0.0f, 0.0f,
+    const Rect2f rc{0.0f, 0.0f,
                     static_cast<float>(bitmap->width),
                     static_cast<float>(bitmap->height)};
     batch.bounds.add(rc, world.matrix);
@@ -166,7 +166,7 @@ bool Scanner::renderShapeObject(const Element& el, const TransformModel& world) 
         return false;
     }
     const auto& shape = *el.shape;
-    rect_f rc{shape.x, shape.y, shape.objectWidth, shape.objectHeight};
+    Rect2f rc{shape.x, shape.y, shape.objectWidth, shape.objectHeight};
     Op op = el.elementType == ElementType::object_rectangle ? Op::rectangle : Op::oval;
 
     RenderCommand cmd{op};

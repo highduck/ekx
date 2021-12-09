@@ -1,82 +1,80 @@
 #pragma once
 
-#include <unordered_map>
 #include <ek/util/Signal.hpp>
 #include <ecxx/ecxx.hpp>
-#include <string>
-#include <any>
+#include <ek/ds/String.hpp>
 #include <utility>
 #include "Node.hpp"
 
 namespace ek {
 
-using NodeEventType = std::string;
+union EventPayload {
+    const void* pointer;
+    const char* cstr;
+    float f32;
+    uint32_t u32;
+    int64_t i64;
+    int i32;
+};
 
 struct NodeEventData {
-    NodeEventType type;
+    const char* type;
     ecs::EntityApi source;
-    std::any payload;
+    EventPayload payload{nullptr};
     mutable bool processed = false;
 };
 
 struct NodeEventHandler {
-    using Callback = std::function<void(const NodeEventData&)>;
-    using SignalType = Signal<const NodeEventData&>;
-
-    SignalType& getSignal(const NodeEventType& type) {
-        return map_[type];
+    template<typename Fn>
+    void on(const char* type, Fn&& listener) {
+        signal.add(listener, type);
     }
 
-    void on(const NodeEventType& type, Callback listener) {
-        getSignal(type).add(std::move(listener));
+    template<typename Fn>
+    void once(const char* type, Fn&& listener) {
+        signal.once(listener, type);
     }
-
-    void once(const NodeEventType& type, Callback listener) {
-        getSignal(type).once(std::move(listener));
-    }
-
-//    void off(const NodeEventType& type, Callback listener) {
-//        auto it = map_.find(type);
-//        if (it != map_.end()) {
-//            it->second.remove(listener);
-//        }
-//    }
 
     NodeEventData emit(const NodeEventData& event) {
-        auto it = map_.find(event.type);
-        if (it != map_.end()) {
-            it->second.emit(event);
-        }
+        signal.emit_(event.type, event);
         return event;
     }
 
 private:
-    std::unordered_map<NodeEventType, SignalType> map_;
+    Signal<const NodeEventData&> signal;
 };
 
-EK_DECLARE_TYPE(NodeEventHandler);
+ECX_TYPE(3, NodeEventHandler);
 
 /*** events functions ***/
 
 void dispatch_broadcast(ecs::EntityApi e, const NodeEventData& data);
 void dispatch_bubble(ecs::EntityApi e, const NodeEventData& data);
 
-inline void broadcast(ecs::EntityApi e, const std::string& event) {
-    dispatch_broadcast(e, {event, e, nullptr});
+inline void broadcast(ecs::EntityApi e, const char* event) {
+    dispatch_broadcast(e, {event, e, {nullptr}});
 }
 
-template<typename Payload>
-inline void broadcast(ecs::EntityApi e, const std::string& event, Payload payload) {
-    dispatch_broadcast(e, {event, e, std::any{payload}});
+inline void broadcast(ecs::EntityApi e, const char* event, float value) {
+    NodeEventData data{event, e};
+    data.payload.f32 = value;
+    dispatch_broadcast(e, data);
 }
 
-template<>
-inline void broadcast(ecs::EntityApi e, const std::string& event, const char* payload) {
-    dispatch_broadcast(e, {event, e, std::any{std::string{payload}}});
+inline void broadcast(ecs::EntityApi e, const char* event, int value) {
+    NodeEventData data{event, e};
+    data.payload.i32 = value;
+    dispatch_broadcast(e, data);
 }
 
-inline void notify_parents(ecs::EntityApi e, const std::string& event, const std::string& payload = "") {
-    dispatch_bubble(e, {event, e, std::any{payload}});
+inline void broadcast(ecs::EntityApi e, const char* event, const char* payload) {
+    NodeEventData data{event, e, {payload}};
+    dispatch_broadcast(e, data);
+}
+
+inline void notify_parents(ecs::EntityApi e, const char* event, const char* payload = "") {
+    NodeEventData data{event, e, {payload}};
+    dispatch_bubble(e, data);
 }
 
 }

@@ -1,8 +1,7 @@
 #pragma once
 
-#include <string>
 #include <ek/serialize/serialize.hpp>
-#include <ek/serialize/stl/String.hpp>
+#include <ek/ds/String.hpp>
 #include <ek/ds/Array.hpp>
 
 namespace ek {
@@ -15,7 +14,7 @@ enum class TextureDataType : uint32_t {
 struct TextureData {
     TextureDataType type;
     uint32_t formatMask = 1;
-    Array<std::string> images;
+    Array<String> images;
 
     template<typename S>
     void serialize(IO<S>& io) {

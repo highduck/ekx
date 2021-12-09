@@ -1,5 +1,5 @@
 #include <cmath>
-#include "../assert.hpp"
+#include <ek/assert.h>
 
 // Exponential blur, Jani Huhtanen, 2006
 

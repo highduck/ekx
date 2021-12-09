@@ -1,8 +1,8 @@
 #include "TextEngine.hpp"
 #include "TrueTypeFont.hpp"
 #include "Font.hpp"
-#include <ek/util/utf8.hpp>
 #include <cstdarg>
+#include <ek/utf8.h>
 
 #include <stb/stb_sprintf.h>
 
@@ -39,7 +39,7 @@ void TextBlockInfo::addLine(TextBlockInfo::Line line) {
 }
 
 void TextBlockInfo::reset() {
-    size = float2::zero;
+    size = Vec2f::zero;
     lines.clear();
 }
 
@@ -87,7 +87,7 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
     if (!font) {
         return;
     }
-    auto alignment = format.alignment;
+    //auto alignment = format.alignment;
 
     draw2d::state.pushProgram("draw2d_alpha");
     // render effects first
@@ -117,7 +117,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
 
     font->setBlur(layer.blurRadius, layer.blurIterations, layer.strength);
 
-    float2 current = position + layer.offset;
+    Vec2f current = position + layer.offset;
     const float startX = current.x;
     int lineIndex = 0;
     int numLines = info.lines.size();
@@ -134,7 +134,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
         const char* it = text + info.lines[lineIndex].begin;
         const auto* end = text + info.lines[lineIndex].end;
         while (it != end) {
-            it = decodeUTF8(it, codepoint);
+            codepoint = ek_utf8_next(&it);
             if (font->getGlyph(codepoint, gdata)) {
                 if (kerning && prevCodepointOnLine) {
                     current.x += gdata.source->getKerning(prevCodepointOnLine, codepoint) * size;
@@ -191,12 +191,11 @@ struct TextEngineUtils {
     }
 
     static const char* skip(const char* it, const char* range) {
-        uint32_t c = 0;
         const auto* prev = it;
-        it = decodeUTF8(it, c);
+        uint32_t c = ek_utf8_next(&it);
         while (inRangeASCII(c, range)) {
             prev = it;
-            it = decodeUTF8(it, c);
+            c = ek_utf8_next(&it);
         }
         return prev;
     }
@@ -229,7 +228,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
     auto leading = format.leading;
     auto kerning = format.kerning;
     auto letterSpacing = format.letterSpacing;
-    auto alignment = format.alignment;
+    //auto alignment = format.alignment;
 
     float x = 0.0f;
     Glyph metrics;
@@ -241,7 +240,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
     uint32_t prevCodepointOnLine = 0;
     uint32_t codepoint = 0;
     TextBlockInfo::Line line;
-    it = decodeUTF8(it, codepoint);
+    codepoint = ek_utf8_next(&it);
     while (codepoint) {
         if (codepoint == '\n') {
             line.close(size, static_cast<int>(prev - text));
@@ -254,7 +253,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
             // next char
             prevCodepointOnLine = 0;
             prev = it;
-            it = decodeUTF8(it, codepoint);
+            codepoint = ek_utf8_next(&it);
             continue;
         }
         // wordwrap
@@ -284,7 +283,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
                     lastWrapLine = {};
                     prevCodepointOnLine = 0;
                     prev = it;
-                    it = decodeUTF8(it, codepoint);
+                    codepoint = ek_utf8_next(&it);
                     continue;
                 }
                     // at least one symbol added to line
@@ -312,7 +311,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
         }
         prevCodepointOnLine = codepoint;
         prev = it;
-        it = decodeUTF8(it, codepoint);
+        codepoint = ek_utf8_next(&it);
     }
     line.close(size, static_cast<int>(prev - text));
     info.addLine(line);

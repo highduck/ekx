@@ -47,7 +47,8 @@ endif ()
 target_compile_options(${PROJECT_NAME} PRIVATE
         -fno-exceptions
         -fno-rtti
-        -fstrict-aliasing
+        -fno-strict-aliasing
+        -Wstrict-aliasing=2
         )
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)

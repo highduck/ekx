@@ -1,24 +1,24 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/math/vec.hpp>
-#include <ek/math/box.hpp>
+#include <ek/math/Vec.hpp>
+#include <ek/math/Rect.hpp>
 #include "Transform2D.hpp"
 
 namespace ek {
 
 struct LayoutRect {
-    float2 x;
-    float2 y;
-    rect_f fill_extra;
+    Vec2f x;
+    Vec2f y;
+    Rect2f fill_extra;
     bool fill_x = false;
     bool fill_y = false;
     bool align_x = false;
     bool align_y = false;
     bool doSafeInsets = true;
 
-    rect_f rect;
-    rect_f safeRect;
+    Rect2f rect;
+    Rect2f safeRect;
 
     LayoutRect& aligned(float relativeX, float absoluteX, float relativeY, float absoluteY) {
         enableAlignX(relativeX, absoluteX);
@@ -77,12 +77,12 @@ struct LayoutRect {
 
     static void updateAll();
 
-    static rect_f DesignCanvasRect;
+    static Rect2f DesignCanvasRect;
 };
 
-EK_DECLARE_TYPE(LayoutRect);
+ECX_TYPE(12, LayoutRect);
 
-rect_f find_parent_layout_rect(ecs::EntityApi e, bool safe);
+Rect2f find_parent_layout_rect(ecs::EntityApi e, bool safe);
 
 
 // wrapper
@@ -125,7 +125,7 @@ public:
         return *this;
     }
 
-    layout_wrapper& fill_extra(const rect_f& rc) {
+    layout_wrapper& fill_extra(const Rect2f& rc) {
         l_.fill_extra = rc;
         return *this;
     }

@@ -7,6 +7,12 @@ namespace ek {
 
 inline get_content_callback_func fetch_callbacks_[64]{};
 
+void closeMemoryFile(LocalResource* lr) {
+    free(lr->buffer);
+    lr->buffer = nullptr;
+    lr->length = 0;
+}
+
 }
 
 extern "C" {
@@ -17,19 +23,24 @@ extern int ek_fetch_close(int id);
 extern int ek_fetch_read(int id, void* pBuffer, int toRead, int offset);
 
 EMSCRIPTEN_KEEPALIVE void _ekfs_onComplete(int id, int err, int size) {
-    std::vector<uint8_t> buffer;
+    using namespace ek;
+    LocalResource lr{};
+    lr.status = err;
     if (err == 0) {
-        buffer.resize(size);
-        const int numRead = ek_fetch_read(id, buffer.data(), size, 0);
+        lr.buffer = (uint8_t*)malloc(size);
+        lr.length = size;
+        lr.status = 0;
+        lr.closeFunc = closeMemoryFile;
+        const int numRead = ek_fetch_read(id, lr.buffer, size, 0);
         if (numRead != size) {
-            buffer.resize(0);
-            buffer.shrink_to_fit();
+            lr.status = 1;
+            lr.close();
         }
     }
 
-    if (ek::fetch_callbacks_[id]) {
-        ek::fetch_callbacks_[id](std::move(buffer));
-        ek::fetch_callbacks_[id] = nullptr;
+    if (fetch_callbacks_[id]) {
+        fetch_callbacks_[id](lr);
+        fetch_callbacks_[id] = nullptr;
     }
 
     ek_fetch_close(id);
@@ -39,7 +50,7 @@ EMSCRIPTEN_KEEPALIVE void _ekfs_onComplete(int id, int err, int size) {
 
 namespace ek {
 
-void get_resource_content_async(const char* path, const get_content_callback_func& callback) {
+void get_resource_content_async(const char* path, get_content_callback_func callback) {
     const auto id = ek_fetch_open(path);
     if (id == 0) {
         if (callback) {
@@ -47,7 +58,7 @@ void get_resource_content_async(const char* path, const get_content_callback_fun
         }
         return;
     }
-    fetch_callbacks_[id] = callback;
+    fetch_callbacks_[id] = std::move(callback);
     int result = ek_fetch_load(id);
     if (result != 0) {
         if (fetch_callbacks_[id]) {

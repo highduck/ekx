@@ -1,17 +1,16 @@
 #pragma once
 
-#include <string>
 #include <ek/ds/Array.hpp>
-#include <optional>
-#include <ek/math/serialize_math.hpp>
-#include <ek/math/packed_color.hpp>
-#include <ek/math/mat3x2.hpp>
-#include <ek/math/box.hpp>
-#include <ek/math/color_transform.hpp>
+#include <ek/ds/String.hpp>
+#include <ek/ds/Hash.hpp>
+#include <ek/util/Type.hpp>
+#include <ek/math/MathSerialize.hpp>
+#include <ek/math/Color32.hpp>
+#include <ek/math/Matrix3x2.hpp>
+#include <ek/math/Rect.hpp>
+#include <ek/math/ColorTransform.hpp>
 
 #include <ek/serialize/serialize.hpp>
-#include <ek/serialize/stl/Optional.hpp>
-#include <ek/serialize/stl/String.hpp>
 #include <ek/serialize/stl/UnorderedMap.hpp>
 
 namespace ek {
@@ -26,8 +25,8 @@ struct SGFilter {
     SGFilterType type = SGFilterType::None;
     uint32_t quality = 1;
     argb32_t color = argb32_t::one;
-    float2 blur;
-    float2 offset;
+    Vec2f blur;
+    Vec2f offset;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -37,7 +36,7 @@ struct SGFilter {
 
 struct SGTextLayerData {
     argb32_t color = 0xFFFFFFFF_argb;
-    float2 offset{};
+    Vec2f offset{};
     float blurRadius = 0.0f;
     int blurIterations = 0;
     int strength = 0;
@@ -49,11 +48,11 @@ struct SGTextLayerData {
 };
 
 struct SGDynamicTextData {
-    std::string text;
-    std::string font;
+    String text;
+    String font;
     float size;
-    float2 alignment;
-    rect_f rect;
+    Vec2f alignment;
+    Rect2f rect;
     float lineSpacing = 0.0f;
     float lineHeight = 0.0f;
 
@@ -71,7 +70,7 @@ struct SGDynamicTextData {
 struct SGEasingData {
     uint8_t attribute = 0;
     float ease = 0.0f;
-    Array<float2> curve{};
+    Array<Vec2f> curve{};
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -80,11 +79,11 @@ struct SGEasingData {
 };
 
 struct SGKeyFrameTransform {
-    float2 position;
-    float2 scale{1.0f, 1.0f};
-    float2 skew;
-    float2 pivot;
-    color_transform_f color;
+    Vec2f position;
+    Vec2f scale{1.0f, 1.0f};
+    Vec2f skew;
+    Vec2f pivot;
+    ColorTransformF color;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -171,17 +170,17 @@ struct SGMovieData {
 
 struct SGNodeData {
 
-    matrix_2d matrix{};
-    color_transform_f color{};
+    Matrix3x2f matrix{};
+    ColorTransformF color{};
 
     // instance name
-    std::string name;
+    String name;
 
     // name in library
-    std::string libraryName;
+    String libraryName;
 
     // sprite id
-    std::string sprite;
+    String sprite;
 
     bool button = false;
     bool touchable = true;
@@ -189,16 +188,16 @@ struct SGNodeData {
     bool scissorsEnabled = false;
     bool hitAreaEnabled = false;
     bool boundsEnabled = false;
-    rect_f boundingRect;
-    rect_f scaleGrid;
+    Rect2f boundingRect;
+    Rect2f scaleGrid;
     Array<SGNodeData> children;
     Array<SGFilter> filters;
-    std::optional<SGDynamicTextData> dynamicText;
-    std::optional<SGMovieData> movie;
+    Array<SGDynamicTextData> dynamicText;
+    Array<SGMovieData> movie;
     int32_t movieTargetId = -1;
 
-    std::unordered_map<int, std::string> labels;
-    std::unordered_map<int, std::string> scripts;
+    Hash<String> labels;
+    Hash<String> scripts;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -232,10 +231,20 @@ struct SGNodeData {
     }
 };
 
+struct SGSceneInfo {
+    String name;
+    String linkage;
+
+    template<typename S>
+    void serialize(IO<S>& io) {
+        io(name, linkage);
+    }
+};
+
 class SGFile {
 public:
-    Array<std::string> scenes;
-    std::unordered_map<std::string, std::string> linkages;
+    Array<String> scenes;
+    Array<SGSceneInfo> linkages;
     Array<SGNodeData> library;
 
     template<typename S>
@@ -244,4 +253,8 @@ public:
     }
 };
 
+EK_DECLARE_TYPE(SGFile);
+EK_TYPE_INDEX(SGFile, 11);
+
 }
+

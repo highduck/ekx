@@ -29,13 +29,8 @@ inline int loadBytes(const char* basePath, const char* url, void** outBuffer, si
     strcat(pathBuffer, url);
 #if defined(__APPLE__)
     NSString* asset_path = [NSString stringWithUTF8String:pathBuffer];
-    NSString* bundle_path = [[NSBundle mainBundle] pathForResource:
-    asset_path
-    ofType:
-    nil];
-    const char* file_path = [bundle_path
-    cStringUsingEncoding:
-    NSASCIIStringEncoding];
+    NSString* bundle_path = [[NSBundle mainBundle] pathForResource:asset_path ofType:nil];
+    const char* file_path = [bundle_path cStringUsingEncoding: NSASCIIStringEncoding];
 #else
     const char* file_path = pathBuffer;
 #endif
@@ -96,7 +91,7 @@ void TextureLoader::update() {
     }
     if (imagesStartLoading < imagesToLoad) {
         const auto idx = imagesStartLoading++;
-        EK_DEBUG_F("poll loading image #%d / %d", idx, imagesToLoad);
+        EK_DEBUG("poll loading image #%d / %d", idx, imagesToLoad);
         void* buffer = nullptr;
         size_t bufferSize = 0;
         int result = loadBytes(basePath.c_str(), urls[idx].c_str(), &buffer, &bufferSize);
@@ -112,7 +107,7 @@ void TextureLoader::update() {
                 img->forget();
             }
             delete img;
-            EK_DEBUG_F("texture #%d loaded %d of %d", idx, imagesLoaded, imagesToLoad);
+            EK_DEBUG("texture #%d loaded %d of %d", idx, imagesLoaded, imagesToLoad);
         } else {
             EK_ASSERT(false);
         }

@@ -1,21 +1,17 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-// should be first include for M_PI
-#include <cmath>
-
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/data/SGFile.hpp>
 #include <ek/scenex/SceneFactory.hpp>
 #include <ek/util/Res.hpp>
-#include <optional>
-#include <ek/timers.hpp>
+#include <ek/ds/String.hpp>
+#include "../base/TimeLayer.hpp"
 
 namespace ek {
 
 struct MovieClip {
     Res<SGFile> library_asset;
-    std::string movie_data_symbol;
+    String movie_data_symbol;
     const SGMovieData* data = nullptr;
     TimeLayer timer;
 
@@ -23,9 +19,9 @@ struct MovieClip {
     const SGMovieData* get_movie_data() const {
         const SGMovieData* result = data;
         if (!data && library_asset) {
-            auto* symbol_data = sg_get(*library_asset, movie_data_symbol);
-            if (symbol_data && symbol_data->movie) {
-                result = &symbol_data->movie.value();
+            auto* symbol_data = sg_get(*library_asset, movie_data_symbol.c_str());
+            if (symbol_data && !symbol_data->movie.empty()) {
+                result = &symbol_data->movie[0];
             }
         }
         return result;
@@ -51,11 +47,13 @@ struct MovieClip {
     static void updateAll();
 };
 
-EK_DECLARE_TYPE(MovieClip);
+ECX_TYPE(13, MovieClip);
 
 struct MovieClipTargetIndex {
     int32_t key = 0;
 };
+
+ECX_TYPE(30, MovieClipTargetIndex);
 
 void goto_and_stop(ecs::EntityApi e, float frame);
 

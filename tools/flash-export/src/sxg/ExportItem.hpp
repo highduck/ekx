@@ -48,11 +48,11 @@ struct ExportItem {
     void append_to(ExportItem* parent_);
 
     [[nodiscard]]
-    ExportItem* find_library_item(const std::string& libraryName) const;
+    ExportItem* find_library_item(const String& libraryName) const;
 
     void inc_ref(ExportItem& lib);
 
-    void update_scale(ExportItem& lib, const matrix_2d& parent_matrix);
+    void update_scale(ExportItem& lib, const Matrix3x2f& parent_matrix);
 
 };
 

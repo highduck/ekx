@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/math/box.hpp>
+#include <ek/math/Rect.hpp>
 
 namespace ek {
 
@@ -12,7 +12,7 @@ class FontImplBase;
 
 struct Glyph {
     // multiply by fontSize
-    rect_f rect{};
+    Rect2f rect{};
     float advanceWidth{};
     float bearingX{};
     float lineHeight{};
@@ -20,7 +20,7 @@ struct Glyph {
     float descender = 0.0f;
 
     // sprite part
-    rect_f texCoord{};
+    Rect2f texCoord{};
     const graphics::Texture* texture = nullptr;
     bool rotated = false;
 

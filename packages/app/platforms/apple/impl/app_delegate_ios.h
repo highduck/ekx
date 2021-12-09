@@ -28,7 +28,7 @@ void handleTouches(EventType type, UIView* view, NSSet* touches, UIEvent*) {
     gAppDelegate = self;
 
 // maybe if you have got this => disable new iOS 13.0 Scene Manifest behavior in Info.plist
-//assert(self.window != nil);
+//EKAPP_ASSERT(self.window != nil);
 
     if (!self.window) {
         self.window = [[UIWindow alloc] initWithFrame:UIScreen.mainScreen.bounds];

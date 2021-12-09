@@ -3,7 +3,8 @@
 #include "../types.hpp"
 
 #include <ek/serialize/serialize.hpp>
-#include <ek/debug.hpp>
+#include <ek_log.h>
+#include <ek_assert.h>
 
 #include <ek/imaging/image.hpp>
 #include <ek/imaging/stbimage_impl.h>
@@ -158,11 +159,11 @@ void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
     }
 }
 
-void readBitmapJPEG(const std::string& data, BitmapData& bitmap) {
+void readBitmapJPEG(const void* data, uint32_t size, BitmapData& bitmap) {
     int w = 0;
     int h = 0;
     int channels = 0;
-    auto* imageData = stbi_load_from_memory((const uint8_t*)data.data(), (int)data.size(),
+    auto* imageData = stbi_load_from_memory((const uint8_t*)data, (int)size,
                                              &w, &h, &channels, 4);
 
     if (imageData != nullptr) {
@@ -177,11 +178,11 @@ void readBitmapJPEG(const std::string& data, BitmapData& bitmap) {
     }
 }
 
-BitmapData* BitmapData::parse(const std::string& data) {
+BitmapData* BitmapData::parse(const void* data, uint32_t size) {
     auto* bitmap_ptr = new BitmapData;
     auto& bitmap = *bitmap_ptr;
 
-    input_memory_stream input{data.data(), data.size()};
+    input_memory_stream input{data, size};
 
     const auto sig = input.read<uint16_t>();
     if (sig == SIGNATURE_ARGB) {
@@ -189,7 +190,7 @@ BitmapData* BitmapData::parse(const std::string& data) {
     } else if (sig == SIGNATURE_CLUT) {
         readBitmapCLUT(input, bitmap);
     } else if (sig == SIGNATURE_JPEG) {
-        readBitmapJPEG(data, bitmap);
+        readBitmapJPEG(data, size, bitmap);
     } else {
         EK_ERROR("unsupported dat");
     }

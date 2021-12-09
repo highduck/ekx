@@ -1,6 +1,7 @@
 #include "ShapeDecoder.hpp"
 
-#include <ek/debug.hpp>
+#include <ek_log.h>
+#include <ek_assert.h>
 
 namespace ek::xfl {
 
@@ -21,7 +22,7 @@ RenderCommand ShapeEdge::to_command() const {
     }
 }
 
-ShapeEdge ShapeEdge::curve(int style, const float2& p0, const float2& c, const float2& p1) {
+ShapeEdge ShapeEdge::curve(int style, const Vec2f& p0, const Vec2f& c, const Vec2f& p1) {
     ShapeEdge result;
     result.fill_style_idx = style;
     result.p0 = p0;
@@ -31,7 +32,7 @@ ShapeEdge ShapeEdge::curve(int style, const float2& p0, const float2& c, const f
     return result;
 }
 
-ShapeEdge ShapeEdge::line(int style, const float2& p0, const float2& p1) {
+ShapeEdge ShapeEdge::line(int style, const Vec2f& p0, const Vec2f& p1) {
     ShapeEdge result;
     result.fill_style_idx = style;
     result.p0 = p0;
@@ -53,7 +54,7 @@ void ShapeDecoder::decode(const Element& el) {
     read_fill_styles(el);
     read_line_styles(el);
 
-    float2 pen{0.0f, 0.0f};
+    Vec2f pen{0.0f, 0.0f};
 
     int current_fill_0;
     int current_fill_1;
@@ -224,7 +225,7 @@ void ShapeDecoder::flush_commands(const Array<RenderCommand>& edges, Array<Shape
             fills[0] = fills[--left];
         }
         if (first.fill_style_idx >= static_cast<int>(fill_styles_.size())) {
-            EK_WARN_F("Fill Style %d not found", first.fill_style_idx);
+            EK_WARN("Fill Style %d not found", first.fill_style_idx);
             continue;
         }
 
@@ -235,7 +236,7 @@ void ShapeDecoder::flush_commands(const Array<RenderCommand>& edges, Array<Shape
             current_fill = first.fill_style_idx;
         }
 //          }
-        const float2& m = first.p0;
+        const Vec2f& m = first.p0;
 
         commands_.emplace_back(Op::move_to, m);
         commands_.push_back(first.to_command());
@@ -282,7 +283,7 @@ void ShapeDecoder::flush_commands(const Array<RenderCommand>& edges, Array<Shape
     }
 }
 
-void ShapeDecoder::extend(float2 p, float r) {
+void ShapeDecoder::extend(Vec2f p, float r) {
     bounds_builder_.add(p, r);
 }
 

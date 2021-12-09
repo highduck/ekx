@@ -48,7 +48,7 @@ int onConsoleInputCommandCallback(ImGuiInputTextCallbackData* data) {
 
             if (candidates.empty()) {
                 // No match
-                EK_INFO_F("No match for \"%.*s\"!\n", (int) (word_end - word_start), word_start);
+                EK_INFO("No match for \"%.*s\"!\n", (int) (word_end - word_start), word_start);
             } else if (candidates.size() == 1) {
                 // Single match. Delete the beginning of the word and replace it entirely so we've got nice casing.
                 data->DeleteChars((int) (word_start - data->Buf), (int) (word_end - word_start));
@@ -79,7 +79,7 @@ int onConsoleInputCommandCallback(ImGuiInputTextCallbackData* data) {
                 // List matches
                 EK_INFO("Possible matches:");
                 for (auto& candidate: candidates) {
-                    EK_INFO_F("- %s", candidate);
+                    EK_INFO("- %s", candidate);
                 }
             }
 
@@ -183,13 +183,13 @@ void ConsoleWindow::onDraw() {
             if (ImGui::Selectable(msg.icon)) {
                 // Tools -> Create Command-line Launcher...
                 char buf[512];
-                stbsp_sprintf(buf, "clion --line %u ../%s", msg.location.line, msg.location.file);
+                stbsp_sprintf(buf, "clion --line %u ../%s", msg.line, msg.file);
                 system(buf);
             }
             ImGui::PopID();
             ImGui::PopStyleColor();
             if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("%s:%u", msg.location.file, msg.location.line);
+                ImGui::SetTooltip("%s:%u", msg.file, msg.line);
             }
 
             ImGui::SameLine(0, 10);
@@ -225,34 +225,35 @@ void ConsoleWindow::onDraw() {
     }
 }
 
-void ConsoleWindow::onMessageWrite(const LogMessage& message) {
-    if (message.message == nullptr || message.message[0] == '\0') {
+void ConsoleWindow::onMessageWrite(log_msg_t msg) {
+    if (msg.text == nullptr || msg.text[0] == '\0') {
         return;
     }
 
-    auto len = static_cast<uint32_t>(strlen(message.message));
+    auto len = (uint32_t) strnlen(msg.text, 1024);
 
     const char* icon = "";
     ImU32 iconColor = 0xFFFFFFFF;
     for (int i = 0; i < 5; ++i) {
-        if (infos[i].verbosity == message.verbosity) {
+        if (infos[i].verbosity == msg.level) {
             icon = infos[i].icon;
             iconColor = infos[i].iconColor;
         }
     }
 
-    ConsoleMsg msg{
+    ConsoleMsg cmsg{
             Array<char>(len + 1),
-            message.verbosity,
-            message.location,
-            message.frameHash,
+            (log_level_t) msg.level,
+            msg.file,
+            msg.line,
+            (uint8_t) msg.frame,
             icon,
             iconColor
     };
 
-    msg.text.resize(len + 1);
-    memcpy(msg.text.data(), message.message, msg.text.size());
-    messages.emplace_back(std::move(msg));
+    cmsg.text.resize(len + 1);
+    memcpy(cmsg.text.data(), msg.text, cmsg.text.size());
+    messages.emplace_back(std::move(cmsg));
 
     if (autoScroll) {
         scrollDownRequired = true;
@@ -261,7 +262,7 @@ void ConsoleWindow::onMessageWrite(const LogMessage& message) {
 
 inline ConsoleWindow* _consoleWindow = nullptr;
 
-inline void logToConsoleWindow(const LogMessage& msg) {
+inline void logToConsoleWindow(log_msg_t msg) {
     if (_consoleWindow) {
         _consoleWindow->onMessageWrite(msg);
     }
@@ -273,29 +274,29 @@ ConsoleWindow::ConsoleWindow() {
     title = ICON_FA_LAPTOP_CODE " Console###ConsoleWindow";
 
     _consoleWindow = this;
-    LogSystem::addLogSink(logToConsoleWindow);
+    log_add_sink(logToConsoleWindow);
 
-    infos[0].verbosity = Verbosity::Trace;
+    infos[0].verbosity = LOG_LEVEL_TRACE;
     infos[0].icon = ICON_FA_GLASSES;
     infos[0].name = "Trace";
     infos[0].iconColor = 0xFF999999;
 
-    infos[1].verbosity = Verbosity::Debug;
+    infos[1].verbosity = LOG_LEVEL_DEBUG;
     infos[1].icon = ICON_FA_BUG;
     infos[1].name = "Debug";
     infos[1].iconColor = 0xFFAAAA00;
 
-    infos[2].verbosity = Verbosity::Info;
+    infos[2].verbosity = LOG_LEVEL_INFO;
     infos[2].icon = ICON_FA_INFO_CIRCLE;
     infos[2].name = "Info";
     infos[2].iconColor = 0xFFFFFFFF;
 
-    infos[3].verbosity = Verbosity::Warning;
+    infos[3].verbosity = LOG_LEVEL_WARN;
     infos[3].icon = ICON_FA_EXCLAMATION_TRIANGLE;
     infos[3].name = "Warning";
     infos[3].iconColor = 0xFF44BBFF;
 
-    infos[4].verbosity = Verbosity::Error;
+    infos[4].verbosity = LOG_LEVEL_ERROR;
     infos[4].icon = ICON_FA_BAN;
     infos[4].name = "Error";
     infos[4].iconColor = 0xFF4444DD;
@@ -306,7 +307,7 @@ ConsoleWindow::ConsoleWindow() {
 }
 
 void ConsoleWindow::execute(const char* cmd) {
-    EK_INFO_F("$ %s", cmd);
+    EK_INFO("$ %s", cmd);
 
     // Insert into history. First find match and delete it so it can be pushed to the back.
     // This isn't trying to be smart or optimal.
@@ -319,7 +320,7 @@ void ConsoleWindow::execute(const char* cmd) {
         }
     }
     auto cmdLen = strlen(cmd);
-    auto* cmdCopy = (char*)malloc(cmdLen + 1);
+    auto* cmdCopy = (char*) malloc(cmdLen + 1);
     memcpy(cmdCopy, cmd, cmdLen + 1);
     history.push_back(cmdCopy);
     // Process command
@@ -328,15 +329,15 @@ void ConsoleWindow::execute(const char* cmd) {
     } else if (strcasecmp(cmd, "HELP") == 0) {
         EK_INFO("Commands:");
         for (auto* command: commands) {
-            EK_INFO_F("- %s", command);
+            EK_INFO("- %s", command);
         }
     } else if (strcasecmp(cmd, "HISTORY") == 0) {
         int first = static_cast<int>(history.size()) - 10;
         for (int i = first > 0 ? first : 0; i < history.size(); ++i) {
-            EK_INFO_F("%3d: %s", i, history[i]);
+            EK_INFO("%3d: %s", i, history[i]);
         }
     } else {
-        EK_INFO_F("Unknown command: %s", cmd);
+        EK_INFO("Unknown command: %s", cmd);
     }
 
     // On command input, we scroll to bottom even if AutoScroll==false

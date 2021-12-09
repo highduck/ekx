@@ -3,10 +3,9 @@
 #include "Sprite.hpp"
 #include <ek/util/NoCopyAssign.hpp>
 #include <ek/util/Res.hpp>
+#include <ek/util/Type.hpp>
 #include <cstdint>
-#include <string>
 #include <ek/ds/Array.hpp>
-#include <unordered_map>
 #include <functional>
 #include <ek/TextureLoader.hpp>
 
@@ -21,7 +20,7 @@ public:
 
     void clear();
 
-    std::unordered_map<std::string, Res<Sprite>> sprites;
+    Array<Res<Sprite>> sprites;
     Array<Res<graphics::Texture>> pages;
     Array<TextureLoader*> loaders;
     uint32_t formatMask = 1;
@@ -31,6 +30,9 @@ public:
 
     void load(const char* path, float scaleFactor);
 };
+
+EK_DECLARE_TYPE(Atlas);
+EK_TYPE_INDEX(Atlas, 8);
 
 }
 

@@ -26,28 +26,28 @@ void Particle::update(float dt) {
 void Particle::update_current_values() {
     switch (scale_mode) {
         case ParticleScaleMode::CosOut: {
-            float s = cosf(0.5f * float(math::pi) * (1.0f - time / time_total));
-            scale = float2(s, s);
+            float s = cosf(0.5f * float(Math::pi) * (1.0f - time / time_total));
+            scale = Vec2f(s, s);
         }
             break;
         case ParticleScaleMode::Range: {
             float time_max = scale_off_time > 0.0f ? scale_off_time : time_total;
-            float ratio = 1.0f - math::clamp(time / time_max);
-            float s = math::lerp(scale_start, scale_end, ratio);
-            scale = float2(s, s);
+            float ratio = 1.0f - Math::clamp(time / time_max);
+            float s = Math::lerp(scale_start, scale_end, ratio);
+            scale = Vec2f(s, s);
         }
             break;
         default:
-            scale = float2(scale_start, scale_start);
+            scale = Vec2f(scale_start, scale_start);
             break;
     }
 
     switch (alpha_mode) {
         case ParticleAlphaMode::ByScale:
-            color.af(math::clamp(alpha * length(scale)));
+            color.af(Math::clamp(alpha * length(scale)));
             break;
         case ParticleAlphaMode::LifeSin:
-            color.af(alpha * sinf(float(math::pi) * time / time_total));
+            color.af(alpha * sinf(float(Math::pi) * time / time_total));
             break;
         case ParticleAlphaMode::DCBlink: {
             float a = 0.25f;
@@ -71,7 +71,7 @@ void Particle::update_current_values() {
     }
 }
 
-rect_f Particle::get_bounds() {
+Rect2f Particle::get_bounds() {
     if (sprite) {
         bounds = sprite->rect;
     }

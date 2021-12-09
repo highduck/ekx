@@ -3,7 +3,8 @@
 #include <ek/app/app.hpp>
 #include <ek/timers.hpp>
 #include <ek/audio/audio.hpp>
-#include <ek/debug/LogSystem.hpp>
+#include <ek/log.h>
+#include <ek/assert.h>
 #include <sokol_gfx.h>
 
 #ifdef TRACY_ENABLE
@@ -25,7 +26,7 @@ public:
         tracy::SetThreadName("Render");
         FrameMark;
 #endif
-        LogSystem::nextFrame();
+        log_tick();
         dispatchTimers();
     }
 

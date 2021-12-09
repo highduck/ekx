@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <ek/serialize/core.hpp>
 #include <ek/serialize/streams.hpp>
 #include <ek/ds/Array.hpp>
@@ -21,10 +20,6 @@ class Asset {
 
 public:
     Asset() = default;
-
-    explicit Asset(std::string name) :
-            name_{std::move(name)} {
-    }
 
     virtual ~Asset() = default;
 
@@ -56,7 +51,6 @@ public:
     AssetState state = AssetState::Initial;
     int error = 0;
     float weight_ = 1.0f;
-    std::string name_;
 
 protected:
     AssetManager* manager_ = nullptr;
@@ -69,10 +63,10 @@ public:
     virtual ~AssetTypeResolver() = default;
 
     [[nodiscard]]
-    virtual Asset* create_from_file(const std::string& path, const std::string& type) const = 0;
+    virtual Asset* create_from_file(const String& path, const String& type) const = 0;
 
     [[nodiscard]]
-    virtual Asset* create(const std::string& path) const = 0;
+    virtual Asset* create(const String& path) const = 0;
 
     [[nodiscard]]
     virtual Asset* create_for_type(const void* data, uint32_t size) const = 0;
@@ -86,7 +80,7 @@ public:
 
     ~AssetManager();
 
-    Asset* add_file(const std::string& path, const std::string& type);
+    Asset* add_file(const char* path, const char* type);
 
     Asset* add_from_type(const void* data, uint32_t size);
 
@@ -102,7 +96,7 @@ public:
 
     bool is_assets_ready() const;
 
-    path_t base_path{"assets"};
+    String base_path{"assets"};
     Array<Asset*> assets;
     Array<AssetTypeResolver*> resolvers;
     float scale_factor = 2.0f;
@@ -113,10 +107,10 @@ class DefaultAssetsResolver : public AssetTypeResolver {
 public:
 
     [[nodiscard]]
-    Asset* create_from_file(const std::string& path, const std::string& type) const override;
+    Asset* create_from_file(const String& path, const String& type) const override;
 
     [[nodiscard]]
-    Asset* create(const std::string& path) const override;
+    Asset* create(const String& path) const override;
 
     [[nodiscard]]
     Asset* create_for_type(const void* data, uint32_t size) const override;

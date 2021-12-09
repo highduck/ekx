@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/scenex/base/Script.hpp>
-#include <ek/math/packed_color.hpp>
+#include <ek/math/Color32.hpp>
 
 namespace ek {
 
@@ -17,6 +17,7 @@ public:
     argb32_t base_color = 0xFFFFFFFF_argb;
 };
 
+EK_TYPE_INDEX_T(ScriptBase, simple_animator_script, 5);
 }
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../debug.hpp"
+#include <ek/log.h>
+#include <ek/assert.h>
 
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION

@@ -17,7 +17,7 @@ void target_follow_script::update(float dt) {
         if (target_entity.valid()) {
             auto parent = entity_.get<Node>().parent;
             if(parent) {
-                target = Transform2D::localToLocal(target_entity.ent(), parent, float2::zero);
+                target = Transform2D::localToLocal(target_entity.ent(), parent, Vec2f::zero);
             }
         } else {
             target_entity = nullptr;
@@ -45,7 +45,7 @@ void target_follow_script::update(float dt) {
 }
 
 void target_follow_script::gui_gizmo() {
-    draw2d::fill_circle(circle_f{100.0f}, 0x00FFFFFF_argb, 0x77FFFFFF_argb, 10);
+    draw2d::fill_circle(CircleF{100.0f}, 0x00FFFFFF_argb, 0x77FFFFFF_argb, 10);
 }
 
 void target_follow_script::gui_inspector() {

@@ -3,8 +3,7 @@
 #include <ek/util/Res.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/text/Font.hpp>
-#include <ek/math/rand.hpp>
-#include <functional>
+#include <ek/math/Random.hpp>
 
 namespace ek {
 
@@ -45,7 +44,7 @@ public:
             case RandColorMode::RandLerp: {
                 float t = rand_fx.random(0.0f, float(index_max));
                 int i = int(t);
-                t = math::fract(t);
+                t = Math::fract(t);
                 return lerp(colors[i], colors[i + 1], t);
             }
             case RandColorMode::RandElement:
@@ -121,11 +120,11 @@ struct ParticleDecl {
     ParticleScaleMode scale_mode = ParticleScaleMode::None;
     ParticleAlphaMode alpha_mode = ParticleAlphaMode::None;
     FloatRange alpha_start{1.0};
-    float2 acceleration = float2::zero;
+    Vec2f acceleration = Vec2f::zero;
     bool use_reflector = false;
 
     FloatRange life_time{1.0f};
-    FloatRange acc_x_phase{0.5f * math::pi};
+    FloatRange acc_x_phase{0.5f * Math::pi};
     FloatRange acc_x_speed{0.0f};
 
     float scale_off_time = 0.0f;
@@ -146,15 +145,18 @@ struct ParticleDecl {
 struct EmitterData {
     float interval = 0.5f;
     int burst = 1;
-    rect_f rect;
-    float2 offset;
+    Rect2f rect;
+    Vec2f offset;
 
     FloatRange burst_rotation_delta{1.0f, 1.5f};
 
     FloatRange speed{10, 100};
     FloatRange acc{0.0f};
-    FloatRange dir{0.0f, math::pi2};
+    FloatRange dir{0.0f, Math::pi2};
 };
+
+EK_DECLARE_TYPE(ParticleDecl);
+EK_TYPE_INDEX(ParticleDecl, 10);
 
 }
 

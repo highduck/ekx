@@ -1,11 +1,12 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/util/TypeIndex.hpp>
+#include <ek/util/Type.hpp>
 #include <ek/timers.hpp>
 #include <ek/util/StaticSignal.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
-#include <vector>
+#include <ek/ds/Pointer.hpp>
+#include "../base/TimeLayer.hpp"
 
 namespace ek {
 
@@ -14,12 +15,12 @@ struct Updater {
     TimeLayer timeLayer = TimeLayer::Root;
 };
 
-EK_DECLARE_TYPE(Updater);
+ECX_TYPE(5, Updater);
 
 class ScriptBase {
 public:
 
-    explicit ScriptBase(uint32_t type_id) :
+    explicit ScriptBase(int type_id) :
             type_id_{type_id} {
 
     }
@@ -40,7 +41,8 @@ public:
 
     virtual void gui_inspector() {}
 
-    uint32_t get_type_id() {
+    [[nodiscard]]
+    uint32_t get_type_id() const {
         return type_id_;
     }
 
@@ -54,19 +56,17 @@ public:
         return entity_.get_or_create<Component>();
     }
 
-    [[nodiscard]] ecs::EntityApi find_child(const std::string& name) const;
+    [[nodiscard]] ecs::EntityApi find_child(const char* name) const;
 
 protected:
     ecs::EntityApi entity_;
-    uint32_t type_id_;
+    int type_id_;
 };
 
 template<typename T>
 class Script : public ScriptBase {
 public:
-    Script() :
-            ScriptBase{TypeIndex<T, ScriptBase>::value} {
-
+    Script() : ScriptBase{TypeIndex<T, ScriptBase>::value} {
     }
 
     ~Script() override = default;
@@ -74,27 +74,27 @@ public:
 
 struct ScriptHolder {
     ecs::EntityApi owner;
-    std::vector<std::unique_ptr<ScriptBase>> list;
+    Array<Pointer<ScriptBase>> list;
 
     void link(ecs::EntityApi owner_);
 
     template<typename T>
     T& make() {
-        auto& r = *list.emplace_back(std::make_unique<T>());
-        r.link_to_entity(owner);
-        r.start();
-        return static_cast<T&>(r);
+        auto& r = list.emplace_back(Pointer<ScriptBase>{Pointer<T>::make()});
+        r->link_to_entity(owner);
+        r->start();
+        return static_cast<T&>(*r);
     }
 };
 
-EK_DECLARE_TYPE(ScriptHolder);
+ECX_TYPE(4, ScriptHolder);
 
 class ScriptDrawable2D : public Drawable2D<ScriptDrawable2D> {
 public:
     ecs::EntityApi entity_;
-    std::unique_ptr<IDrawable2D> delegate;
+    Pointer<IDrawable2D> delegate;
 
-    ScriptDrawable2D(ecs::EntityApi entity, std::unique_ptr<IDrawable2D> delegate_) :
+    ScriptDrawable2D(ecs::EntityApi entity, Pointer<IDrawable2D> delegate_) :
             Drawable2D(),
             entity_{entity},
             delegate{std::move(delegate_)} {
@@ -106,17 +106,17 @@ public:
             delegate->draw();
         }
         auto* holder = entity_.tryGet<ScriptHolder>();
-        assert(holder);
+        EK_ASSERT(holder);
         for (auto& script : holder->list) {
             script->draw();
         }
     }
 
     [[nodiscard]]
-    rect_f getBounds() const override { return delegate ? delegate->getBounds() : rect_f{}; }
+    Rect2f getBounds() const override { return delegate ? delegate->getBounds() : Rect2f{}; }
 
     [[nodiscard]]
-    bool hitTest(float2 point) const override { return delegate && delegate->hitTest(point); }
+    bool hitTest(Vec2f point) const override { return delegate && delegate->hitTest(point); }
 };
 
 template<typename S>
@@ -140,6 +140,9 @@ inline S& findScript(ecs::EntityApi e) {
 
 void updateScripts();
 
+EK_TYPE_INDEX_T(IDrawable2D, ScriptDrawable2D, 6);
+
 }
 
-#define EK_DECL_SCRIPT_CPP(T) class T : public ::ek::Script<T>
+#define EK_DECL_SCRIPT_CPP(Tp,...) class Tp : public ek::Script<Tp>
+

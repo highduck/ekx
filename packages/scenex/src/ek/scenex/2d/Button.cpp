@@ -1,8 +1,8 @@
 #include "Button.hpp"
 
 #include <ek/scenex/base/Interactive.hpp>
-#include <ek/math/common.hpp>
-#include <ek/math/rand.hpp>
+#include <ek/math/Math.hpp>
+#include <ek/math/Random.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/AudioManager.hpp>
@@ -13,7 +13,7 @@
 
 namespace ek {
 
-void play_sound(const std::string& id) {
+void play_sound(const char* id) {
     Locator::ref<AudioManager>().play_sound(id);
 }
 
@@ -42,38 +42,40 @@ const ButtonSkin& get_skin(const Button& btn) {
 
 void initialize_events(ecs::EntityApi e) {
     auto& interactive = e.get_or_create<Interactive>();
-    interactive.on_over.add([e] {
-        const auto& skin = get_skin(e.get<Button>());
-        play_sound(skin.sfxOver);
-    });
-    interactive.on_out.add([e] {
+    interactive.onEvent += [e](auto event) {
         auto& btn = e.get<Button>();
         const auto& skin = get_skin(btn);
-        if (e.get<Interactive>().pushed) {
-            start_post_tween(btn);
-            play_sound(skin.sfxCancel);
-        } else {
-            play_sound(skin.sfxOut);
+        switch(event) {
+            case PointerEvent::Over:
+                play_sound(skin.sfxOver);
+                break;
+            case PointerEvent::Out:
+                if (e.get<Interactive>().pushed) {
+                    start_post_tween(btn);
+                    play_sound(skin.sfxCancel);
+                } else {
+                    play_sound(skin.sfxOut);
+                }
+                break;
+            case PointerEvent::Down:
+                play_sound(skin.sfxDown);
+                break;
+            case PointerEvent::Tap:
+                btn.clicked.emit();
+
+                play_sound(skin.sfxClick);
+                start_post_tween(btn);
+
+                // TODO:
+                //auto name = e.get_or_default<NodeName>().name;
+                //if (!name.empty()) {
+                //    analytics::event("click", name.c_str());
+                //}
+                break;
+            default:
+                break;
         }
-    });
-    interactive.on_down.add([e] {
-        const auto& skin = get_skin(e.get<Button>());
-        play_sound(skin.sfxDown);
-    });
-    interactive.on_clicked.add([e] {
-        auto& btn = e.get<Button>();
-        btn.clicked.emit();
-
-        const auto& skin = get_skin(btn);
-        play_sound(skin.sfxClick);
-        start_post_tween(btn);
-
-        // TODO:
-        //auto name = e.get_or_default<NodeName>().name;
-        //if (!name.empty()) {
-        //    analytics::event("click", name.c_str());
-        //}
-    });
+    };
 
     e.get_or_create<NodeEventHandler>().on(
             interactive_event::back_button,
@@ -92,12 +94,12 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
     const float over = btn.timeOver;
     const float push = btn.timePush;
     const float post = btn.timePost;
-    const float pi = math::pi;
+    const float pi = Math::pi;
 
     float sx = 1.0f + 0.2f * sinf((1.0f - post) * pi * 5.0f) * post;
     float sy = 1.0f + 0.2f * sinf((1.0f - post) * pi) * cosf((1.0f - post) * pi * 5.0f) * post;
 
-    transform.setScale(btn.baseScale * float2(sx, sy));
+    transform.setScale(btn.baseScale * Vec2f(sx, sy));
 
     auto color = lerp(0xFFFFFFFF_argb, 0xFF888888_argb, push);
     transform.color.scale = btn.baseColor.scale * color;
@@ -135,17 +137,17 @@ void Button::updateAll() {
 
         const auto& skin = get_skin(btn);
 
-        btn.timeOver = math::reach_delta(btn.timeOver,
+        btn.timeOver = Math::reach_delta(btn.timeOver,
                                          interactive.over ? 1.0f : 0.0f,
                                          dt * skin.overSpeedForward,
                                          -dt * skin.overSpeedBackward);
 
-        btn.timePush = math::reach_delta(btn.timePush,
+        btn.timePush = Math::reach_delta(btn.timePush,
                                          interactive.pushed ? 1.0f : 0.0f,
                                          dt * skin.pushSpeedForward,
                                          -dt * skin.pushSpeedBackward);
 
-        btn.timePost = math::reach(btn.timePost, 0.0f, 2.0f * dt);
+        btn.timePost = Math::reach(btn.timePost, 0.0f, 2.0f * dt);
 
         apply_skin(skin, btn, transform);
         update_movie_frame(e, interactive);

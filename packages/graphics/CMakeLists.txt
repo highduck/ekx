@@ -32,14 +32,25 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -g
         -fno-exceptions
         -fno-rtti
-        -fstrict-aliasing
+        -fno-strict-aliasing
+        -Wstrict-aliasing=2
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
 
+    target_compile_options(${PROJECT_NAME}
+            PRIVATE -fobjc-arc
+            PRIVATE -x objective-c++
+            )
+
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+    target_compile_options(${PROJECT_NAME}
+            PRIVATE -fobjc-arc
+            PRIVATE -x objective-c++
+            )
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
 

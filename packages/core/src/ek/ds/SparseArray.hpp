@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../assert.hpp"
+#include <ek/assert.h>
 #include <cstdlib>
 
 namespace ek {
@@ -42,12 +42,12 @@ struct SparseArray {
         V indices[ElementsPerPage];
     };
 
-    static Page sInvalidPage;
+    inline static Page* pInvalidPage = nullptr;
 
     // 32 * 8 = 256
     Page* pages[PagesMaxCount];
 
-    explicit SparseArray() : pages{} {
+    constexpr SparseArray() noexcept : pages{0} {
     }
 
     [[nodiscard]]
@@ -66,7 +66,7 @@ struct SparseArray {
         const auto offset = k & PageMask;
         auto* indices = pages_[page]->indices;
         EK_ASSERT_R2(pages_[page]->indices[offset] == 0);
-        if (indices != sInvalidPage.indices) {
+        if (indices != pInvalidPage->indices) {
             indices[offset] = v;
         } else {
             auto* pageData = (Page*) calloc(1, PageSize);
@@ -108,31 +108,28 @@ struct SparseArray {
     }
 
     static void initArrays(SparseArray* arrays, unsigned count) {
-        auto* pInvalidPage = &sInvalidPage;
+        auto* invalidPage = pInvalidPage;
         for (unsigned j = 0; j < count; ++j) {
             auto* pages = arrays[j].pages;
             for (unsigned i = 0; i < PagesMaxCount; ++i) {
-                pages[i] = pInvalidPage;
+                pages[i] = invalidPage;
             }
         }
     }
 
     static void clearArrays(SparseArray* arrays, unsigned count) {
-        auto* pInvalidPage = &sInvalidPage;
+        auto* invalidPage = pInvalidPage;
         for (unsigned i = 0; i < count; ++i) {
             auto* pages = arrays[i].pages;
             for (unsigned j = 0; j < PagesMaxCount; ++j) {
                 auto* page = pages[j];
-                if (page != pInvalidPage) {
+                if (page != invalidPage) {
                     free(page);
-                    pages[j] = pInvalidPage;
+                    pages[j] = invalidPage;
                 }
             }
         }
     }
 };
-
-template<typename K, typename V, unsigned MaxCount>
-inline typename SparseArray<K, V, MaxCount>::Page SparseArray<K, V, MaxCount>::sInvalidPage{};
 
 }

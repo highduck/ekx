@@ -2,10 +2,10 @@
 
 namespace ek {
 
-void clip_rects(const rect_i& src_bounds, const rect_i& dest_bounds,
-                rect_i& src_rect, rect_i& dest_rect) {
-    const rect_i src_rc = clamp_bounds(src_bounds, src_rect);
-    const rect_i dest_rc = clamp_bounds(dest_bounds, dest_rect);
+void clip_rects(const Rect2i& src_bounds, const Rect2i& dest_bounds,
+                Rect2i& src_rect, Rect2i& dest_rect) {
+    const Rect2i src_rc = clamp_bounds(src_bounds, src_rect);
+    const Rect2i dest_rc = clamp_bounds(dest_bounds, dest_rect);
     src_rect = {
             src_rc.position + dest_rc.position - dest_rect.position,
             dest_rc.size
@@ -13,16 +13,16 @@ void clip_rects(const rect_i& src_bounds, const rect_i& dest_bounds,
     dest_rect = dest_rc;
 }
 
-void copy_pixels_normal(image_t& dest, int2 dest_position,
-                        const image_t& src, const rect_i& src_rect) {
-    rect_i dest_rc = {dest_position, src_rect.size};
-    rect_i src_rc = src_rect;
+void copy_pixels_normal(image_t& dest, Vec2i dest_position,
+                        const image_t& src, const Rect2i& src_rect) {
+    Rect2i dest_rc = {dest_position, src_rect.size};
+    Rect2i src_rc = src_rect;
     clip_rects(src.bounds<int>(), dest.bounds<int>(),
                src_rc, dest_rc);
 
     for (int32_t y = 0; y < src_rc.height; ++y) {
         for (int32_t x = 0; x < src_rc.width; ++x) {
-            const auto pixel = get_pixel_unsafe(src, int2{src_rc.x + x, src_rc.y + y});
+            const auto pixel = get_pixel_unsafe(src, Vec2i{src_rc.x + x, src_rc.y + y});
             set_pixel_unsafe(dest, {dest_rc.x + x, dest_rc.y + y}, pixel);
         }
     }
@@ -36,9 +36,9 @@ void copy_pixels_normal(image_t& dest, int2 dest_position,
 //  2 2
 //  1 1
 
-void copy_pixels_ccw_90(image_t& dest, int2 dest_position, const image_t& src, const rect_i& src_rect) {
-    rect_i src_rc = clamp_bounds(src.bounds<int>(), src_rect);
-    rect_i dest_rc = clamp_bounds(dest.bounds<int>(), {dest_position, {src_rc.height, src_rc.width}});
+void copy_pixels_ccw_90(image_t& dest, Vec2i dest_position, const image_t& src, const Rect2i& src_rect) {
+    Rect2i src_rc = clamp_bounds(src.bounds<int>(), src_rect);
+    Rect2i dest_rc = clamp_bounds(dest.bounds<int>(), {dest_position, {src_rc.height, src_rc.width}});
     src_rc = {
             src_rc.position + dest_rc.position - dest_position,
             {dest_rc.height, dest_rc.width}
@@ -46,8 +46,8 @@ void copy_pixels_ccw_90(image_t& dest, int2 dest_position, const image_t& src, c
 
     for (int32_t y = 0; y < src_rc.height; ++y) {
         for (int32_t x = 0; x < src_rc.width; ++x) {
-            const auto pixel = get_pixel_unsafe(src, int2{src_rc.x + x, src_rc.y + y});
-            const int2 dest_transformed_position{dest_rc.x + y, dest_rc.y + src_rc.width - x};
+            const auto pixel = get_pixel_unsafe(src, Vec2i{src_rc.x + x, src_rc.y + y});
+            const Vec2i dest_transformed_position{dest_rc.x + y, dest_rc.y + src_rc.width - x};
             set_pixel_unsafe(dest, dest_transformed_position, pixel);
         }
     }

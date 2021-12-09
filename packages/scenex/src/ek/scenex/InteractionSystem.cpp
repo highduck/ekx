@@ -1,14 +1,13 @@
 #include "InteractionSystem.hpp"
 
 #include <ecxx/ecxx.hpp>
-#include <ek/math/vec.hpp>
+#include <ek/math/Vec.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
 #include <ek/scenex/systems/hitTest.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/scenex/2d/RenderSystem2D.hpp>
 #include <ek/scenex/base/Node.hpp>
-//#include <ek/scenex/SceneFactory.hpp>
 
 using namespace ek::app;
 
@@ -71,15 +70,15 @@ void InteractionSystem::process() {
         cursor = searchInteractiveTargets(currTargets);
     }
 
-    fireInteraction(InteractionEvent::PointerOver, false, true);
-    fireInteraction(InteractionEvent::PointerOut, true, true);
+    fireInteraction(PointerEvent::Over, false, true);
+    fireInteraction(PointerEvent::Out, true, true);
 
     swapTargetLists();
 
     app::setMouseCursor(cursor);
 }
 
-void InteractionSystem::fireInteraction(InteractionEvent event, bool prev, bool onlyIfChanged) {
+void InteractionSystem::fireInteraction(PointerEvent event, bool prev, bool onlyIfChanged) {
     auto& targets = prev ? getPrevTargets() : getCurrentTargets();
     auto& oppositeTargets = prev ? getCurrentTargets() : getPrevTargets();
 
@@ -93,16 +92,16 @@ void InteractionSystem::fireInteraction(InteractionEvent event, bool prev, bool 
     }
 }
 
-void InteractionSystem::handle_mouse_event(const Event& ev, float2 pos) {
+void InteractionSystem::handle_mouse_event(const Event& ev, Vec2f pos) {
 
     if (ev.type == EventType::MouseDown) {
         mousePosition0_ = pos;
         pointerDown_ = true;
-        fireInteraction(InteractionEvent::PointerDown);
+        fireInteraction(PointerEvent::Down);
     } else if (ev.type == EventType::MouseUp) {
         mousePosition0_ = pos;
         pointerDown_ = false;
-        fireInteraction(InteractionEvent::PointerUp);
+        fireInteraction(PointerEvent::Up);
     } else if (ev.type == EventType::MouseMove) {
         mousePosition0_ = pos;
         mouseActive_ = true;
@@ -111,11 +110,11 @@ void InteractionSystem::handle_mouse_event(const Event& ev, float2 pos) {
         pointerDown_ = false;
         mouseActive_ = false;
         //update();
-        fireInteraction(InteractionEvent::PointerUp);
+        fireInteraction(PointerEvent::Up);
     }
 }
 
-void InteractionSystem::handle_touch_event(const Event& ev, float2 pos) {
+void InteractionSystem::handle_touch_event(const Event& ev, Vec2f pos) {
     if (ev.type == EventType::TouchStart) {
         if (touchID_ == 0) {
             touchID_ = ev.touch.id;
@@ -123,16 +122,16 @@ void InteractionSystem::handle_touch_event(const Event& ev, float2 pos) {
             mouseActive_ = false;
             pointerDown_ = true;
             process();
-            fireInteraction(InteractionEvent::PointerDown);
+            fireInteraction(PointerEvent::Down);
         }
     }
 
     if (touchID_ == ev.touch.id) {
         if (ev.type == EventType::TouchEnd) {
             touchID_ = 0;
-            touchPosition0_ = float2::zero;
+            touchPosition0_ = Vec2f::zero;
             pointerDown_ = false;
-            fireInteraction(InteractionEvent::PointerUp);
+            fireInteraction(PointerEvent::Up);
         } else {
             touchPosition0_ = pos;
         }
@@ -143,7 +142,7 @@ void InteractionSystem::sendBackButton() {
     dispatch_interactive_event(root_, {
             interactive_event::back_button,
             root_,
-            "game"
+            {"game"}
     });
 }
 
@@ -151,7 +150,7 @@ void InteractionSystem::handle_system_pause() {
     broadcast(root_, interactive_event::system_pause);
 }
 
-ecs::EntityApi InteractionSystem::globalHitTest(float2& worldSpacePointer, ecs::EntityRef& capturedCamera) {
+ecs::EntityApi InteractionSystem::globalHitTest(Vec2f& worldSpacePointer, ecs::EntityRef& capturedCamera) {
     auto& cameras = Camera2D::getCameraQueue();
     for (int i = static_cast<int>(cameras.size()) - 1; i >= 0; --i) {
         auto e = cameras[i];
@@ -173,7 +172,7 @@ ecs::EntityApi InteractionSystem::globalHitTest(float2& worldSpacePointer, ecs::
 }
 
 MouseCursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& list) {
-    float2 pointer{};
+    Vec2f pointer{};
     ecs::EntityApi it;
     ecs::EntityRef camera;
     if (dragEntity_.valid()) {

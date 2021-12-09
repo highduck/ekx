@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/math/vec.hpp>
+#include <ek/math/Vec.hpp>
 #include <ek/scenex/base/Script.hpp>
 #include <ecxx/ecxx.hpp>
 
@@ -15,8 +15,8 @@ public:
         None = 2,
     };
 
-    float2 offset{};
-    float2 target{};
+    Vec2f offset{};
+    Vec2f target{};
     ecs::EntityRef target_entity{};
 
     float k = 0.1f;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../assert.hpp"
+#include <ek/assert.h>
 #include "Type.hpp"
 
 namespace ek::Locator {
@@ -63,7 +63,7 @@ void reset(Impl* value) {
     S::value = value;
 }
 
-// noop assert if it's was not initialized before (it's totally fine)
+// noop assert if it was not initialized before (it's totally fine)
 template<typename T>
 void destroy() {
     using S = ServiceStorage<T>;

@@ -2,11 +2,29 @@
 
 #include <ek/ds/StaticHistoryBuffer.hpp>
 #include <ek/ds/Array.hpp>
-#include <ek/math/packed_color.hpp>
+#include <ek/math/Color32.hpp>
 #include <ek/timers.hpp>
+#include <ek/scenex/text/TextEngine.hpp>
 #include "GameDisplay.hpp"
 
 namespace ek {
+
+class FpsMeter final {
+public:
+    void update(float dt);
+
+    [[nodiscard]]
+    float getAverageFPS() const {
+        return avgFPS_;
+    }
+
+private:
+    // if less or equal 0 - calculate FPS for every frame
+    const float measurementsPerSeconds = 2.0f;
+    float avgFPS_ = 0.0f;
+    float counter_ = 0.0f;
+    float accum_ = 0.0f;
+};
 
 class Profiler {
 public:
@@ -29,7 +47,7 @@ public:
 
         [[nodiscard]] argb32_t calculateColor(float val) const {
             return lerp(0x00FF00_rgb, 0xFF0000_rgb,
-                        math::clamp((val - thMin) / (thMax - thMin), 0.0f, 1.0f));
+                        Math::clamp((val - thMin) / (thMax - thMin), 0.0f, 1.0f));
         }
     };
 
@@ -40,6 +58,7 @@ public:
         Track_FillRate = 3,
         DefaultTracks_Count = 4
     };
+    TextFormat textFormat{"Cousine-Regular", 10};
     FpsMeter fpsMeter{};
     Array<Track> tracks{};
     bool enabled = true;

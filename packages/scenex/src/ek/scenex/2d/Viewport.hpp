@@ -1,34 +1,35 @@
 #pragma once
 
-#include <ek/math/box.hpp>
+#include <ek/math/Rect.hpp>
 #include <ek/util/Type.hpp>
+#include <ecxx/ecxx_fwd.hpp>
 
 namespace ek {
 
 /*** Scale Camera viewport to Screen ***/
 struct ViewportScaleOptions {
     // logical resolution size,
-    float2 baseResolution = float2::one;
-    float2 alignment{0.5f, 0.5f};
-    float2 safeAreaFit = float2::one;
+    Vec2f baseResolution = Vec2f::one;
+    Vec2f alignment{0.5f, 0.5f};
+    Vec2f safeAreaFit = Vec2f::one;
     // modes
-    float2 pixelRatio = float2::one;
+    Vec2f pixelRatio = Vec2f::one;
     bool scaleToResolution = true;
-    rect_f viewport = rect_f::zero_one;
+    Rect2f viewport = Rect2f::zero_one;
 };
 
 struct ViewportScaleInput {
     // screen metrics
-    rect_f fullRect;
-    rect_f safeRect;
+    Rect2f fullRect;
+    Rect2f safeRect;
     float dpiScale;
 };
 
 struct ViewportScaleOutput {
-    rect_f screenRect;
-    rect_f fullRect;
-    rect_f safeRect;
-    float2 offset;
+    Rect2f screenRect;
+    Rect2f fullRect;
+    Rect2f safeRect;
+    Vec2f offset;
     float scale;
 };
 
@@ -48,6 +49,6 @@ struct Viewport {
     static void updateAll(const GameDisplayInfo& display0);
 };
 
-EK_DECLARE_TYPE(Viewport);
+ECX_TYPE(17, Viewport);
 
 }

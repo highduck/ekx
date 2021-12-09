@@ -1,6 +1,7 @@
 #include "DynamicAtlas.hpp"
 #include <ek/graphics/graphics.hpp>
-#include <ek/math/common.hpp>
+#include <ek/math/Math.hpp>
+#include <ek/assert.h>
 
 namespace ek {
 
@@ -31,11 +32,13 @@ public:
             x{1},
             y{1},
             lineHeight{0},
-            alphaMap{alphaMap_},
-            mipmaps{mipmaps_},
-            data(width_ * height_ * (alphaMap_ ? 1 : 4), 0u),
             dirtyRect{0, 0, width_, height_},
-            dirty{true} {
+            dirty{true},
+            alphaMap{alphaMap_},
+            mipmaps{mipmaps_} {
+
+        dataSize = width_ * height_ * (alphaMap_ ? 1 : 4);
+        data = (uint8_t*)calloc(1, dataSize);
 
         sg_image_desc desc{
                 .type = SG_IMAGETYPE_2D,
@@ -52,12 +55,12 @@ public:
     }
 
     ~Page() {
+        delete data;
         delete texture;
     }
 
     void reset() {
-        //data.assign(data.size(), 0);
-        memset(data.data(), 0u, data.size());
+        memset(data, 0u, dataSize);
         dirtyRect.set(0, 0, width, height);
         dirty = true;
         x = padding;
@@ -65,9 +68,9 @@ public:
         lineHeight = 0;
     }
 
-    bool add(int spriteWidth, int spriteHeight, const std::vector<uint8_t>& pixels, DynamicAtlasSprite& sprite) {
-        assert(pixels.size() >= spriteWidth * spriteHeight * bytesPerPixel);
-        assert(spriteWidth < width && spriteHeight < height);
+    bool add(int spriteWidth, int spriteHeight, const uint8_t* pixelsData, size_t pixelsSize, DynamicAtlasSprite& sprite) {
+        EK_ASSERT(pixelsSize >= spriteWidth * spriteHeight * bytesPerPixel);
+        EK_ASSERT(spriteWidth < width && spriteHeight < height);
 
         int placeX = x;
         int placeY = y;
@@ -92,7 +95,7 @@ public:
             auto srcStride = bytesPerPixel * spriteWidth;
             auto destStride = bytesPerPixel * width;
             for (int cy = 0; cy < spriteHeight; ++cy) {
-                memcpy(data.data() + placeX + (placeY + cy) * destStride, pixels.data() + cy * srcStride, srcStride);
+                memcpy(data + placeX + (placeY + cy) * destStride, pixelsData + cy * srcStride, srcStride);
             }
             if (!dirty) {
                 dirtyRect.set(placeX, placeY, spriteWidth, spriteHeight);
@@ -116,7 +119,7 @@ public:
 
     void invalidate() {
         if (dirty) {
-            texture->update(data.data(), data.size());
+            texture->update(data, dataSize);
             dirty = false;
         }
     }
@@ -132,8 +135,9 @@ public:
     int y = 0;
     int lineHeight = 0;
 
-    std::vector<uint8_t> data;
-    rect_i dirtyRect;
+    uint8_t* data = nullptr;
+    size_t dataSize = 0;
+    Rect2i dirtyRect;
     bool dirty;
 
 
@@ -157,30 +161,30 @@ DynamicAtlas::~DynamicAtlas() {
     }
 }
 
-DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const std::vector<uint8_t>& pixels) {
+DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const uint8_t* pixels, size_t pixelsSize) {
     int bpp = alphaMap ? 1 : 4;
-    assert(pixels.size() >= width * height * bpp);
-    assert(width < pageWidth && height < pageHeight);
+    EK_ASSERT(pixelsSize >= width * height * bpp);
+    EK_ASSERT(width < pageWidth && height < pageHeight);
 
     DynamicAtlasSprite sprite;
     for (auto* page : pages_) {
-        if (page->add(width, height, pixels, sprite)) {
+        if (page->add(width, height, pixels, pixelsSize, sprite)) {
             return sprite;
         }
     }
     auto* newPage = new Page(pageWidth, pageHeight, alphaMap, mipmaps);
     newPage->reset();
     pages_.push_back(newPage);
-    if (!newPage->add(width, height, pixels, sprite)) {
+    if (!newPage->add(width, height, pixels, pixelsSize, sprite)) {
         // how come?
-        assert(false);
+        EK_ASSERT(false);
     }
 
     return sprite;
 }
 
 const graphics::Texture* DynamicAtlas::getPageTexture(int index) const {
-    assert(index < pages_.size() && index >= 0);
+    EK_ASSERT(index < pages_.size() && index >= 0);
     return pages_[index]->texture;
 }
 
@@ -193,7 +197,7 @@ void DynamicAtlas::reset() {
 
 int DynamicAtlas::estimateBetterSize(float scaleFactor, unsigned baseSize, unsigned maxSize) {
     auto scaledSize = static_cast<unsigned>(ceilf(static_cast<float>(baseSize) * scaleFactor));
-    auto potSize = math::nextPowerOf2(scaledSize);
+    auto potSize = Math::nextPowerOf2(scaledSize);
     return std::min(potSize, maxSize);
 }
 

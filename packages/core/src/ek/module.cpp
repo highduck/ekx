@@ -1,24 +1,23 @@
-#include "math/rand_impl.hpp"
+#include "math/Random.hpp"
 
-#include "time/FpsMeter_impl.hpp"
-#include "time/FrameTimer_impl.hpp"
-#include "time/Stopwatch_impl.hpp"
-#include "time/TimeLayer_impl.hpp"
 #include "time/Timers_impl.hpp"
-#include "time/Clock_impl.hpp"
+#include "util/Res.hpp"
 
-#include "debug/LogSystem_impl.hpp"
-
-#include "util/StringUtil_impl.hpp"
-#include "util/Path_impl.hpp"
-#include "util/Base64_impl.hpp"
+#include <ek/log.h>
+#include <ek/time.h>
 
 namespace ek::core {
 
 void setup() {
-    LogSystem::initialize();
-    Clock::setup();
+    ResourceDB::instance.initialize();
+    log_init();
+    ek_time_init();
     setupTimers();
+
+    auto seed = ek_time_seed32();
+    rand_default.setSeed(seed++);
+    rand_fx.setSeed(seed++);
+    rand_game.setSeed(seed++);
 }
 
 }

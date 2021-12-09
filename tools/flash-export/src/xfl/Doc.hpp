@@ -4,12 +4,18 @@
 #include <memory>
 #include <map>
 #include <ek/ds/Array.hpp>
+#include <ek/ds/String.hpp>
 
 namespace pugi {
 class xml_document;
 }
 
 namespace ek::xfl {
+
+struct SceneInfo {
+    String timeline;
+    String item;
+};
 
 class File {
 public:
@@ -32,11 +38,11 @@ public:
 
     explicit Doc(const char* path);
 
-    [[nodiscard]] const Element* find(const std::string& name,
+    [[nodiscard]] const Element* find(const String& name,
                                       ElementType type = ElementType::unknown,
                                       bool ignoreFolders = false) const;
 
-    [[nodiscard]] const Element* findLinkage(const std::string& className,
+    [[nodiscard]] const Element* findLinkage(const String& className,
                                              ElementType type = ElementType::unknown) const;
 
 public:
@@ -44,7 +50,7 @@ public:
     Array<FolderItem> folders{};
     Array<Element> library{};
     // order is important
-    std::map<std::string, std::string> scenes;
+    Array<SceneInfo> scenes;
 private:
     std::unique_ptr<File> root_;
 };

@@ -6,14 +6,14 @@
 
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/base/Node.hpp>
-#include <ek/math/bounds_builder.hpp>
+#include <ek/math/BoundsBuilder.hpp>
 
 namespace ek {
 
 int RenderSystem2D::currentLayerMask = 0xFF;
 
 void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTransform2D* worldTransform) {
-    assert(w.isValid(e));
+    EK_ASSERT(w.isValid(e));
 
     auto* uglyFilter = w.tryGet<UglyFilter2D>(e);
     if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {
@@ -79,7 +79,7 @@ void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTr
 
 
 void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
-    assert(w.isValid(e));
+    EK_ASSERT(w.isValid(e));
 
     auto* uglyFilter = w.tryGet<UglyFilter2D>(e);
     if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {

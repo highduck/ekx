@@ -6,11 +6,10 @@
 #include "../xfl/Doc.hpp"
 #include "../xfl/renderer/Scanner.hpp"
 #include <ek/util/StringUtil.hpp>
-#include <ek/debug.hpp>
+#include <ek_log.h>
+#include <stb/stb_sprintf.h>
 
 namespace ek::xfl {
-
-using std::string;
 
 enum BoundsMode {
     Bounds_None = 0,
@@ -19,23 +18,22 @@ enum BoundsMode {
     Bounds_Scissors = 4
 };
 
-int getBoundingRectFlags(const string& str) {
+int getBoundingRectFlags(const char* name) {
     int flags = 0;
-    const char* cstr = str.c_str();
-    if (equals_ignore_case(cstr, "hitrect")) {
+    if (ek_cstr_equals(name, "hitrect", 1)) {
         flags |= Bounds_HitArea;
     }
-    if (equals_ignore_case(cstr, "bbrect")) {
+    if (ek_cstr_equals(name, "bbrect", 1)) {
         flags |= Bounds_Bounds;
     }
-    if (equals_ignore_case(cstr, "cliprect")) {
+    if (ek_cstr_equals(name, "cliprect", 1)) {
         flags |= Bounds_Scissors;
     }
     return flags;
 }
 
 bool setupSpecialLayer(const Doc& doc, const Layer& layer, ExportItem& toItem) {
-    auto flags = getBoundingRectFlags(layer.name);
+    auto flags = getBoundingRectFlags(layer.name.c_str());
     if (flags != 0) {
         toItem.node.boundingRect = Scanner::getBounds(doc, layer.frames[0].elements);
         if ((flags & Bounds_HitArea) != 0) {
@@ -63,10 +61,10 @@ void collectFramesMetaInfo(const Doc& doc, ExportItem& item) {
         }
         for (auto& frame: layer.frames) {
             if (!frame.script.empty()) {
-                item.node.scripts[frame.index] = frame.script;
+                item.node.scripts.set(frame.index, frame.script);
             }
             if (!frame.name.empty()) {
-                item.node.labels[frame.index] = frame.name;
+                item.node.labels.set(frame.index, frame.name);
             }
         }
     }
@@ -75,7 +73,7 @@ void collectFramesMetaInfo(const Doc& doc, ExportItem& item) {
 bool shouldConvertItemToSprite(ExportItem& item) {
     if (item.children.size() == 1 && item.drawingLayerChild) {
         return true;
-    } else if (item.node.labels[0] == "*static") {
+    } else if (item.node.labels.get(0, "") == "*static") {
         // special user TAG
         return true;
     } else if (!item.node.scaleGrid.empty()) {
@@ -99,8 +97,8 @@ void process_filters(const Element& el, ExportItem& item) {
         fd.blur = filter.blur;
         fd.quality = filter.quality;
 
-        float a = math::to_radians(filter.angle);
-        fd.offset = filter.distance * float2{cosf(a), sinf(a)};
+        float a = Math::to_radians(filter.angle);
+        fd.offset = filter.distance * Vec2f{cosf(a), sinf(a)};
 
         if (filter.type == FilterType::drop_shadow) {
             fd.type = SGFilterType::DropShadow;
@@ -115,13 +113,13 @@ void process_filters(const Element& el, ExportItem& item) {
 }
 
 void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
-    auto& tf = item.node.dynamicText.emplace();
+    auto& tf = item.node.dynamicText.emplace_back();
     //if(dynamicText.rect != null) {
 //    item->node.matrix.tx += el.rect.x - 2;
 //    item->node.matrix.ty += el.rect.y - 2;
     //}
     const auto& textRun = el.textRuns[0];
-    string faceName = textRun.attributes.face;
+    auto faceName = textRun.attributes.face;
     if (!faceName.empty() && faceName.back() == '*') {
         faceName.pop_back();
         const auto* fontItem = doc.find(faceName, ElementType::font_item, true);
@@ -132,7 +130,7 @@ void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
     // animate exports as CR line-ending (legacy MacOS),
     // we need only LF to not check twice when drawing the text
     tf.text = textRun.characters;
-    replace(tf.text.data(), '\r', '\n');
+    ek_cstr_replace(tf.text.data(), '\r', '\n');
     tf.font = faceName;
     tf.size = textRun.attributes.size;
     if (el.lineType == TextLineType::Multiline) {
@@ -154,16 +152,15 @@ void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
         layer.blurIterations = filter.quality;
         layer.offset = {};
         if (filter.type == FilterType::drop_shadow) {
-            const float a = math::to_radians(filter.angle);
-            layer.offset = filter.distance * float2{cosf(a), sinf(a)};
+            const float a = Math::to_radians(filter.angle);
+            layer.offset = filter.distance * Vec2f{cosf(a), sinf(a)};
         }
         layer.strength = int(filter.strength);
         tf.layers.push_back(layer);
     }
 }
 
-SGBuilder::SGBuilder(const Doc& doc)
-        : doc{doc} {
+SGBuilder::SGBuilder(const Doc& doc) : doc{doc} {
 }
 
 SGBuilder::~SGBuilder() = default;
@@ -239,9 +236,11 @@ SGFile SGBuilder::export_library() {
     // }
 
     SGFile sg;
-    sg.linkages = linkages;
-    for (auto& pair: doc.scenes) {
-        sg.scenes.push_back(pair.second);
+    for (auto& pair: linkages) {
+        sg.linkages.emplace_back(SGSceneInfo{pair.first, pair.second});
+    }
+    for (auto& info: doc.scenes) {
+        sg.scenes.push_back(info.item);
     }
 
     for (auto& item: library.node.children) {
@@ -393,7 +392,6 @@ void SGBuilder::process_shape(const Element& el, ExportItem* parent, processing_
 //    }
 }
 
-static std::string SHAPE_ID = "$";
 // we need global across all libraries to avoid multiple FLA exports overlapping
 int NEXT_SHAPE_IDX = 0;
 
@@ -404,7 +402,7 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
             child->drawingLayerItem &&
             child->animationSpan0 == _animationSpan0 &&
             child->animationSpan1 == _animationSpan1) {
-            // EK_DEBUG_F("Found drawing layer " << child->ref->item.name);
+            // EK_DEBUG("Found drawing layer " << child->ref->item.name);
             auto& timeline = child->drawingLayerItem->timeline;
             assert(!timeline.layers.empty());
             assert(!timeline.layers[0].frames.empty());
@@ -414,9 +412,11 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
         }
     }
     auto shapeItem = std::make_unique<Element>();
-    const std::string name = SHAPE_ID + std::to_string(++NEXT_SHAPE_IDX);
+
+    char shapeName[64];
+    stbsp_snprintf(shapeName, 64, "$%d", ++NEXT_SHAPE_IDX);
     {
-        shapeItem->item.name = name;
+        shapeItem->item.name = shapeName;
         shapeItem->elementType = ElementType::symbol_item;
         auto& layer = shapeItem->timeline.layers.emplace_back();
         auto& frame = layer.frames.emplace_back();
@@ -425,14 +425,14 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
 
     auto* layer = new ExportItem();
     layer->ref = shapeItem.get();
-    layer->node.libraryName = name;
+    layer->node.libraryName = shapeName;
     layer->renderThis = true;
     layer->animationSpan0 = _animationSpan0;
     layer->animationSpan1 = _animationSpan1;
     layer->append_to(&library);
 
     auto shapeInstance = std::make_unique<Element>();
-    shapeInstance->libraryItemName = name;
+    shapeInstance->libraryItemName = shapeName;
     shapeInstance->elementType = ElementType::symbol_instance;
 
     processing_bag_t bag;
@@ -442,7 +442,7 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
     drawingLayerInstance->drawingLayerItem = std::move(shapeItem);
     item->drawingLayerChild = drawingLayerInstance;
     item->shapes++;
-    // EK_DEBUG_F("Created drawing layer " << newElement->item.name);
+    // EK_DEBUG("Created drawing layer " << newElement->item.name);
     return drawingLayerInstance;
 }
 
@@ -477,11 +477,11 @@ void SGBuilder::process(const Element& el, ExportItem* parent, processing_bag_t*
         case ElementType::font_item:
         case ElementType::sound_item:
         case ElementType::static_text:
-            EK_WARN_F("element type is not supported yet: %d", static_cast<int>(type));
+            EK_WARN("element type is not supported yet: %d", static_cast<int>(type));
             break;
 
         case ElementType::unknown:
-            EK_WARN_F("unknown element type: %d", static_cast<int>(type));
+            EK_WARN("unknown element type: %d", static_cast<int>(type));
             break;
     }
 }
@@ -516,7 +516,7 @@ void SGBuilder::build_sprites(ImageSet& toImageSet) const {
     }
 }
 
-bool SGBuilder::isInLinkages(const string& id) const {
+bool SGBuilder::isInLinkages(const String& id) const {
     for (const auto& pair: linkages) {
         if (pair.second == id) {
             return true;
@@ -537,7 +537,7 @@ SGMovieLayerData* findTargetLayer(SGMovieData& movie, const SGNodeData* item) {
 }
 
 void SGBuilder::processTimeline(const Element& el, ExportItem* item) {
-    auto& movie = item->node.movie.emplace();
+    auto& movie = item->node.movie.emplace_back();
     movie.frames = el.timeline.getTotalFrames();
     movie.fps = doc.info.frameRate;
 
@@ -637,7 +637,7 @@ void SGBuilder::processTimeline(const Element& el, ExportItem* item) {
                     target->movieTargetId = static_cast<int>(i);
                 }
             }
-            item->node.movie = movie;
+            item->node.movie[0] = movie;
         }
 
         _animationSpan0 = 0;

@@ -8,8 +8,7 @@ function setup(project) {
         path: __dirname,
         cpp: "src"
     });
-    project.importModule("@ekx/stb", __dirname);
-    project.importModule("@ekx/sokol", __dirname);
+    project.importModule("@ekx/std", __dirname);
 }
 
 module.exports = setup;

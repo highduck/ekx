@@ -1,53 +1,60 @@
 #pragma once
 
-#include "../assert.hpp"
+#include <ek/assert.h>
 
 namespace ek {
 
 template<typename T>
 class alignas(alignof(T)) StaticStorage {
-    union {
-        T value;
-        char buffer[sizeof(T) + 1];
-    };
-public:
-    inline constexpr StaticStorage() noexcept {
-        buffer[sizeof(T)] = 0;
-    }
+    char buffer[sizeof(T) + 1];
 
-    inline ~StaticStorage() noexcept {
-        // we are exit the process
-        //EK_ASSERT(!isInitialized());
-    }
+    union Converter {
+        const void* data;
+        T* ptr;
+    };
+
+public:
+
+//    constexpr StaticStorage() noexcept {
+//        buffer[sizeof(T)] = 0;
+//    }
+
+//    ~StaticStorage() noexcept {
+//         we are exit the process
+//        EK_ASSERT(!isInitialized());
+//    }
 
     [[nodiscard]]
-    inline bool isInitialized() const {
+    bool isInitialized() const {
         return buffer[sizeof(T)] != 0;
     }
 
     template<typename ...Args>
-    inline void initialize(Args&& ...args) {
+    void initialize(Args&& ...args) {
         EK_ASSERT(!isInitialized());
         buffer[sizeof(T)] = 1;
         new(buffer) T(args...);
     }
 
-    constexpr inline T& get() {
+    constexpr T& get() const {
         EK_ASSERT(isInitialized());
-        return value;
+        Converter u{buffer};
+        return *u.ptr;
     }
 
-    constexpr inline T* ptr() {
-        return (T*) &value;
+    constexpr T* ptr() const {
+        Converter u{buffer};
+        return u.ptr;
     }
 
-    constexpr inline T& ref() {
-        return value;
+    constexpr T& ref() const {
+        Converter u{buffer};
+        return *u.ptr;
     }
 
-    inline void shutdown() {
+    void shutdown() {
         EK_ASSERT(isInitialized());
-        value.~T();
+        Converter{buffer}.ptr->~T();
         buffer[sizeof(T)] = 0;
     }
 };

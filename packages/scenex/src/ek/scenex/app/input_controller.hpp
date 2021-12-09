@@ -3,6 +3,7 @@
 #include <ek/app/app.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/ds/Array.hpp>
+#include <ek/ds/String.hpp>
 #include "GameAppListener.hpp"
 #include "GameDisplay.hpp"
 
@@ -10,10 +11,10 @@ namespace ek {
 
 struct touch_state_t {
     uint64_t id = 0;
-    float2 position;
-    float2 start_position;
+    Vec2f position;
+    Vec2f start_position;
     bool is_started_event = false;
-    float2 end_position;
+    Vec2f end_position;
     bool is_ended_event = false;
     bool pressed = false;
     bool active = false;
@@ -64,7 +65,7 @@ public:
     bool hovered_by_editor_gui = false;
     bool emulateTouch = false;
 private:
-    [[nodiscard]] float2 screenCoordToGameDisplay(float2 pos) const;
+    [[nodiscard]] Vec2f screenCoordToGameDisplay(Vec2f pos) const;
 
     void emulate_mouse_as_touch(const app::Event& event, touch_state_t& data);
 
@@ -78,8 +79,7 @@ private:
 
     GameDisplay& display_;
     InteractionSystem& interactions_;
-    std::string keyboard_text_;
-    int keyboard_modifiers_{};
+    //int keyboard_modifiers_{};
     bool reset_keys_ = false;
 
     constexpr static size_t keys_count = static_cast<size_t>(app::KeyCode::MaxCount);

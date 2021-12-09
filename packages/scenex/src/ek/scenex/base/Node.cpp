@@ -82,10 +82,10 @@ void removeFromParent(ecs::EntityApi e) {
 }
 
 void appendStrict(ecs::EntityApi e, ecs::EntityApi child) {
-    assert(e != child);
-    assert(e.has<Node>());
-    assert(child.has<Node>());
-    assert(!child.get<Node>().parent);
+    EK_ASSERT(e != child);
+    EK_ASSERT(e.has<Node>());
+    EK_ASSERT(child.has<Node>());
+    EK_ASSERT(!child.get<Node>().parent);
 
     auto& entity_node = e.get<Node>();
     auto& child_node = child.get<Node>();
@@ -110,10 +110,10 @@ void append(ecs::EntityApi e, ecs::EntityApi child) {
 }
 
 void prependStrict(ecs::EntityApi e, ecs::EntityApi child) {
-    assert(e != child);
-    assert(e.has<Node>());
-    assert(child.has<Node>());
-    assert(!child.get<Node>().parent);
+    EK_ASSERT(e != child);
+    EK_ASSERT(e.has<Node>());
+    EK_ASSERT(child.has<Node>());
+    EK_ASSERT(!child.get<Node>().parent);
 
     auto& entity_node = e.get<Node>();
     auto& child_node = child.get<Node>();
@@ -159,7 +159,7 @@ void removeChildren(ecs::EntityApi e) {
 
 void insertAfter(ecs::EntityApi e, ecs::EntityApi childAfter) {
     auto& entityNode = e.get<Node>();
-    assert (entityNode.parent);
+    EK_ASSERT(entityNode.parent);
     auto& childAfterNode = childAfter.get_or_create<Node>();
     removeFromParent(childAfter);
     auto next = entityNode.sibling_next;
@@ -175,10 +175,10 @@ void insertAfter(ecs::EntityApi e, ecs::EntityApi childAfter) {
 }
 
 void insertBeforeStrict(ecs::EntityApi e, ecs::EntityApi childBefore) {
-    assert(e.has<Node>());
-    assert(childBefore.has<Node>());
-    assert(!childBefore.get<Node>().parent);
-    assert(e.get<Node>().parent);
+    EK_ASSERT(e.has<Node>());
+    EK_ASSERT(childBefore.has<Node>());
+    EK_ASSERT(!childBefore.get<Node>().parent);
+    EK_ASSERT(e.get<Node>().parent);
 
     auto& entityNode = e.get<Node>();
     auto& childNode = childBefore.get<Node>();
@@ -195,7 +195,7 @@ void insertBeforeStrict(ecs::EntityApi e, ecs::EntityApi childBefore) {
 }
 
 void insertBefore(ecs::EntityApi e, ecs::EntityApi childBefore) {
-    assert(e.get<Node>().parent);
+    EK_ASSERT(e.get<Node>().parent);
 
     // TODO: a lot of places just require assign if not exists
     if (childBefore.get_or_create<Node>().parent) {
@@ -225,7 +225,7 @@ void destroyNode(ecs::EntityApi e) {
 }
 
 ecs::EntityApi getRoot(ecs::EntityApi e) {
-    assert(e.has<Node>());
+    EK_ASSERT(e.has<Node>());
     while (e && e.get<Node>().parent) {
         e = e.get<Node>().parent;
     }
@@ -278,7 +278,7 @@ ecs::EntityApi find(ecs::EntityApi e, const char* childName) {
     return nullptr;
 }
 
-ecs::EntityApi findByPath(const ecs::EntityApi e, const std::vector<std::string>& path) {
+ecs::EntityApi findByPath(const ecs::EntityApi e, const Array<String>& path) {
     auto it = e;
     for (const auto& p : path) {
         it = find(it, p.c_str());
@@ -289,8 +289,8 @@ ecs::EntityApi findByPath(const ecs::EntityApi e, const std::vector<std::string>
     return it;
 }
 
-std::vector<ecs::EntityApi> findMany(const ecs::EntityApi e, const std::vector<std::string>& names) {
-    std::vector<ecs::EntityApi> entities;
+Array<ecs::EntityApi> findMany(const ecs::EntityApi e, const Array<String>& names) {
+    Array<ecs::EntityApi> entities;
     for (const auto& name : names) {
         auto f = find(e, name.c_str());
         if (f) {

@@ -1,7 +1,8 @@
 #include "parsing.hpp"
 
 #include "../types.hpp"
-#include <ek/debug.hpp>
+#include <ek_log.h>
+#include <ek_assert.h>
 
 #include <pugixml.hpp>
 
@@ -26,7 +27,7 @@ static uint32_t parse_css_color(const char* str) {
     return col;
 }
 
-rect_f read_rect(const xml_node& node) {
+Rect2f read_rect(const xml_node& node) {
     return {
             node.attribute("left").as_float(),
             node.attribute("top").as_float(),
@@ -35,14 +36,14 @@ rect_f read_rect(const xml_node& node) {
     };
 }
 
-static rect_f read_rect_bounds(const xml_node& node, const std::array<const char*, 4>& nn) {
+static Rect2f read_rect_bounds(const xml_node& node, const std::array<const char*, 4>& nn) {
     return min_max_box<float, 2>(
             {node.attribute(nn[0]).as_float(), node.attribute(nn[1]).as_float()},
             {node.attribute(nn[2]).as_float(), node.attribute(nn[3]).as_float()}
     );
 }
 
-rect_f read_scale_grid(const xml_node& node) {
+Rect2f read_scale_grid(const xml_node& node) {
     return read_rect_bounds(node, {
             "scaleGridLeft",
             "scaleGridTop",
@@ -51,15 +52,15 @@ rect_f read_scale_grid(const xml_node& node) {
     });
 }
 
-float2 read_point(const xml_node& node) {
+Vec2f read_point(const xml_node& node) {
     return {node.attribute("x").as_float(), node.attribute("y").as_float()};
 }
 
-float2 read_transformation_point(const xml_node& node) {
+Vec2f read_transformation_point(const xml_node& node) {
     return read_point(node.child("transformationPoint").child("Point"));
 }
 
-matrix_2d& operator<<(matrix_2d& r, const xml_node& node) {
+Matrix3x2f& operator<<(Matrix3x2f& r, const xml_node& node) {
     const auto& m = node.child("matrix").child("Matrix");
     r.a = m.attribute("a").as_float(1.0f);
     r.b = m.attribute("b").as_float();
@@ -70,7 +71,7 @@ matrix_2d& operator<<(matrix_2d& r, const xml_node& node) {
     return r;
 }
 
-color_transform_f& operator<<(color_transform_f& color, const xml_node& node) {
+ColorTransformF& operator<<(ColorTransformF& color, const xml_node& node) {
     const auto& ct = node.child("color").child("Color");
 
     color.scale.x = ct.attribute("redMultiplier").as_float(1.0f);
@@ -90,7 +91,7 @@ color_transform_f& operator<<(color_transform_f& color, const xml_node& node) {
     }
 
     // default: 0, values: -1 ... 1
-    const auto br = math::clamp(ct.attribute("brightness").as_float(0.0f), -1.0f, 1.0f);
+    const auto br = Math::clamp(ct.attribute("brightness").as_float(0.0f), -1.0f, 1.0f);
     if (br < 0.0f) {
         color.scale.x =
         color.scale.y =
@@ -104,7 +105,7 @@ color_transform_f& operator<<(color_transform_f& color, const xml_node& node) {
     return color;
 }
 
-static float4 read_color(const xml_node& node, const char* color_tag = "color", const char* alpha_tag = "alpha") {
+static Vec4f read_color(const xml_node& node, const char* color_tag = "color", const char* alpha_tag = "alpha") {
     const auto c = parse_css_color(node.attribute(color_tag).value());
     return {
             static_cast<float>((c >> 16u) & 0xFFu) / 255.0f,
@@ -204,8 +205,8 @@ FolderItem& operator<<(FolderItem& r, const xml_node& node) {
     return r;
 }
 
-float2 read_alignment(const xml_node& node) {
-    float2 r{0.0f, 0.0f};
+Vec2f read_alignment(const xml_node& node) {
+    Vec2f r{0.0f, 0.0f};
     const char* alignment = node.attribute("alignment").value();
     if (equals(alignment, "center")) {
         r.x = 0.5f;
@@ -259,13 +260,13 @@ ScaleMode& operator<<(ScaleMode& r, const char* str) {
     else if (equals(str, "horizontal")) return r = ScaleMode::horizontal;
     else if (equals(str, "vertical")) return r = ScaleMode::vertical;
     else if (equals(str, "none")) return r = ScaleMode::none;
-    else if (str && *str) EK_WARN_F("unknown ScaleMode: %s", str);
+    else if (str && *str) EK_WARN("unknown ScaleMode: %s", str);
     return r = ScaleMode::none;
 }
 
 SolidStyleType& operator<<(SolidStyleType& r, const char* str) {
     if (equals(str, "hairline")) return r = SolidStyleType::hairline;
-    else if (str && *str) EK_WARN_F("unknown SolidStyle: %s", str);
+    else if (str && *str) EK_WARN("unknown SolidStyle: %s", str);
     return r = SolidStyleType::hairline;
 }
 
@@ -273,7 +274,7 @@ LineCaps& operator<<(LineCaps& r, const char* str) {
     if (equals(str, "none")) return r = LineCaps::none;
     else if (equals(str, "round")) return r = LineCaps::round;
     else if (equals(str, "square")) return r = LineCaps::square;
-    else if (str && *str) EK_WARN_F("unknown LineCaps: %s", str);
+    else if (str && *str) EK_WARN("unknown LineCaps: %s", str);
     return r = LineCaps::round;
 }
 
@@ -281,7 +282,7 @@ LineJoints& operator<<(LineJoints& r, const char* str) {
     if (equals(str, "miter")) return r = LineJoints::miter;
     else if (equals(str, "round")) return r = LineJoints::round;
     else if (equals(str, "bevel")) return r = LineJoints::bevel;
-    else if (str && *str) EK_WARN_F("unknown LineJoints: %s", str);
+    else if (str && *str) EK_WARN("unknown LineJoints: %s", str);
     return r = LineJoints::round;
 }
 
@@ -325,7 +326,7 @@ BlendMode& operator<<(BlendMode& r, const char* str) {
     else if (equals(str, "erase")) return r = BlendMode::erase;
     else if (equals(str, "overlay")) return r = BlendMode::overlay;
     else if (equals(str, "hardlight")) return r = BlendMode::hardlight;
-    EK_WARN_F("unknown BlendMode: %s", str);
+    EK_WARN("unknown BlendMode: %s", str);
     return r = BlendMode::normal;
 }
 

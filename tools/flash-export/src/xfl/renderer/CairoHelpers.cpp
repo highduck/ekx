@@ -2,11 +2,11 @@
 #include <cairo.h>
 
 #include "../types.hpp"
-#include <ek/math/common.hpp>
+#include <ek/math/Math.hpp>
 
 namespace ek::xfl {
 
-cairo_matrix_t create_matrix(const matrix_2d& m) {
+cairo_matrix_t create_matrix(const Matrix3x2f& m) {
     cairo_matrix_t cm;
     cm.xx = m.a;
     cm.yx = m.b;
@@ -17,7 +17,7 @@ cairo_matrix_t create_matrix(const matrix_2d& m) {
     return cm;
 }
 
-void cairo_transform(cairo_t* cr, const matrix_2d& m) {
+void cairo_transform(cairo_t* cr, const Matrix3x2f& m) {
     cairo_matrix_t transform_matrix = create_matrix(m);
     cairo_transform(cr, &transform_matrix);
 }
@@ -52,7 +52,7 @@ void set_line_join(cairo_t* ctx, LineJoints join) {
     cairo_set_line_join(ctx, convert_line_join(join));
 }
 
-void set_solid_fill(cairo_t* context, const float4& color) {
+void set_solid_fill(cairo_t* context, const Vec4f& color) {
     cairo_set_source_rgba(context, color.x, color.y, color.z, color.w);
 }
 
@@ -63,6 +63,7 @@ void set_blend_mode(cairo_t* ctx, BlendMode blend_mode) {
             cop = cairo_operator_t::CAIRO_OPERATOR_MULTIPLY;
             break;
         case BlendMode::screen:
+
             cop = cairo_operator_t::CAIRO_OPERATOR_SCREEN;
             break;
         case BlendMode::overlay:
@@ -122,7 +123,7 @@ void cairo_quadratic_curve_to(cairo_t* context, float x1, float y1, float x2, fl
 
 void add_color_stops(cairo_pattern_t* pattern,
                      const Array<GradientEntry>& entries,
-                     const color_transform_f& color_transform) {
+                     const ColorTransformF& color_transform) {
     for (const auto& entry: entries) {
         const auto& color = color_transform.transform(entry.color);
         cairo_pattern_add_color_stop_rgba(pattern, entry.ratio, color.x, color.y, color.z, color.w);
@@ -130,13 +131,13 @@ void add_color_stops(cairo_pattern_t* pattern,
 }
 
 // https://github.com/lightspark/lightspark/blob/master/src/backends/graphics.cpp
-cairo_pattern_t* create_linear_pattern(const matrix_2d& matrix) {
+cairo_pattern_t* create_linear_pattern(const Matrix3x2f& matrix) {
     const auto p0 = matrix.transform(-819.2f, 0.0f);
     const auto p1 = matrix.transform(819.2f, 0.0f);
     return cairo_pattern_create_linear(p0.x, p0.y, p1.x, p1.y);
 }
 
-cairo_pattern_t* create_radial_pattern(const matrix_2d& matrix) {
+cairo_pattern_t* create_radial_pattern(const Matrix3x2f& matrix) {
     const auto p0 = matrix.transform(0.0f, 0.0f);
     const auto p1 = matrix.transform(819.2f, 0.0f);
     const auto radius = length(p1 - p0);
@@ -231,12 +232,12 @@ void cairo_round_rectangle(cairo_t* cr, const double* values) {
 
     const double maxRadius = fmin((b - t) / 2, (r - l) / 2);
 
-    const double r0 = math::clamp(values[4], -maxRadius, maxRadius);
-    const double r1 = math::clamp(values[5], -maxRadius, maxRadius);
-    const double r2 = math::clamp(values[6], -maxRadius, maxRadius);
-    const double r3 = math::clamp(values[7], -maxRadius, maxRadius);
+    const double r0 = Math::clamp(values[4], -maxRadius, maxRadius);
+    const double r1 = Math::clamp(values[5], -maxRadius, maxRadius);
+    const double r2 = Math::clamp(values[6], -maxRadius, maxRadius);
+    const double r3 = Math::clamp(values[7], -maxRadius, maxRadius);
 
-    double degrees = math::pi / 180.0;
+    double degrees = Math::pi / 180.0;
 
     cairo_new_sub_path(cr);
     if (r1 >= 0) {
@@ -265,7 +266,7 @@ void cairo_round_rectangle(cairo_t* cr, const double* values) {
 }
 
 void cairo_oval(cairo_t* cr, const double* values) {
-    const double degrees = math::pi / 180.0;
+    const double degrees = Math::pi / 180.0;
 
     const double a0 = values[4];
     double a1 = values[5];

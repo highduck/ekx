@@ -2,29 +2,30 @@
 
 namespace ek {
 
-struct BaseType {
-    const char* label = nullptr;
+template<typename T>
+struct TypeName {
+    constexpr static const char* value{""};
 };
 
-template<typename T>
-struct Type : public BaseType {
-    static Type<T> Data;
+#define EK_DECLARE_TYPE(Tp)  template<> struct TypeName<Tp>{constexpr static const char* value = #Tp;}
 
-    Type() = default;
-
-    explicit Type(const char* l) {
-        label = l;
-    }
+template<typename A>
+struct Counter {
+    inline static int value = 0;
 };
 
-template<typename T>
-inline Type<T> Type<T>::Data{};
-
-#define EK_DECLARE_TYPE(Tp) template<> inline ek::Type<Tp>  ek::Type<Tp>::Data{#Tp}
-
-template<typename T>
-inline Type<T>& getType() {
-    return Type<T>::Data;
-}
+template<typename T, typename Tag = void>
+struct TypeIndex {
+    inline const static int value = Counter<Tag>::value++;
+};
 
 }
+
+//#define EK_TYPE_INDEX_T(Bs, Tp, Idx) template<> struct TypeIndex<Tp,Bs>{constexpr static int value = (Idx);}
+//#define EK_TYPE_INDEX(Tp, Idx) template<> struct TypeIndex<Tp,void>{constexpr static int value = (Idx);}
+
+//#define EK_TYPE_INDEX_T(Bs, Tp, Idx) template<> struct TypeIndex<Tp,Bs>;
+//#define EK_TYPE_INDEX(Tp, Idx) template<> struct TypeIndex<Tp,void>;
+
+#define EK_TYPE_INDEX_T(Bs, Tp, Idx)
+#define EK_TYPE_INDEX(Tp, Idx)

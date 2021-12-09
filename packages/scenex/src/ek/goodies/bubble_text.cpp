@@ -4,9 +4,9 @@
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/SceneFactory.hpp>
-#include <ek/math/easing.hpp>
-#include <ek/math/rand.hpp>
-#include <ek/timers.hpp>
+#include <ek/math/Easings.hpp>
+#include <ek/math/Random.hpp>
+#include <ek/scenex/base/TimeLayer.hpp>
 
 namespace ek {
 
@@ -31,7 +31,7 @@ void BubbleText::updateAll() {
             continue;
         }
 
-        float r = math::clamp(state.time / time_max);
+        float r = Math::clamp(state.time / time_max);
         float sc = 1.0f;
         float sct;
         auto off = state.offset;
@@ -43,14 +43,14 @@ void BubbleText::updateAll() {
 
         auto& transform = e.get<Transform2D>();
         transform.setScale(sc);
-        float2 fly_pos{0.0f, delta_y * easing::P3_OUT.calculate(r)};
+        Vec2f fly_pos{0.0f, delta_y * easing::P3_OUT.calculate(r)};
         transform.setPosition(state.start + off + fly_pos);
         transform.color.setAlpha(1.0f - (r * r * r));
         transform.color.setAdditive(r * r * r);
     }
 }
 
-ecs::EntityApi BubbleText::create(const char* fontName, const std::string& text, const float2& pos, float delay) {
+ecs::EntityApi BubbleText::create(const char* fontName, const String& text, const Vec2f& pos, float delay) {
     auto e = createNode2D();
     auto& c = e.assign<BubbleText>();
     c.delay = delay;
@@ -64,7 +64,7 @@ ecs::EntityApi BubbleText::create(const char* fontName, const std::string& text,
 
     e.assign<Display2D>(new Text2D(text, format));
     setTouchable(e, false);
-    setScale(e, float2::zero);
+    setScale(e, Vec2f::zero);
     return e;
 }
 

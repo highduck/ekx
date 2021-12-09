@@ -21,7 +21,8 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -g
         -fno-exceptions
         -fno-rtti
-        -fstrict-aliasing
+        -fno-strict-aliasing
+        -Wstrict-aliasing=2
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
@@ -30,6 +31,11 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     add_subdirectory(platforms/apple)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_subdirectory(platforms/apple)
+    file(GLOB_RECURSE ek_app_c_file ${CMAKE_SOURCE_DIR}/**/ek_app.c)
+    message(STATUS ${ek_app_c_file})
+    set_source_files_properties(${ek_app_c_file} PROPERTIES
+            LANGUAGE CXX
+            )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
     add_subdirectory(platforms/android)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")

@@ -1,20 +1,18 @@
 #pragma once
 
 #include <ek/util/NoCopyAssign.hpp>
-#include <ek/math/box.hpp>
+#include <ek/math/Rect.hpp>
+#include <ek/util/Type.hpp>
 #include <ek/util/Res.hpp>
+#include <ek/graphics/graphics.hpp>
 
 namespace ek {
-
-namespace graphics {
-class Texture;
-}
 
 class Sprite : private NoCopyAssign {
 public:
     Res<graphics::Texture> texture;
-    rect_f rect{0, 0, 1, 1};
-    rect_f tex{0, 0, 1, 1};
+    Rect2f rect{0, 0, 1, 1};
+    Rect2f tex{0, 0, 1, 1};
     bool rotated = false;
 
     Sprite() = default;
@@ -23,14 +21,17 @@ public:
 
     void draw() const;
 
-    void draw(const rect_f& rc) const;
+    void draw(const Rect2f& rc) const;
 
-    void draw_grid(const rect_f& grid, const rect_f& target) const;
+    void draw_grid(const Rect2f& grid, const Rect2f& target) const;
 
-    [[nodiscard]] bool hit_test(const float2& position) const;
+    [[nodiscard]] bool hit_test(const Vec2f& position) const;
 
     [[nodiscard]] bool select() const;
 };
+
+EK_DECLARE_TYPE(Sprite);
+EK_TYPE_INDEX(Sprite, 4);
 
 }
 

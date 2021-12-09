@@ -3,6 +3,7 @@
 #include "TextureLoader.hpp"
 #include <jni.h>
 #include <ek/app/Platform.h>
+#include <GLES2/gl2.h>
 
 namespace ek {
 
@@ -10,10 +11,6 @@ void TextureLoader::load() {
     loading = true;
     status = 0;
     progress = 0.0f;
-    const char *urls_[IMAGES_MAX_COUNT]{};
-    for (int i = 0; i < IMAGES_MAX_COUNT; ++i) {
-        urls_[i] = urls[i].c_str();
-    }
     int flags = 0;
     if (premultiplyAlpha) flags |= 1;
     if (isCubeMap) flags |= 2;
@@ -26,14 +23,14 @@ void TextureLoader::load() {
     jobjectArray jURLs = env->NewObjectArray(imagesToLoad, env->FindClass("java/lang/String"),
                                              0);
     for (int i = 0; i < imagesToLoad; ++i) {
-        jstring str = env->NewStringUTF(urls_[i]);
+        jstring str = env->NewStringUTF(urls[i].c_str());
         env->SetObjectArrayElement(jURLs, i, str);
     }
     auto cls = env->FindClass("ek/TextureLoader");
 
     auto method = env->GetStaticMethodID(cls, "load",
                                          "(Landroid/content/Context;Ljava/lang/String;[Ljava/lang/String;II)I");
-    handle = env->CallStaticIntMethod(cls, method, app::get_context(), jBasePath, jURLs, flags, formatMask);
+    handle = env->CallStaticIntMethod(cls, method, app::get_context(), jBasePath, jURLs, flags, (int)formatMask);
 
     env->DeleteLocalRef(cls);
     env->DeleteLocalRef(jURLs);

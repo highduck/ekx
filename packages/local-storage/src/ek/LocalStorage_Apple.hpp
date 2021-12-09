@@ -39,14 +39,14 @@ void set_user_string(const char* key, const char* str) {
     [user_defaults synchronize];
 }
 
-std::string get_user_string(const char* key, const char* defaultValue) {
+String get_user_string(const char* key, const char* defaultValue) {
     ASSERT_KEY_IS_VALID(key);
 
     NSString* ns_key = [NSString stringWithUTF8String:key];
     NSUserDefaults* user_defaults = [NSUserDefaults standardUserDefaults];
     if ([user_defaults objectForKey:ns_key] != nil) {
         NSString* ns_result = [user_defaults stringForKey:ns_key];
-        return std::string{[ns_result UTF8String]};
+        return String{[ns_result UTF8String]};
     }
 
     return defaultValue;

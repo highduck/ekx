@@ -1,15 +1,15 @@
 #pragma once
 
-#include <ek/math/packed_color.hpp>
-#include <ek/math/vec.hpp>
+#include <ek/math/Color32.hpp>
+#include <ek/math/Vec.hpp>
 #include <ek/serialize/serialize.hpp>
 
 namespace ek {
 
 struct ModelVertex3D {
-    float3 position;
-    float3 normal;
-    float2 uv;
+    Vec3f position;
+    Vec3f normal;
+    Vec2f uv;
     abgr32_t color;
     abgr32_t color2;
 };
@@ -27,13 +27,13 @@ struct Model3D {
         io(vertices, indices);
     }
 
-    static Model3D createCube(const float3& position, const float3& size, argb32_t color = 0xFFFFFF_rgb);
+    static Model3D createCube(const Vec3f& position, const Vec3f& size, argb32_t color = 0xFFFFFF_rgb);
 
-    static Model3D createPlane(const float3& position, const float2& size, argb32_t color = 0xFFFFFF_rgb);
+    static Model3D createPlane(const Vec3f& position, const Vec2f& size, argb32_t color = 0xFFFFFF_rgb);
 };
 
 
-inline Model3D Model3D::createCube(const float3& position, const float3& size, argb32_t color) {
+inline Model3D Model3D::createCube(const Vec3f& position, const Vec3f& size, argb32_t color) {
     Model3D result{};
 
     // 6 sides
@@ -42,7 +42,7 @@ inline Model3D Model3D::createCube(const float3& position, const float3& size, a
     result.vertices.resize(6 * 4);
     result.indices.resize(6 * 2 * 3);
 
-    float3 n;
+    Vec3f n;
     const float u = 0.5f;
     const auto color1 = color.abgr();
     const abgr32_t color2 = 0x0;
@@ -108,13 +108,13 @@ inline Model3D Model3D::createCube(const float3& position, const float3& size, a
     return result;
 }
 
-inline Model3D Model3D::createPlane(const float3& position, const float2& size, argb32_t color) {
+inline Model3D Model3D::createPlane(const Vec3f& position, const Vec2f& size, argb32_t color) {
     Model3D result{};
 
     const float u = 0.5f;
     const auto color1 = color.abgr();
     const abgr32_t color2 = 0x0;
-    const float3 n{0, 0, 1};
+    const Vec3f n{0, 0, 1};
 
     result.vertices.resize(4);
     result.vertices[0] = {{-u, -u, 0.0f}, n, {0, 0}, color1, color2};
@@ -131,7 +131,7 @@ inline Model3D Model3D::createPlane(const float3& position, const float2& size, 
     result.indices[5] = 0;
 
     for (auto& v : result.vertices) {
-        v.position = position + v.position * float3{size.x, size.y, 1.0f};
+        v.position = position + v.position * Vec3f{size.x, size.y, 1.0f};
     }
 
     return result;

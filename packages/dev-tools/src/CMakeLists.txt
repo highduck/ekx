@@ -40,7 +40,8 @@ endif()
 target_compile_options(${PROJECT_NAME} PRIVATE
         -fno-exceptions
         -fno-rtti
-        -fstrict-aliasing
+        -fno-strict-aliasing
+        -Wstrict-aliasing=2
         )
 
 target_link_libraries(${PROJECT_NAME}
@@ -49,6 +50,11 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC imgui
         PUBLIC pugixml
         )
+
+target_compile_definitions(${PROJECT_NAME}
+        PUBLIC PUGIXML_NO_XPATH
+        PUBLIC PUGIXML_NO_STL
+        PUBLIC PUGIXML_NO_EXCEPTIONS)
 
 #set_target_properties(${PROJECT_NAME} PROPERTIES
 #        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../build")

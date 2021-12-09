@@ -2,7 +2,8 @@
 
 #include <ek/scenex/data/SGFile.hpp>
 #include "../xfl/Doc.hpp"
-#include <ek/debug.hpp>
+#include <ek_log.h>
+#include <ek_assert.h>
 
 namespace ek::xfl {
 
@@ -22,15 +23,15 @@ static SGKeyFrameTransform createKeyFrameTransform(const Element& el) {
 }
 
 static void fixRotation(SGKeyFrameTransform& curr, const SGKeyFrameTransform& prev) {
-    if (prev.skew.x + math::pi < curr.skew.x) {
-        curr.skew.x -= 2 * math::pi;
-    } else if (prev.skew.x - math::pi > curr.skew.x) {
-        curr.skew.x += 2 * math::pi;
+    if (prev.skew.x + Math::pi < curr.skew.x) {
+        curr.skew.x -= 2 * Math::pi;
+    } else if (prev.skew.x - Math::pi > curr.skew.x) {
+        curr.skew.x += 2 * Math::pi;
     }
-    if (prev.skew.y + math::pi < curr.skew.y) {
-        curr.skew.y -= 2 * math::pi;
-    } else if (prev.skew.y - math::pi > curr.skew.y) {
-        curr.skew.y += 2 * math::pi;
+    if (prev.skew.y + Math::pi < curr.skew.y) {
+        curr.skew.y -= 2 * Math::pi;
+    } else if (prev.skew.y - Math::pi > curr.skew.y) {
+        curr.skew.y += 2 * Math::pi;
     }
 }
 
@@ -45,20 +46,20 @@ static void addRotation(SGKeyFrameTransform& curr, const Frame& frame, const SGK
         direction *= sign(curr.scale.x) * sign(curr.scale.y);
 
         while (direction < 0 && prev.skew.x < curr.skew.x) {
-            curr.skew.x -= 2 * math::pi;
+            curr.skew.x -= 2 * Math::pi;
         }
         while (direction > 0 && prev.skew.x > curr.skew.x) {
-            curr.skew.x += 2 * math::pi;
+            curr.skew.x += 2 * Math::pi;
         }
         while (direction < 0 && prev.skew.y < curr.skew.y) {
-            curr.skew.y -= 2 * math::pi;
+            curr.skew.y -= 2 * Math::pi;
         }
         while (direction > 0 && prev.skew.y > curr.skew.y) {
-            curr.skew.y += 2 * math::pi;
+            curr.skew.y += 2 * Math::pi;
         }
 
 // additional rotations specified?
-        additionalRotation += 2.0 * math::pi * direction * times;
+        additionalRotation += 2.0 * Math::pi * direction * times;
     }
 
     curr.skew.x += additionalRotation;

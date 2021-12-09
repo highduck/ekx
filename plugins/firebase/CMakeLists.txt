@@ -24,7 +24,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
     target_compile_options(${PROJECT_NAME}
-            PUBLIC -xobjective-c++
+            PRIVATE -xobjective-c++
             )
 
 endif()
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+        -fno-exceptions
+        -fno-rtti
+        -fno-strict-aliasing
+        -Wstrict-aliasing=2
+        )

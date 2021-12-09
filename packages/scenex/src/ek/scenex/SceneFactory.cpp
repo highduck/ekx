@@ -10,10 +10,11 @@
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/2d/UglyFilter2D.hpp>
-#include <ek/debug.hpp>
+#include <ek/log.h>
+#include <ek/assert.h>
 #include <ek/util/Res.hpp>
-#include <ek/math/bounds_builder.hpp>
-#include <ek/Localization.hpp>
+#include <ek/math/BoundsBuilder.hpp>
+#include <ek/scenex/Localization.hpp>
 
 namespace ek {
 
@@ -54,7 +55,7 @@ SGFile* sg_load(const void* data, uint32_t size) {
     return sg;
 }
 
-const SGNodeData* sg_get(const SGFile& sg, const std::string& library_name) {
+const SGNodeData* sg_get(const SGFile& sg, const char* library_name) {
     // TODO: optimize access!
     for (auto& item: sg.library) {
         if (item.libraryName == library_name) {
@@ -68,7 +69,7 @@ using SGFileRes = Res<SGFile>;
 
 void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
     if (!data->name.empty()) {
-        entity.get_or_create<NodeName>().name = data->name;
+        entity.get_or_create<NodeName>().name = data->name.c_str();
     }
 
     if (data->movieTargetId >= 0) {
@@ -88,8 +89,8 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
         node.setVisible(data->visible);
     }
 
-    if (data->dynamicText.has_value()) {
-        const auto& dynamicText = data->dynamicText.value();
+    if (!data->dynamicText.empty()) {
+        const auto& dynamicText = data->dynamicText[0];
         TextFormat format{dynamicText.font.c_str(), dynamicText.size};
         format.alignment = dynamicText.alignment;
         format.leading = dynamicText.lineSpacing;
@@ -108,22 +109,22 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
         }
 
         auto& display = entity.get_or_create<Display2D>();
-        auto dtext = std::make_unique<Text2D>(dynamicText.text, format);
+        auto dtext = Pointer<Text2D>::make(dynamicText.text, format);
         dtext->localize = Localization::instance.has(dynamicText.text.c_str());
         dtext->adjustsFontSizeToFitBounds = dtext->localize;
         dtext->rect = dynamicText.rect;
         display.drawable = std::move(dtext);
     }
 
-    if (data->movie.has_value()) {
+    if (!data->movie.empty()) {
         auto& mov = entity.assign<MovieClip>();
         if (asset) {
             mov.library_asset = asset;
-            mov.movie_data_symbol = data->libraryName;
+            mov.movie_data_symbol = data->libraryName.c_str();
         } else {
-            mov.data = &(data->movie.value());
+            mov.data = &data->movie[0];
         }
-        mov.fps = data->movie->fps;
+        mov.fps = data->movie[0].fps;
     }
 
     auto* display = entity.tryGet<Display2D>();
@@ -182,7 +183,7 @@ ecs::EntityApi create_and_merge(const SGFile& sg, SGFileRes asset,
     }
     if (data) {
         for (const auto& child: data->children) {
-            auto child_entity = create_and_merge(sg, asset, sg_get(sg, child.libraryName), &child);
+            auto child_entity = create_and_merge(sg, asset, sg_get(sg, child.libraryName.c_str()), &child);
             appendStrict(entity, child_entity);
         }
     }
@@ -190,19 +191,19 @@ ecs::EntityApi create_and_merge(const SGFile& sg, SGFileRes asset,
     return entity;
 }
 
-void extend_bounds(const SGFile& file, const SGNodeData& data, bounds_builder_2f& boundsBuilder,
-                   const matrix_2d& matrix) {
-    const Res<Sprite> spr{data.sprite};
+void extend_bounds(const SGFile& file, const SGNodeData& data, BoundsBuilder2f& boundsBuilder,
+                   const Matrix3x2f& matrix) {
+    const Res<Sprite> spr{data.sprite.c_str()};
     if (spr) {
         boundsBuilder.add(spr->rect, matrix);
     }
     for (const auto& child: data.children) {
-        const auto& symbol = child.libraryName.empty() ? child : *sg_get(file, child.libraryName);
+        const auto& symbol = child.libraryName.empty() ? child : *sg_get(file, child.libraryName.c_str());
         extend_bounds(file, symbol, boundsBuilder, matrix * child.matrix);
     }
 }
 
-ecs::EntityApi sg_create(const std::string& library, const std::string& name, ecs::EntityApi parent) {
+ecs::EntityApi sg_create(const char* library, const char* name, ecs::EntityApi parent) {
     ecs::EntityApi result = nullptr;
     SGFileRes file{library};
     if (file) {
@@ -213,20 +214,20 @@ ecs::EntityApi sg_create(const std::string& library, const std::string& name, ec
                 appendStrict(parent, result);
             }
         } else {
-            EK_WARN_F("SG Object %s not found in library %s", name.c_str(), library.c_str());
+            EK_WARN("SG Object %s not found in library %s", name, library);
         }
     } else {
-        EK_WARN_F("SG not found: %s", library.c_str());
+        EK_WARN("SG not found: %s", library);
     }
     return result;
 }
 
-rect_f sg_get_bounds(const std::string& library, const std::string& name) {
+Rect2f sg_get_bounds(const char* library, const char* name) {
     SGFileRes file{library};
     if (file) {
         const SGNodeData* data = sg_get(*file, name);
         if (data) {
-            bounds_builder_2f bb{};
+            BoundsBuilder2f bb{};
             extend_bounds(*file, *data, bb, data->matrix);
             return bb.rect();
         }

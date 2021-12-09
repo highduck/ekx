@@ -36,26 +36,26 @@ public:
         Locator::ref<basic_application>().dispatcher.listeners.remove(this);
     }
 
-    void showInterstitial(const std::function<void()>& callback) override {
+    void showInterstitial(std::function<void()> callback) override {
         activeInterstitial = true;
         audio::muteDeviceBegin();
-        setTimeout([this, callback] {
+        setTimeout([this, cb=std::move(callback)] {
             activeInterstitial = false;
             audio::muteDeviceEnd();
-            if (callback) {
-                callback();
+            if (cb) {
+                cb();
             }
         }, 3.0f);
     }
 
-    void showRewardedAd(const std::function<void(bool)>& callback) override {
+    void showRewardedAd(std::function<void(bool)> callback) override {
         activeRewardedAd = true;
         audio::muteDeviceBegin();
-        setTimeout([this, callback] {
+        setTimeout([this, cb = std::move(callback)] {
             activeRewardedAd = false;
             audio::muteDeviceEnd();
-            if (callback) {
-                callback(true);
+            if (cb) {
+                cb(true);
             }
         }, 5.0f);
     }

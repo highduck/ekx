@@ -1,7 +1,6 @@
 #pragma once
 
 #include "LocalStorage.hpp"
-#include <string>
 
 extern "C" {
 
@@ -31,7 +30,7 @@ void set_user_string(const char* key, const char* value) {
     web_ls_set(key, value);
 }
 
-std::string get_user_string(const char* key, const char* defaultValue) {
+String get_user_string(const char* key, const char* defaultValue) {
     char buffer[4096];
     return web_ls_get(key, buffer, 4096) ? buffer : defaultValue;
 }

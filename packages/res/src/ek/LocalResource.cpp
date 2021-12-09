@@ -1,3 +1,4 @@
+
 #if defined(__APPLE__)
 #include "LocalResource_Apple.hpp"
 #elif defined(__ANDROID__)

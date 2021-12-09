@@ -26,7 +26,7 @@ namespace ek {
 
 using namespace ecs;
 
-void scene_pre_update(EntityApi root, float dt) {
+void scene_pre_update(EntityApi /*root*/, float dt) {
     ZoneScoped;
 
     Locator::ref<InteractionSystem>().process();
@@ -69,18 +69,21 @@ void scene_post_update(ecs::EntityApi root) {
 void scene_render(ecs::EntityApi root) {
     ZoneScoped;
 
-    for (auto& it: Res<DynamicAtlas>::map()) {
-        auto* atlas = const_cast<DynamicAtlas*>(it.second->content);
-        if (atlas) {
-            atlas->invalidate();
+    FixedArray<Atlas*, 64> atlases;
+    for (auto& it: ResourceDB::instance.get().map) {
+        auto* content = it.second.content;
+        if (content) {
+            auto type = it.second.key.type;
+            if (type == TypeIndex<DynamicAtlas>::value) {
+                ((DynamicAtlas*) content)->invalidate();
+            } else if (type == TypeIndex<Atlas>::value) {
+                atlases.push_back(((Atlas*) content));
+            }
         }
     }
 
-    for (auto& it: Res<Atlas>::map()) {
-        auto* atlas = const_cast<Atlas*>(it.second->content);
-        if (atlas) {
-            atlas->pollLoading();
-        }
+    for (auto& it: atlases) {
+        it->pollLoading();
     }
 
     Camera2D::render();

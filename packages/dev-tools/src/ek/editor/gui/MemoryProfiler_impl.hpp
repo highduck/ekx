@@ -170,13 +170,10 @@ void drawECSMemoryStats() {
         if (header) {
             const char* name = header->name;
             auto lookupSize = sizeof(ecs::EntityLookup);
-            auto h2eSizeReserved = header->handleToEntity._capacity * sizeof(ecs::EntityIndex);
+            auto h2eSizeReserved = header->handleToEntity.capacity() * sizeof(ecs::EntityIndex);
             auto h2eSizeUsed = header->handleToEntity.size() * sizeof(ecs::EntityIndex);
             auto dataSizeUsed = header->count() * header->storageElementSize;
             auto dataSizeReserved = dataSizeUsed;
-            if (header->pDebugStorageCapacity) {
-                dataSizeReserved = (*header->pDebugStorageCapacity) * header->storageElementSize;
-            }
             totalLookups += lookupSize;
             totalUsed += lookupSize + h2eSizeUsed + dataSizeUsed;
             totalReserved += lookupSize + h2eSizeReserved + dataSizeReserved;
@@ -184,13 +181,9 @@ void drawECSMemoryStats() {
                                 header->typeId,
                                 name ? name : "Component",
                                 toKB(h2eSizeReserved + dataSizeReserved))) {
-                ImGui::Text("Handle-2-Entity Array: %u / %u | %0.2lf of %0.2lf KB", header->handleToEntity._size,
-                            header->handleToEntity._capacity,
+                ImGui::Text("Handle-2-Entity Array: %u / %u | %0.2lf of %0.2lf KB", header->handleToEntity.size(),
+                            header->handleToEntity.capacity(),
                             toKB(h2eSizeUsed), toKB(h2eSizeReserved));
-                if (header->pDebugStorageCapacity) {
-                    ImGui::Text("Data Array: %u elements | %0.2lf of %0.2lf KB", header->count(),
-                                toKB(dataSizeUsed), toKB(dataSizeReserved));
-                }
                 ImGui::TreePop();
             }
         }

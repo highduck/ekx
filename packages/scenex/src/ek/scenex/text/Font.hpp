@@ -2,14 +2,14 @@
 
 #include "FontImplBase.hpp"
 
-#include <ek/math/vec.hpp>
-#include <ek/math/packed_color.hpp>
-#include <ek/math/box.hpp>
+#include <ek/math/Vec.hpp>
+#include <ek/math/Color32.hpp>
+#include <ek/math/Rect.hpp>
 #include <ek/util/NoCopyAssign.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/util/Type.hpp>
 
-#include <string>
+#include <ek/ds/String.hpp>
 
 namespace ek {
 
@@ -19,15 +19,15 @@ public:
 
     ~Font();
 
-    void draw(const std::string& text,
+    void draw(const char* text,
               float size,
-              const float2& position,
+              const Vec2f& position,
               argb32_t color,
               float line_height,
               float line_spacing = 0.0f) const;
 
     [[nodiscard]]
-    float get_text_segment_width(const std::string& text, float size, int begin, int end) const;
+    float get_text_segment_width(const char* text, float size, int begin, int end) const;
 
     [[nodiscard]] FontType getFontType() const;
 
@@ -50,5 +50,6 @@ private:
 };
 
 EK_DECLARE_TYPE(Font);
+EK_TYPE_INDEX(Font, 3);
 
 }

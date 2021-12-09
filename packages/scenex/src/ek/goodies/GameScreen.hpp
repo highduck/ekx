@@ -1,35 +1,48 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <vector>
-#include <string>
+#include <ek/ds/Array.hpp>
+#include <ek/ds/String.hpp>
 #include <ek/util/Signal.hpp>
 #include <ek/util/Type.hpp>
-#include <ek/math/box.hpp>
+#include <ek/math/Rect.hpp>
 
 namespace ek {
 
-struct GameScreen {
-    //inline static const std::string EnterBegin = "game_screen_enter_begin";
-    //inline static const std::string Enter = "game_screen_enter";
-    //inline static const std::string ExitBegin = "game_screen_exit_begin";
-    //inline static const std::string Exit = "game_screen_exit";
+class GameScreenHandler {
+public:
+    virtual ~GameScreenHandler() = default;
 
-    Signal<> onEnter;
-    Signal<> onEnterBegin;
-    Signal<> onExit;
-    Signal<> onExitBegin;
+    virtual void onScreenCreate() = 0;
 
-    std::function<void()> fnCreate;
+    virtual void onScreenEnter() = 0;
+    virtual void onScreenEnterBegin() = 0;
+    virtual void onScreenExit() = 0;
+    virtual void onScreenExitBegin() = 0;
 
     // by default just destroy all children
-    std::function<void()> fnDestroy;
+    virtual void onScreenDestroy() = 0;
+};
+
+enum class GameScreenEvent {
+    Create,
+    Destroy,
+    Enter,
+    EnterBegin,
+    Exit,
+    ExitBegin
+};
+
+struct GameScreen {
+    Signal<GameScreenEvent> onEvent;
 
     // do not create/destroy content
-    bool persistent = true;
+    //bool persistent = true;
 
     static GameScreen& init(ecs::EntityApi e, const char* name = nullptr);
 };
+
+ECX_TYPE(21, GameScreen);
 
 struct ScreenTransitionState {
     bool active = false;
@@ -52,7 +65,7 @@ struct ScreenTransitionState {
     float delay = 0.15f;
     float delayTimer = 0.0f;
 
-    rect_f screenRect{};
+    Rect2f screenRect{};
 
     void checkStates();
 
@@ -74,7 +87,7 @@ class GameScreenManager {
 public:
     ecs::EntityApi layer;
 
-    std::vector<ecs::EntityApi> stack;
+    Array<ecs::EntityApi> stack;
 
     ScreenTransitionState transition;
 
@@ -82,12 +95,12 @@ public:
 
     explicit GameScreenManager(ecs::EntityApi layer_);
 
-    void setScreen(const std::string& name);
+    void setScreen(const char* name);
 
     [[nodiscard]]
-    ecs::EntityApi findScreen(const std::string& name) const;
+    ecs::EntityApi findScreen(const char* name) const;
 
-    void changeScreen(const std::string& name);
+    void changeScreen(const char* name);
 
     void update();
 

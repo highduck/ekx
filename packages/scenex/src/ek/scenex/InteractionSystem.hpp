@@ -3,7 +3,6 @@
 #include <ecxx/ecxx_fwd.hpp>
 
 #include <ek/app/app.hpp>
-#include <string>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/util/Type.hpp>
@@ -20,7 +19,7 @@ inline constexpr auto system_pause = "system_pause";
 class InteractionSystem {
 public:
     // screen-space pointer position
-    float2 pointerScreenPosition_ = float2::zero;
+    Vec2f pointerScreenPosition_ = Vec2f::zero;
     bool pointerDown_ = false;
 
     explicit InteractionSystem(ecs::EntityApi root);
@@ -29,16 +28,16 @@ public:
 
     void process();
 
-    ecs::EntityApi globalHitTest(float2& worldSpacePointer, ecs::EntityRef& capturedCamera);
+    ecs::EntityApi globalHitTest(Vec2f& worldSpacePointer, ecs::EntityRef& capturedCamera);
     app::MouseCursor searchInteractiveTargets(Array<ecs::EntityApi>& out_entities);
 
     void sendBackButton();
 
     void handle_system_pause();
 
-    void handle_mouse_event(const app::Event& ev, float2 pos);
+    void handle_mouse_event(const app::Event& ev, Vec2f pos);
 
-    void handle_touch_event(const app::Event& ev, float2 pos);
+    void handle_touch_event(const app::Event& ev, Vec2f pos);
 
     void drag(ecs::EntityApi entity);
 
@@ -46,7 +45,7 @@ public:
     ecs::EntityApi getHitTarget() const;
 
 private:
-    void fireInteraction(InteractionEvent event, bool prev = true, bool onlyIfChanged = false);
+    void fireInteraction(PointerEvent event, bool prev = true, bool onlyIfChanged = false);
 
     Array<ecs::EntityApi>& getPrevTargets() {
         return targetLists[targetListIndex & 1];
@@ -69,8 +68,8 @@ private:
 
     bool mouseActive_ = false;
     uint64_t touchID_ = 0ull;
-    float2 touchPosition0_;
-    float2 mousePosition0_;
+    Vec2f touchPosition0_;
+    Vec2f mousePosition0_;
 
     ecs::EntityRef dragEntity_;
 };

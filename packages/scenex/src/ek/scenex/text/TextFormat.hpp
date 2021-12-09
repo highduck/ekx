@@ -1,10 +1,9 @@
 #pragma once
 
-#include <utility>
-#include <string>
-#include <ek/math/vec.hpp>
-#include <ek/math/packed_color.hpp>
+#include <ek/math/Vec.hpp>
+#include <ek/math/Color32.hpp>
 #include <ek/util/Res.hpp>
+#include "Font.hpp"
 
 namespace ek {
 
@@ -29,7 +28,7 @@ struct Alignment {
         return (flags_ & Right) != 0;
     }
 
-    [[nodiscard]] inline float2 anchor() const {
+    [[nodiscard]] inline Vec2f anchor() const {
         return {
                 is_right() ? 1.0f : (is_left() ? 0.0f : 0.5f),
                 is_bottom() ? 1.0f : (is_top() ? 0.0f : 0.5f)
@@ -65,7 +64,7 @@ enum class TextLayerType {
 struct TextLayerEffect {
     TextLayerType type = TextLayerType::Text;
     argb32_t color = 0xFFFFFFFF_argb;
-    float2 offset{};
+    Vec2f offset{};
     float blurRadius = 0.0f;
     uint8_t blurIterations = 0;
     uint8_t strength = 0;
@@ -84,7 +83,7 @@ struct TextFormat {
     float letterSpacing = 0.0f;
 
     // not actually box alignment , but just to be shared for single line
-    float2 alignment{};
+    Vec2f alignment{};
 
     bool kerning = true;
     bool underline = false;
@@ -121,7 +120,7 @@ struct TextFormat {
         alignment = align.anchor();
     }
 
-    void addShadow(argb32_t color, float radius, float2 offset = float2::zero, float hardness = 0.2f /* 0..1 */) {
+    void addShadow(argb32_t color, float radius, Vec2f offset = Vec2f::zero, float hardness = 0.2f /* 0..1 */) {
         auto& layer = layers[layersCount++];
         layer.type = TextLayerType::Shadow;
         layer.color = color;

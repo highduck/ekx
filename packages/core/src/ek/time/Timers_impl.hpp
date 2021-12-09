@@ -1,17 +1,20 @@
 #pragma once
 
 #include "Timers.hpp"
-#include <map>
-#include <memory>
-#include "Stopwatch.hpp"
+#include "../ds/Hash.hpp"
+#include <ek/time.h>
 
 namespace ek {
 
 struct TimerJob final {
     std::function<void()> fn;
-    double time = 0.0;
-    double repeat = 0.0;
+    uint64_t time = 0;
+    uint64_t repeat = 0;
 };
+
+uint64_t toNanoSeconds(double time) {
+    return (uint64_t)(time * 1000000000.0);
+}
 
 class TimerJobManager final {
 public:
@@ -20,24 +23,21 @@ public:
         destroyEmptyTimers();
     }
 
-    int create(std::function<void()> fn, double timeout, double interval) {
+    int create(std::function<void()> fn, uint64_t timeout, uint64_t interval) {
         ++nextID;
-        auto timer = std::make_unique<TimerJob>();
-        timer->fn = std::move(fn);
-        timer->time = clock.readSeconds() + timeout;
-        timer->repeat = interval;
-        jobs[nextID] = std::move(timer);
+        TimerJob timer{};
+        timer.fn = std::move(fn);
+        timer.time = ek_ticks(nullptr) + timeout;
+        timer.repeat = interval;
+        jobs.set(nextID, std::move(timer));
         return nextID;
     }
 
     bool cancel(int id) {
-        auto it = jobs.find(id);
-        if (it != jobs.end()) {
-            auto& timer = (*it).second;
-            if (timer) {
-                timer.reset();
-                return true;
-            }
+        auto* timer = (TimerJob*) jobs.tryGet(id);
+        if (timer) {
+            timer->fn = nullptr;
+            return true;
         }
         return false;
     }
@@ -46,46 +46,44 @@ public:
 
 private:
     void updateTimers() {
-        auto now = clock.readSeconds();
-        for (auto& p : jobs) {
-            auto& job = p.second;
-            if (job && now >= job->time) {
-                job->fn();
-                if(job) {
-                    if (job->repeat > 0.0f) {
-                        job->time += job->repeat;
-                    } else {
-                        job.reset();
-                    }
+        auto now = ek_ticks(nullptr);
+        for (uint32_t i = 0; i < jobs.size(); ++i) {
+            auto& entry = jobs._data[i];
+            if (now >= entry.value.time) {
+                entry.value.fn();
+                if (entry.value.repeat != 0) {
+                    entry.value.time += entry.value.repeat;
+                } else {
+                    entry.value.fn = nullptr;
                 }
             }
         }
     }
 
     void destroyEmptyTimers() {
-        auto it = jobs.begin();
-        while (it != jobs.end()) {
-            if (it->second) {
-                it++;
+        uint32_t i = 0;
+        while (i < jobs.size()) {
+            auto& entry = jobs._data[i];
+            if (!entry.value.fn) {
+                jobs.remove(entry.key);
             } else {
-                it = jobs.erase(it);
+                ++i;
             }
         }
     }
 
-    std::map<int, std::unique_ptr<TimerJob>> jobs{};
-    ek::Stopwatch clock{};
+    Hash<TimerJob> jobs;
     int nextID = 0;
 };
 
-TimerJobManager* TimerJobManager::instance = nullptr;
+inline TimerJobManager* TimerJobManager::instance = nullptr;
 
-int setTimeout(std::function<void()> fn, double timeout) {
-    return TimerJobManager::instance->create(std::move(fn), timeout, 0.0f);
+int setTimeout_(std::function<void()> fn, double timeout) {
+    return TimerJobManager::instance->create(std::move(fn), toNanoSeconds(timeout), 0);
 }
 
-int setInterval(std::function<void()> fn, double interval) {
-    return TimerJobManager::instance->create(std::move(fn), interval, interval);
+int setInterval_(std::function<void()> fn, double interval) {
+    return TimerJobManager::instance->create(std::move(fn), toNanoSeconds(interval), toNanoSeconds(interval));
 }
 
 bool cancelTimer(int id) {

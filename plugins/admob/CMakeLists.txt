@@ -22,7 +22,10 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC scenex
         )
 
-#target_compile_options(${PROJECT_NAME} PUBLIC -std=c++17)
+target_compile_options(${PROJECT_NAME}
+        PUBLIC -fno-exceptions
+        PUBLIC -fno-rtti
+        )
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17

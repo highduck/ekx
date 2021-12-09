@@ -1,6 +1,6 @@
 #include "fireworks_script.h"
 
-#include <ek/math/box.hpp>
+#include <ek/math/Rect.hpp>
 #include <ek/util/ServiceLocator.hpp>
 #include <ek/scenex/SceneFactory.hpp>
 #include <ek/scenex/particles/ParticleSystem.hpp>

@@ -2,7 +2,7 @@
 
 #include <ek/ds/SparseArray.hpp>
 #include <ek/ds/Array.hpp>
-#include <ek/assert.hpp>
+#include <ek/assert.h>
 #include <ek/util/Type.hpp>
 #include "../ecxx_fwd.hpp"
 
@@ -13,19 +13,16 @@ namespace ecs {
 
 /** Component Managers **/
 
-struct ComponentRegistration {
-    void* data; // 8 bytes
-
-    ComponentHandle (* emplace)(void* component, EntityIndex entity); // 8 bytes
-
-    void (* erase)(void* component, EntityIndex entity); // 8 bytes
-
-    void (* clear)(void* component); // 8 bytes
-
-    ComponentTypeId typeId; // 2 bytes
-};
+class World;
 
 using EntityLookup = ek::SparseArray<EntityIndex, ComponentHandle, ENTITIES_MAX_COUNT>;
+
+enum class StorageCommand {
+    Emplace = 0,
+    Erase = 1,
+    Clear = 2,
+    Shutdown = 3
+};
 
 // 256 + 74 = 330 bytes
 // 128 * 330 = 42'240 kb
@@ -37,68 +34,61 @@ struct ComponentHeader {
     void* data; // 8 bytes
 
     uint32_t storageElementSize = 0;
-    // pointer to data array capacity for Profiling
-    uint32_t* pDebugStorageCapacity = nullptr;
 
     // Type Name for Debugging
     const char* name = nullptr;
 
-    ComponentHandle (* emplace)(ComponentHeader* component, EntityIndex entity); // 8 bytes
-
-    void (* erase)(ComponentHeader* component, EntityIndex entity); // 8 bytes
-
-    void (* clear)(ComponentHeader* component); // 8 bytes
-
-    void (* shutdown)(void* manager); // 8 bytes
+    ComponentHandle (* run)(StorageCommand cmd, ComponentHeader* component, EntityIndex entity); // 8 bytes
 
     uint32_t lockCounter; // 4 bytes
 
     ComponentTypeId typeId; // 2 bytes
 
     [[nodiscard]] inline unsigned count() const {
-        return handleToEntity._size;
+        return handleToEntity.size();
     }
 
-    ComponentHeader(unsigned initialCapacity, ComponentTypeId typeId_, void* manager) : handleToEntity(
-            initialCapacity) {
+    ComponentHeader(unsigned initialCapacity, ComponentTypeId typeId_, void* manager) :
+            handleToEntity(initialCapacity) {
         typeId = typeId_;
         lockCounter = 0;
         data = manager;
-        emplace = nullptr;
-        erase = nullptr;
-        clear = nullptr;
-        shutdown = nullptr;
+        run = nullptr;
         entityToHandle.init();
         handleToEntity.push_back(0);
     }
-};
 
-void component_type_init(ComponentHeader* component, ComponentTypeId typeId, void* userData);
-
-/** Identity Index generator **/
-struct ComponentTypeIdCounter {
-    static ComponentTypeId counter;
-
-    inline static ComponentTypeId next() {
-        return counter++;
+    static int compareBySize(const void* a, const void* b) {
+        return (int)(*(const ComponentHeader**)a)->count() -
+               (int)(*(const ComponentHeader**)b)->count();
     }
 };
 
-inline ComponentTypeId ComponentTypeIdCounter::counter = 0;
-
-// 1. match between TU
-// 2. starts from 0 for each Identity type
-template<typename T>
-struct ComponentTypeIdGenerator {
-    static const ComponentTypeId value;
-};
-
-template<typename T>
-inline const ComponentTypeId ComponentTypeIdGenerator<T>::value = ComponentTypeIdCounter::next();
+/** Identity Index generator **/
+//struct ComponentTypeIdCounter {
+//    static ComponentTypeId counter;
+//
+//    inline static ComponentTypeId next() {
+//        return counter++;
+//    }
+//};
+//
+//inline ComponentTypeId ComponentTypeIdCounter::counter = 0;
+//
+//// 1. match between TU
+//// 2. starts from 0 for each Identity type
+//template<typename T>
+//struct ComponentTypeIdGenerator {
+//    static const ComponentTypeId value;
+//};
+//
+//template<typename T>
+//inline const ComponentTypeId ComponentTypeIdGenerator<T>::value = ComponentTypeIdCounter::next();
 
 template<typename Component>
-inline constexpr static ComponentTypeId type() noexcept {
-    return ComponentTypeIdGenerator<Component>::value;
+inline constexpr ComponentTypeId type() noexcept {
+//    return ComponentTypeIdGenerator<Component>::value;
+    return ek::TypeIndex<Component, World>::value;
 }
 
 /**
@@ -122,17 +112,15 @@ public:
     EntityIndex entityPool[ENTITIES_MAX_COUNT]; // 2 * ENTITIES_MAX_COUNT = 131072 bytes
 
     // entity generations
-    //alignas(4096)
     EntityGeneration generations[ENTITIES_MAX_COUNT]; // 65536 bytes
 
     //EntityLookup componentEntityToHandle[COMPONENTS_MAX_COUNT]; // 256 * 128 = 32768 bytes
 
     // per component, data manager
-    //alignas(1024)
     ComponentHeader* components[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
 
     // per component, map entity to data handle
-//    alignas(1024) SparseArray* pEntityToHandle[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
+    // SparseArray* pEntityToHandle[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
 
     //// control section
     // allocated entities count
@@ -222,7 +210,7 @@ public:
         auto* component = getComponentHeader(componentId);
         const auto handle = component->entityToHandle.get(e);
         if (handle == 0) {
-            return component->emplace(component, e);
+            return component->run(StorageCommand::Emplace, component, e);
         }
         return handle;
     }
@@ -240,7 +228,9 @@ public:
     inline const Component& getOrDefault(EntityIndex e) const;
 
     inline void registerComponent(ComponentHeader* component) {
-        components[component->typeId] = component;
+        const auto typeId = component->typeId;
+        EK_ASSERT(components[typeId] == nullptr);
+        components[typeId] = component;
     }
 
     template<typename Component>
@@ -263,14 +253,11 @@ public:
 
     static constexpr bool EmptyData = std::is_empty_v<DataType>;
 
-    explicit ComponentStorage(unsigned initialCapacity) : component{initialCapacity, type<DataType>(), this},
-                                                          data(initialCapacity) {
-        component.emplace = ComponentStorage<DataType>::s_emplace;
-        component.erase = ComponentStorage<DataType>::s_erase;
-        component.clear = ComponentStorage<DataType>::s_clear;
-        component.shutdown = ComponentStorage<DataType>::s_shutdown;
+    explicit ComponentStorage(unsigned initialCapacity) :
+            component{initialCapacity, type<DataType>(), this},
+            data(initialCapacity) {
+        component.run = ComponentStorage<DataType>::s_run;
         component.storageElementSize = (uint32_t) sizeof(DataType);
-        component.pDebugStorageCapacity = &data._capacity;
         data.emplace_back();
     }
 
@@ -358,9 +345,9 @@ public:
 
     inline DataType* get_ptr_by_handle(ComponentHandle handle) {
         if constexpr (EmptyData) {
-            return data._data;
+            return data.begin();
         } else {
-            return data._data + handle;
+            return data.begin() + handle;
         }
     }
 
@@ -373,20 +360,22 @@ public:
     }
 
     /** Methods used for dynamic operations instead of using virtual calls **/
-    static ComponentHandle s_emplace(ComponentHeader* hdr, EntityIndex e) {
-        return static_cast<ComponentStorage*>(hdr->data)->emplace_default(e);
-    }
-
-    static void s_erase(ComponentHeader* hdr, EntityIndex entity) {
-        static_cast<ComponentStorage*>(hdr->data)->erase(entity);
-    }
-
-    static void s_clear(ComponentHeader* hdr) {
-        static_cast<ComponentStorage*>(hdr->data)->data.reduceSize(1);
-    }
-
-    static void s_shutdown(void* manager) {
-        static_cast<ComponentStorage<DataType>*>(manager)->~ComponentStorage<DataType>();
+    constexpr static ComponentHandle s_run(StorageCommand cmd, ComponentHeader* hdr, EntityIndex e) {
+        auto* storage = static_cast<ComponentStorage*>(hdr->data);
+        switch(cmd) {
+            case StorageCommand::Emplace:
+                return storage->emplace_default(e);
+            case StorageCommand::Erase:
+                storage->erase(e);
+                break;
+            case StorageCommand::Clear:
+                storage->data.reduceSize(1);
+                break;
+            case StorageCommand::Shutdown:
+                storage->~ComponentStorage<DataType>();
+                break;
+        }
+        return 0;
     }
 
     inline DataType& get_data(ComponentHandle i) const {
@@ -499,12 +488,9 @@ inline void World::create(EntityIndex* outEntities, uint32_t count) {
 
 template<typename Component>
 inline void World::registerComponent(unsigned initialCapacity) {
-    const char* label = ek::Type<Component>::Data.label;
-    {
-        auto* storage = new ComponentStorage<Component>(initialCapacity);
-        storage->component.name = label;
-        registerComponent(&storage->component);
-    }
+    auto* storage = new ComponentStorage<Component>(initialCapacity);
+    storage->component.name = ek::TypeName<Component>::value;
+    registerComponent(&storage->component);
 }
 
 template<typename Component>

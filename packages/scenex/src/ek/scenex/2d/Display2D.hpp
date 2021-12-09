@@ -1,22 +1,25 @@
 #pragma once
 
-#include <memory>
-#include <string>
+#include <ek/ds/String.hpp>
 #include <ek/scenex/text/TextFormat.hpp>
-#include <ek/math/box.hpp>
-#include <ek/math/mat3x2.hpp>
-#include <ek/util/TypeIndex.hpp>
+#include <ek/math/Rect.hpp>
+#include <ek/math/Matrix3x2.hpp>
+#include <ek/util/Type.hpp>
+#include <ek/ds/Pointer.hpp>
 #include <ecxx/ecxx.hpp>
 #include <ek/graphics/graphics.hpp>
 #include "Sprite.hpp"
-#include <ek/debug/LogSystem.hpp>
+#include <ek/log.h>
+#include <ek/assert.h>
+#include <ek/scenex/types.h>
 
 namespace ek {
 
 class IDrawable2D {
 public:
-    explicit IDrawable2D(uint32_t type_id) :
-            typeID_{type_id} {
+    IDrawable2D() = delete;
+
+    constexpr explicit IDrawable2D(int type_id) noexcept: typeID_{type_id} {
     }
 
     virtual ~IDrawable2D();
@@ -24,24 +27,24 @@ public:
     virtual void draw() = 0;
 
     [[nodiscard]]
-    virtual bool hitTest(float2 point) const = 0;
+    virtual bool hitTest(Vec2f point) const = 0;
 
     [[nodiscard]]
-    virtual rect_f getBounds() const = 0;
+    virtual Rect2f getBounds() const = 0;
 
     [[nodiscard]]
-    inline uint32_t getTypeID() const {
+    uint32_t getTypeID() const {
         return typeID_;
     }
 
     template<typename T>
-    [[nodiscard]] inline bool matchType() {
+    [[nodiscard]] bool matchType() const {
         return typeID_ == TypeIndex<T, IDrawable2D>::value;
     }
 
 protected:
 
-    uint32_t typeID_ = 0;
+    int typeID_;
 };
 
 template<typename T>
@@ -59,21 +62,21 @@ struct Bounds2D {
 //        Scissors,
 //        Bounds
 //    };
-    rect_f rect;
+    Rect2f rect;
 
     bool hitArea = false;
     bool scissors = false;
     bool culling = false;
 
     [[nodiscard]]
-    rect_f getWorldRect(const matrix_2d &worldMatrix) const;
+    Rect2f getWorldRect(const Matrix3x2f& worldMatrix) const;
 
     [[nodiscard]]
-    rect_f getScreenRect(matrix_2d viewMatrix, matrix_2d worldMatrix) const;
+    Rect2f getScreenRect(Matrix3x2f viewMatrix, Matrix3x2f worldMatrix) const;
 };
 
 struct Display2D {
-    std::unique_ptr<IDrawable2D> drawable;
+    Pointer<IDrawable2D> drawable;
 
     // state management
     Res<graphics::Shader> program;
@@ -83,30 +86,29 @@ struct Display2D {
 
     Display2D() = default;
 
-    explicit Display2D(IDrawable2D *ptr) :
-            drawable(ptr) {
+    explicit Display2D(IDrawable2D* ptr) : drawable(ptr) {
     }
 
     template<typename T>
     [[nodiscard]]
-    inline T &get() const {
+    inline T& get() const {
         if (!drawable) {
             EK_WARN("Drawable2D required");
         }
         if (!drawable->matchType<T>()) {
-            EK_WARN_F("Drawable2D TypeID mismatch: required %u, got %u", TypeIndex<T, IDrawable2D>::value,
-                    drawable->getTypeID());
+            EK_WARN("Drawable2D TypeID mismatch: required %d, got %d", TypeIndex<T, IDrawable2D>::value,
+                      drawable->getTypeID());
         }
         EK_ASSERT(!!drawable);
         EK_ASSERT(drawable->matchType<T>());
-        return *static_cast<T *>(drawable.get());
+        return *(T*) drawable.get();
     }
 
     template<typename T>
     [[nodiscard]]
-    inline T *tryGet() const {
+    inline T* tryGet() const {
         if (drawable && drawable->matchType<T>()) {
-            return static_cast<T *>(drawable.get());
+            return (T*) drawable.get();
         }
         return nullptr;
     }
@@ -118,25 +120,25 @@ struct Display2D {
     }
 
     [[nodiscard]]
-    inline bool hitTest(float2 local) const {
+    inline bool hitTest(Vec2f local) const {
         return drawable && drawable->hitTest(local);
     }
 
     [[nodiscard]]
-    inline rect_f getBounds() const {
-        return drawable ? drawable->getBounds() : rect_f{};
+    inline Rect2f getBounds() const {
+        return drawable ? drawable->getBounds() : Rect2f{};
     }
 
     template<typename T, typename ...Args>
-    inline static T &make(ecs::EntityApi e, Args &&...args) {
-        auto &d = e.get_or_create<Display2D>();
-        d.drawable = std::move(std::make_unique<T>(args...));
-        return static_cast<T &>(*d.drawable);
+    inline static T& make(ecs::EntityApi e, Args&& ...args) {
+        auto& d = e.get_or_create<Display2D>();
+        d.drawable = std::move(Pointer<T>::make(args...));
+        return static_cast<T&>(*d.drawable);
     }
 
     template<typename T>
-    static T &get(ecs::EntityApi e) {
-        auto *display = e.tryGet<Display2D>();
+    static T& get(ecs::EntityApi e) {
+        auto* display = e.tryGet<Display2D>();
         if (!display) {
             EK_WARN("Display2D required");
         }
@@ -144,15 +146,15 @@ struct Display2D {
     }
 
     template<typename T>
-    static T *tryGet(ecs::EntityApi e) {
-        auto *display = e.tryGet<Display2D>();
+    static T* tryGet(ecs::EntityApi e) {
+        auto* display = e.tryGet<Display2D>();
         return display ? display->tryGet<T>() : nullptr;
     }
 
     template<typename T>
-    T &makeDrawable() {
-        drawable = std::move(std::make_unique<T>());
-        return static_cast<T &>(*drawable);
+    T& makeDrawable() {
+        drawable = Pointer<T>::make();
+        return static_cast<T&>(*drawable);
     }
 };
 
@@ -160,29 +162,29 @@ struct Display2D {
 class Quad2D : public Drawable2D<Quad2D> {
 public:
     Res<Sprite> src{"empty"};
-    rect_f rect{0.0f, 0.0f, 1.0f, 1.0f};
+    Rect2f rect{0.0f, 0.0f, 1.0f, 1.0f};
     argb32_t colors[4]{argb32_t::one, argb32_t::one, argb32_t::one, argb32_t::one};
 
     void draw() override;
 
     [[nodiscard]]
-    rect_f getBounds() const override;
+    Rect2f getBounds() const override;
 
     [[nodiscard]]
-    bool hitTest(float2 point) const override;
+    bool hitTest(Vec2f point) const override;
 
-    inline Quad2D &setGradientVertical(argb32_t top, argb32_t bottom) {
+    inline Quad2D& setGradientVertical(argb32_t top, argb32_t bottom) {
         colors[0] = colors[1] = top;
         colors[2] = colors[3] = bottom;
         return *this;
     };
 
-    inline Quad2D &setColor(argb32_t color) {
+    inline Quad2D& setColor(argb32_t color) {
         colors[0] = colors[1] = colors[2] = colors[3] = color;
         return *this;
     };
 
-    inline Quad2D &setHalfExtents(float hw, float hh) {
+    inline Quad2D& setHalfExtents(float hw, float hh) {
         rect.set(-hw, -hh, 2.0f * hw, 2.0f * hh);
         return *this;
     }
@@ -196,15 +198,15 @@ public:
 
     Sprite2D();
 
-    explicit Sprite2D(const std::string &spriteId);
+    explicit Sprite2D(const String& spriteId);
 
     void draw() override;
 
     [[nodiscard]]
-    rect_f getBounds() const override;
+    Rect2f getBounds() const override;
 
     [[nodiscard]]
-    bool hitTest(float2 point) const override;
+    bool hitTest(Vec2f point) const override;
 };
 
 // 8 + 16 + 16 + 8 + 1 = 49 bytes
@@ -213,29 +215,29 @@ public:
     Res<Sprite> src;
     bool hit_pixels = true;
 
-    rect_f scale_grid;
-    float2 scale;
-    rect_f manual_target;
+    Rect2f scale_grid;
+    Vec2f scale;
+    Rect2f manual_target;
 
     NinePatch2D();
 
-    explicit NinePatch2D(const std::string &spriteId, rect_f aScaleGrid = rect_f::zero);
+    explicit NinePatch2D(const String& spriteId, Rect2f aScaleGrid = Rect2f::zero);
 
     void draw() override;
 
     [[nodiscard]]
-    rect_f getBounds() const override;
+    Rect2f getBounds() const override;
 
     [[nodiscard]]
-    bool hitTest(float2 point) const override;
+    bool hitTest(Vec2f point) const override;
 };
 
 // 8 + 136 + 16 + 8 + 4 = 172 bytes
 class Text2D : public Drawable2D<Text2D> {
 public:
-    std::string text;
+    String text;
     TextFormat format;
-    rect_f rect;
+    Rect2f rect;
 
     argb32_t borderColor = 0x00FF0000_argb;
     argb32_t fillColor = 0x00000000_argb;
@@ -253,18 +255,18 @@ public:
 
     Text2D();
 
-    Text2D(std::string text, TextFormat format);
+    Text2D(String text, TextFormat format);
 
     void draw() override;
 
     [[nodiscard]]
-    rect_f getBounds() const override;
+    Rect2f getBounds() const override;
 
     [[nodiscard]]
-    rect_f getTextBounds() const;
+    Rect2f getTextBounds() const;
 
     [[nodiscard]]
-    bool hitTest(float2 point) const override;
+    bool hitTest(Vec2f point) const override;
 };
 
 // 4 + 4 + 4 + 4 + 4 + 4 + 8 = 32 bytes
@@ -281,38 +283,44 @@ public:
     void draw() override;
 
     [[nodiscard]]
-    rect_f getBounds() const override;
+    Rect2f getBounds() const override;
 
     [[nodiscard]]
-    bool hitTest(float2 point) const override;
+    bool hitTest(Vec2f point) const override;
 };
 
 
 /** utilities **/
-void set_gradient_quad(ecs::EntityApi e, const rect_f &rc, argb32_t top, argb32_t bottom);
+void set_gradient_quad(ecs::EntityApi e, const Rect2f& rc, argb32_t top, argb32_t bottom);
 
-inline void set_color_quad(ecs::EntityApi e, const rect_f &rc, argb32_t color) {
+inline void set_color_quad(ecs::EntityApi e, const Rect2f& rc, argb32_t color) {
     set_gradient_quad(e, rc, color, color);
 }
 
 template<typename T>
-inline T &getDrawable(ecs::EntityApi e) {
+inline T& getDrawable(ecs::EntityApi e) {
     return e.get<Display2D>().get<T>();
 }
 
-inline void setText(ecs::EntityApi e, const std::string &v) {
-    auto *d = e.tryGet<Display2D>();
+inline void setText(ecs::EntityApi e, const String& v) {
+    auto* d = e.tryGet<Display2D>();
     if (d) {
-        auto *txt = d->tryGet<Text2D>();
+        auto* txt = d->tryGet<Text2D>();
         if (txt) {
             txt->text = v;
         }
     }
 }
 
+ECX_TYPE(11, Display2D);
+ECX_TYPE(32, Bounds2D);
 
-EK_DECLARE_TYPE(Display2D);
 EK_DECLARE_TYPE(IDrawable2D);
+EK_TYPE_INDEX_T(IDrawable2D, Sprite2D, IDrawable2D_Sprite2D);
+EK_TYPE_INDEX_T(IDrawable2D, Quad2D, IDrawable2D_Quad2D);
+EK_TYPE_INDEX_T(IDrawable2D, Arc2D, IDrawable2D_Arc2D);
+EK_TYPE_INDEX_T(IDrawable2D, NinePatch2D, IDrawable2D_NinePatch2D);
+EK_TYPE_INDEX_T(IDrawable2D, Text2D, IDrawable2D_Text2D);
 
 }
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/math/vec.hpp>
-#include <ek/math/box.hpp>
-#include <ek/math/mat.hpp>
+#include <ek/math/Vec.hpp>
+#include <ek/math/Rect.hpp>
+#include <ek/math/Matrix.hpp>
 #include <ek/ds/FixedArray.hpp>
 
 namespace ek {
@@ -22,14 +22,14 @@ struct Camera2D {
     ecs::EntityRef root;
     float contentScale = 1;
 
-    float2 relativeOrigin{};
+    Vec2f relativeOrigin{};
 
     bool clearColorEnabled = false;
-    float4 clearColor{0.5f, 0.5f, 0.5f, 1.0f};
+    Vec4f clearColor{0.5f, 0.5f, 0.5f, 1.0f};
 
     // just for fun (quad is used to clear.
     // todo: know about sync/de-sync clearing surface/RT?)
-    float4 clearColor2 = float4::zero;
+    Vec4f clearColor2{};
 
     bool debugOcclusion = false;
     bool debugVisibleBounds = false;
@@ -39,10 +39,10 @@ struct Camera2D {
     bool debugDrawScriptGizmo = false;
     float debugDrawScale = 1;
 
-    matrix_2d screenToWorldMatrix{};
-    matrix_2d worldToScreenMatrix{};
-    rect_f screenRect = rect_f::zero_one;
-    rect_f worldRect = rect_f::zero_one;
+    Matrix3x2f screenToWorldMatrix{};
+    Matrix3x2f worldToScreenMatrix{};
+    Rect2f screenRect = Rect2f::zero_one;
+    Rect2f worldRect = Rect2f::zero_one;
 
     static ecs::EntityApi Main;
 public:
@@ -50,7 +50,7 @@ public:
 
     explicit Camera2D(ecs::EntityApi root);
 
-    [[nodiscard]] matrix_2d getMatrix(ecs::EntityApi view, float scale, const float2& screenOffset, const float2& screenSize) const;
+    [[nodiscard]] Matrix3x2f getMatrix(ecs::EntityApi view, float scale, const Vec2f& screenOffset, const Vec2f& screenSize) const;
 
 public:
     static void updateQueue();
@@ -64,7 +64,6 @@ public:
     static const Camera2D* getCurrentRenderingCamera();
 };
 
-EK_DECLARE_TYPE(Camera2D);
-
+ECX_TYPE(10, Camera2D);
 }
 

@@ -3,7 +3,7 @@
 #include "Atlas.h"
 #include <pugixml.hpp>
 #include <thread>
-#include "max_rects.hpp"
+#include "MaxRects.hpp"
 #include "ImageIO.h"
 #include "Bitmap.h"
 #include "Writer.h"
@@ -127,7 +127,7 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
     std::vector<PageData> pages;
 
 //    timer timer{};
-//    EK_DEBUG_F("Packing %lu sprites...", sprites.size());
+//    EK_DEBUG("Packing %lu sprites...", sprites.size());
 
     bool need_to_pack = true;
     while (need_to_pack) {

@@ -7,8 +7,8 @@ namespace ek {
 
 class EditorWindow {
 public:
-    std::string name{};
-    std::string title{};
+    String name{};
+    String title{};
     bool dirty = false;
     bool opened = true;
     bool fullFrame = false;

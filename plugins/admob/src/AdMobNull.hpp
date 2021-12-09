@@ -7,13 +7,13 @@ namespace ek {
 class AdMobNull : public AdMobWrapper {
 public:
 
-    void showInterstitial(const std::function<void()>& callback) override {
+    void showInterstitial(std::function<void()> callback) override {
         if (callback) {
             callback();
         }
     }
 
-    void showRewardedAd(const std::function<void(bool)>& callback) override {
+    void showRewardedAd(std::function<void(bool)> callback) override {
         if (callback) {
             callback(false);
         }

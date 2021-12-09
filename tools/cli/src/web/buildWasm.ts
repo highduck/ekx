@@ -53,8 +53,11 @@ function renderCMakeFile(ctx:Project, buildType): string {
     };
 
     if (buildType === "Release") {
-        cmakeTarget.linkOptions.push("-Oz", "-flto", "-g0");
-        cmakeTarget.compileOptions.push("-Oz", "-flto", "-g0");
+        // const releaseExpFlags = ["-fno-align-functions", "-fno-strict-overflow", "-fno-strict-aliasing"];
+        // const releaseExpFlags = ["-fno-vectorize", "-fno-slp-vectorize", "-fno-tree-vectorize", "-fno-unroll-loops"];
+        const releaseExpFlags = [];
+        cmakeTarget.linkOptions.push("-Oz", "-flto", ...releaseExpFlags);
+        cmakeTarget.compileOptions.push("-Oz", "-flto", ...releaseExpFlags);
         if (1) {
             cmakeTarget.linkOptions.push("-g0");
             cmakeTarget.compileOptions.push("-g0");

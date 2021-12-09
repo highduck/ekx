@@ -32,7 +32,7 @@ image_t* decode_image_data(const void* data, size_t size, bool pma) {
         }
     } else {
 #ifndef NDEBUG
-        EK_ERROR_F("image decoding error: %s", stbi_failure_reason());
+        EK_ERROR("image decoding error: %s", stbi_failure_reason());
 #endif
     }
     EK_DEBUG("decode image: end");

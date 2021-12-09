@@ -11,10 +11,10 @@
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app/app.hpp>
 #include <ek/scenex/base/Node.hpp>
-#include <ek/math/matrix_transform.hpp>
-#include <ek/math/matrix_transpose.hpp>
-#include <ek/math/matrix_inverse.hpp>
-#include <ek/math/matrix_camera.hpp>
+#include <ek/math/MatrixTransform.hpp>
+#include <ek/math/MatrixTranspose.hpp>
+#include <ek/math/MatrixInverse.hpp>
+#include <ek/math/MatrixCamera.hpp>
 
 #include <cstring>
 
@@ -23,26 +23,26 @@ namespace ek {
 const auto DEFAULT_FACE_WINDING = SG_FACEWINDING_CCW;
 using namespace graphics;
 
-box_t<3, float> get_shadow_map_box(const mat4f& camera_projection, const mat4f& camera_view, const mat4f& light_view) {
-    const mat4f inv_proj_view = inverse(camera_projection * camera_view);
-    float3 corners[8] = {
-            float3{-1, -1, -1},
-            float3{-1, -1, 1},
-            float3{1, -1, -1},
-            float3{1, -1, 1},
-            float3{-1, 1, -1},
-            float3{-1, 1, 1},
-            float3{1, 1, -1},
-            float3{1, 1, 1}
+Rect<3, float> get_shadow_map_box(const Matrix4f& camera_projection, const Matrix4f& camera_view, const Matrix4f& light_view) {
+    const Matrix4f inv_proj_view = inverse(camera_projection * camera_view);
+    Vec3f corners[8] = {
+            Vec3f{-1, -1, -1},
+            Vec3f{-1, -1, 1},
+            Vec3f{1, -1, -1},
+            Vec3f{1, -1, 1},
+            Vec3f{-1, 1, -1},
+            Vec3f{-1, 1, 1},
+            Vec3f{1, 1, -1},
+            Vec3f{1, 1, 1}
     };
-    float3 bb_min{100000, 100000, 100000};
-    float3 bb_max{-100000, -100000, -100000};
+    Vec3f bb_min{100000, 100000, 100000};
+    Vec3f bb_max{-100000, -100000, -100000};
 
     for (size_t i = 0; i < 8; ++i) {
-        vec4_t<float> c{corners[i], 1.0f};
-        vec4_t<float> v2 = inv_proj_view * c;
+        Vec4<float> c{corners[i], 1.0f};
+        Vec4<float> v2 = inv_proj_view * c;
         auto len = length(v2);
-        vec3_t<float> v = len * normalize(vec3_t<float>{v2.x, v2.y, v2.z});
+        Vec3<float> v = len * normalize(Vec3<float>{v2.x, v2.y, v2.z});
         if (v.x < bb_min.x) bb_min.x = v.x;
         if (v.y < bb_min.y) bb_min.y = v.y;
         if (v.z < bb_min.z) bb_min.z = v.z;
@@ -93,8 +93,8 @@ struct ShadowMapRes {
     sg_pass_action clear{};
     sg_pipeline pip{};
 
-    mat4f projection{};
-    mat4f view{};
+    Matrix4f projection{};
+    Matrix4f view{};
 
     void init() {
 
@@ -144,9 +144,9 @@ struct ShadowMapRes {
         sg_apply_pipeline(pip);
     }
 
-    void updateLightDirection(const mat4f& cameraProjection, const mat4f& cameraView) {
+    void updateLightDirection(const Matrix4f& cameraProjection, const Matrix4f& cameraView) {
         // find directional light
-        float3 light_position{0, 0, 1};
+        Vec3f light_position{0, 0, 1};
         Light3D light_data{};
         for (auto e : ecs::view<Light3D, Transform3D>()) {
             auto& l = e.get<Light3D>();
@@ -157,12 +157,12 @@ struct ShadowMapRes {
             }
         }
 
-        const float3 light_target = float3::zero;
+        const Vec3f light_target = Vec3f::zero;
 //    auto light_dir = normalize(light_target - light_position);
 
         auto bb = get_shadow_map_box(cameraProjection, cameraView, view);
         const float shadow_zone_size = 200.0f;
-        view = look_at_rh(light_position, light_target, float3{0, 0, 1});
+        view = look_at_rh(light_position, light_target, Vec3f{0, 0, 1});
         projection = ortho_projection_rh<float>(-shadow_zone_size,
                                                 shadow_zone_size,
                                                 shadow_zone_size,
@@ -172,13 +172,13 @@ struct ShadowMapRes {
 
     void renderObjects() {
         sg_bindings bindings{};
-        mat4f mvp;
+        Matrix4f mvp;
 
         Res<StaticMesh> resMesh{};
         for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
             const auto& filter = e.get<MeshRenderer>();
             if (filter.castShadows && e.get_or_default<Node>().visible()) {
-                resMesh.setID(filter.mesh);
+                resMesh.setID(filter.mesh.c_str());
                 auto* mesh = resMesh.get_or(filter.meshPtr);
                 if (mesh) {
                     bindings.index_buffer = mesh->ib.buffer;
@@ -224,14 +224,14 @@ struct Main3DRes {
         pip = sg_make_pipeline(pipDesc);
     }
 
-    void setDirectionalLightInfo(float3 pos, const Light3D& data) {
+    void setDirectionalLightInfo(Vec3f pos, const Light3D& data) {
         memcpy(directionalLightParams.light_position, pos.data(), sizeof(float) * 3);
         memcpy(directionalLightParams.light_ambient, data.ambient.data(), sizeof(float) * 3);
         memcpy(directionalLightParams.light_diffuse, data.diffuse.data(), sizeof(float) * 3);
         memcpy(directionalLightParams.light_specular, data.specular.data(), sizeof(float) * 3);
     }
 
-    void setPointLightInfo(float3 pos, const Light3D& data) {
+    void setPointLightInfo(Vec3f pos, const Light3D& data) {
         memcpy(pointLightParams.light2_position, pos.data(), sizeof(float) * 3);
         memcpy(pointLightParams.light2_ambient, data.ambient.data(), sizeof(float) * 3);
         memcpy(pointLightParams.light2_diffuse, data.diffuse.data(), sizeof(float) * 3);
@@ -264,14 +264,14 @@ struct RenderSkyBoxRes {
         pip = sg_make_pipeline(pipDesc);
     }
 
-    void render(const Texture* cubeMapTexture, const mat4f& view, const mat4f& projection) {
+    void render(const Texture* cubeMapTexture, const Matrix4f& view, const Matrix4f& projection) {
         Res<StaticMesh> mesh{"cube"};
         if (cubeMapTexture && mesh) {
             sg_apply_pipeline(pip);
 
-            mat4f model{};
+            Matrix4f model{};
 
-            mat4f view3 = view;
+            Matrix4f view3 = view;
             view3.m03 = 0;
             view3.m13 = 0;
             view3.m23 = 0;
@@ -280,7 +280,7 @@ struct RenderSkyBoxRes {
             view3.m31 = 0;
             view3.m32 = 0;
 
-            const mat4f mvp = projection * view3 * model;
+            const Matrix4f mvp = projection * view3 * model;
 
             sg_bindings bind{};
             bind.fs_images[0] = cubeMapTexture->image;
@@ -309,18 +309,18 @@ RenderSystem3D::~RenderSystem3D() {
     delete skybox;
 }
 
-void RenderSystem3D::renderObjects(const mat4f& proj, const mat4f& view) {
+void RenderSystem3D::renderObjects(const Matrix4f& proj, const Matrix4f& view) {
     Res<Texture> texEmpty{"empty"};
     main->bind.fs_images[SLOT_uImage0] = texEmpty->image;
     main->bind.fs_images[SLOT_u_image_shadow_map] = shadows->rtColor->image;
 
     for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
         const auto& filter = e.get<MeshRenderer>();
-        auto* mesh = Res<StaticMesh>{filter.mesh}.get_or(filter.meshPtr);
+        auto* mesh = Res<StaticMesh>{filter.mesh.c_str()}.get_or(filter.meshPtr);
         if (mesh && e.get_or_default<Node>().visible()) {
-            mat4f model = e.get<Transform3D>().world;
-            mat3f nm = transpose(inverse(mat3f{model}));
-            mat4f nm4{};
+            Matrix4f model = e.get<Transform3D>().world;
+            Matrix3f nm = transpose(inverse(Matrix3f{model}));
+            Matrix4f nm4{};
             nm4.m00 = nm.m00;
             nm4.m01 = nm.m01;
             nm4.m02 = nm.m02;
@@ -331,9 +331,9 @@ void RenderSystem3D::renderObjects(const mat4f& proj, const mat4f& view) {
             nm4.m21 = nm.m21;
             nm4.m22 = nm.m22;
 
-            const mat4f depth_mvp = shadows->projection * shadows->view * model;
+            const Matrix4f depth_mvp = shadows->projection * shadows->view * model;
 
-            const auto& material = *(Res<Material3D>{filter.material}.get_or(&defaultMaterial));
+            const auto& material = *(Res<Material3D>{filter.material.c_str()}.get_or(&defaultMaterial));
             vs_params_t params;
             memcpy(params.uModelViewProjection, (proj * view * model).data_, sizeof(float) * 16);
             memcpy(params.uModel, model.data_, sizeof(float) * 16);
@@ -373,10 +373,10 @@ void RenderSystem3D::prepare() {
     const auto& cameraData = camera.get<Camera3D>();
     const auto& cameraTransform = camera.get<Transform3D>();
 
-    float3 point_light_pos{0, 15, 0};
+    Vec3f point_light_pos{0, 15, 0};
     Light3D point_light{};
 
-    float3 directional_light_pos{0, 0, -1};
+    Vec3f directional_light_pos{0, 0, -1};
     Light3D directional_light{};
     for (auto e : ecs::view<Light3D, Transform3D>()) {
         auto& l = e.get<Light3D>();
@@ -390,11 +390,11 @@ void RenderSystem3D::prepare() {
         }
     }
 
-    mat4f view = inverse(cameraTransform.world);
+    Matrix4f view = inverse(cameraTransform.world);
 
     const float width = app::g_app.drawableWidth;
     const float height = app::g_app.drawableHeight;
-    mat4f proj{};
+    Matrix4f proj{};
     const auto aspect = (float) width / height;
     if (cameraData.orthogonal) {
         const auto ortho_size = cameraData.orthogonalSize;
@@ -437,13 +437,13 @@ void RenderSystem3D::render(float width, float height) {
 
     static float fc_ = 1.0;
     fc_ += 1.0f;
-    auto time = static_cast<float>(Clock::now());
+    auto time = static_cast<float>(ek_time_now());
 
     sg_apply_pipeline(main->pip);
 
     fs_params_t fs_params;
     fs_params.u_time[0] = time;
-    fs_params.u_time[1] = math::fract(time);
+    fs_params.u_time[1] = Math::fract(time);
     fs_params.u_time[2] = fc_;
     fs_params.u_time[3] = 0.0f;
     fs_params.u_resolution[0] = width;

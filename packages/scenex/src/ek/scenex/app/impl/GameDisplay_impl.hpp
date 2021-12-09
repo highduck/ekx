@@ -58,7 +58,7 @@ bool GameDisplay::beginOverlayDev() {
 
     if (simulated) {
 
-        static sg_pass_action pass_action{};
+        sg_pass_action pass_action{};
         pass_action.colors[0].action = SG_ACTION_DONTCARE;
 
         sg_begin_default_pass(pass_action, w, h);
@@ -69,7 +69,7 @@ bool GameDisplay::beginOverlayDev() {
         sg_push_debug_group("Game viewport");
 // todo: temp disable
         draw2d::begin({0, 0, fw, fh});
-        draw2d::state.setTextureRegion(color, rect_f::zero_one);
+        draw2d::state.setTextureRegion(color, Rect2f::zero_one);
         draw2d::quad(0, 0, scale * info.size.x, scale * info.size.y);
         draw2d::end();
 
@@ -143,14 +143,14 @@ void GameDisplay::update() {
         info.window.y = g_app.windowHeight;
         const float* insets = app::getScreenInsets();
         if(insets) {
-            info.insets = *(const float4*)insets;
+            info.insets = *(const Vec4f*)insets;
         }
         else {
-            info.insets = float4::zero;
+            info.insets = Vec4f{};
         }
         info.dpiScale = g_app.dpiScale;
 
-        info.destinationViewport.position = float2::zero;
+        info.destinationViewport.position = Vec2f::zero;
         info.destinationViewport.size.x = g_app.drawableWidth;
         info.destinationViewport.size.y = g_app.drawableHeight;
     }

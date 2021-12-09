@@ -1,7 +1,8 @@
 #include "Doc.hpp"
 
 #include <pugixml.hpp>
-#include <ek/debug.hpp>
+#include <ek_log.h>
+#include <ek_assert.h>
 #include <sys/stat.h>
 #include <miniz.h>
 #include <unordered_map>
@@ -37,7 +38,7 @@ public:
             xml_doc_ = new pugi::xml_document();
             auto res = xml_doc_->load(this->content().c_str());
             if (!res) {
-                EK_ERROR_F("XML PARSE ERROR: %s", res.description());
+                EK_ERROR("XML PARSE ERROR: %s", res.description());
                 delete xml_doc_;
                 xml_doc_ = nullptr;
             }
@@ -50,14 +51,16 @@ public:
     }
 
     const File* open(const char* relPath) const override {
-        auto childPath = path_;
-        path_t::append(childPath, relPath);
+        String childPath{path_.c_str()};
+        Path::appendJoin(childPath, relPath);
+        // TODO: remmmmove std::string everywhere...
+        std::string childPath_{childPath.c_str()};
         auto& children = root_->children_;
-        auto it = children.find(childPath);
+        auto it = children.find(childPath_);
         if (it == children.end()) {
-            children[childPath] = create(childPath.c_str(), root_);
+            children[childPath_] = create(childPath_.c_str(), root_);
         }
-        return children[childPath];
+        return children[childPath_];
     }
 
 protected:
@@ -96,7 +99,7 @@ public:
 
                 fclose(stream);
             } else {
-                EK_ERROR_F("Error read XFL node: %s", path_.c_str());
+                EK_ERROR("Error read XFL node: %s", path_.c_str());
             }
         }
         return contents_;
@@ -121,7 +124,7 @@ public:
         // MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY
         auto status = mz_zip_reader_init_file(zip_, zip_file_path, 0);
         if (!status) {
-            EK_WARN_F("Error reading FLA zip archive: %s", zip_file_path);
+            EK_WARN("Error reading FLA zip archive: %s", zip_file_path);
         }
     }
 
@@ -170,19 +173,19 @@ std::unique_ptr<File> File::load(const char* path) {
     char tmp[1024] = "";
 
     if (is_file(path)) {
-        const char* ext = path_ext(path);
+        const char* ext = ek_path_ext(path);
         // dir/FILE/FILE.xfl
         if (strncmp(ext, "xfl", 3) == 0) {
-            path_extract_dir(tmp, 1024, path);
+            ek_path_dirname(tmp, 1024, path);
             if (is_dir(tmp)) {
                 return std::make_unique<XFLNode>(tmp, nullptr);
             } else {
-                EK_ERROR_F("Import Flash: loading %s XFL file, but %s is not a dir", path, tmp);
+                EK_ERROR("Import Flash: loading %s XFL file, but %s is not a dir", path, tmp);
             }
         } else if (strncmp(ext, "fla", 3) == 0 || strncmp(ext, "zip", 3) == 0) {
             return std::make_unique<FLANode>(path);
         } else {
-            EK_ERROR_F("Import Flash: file is not xfl or fla: %s", path);
+            EK_ERROR("Import Flash: file is not xfl or fla: %s", path);
         }
     }
 
@@ -191,15 +194,15 @@ std::unique_ptr<File> File::load(const char* path) {
     if (is_file(tmp)) {
         return std::make_unique<FLANode>(tmp);
     } else if (is_dir(path)) {
-        stbsp_snprintf(tmp, 1024, "%s/%s.xfl", path, path_name(path));
+        stbsp_snprintf(tmp, 1024, "%s/%s.xfl", path, ek_path_name(path));
         if (is_file(tmp)) {
             return std::make_unique<XFLNode>(path, nullptr);
         } else {
-            EK_WARN_F("Import Flash: given dir doesn't contain .xfl file: %s", path);
+            EK_WARN("Import Flash: given dir doesn't contain .xfl file: %s", path);
         }
     }
 
-    EK_ERROR_F("Import Flash: file not found: %s", path);
+    EK_ERROR("Import Flash: file not found: %s", path);
     return nullptr;
 }
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include "../math/packed_color.hpp"
-#include "../math/box.hpp"
+#include "../math/Color32.hpp"
+#include "../math/Rect.hpp"
 
 namespace ek {
 
@@ -55,7 +55,7 @@ public:
     }
 
     template<typename T>
-    rect_t<T> bounds() const {
+    Rect2<T> bounds() const {
         return {static_cast<T>(0),
                 static_cast<T>(0),
                 static_cast<T>(width_),

@@ -1,22 +1,23 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/math/vec.hpp>
-#include <string>
+#include <ek/math/Vec.hpp>
+#include <ek/ds/String.hpp>
 
 namespace ek {
 
 struct BubbleText {
     float delay = 0.0f;
     float time = 0.0f;
-    float2 start{};
-    float2 offset{};
+    Vec2f start{};
+    Vec2f offset{};
 
     static void updateAll();
 
-    static ecs::EntityApi create(const char* fontName, const std::string& text, const float2& pos, float delay = 0.0f);
+    static ecs::EntityApi create(const char* fontName, const String& text, const Vec2f& pos, float delay = 0.0f);
 };
 
+ECX_TYPE(20, BubbleText);
 
 }
 

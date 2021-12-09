@@ -2,9 +2,6 @@
 
 #include <ek/draw2d/drawer.hpp>
 #include "FontImplBase.hpp"
-//#include <unordered_map>
-//#include <vector>
-//#include <array>
 
 namespace ek {
 
@@ -17,22 +14,23 @@ Font::~Font() {
     delete impl;
 }
 
-void Font::draw(const std::string& text,
+void Font::draw(const char* text,
                 float size,
-                const float2& position,
+                const Vec2f& position,
                 argb32_t color,
                 float line_height,
                 float line_spacing) const {
 
-    float2 current = position;
-    float2 start = position;
+    Vec2f current = position;
+    Vec2f start = position;
 
     draw2d::state.save_color()
             .scaleColor(color);
 
     const graphics::Texture* prevTexture = nullptr;
     Glyph gdata;
-    for (char code : text) {
+    for(; *text; ++text) {
+        char code = *text;
         if (code == '\n') {
             current.x = start.x;
             current.y += line_height + line_spacing;
@@ -67,7 +65,7 @@ void Font::draw(const std::string& text,
     draw2d::state.restore_color();
 }
 
-float Font::get_text_segment_width(const std::string& text, float size, int begin, int end) const {
+float Font::get_text_segment_width(const char* text, float size, int begin, int end) const {
     float x = 0.0f;
     float max = 0.0f;
     Glyph gdata;

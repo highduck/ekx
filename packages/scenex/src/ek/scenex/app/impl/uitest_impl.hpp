@@ -61,11 +61,11 @@ void runUITest() {
     }
     auto it = _tests.find(_testToRun);
     if (it != _tests.end()) {
-        EK_INFO_F("UI test run: %s", _testToRun.c_str());
+        EK_INFO("UI test run: %s", _testToRun.c_str());
         it->second();
         return;
     }
-    EK_ERROR_F("UI test %s not found", _testToRun.c_str());
+    EK_ERROR("UI test %s not found", _testToRun.c_str());
     fail();
 }
 

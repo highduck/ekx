@@ -88,9 +88,7 @@ public:
             ((access_[i] = table_[i] = w.components[type<Component>()], ++i), ...);
         }
 
-        std::sort(table_, table_ + components_num, [](auto* a, auto* b) -> bool {
-            return a->count() < b->count();
-        });
+        qsort(table_, components_num, sizeof(table_[0]), ComponentHeader::compareBySize);
 
         for (uint32_t j = 0u; j < components_num; ++j) {
             ++access_[j]->lockCounter;

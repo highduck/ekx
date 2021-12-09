@@ -3,7 +3,7 @@
 #include "RenderSystem2D.hpp"
 #include "Viewport.hpp"
 
-#include <ek/math/bounds_builder.hpp>
+#include <ek/math/BoundsBuilder.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/scenex/base/Node.hpp>
@@ -14,13 +14,13 @@ void drawEntity(ecs::EntityApi e, const Transform2D* transform);
 
 ecs::EntityApi Camera2D::Main{};
 
-matrix_2d
-Camera2D::getMatrix(ecs::EntityApi root_, float scale, const float2& screenOffset, const float2& screenSize) const {
+Matrix3x2f
+Camera2D::getMatrix(ecs::EntityApi root_, float scale, const Vec2f& screenOffset, const Vec2f& screenSize) const {
 //    auto screen = screenRect;
     auto m = root_.get<WorldTransform2D>().matrix;
     float invScale = 1.0f / (scale * contentScale);
 //    m.scale(invScale, invScale).translate( -screen.position - relativeOrigin * screen.size - screenOffset);
-    m.translate(-relativeOrigin * screenSize).scale(invScale, invScale).translate( - screenOffset);
+    m.translate(-relativeOrigin * screenSize).scale(invScale, invScale).translate(-screenOffset);
     return m;
 }
 
@@ -35,7 +35,7 @@ FixedArray<ecs::EntityRef, Camera2D::MaxCount>& Camera2D::getCameraQueue() {
 void Camera2D::updateQueue() {
     activeCameras.clear();
 
-    for (auto e : ecs::view<Camera2D>()) {
+    for (auto e: ecs::view<Camera2D>()) {
         auto& camera = e.get<Camera2D>();
         const auto& vp = camera.viewportNode.get().get<Viewport>();
         if (!camera.enabled) {
@@ -45,7 +45,7 @@ void Camera2D::updateQueue() {
         // maybe we need region from not 0,0 started input rect
         camera.screenRect = vp.output.screenRect;
         camera.screenToWorldMatrix = camera.getMatrix(e, vp.output.scale, vp.output.offset, vp.options.baseResolution);
-        camera.worldRect = bounds_builder_2f::transform(camera.screenRect, camera.screenToWorldMatrix);
+        camera.worldRect = BoundsBuilder2f::transform(camera.screenRect, camera.screenToWorldMatrix);
 
         camera.worldToScreenMatrix = camera.screenToWorldMatrix;
         if (camera.worldToScreenMatrix.inverse()) {
@@ -55,15 +55,16 @@ void Camera2D::updateQueue() {
             //EK_ASSERT(false);
         }
     }
-    std::sort(activeCameras.begin(), activeCameras.end(), [](ecs::EntityRef a, ecs::EntityRef b) -> bool {
-        return a.get().get<Camera2D>().order < b.get().get<Camera2D>().order;
+    qsort(activeCameras.data(), activeCameras.size(), sizeof(ecs::EntityRef), [](void const* _a, void const* _b) {
+        auto* a = (ecs::EntityRef*) _a;
+        auto* b = (ecs::EntityRef*) _b;
+        return a->get().get<Camera2D>().order - b->get().get<Camera2D>().order;
     });
 }
 
-
 void Camera2D::render() {
-    for (auto e : activeCameras) {
-        if(!e.valid()) {
+    for (auto e: activeCameras) {
+        if (!e.valid()) {
             continue;
         }
         auto& camera = e.get().get<Camera2D>();
@@ -87,14 +88,14 @@ void Camera2D::render() {
             draw2d::state.restoreProgram();
         }
 
-        if(camera.root.valid() && camera.root.get().get_or_default<Node>().visible()) {
+        if (camera.root.valid() && camera.root.get().get_or_default<Node>().visible()) {
             RenderSystem2D::draw(ecs::the_world, camera.root.index(), camera.root.get().tryGet<WorldTransform2D>());
         }
 
 #ifndef NDEBUG
-//        draw2d::begin(camera.screenRect, camera.worldToScreenMatrix);
-        drawGizmo(camera);
-//        sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.width, camera.screenRect.height, true);
+        //        draw2d::begin(camera.screenRect, camera.worldToScreenMatrix);
+                drawGizmo(camera);
+        //        sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.width, camera.screenRect.height, true);
 #endif
 
         draw2d::end();

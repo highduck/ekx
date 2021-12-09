@@ -9,15 +9,14 @@ AudioManager::AudioManager() = default;
 
 AudioManager::~AudioManager() = default;
 
-void AudioManager::play_music(const std::string& name) {
-    if (name != music_) {
+void AudioManager::play_music(const char* name) {
+    if (music_ != name) {
         if (auph::isActive(musicVoice_.id)) {
             auph::stop(musicVoice_.id);
             musicVoice_ = {};
         }
 
-        Res<audio::AudioResource> audioRes{music_};
-        audioRes.setID(name);
+        Res<audio::AudioResource> audioRes{name};
         if (audioRes) {
             if (auph::isBufferLoaded(audioRes->buffer) && !auph::isActive(musicVoice_.id)) {
                 musicVoice_ = auph::play(audioRes->buffer,
@@ -30,7 +29,7 @@ void AudioManager::play_music(const std::string& name) {
     }
 }
 
-void AudioManager::play_sound(const std::string& name, float vol, float pitch) const {
+void AudioManager::play_sound(const char* name, float vol, float pitch) const {
     if (sound.enabled()) {
         Res<audio::AudioResource> snd{name};
         if (snd) {
@@ -39,7 +38,7 @@ void AudioManager::play_sound(const std::string& name, float vol, float pitch) c
     }
 }
 
-void AudioManager::play_sound_at(const std::string& name, const float2& position, float volume, float pitch) const {
+void AudioManager::play_sound_at(const char* name, const Vec2f& position, float volume, float pitch) const {
     if (sound.enabled()) {
         auto relVolume = volume;
         //auto spatialPanning = -1 .. 1;
@@ -60,7 +59,7 @@ void AudioManager::update(float) {
     if (music_.empty()) {
         return;
     }
-    Res<audio::AudioResource> audioRes{music_};
+    Res<audio::AudioResource> audioRes{music_.c_str()};
     if (audioRes && auph::isBufferLoaded(audioRes->buffer) && !auph::isActive(musicVoice_.id)) {
         musicVoice_ = auph::play(audioRes->buffer, musicVolume_, 0.0f, musicPitch_, true, false, auph::Bus_Music);
     }

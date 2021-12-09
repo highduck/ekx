@@ -1,7 +1,8 @@
 #pragma once
 
 #include <ek/ds/Array.hpp>
-#include <ek/math/box.hpp>
+#include <ek/ds/Hash.hpp>
+#include <ek/math/Rect.hpp>
 
 #include <ek/serialize/serialize.hpp>
 #include <ek/serialize/stl/String.hpp>
@@ -10,14 +11,13 @@ namespace ek {
 
 class BMFontGlyph {
 public:
-    Array<uint32_t> codepoints;
-    rect_t<int32_t> box;
+    Rect2<int32_t> box;
     int32_t advanceWidth;
-    std::string sprite;
+    String sprite;
 
     template<typename S>
     void serialize(IO <S>& io) {
-        io(codepoints, box, advanceWidth, sprite);
+        io(box, advanceWidth, sprite);
     }
 };
 
@@ -30,10 +30,11 @@ public:
     int32_t ascender;
     int32_t descender;
     Array <BMFontGlyph> glyphs;
+    Hash <uint32_t> codepoints;
 
     template<typename S>
     void serialize(IO <S>& io) {
-        io(unitsPerEM, fontSize, lineHeight, ascender, descender, glyphs);
+        io(unitsPerEM, fontSize, lineHeight, ascender, descender, glyphs, codepoints);
     }
 };
 

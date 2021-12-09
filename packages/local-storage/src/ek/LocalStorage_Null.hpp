@@ -20,7 +20,7 @@ void set_user_string(const char* key, const char* str) {
     ASSERT_KEY_IS_VALID(key);
 }
 
-std::string get_user_string(const char* key, const char* defaultValue) {
+String get_user_string(const char* key, const char* defaultValue) {
     ASSERT_KEY_IS_VALID(key);
     return defaultValue;
 }

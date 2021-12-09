@@ -4,11 +4,11 @@
 #include <ek/ds/Hash.hpp>
 #include <ek/util/NoCopyAssign.hpp>
 #include <ek/util/Res.hpp>
-#include <ek/math/mat3x2.hpp>
-#include <ek/math/mat4x4.hpp>
-#include <ek/math/packed_color.hpp>
-#include <ek/math/circle.hpp>
-#include <ek/math/box.hpp>
+#include <ek/math/Matrix3x2.hpp>
+#include <ek/math/Matrix4.hpp>
+#include <ek/math/Color32.hpp>
+#include <ek/math/Circle.hpp>
+#include <ek/math/Rect.hpp>
 #include <ek/graphics/graphics.hpp>
 
 namespace ek::draw2d {
@@ -20,8 +20,8 @@ struct FrameStats {
 };
 
 struct Vertex2D {
-    float2 position;
-    float2 uv;
+    Vec2f position;
+    Vec2f uv;
     abgr32_t cm;
     abgr32_t co;
 
@@ -37,7 +37,7 @@ class BufferChain;
 struct BatchState {
     sg_shader shader{0};
     sg_image texture{0};
-    rect_i scissors{};
+    Rect2i scissors{};
     BlendMode blend = BlendMode::PremultipliedAlpha;
     uint8_t shaderTexturesCount = 0;
 
@@ -58,11 +58,11 @@ struct Context : private NoCopyAssign {
 
     /** Scissors **/
 
-    void pushClipRect(const rect_f& rc);
+    void pushClipRect(const Rect2f& rc);
 
     Context& saveScissors();
 
-    void setScissors(const rect_f& rc);
+    void setScissors(const Rect2f& rc);
 
     Context& popClipRect();
 
@@ -74,7 +74,7 @@ struct Context : private NoCopyAssign {
 
     Context& restore_transform();
 
-    Context& transform_pivot(float2 position, float rotation, float2 scale, float2 pivot) {
+    Context& transform_pivot(Vec2f position, float rotation, Vec2f scale, Vec2f pivot) {
         matrix.translate(position.x + pivot.x, position.y + pivot.y)
                 .scale(scale.x, scale.y)
                 .rotate(rotation)
@@ -84,15 +84,15 @@ struct Context : private NoCopyAssign {
 
     Context& translate(float tx, float ty);
 
-    Context& translate(const float2& v);
+    Context& translate(const Vec2f& v);
 
     Context& scale(float sx, float sy);
 
-    Context& scale(const float2& v);
+    Context& scale(const Vec2f& v);
 
     Context& rotate(float radians);
 
-    Context& concat(const matrix_2d& r);
+    Context& concat(const Matrix3x2f& r);
 
     Context& restore_matrix();
 
@@ -116,7 +116,7 @@ struct Context : private NoCopyAssign {
 
     Context& setTextureCoords(float u0, float v0, float du, float dv);
 
-    Context& setTextureCoords(const rect_f& uv_rect);
+    Context& setTextureCoords(const Rect2f& uv_rect);
 
     Context& restore_texture_coords();
 
@@ -127,7 +127,7 @@ struct Context : private NoCopyAssign {
     Context& setTexture(const graphics::Texture* texture_);
 
     Context& setTextureRegion(const graphics::Texture* texture_ = nullptr,
-                              const rect_f& region = rect_f::zero_one);
+                              const Rect2f& region = Rect2f{0.0f, 0.0f, 1.0f, 1.0f});
 
     Context& restoreTexture();
 
@@ -142,7 +142,7 @@ struct Context : private NoCopyAssign {
     // do extra checking and clear states stack
     void finish();
 
-    void setNextScissors(rect_i rc);
+    void setNextScissors(Rect2i rc);
 
     void setNextBlending(BlendMode blending);
 
@@ -171,18 +171,18 @@ public:
     constexpr static int MaxVertex = 0xFFFF;
 
     // Default resources
-    const graphics::Shader* defaultShader = nullptr;
-    const graphics::Shader* alphaMapShader = nullptr;
-    const graphics::Shader* solidColorShader = nullptr;
-    const graphics::Texture* emptyTexture = nullptr;
+    graphics::Shader* defaultShader = nullptr;
+    graphics::Shader* alphaMapShader = nullptr;
+    graphics::Shader* solidColorShader = nullptr;
+    graphics::Texture* emptyTexture = nullptr;
 
     // Current drawing state
     const graphics::Texture* texture = nullptr;
     const graphics::Shader* program = nullptr;
-    matrix_2d matrix{};
-    rect_f uv{0.0f, 0.0f, 1.0f, 1.0f};
+    Matrix3x2f matrix{};
+    Rect2f uv{0.0f, 0.0f, 1.0f, 1.0f};
     ColorMod32 color{};
-    rect_f scissors{};
+    Rect2f scissors{};
 
     // Current pass state
     bool active = false;
@@ -194,15 +194,15 @@ public:
     const graphics::Texture* framebufferColor = nullptr;
     const graphics::Texture* framebufferDepthStencil = nullptr;
 
-    mat4f mvp{};
+    Matrix4f mvp{};
 
     // Stacks for save-restore states
-    Array<matrix_2d> matrixStack{};
+    Array<Matrix3x2f> matrixStack{};
     Array<ColorMod32> colorStack{};
-    Array<rect_f> scissorsStack{};
+    Array<Rect2f> scissorsStack{};
     Array<const graphics::Shader*> programStack{};
     Array<const graphics::Texture*> textureStack{};
-    Array<rect_f> texCoordStack{};
+    Array<Rect2f> texCoordStack{};
 
     // Checking what states could be potentially changed
     enum CheckFlags : uint8_t {
@@ -247,7 +247,7 @@ extern Context& state;
 
 void beginNewFrame();
 
-void begin(rect_f viewport, const matrix_2d& view = matrix_2d{}, const graphics::Texture* renderTarget = nullptr, const graphics::Texture* depthStencilTarget = nullptr);
+void begin(Rect2f viewport, const Matrix3x2f& view = Matrix3x2f{}, const graphics::Texture* renderTarget = nullptr, const graphics::Texture* depthStencilTarget = nullptr);
 
 void end();
 
@@ -267,15 +267,15 @@ void quad(float x, float y, float w, float h, abgr32_t color);
 
 void quad(float x, float y, float w, float h, abgr32_t c1, abgr32_t c2, abgr32_t c3, abgr32_t c4);
 
-inline void quad(const rect_f& rc, abgr32_t color = abgr32_t::one) {
+inline void quad(const Rect2f& rc, abgr32_t color = abgr32_t::one) {
     quad(rc.x, rc.y, rc.width, rc.height, color);
 }
 
-void fill_circle(const circle_f& circle, abgr32_t inner_color, abgr32_t outer_color, int segments);
+void fill_circle(const CircleF& circle, abgr32_t inner_color, abgr32_t outer_color, int segments);
 
 void write_vertex(float x, float y, float u, float v, abgr32_t cm, abgr32_t co);
 
-void write_raw_vertex(const float2& pos, const float2& tex_coord, abgr32_t cm, abgr32_t co);
+void write_raw_vertex(const Vec2f& pos, const Vec2f& tex_coord, abgr32_t cm, abgr32_t co);
 
 void write_indices_quad(uint16_t i0,
                         uint16_t i1,
@@ -289,25 +289,25 @@ inline void write_indices_quad(const uint16_t base_index = 0) {
 
 void write_indices(const uint16_t* source, uint16_t count, uint16_t base_vertex = 0);
 
-void draw_indexed_triangles(const Array<float2>& positions,
+void draw_indexed_triangles(const Array<Vec2f>& positions,
                             const Array<abgr32_t>& colors,
                             const Array<uint16_t>& indices,
-                            float2 offset, float2 scale);
+                            Vec2f offset, Vec2f scale);
 
-void line(const float2& start, const float2& end,
+void line(const Vec2f& start, const Vec2f& end,
           abgr32_t color1, abgr32_t color2,
           float lineWidth1, float lineWidth2);
 
-void line(const float2& start, const float2& end, abgr32_t color = abgr32_t::one, float lineWidth = 1.0f);
+void line(const Vec2f& start, const Vec2f& end, abgr32_t color = abgr32_t::one, float lineWidth = 1.0f);
 
 void line_arc(float x, float y, float r,
               float angle_from, float angle_to,
               float line_width, int segments,
               abgr32_t color_inner, abgr32_t color_outer);
 
-void strokeRect(const rect_f& rc, abgr32_t color, float lineWidth);
+void strokeRect(const Rect2f& rc, abgr32_t color, float lineWidth);
 
-void strokeCircle(const circle_f& circle, abgr32_t color, float lineWidth, int segments);
+void strokeCircle(const CircleF& circle, abgr32_t color, float lineWidth, int segments);
 
 
 void initialize();

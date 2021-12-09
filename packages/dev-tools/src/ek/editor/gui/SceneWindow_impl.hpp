@@ -2,21 +2,21 @@
 
 #include "SceneWindow.hpp"
 #include <ImGuizmo/ImGuizmo.h>
-#include <ek/math/matrix_camera.hpp>
-#include <ek/math/matrix_transpose.hpp>
-#include <ek/math/matrix_inverse.hpp>
+#include <ek/math/MatrixCamera.hpp>
+#include <ek/math/MatrixTranspose.hpp>
+#include <ek/math/MatrixInverse.hpp>
 
 namespace ek {
 
 // matrix 2d utility
-matrix_2d matrix3Dto2D(const mat4f& m) {
-    return matrix_2d{m.m00, m.m01,
-                     m.m10, m.m11,
-                     m.m30, m.m31};
+Matrix3x2f matrix3Dto2D(const Matrix4f& m) {
+    return Matrix3x2f{m.m00, m.m01,
+                      m.m10, m.m11,
+                      m.m30, m.m31};
 }
 
-mat4f matrix2Dto3D(const matrix_2d& m) {
-    mat4f result{};
+Matrix4f matrix2Dto3D(const Matrix3x2f& m) {
+    Matrix4f result{};
     result.m00 = m.a;
     result.m01 = m.b;
     result.m10 = m.c;
@@ -26,25 +26,25 @@ mat4f matrix2Dto3D(const matrix_2d& m) {
     return result;
 }
 
-float2 SceneView2D::getMouseWorldPos(float2 pos) const {
+Vec2f SceneView2D::getMouseWorldPos(Vec2f pos) const {
     return matrix.transformInverse(pos);
 }
 
 void SceneView2D::reset() {
-    matrix = matrix_2d{};
-    position = float2{};
+    matrix = Matrix3x2f{};
+    position = Vec2f{};
     scale = 1.0f;
-    translation = float2::zero;
+    translation = Vec2f::zero;
 }
 
-void SceneView2D::manipulateView(float2 mouseWorldPosition, const rect_f& viewport) {
+void SceneView2D::manipulateView(Vec2f mouseWorldPosition, const Rect2f& viewport) {
     if (ImGui::IsMouseDragging(ImGuiPopupFlags_MouseButtonRight)) {
         const auto delta = ImGui::GetMouseDragDelta(ImGuiPopupFlags_MouseButtonRight);
         translation.x = delta.x;
         translation.y = delta.y;
     } else {
         position += translation;
-        translation = float2::zero;
+        translation = Vec2f::zero;
     }
 
     const auto wheel = ImGui::GetIO().MouseWheel;
@@ -55,24 +55,24 @@ void SceneView2D::manipulateView(float2 mouseWorldPosition, const rect_f& viewpo
         position -= mouseWorldPosition * deltaScale;
     }
 
-    matrix.set(position + translation, float2{scale, scale}, float2::zero);
+    matrix.set(position + translation, Vec2f{scale, scale}, Vec2f::zero);
     projectionMatrix = ortho_2d<float>(0, 0, viewport.width, viewport.height, -1000.0f, 1000.0f);
     viewMatrix3D.setTransform2D(position + translation, scale);
 }
 
 void SceneView3D::reset() {
-    position = float3::zero;
-    translation = float3::zero;
+    position = Vec3f::zero;
+    translation = Vec3f::zero;
 }
 
-float2 SceneView3D::getMouseWorldPos(float2 viewportMousePosition) const {
+Vec2f SceneView3D::getMouseWorldPos(Vec2f viewportMousePosition) const {
     // TODO:
     return viewportMousePosition;
 }
 
-float2 SceneView::getMouseWorldPos() const {
+Vec2f SceneView::getMouseWorldPos() const {
     const auto mousePos = ImGui::GetMousePos();
-    const float2 pos{mousePos.x - rect.position.x,
+    const Vec2f pos{mousePos.x - rect.position.x,
                      mousePos.y - rect.position.y};
 
     if(mode2D) return view2.getMouseWorldPos(pos);
@@ -112,7 +112,7 @@ void SceneWindow::onDraw() {
 
     // update size
     const float k = display.info.dpiScale;
-    display.info.destinationViewport = rect_f{
+    display.info.destinationViewport = Rect2f{
             k * displayPos.x, k * displayPos.y,
             k * displaySize.x, k * displaySize.y
     };
@@ -177,12 +177,12 @@ SceneWindow::SceneWindow() {
     display.info.window = {120, 120};
     display.info.dpiScale = 1.0f;
 
-    view.view3.projectionMatrix = perspective_rh(math::to_radians(45.0f), 4.0f / 3.0f, 10.0f, 1000.0f);
-    view.view3.viewMatrix = look_at_rh(float3{0.0f, 0.0f, 100.0f}, float3::zero, float3{0.0f, 1.0f, 0.0f});
+    view.view3.projectionMatrix = perspective_rh(Math::to_radians(45.0f), 4.0f / 3.0f, 10.0f, 1000.0f);
+    view.view3.viewMatrix = look_at_rh(Vec3f{0.0f, 0.0f, 100.0f}, Vec3f::zero, Vec3f{0.0f, 1.0f, 0.0f});
 }
 
 
-void drawBox2(const rect_f& rc, const matrix_2d& m, argb32_t color1, argb32_t color2,
+void drawBox2(const Rect2f& rc, const Matrix3x2f& m, argb32_t color1, argb32_t color2,
               bool cross = true, argb32_t fillColor = 0_argb) {
 
     draw2d::state.setEmptyTexture();
@@ -218,7 +218,7 @@ void SceneWindow::drawSceneNode(ecs::EntityApi e) {
             draw2d::state.matrix = transform->matrix;
             draw2d::state.color = transform->color;
         } else {
-            draw2d::state.matrix = matrix_2d{};
+            draw2d::state.matrix = Matrix3x2f{};
             draw2d::state.color = ColorMod32{};
         }
         disp->drawable->draw();
@@ -237,15 +237,15 @@ void SceneWindow::drawSceneNodeBounds(ecs::EntityApi e) {
 
     auto* disp = e.tryGet<Display2D>();
     if (disp) {
-        draw2d::state.matrix = matrix_2d{};
+        draw2d::state.matrix = Matrix3x2f{};
         draw2d::state.color = ColorMod32{};
 
-        matrix_2d m = view.view2.matrix;
+        Matrix3x2f m = view.view2.matrix;
         auto* transform = e.tryGet<WorldTransform2D>();
         if (transform) {
             m = view.view2.matrix * transform->matrix;
         }
-        rect_f b = disp->getBounds();
+        Rect2f b = disp->getBounds();
         if (Locator::get<Editor>()->hierarchy.isSelectedInHierarchy(e)) {
             drawBox2(b, m, 0xFFFFFFFF_argb, 0xFF000000_argb, true, 0x77FFFFFF_argb);
         }
@@ -295,7 +295,7 @@ void SceneWindow::drawScene() {
     draw2d::end();
 }
 
-ecs::EntityApi SceneWindow::hitTest(ecs::EntityApi e, float2 worldPos) {
+ecs::EntityApi SceneWindow::hitTest(ecs::EntityApi e, Vec2f worldPos) {
     const auto& node = e.get<Node>();
     if(!node.visible() || !node.touchable()) {
         return nullptr;
@@ -381,7 +381,7 @@ void SceneWindow::manipulateObject2D() {
     if (selection.size() > 0 && selection[0].valid()) {
         ecs::EntityApi sel = selection[0].get();
         auto worldMatrix2D = sel.get<WorldTransform2D>().matrix;
-        mat4f worldMatrix3D = matrix2Dto3D(worldMatrix2D);
+        Matrix4f worldMatrix3D = matrix2Dto3D(worldMatrix2D);
         ImGuizmo::OPERATION op = ImGuizmo::OPERATION::BOUNDS;
         if (currentTool == 2) {
             op = ImGuizmo::OPERATION::TRANSLATE_X | ImGuizmo::OPERATION::TRANSLATE_Y;
@@ -416,7 +416,7 @@ void SceneWindow::manipulateObject3D() {
     if (selection.size() > 0 && selection[0].valid()) {
         ecs::EntityApi sel = selection[0].get();
         auto worldMatrix2D = sel.get<WorldTransform2D>().matrix;
-        mat4f worldMatrix3D = matrix2Dto3D(worldMatrix2D);
+        Matrix4f worldMatrix3D = matrix2Dto3D(worldMatrix2D);
         ImGuizmo::OPERATION op = ImGuizmo::OPERATION::BOUNDS;
         if (currentTool == 2) {
             op = ImGuizmo::OPERATION::TRANSLATE_X | ImGuizmo::OPERATION::TRANSLATE_Y;

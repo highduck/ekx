@@ -1,21 +1,21 @@
 #pragma once
 
-#include <ek/math/box.hpp>
-#include <string>
-#include <vector>
+#include <ek/math/Rect.hpp>
+#include <ek/ds/String.hpp>
+#include <ek/ds/Array.hpp>
 #include <ek/imaging/image.hpp>
 
 namespace ek {
 
 struct SpriteData {
 
-    std::string name;
+    String name;
 
     // physical rect
-    rect_f rc;
+    Rect2f rc;
 
     // rect in source image
-    rect_i source;
+    Rect2i source;
 
     uint8_t padding = 1;
 
@@ -29,16 +29,18 @@ struct SpriteData {
 struct Resolution {
     int index = 0;
     float scale = 1.0f;
-    std::vector<SpriteData> sprites;
+    Array<SpriteData> sprites;
 };
 
 struct ImageSet {
-    std::string name;
-    std::vector<Resolution> resolutions;
+    String name;
+    Array<Resolution> resolutions;
 };
 
 void saveImagePNG(const image_t& image, const char* path, bool alpha = true);
+
 void saveImageJPG(const image_t& image, const char* path, bool alpha = true);
+
 void save(ImageSet& images, const char* output);
 
 }

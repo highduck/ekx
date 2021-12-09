@@ -2,7 +2,7 @@
 #include <pugixml.hpp>
 #include "xfl/Doc.hpp"
 #include <ek/scenex/data/SGFile.hpp>
-#include <ek/debug/LogSystem.hpp>
+#include <ek_log.h>
 #include "sxg/SGBuilder.hpp"
 #include "sxg/RenderElement.hpp"
 #include "ImageSet.hpp"
@@ -14,7 +14,7 @@ namespace ek {
 void exportFlash(const char* xmlPath) {
     pugi::xml_document xml;
     if (!xml.load_file(xmlPath)) {
-        EK_ERROR_F("error parse xml %s", xmlPath);
+        EK_ERROR("error parse xml %s", xmlPath);
         return;
     }
     auto node = xml.first_child();

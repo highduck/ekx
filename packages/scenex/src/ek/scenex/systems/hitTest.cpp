@@ -6,12 +6,12 @@
 
 namespace ek {
 
-ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, const Node& node, float2 parentPosition) {
+ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, const Node& node, Vec2f parentPosition) {
     if ((node.flags & Node::VisibleAndTouchable) != Node::VisibleAndTouchable) {
         return 0;
     }
 
-    float2 local = parentPosition;
+    Vec2f local = parentPosition;
     const auto* transform = w.tryGet<Transform2D>(e);
     if (transform) {
         transform->matrix.transform_inverse(local, local);
@@ -44,7 +44,7 @@ ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, const Node& 
     return 0;
 }
 
-ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, float2 parentPosition) {
+ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, Vec2f parentPosition) {
     return hitTest2D(w, e, w.get<Node>(e), parentPosition);
 }
 

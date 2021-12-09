@@ -8,7 +8,7 @@
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
 #include <ek/scenex/SceneFactory.hpp>
-#include <ek/debug.hpp>
+#include <ek/log.h>
 #include <ek/scenex/asset2/Asset.hpp>
 #include <ek/graphics/graphics.hpp>
 #include <ek/draw2d/drawer.hpp>
@@ -38,14 +38,19 @@
 
 namespace ek {
 
+double FrameTimer::update() {
+    ++frameIndex;
+    return deltaTime = ek_ticks_to_sec(ek_ticks(&timer_));
+}
+
 using namespace ek::app;
 
 void logDisplayInfo() {
 #ifndef NDEBUG
-    EK_INFO_F("Display: %d x %d", (int)g_app.drawableWidth, (int)g_app.drawableHeight);
+    EK_INFO("Display: %d x %d", (int)g_app.drawableWidth, (int)g_app.drawableHeight);
     const float* insets = app::getScreenInsets();
     if (insets) {
-        EK_INFO_F("Insets: %d, %d, %d, %d", (int)insets[0], (int)insets[1], (int)insets[2], (int)insets[3]);
+        EK_INFO("Insets: %d, %d, %d, %d", (int)insets[0], (int)insets[1], (int)insets[2], (int)insets[3]);
     }
 #endif
 }
@@ -62,14 +67,14 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
     draw2d::quad(pad + 4, y + 4, (w - 8) * progress, h - 8, 0xFFFFFFFF_argb);
 
     {
-        static Stopwatch timer{};
         float sz = zoneWidth < zoneHeight ? zoneWidth : zoneHeight;
         float cx = zoneWidth / 2.0f;
         float cy = zoneHeight / 2.0f;
         float sh = sz / 16.0f;
         float sw = sh * 3;
+        const auto time = (float)ek_time_now();
         for (int i = 0; i < 7; ++i) {
-            float r = ((float) i / 7) * 1.5f + timer.readSeconds();
+            float r = ((float) i / 7) * 1.5f + time;
             float speed = (0.5f + 0.5f * sinf(r * 2 + 1));
             r = r + 0.5f * speed;
             float ox = sinf(r * 3.14f);
@@ -152,7 +157,7 @@ void basic_application::initialize() {
     EK_DEBUG("base application: initialize scene root");
     root = createNode2D("root");
 
-    const float2 baseResolution{app::g_app.config.width, app::g_app.config.height};
+    const Vec2f baseResolution{app::g_app.config.width, app::g_app.config.height};
     root.assign<Viewport>(baseResolution.x, baseResolution.y);
 
     root.assign<LayoutRect>();
@@ -175,11 +180,11 @@ void basic_application::initialize() {
     Camera2D::Main = camera;
     append(root, camera);
 
-    LayoutRect::DesignCanvasRect = {float2::zero, baseResolution};
+    LayoutRect::DesignCanvasRect = {Vec2f::zero, baseResolution};
 }
 
 void basic_application::preload() {
-    EK_DEBUG_F("base application: preloading, content scale: %d perc.", (int) (100 * scale_factor));
+    EK_DEBUG("base application: preloading, content scale: %d perc.", (int) (100 * scale_factor));
     asset_manager_->set_scale_factor(scale_factor);
 
     dispatcher.onPreload();
@@ -192,7 +197,7 @@ void basic_application::preload() {
 
 void basic_application::onFrame() {
     ZoneScoped;
-    Stopwatch timer{};
+    uint64_t timer = ek_ticks(nullptr);
 
     RootAppListener::onFrame();
 
@@ -207,9 +212,10 @@ void basic_application::onFrame() {
     // fixed for GIF recorder
     //dt = 1.0f / 60.0f;
     doUpdateFrame(dt);
-    profiler.addTime("UPDATE", timer.readMillis());
-    profiler.addTime("FRAME", timer.readMillis());
-    timer.reset();
+
+    double elapsed = ek_ticks_to_sec(ek_ticks(&timer));
+    profiler.addTime("UPDATE", (float) (elapsed * 1000));
+    profiler.addTime("FRAME", (float) (elapsed * 1000));
 
     draw2d::beginNewFrame();
 
@@ -217,9 +223,9 @@ void basic_application::onFrame() {
     onPreRender();
     dispatcher.onPreRender();
 
-    static sg_pass_action pass_action{};
+    sg_pass_action pass_action{};
     pass_action.colors[0].action = started_ ? SG_ACTION_DONTCARE : SG_ACTION_CLEAR;
-    const float4 fillColor = static_cast<float4>(argb32_t{g_app.config.backgroundColor});
+    const Vec4f fillColor = static_cast<Vec4f>(argb32_t{g_app.config.backgroundColor});
     pass_action.colors[0].value.r = fillColor.x;
     pass_action.colors[0].value.g = fillColor.y;
     pass_action.colors[0].value.b = fillColor.z;
@@ -246,9 +252,9 @@ void basic_application::onFrame() {
 
         dispatcher.onRenderFrame();
 
-        profiler.addTime("RENDER", timer.readMillis());
-        profiler.addTime("FRAME", timer.readMillis());
-        timer.reset();
+        elapsed = ek_ticks_to_sec(ek_ticks(&timer));
+        profiler.addTime("RENDER", (float) (elapsed * 1000));
+        profiler.addTime("FRAME", (float) (elapsed * 1000));
 
         profiler.endRender();
         draw(profiler, display.info);
@@ -265,9 +271,9 @@ void basic_application::onFrame() {
             onFrameEnd();
             draw2d::end();
 
-            profiler.addTime("OVERLAY", timer.readMillis());
-            profiler.addTime("FRAME", timer.readMillis());
-            timer.reset();
+            elapsed = ek_ticks_to_sec(ek_ticks(&timer));
+            profiler.addTime("OVERLAY", (float) (elapsed * 1000));
+            profiler.addTime("FRAME", (float) (elapsed * 1000));
 
             display.endOverlayDev(); // display.beginOverlayDev()
         }
@@ -286,11 +292,11 @@ void basic_application::onFrame() {
     Locator::ref<input_controller>().onPostFrame();
     dispatcher.onPostFrame();
 
-    profiler.addTime("END", timer.readMillis());
-    profiler.addTime("FRAME", timer.readMillis());
-    timer.reset();
+    elapsed = ek_ticks_to_sec(ek_ticks(&timer));
+    profiler.addTime("END", (float) (elapsed * 1000));
+    profiler.addTime("FRAME", (float) (elapsed * 1000));
 
-    profiler.update(frameTimer.deltaTime);
+    profiler.update((float) frameTimer.deltaTime);
 }
 
 void basic_application::preload_root_assets_pack() {
@@ -302,7 +308,7 @@ void basic_application::preload_root_assets_pack() {
 
 void basic_application::onEvent(const Event& event) {
     ZoneScoped;
-    Stopwatch timer{};
+    uint64_t timer = ek_ticks(nullptr);
 
     RootAppListener::onEvent(event);
     if (event.type == EventType::Resize) {
@@ -313,8 +319,9 @@ void basic_application::onEvent(const Event& event) {
 
     dispatcher.onEvent(event);
 
-    profiler.addTime("EVENTS", timer.readMillis());
-    profiler.addTime("FRAME", timer.readMillis());
+    double elapsed = ek_ticks_to_sec(ek_ticks(&timer));
+    profiler.addTime("EVENTS", (float) (elapsed * 1000));
+    profiler.addTime("FRAME", (float) (elapsed * 1000));
 }
 
 void basic_application::doUpdateFrame(float dt) {
@@ -388,9 +395,9 @@ void Initializer::onFrame() {
         const auto height = g_app.drawableHeight;
         if (width > 0 && height > 0) {
             //EK_PROFILE_SCOPE("init frame");
-            static sg_pass_action pass_action{};
+            sg_pass_action pass_action{};
             pass_action.colors[0].action = SG_ACTION_CLEAR;
-            const float4 fillColor = static_cast<float4>(argb32_t{g_app.config.backgroundColor});
+            const Vec4f fillColor = static_cast<Vec4f>(argb32_t{g_app.config.backgroundColor});
             pass_action.colors[0].value.r = fillColor.x;
             pass_action.colors[0].value.g = fillColor.y;
             pass_action.colors[0].value.b = fillColor.z;

@@ -2,7 +2,7 @@
 #include "RenderSystem2D.hpp"
 #include "Transform2D.hpp"
 
-#include <ek/math/common.hpp>
+#include <ek/math/Math.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/data/SGFile.hpp>
@@ -12,7 +12,7 @@ namespace ek {
 bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
     auto* localTransform = w.tryGet<Transform2D>(e);
     auto* parentTransform = findComponentInParent<WorldTransform2D>(w.get<Node>(e).parent);
-    assert(parentTransform);
+    EK_ASSERT(parentTransform);
     auto parentMatrix = parentTransform->matrix;
     auto parentColor = parentTransform->color;
 
@@ -41,12 +41,12 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
 
             const int segments = std::min(12,
                                           8 * std::max(int(std::ceil((filter.blur.x + filter.blur.y)) / 2.0f), 1));
-            const auto da = float(math::pi2 / segments);
+            const auto da = float(Math::pi2 / segments);
             auto a = 0.0f;
             for (int i = 0; i < segments; ++i) {
                 draw2d::state.matrix = parentMatrix;
 
-                draw2d::state.translate(filter.blur * float2{std::cos(a), std::sin(a)});
+                draw2d::state.translate(filter.blur * Vec2f{std::cos(a), std::sin(a)});
                 if (localTransform) {
                     draw2d::state.concat(localTransform->matrix);
                 }

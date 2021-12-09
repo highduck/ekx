@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include <string>
+#include <ek/ds/String.hpp>
 #include <ek/util/Signal.hpp>
 
 namespace admob {
@@ -22,9 +22,9 @@ enum class ChildDirected {
 };
 
 struct Config {
-    std::string banner;
-    std::string video;
-    std::string inters;
+    ek::String banner;
+    ek::String video;
+    ek::String inters;
     ChildDirected childDirected = ChildDirected::Unspecified;
 };
 

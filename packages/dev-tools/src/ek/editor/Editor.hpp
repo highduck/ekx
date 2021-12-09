@@ -69,7 +69,6 @@ public:
     void save();
 
     basic_application& app;
-
 public:
 
     static void initialize();

@@ -2,8 +2,6 @@
 #include <ek/audio/audio.hpp>
 #include "AdMobNull.hpp"
 
-#include <memory>
-
 // implementation
 #if defined(__APPLE__)
 
@@ -31,21 +29,21 @@ AdMobWrapper::AdMobWrapper() {
     };
 }
 
-void AdMobWrapper::showInterstitial(const std::function<void()>& callback) {
+void AdMobWrapper::showInterstitial(std::function<void()> callback) {
     activeInterstitial = true;
     audio::muteDeviceBegin();
-    admob::context.onInterstitialClosed.once([callback, this] {
+    admob::context.onInterstitialClosed.once([cb=std::move(callback), this] {
         activeInterstitial = false;
         audio::muteDeviceEnd();
-        if (callback) {
-            callback();
+        if (cb) {
+            cb();
         }
     });
     admob::show_interstitial_ad();
 }
 
-void AdMobWrapper::showRewardedAd(const std::function<void(bool)>& callback) {
-    rewardedAdCompletedCallback = callback;
+void AdMobWrapper::showRewardedAd(std::function<void(bool)> callback) {
+    rewardedAdCompletedCallback = std::move(callback);
     userRewarded = false;
     admob::show_rewarded_ad();
     audio::muteDeviceBegin();
@@ -79,19 +77,19 @@ void AdMobWrapper::onAdmobEvent(admob::EventType event) {
     }
 }
 
-std::unique_ptr<AdMobWrapper> AdMobWrapper::create(bool devMode) {
+Pointer<AdMobWrapper> AdMobWrapper::create(bool devMode) {
     (void)devMode;
 
 #if EK_ADMOB_SIMULATOR
     if (devMode) {
-        return std::make_unique<AdMobSimulator>();
+        return Pointer<AdMobSimulator>::make();
     }
 #endif
 
     if (admob::hasSupport()) {
-        return std::make_unique<AdMobWrapper>();
+        return Pointer<AdMobWrapper>::make();
     }
-    return std::make_unique<AdMobNull>();
+    return Pointer<AdMobNull>::make();
 }
 
 }

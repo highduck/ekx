@@ -1,20 +1,20 @@
 #pragma once
 
 #include <ek/app/Platform.h>
-#include <vector>
-#include <string>
+#include <ek/ds/Array.hpp>
+#include <ek/ds/String.hpp>
 
-std::string jniGetString(JNIEnv* env, jstring jstr) {
+ek::String jniGetString(JNIEnv* env, jstring jstr) {
     if (!jstr) {
         return "";
     }
     const char* cstr = env->GetStringUTFChars(jstr, nullptr);
-    std::string str = cstr;
+    ek::String str = cstr;
     env->ReleaseStringUTFChars(jstr, cstr);
     return str;
 }
 
-jobjectArray jniGetObjectStringArray(const std::vector<std::string>& src, JNIEnv* env) {
+jobjectArray jniGetObjectStringArray(const ek::Array<ek::String>& src, JNIEnv* env) {
     jobjectArray res = env->NewObjectArray(src.size(), env->FindClass("java/lang/String"), nullptr);
 
     for (size_t i = 0; i < src.size(); ++i) {
@@ -30,7 +30,7 @@ namespace billing {
 
 const char* class_path = "ek/billing/BillingBridge";
 
-void initialize(const std::string& key) {
+void initialize(const char* key) {
     _initialize();
 
     auto* env = ek::app::getJNIEnv();
@@ -39,7 +39,7 @@ void initialize(const std::string& key) {
     const char* method_sig = "(Ljava/lang/String;)V";
 
     auto class_ref = env->FindClass(class_path);
-    auto key_ref = env->NewStringUTF(key.c_str());
+    auto key_ref = env->NewStringUTF(key);
 
     auto method = env->GetStaticMethodID(class_ref, method_name, method_sig);
     env->CallStaticVoidMethod(class_ref, method, key_ref);
@@ -61,7 +61,7 @@ void getPurchases() {
     env->DeleteLocalRef(class_ref);
 }
 
-void getDetails(const std::vector<std::string>& skus) {
+void getDetails(const ek::Array<ek::String>& skus) {
     auto* env = ek::app::getJNIEnv();
 
     const char* method_name = "getDetails";
@@ -77,7 +77,7 @@ void getDetails(const std::vector<std::string>& skus) {
     env->DeleteLocalRef(skuList_ref);
 }
 
-void purchase(const std::string& sku, const std::string& payload) {
+void purchase(const ek::String& sku, const ek::String& payload) {
     auto* env = ek::app::getJNIEnv();
 
     const char* method_name = "purchase";
@@ -95,7 +95,7 @@ void purchase(const std::string& sku, const std::string& payload) {
     env->DeleteLocalRef(payload_ref);
 }
 
-void consume(const std::string& token) {
+void consume(const ek::String& token) {
     auto* env = ek::app::getJNIEnv();
 
     const char* method_name = "consume";

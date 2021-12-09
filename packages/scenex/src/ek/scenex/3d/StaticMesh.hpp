@@ -2,9 +2,10 @@
 
 #include "Material3D.hpp"
 #include <ek/ds/Array.hpp>
+#include <ek/ds/String.hpp>
 #include <ek/graphics/graphics.hpp>
 #include <ek/scenex/data/Model3D.hpp>
-#include <string>
+#include <ek/util/Type.hpp>
 
 namespace ek {
 
@@ -18,12 +19,12 @@ struct StaticMesh {
             vb{
                     graphics::BufferType::VertexBuffer,
                     model.vertices.data(),
-                    model.vertices.size() * (uint32_t) sizeof(ModelVertex3D)
+                    (uint32_t)(model.vertices.size() * sizeof(ModelVertex3D))
             },
             ib{
                     graphics::BufferType::IndexBuffer,
                     model.indices.data(),
-                    model.indices.size() * (uint32_t) sizeof(uint16_t)
+                    (uint32_t)(model.indices.size() * sizeof(uint16_t))
             },
             origin{model} {
         indices_count = static_cast<uint32_t>(model.indices.size());
@@ -32,13 +33,16 @@ struct StaticMesh {
 
 struct MeshRenderer /* Component */ {
     StaticMesh* meshPtr = nullptr;
-    std::string mesh;
-    std::string material;
+    String mesh;
+    String material;
     bool castShadows = true;
     bool receiveShadows = true;
 };
 
-EK_DECLARE_TYPE(MeshRenderer);
+ECX_TYPE(33, MeshRenderer);
+
+EK_DECLARE_TYPE(StaticMesh);
+EK_TYPE_INDEX(StaticMesh, 5);
 
 }
 

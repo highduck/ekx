@@ -1,10 +1,11 @@
 #include "audio.hpp"
 
-#include <ek/assert.hpp>
-#include <ek/debug.hpp>
+#include <ek/log.h>
+#include <ek/assert.h>
 
 // auph implementation
 #define AUPH_MP3
+//#define AUPH_OGG
 
 #include <auph/auph_impl.hpp>
 

@@ -4,8 +4,8 @@
 #include <ek/util/Platform.hpp>
 #include <ek/scenex/app/GameAppListener.hpp>
 #include <ek/util/Type.hpp>
+#include <ek/ds/Pointer.hpp>
 #include <functional>
-#include <memory>
 
 namespace ek {
 
@@ -15,10 +15,10 @@ class Ads : public GameAppListener {
 public:
 
     struct Config {
-        std::string skuRemoveAds = "remove_ads";
-        std::string key0 = "ads_key_0";
+        String skuRemoveAds = "remove_ads";
+        String key0 = "ads_key_0";
         int val0 = 1111;
-        std::string key1 = "ads_key_1";
+        String key1 = "ads_key_1";
         int val1 = 2222;
     };
 
@@ -36,9 +36,9 @@ public:
     void purchaseRemoveAds() const;
 
     // TODO: rename, try start commercial break
-    void gameOver(const std::function<void()>& callback);
+    void gameOver(std::function<void()> callback);
 
-    void showRewardVideo(const std::function<void(bool)>& callback);
+    void showRewardVideo(std::function<void(bool)> callback);
 
     Signal<> onRemoved{};
     Signal<> onProductLoaded{};
@@ -49,7 +49,7 @@ public:
 
     [[nodiscard]] bool isSupported() const;
 
-    std::string price{};
+    String price{};
 
 private:
     void setRemoveAdsPurchaseCache(bool adsRemoved) const;
@@ -62,7 +62,7 @@ private:
     bool removed = false;
     Config config_;
 
-    std::unique_ptr<AdMobWrapper> wrapper;
+    Pointer<AdMobWrapper> wrapper;
 };
 
 EK_DECLARE_TYPE(Ads);

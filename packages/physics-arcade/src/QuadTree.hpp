@@ -1,10 +1,10 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/math/box.hpp>
-#include <ek/math/vec.hpp>
+#include <ek/math/Rect.hpp>
+#include <ek/math/Vec.hpp>
 #include <ek/ds/Hash.hpp>
-#include <ek/assert.hpp>
+#include <ek/assert.h>
 
 namespace ek {
 
@@ -25,7 +25,7 @@ struct QuadTreeNode {
     int objects = -1;
     int objectsCount = 0;
 
-    [[nodiscard]] int getChildIndex(const rect_i& objectBounds, rect_i& nodeBounds) const {
+    [[nodiscard]] int getChildIndex(const Rect2i& objectBounds, Rect2i& nodeBounds) const {
         const int subWidth = nodeBounds.width >> 1u;
         const int subHeight = nodeBounds.height >> 1u;
         const int splitX = nodeBounds.x + subWidth;
@@ -86,7 +86,7 @@ public:
 
     Array<int> objectNext;
     Array<ecs::EntityIndex> objectEntity;
-    Array<rect_i> objectsBoundsArray;
+    Array<Rect2i> objectsBoundsArray;
     int nextFreeObject = -1;
 
     int allocNode() {
@@ -96,7 +96,7 @@ public:
             nextFreeNode = nodes[nextFreeNode].firstChildNode;
             nodes[freeID].firstChildNode = 0;
         } else {
-            freeID = static_cast<int>(nodes._size);
+            freeID = static_cast<int>(nodes.size());
             nodes.emplace_back();
             nodes.emplace_back();
             nodes.emplace_back();
@@ -119,7 +119,7 @@ public:
             nextFreeObject = objectNext[objId];
             //objectNext[objId] = -1;
         } else {
-            objId = static_cast<int>(objectNext._size);
+            objId = static_cast<int>(objectNext.size());
             objectNext.push_back(-1);
             objectsBoundsArray.emplace_back();
             objectEntity.emplace_back();
@@ -138,21 +138,21 @@ public:
     // starting from the base node (0) how many times can it (and its children) split
     int maxLevels = 5;
 
-    rect_i bounds;
+    Rect2i bounds;
 
-    explicit QuadTree(rect_i bounds_) : bounds{bounds_} {
+    explicit QuadTree(Rect2i bounds_) : bounds{bounds_} {
         nodes.emplace_back();
     }
 
-    void search(const rect_f& area, Hash<int>& outNodesList) {
-        search(0, rect_i{area}, outNodesList, bounds);
+    void search(const Rect2f& area, Hash<int>& outNodesList) {
+        search(0, Rect2i{area}, outNodesList, bounds);
     }
 
-    int insert(ecs::EntityIndex entity, const rect_f& objectBounds) {
+    int insert(ecs::EntityIndex entity, const Rect2f& objectBounds) {
         int objectId = allocObject();
         objectNext[objectId] = -1;
         objectEntity[objectId] = entity;
-        objectsBoundsArray[objectId] = rect_i{objectBounds};
+        objectsBoundsArray[objectId] = Rect2i{objectBounds};
         insert(0, objectId, 0, bounds);
         return objectId;
     }
@@ -190,10 +190,10 @@ public:
         }
     }
 
-    static rect_i getChildBounds(rect_i bb, int childIndex) {
+    static Rect2i getChildBounds(Rect2i bb, int childIndex) {
         const int w = bb.width >> 1;
         const int h = bb.height >> 1;
-        rect_i result{bb.x, bb.y, w, h};
+        Rect2i result{bb.x, bb.y, w, h};
         switch (childIndex) {
             case QuadTreeNode::RightTop:
                 result.x += w;
@@ -225,7 +225,7 @@ private:
         nodes[nodeId].firstChildNode = allocNode();
     }
 
-    void insert(int nodeId, int objectId, int nodeLevel, rect_i nodeBounds) {
+    void insert(int nodeId, int objectId, int nodeLevel, Rect2i nodeBounds) {
         auto& node = nodes[nodeId];
         // Needs to check if it has any children nodes.
         if (node.firstChildNode) {
@@ -277,7 +277,7 @@ private:
         }
     }
 
-    void search(int nodeId, const rect_i& area, Hash<int>& outNodesList, rect_i nodeBounds) {
+    void search(int nodeId, const Rect2i& area, Hash<int>& outNodesList, Rect2i nodeBounds) {
         auto& node = nodes[nodeId];
         if (node.objectsCount) {
             outNodesList.set(nodeId, 1);

@@ -2,7 +2,7 @@
 
 #include <ek/ds/Array.hpp>
 #include <string>
-#include <ek/math/bounds_builder.hpp>
+#include <ek/math/BoundsBuilder.hpp>
 #include "../types.hpp"
 #include "RenderCommand.hpp"
 
@@ -28,7 +28,7 @@ public:
 
     void drawSymbolItem(const Doc& doc, const Element& element);
 
-    static rect_f getBounds(const Doc& doc, const Array<Element>& elements);
+    static Rect2f getBounds(const Doc& doc, const Array<Element>& elements);
 
 /** Covert concrete objects to render commands **/
 
@@ -42,7 +42,7 @@ public:
 
 public:
     Array<RenderCommandsBatch> batches;
-    bounds_builder_2f bounds{};
+    BoundsBuilder2f bounds{};
 
 private:
     Array<TransformModel> stack_;

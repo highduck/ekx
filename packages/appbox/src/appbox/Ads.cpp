@@ -79,18 +79,18 @@ void Ads::onRemoveAdsPurchased() {
     onRemoved();
 }
 
-void Ads::gameOver(const std::function<void()>& callback) {
+void Ads::gameOver(std::function<void()> callback) {
     if (removed) {
         if (callback) {
             callback();
         }
     } else {
-        wrapper->showInterstitial(callback);
+        wrapper->showInterstitial(std::move(callback));
     }
 }
 
-void Ads::showRewardVideo(const std::function<void(bool)>& callback) {
-    wrapper->showRewardedAd(callback);
+void Ads::showRewardVideo(std::function<void(bool)> callback) {
+    wrapper->showRewardedAd(std::move(callback));
 }
 
 void Ads::cheat_RemoveAds() {

@@ -5,41 +5,34 @@ project(core)
 add_library(${PROJECT_NAME} STATIC
         ek/module.cpp
 
-        ek/config.hpp
-
         ek/math/internal/compiler_unsafe_begin.h
         ek/math/internal/compiler_unsafe_end.h
-        ek/math/common.hpp
-        ek/math/serialize_math.hpp
+        ek/math/Math.hpp
+        ek/math/MathSerialize.hpp
 
-        ek/math/max_rects.hpp
-        ek/math/max_rects.cpp
+        ek/math/Vec.hpp
+        ek/math/MatrixDecl.hpp
+        ek/math/Matrix.hpp
+        ek/math/Matrix2.hpp
+        ek/math/Matrix3x2.hpp
+        ek/math/Matrix3.hpp
+        ek/math/Matrix4.hpp
+        ek/math/MatrixInverse.hpp
+        ek/math/MatrixCamera.hpp
+        ek/math/MatrixTransform.hpp
+        ek/math/MatrixTranspose.hpp
+        ek/math/Quaternion.hpp
 
-        ek/math/vec.hpp
-        ek/math/matrix_decl.hpp
-        ek/math/mat.hpp
-        ek/math/mat2x2.hpp
-        ek/math/mat3x2.hpp
-        ek/math/mat3x3.hpp
-        ek/math/mat4x4.hpp
-        ek/math/matrix_inverse.hpp
-        ek/math/matrix_camera.hpp
-        ek/math/matrix_transform.hpp
-        ek/math/matrix_transpose.hpp
-        ek/math/quaternion.hpp
+        ek/math/Rect.hpp
+        ek/math/Circle.hpp
+        ek/math/BoundsBuilder.hpp
 
-        ek/math/box.hpp
-        ek/math/circle.hpp
-        ek/math/bounds_builder.hpp
+        ek/math/HSVColor.hpp
+        ek/math/ColorTransform.hpp
+        ek/math/Color32.hpp
 
-        ek/math/hvs_color.hpp
-        ek/math/color_transform.hpp
-        ek/math/packed_color.hpp
-
-        ek/math/easing.hpp
-
-        ek/math/rand_impl.hpp
-        ek/math/rand.hpp
+        ek/math/Easings.hpp
+        ek/math/Random.hpp
 
         ek/serialize/streams.hpp
         ek/serialize/core.hpp
@@ -57,24 +50,15 @@ add_library(${PROJECT_NAME} STATIC
         ek/util/Res.hpp
         ek/util/ServiceLocator.hpp
         ek/util/Signal.hpp
-        ek/util/Base64.hpp
-        ek/util/Base64_impl.hpp
         ek/util/Platform.hpp
         ek/util/NoCopyAssign.hpp
         ek/util/StringUtil.hpp
-        ek/util/StringUtil_impl.hpp
-        ek/util/Path_impl.hpp
         ek/util/Path.hpp
-        ek/util/TypeIndex.hpp
-
-        ek/Localization.hpp
-        ek/Localization.cpp
 
         ek/util/StaticStorage.hpp
 
         ek/ds/StaticRingBuffer.hpp
         ek/ds/StaticHistoryBuffer.hpp
-        ek/ds/BitVector.hpp
         ek/ds/FixedArray.hpp
         ek/ds/Array.hpp
         ek/ds/SparseArray.hpp
@@ -89,7 +73,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
-        C_STANDARD 17
+        C_STANDARD 11
         )
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
@@ -97,7 +81,7 @@ if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
 
     set(EK_COMPILE_WARNINGS
             -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type
-            -Woverloaded-virtual -Wcast-align -Wno-deprecated-declarations -Wstrict-aliasing)
+            -Woverloaded-virtual -Wcast-align -Wno-deprecated-declarations -Wstrict-aliasing=2)
 
     #set(EK_COMPILER_LTO "-flto")
 endif ()
@@ -112,10 +96,12 @@ endif ()
 target_compile_options(${PROJECT_NAME} PRIVATE
         -fno-exceptions
         -fno-rtti
-        -fstrict-aliasing
+        -fno-strict-aliasing
+        -Wstrict-aliasing=2
         )
 
 target_link_libraries(${PROJECT_NAME}
+        PUBLIC ekx::std
         PUBLIC stb
         PUBLIC sokol
         )

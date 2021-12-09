@@ -49,10 +49,11 @@ int main(int argc, char** argv) {
     writer.writeI32(fontData.ascender);
     writer.writeI32(fontData.descender);
     writer.writeI32((int32_t) fontData.glyphs.size());
+    int32_t dictSize = 0;
+
     for (auto& glyph: fontData.glyphs) {
-        writer.writeI32((int32_t) glyph.codepoints.size());
-        for (auto cp: glyph.codepoints) {
-            writer.writeI32((int32_t) cp);
+        for (auto _: glyph.codepoints) {
+            ++dictSize;
         }
         writer.writeI32(glyph.box.x);
         writer.writeI32(glyph.box.y);
@@ -61,6 +62,15 @@ int main(int argc, char** argv) {
         writer.writeI32(glyph.advanceWidth);
         writer.writeString(glyph.sprite);
     }
+    writer.writeI32(dictSize);
+    for (size_t i = 0; i < fontData.glyphs.size(); ++i) {
+        const auto& glyph = fontData.glyphs[i];
+        for (auto cp: glyph.codepoints) {
+            writer.writeU64((int32_t) cp);
+            writer.writeI32((int32_t) i);
+        }
+    }
+
     auto f = fopen(outputFont, "wb");
     fwrite(writer.data, 1, writer.pos, f);
     fclose(f);

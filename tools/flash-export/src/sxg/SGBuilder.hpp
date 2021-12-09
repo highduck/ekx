@@ -13,7 +13,7 @@ class SGBuilder : private NoCopyAssign {
 public:
     const Doc& doc;
     ExportItem library;
-    std::unordered_map<std::string, std::string> linkages;
+    std::unordered_map<String, String> linkages;
 
 private:
     int _animationSpan0 = 0;
@@ -52,7 +52,7 @@ public:
     ExportItem* addElementToDrawingLayer(ExportItem* item, const Element& el);
 
 private:
-    [[nodiscard]] bool isInLinkages(const std::string& id) const;
+    [[nodiscard]] bool isInLinkages(const String& id) const;
 
     void processTimeline(const Element& Element, ExportItem* PItem);
 };

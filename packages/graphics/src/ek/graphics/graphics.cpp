@@ -1,15 +1,15 @@
 #include "graphics.hpp"
-#include <ek/debug.hpp>
-#include <ek/assert.hpp>
+#include <ek/log.h>
+#include <ek/assert.h>
 #include <ek/imaging/image.hpp>
-#include <ek/math/box.hpp>
+#include <ek/math/Rect.hpp>
 #include <ek/app/app.hpp>
 #include <ek/app/Platform.h>
 
 #define SOKOL_GFX_IMPL
 
 #define SOKOL_ASSERT(x) EK_ASSERT(x)
-#define SOKOL_LOG(s) EK_DEBUG(s);
+#define SOKOL_LOG(__VA_ARGS__) EK_DEBUG("SG: %s", __VA_ARGS__);
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc99-extensions"
@@ -202,7 +202,8 @@ bool Texture::getPixels(void* pixels) const {
     return false;
 }
 
-inline const char* BackendToString[] = {
+
+const char* BackendToString[] = {
         "SG_BACKEND_GLCORE33",
         "SG_BACKEND_GLES2",
         "SG_BACKEND_GLES3",
@@ -211,8 +212,14 @@ inline const char* BackendToString[] = {
         "SG_BACKEND_METAL_MACOS",
         "SG_BACKEND_METAL_SIMULATOR",
         "SG_BACKEND_WGPU",
-        "SG_BACKEND_DUMMY"
+        "SG_BACKEND_DUMMY",
+        nullptr
 };
+
+void logBackendName() {
+    auto backend = sg_query_backend();
+    EK_INFO("Sokol Backend: %s", BackendToString[backend]);
+}
 
 void initialize(int maxDrawCalls) {
     EK_DEBUG("graphics initialize");
@@ -228,8 +235,7 @@ void initialize(int maxDrawCalls) {
     desc.context.depth_format = SG_PIXELFORMAT_DEPTH_STENCIL;
 #endif
     sg_setup(desc);
-    auto backend = sg_query_backend();
-    EK_INFO_F("Sokol Backend: %s", BackendToString[backend]);
+    logBackendName();
 }
 
 void shutdown() {

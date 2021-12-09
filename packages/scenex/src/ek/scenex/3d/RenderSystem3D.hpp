@@ -20,15 +20,15 @@ public:
     void prerender();
     void render(float width, float height);
 //    void renderShadowMap(const mat4f& cameraProjection, const mat4f& cameraView);
-    void renderObjects(const mat4f& proj, const mat4f& view);
+    void renderObjects(const Matrix4f& proj, const Matrix4f& view);
 
     Material3D defaultMaterial{};
     ShadowMapRes* shadows = nullptr;
     Main3DRes* main = nullptr;
     RenderSkyBoxRes* skybox= nullptr;
 
-    mat4f cameraProjection;
-    mat4f cameraView;
+    Matrix4f cameraProjection;
+    Matrix4f cameraView;
 
     ecs::EntityApi scene;
     ecs::EntityApi camera;

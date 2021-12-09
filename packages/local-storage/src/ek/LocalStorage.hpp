@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include <ek/ds/Array.hpp>
+#include <ek/ds/String.hpp>
 #include <cstdint>
 
 namespace ek {
@@ -12,11 +12,11 @@ int get_user_preference(const char* key, int default_value = 0);
 
 void set_user_string(const char* key, const char* str);
 
-std::string get_user_string(const char* key, const char* default_value = "");
+String get_user_string(const char* key, const char* default_value = "");
 
 void set_user_data(const char* key, const uint8_t* data, uint32_t size);
 
-std::vector<uint8_t> get_user_data(const char* key);
+void get_user_data(const char* key, Array<uint8_t>& output);
 
 namespace UserPreferences {
 

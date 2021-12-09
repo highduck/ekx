@@ -215,8 +215,8 @@ int get_cubic_roots(float* out_roots, float a = 0.0f, float b = 0.0f, float c = 
         const float q_sqrt = sqrt(q); // won't change
 
         out_roots[0] = -2.0f * q_sqrt * cos(theta / 3.0f) - b / 3.0f;
-        out_roots[1] = -2.0f * q_sqrt * cos((theta + 2.0f * math::fPI) / 3.0f) - b / 3.0f;
-        out_roots[2] = -2.0f * q_sqrt * cos((theta + 4.0f * math::fPI) / 3.0f) - b / 3.0f;
+        out_roots[1] = -2.0f * q_sqrt * cos((theta + 2.0f * Math::fPI) / 3.0f) - b / 3.0f;
+        out_roots[2] = -2.0f * q_sqrt * cos((theta + 4.0f * Math::fPI) / 3.0f) - b / 3.0f;
 
         return 3;
     }
@@ -231,7 +231,7 @@ float get_bezier_value_normalized(float t, float a, float b, float c, float d) {
     return (t * t * (d - a) + 3 * (1 - t) * (t * (c - a) + (1 - t) * (b - a))) * t + a;
 }
 
-float get_bezier_y(const float2* curve, float x) {
+float get_bezier_y(const Vec2f* curve, float x) {
     const float eps = 0.000001f;
     const float a = curve[0].x;
     const float b = curve[1].x;

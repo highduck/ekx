@@ -5,6 +5,8 @@
 #include <ek/serialize/stl/String.hpp>
 #include <ek/serialize/stl/Array.hpp>
 
+TEST_SUITE_BEGIN("c++ serialize");
+
 using namespace ek;
 
 enum class TestFlagsCpp : uint8_t {
@@ -70,7 +72,7 @@ template<typename T>
 struct declared_as_pod_type<Vector2<T>> : public std::true_type {
 };
 
-TEST_CASE("Serialization Basic") {
+TEST_CASE("Basic") {
 
     Bar bar{};
 
@@ -109,7 +111,7 @@ TEST_CASE("Serialization Basic") {
     REQUIRE_EQ(barLoaded.i4, 4);
 }
 
-TEST_CASE("Serialization Basic2") {
+TEST_CASE("Basic2") {
 
     GlyphModel glyph{
             {1, 2, 3},
@@ -135,7 +137,7 @@ TEST_CASE("Serialization Basic2") {
     REQUIRE_EQ(s.codes[0], 1);
 }
 
-TEST_CASE("Serialization Nesting") {
+TEST_CASE("Nesting") {
 
     GlyphModel glyph1{
             {1, 2, 3},
@@ -181,7 +183,7 @@ TEST_CASE("Serialization Nesting") {
     REQUIRE_EQ(s.sizes[3], 32);
 }
 
-TEST_CASE("Serialization Enum") {
+TEST_CASE("Enum") {
     output_memory_stream outs{200};
     IO writer{outs};
 
@@ -212,7 +214,7 @@ TEST_CASE("Serialization Enum") {
     REQUIRE_EQ(v[2], TestFlagsCpp::Three);
 }
 
-TEST_CASE("Serialization PodArray") {
+TEST_CASE("PodArray") {
     output_memory_stream output{0xFFu};
     {
         IO io{output};
@@ -254,3 +256,5 @@ TEST_CASE("Serialization PodArray") {
         REQUIRE_EQ(fs[1].x, doctest::Approx(0.7));
     }
 }
+
+TEST_SUITE_END();

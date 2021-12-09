@@ -1,11 +1,9 @@
 #pragma once
 
 #include "FontImplBase.hpp"
-#include <vector>
-#include <array>
-#include <string>
-#include <unordered_map>
-#include <ek/math/serialize_math.hpp>
+#include <ek/ds/Array.hpp>
+#include <ek/ds/Hash.hpp>
+#include <ek/math/MathSerialize.hpp>
 #include <ek/util/NoCopyAssign.hpp>
 #include <ek/scenex/data/BMFont.hpp>
 #include <ek/util/Type.hpp>
@@ -19,9 +17,9 @@ public:
 
     ~BitmapFont() override;
 
-    void load(const std::vector<uint8_t>& buffer);
+    void load(const uint8_t* buffer, size_t length);
 
-    void load(const BMFont& data);
+    void load(BMFont& data);
 
     bool getGlyph(uint32_t codepoint, Glyph& outGlyph) override;
 
@@ -30,7 +28,8 @@ public:
     float getKerning(uint32_t codepoint1, uint32_t codepoint2) override;
 
 public:
-    std::unordered_map<uint32_t, BMFontGlyph> map;
+    Array<BMFontGlyph> glyphs;
+    Hash<BMFontGlyph*> map;
     float unitsPerEM = 1.0f;
     float baseFontSize = 1.0f;
     float baseFontSizeInv = 1.0f;

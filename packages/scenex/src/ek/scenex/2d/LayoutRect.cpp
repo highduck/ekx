@@ -5,7 +5,7 @@
 
 namespace ek {
 
-rect_f find_parent_layout_rect(ecs::EntityApi e, bool safe) {
+Rect2f find_parent_layout_rect(ecs::EntityApi e, bool safe) {
     auto it = e.get<Node>().parent;
     while (it) {
         const auto* layout = it.tryGet<LayoutRect>();
@@ -14,7 +14,7 @@ rect_f find_parent_layout_rect(ecs::EntityApi e, bool safe) {
         }
         it = it.get<Node>().parent;
     }
-    return rect_f::zero_one;
+    return Rect2f::zero_one;
 }
 
 // system
@@ -73,6 +73,6 @@ void LayoutRect::updateAll() {
 }
 
 /**** wrapper ****/
-rect_f LayoutRect::DesignCanvasRect{0.0f, 0.0f, 1.0f, 1.0f};
+Rect2f LayoutRect::DesignCanvasRect{0.0f, 0.0f, 1.0f, 1.0f};
 
 }

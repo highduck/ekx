@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ecxx_fwd.hpp"
 #include "impl/world.hpp"
 #include "impl/view_forward.hpp"
 #include "impl/view_backward.hpp"

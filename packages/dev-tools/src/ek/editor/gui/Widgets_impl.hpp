@@ -3,6 +3,58 @@
 
 namespace ImGui {
 
+struct InputTextCallback_UserData
+{
+    ek::String*             Str;
+    ImGuiInputTextCallback  ChainCallback;
+    void*                   ChainCallbackUserData;
+};
+
+static int InputTextCallback_ek_String(ImGuiInputTextCallbackData* data)
+{
+    InputTextCallback_UserData* user_data = (InputTextCallback_UserData*)data->UserData;
+    if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+    {
+        // Resize string callback
+        // If for some reason we refuse the new length (BufTextLen) and/or capacity (BufSize) we need to set them back to what we want.
+        auto* str = user_data->Str;
+        IM_ASSERT(data->Buf == str->c_str());
+        str->reserve(data->BufTextLen);
+        data->Buf = (char*)str->c_str();
+    }
+    else if (user_data->ChainCallback)
+    {
+        // Forward to user callback, if any
+        data->UserData = user_data->ChainCallbackUserData;
+        return user_data->ChainCallback(data);
+    }
+    return 0;
+}
+
+bool InputText(const char* label, ek::String* str, ImGuiInputTextFlags flags, ImGuiInputTextCallback callback, void* user_data)
+{
+    IM_ASSERT((flags & ImGuiInputTextFlags_CallbackResize) == 0);
+    flags |= ImGuiInputTextFlags_CallbackResize;
+
+    InputTextCallback_UserData cb_user_data;
+    cb_user_data.Str = str;
+    cb_user_data.ChainCallback = callback;
+    cb_user_data.ChainCallbackUserData = user_data;
+    return InputText(label, str->data(), str->capacity() + 1, flags, InputTextCallback_ek_String, &cb_user_data);
+}
+
+bool InputTextMultiline(const char* label, ek::String* str, const ImVec2& size, ImGuiInputTextFlags flags, ImGuiInputTextCallback callback, void* user_data)
+{
+    IM_ASSERT((flags & ImGuiInputTextFlags_CallbackResize) == 0);
+    flags |= ImGuiInputTextFlags_CallbackResize;
+
+    InputTextCallback_UserData cb_user_data;
+    cb_user_data.Str = str;
+    cb_user_data.ChainCallback = callback;
+    cb_user_data.ChainCallbackUserData = user_data;
+    return InputTextMultiline(label, str->data(), str->capacity() + 1, size, flags, InputTextCallback_ek_String, &cb_user_data);
+}
+
 void HelpMarker(const char* desc)
 {
     ImGui::TextDisabled(ICON_FA_QUESTION_CIRCLE);
@@ -17,7 +69,7 @@ void HelpMarker(const char* desc)
 }
 
 bool Color32Edit(const char* label, ek::argb32_t& argb) {
-    ek::float4 v{argb};
+    ek::Vec4f v{argb};
     bool changed = ImGui::ColorEdit4(label, v.data());
     if (changed) {
         argb = ek::argb32_t{v};
@@ -49,13 +101,28 @@ bool ToolbarButton(const char* label, bool active, const char* tooltip) {
 
 namespace ek {
 
-std::string getDebugNodePath(ecs::EntityApi e) {
-    std::string result{};
-    while (e) {
-        result = e.get_or_default<NodeName>().name + "/" + result;
+String getDebugNodePath(ecs::EntityApi e) {
+    const String* names[32];
+    int depth = 0;
+    String result;
+    while (e && depth < 32) {
+        names[depth++] = &(e.get_or_default<NodeName>().name);
+        //result = e.get_or_default<NodeName>().name + "/" + result;
         e = e.get<Node>().parent;
     }
-    return result;
+    char buf[1024];
+    uint32_t len = 0;
+    while(depth-- > 0) {
+        buf[len++] = '/';
+        auto* str = names[depth];
+        uint32_t size = str->size();
+        if(size > 0) {
+            memcpy(buf + len, str->data(), size);
+            len += size;
+        }
+    }
+    buf[len] = '\0';
+    return String{buf, (uint32_t)len};
 }
 
 const char* getTextLayerTypeName(TextLayerType type) {
@@ -129,15 +196,13 @@ void guiFont(const Font& font) {
         case FontType::Bitmap: {
             auto* bm = reinterpret_cast<const BitmapFont*>(font.getImpl());
             ImGui::Text("Font Type: Bitmap");
-            ImGui::Text("Glyphs: %lu", bm->map.size());
+            ImGui::Text("Glyphs: %u", bm->map._data.size());
         }
             break;
         case FontType::TrueType: {
             auto* ttf = reinterpret_cast<const TrueTypeFont*>(font.getImpl());
             ImGui::Text("Font Type: TrueType");
-            if(ttf->map) {
-                ImGui::Text("Glyphs: %lu", ttf->map->size());
-            }
+            ImGui::Text("Glyphs: %u", ttf->map.size());
         }
             break;
     }

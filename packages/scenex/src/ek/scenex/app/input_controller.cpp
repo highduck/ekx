@@ -5,8 +5,8 @@ namespace ek {
 using namespace ek::app;
 
 input_controller::input_controller(InteractionSystem& interactions, GameDisplay& display) :
-        interactions_{interactions},
-        display_{display} {
+        display_{display},
+        interactions_{interactions} {
 }
 
 input_controller::~input_controller() = default;
@@ -135,8 +135,6 @@ void input_controller::onPostFrame() {
         }
     }
 
-    keyboard_text_.clear();
-
     // update touches info
     unsigned i = 0;
     while (i < touches_.size()) {
@@ -152,7 +150,7 @@ void input_controller::reset_keyboard() {
     reset_keys_ = true;
 }
 
-float2 input_controller::screenCoordToGameDisplay(float2 screenPos) const {
+Vec2f input_controller::screenCoordToGameDisplay(Vec2f screenPos) const {
     const auto size = display_.info.destinationViewport.size;
     const auto offset = display_.info.destinationViewport.position;
     const auto displaySize = display_.info.size;

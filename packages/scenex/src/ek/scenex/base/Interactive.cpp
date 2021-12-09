@@ -2,32 +2,32 @@
 
 namespace ek {
 
-void Interactive::handle(InteractionEvent event) {
+void Interactive::handle(PointerEvent event) {
     switch (event) {
-        case InteractionEvent::PointerDown:
+        case PointerEvent::Down:
             pushed = true;
-            on_down();
+            onEvent.emit(event);
             break;
-        case InteractionEvent::PointerUp: {
+        case PointerEvent::Up: {
             bool shouldBeClicked = pushed && over;
             pushed = false;
-            on_up();
+            onEvent.emit(event);
 
             if (shouldBeClicked) {
-                on_clicked();
+                onEvent.emit(PointerEvent::Tap);
             }
         }
             break;
-        case InteractionEvent::PointerOver:
+        case PointerEvent::Over:
             over = true;
-            on_over();
+            onEvent.emit(event);
             break;
-        case InteractionEvent::PointerOut:
-            on_out();
+        case PointerEvent::Out:
+            onEvent.emit(event);
             over = false;
             pushed = false;
             break;
-        case InteractionEvent::Click:
+        case PointerEvent::Tap:
             break;
     }
 }

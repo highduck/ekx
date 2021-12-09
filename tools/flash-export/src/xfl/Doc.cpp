@@ -4,10 +4,11 @@
 
 namespace ek::xfl {
 
-const char* findLastOf(const std::string& str, char ch) {
+const char* findLastOf(const String& str, char ch) {
     int sz = static_cast<int>(str.size());
     for (int i = sz - 1; i >= 0; --i) {
-        if (str[i] == ch) {
+        // TODO: add string []
+        if (*(str.data() + i) == ch) {
             return str.c_str() + i;
         }
     }
@@ -22,7 +23,7 @@ Doc::Doc(std::unique_ptr<File> root) {
 Doc::Doc(const char* path) : Doc{File::load(path)} {
 }
 
-const Element* Doc::find(const std::string& name,
+const Element* Doc::find(const String& name,
                          ElementType type,
                          bool ignoreFolders) const {
     for (const auto& s: library) {
@@ -41,7 +42,7 @@ const Element* Doc::find(const std::string& name,
     return nullptr;
 }
 
-const Element* Doc::findLinkage(const std::string& className, ElementType type) const {
+const Element* Doc::findLinkage(const String& className, ElementType type) const {
     for (const auto& s: library) {
         if (s.item.linkageClassName == className &&
             (type == ElementType::unknown || s.elementType == type)) {

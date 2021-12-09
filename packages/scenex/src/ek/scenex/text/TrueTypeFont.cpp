@@ -1,9 +1,8 @@
 #include "TrueTypeFont.hpp"
 
-#include <unordered_map>
 #include <ek/LocalResource.hpp>
-#include <ek/FileView.hpp>
 #include <ek/app/app.hpp>
+#include <ek/assert.h>
 #include <ek/imaging/image.hpp>
 
 #ifndef STB_TRUETYPE_IMPLEMENTATION
@@ -23,38 +22,31 @@
 
 namespace ek {
 
-TrueTypeFont::TrueTypeFont(float dpiScale_, float fontSize, const std::string& dynamicAtlasName) :
+TrueTypeFont::TrueTypeFont(float dpiScale_, float fontSize, const char* dynamicAtlasName) :
         FontImplBase(FontType::TrueType),
         baseFontSize{fontSize},
         dpiScale{dpiScale_},
         atlas{dynamicAtlasName} {
-
-    mapByEffect[0] = std::make_unique<std::unordered_map<uint32_t, Glyph>>();
-    map = mapByEffect[0].get();
 }
 
 TrueTypeFont::~TrueTypeFont() {
     unload();
 }
 
-void TrueTypeFont::loadFromMemory(array_buffer&& buffer) {
-    assert(!loaded_);
-    if (!buffer.empty() && initFromMemory(buffer.data(), buffer.size())) {
-        source = std::move(buffer);
+void TrueTypeFont::loadFromMemory(LocalResource lr) {
+    EK_ASSERT(!loaded_);
+    if (lr.buffer && initFromMemory(lr.buffer, lr.length)) {
+        source = lr;
         loaded_ = true;
     }
 }
 
 void TrueTypeFont::unload() {
     if (loaded_) {
-        source.resize(0);
-        source.shrink_to_fit();
+        source.close();
 
         delete info;
         info = nullptr;
-
-        delete mappedSourceFile_;
-        mappedSourceFile_ = nullptr;
 
         loaded_ = false;
     }
@@ -63,7 +55,6 @@ void TrueTypeFont::unload() {
 // store pre-rendered glyph for baseFontSize and upscaled by dpiScale
 // quad scale just multiplier to get fontSize relative to baseFontSize
 bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
-    assert(map != nullptr);
     if (!loaded_) {
         return false;
     }
@@ -76,10 +67,10 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         resetGlyphs();
     }
 
-    auto& map_ = *map;
-    auto it = map_.find(codepoint);
-    if (it != map_.end()) {
-        outGlyph = it->second;
+    const uint64_t hash = effectKeyBits | codepoint;
+    const auto* it = map.tryGet(hash);
+    if (it) {
+        outGlyph = *it;
         return true;
     }
 
@@ -90,7 +81,8 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     }
 
     const float scale = stbtt_ScaleForPixelHeight(info, baseFontSize);
-    auto& glyph = map_.try_emplace(codepoint).first->second;
+    map.set(hash, {});
+    auto& glyph = (Glyph&)*map.tryGet(hash);
     glyph.source = this;
 
     int advanceWidth = 0, leftSideBearing = 0;
@@ -115,16 +107,20 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         auto bitmapWidth = x1 - x0;
         auto bitmapHeight = y1 - y0;
 
-        static std::vector<uint8_t> bmp{};
-        bmp.resize(bitmapWidth * bitmapHeight);
-        bmp.assign(bitmapWidth * bitmapHeight, 0);
+        size_t bmpSize = bitmapWidth * bitmapHeight;
+        uint8_t bmp[512*512];
+        EK_ASSERT(bmpSize < 512 * 512);
+        memset(bmp, 0, bmpSize);
+        //uint8_t* bmp = (uint8_t*)calloc(1, bmpSize);
 
-        stbtt_MakeGlyphBitmap(info, bmp.data() + pad * bitmapWidth + pad, glyphWidth, glyphHeight, bitmapWidth,
+        stbtt_MakeGlyphBitmap(info, bmp + pad * bitmapWidth + pad, glyphWidth, glyphHeight, bitmapWidth,
                               dpiScale * scale, dpiScale * scale, glyphIndex);
 
-        fastBlurA8(bmp.data(), bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_, strengthPower_);
+        fastBlurA8(bmp, bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_, strengthPower_);
 
-        auto sprite = atlas->addBitmap(bitmapWidth, bitmapHeight, bmp);
+        auto sprite = atlas->addBitmap(bitmapWidth, bitmapHeight, bmp, bmpSize);
+        //free(bmp);
+
         glyph.texture = sprite.texture;
         glyph.texCoord = sprite.texCoords;
 
@@ -149,10 +145,9 @@ bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
         return false;
     }
 
-    auto* map0 = mapByEffect[0].get();
-    auto it = map0->find(codepoint);
-    if (it != map0->end()) {
-        outGlyph = it->second;
+    auto* it = map.tryGet(effectKeyBits | codepoint);
+    if (it) {
+        outGlyph = *it;
         return true;
     }
 
@@ -184,20 +179,13 @@ bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
 }
 
 void TrueTypeFont::loadDeviceFont(const char* fontName) {
-    assert(!loaded_);
+    EK_ASSERT(!loaded_);
 
     const char* filePath = app::getSystemFontPath(fontName);
     if (filePath) {
-//        get_resource_content_async(path.c_str(), [this](auto buffer) {
-//            loadFromMemory(std::move(buffer));
-//        });
-        auto* file = new FileView(filePath);
-        if (file->size() > 0 && initFromMemory(file->data(), file->size())) {
-            loaded_ = true;
-            mappedSourceFile_ = file;
-        } else {
-            delete file;
-        }
+        get_resource_content_async(filePath, [this](auto lr) {
+            loadFromMemory(lr);
+        });
     }
 }
 
@@ -205,7 +193,7 @@ bool TrueTypeFont::initFromMemory(const uint8_t* data, size_t size) {
     const auto* fontData = data;
     const auto fontIndex = 0;
     const int fontOffset = stbtt_GetFontOffsetForIndex(fontData, fontIndex);
-    assert(fontOffset >= 0 && "fontData is incorrect, or fontIndex cannot be found.");
+    EK_ASSERT(fontOffset >= 0 && "fontData is incorrect, or fontIndex cannot be found.");
     info = new stbtt_fontinfo;
     if (stbtt_InitFont(info, fontData, fontOffset)) {
         int ascent, descent, lineGap;
@@ -230,17 +218,13 @@ void TrueTypeFont::setBlur(float radius, int iterations, int strengthPower) {
         blurRadius_ = radius < 0 ? 0 : (radius > 0xFF ? 0xFF : (uint8_t) radius);
         blurIterations_ = iterations < 0 ? 0 : (iterations > 3 ? 3 : iterations);
         strengthPower_ = strengthPower < 0 ? 0 : (strengthPower > 7 ? 7 : strengthPower);
-        uint32_t hashCode = (strengthPower_ << 16) | (blurIterations_ << 8) | blurRadius_;
-        auto it = mapByEffect.find(hashCode);
-        if (it == mapByEffect.end()) {
-            mapByEffect[hashCode] = std::make_unique<std::unordered_map<uint32_t, Glyph>>();
-        }
-        map = mapByEffect[hashCode].get();
+        effectKeyBits = (strengthPower_ << 16) | (blurIterations_ << 8) | blurRadius_;
+        effectKeyBits = effectKeyBits << 32u;
     } else {
         blurRadius_ = 0;
         blurIterations_ = 0;
         strengthPower_ = 0;
-        map = mapByEffect[0].get();
+        effectKeyBits = 0;
     }
 }
 
@@ -256,9 +240,7 @@ float TrueTypeFont::getKerning(uint32_t codepoint1, uint32_t codepoint2) {
 }
 
 void TrueTypeFont::resetGlyphs() {
-    for (auto& it: mapByEffect) {
-        it.second->clear();
-    }
+    map.clear();
     if (atlas) {
         atlasVersion = atlas->version;
     }

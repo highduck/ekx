@@ -17,34 +17,76 @@
 
 #if EK_STATIC_RESOURCES_READ_FILE
 
-#include <vector>
 #include <cstdint>
-#include <ek/app/app.hpp>
+#include "MapFile.hpp"
 
-namespace ek::internal {
+namespace ek {
 
-inline std::vector<uint8_t> read_file_bytes(const char* path) {
-    EKAPP_ASSERT(path != nullptr);
-    std::vector<uint8_t> buffer;
+int readFile(const char* path, uint8_t** outBuffer, size_t* outLength) {
+    if (path == nullptr) {
+        return 3;
+    }
+
+    int32_t result = 0;
+
+    *outBuffer = nullptr;
+    *outLength = 0;
+
     auto* stream = fopen(path, "rb");
-    if (stream) {
+    if (!stream) {
+        result = 1;
+    } else {
         fseek(stream, 0, SEEK_END);
-        buffer.resize(static_cast<size_t>(ftell(stream)));
+        *outLength = static_cast<size_t>(ftell(stream));
         fseek(stream, 0, SEEK_SET);
 
-        fread(buffer.data(), buffer.size(), 1u, stream);
+        *outBuffer = (uint8_t*) malloc(*outLength);
+        fread(*outBuffer, *outLength, 1u, stream);
 
         if (ferror(stream) != 0) {
-            buffer.resize(0);
-            buffer.shrink_to_fit();
+            free(*outBuffer);
+            *outBuffer = nullptr;
+            *outLength = 0;
+            result = 2;
         }
 
         fclose(stream);
     }
-    else {
-        EKAPP_LOG("Read file bytes error: file not found");
+
+    return result;
+}
+
+#if EK_HAS_MAP_FILE
+
+void closeMappedFile(LocalResource* lr) {
+    if (lr->buffer) {
+        munmap(lr->buffer, lr->length);
+        lr->buffer = nullptr;
+        lr->length = 0;
     }
-    return buffer;
+}
+
+#endif
+
+void closeMemoryFile(LocalResource* lr) {
+    free(lr->buffer);
+    lr->buffer = nullptr;
+    lr->length = 0;
+}
+
+int getFile(const char* path, LocalResource* lr) {
+#if EK_HAS_MAP_FILE
+    auto mapFileResult = mapFile(path, &lr->buffer, &lr->length);
+    if (mapFileResult == 0) {
+        lr->closeFunc = closeMappedFile;
+        lr->status = 0;
+        return 0;
+    }
+#endif
+    auto openFileResult = readFile(path, &lr->buffer, &lr->length);
+    lr->status = openFileResult;
+    lr->closeFunc = closeMemoryFile;
+    return openFileResult;
 }
 
 }

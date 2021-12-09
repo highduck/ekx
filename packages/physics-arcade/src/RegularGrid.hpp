@@ -3,7 +3,7 @@
 #include <cstring>
 #include <cstdint>
 #include <ecxx/ecxx_fwd.hpp>
-#include <ek/math/box.hpp>
+#include <ek/math/Rect.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/Hash.hpp>
 
@@ -11,7 +11,7 @@ namespace ek {
 
 class RegularGrid {
 public:
-    rect_i bounds;
+    Rect2i bounds;
     uint32_t cellSize;
     uint32_t power;
     uint32_t columns;
@@ -25,7 +25,7 @@ public:
     Hash<ecs::EntityIndex> filter{};
     Array<ecs::EntityIndex> query{};
 
-    RegularGrid(rect_i bounds_, uint32_t power_) :
+    RegularGrid(Rect2i bounds_, uint32_t power_) :
             bounds{bounds_},
             cellSize{1u << power_},
             power{power_},
@@ -48,11 +48,11 @@ public:
         next.resize(1);
     }
 
-    void insert(ecs::EntityIndex entity, const rect_f& rc) {
-        insert(entity, rect_i{rc});
+    void insert(ecs::EntityIndex entity, const Rect2f& rc) {
+        insert(entity, Rect2i{rc});
     }
 
-    void insert(ecs::EntityIndex entity, const rect_i& rc) {
+    void insert(ecs::EntityIndex entity, const Rect2i& rc) {
         if(!bounds.overlaps(rc)) {
             return;
         }
@@ -85,11 +85,11 @@ public:
         query.clear();
     }
 
-    const Array<ecs::EntityIndex>& search(const rect_f& rc) {
-        return search(rect_i{rc});
+    const Array<ecs::EntityIndex>& search(const Rect2f& rc) {
+        return search(Rect2i{rc});
     }
 
-    const Array<ecs::EntityIndex>& search(const rect_i& rc) {
+    const Array<ecs::EntityIndex>& search(const Rect2i& rc) {
         if(!bounds.overlaps(rc)) {
             return query;
         }

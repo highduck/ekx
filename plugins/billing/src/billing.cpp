@@ -1,6 +1,6 @@
 #include "billing.hpp"
 #include <ek/util/StaticStorage.hpp>
-#include <ek/debug.hpp>
+#include <ek/log.h>
 
 // implementation
 #if defined(__APPLE__)

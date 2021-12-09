@@ -60,7 +60,7 @@ struct run_context_t {
     double elapsed = 0.0;
 
     template<typename Fn>
-    void run(const char* name, Fn fn) {
+    void run(const char* name, Fn&& fn) {
         curr_test = name;
         elapsed = 0.0;
         fn(*this);
@@ -68,7 +68,7 @@ struct run_context_t {
     }
 
     template<typename Fn>
-    inline void measure(Fn fn) {
+    void measure(Fn&& fn) {
         start();
         fn();
         stop();

@@ -24,11 +24,11 @@ namespace ek {
 
 template<typename T>
 inline void selectAsset(const char* label, Res<T>& asset) {
-    if (ImGui::BeginCombo(label, asset.getID().c_str())) {
-        for (auto& it : Res<T>::map()) {
-            auto& key = it.first;
-            if (ImGui::Selectable(key.c_str(), key == asset.getID())) {
-                asset.setID(key);
+    if (ImGui::BeginCombo(label, asset.getID())) {
+        for (auto& it : ResourceDB::instance.get().map) {
+            auto& key = it.second.key;
+            if (ImGui::Selectable(key.name.c_str(), key.name == asset.getID())) {
+                asset.setID(key.name);
             }
         }
         ImGui::EndCombo();
@@ -108,12 +108,12 @@ inline void guiTransform2D(Transform2D& transform) {
 //    ImGui::DragFloat2("Origin", transform.origin.data(), 0.1f, 0.0f, 0.0f, "%.2f");
 //    ImGui::DragFloat2("Pivot", transform.pivot.data(), 0.1f, 0.0f, 0.0f, "%.2f");
 
-    auto color = static_cast<float4>(transform.color.scale);
+    auto color = static_cast<Vec4f>(transform.color.scale);
     if (ImGui::ColorEdit4("Color Scale", color.data())) {
         transform.color.scale = argb32_t{color};
     }
 
-    color = static_cast<float4>(transform.color.offset);
+    color = static_cast<Vec4f>(transform.color.offset);
     if (ImGui::ColorEdit4("Color Offset", color.data())) {
         transform.color.offset = argb32_t{color};
     }
@@ -165,17 +165,17 @@ inline void guiCamera2D(Camera2D& camera) {
 inline void guiTransform3D(Transform3D& transform) {
     ImGui::DragFloat3("Position", transform.position.data(), 1.0f, 0.0f, 0.0f, "%.1f");
     ImGui::DragFloat3("Scale", transform.scale.data(), 0.1f, 0.0f, 0.0f, "%.2f");
-    float3 euler_angles = transform.rotation * 180.0f / ek::math::pi;
+    Vec3f euler_angles = transform.rotation * 180.0f / ek::Math::pi;
     if (ImGui::DragFloat3("Rotation", euler_angles.data(), 0.1f, 0.0f, 0.0f, "%.2f")) {
-        transform.rotation = euler_angles * ek::math::pi / 180.0f;
+        transform.rotation = euler_angles * ek::Math::pi / 180.0f;
     }
 }
 
 inline void guiCamera3D(Camera3D& camera) {
     ImGui::DragFloatRange2("Clip Plane", &camera.zNear, &camera.zFar, 1.0f, 0.0f, 0.0f, "%.1f");
-    float fov_degree = ek::math::to_degrees(camera.fov);
+    float fov_degree = ek::Math::to_degrees(camera.fov);
     if (ImGui::DragFloat("FOV", &fov_degree, 1.0f, 0.0f, 0.0f, "%.1f")) {
-        camera.fov = ek::math::to_radians(fov_degree);
+        camera.fov = ek::Math::to_radians(fov_degree);
     }
 
     ImGui::Checkbox("Orthogonal", &camera.orthogonal);
@@ -324,7 +324,7 @@ inline void guiParticleEmitter2D(ParticleEmitter2D& emitter) {
     ImGui::Checkbox("Enabled", &emitter.enabled);
     ImGui::Text("_Time: %f", emitter.time);
     guiEntityRef("Layer", emitter.layer);
-    ImGui::LabelText("Particle ID", "%s", emitter.particle.getID().c_str());
+    ImGui::LabelText("Particle ID", "%s", emitter.particle.getID());
     ImGui::DragFloat2("Offset", emitter.position.data());
     ImGui::Separator();
 
@@ -351,7 +351,7 @@ void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
     ecs::EntityApi e = entity.ent();
     ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index, ecs::the_world.generation(e.index));
     if (e.has<NodeName>()) {
-        ImGui::InputText("Name", &e.get<NodeName>().name);
+        //ImGui::InputText("Name", &e.get<NodeName>().name);
     }
     if (e.has<Node>()) {
         auto& node = e.get<Node>();

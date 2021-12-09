@@ -4,9 +4,9 @@
 #include <ek/ds/Array.hpp>
 #include <memory>
 #include <optional>
-#include <ek/math/box.hpp>
-#include <ek/math/color_transform.hpp>
-#include <ek/math/mat3x2.hpp>
+#include <ek/math/Rect.hpp>
+#include <ek/math/ColorTransform.hpp>
+#include <ek/math/Matrix3x2.hpp>
 #include <ek/util/Path.hpp>
 
 namespace ek::xfl {
@@ -18,7 +18,8 @@ struct BitmapData {
     bool alpha = true;
     Array<uint8_t> data;
 
-    static BitmapData* parse(const std::string& data);
+    // TODO: data is data, remove string usage
+    static BitmapData* parse(const void* data, uint32_t size);
 };
 
 enum class FilterType {
@@ -34,8 +35,8 @@ enum class FilterType {
 struct Filter {
     FilterType type = FilterType::none;
 
-    float4 color;
-    float2 blur;
+    Vec4f color;
+    Vec2f blur;
     float distance = 0.0f;
     float angle = 0.0f; // degrees
     uint8_t quality = 1; // TODO: check
@@ -90,12 +91,12 @@ struct Edge {
 };
 
 struct TextAttributes {
-    float2 alignment{};// alignment = "left"; / center / right
+    Vec2f alignment{};// alignment = "left"; / center / right
     bool aliasText = false;
     bool bold = false;
     bool italic = false;
-    float4 color{0.0f, 0.0f, 0.0f, 1.0f};
-    std::string face; // face="Font 1*"
+    Vec4f color{0.0f, 0.0f, 0.0f, 1.0f};
+    String face; // face="Font 1*"
     float lineHeight = 20; // 20
     float lineSpacing = 0; // "-14";
     float size = 32;// = "32";
@@ -104,7 +105,7 @@ struct TextAttributes {
 };
 
 struct TextRun {
-    std::string characters;
+    String characters;
     TextAttributes attributes;
 };
 
@@ -163,13 +164,13 @@ enum class SpreadMethod {
 };
 
 struct GradientEntry {
-    float4 color;
+    Vec4f color;
     float ratio = 0.0f;
 
     GradientEntry() = default;
 
-    explicit GradientEntry(const float4& color, float ratio = 0.0f) : color{color},
-                                                                      ratio{ratio} {
+    explicit GradientEntry(const Vec4f& color, float ratio = 0.0f) : color{color},
+                                                                     ratio{ratio} {
     }
 };
 
@@ -179,8 +180,8 @@ struct FillStyle {
     FillType type = FillType::solid;
     SpreadMethod spreadMethod = SpreadMethod::repeat;
     Array<GradientEntry> entries{};
-    matrix_2d matrix{};
-    std::string bitmapPath;
+    Matrix3x2f matrix{};
+    String bitmapPath;
     std::shared_ptr<BitmapData> bitmap;
 };
 
@@ -215,7 +216,7 @@ enum class TweenTarget {
 struct TweenObject {
     TweenTarget target = TweenTarget::all;
     int intensity; // <Ease intensity="-100...100" />
-    Array<float2> custom_ease;
+    Array<Vec2f> custom_ease;
 };
 
 struct Frame {
@@ -234,13 +235,13 @@ struct Frame {
     RotationDirection motionTweenRotate = RotationDirection::none;
     int motionTweenRotateTimes = 0;
 
-    std::string name; // label
+    String name; // label
     int acceleration; // ease -100...100
 
     bool hasCustomEase;
     Array<TweenObject> tweens{};
 
-    std::string script;
+    String script;
     Array<Element> elements{};
     MotionObject motionObject;
 };
@@ -251,9 +252,9 @@ enum class LayerType {
 };
 
 struct Layer {
-    std::string name;
+    String name;
     LayerType layerType = LayerType::normal;
-    float4 color;
+    Vec4f color;
 
     bool autoNamed = false;
     bool current = false;
@@ -282,7 +283,7 @@ struct Layer {
 };
 
 struct Timeline {
-    std::string name;
+    String name;
     Array<Layer> layers{};
 
     [[nodiscard]]
@@ -358,26 +359,26 @@ enum class LoopMode {
 };
 
 struct ItemProperties {
-    std::string name;
-    std::string itemID;
+    String name;
+    String itemID;
 
     int lastModified;
     int sourceLastImported;
-    std::string sourceExternalFilepath;
+    String sourceExternalFilepath;
 
-    std::string linkageClassName; //="Font1"
-    std::string linkageBaseClass; //="flash.text.Font"
+    String linkageClassName; //="Font1"
+    String linkageBaseClass; //="flash.text.Font"
     bool linkageExportForAS;
 };
 
 struct TransformModel {
-    matrix_2d matrix{};
-    color_transform_f color{};
+    Matrix3x2f matrix{};
+    ColorTransformF color{};
     BlendMode blendMode{BlendMode::normal};
 
     TransformModel() = default;
 
-    TransformModel(const matrix_2d& matrix_, const color_transform_f& color_, BlendMode blend_mode_ = BlendMode::last) :
+    TransformModel(const Matrix3x2f& matrix_, const ColorTransformF& color_, BlendMode blend_mode_ = BlendMode::last) :
             matrix{matrix_},
             color{color_},
             blendMode{blend_mode_} {
@@ -399,16 +400,16 @@ struct Element {
 
     /** Transform point (Free Transform Tool) for current element, in LOCAL SPACE (do not applicate matrix) **/
     TransformModel transform;
-    float2 transformationPoint;
-    rect_f rect;
+    Vec2f transformationPoint;
+    Rect2f rect;
 
     /// SYMBOL ITEM
     Timeline timeline{};
 
-    rect_f scaleGrid; //scaleGridLeft="-2" scaleGridRight="2" scaleGridTop="-2" scaleGridBottom="2"
+    Rect2f scaleGrid; //scaleGridLeft="-2" scaleGridRight="2" scaleGridTop="-2" scaleGridBottom="2"
 
 /// ref to item
-    std::string libraryItemName;
+    String libraryItemName;
 
 ////// group
     Array<Element> members{};
@@ -447,18 +448,18 @@ struct Element {
     TextLineType lineType = TextLineType::SingleLine;
 
     // bitmap item
-    std::string bitmapDataHRef;
+    String bitmapDataHRef;
     //public var frameBottom:Int;
     //public var frameRight:Int;
 
-    std::string href;
+    String href;
     bool isJPEG;
     int quality;
 
     std::shared_ptr<BitmapData> bitmap = nullptr;
 
     /// FONT ITEM
-    std::string font;
+    String font;
     int size = 0;
     int id = 0;
     // embedRanges="1|2|3|4|5"

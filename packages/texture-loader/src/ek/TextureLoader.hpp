@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sokol_gfx.h>
-#include <string>
+#include <ek/ds/String.hpp>
 
 namespace ek {
 
@@ -25,8 +25,8 @@ public:
     inline static const int IMAGES_MAX_COUNT = 6;
 
     uint32_t formatMask = 1;
-    std::string basePath;
-    std::string urls[IMAGES_MAX_COUNT];
+    String basePath;
+    String urls[IMAGES_MAX_COUNT];
     int imagesToLoad = 0;
     bool isCubeMap = false;
     bool premultiplyAlpha = true;

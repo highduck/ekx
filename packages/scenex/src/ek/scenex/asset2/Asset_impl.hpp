@@ -2,9 +2,10 @@
 
 #include "Asset.hpp"
 
-#include <ek/debug.hpp>
+#include <ek/log.h>
+#include <ek/assert.h>
 #include <ek/util/Path.hpp>
-#include <ek/math/common.hpp>
+#include <ek/math/Math.hpp>
 
 namespace ek {
 
@@ -50,7 +51,7 @@ void AssetManager::clear() {
 
 void AssetManager::set_scale_factor(float scale) {
     auto new_uid = get_scale_uid(scale);
-    scale_factor = math::clamp(scale, 1.0f, 4.0f);
+    scale_factor = Math::clamp(scale, 1.0f, 4.0f);
     if (scale_uid != new_uid) {
         scale_uid = new_uid;
         // todo: maybe better naming `update`?
@@ -76,7 +77,7 @@ Asset* AssetManager::add_from_type(const void* data, uint32_t size) {
     return nullptr;
 }
 
-Asset* AssetManager::add_file(const std::string& path, const std::string& type) {
+Asset* AssetManager::add_file(const char* path, const char* type) {
     for (const auto* resolver : resolvers) {
         Asset* asset = resolver->create_from_file(path, type);
         if (asset) {
@@ -85,7 +86,7 @@ Asset* AssetManager::add_file(const std::string& path, const std::string& type) 
             return asset;
         }
     }
-    EK_WARN_F("Can't resolve asset [%s] from file: %s", type.c_str(), path.c_str());
+    EK_WARN("Can't resolve asset [%s] from file: %s", type, path);
     return nullptr;
 }
 

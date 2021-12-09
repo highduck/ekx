@@ -1,10 +1,11 @@
 #pragma once
 
-#include <ek/math/vec.hpp>
+#include <ek/math/Vec.hpp>
 #include <ek/scenex/base/Script.hpp>
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/timers.hpp>
+#include <ek/scenex/types.h>
 
 namespace ek {
 
@@ -61,33 +62,35 @@ struct VectorDequeue {
 
 struct Trail2D {
     struct Node {
-        float2 position{};
+        Vec2f position{};
         float energy = 1.0f;
         float scale = 1.0f;
     };
 
     TimeLayer timer;
-    float2 offset;
+    Vec2f offset;
     float drain_speed = 2.0f;
     float segment_distance_max = 10.0f;
 //    float particles_per_second = 15.0f;
 
     Trail2D() = default;
 
-    void update(const matrix_2d& m);
+    void update(const Matrix3x2f& m);
 
     static void updateAll();
 
 private:
 
-    void update_position(float2 newPosition);
+    void update_position(Vec2f newPosition);
 
 public:
     float scale = 1.0f;
-    float2 lastPosition;
+    Vec2f lastPosition;
     VectorDequeue<Node> nodes;
     bool initialized = false;
 };
+
+ECX_TYPE(26, Trail2D);
 
 class TrailRenderer2D : public Drawable2D<TrailRenderer2D> {
 public:
@@ -100,13 +103,13 @@ public:
     void draw() override;
 
     [[nodiscard]]
-    bool hitTest(float2 point) const override {
+    bool hitTest(Vec2f point) const override {
         (void) point;
         return false;
     }
 
     [[nodiscard]]
-    rect_f getBounds() const override { return rect_f{}; }
+    Rect2f getBounds() const override { return Rect2f{}; }
 
 public:
     ecs::World* w = nullptr;
@@ -116,6 +119,8 @@ public:
     float minWidth = 5.0f;
     Res <Sprite> sprite{"empty"};
 };
+
+EK_TYPE_INDEX_T(IDrawable2D, TrailRenderer2D, IDrawable2D_TrailRenderer2D);
 
 }
 

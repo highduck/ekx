@@ -2,9 +2,9 @@
 
 #include <ek/graphics/graphics.hpp>
 #include <ek/app/app.hpp>
-#include <ek/math/vec.hpp>
+#include <ek/math/Vec.hpp>
 #include <ek/util/Res.hpp>
-#include <string>
+#include <ek/ds/String.hpp>
 
 #include <util/sokol_gfx_imgui.h>
 
@@ -35,7 +35,7 @@ private:
     void initializeFontTexture();
 
 private:
-    std::string clipboard_text_{};
+    String clipboard_text_{};
     sg_image fontTexture;
     float dpiScale = 2.0f;
 };

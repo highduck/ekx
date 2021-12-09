@@ -4,9 +4,19 @@
 
 namespace ek {
 
-int setTimeout(std::function<void()> callback, double timeout);
+int setTimeout_(std::function<void()> callback, double timeout);
 
-int setInterval(std::function<void()> callback, double interval);
+int setInterval_(std::function<void()> callback, double interval);
+
+template<typename Fn>
+int setTimeout(Fn&& callback, double timeout) {
+    return setTimeout_(callback, timeout);
+}
+
+template<typename Fn>
+int setInterval(Fn&& callback, double interval) {
+    return setInterval_(callback, interval);
+}
 
 bool cancelTimer(int id);
 

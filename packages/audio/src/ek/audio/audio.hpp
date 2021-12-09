@@ -1,8 +1,7 @@
 #pragma once
 
-#include <vector>
-#include <string>
 #include <auph/auph.hpp>
+#include <ek/util/Type.hpp>
 
 namespace ek::audio {
 
@@ -26,5 +25,12 @@ public:
 
     auph::Buffer buffer{};
 };
+
+}
+
+namespace ek {
+
+EK_DECLARE_TYPE(audio::AudioResource);
+EK_TYPE_INDEX(audio::AudioResource, 7);
 
 }

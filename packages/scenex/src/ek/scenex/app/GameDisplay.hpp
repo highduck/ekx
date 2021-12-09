@@ -1,20 +1,20 @@
 #pragma once
 
 #include <ek/graphics/graphics.hpp>
-#include <ek/math/vec.hpp>
-#include <ek/math/box.hpp>
+#include <ek/math/Vec.hpp>
+#include <ek/math/Rect.hpp>
 
 namespace ek {
 
 struct GameDisplayInfo {
     // when game drawing inside window viewport
-    rect_f destinationViewport{};
-    float2 size{1.0f, 1.0f};
-    float2 window{1.0f, 1.0f};
-    float4 insets{0.0f, 0.0f, 0.0f, 0.0f};
+    Rect2f destinationViewport{};
+    Vec2f size{1.0f};
+    Vec2f window{1.0f};
+    Vec4f insets{};
+    Vec4f userInsetsAbsolute{};
+    Vec4f userInsetsRelative{};
     float dpiScale = 1.0f;
-    float4 userInsetsAbsolute = float4::zero;
-    float4 userInsetsRelative = float4::zero;
 };
 
 class GameDisplay {

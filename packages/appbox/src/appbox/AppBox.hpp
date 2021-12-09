@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <ek/ds/String.hpp>
 #include <ecxx/ecxx.hpp>
 #include <admob.hpp>
 #include <ek/util/Type.hpp>
@@ -9,22 +9,22 @@
 namespace ek {
 
 struct AppBoxConfig {
-    std::string version{"1.0.0"};
-    std::string privacyPolicyURL{"https://eliasku-games.web.app/privacy-policy/"};
+    String version{"1.0.0"};
+    String privacyPolicyURL{"https://eliasku-games.web.app/privacy-policy/"};
     Ads::Config ads{};
     ::admob::Config admob{};
-    std::string billingKey{};
+    String billingKey{};
 
     // used for sharing results or app for link in the end of the message
     // TODO: could be better to share link object with text description
-    std::string appLinkURL{};
+    String appLinkURL{};
 
     // currently only for manual "rate us" feature
-    std::string appID{};
+    String appID{};
 
     struct DownloadAppURLs {
-        std::string googlePlay;
-        std::string appStore;
+        String googlePlay;
+        String appStore;
     };
 
     DownloadAppURLs downloadApp;
@@ -36,7 +36,7 @@ public:
 
     void initDefaultControls(ecs::EntityApi e);
 
-    void shareWithAppLink(const std::string& text);
+    void shareWithAppLink(const String& text);
 
     void rateUs();
 
@@ -44,7 +44,7 @@ public:
 
     void initLanguageButton(ecs::EntityApi e);
 
-    static void showAchievements();
+    void showAchievements();
 
 public:
     AppBoxConfig config;
@@ -65,7 +65,7 @@ public:
     void submit(int score) const;
 
 private:
-    std::string id_;
+    String id_;
 };
 
 class Achievement {
@@ -78,7 +78,7 @@ public:
     void run() const;
 
 private:
-    std::string code_;
+    String code_;
     int count_;
 };
 

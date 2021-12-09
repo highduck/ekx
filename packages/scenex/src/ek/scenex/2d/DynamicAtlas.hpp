@@ -1,8 +1,9 @@
 #pragma once
 
-#include <vector>
+#include <ek/ds/Array.hpp>
 #include <ek/util/NoCopyAssign.hpp>
-#include <ek/math/box.hpp>
+#include <ek/util/Type.hpp>
+#include <ek/math/Rect.hpp>
 #include <cstring>
 
 namespace ek {
@@ -12,7 +13,7 @@ class Texture;
 }
 
 struct DynamicAtlasSprite {
-    rect_f texCoords{0, 0, 1, 1};
+    Rect2f texCoords{0, 0, 1, 1};
     graphics::Texture* texture = nullptr;
 };
 
@@ -24,7 +25,7 @@ public:
 
     ~DynamicAtlas();
 
-    DynamicAtlasSprite addBitmap(int width, int height, const std::vector<uint8_t>& pixels);
+    DynamicAtlasSprite addBitmap(int width, int height, const uint8_t* pixels, size_t pixelsSize);
 
     [[nodiscard]] const graphics::Texture* getPageTexture(int index) const;
 
@@ -33,8 +34,9 @@ public:
     static int estimateBetterSize(float scaleFactor, unsigned baseSize, unsigned maxSize);
 
     void invalidate();
+
 public:
-    std::vector<Page*> pages_;
+    Array<Page*> pages_;
     int pageWidth;
     int pageHeight;
     bool alphaMap;
@@ -44,6 +46,9 @@ public:
     unsigned version = 0;
 private:
 };
+
+EK_DECLARE_TYPE(DynamicAtlas);
+EK_TYPE_INDEX(DynamicAtlas, 6);
 
 }
 

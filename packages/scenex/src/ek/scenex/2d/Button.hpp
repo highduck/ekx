@@ -1,11 +1,11 @@
 #pragma once
 
-#include <string>
-#include <ek/math/easing.hpp>
+#include <ek/math/Easings.hpp>
 #include <ek/util/Signal.hpp>
-#include <ek/math/vec.hpp>
-#include <ek/math/packed_color.hpp>
+#include <ek/math/Vec.hpp>
+#include <ek/math/Color32.hpp>
 #include "MovieClip.hpp"
+#include "../base/TimeLayer.hpp"
 
 namespace ek {
 
@@ -36,8 +36,8 @@ struct Button {
     float timePush = 0.0f;
     float timePost = 0.0f;
 
-    float2 baseSkew{};
-    float2 baseScale = float2::one;
+    Vec2f baseSkew{};
+    Vec2f baseScale = Vec2f::one;
     ColorMod32 baseColor{};
 
     TimeLayer time = TimeLayer::UI;
@@ -45,7 +45,7 @@ struct Button {
     static void updateAll();
 };
 
-EK_DECLARE_TYPE(Button);
+ECX_TYPE(9, Button);
 
 }
 

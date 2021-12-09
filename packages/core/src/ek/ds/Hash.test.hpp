@@ -2,7 +2,9 @@
 
 #include "Hash.hpp"
 
-TEST_CASE("Hash general") {
+TEST_SUITE_BEGIN("c++ hash");
+
+TEST_CASE("general") {
     using namespace ek;
     {
         Hash<int> h{};
@@ -33,7 +35,7 @@ TEST_CASE("Hash general") {
     }
 }
 
-TEST_CASE("Hash stress") {
+TEST_CASE("stress") {
     using namespace ek;
     {
         const size_t i0 = 0xFFFFFFFF00000000;
@@ -71,3 +73,5 @@ TEST_CASE("Hash stress") {
         h.clear();
     }
 }
+
+TEST_SUITE_END();

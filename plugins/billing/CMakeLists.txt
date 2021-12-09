@@ -26,3 +26,10 @@ target_compile_options(${PROJECT_NAME}
         )
 
 endif()
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+        -fno-exceptions
+        -fno-rtti
+        -fno-strict-aliasing
+        -Wstrict-aliasing=2
+        )

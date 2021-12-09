@@ -11,7 +11,7 @@
 
 namespace ek::xfl {
 
-SpriteData renderMultiSample(const rect_f& bounds,
+SpriteData renderMultiSample(const Rect2f& bounds,
                              const Array<RenderCommandsBatch>& batches,
                              const RenderElementOptions& options) {
     // x4 super-sampling
@@ -43,8 +43,8 @@ SpriteData renderMultiSample(const rect_f& bounds,
         cairo_set_antialias(cr, CAIRO_ANTIALIAS_BEST);
         cairo_set_source_surface(cr, surf, 0, 0);
 
-        const int2 up_scaled_size{static_cast<int>(w * upscale),
-                                  static_cast<int>(h * upscale)};
+        const Vec2i up_scaled_size{static_cast<int>(w * upscale),
+                                   static_cast<int>(h * upscale)};
 
         auto sub_surf = cairo_surface_create_similar(surf,
                                                      CAIRO_CONTENT_COLOR_ALPHA,
@@ -93,7 +93,7 @@ SpriteData renderMultiSample(const rect_f& bounds,
     return data;
 }
 
-SpriteData renderLowQuality(const rect_f& bounds,
+SpriteData renderLowQuality(const Rect2f& bounds,
                             const Array<RenderCommandsBatch>& batches,
                             const RenderElementOptions& options) {
     const double scale = options.scale;
@@ -165,7 +165,7 @@ bool checkContainsOnlyBitmapOperations(const Array<RenderCommandsBatch>& batches
     return true;
 }
 
-SpriteData renderElementBatches(const rect_f& bounds,
+SpriteData renderElementBatches(const Rect2f& bounds,
                                 const Array<RenderCommandsBatch>& batches,
                                 const RenderElementOptions& options) {
     if (checkContainsOnlyBitmapOperations(batches)) {

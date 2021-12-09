@@ -31,6 +31,13 @@ public:
         pos += 4;
     }
 
+    void writeU64(uint64_t v) {
+        constexpr int sz = sizeof(uint64_t);
+        ensure(pos + sz);
+        memcpy(data + pos, (void*) &v, sz);
+        pos += sz;
+    }
+
     void writeString(const std::string& str) {
         int size = (int)str.size();
         ensure(pos + 4 + size);

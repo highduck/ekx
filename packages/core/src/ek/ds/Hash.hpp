@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstdint>
 #include "Array.hpp"
+#include <ek/assert.h>
 
 namespace ek {
 
@@ -26,10 +28,10 @@ struct Hash {
         T value;
     };
 
-    Array<uint32_t> _hash;
-    Array<Entry> _data;
+    Array <uint32_t> _hash;
+    Array <Entry> _data;
 
-    Hash();
+    constexpr Hash() noexcept;
 
     /// Returns true if the specified key exists in the hash.
     [[nodiscard]]
@@ -43,6 +45,8 @@ struct Hash {
 
     /// Sets the value for the key.
     void set(uint64_t key, const T& value);
+
+    void set(uint64_t key, T&& value);
 
     /// Removes the key from the hash if it exists.
     void remove(uint64_t key);
@@ -61,29 +65,37 @@ struct Hash {
     const Entry* end() const;
 
     [[nodiscard]]
+    uint32_t size() const {
+        return _data.size();
+    }
+
+    [[nodiscard]]
     inline bool empty() const {
-        return _data._size == 0;
+        return _data.empty();
     }
 
-    Hash(Hash&& m) noexcept: _hash{static_cast<Array<uint32_t>&&>(m._hash)},
-                             _data{static_cast<Array<Entry>&&>(m._data)} {
+    constexpr Hash(Hash&& m) noexcept: _hash{std::move(m._hash)},
+                             _data{std::move(m._data)} {
     }
 
-    Hash(const Hash& m) noexcept = delete;
+    Hash(const Hash& m) noexcept: _hash{m._hash}, _data{m._data} {
+    }
 
     Hash& operator=(Hash&& m) noexcept {
-        _hash = static_cast<Array<uint32_t>&&>(m._hash);
-        _data = static_cast<Array<Entry>&&>(m._data);
+        _hash = std::move(m._hash);
+        _data = std::move(m._data);
         return *this;
     }
 
-    Hash& operator=(const Hash& m) noexcept = delete;
+    Hash& operator=(const Hash& m) noexcept {
+        _hash = m._hash;
+        _data = m.data;
+        return *this;
+    }
 };
 
 template<typename T>
-Hash<T>::Hash() : _hash(4),
-                  _data(4) {
-
+constexpr Hash<T>::Hash() noexcept : _hash{}, _data{} {
 }
 
 namespace hash_internal {
@@ -114,7 +126,7 @@ uint32_t add_entry(Hash<T>& h, uint64_t key) {
     typename Hash<T>::Entry e;
     e.key = key;
     e.next = END_OF_LIST;
-    uint32_t ei = h._data._size;
+    uint32_t ei = h._data.size();
     h._data.push_back(e);
     return ei;
 }
@@ -122,9 +134,9 @@ uint32_t add_entry(Hash<T>& h, uint64_t key) {
 template<typename T>
 void debugValidateList(Hash<T>& h, const FindResult& fr) {
     auto it = h._hash[fr.hash_i];
-    while(it != END_OF_LIST) {
+    while (it != END_OF_LIST) {
         auto next = h._data[it].next;
-        EK_ASSERT(next == END_OF_LIST || next < h._data._size);
+        EK_ASSERT(next == END_OF_LIST || next < h._data.size());
         it = next;
     }
 }
@@ -137,13 +149,13 @@ void erase(Hash<T>& h, const FindResult& fr) {
         h._data[fr.data_prev].next = h._data[fr.data_i].next;
     }
 
-    if (fr.data_i == h._data._size - 1) {
+    if (fr.data_i + 1 == h._data.size()) {
         h._data.pop_back();
         debugValidateList(h, fr);
         return;
     }
 
-    FindResult last = hash_internal::find(h, h._data[h._data._size - 1].key);
+    FindResult last = hash_internal::find(h, h._data[h._data.size() - 1].key);
     if (last.data_prev == END_OF_LIST) {
         h._hash[last.hash_i] = fr.data_i;
     } else {
@@ -151,7 +163,7 @@ void erase(Hash<T>& h, const FindResult& fr) {
         h._data[last.data_prev].next = fr.data_i;
     }
 
-    h._data[fr.data_i] = h._data[h._data._size - 1];
+    h._data[fr.data_i] = std::move(h._data[h._data.size() - 1]);
     h._data.pop_back();
 
     debugValidateList(h, fr);
@@ -164,11 +176,11 @@ FindResult find(const Hash<T>& h, uint64_t key) {
     fr.data_prev = END_OF_LIST;
     fr.data_i = END_OF_LIST;
 
-    if (h._hash._size == 0) {
+    if (h._hash.empty()) {
         return fr;
     }
 
-    fr.hash_i = modKey(key, h._hash._size);
+    fr.hash_i = modKey(key, h._hash.size());
     fr.data_i = h._hash[fr.hash_i];
     while (fr.data_i != END_OF_LIST) {
         if (h._data[fr.data_i].key == key) {
@@ -176,7 +188,7 @@ FindResult find(const Hash<T>& h, uint64_t key) {
         }
         fr.data_prev = fr.data_i;
         fr.data_i = h._data[fr.data_i].next;
-        EK_ASSERT_R2(fr.data_i < h._data._size || fr.data_i == END_OF_LIST );
+        EK_ASSERT_R2(fr.data_i < h._data.size() || fr.data_i == END_OF_LIST);
     }
     return fr;
 }
@@ -188,11 +200,11 @@ FindResult find(const Hash<T>& h, const typename Hash<T>::Entry* e) {
     fr.data_prev = END_OF_LIST;
     fr.data_i = END_OF_LIST;
 
-    if (h._hash._size == 0) {
+    if (h._hash.empty()) {
         return fr;
     }
 
-    fr.hash_i = modKey(e->key, h._hash._size);
+    fr.hash_i = modKey(e->key, h._hash.size());
     fr.data_i = h._hash[fr.hash_i];
     while (fr.data_i != END_OF_LIST) {
         if (&h._data[fr.data_i] == e) {
@@ -200,7 +212,7 @@ FindResult find(const Hash<T>& h, const typename Hash<T>::Entry* e) {
         }
         fr.data_prev = fr.data_i;
         fr.data_i = h._data[fr.data_i].next;
-        EK_ASSERT_R2(fr.data_i == END_OF_LIST || fr.data_i < h._data._size);
+        EK_ASSERT_R2(fr.data_i == END_OF_LIST || fr.data_i < h._data.size());
     }
     return fr;
 }
@@ -214,12 +226,12 @@ template<typename T>
 uint32_t find_or_make(Hash<T>& h, uint64_t key) {
     const FindResult fr = hash_internal::find(h, key);
     if (fr.data_i != END_OF_LIST) {
-        EK_ASSERT_R2(fr.data_i < h._data._size);
+        EK_ASSERT_R2(fr.data_i < h._data.size());
         return fr.data_i;
     }
 
     uint32_t i = add_entry(h, key);
-    EK_ASSERT_R2(i < h._data._size);
+    EK_ASSERT_R2(i < h._data.size());
     if (fr.data_prev == END_OF_LIST) {
         h._hash[fr.hash_i] = i;
     } else {
@@ -259,34 +271,34 @@ template<typename T>
 void rehash(Hash<T>& h, uint32_t new_size) {
     Hash<T> nh{};
     nh._hash.resize(new_size);
-    nh._data.reserve(h._data._size);
+    nh._data.reserve(h._data.size());
     for (uint32_t i = 0; i < new_size; ++i) {
         nh._hash[i] = END_OF_LIST;
     }
-    for (uint32_t i = 0; i < h._data._size; ++i) {
+    for (uint32_t i = 0; i < h._data.size(); ++i) {
         const typename Hash<T>::Entry& e = h._data[i];
         insertMulti(nh, e.key, e.value);
     }
 
-    h = static_cast<Hash<T>&&>(nh);
+    h = std::move(nh);
 //    nh.~Hash();
 }
 
 template<typename T>
 bool full(const Hash<T>& h) {
     const float max_load_factor = 0.7f;
-    return h._data._size >= h._hash._size * max_load_factor;
+    return h._data.size() >= h._hash.size() * max_load_factor;
 }
 
 template<typename T>
 void grow(Hash<T>& h) {
-    const uint32_t new_size = h._data._size * 2 + 10;
+    const uint32_t new_size = h._data.size() * 2 + 10;
     rehash(h, new_size);
 }
 
 template<typename T>
 void insertMulti(Hash<T>& h, uint64_t key, const T& value) {
-    if (h._hash._size == 0) {
+    if (h._hash.empty()) {
         grow(h);
     }
     const uint32_t i = hash_internal::make(h, key);
@@ -316,12 +328,25 @@ const T* Hash<T>::tryGet(uint64_t key) const {
 
 template<typename T>
 void Hash<T>::set(uint64_t key, const T& value) {
-    if (_hash._size == 0) {
+    if (_hash.empty()) {
         hash_internal::grow(*this);
     }
 
     const uint32_t i = hash_internal::find_or_make(*this, key);
     _data[i].value = value;
+    if (hash_internal::full(*this)) {
+        hash_internal::grow(*this);
+    }
+}
+
+template<typename T>
+void Hash<T>::set(uint64_t key, T&& value) {
+    if (_hash.empty()) {
+        hash_internal::grow(*this);
+    }
+
+    const uint32_t i = hash_internal::find_or_make(*this, key);
+    _data[i].value = (T&&) value;
     if (hash_internal::full(*this)) {
         hash_internal::grow(*this);
     }

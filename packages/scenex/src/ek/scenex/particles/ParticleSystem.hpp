@@ -1,10 +1,10 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
-#include <ek/scenex/2d/Display2D.hpp>
-#include <ek/timers.hpp>
 #include "ParticleDecl.hpp"
 #include "Particle.hpp"
+#include <ecxx/ecxx.hpp>
+#include <ek/scenex/2d/Display2D.hpp>
+#include <ek/scenex/base/TimeLayer.hpp>
 
 namespace ek {
 
@@ -14,14 +14,14 @@ struct ParticleLayer2D {
     TimeLayer timer;
 };
 
-EK_DECLARE_TYPE(ParticleLayer2D);
+ECX_TYPE(19, ParticleLayer2D);
 
 struct ParticleEmitter2D {
     typedef void SpawnCallback(ecs::EntityApi, Particle&);
 
     EmitterData data;
-    float2 position = float2::zero;
-    float2 velocity = float2::zero;
+    Vec2f position = Vec2f::zero;
+    Vec2f velocity = Vec2f::zero;
     SpawnCallback* on_spawn = nullptr;
     Res<ParticleDecl> particle;
     ecs::EntityRef layer;
@@ -30,7 +30,7 @@ struct ParticleEmitter2D {
     bool enabled = true;
 };
 
-EK_DECLARE_TYPE(ParticleEmitter2D);
+ECX_TYPE(18, ParticleEmitter2D);
 
 class ParticleRenderer2D : public Drawable2D<ParticleRenderer2D> {
 public:
@@ -43,12 +43,12 @@ public:
     void draw() override;
 
     [[nodiscard]]
-    rect_f getBounds() const override {
-        return rect_f{};
+    Rect2f getBounds() const override {
+        return Rect2f{};
     }
 
     [[nodiscard]]
-    bool hitTest(float2 pos) const override {
+    bool hitTest(Vec2f pos) const override {
         (void) pos;
         return false;
     }
@@ -58,11 +58,14 @@ public:
 };
 
 EK_DECLARE_TYPE(ParticleRenderer2D);
+EK_TYPE_INDEX_T(IDrawable2D, ParticleRenderer2D, IDrawable2D_ParticleRenderer2D);
 
-void particles_burst(ecs::EntityApi e, int count, float2 relativeVelocity = float2::zero);
+void particles_burst(ecs::EntityApi e, int count, Vec2f relativeVelocity = Vec2f::zero);
 
-Particle* spawn_particle(ecs::EntityApi e, const std::string& particle_id);
-void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const ParticleDecl& decl, ParticleEmitter2D& emitter, int count);
+Particle* spawn_particle(ecs::EntityApi e, const char* particle_id);
+
+void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const ParticleDecl& decl, ParticleEmitter2D& emitter,
+                      int count);
 
 void update_emitters();
 
@@ -71,6 +74,7 @@ void update_particles();
 void draw_particle_layer(ecs::EntityApi e);
 
 ParticleLayer2D& find_particle_layer(ecs::EntityApi e);
+
 Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl);
 
 }

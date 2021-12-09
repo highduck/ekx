@@ -1,31 +1,31 @@
 #pragma once
 
-#include <vector>
 #include "FontImplBase.hpp"
-#include <ek/math/vec.hpp>
-#include <ek/math/packed_color.hpp>
-#include <ek/math/box.hpp>
-#include <unordered_map>
+#include <ek/math/Vec.hpp>
+#include <ek/math/Color32.hpp>
+#include <ek/math/Rect.hpp>
+#include <ek/ds/Hash.hpp>
 #include <ek/draw2d/drawer.hpp>
+#include <ek/LocalResource.hpp>
 
 struct stbtt_fontinfo;
 
 namespace ek {
 
 class DynamicAtlas;
-class FileView;
+class MapFile;
 
 // TODO: metadata for base size, atlas resolution, etc
 // TODO: how to generate outlines?
 class TrueTypeFont : public FontImplBase {
 public:
-    TrueTypeFont(float dpiScale, float fontSize, const std::string& dynamicAtlasName);
+    TrueTypeFont(float dpiScale, float fontSize, const char* dynamicAtlasName);
 
     ~TrueTypeFont() override;
 
     void loadDeviceFont(const char* fontName);
 
-    void loadFromMemory(std::vector<uint8_t>&& buffer);
+    void loadFromMemory(LocalResource lr);
 
     bool initFromMemory(const uint8_t* data, size_t size);
 
@@ -42,15 +42,14 @@ public:
     void resetGlyphs();
 public:
     stbtt_fontinfo* info = nullptr;
-    std::vector<uint8_t> source;
-    FileView* mappedSourceFile_ = nullptr;
+    LocalResource source{};
 
     float baseFontSize;
     float dpiScale;
     Res<DynamicAtlas> atlas;
     unsigned atlasVersion = 0;
-    std::unordered_map<uint32_t, std::unique_ptr<std::unordered_map<uint32_t, Glyph>>> mapByEffect;
-    std::unordered_map<uint32_t, Glyph>* map = nullptr;
+    Hash<Glyph> map;
+    uint64_t effectKeyBits = 0;
 
     float ascender = 0.0f;
     float descender = 0.0f;

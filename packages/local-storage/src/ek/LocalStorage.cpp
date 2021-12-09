@@ -1,6 +1,6 @@
 #include "LocalStorage.hpp"
 #include <ek/app/app.hpp>
-#include <ek/util/Base64.hpp>
+#include <ek/base64.h>
 
 #if defined(__EMSCRIPTEN__)
 #include "LocalStorage_Web.hpp"
@@ -17,26 +17,24 @@ namespace ek {
 void set_user_data(const char* key, const uint8_t* data, uint32_t size) {
     EKAPP_ASSERT(key != nullptr && data != nullptr);
 
-    auto encodedSize = base64_encodedMaxSize(size);
-    std::string encoded;
+    auto encodedSize = base64_encode_size(size);
+    Array<char> encoded;
     encoded.resize(encodedSize);
     encodedSize = base64_encode(encoded.data(), encodedSize, data, size);
     encoded.resize(encodedSize);
 
-    set_user_string(key, encoded.c_str());
+    set_user_string(key, encoded.data());
 }
 
-std::vector<uint8_t> get_user_data(const char* key) {
+void get_user_data(const char* key, Array<uint8_t>& output) {
     EKAPP_ASSERT(key != nullptr);
 
-    const std::string str = get_user_string(key);
+    const String str = get_user_string(key);
 
-    std::vector<uint8_t> decoded{};
-    auto decodedSize = base64_decodedMaxSize(str.size());
-    decoded.resize(decodedSize);
-    decodedSize = base64_decode(decoded.data(), decodedSize, str.c_str(), str.size());
-    decoded.resize(decodedSize);
-    return decoded;
+    auto decodedSize = base64_decode_size(str.size());
+    output.resize(decodedSize);
+    decodedSize = base64_decode(output.data(), decodedSize, str.c_str(), str.size());
+    output.resize(decodedSize);
 }
 
 namespace UserPreferences {
@@ -48,7 +46,7 @@ uint32_t read(const char* key, uint8_t* buffer, uint32_t bufferSize) {
     const auto inputData = str.data();
     const auto inputSize = str.size();
 
-    auto decodedSize = base64_decodedMaxSize(inputSize);
+    auto decodedSize = base64_decode_size(inputSize);
     if (buffer && decodedSize <= bufferSize) {
         return base64_decode(buffer, decodedSize, inputData, inputSize);
     }

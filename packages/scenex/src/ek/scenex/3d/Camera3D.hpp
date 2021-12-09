@@ -1,10 +1,10 @@
 #pragma once
 
-#include <ek/math/common.hpp>
-#include <ek/math/vec.hpp>
-#include <string>
+#include <ek/math/Math.hpp>
+#include <ek/math/Vec.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/util/Type.hpp>
+#include <ecxx/ecxx_fwd.hpp>
 
 #undef near
 #undef far
@@ -25,21 +25,21 @@ struct Camera3D {
     float orthogonalSize = 30.0f;
 
     // field of view in radians
-    float fov = math::to_radians(45.0f);
+    float fov = Math::to_radians(45.0f);
 
     // camera up vector
-    float3 up{0.0f, 0.0f, 1.0f};
+    Vec3f up{0.0f, 0.0f, 1.0f};
 
     bool clearColorEnabled = true;
     bool clearDepthEnabled = true;
 
-    float4 clearColor{0.5f, 0.5f, 0.5f, 1.0f};
+    Vec4f clearColor{0.5f, 0.5f, 0.5f, 1.0f};
     float clearDepth = 1.0f;
 
     Res<graphics::Texture> cubeMap;
 };
 
-EK_DECLARE_TYPE(Camera3D);
+ECX_TYPE(29, Camera3D);
 
 }
 

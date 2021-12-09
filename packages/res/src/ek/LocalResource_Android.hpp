@@ -2,21 +2,31 @@
 
 #include "LocalResource.hpp"
 #include "LocalResource_System.hpp"
+#include <ek/app/Platform.h>
 
 namespace ek {
 
-void get_resource_content_async(const char* path, const get_content_callback_func& callback) {
-    auto* asset = AAssetManager_open(app::get_asset_manager(), path, AASSET_MODE_BUFFER);
-    array_buffer buffer{};
-    if (asset) {
-        auto data = static_cast<const uint8_t*>(AAsset_getBuffer(asset));
-        buffer.assign(data, data + AAsset_getLength(asset));
-        AAsset_close(asset);
-    } else {
-        // TODO: better return error code
-        //EKAPP_LOG("Asset file not found: %s", path);
+void closeAndroidAsset(LocalResource* lr) {
+    if(lr->handle) {
+        AAsset_close((AAsset*) lr->handle);
+        lr->handle = nullptr;
     }
-    callback(buffer);
+    lr->buffer = nullptr;
+    lr->length = 0;
+}
+
+int getFile_platform(const char* path, LocalResource* lr) {
+    auto* asset = AAssetManager_open(app::get_asset_manager(), path, AASSET_MODE_BUFFER);
+    if (asset) {
+        lr->handle = asset;
+        lr->buffer = (uint8_t*)AAsset_getBuffer(asset);
+        lr->length = AAsset_getLength(asset);
+        lr->closeFunc = closeAndroidAsset;
+        lr->status = 0;
+        return 0;
+    }
+    lr->status = 1;
+    return 1;
 }
 
 }

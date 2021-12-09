@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../assert.hpp"
+#include <ek_assert.h>
 
 namespace ek {
 

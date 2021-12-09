@@ -5,7 +5,7 @@
 #include <ek/assert.hpp>
 #include <cstdlib>
 #include <ek/scenex/app/basic_application.hpp>
-#include <ek/Localization.hpp>
+#include <ek/scenex/Localization.hpp>
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <functional>

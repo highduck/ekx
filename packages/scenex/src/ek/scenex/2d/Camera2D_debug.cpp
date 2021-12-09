@@ -8,7 +8,7 @@
 #include "Transform2D.hpp"
 #include "Display2D.hpp"
 #include <ek/scenex/base/Script.hpp>
-#include <ek/math/bounds_builder.hpp>
+#include <ek/math/BoundsBuilder.hpp>
 
 namespace ek {
 
@@ -26,7 +26,7 @@ void debugDrawPointer(Camera2D& camera) {
     }
 }
 
-void drawBox(const rect_f& rc, const matrix_2d& m, argb32_t color1, argb32_t color2,
+void drawBox(const Rect2f& rc, const Matrix3x2f& m, argb32_t color1, argb32_t color2,
              bool cross = true, argb32_t fillColor = 0_argb) {
 
     draw2d::state.setEmptyTexture();
@@ -56,7 +56,7 @@ void debugDrawHitTarget(Camera2D& camera) {
     if (!target) {
         return;
     }
-    matrix_2d matrix{};
+    Matrix3x2f matrix{};
     auto* worldTransform = findComponentInParent<WorldTransform2D>(target);
     if (worldTransform) {
         matrix = worldTransform->matrix;
@@ -149,11 +149,11 @@ void drawOcclusion(Camera2D& camera) {
     auto cameraRect = camera.worldRect;
     traverseVisibleNodes<Bounds2D>(camera.root.ent(), nullptr,
                                    [cameraRect](const Bounds2D& bounds, const WorldTransform2D* transform) {
-                                       const auto worldRect = bounds_builder_2f::transform(bounds.rect,
-                                                                                           transform->matrix);
+                                       const auto worldRect = BoundsBuilder2f::transform(bounds.rect,
+                                                                                         transform->matrix);
                                        const bool occluded = !worldRect.overlaps(cameraRect);
                                        const auto worldColor = occluded ? 0x77FF0000_argb : 0x7700FF00_argb;
-                                       drawBox(worldRect, matrix_2d{}, worldColor, worldColor, false);
+                                       drawBox(worldRect, Matrix3x2f{}, worldColor, worldColor, false);
                                        const auto boundsColor = occluded ? 0x77770000_argb : 0x77007700_argb;
                                        drawBox(bounds.rect, transform->matrix, boundsColor, boundsColor, false);
                                    });
@@ -162,7 +162,7 @@ void drawOcclusion(Camera2D& camera) {
 
 void debugCameraGizmo(Camera2D& camera) {
     auto rc = expand(camera.worldRect, -10.0f);
-    drawBox(rc, matrix_2d{}, 0xFFFFFFFF_argb, 0xFF000000_argb);
+    drawBox(rc, Matrix3x2f{}, 0xFFFFFFFF_argb, 0xFF000000_argb);
 
     {
         // it's not correct because:
@@ -176,8 +176,8 @@ void debugCameraGizmo(Camera2D& camera) {
     auto v = camera.screenToWorldMatrix.transform(camera.screenRect.relative(camera.relativeOrigin));
 
     draw2d::fill_circle({v, 10.0f}, 0x00FFFFFF_argb, 0x44FFFFFF_argb, 7);
-    draw2d::line(v - float2{20, 0}, v + float2{20, 0}, 0xFF000000_argb, 0xFFFFFFFF_argb, 1, 3);
-    draw2d::line(v - float2{0, 20}, v + float2{0, 20}, 0xFF000000_argb, 0xFFFFFFFF_argb, 3, 1);
+    draw2d::line(v - Vec2f{20, 0}, v + Vec2f{20, 0}, 0xFF000000_argb, 0xFFFFFFFF_argb, 1, 3);
+    draw2d::line(v - Vec2f{0, 20}, v + Vec2f{0, 20}, 0xFF000000_argb, 0xFFFFFFFF_argb, 3, 1);
 }
 
 void Camera2D::drawGizmo(Camera2D& camera) {

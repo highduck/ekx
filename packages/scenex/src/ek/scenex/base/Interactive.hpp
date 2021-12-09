@@ -4,32 +4,28 @@
 #include <ek/app/app.hpp>
 #include <ecxx/ecxx_fwd.hpp>
 #include <ek/util/Type.hpp>
-#include <ek/math/vec.hpp>
+#include <ek/math/Vec.hpp>
 
 namespace ek {
 
-enum class InteractionEvent {
-    PointerDown,
-    PointerUp,
-    PointerOver,
-    PointerOut,
-    Click
+enum class PointerEvent {
+    Down,
+    Up,
+    Over,
+    Out,
+    Tap
 };
 
 struct Interactive {
     // events
-    Signal<> on_over;
-    Signal<> on_out;
-    Signal<> on_down;
-    Signal<> on_up;
-    Signal<> on_clicked;
+    Signal<PointerEvent> onEvent;
 
     app::MouseCursor cursor{app::MouseCursor::Parent};
 
     // TODO: Interactive::pointer is useless
     // global world space pointer, because of that maybe we don't dispatch this coordinate into components,
     // just use global pointer from Interaction System
-    float2 pointer{};
+    Vec2f pointer{};
     ecs::EntityRef camera{};
 
     //bool enabled = true;
@@ -41,9 +37,9 @@ struct Interactive {
 
     Interactive() = default;
 
-    void handle(InteractionEvent event);
+    void handle(PointerEvent event);
 };
 
-EK_DECLARE_TYPE(Interactive);
+ECX_TYPE(7, Interactive);
 
 }

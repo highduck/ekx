@@ -4,7 +4,7 @@ project(sprite-packer)
 
 add_executable(${PROJECT_NAME}
         src/sprite_packer.cpp
-        src/sprite_packer/max_rects.cpp
+        src/sprite_packer/MaxRects.cpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
@@ -15,13 +15,16 @@ if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
             -Wno-deprecated-declarations
             -Wno-gnu-anonymous-struct
             -Wno-nested-anon-types
-            -fstrict-aliasing
-            -Wstrict-aliasing
+            -fno-strict-aliasing
+            -Wstrict-aliasing=2
             )
 endif ()
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC
-        -DPUGIXML_NO_XPATH)
+target_compile_definitions(${PROJECT_NAME}
+        PUBLIC PUGIXML_NO_XPATH
+        PUBLIC PUGIXML_NO_STL
+        PUBLIC PUGIXML_NO_EXCEPTIONS
+        )
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC pugixml

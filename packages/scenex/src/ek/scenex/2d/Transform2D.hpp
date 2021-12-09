@@ -1,30 +1,30 @@
 #pragma once
 
-#include <ek/math/mat3x2.hpp>
-#include <ek/math/vec.hpp>
-#include <ek/math/box.hpp>
-#include <ek/math/packed_color.hpp>
+#include <ek/math/Matrix3x2.hpp>
+#include <ek/math/Vec.hpp>
+#include <ek/math/Rect.hpp>
+#include <ek/math/Color32.hpp>
 #include <ecxx/ecxx.hpp>
 
 namespace ek {
 
 // 32 bytes
 struct WorldTransform2D {
-    alignas(16) matrix_2d matrix{}; // 4 * 6 = 24
+    Matrix3x2f matrix{}; // 4 * 6 = 24
     ColorMod32 color{}; // 2 * 4 = 8
 };
 
 // TODO: mat2x2, position,
 struct Transform2D {
     // 24
-    alignas(16) matrix_2d matrix{};
+    Matrix3x2f matrix{};
 
     // 8
     ColorMod32 color{};
 
     // 16
-    float2 cachedScale = float2::one;
-    float2 cachedSkew = float2::zero;
+    Vec2f cachedScale = Vec2f::one;
+    Vec2f cachedSkew = Vec2f::zero;
 
     inline void setX(float x) {
         matrix.tx = x;
@@ -34,7 +34,7 @@ struct Transform2D {
         matrix.ty = y;
     }
 
-    inline void setMatrix(const matrix_2d& m) {
+    inline void setMatrix(const Matrix3x2f& m) {
         matrix = m;
         cachedScale = m.scale();
         cachedSkew = m.skew();
@@ -55,13 +55,13 @@ struct Transform2D {
         matrix.ty += y;
     }
 
-    inline void setPosition(float2 position_) {
+    inline void setPosition(Vec2f position_) {
         matrix.tx = position_.x;
         matrix.ty = position_.y;
     }
 
     [[nodiscard]]
-    inline float2 getPosition() const {
+    inline Vec2f getPosition() const {
         return {matrix.tx, matrix.ty};
     }
 
@@ -70,14 +70,14 @@ struct Transform2D {
         matrix.ty = y;
     }
 
-    inline void setPosition(float2 position, float2 pivot) {
+    inline void setPosition(Vec2f position, Vec2f pivot) {
         const auto xx = -pivot.x;
         const auto yy = -pivot.y;
         matrix.tx = position.x + matrix.a * xx + matrix.c * yy;
         matrix.ty = position.y + matrix.d * yy + matrix.b * xx;
     }
 
-    inline void setPosition(float2 position_, float2 pivot_, float2 origin_) {
+    inline void setPosition(Vec2f position_, Vec2f pivot_, Vec2f origin_) {
         const auto x = position_.x + origin_.x;
         const auto y = position_.y + origin_.y;
         const auto xx = -origin_.x - pivot_.x;
@@ -98,7 +98,7 @@ struct Transform2D {
         updateMatrix2x2();
     }
 
-    void setScale(float2 value) {
+    void setScale(Vec2f value) {
         cachedScale = value;
         updateMatrix2x2();
     }
@@ -120,7 +120,7 @@ struct Transform2D {
     }
 
     [[nodiscard]]
-    inline float2 getScale() const {
+    inline Vec2f getScale() const {
         return cachedScale;
     }
 
@@ -152,23 +152,23 @@ struct Transform2D {
     }
 
     [[nodiscard]]
-    inline float2 getSkew() const {
+    inline Vec2f getSkew() const {
         return cachedSkew;
     }
 
-    inline void setSkew(float2 value) {
+    inline void setSkew(Vec2f value) {
         cachedSkew = value;
         updateMatrix2x2();
     }
 
-    inline void setTransform(float2 position, float2 scale_, float2 skew_, float2 pivot_) {
+    inline void setTransform(Vec2f position, Vec2f scale_, Vec2f skew_, Vec2f pivot_) {
         cachedScale = scale_;
         cachedSkew = skew_;
         updateMatrix2x2();
         setPosition(position, pivot_);
     }
 
-    void setTransform(float2 position_, float2 scale_, float rotation_) {
+    void setTransform(Vec2f position_, Vec2f scale_, float rotation_) {
         cachedScale = scale_;
         cachedSkew.x = rotation_;
         cachedSkew.y = rotation_;
@@ -182,7 +182,7 @@ struct Transform2D {
         matrix.ty = position_.y;
     }
 
-    inline void setTransform(float2 position_, float2 scale_, float2 skew_) {
+    inline void setTransform(Vec2f position_, Vec2f scale_, Vec2f skew_) {
         cachedScale = scale_;
         cachedSkew = skew_;
         updateMatrix2x2();
@@ -196,20 +196,20 @@ struct Transform2D {
         updateMatrix2x2();
     }
 
-    void translate(float2 delta) {
+    void translate(Vec2f delta) {
         setPosition(getPosition() + delta);
     }
 
-    void lerpScale(float2 target, float t) {
+    void lerpScale(Vec2f target, float t) {
         setScale(lerp(getScale(), target, t));
     }
 
-    void lerpPosition(float2 target, float t) {
+    void lerpPosition(Vec2f target, float t) {
         setPosition(lerp(getPosition(), target, t));
     }
 
     void lerpRotation(float target, float t) {
-        setRotation(math::lerp(getRotation(), target, t));
+        setRotation(Math::lerp(getRotation(), target, t));
     }
 
     inline void updateMatrix2x2() {
@@ -219,27 +219,28 @@ struct Transform2D {
         matrix.d = cosf(cachedSkew.x) * cachedScale.y;
     }
 
-    static float2 transformUp(ecs::EntityApi it, ecs::EntityApi top, float2 pos);
+    static Vec2f transformUp(ecs::EntityApi it, ecs::EntityApi top, Vec2f pos);
 
-    static float2 transformDown(ecs::EntityApi top, ecs::EntityApi it, float2 pos);
+    static Vec2f transformDown(ecs::EntityApi top, ecs::EntityApi it, Vec2f pos);
 
-    static float2 localToLocal(ecs::EntityApi src, ecs::EntityApi dst, float2 pos);
+    static Vec2f localToLocal(ecs::EntityApi src, ecs::EntityApi dst, Vec2f pos);
 
-    static float2 localToGlobal(ecs::EntityApi local, float2 localPos);
+    static Vec2f localToGlobal(ecs::EntityApi local, Vec2f localPos);
 
-    static float2 globalToLocal(ecs::EntityApi local, float2 globalPos);
+    static Vec2f globalToLocal(ecs::EntityApi local, Vec2f globalPos);
 
     // these functions just helpers and use calculated world matrices, so use it only:
     // - after transform invalidation phase
     // - if node has own Transform2D components
-    static void fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, float2 pos, float2& out);
+    static void fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, Vec2f pos, Vec2f& out);
 };
 
-EK_DECLARE_TYPE(Transform2D);
+ECX_TYPE(14, WorldTransform2D);
+ECX_TYPE(15, Transform2D);
 
 /** system to invalidate matrix and color in world space **/
 //void updateWorldTransform2D(ecs::EntityApi root);
-void updateWorldTransformAll(ecs::World* w, ecs::EntityApi root);
+//void updateWorldTransformAll(ecs::World* w, ecs::EntityApi root);
 
 void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root);
 
@@ -257,11 +258,11 @@ inline void setColorOffset(ecs::EntityApi e, argb32_t color_offset) {
     e.get_or_create<Transform2D>().color.offset = color_offset;
 }
 
-inline void setPosition(ecs::EntityApi e, float2 pos) {
+inline void setPosition(ecs::EntityApi e, Vec2f pos) {
     e.get_or_create<Transform2D>().setPosition(pos);
 }
 
-inline float2 getPosition(const ecs::EntityApi e) {
+inline Vec2f getPosition(const ecs::EntityApi e) {
     return e.get_or_default<Transform2D>().getPosition();
 }
 
@@ -273,7 +274,7 @@ inline float getRotation(const ecs::EntityApi e) {
     return e.get_or_default<Transform2D>().getRotation();
 }
 
-inline void setScale(ecs::EntityApi e, float2 sc) {
+inline void setScale(ecs::EntityApi e, Vec2f sc) {
     e.get_or_create<Transform2D>().setScale(sc);
 }
 
@@ -281,7 +282,7 @@ inline void setScale(ecs::EntityApi e, float xy) {
     e.get_or_create<Transform2D>().setScale(xy, xy);
 }
 
-inline float2 getScale(ecs::EntityApi e) {
+inline Vec2f getScale(ecs::EntityApi e) {
     return e.get_or_default<Transform2D>().getScale();
 }
 

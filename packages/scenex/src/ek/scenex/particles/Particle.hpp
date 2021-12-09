@@ -11,17 +11,17 @@ namespace ek {
 
 struct Particle {
     Res<Sprite> sprite;
-    int draw_layer = 0;
-    std::string text;
-    float2 pivot = float2::zero;
+    //int draw_layer = 0;
+    //const char* text = nullptr;
+    Vec2f pivot = Vec2f::zero;
 
     float time = 0.0f;
     float time_total = 0.0f;
-    float2 position = float2::zero;
-    float2 velocity = float2::zero;
-    float2 acc = float2::zero;
+    Vec2f position = Vec2f::zero;
+    Vec2f velocity = Vec2f::zero;
+    Vec2f acc = Vec2f::zero;
 
-    float acc_x_phase{math::pi / 2.0f};
+    float acc_x_phase{Math::pi / 2.0f};
     float acc_x_speed = 0.0f;
 
     // angle state
@@ -44,11 +44,11 @@ struct Particle {
     float scale_end = 0.0f;
 
     // current state
-    float2 scale = float2::one;
+    Vec2f scale = Vec2f::one;
 
     bool reflector = false;
 
-    rect_f bounds = rect_f::zero_one;
+    Rect2f bounds = Rect2f::zero_one;
 public:
 
     void init() {
@@ -67,7 +67,7 @@ public:
 
     void update_current_values();
 
-    rect_f get_bounds();
+    Rect2f get_bounds();
 
     void draw();
 };

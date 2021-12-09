@@ -10,13 +10,12 @@
 
 #include <ek/util/ServiceLocator.hpp>
 #include <ek/app/app.hpp>
-#include <ek/debug.hpp>
+#include <ek/log.h>
+#include <ek/assert.h>
 #include <ek/audio/audio.hpp>
-#include <ek/debug/LogSystem.hpp>
 #include <ek/util/Signal.hpp>
 #include <utility>
-#include <ek/time/FrameTimer.hpp>
-#include <ek/time/Clock.hpp>
+#include <ek/time.h>
 #include <ek/time/Timers.hpp>
 #include "profiler.hpp"
 #include "GameDisplay.hpp"
@@ -32,10 +31,19 @@ class AssetManager;
 
 class Asset;
 
+class FrameTimer final {
+public:
+    double deltaTime = 0.0;
+    uint64_t frameIndex = 0;
+
+    double update();
+
+private:
+    uint64_t timer_ = ek_ticks(nullptr);
+};
+
 class basic_application : public RootAppListener {
 public:
-    inline static GameDisplayInfo currentDisplayInfo{};
-
     GameDisplay display{};
     /**** assets ***/
 

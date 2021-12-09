@@ -2,6 +2,8 @@
 
 #include "Array.hpp"
 
+TEST_SUITE_BEGIN("c++ array");
+
 struct NonTrivialStruct {
     int counter = 0;
 
@@ -25,7 +27,7 @@ struct NonTrivialStruct {
     }
 };
 
-TEST_CASE("Array moveCopy") {
+TEST_CASE("move and copy") {
     using namespace ek;
     {
         Array<int> a;
@@ -76,3 +78,47 @@ TEST_CASE("Array moveCopy") {
         REQUIRE(a[1] == 2);
     }
 }
+
+TEST_CASE("push, erase, insert") {
+
+    ek::Array<int> arr{};
+
+    REQUIRE(arr.size() == 0);
+    for (int i = 0; i < 20000; i += 50) {
+        for (int j = 0; j < i; ++j) {
+            arr.push_back(j);
+        }
+        arr.reset();
+    }
+
+    for (int i = 0; i < 4; ++i) {
+        arr.push_back(1);
+        arr.push_back(2);
+        arr.push_back(3);
+        arr.push_back(4);
+        arr.eraseAt(i);
+        arr.reset();
+        arr.push_back(1);
+        arr.push_back(2);
+        arr.push_back(3);
+        arr.push_back(4);
+        arr.swapRemove(i);
+        arr.reset();
+    }
+
+    // TODO: insert
+//    for (int i = 0; i < 5; ++i) {
+//        arr.push_back(1);
+//        arr.push_back(2);
+//        arr.push_back(3);
+//        arr.push_back(4);
+//        arr.insert(i, 5);
+//        REQUIRE(arr[i] == 5);
+//        if (i < 4) {
+//            REQUIRE(arr[4] == 4);
+//        }
+//        arr.reset();
+//    }
+}
+
+TEST_SUITE_END();

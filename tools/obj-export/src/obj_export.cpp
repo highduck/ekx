@@ -1,4 +1,4 @@
-#include <ek/math/packed_color.hpp>
+#include <ek/math/Color32.hpp>
 #include <ek/scenex/data/Model3D.hpp>
 
 #define FAST_OBJ_IMPLEMENTATION

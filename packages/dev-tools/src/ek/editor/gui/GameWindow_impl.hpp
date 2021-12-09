@@ -26,7 +26,7 @@ void GameWindow::onDraw() {
         {
             // update size;
             const float k = display.info.dpiScale;
-            display.info.destinationViewport = rect_f{
+            display.info.destinationViewport = Rect2f{
                     k * displayPos.x, k * displayPos.y,
                     k * displaySize.x, k * displaySize.y
             };

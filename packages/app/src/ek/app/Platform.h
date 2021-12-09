@@ -45,8 +45,6 @@ jobject get_activity();
 
 jobject get_context();
 
-void set_asset_manager(jobject asset_manager);
-
 AAssetManager* get_asset_manager();
 
 jobject assetManagerRef();

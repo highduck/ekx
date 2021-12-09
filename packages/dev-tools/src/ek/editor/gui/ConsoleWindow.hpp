@@ -1,21 +1,21 @@
 #pragma once
 
 #include "EditorWindow.hpp"
-#include <ek/debug/LogMessage.hpp>
 
 namespace ek {
 
 struct ConsoleMsg {
     Array<char> text;
-    Verbosity verbosity;
-    SourceLocation location;
-    uint8_t frameHash;
+    log_level_t verbosity;
+    const char* file;
+    int line;
+    uint8_t tick;
     const char* icon;
     ImU32 iconColor;
 };
 
 struct VerbosityFilterInfo {
-    Verbosity verbosity = Verbosity::Debug;
+    log_level_t verbosity = LOG_LEVEL_DEBUG;
     const char* name = "";
     ImU32 iconColor = 0xFFFFFFFF;
     unsigned count = 0;
@@ -32,7 +32,7 @@ public:
 
     void onDraw() override;
 
-    void onMessageWrite(const LogMessage& message);
+    void onMessageWrite(log_msg_t msg);
 
     void execute(const char* cmd);
 

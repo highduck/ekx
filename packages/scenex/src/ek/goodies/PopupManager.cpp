@@ -6,7 +6,7 @@
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
-#include <ek/math/easing.hpp>
+#include <ek/math/Easings.hpp>
 #include <ek/util/ServiceLocator.hpp>
 #include <ek/scenex/base/Tween.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
@@ -37,7 +37,7 @@ void on_popup_opening(EntityApi e) {
 }
 
 void on_popup_open_animation(float t, EntityApi e) {
-    t = math::clamp(t, 0.0f, 1.0f);
+    t = Math::clamp(t, 0.0f, 1.0f);
     float scale = easing::BACK_OUT.calculate(t);
     float fly = easing::P3_OUT.calculate(t);
     auto& transform = e.get<Transform2D>();
@@ -75,7 +75,7 @@ void on_popup_closed(EntityApi e) {
 }
 
 void on_popup_close_animation(float t, EntityApi e) {
-    t = math::clamp(1.0f - t, 0.0f, 1.0f);
+    t = Math::clamp(1.0f - t, 0.0f, 1.0f);
     float scale = easing::BACK_OUT.calculate(t);
     float fly = easing::P3_OUT.calculate(t);
     auto& transform = e.get<Transform2D>();
@@ -104,10 +104,10 @@ void PopupManager::updateAll() {
     for (auto e : ecs::view<PopupManager>()) {
         auto& p = e.get<PopupManager>();
         bool needFade = !p.active.empty();
-        if (p.active._size == 1 && p.active.back() == p.closingLast) {
+        if (p.active.size() == 1 && p.active.back() == p.closingLast) {
             needFade = false;
         }
-        p.fade_progress = math::reach(p.fade_progress,
+        p.fade_progress = Math::reach(p.fade_progress,
                                       needFade ? 1.0f : 0.0f,
                                       dt / p.fade_duration);
 
@@ -191,7 +191,7 @@ void close_popup(EntityApi e) {
 uint32_t count_active_popups() {
     auto pm = PopupManager::Main;
     auto& state = pm.get<PopupManager>();
-    return state.active._size;
+    return state.active.size();
 }
 
 void clear_popups() {
@@ -235,10 +235,12 @@ ecs::EntityApi createBackQuad() {
 
     // if touch outside of popups, simulate back-button behavior
     auto& interactive = e.assign<Interactive>();
-    interactive.on_down += [e] {
-        const auto* state = findComponentInParent<PopupManager>(e);
-        if (state && !state->active.empty()) {
-            Locator::ref<InteractionSystem>().sendBackButton();
+    interactive.onEvent += [e](auto event) {
+        if(event == PointerEvent::Down) {
+            const auto* state = findComponentInParent<PopupManager>(e);
+            if (state && !state->active.empty()) {
+                Locator::ref<InteractionSystem>().sendBackButton();
+            }
         }
     };
 

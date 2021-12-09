@@ -1,40 +1,40 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include <ek/ds/String.hpp>
+#include <ek/ds/Array.hpp>
 #include <ek/util/Signal.hpp>
 
 namespace billing {
 
-void initialize(const std::string& developerKey);
+void initialize(const char* developerKey);
 void _initialize();
 
 void shutdown();
 
 void getPurchases();
 
-void getDetails(const std::vector<std::string>& skuList);
+void getDetails(const ek::Array<ek::String>& skuList);
 
-void purchase(const std::string& sku, const std::string& payload);
+void purchase(const ek::String& sku, const ek::String& payload);
 
-void consume(const std::string& token);
+void consume(const ek::String& token);
 
 struct PurchaseData {
-    std::string productID;
-    std::string token;
+    ek::String productID;
+    ek::String token;
     int state;
-    std::string payload;
-    std::string signature;
+    ek::String payload;
+    ek::String signature;
     int errorCode;
 
     // ios
-    std::string receipt;
+    ek::String receipt;
 };
 
 struct ProductDetails {
-    std::string sku;
-    std::string price;
-    std::string currencyCode;
+    ek::String sku;
+    ek::String price;
+    ek::String currencyCode;
 };
 
 struct Context {

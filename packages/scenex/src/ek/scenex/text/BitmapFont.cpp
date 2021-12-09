@@ -11,9 +11,9 @@ BitmapFont::BitmapFont() :
 
 BitmapFont::~BitmapFont() = default;
 
-void BitmapFont::load(const std::vector<uint8_t>& buffer) {
-    if (!buffer.empty()) {
-        input_memory_stream input{buffer.data(), buffer.size()};
+void BitmapFont::load(const uint8_t* buffer, size_t length) {
+    if (length > 0) {
+        input_memory_stream input{buffer, length};
 
         IO io{input};
         BMFont fontData;
@@ -23,35 +23,33 @@ void BitmapFont::load(const std::vector<uint8_t>& buffer) {
     }
 }
 
-void BitmapFont::load(const BMFont& data) {
+void BitmapFont::load(BMFont& data) {
     unitsPerEM = data.unitsPerEM;
     baseFontSize = data.fontSize;
     ascender = float(data.ascender) / unitsPerEM;
     descender = float(data.descender) / unitsPerEM;
     lineHeightMultiplier = float(data.lineHeight) / unitsPerEM;
-    for (const auto& g : data.glyphs) {
-        for (auto code : g.codepoints) {
-            map[code] = g;
-        }
+    glyphs = std::move(data.glyphs);
+    for (const auto& e : data.codepoints) {
+        map.set(e.key, glyphs.begin() + e.value);
     }
 
     ready_ = loaded_ = true;
 }
 
 bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
-    auto it = map.find(codepoint);
-    if (it != map.end()) {
-        const auto& g = it->second;
-        outGlyph.advanceWidth = static_cast<float>(g.advanceWidth) / unitsPerEM;
+    const auto* g = map.get(codepoint, nullptr);
+    if (g) {
+        outGlyph.advanceWidth = static_cast<float>(g->advanceWidth) / unitsPerEM;
         outGlyph.lineHeight = lineHeightMultiplier;
-        Res<Sprite> spr{g.sprite};
+        Res<Sprite> spr{g->sprite};
         if (spr) {
             outGlyph.rect = spr->rect / baseFontSize;
             outGlyph.texCoord = spr->tex;
             outGlyph.texture = spr->texture.get();
             outGlyph.rotated = spr->rotated;
         } else {
-            outGlyph.rect = g.box / unitsPerEM;
+            outGlyph.rect = g->box / unitsPerEM;
         }
         outGlyph.source = this;
         return true;
@@ -60,14 +58,13 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
 }
 
 bool BitmapFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
-    auto it = map.find(codepoint);
-    if (it != map.end()) {
-        const auto& g = it->second;
-        outGlyph.advanceWidth = static_cast<float>(g.advanceWidth) / unitsPerEM;
+    const auto* g = map.get(codepoint, nullptr);
+    if (g) {
+        outGlyph.advanceWidth = static_cast<float>(g->advanceWidth) / unitsPerEM;
         outGlyph.lineHeight = lineHeightMultiplier;
         outGlyph.ascender = ascender;
         outGlyph.descender = descender;
-        outGlyph.rect = g.box / unitsPerEM;
+        outGlyph.rect = g->box / unitsPerEM;
         outGlyph.source = this;
         return true;
     }

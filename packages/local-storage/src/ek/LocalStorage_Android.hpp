@@ -19,7 +19,7 @@ void set_user_string(const char* key, const char* str) {
     env->DeleteLocalRef(val_ref);
 }
 
-std::string get_user_string(const char* key, const char* default_value) {
+String get_user_string(const char* key, const char* default_value) {
     auto* env = app::getJNIEnv();
 
     auto class_ref = env->FindClass("ek/LocalStorage");
@@ -33,7 +33,7 @@ std::string get_user_string(const char* key, const char* default_value) {
     jboolean is_copy;
     const char* data = env->GetStringUTFChars(result, &is_copy);
     const jsize size = env->GetStringUTFLength(result);
-    const std::string result_str{data, size_t(size)};
+    const String result_str{data, (uint32_t)size};
     env->ReleaseStringUTFChars(result, data);
     env->DeleteLocalRef(result);
 

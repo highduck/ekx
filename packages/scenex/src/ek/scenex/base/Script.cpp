@@ -7,7 +7,7 @@ namespace ek {
 
 ScriptBase::~ScriptBase() = default;
 
-ecs::EntityApi ScriptBase::find_child(const std::string& name) const {
+ecs::EntityApi ScriptBase::find_child(const char* name) const {
     return find(entity_, name);
 }
 
@@ -32,7 +32,7 @@ void ScriptHolder::link(ecs::EntityApi owner_) {
     if (!owner) {
         owner = owner_;
         auto& display = owner_.get_or_create<Display2D>();
-        display.drawable = std::make_unique<ScriptDrawable2D>(owner_, std::move(display.drawable));
+        display.drawable = Pointer<ScriptDrawable2D>::make(owner_, std::move(display.drawable));
     }
 }
 }

@@ -8,26 +8,26 @@ namespace ek {
 struct SceneView2D {
     float scaleMin = 0.1f;
     float scale = 1.0f;
-    float2 position{};
-    matrix_2d matrix{};
-    float2 translation{};
-    mat4f viewMatrix3D{};
-    mat4f projectionMatrix{};
+    Vec2f position{};
+    Matrix3x2f matrix{};
+    Vec2f translation{};
+    Matrix4f viewMatrix3D{};
+    Matrix4f projectionMatrix{};
 
     [[nodiscard]]
-    float2 getMouseWorldPos(float2 viewportMousePosition) const;
+    Vec2f getMouseWorldPos(Vec2f viewportMousePosition) const;
     void reset();
-    void manipulateView(float2 mouseWorldPosition, const rect_f& viewport);
+    void manipulateView(Vec2f mouseWorldPosition, const Rect2f& viewport);
 };
 
 struct SceneView3D {
-    float3 position{};
-    float3 translation{};
-    mat4f viewMatrix{};
-    mat4f projectionMatrix{};
+    Vec3f position{};
+    Vec3f translation{};
+    Matrix4f viewMatrix{};
+    Matrix4f projectionMatrix{};
 
     [[nodiscard]]
-    float2 getMouseWorldPos(float2 viewportMousePosition) const;
+    Vec2f getMouseWorldPos(Vec2f viewportMousePosition) const;
     void reset();
 //    void manipulateView();
 };
@@ -36,10 +36,10 @@ struct SceneView {
     SceneView2D view2;
     SceneView3D view3;
     bool mode2D = true;
-    rect_f rect{0, 0, 1, 1};
+    Rect2f rect{0, 0, 1, 1};
 
     [[nodiscard]]
-    float2 getMouseWorldPos() const;
+    Vec2f getMouseWorldPos() const;
     void reset();
     void manipulateView();
 };
@@ -70,7 +70,7 @@ public:
     void drawSceneNode(ecs::EntityApi e);
     void drawSceneNodeBounds(ecs::EntityApi e);
 
-    ecs::EntityApi hitTest(ecs::EntityApi e, float2 worldPos);
+    ecs::EntityApi hitTest(ecs::EntityApi e, Vec2f worldPos);
 
     void drawToolbar();
 

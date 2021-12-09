@@ -1,17 +1,15 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <cassert>
-#include <string>
-#include <vector>
+#include <ek/assert.h>
+#include <ek/ds/String.hpp>
+#include <ek/ds/Array.hpp>
 
 namespace ek {
 
 struct NodeName {
-    std::string name;
+    String name;
 };
-
-EK_DECLARE_TYPE(NodeName);
 
 struct Node {
     enum Flags {
@@ -58,7 +56,8 @@ struct Node {
     static ecs::EntityApi findLowerCommonAncestor(ecs::EntityApi e1, ecs::EntityApi e2);
 };
 
-EK_DECLARE_TYPE(Node);
+ECX_TYPE(1, NodeName);
+ECX_TYPE(2, Node);
 
 template<typename Func>
 inline void eachChild(ecs::EntityApi e, Func func) {
@@ -167,11 +166,11 @@ ecs::EntityApi getChildAt(ecs::EntityApi e, int index);
 
 /** utility functions **/
 
-inline void setName(ecs::EntityApi e, const std::string& name) {
+inline void setName(ecs::EntityApi e, const String& name) {
     e.get_or_create<NodeName>().name = name;
 }
 
-inline const std::string& getName(ecs::EntityApi e) {
+inline const String& getName(ecs::EntityApi e) {
     return e.get_or_default<NodeName>().name;
 }
 
@@ -215,12 +214,12 @@ Comp* findComponentInParent(ecs::EntityApi e) {
 
 ecs::EntityApi find(ecs::EntityApi e, const char* childName);
 
-inline ecs::EntityApi find(const ecs::EntityApi e, const std::string& childName) {
+inline ecs::EntityApi find(const ecs::EntityApi e, const String& childName) {
     return find(e, childName.c_str());
 }
 
-ecs::EntityApi findByPath(ecs::EntityApi e, const std::vector<std::string>& path);
+ecs::EntityApi findByPath(ecs::EntityApi e, const Array<String>& path);
 
-std::vector<ecs::EntityApi> findMany(ecs::EntityApi e, const std::vector<std::string>& names);
+Array<ecs::EntityApi> findMany(ecs::EntityApi e, const Array<String>& names);
 
 }

@@ -12,7 +12,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC src)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
-        C_STANDARD 17
+        C_STANDARD 11
         )
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
@@ -20,7 +20,7 @@ if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
 
     set(EK_COMPILE_WARNINGS
             -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type
-            -Woverloaded-virtual -Wcast-align -Wno-deprecated-declarations -Wstrict-aliasing)
+            -Woverloaded-virtual -Wcast-align -Wno-deprecated-declarations -Wstrict-aliasing=2)
 
     #set(EK_COMPILER_LTO "-flto")
 endif ()
@@ -35,7 +35,8 @@ endif ()
 target_compile_options(${PROJECT_NAME} PRIVATE
         -fno-exceptions
         -fno-rtti
-        -fstrict-aliasing
+        -fno-strict-aliasing
+        -Wstrict-aliasing=2
         )
 
 target_link_libraries(${PROJECT_NAME}

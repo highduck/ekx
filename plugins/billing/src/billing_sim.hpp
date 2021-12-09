@@ -1,10 +1,11 @@
 #pragma once
 
+#include <ek/ds/String.hpp>
 #include <ek/timers.hpp>
 
 namespace billing {
 
-void initialize(const std::string& developerKey) {
+void initialize(const char* developerKey) {
     (void) developerKey;
     _initialize();
 }
@@ -13,7 +14,7 @@ void getPurchases() {
 
 }
 
-void getDetails(const std::vector<std::string>& skuList) {
+void getDetails(const ek::Array<ek::String>& skuList) {
     double time = 0.5;
     for (const auto& sku : skuList) {
         ek::setTimeout([sku]() {
@@ -23,7 +24,7 @@ void getDetails(const std::vector<std::string>& skuList) {
     }
 }
 
-void purchase(const std::string& sku, const std::string& payload) {
+void purchase(const ek::String& sku, const ek::String& payload) {
     PurchaseData data;
     data.productID = sku;
     data.payload = payload;
@@ -33,7 +34,7 @@ void purchase(const std::string& sku, const std::string& payload) {
         }, 2.0);
 }
 
-void consume(const std::string& token) {
+void consume(const ek::String& token) {
     (void) token;
 }
 

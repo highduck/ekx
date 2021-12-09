@@ -7,13 +7,12 @@
 #include <billing.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/util/ServiceLocator.hpp>
-#include <ek/util/StringUtil.hpp>
 #include <utility>
 #include <GameServices.hpp>
 #include <ek/ext/sharing/sharing.hpp>
 #include <ek/goodies/GameScreen.hpp>
 #include <ek/app/app.hpp>
-#include <ek/Localization.hpp>
+#include <ek/scenex/Localization.hpp>
 #include "Ads.hpp"
 
 namespace ek {
@@ -23,7 +22,7 @@ AppBox::AppBox(AppBoxConfig config_) :
 
     // unlock abort()
 
-    billing::initialize(config.billingKey);
+    billing::initialize(config.billingKey.c_str());
     admob::initialize(config.admob);
     Locator::create<Ads>(config.ads);
     game_services_init();
@@ -40,10 +39,10 @@ AppBox::AppBox(AppBoxConfig config_) :
     Localization::instance.setLanguage(lang);
 }
 
-void set_state_by_name(ecs::EntityApi e, const std::string &state) {
+void set_state_by_name(ecs::EntityApi e, const char* state) {
     eachChild(e, [&state](ecs::EntityApi child) {
-        const auto &name = child.get_or_default<NodeName>().name;
-        if (starts_with(name, "state_")) {
+        const auto& name = child.get_or_default<NodeName>().name;
+        if (name.startsWith("state_")) {
             setVisible(child, name == state);
         }
     });
@@ -58,7 +57,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
         // VERSION
         auto e_version = find(e, "version");
         if (e_version) {
-            auto *txt = Display2D::tryGet<Text2D>(e_version);
+            auto* txt = Display2D::tryGet<Text2D>(e_version);
             if (txt) {
                 txt->text = config.version;
             }
@@ -70,8 +69,8 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
         if (e_pp) {
             auto lbl = find(e_pp, "label");
             if (lbl) {
-                auto *txt = Display2D::tryGet<Text2D>(lbl);
-                if(txt) {
+                auto* txt = Display2D::tryGet<Text2D>(lbl);
+                if (txt) {
                     txt->hitFullBounds = true;
                 }
             }
@@ -86,7 +85,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
     {
         auto btn = find(e, "remove_ads");
         if (btn) {
-            auto &ads = Locator::ref<Ads>();
+            auto& ads = Locator::ref<Ads>();
             if (ads.isRemoved()) {
                 btn.get<Node>().setVisible(false);
             } else {
@@ -112,7 +111,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
 
     // Settings
     {
-        auto &audio = Locator::ref<AudioManager>();
+        auto& audio = Locator::ref<AudioManager>();
         {
             auto btn = find(e, "sound");
             if (btn) {
@@ -148,7 +147,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
     }
 }
 
-void AppBox::shareWithAppLink(const std::string &text) {
+void AppBox::shareWithAppLink(const String& text) {
     auto msg = text;
     if (!config.appLinkURL.empty()) {
         msg += ' ';
@@ -163,11 +162,11 @@ void AppBox::rateUs() {
 
 /// download app feature
 
-void wrap_button(ecs::EntityApi e, const std::string &name, const std::string &link) {
+void wrap_button(ecs::EntityApi e, const char* name, const char* link) {
     auto x = find(e, name);
-    if (!link.empty()) {
+    if (link && *link) {
         x.get_or_create<Button>().clicked.add([link] {
-            app::openURL(link.c_str());
+            app::openURL(link);
         });
     } else {
         setVisible(e, false);
@@ -189,15 +188,15 @@ void AppBox::initLanguageButton(ecs::EntityApi e) {
     auto btn = find(e, "language");
     if (btn) {
         btn.get<Button>().clicked += [] {
-            auto &lm = Localization::instance;
-            auto &locales = lm.getAvailableLanguages();
+            auto& lm = Localization::instance;
+            auto& locales = lm.getAvailableLanguages();
             auto locale = std::find(locales.begin(), locales.end(), lm.getLanguage());
             if (locale != locales.end()) {
                 ++locale;
                 if (locale == locales.end()) {
                     locale = locales.begin();
                 }
-                auto &lang = *locale;
+                auto& lang = *locale;
                 lm.setLanguage(lang);
                 set_user_string("selected_lang", lang.c_str());
             }
@@ -209,7 +208,7 @@ void AppBox::showAchievements() {
     achievement_show();
 }
 
-Leaderboard::Leaderboard(const char *id) :
+Leaderboard::Leaderboard(const char* id) :
         id_{id} {
 
 }
@@ -222,7 +221,7 @@ void Leaderboard::submit(int score) const {
     leader_board_submit(id_.c_str(), score);
 }
 
-Achievement::Achievement(const char *code, int count) :
+Achievement::Achievement(const char* code, int count) :
         code_{code},
         count_{count} {
 }

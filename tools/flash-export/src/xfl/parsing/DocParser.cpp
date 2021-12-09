@@ -2,7 +2,7 @@
 #include "parsing.hpp"
 
 #include <pugixml.hpp>
-#include <ek/debug.hpp>
+#include <ek_log.h>
 #include <cstring>
 
 namespace ek::xfl {
@@ -140,11 +140,12 @@ void DocParser::load() {
         Element bi;
         parse(item, bi);
 
-        std::string path = "bin";
-        path_t::append(path, bi.bitmapDataHRef.c_str());
+        String path{"bin"};
+        Path::appendJoin(path, bi.bitmapDataHRef.c_str());
         auto* file = root->open(path.c_str());
-        bi.bitmap.reset(BitmapData::parse(file->content()));
-        doc.library.push_back(std::move(bi));
+        const auto& content = file->content();
+        bi.bitmap.reset(BitmapData::parse(content.c_str(), content.size()));
+        doc.library.emplace_back(std::move(bi));
     }
 
     for (const auto& item: node.child("media").children("DOMSoundItem")) {
@@ -152,11 +153,11 @@ void DocParser::load() {
     }
 
     for (const auto& item: node.child("symbols").children("Include")) {
-        std::string path = "LIBRARY";
-        path_t::append(path, item.attribute("href").value());
+        String path{"LIBRARY"};
+        Path::appendJoin(path, item.attribute("href").value());
         auto library_doc = load_xml(*root, path.c_str());
         auto symbol = read<Element>(library_doc->child("DOMSymbolItem"));
-        doc.library.push_back(std::move(symbol));
+        doc.library.emplace_back(std::move(symbol));
     }
 
     for (const auto& item: node.child("timelines").children("DOMTimeline")) {
@@ -164,11 +165,12 @@ void DocParser::load() {
         el.timeline = read<Timeline>(item);
         if (!el.timeline.name.empty()) {
             el.elementType = ElementType::scene_timeline;
-            el.item.name = "_SCENE_" + el.timeline.name;
+            el.item.name = "_SCENE_";
+            el.item.name += el.timeline.name;
             el.item.linkageExportForAS = true;
             el.item.linkageClassName = el.item.name;
-            doc.scenes[el.timeline.name] = el.item.name;
-            doc.library.push_back(std::move(el));
+            doc.scenes.emplace_back({el.timeline.name, el.item.name});
+            doc.library.emplace_back(std::move(el));
         }
     }
 }
@@ -221,7 +223,7 @@ void DocParser::parse(const xml_node& node, FillStyle& r) const {
                     if (item && item->bitmap) {
                         r.bitmap = item->bitmap;
                     } else {
-                        EK_WARN_F("[BitmapFill] bitmap item not found: %s", r.bitmapPath.c_str());
+                        EK_WARN("[BitmapFill] bitmap item not found: %s", r.bitmapPath.c_str());
                     }
                 }
                 break;
@@ -229,7 +231,7 @@ void DocParser::parse(const xml_node& node, FillStyle& r) const {
                 EK_ERROR("Fill Style has unknown type!");
                 break;
         }
-        if (math::equals(det(r.matrix), 0.0f)) {
+        if (Math::equals(det(r.matrix), 0.0f)) {
             r.type = FillType::solid;
         }
     }
@@ -280,7 +282,7 @@ void DocParser::parse(const xml_node& node, Frame& r) const {
     }
 
     if (!r.script.empty()) {
-        if (r.script.find("valign=middle") != std::string::npos) {
+        if (r.script.find("valign=middle") != nullptr) {
             for (auto& el: r.elements) {
                 if (el.elementType == ElementType::dynamic_text) {
                     el.textRuns[0].attributes.alignment.y = 0.5;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/math/vec.hpp>
+#include <ek/math/Vec.hpp>
 
 namespace ek {
 
@@ -13,9 +13,9 @@ enum class Light3DType {
 struct Light3D {
     Light3DType type = Light3DType::Point;
 
-    float3 ambient = 0.1f * float3::one;
-    float3 diffuse = float3::one;
-    float3 specular = float3::one;
+    Vec3f ambient = 0.1f * Vec3f::one;
+    Vec3f diffuse = Vec3f::one;
+    Vec3f specular = Vec3f::one;
 
     float radius = 100.0f;
     float falloff = 1.0f;
@@ -23,7 +23,7 @@ struct Light3D {
     bool cast_shadows = true;
 };
 
-EK_DECLARE_TYPE(Light3D);
+ECX_TYPE(28, Light3D);
 
 }
 

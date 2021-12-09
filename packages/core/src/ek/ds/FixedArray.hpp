@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../assert.hpp"
+#include <ek/assert.h>
 
 namespace ek {
 
@@ -10,54 +10,59 @@ struct FixedArray {
 
     static_assert(MaxCount <= 0x10000);
 
-    T _data[MaxCount];
     unsigned _size = 0;
+    T _data[MaxCount];
 
-    inline void push_back(T el) {
+    constexpr void push_back(T el) {
         EK_ASSERT(_size < MaxCount);
         _data[_size++] = el;
     }
 
-    inline T* begin() {
+    constexpr void emplace_back(T&& el) {
+        EK_ASSERT(_size < MaxCount);
+        _data[_size++] = std::move(el);
+    }
+
+    constexpr T* begin() {
         return _data;
     }
 
-    inline T* end() {
+    constexpr T* end() {
         return _data + _size;
     }
 
     [[nodiscard]]
-    inline unsigned size() const {
+    constexpr unsigned size() const {
         return _size;
     }
 
     [[nodiscard]]
-    inline const T* data() const {
+    constexpr const T* data() const {
         return _data;
     }
 
     [[nodiscard]]
-    inline T* data() {
+    constexpr T* data() {
         return _data;
     }
 
     [[nodiscard]]
-    inline T back() const {
+    constexpr T back() const {
         EK_ASSERT(_size > 0);
         return *(_data + _size - 1);
     }
 
-    inline T& operator[](unsigned i) {
+    constexpr T& operator[](unsigned i) {
         EK_ASSERT(i < _size);
-        return *(_data + i);
+        return _data[i];
     }
 
-    inline const T& operator[](unsigned i) const {
+    constexpr const T& operator[](unsigned i) const {
         EK_ASSERT(i < _size);
-        return *(_data + i);
+        return _data[i];
     }
 
-    inline void clear() {
+    constexpr void clear() {
         _size = 0;
     }
 };

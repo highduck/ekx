@@ -27,7 +27,8 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -g
         -fno-exceptions
         -fno-rtti
-        -fstrict-aliasing
+        -fno-strict-aliasing
+        -Wstrict-aliasing=2
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
@@ -40,7 +41,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
     target_compile_options(${PROJECT_NAME}
-            PUBLIC -x objective-c++
+            PRIVATE -x objective-c++
             )
 
     target_link_libraries(${PROJECT_NAME}

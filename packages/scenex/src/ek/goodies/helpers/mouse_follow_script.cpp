@@ -23,7 +23,7 @@ void mouse_follow_script::update(float dt) {
 }
 
 void mouse_follow_script::gui_gizmo() {
-    draw2d::fill_circle(circle_f{100.0f}, 0x00FFFFFF_argb, 0x77FFFFFF_argb, 10);
+    draw2d::fill_circle(CircleF{100.0f}, 0x00FFFFFF_argb, 0x77FFFFFF_argb, 10);
 }
 
 void mouse_follow_script::gui_inspector() {

@@ -47,8 +47,8 @@ if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
             -Wno-deprecated-declarations
             -Wno-gnu-anonymous-struct
             -Wno-nested-anon-types
-            -fstrict-aliasing
-            -Wstrict-aliasing
+            -fno-strict-aliasing
+            -Wstrict-aliasing=2
             )
 endif ()
 #
@@ -61,8 +61,11 @@ endif ()
 #            -fno-exceptions -fno-rtti)
 #endif ()
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC
-        -DPUGIXML_NO_XPATH)
+target_compile_definitions(${PROJECT_NAME}
+        PUBLIC PUGIXML_NO_XPATH
+        PUBLIC PUGIXML_NO_STL
+        PUBLIC PUGIXML_NO_EXCEPTIONS
+        )
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC pugixml
@@ -77,7 +80,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO
+        #CXX_EXTENSIONS NO
+
         )
 
 

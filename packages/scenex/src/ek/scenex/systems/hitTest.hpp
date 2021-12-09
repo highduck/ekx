@@ -1,12 +1,12 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/math/vec.hpp>
+#include <ek/math/Vec.hpp>
 
 namespace ek {
 
 struct Node;
 
-ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, float2 parentSpacePosition);
+ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, Vec2f parentSpacePosition);
 
 }

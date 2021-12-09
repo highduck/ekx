@@ -30,7 +30,7 @@ void Sprite::draw() const {
     draw(rect);
 }
 
-void Sprite::draw(const rect_f& rc) const {
+void Sprite::draw(const Rect2f& rc) const {
     if (texture) {
         draw2d::state.setTextureRegion(texture.get(), tex);
         if (rotated) {
@@ -41,7 +41,7 @@ void Sprite::draw(const rect_f& rc) const {
     }
 }
 
-void Sprite::draw_grid(const rect_f& grid, const rect_f& target) const {
+void Sprite::draw_grid(const Rect2f& grid, const Rect2f& target) const {
     if (!texture) {
         return;
     }
@@ -103,7 +103,7 @@ void Sprite::draw_grid(const rect_f& grid, const rect_f& target) const {
     draw2d::write_indices(nine_patch_indices, 9 * 6);
 }
 
-bool Sprite::hit_test(const float2& position) const {
+bool Sprite::hit_test(const Vec2f& position) const {
     (void) position;
     if (texture) {
         return true;

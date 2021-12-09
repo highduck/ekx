@@ -2,6 +2,7 @@
 
 #include "world.hpp"
 #include <ek/ds/FixedArray.hpp>
+#include <cstdlib>
 
 namespace ecs {
 
@@ -11,13 +12,13 @@ public:
     static constexpr auto components_num = sizeof ... (Component);
 
     using table_index_type = uint32_t;
-    using table_type = ComponentHeader*[components_num];
+    using table_type = ComponentHeader* [components_num];
 
     class iterator final {
     public:
         iterator(table_type& table, EntityIndex it) : it_{it},
-                                                 table_{table},
-                                                 map_0{table[0]} {
+                                                      table_{table},
+                                                      map_0{table[0]} {
             skips();
         }
 
@@ -73,10 +74,7 @@ public:
     explicit ViewBackward(World& w) {
         table_index_type i{};
         ((access_[i] = table_[i] = w.getComponentHeader(type<Component>()), ++i), ...);
-
-        std::sort(table_, table_ + components_num, [](auto a, auto b) -> bool {
-            return a->count() < b->count();
-        });
+        qsort(table_, components_num, sizeof(table_[0]), ComponentHeader::compareBySize);
     }
 
     iterator begin() {
@@ -94,7 +92,7 @@ public:
 
     template<typename Func>
     void each(Func func) {
-        for (auto e : *this) {
+        for (auto e: *this) {
             table_index_type i{0u};
             func(unsafe_get<Component>(i++, e.index)...);
         }

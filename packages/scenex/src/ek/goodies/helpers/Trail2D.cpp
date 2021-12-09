@@ -2,11 +2,11 @@
 
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/math/easing.hpp>
+#include <ek/math/Easings.hpp>
 
 namespace ek {
 
-void Trail2D::update(const matrix_2d& m) {
+void Trail2D::update(const Matrix3x2f& m) {
     float dt = timer->dt;
     auto scale2 = m.scale();
     scale = fminf(scale2.x, scale2.y);
@@ -24,7 +24,7 @@ void Trail2D::update(const matrix_2d& m) {
     }
 }
 
-void Trail2D::update_position(float2 newPosition) {
+void Trail2D::update_position(Vec2f newPosition) {
 
     if (!initialized) {
         initialized = true;
@@ -111,8 +111,8 @@ void TrailRenderer2D::draw() {
 
     // we could generate vertices right into destination buffer :)
     for (int i = 0; i < columns; ++i) {
-        const float2 p = nodeArray[node_idx].position;
-        float2 perp{};
+        const Vec2f p = nodeArray[node_idx].position;
+        Vec2f perp{};
         if (i > 0/* node_idx > begin */) {
             perp = normalize_2f(nodeArray[node_idx - 1].position - p);
             if (i + 1 < columns) {
@@ -125,7 +125,7 @@ void TrailRenderer2D::draw() {
 
         const auto energy = nodeArray[node_idx].energy;
         const auto easedEnergy = easing::P2_OUT.calculate(energy);
-        const auto r = math::lerp(minWidth, width, easedEnergy);
+        const auto r = Math::lerp(minWidth, width, easedEnergy);
         const auto nodeScale = nodeArray[node_idx].scale;
         perp *= nodeScale * r;
 

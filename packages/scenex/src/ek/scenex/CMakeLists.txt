@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.19)
 
 target_sources(${PROJECT_NAME} PRIVATE
+        Localization.hpp
+        Localization.cpp
 
         base/Node.hpp
         base/Node.cpp
@@ -11,9 +13,9 @@ target_sources(${PROJECT_NAME} PRIVATE
         base/NodeEvents.hpp
         base/NodeEvents.cpp
         base/Tween.hpp
-        base/Tween.cpp
         base/DestroyTimer.hpp
-        base/DestroyTimer.cpp
+        base/TimeLayer.hpp
+        base/module.cpp
 
         3d/Transform3D.cpp
         3d/Transform3D.hpp

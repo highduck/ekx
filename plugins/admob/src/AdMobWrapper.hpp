@@ -1,8 +1,7 @@
 #pragma once
 
 #include <admob.hpp>
-
-#include <memory>
+#include <ek/ds/Pointer.hpp>
 
 namespace ek {
 
@@ -19,9 +18,9 @@ public:
 
     virtual ~AdMobWrapper() = default;
 
-    virtual void showInterstitial(const std::function<void()>& callback);
+    virtual void showInterstitial(std::function<void()> callback);
 
-    virtual void showRewardedAd(const std::function<void(bool)>& callback);
+    virtual void showRewardedAd(std::function<void(bool)> callback);
 
     void completeRewardedAd(bool rewarded);
 
@@ -32,7 +31,7 @@ public:
         return isAvailable_;
     }
 
-    static std::unique_ptr<AdMobWrapper> create(bool devMode);
+    static Pointer<AdMobWrapper> create(bool devMode);
 };
 
 }

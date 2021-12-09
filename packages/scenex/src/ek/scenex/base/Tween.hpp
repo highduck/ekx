@@ -2,7 +2,7 @@
 
 #include <ecxx/ecxx.hpp>
 #include <ek/util/Signal.hpp>
-#include <ek/timers.hpp>
+#include "TimeLayer.hpp"
 
 namespace ek {
 
@@ -25,6 +25,6 @@ struct Tween {
     }
 };
 
-EK_DECLARE_TYPE(Tween);
+ECX_TYPE(6, Tween);
 
 }

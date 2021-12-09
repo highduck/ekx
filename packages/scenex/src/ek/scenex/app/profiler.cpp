@@ -3,7 +3,6 @@
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app/app.hpp>
-#include <ek/scenex/text/TextEngine.hpp>
 
 // TODO: EK_DEV_BUILD
 #ifndef ENABLE_PROFILER
@@ -16,15 +15,29 @@
 
 namespace ek {
 
+void FpsMeter::update(float dt) {
+    if (measurementsPerSeconds > 0.0f) {
+        // estimate average FPS for some period
+        counter_ += 1.0f;
+        accum_ += dt;
+        const auto period = 1.0f / measurementsPerSeconds;
+        if (accum_ >= period) {
+            avgFPS_ = counter_ * measurementsPerSeconds;
+            accum_ -= period;
+            counter_ = 0.0f;
+        }
+    } else {
+        avgFPS_ = dt > 0.0f ? (1.0f / dt) : 0.0f;
+    }
+}
+
 using namespace std;
 
-static TextFormat devTextFormat{"Cousine-Regular", 10};
-
-void drawText(const Profiler::Track& track) {
-    devTextFormat.leading = 1;
+void drawText(const Profiler::Track& track, TextFormat textFormat) {
+    textFormat.leading = 1;
     auto& textEngine = gTextEngine.get().engine;
-    textEngine.format = devTextFormat;
-    textEngine.position = {2.0f, 2.0f + devTextFormat.size};
+    textEngine.format = textFormat;
+    textEngine.position = {2.0f, 2.0f + textFormat.size};
     textEngine.drawFormat(track.titleFormat, track.name, (int)track.value);
 }
 
@@ -62,7 +75,7 @@ void draw(Profiler& profiler, const GameDisplayInfo& displayInfo) {
     const auto scale = displayInfo.dpiScale;
     const auto x = displayInfo.insets.x;
     const auto y = displayInfo.insets.y;
-    draw2d::state.matrix = matrix_2d{scale, 0, 0, scale, x, y};
+    draw2d::state.matrix = Matrix3x2f{scale, 0, 0, scale, x, y};
     draw2d::state.setEmptyTexture();
 
     draw2d::state.save_matrix();
@@ -74,7 +87,7 @@ void draw(Profiler& profiler, const GameDisplayInfo& displayInfo) {
 
     draw2d::state.save_matrix();
     for (auto& track : profiler.tracks) {
-        drawText(track);
+        drawText(track, profiler.textFormat);
         draw2d::state.translate(0, 35);
     }
     draw2d::state.restore_matrix();
