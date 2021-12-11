@@ -1,12 +1,11 @@
 {
   "name": "@ekx/auph",
   "version": "0.1.1",
-  "browser": "web/dist/browser/auph.js",
-  "main": "web/dist/cjs/index.js",
+  "browser": "web/dist/emscripten/auph.js",
   "module": "web/dist/module/index.js",
   "types": "web/dist/types/index.d.ts",
   "scripts": {
-    "install": "npx cmake-build || exit 0",
+    "postinstall": "cmake-build || exit 0",
     "watch": "tsc -w -p web/tsconfig.json & rollup -w -c web/rollup.config.js",
     "build": "tsc -p web/tsconfig.json && rollup -c web/rollup.config.js",
     "build-cmake": "node scripts/build-cmake",

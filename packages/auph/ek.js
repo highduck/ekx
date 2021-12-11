@@ -17,12 +17,6 @@ function setup(project) {
             android_permission: "android.permission.VIBRATE"
         },
         apple: {
-            cpp_flags: {
-                // TODO: this file is local compiled to static lib,
-                // need to migrate flags to implementor module
-                files: ["auph-static.cpp"],
-                flags: "-x objective-c++"
-            },
             xcode_framework: ["Foundation", "AudioToolbox"]
         },
         macos: {
