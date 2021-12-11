@@ -84,9 +84,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    error("Platform: not supported")
+
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    error("Platform: not supported")
+
 else ()
     error("Platform: UNKNOWN")
 endif ()

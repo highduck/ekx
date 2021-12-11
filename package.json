@@ -6,6 +6,8 @@
     "release": "changeset publish",
     "version": "changeset version && yarn run update-lock",
     "update-lock": "yarn && git add yarn.lock",
+    "all:build-recipes": "wsrun -m -e -t --report recipe:build",
+    "all:package:test": "wsrun -m -e -t --report package:test",
     "ci:build": "wsrun -m -e -t build",
     "ci:build-native": "wsrun -m -e -t build:native",
     "ci:test-native": "wsrun -m -e -t test-native",
@@ -17,9 +19,10 @@
   },
   "workspaces": {
     "packages": [
+      "external/*",
+      "packages/*",
       "tools/*",
       "plugins/*",
-      "packages/*",
       "samples/*"
     ]
   }

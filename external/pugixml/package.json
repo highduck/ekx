@@ -1,0 +1,20 @@
+{
+  "name": "@ekx/pugixml",
+  "version": "0.0.6",
+  "scripts": {
+    "recipe:build": "node recipe/package.js",
+    "package:test": "node recipe/test-package.js"
+  },
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "CMakeLists.txt",
+    "src"
+  ],
+  "devDependencies": {
+    "@ekx/cli-utils": "0.0.15"
+  },
+  "dependencies": {}
+}

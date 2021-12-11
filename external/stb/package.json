@@ -1,0 +1,24 @@
+{
+  "name": "@ekx/stb",
+  "version": "0.0.7",
+  "scripts": {
+    "recipe:build": "node recipe/package.js",
+    "package:test": "node recipe/test-package.js"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "CMakeLists.txt",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "include",
+    "ek.js"
+  ],
+  "devDependencies": {
+    "@ekx/cli-utils": "0.0.15"
+  },
+  "dependencies": {}
+}

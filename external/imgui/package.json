@@ -1,0 +1,25 @@
+{
+  "name": "@ekx/imgui",
+  "version": "0.0.21",
+  "scripts": {
+    "recipe:build": "node recipe/package.js",
+    "package:test": "node recipe/test-package.js",
+    "postinstall": "cmake-build || exit 0"
+  },
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "CMakeLists.txt",
+    "src"
+  ],
+  "devDependencies": {
+    "@ekx/cli-utils": "0.0.15"
+  },
+  "dependencies": {
+    "@ekx/freetype": "0.0.10",
+    "@ekx/stb": "0.0.7",
+    "cmake-build": "0.0.3"
+  }
+}

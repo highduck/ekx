@@ -1,0 +1,26 @@
+{
+  "name": "@ekx/cli-utils",
+  "version": "0.0.15",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "watch": "tsc -w",
+    "build": "tsc"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^16.10.2",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "follow-redirects": "^1.14.4"
+  }
+}
