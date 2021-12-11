@@ -19,7 +19,6 @@
 #include <ek/scenex/base/Tween.hpp>
 #include <ek/goodies/GameScreen.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
-#include <Tracy.hpp>
 #include <ek/scenex/2d/Atlas.hpp>
 
 namespace ek {
@@ -27,8 +26,6 @@ namespace ek {
 using namespace ecs;
 
 void scene_pre_update(EntityApi /*root*/, float dt) {
-    ZoneScoped;
-
     Locator::ref<InteractionSystem>().process();
 
     TimeLayer::updateTimers(dt);
@@ -54,8 +51,6 @@ void scene_pre_update(EntityApi /*root*/, float dt) {
 }
 
 void scene_post_update(ecs::EntityApi root) {
-    ZoneScoped;
-
     DestroyTimer::updateAll();
 
     updateWorldTransformAll2(&ecs::the_world, root);
@@ -67,8 +62,6 @@ void scene_post_update(ecs::EntityApi root) {
 }
 
 void scene_render(ecs::EntityApi root) {
-    ZoneScoped;
-
     FixedArray<Atlas*, 64> atlases;
     for (auto& it: ResourceDB::instance.get().map) {
         auto* content = it.second.content;

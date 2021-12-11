@@ -1,6 +1,6 @@
 #include "Firebase.h"
 
-#include <ek/app/Platform.h>
+#include <ek/app_native.h>
 
 #if defined(__APPLE__)
 
@@ -21,7 +21,7 @@ namespace ek::analytics {
 #if defined(__ANDROID__)
 
 void init() {
-    auto* env = app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     auto class_ref = env->FindClass("ek/FirebasePlugin");
     auto method = env->GetStaticMethodID(class_ref, "init", "()V");
@@ -31,7 +31,7 @@ void init() {
 }
 
 void screen(const char* name) {
-    auto* env = app::getJNIEnv();
+    auto* env = ek_android_jni();
     auto class_ref = env->FindClass("ek/FirebasePlugin");
     auto name_ref = env->NewStringUTF(name);
     auto method = env->GetStaticMethodID(class_ref, "set_screen", "(Ljava/lang/String;)V");
@@ -42,7 +42,7 @@ void screen(const char* name) {
 }
 
 void event(const char* action, const char* target) {
-    auto* env = app::getJNIEnv();
+    auto* env = ek_android_jni();
     auto class_ref = env->FindClass("ek/FirebasePlugin");
     auto action_ref = env->NewStringUTF(action);
     auto target_ref = env->NewStringUTF(target);

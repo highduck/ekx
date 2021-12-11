@@ -1,8 +1,8 @@
 #include "Doc.hpp"
 
 #include <pugixml.hpp>
-#include <ek_log.h>
-#include <ek_assert.h>
+#include <ek/log.h>
+#include <ek/assert.h>
 #include <sys/stat.h>
 #include <miniz.h>
 #include <unordered_map>
@@ -170,7 +170,8 @@ bool is_file(const char* path) {
 }
 
 std::unique_ptr<File> File::load(const char* path) {
-    char tmp[1024] = "";
+    char tmp[1024];
+    *tmp = 0;
 
     if (is_file(path)) {
         const char* ext = ek_path_ext(path);

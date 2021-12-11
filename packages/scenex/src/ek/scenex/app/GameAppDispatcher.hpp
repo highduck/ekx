@@ -53,7 +53,7 @@ public:
         }
     }
 
-    void onEvent(const app::Event& event) override {
+    void onEvent(const ek_app_event& event) override {
         for (auto* listener : listeners) {
             listener->onEvent(event);
         }

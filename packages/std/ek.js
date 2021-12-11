@@ -7,7 +7,11 @@ function setup(project) {
         name: "std",
         path: __dirname,
         cpp: "src",
-        cpp_include: "include"
+        cpp_include: "include",
+        web: {
+            //cpp: "src-wasm",
+            cpp_lib: "--import-memory"
+        }
     });
     project.importModule("@ekx/stb", __dirname);
     project.importModule("@ekx/sokol", __dirname);

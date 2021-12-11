@@ -16,7 +16,8 @@ void saveImagePNG(const Bitmap& bitmap, const char* path, bool alpha);
 std::vector<PageData> packSprites(std::vector<SpriteData> sprites, int maxWidth, int maxHeight);
 
 void formatAtlasFileName(char* buffer, int bufferSize, const char* name, float scale, int pageIndex, const char* ext) {
-    char pageSuffix[8] = "";
+    char pageSuffix[8];
+    *pageSuffix = 0;
     if (pageIndex != 0) {
         snprintf(pageSuffix, 8, "_%d", pageIndex);
     }

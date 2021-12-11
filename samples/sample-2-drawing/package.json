@@ -1,0 +1,20 @@
+{
+  "name": "sample-2-drawing",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "postinstall": "cmake-build",
+    "build:web": "ekx web clean --verbose",
+    "build:android": "ekx android bundle clean --verbose",
+    "build:assets:dev": "ekx assets --dev",
+    "clean": "rimraf ./build ./export ./.firebase"
+  },
+  "dependencies": {
+    "@ekx/graphics": "0.1.7",
+    "@ekx/cli": "0.1.10",
+    "cmake-build": "0.0.3"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2"
+  }
+}

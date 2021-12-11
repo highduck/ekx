@@ -38,7 +38,7 @@ public:
 
     void shareWithAppLink(const String& text);
 
-    void rateUs();
+    void rateUs() const;
 
     void initDownloadAppButtons(ecs::EntityApi e);
 

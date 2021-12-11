@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/util/Signal.hpp>
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 #include <ecxx/ecxx_fwd.hpp>
 #include <ek/util/Type.hpp>
 #include <ek/math/Vec.hpp>
@@ -20,7 +20,7 @@ struct Interactive {
     // events
     Signal<PointerEvent> onEvent;
 
-    app::MouseCursor cursor{app::MouseCursor::Parent};
+    ek_mouse_cursor cursor = EK_MOUSE_CURSOR_PARENT;
 
     // TODO: Interactive::pointer is useless
     // global world space pointer, because of that maybe we don't dispatch this coordinate into components,

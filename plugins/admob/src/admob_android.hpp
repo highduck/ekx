@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/app/Platform.h>
+#include <ek/app_native.h>
 
 namespace admob {
 
@@ -10,7 +10,7 @@ void initialize(const Config& config) {
     _initialize();
     context.config = config;
 
-    auto* env = ek::app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     const char* method_name = "initialize";
     const char* method_sig = "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V";
@@ -34,7 +34,7 @@ void initialize(const Config& config) {
 }
 
 void show_banner(int flags) {
-    auto* env = ek::app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     const char* method_name = "show_banner";
     const char* method_sig = "(I)V";
@@ -48,7 +48,7 @@ void show_banner(int flags) {
 }
 
 void show_rewarded_ad() {
-    auto* env = ek::app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     const char* method_name = "show_rewarded_ad";
     const char* method_sig = "()V";
@@ -62,7 +62,7 @@ void show_rewarded_ad() {
 }
 
 void show_interstitial_ad() {
-    auto* env = ek::app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     const char* method_name = "show_interstitial_ad";
     const char* method_sig = "()V";

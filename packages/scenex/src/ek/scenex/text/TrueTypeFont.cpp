@@ -1,7 +1,7 @@
 #include "TrueTypeFont.hpp"
 
 #include <ek/LocalResource.hpp>
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 #include <ek/assert.h>
 #include <ek/imaging/image.hpp>
 
@@ -82,7 +82,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
 
     const float scale = stbtt_ScaleForPixelHeight(info, baseFontSize);
     map.set(hash, {});
-    auto& glyph = (Glyph&)*map.tryGet(hash);
+    auto& glyph = (Glyph&) *map.tryGet(hash);
     glyph.source = this;
 
     int advanceWidth = 0, leftSideBearing = 0;
@@ -108,7 +108,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         auto bitmapHeight = y1 - y0;
 
         size_t bmpSize = bitmapWidth * bitmapHeight;
-        uint8_t bmp[512*512];
+        uint8_t bmp[512 * 512];
         EK_ASSERT(bmpSize < 512 * 512);
         memset(bmp, 0, bmpSize);
         //uint8_t* bmp = (uint8_t*)calloc(1, bmpSize);
@@ -181,9 +181,10 @@ bool TrueTypeFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
 void TrueTypeFont::loadDeviceFont(const char* fontName) {
     EK_ASSERT(!loaded_);
 
-    const char* filePath = app::getSystemFontPath(fontName);
-    if (filePath) {
-        get_resource_content_async(filePath, [this](auto lr) {
+    char fontPath[1024];
+    if (0 == ek_app_font_path(fontPath, sizeof(fontPath), fontName) &&
+        *fontPath) {
+        get_resource_content_async(fontPath, [this](auto lr) {
             loadFromMemory(lr);
         });
     }

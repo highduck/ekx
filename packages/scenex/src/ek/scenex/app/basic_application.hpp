@@ -8,14 +8,14 @@
 
 #endif
 
-#include <ek/util/ServiceLocator.hpp>
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 #include <ek/log.h>
 #include <ek/assert.h>
+#include <ek/time.h>
+#include <ek/util/ServiceLocator.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/util/Signal.hpp>
 #include <utility>
-#include <ek/time.h>
 #include <ek/time/Timers.hpp>
 #include "profiler.hpp"
 #include "GameDisplay.hpp"
@@ -42,7 +42,12 @@ private:
     uint64_t timer_ = ek_ticks(nullptr);
 };
 
-class basic_application : public RootAppListener {
+
+void basic_app_on_frame();
+
+void basic_app_on_event(ek_app_event);
+
+class basic_application {
 public:
     GameDisplay display{};
     /**** assets ***/
@@ -61,15 +66,14 @@ public:
 
     basic_application();
 
-    ~basic_application() override;
+    virtual ~basic_application();
 
     virtual void initialize();
 
     virtual void preload();
 
-    void onFrame() override;
-
-    void onEvent(const app::Event&) override;
+    void onFrame();
+    void onEvent(ek_app_event event);
 
 public:
     bool preloadOnStart = true;
@@ -101,42 +105,29 @@ protected:
 
 EK_DECLARE_TYPE(basic_application);
 
-class Initializer : public RootAppListener {
-public:
-    void (* creator)() = nullptr;
-
-    int _initializeSubSystemsState = 0;
-
-    ~Initializer() override = default;
-
-    void onReady() override;
-
-    void onFrame() override;
-};
+void launcher_on_frame();
 
 template<typename T>
-inline void run_app(app::AppConfig cfg) {
-    using app::g_app;
-
+inline void run_app(ek_app_config cfg) {
     ek::core::setup();
     gTextEngine.initialize();
-    g_app.config = cfg;
+    ek_app.config = cfg;
 
 #ifdef EK_DEV_TOOLS
     Editor::inspectorEnabled = true;
     Editor::settings.load();
-    if (Editor::settings.width > 0.0f && Editor::settings.height > 0.0f) {
-        g_app.config.windowWidth = Editor::settings.width;
-        g_app.config.windowHeight = Editor::settings.height;
+    if (Editor::settings.width > 0 && Editor::settings.height > 0) {
+        ek_app.config.window_width = Editor::settings.width;
+        ek_app.config.window_height = Editor::settings.height;
     }
 #endif
 
     // audio should be initialized before "Resume" event, so the best place is "On Create" event
     audio::initialize();
 
-    static Initializer initializer;
-    initializer.creator = []{Locator::create<basic_application, T>();};
-    g_app.listener = &initializer;
+    ek_app.on_ready = []{Locator::create<basic_application, T>();};
+    ek_app.on_frame = launcher_on_frame;
+    ek_app.on_event = root_app_on_event;
 }
 
 }

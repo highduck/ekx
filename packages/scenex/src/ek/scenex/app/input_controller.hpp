@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/String.hpp>
@@ -33,18 +33,18 @@ public:
 
     ~input_controller();
 
-    void onEvent(const app::Event& event);
+    void onEvent(const ek_app_event& event);
 
     void onPostFrame();
 
     [[nodiscard]]
-    bool is_key(app::KeyCode code) const;
+    bool is_key(ek_key_code code) const;
 
     [[nodiscard]]
-    bool is_key_down(app::KeyCode code) const;
+    bool is_key_down(ek_key_code code) const;
 
     [[nodiscard]]
-    bool is_key_up(app::KeyCode code) const;
+    bool is_key_up(ek_key_code code) const;
 
     void reset_keyboard();
 
@@ -67,9 +67,9 @@ public:
 private:
     [[nodiscard]] Vec2f screenCoordToGameDisplay(Vec2f pos) const;
 
-    void emulate_mouse_as_touch(const app::Event& event, touch_state_t& data);
+    void emulate_mouse_as_touch(const ek_app_event& event, touch_state_t& data);
 
-    void update_touch(const app::Event& event, touch_state_t& data);
+    void update_touch(const ek_app_event& event, touch_state_t& data);
 
     struct key_state_t {
         bool state = false;
@@ -82,8 +82,7 @@ private:
     //int keyboard_modifiers_{};
     bool reset_keys_ = false;
 
-    constexpr static size_t keys_count = static_cast<size_t>(app::KeyCode::MaxCount);
-    key_state_t keys_[keys_count];
+    key_state_t keys_[EK_KEYCODE_MAX_COUNT];
 
     Array<touch_state_t> touches_;
 };

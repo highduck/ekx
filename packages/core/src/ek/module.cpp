@@ -9,6 +9,9 @@
 namespace ek::core {
 
 void setup() {
+    void* lt = malloc(4);
+    (void)lt;
+
     ResourceDB::instance.initialize();
     log_init();
     ek_time_init();

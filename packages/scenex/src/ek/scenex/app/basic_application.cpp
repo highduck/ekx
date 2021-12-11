@@ -28,7 +28,6 @@
 #include <ek/scenex/base/DestroyTimer.hpp>
 #include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
-#include <Tracy.hpp>
 
 #include "impl/GameDisplay_impl.hpp"
 
@@ -43,15 +42,14 @@ double FrameTimer::update() {
     return deltaTime = ek_ticks_to_sec(ek_ticks(&timer_));
 }
 
-using namespace ek::app;
-
 void logDisplayInfo() {
 #ifndef NDEBUG
-    EK_INFO("Display: %d x %d", (int)g_app.drawableWidth, (int)g_app.drawableHeight);
-    const float* insets = app::getScreenInsets();
-    if (insets) {
-        EK_INFO("Insets: %d, %d, %d, %d", (int)insets[0], (int)insets[1], (int)insets[2], (int)insets[3]);
-    }
+    EK_INFO("Display: %d x %d", (int) ek_app.viewport.width, (int) ek_app.viewport.height);
+    EK_INFO("Insets: %d, %d, %d, %d",
+            (int) ek_app.viewport.insets[0],
+            (int) ek_app.viewport.insets[1],
+            (int) ek_app.viewport.insets[2],
+            (int) ek_app.viewport.insets[3]);
 #endif
 }
 
@@ -72,7 +70,7 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
         float cy = zoneHeight / 2.0f;
         float sh = sz / 16.0f;
         float sw = sh * 3;
-        const auto time = (float)ek_time_now();
+        const auto time = (float) ek_time_now();
         for (int i = 0; i < 7; ++i) {
             float r = ((float) i / 7) * 1.5f + time;
             float speed = (0.5f + 0.5f * sinf(r * 2 + 1));
@@ -87,7 +85,6 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
 }
 
 basic_application::basic_application() {
-    tracy::SetThreadName("Main");
 #ifdef EK_UITEST
     uitest::initialize(this);
 #endif
@@ -141,8 +138,6 @@ void registerSceneXComponents() {
 }
 
 void basic_application::initialize() {
-    ZoneScopedN("initialize");
-
     EK_DEBUG("base application: initialize");
     // init default empty sprite data
     {
@@ -157,7 +152,7 @@ void basic_application::initialize() {
     EK_DEBUG("base application: initialize scene root");
     root = createNode2D("root");
 
-    const Vec2f baseResolution{app::g_app.config.width, app::g_app.config.height};
+    const Vec2f baseResolution{ek_app.config.width, ek_app.config.height};
     root.assign<Viewport>(baseResolution.x, baseResolution.y);
 
     root.assign<LayoutRect>();
@@ -195,11 +190,18 @@ void basic_application::preload() {
     }
 }
 
+void basic_app_on_frame() {
+    Locator::get<basic_application>()->onFrame();
+}
+
+void basic_app_on_event(const ek_app_event ev) {
+    Locator::get<basic_application>()->onEvent(ev);
+}
+
 void basic_application::onFrame() {
-    ZoneScoped;
     uint64_t timer = ek_ticks(nullptr);
 
-    RootAppListener::onFrame();
+    root_app_on_frame();
 
     dispatcher.onBeforeFrameBegin();
     display.update();
@@ -208,7 +210,7 @@ void basic_application::onFrame() {
 
     /** base app BEGIN **/
 
-    const float dt = fmin(frameTimer.update(), 0.3f);
+    const float dt = (float) fmin(frameTimer.update(), 0.3);
     // fixed for GIF recorder
     //dt = 1.0f / 60.0f;
     doUpdateFrame(dt);
@@ -225,12 +227,12 @@ void basic_application::onFrame() {
 
     sg_pass_action pass_action{};
     pass_action.colors[0].action = started_ ? SG_ACTION_DONTCARE : SG_ACTION_CLEAR;
-    const Vec4f fillColor = static_cast<Vec4f>(argb32_t{g_app.config.backgroundColor});
+    const Vec4f fillColor = static_cast<Vec4f>(argb32_t{ek_app.config.background_color});
     pass_action.colors[0].value.r = fillColor.x;
     pass_action.colors[0].value.g = fillColor.y;
     pass_action.colors[0].value.b = fillColor.z;
-    pass_action.colors[0].value.a = fillColor.w;
-    if (app::g_app.config.needDepth) {
+    pass_action.colors[0].value.a = 1.0f;
+    if (ek_app.config.need_depth) {
         pass_action.depth.action = SG_ACTION_CLEAR;
         pass_action.depth.value = 1.0f;
     }
@@ -267,7 +269,7 @@ void basic_application::onFrame() {
 
             dispatcher.onRenderOverlay();
 
-            draw2d::begin({0, 0, g_app.drawableWidth, g_app.drawableHeight});
+            draw2d::begin({0, 0, ek_app.viewport.width, ek_app.viewport.height});
             onFrameEnd();
             draw2d::end();
 
@@ -306,12 +308,11 @@ void basic_application::preload_root_assets_pack() {
     }
 }
 
-void basic_application::onEvent(const Event& event) {
-    ZoneScoped;
+void basic_application::onEvent(const ek_app_event event) {
     uint64_t timer = ek_ticks(nullptr);
 
-    RootAppListener::onEvent(event);
-    if (event.type == EventType::Resize) {
+    root_app_on_event(event);
+    if (event.type == EK_APP_EVENT_RESIZE) {
         display.update();
     }
 
@@ -338,14 +339,10 @@ void basic_application::doRenderFrame() {
     onRenderSceneAfter();
 }
 
-void Initializer::onReady() {
-    if (creator != nullptr) {
-        creator();
-    }
-}
+void launcher_on_frame() {
+    root_app_on_frame();
 
-void Initializer::onFrame() {
-    RootAppListener::onFrame();
+    static int _initializeSubSystemsState = 0;
 
     const float steps = 5.0f;
     {
@@ -385,23 +382,24 @@ void Initializer::onFrame() {
                 Locator::ref<basic_application>().preload();
                 break;
             default:
-                g_app.listener = Locator::get<basic_application>();
+                ek_app.on_frame = basic_app_on_frame;
+                ek_app.on_event = basic_app_on_event;
                 break;
         }
     }
 
     if (_initializeSubSystemsState > 0) {
-        const auto width = g_app.drawableWidth;
-        const auto height = g_app.drawableHeight;
+        const auto width = ek_app.viewport.width;
+        const auto height = ek_app.viewport.height;
         if (width > 0 && height > 0) {
             //EK_PROFILE_SCOPE("init frame");
             sg_pass_action pass_action{};
             pass_action.colors[0].action = SG_ACTION_CLEAR;
-            const Vec4f fillColor = static_cast<Vec4f>(argb32_t{g_app.config.backgroundColor});
+            const Vec4f fillColor = static_cast<Vec4f>(argb32_t{ek_app.config.background_color});
             pass_action.colors[0].value.r = fillColor.x;
             pass_action.colors[0].value.g = fillColor.y;
             pass_action.colors[0].value.b = fillColor.z;
-            pass_action.colors[0].value.a = fillColor.w;
+            pass_action.colors[0].value.a = 1.0f;
             sg_begin_default_pass(&pass_action, (int) width, (int) height);
 
             if (_initializeSubSystemsState > 2) {

@@ -4,21 +4,13 @@
  */
 function setup(project) {
     project.addModule({
-        name: "ek-app",
+        name: "app",
         path: __dirname,
         cpp: "src",
+        cpp_include: "include",
         android: {
-            cpp: "platforms/android",
-            cpp_lib: [
-                // basic Android libraries
-                "log",
-                "android",
-                "GLESv2"
-            ],
-            android_java: "platforms/android/java"
-        },
-        apple: {
-            cpp: "platforms/apple"
+            cpp_lib: ["log", "android", "GLESv2"],
+            android_java: "java"
         },
         macos: {
             xcode_framework: [
@@ -35,24 +27,14 @@ function setup(project) {
                 "Metal",
                 "MetalKit",
                 "QuartzCore",
-            ],
-            xcode_pod: [
-                "Firebase/Crashlytics",
-                "Firebase/Analytics"
             ]
         },
         web: {
-            cpp: "platforms/web",
-            js: "platforms/web",
+            js: "src/web",
             cpp_lib: ["GLESv2", "GL"]
         },
-        windows: {
-            cpp: "platforms/windows"
-        },
-        linux: {
-            cpp: "platforms/linux"
-        }
     });
+    project.importModule("@ekx/std", __dirname);
 }
 
 module.exports = setup;

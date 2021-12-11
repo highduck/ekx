@@ -2,7 +2,7 @@
 
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 
 // TODO: EK_DEV_BUILD
 #ifndef ENABLE_PROFILER

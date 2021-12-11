@@ -31,7 +31,7 @@ private:
 
 class Localization final {
 public:
-    bool setLanguage(const String& lang);
+    bool setLanguage(const char* lang);
 
     [[nodiscard]] const String& getLanguage() const;
 

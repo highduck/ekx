@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">template-android</string>
+    <string name="package_name" translatable="false">com.eliasku.template_android</string>
+</resources>

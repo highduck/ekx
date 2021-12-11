@@ -52,7 +52,7 @@ public:
 
     VerbosityFilterInfo infos[5]{};
 
-    char input[1024] = "";
+    char input[1024]{0};
 };
 
 }

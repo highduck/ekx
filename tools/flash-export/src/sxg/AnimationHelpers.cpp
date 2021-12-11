@@ -2,8 +2,8 @@
 
 #include <ek/scenex/data/SGFile.hpp>
 #include "../xfl/Doc.hpp"
-#include <ek_log.h>
-#include <ek_assert.h>
+#include <ek/log.h>
+#include <ek/assert.h>
 
 namespace ek::xfl {
 

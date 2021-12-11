@@ -3,8 +3,7 @@
 #include <ek/assert.h>
 #include <ek/imaging/image.hpp>
 #include <ek/math/Rect.hpp>
-#include <ek/app/app.hpp>
-#include <ek/app/Platform.h>
+#include <ek/app_native.h>
 
 #define SOKOL_GFX_IMPL
 
@@ -227,9 +226,9 @@ void initialize(int maxDrawCalls) {
     // this size is 2x Draw Calls per frame (because of sokol internal double-buffering)
     desc.buffer_pool_size = maxDrawCalls << 1;
 #if defined(__APPLE__)
-    desc.context.metal.device = app::getMetalDevice();
-    desc.context.metal.renderpass_descriptor_cb = app::getMetalRenderPass;
-    desc.context.metal.drawable_cb = app::getMetalDrawable;
+    desc.context.metal.device = ek_metal__device();
+    desc.context.metal.renderpass_descriptor_cb = ek_metal__render_pass;
+    desc.context.metal.drawable_cb = ek_metal__drawable;
     desc.context.sample_count = 1;
     desc.context.color_format = SG_PIXELFORMAT_BGRA8;
     desc.context.depth_format = SG_PIXELFORMAT_DEPTH_STENCIL;

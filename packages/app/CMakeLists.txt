@@ -1,51 +1,92 @@
 cmake_minimum_required(VERSION 3.19)
 include(npm.cmake)
-project(app)
 
-add_library(${PROJECT_NAME} STATIC "")
+project(app C)
+
+add_library(${PROJECT_NAME} STATIC
+        src/app.c
+        )
+
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
-add_subdirectory(src)
-
-#target_link_libraries(${PROJECT_NAME}
-#        PUBLIC ekx::core
-#        )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO)
+        )
 
-target_compile_options(${PROJECT_NAME} PRIVATE
-        -g
-        -fno-exceptions
-        -fno-rtti
-        -fno-strict-aliasing
-        -Wstrict-aliasing=2
+target_include_directories(${PROJECT_NAME} PUBLIC include)
+
+target_compile_options(${PROJECT_NAME}
+        PRIVATE -g
+#        PRIVATE -flto
+        PRIVATE -Os
+        PRIVATE -Weverything
+        #PRIVATE -Wno-c99-compat
+        PRIVATE -std=c18
+        PRIVATE -fno-strict-aliasing
+        PRIVATE -fno-exceptions
+        PRIVATE -fno-rtti
+        PRIVATE -ffast-math
+#        PRIVATE -mstackrealign
+#        PRIVATE -fshort-enums
+        )
+
+target_link_options(${PROJECT_NAME}
+        PRIVATE -g
+#        PRIVATE -flto
+        PRIVATE -Os
+        PRIVATE -fno-strict-aliasing
+        PRIVATE -fno-exceptions
+        PRIVATE -fno-rtti
+        PRIVATE -ffast-math
+        )
+
+target_link_libraries(${PROJECT_NAME}
+        PRIVATE ekx::std
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-    add_subdirectory(platforms/web)
+    target_link_options(${PROJECT_NAME}
+            PUBLIC SHELL:--js-library ${CMAKE_CURRENT_SOURCE_DIR}/src/web/app.js
+            )
+
+    target_link_libraries(${PROJECT_NAME}
+            PUBLIC GLESv2
+            )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
-    add_subdirectory(platforms/apple)
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE "-framework Foundation"
+            PRIVATE "-framework UIKit"
+            PRIVATE "-framework Metal"
+            PRIVATE "-framework MetalKit"
+            PRIVATE "-framework QuartzCore"
+            )
+#    target_compile_options(${PROJECT_NAME}
+#            PRIVATE -fobjc-arc
+#            PRIVATE -x objective-c++
+#            )
+    target_sources(${PROJECT_NAME} PRIVATE
+            src/apple/apple.m
+            )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    add_subdirectory(platforms/apple)
-    file(GLOB_RECURSE ek_app_c_file ${CMAKE_SOURCE_DIR}/**/ek_app.c)
-    message(STATUS ${ek_app_c_file})
-    set_source_files_properties(${ek_app_c_file} PROPERTIES
-            LANGUAGE CXX
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE "-framework Cocoa"
+            PRIVATE "-framework Metal"
+            PRIVATE "-framework MetalKit"
+            PRIVATE "-framework QuartzCore"
+            )
+#    target_compile_options(${PROJECT_NAME}
+#            PRIVATE -fobjc-arc
+#            PRIVATE -x objective-c++
+#            )
+    target_sources(${PROJECT_NAME} PRIVATE
+            src/apple/apple.m
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
-    add_subdirectory(platforms/android)
+
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    add_subdirectory(platforms/windows)
+    error("Platform: not supported")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    add_subdirectory(platforms/linux)
+    error("Platform: not supported")
 else ()
     error("Platform: UNKNOWN")
-endif ()
-
-if (EKX_BUILD_TESTS)
-    add_subdirectory(test)
 endif ()

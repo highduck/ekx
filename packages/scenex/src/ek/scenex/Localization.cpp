@@ -96,7 +96,7 @@ const char* Localization::getText(const char* str) const {
     return str;
 }
 
-bool Localization::setLanguage(const String& lang) {
+bool Localization::setLanguage(const char* lang) {
     language = lang;
     auto it = languages.find(lang);
     if (it != languages.end()) {

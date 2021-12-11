@@ -1,6 +1,5 @@
 ./.idea
 cmake-build-*/
-build/
 yarn-error.log
 
 # npm dependencies
@@ -11,3 +10,5 @@ npm.cmake
 
 # samples generated resources
 generated/
+build/
+export/

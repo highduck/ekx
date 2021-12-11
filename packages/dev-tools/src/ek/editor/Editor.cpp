@@ -7,13 +7,11 @@
 
 namespace ek {
 
-using app::g_app;
-
 void Editor::onRenderOverlay() {
     gui_.end_frame();
 
     bool dirty = false;
-    for (auto* wnd : windows) {
+    for (auto* wnd: windows) {
         dirty |= wnd->dirty;
     }
     if (dirty) {
@@ -70,7 +68,7 @@ void Editor::load() {
         return;
     }
     auto node = doc.first_child();
-    for (auto* wnd : windows) {
+    for (auto* wnd: windows) {
         wnd->load(node);
     }
 }
@@ -78,7 +76,7 @@ void Editor::load() {
 void Editor::save() {
     pugi::xml_document xml;
     auto node = xml.append_child("EditorLayoutState");
-    for (auto* wnd : windows) {
+    for (auto* wnd: windows) {
         wnd->save(node);
     }
     xml.save_file("EditorLayoutState.xml");
@@ -89,21 +87,19 @@ void Editor::onPostFrame() {
     invalidateSettings();
 }
 
-void Editor::onEvent(const app::Event& event) {
-    using ek::app::EventType;
-
+void Editor::onEvent(const ek_app_event& event) {
     switch (event.type) {
-        case EventType::KeyDown:
-            if (event.key.code == app::KeyCode::A &&
-                event.key.isControl() &&
-                event.key.isShift()) {
+        case EK_APP_EVENT_KEY_DOWN:
+            if (event.key.code == EK_KEYCODE_A &&
+                (event.key.modifiers & EK_KEY_MOD_CONTROL) &&
+                (event.key.modifiers & EK_KEY_MOD_SHIFT)) {
                 settings.showEditor = !settings.showEditor;
                 settings.dirty = true;
             }
             break;
-        case EventType::Resize: {
-            const auto width = (int)g_app.windowWidth;
-            const auto height = (int)g_app.windowHeight;
+        case EK_APP_EVENT_RESIZE: {
+            const auto width = (int) (ek_app.viewport.width / ek_app.viewport.scale);
+            const auto height = (int) (ek_app.viewport.height / ek_app.viewport.scale);
             if (width != settings.width || height != settings.height) {
                 settings.width = width;
                 settings.height = height;
@@ -151,8 +147,8 @@ void EditorSettings::load() {
             notifyAssetsOnScaleFactorChanged);
     showEditor = node.attribute("showEditor").as_bool(showEditor);
     auto wnd = node.child("window");
-    width = wnd.attribute("width").as_int((int)g_app.config.width);
-    height = wnd.attribute("height").as_int((int)g_app.config.height);
+    width = wnd.attribute("width").as_int((int) ek_app.config.width);
+    height = wnd.attribute("height").as_int((int) ek_app.config.height);
 }
 
 void Editor::invalidateSettings() {

@@ -16,7 +16,7 @@ uint32_t base64_decode(void* dst, uint32_t dstMaxSize, const void* src, uint32_t
     // TODO: check `dstMaxSize` for overflow
     (void) dstMaxSize;
 
-    const uint8_t decoder[256] = {
+    static const uint8_t decoder[256] = {
             64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
             64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64,
             64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 62, 64, 64, 64, 63,
@@ -43,38 +43,38 @@ uint32_t base64_decode(void* dst, uint32_t dstMaxSize, const void* src, uint32_t
         const uint8_t i1 = decoder[*(in++)];
         const uint8_t i2 = decoder[*(in++)];
         const uint8_t i3 = decoder[*(in++)];
-        *(p++) = (uint8_t)(i0 << 2u) | (i1 >> 4u);
-        *(p++) = (uint8_t)(i1 << 4u) | (i2 >> 2u);
-        *(p++) = (uint8_t)(i2 << 6u) | i3;
+        *(p++) = (uint8_t) (i0 << 2u) | (i1 >> 4u);
+        *(p++) = (uint8_t) (i1 << 4u) | (i2 >> 2u);
+        *(p++) = (uint8_t) (i2 << 6u) | i3;
         srcSize -= 4;
     }
     // Note: (srcSize == 1) would be an error, so just ignore that case
     if (srcSize > 1) {
         const uint8_t i0 = decoder[*(in++)];
         const uint8_t i1 = decoder[*(in++)];
-        *(p++) = (uint8_t)(i0 << 2u) | (i1 >> 4u);
+        *(p++) = (uint8_t) (i0 << 2u) | (i1 >> 4u);
         if (srcSize > 2) {
             const uint8_t i2 = decoder[*(in++)];
             if (i2 < 64) {
-                *(p++) = (uint8_t)(i1 << 4u) | (i2 >> 2u);
+                *(p++) = (uint8_t) (i1 << 4u) | (i2 >> 2u);
                 if (srcSize > 3) {
                     const uint8_t i3 = decoder[*in];
                     if (i3 < 64) {
-                        *(p++) = (uint8_t)(i2 << 6u) | i3;
+                        *(p++) = (uint8_t) (i2 << 6u) | i3;
                     }
                 }
             }
         }
     }
 
-    return (uint32_t)(p - (uint8_t*) dst);
+    return (uint32_t) (p - (uint8_t*) dst);
 }
 
 uint32_t base64_encode(void* dst, uint32_t dstMaxSize, const void* src, uint32_t srcSize) {
     // TODO: check `dstMaxSize` for overflow
     (void) dstMaxSize;
 
-    const char alphabet[66] =
+    static const char alphabet[66] =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             "abcdefghijklmnopqrstuvwxyz"
             "0123456789+/=";
@@ -105,5 +105,5 @@ uint32_t base64_encode(void* dst, uint32_t dstMaxSize, const void* src, uint32_t
         *(p++) = alphabet[0x40];
     }
 
-    return (uint32_t)(p - (const char*) dst);
+    return (uint32_t) (p - (const char*) dst);
 }

@@ -1,5 +1,6 @@
 #include "AppBox.hpp"
 
+#include <ek/app.h>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/2d/Button.hpp>
@@ -9,9 +10,7 @@
 #include <ek/util/ServiceLocator.hpp>
 #include <utility>
 #include <GameServices.hpp>
-#include <ek/ext/sharing/sharing.hpp>
 #include <ek/goodies/GameScreen.hpp>
-#include <ek/app/app.hpp>
 #include <ek/scenex/Localization.hpp>
 #include "Ads.hpp"
 
@@ -28,15 +27,18 @@ AppBox::AppBox(AppBoxConfig config_) :
     game_services_init();
 
     // initialize translations
-    auto lang = get_user_string("selected_lang", "");
-    if (lang.empty()) {
-        const char* l = app::getPreferredLang();
-        lang = l != nullptr ? l : "en";
+    // TODO: wtf
+    char lang_buf[sizeof(ek_app.lang)];
+    int n = ek_ls_get_s("selected_lang", lang_buf, sizeof(lang_buf));
+    if(n < 2) {
+        memcpy(lang_buf, ek_app.lang, sizeof(lang_buf));
     }
-    if (lang.size() > 2) {
-        lang.resize(2);
+    lang_buf[3] = 0;
+    if(lang_buf[0] == 0) {
+        lang_buf[0] = 'e';
+        lang_buf[1] = 'n';
     }
-    Localization::instance.setLanguage(lang);
+    Localization::instance.setLanguage(lang_buf);
 }
 
 void set_state_by_name(ecs::EntityApi e, const char* state) {
@@ -76,7 +78,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
             }
             e_pp.get_or_create<Interactive>();
             e_pp.get_or_create<Button>().clicked += [this] {
-                app::openURL(config.privacyPolicyURL.c_str());
+                ek_app_open_url(config.privacyPolicyURL.c_str());
             };
         }
     }
@@ -153,11 +155,21 @@ void AppBox::shareWithAppLink(const String& text) {
         msg += ' ';
         msg += config.appLinkURL;
     }
-    sharing_send_message(msg.c_str());
+    ek_app_share(msg.c_str());
 }
 
-void AppBox::rateUs() {
-    sharing_rate_us(config.appID.c_str());
+void AppBox::rateUs() const {
+#ifdef __ANDROID__
+    char buf[1024];
+    stbsp_snprintf(buf, 1024, "market://details?id=%s", config.appID.c_str());
+    ek_app_open_url(buf);
+#endif // __ANDROID__
+
+#ifdef __APPLE__
+    char buf[1024];
+    stbsp_snprintf(buf, 1024, "itms-apps://itunes.apple.com/us/app/apple-store/id%s?mt=8&action=write-review", config.appID.c_str());
+    ek_app_open_url(buf);
+#endif // __APPLE__
 }
 
 /// download app feature
@@ -166,7 +178,7 @@ void wrap_button(ecs::EntityApi e, const char* name, const char* link) {
     auto x = find(e, name);
     if (link && *link) {
         x.get_or_create<Button>().clicked.add([link] {
-            app::openURL(link);
+            ek_app_open_url(link);
         });
     } else {
         setVisible(e, false);
@@ -197,8 +209,8 @@ void AppBox::initLanguageButton(ecs::EntityApi e) {
                     locale = locales.begin();
                 }
                 auto& lang = *locale;
-                lm.setLanguage(lang);
-                set_user_string("selected_lang", lang.c_str());
+                lm.setLanguage(lang.c_str());
+                ek_ls_set_s("selected_lang", lang.c_str());
             }
         };
     }

@@ -130,7 +130,7 @@ void Button::updateAll() {
 
         if (!btn.initialized) {
             btn.initialized = true;
-            interactive.cursor = app::MouseCursor::Button;
+            interactive.cursor = EK_MOUSE_CURSOR_BUTTON;
             initialize_base_transform(btn, transform);
             initialize_events(e);
         }

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "TextureLoader.hpp"
-#include <jni.h>
-#include <ek/app/Platform.h>
+#include <ek/app_native.h>
 #include <GLES2/gl2.h>
 
 namespace ek {
@@ -15,7 +14,7 @@ void TextureLoader::load() {
     if (premultiplyAlpha) flags |= 1;
     if (isCubeMap) flags |= 2;
 
-    auto *env = app::getJNIEnv();
+    auto *env = ek_android_jni();
     jobject jBasePath = nullptr;
     if (!basePath.empty()) {
         jBasePath = env->NewStringUTF(basePath.c_str());
@@ -30,7 +29,7 @@ void TextureLoader::load() {
 
     auto method = env->GetStaticMethodID(cls, "load",
                                          "(Landroid/content/Context;Ljava/lang/String;[Ljava/lang/String;II)I");
-    handle = env->CallStaticIntMethod(cls, method, app::get_context(), jBasePath, jURLs, flags, (int)formatMask);
+    handle = env->CallStaticIntMethod(cls, method, ek_android_context(), jBasePath, jURLs, flags, (int)formatMask);
 
     env->DeleteLocalRef(cls);
     env->DeleteLocalRef(jURLs);
@@ -43,7 +42,7 @@ void TextureLoader::update() {
     if (imagesToLoad <= 0 || !loading) {
         return;
     }
-    auto *env = app::getJNIEnv();
+    auto *env = ek_android_jni();
     auto cls = env->FindClass("ek/TextureLoader");
 
     auto metGetProgress = env->GetStaticMethodID(cls, "getProgress",

@@ -2,7 +2,6 @@
 
 #include <ek/ds/FixedArray.hpp>
 #include <ek/scenex/base/Node.hpp>
-#include <Tracy.hpp>
 
 namespace ek {
 
@@ -119,8 +118,6 @@ void Transform2D::fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, Vec2f
 //}
 
 void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root) {
-    ZoneScoped;
-
     FixedArray<ecs::EntityIndex, ecs::ENTITIES_MAX_COUNT> out;
     out.push_back(root.index);
 

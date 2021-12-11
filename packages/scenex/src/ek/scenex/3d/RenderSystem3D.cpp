@@ -9,7 +9,7 @@
 
 #include <ek/timers.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/math/MatrixTransform.hpp>
 #include <ek/math/MatrixTranspose.hpp>
@@ -392,8 +392,8 @@ void RenderSystem3D::prepare() {
 
     Matrix4f view = inverse(cameraTransform.world);
 
-    const float width = app::g_app.drawableWidth;
-    const float height = app::g_app.drawableHeight;
+    const float width = ek_app.viewport.width;
+    const float height = ek_app.viewport.height;
     Matrix4f proj{};
     const auto aspect = (float) width / height;
     if (cameraData.orthogonal) {

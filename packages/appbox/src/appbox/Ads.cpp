@@ -2,7 +2,7 @@
 
 #include <ek/timers.hpp>
 #include <ek/scenex/app/basic_application.hpp>
-#include <ek/LocalStorage.hpp>
+#include <ek/local_storage.h>
 #include <AdMobWrapper.hpp>
 
 namespace ek {
@@ -59,13 +59,13 @@ void Ads::purchaseRemoveAds() const {
 }
 
 void Ads::setRemoveAdsPurchaseCache(bool adsRemoved) const {
-    set_user_preference(config_.key0.c_str(), adsRemoved ? config_.val0 : 0);
-    set_user_preference(config_.key1.c_str(), adsRemoved ? config_.val1 : 1);
+    ek_ls_set_i(config_.key0.c_str(), adsRemoved ? config_.val0 : 0);
+    ek_ls_set_i(config_.key1.c_str(), adsRemoved ? config_.val1 : 1);
 }
 
 bool Ads::checkRemoveAdsPurchase() const {
-    return get_user_preference(config_.key0.c_str(), 0) == config_.val0 &&
-           get_user_preference(config_.key1.c_str(), 0) == config_.val1;
+    return ek_ls_get_i(config_.key0.c_str(), 0) == config_.val0 &&
+            ek_ls_get_i(config_.key1.c_str(), 0) == config_.val1;
 }
 
 void Ads::onRemoveAdsPurchased() {

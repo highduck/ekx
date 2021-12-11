@@ -2,7 +2,7 @@
 #include "parsing.hpp"
 
 #include <pugixml.hpp>
-#include <ek_log.h>
+#include <ek/log.h>
 #include <cstring>
 
 namespace ek::xfl {

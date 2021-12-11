@@ -2,7 +2,7 @@
 
 #include "LocalResource.hpp"
 #include "LocalResource_System.hpp"
-#include <ek/app/Platform.h>
+#include <ek/app_native.h>
 
 namespace ek {
 
@@ -16,7 +16,7 @@ void closeAndroidAsset(LocalResource* lr) {
 }
 
 int getFile_platform(const char* path, LocalResource* lr) {
-    auto* asset = AAssetManager_open(app::get_asset_manager(), path, AASSET_MODE_BUFFER);
+    auto* asset = AAssetManager_open(ek_android_assets(), path, AASSET_MODE_BUFFER);
     if (asset) {
         lr->handle = asset;
         lr->buffer = (uint8_t*)AAsset_getBuffer(asset);

@@ -20,7 +20,6 @@ uint32_t ek_rand1(uint32_t* state) {
     x = x * 1103515245 + 12345;
     *state = x;
     return ek_temper(x) >> 1;
-//    return x >> 1;
 }
 
 // simple PRNG from libc with u64 state
@@ -44,4 +43,4 @@ float ek_norm_f32_from_u32(uint32_t value) {
     EK_ASSERT_R2(f >= 0.0f);
     EK_ASSERT_R2(f < 1.0f);
     return f;
-    }
+}

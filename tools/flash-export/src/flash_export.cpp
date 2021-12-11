@@ -2,7 +2,7 @@
 #include <pugixml.hpp>
 #include "xfl/Doc.hpp"
 #include <ek/scenex/data/SGFile.hpp>
-#include <ek_log.h>
+#include <ek/log.h>
 #include "sxg/SGBuilder.hpp"
 #include "sxg/RenderElement.hpp"
 #include "ImageSet.hpp"

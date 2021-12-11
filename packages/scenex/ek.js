@@ -16,7 +16,6 @@ function setup(project) {
     project.importModule("@ekx/audio", __dirname);
     project.importModule("@ekx/local-storage", __dirname);
     project.importModule("@ekx/texture-loader", __dirname);
-    project.importModule("@ekx/tracy", __dirname);
     project.importModule("@ekx/res", __dirname);
     project.importModule("@ekx/ecs", __dirname);
 }

@@ -30,7 +30,6 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::local-storage
         PUBLIC ekx::texture-loader
         PUBLIC ekx::sg-file
-        PUBLIC ekx::tracy
         PUBLIC ekx::res
         PUBLIC ekx::ecs
         )

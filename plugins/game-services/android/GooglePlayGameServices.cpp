@@ -1,5 +1,6 @@
-#include <ek/app/Platform.h>
-#include <ek/debug.hpp>
+#include <ek/app_native.h>
+#include <ek/assert.h>
+#include <ek/log.h>
 
 namespace ek {
 
@@ -8,7 +9,7 @@ namespace ek {
 void game_services_init() {
     EK_DEBUG("game-services initialize");
 
-    auto* env = app::getJNIEnv();
+    auto* env = ek_android_jni();
     auto class_ref = env->FindClass(CLASS_PATH);
 
     auto method = env->GetStaticMethodID(class_ref, "init", "()V");
@@ -18,7 +19,7 @@ void game_services_init() {
 }
 
 void leader_board_show(const char* leader_board_id) {
-    auto* env = app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     auto class_ref = env->FindClass(CLASS_PATH);
     auto id_ref = env->NewStringUTF(leader_board_id);
@@ -32,7 +33,7 @@ void leader_board_show(const char* leader_board_id) {
 }
 
 void leader_board_submit(const char* leader_board_id, int score) {
-    auto* env = app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     auto class_ref = env->FindClass(CLASS_PATH);
     auto id_ref = env->NewStringUTF(leader_board_id);
@@ -46,7 +47,7 @@ void leader_board_submit(const char* leader_board_id, int score) {
 }
 
 void achievement_update(const char* achievement_id, int increment) {
-    auto* env = app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     auto class_ref = env->FindClass(CLASS_PATH);
     auto id_ref = env->NewStringUTF(achievement_id);
@@ -60,7 +61,7 @@ void achievement_update(const char* achievement_id, int increment) {
 }
 
 void achievement_show() {
-    auto* env = app::getJNIEnv();
+    auto* env = ek_android_jni();
     auto class_ref = env->FindClass(CLASS_PATH);
 
     auto method = env->GetStaticMethodID(class_ref, "achievement_show", "()V");

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ek/LocalStorage.hpp>
-#include <ek/app/app.hpp>
+#include <ek/local_storage.h>
+#include <ek/app.h>
 #include <ek/util/Signal.hpp>
 #include <ek/ds/String.hpp>
 
@@ -15,7 +15,7 @@ public:
 
     explicit StorageVariable(const char* key, int default_value = 0) :
             key_{key} {
-        value_ = get_user_preference(key, default_value);
+        value_ = ek_ls_get_i(key, default_value);
     }
 
     [[nodiscard]]
@@ -26,7 +26,7 @@ public:
     void value(int v) {
         if (value_ != v) {
             value_ = v;
-            set_user_preference(key_.c_str(), v);
+            ek_ls_set_i(key_.c_str(), v);
             changed.emit(*this);
         }
     }

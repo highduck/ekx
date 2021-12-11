@@ -19,7 +19,6 @@
     "@ekx/sg-file": "0.1.7",
     "@ekx/graphics": "0.1.7",
     "@ekx/audio": "0.1.7",
-    "@ekx/tracy": "^0.0.14",
     "@ekx/res": "0.1.7"
   },
   "devDependencies": {

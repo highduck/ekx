@@ -3,8 +3,8 @@
 #include "../types.hpp"
 
 #include <ek/serialize/serialize.hpp>
-#include <ek_log.h>
-#include <ek_assert.h>
+#include <ek/log.h>
+#include <ek/assert.h>
 
 #include <ek/imaging/image.hpp>
 #include <ek/imaging/stbimage_impl.h>

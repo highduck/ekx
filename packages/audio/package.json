@@ -9,7 +9,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "auph": "^0.1.1",
+    "@ekx/auph": "0.1.1",
     "@ekx/app": "0.1.7",
     "cmake-build": "0.0.3"
   },

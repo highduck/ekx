@@ -1,0 +1,74 @@
+{
+  "name": "@ekx/auph",
+  "version": "0.1.1",
+  "browser": "web/dist/browser/auph.js",
+  "main": "web/dist/cjs/index.js",
+  "module": "web/dist/module/index.js",
+  "types": "web/dist/types/index.d.ts",
+  "scripts": {
+    "install": "npx cmake-build || exit 0",
+    "watch": "tsc -w -p web/tsconfig.json & rollup -w -c web/rollup.config.js",
+    "build": "tsc -p web/tsconfig.json && rollup -c web/rollup.config.js",
+    "build-cmake": "node scripts/build-cmake",
+    "build-pages": "node scripts/build-demo && node scripts/build-pages",
+    "build-node": "node-gyp rebuild",
+    "start-node": "cd demo && node node.js",
+    "build-demo": "node scripts/build-demo",
+    "start-demo": "http-server demo -o",
+    "clean": "rimraf ./build ./pages ./web/dist"
+  },
+  "files": [
+    "include",
+    "android",
+    "CMakeLists.txt",
+    "auph-static.cpp",
+    "ek.js",
+    "web/dist",
+    "README.md",
+    "REFERENCES.md",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/eliasku/auph.git"
+  },
+  "devDependencies": {
+    "@rollup/plugin-replace": "^3.0.0",
+    "follow-redirects": "^1.14.4",
+    "http-server": "^13.0.2",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.56.3",
+    "rollup-plugin-terser": "^7.0.2",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@ekx/dr-libs": "^0.0.3",
+    "@ekx/stb": "^0.0.7",
+    "cmake-build": "0.0.3"
+  },
+  "keywords": [
+    "auph",
+    "auph.js",
+    "audio",
+    "sound",
+    "web audio",
+    "webaudio",
+    "c++",
+    "nodejs",
+    "coreaudio",
+    "oboe",
+    "aaudio",
+    "android",
+    "ios",
+    "opensles",
+    "xcode",
+    "audiosession",
+    "macos",
+    "native",
+    "audio mixer"
+  ],
+  "homepage": "https://eliasku.github.io/auph"
+}

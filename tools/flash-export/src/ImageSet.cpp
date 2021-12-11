@@ -1,6 +1,6 @@
 #include "ImageSet.hpp"
 #include <pugixml.hpp>
-#include <ek_assert.h>
+#include <ek/assert.h>
 #include <ek/imaging/drawing.hpp>
 
 #include <miniz.h>

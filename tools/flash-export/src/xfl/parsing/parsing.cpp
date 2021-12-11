@@ -1,8 +1,8 @@
 #include "parsing.hpp"
 
 #include "../types.hpp"
-#include <ek_log.h>
-#include <ek_assert.h>
+#include <ek/log.h>
+#include <ek/assert.h>
 
 #include <pugixml.hpp>
 

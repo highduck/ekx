@@ -9,8 +9,6 @@
 #include <ek/scenex/2d/RenderSystem2D.hpp>
 #include <ek/scenex/base/Node.hpp>
 
-using namespace ek::app;
-
 namespace ek {
 
 InteractionSystem::InteractionSystem(ecs::EntityApi root) :
@@ -56,7 +54,7 @@ void InteractionSystem::process() {
     currTargets.clear();
 
     //pointer_global_space = float2::zero;
-    auto cursor = MouseCursor::Parent;
+    auto cursor = EK_MOUSE_CURSOR_PARENT;
     bool changed = false;
     if (mouseActive_) {
         pointerScreenPosition_ = mousePosition0_;
@@ -75,7 +73,7 @@ void InteractionSystem::process() {
 
     swapTargetLists();
 
-    app::setMouseCursor(cursor);
+    ek_app_set_mouse_cursor(cursor);
 }
 
 void InteractionSystem::fireInteraction(PointerEvent event, bool prev, bool onlyIfChanged) {
@@ -92,21 +90,21 @@ void InteractionSystem::fireInteraction(PointerEvent event, bool prev, bool only
     }
 }
 
-void InteractionSystem::handle_mouse_event(const Event& ev, Vec2f pos) {
+void InteractionSystem::handle_mouse_event(const ek_app_event& ev, Vec2f pos) {
 
-    if (ev.type == EventType::MouseDown) {
+    if (ev.type == EK_APP_EVENT_MOUSE_DOWN) {
         mousePosition0_ = pos;
         pointerDown_ = true;
         fireInteraction(PointerEvent::Down);
-    } else if (ev.type == EventType::MouseUp) {
+    } else if (ev.type == EK_APP_EVENT_MOUSE_UP) {
         mousePosition0_ = pos;
         pointerDown_ = false;
         fireInteraction(PointerEvent::Up);
-    } else if (ev.type == EventType::MouseMove) {
+    } else if (ev.type == EK_APP_EVENT_MOUSE_MOVE) {
         mousePosition0_ = pos;
         mouseActive_ = true;
         process();
-    } else if (ev.type == EventType::MouseExit) {
+    } else if (ev.type == EK_APP_EVENT_MOUSE_EXIT) {
         pointerDown_ = false;
         mouseActive_ = false;
         //update();
@@ -114,8 +112,8 @@ void InteractionSystem::handle_mouse_event(const Event& ev, Vec2f pos) {
     }
 }
 
-void InteractionSystem::handle_touch_event(const Event& ev, Vec2f pos) {
-    if (ev.type == EventType::TouchStart) {
+void InteractionSystem::handle_touch_event(const ek_app_event& ev, Vec2f pos) {
+    if (ev.type == EK_APP_EVENT_TOUCH_START) {
         if (touchID_ == 0) {
             touchID_ = ev.touch.id;
             touchPosition0_ = pos;
@@ -127,7 +125,7 @@ void InteractionSystem::handle_touch_event(const Event& ev, Vec2f pos) {
     }
 
     if (touchID_ == ev.touch.id) {
-        if (ev.type == EventType::TouchEnd) {
+        if (ev.type == EK_APP_EVENT_TOUCH_END) {
             touchID_ = 0;
             touchPosition0_ = Vec2f::zero;
             pointerDown_ = false;
@@ -171,7 +169,7 @@ ecs::EntityApi InteractionSystem::globalHitTest(Vec2f& worldSpacePointer, ecs::E
     return nullptr;
 }
 
-MouseCursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& list) {
+ek_mouse_cursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& list) {
     Vec2f pointer{};
     ecs::EntityApi it;
     ecs::EntityRef camera;
@@ -187,13 +185,13 @@ MouseCursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& l
     }
     hitTarget_ = ecs::EntityRef{it};
 
-    auto cursor = MouseCursor::Parent;
+    auto cursor = EK_MOUSE_CURSOR_PARENT;
     while (it) {
         auto* interactive = it.tryGet<Interactive>();
         if (interactive) {
             interactive->pointer = pointer;
             interactive->camera = ecs::EntityRef{camera};
-            if (cursor == MouseCursor::Parent) {
+            if (cursor == EK_MOUSE_CURSOR_PARENT) {
                 cursor = interactive->cursor;
             }
             list.push_back(it);

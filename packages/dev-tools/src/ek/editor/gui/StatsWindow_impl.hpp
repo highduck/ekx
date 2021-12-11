@@ -18,18 +18,17 @@ static float getterProfilerTrackValue(void* data, int idx) {
 void StatsWindow::onDraw() {
     auto& app = Locator::ref<basic_application>();
     auto stats = draw2d::state.stats;
-    using ek::app::g_app;
-    const float drawableArea = g_app.drawableWidth * g_app.drawableHeight;
-    ImGui::Text("%0.2f ms | dc: %u | tri: %u | fill: %0.2f",
-                app.frameTimer.deltaTime * 1000.0f,
+    const float drawableArea = ek_app.viewport.width * ek_app.viewport.height;
+    ImGui::Text("%ld µs | dc: %u | tri: %u | fill: %d%%",
+                (long)(app.frameTimer.deltaTime * 1000000.0f),
                 stats.drawCalls,
                 stats.triangles,
-                stats.fillArea / drawableArea
+                (int)(100.0f * stats.fillArea / drawableArea)
     );
     auto entitiesCount = ecs::the_world.size;
     auto entitiesAvailable = ecs::ENTITIES_MAX_COUNT - entitiesCount;
     ImGui::Text("%u entities | %u free", entitiesCount - 1, entitiesAvailable);
-    ImGui::Text("Batching buffer objects: %0.2f MB", ((float)draw2d::state.getUsedMemory() / 1000000.0f));
+    ImGui::Text("Batching buffer objects: %d kb", draw2d::state.getUsedMemory() / 1000);
 
     auto hitTarget = Locator::ref<InteractionSystem>().getHitTarget();
     if (hitTarget) {

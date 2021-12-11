@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/graphics/graphics.hpp>
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 #include <ek/math/Vec.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/ds/String.hpp>
@@ -18,7 +18,7 @@ public:
 
     ~ImGuiIntegration();
 
-    void on_event(const app::Event& event);
+    void on_event(const ek_app_event& event);
 
     void on_frame_completed();
 

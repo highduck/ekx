@@ -8,7 +8,7 @@ import {Project} from "../project";
 function renderCMakeFile(ctx:Project, buildType): string {
     const platforms = ["web"];
     const cppSourceFiles = [];
-    const cppExtensions = ["hpp", "hxx", "h", "cpp", "cxx", "c", "cc", "m", "mm"];
+    const cppExtensions = ["hpp", "hxx", "h", "hh", "cpp", "cxx", "c", "cc"];
     const cppSourceRoots = collectSourceRootsAll(ctx, "cpp", platforms, ".");
     for (const cppSourceRoot of cppSourceRoots) {
         collectSourceFiles(cppSourceRoot, cppExtensions, cppSourceFiles);
@@ -71,8 +71,9 @@ function renderCMakeFile(ctx:Project, buildType): string {
 
     if (buildType === "Debug") {
         cmakeTarget.linkOptions.push("-Oz", "-g");
-        //cmakeTarget.linkOptions.push("-Oz", "-gsource-map");
         cmakeTarget.compileOptions.push("-Oz", "-g");
+
+        //cmakeTarget.linkOptions.push("-Oz", "-gsource-map");
     }
 
     for (let jsLibraryFile of jsLibraryFiles) {
@@ -82,13 +83,13 @@ function renderCMakeFile(ctx:Project, buildType): string {
         cmakeTarget.linkOptions.push(`"SHELL:--pre-js \${CMAKE_CURRENT_SOURCE_DIR}/${jsPreFile}"`);
     }
 
+    // cmakeTarget.linkOptions.push("-Wl,--import-memory");
+
     const emOptions: any = {
         ASSERTIONS: buildType === "Debug" ? 2 : 0,
         DEMANGLE_SUPPORT: buildType === "Debug" ? 1 : 0,
         SAFE_HEAP: buildType === "Debug" ? 1 : 0,
         // SAFE_HEAP_LOG: buildType === "Debug" ? 1 : 0,
-        // ASSERTIONS: 1,
-        // DEMANGLE_SUPPORT: 1,
 
         // TODO: strange runtime DOM exception error with Release
         STRICT: 1,
@@ -106,9 +107,7 @@ function renderCMakeFile(ctx:Project, buildType): string {
         DISABLE_EXCEPTION_CATCHING: 1,
 
         ALLOW_MEMORY_GROWTH: 1,
-
         // INITIAL_MEMORY: "128MB",
-        // ALLOW_MEMORY_GROWTH: 0,
 
         FILESYSTEM: 0,
         INLINING_LIMIT: 1,

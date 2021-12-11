@@ -64,14 +64,15 @@ static void log__default(const log_msg_t msg) {
 
 static void log__default(log_msg_t msg) {
   // android
-  const int priority = (int[]){
+  static const int priorities[] = {
           ANDROID_LOG_VERBOSE,
           ANDROID_LOG_DEBUG,
           ANDROID_LOG_INFO,
           ANDROID_LOG_WARN,
           ANDROID_LOG_ERROR,
           ANDROID_LOG_ERROR
-  }[msg.level];
+  };
+  const int priority = priorities[msg.level];
 
     const char* tag = "ekx";
 #ifndef NDEBUG
@@ -123,25 +124,16 @@ static void log__default(log_msg_t msg) {
     const int32_t millis = (int32_t) (tmnow.tv_usec / 1000);
     const uint8_t frame = (uint8_t) (msg.frame & 0xFFu);
     stbsp_snprintf(usec, sizeof(usec), "%03d+%02hhX", millis, frame);
-    const char* prefix = 0;
-    switch (msg.level) {
-        case LOG_LEVEL_TRACE:
-            prefix = WHITE "[t]";
-            break;
-        case LOG_LEVEL_DEBUG:
-            prefix = CYAN "[d]";
-            break;
-        case LOG_LEVEL_INFO:
-            prefix = BLUE "[i]";
-            break;
-        case LOG_LEVEL_WARN:
-            prefix = BOLDYELLOW "[W]";
-            break;
-        case LOG_LEVEL_ERROR:
-        case LOG_LEVEL_FATAL:
-            prefix = BOLDRED "[E]";
-            break;
-    }
+    static const char* prefixes[] = {
+            WHITE "[t]", // TRACE
+            CYAN "[d]", // DEBUG
+            BLUE "[i]", // INFO
+            BOLDYELLOW "[W]", // WARN
+            BOLDRED "[E]", // ERROR
+            BOLDRED "[F]", // FATAL
+    };
+    EK_ASSERT(msg.level >= 0 && msg.level < 6);
+    const char* prefix = prefixes[msg.level];
 
     char buffer[1024];
     stbsp_snprintf(buffer, 1024, "%s.%s %s %s" RESET, time, usec, prefix, msg.text);

@@ -16,7 +16,7 @@ function setup(project) {
             },
         }
     });
-    project.importModule("auph", __dirname);
+    project.importModule("@ekx/auph", __dirname);
     project.importModule("@ekx/core", __dirname);
     project.importModule("@ekx/app", __dirname);
 }

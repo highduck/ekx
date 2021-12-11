@@ -2,8 +2,6 @@
 
 namespace ek {
 
-using namespace ek::app;
-
 input_controller::input_controller(InteractionSystem& interactions, GameDisplay& display) :
         display_{display},
         interactions_{interactions} {
@@ -11,11 +9,11 @@ input_controller::input_controller(InteractionSystem& interactions, GameDisplay&
 
 input_controller::~input_controller() = default;
 
-void input_controller::emulate_mouse_as_touch(const Event& event, touch_state_t& data) {
+void input_controller::emulate_mouse_as_touch(const ek_app_event& event, touch_state_t& data) {
     bool active_prev = data.active;
-    if (!data.active && event.type == EventType::MouseDown) {
+    if (!data.active && event.type == EK_APP_EVENT_MOUSE_DOWN) {
         data.active = true;
-    } else if (data.active && (event.type == EventType::MouseUp || event.type == EventType::MouseExit)) {
+    } else if (data.active && (event.type == EK_APP_EVENT_MOUSE_UP || event.type == EK_APP_EVENT_MOUSE_EXIT)) {
         data.active = false;
     }
 
@@ -32,9 +30,9 @@ void input_controller::emulate_mouse_as_touch(const Event& event, touch_state_t&
     }
 }
 
-void input_controller::update_touch(const Event& event, touch_state_t& data) {
+void input_controller::update_touch(const ek_app_event& event, touch_state_t& data) {
     bool active_prev = data.active;
-    data.active = event.type != EventType::TouchEnd;
+    data.active = event.type != EK_APP_EVENT_TOUCH_END;
 
     data.position = screenCoordToGameDisplay({event.touch.x, event.touch.y});
     data.pressed = data.active;
@@ -49,21 +47,21 @@ void input_controller::update_touch(const Event& event, touch_state_t& data) {
     }
 }
 
-void input_controller::onEvent(const Event& event) {
+void input_controller::onEvent(const ek_app_event& event) {
     switch (event.type) {
-        case EventType::TouchStart:
-        case EventType::TouchMove:
-        case EventType::TouchEnd:
+        case EK_APP_EVENT_TOUCH_START:
+        case EK_APP_EVENT_TOUCH_MOVE:
+        case EK_APP_EVENT_TOUCH_END:
             if (!hovered_by_editor_gui) {
                 interactions_.handle_touch_event(event, screenCoordToGameDisplay({event.touch.x, event.touch.y}));
             }
             update_touch(event, get_or_create_touch(event.touch.id));
             break;
-        case EventType::MouseDown:
-        case EventType::MouseUp:
-        case EventType::MouseMove:
-        case EventType::MouseEnter:
-        case EventType::MouseExit:
+        case EK_APP_EVENT_MOUSE_DOWN:
+        case EK_APP_EVENT_MOUSE_UP:
+        case EK_APP_EVENT_MOUSE_MOVE:
+        case EK_APP_EVENT_MOUSE_ENTER:
+        case EK_APP_EVENT_MOUSE_EXIT:
             if (!hovered_by_editor_gui) {
                 interactions_.handle_mouse_event(event, screenCoordToGameDisplay({event.mouse.x, event.mouse.y}));
             }
@@ -71,20 +69,20 @@ void input_controller::onEvent(const Event& event) {
                 emulate_mouse_as_touch(event, get_or_create_touch(1u));
             }
             break;
-        case EventType::Wheel:
+        case EK_APP_EVENT_WHEEL:
             break;
-        case EventType::KeyUp:
-        case EventType::KeyDown:
-            if (event.type == EventType::KeyDown && event.key.code == KeyCode::Escape) {
+        case EK_APP_EVENT_KEY_UP:
+        case EK_APP_EVENT_KEY_DOWN:
+            if (event.type == EK_APP_EVENT_KEY_DOWN && event.key.code == EK_KEYCODE_ESCAPE) {
                 interactions_.sendBackButton();
             }
-            if (event.key.code != KeyCode::Unknown) {
+            if (event.key.code != EK_KEYCODE_UNKNOWN) {
                 auto& key = keys_[static_cast<size_t>(event.key.code)];
-                if (event.type == EventType::KeyDown) {
+                if (event.type == EK_APP_EVENT_KEY_DOWN) {
                     key.down = !key.state;
                     key.state = true;//!keyboard_modifiers.ctrlKey;
                     key.up = false;
-                } else if (event.type == EventType::KeyUp) {
+                } else if (event.type == EK_APP_EVENT_KEY_UP) {
                     key.down = false;
                     key.state = false;
                     key.up = true;
@@ -92,10 +90,10 @@ void input_controller::onEvent(const Event& event) {
                 }
             }
             break;
-        case EventType::BackButton:
+        case EK_APP_EVENT_BACK_BUTTON:
             interactions_.sendBackButton();
             break;
-        case EventType::Pause:
+        case EK_APP_EVENT_PAUSE:
             interactions_.handle_system_pause();
             break;
         default:
@@ -103,23 +101,23 @@ void input_controller::onEvent(const Event& event) {
     }
 }
 
-bool input_controller::is_key(KeyCode code) const {
-    if (code != KeyCode::Unknown) {
-        return keys_[static_cast<size_t>(code)].state;
+bool input_controller::is_key(ek_key_code code) const {
+    if (code != EK_KEYCODE_UNKNOWN && code < EK_KEYCODE_MAX_COUNT) {
+        return keys_[code].state;
     }
     return false;
 }
 
-bool input_controller::is_key_down(KeyCode code) const {
-    if (code != KeyCode::Unknown) {
-        return keys_[static_cast<size_t>(code)].down;
+bool input_controller::is_key_down(ek_key_code code) const {
+    if (code != EK_KEYCODE_UNKNOWN && code < EK_KEYCODE_MAX_COUNT) {
+        return keys_[code].down;
     }
     return false;
 }
 
-bool input_controller::is_key_up(KeyCode code) const {
-    if (code != KeyCode::Unknown) {
-        return keys_[static_cast<size_t>(code)].up;
+bool input_controller::is_key_up(ek_key_code code) const {
+    if (code != EK_KEYCODE_UNKNOWN && code < EK_KEYCODE_MAX_COUNT) {
+        return keys_[code].up;
     }
     return false;
 }

@@ -6,7 +6,7 @@
 #include "../xfl/Doc.hpp"
 #include "../xfl/renderer/Scanner.hpp"
 #include <ek/util/StringUtil.hpp>
-#include <ek_log.h>
+#include <ek/log.h>
 #include <stb/stb_sprintf.h>
 
 namespace ek::xfl {

@@ -11,7 +11,7 @@
 
 #if defined(__ANDROID__)
 
-#include <ek/app/Platform.h>
+#include <ek/app_native.h>
 
 #endif
 
@@ -28,9 +28,9 @@ void initialize() {
     EK_DEBUG("audio initialize");
     EK_ASSERT(!audioSystem.initialized);
 #if defined(__ANDROID__)
-    auto activity = app::get_activity();
-    auto assets = app::assetManagerRef();
-    auph::setAndroidActivity(app::getJNIEnv, activity, assets);
+    auto activity = ek_android_activity();
+    auto assets = ek_android_assets_object();
+    auph::setAndroidActivity(ek_android_jni, activity, assets);
 #endif
     auph::init();
     audioSystem.initialized = true;

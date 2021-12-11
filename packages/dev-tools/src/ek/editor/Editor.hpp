@@ -35,7 +35,7 @@ public:
 
     ~Editor() override;
 
-    void onEvent(const app::Event& event) override;
+    void onEvent(const ek_app_event& event) override;
     void onPostFrame() override;
 
 public:

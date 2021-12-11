@@ -1,7 +1,7 @@
 #include <ek/editor/imgui/imgui.hpp>
 
 #include "ImGuiIntegration.hpp"
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 #include <IconsFontAwesome5.h>
 
 #include <ek/graphics/graphics.hpp>
@@ -17,7 +17,6 @@
 
 namespace ek {
 
-using namespace ek::app;
 using namespace ek::graphics;
 
 void reset_keys() {
@@ -58,7 +57,7 @@ ImGuiIntegration::~ImGuiIntegration() {
     simgui_shutdown();
 }
 
-#define MAP_KEY_CODE(from, to) io.KeyMap[(to)] = static_cast<int>((from))
+#define MAP_KEY_CODE(from, to) io.KeyMap[(to)] = (int)((from))
 
 void ImGuiIntegration::setup() {
     auto& io = ImGui::GetIO();
@@ -67,27 +66,27 @@ void ImGuiIntegration::setup() {
                        ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 
     // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
-    MAP_KEY_CODE(KeyCode::Tab, ImGuiKey_Tab);
-    MAP_KEY_CODE(KeyCode::ArrowLeft, ImGuiKey_LeftArrow);
-    MAP_KEY_CODE(KeyCode::ArrowRight, ImGuiKey_RightArrow);
-    MAP_KEY_CODE(KeyCode::ArrowUp, ImGuiKey_UpArrow);
-    MAP_KEY_CODE(KeyCode::ArrowDown, ImGuiKey_DownArrow);
-    MAP_KEY_CODE(KeyCode::PageUp, ImGuiKey_PageUp);
-    MAP_KEY_CODE(KeyCode::PageDown, ImGuiKey_PageDown);
-    MAP_KEY_CODE(KeyCode::Home, ImGuiKey_Home);
-    MAP_KEY_CODE(KeyCode::End, ImGuiKey_End);
-    MAP_KEY_CODE(KeyCode::Insert, ImGuiKey_Insert);
-    MAP_KEY_CODE(KeyCode::Delete, ImGuiKey_Delete);
-    MAP_KEY_CODE(KeyCode::Backspace, ImGuiKey_Backspace);
-    MAP_KEY_CODE(KeyCode::Space, ImGuiKey_Space);
-    MAP_KEY_CODE(KeyCode::Enter, ImGuiKey_Enter);
-    MAP_KEY_CODE(KeyCode::Escape, ImGuiKey_Escape);
-    MAP_KEY_CODE(KeyCode::A, ImGuiKey_A);
-    MAP_KEY_CODE(KeyCode::C, ImGuiKey_C);
-    MAP_KEY_CODE(KeyCode::V, ImGuiKey_V);
-    MAP_KEY_CODE(KeyCode::X, ImGuiKey_X);
-    MAP_KEY_CODE(KeyCode::Y, ImGuiKey_Y);
-    MAP_KEY_CODE(KeyCode::Z, ImGuiKey_Z);
+    MAP_KEY_CODE(EK_KEYCODE_TAB, ImGuiKey_Tab);
+    MAP_KEY_CODE(EK_KEYCODE_ARROW_LEFT, ImGuiKey_LeftArrow);
+    MAP_KEY_CODE(EK_KEYCODE_ARROW_RIGHT, ImGuiKey_RightArrow);
+    MAP_KEY_CODE(EK_KEYCODE_ARROW_UP, ImGuiKey_UpArrow);
+    MAP_KEY_CODE(EK_KEYCODE_ARROW_DOWN, ImGuiKey_DownArrow);
+    MAP_KEY_CODE(EK_KEYCODE_PAGEUP, ImGuiKey_PageUp);
+    MAP_KEY_CODE(EK_KEYCODE_PAGEDOWN, ImGuiKey_PageDown);
+    MAP_KEY_CODE(EK_KEYCODE_HOME, ImGuiKey_Home);
+    MAP_KEY_CODE(EK_KEYCODE_END, ImGuiKey_End);
+    MAP_KEY_CODE(EK_KEYCODE_INSERT, ImGuiKey_Insert);
+    MAP_KEY_CODE(EK_KEYCODE_DELETE, ImGuiKey_Delete);
+    MAP_KEY_CODE(EK_KEYCODE_BACKSPACE, ImGuiKey_Backspace);
+    MAP_KEY_CODE(EK_KEYCODE_SPACE, ImGuiKey_Space);
+    MAP_KEY_CODE(EK_KEYCODE_ENTER, ImGuiKey_Enter);
+    MAP_KEY_CODE(EK_KEYCODE_ESCAPE, ImGuiKey_Escape);
+    MAP_KEY_CODE(EK_KEYCODE_A, ImGuiKey_A);
+    MAP_KEY_CODE(EK_KEYCODE_C, ImGuiKey_C);
+    MAP_KEY_CODE(EK_KEYCODE_V, ImGuiKey_V);
+    MAP_KEY_CODE(EK_KEYCODE_X, ImGuiKey_X);
+    MAP_KEY_CODE(EK_KEYCODE_Y, ImGuiKey_Y);
+    MAP_KEY_CODE(EK_KEYCODE_Z, ImGuiKey_Z);
 
     io.ClipboardUserData = this;
     io.SetClipboardTextFn = [](void* context, const char* text) {
@@ -175,22 +174,22 @@ void ImGuiIntegration::initializeFontTexture() {
     ImGui::GetIO().Fonts->TexID = (ImTextureID) (uintptr_t) fontTexture.id;
 }
 
-void ImGuiIntegration::on_event(const Event& event) {
+void ImGuiIntegration::on_event(const ek_app_event& event) {
     auto& io = ImGui::GetIO();
     switch (event.type) {
-        case EventType::KeyUp:
-        case EventType::KeyDown:
-        case EventType::KeyPress_: {
+        case EK_APP_EVENT_KEY_UP:
+        case EK_APP_EVENT_KEY_DOWN:
+        case EK_APP_EVENT_KEY_PRESS: {
             int key = static_cast<int>(event.key.code);
             if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown)) {
-                io.KeysDown[key] = (event.type == EventType::KeyDown);
+                io.KeysDown[key] = (event.type == EK_APP_EVENT_KEY_DOWN);
             }
 
             // update modifier keys
-            const bool isShift = event.key.isShift();
-            const bool isControl = event.key.isControl();
-            const bool isAlt = event.key.isAlt();
-            const bool isSuper = event.key.isSuper();
+            const bool isShift = (event.key.modifiers & EK_KEY_MOD_SHIFT) != 0;
+            const bool isControl = (event.key.modifiers & EK_KEY_MOD_CONTROL) != 0;
+            const bool isAlt = (event.key.modifiers & EK_KEY_MOD_ALT) != 0;
+            const bool isSuper = (event.key.modifiers & EK_KEY_MOD_SUPER) != 0;
             if ((io.KeyShift && !isShift) || (io.KeyCtrl && !isControl) || (io.KeyAlt && !isAlt) ||
                 (io.KeySuper && !isSuper)) {
                 // need to reset key states when any of meta keys disabled
@@ -203,24 +202,24 @@ void ImGuiIntegration::on_event(const Event& event) {
         }
             break;
 
-        case EventType::Text:
-            if (!event.text.empty()) {
+        case EK_APP_EVENT_TEXT:
+            if (*event.text.data /* not empty */) {
                 io.AddInputCharactersUTF8(event.text.data);
             }
             break;
 
-        case EventType::MouseDown:
-        case EventType::MouseUp: {
+        case EK_APP_EVENT_MOUSE_DOWN:
+        case EK_APP_EVENT_MOUSE_UP: {
             int button = 0;
-            if (event.mouse.button == MouseButton::Right) {
+            if (event.mouse.button == EK_MOUSE_BUTTON_RIGHT) {
                 button = 1;
-            } else if (event.mouse.button == MouseButton::Other) {
+            } else if (event.mouse.button == EK_MOUSE_BUTTON_OTHER) {
                 button = 2;
             }
-            io.MouseDown[button] = (event.type == EventType::MouseDown);
+            io.MouseDown[button] = (event.type == EK_APP_EVENT_MOUSE_DOWN);
         }
             break;
-        case EventType::Wheel:
+        case EK_APP_EVENT_WHEEL:
             if (fabs(event.wheel.x) > 0.0f) {
                 io.MouseWheelH += event.wheel.x * 0.1f;
             }
@@ -229,9 +228,13 @@ void ImGuiIntegration::on_event(const Event& event) {
             }
             break;
 
-        case EventType::MouseMove:
-            io.MousePos.x = event.mouse.x / g_app.dpiScale;
-            io.MousePos.y = event.mouse.y / g_app.dpiScale;
+        case EK_APP_EVENT_MOUSE_MOVE:
+            io.MousePos.x = event.mouse.x / ek_app.viewport.scale;
+            io.MousePos.y = event.mouse.y / ek_app.viewport.scale;
+            break;
+
+        case EK_APP_EVENT_PAUSE:
+        case EK_APP_EVENT_RESUME:
             break;
 
         default:
@@ -247,7 +250,7 @@ void update_mouse_cursor() {
     }
 
     ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-    auto cursor = MouseCursor::Parent;
+    auto cursor = EK_MOUSE_CURSOR_PARENT;
     bool cursor_visible = true;
     if (io.MouseDrawCursor || imgui_cursor == ImGuiMouseCursor_None) {
         // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
@@ -262,15 +265,15 @@ void update_mouse_cursor() {
             case ImGuiMouseCursor_ResizeEW:
             case ImGuiMouseCursor_ResizeNESW:
             case ImGuiMouseCursor_ResizeNWSE:
-                cursor = MouseCursor::Arrow;
+                cursor = EK_MOUSE_CURSOR_ARROW;
                 break;
             case ImGuiMouseCursor_Hand:
-                cursor = MouseCursor::Button;
+                cursor = EK_MOUSE_CURSOR_BUTTON;
                 break;
             default:
                 break;
         }
-        app::setMouseCursor(cursor);
+        ek_app_set_mouse_cursor(cursor);
         cursor_visible = true;
     }
 
@@ -279,8 +282,8 @@ void update_mouse_cursor() {
 }
 
 void ImGuiIntegration::begin_frame(float dt) {
-    auto w = static_cast<int>(g_app.drawableWidth);
-    auto h = static_cast<int>(g_app.drawableHeight);
+    auto w = (int)ek_app.viewport.width;
+    auto h = (int)ek_app.viewport.height;
     if (w > 0 && h > 0) {
         update_mouse_cursor();
         simgui_new_frame(w, h, dt);

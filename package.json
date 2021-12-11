@@ -19,7 +19,8 @@
     "packages": [
       "tools/*",
       "plugins/*",
-      "packages/*"
+      "packages/*",
+      "samples/*"
     ]
   }
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/app/Platform.h>
+#include <ek/app_native.h>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/String.hpp>
 
@@ -33,7 +33,7 @@ const char* class_path = "ek/billing/BillingBridge";
 void initialize(const char* key) {
     _initialize();
 
-    auto* env = ek::app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     const char* method_name = "initialize";
     const char* method_sig = "(Ljava/lang/String;)V";
@@ -49,7 +49,7 @@ void initialize(const char* key) {
 }
 
 void getPurchases() {
-    auto* env = ek::app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     const char* method_name = "getPurchases";
     const char* method_sig = "()V";
@@ -62,7 +62,7 @@ void getPurchases() {
 }
 
 void getDetails(const ek::Array<ek::String>& skus) {
-    auto* env = ek::app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     const char* method_name = "getDetails";
     const char* method_sig = "([Ljava/lang/String;)V";
@@ -78,7 +78,7 @@ void getDetails(const ek::Array<ek::String>& skus) {
 }
 
 void purchase(const ek::String& sku, const ek::String& payload) {
-    auto* env = ek::app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     const char* method_name = "purchase";
     const char* method_sig = "(Ljava/lang/String;Ljava/lang/String;)V";
@@ -96,7 +96,7 @@ void purchase(const ek::String& sku, const ek::String& payload) {
 }
 
 void consume(const ek::String& token) {
-    auto* env = ek::app::getJNIEnv();
+    auto* env = ek_android_jni();
 
     const char* method_name = "consume";
     const char* method_sig = "(Ljava/lang/String;)V";

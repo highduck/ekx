@@ -3,7 +3,7 @@
 #include "../GameDisplay.hpp"
 
 #include <ek/draw2d/drawer.hpp>
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 
 #ifdef EK_UITEST
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -47,9 +47,8 @@ void GameDisplay::endGame() {
 }
 
 bool GameDisplay::beginOverlayDev() {
-    using app::g_app;
-    const auto fw = g_app.drawableWidth;
-    const auto fh = g_app.drawableHeight;
+    const auto fw = ek_app.viewport.width;
+    const auto fh = ek_app.viewport.height;
     const auto w = static_cast<int>(fw);
     const auto h = static_cast<int>(fh);
     if (w <= 0 || h <= 0) {
@@ -107,7 +106,6 @@ graphics::Texture* createGameDisplayTexture(int w, int h, bool isColor, const ch
 }
 
 void GameDisplay::update() {
-    using app::g_app;
     if (simulated) {
         // limit min size
         info.size.x = fmax(16.0f, info.size.x);
@@ -120,7 +118,7 @@ void GameDisplay::update() {
             color = createGameDisplayTexture(w, h, true, "game-display-color");
             colorFirstClearFlag = true;
 
-            if (g_app.config.needDepth) {
+            if (ek_app.config.need_depth) {
                 delete depthStencil;
                 depthStencil = createGameDisplayTexture(w, h, false, "game-display-depth");
             }
@@ -137,22 +135,16 @@ void GameDisplay::update() {
             screenshotBuffer = malloc(w * h * 4);
         }
     } else {
-        info.size.x = g_app.drawableWidth;
-        info.size.y = g_app.drawableHeight;
-        info.window.x = g_app.windowWidth;
-        info.window.y = g_app.windowHeight;
-        const float* insets = app::getScreenInsets();
-        if(insets) {
-            info.insets = *(const Vec4f*)insets;
-        }
-        else {
-            info.insets = Vec4f{};
-        }
-        info.dpiScale = g_app.dpiScale;
+        info.size.x = ek_app.viewport.width;
+        info.size.y = ek_app.viewport.height;
+        info.window.x = ek_app.viewport.width / ek_app.viewport.scale;
+        info.window.y = ek_app.viewport.height / ek_app.viewport.scale;
+        info.insets = *(const Vec4f*)ek_app.viewport.insets;
+        info.dpiScale = ek_app.viewport.scale;
 
         info.destinationViewport.position = Vec2f::zero;
-        info.destinationViewport.size.x = g_app.drawableWidth;
-        info.destinationViewport.size.y = g_app.drawableHeight;
+        info.destinationViewport.size.x = ek_app.viewport.width;
+        info.destinationViewport.size.y = ek_app.viewport.height;
     }
 }
 

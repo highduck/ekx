@@ -2,7 +2,7 @@
 
 #include <ecxx/ecxx_fwd.hpp>
 
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/util/Type.hpp>
@@ -29,15 +29,15 @@ public:
     void process();
 
     ecs::EntityApi globalHitTest(Vec2f& worldSpacePointer, ecs::EntityRef& capturedCamera);
-    app::MouseCursor searchInteractiveTargets(Array<ecs::EntityApi>& out_entities);
+    ek_mouse_cursor searchInteractiveTargets(Array<ecs::EntityApi>& out_entities);
 
     void sendBackButton();
 
     void handle_system_pause();
 
-    void handle_mouse_event(const app::Event& ev, Vec2f pos);
+    void handle_mouse_event(const ek_app_event& ev, Vec2f pos);
 
-    void handle_touch_event(const app::Event& ev, Vec2f pos);
+    void handle_touch_event(const ek_app_event& ev, Vec2f pos);
 
     void drag(ecs::EntityApi entity);
 

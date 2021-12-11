@@ -26,8 +26,8 @@ target_compile_options(${PROJECT_NAME}
         PRIVATE -fno-exceptions
         PRIVATE -fno-rtti
         PRIVATE -ffast-math
-        PRIVATE -mstackrealign
-        PRIVATE -fshort-enums
+#        PRIVATE -mstackrealign
+#        PRIVATE -fshort-enums
         )
 
 target_link_options(${PROJECT_NAME}
@@ -68,7 +68,7 @@ target_link_libraries(${PROJECT_NAME}
             PUBLIC -fno-rtti
             PUBLIC -ffast-math
             PUBLIC -Wstrict-aliasing=2
-            PUBLIC -fshort-enums
+#            PUBLIC -fshort-enums
             )
 
     target_link_libraries(${PROJECT_NAME}

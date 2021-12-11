@@ -1,47 +1,28 @@
 #pragma once
 
-#include <ek/app/app.hpp>
+#include <ek/app.h>
 #include <ek/timers.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/log.h>
 #include <ek/assert.h>
 #include <sokol_gfx.h>
 
-#ifdef TRACY_ENABLE
-
-#include <Tracy.hpp>
-
-#endif
-
 namespace ek {
 
-class RootAppListener : public app::AppListener {
-public:
+inline void root_app_on_frame() {
+    log_tick();
+    dispatchTimers();
+}
 
-    ~RootAppListener() override = default;
-
-    void onFrame() override {
-#ifdef TRACY_ENABLE
-        // Tracy integration
-        tracy::SetThreadName("Render");
-        FrameMark;
-#endif
-        log_tick();
-        dispatchTimers();
+inline void root_app_on_event(const ek_app_event ev) {
+    if (ev.type == EK_APP_EVENT_PAUSE) {
+        auph::pause();
+    } else if (ev.type == EK_APP_EVENT_RESUME) {
+        auph::resume();
+    } else if (ev.type == EK_APP_EVENT_CLOSE) {
+        auph::shutdown();
+        sg_shutdown();
     }
-
-    void onEvent(const app::Event& event) override {
-        using ek::app::EventType;
-        if (event.type == EventType::Pause) {
-            auph::pause();
-        } else if (event.type == EventType::Resume) {
-            auph::resume();
-        } else if (event.type == EventType::Close) {
-            auph::shutdown();
-            sg_shutdown();
-        }
-    }
-
-};
+}
 
 }
