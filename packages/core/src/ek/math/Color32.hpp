@@ -57,7 +57,7 @@ struct abgr32_t final {
         return *this;
     }
 
-    constexpr abgr32_t operator+(const abgr32_t offset) const {
+    abgr32_t operator+(const abgr32_t offset) const {
         return {sat_add_u8(r, offset.r),
                 sat_add_u8(g, offset.g),
                 sat_add_u8(b, offset.b),
@@ -169,7 +169,7 @@ struct argb32_t final {
         return *this;
     }
 
-    constexpr argb32_t operator+(const argb32_t offset) const {
+    argb32_t operator+(const argb32_t offset) const {
         return {sat_add_u8(r, offset.r),
                 sat_add_u8(g, offset.g),
                 sat_add_u8(b, offset.b),

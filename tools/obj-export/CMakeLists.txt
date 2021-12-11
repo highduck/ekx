@@ -25,14 +25,17 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(OBJ_EXPORT_OS_PREFIX osx)
 
     if (CMAKE_BUILD_TYPE MATCHES Debug)
+        set(EKC_COMPILE_FLAGS "-O2 -g -fno-exceptions -fno-rtti")
+        set(EKC_LINK_FLAGS "-O2 -g")
     else ()
         set(EKC_COMPILE_FLAGS "-Oz -flto -DNDEBUG -fno-exceptions -fno-rtti")
         set(EKC_LINK_FLAGS "-Oz -flto -Wl,-dead_strip -Wl,-dead_strip_dylibs")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EKC_COMPILE_FLAGS}")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EKC_COMPILE_FLAGS}")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EKC_LINK_FLAGS}")
-
     endif ()
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EKC_COMPILE_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EKC_COMPILE_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EKC_LINK_FLAGS}")
+
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(${PROJECT_NAME}
             PRIVATE shlwapi
