@@ -7,6 +7,7 @@
 #include "../xfl/renderer/Scanner.hpp"
 #include <ek/util/StringUtil.hpp>
 #include <ek/log.h>
+#include <ek/assert.h>
 #include <stb/stb_sprintf.h>
 
 namespace ek::xfl {
@@ -256,7 +257,7 @@ SGFile SGBuilder::export_library() {
 }
 
 void SGBuilder::process_symbol_instance(const Element& el, ExportItem* parent, processing_bag_t* bag) {
-    assert(el.elementType == ElementType::symbol_instance);
+    EK_ASSERT(el.elementType == ElementType::symbol_instance);
 
     auto* item = new ExportItem();
     item->ref = &el;
@@ -275,7 +276,7 @@ void SGBuilder::process_symbol_instance(const Element& el, ExportItem* parent, p
 }
 
 void SGBuilder::process_bitmap_instance(const Element& el, ExportItem* parent, processing_bag_t* bag) {
-    assert(el.elementType == ElementType::bitmap_instance);
+    EK_ASSERT(el.elementType == ElementType::bitmap_instance);
 
     auto* item = new ExportItem;
     item->ref = &el;
@@ -303,7 +304,7 @@ void SGBuilder::process_bitmap_item(const Element& el, ExportItem* parent, proce
 }
 
 void SGBuilder::process_dynamic_text(const Element& el, ExportItem* parent, processing_bag_t* bag) {
-    assert(el.elementType == ElementType::dynamic_text);
+    EK_ASSERT(el.elementType == ElementType::dynamic_text);
 
     auto* item = new ExportItem();
     item->ref = &el;
@@ -319,14 +320,14 @@ void SGBuilder::process_dynamic_text(const Element& el, ExportItem* parent, proc
 }
 
 void SGBuilder::process_symbol_item(const Element& el, ExportItem* parent, processing_bag_t* bag) {
-    assert(el.elementType == ElementType::symbol_item ||
+    EK_ASSERT(el.elementType == ElementType::symbol_item ||
            el.elementType == ElementType::scene_timeline);
 
     auto* item = new ExportItem();
     item->ref = &el;
     process_transform(el, *item);
     item->node.libraryName = el.item.name;
-    assert(el.libraryItemName.empty());
+    EK_ASSERT(el.libraryItemName.empty());
     item->node.scaleGrid = el.scaleGrid;
 
     collectFramesMetaInfo(doc, *item);
@@ -373,14 +374,14 @@ void SGBuilder::process_symbol_item(const Element& el, ExportItem* parent, proce
 }
 
 void SGBuilder::process_group(const Element& el, ExportItem* parent, processing_bag_t* bag) {
-    assert(el.elementType == ElementType::group);
+    EK_ASSERT(el.elementType == ElementType::group);
     for (const auto& member: el.members) {
         process(member, parent, bag);
     }
 }
 
 void SGBuilder::process_shape(const Element& el, ExportItem* parent, processing_bag_t* bag) {
-    assert(el.elementType == ElementType::shape ||
+    EK_ASSERT(el.elementType == ElementType::shape ||
            el.elementType == ElementType::object_oval ||
            el.elementType == ElementType::object_rectangle);
     auto* item = addElementToDrawingLayer(parent, el);
@@ -404,8 +405,8 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
             child->animationSpan1 == _animationSpan1) {
             // EK_DEBUG("Found drawing layer " << child->ref->item.name);
             auto& timeline = child->drawingLayerItem->timeline;
-            assert(!timeline.layers.empty());
-            assert(!timeline.layers[0].frames.empty());
+            EK_ASSERT(!timeline.layers.empty());
+            EK_ASSERT(!timeline.layers[0].frames.empty());
             timeline.layers[0].frames[0].elements.push_back(el);
             child->shapes++;
             return child;
@@ -597,7 +598,7 @@ void SGBuilder::processTimeline(const Element& el, ExportItem* item) {
                         target->movieLayerIsLinked = true;
                     } else {
                         targetLayer = findTargetLayer(movie, targetNodeRef);
-                        assert(targetLayer);
+                        EK_ASSERT(targetLayer);
                     }
 
                     auto kf0 = createFrameModel(frame);

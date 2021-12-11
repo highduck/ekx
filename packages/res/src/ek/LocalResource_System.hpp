@@ -18,6 +18,7 @@
 #if EK_STATIC_RESOURCES_READ_FILE
 
 #include <cstdint>
+#include <cstdio>
 #include "MapFile.hpp"
 
 namespace ek {

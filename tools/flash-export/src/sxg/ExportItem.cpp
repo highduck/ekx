@@ -1,5 +1,6 @@
 #include "ExportItem.hpp"
 #include "../xfl/types.hpp"
+#include <ek/assert.h>
 
 namespace ek::xfl {
 
@@ -10,13 +11,13 @@ ExportItem::~ExportItem() {
 }
 
 void ExportItem::add(ExportItem* item) {
-    assert(item != nullptr);
+    EK_ASSERT(item != nullptr);
     children.push_back(item);
     item->parent = this;
 }
 
 void ExportItem::append_to(ExportItem* parent_) {
-    assert(parent == nullptr);
+    EK_ASSERT(parent == nullptr);
     if (parent_) {
         parent_->add(this);
     }
