@@ -3,6 +3,7 @@
 #include "TextureLoader.hpp"
 #include <ek/imaging/image.hpp>
 #include <cstdlib>
+#include <cstdio>
 
 // implement decode + stbi
 #include <ek/imaging/Image_Decode.hpp>
