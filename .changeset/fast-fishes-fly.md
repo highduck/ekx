@@ -11,6 +11,7 @@
 "@ekx/sokol": patch
 "@ekx/sokol-shdc": patch
 "@ekx/stb": patch
+"@ekx/std": patch
 ---
 
 migration to monorepo

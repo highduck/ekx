@@ -4,7 +4,7 @@
 "@ekx/audio": patch
 "@ekx/core": patch
 "@ekx/dev-tools": patch
-"@ekx/ecs": pa
+"@ekx/ecs": patch
 "@ekx/graphics": patch
 "@ekx/local-storage": patch
 "@ekx/physics-arcade": patch
