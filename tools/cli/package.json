@@ -40,7 +40,7 @@
     "xmldoc": "^1.1.2"
   },
   "devDependencies": {
-    "@types/glob": "^7.1.4",
+    "@types/glob": "^7.2.0",
     "@types/http-server": "^0.12.1",
     "@types/mustache": "^4.1.2",
     "@types/node": "^16.9.2",
