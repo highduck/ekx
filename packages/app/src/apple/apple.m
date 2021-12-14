@@ -1,6 +1,10 @@
 #ifdef __APPLE__
 
 #include <ek/app_native.h>
+#include <ek/assert.h>
+
+// for system font
+#include <CoreText/CoreText.h>
 
 #if TARGET_OS_IOS || TARGET_OS_TV
 
@@ -88,25 +92,37 @@ int ek_app_share(const char* content) {
 #endif
 }
 
-void* ek_metal__device(void) {
+void* ek_app_mtl_device(void) {
     if (ek_app_delegate.view != nil) {
         return (__bridge void*) (ek_app_delegate.view.device);
     }
     return NULL;
 }
 
-const void* ek_metal__render_pass(void) {
+const void* ek_app_mtl_render_pass(void) {
     if (ek_app_delegate.view != nil) {
         return (__bridge const void*) (ek_app_delegate.view.defaultPass);
     }
     return NULL;
 }
 
-const void* ek_metal__drawable(void) {
+const void* ek_app_mtl_drawable(void) {
     if (ek_app_delegate.view != nil) {
         return (__bridge const void*) (ek_app_delegate.view.currentDrawable);
     }
     return NULL;
+}
+
+// just C version could be found here: https://stackoverflow.com/questions/20283054/xcode-file-open-native-c
+const char* ek_app_ns_bundle_path(const char* path, char* buffer, uint32_t size) {
+    EK_ASSERT(path != 0);
+    EK_ASSERT(buffer != 0);
+    NSString* ns_path = [NSString stringWithUTF8String:path];
+    NSString* ns_bundle_path = [[NSBundle mainBundle] pathForResource:ns_path ofType:nil];
+    if(ns_bundle_path && [ns_bundle_path getCString: buffer maxLength: size encoding: NSASCIIStringEncoding]) {
+        return buffer;
+    }
+    return path;
 }
 
 #else // __APPLE__

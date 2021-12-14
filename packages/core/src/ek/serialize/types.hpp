@@ -65,14 +65,43 @@ inline void serialize(IO<S>& io, Hash<V>& value) {
 template<typename S>
 inline void serialize(IO<S>& io, String& value) {
     if constexpr (is_readable_stream<S>()) {
-        uint32_t size;
+        int32_t size;
         io.value(size);
         value.resize(size);
         io.span(value.data(), size);
+
+        // null-terminator
+        uint8_t term;
+        io.value(term);
+        EK_ASSERT(term == 0);
     } else {
-        auto size = static_cast<uint32_t>(value.size());
+        auto size = static_cast<int32_t>(value.size());
         io.value(size);
         io.span(value.data(), size);
+        // null-terminator
+        const uint8_t term = 0;
+        io.value(term);
+    }
+}
+
+struct IOStringView {
+    int32_t size = 0;
+    const char* data = nullptr;
+};
+
+template<typename S>
+inline void serialize(IO<S>& io, IOStringView& value) {
+    if constexpr (is_readable_stream<S>()) {
+        io.value(value.size);
+        value.data = (const char*)io.stream.dataAtPosition();
+        io.stream.seek(value.size + 1);
+    } else {
+        io.value(value.size);
+        io.span(value.data, value.size);
+
+        // null-terminator
+        const uint8_t term = 0;
+        io.value(term);
     }
 }
 

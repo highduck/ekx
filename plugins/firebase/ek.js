@@ -53,7 +53,7 @@ function setup(project) {
             // TODO: fastlane
             // gradle(task: "uploadCrashlyticsSymbolFile", build_type: "Release")
 
-            android_java: "android/java",
+            android_java: "java",
             // Import the BoM for the Firebase platform
             // Check Release Notes for updates: https://firebase.google.com/support/release-notes/android
             android_buildScriptDependency: [
@@ -80,9 +80,9 @@ function setup(project) {
             ],
             cpp_flags: {
                 files: [
-                    "src/ek/firebase/Firebase.cpp"
+                    "src/ek/firebase.c"
                 ],
-                flags: "-x objective-c++"
+                flags: "-x objective-c"
             },
             xcode_file: [
                 "GoogleService-Info.plist"

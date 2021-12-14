@@ -3,7 +3,7 @@
 #include <ek/math/Rect.hpp>
 #include <ek/ds/String.hpp>
 #include <ek/ds/Array.hpp>
-#include <ek/imaging/image.hpp>
+#include <ek/image.h>
 
 namespace ek {
 
@@ -20,7 +20,7 @@ struct SpriteData {
     uint8_t padding = 1;
 
     // reference image;
-    image_t* image = nullptr;
+    ek_image image{0, 0, nullptr};
 
     // TODO:
     bool trim = false;
@@ -37,9 +37,9 @@ struct ImageSet {
     Array<Resolution> resolutions;
 };
 
-void saveImagePNG(const image_t& image, const char* path, bool alpha = true);
+void saveImagePNG(const ek_image* image, const char* path, bool alpha = true);
 
-void saveImageJPG(const image_t& image, const char* path, bool alpha = true);
+void saveImageJPG(const ek_image* image, const char* path, bool alpha = true);
 
 void save(ImageSet& images, const char* output);
 

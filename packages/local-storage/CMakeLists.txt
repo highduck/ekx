@@ -23,6 +23,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
 )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+    target_link_options(${PROJECT_NAME}
+            PUBLIC "SHELL:--js-library ${CMAKE_CURRENT_SOURCE_DIR}/src/local_storage.js"
+            )
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 endif()

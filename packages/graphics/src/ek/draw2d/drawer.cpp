@@ -118,7 +118,7 @@ float getTriangleArea(const Vertex2D* vertices, const uint16_t* indices, int cou
 
 class BufferChain {
 public:
-    BufferChain(BufferType type, uint32_t elementsMaxCount, uint32_t elementMaxSize) :
+    BufferChain(sg_buffer_type type, uint32_t elementsMaxCount, uint32_t elementMaxSize) :
             type_{type},
             caps{0x10 * elementMaxSize,
                  0x100 * elementMaxSize,
@@ -143,7 +143,7 @@ public:
         auto& v = buffers_[index];
         auto position = pos[index];
         if (position >= v.size()) {
-            buf = new Buffer(type_, Usage::Stream, caps[index]);
+            buf = new Buffer(type_, SG_USAGE_STREAM, caps[index]);
             v.push_back(buf);
         } else {
             buf = v[position];
@@ -194,7 +194,7 @@ public:
     }
 
 private:
-    BufferType type_;
+    sg_buffer_type type_;
     Array<Buffer*> buffers_[4]{};
     uint16_t pos[4] = {0, 0, 0, 0};
     // each bucket buffer size
@@ -332,8 +332,8 @@ uint32_t Context::getUsedMemory() const {
 
 
 Context::Context() {
-    vertexBuffers_ = new BufferChain(BufferType::VertexBuffer, MaxVertex + 1, (uint32_t) sizeof(Vertex2D));
-    indexBuffers_ = new BufferChain(BufferType::IndexBuffer, MaxIndex + 1, (uint32_t) sizeof(uint16_t));
+    vertexBuffers_ = new BufferChain(SG_BUFFERTYPE_VERTEXBUFFER, MaxVertex + 1, (uint32_t) sizeof(Vertex2D));
+    indexBuffers_ = new BufferChain(SG_BUFFERTYPE_INDEXBUFFER, MaxIndex + 1, (uint32_t) sizeof(uint16_t));
 
     EK_DEBUG("draw2d: allocate memory buffers");
     vertexData_ = new Vertex2D[MaxVertex + 1];

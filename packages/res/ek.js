@@ -7,16 +7,9 @@ function setup(project) {
         name: "@ekx/res",
         path: __dirname,
         cpp: "src",
+        cpp_include: "include",
         web: {
-            js: "platform/web"
-        },
-        apple: {
-            cpp_flags: {
-                files: [
-                    "src/ek/LocalResource.cpp"
-                ],
-                flags: "-x objective-c++"
-            },
+            js: "src"
         }
     });
     project.importModule("@ekx/app", __dirname);

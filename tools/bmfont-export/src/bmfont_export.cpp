@@ -42,38 +42,42 @@ int main(int argc, char** argv) {
     save(images, outputSprites);
 
     BMFE_LOG_F("Export Bitmap Font binary: %s\n", outputFont);
-    Writer writer{100};
-    writer.writeI32(fontData.unitsPerEM);
-    writer.writeI32(fontData.fontSize);
-    writer.writeI32(fontData.lineHeight);
-    writer.writeI32(fontData.ascender);
-    writer.writeI32(fontData.descender);
-    writer.writeI32((int32_t) fontData.glyphs.size());
+    bytes_writer writer;
+    bytes_writer_alloc(&writer, 100);
+    bytes_write_i32(&writer, fontData.unitsPerEM);
+    bytes_write_i32(&writer, fontData.fontSize);
+    bytes_write_i32(&writer, fontData.lineHeight);
+    bytes_write_i32(&writer, fontData.ascender);
+    bytes_write_i32(&writer, fontData.descender);
+    bytes_write_i32(&writer, (int32_t) fontData.glyphs.size());
     int32_t dictSize = 0;
 
     for (auto& glyph: fontData.glyphs) {
         for (auto _: glyph.codepoints) {
             ++dictSize;
         }
-        writer.writeI32(glyph.box.x);
-        writer.writeI32(glyph.box.y);
-        writer.writeI32(glyph.box.w);
-        writer.writeI32(glyph.box.h);
-        writer.writeI32(glyph.advanceWidth);
-        writer.writeString(glyph.sprite);
+        bytes_write_i32(&writer, glyph.box.x);
+        bytes_write_i32(&writer, glyph.box.y);
+        bytes_write_i32(&writer, glyph.box.w);
+        bytes_write_i32(&writer, glyph.box.h);
+        bytes_write_i32(&writer, glyph.advanceWidth);
+        bytes_write_string(&writer, glyph.sprite.c_str(), (int)glyph.sprite.size());
     }
-    writer.writeI32(dictSize);
+    bytes_write_i32(&writer, dictSize);
     for (size_t i = 0; i < fontData.glyphs.size(); ++i) {
         const auto& glyph = fontData.glyphs[i];
+        // hash<u64, i32>
         for (auto cp: glyph.codepoints) {
-            writer.writeU64((int32_t) cp);
-            writer.writeI32((int32_t) i);
+            bytes_write_u64(&writer, (uint64_t) cp);
+            bytes_write_i32(&writer, (int32_t) i);
         }
     }
 
     auto f = fopen(outputFont, "wb");
     fwrite(writer.data, 1, writer.pos, f);
     fclose(f);
+
+    bytes_writer_free(&writer);
 
     return 0;
 }

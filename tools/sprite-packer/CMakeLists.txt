@@ -3,6 +3,7 @@ include(npm.cmake)
 project(sprite-packer)
 
 add_executable(${PROJECT_NAME}
+        src/sprite_packer/sprpk_image.c
         src/sprite_packer.cpp
         src/sprite_packer/MaxRects.cpp
         )
@@ -36,7 +37,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO
+        CXX_EXTENSIONS YES
         )
 
 

@@ -3,8 +3,7 @@ include(npm.cmake)
 project(plugin-firebase)
 
 add_library(${PROJECT_NAME} STATIC
-        src/ek/firebase/Firebase.h
-        src/ek/firebase/Firebase.cpp
+        src/ek/firebase.c
         )
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
@@ -21,11 +20,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin|iOS")
 
-    target_compile_options(${PROJECT_NAME}
-            PRIVATE -xobjective-c++
-            )
+    set_source_files_properties("src/ek/firebase.c" PROPERTIES
+            COMPILE_FLAGS "-x objective-c")
 
 endif()
 

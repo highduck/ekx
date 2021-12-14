@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/app/Platform.h>
+#include <ek/app_native.h>
 
 #import <GoogleMobileAds/GoogleMobileAds.h>
 #import <AppTrackingTransparency/AppTrackingTransparency.h>
@@ -17,7 +17,7 @@ GADRewardedAd* rewardedAd = nil;
 
 /// AdMob
 void addBannerViewToView(GADBannerView* bannerView) {
-    UIViewController* root_view_controller = gAppDelegate.window.rootViewController;
+    UIViewController* root_view_controller = ek_app_delegate.window.rootViewController;
     UIView* view = root_view_controller.view;
     bannerView.translatesAutoresizingMaskIntoConstraints = NO;
     bannerView.rootViewController = root_view_controller;
@@ -211,7 +211,7 @@ void reloadRewardedAd() {
 
 bool isRewardedAdReady() {
     if(rewardedAd != nil) {
-        UIViewController* rootViewController = gAppDelegate.window.rootViewController;
+        UIViewController* rootViewController = ek_app_delegate.window.rootViewController;
         if([rewardedAd canPresentFromRootViewController: rootViewController error:nil]) {
             return true;
         }
@@ -226,7 +226,7 @@ void show_rewarded_ad() {
     }
 
     if (isRewardedAdReady()) {
-        UIViewController* rootViewController = gAppDelegate.window.rootViewController;
+        UIViewController* rootViewController = ek_app_delegate.window.rootViewController;
         [rewardedAd presentFromRootViewController: rootViewController
         userDidEarnRewardHandler:^ {
             NSLog(@"rewardedAd:userDidEarnReward:");
@@ -241,7 +241,7 @@ void show_rewarded_ad() {
 
 bool isInterstitialAdReady() {
     if(interstitialAd != nil) {
-        UIViewController* rootViewController = gAppDelegate.window.rootViewController;
+        UIViewController* rootViewController = ek_app_delegate.window.rootViewController;
         if([interstitialAd canPresentFromRootViewController: rootViewController error:nil]) {
             return true;
         }
@@ -257,7 +257,7 @@ void show_interstitial_ad() {
     }
 
     if(isInterstitialAdReady()) {
-        UIViewController* rootViewController = gAppDelegate.window.rootViewController;
+        UIViewController* rootViewController = ek_app_delegate.window.rootViewController;
         [interstitialAd presentFromRootViewController: rootViewController];
     } else {
         NSLog(@"Interstitial Ad is not ready");

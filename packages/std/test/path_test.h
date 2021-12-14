@@ -34,6 +34,9 @@ TEST_CASE("join") {
     char buf2[10];
     ek_path_join(buf2, 10, buf, "c.txt");
     CHECK_FALSE(strcmp(buf2, "a/b/c.txt"));
+
+    ek_path_join(buf2, 10, "", "document.xml");
+    CHECK_FALSE(strcmp(buf2, "document."));
 }
 
 TEST_CASE("ext") {

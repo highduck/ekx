@@ -16,10 +16,10 @@ export default [
     {
         input: "./web/dist/module/lib.js",
         output: {
-            file: "./platform/web/lib/lib-texture-loader.js",
+            file: "./js/lib/lib-texture-loader.js",
             format: "es",
             compact: true,
-            module: false,
+            esModule: false,
             //plugins: [terser()],
             sourcemap: true
         },
@@ -28,7 +28,7 @@ export default [
     {
         input: "./web/dist/module/index.js",
         output: {
-            file: "./platform/web/pre/texture-loader.js",
+            file: "./js/pre/texture-loader.js",
             format: "iife",
             name: "TextureLoader",
             compact: true,

@@ -56,32 +56,8 @@
 
 #include <ek/util/NoCopyAssign.hpp>
 
-namespace ek {
-class image_t;
-}
-
 // sokol gfx objects RAII wrappers with utilities
 namespace ek::graphics {
-
-enum class GraphicsContextType {
-    OpenGL,
-    GLES_2,
-    GLES_3,
-    WebGL,
-    WebGL_2
-};
-
-
-enum class Usage {
-    Immutable = SG_USAGE_IMMUTABLE,
-    Dynamic = SG_USAGE_DYNAMIC,
-    Stream = SG_USAGE_STREAM
-};
-
-enum class BufferType {
-    VertexBuffer = SG_BUFFERTYPE_VERTEXBUFFER,
-    IndexBuffer = SG_BUFFERTYPE_INDEXBUFFER
-};
 
 class Shader : private NoCopyAssign {
 public:
@@ -95,10 +71,10 @@ public:
 
 class Buffer : private NoCopyAssign {
 public:
-    Buffer(BufferType type, Usage usage, uint32_t maxSize);
+    Buffer(sg_buffer_type type, sg_usage usage, uint32_t maxSize);
 
     // immutable init
-    Buffer(BufferType type, const void* data, uint32_t dataSize);
+    Buffer(sg_buffer_type type, const void* data, uint32_t dataSize);
 
     ~Buffer();
 
@@ -134,10 +110,6 @@ void initialize(int maxDrawCalls = 128);
 void shutdown();
 
 /*** Helpers ***/
-Texture* createTexture(const image_t& image, const char* label = nullptr);
-
-Texture* createTexture(ek::image_t* images[6], const char* label = nullptr);
-
 Texture* createRenderTarget(int width, int height, const char* label = nullptr);
 
 }

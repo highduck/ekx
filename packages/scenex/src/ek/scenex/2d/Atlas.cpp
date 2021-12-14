@@ -6,9 +6,9 @@
 #include <ek/math/MathSerialize.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/util/Path.hpp>
-#include <ek/LocalResource.hpp>
+#include <ek/local_res.hpp>
 #include <ek/graphics/graphics.hpp>
-#include <ek/imaging/image.hpp>
+#include <ek/image.h>
 #include <stb/stb_sprintf.h>
 
 namespace ek {
@@ -82,7 +82,7 @@ Atlas::~Atlas() {
     clear();
 }
 
-void load_atlas_meta(const char* base_path, Atlas* atlas, LocalResource lr) {
+void load_atlas_meta(const char* base_path, Atlas* atlas, ek_local_res lr) {
     EK_DEBUG("Decoding Atlas META");
     EK_DEBUG("Atlas Base Path: %s", base_path);
 
@@ -93,15 +93,15 @@ void load_atlas_meta(const char* base_path, Atlas* atlas, LocalResource lr) {
     AtlasInfo atlasInfo{};
     io(atlasInfo);
 
-    for(auto* loader : atlas->loaders) {
-        delete loader;
+    for (auto* loader: atlas->loaders) {
+        ek_texture_loader_destroy(loader);
     }
     atlas->loaders.clear();
 
-    for (const auto& page : atlasInfo.pages) {
+    for (const auto& page: atlasInfo.pages) {
         auto& texture_asset = atlas->pages.emplace_back(page.imagePath.c_str());
-        atlas->loaders.emplace_back(new TextureLoader);
-        for (auto& spr_data : page.sprites) {
+        atlas->loaders.emplace_back(ek_texture_loader_create());
+        for (auto& spr_data: page.sprites) {
             auto sprite = new Sprite();
             sprite->rotated = spr_data.isRotated();
             sprite->rect = spr_data.rc;
@@ -127,10 +127,10 @@ void load_atlas_meta(const char* base_path, Atlas* atlas, LocalResource lr) {
 
         auto* loader = atlas->loaders[i];
         loader->formatMask = atlas->formatMask;
-        loader->basePath = base_path;
+        ek_texture_loader_set_path(&loader->basePath, base_path);
         loader->imagesToLoad = 1;
-        loader->urls[0] = pageImagePath.c_str();
-        loader->load();
+        ek_texture_loader_set_path(&loader->urls[0], pageImagePath.c_str());
+        ek_texture_loader_load(loader);
     }
 }
 
@@ -139,27 +139,26 @@ void Atlas::load(const char* path, float scaleFactor) {
     stbsp_snprintf(tmp, 1024, "%s%s.atlas", path, get_scale_suffix(scaleFactor));
     const String metaFilePath{tmp};
     const String basePath = Path::directory(path);
-    get_resource_content_async(metaFilePath.c_str(), [this, metaFilePath, basePath](auto lr) {
-        if (lr.success()) {
+    get_resource_content_async(metaFilePath.c_str(), [this, metaFilePath, basePath](ek_local_res lr) {
+        if (ek_local_res_success(&lr)) {
             load_atlas_meta(basePath.c_str(), this, lr);
-        }
-        else {
+        } else {
             EK_DEBUG("ATLAS META resource not found: %s", metaFilePath.c_str());
         }
-        lr.close();
+        ek_local_res_close(&lr);
     });
 }
 
 int Atlas::pollLoading() {
     int toLoad = (int) loaders.size();
-    if(toLoad > 0) {
+    if (toLoad > 0) {
         for (uint32_t i = 0; i < loaders.size(); ++i) {
             auto* loader = loaders[i];
             if (loader) {
-                loader->update();
+                ek_texture_loader_update(loader);
                 if (!loader->loading) {
                     if (loader->status == 0) {
-                        Res<graphics::Texture> res{loader->urls[0].c_str()};
+                        Res<graphics::Texture> res{loader->urls[0].path};
                         res.reset(new graphics::Texture{loader->image, loader->desc});
                         delete loader;
                         loaders[i] = nullptr;
@@ -176,8 +175,7 @@ int Atlas::pollLoading() {
             }
             loaders.clear();
             return 0;
-        }
-        else {
+        } else {
             return toLoad;
         }
     }
@@ -201,11 +199,11 @@ void Atlas::clear() {
 //        asset_t<texture_t>::unload(texture);
 //    }
 
-    for (auto& page : pages) {
+    for (auto& page: pages) {
         page.reset(nullptr);
     }
 
-    for (auto& spr : sprites) {
+    for (auto& spr: sprites) {
         spr.reset(nullptr);
     }
 }

@@ -108,10 +108,9 @@ EK_DECLARE_TYPE(basic_application);
 void launcher_on_frame();
 
 template<typename T>
-inline void run_app(ek_app_config cfg) {
+inline void run_app() {
     ek::core::setup();
     gTextEngine.initialize();
-    ek_app.config = cfg;
 
 #ifdef EK_DEV_TOOLS
     Editor::inspectorEnabled = true;

@@ -52,10 +52,13 @@ export class BytesWriter {
     }
 
     writeString(s: string) {
-        this.ensureSize(this.size + 4 + (s.length << 2));
+        this.ensureSize(this.size + 4 + (s.length << 2) + 1);
         const bytesWritten = this.writeUtf8(s, this.size + 4);
         this.writeU32(bytesWritten);
         this.size += bytesWritten;
+
+        // null-terminator
+        this.bytes[this.size++] = 0;
     }
 
     writeUtf8(s: string, destOffset: number): number {

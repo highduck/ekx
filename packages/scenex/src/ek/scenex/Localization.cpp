@@ -4,7 +4,7 @@
 
 namespace ek {
 
-bool StringCatalog::init(LocalResource lr) {
+bool StringCatalog::init(ek_local_res lr) {
     data = lr;
     if (data.buffer == nullptr) {
         EK_ERROR("mo-file has no data");
@@ -86,7 +86,7 @@ const char* StringCatalog::get(const char* text) const {
 }
 
 StringCatalog::~StringCatalog() {
-    data.close();
+    ek_local_res_close(&data);
 }
 
 const char* Localization::getText(const char* str) const {
@@ -111,7 +111,7 @@ const String& Localization::getLanguage() const {
     return language;
 }
 
-void Localization::load(const char* name, LocalResource lr) {
+void Localization::load(const char* name, ek_local_res lr) {
     auto& catalog = languages[name];
     if (catalog.init(lr)) {
         languagesList.emplace_back(name);

@@ -18,6 +18,7 @@ add_subdirectory(src/ek/scenex)
 add_subdirectory(src/ek/goodies)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
+        C_STANDARD 11
         CXX_STANDARD 17
         #UNITY_BUILD ON
         )

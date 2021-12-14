@@ -1,7 +1,6 @@
 #include "ImageSet.hpp"
 #include <pugixml.hpp>
 #include <ek/assert.h>
-#include <ek/imaging/drawing.hpp>
 
 #include <miniz.h>
 
@@ -42,8 +41,13 @@ namespace ek {
 
 /*** Save Image ***/
 
-void saveImagePNG(const image_t& image, const char* path, bool alpha) {
-    image_t img{image};
+void saveImagePNG(const ek_image* image, const char* path, bool alpha) {
+    EK_ASSERT(image != NULL);
+    EK_ASSERT(image->pixels != NULL);
+
+    const int w = (int) image->w;
+    const int h = (int) image->h;
+
     // require RGBA non-premultiplied alpha
     //undo_premultiply_image(img);
 
@@ -51,18 +55,12 @@ void saveImagePNG(const image_t& image, const char* path, bool alpha) {
     stbi_write_force_png_filter = 0;
 
     if (alpha) {
-        stbi_write_png(path,
-                       img.width(),
-                       img.height(),
-                       4,
-                       img.data(),
-                       4 * static_cast<int>(img.width()));
+        stbi_write_png(path, w, h, 4, image->pixels, 4 * w);
     } else {
-
-        size_t pixels_count = img.width() * img.height();
+        const size_t pixels_count = w * h;
         auto* buffer = (uint8_t*) malloc(pixels_count * 3);
         auto* buffer_rgb = buffer;
-        auto* buffer_rgba = img.data();
+        const uint8_t* buffer_rgba = (const uint8_t*) image->pixels;
 
         for (size_t i = 0; i < pixels_count; ++i) {
             buffer_rgb[0] = buffer_rgba[0];
@@ -72,25 +70,18 @@ void saveImagePNG(const image_t& image, const char* path, bool alpha) {
             buffer_rgb += 3;
         }
 
-        stbi_write_png(path,
-                       img.width(),
-                       img.height(),
-                       3,
-                       buffer,
-                       3 * static_cast<int>(img.width()));
-
+        stbi_write_png(path, w, h, 3, buffer, 3 * w);
         free(buffer);
     }
 }
 
-void saveImageJPG(const image_t& image, const char* path, bool alpha) {
-    image_t img{image};
+void saveImageJPG(const ek_image* image, const char* path, bool alpha) {
     // require RGBA non-premultiplied alpha
     //undo_premultiply_image(img);
-    const int w = (int) img.width();
-    const int h = (int) img.height();
+    const int w = (int) image->w;
+    const int h = (int) image->h;
     const size_t pixels_count = w * h;
-    const auto* buffer_rgba = img.data();
+    const uint8_t* buffer_rgba = (uint8_t*)image->pixels;
 
     if (alpha) {
         auto* buffer_rgb = (uint8_t*) malloc(pixels_count * 3);
@@ -161,16 +152,16 @@ void save(ImageSet& images, const char* output) {
     for (auto& resolution: images.resolutions) {
         auto nodeResolution = nodeAtlas.append_child("resolution");
         for (auto& image: resolution.sprites) {
-            if (image.image) {
-                auto& bitmap = *image.image;
+            if (image.image.pixels) {
+                auto* bitmap = &image.image;
                 // require RGBA non-premultiplied alpha
-                undoPremultiplyAlpha(bitmap);
+                ek_image_un_premultiply(bitmap);
 
                 auto nodeSprite = nodeResolution.append_child("image");
 //                snprintf(path, 1024, "%s/%d.png", output, idx++);
 //                stbi_write_png(path, (int) bitmap.width(), (int) bitmap.height(), 4, bitmap.data(), (int)bitmap.width() * 4);
                 snprintf(path, 1024, "%s/%d.bmp", output, idx++);
-                stbi_write_bmp(path, (int) bitmap.width(), (int) bitmap.height(), 4, bitmap.data());
+                stbi_write_bmp(path, (int) bitmap->w, (int) bitmap->h, 4, bitmap->pixels);
 
                 nodeSprite.append_attribute("path").set_value(path);
                 nodeSprite.append_attribute("name").set_value(image.name.c_str());

@@ -9,6 +9,8 @@
 #include "time.c.h"
 #include "utf8.c.h"
 
+#include "image/fastblur.c.h"
+#include "image/image.c.h"
 
 /*
 #ifdef __EMSCRIPTEN__

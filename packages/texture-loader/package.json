@@ -4,8 +4,7 @@
   "scripts": {
     "postinstall": "cmake-build || exit 0",
     "watch": "tsc -w -p web/tsconfig.json & rollup -w -c web/rollup.config.js",
-    "build": "tsc -p web/tsconfig.json && rollup -c web/rollup.config.js",
-    "jsify": "emscripten-library-generator platform/web/lib-texture-loader.js > platform/web/lib-texture-loader2.js"
+    "build": "tsc -p web/tsconfig.json && rollup -c web/rollup.config.js"
   },
   "dependencies": {
     "@ekx/app": "0.1.7",

@@ -5,13 +5,13 @@
 #include <thread>
 #include "MaxRects.hpp"
 #include "ImageIO.h"
-#include "Bitmap.h"
+#include "sprpk_image.h"
 #include "Writer.h"
 #include <cstdio>
 
 namespace sprite_packer {
 
-void saveImagePNG(const Bitmap& bitmap, const char* path, bool alpha);
+void saveImagePNG(const ek_bitmap* bitmap, const char* path, bool alpha);
 
 std::vector<PageData> packSprites(std::vector<SpriteData> sprites, int maxWidth, int maxHeight);
 
@@ -27,7 +27,7 @@ void formatAtlasFileName(char* buffer, int bufferSize, const char* name, float s
     else if (scale <= 3) scaleSuffix = "@3x";
     else if (scale <= 4) scaleSuffix = "@4x";
     else {
-        SPRITE_PACKER_LOG("atlas more than 4x scale-factor! %d %%\n", (int)(100 * scale));
+        SPRITE_PACKER_LOG("atlas more than 4x scale-factor! %d %%\n", (int) (100 * scale));
         // to support bigger density
         scaleSuffix = "@4x";
     }
@@ -35,37 +35,32 @@ void formatAtlasFileName(char* buffer, int bufferSize, const char* name, float s
 }
 
 void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const char* name) {
-    Writer writer{100};
-    writer.writeI32((int32_t) resolution.pages.size());
+    bytes_writer writer;
+    bytes_writer_alloc(&writer, 100);
+    bytes_write_i32(&writer, (int32_t) resolution.pages.size());
 
+    char imagePath[1024];
     int page_index = 0;
     for (auto& page: resolution.pages) {
-        assert(page.bitmap != nullptr);
-        char imagePath[1024];
+        assert(page.bitmap.data != nullptr);
         formatAtlasFileName(imagePath, 1024, name, resolution.resolution_scale, page_index, "png");
-        writer.writeU16(page.w);
-        writer.writeU16(page.h);
-        writer.writeString(std::string{imagePath});
-        writer.writeI32((int32_t) page.sprites.size());
+        bytes_write_u16(&writer, page.w);
+        bytes_write_u16(&writer, page.h);
+        bytes_write_string(&writer, imagePath, (int) strnlen(imagePath, 1024));
+        bytes_write_i32(&writer, (int32_t) page.sprites.size());
         for (auto& spr: page.sprites) {
-            writer.writeString(spr.name);
-            writer.writeF32(spr.rc.x);
-            writer.writeF32(spr.rc.y);
-            writer.writeF32(spr.rc.w);
-            writer.writeF32(spr.rc.h);
-            writer.writeF32(spr.uv.x);
-            writer.writeF32(spr.uv.y);
-            writer.writeF32(spr.uv.w);
-            writer.writeF32(spr.uv.h);
+            bytes_write_string(&writer, spr.name.c_str(), (int) spr.name.size());
+            bytes_writer_push(&writer, &spr.rc, sizeof(spr.rc));
+            bytes_writer_push(&writer, &spr.uv, sizeof(spr.uv));
             // keep only rotation flag in output
-            writer.writeU8(spr.flags & 1);
+            bytes_write_u8(&writer, spr.flags & 1);
         }
 
         char absImagePath[1024];
         snprintf(absImagePath, 1024, "%s/%s", outputPath, imagePath);
 
         //page.image_path = name + get_atlas_suffix(resolution.resolution_scale, page_index) + ".png";
-        saveImagePNG(*page.bitmap, absImagePath, true);
+        saveImagePNG(&page.bitmap, absImagePath, true);
         // saveImageJPG(*page.image, name + get_atlas_suffix(resolution.resolution_scale, page_index));
         ++page_index;
     }
@@ -77,6 +72,8 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
     auto f = fopen(absAtlasPath, "wb");
     fwrite(writer.data, 1, writer.pos, f);
     fclose(f);
+
+    bytes_writer_free(&writer);
 }
 
 static void packAtlasThread(const char* name, const char* outputPath, AtlasData& resolution) {
@@ -102,7 +99,7 @@ void Atlas::packAndSaveMultiThreaded(const char* outputPath) {
 
 /*** Pack Sprites ***/
 
-RectI no_pack_padding(ek::binpack::rect_t rect, int pad) {
+ek_img_rect no_pack_padding(ek::binpack::rect_t rect, int pad) {
     return {
             rect.x + pad,
             rect.y + pad,
@@ -111,7 +108,7 @@ RectI no_pack_padding(ek::binpack::rect_t rect, int pad) {
     };
 }
 
-Rect calc_uv(RectI source, float w, float h, bool rotated) {
+ek_img_rect_f calc_uv(ek_img_rect source, float w, float h, bool rotated) {
     if (rotated) {
         std::swap(source.w, source.h);
     }
@@ -151,13 +148,13 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
             PageData page{};
             page.w = packer_state.canvas.width;
             page.h = packer_state.canvas.height;
-            page.bitmap = new Bitmap(page.w, page.h);
+            ek_bitmap_alloc(&page.bitmap, page.w, page.h);
             const auto fw = (float) page.w;
             const auto fh = (float) page.h;
 
             {
                 //atlas_renderer_cairo renderer{*page.image};
-                for (size_t i = 0; i < packer_state.rects.size(); ++i) {
+                for (int i = 0; i < (int)packer_state.rects.size(); ++i) {
                     if (!packer_state.is_packed(i)) {
                         continue;
                     }
@@ -167,15 +164,15 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
                         sprite.enable(SpriteFlag::Rotated);
                     }
 
-                    const RectI packed_rect = no_pack_padding(packer_state.get_rect(i), sprite.padding);
+                    const ek_img_rect packed_rect = no_pack_padding(packer_state.get_rect(i), sprite.padding);
                     if (sprite.is_rotated()) {
-                        copyPixels_CCW_90(*page.bitmap, packed_rect.x, packed_rect.y, *sprite.bitmap,
+                        copyPixels_CCW_90(&page.bitmap, packed_rect.x, packed_rect.y, &sprite.bitmap,
                                           sprite.source.x, sprite.source.y, sprite.source.w, sprite.source.h);
                     } else {
-                        copyPixels(*page.bitmap, packed_rect.x, packed_rect.y, *sprite.bitmap,
+                        copyPixels(&page.bitmap, packed_rect.x, packed_rect.y, &sprite.bitmap,
                                    sprite.source.x, sprite.source.y, sprite.source.w, sprite.source.h);
                     }
-                    delete sprite.bitmap;
+                    ek_bitmap_free(&sprite.bitmap);
                     sprite.bitmap = page.bitmap;
                     sprite.source = packed_rect;
                     sprite.uv = calc_uv(packed_rect, fw, fh, sprite.is_rotated());
@@ -201,20 +198,22 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
 
 /*** Save Image ***/
 
-void saveImagePNG(const Bitmap& bitmap, const char* path, bool alpha) {
+void saveImagePNG(const ek_bitmap* bitmap, const char* path, bool alpha) {
     stbi_write_png_compression_level = 10;
     stbi_write_force_png_filter = 0;
 
+    int w = bitmap->w;
+    int h = bitmap->h;
+    int pixels_count = w * h;
+
     if (alpha) {
-        stbi_write_png(path, bitmap.w, bitmap.h, 4, bitmap.data, 4 * bitmap.w);
+        stbi_write_png(path, w, h, 4, bitmap->data, 4 * w);
     } else {
-        Bitmap img{bitmap};
-        size_t pixels_count = img.w * img.h;
         uint8_t* buffer = (uint8_t*) malloc(pixels_count * 3);
         uint8_t* buffer_rgb = buffer;
-        uint8_t* buffer_rgba = (uint8_t*) img.data;
+        uint8_t* buffer_rgba = (uint8_t*) bitmap->data;
 
-        for (size_t i = 0; i < pixels_count; ++i) {
+        for (int i = 0; i < pixels_count; ++i) {
             buffer_rgb[0] = buffer_rgba[0];
             buffer_rgb[1] = buffer_rgba[1];
             buffer_rgb[2] = buffer_rgba[2];
@@ -222,31 +221,27 @@ void saveImagePNG(const Bitmap& bitmap, const char* path, bool alpha) {
             buffer_rgb += 3;
         }
 
-        stbi_write_png(path,
-                       img.w,
-                       img.h,
-                       3,
-                       buffer,
-                       3 * img.w);
-
+        stbi_write_png(path,w,h,3,buffer,3 * w);
         free(buffer);
     }
 }
 
-void saveImageJPG(const Bitmap& bitmap, const std::string& path, bool alpha) {
-    Bitmap img{bitmap};
+void saveImageJPG(const ek_bitmap* bitmap, const std::string& path, bool alpha) {
     // require RGBA non-premultiplied alpha
     //undo_premultiply_image(img);
 
+    int w = bitmap->w;
+    int h = bitmap->h;
+    int pixels_count = w * h;
+
     if (alpha) {
-        size_t pixels_count = img.w * img.h;
         uint8_t* buffer_rgb = (uint8_t*) malloc(pixels_count * 3);
         uint8_t* buffer_alpha = (uint8_t*) malloc(pixels_count);
-        uint8_t* buffer_rgba = (uint8_t*)img.data;
+        uint8_t* buffer_rgba = (uint8_t*) bitmap->data;
 
         uint8_t* rgb = buffer_rgb;
         uint8_t* alphaMask = buffer_alpha;
-        for (size_t i = 0; i < pixels_count; ++i) {
+        for (int i = 0; i < pixels_count; ++i) {
             rgb[0] = buffer_rgba[0];
             rgb[1] = buffer_rgba[1];
             rgb[2] = buffer_rgba[2];
@@ -256,30 +251,17 @@ void saveImageJPG(const Bitmap& bitmap, const std::string& path, bool alpha) {
             alphaMask += 1;
         }
 
-        stbi_write_jpg((path + ".jpg").c_str(),
-                       img.w,
-                       img.h,
-                       3,
-                       buffer_rgb,
-                       90);
-
-        stbi_write_jpg((path + "a.jpg").c_str(),
-                       img.w,
-                       img.h,
-                       1,
-                       buffer_alpha,
-                       90);
+        stbi_write_jpg((path + ".jpg").c_str(), w, h, 3, buffer_rgb, 90);
+        stbi_write_jpg((path + "a.jpg").c_str(), w, h, 1, buffer_alpha, 90);
 
         free(buffer_rgb);
         free(buffer_alpha);
     } else {
-
-        size_t pixels_count = img.w * img.h;
         auto* buffer = (uint8_t*) malloc(pixels_count * 3);
         auto* buffer_rgb = buffer;
-        auto* buffer_rgba = (uint8_t*) img.data;
+        auto* buffer_rgba = (uint8_t*) bitmap->data;
 
-        for (size_t i = 0; i < pixels_count; ++i) {
+        for (int i = 0; i < pixels_count; ++i) {
             buffer_rgb[0] = buffer_rgba[0];
             buffer_rgb[1] = buffer_rgba[1];
             buffer_rgb[2] = buffer_rgba[2];
@@ -287,12 +269,7 @@ void saveImageJPG(const Bitmap& bitmap, const std::string& path, bool alpha) {
             buffer_rgb += 3;
         }
 
-        stbi_write_jpg(path.c_str(),
-                       img.w,
-                       img.h,
-                       3,
-                       buffer,
-                       3 * img.w);
+        stbi_write_jpg(path.c_str(), w, h, 3, buffer, 3 * w);
 
         free(buffer);
     }

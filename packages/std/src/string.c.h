@@ -67,7 +67,7 @@ void ek_path_dirname(char* buf, uint32_t size, const char* path) {
 uint32_t ek_path_join(char* buf, uint32_t size, const char* path1, const char* path2) {
     char* it = buf;
     char* end = buf + size - 1;
-    if (path1) {
+    if (path1 && path1[0]) {
         bool last_delim = false;
         while (it != end) {
             char c = *(path1++);

@@ -31,7 +31,8 @@ int exportAtlas(const char* xmlPath) {
                     int ch = 0;
                     auto* pixels = stbi_load(imagePath, &w, &h, &ch, 4);
 
-                    sprite.bitmap = new Bitmap(pixels, w, h);
+                    assert(sprite.bitmap.data == nullptr);
+                    sprite.bitmap = {w, h, (uint32_t*)pixels};
                     sprite.source = {0, 0, w, h};
                     sprite.rc.x = nodeSprite.attribute("x").as_float(0.0f);
                     sprite.rc.y = nodeSprite.attribute("y").as_float(0.0f);

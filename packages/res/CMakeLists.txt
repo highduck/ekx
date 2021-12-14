@@ -6,10 +6,11 @@ add_library(${PROJECT_NAME} STATIC "")
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME} PUBLIC
-        src/ek/LocalResource.cpp
+        src/local_res.c
+        src/local_res_web.cpp
         )
 
-target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::app
@@ -19,7 +20,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO)
+        CXX_EXTENSIONS NO
+        )
 
 target_compile_options(${PROJECT_NAME} PRIVATE
         -g
@@ -31,19 +33,19 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     target_link_options(${PROJECT_NAME}
-            PUBLIC SHELL:--js-library ${CMAKE_CURRENT_SOURCE_DIR}/platform/web/LocalResource.js
+            PUBLIC "SHELL:--js-library ${CMAKE_CURRENT_SOURCE_DIR}/src/local_res.js"
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
-    target_compile_options(${PROJECT_NAME}
-            PUBLIC -x objective-c++
-            )
+#    target_sources(${PROJECT_NAME} PUBLIC
+#            src/local_res.m
+#            )
     target_link_libraries(${PROJECT_NAME}
             PRIVATE "-framework Foundation"
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_compile_options(${PROJECT_NAME}
-            PUBLIC -x objective-c++
-            )
+#    target_sources(${PROJECT_NAME} PUBLIC
+#            src/local_res.m
+#            )
     target_link_libraries(${PROJECT_NAME}
             PRIVATE "-framework Foundation"
             )

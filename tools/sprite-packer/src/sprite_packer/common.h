@@ -1,29 +1,14 @@
-#pragma once
+#ifndef SPRITE_PACKER_COMMON_H
+#define SPRITE_PACKER_COMMON_H
 
 #include <pugixml.hpp>
 #include <vector>
 #include <string>
 
-#include <cstdio>
+#include <stdio.h>
 #define SPRITE_PACKER_LOG(x, ...) printf(x, __VA_ARGS__)
 
-#include <cassert>
+#include <assert.h>
 #define SPRITE_PACKER_ASSERT(x) assert(x)
 
-namespace sprite_packer {
-
-struct RectI {
-    int x;
-    int y;
-    int w;
-    int h;
-};
-
-struct Rect {
-    float x;
-    float y;
-    float w;
-    float h;
-};
-
-}
+#endif // SPRITE_PACKER_COMMON_H

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "sprpk_image.h"
 
 namespace sprite_packer {
 
@@ -43,21 +44,21 @@ struct SpriteData {
     std::string name;
 
     // physical rect
-    Rect rc;
+    ek_img_rect_f rc;
 
     // coords in atlas image
-    Rect uv;
+    ek_img_rect_f uv;
 
     // flags in atlas image
     uint8_t flags = 0u;
 
     // rect in source image
-    RectI source;
+    ek_img_rect source;
 
     uint8_t padding = 1;
 
     // reference image;
-    Bitmap* bitmap = nullptr;
+    ek_bitmap bitmap = {0, 0, nullptr};
 
     [[nodiscard]]
     bool is_packed() const {
@@ -88,7 +89,7 @@ struct PageData {
     uint16_t h;
     std::vector<SpriteData> sprites;
     std::string image_path;
-    Bitmap* bitmap = nullptr;
+    ek_bitmap bitmap;
 
 //    template<typename S>
 //    void serialize(IO <S>& io) {
@@ -144,10 +145,7 @@ struct Atlas {
     ~Atlas() {
         for (auto& res: resolutions) {
             for (auto& page: res.pages) {
-                if (page.bitmap) {
-                    delete page.bitmap;
-                    page.bitmap = nullptr;
-                }
+                ek_bitmap_free(&page.bitmap);
             }
         }
     }

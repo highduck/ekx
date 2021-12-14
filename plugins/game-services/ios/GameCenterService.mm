@@ -1,6 +1,6 @@
 #include <GameServices.hpp>
-#include <ek/app/Platform.h>
-#include <ek/debug.hpp>
+#include <ek/app_native.h>
+#include <ek/log.h>
 
 #import <GameKit/GameKit.h>
 #import <Firebase/Firebase.h>
@@ -24,7 +24,7 @@ GameCenterDelegate* game_center_delegate;
 /** Game Center **/
 void GC_authenticateLocalPlayer() {
     game_center_delegate = [GameCenterDelegate new];
-    GC_rootViewController = gAppDelegate.window.rootViewController;
+    GC_rootViewController = ek_app_delegate.window.rootViewController;
     GKLocalPlayer* localPlayer = [GKLocalPlayer localPlayer];
 
     localPlayer.authenticateHandler = ^(UIViewController* viewController, NSError* error) {

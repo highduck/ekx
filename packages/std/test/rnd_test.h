@@ -39,9 +39,6 @@ static void print_stats(const int* buckets) {
 #endif
 
 TEST_CASE("distribution") {
-#ifdef __EMSCRIPTEN__
-    EM_ASM(global.performance = global.performance || {};performance.now = function(){ return +(new Date()); };);
-#endif
     ek_time_init();
     int buckets[BUCKETS];
     memset(buckets, 0, sizeof(buckets));

@@ -6,8 +6,9 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 
-#include <ek/imaging/image.hpp>
-#include <ek/imaging/stbimage_impl.h>
+//#include <ek/image_stb.c.h>
+#include <stb/stb_image.h>
+
 #include <miniz.h>
 
 namespace ek::xfl {

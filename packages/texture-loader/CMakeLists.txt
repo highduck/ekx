@@ -3,13 +3,12 @@ include(npm.cmake)
 project(texture-loader)
 
 add_library(${PROJECT_NAME} STATIC
-        src/ek/TextureLoader.cpp
+        src/texture_loader.c
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME}
-        PUBLIC src)
+target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::app
@@ -20,8 +19,7 @@ target_link_libraries(${PROJECT_NAME}
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO)
+        )
 
 target_compile_options(${PROJECT_NAME} PRIVATE
         -g
@@ -34,19 +32,11 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 
     target_link_options(${PROJECT_NAME}
-            PUBLIC "SHELL:--js-library ${CMAKE_CURRENT_SOURCE_DIR}/src/ek/lib_texture_loader.js"
-            PUBLIC "SHELL:--pre-js ${CMAKE_CURRENT_SOURCE_DIR}/platform/web/texture-loader.js"
+            PUBLIC "SHELL:--js-library ${CMAKE_CURRENT_SOURCE_DIR}/js/lib/lib-texture-loader.js"
+            PUBLIC "SHELL:--pre-js ${CMAKE_CURRENT_SOURCE_DIR}/js/pre/texture-loader.js"
             )
 
-elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-    target_compile_options(${PROJECT_NAME}
-            PRIVATE -x objective-c++
-            )
-
-    target_link_libraries(${PROJECT_NAME}
-            PUBLIC "-framework Foundation"
-            )
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin|iOS")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
 

@@ -17,12 +17,12 @@ struct StaticMesh {
 
     explicit StaticMesh(const Model3D& model) :
             vb{
-                    graphics::BufferType::VertexBuffer,
+                    SG_BUFFERTYPE_VERTEXBUFFER,
                     model.vertices.data(),
                     (uint32_t)(model.vertices.size() * sizeof(ModelVertex3D))
             },
             ib{
-                    graphics::BufferType::IndexBuffer,
+                    SG_BUFFERTYPE_INDEXBUFFER,
                     model.indices.data(),
                     (uint32_t)(model.indices.size() * sizeof(uint16_t))
             },

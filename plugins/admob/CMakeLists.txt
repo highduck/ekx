@@ -26,16 +26,16 @@ target_compile_options(${PROJECT_NAME}
         PUBLIC -fno-exceptions
         PUBLIC -fno-rtti
         )
+
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED YES
         CXX_EXTENSIONS NO)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
 
-    target_compile_options(${PROJECT_NAME}
-            PUBLIC -x objective-c++
-            )
+    set_source_files_properties("src/admob.cpp" PROPERTIES
+            COMPILE_FLAGS "-x objective-c++")
 
 endif()

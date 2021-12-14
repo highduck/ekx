@@ -1,9 +1,8 @@
 #include "graphics.hpp"
 #include <ek/log.h>
 #include <ek/assert.h>
-#include <ek/imaging/image.hpp>
 #include <ek/math/Rect.hpp>
-#include <ek/app_native.h>
+#include <ek/app.h>
 
 #define SOKOL_GFX_IMPL
 
@@ -20,7 +19,7 @@
 namespace ek::graphics {
 
 /** buffer wrapper **/
-Buffer::Buffer(BufferType type, const void* data, uint32_t dataSize) {
+Buffer::Buffer(sg_buffer_type type, const void* data, uint32_t dataSize) {
     sg_buffer_desc desc{};
     desc.type = (sg_buffer_type) type;
     desc.usage = SG_USAGE_IMMUTABLE;
@@ -30,9 +29,9 @@ Buffer::Buffer(BufferType type, const void* data, uint32_t dataSize) {
     size = dataSize;
 }
 
-Buffer::Buffer(BufferType type, Usage usage, uint32_t maxSize) {
+Buffer::Buffer(sg_buffer_type type, sg_usage usage, uint32_t maxSize) {
     sg_buffer_desc desc{};
-    desc.usage = (sg_usage) usage;
+    desc.usage = usage;
     desc.type = (sg_buffer_type) type;
     desc.size = maxSize;
     buffer = sg_make_buffer(&desc);
@@ -201,23 +200,25 @@ bool Texture::getPixels(void* pixels) const {
     return false;
 }
 
-
-const char* BackendToString[] = {
-        "SG_BACKEND_GLCORE33",
-        "SG_BACKEND_GLES2",
-        "SG_BACKEND_GLES3",
-        "SG_BACKEND_D3D11",
-        "SG_BACKEND_METAL_IOS",
-        "SG_BACKEND_METAL_MACOS",
-        "SG_BACKEND_METAL_SIMULATOR",
-        "SG_BACKEND_WGPU",
-        "SG_BACKEND_DUMMY",
-        nullptr
-};
-
-void logBackendName() {
-    auto backend = sg_query_backend();
+static void logBackendName() {
+#ifndef NDEBUG
+    static const char* BackendToString[] = {
+            "SG_BACKEND_GLCORE33",
+            "SG_BACKEND_GLES2",
+            "SG_BACKEND_GLES3",
+            "SG_BACKEND_D3D11",
+            "SG_BACKEND_METAL_IOS",
+            "SG_BACKEND_METAL_MACOS",
+            "SG_BACKEND_METAL_SIMULATOR",
+            "SG_BACKEND_WGPU",
+            "SG_BACKEND_DUMMY",
+            nullptr
+    };
+    const int backend = (int) sg_query_backend();
+    EK_ASSERT(backend >= 0);
+    EK_ASSERT(backend < (sizeof(BackendToString) / sizeof(BackendToString[0])));
     EK_INFO("Sokol Backend: %s", BackendToString[backend]);
+#endif
 }
 
 void initialize(int maxDrawCalls) {
@@ -226,9 +227,9 @@ void initialize(int maxDrawCalls) {
     // this size is 2x Draw Calls per frame (because of sokol internal double-buffering)
     desc.buffer_pool_size = maxDrawCalls << 1;
 #if defined(__APPLE__)
-    desc.context.metal.device = ek_metal__device();
-    desc.context.metal.renderpass_descriptor_cb = ek_metal__render_pass;
-    desc.context.metal.drawable_cb = ek_metal__drawable;
+    desc.context.metal.device = ek_app_mtl_device();
+    desc.context.metal.renderpass_descriptor_cb = ek_app_mtl_render_pass;
+    desc.context.metal.drawable_cb = ek_app_mtl_drawable;
     desc.context.sample_count = 1;
     desc.context.color_format = SG_PIXELFORMAT_BGRA8;
     desc.context.depth_format = SG_PIXELFORMAT_DEPTH_STENCIL;
@@ -243,43 +244,6 @@ void shutdown() {
 }
 
 /** Helpers **/
-
-Texture* createTexture(const image_t& image, const char* label) {
-    sg_image_desc desc{};
-    desc.label = label;
-    desc.type = SG_IMAGETYPE_2D;
-    desc.width = (int) image.width();
-    desc.height = (int) image.height();
-    desc.usage = SG_USAGE_IMMUTABLE;
-    desc.pixel_format = SG_PIXELFORMAT_RGBA8;
-    desc.min_filter = SG_FILTER_LINEAR;
-    desc.mag_filter = SG_FILTER_LINEAR;
-    desc.wrap_u = SG_WRAP_CLAMP_TO_EDGE;
-    desc.wrap_v = SG_WRAP_CLAMP_TO_EDGE;
-    desc.data.subimage[0][0].ptr = image.data();
-    desc.data.subimage[0][0].size = image.height() * image.stride();
-    return new Texture(desc);
-}
-
-Texture* createTexture(ek::image_t* images[6], const char* label) {
-    sg_image_desc desc{};
-    desc.label = label;
-    desc.type = SG_IMAGETYPE_CUBE;
-    desc.width = (int) images[0]->width();
-    desc.height = (int) images[0]->height();
-    desc.usage = SG_USAGE_IMMUTABLE;
-    desc.pixel_format = SG_PIXELFORMAT_RGBA8;
-    desc.min_filter = SG_FILTER_LINEAR;
-    desc.mag_filter = SG_FILTER_LINEAR;
-    desc.wrap_u = SG_WRAP_CLAMP_TO_EDGE;
-    desc.wrap_v = SG_WRAP_CLAMP_TO_EDGE;
-
-    for (int i = 0; i < 6; ++i) {
-        desc.data.subimage[i][0].ptr = images[i]->data();
-        desc.data.subimage[i][0].size = images[i]->height() * images[i]->stride();
-    }
-    return new Texture(desc);
-}
 
 Texture* createRenderTarget(int width, int height, const char* label) {
     sg_image_desc desc{};

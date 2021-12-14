@@ -61,7 +61,7 @@ mergeInto(LibraryManager.library, {
                     written = stringToUTF8(value, pDest, maxLength);
                 }
                 if (pOutStringLen) {
-                    HEAPU32[pOutStringLen] = written;
+                    HEAPU32[pOutStringLen >> 2] = written;
                 }
                 return true;
             }

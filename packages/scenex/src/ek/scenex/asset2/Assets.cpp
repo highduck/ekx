@@ -5,10 +5,10 @@
 #include <ek/assert.h>
 #include <ek/time.h>
 #include <ek/audio/audio.hpp>
-#include <ek/LocalResource.hpp>
+#include <ek/local_res.hpp>
 
 // texture loading
-#include <ek/TextureLoader.hpp>
+#include <ek/texture_loader.h>
 
 #include <ek/scenex/data/TextureData.hpp>
 #include <ek/graphics/graphics.hpp>
@@ -186,11 +186,11 @@ public:
         fullPath_ = manager_->base_path / path_;
         get_resource_content_async(
                 fullPath_.c_str(),
-                [this](auto lr) {
-                    if (lr.success()) {
+                [this](ek_local_res lr) {
+                    if (ek_local_res_success(&lr)) {
                         res.reset(sg_load(lr.buffer, static_cast<uint32_t>(lr.length)));
                     }
-                    lr.close();
+                    ek_local_res_close(&lr);
                     state = AssetState::Ready;
                 });
     }
@@ -213,13 +213,13 @@ public:
 
     void do_load() override {
         fullPath_ = manager_->base_path / path_;
-        get_resource_content_async(fullPath_.c_str(), [this](auto lr) {
-            if (lr.success()) {
+        get_resource_content_async(fullPath_.c_str(), [this](ek_local_res lr) {
+            if (ek_local_res_success(&lr)) {
                 auto* bmFont = new BitmapFont();
                 bmFont->load(lr.buffer, lr.length);
                 res.reset(new Font(bmFont));
             }
-            lr.close();
+            ek_local_res_close(&lr);
             state = AssetState::Ready;
         });
     }
@@ -242,11 +242,11 @@ public:
     }
 
     void do_load() override {
-        loader = new TextureLoader();
-        loader->basePath = manager_->base_path.c_str();
-        EK_ASSERT(data_.images.size() <= TextureLoader::IMAGES_MAX_COUNT);
+        loader = ek_texture_loader_create();
+        ek_texture_loader_set_path(&loader->basePath, manager_->base_path.c_str());
+        EK_ASSERT(data_.images.size() <= EK_TEXTURE_LOADER_IMAGES_MAX_COUNT);
         for (int i = 0; i < data_.images.size(); ++i) {
-            loader->urls[i] = data_.images[i];
+            ek_texture_loader_set_path(loader->urls + i, data_.images[i].c_str());
         }
         loader->imagesToLoad = (int) data_.images.size();
         if (data_.type == TextureDataType::CubeMap) {
@@ -254,14 +254,14 @@ public:
             loader->premultiplyAlpha = false;
             loader->formatMask = data_.formatMask;
         }
-        loader->load();
+        ek_texture_loader_load(loader);
         state = AssetState::Loading;
     }
 
     void poll() override {
         if (loader) {
             if (loader->loading) {
-                loader->update();
+                ek_texture_loader_update(loader);
             }
 
             if (!loader->loading) {
@@ -270,7 +270,7 @@ public:
                     res.reset(new graphics::Texture{loader->image, loader->desc});
                 }
                 state = AssetState::Ready;
-                delete loader;
+                ek_texture_loader_destroy(loader);
                 loader = nullptr;
             }
         }
@@ -289,7 +289,7 @@ public:
     }
 
     Res<Texture> res;
-    TextureLoader* loader = nullptr;
+    ek_texture_loader* loader = nullptr;
     TextureData data_{};
     // by default always premultiply alpha,
     // currently for cube maps will be disabled
@@ -310,8 +310,8 @@ public:
         for (const auto& lang: langs_) {
             auto langPath = manager_->base_path / name_ / lang + ".mo";
             get_resource_content_async(langPath.c_str(),
-                                       [this, lang](auto lr) {
-                                           if (lr.success()) {
+                                       [this, lang](ek_local_res lr) {
+                                           if (ek_local_res_success(&lr)) {
                                                Localization::instance.load(lang.c_str(), lr);
                                            } else {
                                                EK_ERROR("Strings resource not found: %s", lang.c_str());
@@ -342,14 +342,14 @@ public:
 
     void do_load() override {
         fullPath_ = manager_->base_path / name_ + ".model";
-        get_resource_content_async(fullPath_.c_str(), [this](LocalResource lr) {
-            if (lr.success()) {
+        get_resource_content_async(fullPath_.c_str(), [this](ek_local_res lr) {
+            if (ek_local_res_success(&lr)) {
                 input_memory_stream input{lr.buffer, lr.length};
                 IO io{input};
                 Model3D model;
                 io(model);
                 Res<StaticMesh>{name_.c_str()}.reset(new StaticMesh(model));
-                lr.close();
+                ek_local_res_close(&lr);
             } else {
                 EK_ERROR("MODEL resource not found: %s", fullPath_.c_str());
                 error = 1;
@@ -383,8 +383,8 @@ public:
         assetListLoaded = false;
         assetsLoaded = 0;
         fullPath_ = manager_->base_path / name_;
-        get_resource_content_async(fullPath_.c_str(), [this](LocalResource lr) {
-            if (lr.success()) {
+        get_resource_content_async(fullPath_.c_str(), [this](ek_local_res lr) {
+            if (ek_local_res_success(&lr)) {
                 input_memory_stream input{lr.buffer, lr.length};
                 IO io{input};
                 bool end = false;
@@ -401,7 +401,7 @@ public:
                         end = true;
                     }
                 }
-                lr.close();
+                ek_local_res_close(&lr);
             }
             // ready for loading
             assetListLoaded = true;
@@ -501,7 +501,7 @@ public:
     void do_load() override {
         fullPath_ = manager_->base_path / path_;
         get_resource_content_async(fullPath_.c_str(),
-                                   [this](LocalResource lr) {
+                                   [this](ek_local_res lr) {
                                        auto* ttfFont = new TrueTypeFont(manager_->scale_factor, this->baseFontSize_,
                                                                         this->glyphCache_.c_str());
                                        ttfFont->loadFromMemory(lr);
@@ -533,59 +533,63 @@ Asset* DefaultAssetsResolver::create(const String& path) const {
     return nullptr;
 }
 
+bool io_string_view_equals(IOStringView view, const char* lit) {
+    return strncmp(view.data, lit, view.size) == 0;
+}
+
 Asset* DefaultAssetsResolver::create_for_type(const void* data, uint32_t size) const {
     input_memory_stream stream{data, size};
     IO io{stream};
-    String type;
+    IOStringView type;
     io(type);
-    if (type == "audio") {
-        String name;
+    if (io_string_view_equals(type, "audio")) {
+        IOStringView name;
         String path;
         uint32_t flags = 0;
         io(name, path, flags);
-        return new AudioAsset(name.c_str(), path, flags);
-    } else if (type == "scene") {
-        String name;
+        return new AudioAsset(name.data, path, flags);
+    } else if (io_string_view_equals(type, "scene")) {
+        IOStringView name;
         String path;
         io(name, path);
-        return new SceneAsset(name.c_str(), path);
-    } else if (type == "bmfont") {
-        String name;
+        return new SceneAsset(name.data, path);
+    } else if (io_string_view_equals(type, "bmfont")) {
+        IOStringView name;
         String path;
         io(name, path);
-        return new BitmapFontAsset(name.c_str(), path);
-    } else if (type == "ttf") {
-        String name;
+        return new BitmapFontAsset(name.data, path);
+    } else if (io_string_view_equals(type, "ttf")) {
+        IOStringView name;
         String path;
         String glyphCache;
         float baseFontSize;
         io(name, path, glyphCache, baseFontSize);
-        return new TrueTypeFontAsset(name.c_str(), path, glyphCache, baseFontSize);
-    } else if (type == "atlas") {
-        String name;
+        return new TrueTypeFontAsset(name.data, path, glyphCache, baseFontSize);
+    } else if (io_string_view_equals(type, "atlas")) {
+        IOStringView name;
         uint32_t formatMask = 1;
         io(name, formatMask);
-        return new AtlasAsset(name.c_str(), formatMask);
-    } else if (type == "dynamic_atlas") {
-        String name;
+        return new AtlasAsset(name.data, formatMask);
+    } else if (io_string_view_equals(type, "dynamic_atlas")) {
+        IOStringView name;
         uint32_t flags;
         io(name, flags);
-        return new DynamicAtlasAsset(name.c_str(), flags);
-    } else if (type == "model") {
+        return new DynamicAtlasAsset(name.data, flags);
+    } else if (io_string_view_equals(type, "model")) {
         String name;
         io(name);
         return new ModelAsset(name);
-    } else if (type == "texture") {
-        String name;
+    } else if (io_string_view_equals(type, "texture")) {
+        IOStringView name;
         TextureData texData;
         io(name, texData);
-        return new TextureAsset(name.c_str(), texData);
-    } else if (type == "strings") {
+        return new TextureAsset(name.data, texData);
+    } else if (io_string_view_equals(type, "strings")) {
         String name;
         Array<String> langs;
         io(name, langs);
         return new StringsAsset(name, langs);
-    } else if (type == "pack") {
+    } else if (io_string_view_equals(type, "pack")) {
         String name;
         io(name);
         return new PackAsset(name);

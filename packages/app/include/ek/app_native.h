@@ -85,20 +85,6 @@ jobject ek_android_assets_object(void);
 
 extern AppDelegate* ek_app_delegate;
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-void* ek_metal__device(void);
-
-const void* ek_metal__render_pass(void);
-
-const void* ek_metal__drawable(void);
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
-
 #endif // __APPLE__
 //endregion APPLE
 

@@ -13,18 +13,12 @@ target_link_libraries(${PROJECT_NAME}
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_compile_options(${PROJECT_NAME}
-            INTERFACE -x objective-c++
-            )
     target_link_libraries(${PROJECT_NAME}
             INTERFACE "-framework Foundation"
             INTERFACE "-framework CoreAudio"
             INTERFACE "-framework AudioToolbox"
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
-    target_compile_options(${PROJECT_NAME}
-            INTERFACE -x objective-c++
-            )
     target_link_libraries(${PROJECT_NAME}
             INTERFACE "-framework Foundation"
             INTERFACE "-framework AVFoundation"

@@ -6,7 +6,7 @@
 #include <ek/math/Rect.hpp>
 #include <ek/ds/Hash.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/LocalResource.hpp>
+#include <ek/local_res.hpp>
 
 struct stbtt_fontinfo;
 
@@ -25,7 +25,7 @@ public:
 
     void loadDeviceFont(const char* fontName);
 
-    void loadFromMemory(LocalResource lr);
+    void loadFromMemory(ek_local_res lr);
 
     bool initFromMemory(const uint8_t* data, size_t size);
 
@@ -42,7 +42,7 @@ public:
     void resetGlyphs();
 public:
     stbtt_fontinfo* info = nullptr;
-    LocalResource source{};
+    ek_local_res source{};
 
     float baseFontSize;
     float dpiScale;

@@ -40,17 +40,13 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
 
-    target_compile_options(${PROJECT_NAME}
-            PRIVATE -fobjc-arc
-            PRIVATE -x objective-c++
-            )
+    set_source_files_properties("src/ek/graphics/graphics.cpp" PROPERTIES
+            COMPILE_FLAGS "-x objective-c++")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-    target_compile_options(${PROJECT_NAME}
-            PRIVATE -fobjc-arc
-            PRIVATE -x objective-c++
-            )
+    set_source_files_properties("src/ek/graphics/graphics.cpp" PROPERTIES
+            COMPILE_FLAGS "-x objective-c++")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
 

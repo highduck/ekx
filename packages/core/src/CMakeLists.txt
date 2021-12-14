@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.19)
 project(core)
 
 add_library(${PROJECT_NAME} STATIC
-        ek/module.cpp
+        ek/ek_core_module.cpp
 
         ek/math/internal/compiler_unsafe_begin.h
         ek/math/internal/compiler_unsafe_end.h
@@ -39,14 +39,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/serialize/types.hpp
         ek/serialize/serialize.hpp
 
-        ek/imaging/Image_impl.hpp
-        ek/imaging/image.hpp
-        ek/imaging/Image_Drawing.hpp
-        ek/imaging/drawing.hpp
-        ek/imaging/Image_Decode.hpp
-        ek/imaging/Image_FastBlur.hpp
-        ek/imaging/ImageSubSystem.cpp
-
         ek/util/Res.hpp
         ek/util/ServiceLocator.hpp
         ek/util/Signal.hpp
@@ -70,6 +62,7 @@ add_library(${PROJECT_NAME} STATIC
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
+target_include_directories(${PROJECT_NAME} PUBLIC ../include)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
@@ -77,8 +70,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         )
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
-    set_source_files_properties(stb/stb_image.cpp PROPERTIES COMPILE_FLAGS -Wno-cast-align) #
-
     set(EK_COMPILE_WARNINGS
             -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type
             -Woverloaded-virtual -Wcast-align -Wno-deprecated-declarations -Wstrict-aliasing=2)

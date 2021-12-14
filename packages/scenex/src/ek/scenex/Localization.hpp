@@ -1,7 +1,7 @@
 #pragma once
 
 #include <unordered_map>
-#include <ek/LocalResource.hpp>
+#include <ek/local_res.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/String.hpp>
 
@@ -16,7 +16,7 @@ public:
     /// load MO file, and map c-string pointers to identifiers
     /// sourceData will be preserved
     /// specification: https://www.gnu.org/software/gettext/manual/gettext.html#Binaries
-    bool init(LocalResource lr);
+    bool init(ek_local_res lr);
 
     bool has(const char* text) const;
 
@@ -25,7 +25,7 @@ public:
 
     ~StringCatalog();
 private:
-    LocalResource data{};
+    ek_local_res data{};
     std::unordered_map<String, const char*> strings;
 };
 
@@ -37,7 +37,7 @@ public:
 
     [[nodiscard]] const char* getText(const char* str) const;
 
-    void load(const char* name, LocalResource lr);
+    void load(const char* name, ek_local_res lr);
 
     [[nodiscard]] const Array<String>& getAvailableLanguages() const;
 

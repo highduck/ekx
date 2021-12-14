@@ -229,6 +229,18 @@ int ek_app_font_path(char* dest, uint32_t size, const char* font_name);
 
 int ek_app_share(const char* content);
 
+#ifdef __APPLE__
+
+void* ek_app_mtl_device(void);
+
+const void* ek_app_mtl_render_pass(void);
+
+const void* ek_app_mtl_drawable(void);
+
+const char* ek_app_ns_bundle_path(const char* path, char* buffer, uint32_t size);
+
+#endif
+
 #ifdef __cplusplus
 }
 #endif

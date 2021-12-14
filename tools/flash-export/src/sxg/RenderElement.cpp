@@ -7,7 +7,6 @@
 #include "../xfl/renderer/RenderCommand.hpp"
 #include "../xfl/Doc.hpp"
 #include <cairo.h>
-#include <ek/imaging/drawing.hpp>
 
 namespace ek::xfl {
 
@@ -28,15 +27,16 @@ SpriteData renderMultiSample(const Rect2f& bounds,
         rc.height += 2;
     }
 
-    image_t* img = nullptr;
+    ek_image img{0, 0, nullptr};
     const auto w = static_cast<int>(fixed ? options.width : ceil(rc.width * scale));
     const auto h = static_cast<int>(fixed ? options.height : ceil(rc.height * scale));
     const int stride = w * 4;
 
     if (w > 0 && h > 0) {
-        img = new image_t(w, h);
+        ek_image_alloc(&img, w, h);
+        ek_image_fill(&img, 0);
 
-        auto surf = cairo_image_surface_create_for_data(img->data(),
+        auto surf = cairo_image_surface_create_for_data((uint8_t*)img.pixels,
                                                         CAIRO_FORMAT_ARGB32,
                                                         w, h, stride);
         auto cr = cairo_create(surf);
@@ -82,7 +82,7 @@ SpriteData renderMultiSample(const Rect2f& bounds,
         cairo_surface_destroy(sub_surf);
 
         // convert ARGB to ABGR
-        convert_image_bgra_to_rgba(*img, *img);
+        ek_image_swap_rb(&img);
     }
 
     SpriteData data;
@@ -107,15 +107,16 @@ SpriteData renderLowQuality(const Rect2f& bounds,
         rc.height += 2;
     }
 
-    image_t* img = nullptr;
+    ek_image img = {0, 0,nullptr};
     const auto w = static_cast<int>(fixed ? options.width : ceil(rc.width * scale));
     const auto h = static_cast<int>(fixed ? options.height : ceil(rc.height * scale));
     const int stride = w * 4;
 
     if (w > 0 && h > 0) {
-        img = new image_t(w, h);
+        ek_image_alloc(&img, w, h);
+        ek_image_fill(&img, 0);
 
-        auto surf = cairo_image_surface_create_for_data(img->data(),
+        auto surf = cairo_image_surface_create_for_data((uint8_t*)img.pixels,
                                                         CAIRO_FORMAT_ARGB32,
                                                         w, h, stride);
         auto cr = cairo_create(surf);
@@ -143,7 +144,7 @@ SpriteData renderLowQuality(const Rect2f& bounds,
         cairo_surface_destroy(surf);
 
         // convert ARGB to ABGR
-        convert_image_bgra_to_rgba(*img, *img);
+        ek_image_swap_rb(&img);
     }
 
     SpriteData data;

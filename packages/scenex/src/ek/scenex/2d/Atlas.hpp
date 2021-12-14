@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <ek/ds/Array.hpp>
 #include <functional>
-#include <ek/TextureLoader.hpp>
+#include <ek/texture_loader.h>
 
 namespace ek {
 
@@ -22,7 +22,7 @@ public:
 
     Array<Res<Sprite>> sprites;
     Array<Res<graphics::Texture>> pages;
-    Array<TextureLoader*> loaders;
+    Array<ek_texture_loader*> loaders;
     uint32_t formatMask = 1;
 
     [[nodiscard]] int getLoadingTexturesCount() const;

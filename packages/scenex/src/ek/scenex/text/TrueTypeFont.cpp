@@ -1,9 +1,9 @@
 #include "TrueTypeFont.hpp"
 
-#include <ek/LocalResource.hpp>
+#include <ek/local_res.hpp>
 #include <ek/app.h>
 #include <ek/assert.h>
-#include <ek/imaging/image.hpp>
+#include <ek/image.h>
 
 #ifndef STB_TRUETYPE_IMPLEMENTATION
 #define STB_TRUETYPE_IMPLEMENTATION
@@ -33,7 +33,7 @@ TrueTypeFont::~TrueTypeFont() {
     unload();
 }
 
-void TrueTypeFont::loadFromMemory(LocalResource lr) {
+void TrueTypeFont::loadFromMemory(ek_local_res lr) {
     EK_ASSERT(!loaded_);
     if (lr.buffer && initFromMemory(lr.buffer, lr.length)) {
         source = lr;
@@ -43,7 +43,7 @@ void TrueTypeFont::loadFromMemory(LocalResource lr) {
 
 void TrueTypeFont::unload() {
     if (loaded_) {
-        source.close();
+        ek_local_res_close(&source);
 
         delete info;
         info = nullptr;
@@ -116,7 +116,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         stbtt_MakeGlyphBitmap(info, bmp + pad * bitmapWidth + pad, glyphWidth, glyphHeight, bitmapWidth,
                               dpiScale * scale, dpiScale * scale, glyphIndex);
 
-        fastBlurA8(bmp, bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_, strengthPower_);
+        ek_image_blur_fast_a8(bmp, bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_, strengthPower_);
 
         auto sprite = atlas->addBitmap(bitmapWidth, bitmapHeight, bmp, bmpSize);
         //free(bmp);

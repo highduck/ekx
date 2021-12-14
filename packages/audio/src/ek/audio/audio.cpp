@@ -3,11 +3,13 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 
-// auph implementation
+//#ifndef __APPLE__
+
 #define AUPH_MP3
 //#define AUPH_OGG
-
 #include <auph/auph_impl.hpp>
+
+//#endif // not __APPLE__
 
 #if defined(__ANDROID__)
 
