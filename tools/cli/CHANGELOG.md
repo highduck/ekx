@@ -1,5 +1,39 @@
 ## 0.0.4
 
+## 0.1.11
+
+### Patch Changes
+
+- e3922169: cli: change workflow for version, build-number and name, now it's controlled by project's package.json file, native BuildInfo.h generates on each build step
+- 11a94ae7: android: remove project template (use android-proj-gen package)
+- d75fd9cf: Bump http-server from 13.0.1 to 13.0.2
+- 7506f0a5: change vibrate implementation to auph library
+- 4759a4ff: up dep versions
+- 7506f0a5: web: update html template for MINIMAL_RUNTIME
+- 85403373: ios: fix default assets, add debug symbols for Crashlytics
+- 11a94ae7: android: enable all native strip features
+- 3609031d: refactoring
+- bee52e67: adnroid: remove required release signing options, add application_id and package_id by default
+- 404b1bda: Bump typescript from 4.4.2 to 4.4.3
+- 7506f0a5: sync @ekx api changes
+- af268fad: Bump @types/node from 16.9.1 to 16.9.2
+- b00505af: app module refactoring
+- Updated dependencies [923f15f8]
+- Updated dependencies [4759a4ff]
+- Updated dependencies [67dc93d6]
+- Updated dependencies [3609031d]
+- Updated dependencies [cac14838]
+- Updated dependencies [82f3ee44]
+- Updated dependencies [7506f0a5]
+- Updated dependencies [7506f0a5]
+  - @ekx/sprite-packer@0.0.2
+  - @ekx/bmfont-export@0.0.2
+  - @ekx/scenex@0.1.8
+  - @ekx/flash-export@0.0.7
+  - @ekx/obj-export@0.0.2
+  - android-proj-gen@0.0.6
+  - cmake-build@0.0.4
+
 ## 0.1.10
 
 ### Patch Changes

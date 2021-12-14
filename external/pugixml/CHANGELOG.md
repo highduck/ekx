@@ -1,5 +1,12 @@
 # @ekx/pugixml
 
+## 0.0.7
+
+### Patch Changes
+
+- adfc00a8: migration to monorepo
+- adfc00a8: add no-stl, no-exceptions, no-xpath to cmake
+
 ## 0.0.6
 
 ### Patch Changes

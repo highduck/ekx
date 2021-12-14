@@ -1,5 +1,11 @@
 # cmake-build
 
+## 0.0.4
+
+### Patch Changes
+
+- 82f3ee44: migration to monorepo
+
 ## 0.0.3
 
 ### Patch Changes

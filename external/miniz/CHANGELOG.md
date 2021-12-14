@@ -1,5 +1,12 @@
 # @ekx/miniz
 
+## 0.0.5
+
+### Patch Changes
+
+- adfc00a8: migration to monorepo
+- adfc00a8: update source
+
 ## 0.0.4
 
 ### Patch Changes

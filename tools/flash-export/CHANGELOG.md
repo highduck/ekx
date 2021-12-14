@@ -1,5 +1,23 @@
 ## 0.0.1
 
+## 0.0.7
+
+### Patch Changes
+
+- 3609031d: refactoring
+- cac14838: Fix un-premultiply alpha for export
+- 7506f0a5: sync @ekx api changes
+- Updated dependencies [adfc00a8]
+- Updated dependencies [3609031d]
+- Updated dependencies [82f3ee44]
+- Updated dependencies [adfc00a8]
+- Updated dependencies [adfc00a8]
+  - @ekx/cairo@0.0.8
+  - @ekx/miniz@0.0.5
+  - @ekx/pugixml@0.0.7
+  - @ekx/sg-file@0.1.8
+  - cmake-build@0.0.4
+
 ## 0.0.6
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@ekx/cli",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "bin": {
     "ekx": "bin.js"
   },
@@ -21,14 +21,14 @@
     "templates"
   ],
   "dependencies": {
-    "@ekx/bmfont-export": "0.0.1",
-    "@ekx/flash-export": "0.0.6",
-    "@ekx/obj-export": "0.0.1",
-    "@ekx/scenex": "0.1.7",
-    "@ekx/sprite-packer": "0.0.1",
-    "android-proj-gen": "0.0.5",
+    "@ekx/bmfont-export": "0.0.2",
+    "@ekx/flash-export": "0.0.7",
+    "@ekx/obj-export": "0.0.2",
+    "@ekx/scenex": "0.1.8",
+    "@ekx/sprite-packer": "0.0.2",
+    "android-proj-gen": "0.0.6",
     "chalk": "^4.1.2",
-    "cmake-build": "0.0.3",
+    "cmake-build": "0.0.4",
     "glob": "^7.2.0",
     "http-server": "^14.0.0",
     "mustache": "^4.2.0",

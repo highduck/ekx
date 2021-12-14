@@ -1,5 +1,20 @@
 # auph
 
+## 0.1.2
+
+### Patch Changes
+
+- 82f3ee44: remove static decl
+- 82f3ee44: add OBOE_NULL option to remove oboe implementation (test build size)
+- 82f3ee44: android: optimize oboe build size
+- Updated dependencies [adfc00a8]
+- Updated dependencies [9e4441b2]
+- Updated dependencies [82f3ee44]
+- Updated dependencies [adfc00a8]
+  - @ekx/dr-libs@0.0.4
+  - @ekx/stb@0.0.8
+  - cmake-build@0.0.4
+
 ## 0.1.1
 
 ### Patch Changes

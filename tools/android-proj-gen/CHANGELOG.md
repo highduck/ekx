@@ -1,5 +1,11 @@
 # android-proj-gen
 
+## 0.0.6
+
+### Patch Changes
+
+- 82f3ee44: migration to monorepo
+
 ## 0.0.5
 
 ### Patch Changes
