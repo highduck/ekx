@@ -10,7 +10,9 @@
 #include <stb/stb_image.h>
 
 static int ek_texture_loader__load_bytes(const char* basePath, const char* url, void** outBuffer, size_t* outSize) {
-    char pathBuffer[1024] = "\0";
+    char pathBuffer[1024];
+    pathBuffer[0] = 0;
+
     if (basePath) {
         const size_t len = strlen(basePath);
         strcat(pathBuffer, basePath);
