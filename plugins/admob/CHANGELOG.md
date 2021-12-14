@@ -1,5 +1,25 @@
 # @ekx/plugin-admob
 
+## 0.0.7
+
+### Patch Changes
+
+- ad363d3e: ios: ATT request
+- 11a94ae7: Use lite version to reduce build size, udpate version
+- 3609031d: refactoring
+- 7506f0a5: sync @ekx api changes
+- b00505af: app module refactoring
+- Updated dependencies [67dc93d6]
+- Updated dependencies [67dc93d6]
+- Updated dependencies [3609031d]
+- Updated dependencies [82f3ee44]
+- Updated dependencies [11a94ae7]
+- Updated dependencies [b00505af]
+- Updated dependencies [7506f0a5]
+  - @ekx/plugin-firebase@0.0.2
+  - @ekx/scenex@0.1.8
+  - cmake-build@0.0.4
+
 ## 0.0.6
 
 ### Patch Changes

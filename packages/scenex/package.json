@@ -1,6 +1,6 @@
 {
   "name": "@ekx/scenex",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "scripts": {
     "postinstall": "npx cmake-build || exit 0",
     "build:shader": "sokol-shdc -i src/ek/scenex/3d/render3d.glsl -o src/ek/scenex/3d/render3d_shader.h -l glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos --ifdef"
@@ -10,19 +10,19 @@
   },
   "license": "ISC",
   "dependencies": {
-    "cmake-build": "0.0.3",
-    "@ekx/texture-loader": "0.0.1",
-    "@ekx/core": "0.1.7",
-    "@ekx/ecs": "0.1.7",
-    "@ekx/app": "0.1.7",
-    "@ekx/local-storage": "0.0.1",
-    "@ekx/sg-file": "0.1.7",
-    "@ekx/graphics": "0.1.7",
-    "@ekx/audio": "0.1.7",
-    "@ekx/res": "0.1.7"
+    "cmake-build": "0.0.4",
+    "@ekx/texture-loader": "0.0.2",
+    "@ekx/core": "0.1.8",
+    "@ekx/ecs": "0.1.8",
+    "@ekx/app": "0.1.8",
+    "@ekx/local-storage": "0.0.2",
+    "@ekx/sg-file": "0.1.8",
+    "@ekx/graphics": "0.1.8",
+    "@ekx/audio": "0.1.8",
+    "@ekx/res": "0.1.8"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",
-    "@ekx/sokol-shdc": "0.0.4"
+    "@ekx/sokol-shdc": "0.0.5"
   }
 }

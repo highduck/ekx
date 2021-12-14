@@ -1,6 +1,6 @@
 {
   "name": "@ekx/miniz",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "recipe:build": "node recipe/package.js",
     "package:test": "node recipe/test-package.js"

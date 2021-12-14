@@ -1,6 +1,6 @@
 {
   "name": "@ekx/cairo",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "scripts": {
     "recipe:build": "node recipe/package.js",
     "package:test": "node recipe/test-package.js"

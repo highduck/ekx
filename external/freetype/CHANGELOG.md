@@ -1,5 +1,12 @@
 # @ekx/freetype
 
+## 0.0.11
+
+### Patch Changes
+
+- adfc00a8: migration to monorepo
+- adfc00a8: update source
+
 ## 0.0.10
 
 ### Patch Changes

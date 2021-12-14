@@ -1,5 +1,26 @@
 # @ekx/appbox
 
+## 0.0.7
+
+### Patch Changes
+
+- 7506f0a5: change vibrate implementation to auph library
+- 3609031d: refactoring
+- b00505af: app module refactoring
+- Updated dependencies [ad363d3e]
+- Updated dependencies [11a94ae7]
+- Updated dependencies [67dc93d6]
+- Updated dependencies [3609031d]
+- Updated dependencies [82f3ee44]
+- Updated dependencies [7506f0a5]
+- Updated dependencies [b00505af]
+- Updated dependencies [7506f0a5]
+  - @ekx/plugin-admob@0.0.7
+  - @ekx/scenex@0.1.8
+  - @ekx/plugin-billing@0.0.7
+  - @ekx/plugin-game-services@0.0.7
+  - cmake-build@0.0.4
+
 ## 0.0.6
 
 ### Patch Changes

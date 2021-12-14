@@ -1,6 +1,6 @@
 {
   "name": "@ekx/plugin-game-services",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "scripts": {
     "postinstall": "cmake-build || exit 0"
   },
@@ -9,8 +9,8 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/core": "0.1.7",
-    "@ekx/app": "0.1.7",
-    "cmake-build": "0.0.3"
+    "@ekx/core": "0.1.8",
+    "@ekx/app": "0.1.8",
+    "cmake-build": "0.0.4"
   }
 }

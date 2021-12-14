@@ -1,5 +1,11 @@
 # @ekx/dev-fonts
 
+## 0.0.11
+
+### Patch Changes
+
+- adfc00a8: migration to monorepo
+
 ## 0.0.10
 
 ### Patch Changes

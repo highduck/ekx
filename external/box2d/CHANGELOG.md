@@ -1,5 +1,11 @@
 # @ekx/box2d
 
+## 0.0.5
+
+### Patch Changes
+
+- adfc00a8: migration to monorepo
+
 ## 0.0.4
 
 ### Patch Changes

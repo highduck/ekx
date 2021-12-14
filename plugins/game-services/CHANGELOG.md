@@ -1,5 +1,25 @@
 # @ekx/plugin-game-services
 
+## 0.0.7
+
+### Patch Changes
+
+- 3609031d: refactoring
+- 7506f0a5: sync @ekx api changes
+- b00505af: app module refactoring
+- Updated dependencies [7506f0a5]
+- Updated dependencies [4759a4ff]
+- Updated dependencies [7506f0a5]
+- Updated dependencies [3609031d]
+- Updated dependencies [cac14838]
+- Updated dependencies [82f3ee44]
+- Updated dependencies [7506f0a5]
+- Updated dependencies [67dc93d6]
+- Updated dependencies [b00505af]
+  - @ekx/core@0.1.8
+  - @ekx/app@0.1.8
+  - cmake-build@0.0.4
+
 ## 0.0.6
 
 ### Patch Changes
