@@ -1,5 +1,4 @@
 #include "sprite_packer/AtlasPack.h"
-#include "sprite_packer/ImageIO_impl.h"
 
 namespace sprite_packer {
 
@@ -31,7 +30,7 @@ int exportAtlas(const char* xmlPath) {
                     int ch = 0;
                     auto* pixels = stbi_load(imagePath, &w, &h, &ch, 4);
 
-                    assert(sprite.bitmap.data == nullptr);
+                    assert(sprite.bitmap.pixels == nullptr);
                     sprite.bitmap = {w, h, (uint32_t*)pixels};
                     sprite.source = {0, 0, w, h};
                     sprite.rc.x = nodeSprite.attribute("x").as_float(0.0f);

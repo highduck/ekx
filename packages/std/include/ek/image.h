@@ -4,13 +4,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// expose stb_image API
+#include <stb/stb_image.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct ek_image {
-    uint32_t w;
-    uint32_t h;
+    int w;
+    int h;
     uint32_t* pixels;
 } ek_image;
 

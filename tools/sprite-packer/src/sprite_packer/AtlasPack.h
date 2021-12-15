@@ -4,14 +4,11 @@
 #include <pugixml.hpp>
 #include <thread>
 #include "MaxRects.hpp"
-#include "ImageIO.h"
 #include "sprpk_image.h"
 #include "Writer.h"
 #include <cstdio>
 
 namespace sprite_packer {
-
-void saveImagePNG(const ek_bitmap* bitmap, const char* path, bool alpha);
 
 std::vector<PageData> packSprites(std::vector<SpriteData> sprites, int maxWidth, int maxHeight);
 
@@ -42,7 +39,7 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
     char imagePath[1024];
     int page_index = 0;
     for (auto& page: resolution.pages) {
-        assert(page.bitmap.data != nullptr);
+        assert(page.bitmap.pixels != nullptr);
         formatAtlasFileName(imagePath, 1024, name, resolution.resolution_scale, page_index, "png");
         bytes_write_u16(&writer, page.w);
         bytes_write_u16(&writer, page.h);
@@ -60,7 +57,7 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
         snprintf(absImagePath, 1024, "%s/%s", outputPath, imagePath);
 
         //page.image_path = name + get_atlas_suffix(resolution.resolution_scale, page_index) + ".png";
-        saveImagePNG(&page.bitmap, absImagePath, true);
+        sprite_pack_image_save(&page.bitmap, absImagePath, SPRITE_PACK_ALPHA | SPRITE_PACK_PNG);
         // saveImageJPG(*page.image, name + get_atlas_suffix(resolution.resolution_scale, page_index));
         ++page_index;
     }
@@ -190,89 +187,6 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
 //             get_elapsed_time(timer));
 
     return pages;
-}
-
-// TODO: atlas
-// ++page_index;
-// page.image_path = atlas.name + get_atlas_suffix(atlas.scale, page_index) + ".png";
-
-/*** Save Image ***/
-
-void saveImagePNG(const ek_bitmap* bitmap, const char* path, bool alpha) {
-    stbi_write_png_compression_level = 10;
-    stbi_write_force_png_filter = 0;
-
-    int w = bitmap->w;
-    int h = bitmap->h;
-    int pixels_count = w * h;
-
-    if (alpha) {
-        stbi_write_png(path, w, h, 4, bitmap->data, 4 * w);
-    } else {
-        uint8_t* buffer = (uint8_t*) malloc(pixels_count * 3);
-        uint8_t* buffer_rgb = buffer;
-        uint8_t* buffer_rgba = (uint8_t*) bitmap->data;
-
-        for (int i = 0; i < pixels_count; ++i) {
-            buffer_rgb[0] = buffer_rgba[0];
-            buffer_rgb[1] = buffer_rgba[1];
-            buffer_rgb[2] = buffer_rgba[2];
-            buffer_rgba += 4;
-            buffer_rgb += 3;
-        }
-
-        stbi_write_png(path,w,h,3,buffer,3 * w);
-        free(buffer);
-    }
-}
-
-void saveImageJPG(const ek_bitmap* bitmap, const std::string& path, bool alpha) {
-    // require RGBA non-premultiplied alpha
-    //undo_premultiply_image(img);
-
-    int w = bitmap->w;
-    int h = bitmap->h;
-    int pixels_count = w * h;
-
-    if (alpha) {
-        uint8_t* buffer_rgb = (uint8_t*) malloc(pixels_count * 3);
-        uint8_t* buffer_alpha = (uint8_t*) malloc(pixels_count);
-        uint8_t* buffer_rgba = (uint8_t*) bitmap->data;
-
-        uint8_t* rgb = buffer_rgb;
-        uint8_t* alphaMask = buffer_alpha;
-        for (int i = 0; i < pixels_count; ++i) {
-            rgb[0] = buffer_rgba[0];
-            rgb[1] = buffer_rgba[1];
-            rgb[2] = buffer_rgba[2];
-            alphaMask[0] = buffer_rgba[3];
-            buffer_rgba += 4;
-            rgb += 3;
-            alphaMask += 1;
-        }
-
-        stbi_write_jpg((path + ".jpg").c_str(), w, h, 3, buffer_rgb, 90);
-        stbi_write_jpg((path + "a.jpg").c_str(), w, h, 1, buffer_alpha, 90);
-
-        free(buffer_rgb);
-        free(buffer_alpha);
-    } else {
-        auto* buffer = (uint8_t*) malloc(pixels_count * 3);
-        auto* buffer_rgb = buffer;
-        auto* buffer_rgba = (uint8_t*) bitmap->data;
-
-        for (int i = 0; i < pixels_count; ++i) {
-            buffer_rgb[0] = buffer_rgba[0];
-            buffer_rgb[1] = buffer_rgba[1];
-            buffer_rgb[2] = buffer_rgba[2];
-            buffer_rgba += 4;
-            buffer_rgb += 3;
-        }
-
-        stbi_write_jpg(path.c_str(), w, h, 3, buffer, 3 * w);
-
-        free(buffer);
-    }
 }
 
 }

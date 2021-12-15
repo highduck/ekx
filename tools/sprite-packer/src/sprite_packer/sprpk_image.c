@@ -1,17 +1,19 @@
 #include "sprpk_image.h"
 
+#include "sprpk_stb_impl.c.h"
+
 #include <stdlib.h>
 #include <string.h>
 
-void ek_bitmap_alloc(ek_bitmap* img, int w, int h) {
+void ek_bitmap_alloc(ek_image* img, int w, int h) {
     img->w = w;
     img->h = h;
-    img->data = (uint32_t*) calloc(1, w * h * 4);
+    img->pixels = (uint32_t*) calloc(1, w * h * 4);
 }
 
-void ek_bitmap_free(ek_bitmap* img) {
-    free(img->data);
-    img->data = 0;
+void ek_bitmap_free(ek_image* img) {
+    free(img->pixels);
+    img->pixels = 0;
 }
 
 ek_img_rect clampBounds(const ek_img_rect a, const ek_img_rect b) {
@@ -33,14 +35,14 @@ void clipRects(const ek_img_rect src_bounds, const ek_img_rect dest_bounds,
     *dest_rect = dest_rc;
 }
 
-uint32_t get_pixel_unsafe(const ek_bitmap* image, int x, int y) {
+uint32_t get_pixel_unsafe(const ek_image* image, int x, int y) {
     //EK_ASSERT(pixel_in_bounds(image, pos));
-    return image->data[y * image->w + x];
+    return image->pixels[y * image->w + x];
 }
 
-void set_pixel_unsafe(ek_bitmap* image, int x, int y, uint32_t pixel) {
+void set_pixel_unsafe(ek_image* image, int x, int y, uint32_t pixel) {
     //EK_ASSERT(pixel_in_bounds(image, pos));
-    image->data[y * image->w + x] = pixel;
+    image->pixels[y * image->w + x] = pixel;
 }
 
 /// 1 2 3 4
@@ -51,8 +53,8 @@ void set_pixel_unsafe(ek_bitmap* image, int x, int y, uint32_t pixel) {
 //  2 2
 //  1 1
 
-void copyPixels_CCW_90(ek_bitmap* dest, int dx, int dy,
-                       const ek_bitmap* src, int sx, int sy, int sw, int sh) {
+void copyPixels_CCW_90(ek_image* dest, int dx, int dy,
+                       const ek_image* src, int sx, int sy, int sw, int sh) {
     ek_img_rect dest_rc = {dx, dy, /* swap w/h here */ sh, sw};
     ek_img_rect src_rc = {sx, sy, sw, sh};
     clipRects((ek_img_rect){0, 0, src->w, src->h},
@@ -75,8 +77,8 @@ void copyPixels_CCW_90(ek_bitmap* dest, int dx, int dy,
     }
 }
 
-void copyPixels(ek_bitmap* dest, int dx, int dy,
-                const ek_bitmap* src, int sx, int sy, int sw, int sh) {
+void copyPixels(ek_image* dest, int dx, int dy,
+                const ek_image* src, int sx, int sy, int sw, int sh) {
     ek_img_rect dest_rc = {dx, dy, sw, sh};
     ek_img_rect src_rc = {sx, sy, sw, sh};
     clipRects((ek_img_rect){0, 0, src->w, src->h},
@@ -90,3 +92,84 @@ void copyPixels(ek_bitmap* dest, int dx, int dy,
         }
     }
 }
+
+void sprite_pack_image_save(const ek_image* bitmap, const char* path, uint32_t format_flags) {
+    uint32_t alpha = format_flags & SPRITE_PACK_ALPHA;
+    if(format_flags & SPRITE_PACK_PNG) {
+        stbi_write_png_compression_level = 10;
+        stbi_write_force_png_filter = 0;
+
+        int w = bitmap->w;
+        int h = bitmap->h;
+        int pixels_count = w * h;
+
+        if (alpha) {
+            stbi_write_png(path, w, h, 4, bitmap->pixels, 4 * w);
+        } else {
+            uint8_t* buffer = (uint8_t*) malloc(pixels_count * 3);
+            uint8_t* buffer_rgb = buffer;
+            uint8_t* buffer_rgba = (uint8_t*) bitmap->pixels;
+
+            for (int i = 0; i < pixels_count; ++i) {
+                buffer_rgb[0] = buffer_rgba[0];
+                buffer_rgb[1] = buffer_rgba[1];
+                buffer_rgb[2] = buffer_rgba[2];
+                buffer_rgba += 4;
+                buffer_rgb += 3;
+            }
+
+            stbi_write_png(path, w, h, 3, buffer, 3 * w);
+            free(buffer);
+        }
+    }
+    else if(format_flags & SPRITE_PACK_JPEG) {
+
+        int w = bitmap->w;
+        int h = bitmap->h;
+        int pixels_count = w * h;
+
+        if (alpha) {
+            uint8_t* buffer_rgb = (uint8_t*) malloc(pixels_count * 3);
+            uint8_t* buffer_alpha = (uint8_t*) malloc(pixels_count);
+            uint8_t* buffer_rgba = (uint8_t*) bitmap->pixels;
+
+            uint8_t* rgb = buffer_rgb;
+            uint8_t* alphaMask = buffer_alpha;
+            for (int i = 0; i < pixels_count; ++i) {
+                rgb[0] = buffer_rgba[0];
+                rgb[1] = buffer_rgba[1];
+                rgb[2] = buffer_rgba[2];
+                alphaMask[0] = buffer_rgba[3];
+                buffer_rgba += 4;
+                rgb += 3;
+                alphaMask += 1;
+            }
+
+            char path_buf[1024];
+            snprintf(path_buf, 1024, "%s.jpg", path);
+            stbi_write_jpg(path_buf, w, h, 3, buffer_rgb, 90);
+            snprintf(path_buf, 1024, "%s.a.jpg", path);
+            stbi_write_jpg(path_buf, w, h, 1, buffer_alpha, 90);
+
+            free(buffer_rgb);
+            free(buffer_alpha);
+        } else {
+            auto* buffer = (uint8_t*) malloc(pixels_count * 3);
+            auto* buffer_rgb = buffer;
+            auto* buffer_rgba = (uint8_t*) bitmap->pixels;
+
+            for (int i = 0; i < pixels_count; ++i) {
+                buffer_rgb[0] = buffer_rgba[0];
+                buffer_rgb[1] = buffer_rgba[1];
+                buffer_rgb[2] = buffer_rgba[2];
+                buffer_rgba += 4;
+                buffer_rgb += 3;
+            }
+
+            stbi_write_jpg(path, w, h, 3, buffer, 3 * w);
+
+            free(buffer);
+        }
+    }
+}
+

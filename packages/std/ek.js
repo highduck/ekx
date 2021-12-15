@@ -10,7 +10,7 @@ function setup(project) {
         cpp_include: "include",
         web: {
             //cpp: "src-wasm",
-            cpp_lib: "--import-memory"
+            //cpp_lib: "--import-memory"
         }
     });
     project.importModule("@ekx/stb", __dirname);

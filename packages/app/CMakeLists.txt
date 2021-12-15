@@ -19,7 +19,8 @@ target_compile_options(${PROJECT_NAME}
         PRIVATE -g
 #        PRIVATE -flto
         PRIVATE -Os
-        PRIVATE -Weverything
+        PRIVATE -Wall
+        PRIVATE -Wextra
         #PRIVATE -Wno-c99-compat
         PRIVATE -std=c18
         PRIVATE -fno-strict-aliasing

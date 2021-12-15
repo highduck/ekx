@@ -1,4 +1,6 @@
 #include <ek/image.h>
+#include <ek/log.h>
+#include <ek/assert.h>
 
 void ek_image_alloc(ek_image* img, int width, int height) {
     EK_ASSERT(img != 0);
@@ -17,8 +19,8 @@ void ek_image_free(ek_image* img) {
 
 void ek_image_swap_rb(ek_image* img) {
     uint32_t* pixels = img->pixels;
-    const uint32_t size = img->w * img->h;
-    for (uint32_t i = 0; i < size; ++i) {
+    const int size = img->w * img->h;
+    for (int i = 0; i < size; ++i) {
         const uint32_t c = pixels[i];
         pixels[i] = EK_IMAGE_SWAP_RB(c);
     }
@@ -26,8 +28,8 @@ void ek_image_swap_rb(ek_image* img) {
 
 void ek_image_fill(ek_image* img, uint32_t color) {
     uint32_t* pixels = img->pixels;
-    const uint32_t size = img->w * img->h;
-    for (uint32_t i = 0; i < size; ++i) {
+    const int size = img->w * img->h;
+    for (int i = 0; i < size; ++i) {
         pixels[i] = color;
     }
 }
@@ -81,9 +83,7 @@ void ek_image_un_premultiply(ek_image* img) {
 }
 
 #include <ek/log.h>
-
-//#include <stb/stb_image.h>
-#include <ek/image_stb.c.h>
+#include <ek/image.h>
 
 //extern stbi_uc* stbi_load_from_memory(stbi_uc const* buffer, int len, int* x, int* y, int* channels_in_file,
 //                                      int desired_channels) ;
@@ -103,8 +103,8 @@ void ek_image_decode(ek_image* img, const void* data, uint32_t size, bool pma) {
 
 
     if (decoded) {
-        img->w = (uint32_t) w;
-        img->h = (uint32_t) h;
+        img->w = w;
+        img->h = h;
         img->pixels = (uint32_t*) decoded;
         if (pma) {
             log_debug("decode image: premultiply alpha");

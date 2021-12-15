@@ -58,7 +58,7 @@ struct SpriteData {
     uint8_t padding = 1;
 
     // reference image;
-    ek_bitmap bitmap = {0, 0, nullptr};
+    ek_image bitmap = {0, 0, nullptr};
 
     [[nodiscard]]
     bool is_packed() const {
@@ -89,7 +89,7 @@ struct PageData {
     uint16_t h;
     std::vector<SpriteData> sprites;
     std::string image_path;
-    ek_bitmap bitmap;
+    ek_image bitmap;
 
 //    template<typename S>
 //    void serialize(IO <S>& io) {

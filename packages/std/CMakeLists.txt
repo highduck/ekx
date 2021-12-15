@@ -4,7 +4,8 @@ include(npm.cmake)
 project(std C)
 
 add_library(${PROJECT_NAME} STATIC
-        src/all.c
+        src/ek_std.c
+        src/ek_image.c
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -19,8 +20,8 @@ target_compile_options(${PROJECT_NAME}
         PRIVATE -g
 #        PRIVATE -flto
         PRIVATE -Os
-        PRIVATE -Weverything
-        #PRIVATE -Wno-c99-compat
+        PRIVATE -Wall
+        PRIVATE -Wextra
         PRIVATE -std=c18
         PRIVATE -fno-strict-aliasing
         PRIVATE -fno-exceptions

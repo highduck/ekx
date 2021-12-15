@@ -8,7 +8,7 @@
 #define APREC 12
 #define ZPREC 10
 
-static void blurCols(uint8_t* data, int width, int height, int stride, int alpha) {
+static void blur_cols(uint8_t* data, int width, int height, int stride, int alpha) {
     int x, y;
     for (y = 0; y < height; y++) {
         int z = 0; // force zero border
@@ -27,7 +27,7 @@ static void blurCols(uint8_t* data, int width, int height, int stride, int alpha
     }
 }
 
-static void blurRows(uint8_t* data, int width, int height, int stride, int alpha) {
+static void blur_rows(uint8_t* data, int width, int height, int stride, int alpha) {
     for (int x = 0; x < width; x++) {
         int z = 0; // force zero border
         for (int y = 1; y < height * stride; y += stride) {
@@ -45,27 +45,27 @@ static void blurRows(uint8_t* data, int width, int height, int stride, int alpha
     }
 }
 
-static void expBlurAlpha(uint8_t* data, int width, int height, int stride, float radius, int iterations) {
+static void exp_blur_alpha(uint8_t* data, int width, int height, int stride, float radius, int iterations) {
     EK_ASSERT(radius >= 1.0f && iterations > 0);
-    float sigma = radius * (1.0f / sqrtf(iterations)); // 1 / sqrt(3)
-    int alpha = (int) ((1 << APREC) * (1.0f - powf(iterations * 5.0f / 255.0f, 1.0f / sigma)));
+    float sigma = radius * (1.0f / sqrtf((float)iterations)); // 1 / sqrt(3)
+    int alpha = (int) ((1 << APREC) * (1.0f - powf((float)iterations * 5.0f / 255.0f, 1.0f / sigma)));
     for (int i = 0; i < iterations; ++i) {
-        blurRows(data, width, height, stride, alpha);
-        blurCols(data, width, height, stride, alpha);
+        blur_rows(data, width, height, stride, alpha);
+        blur_cols(data, width, height, stride, alpha);
     }
 }
 
-static uint8_t shiftSat(int x, int sh) {
-    x <<= sh;
+static uint8_t shl_saturate(int x, int bits) {
+    x <<= bits;
     return x > 0xFF ? 0xFF : (uint8_t)x;
 }
 
-static void saturateAlpha(uint8_t* data, int width, int height, int stride, int shift) {
+static void saturate_alpha(uint8_t* data, int width, int height, int stride, int shift) {
     for (int y = 0; y < height; ++y) {
         uint8_t* it = data;
         const uint8_t* end = data + width;
         for (; it != end; ++it) {
-            *it = shiftSat(*it, shift);
+            *it = shl_saturate(*it, shift);
         }
         data += stride;
     }
@@ -80,12 +80,12 @@ void ek_image_blur_fast_a8(uint8_t* data, int width, int height, int stride, flo
         if (radius > 255.0f) {
             radius = 255.0f;
         }
-        expBlurAlpha(data, width, height, stride, radius, iterations);
+        exp_blur_alpha(data, width, height, stride, radius, iterations);
     }
     if (strength > 0) {
         if (strength > 7) {
             strength = 7;
         }
-        saturateAlpha(data, width, height, stride, strength);
+        saturate_alpha(data, width, height, stride, strength);
     }
 }
