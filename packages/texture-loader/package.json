@@ -9,7 +9,7 @@
   "dependencies": {
     "@ekx/app": "0.1.8",
     "@ekx/core": "0.1.8",
-    "@ekx/sokol": "^0.0.14"
+    "@ekx/sokol": "0.0.14"
   },
   "devDependencies": {
     "@rollup/plugin-replace": "^3.0.0",
