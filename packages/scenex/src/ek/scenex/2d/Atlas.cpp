@@ -136,17 +136,20 @@ void load_atlas_meta(const char* base_path, Atlas* atlas, ek_local_res lr) {
 
 void Atlas::load(const char* path, float scaleFactor) {
     char tmp[1024];
-    stbsp_snprintf(tmp, 1024, "%s%s.atlas", path, get_scale_suffix(scaleFactor));
+    ek_snprintf(tmp, 1024, "%s%s.atlas", path, get_scale_suffix(scaleFactor));
     const String metaFilePath{tmp};
     const String basePath = Path::directory(path);
-    get_resource_content_async(metaFilePath.c_str(), [this, metaFilePath, basePath](ek_local_res lr) {
-        if (ek_local_res_success(&lr)) {
-            load_atlas_meta(basePath.c_str(), this, lr);
-        } else {
-            EK_DEBUG("ATLAS META resource not found: %s", metaFilePath.c_str());
-        }
-        ek_local_res_close(&lr);
-    });
+    get_resource_content_async(
+            metaFilePath.c_str(),
+            [this, metaFilePath, basePath](ek_local_res lr) {
+                if (ek_local_res_success(&lr)) {
+                    load_atlas_meta(basePath.c_str(), this, lr);
+                } else {
+                    EK_DEBUG("ATLAS META resource not found: %s", metaFilePath.c_str());
+                }
+                ek_local_res_close(&lr);
+            }
+    );
 }
 
 int Atlas::pollLoading() {
@@ -159,8 +162,8 @@ int Atlas::pollLoading() {
                 if (!loader->loading) {
                     if (loader->status == 0) {
                         Res<graphics::Texture> res{loader->urls[0].path};
-                        res.reset(new graphics::Texture{loader->image, loader->desc});
-                        delete loader;
+                        res.reset(new graphics::Texture{loader->image});
+                        ek_texture_loader_destroy(loader);
                         loaders[i] = nullptr;
                     }
                     --toLoad;
@@ -171,7 +174,9 @@ int Atlas::pollLoading() {
         }
         if (toLoad == 0) {
             for (auto* loader: loaders) {
-                delete loader;
+                if(loader) {
+                    ek_texture_loader_destroy(loader);
+                }
             }
             loaders.clear();
             return 0;

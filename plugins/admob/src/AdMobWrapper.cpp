@@ -1,4 +1,4 @@
-#include "AdMobWrapper.hpp"
+#include <ek/admob_wrapper.hpp>
 #include <ek/audio/audio.hpp>
 #include "AdMobNull.hpp"
 
@@ -24,29 +24,23 @@
 namespace ek {
 
 AdMobWrapper::AdMobWrapper() {
-    admob::context.onEvent += [this](auto event) {
-        this->onAdmobEvent(event);
-    };
+    ek_admob_set_callback([](void* userdata, auto event) {
+        ((AdMobWrapper*)userdata)->onAdmobEvent(event);
+    }, this);
 }
 
 void AdMobWrapper::showInterstitial(std::function<void()> callback) {
-    activeInterstitial = true;
     audio::muteDeviceBegin();
-    admob::context.onInterstitialClosed.once([cb=std::move(callback), this] {
-        activeInterstitial = false;
-        audio::muteDeviceEnd();
-        if (cb) {
-            cb();
-        }
-    });
-    admob::show_interstitial_ad();
+    interstitialCompletedCallback = std::move(callback);
+    activeInterstitial = true;
+    ek_admob_show_interstitial_ad();
 }
 
 void AdMobWrapper::showRewardedAd(std::function<void(bool)> callback) {
+    audio::muteDeviceBegin();
     rewardedAdCompletedCallback = std::move(callback);
     userRewarded = false;
-    admob::show_rewarded_ad();
-    audio::muteDeviceBegin();
+    ek_admob_show_rewarded_ad();
 }
 
 void AdMobWrapper::completeRewardedAd(bool rewarded) {
@@ -57,19 +51,28 @@ void AdMobWrapper::completeRewardedAd(bool rewarded) {
     }
 }
 
-void AdMobWrapper::onAdmobEvent(admob::EventType event) {
-    using namespace admob;
+void AdMobWrapper::onAdmobEvent(ek_admob_event_type event) {
     switch (event) {
-        case EventType::VideoRewarded:
+        case EK_ADMOB_VIDEO_REWARDED:
             userRewarded = true;
             break;
-            case EventType::VideoFailed:
-                case EventType::VideoClosed:
+        case EK_ADMOB_VIDEO_FAILED:
+        case EK_ADMOB_VIDEO_CLOSED:
             completeRewardedAd(userRewarded);
             break;
-            case EventType::VideoLoaded:
+        case EK_ADMOB_VIDEO_LOADED:
             if (rewardedAdCompletedCallback) {
-                show_rewarded_ad();
+                ek_admob_show_rewarded_ad();
+            }
+            break;
+        case EK_ADMOB_INTERSTITIAL_CLOSED:
+            if(activeInterstitial) {
+                audio::muteDeviceEnd();
+                activeInterstitial = false;
+                if (interstitialCompletedCallback) {
+                    interstitialCompletedCallback();
+                    interstitialCompletedCallback = nullptr;
+                }
             }
             break;
         default:
@@ -78,7 +81,7 @@ void AdMobWrapper::onAdmobEvent(admob::EventType event) {
 }
 
 Pointer<AdMobWrapper> AdMobWrapper::create(bool devMode) {
-    (void)devMode;
+    (void) devMode;
 
 #if EK_ADMOB_SIMULATOR
     if (devMode) {
@@ -86,7 +89,7 @@ Pointer<AdMobWrapper> AdMobWrapper::create(bool devMode) {
     }
 #endif
 
-    if (admob::hasSupport()) {
+    if (ek_admob_supported()) {
         return Pointer<AdMobWrapper>::make();
     }
     return Pointer<AdMobNull>::make();

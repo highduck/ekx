@@ -51,7 +51,7 @@ public:
             // filter secondary entity vectors
             const auto entity = m->handleToEntity.get(it);
             for (uint32_t k = 1u; k < components_num; ++k) {
-                if (table[k]->entityToHandle.get(entity) == 0) {
+                if (ek_sparse_array_get(table[k]->entityToHandle, entity) == 0) {
                     return false;
                 }
             }
@@ -62,7 +62,7 @@ public:
             // filter secondary entity vectors
             const uint32_t cn = components_num;
             for (uint32_t k = 1u; k < cn; ++k) {
-                if (table[k]->entityToHandle.get(idx) == 0) {
+                if (ek_sparse_array_get(table[k]->entityToHandle, idx) == 0) {
                     return false;
                 }
             }

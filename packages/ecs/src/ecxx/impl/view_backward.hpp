@@ -49,7 +49,7 @@ public:
         [[nodiscard]]
         inline bool valid(EntityIndex e) const {
             for (uint32_t i = 1u; i < components_num; ++i) {
-                if (table_[i]->entityToHandle.get(e) == 0) {
+                if (ek_sparse_array_get(table_[i]->entityToHandle, e) == 0) {
                     return false;
                 }
             }

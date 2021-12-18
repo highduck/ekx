@@ -2,7 +2,6 @@
 #define EK_STRING_H
 
 #include <ek/pre.h>
-#include <stb/stb_sprintf.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -6,6 +6,7 @@
 #include <ek/buf.h>
 #include <ek/murmur.h>
 #include <ek/string.h>
+#include <ek/print.h>
 #include <ek/assert.h>
 
 namespace ek {
@@ -236,7 +237,7 @@ public:
         va_start(va, fmt);
 
 //        result =
-        stbsp_vsnprintf(buf, 1024, fmt, va);
+        ek_vsnprintf(buf, 1024, fmt, va);
         va_end(va);
 
         return buf;
@@ -255,22 +256,3 @@ struct std::hash<ek::String> {
         return (std::size_t) s.hash();
     }
 };
-
-/** string pool **/
-//#include "Hash.hpp"
-//
-//namespace ek {
-//
-//struct Str {
-//    const char* cstr;
-//};
-//
-//struct StrPool {
-//    Hash<Str> pool;
-//
-//    const char* cstr(const char* p) {
-//
-//    }
-//};
-//
-//}

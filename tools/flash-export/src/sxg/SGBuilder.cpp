@@ -415,7 +415,7 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
     auto shapeItem = std::make_unique<Element>();
 
     char shapeName[64];
-    stbsp_snprintf(shapeName, 64, "$%d", ++NEXT_SHAPE_IDX);
+    ek_snprintf(shapeName, sizeof(shapeName), "$%d", ++NEXT_SHAPE_IDX);
     {
         shapeItem->item.name = shapeName;
         shapeItem->elementType = ElementType::symbol_item;

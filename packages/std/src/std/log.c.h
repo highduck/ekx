@@ -1,6 +1,6 @@
 #include <ek/log.h>
 #include <ek/assert.h>
-#include <ek/string.h>
+#include <ek/print.h>
 
 enum {
     LOG_CALLBACKS_MAX = 4
@@ -20,7 +20,7 @@ void log_print(log_level_t level, const char* file, int line, const char* fmt, .
     char text[1024];
     va_list args;
     va_start(args, fmt);
-    stbsp_vsnprintf(text, sizeof(text), fmt, args);
+    ek_vsnprintf(text, sizeof(text), fmt, args);
     va_end(args);
 
     const log_msg_t msg = {
@@ -123,7 +123,7 @@ static void log__default(log_msg_t msg) {
     strftime(time, sizeof(time), "%Y-%m-%d %H:%M:%S", tm);
     const int32_t millis = (int32_t) (tmnow.tv_usec / 1000);
     const uint8_t frame = (uint8_t) (msg.frame & 0xFFu);
-    stbsp_snprintf(usec, sizeof(usec), "%03d+%02hhX", millis, frame);
+    ek_snprintf(usec, sizeof(usec), "%03d+%02hhX", millis, frame);
     static const char* prefixes[] = {
             WHITE "[t]", // TRACE
             CYAN "[d]", // DEBUG
@@ -136,10 +136,10 @@ static void log__default(log_msg_t msg) {
     const char* prefix = prefixes[msg.level];
 
     char buffer[1024];
-    stbsp_snprintf(buffer, 1024, "%s.%s %s %s" RESET, time, usec, prefix, msg.text);
+    ek_snprintf(buffer, 1024, "%s.%s %s %s" RESET, time, usec, prefix, msg.text);
     puts(buffer);
     if (msg.file && msg.file[0] != '\0') {
-        stbsp_snprintf(buffer, 1024, "\t%s:%d", msg.file, msg.line);
+        ek_snprintf(buffer, 1024, "\t%s:%d", msg.file, msg.line);
         puts(buffer);
     }
 }

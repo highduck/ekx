@@ -1,6 +1,5 @@
 #include "math/Random.hpp"
 
-#include "time/Timers_impl.hpp"
 #include "util/Res.hpp"
 
 #include <ek/log.h>
@@ -12,7 +11,7 @@ void setup() {
     ResourceDB::instance.initialize();
     log_init();
     ek_time_init();
-    setupTimers();
+    ek_timers_init();
 
     auto seed = ek_time_seed32();
     rand_default.setSeed(seed++);

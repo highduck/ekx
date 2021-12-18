@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/app.h>
-#include <ek/timers.hpp>
+#include <ek/time.h>
 #include <ek/audio/audio.hpp>
 #include <ek/log.h>
 #include <ek/assert.h>
@@ -11,7 +11,7 @@ namespace ek {
 
 inline void root_app_on_frame() {
     log_tick();
-    dispatchTimers();
+    ek_timers_update();
 }
 
 inline void root_app_on_event(const ek_app_event ev) {

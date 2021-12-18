@@ -52,6 +52,7 @@ export class AndroidProjGen {
         try {
             fs.mkdirSync(dir, {recursive: true});
             fs.mkdirSync(path.join(dir, "app"));
+            fs.mkdirSync(path.join(dir, ".idea"));
         } catch {
         }
 
@@ -70,6 +71,7 @@ export class AndroidProjGen {
         for (const file of filesToCopy) {
             fs.copyFileSync(path.join(srcDir, file), path.join(dir, file));
         }
+        fs.copyFileSync(path.join(srcDir, "_idea/gradle.xml"), path.join(dir, ".idea/gradle.xml"));
 
         if (this.fastlane) {
             try {
@@ -162,7 +164,7 @@ export function generateTopModule(): BuildTop {
             dependencies: [{
                 type: "classpath",
                 name: "com.android.tools.build:gradle",
-                version: "7.0.2"
+                version: "7.0.4"
             }]
         },
         allprojects: {
@@ -177,7 +179,7 @@ export function generateNativeApp(): BaseModuleConfig {
             "com.android.application"
         ],
         android: {
-            compileSdk: 30,
+            compileSdk: 31,
             buildToolsVersion: "30.0.3",
             ndkVersion: "23.0.7599858",
             signingConfigs: {},
@@ -186,7 +188,7 @@ export function generateNativeApp(): BaseModuleConfig {
                 versionCode: 1,
                 versionName: "1.0",
                 minSdk: 19,
-                targetSdk: 30,
+                targetSdk: 31,
                 multiDexEnabled: true,
                 testInstrumentationRunner: "androidx.test.runner.AndroidJUnitRunner",
                 externalNativeBuild: {
@@ -233,7 +235,7 @@ export function generateNativeApp(): BaseModuleConfig {
         },
         dependencies: [
             `implementation fileTree(dir: 'libs', include: ['*.jar'])`,
-            {type: "implementation", name: "androidx.annotation:annotation", version: "1.2.0"},
+            {type: "implementation", name: "androidx.annotation:annotation", version: "1.3.0"},
             {type: "implementation", name: "androidx.multidex:multidex", version: "2.0.1"},
             {type: "implementation", name: "com.getkeepsafe.relinker:relinker", version: "1.4.4"}
         ]

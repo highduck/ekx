@@ -1,7 +1,7 @@
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/util/ServiceLocator.hpp>
-#include <ek/timers.hpp>
+#include <ek/time.h>
 #include <ek/scenex/base/Node.hpp>
 #include "Camera2D.hpp"
 #include "Viewport.hpp"

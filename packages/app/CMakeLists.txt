@@ -55,6 +55,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
     target_link_libraries(${PROJECT_NAME}
+            PRIVATE "-framework CoreText"
             PRIVATE "-framework Foundation"
             PRIVATE "-framework UIKit"
             PRIVATE "-framework Metal"
@@ -70,6 +71,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries(${PROJECT_NAME}
+            PRIVATE "-framework CoreText"
             PRIVATE "-framework Cocoa"
             PRIVATE "-framework Metal"
             PRIVATE "-framework MetalKit"

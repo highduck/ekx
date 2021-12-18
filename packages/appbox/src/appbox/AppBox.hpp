@@ -2,7 +2,7 @@
 
 #include <ek/ds/String.hpp>
 #include <ecxx/ecxx.hpp>
-#include <admob.hpp>
+#include <ek/admob.h>
 #include <ek/util/Type.hpp>
 #include "Ads.hpp"
 
@@ -12,7 +12,7 @@ struct AppBoxConfig {
     String version{"1.0.0"};
     String privacyPolicyURL{"https://eliasku-games.web.app/privacy-policy/"};
     Ads::Config ads{};
-    ::admob::Config admob{};
+    ek_admob_config admob{nullptr, nullptr, nullptr, EK_ADMOB_CHILD_DIRECTED_UNSPECIFIED};
     String billingKey{};
 
     // used for sharing results or app for link in the end of the message

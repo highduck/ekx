@@ -1,59 +1,6 @@
 #pragma once
 
-#if defined(__ANDROID__)
-
-//#define SOKOL_GLES3
-
-//#include <GLES3/gl3.h>
-//#include <GLES3/gl3ext.h>
-
-#define SOKOL_GLES2
-
-//#include <EGL/egl.h>
-
-#ifndef GL_EXT_PROTOTYPES
-#define GL_GLEXT_PROTOTYPES
-#endif
-
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
-#undef GL_ANGLE_instanced_arrays
-#undef GL_EXT_draw_instanced
-
-#elif defined(__EMSCRIPTEN__)
-
-//#define SOKOL_GLES3
-
-//#include <GLES3/gl3.h>
-
-#define SOKOL_GLES2
-
-#ifndef GL_EXT_PROTOTYPES
-#define GL_GLEXT_PROTOTYPES
-#endif
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
-#elif defined (__APPLE__)
-
-#define SOKOL_METAL
-
-#elif defined(__linux__)
-
-#define SOKOL_GLCORE33
-
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-
-#elif defined(_WIN32) || defined(_WIN64)
-
-#define SOKOL_D3D11
-
-#endif
-
-#include <sokol_gfx.h>
-
+#include <ek/gfx.h>
 #include <ek/util/NoCopyAssign.hpp>
 
 // sokol gfx objects RAII wrappers with utilities
@@ -92,7 +39,7 @@ class Texture : private NoCopyAssign {
 public:
     explicit Texture(const sg_image_desc& desc);
 
-    Texture(sg_image image, const sg_image_desc& desc);
+    explicit Texture(sg_image image);
 
     ~Texture();
 
@@ -100,17 +47,10 @@ public:
     bool getPixels(void* pixels) const;
 
     sg_image image{};
-    sg_image_desc desc{};
 
-    static Texture* createSolid32(int width, int height, uint32_t pixelColor);
+    static Texture* solid(int width, int height, uint32_t pixelColor);
+    static Texture* renderTarget(int width, int height, const char* label = nullptr);
 };
-
-void initialize(int maxDrawCalls = 128);
-
-void shutdown();
-
-/*** Helpers ***/
-Texture* createRenderTarget(int width, int height, const char* label = nullptr);
 
 }
 

@@ -100,6 +100,7 @@ export class AndroidManifest {
                 activity.attr["android:screenOrientation"] = this.screenOrientation;
                 activity.attr["android:theme"] = "@style/AppTheme.Launch";
                 activity.attr["android:launchMode"] = "singleTask";
+                activity.attr["android:exported"] = "true";
 
                 activity.children.push(new XmlDocument(`<intent-filter>
     <action android:name="android.intent.action.MAIN" />

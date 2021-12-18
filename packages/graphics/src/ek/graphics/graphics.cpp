@@ -2,19 +2,6 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 #include <ek/math/Rect.hpp>
-#include <ek/app.h>
-
-#define SOKOL_GFX_IMPL
-
-#define SOKOL_ASSERT(x) EK_ASSERT(x)
-#define SOKOL_LOG(__VA_ARGS__) EK_DEBUG("SG: %s", __VA_ARGS__);
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wc99-extensions"
-
-#include <sokol_gfx.h>
-
-#pragma clang diagnostic pop
 
 namespace ek::graphics {
 
@@ -75,12 +62,11 @@ Shader::~Shader() {
 
 /** texture wrapper **/
 
-Texture::Texture(const sg_image_desc& desc_) {
-    desc = desc_;
-    image = sg_make_image(desc_);
+Texture::Texture(const sg_image_desc& desc) {
+    image = sg_make_image(desc);
 }
 
-Texture::Texture(sg_image image_, const sg_image_desc& desc_) : image{image_}, desc{desc_} {
+Texture::Texture(sg_image image_) : image{image_} {
 }
 
 Texture::~Texture() {
@@ -94,171 +80,16 @@ void Texture::update(const void* data, uint32_t size) const {
     sg_update_image(image, imageData);
 }
 
-Texture* Texture::createSolid32(int width, int height, uint32_t pixelColor) {
-    sg_image_desc desc{};
-    desc.type = SG_IMAGETYPE_2D;
-    desc.width = width;
-    desc.height = height;
-    desc.usage = SG_USAGE_IMMUTABLE;
-    desc.pixel_format = SG_PIXELFORMAT_RGBA8;
-
-    int count = width * height;
-    auto* pixels = new uint32_t[count];
-    for (int i = 0; i < count; ++i) {
-        pixels[i] = pixelColor;
-    }
-    desc.data.subimage[0][0].ptr = pixels;
-    desc.data.subimage[0][0].size = (size_t) count * 4;
-    auto* tex = new Texture(desc);
-    delete[] pixels;
-    return tex;
+Texture* Texture::solid(int width, int height, uint32_t pixelColor) {
+    return new Texture(ek_gfx_make_color_image(width, height, pixelColor));
 }
 
 bool Texture::getPixels(void* pixels) const {
-    (void) pixels;
-#if TARGET_OS_OSX
-    // get the texture from the sokol internals here...
-    _sg_image_t* img = _sg_lookup_image(&_sg.pools, image.id);
-    __unsafe_unretained id<MTLTexture> tex = _sg_mtl_id(img->mtl.tex[img->cmn.active_slot]);
-    const auto width = desc.width;
-    const auto height = desc.height;
-    id < MTLTexture > temp_texture = 0;
-    if (_sg.mtl.cmd_queue && tex) {
-        const MTLPixelFormat format = [tex
-        pixelFormat];
-        MTLTextureDescriptor* textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:format
-        width:
-        (width)
-        height:
-        (height)
-        mipmapped:
-        NO];
-
-        textureDescriptor.storageMode = MTLStorageModeManaged;
-        textureDescriptor.resourceOptions = MTLResourceStorageModeManaged;
-        textureDescriptor.usage = MTLTextureUsageShaderRead + MTLTextureUsageShaderWrite;
-        temp_texture = [_sg.mtl.device
-        newTextureWithDescriptor:
-        textureDescriptor];
-        if (temp_texture) {
-            id<MTLCommandBuffer> cmdbuffer = [_sg.mtl.cmd_queue
-            commandBuffer];
-            id<MTLBlitCommandEncoder> blitcmd = [cmdbuffer
-            blitCommandEncoder];
-
-            [blitcmd
-            copyFromTexture:
-            tex
-            sourceSlice:
-            0
-            sourceLevel:
-            0
-            sourceOrigin:
-            MTLOriginMake(0, 0, 0)
-            sourceSize:
-            MTLSizeMake(width, height, 1)
-            toTexture:
-            temp_texture
-            destinationSlice:
-            0
-            destinationLevel:
-            0
-            destinationOrigin:
-            MTLOriginMake(0, 0, 0)];
-
-            [blitcmd
-            synchronizeTexture:
-            temp_texture
-            slice:
-            0
-            level:
-            0];
-            [blitcmd
-            endEncoding];
-
-            [cmdbuffer
-            commit];
-            [cmdbuffer
-            waitUntilCompleted];
-        }
-    }
-    if (temp_texture) {
-        MTLRegion region = MTLRegionMake2D(0, 0, width, height);
-        NSUInteger rowbyte = width * 4;
-        [temp_texture
-        getBytes:
-        pixels
-        bytesPerRow:
-        rowbyte
-        fromRegion:
-        region
-        mipmapLevel:
-        0];
-        return true;
-    }
-#endif // OSX
-    return false;
+    return ek_gfx_read_pixels(image, pixels);
 }
 
-static void logBackendName() {
-#ifndef NDEBUG
-    static const char* BackendToString[] = {
-            "SG_BACKEND_GLCORE33",
-            "SG_BACKEND_GLES2",
-            "SG_BACKEND_GLES3",
-            "SG_BACKEND_D3D11",
-            "SG_BACKEND_METAL_IOS",
-            "SG_BACKEND_METAL_MACOS",
-            "SG_BACKEND_METAL_SIMULATOR",
-            "SG_BACKEND_WGPU",
-            "SG_BACKEND_DUMMY",
-            nullptr
-    };
-    const int backend = (int) sg_query_backend();
-    EK_ASSERT(backend >= 0);
-    EK_ASSERT(backend < (sizeof(BackendToString) / sizeof(BackendToString[0])));
-    EK_INFO("Sokol Backend: %s", BackendToString[backend]);
-#endif
-}
-
-void initialize(int maxDrawCalls) {
-    EK_DEBUG("graphics initialize");
-    sg_desc desc{};
-    // this size is 2x Draw Calls per frame (because of sokol internal double-buffering)
-    desc.buffer_pool_size = maxDrawCalls << 1;
-#if defined(__APPLE__)
-    desc.context.metal.device = ek_app_mtl_device();
-    desc.context.metal.renderpass_descriptor_cb = ek_app_mtl_render_pass;
-    desc.context.metal.drawable_cb = ek_app_mtl_drawable;
-    desc.context.sample_count = 1;
-    desc.context.color_format = SG_PIXELFORMAT_BGRA8;
-    desc.context.depth_format = SG_PIXELFORMAT_DEPTH_STENCIL;
-#endif
-    sg_setup(desc);
-    logBackendName();
-}
-
-void shutdown() {
-    EK_DEBUG("graphics shutdown");
-    sg_shutdown();
-}
-
-/** Helpers **/
-
-Texture* createRenderTarget(int width, int height, const char* label) {
-    sg_image_desc desc{};
-    desc.label = label;
-    desc.type = SG_IMAGETYPE_2D;
-    desc.render_target = true;
-    desc.width = width;
-    desc.height = height;
-    desc.usage = SG_USAGE_IMMUTABLE;
-    //desc.pixel_format = SG_PIXELFORMAT_RGBA8;
-    desc.min_filter = SG_FILTER_LINEAR;
-    desc.mag_filter = SG_FILTER_LINEAR;
-    desc.wrap_u = SG_WRAP_CLAMP_TO_EDGE;
-    desc.wrap_v = SG_WRAP_CLAMP_TO_EDGE;
-    return new Texture(desc);
+Texture* Texture::renderTarget(int width, int height, const char* label) {
+    return new Texture(ek_gfx_make_render_target(width, height, label));
 }
 
 }

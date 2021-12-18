@@ -113,7 +113,8 @@ void GameDisplay::update() {
 
         const auto w = static_cast<int>(info.size.x);
         const auto h = static_cast<int>(info.size.y);
-        if (color == nullptr || color->desc.width != w || color->desc.height != h) {
+        auto color_image_info = sg_query_image_info(color->image);
+        if (color == nullptr || color_image_info.width != w || color_image_info.height != h) {
             delete color;
             color = createGameDisplayTexture(w, h, true, "game-display-color");
             colorFirstClearFlag = true;

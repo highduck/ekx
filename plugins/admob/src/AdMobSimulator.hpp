@@ -1,12 +1,12 @@
 #pragma once
 
-#include "AdMobWrapper.hpp"
+#include <ek/admob_wrapper.hpp>
 #include <ek/scenex/app/GameAppListener.hpp>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app.h>
 #include <ek/scenex/app/basic_application.hpp>
-#include <ek/timers.hpp>
 #include <ek/audio/audio.hpp>
+#include <ek/time.hpp>
 
 namespace ek {
 
@@ -37,25 +37,25 @@ public:
     void showInterstitial(std::function<void()> callback) override {
         activeInterstitial = true;
         audio::muteDeviceBegin();
-        setTimeout([this, cb=std::move(callback)] {
+        ek_set_timeout(ek::timer_func([this, cb = std::move(callback)] {
             activeInterstitial = false;
             audio::muteDeviceEnd();
             if (cb) {
                 cb();
             }
-        }, 3.0f);
+        }), 3);
     }
 
     void showRewardedAd(std::function<void(bool)> callback) override {
         activeRewardedAd = true;
         audio::muteDeviceBegin();
-        setTimeout([this, cb = std::move(callback)] {
+        ek_set_timeout(ek::timer_func([this, cb = std::move(callback)] {
             activeRewardedAd = false;
             audio::muteDeviceEnd();
             if (cb) {
                 cb(true);
             }
-        }, 5.0f);
+        }), 5);
     }
 };
 

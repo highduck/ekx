@@ -3,7 +3,7 @@
 //#include <ek/audio/audio.hpp>
 #include <ek/graphics/graphics.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/timers.hpp>
+#include <ek/time.h>
 
 using namespace ek;
 
@@ -37,7 +37,7 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
 }
 
 void on_ready() {
-    graphics::initialize(128);
+    ek_gfx_init(128);
     draw2d::initialize();
 }
 

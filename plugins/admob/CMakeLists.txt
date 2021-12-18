@@ -3,20 +3,14 @@ include(npm.cmake)
 project(plugin-admob)
 
 add_library(${PROJECT_NAME} STATIC
-        src/admob.hpp
-        src/admob.cpp
-        src/admob_android.hpp
-        src/admob_null.hpp
-        src/admob_ios.hpp
-
-        src/AdMobWrapper.hpp
+        src/ek_admob.c
         src/AdMobWrapper.cpp
         src/AdMobSimulator.hpp
         src/AdMobNull.hpp
         )
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_link_libraries(${PROJECT_NAME}
         PUBLIC plugin-firebase
         PUBLIC scenex
@@ -35,7 +29,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
 
-    set_source_files_properties("src/admob.cpp" PROPERTIES
-            COMPILE_FLAGS "-x objective-c++")
+    set_source_files_properties("src/ek_admob.c" PROPERTIES
+            COMPILE_FLAGS "-x objective-c")
 
 endif()

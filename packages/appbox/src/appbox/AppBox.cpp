@@ -9,7 +9,7 @@
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/util/ServiceLocator.hpp>
 #include <utility>
-#include <GameServices.hpp>
+#include <ek/game_services.h>
 #include <ek/goodies/GameScreen.hpp>
 #include <ek/scenex/Localization.hpp>
 #include "Ads.hpp"
@@ -22,9 +22,9 @@ AppBox::AppBox(AppBoxConfig config_) :
     // unlock abort()
 
     billing::initialize(config.billingKey.c_str());
-    admob::initialize(config.admob);
+    ek_admob_init(config.admob);
     Locator::create<Ads>(config.ads);
-    game_services_init();
+    ek_game_services_init();
 
     // initialize translations
     // TODO: wtf
@@ -161,13 +161,13 @@ void AppBox::shareWithAppLink(const String& text) {
 void AppBox::rateUs() const {
 #ifdef __ANDROID__
     char buf[1024];
-    stbsp_snprintf(buf, 1024, "market://details?id=%s", config.appID.c_str());
+    ek_snprintf(buf, 1024, "market://details?id=%s", config.appID.c_str());
     ek_app_open_url(buf);
 #endif // __ANDROID__
 
 #ifdef __APPLE__
     char buf[1024];
-    stbsp_snprintf(buf, 1024, "itms-apps://itunes.apple.com/us/app/apple-store/id%s?mt=8&action=write-review", config.appID.c_str());
+    ek_snprintf(buf, 1024, "itms-apps://itunes.apple.com/us/app/apple-store/id%s?mt=8&action=write-review", config.appID.c_str());
     ek_app_open_url(buf);
 #endif // __APPLE__
 }
@@ -217,7 +217,7 @@ void AppBox::initLanguageButton(ecs::EntityApi e) {
 }
 
 void AppBox::showAchievements() {
-    achievement_show();
+    ek_achievement_show();
 }
 
 Leaderboard::Leaderboard(const char* id) :
@@ -226,11 +226,11 @@ Leaderboard::Leaderboard(const char* id) :
 }
 
 void Leaderboard::show() const {
-    leader_board_show(id_.c_str());
+    ek_leaderboard_show(id_.c_str());
 }
 
 void Leaderboard::submit(int score) const {
-    leader_board_submit(id_.c_str(), score);
+    ek_leaderboard_submit(id_.c_str(), score);
 }
 
 Achievement::Achievement(const char* code, int count) :
@@ -239,7 +239,7 @@ Achievement::Achievement(const char* code, int count) :
 }
 
 void Achievement::run() const {
-    achievement_update(code_.c_str(), count_);
+    ek_achievement_update(code_.c_str(), count_);
 }
 
 }

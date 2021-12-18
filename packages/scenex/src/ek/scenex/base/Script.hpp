@@ -2,7 +2,7 @@
 
 #include <ecxx/ecxx.hpp>
 #include <ek/util/Type.hpp>
-#include <ek/timers.hpp>
+#include <ek/time.h>
 #include <ek/util/StaticSignal.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/ds/Pointer.hpp>

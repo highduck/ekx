@@ -25,6 +25,8 @@ typedef struct ek_local_res {
 bool ek_local_res_success(const ek_local_res* lr);
 void ek_local_res_close(ek_local_res* lr);
 
+void ek_local_res_load(const char* path, ek_local_res_callback callback, void* userdata);
+
 #ifndef __EMSCRIPTEN__
 
 int ek_local_res_get_file_platform(const char* path, ek_local_res* lr);

@@ -4,6 +4,7 @@ include(npm.cmake)
 project(graphics)
 
 add_library(${PROJECT_NAME} STATIC
+        src/ek/ek_gfx.c
         src/ek/draw2d/drawer.cpp
         src/ek/graphics/graphics.cpp
         )
@@ -40,13 +41,13 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
 
-    set_source_files_properties("src/ek/graphics/graphics.cpp" PROPERTIES
-            COMPILE_FLAGS "-x objective-c++")
+    set_source_files_properties("src/ek/ek_gfx.c" PROPERTIES
+            COMPILE_FLAGS "-x objective-c")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-    set_source_files_properties("src/ek/graphics/graphics.cpp" PROPERTIES
-            COMPILE_FLAGS "-x objective-c++")
+    set_source_files_properties("src/ek/ek_gfx.c" PROPERTIES
+            COMPILE_FLAGS "-x objective-c")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
 

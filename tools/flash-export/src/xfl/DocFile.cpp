@@ -2,12 +2,11 @@
 
 #include <pugixml.hpp>
 #include <ek/log.h>
-#include <ek/assert.h>
+#include <ek/print.h>
 #include <sys/stat.h>
 #include <miniz.h>
 #include <unordered_map>
 #include <utility>
-#include <stb/stb_sprintf.h>
 
 using pugi::xml_document;
 
@@ -191,11 +190,11 @@ std::unique_ptr<File> File::load(const char* path) {
     }
 
     // dir/FILE.fla
-    stbsp_snprintf(tmp, 1024, "%s.fla", path);
+    ek_snprintf(tmp, sizeof tmp, "%s.fla", path);
     if (is_file(tmp)) {
         return std::make_unique<FLANode>(tmp);
     } else if (is_dir(path)) {
-        stbsp_snprintf(tmp, 1024, "%s/%s.xfl", path, ek_path_name(path));
+        ek_snprintf(tmp, sizeof tmp, "%s/%s.xfl", path, ek_path_name(path));
         if (is_file(tmp)) {
             return std::make_unique<XFLNode>(path, nullptr);
         } else {

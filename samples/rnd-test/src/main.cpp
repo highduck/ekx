@@ -2,7 +2,6 @@
 #include <ek/core.hpp>
 #include <ek/graphics/graphics.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/timers.hpp>
 #include <ek/math/Random.hpp>
 #include <ek/bitset.h>
 #include <ek/time.h>
@@ -10,8 +9,8 @@
 using namespace ek;
 
 struct random_estimator_t {
-    uint32_t* bitset;
-    uint32_t* bitset_occupy;
+    uint64_t* bitset;
+    uint64_t* bitset_occupy;
     uint32_t* pixels;
     graphics::Texture* image;
     int bitset_size;
@@ -24,11 +23,11 @@ void estimator_init(random_estimator_t* estimator) {
     estimator->bitset_size = side;
     estimator->image_size = 1024;
 
-    const size_t bitset_bytes = bitset_words(side * side) * sizeof(uint32_t);
-    const size_t image_data_size = estimator->image_size * estimator->image_size * sizeof(uint32_t);
+    const uint32_t bitset_bytes = ek_bitset_byte_size(side * side);
+    const uint32_t image_data_size = estimator->image_size * estimator->image_size * sizeof(uint32_t);
     char* mem = (char*) calloc(1, bitset_bytes + bitset_bytes + image_data_size);
-    estimator->bitset = (uint32_t*) mem;
-    estimator->bitset_occupy = (uint32_t*) (mem + bitset_bytes);
+    estimator->bitset = (uint64_t*) mem;
+    estimator->bitset_occupy = (uint64_t*) (mem + bitset_bytes);
     estimator->pixels = (uint32_t*) (mem + bitset_bytes + bitset_bytes);
 
     sg_image_desc desc{};
@@ -42,8 +41,8 @@ void estimator_init(random_estimator_t* estimator) {
 
 void estimator_set(random_estimator_t* estimator, uint32_t x, uint32_t y) {
     const uint32_t bp = y * estimator->bitset_size + x;
-    bitset_flip(estimator->bitset, bp);
-    bitset_set(estimator->bitset_occupy, bp);
+    ek_bitset_flip(estimator->bitset, bp);
+    ek_bitset_set(estimator->bitset_occupy, bp);
 }
 
 void estimator_update_pixels(random_estimator_t* estimator) {
@@ -52,8 +51,8 @@ void estimator_update_pixels(random_estimator_t* estimator) {
         for (int cx = 0; cx < size; ++cx) {
             const uint32_t ip = size * cy + cx;
             const uint32_t bp = estimator->bitset_size * cy + cx;
-            if (bitset_get(estimator->bitset_occupy, bp)) {
-                const bool odd = bitset_get(estimator->bitset, bp);
+            if (ek_bitset_get(estimator->bitset_occupy, bp)) {
+                const bool odd = ek_bitset_get(estimator->bitset, bp);
                 estimator->pixels[ip] = odd ? 0xFF000000 : 0xFFFFFFFF;
             } else {
                 estimator->pixels[ip] = 0xFF777777;
@@ -68,7 +67,7 @@ void estimator_update_pixels(random_estimator_t* estimator) {
 random_estimator_t estimator;
 
 void on_ready() {
-    graphics::initialize(128);
+    ek_gfx_init(128);
     draw2d::initialize();
 
     estimator_init(&estimator);

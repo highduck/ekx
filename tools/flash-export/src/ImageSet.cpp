@@ -100,10 +100,10 @@ void saveImageJPG(const ek_image* image, const char* path, bool alpha) {
         }
 
         char outputPath[1024];
-        stbsp_snprintf(outputPath, 1024, "%s.jpg", path);
+        ek_snprintf(outputPath, sizeof(outputPath), "%s.jpg", path);
         stbi_write_jpg(outputPath, w, h, 3, buffer_rgb, 90);
 
-        stbsp_snprintf(outputPath, 1024, "%s_a.jpg", path);
+        ek_snprintf(outputPath, sizeof(outputPath), "%s_a.jpg", path);
         stbi_write_jpg(outputPath, w, h, 1, buffer_alpha, 90);
 
         free(buffer_rgb);

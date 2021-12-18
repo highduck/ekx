@@ -58,7 +58,7 @@ function setup(project) {
             // Check Release Notes for updates: https://firebase.google.com/support/release-notes/android
             android_buildScriptDependency: [
                 `classpath 'com.google.gms:google-services:4.3.10'`,
-                `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.7.1'`
+                `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.8.1'`
             ],
             android_gradleApplyPlugin: ['com.google.gms.google-services', 'com.google.firebase.crashlytics'],
             android_gradleConfigRelease: `firebaseCrashlytics {
@@ -100,6 +100,8 @@ app_target.add_build_phase(shell)`
          //   js: "web/dist"
         }
     });
+
+    project.importModule("@ekx/app", __dirname);
 }
 
 module.exports = setup;

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <ek/ds/SparseArray.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/assert.h>
 #include <ek/util/Type.hpp>
+#include <ek/sparse_array.h>
 #include "../ecxx_fwd.hpp"
 
 // for `std::is_empty`
@@ -15,8 +15,6 @@ namespace ecs {
 
 class World;
 
-using EntityLookup = ek::SparseArray<EntityIndex, ComponentHandle, ENTITIES_MAX_COUNT>;
-
 enum class StorageCommand {
     Emplace = 0,
     Erase = 1,
@@ -27,7 +25,7 @@ enum class StorageCommand {
 // 256 + 74 = 330 bytes
 // 128 * 330 = 42'240 kb
 struct ComponentHeader {
-    EntityLookup entityToHandle; // 256 bytes
+    ek_sparse_array entityToHandle; // 256 bytes
 
     ek::Array<EntityIndex> handleToEntity; // dynamic (8 + 4 + 4 ~ 16 bytes)
 
@@ -54,7 +52,7 @@ struct ComponentHeader {
         lockCounter = 0;
         data = manager;
         run = nullptr;
-        entityToHandle.init();
+        //entityToHandle = ek_sparse_array_create(ENTITIES_MAX_COUNT);
         handleToEntity.push_back(0);
     }
 
@@ -119,6 +117,7 @@ public:
     // per component, data manager
     ComponentHeader* components[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
 
+    ek_sparse_array entityToHandle;
     // per component, map entity to data handle
     // SparseArray* pEntityToHandle[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
 
@@ -202,13 +201,14 @@ public:
 
     [[nodiscard]]
     inline ComponentHandle get(EntityIndex e, ComponentTypeId componentId) const {
-        return getComponentHeader(componentId)->entityToHandle.get(e);
+        auto e2h = getComponentHeader(componentId)->entityToHandle;
+        return ek_sparse_array_get(e2h, e);
     }
 
     [[nodiscard]]
     inline ComponentHandle getOrCreate(EntityIndex e, ComponentTypeId componentId) const {
         auto* component = getComponentHeader(componentId);
-        const auto handle = component->entityToHandle.get(e);
+        const auto handle = ek_sparse_array_get(component->entityToHandle, e);
         if (handle == 0) {
             return component->run(StorageCommand::Emplace, component, e);
         }
@@ -263,13 +263,13 @@ public:
 
     template<typename ...Args>
     DataType& emplace(EntityIndex entity, Args&& ...args) {
-        auto& entityToHandle = component.entityToHandle;
+        auto entityToHandle = component.entityToHandle;
         auto& handleToEntity = component.handleToEntity;
         const auto handle = component.count();
         EK_ASSERT(component.lockCounter == 0);
-        EK_ASSERT(entityToHandle.get(entity) == 0);
+        EK_ASSERT(ek_sparse_array_get(entityToHandle, entity) == 0);
 
-        entityToHandle.insert(entity, handle);
+        ek_sparse_array_insert(entityToHandle, entity, handle);
         handleToEntity.push_back(entity);
         if constexpr (EmptyData) {
             return data.get(0);
@@ -283,13 +283,13 @@ public:
     }
 
     ComponentHandle emplace_default(EntityIndex entity) {
-        auto& entityToHandle = component.entityToHandle;
+        auto entityToHandle = component.entityToHandle;
         auto& handleToEntity = component.handleToEntity;
         const auto handle = component.count();
         EK_ASSERT(component.lockCounter == 0);
-        EK_ASSERT(entityToHandle.get(entity) == 0);
+        EK_ASSERT(ek_sparse_array_get(entityToHandle, entity) == 0);
 
-        entityToHandle.insert(entity, handle);
+        ek_sparse_array_insert(entityToHandle, entity, handle);
         handleToEntity.push_back(entity);
         if constexpr (EmptyData) {
             return 0;
@@ -301,7 +301,7 @@ public:
 
     void erase(EntityIndex entity) {
         EK_ASSERT(component.lockCounter == 0);
-        EK_ASSERT(component.entityToHandle.get(entity) != 0);
+        EK_ASSERT(ek_sparse_array_get(component.entityToHandle, entity) != 0);
         const auto backEntity = component.handleToEntity.back();
         if (entity != backEntity) {
             erase_from_middle(entity, backEntity);
@@ -311,7 +311,7 @@ public:
     }
 
     void erase_from_middle(EntityIndex e, EntityIndex last) {
-        const auto handle = component.entityToHandle.moveRemove(e, last);
+        const auto handle = ek_sparse_array_move_remove(component.entityToHandle, e, last);
         component.handleToEntity.set(handle, last);
         component.handleToEntity.pop_back();
         if constexpr (!EmptyData) {
@@ -320,7 +320,7 @@ public:
     }
 
     void erase_from_back(EntityIndex e) {
-        component.entityToHandle.set(e, 0);
+        ek_sparse_array_set(component.entityToHandle, e, 0);
         component.handleToEntity.pop_back();
         if constexpr (!EmptyData) {
             data.pop_back();
@@ -331,7 +331,8 @@ public:
         if constexpr (EmptyData) {
             return const_cast<DataType&>(data.get(0));
         } else {
-            return const_cast<DataType&>(data.get(component.entityToHandle.get(e)));
+            const auto h = ek_sparse_array_get(component.entityToHandle, e);
+            return const_cast<DataType&>(data.get(h));
         }
     }
 
@@ -415,7 +416,7 @@ inline void World::assignBatch(EntityIndex* entities, uint32_t count, Args&& ...
 template<typename Component, typename ...Args>
 inline Component& World::reassign(EntityIndex e, Args&& ... args) const {
     ComponentStorage<Component>* storage = getStorage<Component>();
-    const auto handle = storage->component.entityToHandle.get(e);
+    const auto handle = ek_sparse_array_get(storage->component.entityToHandle, e);
     if (handle != 0) {
         auto& data = storage->get_by_handle(handle);
         data = {args...};
@@ -427,8 +428,8 @@ inline Component& World::reassign(EntityIndex e, Args&& ... args) const {
 template<typename Component>
 inline bool World::has(EntityIndex e) const {
     const auto* component = getComponentHeader(type<Component>());
-    const auto& entityToHandle = component->entityToHandle;
-    const auto handle = entityToHandle.get(e);
+    const auto e2h = component->entityToHandle;
+    const auto handle = ek_sparse_array_get(e2h, e);
     return handle != 0;
 }
 
@@ -440,7 +441,7 @@ inline Component& World::get(EntityIndex e) const {
 template<typename Component>
 inline Component* World::tryGet(EntityIndex e) const {
     auto* storage = getStorage<Component>();
-    const auto handle = storage->component.entityToHandle.get(e);
+    const auto handle = ek_sparse_array_get(storage->component.entityToHandle, e);
     if (handle != 0) {
         return storage->get_ptr_by_handle(handle);
     }
@@ -455,7 +456,7 @@ inline void World::remove(EntityIndex e) const {
 template<typename Component>
 inline bool World::tryRemove(EntityIndex e) const {
     auto* storage = getStorage<Component>();
-    if (storage->component.entityToHandle.get(e) != 0) {
+    if (ek_sparse_array_get(storage->component.entityToHandle, e) != 0) {
         storage->erase(e);
         return true;
     }
@@ -465,7 +466,7 @@ inline bool World::tryRemove(EntityIndex e) const {
 template<typename Component>
 inline Component& World::getOrCreate(EntityIndex e) const {
     auto* storage = getStorage<Component>();
-    const auto handle = storage->component.entityToHandle.get(e);
+    const auto handle = ek_sparse_array_get(storage->component.entityToHandle, e);
     if (handle != 0) {
         return storage->get_by_handle(handle);
     }
@@ -476,7 +477,7 @@ inline Component& World::getOrCreate(EntityIndex e) const {
 template<typename Component>
 inline const Component& World::getOrDefault(EntityIndex e) const {
     const auto* storage = getStorage<Component>();
-    const auto handle = storage->component.entityToHandle.get(e);
+    const auto handle = ek_sparse_array_get(storage->component.entityToHandle, e);
     return storage->get_or_default_by_handle(handle);
 }
 
@@ -489,6 +490,7 @@ inline void World::create(EntityIndex* outEntities, uint32_t count) {
 template<typename Component>
 inline void World::registerComponent(unsigned initialCapacity) {
     auto* storage = new ComponentStorage<Component>(initialCapacity);
+    storage->component.entityToHandle = ek_sparse_array_offset(entityToHandle, storage->component.typeId * ENTITIES_MAX_COUNT);
     storage->component.name = ek::TypeName<Component>::value;
     registerComponent(&storage->component);
 }

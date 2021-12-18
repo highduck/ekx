@@ -38,32 +38,32 @@ TEST_CASE("general") {
 TEST_CASE("stress") {
     using namespace ek;
     {
-        const size_t i0 = 0xFFFFFFFF00000000;
-        //const size_t i1 = i0 + 10000000;
-        const size_t i1 = i0 + 1000;
+        const uint64_t i0 = 0xFFFFFFFF00000000ULL;
+        //const uint64_t i1 = i0 + 10000000;
+        const uint64_t i1 = i0 + 1000;
         Hash<int> h{};
-        for(size_t i = i0; i < i1; ++i) {
+        for(uint64_t i = i0; i < i1; ++i) {
             REQUIRE(!h.has(i));
             REQUIRE(h.get(i, 0) == 0);
             h.set(i, 1);
             REQUIRE(h.has(i));
             REQUIRE(h.get(i, 0) == 1);
         }
-        for(size_t i = i0; i < i1; ++i) {
+        for(uint64_t i = i0; i < i1; ++i) {
             REQUIRE(h.has(i));
             REQUIRE(h.get(i, 0) == 1);
             h.remove(i);
             REQUIRE(!h.has(i));
             REQUIRE(h.get(i, 0) == 0);
         }
-        for(size_t i = i0; i < i1; ++i) {
+        for(uint64_t i = i0; i < i1; ++i) {
             REQUIRE(!h.has(i));
             REQUIRE(h.get(i, 0) == 0);
             h.set(i, 1);
             REQUIRE(h.has(i));
             REQUIRE(h.get(i, 0) == 1);
         }
-        for(size_t i = i0; i < i1; ++i) {
+        for(uint64_t i = i0; i < i1; ++i) {
             REQUIRE(h.has(i));
             REQUIRE(h.get(i, 0) == 1);
             h.remove(i);

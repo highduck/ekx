@@ -1,13 +1,17 @@
 #include <ek/assert.h>
 
-#ifdef EK_DEBUG_BUILD
+#if defined(EK_DEBUG_BUILD) || defined(EK_ASSERTION_PEDANTIC)
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #else //__EMSCRIPTEN__
+
 #include <stdio.h>
 #include <signal.h>
+
 #endif // !__EMSCRIPTEN__
+
+//#include <stdnoreturn.h>
 
 void ek_handle_assert(const char* e, const char* file, int line) {
 #ifdef __EMSCRIPTEN__

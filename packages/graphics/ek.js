@@ -10,9 +10,9 @@ function setup(project) {
         apple: {
             cpp_flags: {
                 files: [
-                    "src/ek/graphics/graphics.cpp"
+                    "src/ek/ek_gfx.c"
                 ],
-                flags: "-x objective-c++"
+                flags: "-x objective-c"
             },
         }
     });

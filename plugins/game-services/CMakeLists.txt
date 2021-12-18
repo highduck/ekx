@@ -2,15 +2,14 @@ cmake_minimum_required(VERSION 3.19)
 include(npm.cmake)
 project(plugin-game-services)
 add_library(${PROJECT_NAME} STATIC
-        src/GameServices.hpp
-        src/GameServices.cpp
-        null/NullGameService.cpp
+        src/ek_game_services.c
         )
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_include_directories(${PROJECT_NAME} PUBLIC include)
+
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC ekx::core
+        PUBLIC ekx::std
         PUBLIC ekx::app
         )
 
@@ -26,3 +25,10 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -fno-strict-aliasing
         -Wstrict-aliasing=2
         )
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin|iOS")
+
+    set_source_files_properties("src/ek_game_services.c" PROPERTIES
+            COMPILE_FLAGS "-x objective-c")
+
+endif()

@@ -1,9 +1,9 @@
 #include "Ads.hpp"
 
-#include <ek/timers.hpp>
+#include <ek/time.h>
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/local_storage.h>
-#include <AdMobWrapper.hpp>
+#include <ek/admob_wrapper.hpp>
 
 namespace ek {
 
@@ -39,10 +39,14 @@ Ads::Ads(Ads::Config config) :
 void Ads::onStart() {
     const auto sku = config_.skuRemoveAds;
     // just wait billing service a little, TODO: billing initialized promise
-    setTimeout([sku] {
+    ek_timer_callback cb;
+    cb.action = [](void* sku_) {
         billing::getPurchases();
-        billing::getDetails({sku});
-    }, 3);
+        billing::getDetails({(const char*) sku_});
+    };
+    cb.cleanup = nullptr;
+    cb.userdata = (void*) config_.skuRemoveAds.c_str();
+    ek_set_timeout(cb, 3);
 }
 
 void Ads::onPurchaseChanged(const billing::PurchaseData& purchase) {
@@ -65,7 +69,7 @@ void Ads::setRemoveAdsPurchaseCache(bool adsRemoved) const {
 
 bool Ads::checkRemoveAdsPurchase() const {
     return ek_ls_get_i(config_.key0.c_str(), 0) == config_.val0 &&
-            ek_ls_get_i(config_.key1.c_str(), 0) == config_.val1;
+           ek_ls_get_i(config_.key1.c_str(), 0) == config_.val1;
 }
 
 void Ads::onRemoveAdsPurchased() {
@@ -98,11 +102,11 @@ void Ads::cheat_RemoveAds() {
 }
 
 bool Ads::hasVideoRewardSupport() const {
-    return admob::hasSupport() && !admob::context.config.video.empty();
+    return ek_admob_supported() && ek_admob.config.video;
 }
 
 bool Ads::isSupported() const {
-    return admob::hasSupport();
+    return ek_admob_supported();
 }
 
 }

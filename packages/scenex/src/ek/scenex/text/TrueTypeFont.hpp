@@ -25,7 +25,7 @@ public:
 
     void loadDeviceFont(const char* fontName);
 
-    void loadFromMemory(ek_local_res lr);
+    void loadFromMemory(ek_local_res* lr);
 
     bool initFromMemory(const uint8_t* data, size_t size);
 

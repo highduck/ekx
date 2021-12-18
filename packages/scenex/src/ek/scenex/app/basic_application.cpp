@@ -100,7 +100,7 @@ basic_application::~basic_application() {
     delete asset_manager_;
 
     audio::shutdown();
-    graphics::shutdown();
+    ek_gfx_shutdown();
 }
 
 void registerSceneXComponents() {
@@ -356,7 +356,7 @@ void launcher_on_frame() {
 #else
                     const int drawCalls = 128;
 #endif
-                    graphics::initialize(drawCalls);
+                    ek_gfx_init(drawCalls);
                 }
 #ifdef EK_DEV_TOOLS
                 if (Editor::inspectorEnabled) {

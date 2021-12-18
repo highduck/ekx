@@ -4,7 +4,7 @@
 #include <ek/scenex/base/Script.hpp>
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
-#include <ek/timers.hpp>
+#include <ek/time.h>
 #include <ek/scenex/types.h>
 
 namespace ek {

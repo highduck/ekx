@@ -589,7 +589,7 @@ Context& Context::restoreProgram() {
 void Context::createDefaultResources() {
     EK_DEBUG("draw2d: create default resources");
     const auto backend = sg_query_backend();
-    emptyTexture = Texture::createSolid32(4, 4, 0xFFFFFFFFu);
+    emptyTexture = Texture::solid(4, 4, 0xFFFFFFFFu);
     defaultShader = new Shader(draw2d_shader_desc(backend));
     alphaMapShader = new Shader(draw2d_alpha_shader_desc(backend));
     solidColorShader = new Shader(draw2d_color_shader_desc(backend));

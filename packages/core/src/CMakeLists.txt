@@ -55,8 +55,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/ds/Array.hpp
         ek/ds/SparseArray.hpp
         ek/ds/Hash.hpp
-
-        ek/timers.hpp
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})

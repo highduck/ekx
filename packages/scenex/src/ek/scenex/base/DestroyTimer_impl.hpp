@@ -1,7 +1,7 @@
 #include "DestroyTimer.hpp"
 
 #include <ek/scenex/base/Node.hpp>
-#include <ek/timers.hpp>
+#include <ek/time.h>
 #include <ek/ds/Array.hpp>
 
 namespace ek {

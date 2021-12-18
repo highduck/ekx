@@ -1,10 +1,5 @@
 #include <ek/string.h>
-
-#define STB_SPRINTF_IMPLEMENTATION
-#define STB_SPRINTF_NOFLOAT
-#define STB_SPRINTF_NOUNALIGNED
-
-#include <stb/stb_sprintf.h>
+#include <ek/print.h>
 
 #define ek_path_is_del(ch) ((ch) == '/' || (ch) == '\\')
 
@@ -136,8 +131,8 @@ void ek_cstr_format_timer(char* buf, int buf_size, int millis, int flags) {
     int minutes = (seconds / 60) % 60;
     int secs = seconds % 60;
     if (hours > 0 || (flags & 1) != 0) {
-        stbsp_snprintf(buf, buf_size, "%02d:%02d:%02d", hours, minutes, secs);
+        ek_snprintf(buf, buf_size, "%02d:%02d:%02d", hours, minutes, secs);
     } else {
-        stbsp_snprintf(buf, buf_size, "%02d:%02d", minutes, secs);
+        ek_snprintf(buf, buf_size, "%02d:%02d", minutes, secs);
     }
 }

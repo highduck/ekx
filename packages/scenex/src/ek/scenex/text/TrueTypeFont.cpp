@@ -1,6 +1,6 @@
 #include "TrueTypeFont.hpp"
 
-#include <ek/local_res.hpp>
+#include <ek/local_res.h>
 #include <ek/app.h>
 #include <ek/assert.h>
 #include <ek/image.h>
@@ -33,10 +33,10 @@ TrueTypeFont::~TrueTypeFont() {
     unload();
 }
 
-void TrueTypeFont::loadFromMemory(ek_local_res lr) {
+void TrueTypeFont::loadFromMemory(ek_local_res* lr) {
     EK_ASSERT(!loaded_);
-    if (lr.buffer && initFromMemory(lr.buffer, lr.length)) {
-        source = lr;
+    if (lr && lr->buffer && initFromMemory(lr->buffer, lr->length)) {
+        source = *lr;
         loaded_ = true;
     }
 }
@@ -116,7 +116,8 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         stbtt_MakeGlyphBitmap(info, bmp + pad * bitmapWidth + pad, glyphWidth, glyphHeight, bitmapWidth,
                               dpiScale * scale, dpiScale * scale, glyphIndex);
 
-        ek_image_blur_fast_a8(bmp, bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_, strengthPower_);
+        ek_image_blur_fast_a8(bmp, bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_,
+                              strengthPower_);
 
         auto sprite = atlas->addBitmap(bitmapWidth, bitmapHeight, bmp, bmpSize);
         //free(bmp);
@@ -184,9 +185,10 @@ void TrueTypeFont::loadDeviceFont(const char* fontName) {
     char fontPath[1024];
     if (0 == ek_app_font_path(fontPath, sizeof(fontPath), fontName) &&
         *fontPath) {
-        get_resource_content_async(fontPath, [this](auto lr) {
-            loadFromMemory(lr);
-        });
+        ek_local_res_load(fontPath, [](ek_local_res* lr) {
+            TrueTypeFont* this_ = (TrueTypeFont*) lr->userdata;
+            this_->loadFromMemory(lr);
+        }, this);
     }
 }
 

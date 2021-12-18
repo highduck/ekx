@@ -3,7 +3,7 @@
 #include <ek/ds/StaticHistoryBuffer.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/math/Color32.hpp>
-#include <ek/timers.hpp>
+#include <ek/time.h>
 #include <ek/scenex/text/TextEngine.hpp>
 #include "GameDisplay.hpp"
 

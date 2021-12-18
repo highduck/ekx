@@ -8,7 +8,7 @@ function setup(project) {
         path: __dirname,
         cpp: "src",
         android: {
-            android_java: "android/java",
+            android_java: "java",
             android_dependency: `implementation 'com.android.billingclient:billing:4.0.0'`
         },
         ios: {

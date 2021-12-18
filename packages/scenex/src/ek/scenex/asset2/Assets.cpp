@@ -184,15 +184,15 @@ public:
 
     void do_load() override {
         fullPath_ = manager_->base_path / path_;
-        get_resource_content_async(
-                fullPath_.c_str(),
-                [this](ek_local_res lr) {
-                    if (ek_local_res_success(&lr)) {
-                        res.reset(sg_load(lr.buffer, static_cast<uint32_t>(lr.length)));
-                    }
-                    ek_local_res_close(&lr);
-                    state = AssetState::Ready;
-                });
+        ek_local_res_load(fullPath_.c_str(),
+                          [](ek_local_res* lr) {
+                              SceneAsset* this_ = (SceneAsset*) lr->userdata;
+                              if (ek_local_res_success(lr)) {
+                                  this_->res.reset(sg_load(lr->buffer, (uint32_t) lr->length));
+                              }
+                              ek_local_res_close(lr);
+                              this_->state = AssetState::Ready;
+                          }, this);
     }
 
     void do_unload() override {
@@ -213,15 +213,18 @@ public:
 
     void do_load() override {
         fullPath_ = manager_->base_path / path_;
-        get_resource_content_async(fullPath_.c_str(), [this](ek_local_res lr) {
-            if (ek_local_res_success(&lr)) {
-                auto* bmFont = new BitmapFont();
-                bmFont->load(lr.buffer, lr.length);
-                res.reset(new Font(bmFont));
-            }
-            ek_local_res_close(&lr);
-            state = AssetState::Ready;
-        });
+        ek_local_res_load(
+                fullPath_.c_str(),
+                [](ek_local_res* lr) {
+                    BitmapFontAsset* this_ = (BitmapFontAsset*) lr->userdata;
+                    if (ek_local_res_success(lr)) {
+                        auto* bmFont = new BitmapFont();
+                        bmFont->load(lr->buffer, lr->length);
+                        this_->res.reset(new Font(bmFont));
+                    }
+                    ek_local_res_close(lr);
+                    this_->state = AssetState::Ready;
+                }, this);
     }
 
     void do_unload() override {
@@ -267,7 +270,7 @@ public:
             if (!loader->loading) {
                 error = loader->status;
                 if (error == 0) {
-                    res.reset(new graphics::Texture{loader->image, loader->desc});
+                    res.reset(new graphics::Texture{loader->image});
                 }
                 state = AssetState::Ready;
                 ek_texture_loader_destroy(loader);
@@ -307,21 +310,26 @@ public:
 
     void do_load() override {
         loaded = 0;
-        for (const auto& lang: langs_) {
+
+        for (int i = 0; i < langs_.size(); ++i) {
+            auto& lang = langs_[i];
             auto langPath = manager_->base_path / name_ / lang + ".mo";
-            get_resource_content_async(langPath.c_str(),
-                                       [this, lang](ek_local_res lr) {
-                                           if (ek_local_res_success(&lr)) {
-                                               Localization::instance.load(lang.c_str(), lr);
-                                           } else {
-                                               EK_ERROR("Strings resource not found: %s", lang.c_str());
-                                               error = 1;
-                                           }
-                                           ++loaded;
-                                           if (loaded >= langs_.size()) {
-                                               state = AssetState::Ready;
-                                           }
-                                       });
+            get_resource_content_async(
+                    langPath.c_str(),
+                    [this, idx = i](ek_local_res lr) {
+                        const char* lang = langs_[idx].c_str();
+                        if (ek_local_res_success(&lr)) {
+                            Localization::instance.load(lang, lr);
+                        } else {
+                            EK_ERROR("Strings resource not found: %s", lang);
+                            error = 1;
+                        }
+                        ++loaded;
+                        if (loaded >= langs_.size()) {
+                            state = AssetState::Ready;
+                        }
+                    }
+            );
         }
     }
 
@@ -342,20 +350,25 @@ public:
 
     void do_load() override {
         fullPath_ = manager_->base_path / name_ + ".model";
-        get_resource_content_async(fullPath_.c_str(), [this](ek_local_res lr) {
-            if (ek_local_res_success(&lr)) {
-                input_memory_stream input{lr.buffer, lr.length};
-                IO io{input};
-                Model3D model;
-                io(model);
-                Res<StaticMesh>{name_.c_str()}.reset(new StaticMesh(model));
-                ek_local_res_close(&lr);
-            } else {
-                EK_ERROR("MODEL resource not found: %s", fullPath_.c_str());
-                error = 1;
-            }
-            state = AssetState::Ready;
-        });
+        ek_local_res_load(
+                fullPath_.c_str(),
+                [](ek_local_res* lr) {
+                    ModelAsset* this_ = (ModelAsset*) lr->userdata;
+                    if (ek_local_res_success(lr)) {
+                        input_memory_stream input{lr->buffer, lr->length};
+                        IO io{input};
+                        Model3D model;
+                        io(model);
+                        Res<StaticMesh>{this_->name_.c_str()}.reset(new StaticMesh(model));
+                        ek_local_res_close(lr);
+                    } else {
+                        EK_ERROR("MODEL resource not found: %s", this_->fullPath_.c_str());
+                        this_->error = 1;
+                    }
+                    this_->state = AssetState::Ready;
+                },
+                this
+        );
     }
 
     void do_unload() override {
@@ -383,29 +396,34 @@ public:
         assetListLoaded = false;
         assetsLoaded = 0;
         fullPath_ = manager_->base_path / name_;
-        get_resource_content_async(fullPath_.c_str(), [this](ek_local_res lr) {
-            if (ek_local_res_success(&lr)) {
-                input_memory_stream input{lr.buffer, lr.length};
-                IO io{input};
-                bool end = false;
-                while (!end) {
-                    uint32_t headerSize = 0;
-                    io(headerSize);
-                    if (headerSize != 0) {
-                        auto* asset = manager_->add_from_type(io.stream.dataAtPosition(), headerSize);
-                        if (asset) {
-                            assets.push_back(asset);
+        ek_local_res_load(
+                fullPath_.c_str(),
+                [](ek_local_res* lr) {
+                    PackAsset* this_ = (PackAsset*) lr->userdata;
+                    if (ek_local_res_success(lr)) {
+                        input_memory_stream input{lr->buffer, lr->length};
+                        IO io{input};
+                        bool end = false;
+                        while (!end) {
+                            uint32_t headerSize = 0;
+                            io(headerSize);
+                            if (headerSize != 0) {
+                                auto* asset = this_->manager_->add_from_type(io.stream.dataAtPosition(), headerSize);
+                                if (asset) {
+                                    this_->assets.push_back(asset);
+                                }
+                                io.stream.seek((int32_t) headerSize);
+                            } else {
+                                end = true;
+                            }
                         }
-                        io.stream.seek((int32_t) headerSize);
-                    } else {
-                        end = true;
+                        ek_local_res_close(lr);
                     }
-                }
-                ek_local_res_close(&lr);
-            }
-            // ready for loading
-            assetListLoaded = true;
-        });
+                    // ready for loading
+                    this_->assetListLoaded = true;
+                },
+                this
+        );
     }
 
     void do_unload() override {
@@ -500,14 +518,16 @@ public:
 
     void do_load() override {
         fullPath_ = manager_->base_path / path_;
-        get_resource_content_async(fullPath_.c_str(),
-                                   [this](ek_local_res lr) {
-                                       auto* ttfFont = new TrueTypeFont(manager_->scale_factor, this->baseFontSize_,
-                                                                        this->glyphCache_.c_str());
-                                       ttfFont->loadFromMemory(lr);
-                                       res.reset(new Font(ttfFont));
-                                       state = AssetState::Ready;
-                                   });
+        ek_local_res_load(
+                fullPath_.c_str(),
+                [](ek_local_res* lr) {
+                    TrueTypeFontAsset* this_ = (TrueTypeFontAsset*) lr->userdata;
+                    TrueTypeFont* ttfFont = new TrueTypeFont(this_->manager_->scale_factor, this_->baseFontSize_,
+                                                             this_->glyphCache_.c_str());
+                    ttfFont->loadFromMemory(lr);
+                    this_->res.reset(new Font(ttfFont));
+                    this_->state = AssetState::Ready;
+                }, this);
     }
 
     void do_unload() override {

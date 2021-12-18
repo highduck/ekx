@@ -7,7 +7,7 @@
 #include <ek/graphics/graphics.hpp>
 #include "render3d_shader.h"
 
-#include <ek/timers.hpp>
+#include <ek/time.h>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/app.h>
 #include <ek/scenex/base/Node.hpp>
@@ -136,8 +136,9 @@ struct ShadowMapRes {
     }
 
     void begin() {
-        auto w = rt->desc.width;
-        auto h = rt->desc.height;
+        auto info = sg_query_image_info(rt->image);
+        auto w = info.width;
+        auto h = info.height;
         sg_begin_pass(pass, clear);
         sg_apply_viewport(0, 0, w, h, true);
         sg_apply_scissor_rect(0, 0, w, h, true);

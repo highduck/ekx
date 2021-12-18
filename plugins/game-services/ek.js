@@ -12,10 +12,10 @@ function setup(project) {
     project.addModule({
         name: "plugin-game-services",
         path: __dirname,
+        cpp_include: "include",
         cpp: "src",
         android: {
-            cpp: "android",
-            android_java: "android/java",
+            android_java: "java",
             android_dependency: [
                 "implementation 'com.google.android.gms:play-services-base:17.6.0'",
                 "implementation 'com.google.android.gms:play-services-games:21.0.0'",
@@ -30,17 +30,18 @@ function setup(project) {
             }
         },
         ios: {
-            cpp: "ios",
+            cpp_flags: {
+                files: [
+                    "src/ek_game_services.c"
+                ],
+                flags: "-x objective-c"
+            },
             xcode_capability: "com.apple.GameCenter",
             xcode_framework: "GameKit"
-        },
-        web: {
-            cpp: "null"
-        },
-        macos: {
-            cpp: "null"
-        },
+        }
     });
+
+    project.importModule("@ekx/app", __dirname);
 }
 
 module.exports = setup;

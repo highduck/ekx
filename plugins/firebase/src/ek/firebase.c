@@ -55,7 +55,7 @@ void ek_firebase_event(const char* action, const char* target) {
     (*env)->DeleteLocalRef(env, target_ref);
 }
 
-#elif TARGET_OS_IOS || TARGET_OS_TV
+#elif (TARGET_OS_IOS || TARGET_OS_TV)
 
 void ek_firebase_init(void) {
     [FIRApp configure];

@@ -9,19 +9,19 @@
 extern "C" {
 #endif
 
-uint32_t bitset_index(uint32_t position);
+uint32_t ek_bitset_index(uint32_t position);
 
-uint32_t bitset_words(size_t bits);
+uint32_t ek_bitset_byte_size(uint32_t bits);
 
-uint32_t bitset_mask(uint32_t position);
+uint64_t ek_bitset_mask(uint32_t position);
 
-bool bitset_get(const uint32_t* bitset, uint32_t position);
+bool ek_bitset_get(const uint64_t* bitset, uint32_t position);
 
-void bitset_set(uint32_t* bitset, uint32_t position);
+void ek_bitset_set(uint64_t* bitset, uint32_t position);
 
-void bitset_unset(uint32_t* bitset, uint32_t position);
+void ek_bitset_unset(uint64_t* bitset, uint32_t position);
 
-void bitset_flip(uint32_t* bitset, uint32_t position);
+void ek_bitset_flip(uint64_t* bitset, uint32_t position);
 
 #ifdef __cplusplus
 }

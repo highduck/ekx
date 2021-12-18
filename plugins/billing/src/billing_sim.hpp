@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/ds/String.hpp>
-#include <ek/timers.hpp>
+#include <ek/time.hpp>
 
 namespace billing {
 
@@ -17,9 +17,9 @@ void getPurchases() {
 void getDetails(const ek::Array<ek::String>& skuList) {
     double time = 0.5;
     for (const auto& sku : skuList) {
-        ek::setTimeout([sku]() {
+        ek_set_timeout(ek::timer_func([sku]() {
             context.onProductDetails({sku, "$1.99", "USD"});
-            }, time);
+            }), time);
         time += 0.5;
     }
 }
@@ -29,9 +29,9 @@ void purchase(const ek::String& sku, const ek::String& payload) {
     data.productID = sku;
     data.payload = payload;
     data.state = 0;
-    ek::setTimeout([data]() {
+    ek_set_timeout(ek::timer_func([data]() {
         context.onPurchaseChanged(data);
-        }, 2.0);
+        }), 2);
 }
 
 void consume(const ek::String& token) {

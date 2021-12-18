@@ -1,7 +1,7 @@
 #include "Script.hpp"
 #include "Node.hpp"
 
-#include <ek/timers.hpp>
+#include <ek/time.h>
 
 namespace ek {
 

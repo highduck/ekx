@@ -16,7 +16,6 @@
 #include <ek/audio/audio.hpp>
 #include <ek/util/Signal.hpp>
 #include <utility>
-#include <ek/time/Timers.hpp>
 #include "profiler.hpp"
 #include "GameDisplay.hpp"
 #include "GameAppDispatcher.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AdMobWrapper.hpp"
+#include <ek/admob_wrapper.hpp>
 
 namespace ek {
 
