@@ -53,7 +53,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/ds/StaticHistoryBuffer.hpp
         ek/ds/FixedArray.hpp
         ek/ds/Array.hpp
-        ek/ds/SparseArray.hpp
         ek/ds/Hash.hpp
         )
 
