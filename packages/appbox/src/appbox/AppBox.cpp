@@ -33,11 +33,11 @@ AppBox::AppBox(AppBoxConfig config_) :
     if(n < 2) {
         memcpy(lang_buf, ek_app.lang, sizeof(lang_buf));
     }
-    lang_buf[3] = 0;
     if(lang_buf[0] == 0) {
         lang_buf[0] = 'e';
         lang_buf[1] = 'n';
     }
+    lang_buf[2] = 0;
     Localization::instance.setLanguage(lang_buf);
 }
 
