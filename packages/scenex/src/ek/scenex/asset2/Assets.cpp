@@ -310,10 +310,9 @@ public:
 
     void do_load() override {
         loaded = 0;
-
         for (int i = 0; i < langs_.size(); ++i) {
             auto& lang = langs_[i];
-            auto langPath = manager_->base_path / name_ / lang + ".mo";
+            auto langPath = (manager_->base_path / name_ / lang) + ".mo";
             get_resource_content_async(
                     langPath.c_str(),
                     [this, idx = i](ek_local_res lr) {

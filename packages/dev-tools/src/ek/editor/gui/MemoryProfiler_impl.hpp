@@ -165,16 +165,14 @@ void drawECSMemoryStats() {
     ImGui::Text("ECS World Struct Size: %lu", sizeof(ecs::World));
     uint32_t totalUsed = 0;
     uint32_t totalReserved = 0;
-    uint32_t totalLookups = 0;
+    uint32_t lookupSize = 0 /* TODO */;
     for (auto* header : ecs::the_world.components) {
         if (header) {
             const char* name = header->name;
-            auto lookupSize = sizeof(ecs::EntityLookup);
             auto h2eSizeReserved = header->handleToEntity.capacity() * sizeof(ecs::EntityIndex);
             auto h2eSizeUsed = header->handleToEntity.size() * sizeof(ecs::EntityIndex);
             auto dataSizeUsed = header->count() * header->storageElementSize;
             auto dataSizeReserved = dataSizeUsed;
-            totalLookups += lookupSize;
             totalUsed += lookupSize + h2eSizeUsed + dataSizeUsed;
             totalReserved += lookupSize + h2eSizeReserved + dataSizeReserved;
             if (ImGui::TreeNode(header, "#%u. %s | %0.2lf KB",
@@ -188,7 +186,7 @@ void drawECSMemoryStats() {
             }
         }
     }
-    ImGui::Text("ECXX Lookups: %0.2lf KB", toKB(totalLookups));
+    ImGui::Text("ECXX Lookups: %0.2lf KB", toKB(lookupSize));
     ImGui::Text("ECXX Used: %0.2lf MB", toMB(totalUsed));
     ImGui::Text("ECXX Reserved: %0.2lf MB", toMB(totalReserved));
 }

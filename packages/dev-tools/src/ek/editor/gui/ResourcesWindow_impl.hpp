@@ -36,8 +36,9 @@ void drawAssetItem<DynamicAtlas>(const DynamicAtlas& asset) {
         const auto* page = asset.getPageTexture(i);
         if (page) {
             ImGui::Text("Page #%d", i);
-            const auto width = pageScale * (float) page->desc.width;
-            const auto height = pageScale * (float) page->desc.height;
+            const auto info = sg_query_image_info(page->image);
+            const auto width = pageScale * (float) info.width;
+            const auto height = pageScale * (float) info.height;
             ImGui::Image((void*) (uintptr_t) page->image.id, ImVec2{width, height});
         } else {
             ImGui::TextDisabled("Page #%d", i);
@@ -55,15 +56,16 @@ void drawAssetItem<Atlas>(const Atlas& asset) {
         const auto* page = asset.pages[i].get();
         if (page) {
             ImGui::Text("Page #%d", i);
-            const auto width = pageScale * (float) page->desc.width;
-            const auto height = pageScale * (float) page->desc.height;
+            const auto info = sg_query_image_info(page->image);
+            const auto width = pageScale * (float) info.width;
+            const auto height = pageScale * (float) info.height;
             ImGui::Image((void*) (uintptr_t) page->image.id, ImVec2{width, height});
         } else {
             ImGui::TextDisabled("Page #%d", i);
         }
     }
 
-    for (const auto& spr : asset.sprites) {
+    for (const auto& spr: asset.sprites) {
         const auto* sprite = spr.get();
         const auto* id = spr.getID();
         if (sprite) {
@@ -100,21 +102,20 @@ void drawAssetItem<Material3D>(const Material3D& asset) {
 template<>
 void drawAssetItem<SGFile>(const SGFile& asset) {
     if (ImGui::TreeNode("##scene-list", "Scenes (%u)", asset.scenes.size())) {
-        for (auto& sceneName : asset.scenes) {
+        for (auto& sceneName: asset.scenes) {
             ImGui::TextUnformatted(sceneName.c_str());
         }
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("##linkages-list", "Linkages (%u)", static_cast<uint32_t>(asset.linkages.size()))) {
-        for (auto& info : asset.linkages) {
+        for (auto& info: asset.linkages) {
             auto* node = sg_get(asset, info.linkage.c_str());
-            if(node) {
+            if (node) {
                 if (ImGui::TreeNode(node, "%s -> %s", info.name.c_str(), info.linkage.c_str())) {
                     ImGui::TextDisabled("todo:");
                     ImGui::TreePop();
                 }
-            }
-            else {
+            } else {
                 ImGui::TextDisabled("%s -> %s (not found)", info.name.c_str(), info.linkage.c_str());
             }
         }
@@ -125,8 +126,8 @@ void drawAssetItem<SGFile>(const SGFile& asset) {
 template<typename T>
 void drawAssetsListByType() {
     FixedArray<ResourceDB::Slot*, 1024> list;
-    for(auto& it : ResourceDB::instance.get().map) {
-        if(it.second.key.type == TypeIndex<T>::value) {
+    for (auto& it: ResourceDB::instance.get().map) {
+        if (it.second.key.type == TypeIndex<T>::value) {
             list.push_back(&it.second);
         }
     }
@@ -137,7 +138,7 @@ void drawAssetsListByType() {
     sprintf(buff, "%s (%u)###%s", typeName, count, typeName);
     if (ImGui::BeginTabItem(buff)) {
         for (const auto& slot: list) {
-            const T* content = (const T*)slot->content;
+            const T* content = (const T*) slot->content;
             if (content) {
                 if (ImGui::TreeNode(slot->key.name.c_str())) {
                     drawAssetItem<T>(*content);

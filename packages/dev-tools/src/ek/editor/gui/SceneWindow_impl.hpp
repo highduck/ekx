@@ -126,8 +126,9 @@ void SceneWindow::onDraw() {
     if (display.color && displaySize.x > 0 && displaySize.y > 0) {
         auto texId = (void*) static_cast<uintptr_t>(display.color->image.id);
 
-        const float texCoordX1 = display.info.size.x / static_cast<float>(display.color->desc.width);
-        const float texCoordY1 = display.info.size.y / static_cast<float>(display.color->desc.height);
+        const auto info = sg_query_image_info(display.color->image);
+        const float texCoordX1 = display.info.size.x / (float)info.width;
+        const float texCoordY1 = display.info.size.y / (float)info.height;
 
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         drawList->AddImage(texId, {displayPos.x, displayPos.y},

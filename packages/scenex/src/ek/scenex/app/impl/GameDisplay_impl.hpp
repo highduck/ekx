@@ -113,10 +113,20 @@ void GameDisplay::update() {
 
         const auto w = static_cast<int>(info.size.x);
         const auto h = static_cast<int>(info.size.y);
-        auto color_image_info = sg_query_image_info(color->image);
-        if (color == nullptr || color_image_info.width != w || color_image_info.height != h) {
+
+        int color_img_width = 0;
+        int color_img_height = 0;
+        if(color) {
+            const auto color_image_info = sg_query_image_info(color->image);
+            color_img_width = color_image_info.width;
+            color_img_height = color_image_info.height;
+        }
+        if (color == nullptr || color_img_width != w || color_img_height != h) {
             delete color;
             color = createGameDisplayTexture(w, h, true, "game-display-color");
+            color_img_width = w;
+            color_img_height = h;
+
             colorFirstClearFlag = true;
 
             if (ek_app.config.need_depth) {
