@@ -25,34 +25,29 @@ enum class StorageCommand {
 // 256 + 74 = 330 bytes
 // 128 * 330 = 42'240 kb
 struct ComponentHeader {
+    ek::Array<EntityIndex> handleToEntity; // dynamic (8 + 4 + 4 ~ 16 bytes)
     ek_sparse_array entityToHandle; // 256 bytes
 
-    ek::Array<EntityIndex> handleToEntity; // dynamic (8 + 4 + 4 ~ 16 bytes)
-
     void* data; // 8 bytes
-
-    uint32_t storageElementSize = 0;
-
-    // Type Name for Debugging
-    const char* name = nullptr;
 
     ComponentHandle (* run)(StorageCommand cmd, ComponentHeader* component, EntityIndex entity); // 8 bytes
 
     uint32_t lockCounter; // 4 bytes
 
+    // Debug info
+    uint32_t storageElementSize = 0;
+    const char* name = nullptr;
     ComponentTypeId typeId; // 2 bytes
 
     [[nodiscard]] inline unsigned count() const {
         return handleToEntity.size();
     }
 
-    ComponentHeader(unsigned initialCapacity, ComponentTypeId typeId_, void* manager) :
+    ComponentHeader(unsigned initialCapacity, void* manager) :
             handleToEntity(initialCapacity) {
-        typeId = typeId_;
         lockCounter = 0;
         data = manager;
         run = nullptr;
-        //entityToHandle = ek_sparse_array_create(ENTITIES_MAX_COUNT);
         handleToEntity.push_back(0);
     }
 
@@ -62,30 +57,8 @@ struct ComponentHeader {
     }
 };
 
-/** Identity Index generator **/
-//struct ComponentTypeIdCounter {
-//    static ComponentTypeId counter;
-//
-//    inline static ComponentTypeId next() {
-//        return counter++;
-//    }
-//};
-//
-//inline ComponentTypeId ComponentTypeIdCounter::counter = 0;
-//
-//// 1. match between TU
-//// 2. starts from 0 for each Identity type
-//template<typename T>
-//struct ComponentTypeIdGenerator {
-//    static const ComponentTypeId value;
-//};
-//
-//template<typename T>
-//inline const ComponentTypeId ComponentTypeIdGenerator<T>::value = ComponentTypeIdCounter::next();
-
 template<typename Component>
 inline constexpr ComponentTypeId type() noexcept {
-//    return ComponentTypeIdGenerator<Component>::value;
     return ek::TypeIndex<Component, World>::value;
 }
 
@@ -117,9 +90,8 @@ public:
     // per component, data manager
     ComponentHeader* components[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
 
+    // per component, maps entity to data handle
     ek_sparse_array entityToHandle;
-    // per component, map entity to data handle
-    // SparseArray* pEntityToHandle[COMPONENTS_MAX_COUNT]; // 8 * 128 = 1024 bytes
 
     //// control section
     // allocated entities count
@@ -200,16 +172,15 @@ public:
     inline ComponentStorage<Component>* getStorage() const;
 
     [[nodiscard]]
-    inline ComponentHandle get(EntityIndex e, ComponentTypeId componentId) const {
-        auto e2h = getComponentHeader(componentId)->entityToHandle;
-        return ek_sparse_array_get(e2h, e);
+    inline ComponentHandle get(EntityIndex e, ComponentTypeId cid) const {
+        return ek_sparse_array_get(entityToHandle, ((uint32_t)cid << 16u) | e);
     }
 
     [[nodiscard]]
-    inline ComponentHandle getOrCreate(EntityIndex e, ComponentTypeId componentId) const {
-        auto* component = getComponentHeader(componentId);
-        const auto handle = ek_sparse_array_get(component->entityToHandle, e);
+    inline ComponentHandle getOrCreate(EntityIndex e, ComponentTypeId cid) const {
+        const auto handle = get(e, cid);
         if (handle == 0) {
+            auto* component = getComponentHeader(cid);
             return component->run(StorageCommand::Emplace, component, e);
         }
         return handle;
@@ -227,10 +198,13 @@ public:
     template<typename Component>
     inline const Component& getOrDefault(EntityIndex e) const;
 
-    inline void registerComponent(ComponentHeader* component) {
-        const auto typeId = component->typeId;
-        EK_ASSERT(components[typeId] == nullptr);
-        components[typeId] = component;
+    void registerComponent(ComponentTypeId cid, ComponentHeader* component, const char* label) {
+        EK_ASSERT(components[cid] == nullptr);
+        EK_ASSERT_R2(component != nullptr);
+        component->entityToHandle = ek_sparse_array_offset(entityToHandle, ((int)cid) << 16);
+        component->name = label;
+        component->typeId = cid;
+        components[cid] = component;
     }
 
     template<typename Component>
@@ -254,7 +228,7 @@ public:
     static constexpr bool EmptyData = std::is_empty_v<DataType>;
 
     explicit ComponentStorage(unsigned initialCapacity) :
-            component{initialCapacity, type<DataType>(), this},
+            component{initialCapacity, this},
             data(initialCapacity) {
         component.run = ComponentStorage<DataType>::s_run;
         component.storageElementSize = (uint32_t) sizeof(DataType);
@@ -427,10 +401,7 @@ inline Component& World::reassign(EntityIndex e, Args&& ... args) const {
 
 template<typename Component>
 inline bool World::has(EntityIndex e) const {
-    const auto* component = getComponentHeader(type<Component>());
-    const auto e2h = component->entityToHandle;
-    const auto handle = ek_sparse_array_get(e2h, e);
-    return handle != 0;
+    return get(e, type<Component>()) != 0;
 }
 
 template<typename Component>
@@ -440,9 +411,9 @@ inline Component& World::get(EntityIndex e) const {
 
 template<typename Component>
 inline Component* World::tryGet(EntityIndex e) const {
-    auto* storage = getStorage<Component>();
-    const auto handle = ek_sparse_array_get(storage->component.entityToHandle, e);
+    const auto handle = get(e, type<Component>());
     if (handle != 0) {
+        auto* storage = getStorage<Component>();
         return storage->get_ptr_by_handle(handle);
     }
     return nullptr;
@@ -455,8 +426,9 @@ inline void World::remove(EntityIndex e) const {
 
 template<typename Component>
 inline bool World::tryRemove(EntityIndex e) const {
-    auto* storage = getStorage<Component>();
-    if (ek_sparse_array_get(storage->component.entityToHandle, e) != 0) {
+    const auto handle = get(e, type<Component>());
+    if (handle != 0) {
+        auto* storage = getStorage<Component>();
         storage->erase(e);
         return true;
     }
@@ -465,8 +437,8 @@ inline bool World::tryRemove(EntityIndex e) const {
 
 template<typename Component>
 inline Component& World::getOrCreate(EntityIndex e) const {
+    const auto handle = get(e, type<Component>());
     auto* storage = getStorage<Component>();
-    const auto handle = ek_sparse_array_get(storage->component.entityToHandle, e);
     if (handle != 0) {
         return storage->get_by_handle(handle);
     }
@@ -476,8 +448,8 @@ inline Component& World::getOrCreate(EntityIndex e) const {
 
 template<typename Component>
 inline const Component& World::getOrDefault(EntityIndex e) const {
+    const auto handle = get(e, type<Component>());
     const auto* storage = getStorage<Component>();
-    const auto handle = ek_sparse_array_get(storage->component.entityToHandle, e);
     return storage->get_or_default_by_handle(handle);
 }
 
@@ -490,9 +462,7 @@ inline void World::create(EntityIndex* outEntities, uint32_t count) {
 template<typename Component>
 inline void World::registerComponent(unsigned initialCapacity) {
     auto* storage = new ComponentStorage<Component>(initialCapacity);
-    storage->component.entityToHandle = ek_sparse_array_offset(entityToHandle, storage->component.typeId * ENTITIES_MAX_COUNT);
-    storage->component.name = ek::TypeName<Component>::value;
-    registerComponent(&storage->component);
+    registerComponent(type<Component>(), &storage->component, ek::TypeName<Component>::value);
 }
 
 template<typename Component>
