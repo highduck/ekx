@@ -4,6 +4,13 @@
 
 namespace ek {
 
+inline int cmp_key(const void* a, const void* b) {
+    const char* ka = ((const CStringPair*) a)->k;
+    const char* kb = ((const CStringPair*) b)->k;
+    const int r = ka != kb ? strcmp(ka, kb) : 0;
+    return r;
+}
+
 bool StringCatalog::init(ek_local_res lr) {
     data = lr;
     if (data.buffer == nullptr) {
@@ -32,13 +39,12 @@ bool StringCatalog::init(ek_local_res lr) {
         uint32_t translationLength = 0;
         uint32_t translationOffset = 0;
     };
-    Array<TranslationInfo> translations{stringsCount};
-    translations.resize(stringsCount);
+    TranslationInfo* translations = (TranslationInfo*)alloca(sizeof(TranslationInfo) * stringsCount);
 
     const auto offsetOriginalStrings = input.read<uint32_t>();
     const auto offsetTranslatedStrings = input.read<uint32_t>();
 
-    if (data.length < offsetOriginalStrings + 2 * sizeof(std::uint32_t) * stringsCount) {
+    if (data.length < offsetOriginalStrings + 2 * sizeof(uint32_t) * stringsCount) {
         EK_ERROR("mo-file: not enough data for original strings");
         return false;
     }
@@ -60,6 +66,8 @@ bool StringCatalog::init(ek_local_res lr) {
         translations[i].translationOffset = input.read<uint32_t>();
     }
 
+    strings = (CStringPair*)malloc(sizeof(CStringPair) * stringsCount);
+    strings_num = stringsCount;
     for (uint32_t i = 0; i < stringsCount; ++i) {
         auto& translationInfo = translations[i];
         if (data.length < translationInfo.stringOffset + translationInfo.stringLength ||
@@ -68,29 +76,29 @@ bool StringCatalog::init(ek_local_res lr) {
             return false;
         }
 
-        auto str = reinterpret_cast<const char*>(data.buffer + translationInfo.stringOffset);
-        auto tra = reinterpret_cast<const char*>(data.buffer + translationInfo.translationOffset);
-        strings[str] = tra;
+        const char* tra = (const char*) (data.buffer + translationInfo.translationOffset);
+        strings[i].k = (const char*) (data.buffer + translationInfo.stringOffset);
+        strings[i].v = (const char*) (data.buffer + translationInfo.translationOffset);;
     }
-
+    qsort(strings, strings_num, sizeof(CStringPair), cmp_key);
     return true;
 }
 
-bool StringCatalog::has(const char* text) const {
-    return strings.find(text) != strings.end();
-}
-
 const char* StringCatalog::get(const char* text) const {
-    auto it = strings.find(text);
-    return it != strings.end() ? it->second : text;
+    const CStringPair key{text, nullptr};
+    CStringPair* f = (CStringPair*) bsearch(&key, strings, strings_num, sizeof(CStringPair), cmp_key);
+    return f ? f->v : text;
 }
 
-StringCatalog::~StringCatalog() {
+void StringCatalog::destroy() {
     ek_local_res_close(&data);
+    free(strings);
+    strings = nullptr;
+    strings_num = 0;
 }
 
 const char* Localization::getText(const char* str) const {
-    if (languageCatalog) {
+    if (str && *str && languageCatalog) {
         return languageCatalog->get(str);
     }
     return str;
@@ -98,10 +106,11 @@ const char* Localization::getText(const char* str) const {
 
 bool Localization::setLanguage(const char* lang) {
     language = lang;
-    auto it = languages.find(lang);
-    if (it != languages.end()) {
-        languageCatalog = &it->second;
-        return true;
+    for (int i = 0; i < languagesList.size(); ++i) {
+        if (languagesList[i] == lang) {
+            languageCatalog = languages.begin() + i;
+            return true;
+        }
     }
     languageCatalog = nullptr;
     return false;
@@ -112,12 +121,13 @@ const String& Localization::getLanguage() const {
 }
 
 void Localization::load(const char* name, ek_local_res lr) {
-    auto& catalog = languages[name];
-    if (catalog.init(lr)) {
-        languagesList.emplace_back(name);
+    StringCatalog cat{};
+    if (cat.init(lr)) {
+        languages.push_back(cat);
+        languagesList.push_back(name);
     }
     else {
-        languages.erase(name);
+        cat.destroy();
     }
 }
 
@@ -126,7 +136,7 @@ const Array<String>& Localization::getAvailableLanguages() const {
 }
 
 bool Localization::has(const char* text) const {
-    return languageCatalog && languageCatalog->has(text);
+    return text && *text && languageCatalog && languageCatalog->get(text) != text;
 }
 
 Localization Localization::instance;

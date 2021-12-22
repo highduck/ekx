@@ -32,8 +32,6 @@ enum class BlendMode : uint8_t {
     PremultipliedAlpha = 0
 };
 
-class BufferChain;
-
 struct BatchState {
     sg_shader shader{0};
     sg_image texture{0};
@@ -48,6 +46,85 @@ struct BatchState {
     bool operator!=(const BatchState& a) const {
         return (blend != a.blend || shader.id != a.shader.id || texture.id != a.texture.id);
     }
+};
+
+class BufferChain {
+public:
+    BufferChain(sg_buffer_type type, uint32_t elementsMaxCount, uint32_t elementMaxSize) :
+            type_{type},
+            caps{0x10 * elementMaxSize,
+                 0x100 * elementMaxSize,
+                 0x400 * elementMaxSize,
+                 elementsMaxCount * elementMaxSize} {
+    }
+
+    uint32_t calcSizeBucket(uint32_t requiredSize) {
+        if (requiredSize < caps[0]) {
+            return 0;
+        } else if (requiredSize < caps[1]) {
+            return 1;
+        } else if (requiredSize < caps[2]) {
+            return 2;
+        }
+        return 3;
+    }
+
+    sg_buffer nextBuffer(uint32_t requiredSize) {
+        sg_buffer buf = {};
+        const auto index = calcSizeBucket(requiredSize);
+        auto& v = buffers_[index];
+        auto position = pos[index];
+        if (position >= v.size()) {
+            sg_buffer_desc desc{};
+            desc.usage = SG_USAGE_STREAM;
+            desc.type = (sg_buffer_type) type_;
+            desc.size = caps[index];
+            buf = sg_make_buffer(&desc);
+            EK_ASSERT(buf.id != 0);
+            v.push_back(buf);
+        } else {
+            buf = v[position];
+        }
+        ++position;
+        pos[index] = position;
+        return buf;
+    }
+
+    void nextFrame() {
+        resetPositions();
+    }
+
+    void resetPositions() {
+        pos[0] = 0;
+        pos[1] = 0;
+        pos[2] = 0;
+        pos[3] = 0;
+    }
+
+    void disposeBuffers() {
+        for (auto& chain: buffers_) {
+            for (sg_buffer buffer: chain) {
+                sg_destroy_buffer(buffer);
+            }
+            chain.resize(0);
+        }
+    }
+
+    void reset() {
+        disposeBuffers();
+        resetPositions();
+    }
+
+    ~BufferChain() {
+        disposeBuffers();
+    }
+
+private:
+    sg_buffer_type type_;
+    Array<sg_buffer> buffers_[4]{};
+    uint16_t pos[4] = {0, 0, 0, 0};
+    // each bucket buffer size
+    uint32_t caps[4];
 };
 
 struct Context : private NoCopyAssign {
@@ -124,16 +201,16 @@ struct Context : private NoCopyAssign {
 
     Context& setEmptyTexture();
 
-    Context& setTexture(const graphics::Texture* texture_);
+    Context& setTexture(const Texture* texture_);
 
-    Context& setTextureRegion(const graphics::Texture* texture_ = nullptr,
+    Context& setTextureRegion(const Texture* texture_ = nullptr,
                               const Rect2f& region = Rect2f{0.0f, 0.0f, 1.0f, 1.0f});
 
     Context& restoreTexture();
 
     Context& pushProgram(const char* id);
 
-    Context& setProgram(const graphics::Shader* program_);
+    Context& setProgram(const Shader* program_);
 
     Context& saveProgram();
 
@@ -160,9 +237,6 @@ public:
 
     void allocTriangles(uint32_t vertex_count, uint32_t index_count);
 
-    [[nodiscard]]
-    uint32_t getUsedMemory() const;
-
     sg_pipeline getPipeline(sg_shader shader, bool useRenderTarget, bool depthStencilPass);
 
 public:
@@ -171,14 +245,14 @@ public:
     constexpr static int MaxVertex = 0xFFFF;
 
     // Default resources
-    graphics::Shader* defaultShader = nullptr;
-    graphics::Shader* alphaMapShader = nullptr;
-    graphics::Shader* solidColorShader = nullptr;
-    graphics::Texture* emptyTexture = nullptr;
+    Shader* defaultShader = nullptr;
+    Shader* alphaMapShader = nullptr;
+    Shader* solidColorShader = nullptr;
+    Texture* emptyTexture = nullptr;
 
     // Current drawing state
-    const graphics::Texture* texture = nullptr;
-    const graphics::Shader* program = nullptr;
+    const Texture* texture = nullptr;
+    const Shader* program = nullptr;
     Matrix3x2f matrix{};
     Rect2f uv{0.0f, 0.0f, 1.0f, 1.0f};
     ColorMod32 color{};
@@ -186,13 +260,13 @@ public:
 
     // Current pass state
     bool active = false;
-    const graphics::Texture* renderTarget = nullptr;
-    const graphics::Texture* renderDepthStencil = nullptr;
+    const Texture* renderTarget = nullptr;
+    const Texture* renderDepthStencil = nullptr;
 
     //// Offscreen rendering
     // framebuffer target could be also render target or null as default
-    const graphics::Texture* framebufferColor = nullptr;
-    const graphics::Texture* framebufferDepthStencil = nullptr;
+    const Texture* framebufferColor = nullptr;
+    const Texture* framebufferDepthStencil = nullptr;
 
     Matrix4f mvp{};
 
@@ -200,8 +274,8 @@ public:
     Array<Matrix3x2f> matrixStack{};
     Array<ColorMod32> colorStack{};
     Array<Rect2f> scissorsStack{};
-    Array<const graphics::Shader*> programStack{};
-    Array<const graphics::Texture*> textureStack{};
+    Array<const Shader*> programStack{};
+    Array<const Texture*> textureStack{};
     Array<Rect2f> texCoordStack{};
 
     // Checking what states could be potentially changed
@@ -221,14 +295,14 @@ public:
     FrameStats stats;
 
     // Index data buffers
-    BufferChain* indexBuffers_ = nullptr;
+    BufferChain indexBuffers_;
     uint16_t* indexData_ = nullptr;
     uint16_t* indexDataPos_ = nullptr;
     uint16_t* indexDataNext_ = nullptr;
     uint32_t indicesCount_ = 0;
 
     // Vertex data buffers
-    BufferChain* vertexBuffers_ = nullptr;
+    BufferChain vertexBuffers_;
     Vertex2D* vertexData_ = nullptr;
     Vertex2D* vertexDataPos_ = nullptr;
     Vertex2D* vertexDataNext_ = nullptr;
@@ -247,7 +321,8 @@ extern Context& state;
 
 void beginNewFrame();
 
-void begin(Rect2f viewport, const Matrix3x2f& view = Matrix3x2f{}, const graphics::Texture* renderTarget = nullptr, const graphics::Texture* depthStencilTarget = nullptr);
+void begin(Rect2f viewport, const Matrix3x2f& view = Matrix3x2f{}, const Texture* renderTarget = nullptr,
+           const Texture* depthStencilTarget = nullptr);
 
 void end();
 

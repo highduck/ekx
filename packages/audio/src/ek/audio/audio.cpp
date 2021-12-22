@@ -1,76 +1,17 @@
 #include "audio.hpp"
 
-#include <ek/log.h>
-#include <ek/assert.h>
-
-//#ifndef __APPLE__
-
-#define AUPH_MP3
-//#define AUPH_OGG
-#include <auph/auph_impl.hpp>
-
-//#endif // not __APPLE__
-
-#if defined(__ANDROID__)
-
-#include <ek/app_native.h>
-
-#endif
-
-namespace ek::audio {
-
-struct AudioSystem {
-    int locks = 0;
-    bool initialized = false;
-};
-
-static AudioSystem audioSystem{};
-
-void initialize() {
-    EK_DEBUG("audio initialize");
-    EK_ASSERT(!audioSystem.initialized);
-#if defined(__ANDROID__)
-    auto activity = ek_android_activity();
-    auto assets = ek_android_assets_object();
-    auph::setAndroidActivity(ek_android_jni, activity, assets);
-#endif
-    auph::init();
-    audioSystem.initialized = true;
-}
-
-void shutdown() {
-    EK_DEBUG("audio shutdown");
-    EK_ASSERT(audioSystem.initialized);
-    auph::shutdown();
-    audioSystem.initialized = false;
-}
-
-void muteDeviceBegin() {
-    EK_ASSERT(audioSystem.locks >= 0);
-    if (audioSystem.locks == 0) {
-        auph::setGain(auph::Bus_Master.id, 0.0f);
-    }
-    ++audioSystem.locks;
-}
-
-void muteDeviceEnd() {
-    --audioSystem.locks;
-    EK_ASSERT(audioSystem.locks >= 0);
-    if (audioSystem.locks == 0) {
-        auph::setGain(auph::Bus_Master.id, 1.0f);
-    }
-}
+namespace ek {
 
 /** Sound **/
 
 void AudioResource::load(const char* filepath, bool streaming) {
-    buffer = auph::load(filepath, streaming ? auph::Flag_Stream : 0);
+    buffer = auph_load(filepath, streaming ? AUPH_FLAG_STREAM : 0);
 }
 
 void AudioResource::unload() {
-    if (auph::isActive(buffer.id)) {
-        auph::unload(buffer);
-        buffer = {};
+    if (auph_is_active(buffer.id)) {
+        auph_unload(buffer);
+        buffer.id = 0;
     }
 }
 

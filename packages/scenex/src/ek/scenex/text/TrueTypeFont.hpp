@@ -6,7 +6,7 @@
 #include <ek/math/Rect.hpp>
 #include <ek/ds/Hash.hpp>
 #include <ek/draw2d/drawer.hpp>
-#include <ek/local_res.hpp>
+#include <ek/local_res.h>
 
 struct stbtt_fontinfo;
 

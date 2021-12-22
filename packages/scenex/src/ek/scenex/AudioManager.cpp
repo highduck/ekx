@@ -11,18 +11,18 @@ AudioManager::~AudioManager() = default;
 
 void AudioManager::play_music(const char* name) {
     if (music_ != name) {
-        if (auph::isActive(musicVoice_.id)) {
-            auph::stop(musicVoice_.id);
+        if (auph_is_active(musicVoice_.id)) {
+            auph_stop(musicVoice_.id);
             musicVoice_ = {};
         }
 
-        Res<audio::AudioResource> audioRes{name};
+        Res<AudioResource> audioRes{name};
         if (audioRes) {
-            if (auph::isBufferLoaded(audioRes->buffer) && !auph::isActive(musicVoice_.id)) {
-                musicVoice_ = auph::play(audioRes->buffer,
+            if (auph_is_buffer_loaded(audioRes->buffer) && !auph_is_active(musicVoice_.id)) {
+                musicVoice_ = auph_play_f(audioRes->buffer,
                                          musicVolume_, 0.0f, musicPitch_,
                                          true, false,
-                                         auph::Bus_Music);
+                                         AUPH_BUS_MUSIC);
             }
         }
         music_ = name;
@@ -31,9 +31,9 @@ void AudioManager::play_music(const char* name) {
 
 void AudioManager::play_sound(const char* name, float vol, float pitch) const {
     if (sound.enabled()) {
-        Res<audio::AudioResource> snd{name};
+        Res<AudioResource> snd{name};
         if (snd) {
-            auph::play(snd->buffer, vol, 0.0f, pitch);
+            auph_play_f(snd->buffer, vol, 0.0f, pitch, false, false, AUPH_BUS_SOUND);
         }
     }
 }
@@ -48,20 +48,20 @@ void AudioManager::play_sound_at(const char* name, const Vec2f& position, float 
 
 void AudioManager::vibrate(int length) const {
     if (vibro.enabled() && length > 0) {
-        auph::vibrate(length);
+        auph_vibrate(length);
     }
 }
 
 void AudioManager::update(float) {
-    auph::setGain(auph::Bus_Music.id, music.enabled() ? 1.0f : 0.0f);
-    auph::setGain(auph::Bus_Sound.id, sound.enabled() ? 1.0f : 0.0f);
+    auph_set_gain(AUPH_BUS_MUSIC.id, music.enabled() ? 1.0f : 0.0f);
+    auph_set_gain(AUPH_BUS_SOUND.id, sound.enabled() ? 1.0f : 0.0f);
 
     if (music_.empty()) {
         return;
     }
-    Res<audio::AudioResource> audioRes{music_.c_str()};
-    if (audioRes && auph::isBufferLoaded(audioRes->buffer) && !auph::isActive(musicVoice_.id)) {
-        musicVoice_ = auph::play(audioRes->buffer, musicVolume_, 0.0f, musicPitch_, true, false, auph::Bus_Music);
+    Res<AudioResource> audioRes{music_.c_str()};
+    if (audioRes && auph_is_buffer_loaded(audioRes->buffer) && !auph_is_active(musicVoice_.id)) {
+        musicVoice_ = auph_play_f(audioRes->buffer, musicVolume_, 0.0f, musicPitch_, true, false, AUPH_BUS_MUSIC);
     }
 }
 
@@ -74,9 +74,9 @@ void AudioManager::disable_all() {
 void AudioManager::setMusicParams(float volume, float pitch) {
     musicVolume_ = volume;
     musicPitch_ = pitch;
-    if (auph::isActive(musicVoice_.id)) {
-        auph::setGain(musicVoice_.id, musicVolume_);
-        auph::setRate(musicVoice_, pitch);
+    if (auph_is_active(musicVoice_.id)) {
+        auph_set_gain(musicVoice_.id, musicVolume_);
+        auph_set_rate(musicVoice_, pitch);
     }
 }
 

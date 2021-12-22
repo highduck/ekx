@@ -16,11 +16,11 @@ inline void root_app_on_frame() {
 
 inline void root_app_on_event(const ek_app_event ev) {
     if (ev.type == EK_APP_EVENT_PAUSE) {
-        auph::pause();
+        auph_set_pause(AUPH_MIXER, true);
     } else if (ev.type == EK_APP_EVENT_RESUME) {
-        auph::resume();
+        auph_set_pause(AUPH_MIXER, false);
     } else if (ev.type == EK_APP_EVENT_CLOSE) {
-        auph::shutdown();
+        auph_shutdown();
         sg_shutdown();
     }
 }

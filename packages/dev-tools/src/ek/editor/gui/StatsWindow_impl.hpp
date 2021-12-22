@@ -28,7 +28,6 @@ void StatsWindow::onDraw() {
     auto entitiesCount = ecs::the_world.size;
     auto entitiesAvailable = ecs::ENTITIES_MAX_COUNT - entitiesCount;
     ImGui::Text("%u entities | %u free", entitiesCount - 1, entitiesAvailable);
-    ImGui::Text("Batching buffer objects: %d kb", draw2d::state.getUsedMemory() / 1000);
 
     auto hitTarget = Locator::ref<InteractionSystem>().getHitTarget();
     if (hitTarget) {

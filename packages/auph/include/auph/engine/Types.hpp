@@ -1,78 +1,117 @@
 #pragma once
 
-namespace auph {
+typedef union auph_samples_data {
+    // hackish const
+    void* buffer;
+    float* f32;
+    int16_t* i16;
+} auph_samples_data;
 
-constexpr int tMask = 0x30000000;
-constexpr int vMask = 0x00FFFF00;
-constexpr int vIncr = 0x00000100;
-constexpr int iMask = 0x000000FF;
+typedef struct auph_mix_sample {
+    float L;
+    float R;
+} auph_mix_sample;
 
-constexpr int Unit = 1024;
+/**
+ * stream reader function
+ * reads num of frames and return number of read frames
+ *
+ * returns next dest pointer
+ */
+typedef auph_mix_sample* (* auph_source_reader_func)(auph_mix_sample*, const double, const double, const double,
+                                                     const struct auph_buffer_data_source*,
+                                                     auph_mix_sample volume);
 
-struct Buffer {
+typedef struct auph_buffer_data_source {
+    void* stream_data;
+    auph_samples_data data;
+    // length in frames (samples / channels)
+    uint32_t length;
+
+    auph_sample_format format;
+    uint32_t sample_rate;
+    uint32_t channels;
+    auph_source_reader_func reader;
+} auph_buffer_data_source;
+
+/** object's state **/
+typedef struct auph_bus_obj {
     int id;
-};
+    int state;
+    int gain;
+} auph_bus_obj;
 
-struct Voice {
+typedef struct auph_voice_obj {
     int id;
-};
+    int state;
+    int gain;
+    int pan;
+    // playback speed
+    int rate;
+    auph_bus bus;
 
-struct Bus {
+    // playback position in frames :(
+    double position;
+
+    const auph_buffer_data_source* data;
+} auph_voice_obj;
+
+typedef struct auph_buffer_obj {
     int id;
-};
-
-/** Object Type **/
-enum Type : int {
-    Type_Mixer = 0,
-    Type_Bus = 1 << 28,
-    Type_Buffer = 2 << 28,
-    Type_Voice = 3 << 28
-};
-
-constexpr Bus Bus_Master = {Type_Bus | 0};
-constexpr Bus Bus_Sound = {Type_Bus | 1};
-constexpr Bus Bus_Music = {Type_Bus | 2};
-constexpr Bus Bus_Speech = {Type_Bus | 3};
-
-constexpr Bus DefaultBus = Bus_Sound;
-constexpr int hMixer = Type_Mixer | 1;
-
-enum Param : int {
-    Param_State = 0,
-    Param_Gain = 1,
-    Param_Pan = 2,
-    Param_Rate = 3,
-    Param_CurrentTime = 4,
-    Param_SampleRate = 5,
-    Param_Duration = 6,
-
-    Param_StateMask = (1 << 7) - 1,
-    Param_Flags = 1 << 7,
-    // counts object by state mask
-    Param_Count = 1 << 8
-};
-
-enum Flag : int {
-    Flag_Active = 1,
-    // Voice: playback is running (un-paused)
-    // Buffer: buffer is loaded and ready for reading from
-    // Bus: connected state
-    // Mixer: is not paused
-    Flag_Running = 2,
-    Flag_Loop = 4,
-
-    // Buffer Flags
-    Flag_Loaded = 2,
-    Flag_Stream = 4,
-
-    // Copy Flag for buffer
-    Flag_Copy = 8
-};
+    int state;
+    auph_buffer_data_source data;
+    void* source_buffer_data;
+} auph_buffer_obj;
 
 /** common utilities **/
 
-inline int nextHandle(int id) {
-    return ((id + vIncr) & vMask) | (id & (tMask | iMask));
+auph_source_reader_func auph_select_source_reader(auph_sample_format format, uint32_t channels, bool interpolate);
+
+inline static void auph_bus_obj_init(auph_bus_obj* bus, int new_handle) {
+    bus->id = new_handle;
+    bus->state = AUPH_FLAG_RUNNING | AUPH_FLAG_ACTIVE;
+    bus->gain = AUPH_UNIT;
 }
 
+inline static int auph_next_handle(int handle) {
+    return ((handle + AUPH_ADD_VERSION) & AUPH_MASK_VERSION) | (handle & (AUPH_MASK_TYPE | AUPH_MASK_INDEX));
+}
+
+inline static float auph_bus_get_gain_f(const auph_bus_obj* bus) {
+    return (bus->state & AUPH_FLAG_RUNNING) ? ((float) (bus->gain) / AUPH_UNIT) : 0.0f;
+}
+
+void auph_buffer_obj_unload(auph_buffer_obj* buf);
+
+bool auph_buffer_obj_load(auph_buffer_obj* buf, const char* filepath, int flags);
+
+bool auph_buffer_obj_load_data(auph_buffer_obj* buf, const void* data, uint32_t size, int flags);
+
+inline static void auph_buffer_obj_init(auph_buffer_obj* buf, int new_handle) {
+    memset(buf, 0, sizeof(auph_buffer_obj));
+    buf->id = new_handle;
+}
+
+inline static void auph_voice_obj_init(auph_voice_obj* voice, int new_handle) {
+    memset(voice, 0, sizeof(auph_voice_obj));
+    voice->id = new_handle;
+    voice->gain = AUPH_UNIT;
+    voice->pan = AUPH_UNIT;
+    voice->rate = AUPH_UNIT;
+}
+
+inline static void auph_voice_obj_stop(auph_voice_obj* voice) {
+    auph_voice_obj_init(voice, auph_next_handle(voice->id));
+}
+
+inline static double auph_voice_get_rate_f64(const auph_voice_obj* voice) {
+    return (double) voice->rate / AUPH_UNIT;
+}
+
+inline static float auph_voice_get_gain_f32(const auph_voice_obj* voice) {
+    return (float) voice->gain / AUPH_UNIT;
+}
+
+inline static float auph_voice_get_pan_f32(const auph_voice_obj* voice) {
+    return (float) voice->pan / AUPH_UNIT - 1.0f;
 }

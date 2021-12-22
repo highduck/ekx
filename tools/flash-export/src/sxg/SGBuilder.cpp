@@ -62,10 +62,10 @@ void collectFramesMetaInfo(const Doc& doc, ExportItem& item) {
         }
         for (auto& frame: layer.frames) {
             if (!frame.script.empty()) {
-                item.node.scripts.set(frame.index, frame.script);
+                item.node.scripts.emplace_back({frame.script, frame.index});
             }
             if (!frame.name.empty()) {
-                item.node.labels.set(frame.index, frame.name);
+                item.node.labels.emplace_back({frame.name, frame.index});
             }
         }
     }
@@ -74,7 +74,7 @@ void collectFramesMetaInfo(const Doc& doc, ExportItem& item) {
 bool shouldConvertItemToSprite(ExportItem& item) {
     if (item.children.size() == 1 && item.drawingLayerChild) {
         return true;
-    } else if (item.node.labels.get(0, "") == "*static") {
+    } else if (!item.node.labels.empty() && item.node.labels[0].name == "*static") {
         // special user TAG
         return true;
     } else if (!item.node.scaleGrid.empty()) {
@@ -321,7 +321,7 @@ void SGBuilder::process_dynamic_text(const Element& el, ExportItem* parent, proc
 
 void SGBuilder::process_symbol_item(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     EK_ASSERT(el.elementType == ElementType::symbol_item ||
-           el.elementType == ElementType::scene_timeline);
+              el.elementType == ElementType::scene_timeline);
 
     auto* item = new ExportItem();
     item->ref = &el;
@@ -382,8 +382,8 @@ void SGBuilder::process_group(const Element& el, ExportItem* parent, processing_
 
 void SGBuilder::process_shape(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     EK_ASSERT(el.elementType == ElementType::shape ||
-           el.elementType == ElementType::object_oval ||
-           el.elementType == ElementType::object_rectangle);
+              el.elementType == ElementType::object_oval ||
+              el.elementType == ElementType::object_rectangle);
     auto* item = addElementToDrawingLayer(parent, el);
     if (bag) {
         bag->list.push_back(item);

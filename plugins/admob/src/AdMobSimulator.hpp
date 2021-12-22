@@ -36,10 +36,10 @@ public:
 
     void showInterstitial(std::function<void()> callback) override {
         activeInterstitial = true;
-        audio::muteDeviceBegin();
+        ek_audio_mute_push();
         ek_set_timeout(ek::timer_func([this, cb = std::move(callback)] {
             activeInterstitial = false;
-            audio::muteDeviceEnd();
+            ek_audio_mute_pop();
             if (cb) {
                 cb();
             }
@@ -48,10 +48,10 @@ public:
 
     void showRewardedAd(std::function<void(bool)> callback) override {
         activeRewardedAd = true;
-        audio::muteDeviceBegin();
+        ek_audio_mute_push();
         ek_set_timeout(ek::timer_func([this, cb = std::move(callback)] {
             activeRewardedAd = false;
-            audio::muteDeviceEnd();
+            ek_audio_mute_pop();
             if (cb) {
                 cb(true);
             }

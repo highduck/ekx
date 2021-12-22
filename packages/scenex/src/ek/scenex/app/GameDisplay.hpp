@@ -23,8 +23,8 @@ public:
     GameDisplayInfo info{};
 
     sg_pass pass{};
-    graphics::Texture* color = nullptr;
-    graphics::Texture* depthStencil = nullptr;
+    Texture* color = nullptr;
+    Texture* depthStencil = nullptr;
     void* screenshotBuffer = nullptr;
     bool simulated = false;
     bool colorFirstClearFlag = false;

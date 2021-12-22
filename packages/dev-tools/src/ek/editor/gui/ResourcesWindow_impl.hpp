@@ -126,11 +126,12 @@ void drawAssetItem<SGFile>(const SGFile& asset) {
 template<typename T>
 void drawAssetsListByType() {
     FixedArray<ResourceDB::Slot*, 1024> list;
-    for (auto& it: ResourceDB::instance.get().map) {
-        if (it.second.key.type == TypeIndex<T>::value) {
-            list.push_back(&it.second);
-        }
-    }
+    // TODO:
+    //for (auto& it: ResourceDB::getMap) {
+//        if (it.second.key.type == TypeIndex<T>::value) {
+//            list.push_back(&it.second);
+//        }
+    //}
 
     const char* typeName = TypeName<T>::value;
     const auto count = list.size();
@@ -140,12 +141,12 @@ void drawAssetsListByType() {
         for (const auto& slot: list) {
             const T* content = (const T*) slot->content;
             if (content) {
-                if (ImGui::TreeNode(slot->key.name.c_str())) {
+                if (ImGui::TreeNode(slot->name.c_str())) {
                     drawAssetItem<T>(*content);
                     ImGui::TreePop();
                 }
             } else {
-                ImGui::TextDisabled("%s", slot->key.name.c_str());
+                ImGui::TextDisabled("%s", slot->name.c_str());
             }
         }
         ImGui::EndTabItem();
@@ -154,14 +155,14 @@ void drawAssetsListByType() {
 
 void ResourcesWindow::onDraw() {
     if (ImGui::BeginTabBar("res_by_type", 0)) {
-        drawAssetsListByType<graphics::Shader>();
-        drawAssetsListByType<graphics::Texture>();
+        drawAssetsListByType<Shader>();
+        drawAssetsListByType<Texture>();
         drawAssetsListByType<Sprite>();
         drawAssetsListByType<Atlas>();
         drawAssetsListByType<DynamicAtlas>();
         drawAssetsListByType<Font>();
         drawAssetsListByType<SGFile>();
-        drawAssetsListByType<audio::AudioResource>();
+        drawAssetsListByType<AudioResource>();
         drawAssetsListByType<ParticleDecl>();
         drawAssetsListByType<Material3D>();
         drawAssetsListByType<StaticMesh>();

@@ -16,7 +16,7 @@ void ek_local_res_close(ek_local_res* lr) {
 
 #elif defined(__EMSCRIPTEN__)
 
-// local_res_web.cpp
+#include "local_res_web.c.h"
 
 #else
 

@@ -4,9 +4,7 @@
 
 namespace ek {
 
-namespace graphics {
 class Texture;
-}
 
 class FontImplBase;
 
@@ -21,7 +19,7 @@ struct Glyph {
 
     // sprite part
     Rect2f texCoord{};
-    const graphics::Texture* texture = nullptr;
+    const Texture* texture = nullptr;
     bool rotated = false;
 
     // we need to know what fallback give us this glyph info,

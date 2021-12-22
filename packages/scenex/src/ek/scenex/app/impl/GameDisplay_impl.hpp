@@ -87,7 +87,7 @@ void GameDisplay::endOverlayDev() {
 //    }
 }
 
-graphics::Texture* createGameDisplayTexture(int w, int h, bool isColor, const char* label) {
+Texture* createGameDisplayTexture(int w, int h, bool isColor, const char* label) {
     sg_image_desc desc{};
     desc.type = SG_IMAGETYPE_2D;
     desc.render_target = true;
@@ -102,7 +102,7 @@ graphics::Texture* createGameDisplayTexture(int w, int h, bool isColor, const ch
     desc.wrap_u = SG_WRAP_CLAMP_TO_EDGE;
     desc.wrap_v = SG_WRAP_CLAMP_TO_EDGE;
     desc.label = label;
-    return new graphics::Texture(desc);
+    return new Texture(desc);
 }
 
 void GameDisplay::update() {

@@ -61,15 +61,15 @@ int main(int argc, char** argv) {
         bytes_write_i32(&writer, glyph.box.w);
         bytes_write_i32(&writer, glyph.box.h);
         bytes_write_i32(&writer, glyph.advanceWidth);
-        bytes_write_string(&writer, glyph.sprite.c_str(), (int)glyph.sprite.size());
+        bytes_write_string(&writer, glyph.sprite.c_str(), (int) glyph.sprite.size());
     }
-    bytes_write_i32(&writer, dictSize);
-    for (size_t i = 0; i < fontData.glyphs.size(); ++i) {
+    bytes_write_i32(&writer, dictSize * 2);
+    for (uint32_t i = 0; i < fontData.glyphs.size(); ++i) {
         const auto& glyph = fontData.glyphs[i];
-        // hash<u64, i32>
+        // pair<u32, u32>
         for (auto cp: glyph.codepoints) {
-            bytes_write_u64(&writer, (uint64_t) cp);
-            bytes_write_i32(&writer, (int32_t) i);
+            bytes_write_u32(&writer, cp);
+            bytes_write_u32(&writer, i);
         }
     }
 

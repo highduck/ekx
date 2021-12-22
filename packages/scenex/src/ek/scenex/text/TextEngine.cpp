@@ -3,8 +3,7 @@
 #include "Font.hpp"
 #include <cstdarg>
 #include <ek/utf8.h>
-
-#include <stb/stb_sprintf.h>
+#include <ek/print.h>
 
 namespace ek {
 
@@ -126,7 +125,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
 
     draw2d::state.save_color().scaleColor(layer.color);
 
-    const graphics::Texture* prevTexture = nullptr;
+    const Texture* prevTexture = nullptr;
     uint32_t prevCodepointOnLine = 0;
     Glyph gdata;
     uint32_t codepoint = 0;
@@ -322,17 +321,11 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
 void TextEngine::drawFormat(const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    // TODO: TextBuffer with dynamic growing memory for text?
-    const int bufferSize = 1024;
-    char BUFFER[1024];
-    int w = stbsp_vsnprintf(BUFFER, bufferSize, fmt, args);
-    if (w == -1 || w >= (int) bufferSize) {
-        w = (int) bufferSize - 1;
-    }
-    BUFFER[w] = 0;
+    char buffer[4096];
+    ek_vsnprintf(buffer, sizeof buffer, fmt, args);
     va_end(args);
 
-    draw(BUFFER);
+    draw(buffer);
 }
 
 

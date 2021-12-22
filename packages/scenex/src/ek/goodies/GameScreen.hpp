@@ -91,7 +91,7 @@ public:
 
     ScreenTransitionState transition;
 
-    std::function<void(ScreenTransitionState&)> transitionEffect = defaultTransitionEffect;
+    void(*transitionEffect)(GameScreenManager* gsm) = defaultTransitionEffect;
 
     explicit GameScreenManager(ecs::EntityApi layer_);
 
@@ -104,9 +104,9 @@ public:
 
     void update();
 
-    void applyTransitionEffect(ScreenTransitionState& state) const;
+    void applyTransitionEffect();
 
-    static void defaultTransitionEffect(ScreenTransitionState& state);
+    static void defaultTransitionEffect(GameScreenManager* gsm);
 };
 
 EK_DECLARE_TYPE(GameScreenManager);

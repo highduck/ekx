@@ -25,12 +25,13 @@ namespace ek {
 template<typename T>
 inline void selectAsset(const char* label, Res<T>& asset) {
     if (ImGui::BeginCombo(label, asset.getID())) {
-        for (auto& it : ResourceDB::instance.get().map) {
-            auto& key = it.second.key;
-            if (ImGui::Selectable(key.name.c_str(), key.name == asset.getID())) {
-                asset.setID(key.name);
-            }
-        }
+        // TODO:
+//        for (auto& it : ResourceDB::instance.get().map) {
+//            auto& key = it.second.key;
+//            if (ImGui::Selectable(key.name.c_str(), key.name == asset.getID())) {
+//                asset.setID(key.name);
+//            }
+//        }
         ImGui::EndCombo();
     }
 }

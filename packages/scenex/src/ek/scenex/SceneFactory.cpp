@@ -140,10 +140,10 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
             display = &entity.assign<Display2D>();
         }
         if (data->scaleGrid.empty()) {
-            sprite = new Sprite2D(data->sprite);
+            sprite = new Sprite2D(data->sprite.c_str());
             display->drawable.reset(sprite);
         } else {
-            ninePatch = new NinePatch2D(data->sprite, data->scaleGrid);
+            ninePatch = new NinePatch2D(data->sprite.c_str(), data->scaleGrid);
             display->drawable.reset(ninePatch);
         }
     }

@@ -92,8 +92,6 @@ float ScreenTransitionState::getNextProgress() const {
 
 /** GameScreenManager **/
 
-
-
 GameScreenManager::GameScreenManager(ecs::EntityApi layer_) :
         layer{layer_} {
 }
@@ -104,7 +102,7 @@ void GameScreenManager::setScreen(const char* name) {
     }
 
     // hide all activated screens
-    for (auto it : stack) {
+    for (auto it: stack) {
         auto& node = it.get<Node>();
         node.setVisible(false);
         node.setTouchable(false);
@@ -128,7 +126,7 @@ void GameScreenManager::setScreen(const char* name) {
         transition = {};
         transition.next = e;
         transition.t = 1.0f;
-        applyTransitionEffect(transition);
+        applyTransitionEffect();
 
         //e.get<GameScreen>().onEnterBegin();
         e.get<GameScreen>().onEvent.emit(GameScreenEvent::EnterBegin);
@@ -180,7 +178,7 @@ void GameScreenManager::changeScreen(const char* name) {
     }
 
     transition.checkStates();
-    applyTransitionEffect(transition);
+    applyTransitionEffect();
 
     // TODO:
     //analytics::screen(name.c_str());
@@ -199,7 +197,7 @@ void GameScreenManager::update() {
             transition.t = 1.0f;
         }
 
-        applyTransitionEffect(transition);
+        applyTransitionEffect();
         transition.checkStates();
 
         if (transition.nextPlayCompleted && transition.prevPlayCompleted) {
@@ -209,16 +207,17 @@ void GameScreenManager::update() {
     }
 }
 
-void GameScreenManager::applyTransitionEffect(ScreenTransitionState& state) const {
+void GameScreenManager::applyTransitionEffect() {
     if (transitionEffect) {
-        transitionEffect(state);
+        transitionEffect(this);
     }
 //        else {
 //            defaultTransitionEffect(prev, next, progress)
 //        }
 }
 
-void GameScreenManager::defaultTransitionEffect(ScreenTransitionState& state) {
+void GameScreenManager::defaultTransitionEffect(GameScreenManager* gsm) {
+    auto& state = gsm->transition;
     const auto next = state.next;
     const auto prev = state.prev;
 

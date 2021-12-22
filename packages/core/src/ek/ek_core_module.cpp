@@ -1,6 +1,6 @@
 #include "math/Random.hpp"
 
-#include "util/Res.hpp"
+//#include "util/Res.hpp"
 
 #include <ek/log.h>
 #include <ek/time.h>
@@ -8,7 +8,7 @@
 namespace ek::core {
 
 void setup() {
-    ResourceDB::instance.initialize();
+    //ResourceDB::init();
     log_init();
     ek_time_init();
     ek_timers_init();

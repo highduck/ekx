@@ -1,7 +1,6 @@
 #pragma once
 
-#include <unordered_map>
-#include <ek/local_res.hpp>
+#include <ek/local_res.h>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/String.hpp>
 
@@ -11,6 +10,11 @@
 // - https://github.com/j-jorge/libintl-lite
 namespace ek {
 
+struct CStringPair {
+    const char* k;
+    const char* v;
+};
+
 class StringCatalog final {
 public:
     /// load MO file, and map c-string pointers to identifiers
@@ -18,15 +22,15 @@ public:
     /// specification: https://www.gnu.org/software/gettext/manual/gettext.html#Binaries
     bool init(ek_local_res lr);
 
-    bool has(const char* text) const;
-
     // returns translated c-string or original text if not found
     [[nodiscard]] const char* get(const char* text) const;
 
-    ~StringCatalog();
+    void destroy();
+
 private:
     ek_local_res data{};
-    std::unordered_map<String, const char*> strings;
+    CStringPair* strings = nullptr;
+    uint32_t strings_num = 0;
 };
 
 class Localization final {
@@ -47,7 +51,7 @@ public:
     static Localization instance;
 private:
     Array<String> languagesList;
-    std::unordered_map<String, StringCatalog> languages;
+    Array<StringCatalog> languages;
     StringCatalog* languageCatalog = nullptr;
     String language;
 };

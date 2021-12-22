@@ -1,9 +1,7 @@
 #pragma once
 
 #include <ek/local_storage.h>
-#include <ek/app.h>
 #include <ek/util/Signal.hpp>
-#include <ek/ds/String.hpp>
 
 namespace ek {
 
@@ -26,7 +24,7 @@ public:
     void value(int v) {
         if (value_ != v) {
             value_ = v;
-            ek_ls_set_i(key_.c_str(), v);
+            ek_ls_set_i(key_, v);
             changed.emit(*this);
         }
     }
@@ -47,7 +45,7 @@ public:
     }
 
 private:
-    String key_;
+    const char* key_;
     int value_;
 };
 

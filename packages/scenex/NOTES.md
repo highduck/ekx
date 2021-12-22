@@ -23,3 +23,5 @@ Create x86 image
 ```
 $ANDROID_HOME/emulator/emulator @Nexus_S_API_29 -gpu host -no-boot-anim
 ```
+
+

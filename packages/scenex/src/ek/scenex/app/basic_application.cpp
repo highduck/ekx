@@ -99,7 +99,7 @@ basic_application::~basic_application() {
 
     delete asset_manager_;
 
-    audio::shutdown();
+    ek_audio_shutdown();
     ek_gfx_shutdown();
 }
 

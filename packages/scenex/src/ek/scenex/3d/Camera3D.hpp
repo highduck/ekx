@@ -6,14 +6,9 @@
 #include <ek/util/Type.hpp>
 #include <ecxx/ecxx_fwd.hpp>
 
-#undef near
-#undef far
-
 namespace ek {
 
-namespace graphics {
 class Texture;
-}
 
 struct Camera3D {
     // clip plane near-far
@@ -36,7 +31,7 @@ struct Camera3D {
     Vec4f clearColor{0.5f, 0.5f, 0.5f, 1.0f};
     float clearDepth = 1.0f;
 
-    Res<graphics::Texture> cubeMap;
+    Res<Texture> cubeMap;
 };
 
 ECX_TYPE(29, Camera3D);

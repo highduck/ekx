@@ -43,7 +43,7 @@ static void on_event(const ek_app_event ev) {
         case EK_APP_EVENT_KEY_DOWN:
             log_info("key down %d", ev.key.code);
             if(ev.key.code == EK_KEYCODE_SPACE) {
-                ek_app_set_mouse_cursor(ek_rand1(&rnd) % EK_MOUSE_CURSOR_MAX);
+                ek_app_set_mouse_cursor(ek_rand1(&rnd) % _EK_MOUSE_CURSOR_NUM);
             }
             else if(ev.key.code == EK_KEYCODE_S) {
                 const char* text = "Hello, World! 👋";

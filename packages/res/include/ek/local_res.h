@@ -20,6 +20,7 @@ typedef struct ek_local_res {
     int32_t status;
     void* handle;
     ek_local_res_callback closeFunc;
+    ek_local_res_callback callback;
 } ek_local_res;
 
 bool ek_local_res_success(const ek_local_res* lr);

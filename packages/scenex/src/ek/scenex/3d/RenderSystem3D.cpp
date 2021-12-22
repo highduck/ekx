@@ -18,10 +18,12 @@
 
 #include <cstring>
 
+#undef near
+#undef far
+
 namespace ek {
 
 const auto DEFAULT_FACE_WINDING = SG_FACEWINDING_CCW;
-using namespace graphics;
 
 Rect<3, float> get_shadow_map_box(const Matrix4f& camera_projection, const Matrix4f& camera_view, const Matrix4f& light_view) {
     const Matrix4f inv_proj_view = inverse(camera_projection * camera_view);
@@ -86,9 +88,9 @@ sg_image_desc renderTargetDesc(int w, int h) {
 }
 
 struct ShadowMapRes {
-    graphics::Texture* rt = nullptr;
-    graphics::Texture* rtColor = nullptr;
-    graphics::Shader* shader = nullptr;
+    Texture* rt = nullptr;
+    Texture* rtColor = nullptr;
+    Shader* shader = nullptr;
     sg_pass pass{};
     sg_pass_action clear{};
     sg_pipeline pip{};
@@ -182,8 +184,8 @@ struct ShadowMapRes {
                 resMesh.setID(filter.mesh.c_str());
                 auto* mesh = resMesh.get_or(filter.meshPtr);
                 if (mesh) {
-                    bindings.index_buffer = mesh->ib.buffer;
-                    bindings.vertex_buffers[0] = mesh->vb.buffer;
+                    bindings.index_buffer = mesh->ib;
+                    bindings.vertex_buffers[0] = mesh->vb;
                     sg_apply_bindings(bindings);
                     mvp = projection * view * e.get<Transform3D>().world;
                     sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
@@ -285,8 +287,8 @@ struct RenderSkyBoxRes {
 
             sg_bindings bind{};
             bind.fs_images[0] = cubeMapTexture->image;
-            bind.vertex_buffers[0] = mesh->vb.buffer;
-            bind.index_buffer = mesh->ib.buffer;
+            bind.vertex_buffers[0] = mesh->vb;
+            bind.index_buffer = mesh->ib;
             sg_apply_bindings(bind);
 
             sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
@@ -351,8 +353,8 @@ void RenderSystem3D::renderObjects(const Matrix4f& proj, const Matrix4f& view) {
             matParams.mat_roughness = material.roughness;
             sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_material_params, SG_RANGE(matParams));
 
-            main->bind.index_buffer = mesh->ib.buffer;
-            main->bind.vertex_buffers[0] = mesh->vb.buffer;
+            main->bind.index_buffer = mesh->ib;
+            main->bind.vertex_buffers[0] = mesh->vb;
             sg_apply_bindings(main->bind);
             sg_draw(0, mesh->indices_count, 1);
         }

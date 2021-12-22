@@ -1,17 +1,25 @@
 #pragma once
 
-#include <auph/auph.hpp>
+#include "auph/auph.h"
 #include <ek/util/Type.hpp>
 
-namespace ek::audio {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void initialize();
+void ek_audio_setup(void);
 
-void shutdown();
+void ek_audio_shutdown(void);
 
-void muteDeviceBegin();
+void ek_audio_mute_push(void);
 
-void muteDeviceEnd();
+void ek_audio_mute_pop(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+namespace ek {
 
 class AudioResource {
 public:
@@ -23,14 +31,9 @@ public:
 
     void unload();
 
-    auph::Buffer buffer{};
+    auph_buffer buffer{};
 };
 
-}
-
-namespace ek {
-
-EK_DECLARE_TYPE(audio::AudioResource);
-EK_TYPE_INDEX(audio::AudioResource, 7);
+EK_DECLARE_TYPE(AudioResource);
 
 }

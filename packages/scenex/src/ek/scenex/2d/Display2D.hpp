@@ -79,7 +79,7 @@ struct Display2D {
     Pointer<IDrawable2D> drawable;
 
     // state management
-    Res<graphics::Shader> program;
+    Res<Shader> program;
 
     // 1 - draw debug bounds
     int flags = 0;
@@ -198,7 +198,7 @@ public:
 
     Sprite2D();
 
-    explicit Sprite2D(const String& spriteId);
+    explicit Sprite2D(const char* spriteId);
 
     void draw() override;
 
@@ -221,7 +221,7 @@ public:
 
     NinePatch2D();
 
-    explicit NinePatch2D(const String& spriteId, Rect2f aScaleGrid = Rect2f::zero);
+    explicit NinePatch2D(const char* spriteId, Rect2f aScaleGrid = Rect2f::zero);
 
     void draw() override;
 

@@ -17,8 +17,6 @@
 
 namespace ek {
 
-using namespace ek::graphics;
-
 void reset_keys() {
     auto& io = ImGui::GetIO();
     for (bool& i : io.KeysDown) {

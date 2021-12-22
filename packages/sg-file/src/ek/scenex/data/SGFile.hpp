@@ -1,8 +1,8 @@
 #pragma once
 
+#include <ek/log.h>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/String.hpp>
-#include <ek/ds/Hash.hpp>
 #include <ek/util/Type.hpp>
 #include <ek/math/MathSerialize.hpp>
 #include <ek/math/Color32.hpp>
@@ -11,7 +11,6 @@
 #include <ek/math/ColorTransform.hpp>
 
 #include <ek/serialize/serialize.hpp>
-#include <ek/serialize/stl/UnorderedMap.hpp>
 
 namespace ek {
 
@@ -63,6 +62,7 @@ struct SGDynamicTextData {
     template<typename S>
     void serialize(IO<S>& io) {
         io(text, font, size, alignment, rect, lineSpacing, lineHeight, layers, wordWrap);
+        //log_info("layers size: %u", layers.size());
     }
 };
 
@@ -157,6 +157,16 @@ struct SGMovieLayerData {
     }
 };
 
+struct SGFrameLabel {
+    String name;
+    int frame;
+};
+
+struct SGFrameScript {
+    String code;
+    int frame;
+};
+
 struct SGMovieData {
     int frames = 1;
     float fps = 24.0f;
@@ -164,6 +174,7 @@ struct SGMovieData {
 
     template<typename S>
     void serialize(IO<S>& io) {
+        // TODO: labels and scripts
         io(frames, fps, layers);
     }
 };
@@ -194,10 +205,9 @@ struct SGNodeData {
     Array<SGFilter> filters;
     Array<SGDynamicTextData> dynamicText;
     Array<SGMovieData> movie;
+    Array<SGFrameLabel> labels;
+    Array<SGFrameScript> scripts;
     int32_t movieTargetId = -1;
-
-    Hash<String> labels;
-    Hash<String> scripts;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -217,8 +227,6 @@ struct SGNodeData {
                 boundingRect,
                 scaleGrid,
 
-                // TODO: labels and scripts
-                //script,
                 color,
 
                 children,

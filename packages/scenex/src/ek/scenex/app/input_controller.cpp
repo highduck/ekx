@@ -102,21 +102,21 @@ void input_controller::onEvent(const ek_app_event& event) {
 }
 
 bool input_controller::is_key(ek_key_code code) const {
-    if (code != EK_KEYCODE_UNKNOWN && code < EK_KEYCODE_MAX_COUNT) {
+    if (code != EK_KEYCODE_UNKNOWN && code < _EK_KEYCODE_NUM) {
         return keys_[code].state;
     }
     return false;
 }
 
 bool input_controller::is_key_down(ek_key_code code) const {
-    if (code != EK_KEYCODE_UNKNOWN && code < EK_KEYCODE_MAX_COUNT) {
+    if (code != EK_KEYCODE_UNKNOWN && code < _EK_KEYCODE_NUM) {
         return keys_[code].down;
     }
     return false;
 }
 
 bool input_controller::is_key_up(ek_key_code code) const {
-    if (code != EK_KEYCODE_UNKNOWN && code < EK_KEYCODE_MAX_COUNT) {
+    if (code != EK_KEYCODE_UNKNOWN && code < _EK_KEYCODE_NUM) {
         return keys_[code].up;
     }
     return false;

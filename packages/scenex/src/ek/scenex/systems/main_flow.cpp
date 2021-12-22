@@ -61,21 +61,19 @@ void scene_post_update(ecs::EntityApi root) {
 }
 
 void scene_render(ecs::EntityApi root) {
-    FixedArray<Atlas*, 64> atlases;
-    for (auto& it: ResourceDB::instance.get().map) {
-        auto* content = it.second.content;
+//    FixedArray<Atlas*, 64> atlases;
+    for (auto& it: ResourceDB::list(TypeIndex<DynamicAtlas>::value)) {
+        auto* content = it.content;
         if (content) {
-            auto type = it.second.key.type;
-            if (type == TypeIndex<DynamicAtlas>::value) {
-                ((DynamicAtlas*) content)->invalidate();
-            } else if (type == TypeIndex<Atlas>::value) {
-                atlases.push_back(((Atlas*) content));
-            }
+            ((DynamicAtlas*) content)->invalidate();
         }
     }
 
-    for (auto& it: atlases) {
-        it->pollLoading();
+    for (auto& it: ResourceDB::list(TypeIndex<Atlas>::value)) {
+        auto* content = it.content;
+        if (content) {
+            ((Atlas*)content)->pollLoading();
+        }
     }
 
     Camera2D::render();

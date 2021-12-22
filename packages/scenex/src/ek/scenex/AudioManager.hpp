@@ -33,7 +33,7 @@ public:
 
 private:
     String music_;
-    auph::Voice musicVoice_{};
+    auph_voice musicVoice_{};
     float musicVolume_ = 1.0f;
     float musicPitch_ = 1.0f;
 };

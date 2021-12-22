@@ -19,8 +19,6 @@
 #include "Trace.h"
 #include "OboeDebug.h"
 
-static char buffer[256];
-
 // Tracing functions
 static void *(*ATrace_beginSection)(const char *sectionName);
 
@@ -33,10 +31,10 @@ typedef void *(*fp_ATrace_endSection)();
 bool Trace::mIsTracingSupported = false;
 
 void Trace::beginSection(const char *format, ...){
-
     if (mIsTracingSupported) {
         va_list va;
         va_start(va, format);
+        char buffer[256];
         vsprintf(buffer, format, va);
         ATrace_beginSection(buffer);
         va_end(va);

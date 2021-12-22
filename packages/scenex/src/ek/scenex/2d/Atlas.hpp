@@ -21,8 +21,11 @@ public:
     void clear();
 
     Array<Res<Sprite>> sprites;
-    Array<Res<graphics::Texture>> pages;
+    Array<Res<Texture>> pages;
+
+    // loading routine
     Array<ek_texture_loader*> loaders;
+    String base_path;
     uint32_t formatMask = 1;
 
     [[nodiscard]] int getLoadingTexturesCount() const;

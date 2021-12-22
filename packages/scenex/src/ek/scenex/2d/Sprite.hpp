@@ -10,7 +10,7 @@ namespace ek {
 
 class Sprite : private NoCopyAssign {
 public:
-    Res<graphics::Texture> texture;
+    Res<Texture> texture;
     Rect2f rect{0, 0, 1, 1};
     Rect2f tex{0, 0, 1, 1};
     bool rotated = false;

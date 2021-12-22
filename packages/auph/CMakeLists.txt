@@ -33,6 +33,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
             )
     target_link_libraries(${PROJECT_NAME}
             INTERFACE log
+            INTERFACE android
+            INTERFACE OpenSLES
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 

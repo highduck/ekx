@@ -82,7 +82,7 @@ private:
     //int keyboard_modifiers_{};
     bool reset_keys_ = false;
 
-    key_state_t keys_[EK_KEYCODE_MAX_COUNT];
+    key_state_t keys_[_EK_KEYCODE_NUM];
 
     Array<touch_state_t> touches_;
 };

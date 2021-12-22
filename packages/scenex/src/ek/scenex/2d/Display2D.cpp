@@ -35,7 +35,7 @@ bool Quad2D::hitTest(Vec2f point) const {
 /** Sprite2D **/
 Sprite2D::Sprite2D() = default;
 
-Sprite2D::Sprite2D(const String& spriteId) :
+Sprite2D::Sprite2D(const char* spriteId) :
         src{spriteId} {
 }
 
@@ -69,8 +69,8 @@ bool Sprite2D::hitTest(Vec2f point) const {
 
 NinePatch2D::NinePatch2D() = default;
 
-NinePatch2D::NinePatch2D(const String& spriteId, Rect2f aScaleGrid) :
-        src{spriteId.c_str()},
+NinePatch2D::NinePatch2D(const char* spriteId, Rect2f aScaleGrid) :
+        src{spriteId},
         scale_grid{aScaleGrid} {
 }
 

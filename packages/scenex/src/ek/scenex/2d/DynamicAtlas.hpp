@@ -8,13 +8,11 @@
 
 namespace ek {
 
-namespace graphics {
 class Texture;
-}
 
 struct DynamicAtlasSprite {
     Rect2f texCoords{0, 0, 1, 1};
-    graphics::Texture* texture = nullptr;
+    Texture* texture = nullptr;
 };
 
 class DynamicAtlas : private NoCopyAssign {
@@ -27,7 +25,7 @@ public:
 
     DynamicAtlasSprite addBitmap(int width, int height, const uint8_t* pixels, size_t pixelsSize);
 
-    [[nodiscard]] const graphics::Texture* getPageTexture(int index) const;
+    [[nodiscard]] const Texture* getPageTexture(int index) const;
 
     void reset();
 

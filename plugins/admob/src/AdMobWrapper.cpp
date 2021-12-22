@@ -30,14 +30,14 @@ AdMobWrapper::AdMobWrapper() {
 }
 
 void AdMobWrapper::showInterstitial(std::function<void()> callback) {
-    audio::muteDeviceBegin();
+    ek_audio_mute_push();
     interstitialCompletedCallback = std::move(callback);
     activeInterstitial = true;
     ek_admob_show_interstitial_ad();
 }
 
 void AdMobWrapper::showRewardedAd(std::function<void(bool)> callback) {
-    audio::muteDeviceBegin();
+    ek_audio_mute_push();
     rewardedAdCompletedCallback = std::move(callback);
     userRewarded = false;
     ek_admob_show_rewarded_ad();
@@ -45,7 +45,7 @@ void AdMobWrapper::showRewardedAd(std::function<void(bool)> callback) {
 
 void AdMobWrapper::completeRewardedAd(bool rewarded) {
     if (rewardedAdCompletedCallback) {
-        audio::muteDeviceEnd();
+        ek_audio_mute_pop();
         rewardedAdCompletedCallback(rewarded);
         rewardedAdCompletedCallback = nullptr;
     }
@@ -67,7 +67,7 @@ void AdMobWrapper::onAdmobEvent(ek_admob_event_type event) {
             break;
         case EK_ADMOB_INTERSTITIAL_CLOSED:
             if(activeInterstitial) {
-                audio::muteDeviceEnd();
+                ek_audio_mute_pop();
                 activeInterstitial = false;
                 if (interstitialCompletedCallback) {
                     interstitialCompletedCallback();

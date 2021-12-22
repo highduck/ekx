@@ -1,33 +1,10 @@
 #pragma once
 
+#include <ek/log.h>
 #include <ek/ds/String.hpp>
+#include <ek/ds/Array.hpp>
 #include <ek/util/Type.hpp>
-#include <unordered_map>
 #include "StaticStorage.hpp"
-
-namespace ek::ResourceDB {
-
-struct Key final {
-    int type = 0;
-    String name{};
-
-    constexpr bool operator==(const Key& other) const noexcept {
-        return type == other.type && name == other.name;
-    }
-
-    [[nodiscard]]
-    constexpr uint64_t hash() const noexcept {
-        return type ^ name.hash();
-    }
-};
-}
-
-template<>
-struct std::hash<ek::ResourceDB::Key> {
-    std::size_t operator()(const ek::ResourceDB::Key& s) const noexcept {
-        return (std::size_t) s.hash();
-    }
-};
 
 namespace ek {
 
@@ -35,7 +12,7 @@ namespace ResourceDB {
 
 struct Slot final {
     // stored unique access key
-    Key key;
+    String name{};
     void* content = nullptr;
 
     Slot() = default;
@@ -49,34 +26,58 @@ struct Slot final {
     Slot& operator=(Slot&& v) = default;
 };
 
-struct DB {
+inline StaticStorage<Array<Slot>[32]> s_map;
 
-    std::unordered_map<Key, Slot> map;
-    Slot empty;
+inline Array<Slot>& list(int type) {
+    return *(s_map.get() + type);
+}
 
-    Slot* getSlotPointer(Key&& key) {
-        auto it = map.find(key);
-        if (it == map.end()) {
-            auto& s = map[key];
-            s.key = key;
-            return &s;
+inline uint32_t getSlotPointer(int type, const char* name) {
+#if 0
+    static int maxsize = 0;
+        if(maxsize < key.name.size()) {
+            maxsize = key.name.size();
+            log_debug("max size: %d '%s'", maxsize, key.name.c_str());
         }
-        return &it->second;
+#endif
+    Array<Slot>& arr = list(type);
+    uint32_t i = 0;
+    while (i < arr.size()) {
+        if (arr[i].name == name) {
+            return i;
+        }
+        ++i;
     }
-};
-
-inline StaticStorage<DB> instance{};
-
-inline Slot* getSlotPointer(int type, const String& name) {
-    return instance.get().getSlotPointer({type, name});
+    arr.emplace_back({name, nullptr});
+    return i;
 }
 
-inline Slot* getSlotPointer(int type, const char* name) {
-    return  instance.get().getSlotPointer({type, String{name}});
+inline uint32_t inject(int type, const char* name) {
+    return getSlotPointer(type, name);
 }
 
-inline Slot* getEmptySlot() {
-    return &instance.get().empty;
+inline void reset(int type, uint32_t handle, void* r, void(* deleter)(void*)) {
+    Slot& slot = list(type)[handle];
+    if (slot.content && slot.content != r) {
+        deleter(slot.content);
+    }
+    slot.content = r;
+}
+
+inline Slot* get(int type, uint32_t handle) {
+    return list(type).begin() + handle;
+}
+
+inline void* getContent(int type, uint32_t handle) {
+    return get(type, handle)->content;
+}
+
+inline const char* getName(int type, uint32_t handle) {
+    return get(type, handle)->name.c_str();
+}
+
+inline void init() {
+    s_map.initialize();
 }
 
 }
@@ -84,22 +85,21 @@ inline Slot* getEmptySlot() {
 template<typename T>
 class Res {
 public:
-    constexpr Res() noexcept : slot_{ResourceDB::getEmptySlot()} {}
+    constexpr Res() noexcept: h{ResourceDB::inject(TypeIndex<T>::value, nullptr)} {}
 
     explicit Res(const char* id);
 
-    explicit Res(const String& id);
-
-    void setID(const String& id);
+    void setID(const char* id);
 
     [[nodiscard]]
     const char* getID() const;
 
+    static void deleter(void* obj) {
+        delete (T*)obj;
+    }
+
     inline void reset(T* res = nullptr) {
-        if (slot_->content && slot_->content != res) {
-            delete ((T*) slot_->content);
-        }
-        slot_->content = res;
+        ResourceDB::reset(TypeIndex<T>::value, h, res, Res<T>::deleter);
     }
 
     // assign value-type via copy
@@ -110,11 +110,12 @@ public:
     }
 
     inline const T* get() const {
-        return (const T*) slot_->content;
+        return (const T*) ResourceDB::getContent(TypeIndex<T>::value, h);
     }
 
     inline const T* get_or(const T* def) const {
-        return slot_->content ? (const T*) slot_->content : def;
+        const T* c = get();
+        return c ? c : def;
     }
 
     [[nodiscard]]
@@ -152,27 +153,22 @@ public:
     }
 
 private:
-    ResourceDB::Slot* slot_;
+    uint32_t h;
 };
 
 template<typename T>
-Res<T>::Res(const String& id) :
-        slot_{ResourceDB::getSlotPointer(TypeIndex<T>::value, id)} {
-}
-
-template<typename T>
 Res<T>::Res(const char* id) :
-        slot_{ResourceDB::getSlotPointer(TypeIndex<T>::value, id)} {
+        h{ResourceDB::inject(TypeIndex<T>::value, id)} {
 }
 
 template<typename T>
-void Res<T>::setID(const String& id) {
-    slot_ = ResourceDB::getSlotPointer(TypeIndex<T>::value, id);
+void Res<T>::setID(const char* id) {
+    h = ResourceDB::inject(TypeIndex<T>::value, id);
 }
 
 template<typename T>
 const char* Res<T>::getID() const {
-    return slot_->key.name.c_str();
+    return ResourceDB::getName(TypeIndex<T>::value, h);
 }
 
 }

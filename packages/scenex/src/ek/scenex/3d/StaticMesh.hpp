@@ -10,24 +10,26 @@
 namespace ek {
 
 struct StaticMesh {
-    graphics::Buffer vb;
-    graphics::Buffer ib;
-    uint32_t indices_count = 0;
     Model3D origin;
+    sg_buffer vb;
+    sg_buffer ib;
+    int indices_count;
 
-    explicit StaticMesh(const Model3D& model) :
-            vb{
-                    SG_BUFFERTYPE_VERTEXBUFFER,
-                    model.vertices.data(),
-                    (uint32_t)(model.vertices.size() * sizeof(ModelVertex3D))
-            },
-            ib{
-                    SG_BUFFERTYPE_INDEXBUFFER,
-                    model.indices.data(),
-                    (uint32_t)(model.indices.size() * sizeof(uint16_t))
-            },
-            origin{model} {
-        indices_count = static_cast<uint32_t>(model.indices.size());
+    explicit StaticMesh(const Model3D& model) : origin{model} {
+        sg_buffer_desc desc{};
+        desc.usage = SG_USAGE_IMMUTABLE;
+        desc.type = SG_BUFFERTYPE_VERTEXBUFFER;
+        desc.size = model.vertices.size() * sizeof(ModelVertex3D);
+        vb = sg_make_buffer(&desc);
+        EK_ASSERT(vb.id != 0);
+
+        desc.usage = SG_USAGE_IMMUTABLE;
+        desc.type = SG_BUFFERTYPE_INDEXBUFFER;
+        desc.size = model.indices.size() * sizeof(uint16_t);
+        ib = sg_make_buffer(&desc);
+        EK_ASSERT(ib.id != 0);
+
+        indices_count = (int)model.indices.size();
     }
 };
 

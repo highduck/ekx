@@ -2,9 +2,11 @@
 
 #include <ek/gfx.h>
 #include <ek/util/NoCopyAssign.hpp>
+#include <ek/util/Type.hpp>
+
+namespace ek {
 
 // sokol gfx objects RAII wrappers with utilities
-namespace ek::graphics {
 
 class Shader : private NoCopyAssign {
 public:
@@ -14,25 +16,6 @@ public:
     explicit Shader(const sg_shader_desc* desc);
 
     ~Shader();
-};
-
-class Buffer : private NoCopyAssign {
-public:
-    Buffer(sg_buffer_type type, sg_usage usage, uint32_t maxSize);
-
-    // immutable init
-    Buffer(sg_buffer_type type, const void* data, uint32_t dataSize);
-
-    ~Buffer();
-
-    void update(const void* data, uint32_t dataSize);
-
-    [[nodiscard]]
-    inline uint32_t getSize() const { return size; }
-
-    sg_buffer buffer;
-private:
-    uint32_t size;
 };
 
 class Texture : private NoCopyAssign {
@@ -52,15 +35,7 @@ public:
     static Texture* renderTarget(int width, int height, const char* label = nullptr);
 };
 
-}
-
-#include <ek/util/Type.hpp>
-
-namespace ek {
-
-EK_DECLARE_TYPE(graphics::Texture);
-EK_DECLARE_TYPE(graphics::Shader);
-EK_TYPE_INDEX(graphics::Texture, 1);
-EK_TYPE_INDEX(graphics::Shader, 2);
+EK_DECLARE_TYPE(Texture);
+EK_DECLARE_TYPE(Shader);
 
 }

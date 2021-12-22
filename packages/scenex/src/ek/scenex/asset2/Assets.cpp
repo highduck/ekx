@@ -5,7 +5,7 @@
 #include <ek/assert.h>
 #include <ek/time.h>
 #include <ek/audio/audio.hpp>
-#include <ek/local_res.hpp>
+#include <ek/local_res.h>
 
 // texture loading
 #include <ek/texture_loader.h>
@@ -31,9 +31,6 @@
 
 namespace ek {
 
-using graphics::Texture;
-using graphics::Shader;
-
 class AudioAsset : public Asset {
 public:
     AudioAsset(const char* name, String filepath, uint32_t flags) :
@@ -43,7 +40,7 @@ public:
     }
 
     void do_load() override {
-        auto* audio = new audio::AudioResource();
+        auto* audio = new AudioResource();
 
         fullPath_ = manager_->base_path / path_;
         audio->load(fullPath_.c_str(), streaming);
@@ -52,8 +49,8 @@ public:
 
     void poll() override {
         auto buffer = res->buffer;
-        auto failed = !auph::isActive(buffer.id);
-        auto completed = auph::isBufferLoaded(buffer);
+        auto failed = !auph_is_active(buffer.id);
+        auto completed = auph_is_buffer_loaded(buffer);
         if (failed || completed) {
             state = AssetState::Ready;
         }
@@ -66,7 +63,7 @@ public:
         }
     }
 
-    Res<audio::AudioResource> res;
+    Res<AudioResource> res;
     String path_;
     String fullPath_;
     bool streaming = false;
@@ -270,7 +267,7 @@ public:
             if (!loader->loading) {
                 error = loader->status;
                 if (error == 0) {
-                    res.reset(new graphics::Texture{loader->image});
+                    res.reset(new Texture{loader->image});
                 }
                 state = AssetState::Ready;
                 ek_texture_loader_destroy(loader);
@@ -303,31 +300,36 @@ public:
 class StringsAsset : public Asset {
 public:
     StringsAsset(String name, Array<String> langs) :
-            name_{std::move(name)},
-            langs_{std::move(langs)} {
-        weight_ = (float) langs_.size();
+            name_{std::move(name)} {
+        for (auto& l: langs) {
+            loaders_.push_back({this, std::move(l)});
+        }
+        weight_ = (float) loaders_.size();
     }
 
     void do_load() override {
         loaded = 0;
-        for (int i = 0; i < langs_.size(); ++i) {
-            auto& lang = langs_[i];
-            auto langPath = (manager_->base_path / name_ / lang) + ".mo";
-            get_resource_content_async(
+        for (int i = 0; i < loaders_.size(); ++i) {
+            auto* loader = &loaders_[i];
+            auto langPath = (manager_->base_path / name_ / loader->lang) + ".mo";
+            ek_local_res_load(
                     langPath.c_str(),
-                    [this, idx = i](ek_local_res lr) {
-                        const char* lang = langs_[idx].c_str();
-                        if (ek_local_res_success(&lr)) {
-                            Localization::instance.load(lang, lr);
+                    [](ek_local_res* lr) {
+                        lang_loader* loader_ = (lang_loader*) lr->userdata;
+                        const char* lang = loader_->lang.c_str();
+                        StringsAsset* asset = loader_->asset;
+                        if (ek_local_res_success(lr)) {
+                            Localization::instance.load(lang, *lr);
                         } else {
                             EK_ERROR("Strings resource not found: %s", lang);
-                            error = 1;
+                            asset->error = 1;
                         }
-                        ++loaded;
-                        if (loaded >= langs_.size()) {
-                            state = AssetState::Ready;
+                        ++asset->loaded;
+                        if (asset->loaded >= asset->loaders_.size()) {
+                            asset->state = AssetState::Ready;
                         }
-                    }
+                    },
+                    loader
             );
         }
     }
@@ -336,9 +338,15 @@ public:
 
     }
 
+    struct lang_loader {
+        StringsAsset* asset;
+        String lang;
+    };
+
     String name_;
-    Array<String> langs_;
+    Array<lang_loader> loaders_;
     uint32_t loaded = 0;
+
 };
 
 class ModelAsset : public Asset {

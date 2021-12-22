@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Buffer.hpp"
+#include "Types.hpp"
 
-#include <cmath>
+#include <math.h>
 
 #ifdef AUPH_WAV
 
@@ -23,14 +23,14 @@
 #endif
 
 #if defined(__ANDROID__)
+
 #include <android/asset_manager.h>
+
 #endif
 
 #if defined(__APPLE__)
 #include <Foundation/Foundation.h>
 #endif
-
-namespace auph {
 
 /**
  * Small JS snippet to get FourCC code from 4-char string
@@ -39,31 +39,26 @@ namespace auph {
  * fourCC("OggS") === "0x4f676753"
  * ```
  */
-enum FourCC {
-    FourCC_OggS = 0x4f676753,
-    FourCC_RIFF = 0x52494646,
-    FourCC_WAVE = 0x57415645,
-    FourCC_ID3 = 0x49443300
+enum auph_four_cc {
+    AUPH_FOUR_CC_OGGS = 0x4f676753,
+    AUPH_FOUR_CC_RIFF = 0x52494646,
+    AUPH_FOUR_CC_WAVE = 0x57415645,
+    AUPH_FOUR_CC_ID3 = 0x49443300
 };
 
-BufferObj::~BufferObj() {
-    unload();
-}
+void auph_buffer_obj_unload(auph_buffer_obj* buf) {
+    free(buf->data.data.buffer);
+    free(buf->data.stream_data);
+    free(buf->source_buffer_data);
 
-void BufferObj::unload() {
-    free(data.data.buffer);
-    free(data.streamData);
-    free(sourceBufferData);
-
-    id = nextHandle(id);
-    state = 0;
-    data = {};
-    sourceBufferData = nullptr;
+    int id = auph_next_handle(buf->id);
+    memset(buf, 0, sizeof(auph_buffer_obj));
+    buf->id = id;
 }
 
 #if defined(__APPLE__)
 
-const char* getFilePathFromBundle(const char* filepath) {
+static const char* auph_get_file_path_from_bundle(const char* filepath) {
     NSString * pathToAsset = [NSString stringWithUTF8String: filepath];
     NSString * pathFromBundle = [[NSBundle mainBundle] pathForResource:pathToAsset ofType:nil];
     const char* filepathFromBundle = [pathFromBundle cStringUsingEncoding:NSASCIIStringEncoding];
@@ -72,7 +67,7 @@ const char* getFilePathFromBundle(const char* filepath) {
 
 #endif
 
-const char* getExtension(const char* filepath) {
+static const char* auph_get_extension(const char* filepath) {
     const char* lastDot = filepath;
     while (*filepath != '\0') {
         if (*filepath == '.') {
@@ -83,66 +78,66 @@ const char* getExtension(const char* filepath) {
     return lastDot;
 }
 
-bool loadToBuffer(BufferDataSource* dataSource, const char* filepath, int flags) {
+static bool auph_load_to_buffer(auph_buffer_data_source* dataSource, const char* filepath, int flags) {
 
-    const char* e = getExtension(filepath);
+    const char* e = auph_get_extension(filepath);
 #ifdef AUPH_MP3
     if (e[1] == 'm' && e[2] == 'p' && e[3] == '3') {
-        if (flags & Flag_Stream) {
-            return openFileStreamMp3(filepath, dataSource);
+        if (flags & AUPH_FLAG_STREAM) {
+            return auph_open_file_stream_mp3(filepath, dataSource);
         } else {
-            return loadFileMp3(filepath, dataSource);
+            return auph_load_file_mp3(filepath, dataSource);
         }
     }
 #endif // AUPH_MP3
 
 #ifdef AUPH_OGG
     if (e[1] == 'o' && e[2] == 'g' && e[3] == 'g') {
-        return loadFileOgg(filepath, dataSource, flags & Flag_Stream);
+        return auph_load_file_ogg(filepath, dataSource, flags & AUPH_FLAG_STREAM);
     }
 #endif // AUPH_OGG
 
 #ifdef AUPH_WAV
     if (e[1] == 'w' && e[2] == 'a' && e[3] == 'v') {
-        if (flags & Flag_Stream) {
-            return openFileStreamWav(filepath, dataSource);
+        if (flags & AUPH_FLAG_STREAM) {
+            return auph_open_file_stream_wav(filepath, dataSource);
         } else {
-            return loadFileWav(filepath, dataSource);
+            return auph_load_file_wav(filepath, dataSource);
         }
     }
 #endif // AUPH_WAV
     return false;
 }
 
-bool loadMemoryToBuffer(BufferDataSource* dataSource, const void* data, uint32_t size, int flags) {
+bool auph_load_memory_to_buffer(auph_buffer_data_source* dataSource, const void* data, uint32_t size, int flags) {
     if (size < 4) {
         return false;
     }
-    const auto* u8 = (const uint8_t*) data;
+    const uint8_t* u8 = (const uint8_t*) data;
     const uint32_t fourCC = (u8[0] << 24) | (u8[1] << 16) | (u8[2] << 8) | u8[3];
 
 #ifdef AUPH_OGG
-    if (fourCC == FourCC_OggS) {
-        return loadMemoryOgg(data, size, dataSource, !!(flags & Flag_Stream));
+    if (fourCC == AUPH_FOUR_CC_OGGS) {
+        return auph_load_memory_ogg(data, size, dataSource, !!(flags & AUPH_FLAG_STREAM));
     }
 #endif
 
 #ifdef AUPH_WAV
-    if (fourCC == FourCC_RIFF || fourCC == FourCC_WAVE) {
-        if (flags & Flag_Stream) {
-            return openMemoryStreamWav(data, size, dataSource);
+    if (fourCC == AUPH_FOUR_CC_RIFF || fourCC == AUPH_FOUR_CC_WAVE) {
+        if (flags & AUPH_FLAG_STREAM) {
+            return auph_open_memory_stream_wav(data, size, dataSource);
         } else {
-            return loadMemoryWav(data, size, dataSource);
+            return auph_load_memory_wav(data, size, dataSource);
         }
     }
 #endif
 
 #ifdef AUPH_MP3
-    if ((fourCC & 0xFFFFFF00) == FourCC_ID3 || (fourCC & 0xFFE00000) == 0xFFE00000 /* 11-bit sync */) {
-        if (flags & Flag_Stream) {
-            return openMemoryStreamMp3(data, size, dataSource);
+    if ((fourCC & 0xFFFFFF00) == AUPH_FOUR_CC_ID3 || (fourCC & 0xFFE00000) == 0xFFE00000 /* 11-bit sync */) {
+        if (flags & AUPH_FLAG_STREAM) {
+            return auph_open_memory_stream_mp3(data, size, dataSource);
         } else {
-            return loadMemoryMp3(data, size, dataSource);
+            return auph_load_memory_mp3(data, size, dataSource);
         }
     }
 #endif
@@ -150,14 +145,14 @@ bool loadMemoryToBuffer(BufferDataSource* dataSource, const void* data, uint32_t
     return false;
 }
 
-bool BufferObj::load(const char* filepath, int flags) {
+bool auph_buffer_obj_load(auph_buffer_obj* buf, const char* filepath, int flags) {
 #ifdef __ANDROID__
-    if(_androidAssetManager) {
-        AAsset *asset = AAssetManager_open(_androidAssetManager, filepath, AASSET_MODE_BUFFER);
+    if (auph_android.assets) {
+        AAsset* asset = AAssetManager_open(auph_android.assets, filepath, AASSET_MODE_BUFFER);
         if (asset) {
-            auto dataBuffer = static_cast<const uint8_t *>(AAsset_getBuffer(asset));
-            auto size = AAsset_getLength(asset);
-            auto result = loadFromMemory(dataBuffer, size, flags | Flag_Copy);
+            const uint8_t* dataBuffer = (const uint8_t*) AAsset_getBuffer(asset);
+            off_t size = AAsset_getLength(asset);
+            bool result = auph_buffer_obj_load_data(buf, dataBuffer, size, flags | AUPH_FLAG_COPY);
             AAsset_close(asset);
             return result;
         }
@@ -165,39 +160,37 @@ bool BufferObj::load(const char* filepath, int flags) {
 #endif
 
 #ifdef __APPLE__
-    filepath = getFilePathFromBundle(filepath);
+    filepath = auph_get_file_path_from_bundle(filepath);
 #endif
 
-    const bool result = loadToBuffer(&data, filepath, flags);
+    const bool result = auph_load_to_buffer(&buf->data, filepath, flags);
     if (result) {
-        state = Flag_Active | Flag_Loaded;
-        if (flags & Flag_Stream) {
-            state |= Flag_Stream;
+        buf->state = AUPH_FLAG_ACTIVE | AUPH_FLAG_LOADED;
+        if (flags & AUPH_FLAG_STREAM) {
+            buf->state |= AUPH_FLAG_STREAM;
         }
     }
     return result;
 }
 
-bool BufferObj::loadFromMemory(const void* pData, uint32_t size, int flags) {
+bool auph_buffer_obj_load_data(auph_buffer_obj* buf, const void* pData, uint32_t size, int flags) {
     // check if we need to preserve loaded data, for example we need to read encoded data continuously while playing
-    const int flagsToCopy = Flag_Stream | Flag_Copy;
+    const int flagsToCopy = AUPH_FLAG_STREAM | AUPH_FLAG_COPY;
     if ((flags & flagsToCopy) == flagsToCopy) {
-        sourceBufferData = malloc(size);
-        memcpy(sourceBufferData, pData, size);
-        pData = sourceBufferData;
+        buf->source_buffer_data = malloc(size);
+        memcpy(buf->source_buffer_data, pData, size);
+        pData = buf->source_buffer_data;
     }
 
-    const bool result = loadMemoryToBuffer(&data, pData, size, flags);
+    const bool result = auph_load_memory_to_buffer(&buf->data, pData, size, flags);
     if (result) {
-        state = Flag_Active | Flag_Loaded;
-        if (flags & Flag_Stream) {
-            state |= Flag_Stream;
+        buf->state = AUPH_FLAG_ACTIVE | AUPH_FLAG_LOADED;
+        if (flags & AUPH_FLAG_STREAM) {
+            buf->state |= AUPH_FLAG_STREAM;
         }
     } else {
-        free(sourceBufferData);
-        sourceBufferData = nullptr;
+        free(buf->source_buffer_data);
+        buf->source_buffer_data = NULL;
     }
     return result;
-}
-
 }

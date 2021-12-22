@@ -5,7 +5,6 @@
 #include <ek/math/Rect.hpp>
 
 #include <ek/serialize/serialize.hpp>
-#include <ek/serialize/stl/String.hpp>
 
 namespace ek {
 
@@ -30,7 +29,9 @@ public:
     int32_t ascender;
     int32_t descender;
     Array <BMFontGlyph> glyphs;
-    Hash <uint32_t> codepoints;
+
+    // (codepoint: u32 | glyph_index: u32)
+    Array<uint32_t> codepoints;
 
     template<typename S>
     void serialize(IO <S>& io) {

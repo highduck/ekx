@@ -206,13 +206,15 @@ export class Project {
     }
 
     generateNativeBuildInfo() {
-        const headerFile = "src/config/BuildInfo.h";
+        const headerFile = "src/config/build_info.h";
         const content = `
-#pragma once
-namespace AppVersion {
-const char* Name = "${this.version.shortName()}";
-const char* Code = "${this.version.buildNumber()}";
-}
+#ifndef APP_BUILD_INFO_H
+#define APP_BUILD_INFO_H
+
+#define APP_VERSION_NAME "${this.version.shortName()}" 
+#define APP_VERSION_CODE "${this.version.buildNumber()}" 
+
+#endif // APP_BUILD_INFO_H
 `;
         const filepath = path.join(this.projectPath, headerFile);
         makeDirs(path.dirname(filepath));

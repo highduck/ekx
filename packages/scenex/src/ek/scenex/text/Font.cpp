@@ -27,7 +27,7 @@ void Font::draw(const char* text,
     draw2d::state.save_color()
             .scaleColor(color);
 
-    const graphics::Texture* prevTexture = nullptr;
+    const Texture* prevTexture = nullptr;
     Glyph gdata;
     for(; *text; ++text) {
         char code = *text;

@@ -7,11 +7,9 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 
-using namespace ek::graphics;
-
 namespace ek::draw2d {
 
-StaticStorage<Context> context{};
+StaticStorage<Context> context;
 Context& state = context.ref();
 
 sg_layout_desc Vertex2D::layout() {
@@ -101,6 +99,7 @@ sg_pipeline Context::getPipeline(sg_shader shader, bool useRenderTarget, bool de
     if (pip.id == SG_INVALID_ID) {
         pip = createPipeline(shader, useRenderTarget, depthStencilPass);
         pipelines.set(key, pip);
+        log_debug("pipelines: %d", pipelines.size());
     }
     return pip;
 }
@@ -111,95 +110,10 @@ float getTriangleArea(const Vertex2D* vertices, const uint16_t* indices, int cou
         const Vec2f a = vertices[indices[i++]].position;
         const Vec2f b = vertices[indices[i++]].position;
         const Vec2f c = vertices[indices[i++]].position;
-        sum += (a.x * b.y + b.x * c.y + c.x * a.y - a.x * c.y - b.x * a.y - c.x * b.y) / 2.0f;
+        sum += a.x * b.y + b.x * c.y + c.x * a.y - a.x * c.y - b.x * a.y - c.x * b.y;
     }
-    return sum;
+    return sum / 2.0f;
 }
-
-class BufferChain {
-public:
-    BufferChain(sg_buffer_type type, uint32_t elementsMaxCount, uint32_t elementMaxSize) :
-            type_{type},
-            caps{0x10 * elementMaxSize,
-                 0x100 * elementMaxSize,
-                 0x400 * elementMaxSize,
-                 elementsMaxCount * elementMaxSize} {
-    }
-
-    uint32_t calcSizeBucket(uint32_t requiredSize) {
-        if (requiredSize < caps[0]) {
-            return 0;
-        } else if (requiredSize < caps[1]) {
-            return 1;
-        } else if (requiredSize < caps[2]) {
-            return 2;
-        }
-        return 3;
-    }
-
-    Buffer* nextBuffer(uint32_t requiredSize) {
-        Buffer* buf;
-        const auto index = calcSizeBucket(requiredSize);
-        auto& v = buffers_[index];
-        auto position = pos[index];
-        if (position >= v.size()) {
-            buf = new Buffer(type_, SG_USAGE_STREAM, caps[index]);
-            v.push_back(buf);
-        } else {
-            buf = v[position];
-        }
-        ++position;
-        pos[index] = position;
-        return buf;
-    }
-
-    [[nodiscard]]
-    uint32_t getUsedMemory() const {
-        uint32_t mem = 0u;
-        for (auto& v: buffers_) {
-            for (const auto* buffer: v) {
-                mem += buffer->getSize();
-            }
-        }
-        return mem;
-    }
-
-    void nextFrame() {
-        resetPositions();
-    }
-
-    void resetPositions() {
-        pos[0] = 0;
-        pos[1] = 0;
-        pos[2] = 0;
-        pos[3] = 0;
-    }
-
-    void disposeBuffers() {
-        for (auto& v: buffers_) {
-            for (auto* b: v) {
-                delete b;
-            }
-            v.resize(0);
-        }
-    }
-
-    void reset() {
-        disposeBuffers();
-        resetPositions();
-    }
-
-    ~BufferChain() {
-        disposeBuffers();
-    }
-
-private:
-    sg_buffer_type type_;
-    Array<Buffer*> buffers_[4]{};
-    uint16_t pos[4] = {0, 0, 0, 0};
-    // each bucket buffer size
-    uint32_t caps[4];
-};
 
 void Context::drawUserBatch(sg_pipeline pip, uint32_t numTextures) {
     if (indicesCount_ == 0) {
@@ -208,16 +122,16 @@ void Context::drawUserBatch(sg_pipeline pip, uint32_t numTextures) {
 
     const uint32_t vertexDataSize = verticesCount_ * static_cast<uint32_t>(sizeof(Vertex2D));
     const uint32_t indexDataSize = indicesCount_ << 1u;
-    auto* vb = vertexBuffers_->nextBuffer(vertexDataSize);
-    auto* ib = indexBuffers_->nextBuffer(indexDataSize);
-    vb->update(vertexData_, vertexDataSize);
-    ib->update(indexData_, indexDataSize);
+    sg_buffer vb = vertexBuffers_.nextBuffer(vertexDataSize);
+    sg_buffer ib = indexBuffers_.nextBuffer(indexDataSize);
+    sg_update_buffer(vb, (sg_range) {vertexData_, vertexDataSize});
+    sg_update_buffer(ib, (sg_range) {indexData_, indexDataSize});
 
     // reset current pipeline
     selectedPipeline = pip;
 
-    bind.vertex_buffers[0] = vb->buffer;
-    bind.index_buffer = ib->buffer;
+    bind.vertex_buffers[0] = vb;
+    bind.index_buffer = ib;
     bind.fs_images[0].id = numTextures == 1 ? curr.texture.id : SG_INVALID_ID;
     sg_apply_bindings(bind);
 
@@ -253,10 +167,10 @@ void Context::drawBatch() {
 
     const uint32_t vertexDataSize = verticesCount_ * static_cast<uint32_t>(sizeof(Vertex2D));
     const uint32_t indexDataSize = indicesCount_ << 1u;
-    auto* vb = vertexBuffers_->nextBuffer(vertexDataSize);
-    auto* ib = indexBuffers_->nextBuffer(indexDataSize);
-    vb->update(vertexData_, vertexDataSize);
-    ib->update(indexData_, indexDataSize);
+    sg_buffer vb = vertexBuffers_.nextBuffer(vertexDataSize);
+    sg_buffer ib = indexBuffers_.nextBuffer(indexDataSize);
+    sg_update_buffer(vb, {vertexData_, vertexDataSize});
+    sg_update_buffer(ib, {indexData_, indexDataSize});
 
     const auto* fbColor = renderTarget != nullptr ? renderTarget : framebufferColor;
     const auto* fbDepthStencil = renderDepthStencil != nullptr ? renderDepthStencil : framebufferDepthStencil;
@@ -267,8 +181,8 @@ void Context::drawBatch() {
         sg_apply_pipeline(pip);
         sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
     }
-    bind.vertex_buffers[0] = vb->buffer;
-    bind.index_buffer = ib->buffer;
+    bind.vertex_buffers[0] = vb;
+    bind.index_buffer = ib;
     bind.fs_images[0].id = curr.shaderTexturesCount == 1 ? curr.texture.id : SG_INVALID_ID;
     sg_apply_bindings(bind);
 
@@ -326,34 +240,26 @@ void Context::allocTriangles(uint32_t vertex_count, uint32_t index_count) {
     verticesCount_ += vertex_count;
 }
 
-uint32_t Context::getUsedMemory() const {
-    return indexBuffers_->getUsedMemory() + vertexBuffers_->getUsedMemory();
-}
-
-
-Context::Context() {
-    vertexBuffers_ = new BufferChain(SG_BUFFERTYPE_VERTEXBUFFER, MaxVertex + 1, (uint32_t) sizeof(Vertex2D));
-    indexBuffers_ = new BufferChain(SG_BUFFERTYPE_INDEXBUFFER, MaxIndex + 1, (uint32_t) sizeof(uint16_t));
-
+Context::Context() :
+        vertexBuffers_{SG_BUFFERTYPE_VERTEXBUFFER, MaxVertex + 1, (uint32_t) sizeof(Vertex2D)},
+        indexBuffers_{SG_BUFFERTYPE_INDEXBUFFER, MaxIndex + 1, (uint32_t) sizeof(uint16_t)} {
     EK_DEBUG("draw2d: allocate memory buffers");
-    vertexData_ = new Vertex2D[MaxVertex + 1];
-    indexData_ = new uint16_t[MaxIndex + 1];
+    size_t vertex_mem_size = sizeof(Vertex2D) * (MaxVertex + 1);
+    size_t index_mem_size = sizeof(uint16_t) * (MaxIndex + 1);
+    void* mem = malloc(vertex_mem_size + index_mem_size);
+    vertexData_ = (Vertex2D*) mem;
+    indexData_ = (uint16_t*) ((char*) mem + vertex_mem_size);
 
     vertexDataNext_ = vertexData_;
     indexDataNext_ = indexData_;
 }
 
 Context::~Context() {
-    Res<graphics::Texture>{"empty"}.reset(nullptr);
+    Res<Texture>{"empty"}.reset(nullptr);
     Res<Shader>{"draw2d"}.reset(nullptr);
     Res<Shader>{"draw2d_alpha"}.reset(nullptr);
     Res<Shader>{"draw2d_color"}.reset(nullptr);
-
-    delete vertexBuffers_;
-    delete[] vertexData_;
-
-    delete indexBuffers_;
-    delete[] indexData_;
+    free(vertexData_);
 }
 
 void Context::finish() {
@@ -540,13 +446,13 @@ Context& Context::setEmptyTexture() {
     return *this;
 }
 
-Context& Context::setTexture(const graphics::Texture* texture_) {
+Context& Context::setTexture(const Texture* texture_) {
     texture = texture_;
     checkFlags |= Check_Texture;
     return *this;
 }
 
-Context& Context::setTextureRegion(const graphics::Texture* texture_, const Rect2f& region) {
+Context& Context::setTextureRegion(const Texture* texture_, const Rect2f& region) {
     texture = texture_ != nullptr ? texture_ : emptyTexture;
     checkFlags |= Check_Texture;
     uv = region;
@@ -562,13 +468,13 @@ Context& Context::restoreTexture() {
 
 Context& Context::pushProgram(const char* name) {
     programStack.push_back(program);
-    Res<graphics::Shader> pr{name};
+    Res<Shader> pr{name};
     program = pr.empty() ? defaultShader : pr.get();
     checkFlags |= Check_Shader;
     return *this;
 }
 
-Context& Context::setProgram(const graphics::Shader* program_) {
+Context& Context::setProgram(const Shader* program_) {
     program = program_ ? program_ : defaultShader;
     checkFlags |= Check_Shader;
     return *this;
@@ -605,8 +511,7 @@ void beginNewFrame() {
 }
 
 /*** drawings ***/
-void begin(Rect2f viewport, const Matrix3x2f& view, const graphics::Texture* renderTarget,
-           const graphics::Texture* depthStencilTarget) {
+void begin(Rect2f viewport, const Matrix3x2f& view, const Texture* renderTarget, const Texture* depthStencilTarget) {
     EK_ASSERT(!state.active);
     state.texture = state.emptyTexture;
     state.program = state.defaultShader;
@@ -885,7 +790,7 @@ void strokeCircle(const CircleF& circle, abgr32_t color, float lineWidth, int se
     const float y = circle.center.y;
     const float r = circle.radius;
 
-    const float da = Math::fPI2 / (float)segments;
+    const float da = Math::fPI2 / (float) segments;
     float a = 0.0f;
     Vec2f pen{x, y - r};
     while (a < Math::fPI2) {
@@ -898,10 +803,8 @@ void strokeCircle(const CircleF& circle, abgr32_t color, float lineWidth, int se
 }
 
 void endFrame() {
-    state.vertexBuffers_->nextFrame();
-    state.indexBuffers_->nextFrame();
-
-
+    state.vertexBuffers_.nextFrame();
+    state.indexBuffers_.nextFrame();
 }
 
 void initialize() {

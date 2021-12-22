@@ -135,7 +135,8 @@ inline S& findScript(ecs::EntityApi e) {
             return static_cast<S&>(*script);
         }
     }
-    abort();
+    // unreachable
+    EK_ASSERT(false);
 }
 
 void updateScripts();

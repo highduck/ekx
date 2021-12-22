@@ -30,8 +30,11 @@ void BitmapFont::load(BMFont& data) {
     descender = float(data.descender) / unitsPerEM;
     lineHeightMultiplier = float(data.lineHeight) / unitsPerEM;
     glyphs = std::move(data.glyphs);
-    for (const auto& e : data.codepoints) {
-        map.set(e.key, glyphs.begin() + e.value);
+
+    for (int i = 0; i < data.codepoints.size();) {
+        const uint32_t codepoint = data.codepoints[i++];
+        const uint32_t glyph_id = data.codepoints[i++];
+        map.set(codepoint, glyphs.begin() + glyph_id);
     }
 
     ready_ = loaded_ = true;
@@ -42,7 +45,7 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     if (g) {
         outGlyph.advanceWidth = static_cast<float>(g->advanceWidth) / unitsPerEM;
         outGlyph.lineHeight = lineHeightMultiplier;
-        Res<Sprite> spr{g->sprite};
+        Res<Sprite> spr{g->sprite.c_str()};
         if (spr) {
             outGlyph.rect = spr->rect / baseFontSize;
             outGlyph.texCoord = spr->tex;

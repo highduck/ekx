@@ -44,7 +44,7 @@ typedef enum ek_mouse_cursor {
     EK_MOUSE_CURSOR_ARROW,
     EK_MOUSE_CURSOR_BUTTON,
     EK_MOUSE_CURSOR_HELP,
-    EK_MOUSE_CURSOR_MAX
+    _EK_MOUSE_CURSOR_NUM
 } ek_mouse_cursor;
 
 typedef enum ek_mouse_button {
@@ -83,7 +83,7 @@ typedef enum ek_key_code {
     EK_KEYCODE_W,
     EK_KEYCODE_S,
     EK_KEYCODE_D,
-    EK_KEYCODE_MAX_COUNT
+    _EK_KEYCODE_NUM
 } ek_key_code;
 
 typedef enum ek_key_mod {

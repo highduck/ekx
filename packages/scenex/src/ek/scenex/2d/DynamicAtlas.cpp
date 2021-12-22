@@ -51,7 +51,7 @@ public:
                 .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
                 .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
         };
-        texture = new graphics::Texture(desc);
+        texture = new Texture(desc);
     }
 
     ~Page() {
@@ -124,7 +124,7 @@ public:
         }
     }
 
-    graphics::Texture* texture;
+    Texture* texture;
     int width;
     int height;
     float invWidth;
@@ -183,7 +183,7 @@ DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const uint8_t*
     return sprite;
 }
 
-const graphics::Texture* DynamicAtlas::getPageTexture(int index) const {
+const Texture* DynamicAtlas::getPageTexture(int index) const {
     EK_ASSERT(index < pages_.size() && index >= 0);
     return pages_[index]->texture;
 }

@@ -12,7 +12,7 @@ struct random_estimator_t {
     uint64_t* bitset;
     uint64_t* bitset_occupy;
     uint32_t* pixels;
-    graphics::Texture* image;
+    Texture* image;
     int bitset_size;
     int image_size;
 };
@@ -36,7 +36,7 @@ void estimator_init(random_estimator_t* estimator) {
     desc.height = estimator->image_size;
     desc.usage = SG_USAGE_DYNAMIC;
     desc.pixel_format = SG_PIXELFORMAT_RGBA8;
-    estimator->image = new graphics::Texture(desc);
+    estimator->image = new Texture(desc);
 }
 
 void estimator_set(random_estimator_t* estimator, uint32_t x, uint32_t y) {

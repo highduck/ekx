@@ -47,7 +47,7 @@ typedef double ek_f64;
 #define EK_PRAGMA(x) _Pragma(#x)
 
 #define EK_DISABLE_WARNING_BEGIN() EK_PRAGMA(clang diagnostic push)
-#define EK_DISABLE_WARNING(option) EK_PRAGMA(clang diagnostic ignored #option)
+#define EK_DISABLE_WARNING(option) EK_PRAGMA(clang diagnostic ignored option)
 #define EK_DISABLE_WARNING_END() EK_PRAGMA(clang diagnostic pop)
 
 #endif // EK_PRE_H

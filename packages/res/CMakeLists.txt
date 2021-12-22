@@ -7,7 +7,6 @@ add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME} PUBLIC
         src/local_res.c
-        src/local_res_web.cpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include)
