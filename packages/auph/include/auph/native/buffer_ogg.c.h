@@ -1,5 +1,3 @@
-#pragma once
-
 #include <stb/stb_vorbis.c>
 
 typedef struct auph_stream_ogg {

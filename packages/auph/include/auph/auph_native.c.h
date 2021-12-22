@@ -1,8 +1,12 @@
-#pragma once
+#ifndef AUPH_NATIVE_IMPL
+#define AUPH_NATIVE_IMPL
+#else
+#error You should implement auph once
+#endif
 
-#include "device/AudioDevice_impl.hpp"
-#include "engine/Mixer.hpp"
-#include "auph_api.h"
+#include "native/native.h"
+#include "native/device.c.h"
+#include "native/mixer.c.h"
 
 enum {
     AUPH_BUFFERS_MAX_COUNT = 128,
@@ -71,8 +75,9 @@ auph_voice_obj* auph_get_voice_obj(int name) {
 }
 
 auph_voice auph_get_next_voice(void) {
+    const auph_voice_obj* objs = auph_ctx.voices;
     for (int i = 1; i < AUPH_VOICES_MAX_COUNT; ++i) {
-        const auph_voice_obj* obj = auph_ctx.voices + i;
+        const auph_voice_obj* obj = objs + i;
         if (!obj->state) {
             return (auph_voice) {obj->id};
         }
@@ -81,8 +86,9 @@ auph_voice auph_get_next_voice(void) {
 }
 
 auph_buffer auph_get_next_buffer(void) {
+    const auph_buffer_obj* objs = auph_ctx.buffers;
     for (int i = 1; i < AUPH_BUFFERS_MAX_COUNT; ++i) {
-        const auph_buffer_obj* obj = auph_ctx.buffers + i;
+        const auph_buffer_obj* obj = objs + i;
         // data slot is free
         if (!obj->state) {
             return (auph_buffer) {obj->id};
@@ -103,19 +109,21 @@ auph_bus_obj* auph_get_bus_obj(int name) {
 }
 
 void auph_init(void) {
-    auph_ctx.device.onPlayback = auph_mixer_playback;
-    auph_ctx.device.userData = &auph_ctx;
-    auph_ctx.state = AUPH_FLAG_ACTIVE;
+    auph_context* ctx = &auph_ctx;
+    ctx->state = AUPH_FLAG_ACTIVE;
+    auph_audio_device_init(&ctx->device);
+    ctx->device.onPlayback = auph_mixer_playback;
+    ctx->device.userData = ctx;
 
-    memset(auph_ctx.scratch, 0, sizeof auph_ctx.scratch);
+    memset(ctx->scratch, 0, sizeof ctx->scratch);
     for (int i = 0; i < AUPH_BUFFERS_MAX_COUNT; ++i) {
-        auph_buffer_obj_init(auph_ctx.buffers + i, i | AUPH_TYPE_BUFFER);
+        auph_buffer_obj_init(ctx->buffers + i, i | AUPH_TYPE_BUFFER);
     }
     for (int i = 0; i < AUPH_VOICES_MAX_COUNT; ++i) {
-        auph_voice_obj_init(auph_ctx.voices + i, i | AUPH_TYPE_VOICE);
+        auph_voice_obj_init(ctx->voices + i, i | AUPH_TYPE_VOICE);
     }
     for (int i = 0; i < 4; ++i) {
-        auph_bus_obj_init(auph_ctx.bus + i, i | AUPH_TYPE_BUS);
+        auph_bus_obj_init(ctx->bus + i, i | AUPH_TYPE_BUS);
     }
 }
 
@@ -129,13 +137,14 @@ void auph_set(int name, int param, int value) {
         return;
     }
 
+    auph_context* ctx = &auph_ctx;
     if (name == AUPH_MIXER && (param & AUPH_PARAM_FLAGS) && (param & AUPH_FLAG_RUNNING)) {
-        if (!value && (auph_ctx.state & AUPH_FLAG_RUNNING)) {
-            auph_ctx.state ^= AUPH_FLAG_RUNNING;
-            auph_audio_device_stop(&auph_ctx.device);
-        } else if (value && !(auph_ctx.state & AUPH_FLAG_RUNNING)) {
-            auph_ctx.state ^= AUPH_FLAG_RUNNING;
-            auph_audio_device_start(&auph_ctx.device);
+        if (!value && (ctx->state & AUPH_FLAG_RUNNING)) {
+            ctx->state ^= AUPH_FLAG_RUNNING;
+            auph_audio_device_stop(&ctx->device);
+        } else if (value && !(ctx->state & AUPH_FLAG_RUNNING)) {
+            ctx->state ^= AUPH_FLAG_RUNNING;
+            auph_audio_device_start(&ctx->device);
         }
     }
 
@@ -203,9 +212,10 @@ int auph_get(int name, int param) {
     if (name == 0) {
         return 0;
     }
+    auph_context* ctx = &auph_ctx;
     if (name == AUPH_MIXER) {
         if (param == AUPH_PARAM_STATE) {
-            return auph_ctx.state;
+            return ctx->state;
         } else if (param == AUPH_PARAM_SAMPLE_RATE) {
             // TODO:
             return 44100;
@@ -218,19 +228,19 @@ int auph_get(int name, int param) {
         int count = 0;
         if (type == AUPH_TYPE_VOICE) {
             for (int i = 1; i < AUPH_VOICES_MAX_COUNT; ++i) {
-                if ((auph_ctx.voices[i].state & stateMask) == stateMask) {
+                if ((ctx->voices[i].state & stateMask) == stateMask) {
                     ++count;
                 }
             }
         } else if (type == AUPH_TYPE_BUS) {
             for (int i = 0; i < 4; ++i) {
-                if ((auph_ctx.bus[i].state & stateMask) == stateMask) {
+                if ((ctx->bus[i].state & stateMask) == stateMask) {
                     ++count;
                 }
             }
         } else if (type == AUPH_TYPE_BUFFER) {
             for (int i = 1; i < AUPH_BUFFERS_MAX_COUNT; ++i) {
-                if ((auph_ctx.buffers[i].state & stateMask) == stateMask) {
+                if ((ctx->buffers[i].state & stateMask) == stateMask) {
                     ++count;
                 }
             }
@@ -303,7 +313,7 @@ auph_buffer auph_load(const char* filepath, int flags) {
             return buff;
         }
     }
-    return (auph_buffer){0};
+    return (auph_buffer) {0};
 }
 
 auph_buffer auph_load_data(const void* data, int size, int flags) {
@@ -363,8 +373,9 @@ void auph_stop(int name) {
         const auph_buffer_obj* bufferObj = auph_get_buffer_obj(name);
         if (bufferObj) {
             const auph_buffer_data_source* pDataSource = &bufferObj->data;
+            auph_voice_obj* voices = auph_ctx.voices;
             for (uint32_t i = 1; i < AUPH_VOICES_MAX_COUNT; ++i) {
-                auph_voice_obj* voiceObj = auph_ctx.voices + i;
+                auph_voice_obj* voiceObj = voices + i;
                 if (voiceObj->data == pDataSource) {
                     auph_voice_obj_stop(voiceObj);
                 }

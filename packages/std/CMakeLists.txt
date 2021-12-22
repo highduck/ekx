@@ -46,6 +46,20 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC sokol
         )
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
+    target_link_libraries(${PROJECT_NAME}
+            PUBLIC log
+            )
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+else ()
+    error("Platform: UNKNOWN")
+endif ()
+
+
 #if (EKX_BUILD_TESTS)
     project(std-tests)
 

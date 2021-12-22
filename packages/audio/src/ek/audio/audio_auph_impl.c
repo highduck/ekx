@@ -3,15 +3,16 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 
-#if 1
+#if 0
 // for refactoring enable other formats
 #define AUPH_WAV
 #define AUPH_OGG
+#define AUPH_FORCE_NATIVE_NULL_DEVICE
 #endif
 
 #define AUPH_MP3
 
-#include <auph/auph_impl.hpp>
+#include <auph/auph.c.h>
 
 #if defined(__ANDROID__)
 

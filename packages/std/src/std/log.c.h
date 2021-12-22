@@ -1,6 +1,9 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 #include <ek/print.h>
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
 
 enum {
     LOG_CALLBACKS_MAX = 4
@@ -63,20 +66,20 @@ static void log__default(const log_msg_t msg) {
 #include <android/log.h>
 
 static void log__default(log_msg_t msg) {
-  // android
-  static const int priorities[] = {
-          ANDROID_LOG_VERBOSE,
-          ANDROID_LOG_DEBUG,
-          ANDROID_LOG_INFO,
-          ANDROID_LOG_WARN,
-          ANDROID_LOG_ERROR,
-          ANDROID_LOG_ERROR
-  };
-  const int priority = priorities[msg.level];
+    // android
+    static const int priorities[] = {
+            ANDROID_LOG_VERBOSE,
+            ANDROID_LOG_DEBUG,
+            ANDROID_LOG_INFO,
+            ANDROID_LOG_WARN,
+            ANDROID_LOG_ERROR,
+            ANDROID_LOG_ERROR
+    };
+    const int priority = priorities[msg.level];
 
     const char* tag = "ekx";
 #ifndef NDEBUG
-    __android_log_print(priority, tag, "@%02hhX: %s", (uint8_t)(msg.frame & 0xFF), msg.text);
+    __android_log_print(priority, tag, "@%02hhX: %s", (uint8_t) (msg.frame & 0xFF), msg.text);
 #else
     // for release reduce allocations for printing
     __android_log_write(priority, tag, msg.text);

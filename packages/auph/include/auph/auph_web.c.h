@@ -1,4 +1,10 @@
-#include "auph_api.h"
+#ifndef AUPH_WEB_IMPL
+#define AUPH_WEB_IMPL
+#else
+#error You should implement auph once
+#endif
+
+#include "auph.h"
 #include <emscripten.h>
 
 void auph_init(void) {

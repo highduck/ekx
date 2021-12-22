@@ -1,7 +1,10 @@
-#pragma once
+#ifndef AUPH_NATIVE_MIXER_IMPL
+#define AUPH_NATIVE_MIXER_IMPL
+#else
+#error You should implement auph once
+#endif
 
-#include "Types.hpp"
-#include "../device/AudioDevice.hpp"
+#include "native.h"
 
 //template< bool Interpolate, unsigned Channels, typename S, unsigned Divisor>
 //inline auph_mix_sample* auph_mix_samples_T(auph_mix_sample* mix,

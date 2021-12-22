@@ -1,5 +1,3 @@
-#pragma once
-
 #define DR_MP3_IMPLEMENTATION
 
 #include <dr/dr_mp3.h>

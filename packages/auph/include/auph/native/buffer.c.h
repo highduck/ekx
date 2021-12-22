@@ -1,24 +1,28 @@
-#pragma once
+#ifndef AUPH_NATIVE_BUFFER_IMPL
+#define AUPH_NATIVE_BUFFER_IMPL
+#else
+#error You should implement auph once
+#endif
 
-#include "Types.hpp"
+#include "native.h"
 
 #include <math.h>
 
 #ifdef AUPH_WAV
 
-#include "BufferWav.hpp"
+#include "buffer_wav.c.h"
 
 #endif
 
 #ifdef AUPH_MP3
 
-#include "BufferMp3.hpp"
+#include "buffer_mp3.c.h"
 
 #endif
 
 #ifdef AUPH_OGG
 
-#include "BufferOgg.hpp"
+#include "buffer_ogg.c.h"
 
 #endif
 
@@ -146,7 +150,7 @@ bool auph_load_memory_to_buffer(auph_buffer_data_source* dataSource, const void*
 }
 
 bool auph_buffer_obj_load(auph_buffer_obj* buf, const char* filepath, int flags) {
-#ifdef __ANDROID__
+#if defined(__ANDROID__)
     if (auph_android.assets) {
         AAsset* asset = AAssetManager_open(auph_android.assets, filepath, AASSET_MODE_BUFFER);
         if (asset) {

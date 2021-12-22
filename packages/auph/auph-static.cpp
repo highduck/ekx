@@ -1,1 +1,1 @@
-#include <auph/auph_impl.hpp>
+#include <auph/auph.c.h>

@@ -1,11 +1,15 @@
-#pragma once
+#ifndef AUPH_NATIVE_DEVICE_NULL_IMPL
+#define AUPH_NATIVE_DEVICE_NULL_IMPL
+#else
+#error You should implement auph once
+#endif
 
-#include "AudioDevice.hpp"
+#include "native.h"
 
 struct auph_audio_device {
     auph_audio_stream_info playbackStreamInfo;
-    auph_audio_device_callback onPlayback = nullptr;
-    void* userData = nullptr;
+    auph_audio_device_callback onPlayback;
+    void* userData;
 };
 
 int auph_vibrate(int millis) {

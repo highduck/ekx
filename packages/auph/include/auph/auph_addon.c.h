@@ -1,15 +1,10 @@
-#pragma once
-
-#if defined(__EMSCRIPTEN__)
-
-#include "auph_web.c.h"
-
+#ifndef AUPH_ADDON_IMPL
+#define AUPH_ADDON_IMPL
 #else
-
-#include "auph_native.hpp"
-#include "engine/BufferImpl.hpp"
-
+#error You should implement auph once
 #endif
+
+#include <auph/auph.h>
 
 static int F2U(float x) {
     return (int) (x * AUPH_UNIT);
