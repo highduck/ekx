@@ -126,21 +126,29 @@ export async function export_ios(ctx: Project): Promise<void> {
         }
 
         const xcode_projectPythonPostScript = collectStrings(ctx, "xcode_projectPythonPostScript", iosPlatforms, false);
-        fs.writeFileSync("ek-ios-build.json", JSON.stringify({
-            assets: collectStrings(ctx, "assets", iosPlatforms, true).concat([embeddedAssetsDir]),
+        const declaration:any = {modules:[]};
+        for(const module of ctx.modules) {
+            declaration.modules.push({
+                name: module.name ?? (module.path ? path.basename(module.path) : "global"),
 
-            cpp: collectStrings(ctx, "cpp", iosPlatforms, true),
-            cpp_include: collectStrings(ctx, "cpp_include", iosPlatforms, true),
-            cpp_lib: collectStrings(ctx, "cpp_lib", iosPlatforms, false),
-            cpp_define: collectStrings(ctx, "cpp_define", iosPlatforms, false),
-            cpp_flags: collectCppFlags(ctx, iosPlatforms),
+                assets: collectStrings(module, "assets", iosPlatforms, true),
 
-            xcode_framework: collectStrings(ctx, "xcode_framework", iosPlatforms, false),
-            xcode_capability: collectStrings(ctx, "xcode_capability", iosPlatforms, false),
-            xcode_plist: collectObjects(ctx, "xcode_plist", iosPlatforms),
-            xcode_pod: collectStrings(ctx, "xcode_pod", iosPlatforms, false),
-            xcode_file: collectStrings(ctx, "xcode_file", iosPlatforms, false)
-        }));
+                cpp: collectStrings(module, "cpp", iosPlatforms, true),
+                cpp_include: collectStrings(module, "cpp_include", iosPlatforms, true),
+                cpp_lib: collectStrings(module, "cpp_lib", iosPlatforms, false),
+                cpp_define: collectStrings(module, "cpp_define", iosPlatforms, false),
+                cpp_flags: collectCppFlags(module, iosPlatforms),
+
+                xcode_framework: collectStrings(module, "xcode_framework", iosPlatforms, false),
+                xcode_capability: collectStrings(module, "xcode_capability", iosPlatforms, false),
+                xcode_plist: collectObjects(module, "xcode_plist", iosPlatforms),
+                xcode_pod: collectStrings(module, "xcode_pod", iosPlatforms, false),
+                xcode_file: collectStrings(module, "xcode_file", iosPlatforms, false)
+            });
+        }
+        declaration.modules.push({name:"embedded", assets: [embeddedAssetsDir]});
+
+        fs.writeFileSync("ek-ios-build.json", JSON.stringify(declaration));
 
         /// PRE MOD PROJECT
         //xcode_patch(ctx, platform_proj_name);
@@ -162,7 +170,10 @@ export async function export_ios(ctx: Project): Promise<void> {
         });
 
         logger.info("Install Pods");
-        execute("pod", ["install", "--repo-update"]);
+        if(0 !== execute("pod", ["install", "--repo-update"])) {
+            // maybe no internet connection, so we can't update pods repo
+            execute("pod", ["install"]);
+        }
 
         // POST MOD PROJECT
         replaceInFile("xcode-project-ios-post.py", {

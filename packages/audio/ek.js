@@ -10,9 +10,9 @@ function setup(project) {
         apple: {
             cpp_flags: {
                 files: [
-                    "src/ek/audio/audio.cpp"
+                    "src/ek/audio/audio_auph_impl.c"
                 ],
-                flags: "-x objective-c++"
+                flags: "-x objective-c"
             },
         }
     });

@@ -1,6 +1,10 @@
+// implement `dr_mp3` library
 #define DR_MP3_IMPLEMENTATION
-
 #include <dr/dr_mp3.h>
+
+// includes just for IDE resolving from this file
+#include "native.h"
+#include <math.h>
 
 bool auph_load_file_mp3(const char* filepath, auph_buffer_data_source* dest) {
     drmp3_config config = {0};

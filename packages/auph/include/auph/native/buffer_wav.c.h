@@ -1,6 +1,10 @@
+// implement drwav library
 #define DR_WAV_IMPLEMENTATION
-
 #include <dr/dr_wav.h>
+
+// just for IDE, these files already included
+#include "native.h"
+#include <math.h>
 
 bool auph_load_file_wav(const char* filepath, auph_buffer_data_source* dest) {
     drwav_uint64 totalFrameCount = 0;

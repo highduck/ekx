@@ -1,4 +1,8 @@
+// `stb_vorbis` implementation
 #include <stb/stb_vorbis.c>
+
+#include "native.h"
+#include <math.h>
 
 typedef struct auph_stream_ogg {
     stb_vorbis* f;

@@ -1,6 +1,6 @@
 import {searchFiles} from "./utils";
 import {Project} from "./project";
-import {UserArray, VariableName} from "./module";
+import {ModuleDef, UserArray, VariableName} from "./module";
 import * as path from "path";
 
 export function collectSourceFiles(searchPath: string, extensions: string[], outList: string[] = []) {
@@ -26,9 +26,16 @@ export function _collectObjects(data: any, variableName: VariableName, out: any[
     }
 }
 
-export function collectCppFlags(ctx: Project, platforms: string[]): any[] {
+type ModuleDefSource = Project | ModuleDef | ModuleDef[];
+
+function extractModulesFromContext(ctx: ModuleDefSource): ModuleDef[] {
+    return ctx instanceof Project ? ctx.modules : (ctx instanceof Array ? ctx : [ctx]);
+}
+
+export function collectCppFlags(ctx: ModuleDefSource, platforms: string[]): any[] {
     let all: any[] = [];
-    for (const data of ctx.modules) {
+    const modules = extractModulesFromContext(ctx);
+    for (const data of modules) {
         let result: any[] = [];
         _collectObjects(data, "cpp_flags", result);
         for (const platform of platforms) {
@@ -44,9 +51,10 @@ export function collectCppFlags(ctx: Project, platforms: string[]): any[] {
     return all;
 }
 
-export function collectObjects(ctx: Project, variableName: VariableName, platforms: string[]): any[] {
+export function collectObjects(ctx: ModuleDefSource, variableName: VariableName, platforms: string[]): any[] {
     let result: any[] = [];
-    for (const data of ctx.modules) {
+    const modules = extractModulesFromContext(ctx);
+    for (const data of modules) {
         _collectObjects(data, variableName, result);
         for (const platform of platforms) {
             _collectObjects(data[platform], variableName, result);
@@ -77,9 +85,10 @@ export function _collectStrings(data: any, variableName: VariableName, out: Set<
     }
 }
 
-export function collectStrings(ctx: Project, variableName: VariableName, platforms: string[], isPathVariable: boolean): string[] {
-    let result = new Set<string>()
-    for (const data of ctx.modules) {
+export function collectStrings(ctx: ModuleDefSource, variableName: VariableName, platforms: string[], isPathVariable: boolean): string[] {
+    let result = new Set<string>();
+    let modules = extractModulesFromContext(ctx);
+    for (const data of modules) {
         let basePath = isPathVariable ? data.path : undefined;
         _collectStrings(data, variableName, result, basePath);
         for (const platform of platforms) {
@@ -90,7 +99,7 @@ export function collectStrings(ctx: Project, variableName: VariableName, platfor
 }
 
 // rel_to - optional, for example "." relative to current working directory
-export function collectSourceRootsAll(ctx: Project, srcKind: VariableName, platforms: string[], relativeTo: string): string[] {
+export function collectSourceRootsAll(ctx: ModuleDefSource, srcKind: VariableName, platforms: string[], relativeTo: string): string[] {
     let result = collectStrings(ctx, srcKind, platforms, true);
     if (relativeTo) {
         result = result.map(p => path.relative(relativeTo, p));

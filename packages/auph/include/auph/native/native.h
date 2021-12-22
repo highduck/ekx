@@ -63,6 +63,8 @@ typedef struct auph_mix_sample {
     float R;
 } auph_mix_sample;
 
+typedef struct auph_buffer_data_source auph_buffer_data_source;
+
 /**
  * stream reader function
  * reads num of frames and return number of read frames
@@ -70,10 +72,10 @@ typedef struct auph_mix_sample {
  * returns next dest pointer
  */
 typedef auph_mix_sample* (* auph_source_reader_func)(auph_mix_sample*, const double, const double, const double,
-                                                     const struct auph_buffer_data_source*,
+                                                     const auph_buffer_data_source*,
                                                      auph_mix_sample volume);
 
-typedef struct auph_buffer_data_source {
+struct auph_buffer_data_source {
     void* stream_data;
     auph_samples_data data;
     // length in frames (samples / channels)
@@ -83,7 +85,7 @@ typedef struct auph_buffer_data_source {
     uint32_t sample_rate;
     uint32_t channels;
     auph_source_reader_func reader;
-} auph_buffer_data_source;
+};
 
 /** object's state **/
 typedef struct auph_bus_obj {

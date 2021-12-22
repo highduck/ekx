@@ -9,7 +9,7 @@
 #import <AudioToolbox/AudioToolbox.h>
 
 #if TARGET_OS_IOS
-#include <AVFoundation/AVFoundation.h>
+#import <AVFoundation/AVFoundation.h>
 #endif
 
 #if __has_feature(objc_arc)
@@ -19,12 +19,12 @@
 #endif
 
 #if TARGET_OS_IOS
-@interface AudioAppEventsHandler : NSObject {}
+@interface AuphIOSHandler : NSObject {}
 - (void)startInterruptionHandler;
 - (void)stopInterruptionHandler;
 @end
 
-AudioAppEventsHandler* auph_audioAppEventsHandler = NULL;
+AuphIOSHandler* auph_ios_handler = NULL;
 #endif
 
 void audioPlaybackCallback(void* inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer);
@@ -53,9 +53,10 @@ struct auph_audio_device {
     AudioQueueBufferRef buffers[AUPH_AUDIO_DEVICE_BUFFER_MAX_COUNT];
 };
 
-void auph_audio_device_init(auph_audio_device*) {
+void auph_audio_device_init(auph_audio_device* device) {
+    (void)device;
 #if TARGET_OS_IOS
-    auph_audioAppEventsHandler = [AudioAppEventsHandler new];
+    auph_ios_handler = [AuphIOSHandler new];
 #endif
 }
 
@@ -70,7 +71,7 @@ bool auph_audio_device_start(auph_audio_device* device) {
     }
 
 #if TARGET_OS_IOS
-    [auph_audioAppEventsHandler startInterruptionHandler];
+    [auph_ios_handler startInterruptionHandler];
 #endif
 
     return true;
@@ -78,7 +79,7 @@ bool auph_audio_device_start(auph_audio_device* device) {
 
 bool auph_audio_device_stop(auph_audio_device* device) {
     if (device->audioQueue != NULL) {
-        auto* queue = device->audioQueue;
+        AudioQueueRef queue = device->audioQueue;
         if (checkError(AudioQueueStop(queue, true))) {
             return false;
         }
@@ -89,7 +90,7 @@ bool auph_audio_device_stop(auph_audio_device* device) {
 
         device->audioQueue = NULL;
 #if TARGET_OS_IOS
-        [auph_audioAppEventsHandler stopInterruptionHandler];
+        [auph_ios_handler stopInterruptionHandler];
 #endif
     }
     return true;
@@ -98,7 +99,7 @@ bool auph_audio_device_stop(auph_audio_device* device) {
 void auph_audio_device_term(auph_audio_device* device) {
     auph_audio_device_stop(device);
 #if TARGET_OS_IOS
-    AUPH_OBJC_RELEASE(auph_audioAppEventsHandler);
+    AUPH_OBJC_RELEASE(auph_ios_handler);
 #endif
     device->userData = NULL;
     device->onPlayback = NULL;
@@ -173,7 +174,7 @@ inline void audioPlaybackCallback(void* inUserData, AudioQueueRef inAQ, AudioQue
 
 #if TARGET_OS_IOS
 
-@implementation AudioAppEventsHandler
+@implementation AuphIOSHandler
 
 -(id)init {
     self = [super init];

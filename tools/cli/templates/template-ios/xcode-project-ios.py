@@ -74,11 +74,12 @@ def apply_module_settings(decl, group):
 
     if "cpp" in decl:
         for src in decl["cpp"]:
-            my_add_folder(src, parent=group, excludes=excludes)
+            my_add_folder(src, parent=project.add_group("src", parent=group), excludes=excludes)
             header_search_paths.append(src)
 
     if "cpp_include" in decl:
         for src in decl["cpp_include"]:
+            project.add_folder(src, parent=group, recursive=True, create_groups=False, excludes=excludes, file_options=FileOptions(create_build_files=False, ignore_unknown_type=True, embed_framework=False))
             header_search_paths.append(src)
 
     if "cpp_define" in decl:
@@ -124,9 +125,13 @@ def my_add_folder(path, parent, excludes):
             new_parent = project.add_group(child, child, parent)
             my_add_folder(full_path, new_parent, excludes)
 
-#for module in config_data["modules"]:
-    #group = project.add_group(module["name"])
-apply_module_settings(config_data, project.add_group("modules"))
+modules_group = project.add_group("modules")
+for module in config_data["modules"]:
+    moduleName = "global"
+    if "name" in module:
+        moduleName = module["name"]
+    group = project.add_group(moduleName, parent=modules_group)
+    apply_module_settings(module, group)
 
 project.add_header_search_paths(header_search_paths)
 

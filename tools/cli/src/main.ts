@@ -13,8 +13,9 @@ import {logger} from "./logger";
 logger.info("📺 EKX 📺");
 
 if (process.argv.indexOf("help") >= 0) {
-    logger.info("--verbose : enable verbose mode");
-    logger.info("--diag : enable special debug output");
+    logger.info("--verbose | -v : enable verbose mode");
+    logger.info("--diag : enable additional debug output");
+    logger.info("-V : enable verbose + additional debug");
 }
 
 if (process.argv.indexOf("--verbose") >= 0 || process.argv.indexOf("-v") >= 0) {
@@ -22,6 +23,11 @@ if (process.argv.indexOf("--verbose") >= 0 || process.argv.indexOf("-v") >= 0) {
 }
 
 if (process.argv.indexOf("--diag") >= 0) {
+    logger._diag = true;
+}
+
+if (process.argv.indexOf("-V") >= 0) {
+    UtilityConfig.verbose = true;
     logger._diag = true;
 }
 
