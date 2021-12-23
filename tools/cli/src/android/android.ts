@@ -11,7 +11,13 @@ import {
 } from "../utils";
 import * as path from "path";
 import {buildAssetPackAsync} from "../assets";
-import {collectObjects, collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources";
+import {
+    collectCppFlags,
+    collectObjects,
+    collectSourceFiles,
+    collectSourceRootsAll,
+    collectStrings
+} from "../collectSources";
 import {execSync} from "child_process";
 import * as fs from "fs";
 import {Project} from "../project";
@@ -126,6 +132,7 @@ function createCMakeLists(dir: string, ctx: Project) {
     const cpp_include = collectSourceRootsAll(ctx, "cpp_include", platforms, dir);
     const cpp_define = collectStrings(ctx, "cpp_define", platforms, false);
     const cpp_lib = collectStrings(ctx, "cpp_lib", platforms, false);
+    const cpp_flags = collectCppFlags(ctx, platforms);
 
     const cmakeName = "native-lib";
     const cmakeTarget: CMakeGenerateTarget = {
@@ -160,7 +167,8 @@ function createCMakeLists(dir: string, ctx: Project) {
             "-Wsign-promo",
             //"-Wstrict-null-sentinel"
         ],
-        compileDefinitions: cpp_define
+        compileDefinitions: cpp_define,
+        sourceFileCompileFlags: cpp_flags
     };
 
     // -fno-exceptions

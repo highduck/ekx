@@ -1,4 +1,4 @@
-import {collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources";
+import {collectCppFlags, collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources";
 import {build as buildCMake, CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "cmake-build";
 import * as path from "path";
 import {isDir, withPath} from "../utils";
@@ -31,6 +31,7 @@ function renderCMakeFile(ctx:Project, buildType): string {
 
     const cpp_define = collectStrings(ctx, "cpp_define", platforms, false);
     const cpp_lib = collectStrings(ctx, "cpp_lib", platforms, false);
+    const cpp_flags = collectCppFlags(ctx, platforms);
 
     const cmakeTarget: CMakeGenerateTarget = {
         type: "executable",
@@ -41,7 +42,8 @@ function renderCMakeFile(ctx:Project, buildType): string {
         linkLibraries: cpp_lib,
         linkOptions: [],
         compileOptions: ["-ffast-math", "-fno-exceptions", "-fno-rtti", "-Wall", "-Wextra"],
-        compileDefinitions: cpp_define
+        compileDefinitions: cpp_define,
+        sourceFileCompileFlags: cpp_flags
     };
 
     const cmakeProject: CMakeGenerateProject = {
