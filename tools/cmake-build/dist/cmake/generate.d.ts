@@ -8,6 +8,10 @@ export interface CMakeGenerateTarget {
     linkOptions: string[];
     compileOptions: string[];
     compileDefinitions: string[];
+    sourceFileCompileFlags?: {
+        files: string[];
+        flags: string;
+    }[];
 }
 export interface CMakeGenerateProject {
     cmakeVersion: string;

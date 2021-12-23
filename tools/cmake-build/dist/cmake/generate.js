@@ -61,6 +61,13 @@ function cmakeLists(project) {
             }
             lines.push(`)`);
         }
+        if (target.sourceFileCompileFlags && target.sourceFileCompileFlags.length > 0) {
+            for (const srcCFlags of target.sourceFileCompileFlags) {
+                for (const src of srcCFlags.files) {
+                    lines.push(`\t\tset_source_files_properties("${src}" PROPERTIES COMPILE_FLAGS "${srcCFlags.flags}")`);
+                }
+            }
+        }
         if (target.compileOptions.length > 0) {
             lines.push(`target_compile_options(${target.name}`);
             for (let compileOption of target.compileOptions) {

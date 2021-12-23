@@ -8,6 +8,7 @@ export interface CMakeGenerateTarget {
     linkOptions: string[];
     compileOptions: string[];
     compileDefinitions: string[];
+    sourceFileCompileFlags?: {files:string[], flags:string}[];
 }
 
 export interface CMakeGenerateProject {
@@ -81,6 +82,14 @@ export function cmakeLists(project: CMakeGenerateProject): string {
                 lines.push("\t\tPUBLIC " + compileDefinition);
             }
             lines.push(`)`);
+        }
+
+        if(target.sourceFileCompileFlags && target.sourceFileCompileFlags.length > 0) {
+            for(const srcCFlags of target.sourceFileCompileFlags) {
+                for(const src of srcCFlags.files) {
+                    lines.push(`\t\tset_source_files_properties("${src}" PROPERTIES COMPILE_FLAGS "${srcCFlags.flags}")`);
+                }
+            }
         }
 
         if (target.compileOptions.length > 0) {
