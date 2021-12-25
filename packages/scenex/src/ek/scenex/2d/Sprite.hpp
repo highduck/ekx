@@ -10,7 +10,7 @@ namespace ek {
 
 class Sprite : private NoCopyAssign {
 public:
-    ek_texture_reg_id texture;
+    ek_image_reg_id image_id = {0};
     Rect2f rect{0, 0, 1, 1};
     Rect2f tex{0, 0, 1, 1};
     bool rotated = false;

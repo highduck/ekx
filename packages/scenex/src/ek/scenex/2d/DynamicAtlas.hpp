@@ -24,7 +24,7 @@ public:
 
     DynamicAtlasSprite addBitmap(int width, int height, const uint8_t* pixels, size_t pixelsSize);
 
-    [[nodiscard]] sg_image getPageTexture(int index) const;
+    [[nodiscard]] sg_image get_page_image(int index) const;
 
     void reset();
 

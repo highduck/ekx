@@ -5,7 +5,7 @@ project(std C)
 
 add_library(${PROJECT_NAME} STATIC
         src/ek_std.c
-        src/ek_image.c
+        src/ek_bitmap.c
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})

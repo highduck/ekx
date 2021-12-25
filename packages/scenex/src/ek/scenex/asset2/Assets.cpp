@@ -117,7 +117,7 @@ public:
                 const auto totalPages = (float) res->pages.size();
                 float loadedPages = 0.0f;
                 for (auto page: res->pages) {
-                    if (ek_texture_reg_get(page).id) {
+                    if (ek_image_reg_get(page).id) {
                         loadedPages += 1.0f;
                     }
                 }
@@ -236,7 +236,7 @@ public:
 class TextureAsset : public Asset {
 public:
     TextureAsset(const char* name, TextureData data) :
-            res{ek_texture_reg_named(name)},
+            res{ek_image_reg_named(name)},
             data_{std::move(data)} {
         weight_ = (float) data_.images.size();
     }
@@ -267,7 +267,7 @@ public:
             if (!loader->loading) {
                 error = loader->status;
                 if (error == 0) {
-                    ek_texture_reg_assign(res, loader->image);
+                    ek_image_reg_assign(res, loader->image);
                 }
                 state = AssetState::Ready;
                 ek_texture_loader_destroy(loader);
@@ -285,10 +285,10 @@ public:
     }
 
     void do_unload() override {
-        ek_texture_reg_assign(res, {0});
+        ek_image_reg_assign(res, {0});
     }
 
-    ek_texture_reg_id res;
+    ek_image_reg_id res;
     ek_texture_loader* loader = nullptr;
     TextureData data_{};
     // by default always premultiply alpha,

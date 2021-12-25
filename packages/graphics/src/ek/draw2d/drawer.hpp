@@ -34,17 +34,17 @@ enum class BlendMode : uint8_t {
 
 struct BatchState {
     sg_shader shader = {0};
-    sg_image texture = {0};
+    sg_image image = {0};
     Rect2i scissors{};
     BlendMode blend = BlendMode::PremultipliedAlpha;
-    uint8_t shaderTexturesCount = 0;
+    uint8_t shader_images_count = 0;
 
     bool operator==(const BatchState& a) const {
-        return (blend == a.blend && shader.id == a.shader.id && texture.id == a.texture.id);
+        return (blend == a.blend && shader.id == a.shader.id && image.id == a.image.id);
     }
 
     bool operator!=(const BatchState& a) const {
-        return (blend != a.blend || shader.id != a.shader.id || texture.id != a.texture.id);
+        return (blend != a.blend || shader.id != a.shader.id || image.id != a.image.id);
     }
 };
 
@@ -189,24 +189,24 @@ struct Context : private NoCopyAssign {
 
     Context& offset_color(abgr32_t offset);
 
-    Context& save_texture_coords();
+    Context& save_image_rect();
 
-    Context& setTextureCoords(float u0, float v0, float du, float dv);
+    Context& set_image_rect(float u0, float v0, float du, float dv);
 
-    Context& setTextureCoords(const Rect2f& uv_rect);
+    Context& set_image_rect(const Rect2f& uv_rect);
 
-    Context& restore_texture_coords();
+    Context& restore_image_rect();
 
-    Context& saveTexture();
+    Context& save_image();
 
-    Context& setEmptyTexture();
+    Context& set_empty_image();
 
-    Context& setTexture(sg_image image);
+    Context& set_image(sg_image image);
 
-    Context& setTextureRegion(sg_image image = {0},
+    Context& set_image_region(sg_image image = {0},
                               const Rect2f& region = Rect2f{0.0f, 0.0f, 1.0f, 1.0f});
 
-    Context& restoreTexture();
+    Context& restore_image();
 
     Context& pushProgram(const char* id);
 
@@ -223,15 +223,15 @@ struct Context : private NoCopyAssign {
 
     void setNextBlending(BlendMode blending);
 
-    void setNextTexture(sg_image nextTexture);
+    void setNextImage(sg_image image);
 
-    void setNextShader(sg_shader shader, uint8_t numTextures);
+    void setNextShader(sg_shader shader, uint8_t images_count);
 
     void applyNextState();
 
 public:
 
-    void drawUserBatch(sg_pipeline pip, uint32_t numTextures);
+    void drawUserBatch(sg_pipeline pip, uint32_t images_count);
 
     void drawBatch();
 
@@ -248,10 +248,10 @@ public:
     Shader* defaultShader = nullptr;
     Shader* alphaMapShader = nullptr;
     Shader* solidColorShader = nullptr;
-    sg_image emptyTexture = {0};
+    sg_image empty_image = {0};
 
     // Current drawing state
-    sg_image texture = {0};
+    sg_image image = {0};
     const Shader* program = nullptr;
     Matrix3x2f matrix{};
     Rect2f uv{0.0f, 0.0f, 1.0f, 1.0f};
@@ -275,14 +275,14 @@ public:
     Array<ColorMod32> colorStack{};
     Array<Rect2f> scissorsStack{};
     Array<const Shader*> programStack{};
-    Array<sg_image> textureStack{};
+    Array<sg_image> image_stack{};
     Array<Rect2f> texCoordStack{};
 
     // Checking what states could be potentially changed
     enum CheckFlags : uint8_t {
         Check_Scissors = 1,
         Check_Shader = 4,
-        Check_Texture = 8
+        CHECK_IMAGE = 8
     };
     uint8_t checkFlags = 0;
 

@@ -8,7 +8,7 @@
 #include <ek/util/Path.hpp>
 #include <ek/local_res.h>
 #include <ek/graphics/graphics.hpp>
-#include <ek/image.h>
+#include <ek/bitmap.h>
 #include <ek/print.h>
 
 namespace ek {
@@ -99,7 +99,7 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
     atlas->loaders.clear();
 
     for (const auto& page: atlasInfo.pages) {
-        auto texture_asset = ek_texture_reg_named(page.imagePath.c_str());
+        auto texture_asset = ek_image_reg_named(page.imagePath.c_str());
         atlas->pages.push_back(texture_asset);
         atlas->loaders.emplace_back(ek_texture_loader_create());
         for (auto& spr_data: page.sprites) {
@@ -107,7 +107,7 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
             sprite->rotated = spr_data.isRotated();
             sprite->rect = spr_data.rc;
             sprite->tex = spr_data.uv;
-            sprite->texture = texture_asset;
+            sprite->image_id = texture_asset;
 
             Res<Sprite> asset_spr{spr_data.name.c_str()};
             asset_spr.reset(sprite);
@@ -118,11 +118,11 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
     for (uint32_t i = 0; i < atlasInfo.pages.size(); ++i) {
         const auto& pageInfo = atlasInfo.pages[i];
         const auto& pageImagePath = pageInfo.imagePath;
-        const ek_texture_reg_id texture_id = ek_texture_reg_named(pageImagePath.c_str());
-        const sg_image image = ek_texture_reg_get(texture_id);
+        const ek_image_reg_id texture_id = ek_image_reg_named(pageImagePath.c_str());
+        const sg_image image = ek_image_reg_get(texture_id);
         if (image.id) {
             EK_DEBUG("Destroy old page texture %s", pageImagePath.c_str());
-            ek_texture_reg_assign(texture_id, {SG_INVALID_ID});
+            ek_image_reg_assign(texture_id, {SG_INVALID_ID});
         }
 
         EK_DEBUG("Load atlas page %s/%s", atlas->base_path.c_str(), pageImagePath.c_str());
@@ -162,8 +162,8 @@ int Atlas::pollLoading() {
                 ek_texture_loader_update(loader);
                 if (!loader->loading) {
                     if (loader->status == 0) {
-                        ek_texture_reg_id res = ek_texture_reg_named(loader->urls[0].path);
-                        ek_texture_reg_assign(res, loader->image);
+                        ek_image_reg_id res = ek_image_reg_named(loader->urls[0].path);
+                        ek_image_reg_assign(res, loader->image);
                         ek_texture_loader_destroy(loader);
                         loaders[i] = nullptr;
                     }
@@ -206,7 +206,7 @@ void Atlas::clear() {
 //    }
 
     for (auto page: pages) {
-        ek_texture_reg_assign(page, {SG_INVALID_ID});
+        ek_image_reg_assign(page, {SG_INVALID_ID});
     }
 
     for (auto& spr: sprites) {

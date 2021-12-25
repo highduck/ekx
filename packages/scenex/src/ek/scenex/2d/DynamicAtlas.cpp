@@ -183,7 +183,7 @@ DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const uint8_t*
     return sprite;
 }
 
-sg_image DynamicAtlas::getPageTexture(int index) const {
+sg_image DynamicAtlas::get_page_image(int index) const {
     EK_ASSERT(index < pages_.size() && index >= 0);
     return pages_[index]->image;
 }

@@ -76,9 +76,9 @@ void runFlashFilePrerender(int argc, char** argv) {
 
             xfl::RenderElementOptions opts{scale, width, height, alpha, trim};
             auto spr = renderElement(doc, *item, opts);
-            saveImagePNG(&spr.image, output, alpha);
-            if (spr.image.pixels) {
-                ek_image_free(&spr.image);
+            ek_bitmap_save_png(&spr.bitmap, output, alpha);
+            if (spr.bitmap.pixels) {
+                ek_bitmap_free(&spr.bitmap);
             }
             i += 6;
         }

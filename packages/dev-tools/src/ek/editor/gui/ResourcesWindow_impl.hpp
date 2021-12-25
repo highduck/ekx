@@ -33,7 +33,7 @@ void drawAssetItem<DynamicAtlas>(const DynamicAtlas& asset) {
     static float pageScale = 0.25f;
     ImGui::SliderFloat("Scale", &pageScale, 0.0f, 1.0f);
     for (int i = 0; i < pagesCount; ++i) {
-        const sg_image page = asset.getPageTexture(i);
+        const sg_image page = asset.get_page_image(i);
         if (page.id) {
             ImGui::Text("Page #%d", i);
             const auto info = sg_query_image_info(page);
@@ -53,7 +53,7 @@ void drawAssetItem<Atlas>(const Atlas& asset) {
     static float pageScale = 0.25f;
     ImGui::SliderFloat("Scale", &pageScale, 0.0f, 1.0f);
     for (int i = 0; i < pagesCount; ++i) {
-        const sg_image page = ek_texture_reg_get(asset.pages[i]);
+        const sg_image page = ek_image_reg_get(asset.pages[i]);
         if (page.id) {
             ImGui::Text("Page #%d", i);
             const auto info = sg_query_image_info(page);

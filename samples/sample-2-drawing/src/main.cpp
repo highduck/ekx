@@ -8,7 +8,7 @@
 using namespace ek;
 
 void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
-    draw2d::state.setEmptyTexture();
+    draw2d::state.set_empty_image();
     auto pad = 40.0f;
     auto w = zoneWidth - pad * 2.0f;
     auto h = 16.0f;

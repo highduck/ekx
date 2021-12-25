@@ -79,7 +79,7 @@ void TrailRenderer2D::draw() {
     if (spr == nullptr) {
         return;
     }
-    const sg_image image = ek_texture_reg_get(spr->texture);
+    const sg_image image = ek_image_reg_get(spr->image_id);
     if (image.id == SG_INVALID_ID) {
         return;
     }
@@ -87,7 +87,7 @@ void TrailRenderer2D::draw() {
     const uint32_t quads = columns - 1;
     auto& drawer = draw2d::state;
 
-    drawer.setTexture(image);
+    drawer.set_image(image);
     drawer.allocTriangles(columns * 2, quads * 6);
 
     auto node_idx = trail.nodes.first;

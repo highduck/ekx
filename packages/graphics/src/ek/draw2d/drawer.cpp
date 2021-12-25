@@ -40,19 +40,19 @@ void Context::setNextBlending(BlendMode blending) {
     next.blend = blending;
 }
 
-void Context::setNextTexture(sg_image nextTexture) {
-    if (curr.texture.id != nextTexture.id) {
+void Context::setNextImage(sg_image image) {
+    if (curr.image.id != image.id) {
         stateChanged = true;
     }
-    next.texture = nextTexture;
+    next.image = image;
 }
 
-void Context::setNextShader(sg_shader shader, uint8_t numTextures) {
+void Context::setNextShader(sg_shader shader, uint8_t images_count) {
     if (curr.shader.id != shader.id) {
         stateChanged = true;
     }
     next.shader = shader;
-    next.shaderTexturesCount = numTextures;
+    next.shader_images_count = images_count;
 }
 
 void Context::applyNextState() {
@@ -115,7 +115,7 @@ float getTriangleArea(const Vertex2D* vertices, const uint16_t* indices, int cou
     return sum / 2.0f;
 }
 
-void Context::drawUserBatch(sg_pipeline pip, uint32_t numTextures) {
+void Context::drawUserBatch(sg_pipeline pip, uint32_t images_count) {
     if (indicesCount_ == 0) {
         return;
     }
@@ -132,7 +132,7 @@ void Context::drawUserBatch(sg_pipeline pip, uint32_t numTextures) {
 
     bind.vertex_buffers[0] = vb;
     bind.index_buffer = ib;
-    bind.fs_images[0].id = numTextures == 1 ? curr.texture.id : SG_INVALID_ID;
+    bind.fs_images[0].id = images_count == 1 ? curr.image.id : SG_INVALID_ID;
     sg_apply_bindings(bind);
 
     {
@@ -183,7 +183,7 @@ void Context::drawBatch() {
     }
     bind.vertex_buffers[0] = vb;
     bind.index_buffer = ib;
-    bind.fs_images[0].id = curr.shaderTexturesCount == 1 ? curr.texture.id : SG_INVALID_ID;
+    bind.fs_images[0].id = curr.shader_images_count == 1 ? curr.image.id : SG_INVALID_ID;
     sg_apply_bindings(bind);
 
     {
@@ -213,8 +213,8 @@ void Context::drawBatch() {
 
 void Context::allocTriangles(uint32_t vertex_count, uint32_t index_count) {
     if (checkFlags != 0) {
-        if (checkFlags & Context::Check_Texture) {
-            setNextTexture(texture);
+        if (checkFlags & Context::CHECK_IMAGE) {
+            setNextImage(image);
         }
         if (checkFlags & Context::Check_Shader) {
             setNextShader(program->shader, program->numFSImages);
@@ -255,7 +255,7 @@ Context::Context() :
 }
 
 Context::~Context() {
-    ek_texture_reg_assign(ek_texture_reg_named("empty"), {SG_INVALID_ID});
+    ek_image_reg_assign(ek_image_reg_named("empty"), {SG_INVALID_ID});
     Res<Shader>{"draw2d"}.reset(nullptr);
     Res<Shader>{"draw2d_alpha"}.reset(nullptr);
     Res<Shader>{"draw2d_color"}.reset(nullptr);
@@ -268,14 +268,14 @@ void Context::finish() {
     EK_ASSERT(matrixStack.empty());
     EK_ASSERT(colorStack.empty());
     EK_ASSERT(programStack.empty());
-    EK_ASSERT(textureStack.empty());
+    EK_ASSERT(image_stack.empty());
     EK_ASSERT(texCoordStack.empty());
 
     scissorsStack.clear();
     matrixStack.clear();
     colorStack.clear();
     programStack.clear();
-    textureStack.clear();
+    image_stack.clear();
     texCoordStack.clear();
 }
 
@@ -413,56 +413,56 @@ Context& Context::offset_color(abgr32_t offset) {
 
 /** STATES **/
 
-Context& Context::save_texture_coords() {
+Context& Context::save_image_rect() {
     texCoordStack.push_back(uv);
     return *this;
 }
 
-Context& Context::setTextureCoords(float u0, float v0, float du, float dv) {
+Context& Context::set_image_rect(float u0, float v0, float du, float dv) {
     uv.set(u0, v0, du, dv);
     return *this;
 }
 
-Context& Context::setTextureCoords(const Rect2f& uv_rect) {
+Context& Context::set_image_rect(const Rect2f& uv_rect) {
     uv = uv_rect;
     return *this;
 }
 
-Context& Context::restore_texture_coords() {
+Context& Context::restore_image_rect() {
     uv = texCoordStack.back();
     texCoordStack.pop_back();
     return *this;
 }
 
-Context& Context::saveTexture() {
-    textureStack.push_back(texture);
+Context& Context::save_image() {
+    image_stack.push_back(image);
     return *this;
 }
 
-Context& Context::setEmptyTexture() {
-    texture = emptyTexture;
-    checkFlags |= Check_Texture;
-    setTextureCoords(0, 0, 1, 1);
+Context& Context::set_empty_image() {
+    image = empty_image;
+    checkFlags |= CHECK_IMAGE;
+    set_image_rect(0, 0, 1, 1);
     return *this;
 }
 
-Context& Context::setTexture(const sg_image image) {
-    texture = image;
-    checkFlags |= Check_Texture;
+Context& Context::set_image(sg_image image) {
+    image = image;
+    checkFlags |= CHECK_IMAGE;
     return *this;
 }
 
-Context& Context::setTextureRegion(sg_image image, const Rect2f& region) {
-    texture = image.id ? image : emptyTexture;
-    checkFlags |= Check_Texture;
+Context& Context::set_image_region(sg_image image, const Rect2f& region) {
+    image = image.id ? image : empty_image;
+    checkFlags |= CHECK_IMAGE;
     uv = region;
     return *this;
 }
 
-Context& Context::restoreTexture() {
-    texture = textureStack.back();
-    checkFlags |= Check_Texture;
-    textureStack.pop_back();
+Context& Context::restore_image() {
+    image = image_stack.back();
+    checkFlags |= CHECK_IMAGE;
+    image_stack.pop_back();
     return *this;
 }
 
@@ -495,8 +495,8 @@ Context& Context::restoreProgram() {
 void Context::createDefaultResources() {
     EK_DEBUG("draw2d: create default resources");
     const auto backend = sg_query_backend();
-    emptyTexture = ek_gfx_make_color_image(4, 4, 0xFFFFFFFFu);
-    ek_texture_reg_assign(ek_texture_reg_named("empty"), emptyTexture);
+    empty_image = ek_gfx_make_color_image(4, 4, 0xFFFFFFFFu);
+    ek_image_reg_assign(ek_image_reg_named("empty"), empty_image);
 
     defaultShader = new Shader(draw2d_shader_desc(backend));
     alphaMapShader = new Shader(draw2d_alpha_shader_desc(backend));
@@ -514,7 +514,7 @@ void beginNewFrame() {
 /*** drawings ***/
 void begin(Rect2f viewport, const Matrix3x2f& view, const sg_image renderTarget, const sg_image depthStencilTarget) {
     EK_ASSERT(!state.active);
-    state.texture = state.emptyTexture;
+    state.image = state.empty_image;
     state.program = state.defaultShader;
     state.scissors = viewport;
     state.checkFlags = 0;
@@ -525,8 +525,8 @@ void begin(Rect2f viewport, const Matrix3x2f& view, const sg_image renderTarget,
 
     state.curr = {};
     state.next.shader = state.program->shader;
-    state.next.shaderTexturesCount = 1;
-    state.next.texture = state.texture;
+    state.next.shader_images_count = 1;
+    state.next.image = state.image;
     state.next.scissors = Rect2i{viewport};
     state.selectedPipeline.id = SG_INVALID_ID;
     state.stateChanged = true;

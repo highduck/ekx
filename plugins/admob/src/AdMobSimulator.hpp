@@ -21,7 +21,7 @@ public:
         const argb32_t color = activeRewardedAd ? 0x77FF00FF_argb : 0x7700FF00_argb;
 
         if (splash) {
-            draw2d::state.setEmptyTexture();
+            draw2d::state.set_empty_image();
             draw2d::quad(0, 0, ek_app.viewport.width, ek_app.viewport.height, color);
         }
     }

@@ -45,7 +45,7 @@ ImGuiIntegration::ImGuiIntegration() {
 
     setup();
 
-    initializeFontTexture();
+    init_font_image();
 
     ImGui::StyleColorsDark();
 }
@@ -145,7 +145,7 @@ void addFontWithIcons(const char* filePath, float dpiScale) {
     }
 }
 
-void ImGuiIntegration::initializeFontTexture() {
+void ImGuiIntegration::init_font_image() {
     ImGuiIO& io = ImGui::GetIO();
     addFontWithIcons("dev/sf-pro-text-regular.ttf", dpiScale);
     addFontWithIcons("dev/sf-mono-text-regular.ttf", dpiScale);
@@ -167,9 +167,9 @@ void ImGuiIntegration::initializeFontTexture() {
     img_desc.data.subimage[0][0].ptr = pixels;
     img_desc.data.subimage[0][0].size = width * height * 4;
     img_desc.label = "sokol-imgui-font";
-    fontTexture = sg_make_image(&img_desc);
+    font_image = sg_make_image(&img_desc);
 
-    ImGui::GetIO().Fonts->TexID = (ImTextureID) (uintptr_t) fontTexture.id;
+    ImGui::GetIO().Fonts->TexID = (ImTextureID) (uintptr_t) font_image.id;
 }
 
 void ImGuiIntegration::on_event(const ek_app_event& event) {

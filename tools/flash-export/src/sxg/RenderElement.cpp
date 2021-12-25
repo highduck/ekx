@@ -27,16 +27,16 @@ SpriteData renderMultiSample(const Rect2f& bounds,
         rc.height += 2;
     }
 
-    ek_image img{0, 0, nullptr};
+    ek_bitmap bitmap{0, 0, nullptr};
     const auto w = static_cast<int>(fixed ? options.width : ceil(rc.width * scale));
     const auto h = static_cast<int>(fixed ? options.height : ceil(rc.height * scale));
     const int stride = w * 4;
 
     if (w > 0 && h > 0) {
-        ek_image_alloc(&img, w, h);
-        ek_image_fill(&img, 0);
+        ek_bitmap_alloc(&bitmap, w, h);
+        ek_bitmap_fill(&bitmap, 0);
 
-        auto surf = cairo_image_surface_create_for_data((uint8_t*)img.pixels,
+        auto surf = cairo_image_surface_create_for_data((uint8_t*)bitmap.pixels,
                                                         CAIRO_FORMAT_ARGB32,
                                                         w, h, stride);
         auto cr = cairo_create(surf);
@@ -82,13 +82,13 @@ SpriteData renderMultiSample(const Rect2f& bounds,
         cairo_surface_destroy(sub_surf);
 
         // convert ARGB to ABGR
-        ek_image_swap_rb(&img);
+        ek_bitmap_swap_rb(&bitmap);
     }
 
     SpriteData data;
     data.rc = rc;
     data.source = {0, 0, w, h};
-    data.image = img;
+    data.bitmap = bitmap;
 
     return data;
 }
@@ -107,16 +107,16 @@ SpriteData renderLowQuality(const Rect2f& bounds,
         rc.height += 2;
     }
 
-    ek_image img = {0, 0,nullptr};
+    ek_bitmap bitmap = {0, 0,nullptr};
     const auto w = static_cast<int>(fixed ? options.width : ceil(rc.width * scale));
     const auto h = static_cast<int>(fixed ? options.height : ceil(rc.height * scale));
     const int stride = w * 4;
 
     if (w > 0 && h > 0) {
-        ek_image_alloc(&img, w, h);
-        ek_image_fill(&img, 0);
+        ek_bitmap_alloc(&bitmap, w, h);
+        ek_bitmap_fill(&bitmap, 0);
 
-        auto surf = cairo_image_surface_create_for_data((uint8_t*)img.pixels,
+        auto surf = cairo_image_surface_create_for_data((uint8_t*)bitmap.pixels,
                                                         CAIRO_FORMAT_ARGB32,
                                                         w, h, stride);
         auto cr = cairo_create(surf);
@@ -144,13 +144,13 @@ SpriteData renderLowQuality(const Rect2f& bounds,
         cairo_surface_destroy(surf);
 
         // convert ARGB to ABGR
-        ek_image_swap_rb(&img);
+        ek_bitmap_swap_rb(&bitmap);
     }
 
     SpriteData data;
     data.rc = rc;
     data.source = {0, 0, w, h};
-    data.image = img;
+    data.bitmap = bitmap;
 
     return data;
 }

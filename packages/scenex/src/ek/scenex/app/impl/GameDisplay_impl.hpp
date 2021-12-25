@@ -68,7 +68,7 @@ bool GameDisplay::beginOverlayDev() {
         sg_push_debug_group("Game viewport");
 // todo: temp disable
         draw2d::begin({0, 0, fw, fh});
-        draw2d::state.setTextureRegion(color, Rect2f::zero_one);
+        draw2d::state.set_image_region(color, Rect2f::zero_one);
         draw2d::quad(0, 0, scale * info.size.x, scale * info.size.y);
         draw2d::end();
 

@@ -1,13 +1,9 @@
 #include <ek/texture_loader.h>
-#include <ek/image.h>
+#include <ek/bitmap.h>
 #include <ek/app.h>
 #include <ek/log.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-// implement decode + stbi
-//#include <ek/image_stb.c.h>
-#include <stb/stb_image.h>
 
 static int ek_texture_loader__load_bytes(const char* basePath, const char* url, void** outBuffer, size_t* outSize) {
     char pathBuffer[1024];
@@ -94,13 +90,13 @@ void ek_texture_loader_update(ek_texture_loader* loader) {
         if (result == 0) {
             ++loader->imagesLoaded;
             loader->progress = (float) loader->imagesLoaded / (float) loader->imagesToLoad;
-            ek_image img = {0};
-            ek_image_decode(&img, buffer, bufferSize, loader->premultiplyAlpha);
-            if (img.pixels) {
-                loader->imageData.subImages[idx].data = img.pixels;
-                loader->imageData.subImages[idx].width = (int) img.w;
-                loader->imageData.subImages[idx].height = (int) img.h;
-                loader->imageData.subImages[idx].stride = (int) (img.w * 4u);
+            ek_bitmap bitmap = {0};
+            ek_bitmap_decode(&bitmap, buffer, bufferSize, loader->premultiplyAlpha);
+            if (bitmap.pixels) {
+                loader->imageData.subImages[idx].data = bitmap.pixels;
+                loader->imageData.subImages[idx].width = (int) bitmap.w;
+                loader->imageData.subImages[idx].height = (int) bitmap.h;
+                loader->imageData.subImages[idx].stride = (int) (bitmap.w * 4u);
             }
             EK_DEBUG("texture #%d loaded %d of %d", idx, loader->imagesLoaded, loader->imagesToLoad);
         } else {

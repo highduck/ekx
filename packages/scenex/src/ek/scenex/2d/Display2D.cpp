@@ -14,12 +14,12 @@ IDrawable2D::~IDrawable2D() = default;
 void Quad2D::draw() {
     const Sprite* spr = src.get();
     if (spr) {
-        const sg_image image = ek_texture_reg_get(spr->texture);
+        const sg_image image = ek_image_reg_get(spr->image_id);
         if (image.id) {
-            draw2d::state.setTextureRegion(image, spr->tex);
+            draw2d::state.set_image_region(image, spr->tex);
         }
     } else {
-        draw2d::state.setEmptyTexture();
+        draw2d::state.set_empty_image();
     }
     draw2d::quad(rect.x, rect.y, rect.width, rect.height, colors[0], colors[1], colors[2], colors[3]);
 }
@@ -164,11 +164,11 @@ void Text2D::draw() {
     textDrawer.format = format;
     textDrawer.maxWidth = format.wordWrap ? rect.width : 0.0f;
     if (fillColor.a > 0) {
-        draw2d::state.setEmptyTexture();
+        draw2d::state.set_empty_image();
         draw2d::quad(rect, fillColor);
     }
     if (borderColor.a > 0) {
-        draw2d::state.setEmptyTexture();
+        draw2d::state.set_empty_image();
         draw2d::strokeRect(expand(rect, 1.0f), borderColor, 1);
     }
 
@@ -250,13 +250,13 @@ void Arc2D::draw() {
         return;
     }
 
-    const sg_image image = ek_texture_reg_get(f->texture);
+    const sg_image image = ek_image_reg_get(f->image_id);
     if (!image.id) {
         return;
     }
     
     auto& tex = f->tex;
-    draw2d::state.setTextureRegion(image, {tex.center_x(), tex.y, 0.0f, tex.height});
+    draw2d::state.set_image_region(image, {tex.center_x(), tex.y, 0.0f, tex.height});
 
     float off = -Math::pi * 0.5f;
     draw2d::line_arc(0, 0, radius, 0 + off, angle + off, line_width, segments, color_inner, color_outer);

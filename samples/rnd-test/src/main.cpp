@@ -103,7 +103,7 @@ void on_frame() {
         draw2d::beginNewFrame();
         draw2d::begin({0, 0, width, height});
 
-        draw2d::state.setTextureRegion(estimator.image);
+        draw2d::state.set_image_region(estimator.image);
         draw2d::quad(0, 0, estimator.image_size, estimator.image_size);
 
         draw2d::end();

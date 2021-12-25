@@ -3,7 +3,7 @@
 #include <ek/local_res.h>
 #include <ek/app.h>
 #include <ek/assert.h>
-#include <ek/image.h>
+#include <ek/bitmap.h>
 
 #ifndef STB_TRUETYPE_IMPLEMENTATION
 #define STB_TRUETYPE_IMPLEMENTATION
@@ -116,7 +116,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         stbtt_MakeGlyphBitmap(info, bmp + pad * bitmapWidth + pad, glyphWidth, glyphHeight, bitmapWidth,
                               dpiScale * scale, dpiScale * scale, glyphIndex);
 
-        ek_image_blur_fast_a8(bmp, bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_,
+        ek_bitmap_blur_gray(bmp, bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_,
                               strengthPower_);
 
         auto sprite = atlas->addBitmap(bitmapWidth, bitmapHeight, bmp, bmpSize);

@@ -19,9 +19,9 @@ static unsigned short nine_patch_indices[] = {
 };
 
 bool Sprite::select() const {
-    const sg_image image = ek_texture_reg_get(texture);
+    const sg_image image = ek_image_reg_get(image_id);
     if (image.id) {
-        draw2d::state.setTextureRegion(image, tex);
+        draw2d::state.set_image_region(image, tex);
         return true;
     }
     return false;
@@ -32,9 +32,9 @@ void Sprite::draw() const {
 }
 
 void Sprite::draw(const Rect2f& rc) const {
-    const sg_image image = ek_texture_reg_get(texture);
+    const sg_image image = ek_image_reg_get(image_id);
     if (image.id) {
-        draw2d::state.setTextureRegion(image, tex);
+        draw2d::state.set_image_region(image, tex);
         if (rotated) {
             draw2d::quad_rotated(rc.x, rc.y, rc.width, rc.height);
         } else {
@@ -44,12 +44,12 @@ void Sprite::draw(const Rect2f& rc) const {
 }
 
 void Sprite::draw_grid(const Rect2f& grid, const Rect2f& target) const {
-    const sg_image image = ek_texture_reg_get(texture);
+    const sg_image image = ek_image_reg_get(image_id);
     if (image.id == SG_INVALID_ID) {
         return;
     }
 
-    draw2d::state.setTextureRegion(image, tex);
+    draw2d::state.set_image_region(image, tex);
 
     float x = rect.x;
     float y = rect.y;
@@ -108,7 +108,7 @@ void Sprite::draw_grid(const Rect2f& grid, const Rect2f& target) const {
 
 bool Sprite::hit_test(const Vec2f& position) const {
     (void) position;
-    const sg_image image = ek_texture_reg_get(texture);
+    const sg_image image = ek_image_reg_get(image_id);
     if (image.id) {
         return true;
     }

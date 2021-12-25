@@ -48,7 +48,7 @@ void drawGraph(const Profiler::Track& track) {
     float x = 0.0f;
     float x0 = 0.0f;
     float prev = track.calculateY(track.history.at(0));
-    draw2d::state.setEmptyTexture();
+    draw2d::state.set_empty_image();
     draw2d::quad(0, 0, width, track.height, 0x77000000_argb);
     for (int i = 0; i < samples; ++i) {
         float val = track.history.at(i);
@@ -76,7 +76,7 @@ void draw(Profiler& profiler, const GameDisplayInfo& displayInfo) {
     const auto x = displayInfo.insets.x;
     const auto y = displayInfo.insets.y;
     draw2d::state.matrix = Matrix3x2f{scale, 0, 0, scale, x, y};
-    draw2d::state.setEmptyTexture();
+    draw2d::state.set_empty_image();
 
     draw2d::state.save_matrix();
     for (auto& track : profiler.tracks) {

@@ -32,11 +32,11 @@ private:
 
     void setup();
 
-    void initializeFontTexture();
+    void init_font_image();
 
 private:
     String clipboard_text_{};
-    sg_image fontTexture;
+    sg_image font_image;
     float dpiScale = 2.0f;
 };
 

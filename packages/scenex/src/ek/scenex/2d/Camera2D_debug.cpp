@@ -17,7 +17,7 @@ void debugDrawPointer(Camera2D& camera) {
     auto ptr = im.pointerScreenPosition_;
     auto v = camera.screenToWorldMatrix.transform(ptr.x, ptr.y);
     float t = TimeLayer::Root->total;
-    draw2d::state.setEmptyTexture();
+    draw2d::state.set_empty_image();
     if (im.pointerDown_) {
         draw2d::fill_circle({v.x, v.y, 12 + 2 * sinf(t * 8)}, 0x00FFFF00_argb, 0x77FF0000_argb, 10);
     }
@@ -29,7 +29,7 @@ void debugDrawPointer(Camera2D& camera) {
 void drawBox(const Rect2f& rc, const Matrix3x2f& m, argb32_t color1, argb32_t color2,
              bool cross = true, argb32_t fillColor = 0_argb) {
 
-    draw2d::state.setEmptyTexture();
+    draw2d::state.set_empty_image();
     if (fillColor != argb32_t::zero) {
         draw2d::state.save_matrix();
         draw2d::state.matrix = m;
@@ -106,7 +106,7 @@ void drawFills(Camera2D& camera) {
 
     draw2d::state.save_transform();
     draw2d::state.color = {};
-    draw2d::state.setEmptyTexture();
+    draw2d::state.set_empty_image();
 
     traverseVisibleNodes<Display2D>(
             camera.root.ent(),
@@ -145,7 +145,7 @@ void drawOcclusion(Camera2D& camera) {
 
     draw2d::state.save_transform();
     draw2d::state.color = {};
-    draw2d::state.setEmptyTexture();
+    draw2d::state.set_empty_image();
     auto cameraRect = camera.worldRect;
     traverseVisibleNodes<Bounds2D>(camera.root.ent(), nullptr,
                                    [cameraRect](const Bounds2D& bounds, const WorldTransform2D* transform) {

@@ -140,10 +140,10 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
                 }
                 if (gdata.image.id) {
                     if (prevTexture.id != gdata.image.id) {
-                        draw2d::state.setTexture(gdata.image);
+                        draw2d::state.set_image(gdata.image);
                         prevTexture = gdata.image;
                     }
-                    draw2d::state.setTextureCoords(gdata.texCoord);
+                    draw2d::state.set_image_rect(gdata.texCoord);
                     gdata.rect = translate(gdata.rect * size, current);
                     if (!gdata.rotated) {
                         draw2d::quad(gdata.rect.x,
@@ -158,9 +158,9 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
                     }
                     // only for DEV mode
                     if (layer.showGlyphBounds) {
-                        draw2d::state.setEmptyTexture();
+                        draw2d::state.set_empty_image();
                         draw2d::strokeRect(gdata.rect, 0xFFFFFF_rgb, 1);
-                        draw2d::state.setTexture(gdata.image);
+                        draw2d::state.set_image(gdata.image);
                     }
                 }
 

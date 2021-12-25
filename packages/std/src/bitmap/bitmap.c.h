@@ -1,34 +1,34 @@
-#include <ek/image.h>
+#include <ek/bitmap.h>
 #include <ek/log.h>
 #include <ek/assert.h>
 
-void ek_image_alloc(ek_image* img, int width, int height) {
-    EK_ASSERT(img != 0);
+void ek_bitmap_alloc(ek_bitmap* bitmap, int width, int height) {
+    EK_ASSERT(bitmap != 0);
     EK_ASSERT(width > 0);
     EK_ASSERT(height > 0);
-    free(img->pixels);
-    img->w = width;
-    img->h = height;
-    img->pixels = malloc(width * height * 4);
+    free(bitmap->pixels);
+    bitmap->w = width;
+    bitmap->h = height;
+    bitmap->pixels = malloc(width * height * 4);
 }
 
-void ek_image_free(ek_image* img) {
-    free(img->pixels);
-    img->pixels = NULL;
+void ek_bitmap_free(ek_bitmap* bitmap) {
+    free(bitmap->pixels);
+    bitmap->pixels = NULL;
 }
 
-void ek_image_swap_rb(ek_image* img) {
-    uint32_t* pixels = img->pixels;
-    const int size = img->w * img->h;
+void ek_bitmap_swap_rb(ek_bitmap* bitmap) {
+    uint32_t* pixels = bitmap->pixels;
+    const int size = bitmap->w * bitmap->h;
     for (int i = 0; i < size; ++i) {
         const uint32_t c = pixels[i];
-        pixels[i] = EK_IMAGE_SWAP_RB(c);
+        pixels[i] = EK_PIXEL_SWAP_RB(c);
     }
 }
 
-void ek_image_fill(ek_image* img, uint32_t color) {
-    uint32_t* pixels = img->pixels;
-    const int size = img->w * img->h;
+void ek_bitmap_fill(ek_bitmap* bitmap, uint32_t color) {
+    uint32_t* pixels = bitmap->pixels;
+    const int size = bitmap->w * bitmap->h;
     for (int i = 0; i < size; ++i) {
         pixels[i] = color;
     }
@@ -45,9 +45,9 @@ typedef union ek_pix_ {
     };
 } ek_pix_;
 
-void ek_image_premultiply(ek_image* img) {
-    ek_pix_* it = (ek_pix_*) img->pixels;
-    const ek_pix_* end = it + (img->w * img->h);
+void ek_bitmap_premultiply(ek_bitmap* bitmap) {
+    ek_pix_* it = (ek_pix_*) bitmap->pixels;
+    const ek_pix_* end = it + (bitmap->w * bitmap->h);
 
     while (it < end) {
         const uint8_t a = it->a;
@@ -66,9 +66,9 @@ inline static uint8_t saturate_u8(int v) {
     return v < 255 ? v : 255;
 }
 
-void ek_image_un_premultiply(ek_image* img) {
-    ek_pix_* it = (ek_pix_*) img->pixels;
-    const ek_pix_* end = it + (img->w * img->h);
+void ek_bitmap_un_premultiply(ek_bitmap* bitmap) {
+    ek_pix_* it = (ek_pix_*) bitmap->pixels;
+    const ek_pix_* end = it + (bitmap->w * bitmap->h);
 
     while (it < end) {
         const uint8_t a = it->a;
@@ -83,16 +83,16 @@ void ek_image_un_premultiply(ek_image* img) {
 }
 
 #include <ek/log.h>
-#include <ek/image.h>
+#include <ek/bitmap.h>
 
 //extern stbi_uc* stbi_load_from_memory(stbi_uc const* buffer, int len, int* x, int* y, int* channels_in_file,
 //                                      int desired_channels) ;
 //
-void ek_image_decode(ek_image* img, const void* data, uint32_t size, bool pma) {
-    log_debug("decode image: begin");
+void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool pma) {
+    log_debug("decode bitmap: begin");
     EK_ASSERT(size > 0);
-    EK_ASSERT(img != 0);
-    EK_ASSERT(img->pixels == 0);
+    EK_ASSERT(bitmap != 0);
+    EK_ASSERT(bitmap->pixels == 0);
 
     int w = 0;
     int h = 0;
@@ -103,18 +103,18 @@ void ek_image_decode(ek_image* img, const void* data, uint32_t size, bool pma) {
 
 
     if (decoded) {
-        img->w = w;
-        img->h = h;
-        img->pixels = (uint32_t*) decoded;
+        bitmap->w = w;
+        bitmap->h = h;
+        bitmap->pixels = (uint32_t*) decoded;
         if (pma) {
             log_debug("decode image: premultiply alpha");
             EK_PROFILE_SCOPE("pma");
-            ek_image_premultiply(img);
+            ek_bitmap_premultiply(bitmap);
         }
     } else {
 #ifndef NDEBUG
-        log_error("image decoding error: %s", stbi_failure_reason());
+        log_error("bitmap decoding error: %s", stbi_failure_reason());
 #endif
     }
-    log_debug("decode image: end");
+    log_debug("decode bitmap: end");
 }

@@ -161,7 +161,7 @@ void guiSprite(const Sprite& sprite) {
     auto rc = sprite.rect;
     auto uv0 = sprite.tex.position;
     auto uv1 = sprite.tex.right_bottom();
-    const sg_image sprite_image = ek_texture_reg_get(sprite.texture);
+    const sg_image sprite_image = ek_image_reg_get(sprite.image_id);
     if (sprite_image.id) {
         void* tex_id = (void*)(uintptr_t)sprite_image.id;
         if (sprite.rotated) {
@@ -188,7 +188,7 @@ void guiSprite(const Sprite& sprite) {
             );
         }
     } else {
-        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "Sprite Texture is NULL");
+        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "sprite has no image");
     }
 }
 

@@ -54,7 +54,7 @@ void logDisplayInfo() {
 }
 
 void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
-    draw2d::state.setEmptyTexture();
+    draw2d::state.set_empty_image();
     auto pad = 40.0f;
     auto w = zoneWidth - pad * 2.0f;
     auto h = 16.0f;
@@ -142,7 +142,7 @@ void basic_application::initialize() {
     // init default empty sprite data
     {
         auto* spr = new Sprite();
-        spr->texture = ek_texture_reg_named("empty");
+        spr->image_id = ek_image_reg_named("empty");
         Res<Sprite>{"empty"}.reset(spr);
     }
 

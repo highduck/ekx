@@ -186,7 +186,7 @@ SceneWindow::SceneWindow() {
 void drawBox2(const Rect2f& rc, const Matrix3x2f& m, argb32_t color1, argb32_t color2,
               bool cross = true, argb32_t fillColor = 0_argb) {
 
-    draw2d::state.setEmptyTexture();
+    draw2d::state.set_empty_image();
     if (fillColor != argb32_t::zero) {
         draw2d::state.save_matrix();
         draw2d::state.matrix = m;

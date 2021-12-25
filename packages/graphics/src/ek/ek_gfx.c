@@ -57,7 +57,7 @@ void ek_gfx_setup(int max_draw_calls) {
     ek_gfx_log_backend();
 
 
-    ek_texture_reg_setup();
+    ek_image_reg_setup();
 }
 
 void ek_gfx_shutdown(void) {

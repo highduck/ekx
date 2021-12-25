@@ -43,23 +43,23 @@ bool ek_pool_valid_id(ek_pool* pool, uint32_t id);
 
 void ek_pool_destroy_id(ek_pool* pool, uint32_t id);
 
-typedef struct ek_texture_reg_id {
+typedef struct ek_image_reg_id {
     uint32_t id;
-} ek_texture_reg_id;
+} ek_image_reg_id;
 
-typedef struct ek_texture_reg_name {
+typedef struct ek_image_reg_name {
     char str[64];
-} ek_texture_reg_name;
+} ek_image_reg_name;
 
-void ek_texture_reg_setup();
+void ek_image_reg_setup();
 
 // return existing data index by name
 // if not found creates new data handle, associate it with name, reset data to default state from data[0]
-ek_texture_reg_id ek_texture_reg_named(const char* name);
+ek_image_reg_id ek_image_reg_named(const char* name);
 
-void ek_texture_reg_assign(ek_texture_reg_id id, sg_image image);
+void ek_image_reg_assign(ek_image_reg_id id, sg_image image);
 
-sg_image ek_texture_reg_get(ek_texture_reg_id id);
+sg_image ek_image_reg_get(ek_image_reg_id id);
 
 #ifdef __cplusplus
 }

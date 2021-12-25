@@ -40,10 +40,10 @@ void Font::draw(const char* text,
         if (impl->getGlyph(code, gdata)) {
             if (gdata.image.id) {
                 if (prevTexture.id != gdata.image.id) {
-                    draw2d::state.setTexture(gdata.image);
+                    draw2d::state.set_image(gdata.image);
                     prevTexture = gdata.image;
                 }
-                draw2d::state.setTextureCoords(gdata.texCoord);
+                draw2d::state.set_image_rect(gdata.texCoord);
                 gdata.rect *= size;
                 if (gdata.rotated) {
                     draw2d::quad_rotated(gdata.rect.x + current.x,

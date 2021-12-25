@@ -41,12 +41,12 @@ namespace ek {
 
 /*** Save Image ***/
 
-void saveImagePNG(const ek_image* image, const char* path, bool alpha) {
-    EK_ASSERT(image != NULL);
-    EK_ASSERT(image->pixels != NULL);
+void ek_bitmap_save_png(const ek_bitmap* bitmap, const char* path, bool alpha) {
+    EK_ASSERT(bitmap != NULL);
+    EK_ASSERT(bitmap->pixels != NULL);
 
-    const int w = (int) image->w;
-    const int h = (int) image->h;
+    const int w = (int) bitmap->w;
+    const int h = (int) bitmap->h;
 
     // require RGBA non-premultiplied alpha
     //undo_premultiply_image(img);
@@ -55,12 +55,12 @@ void saveImagePNG(const ek_image* image, const char* path, bool alpha) {
     stbi_write_force_png_filter = 0;
 
     if (alpha) {
-        stbi_write_png(path, w, h, 4, image->pixels, 4 * w);
+        stbi_write_png(path, w, h, 4, bitmap->pixels, 4 * w);
     } else {
         const size_t pixels_count = w * h;
         auto* buffer = (uint8_t*) malloc(pixels_count * 3);
         auto* buffer_rgb = buffer;
-        const uint8_t* buffer_rgba = (const uint8_t*) image->pixels;
+        const uint8_t* buffer_rgba = (const uint8_t*) bitmap->pixels;
 
         for (size_t i = 0; i < pixels_count; ++i) {
             buffer_rgb[0] = buffer_rgba[0];
@@ -75,13 +75,13 @@ void saveImagePNG(const ek_image* image, const char* path, bool alpha) {
     }
 }
 
-void saveImageJPG(const ek_image* image, const char* path, bool alpha) {
+void ek_bitmap_save_jpg(const ek_bitmap* bitmap, const char* path, bool alpha) {
     // require RGBA non-premultiplied alpha
     //undo_premultiply_image(img);
-    const int w = (int) image->w;
-    const int h = (int) image->h;
+    const int w = (int) bitmap->w;
+    const int h = (int) bitmap->h;
     const size_t pixels_count = w * h;
-    const uint8_t* buffer_rgba = (uint8_t*)image->pixels;
+    const uint8_t* buffer_rgba = (uint8_t*) bitmap->pixels;
 
     if (alpha) {
         auto* buffer_rgb = (uint8_t*) malloc(pixels_count * 3);
@@ -152,10 +152,10 @@ void save(ImageSet& images, const char* output) {
     for (auto& resolution: images.resolutions) {
         auto nodeResolution = nodeAtlas.append_child("resolution");
         for (auto& image: resolution.sprites) {
-            if (image.image.pixels) {
-                auto* bitmap = &image.image;
+            if (image.bitmap.pixels) {
+                auto* bitmap = &image.bitmap;
                 // require RGBA non-premultiplied alpha
-                ek_image_un_premultiply(bitmap);
+                ek_bitmap_un_premultiply(bitmap);
 
                 auto nodeSprite = nodeResolution.append_child("image");
 //                snprintf(path, 1024, "%s/%d.png", output, idx++);
