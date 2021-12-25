@@ -10,7 +10,7 @@
 // texture loading
 #include <ek/texture_loader.h>
 
-#include <ek/scenex/data/TextureData.hpp>
+#include <ek/scenex/data/ImageData.hpp>
 #include <ek/graphics/graphics.hpp>
 
 #include <ek/scenex/SceneFactory.hpp>
@@ -100,7 +100,7 @@ public:
         if (state == AssetState::Loading) {
             if (!res.empty()) {
                 // we poll atlas loading / reloading in separated process with Atlas::pollLoading for each Res<Atlas>
-                int loading = res->getLoadingTexturesCount();
+                int loading = res->getLoadingImagesCount();
                 if (loading == 0) {
                     state = AssetState::Ready;
                 }
@@ -233,9 +233,9 @@ public:
     String fullPath_;
 };
 
-class TextureAsset : public Asset {
+class ImageAsset : public Asset {
 public:
-    TextureAsset(const char* name, TextureData data) :
+    ImageAsset(const char* name, ImageData data) :
             res{ek_image_reg_named(name)},
             data_{std::move(data)} {
         weight_ = (float) data_.images.size();
@@ -249,7 +249,7 @@ public:
             ek_texture_loader_set_path(loader->urls + i, data_.images[i].c_str());
         }
         loader->imagesToLoad = (int) data_.images.size();
-        if (data_.type == TextureDataType::CubeMap) {
+        if (data_.type == ImageDataType::CubeMap) {
             loader->isCubeMap = true;
             loader->premultiplyAlpha = false;
             loader->formatMask = data_.formatMask;
@@ -290,7 +290,7 @@ public:
 
     ek_image_reg_id res;
     ek_texture_loader* loader = nullptr;
-    TextureData data_{};
+    ImageData data_{};
     // by default always premultiply alpha,
     // currently for cube maps will be disabled
     // TODO: export level option
@@ -608,9 +608,9 @@ Asset* DefaultAssetsResolver::create_for_type(const void* data, uint32_t size) c
         return new ModelAsset(name);
     } else if (io_string_view_equals(type, "texture")) {
         IOStringView name;
-        TextureData texData;
+        ImageData texData;
         io(name, texData);
-        return new TextureAsset(name.data, texData);
+        return new ImageAsset(name.data, texData);
     } else if (io_string_view_equals(type, "strings")) {
         String name;
         Array<String> langs;

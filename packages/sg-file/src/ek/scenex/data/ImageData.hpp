@@ -6,13 +6,13 @@
 
 namespace ek {
 
-enum class TextureDataType : uint32_t {
+enum class ImageDataType : uint32_t {
     Normal = 0,
     CubeMap = 1
 };
 
-struct TextureData {
-    TextureDataType type;
+struct ImageData {
+    ImageDataType type;
     uint32_t formatMask = 1;
     Array<String> images;
 

@@ -28,7 +28,7 @@ public:
     String base_path;
     uint32_t formatMask = 1;
 
-    [[nodiscard]] int getLoadingTexturesCount() const;
+    [[nodiscard]] int getLoadingImagesCount() const;
     int pollLoading();
 
     void load(const char* path, float scaleFactor);

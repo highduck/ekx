@@ -27,7 +27,7 @@ void Font::draw(const char* text,
     draw2d::state.save_color()
             .scaleColor(color);
 
-    sg_image prevTexture = {0};
+    uint32_t prev_image_id = SG_INVALID_ID;
     Glyph gdata;
     for(; *text; ++text) {
         char code = *text;
@@ -39,9 +39,9 @@ void Font::draw(const char* text,
 
         if (impl->getGlyph(code, gdata)) {
             if (gdata.image.id) {
-                if (prevTexture.id != gdata.image.id) {
+                if (prev_image_id != gdata.image.id) {
                     draw2d::state.set_image(gdata.image);
-                    prevTexture = gdata.image;
+                    prev_image_id = gdata.image.id;
                 }
                 draw2d::state.set_image_rect(gdata.texCoord);
                 gdata.rect *= size;

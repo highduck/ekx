@@ -267,9 +267,9 @@ struct RenderSkyBoxRes {
         pip = sg_make_pipeline(pipDesc);
     }
 
-    void render(const sg_image cubeMapTexture, const Matrix4f& view, const Matrix4f& projection) {
+    void render(const sg_image cubemap, const Matrix4f& view, const Matrix4f& projection) {
         Res<StaticMesh> mesh{"cube"};
-        if (cubeMapTexture.id && mesh) {
+        if (cubemap.id && mesh) {
             sg_apply_pipeline(pip);
 
             Matrix4f model{};
@@ -286,7 +286,7 @@ struct RenderSkyBoxRes {
             const Matrix4f mvp = projection * view3 * model;
 
             sg_bindings bind{};
-            bind.fs_images[0] = cubeMapTexture;
+            bind.fs_images[0] = cubemap;
             bind.vertex_buffers[0] = mesh->vb;
             bind.index_buffer = mesh->ib;
             sg_apply_bindings(bind);

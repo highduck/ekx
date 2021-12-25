@@ -87,7 +87,7 @@ void GameDisplay::endOverlayDev() {
 //    }
 }
 
-sg_image createGameDisplayTexture(int w, int h, bool isColor, const char* label) {
+sg_image createGameDisplayImage(int w, int h, bool isColor, const char* label) {
     sg_image_desc desc{};
     desc.type = SG_IMAGETYPE_2D;
     desc.render_target = true;
@@ -123,7 +123,7 @@ void GameDisplay::update() {
         }
         if (color.id == 0 || color_img_width != w || color_img_height != h) {
             sg_destroy_image(color);
-            color = createGameDisplayTexture(w, h, true, "game-display-color");
+            color = createGameDisplayImage(w, h, true, "game-display-color");
             color_img_width = w;
             color_img_height = h;
 
@@ -131,7 +131,7 @@ void GameDisplay::update() {
 
             if (ek_app.config.need_depth) {
                 sg_destroy_image(depthStencil);
-                depthStencil = createGameDisplayTexture(w, h, false, "game-display-depth");
+                depthStencil = createGameDisplayImage(w, h, false, "game-display-depth");
             }
 
             sg_destroy_pass(pass);

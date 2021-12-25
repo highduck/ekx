@@ -99,15 +99,15 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
     atlas->loaders.clear();
 
     for (const auto& page: atlasInfo.pages) {
-        auto texture_asset = ek_image_reg_named(page.imagePath.c_str());
-        atlas->pages.push_back(texture_asset);
+        auto image_asset = ek_image_reg_named(page.imagePath.c_str());
+        atlas->pages.push_back(image_asset);
         atlas->loaders.emplace_back(ek_texture_loader_create());
         for (auto& spr_data: page.sprites) {
             auto sprite = new Sprite();
             sprite->rotated = spr_data.isRotated();
             sprite->rect = spr_data.rc;
             sprite->tex = spr_data.uv;
-            sprite->image_id = texture_asset;
+            sprite->image_id = image_asset;
 
             Res<Sprite> asset_spr{spr_data.name.c_str()};
             asset_spr.reset(sprite);
@@ -118,11 +118,11 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
     for (uint32_t i = 0; i < atlasInfo.pages.size(); ++i) {
         const auto& pageInfo = atlasInfo.pages[i];
         const auto& pageImagePath = pageInfo.imagePath;
-        const ek_image_reg_id texture_id = ek_image_reg_named(pageImagePath.c_str());
-        const sg_image image = ek_image_reg_get(texture_id);
+        const ek_image_reg_id image_id = ek_image_reg_named(pageImagePath.c_str());
+        const sg_image image = ek_image_reg_get(image_id);
         if (image.id) {
-            EK_DEBUG("Destroy old page texture %s", pageImagePath.c_str());
-            ek_image_reg_assign(texture_id, {SG_INVALID_ID});
+            EK_DEBUG("Destroy old page image %s", pageImagePath.c_str());
+            ek_image_reg_assign(image_id, {SG_INVALID_ID});
         }
 
         EK_DEBUG("Load atlas page %s/%s", atlas->base_path.c_str(), pageImagePath.c_str());
@@ -188,7 +188,7 @@ int Atlas::pollLoading() {
     return 0;
 }
 
-int Atlas::getLoadingTexturesCount() const {
+int Atlas::getLoadingImagesCount() const {
     int loading = 0;
     for (uint32_t i = 0; i < loaders.size(); ++i) {
         auto* loader = loaders[i];
