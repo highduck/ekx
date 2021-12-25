@@ -184,7 +184,7 @@ inline void audioPlaybackCallback(void* inUserData, AudioQueueRef inAQ, AudioQue
 
     #if TARGET_OS_IOS
     AVAudioSession* session = [AVAudioSession sharedInstance];
-    assert(session != nil);
+    NSAssert(session, @"invalid session");
     if(![session setCategory: AVAudioSessionCategoryAmbient
                            error:nil]) {
         NSLog(@"failed to activate audio session");

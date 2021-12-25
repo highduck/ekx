@@ -9,7 +9,7 @@ void handleTouches(ek_app_event_type type, UIView* view, NSSet* touches, UIEvent
                 .type = type,
                 .id = (uint64_t) touch,
                 .x = (float) (location.x * scaleFactor),
-                .y =   (float) (location.y * scaleFactor)
+                .y = (float) (location.y * scaleFactor)
         }});
     }
 }

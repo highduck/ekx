@@ -40,7 +40,7 @@ public:
         dataSize = width_ * height_ * (alphaMap_ ? 1 : 4);
         data = (uint8_t*)calloc(1, dataSize);
 
-        sg_image_desc desc{
+        const sg_image_desc desc = {
                 .type = SG_IMAGETYPE_2D,
                 .width = width,
                 .height = height,
@@ -51,12 +51,12 @@ public:
                 .wrap_u = SG_WRAP_CLAMP_TO_EDGE,
                 .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
         };
-        texture = new Texture(desc);
+        image = sg_make_image(&desc);
     }
 
     ~Page() {
-        delete data;
-        delete texture;
+        free(data);
+        sg_destroy_image(image);
     }
 
     void reset() {
@@ -86,7 +86,7 @@ public:
             return false;
         }
 
-        sprite.texture = texture;
+        sprite.image = image;
         sprite.texCoords.set(invWidth * placeX, invHeight * placeY, invWidth * spriteWidth, invHeight * spriteHeight);
 
         //texture->updateRect(placeX, placeY, spriteWidth, spriteHeight, pixels.data());
@@ -119,12 +119,12 @@ public:
 
     void invalidate() {
         if (dirty) {
-            texture->update(data, dataSize);
+            ek_gfx_update_image_0(image, data, dataSize);
             dirty = false;
         }
     }
 
-    Texture* texture;
+    sg_image image;
     int width;
     int height;
     float invWidth;
@@ -183,9 +183,9 @@ DynamicAtlasSprite DynamicAtlas::addBitmap(int width, int height, const uint8_t*
     return sprite;
 }
 
-const Texture* DynamicAtlas::getPageTexture(int index) const {
+sg_image DynamicAtlas::getPageTexture(int index) const {
     EK_ASSERT(index < pages_.size() && index >= 0);
-    return pages_[index]->texture;
+    return pages_[index]->image;
 }
 
 void DynamicAtlas::reset() {

@@ -8,12 +8,12 @@ void GameWindow::onDraw() {
     auto& display = Locator::ref<basic_application>().display;
     const ImVec2 displayPos = ImGui::GetCursorScreenPos();
     const ImVec2 displaySize = ImGui::GetContentRegionAvail();
-    if (display.color && displaySize.x > 0 && displaySize.y > 0) {
-        auto texId = (void*) static_cast<uintptr_t>(display.color->image.id);
+    if (display.color.id && displaySize.x > 0 && displaySize.y > 0) {
+        auto texId = (void*) static_cast<uintptr_t>(display.color.id);
 
         const float scale = fmin(displaySize.x / display.info.size.x, displaySize.y / display.info.size.y);
 
-        const auto info = sg_query_image_info(display.color->image);
+        const auto info = sg_query_image_info(display.color);
         const float texCoordX1 = display.info.size.x / (float)info.width;
         const float texCoordY1 = display.info.size.y / (float)info.height;
 

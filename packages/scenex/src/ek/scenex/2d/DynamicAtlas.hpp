@@ -5,14 +5,13 @@
 #include <ek/util/Type.hpp>
 #include <ek/math/Rect.hpp>
 #include <cstring>
+#include <sokol_gfx.h>
 
 namespace ek {
 
-class Texture;
-
 struct DynamicAtlasSprite {
     Rect2f texCoords{0, 0, 1, 1};
-    Texture* texture = nullptr;
+    sg_image image = {0};
 };
 
 class DynamicAtlas : private NoCopyAssign {
@@ -25,7 +24,7 @@ public:
 
     DynamicAtlasSprite addBitmap(int width, int height, const uint8_t* pixels, size_t pixelsSize);
 
-    [[nodiscard]] const Texture* getPageTexture(int index) const;
+    [[nodiscard]] sg_image getPageTexture(int index) const;
 
     void reset();
 

@@ -18,7 +18,6 @@
 #define OBOE_STREAM_BASE_H_
 
 #include <memory>
-#include <string>
 #include "oboe/AudioStreamCallback.h"
 #include "oboe/Definitions.h"
 
@@ -219,9 +218,9 @@ protected:
     SessionId                       mSessionId = SessionId::None;
 
     /** Control the name of the package creating the stream. Only active on Android 31+ */
-    std::string                     mPackageName;
+    char                     mPackageName[1024] = {0};
     /** Control the attribution tag of the context creating the stream. Only active on Android 31+ */
-    std::string                     mAttributionTag;
+    char                     mAttributionTag[1024] = {0};
 
     // Control whether Oboe can convert channel counts to achieve optimal results.
     bool                            mChannelConversionAllowed = false;

@@ -65,13 +65,15 @@ bool QuirksManager::DeviceQuirks::isAAudioMMapPossible(const AudioStreamBuilder 
 class SamsungDeviceQuirks : public  QuirksManager::DeviceQuirks {
 public:
     SamsungDeviceQuirks() {
-        std::string arch = getPropertyString("ro.arch");
-        isExynos = (arch.rfind("exynos", 0) == 0); // starts with?
+        char arch[PROP_VALUE_MAX];
+        getPropertyString("ro.arch", arch);
+        isExynos = (strstr(arch, "exynos") == arch); // starts with?
 
-        std::string chipname = getPropertyString("ro.hardware.chipname");
-        isExynos9810 = (chipname == "exynos9810");
-        isExynos990 = (chipname == "exynos990");
-        isExynos850 = (chipname == "exynos850");
+        char chipname[PROP_VALUE_MAX];
+        getPropertyString("ro.hardware.chipname", chipname);
+        isExynos9810 = strcmp(chipname, "exynos9810") == 0;
+        isExynos990 = strcmp(chipname, "exynos990") == 0;
+        isExynos850 = strcmp(chipname, "exynos850") == 0;
 
         mBuildChangelist = getPropertyInteger("ro.build.changelist", 0);
     }
@@ -136,8 +138,9 @@ private:
 };
 
 QuirksManager::QuirksManager() {
-    std::string manufacturer = getPropertyString("ro.product.manufacturer");
-    if (manufacturer == "samsung") {
+    char manufacturer[PROP_VALUE_MAX];
+    getPropertyString("ro.product.manufacturer", manufacturer);
+    if (strcmp(manufacturer, "samsung") == 0) {
         mDeviceQuirks = std::make_unique<SamsungDeviceQuirks>();
     } else {
         mDeviceQuirks = std::make_unique<DeviceQuirks>();

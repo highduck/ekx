@@ -14,6 +14,14 @@ function setup(project) {
                 ],
                 flags: "-x objective-c"
             },
+        },
+        android: {
+            cpp_flags: {
+                files: [
+                    "src/ek/audio/audio_auph_impl.c"
+                ],
+                flags: "-xc++ -std=c++17"
+            },
         }
     });
     project.importModule("@ekx/auph", __dirname);

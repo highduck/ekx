@@ -2,6 +2,7 @@
 #include <ek/assert.h>
 #include <ek/log.h>
 #include <ek/app.h>
+#include "temp_res_man.h"
 
 #define SOKOL_GFX_IMPL
 
@@ -36,7 +37,7 @@ static void ek_gfx_log_backend() {
 #endif
 }
 
-void ek_gfx_init(int max_draw_calls) {
+void ek_gfx_setup(int max_draw_calls) {
     EK_DEBUG("gfx init");
     sg_desc desc = {0};
     // this size is 2x Draw Calls per frame (because of sokol internal double-buffering)
@@ -54,6 +55,9 @@ void ek_gfx_init(int max_draw_calls) {
 #endif
     sg_setup(&desc);
     ek_gfx_log_backend();
+
+
+    ek_texture_reg_setup();
 }
 
 void ek_gfx_shutdown(void) {
@@ -145,6 +149,7 @@ bool ek_gfx_read_pixels(sg_image image, void* pixels) {
         return true;
     }
 #else // OSX
+    (void) image;
     (void) pixels;
 #endif
     return false;
@@ -152,10 +157,11 @@ bool ek_gfx_read_pixels(sg_image image, void* pixels) {
 
 sg_image ek_gfx_make_color_image(int width, int height, uint32_t color) {
     sg_image_desc desc = {
-            .type = SG_IMAGETYPE_2D,
+            // defaults:
+            //.type = SG_IMAGETYPE_2D,
+            //.usage = SG_USAGE_IMMUTABLE,
             .width = width,
             .height = height,
-            .usage = SG_USAGE_IMMUTABLE,
             .pixel_format = SG_PIXELFORMAT_RGBA8,
     };
     int count = width * height;
@@ -172,12 +178,15 @@ sg_image ek_gfx_make_color_image(int width, int height, uint32_t color) {
 
 sg_image ek_gfx_make_render_target(int width, int height, const char* label) {
     sg_image_desc desc = {
+            // defaults:
+            //.type = SG_IMAGETYPE_2D,
+            //.usage = SG_USAGE_IMMUTABLE,
+
             .label = label,
-            .type = SG_IMAGETYPE_2D,
             .render_target = true,
             .width = width,
             .height = height,
-            .usage = SG_USAGE_IMMUTABLE,
+
             //.pixel_format = SG_PIXELFORMAT_RGBA8,
             .min_filter = SG_FILTER_LINEAR,
             .mag_filter = SG_FILTER_LINEAR,
@@ -185,4 +194,11 @@ sg_image ek_gfx_make_render_target(int width, int height, const char* label) {
             .wrap_v = SG_WRAP_CLAMP_TO_EDGE,
     };
     return sg_make_image(&desc);
+}
+
+void ek_gfx_update_image_0(sg_image image, void* data, size_t size) {
+    sg_image_data image_data = {};
+    image_data.subimage[0][0].ptr = data;
+    image_data.subimage[0][0].size = size;
+    sg_update_image(image, &image_data);
 }

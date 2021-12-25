@@ -19,7 +19,6 @@
 
 #include <unistd.h>
 #include <sys/types.h>
-#include <string>
 #include "oboe/Definitions.h"
 
 namespace oboe {
@@ -63,7 +62,7 @@ const char * convertToText(FromType input);
  * @param name
  * @return the value of a named system property in a string or empty string
  */
-std::string getPropertyString(const char * name);
+void getPropertyString(const char * name, char* out);
 
 /**
  * @param name

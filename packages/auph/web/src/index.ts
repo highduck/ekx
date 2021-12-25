@@ -16,7 +16,7 @@ function loadDriver(): IAuph {
 const _ = loadDriver();
 
 export * from "./protocol/static";
-export const init = _.init;
+export const setup = _.setup;
 export const shutdown = _.shutdown;
 export const set = _.set;
 export const get = _.get;

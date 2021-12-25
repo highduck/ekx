@@ -7,15 +7,15 @@
 #include <math.h>
 
 bool auph_load_file_mp3(const char* filepath, auph_buffer_data_source* dest) {
-    drmp3_config config = {0};
-    drmp3_uint64 totalFrames = 0;
-    int16_t* data = drmp3_open_file_and_read_pcm_frames_s16(filepath, &config, &totalFrames, NULL);
-    if (data) {
-        dest->data.i16 = data;
+    drmp3_uint64 frames_num;
+    drmp3_config config;
+    int16_t* frames = drmp3_open_file_and_read_pcm_frames_s16(filepath, &config, &frames_num, NULL);
+    if (frames) {
+        dest->data.i16 = frames;
         dest->format = AUPH_SAMPLE_FORMAT_I16;
         dest->sample_rate = config.sampleRate;
         dest->channels = config.channels;
-        dest->length = totalFrames;
+        dest->length = frames_num;
         dest->reader = auph_select_source_reader(dest->format, dest->channels, false);
         return true;
     }
@@ -23,15 +23,15 @@ bool auph_load_file_mp3(const char* filepath, auph_buffer_data_source* dest) {
 }
 
 bool auph_load_memory_mp3(const void* data, uint32_t size, auph_buffer_data_source* dest) {
-    drmp3_config config = {0};
-    drmp3_uint64 totalFrames = 0;
-    int16_t* samples = drmp3_open_memory_and_read_pcm_frames_s16(data, (size_t) size, &config, &totalFrames, NULL);
-    if (data) {
-        dest->data.i16 = samples;
+    drmp3_uint64 frames_num;
+    drmp3_config config;
+    int16_t* frames = drmp3_open_memory_and_read_pcm_frames_s16(data, (size_t) size, &config, &frames_num, NULL);
+    if (frames) {
+        dest->data.i16 = frames;
         dest->format = AUPH_SAMPLE_FORMAT_I16;
         dest->sample_rate = config.sampleRate;
         dest->channels = config.channels;
-        dest->length = totalFrames;
+        dest->length = frames_num;
         dest->reader = auph_select_source_reader(dest->format, dest->channels, false);
         return true;
     }

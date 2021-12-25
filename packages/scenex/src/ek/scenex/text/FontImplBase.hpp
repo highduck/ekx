@@ -1,10 +1,9 @@
 #pragma once
 
 #include <ek/math/Rect.hpp>
+#include <sokol_gfx.h>
 
 namespace ek {
-
-class Texture;
 
 class FontImplBase;
 
@@ -19,7 +18,7 @@ struct Glyph {
 
     // sprite part
     Rect2f texCoord{};
-    const Texture* texture = nullptr;
+    sg_image image = {0};
     bool rotated = false;
 
     // we need to know what fallback give us this glyph info,

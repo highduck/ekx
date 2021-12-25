@@ -123,10 +123,10 @@ void SceneWindow::onDraw() {
     display.update();
 
     // add pass to render imgui
-    if (display.color && displaySize.x > 0 && displaySize.y > 0) {
-        auto texId = (void*) static_cast<uintptr_t>(display.color->image.id);
+    if (display.color.id && displaySize.x > 0 && displaySize.y > 0) {
+        auto texId = (void*) static_cast<uintptr_t>(display.color.id);
 
-        const auto info = sg_query_image_info(display.color->image);
+        const auto info = sg_query_image_info(display.color);
         const float texCoordX1 = display.info.size.x / (float)info.width;
         const float texCoordY1 = display.info.size.y / (float)info.height;
 
@@ -262,7 +262,7 @@ void SceneWindow::drawSceneNodeBounds(ecs::EntityApi e) {
 }
 
 void SceneWindow::onPreRender() {
-    if (!display.color) {
+    if (display.color.id == SG_INVALID_ID) {
         return;
     }
     sg_pass_action passAction{};

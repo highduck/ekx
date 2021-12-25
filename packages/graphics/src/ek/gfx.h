@@ -1,8 +1,6 @@
 #ifndef EK_GFX_H
 #define EK_GFX_H
 
-#include <stdint.h>
-
 #if defined(__ANDROID__)
 
 //#define SOKOL_GLES3
@@ -57,6 +55,9 @@
 
 #include <sokol_gfx.h>
 
+#include <stdint.h>
+#include "temp_res_man.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -65,7 +66,7 @@ extern "C" {
  * initialize sokol gfx subsystem and glue it to ek_app module
  * @param max_draw_calls - if <= 0 - default 128 will be applied
  */
-void ek_gfx_init(int max_draw_calls);
+void ek_gfx_setup(int max_draw_calls);
 
 /**
  * shutdown sokol gfx subsystem
@@ -77,6 +78,8 @@ bool ek_gfx_read_pixels(sg_image image, void* pixels);
 sg_image ek_gfx_make_color_image(int width, int height, uint32_t color);
 
 sg_image ek_gfx_make_render_target(int width, int height, const char* label);
+
+void ek_gfx_update_image_0(sg_image image, void* data, size_t size);
 
 #ifdef __cplusplus
 }

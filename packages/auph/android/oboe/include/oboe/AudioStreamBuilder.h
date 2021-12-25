@@ -429,8 +429,13 @@ public:
      *
      * @param packageName packageName of the calling app.
      */
-    AudioStreamBuilder *setPackageName(std::string packageName) {
-        mPackageName = packageName;
+    AudioStreamBuilder *setPackageName(const char* str) {
+        if(str) {
+            strcpy(mPackageName, str);
+        }
+        else {
+            mPackageName[0] = 0;
+        }
         return this;
     }
 
@@ -445,8 +450,13 @@ public:
      *
      * @param attributionTag attributionTag of the calling context.
      */
-    AudioStreamBuilder *setAttributionTag(std::string attributionTag) {
-        mAttributionTag = attributionTag;
+    AudioStreamBuilder *setAttributionTag(const char* attributionTag) {
+        if(attributionTag) {
+            strcpy(mAttributionTag, attributionTag);
+        }
+        else {
+            mAttributionTag[0] = 0;
+        }
         return this;
     }
 

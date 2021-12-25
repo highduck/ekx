@@ -13,6 +13,7 @@ void resetEntityPoolArrays(EntityIndex* entities, EntityGeneration* generations)
     memset(generations, 0, sizeof(EntityGeneration) * ENTITIES_MAX_COUNT);
     {
         auto* it = entities;
+#pragma nounroll
         for (uint32_t i = 1; i <= ENTITIES_MAX_COUNT; ++i) {
             *(it++) = i;
         }
@@ -32,6 +33,7 @@ void World::create(EntityIndex* outEntities, uint32_t count_) {
     auto* indices = entityPool;
     auto next_ = next;
 
+#pragma nounroll
     for (uint32_t i = 0; i < count_; ++i) {
         const auto nextIndex = indices[next_];
         indices[next_] = next_;
@@ -48,6 +50,7 @@ void World::destroy(const EntityIndex* entitiesToDestroy, uint32_t count) {
         auto* indices = entityPool;
         auto* generations_ = generations;
         auto next_ = next;
+#pragma nounroll
         for (uint32_t i = 0; i < count; ++i) {
             const auto index = entitiesToDestroy[i];
             indices[index] = next_;
@@ -60,6 +63,7 @@ void World::destroy(const EntityIndex* entitiesToDestroy, uint32_t count) {
     {
         // destroy components
         auto** components_ = components;
+#pragma nounroll
         for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {
             auto* component = components_[i];
             // TODO: we can know all components ahead of time and register/init them and not check every case...

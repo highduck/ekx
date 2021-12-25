@@ -99,7 +99,8 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
     atlas->loaders.clear();
 
     for (const auto& page: atlasInfo.pages) {
-        auto& texture_asset = atlas->pages.emplace_back(page.imagePath.c_str());
+        auto texture_asset = ek_texture_reg_named(page.imagePath.c_str());
+        atlas->pages.push_back(texture_asset);
         atlas->loaders.emplace_back(ek_texture_loader_create());
         for (auto& spr_data: page.sprites) {
             auto sprite = new Sprite();
@@ -117,10 +118,11 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
     for (uint32_t i = 0; i < atlasInfo.pages.size(); ++i) {
         const auto& pageInfo = atlasInfo.pages[i];
         const auto& pageImagePath = pageInfo.imagePath;
-        Res<Texture> resTexture{pageImagePath.c_str()};
-        if (resTexture) {
+        const ek_texture_reg_id texture_id = ek_texture_reg_named(pageImagePath.c_str());
+        const sg_image image = ek_texture_reg_get(texture_id);
+        if (image.id) {
             EK_DEBUG("Destroy old page texture %s", pageImagePath.c_str());
-            resTexture.reset(nullptr);
+            ek_texture_reg_assign(texture_id, {SG_INVALID_ID});
         }
 
         EK_DEBUG("Load atlas page %s/%s", atlas->base_path.c_str(), pageImagePath.c_str());
@@ -160,8 +162,8 @@ int Atlas::pollLoading() {
                 ek_texture_loader_update(loader);
                 if (!loader->loading) {
                     if (loader->status == 0) {
-                        Res<Texture> res{loader->urls[0].path};
-                        res.reset(new Texture{loader->image});
+                        ek_texture_reg_id res = ek_texture_reg_named(loader->urls[0].path);
+                        ek_texture_reg_assign(res, loader->image);
                         ek_texture_loader_destroy(loader);
                         loaders[i] = nullptr;
                     }
@@ -203,8 +205,8 @@ void Atlas::clear() {
 //        asset_t<texture_t>::unload(texture);
 //    }
 
-    for (auto& page: pages) {
-        page.reset(nullptr);
+    for (auto page: pages) {
+        ek_texture_reg_assign(page, {SG_INVALID_ID});
     }
 
     for (auto& spr: sprites) {

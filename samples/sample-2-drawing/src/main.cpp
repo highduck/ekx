@@ -37,7 +37,7 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
 }
 
 void on_ready() {
-    ek_gfx_init(128);
+    ek_gfx_setup(128);
     draw2d::initialize();
 }
 

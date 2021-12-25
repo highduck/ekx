@@ -121,7 +121,7 @@ inline void run_app() {
 #endif
 
     // audio should be initialized before "Resume" event, so the best place is "On Create" event
-    ek_audio_setup();
+    auph_setup();
 
     ek_app.on_ready = []{Locator::create<basic_application, T>();};
     ek_app.on_frame = launcher_on_frame;

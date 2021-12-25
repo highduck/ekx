@@ -49,7 +49,7 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         if (spr) {
             outGlyph.rect = spr->rect / baseFontSize;
             outGlyph.texCoord = spr->tex;
-            outGlyph.texture = spr->texture.get();
+            outGlyph.image = ek_texture_reg_get(spr->texture);
             outGlyph.rotated = spr->rotated;
         } else {
             outGlyph.rect = g->box / unitsPerEM;
@@ -75,6 +75,8 @@ bool BitmapFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
 }
 
 float BitmapFont::getKerning(uint32_t codepoint1, uint32_t codepoint2) {
+    (void)codepoint1;
+    (void)codepoint2;
     return 0.0f;
 }
 

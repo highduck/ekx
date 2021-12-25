@@ -33,13 +33,13 @@ void drawAssetItem<DynamicAtlas>(const DynamicAtlas& asset) {
     static float pageScale = 0.25f;
     ImGui::SliderFloat("Scale", &pageScale, 0.0f, 1.0f);
     for (int i = 0; i < pagesCount; ++i) {
-        const auto* page = asset.getPageTexture(i);
-        if (page) {
+        const sg_image page = asset.getPageTexture(i);
+        if (page.id) {
             ImGui::Text("Page #%d", i);
-            const auto info = sg_query_image_info(page->image);
+            const auto info = sg_query_image_info(page);
             const auto width = pageScale * (float) info.width;
             const auto height = pageScale * (float) info.height;
-            ImGui::Image((void*) (uintptr_t) page->image.id, ImVec2{width, height});
+            ImGui::Image((void*) (uintptr_t) page.id, ImVec2{width, height});
         } else {
             ImGui::TextDisabled("Page #%d", i);
         }
@@ -53,13 +53,13 @@ void drawAssetItem<Atlas>(const Atlas& asset) {
     static float pageScale = 0.25f;
     ImGui::SliderFloat("Scale", &pageScale, 0.0f, 1.0f);
     for (int i = 0; i < pagesCount; ++i) {
-        const auto* page = asset.pages[i].get();
-        if (page) {
+        const sg_image page = ek_texture_reg_get(asset.pages[i]);
+        if (page.id) {
             ImGui::Text("Page #%d", i);
-            const auto info = sg_query_image_info(page->image);
+            const auto info = sg_query_image_info(page);
             const auto width = pageScale * (float) info.width;
             const auto height = pageScale * (float) info.height;
-            ImGui::Image((void*) (uintptr_t) page->image.id, ImVec2{width, height});
+            ImGui::Image((void*) (uintptr_t) page.id, ImVec2{width, height});
         } else {
             ImGui::TextDisabled("Page #%d", i);
         }
@@ -154,9 +154,11 @@ void drawAssetsListByType() {
 }
 
 void ResourcesWindow::onDraw() {
+    // TODO: somehow generic draw manual registries
+    // drawAssetsListByType<Texture>();
+
     if (ImGui::BeginTabBar("res_by_type", 0)) {
         drawAssetsListByType<Shader>();
-        drawAssetsListByType<Texture>();
         drawAssetsListByType<Sprite>();
         drawAssetsListByType<Atlas>();
         drawAssetsListByType<DynamicAtlas>();

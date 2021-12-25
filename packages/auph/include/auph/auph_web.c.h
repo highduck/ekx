@@ -7,8 +7,8 @@
 #include "auph.h"
 #include <emscripten.h>
 
-void auph_init(void) {
-    EM_ASM(auph.init());
+void auph_setup(void) {
+    EM_ASM(auph.setup());
 }
 
 void auph_shutdown(void) {

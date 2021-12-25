@@ -12,7 +12,7 @@ struct random_estimator_t {
     uint64_t* bitset;
     uint64_t* bitset_occupy;
     uint32_t* pixels;
-    Texture* image;
+    sg_image image;
     int bitset_size;
     int image_size;
 };
@@ -36,7 +36,7 @@ void estimator_init(random_estimator_t* estimator) {
     desc.height = estimator->image_size;
     desc.usage = SG_USAGE_DYNAMIC;
     desc.pixel_format = SG_PIXELFORMAT_RGBA8;
-    estimator->image = new Texture(desc);
+    estimator->image = sg_make_image(desc);
 }
 
 void estimator_set(random_estimator_t* estimator, uint32_t x, uint32_t y) {
@@ -60,14 +60,14 @@ void estimator_update_pixels(random_estimator_t* estimator) {
         }
     }
     const uint32_t image_data_size = estimator->image_size * estimator->image_size * 4;
-    estimator->image->update(estimator->pixels, image_data_size);
+    ek_gfx_update_image_0(estimator->image, estimator->pixels, image_data_size);
 }
 
 
 random_estimator_t estimator;
 
 void on_ready() {
-    ek_gfx_init(128);
+    ek_gfx_setup(128);
     draw2d::initialize();
 
     estimator_init(&estimator);

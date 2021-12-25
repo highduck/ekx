@@ -9,12 +9,7 @@
     "watch": "tsc -w -p web/tsconfig.json & rollup -w -c web/rollup.config.js",
     "build": "tsc -p web/tsconfig.json && rollup -c web/rollup.config.js",
     "build-cmake": "node scripts/build-cmake",
-    "build-pages": "node scripts/build-demo && node scripts/build-pages",
-    "build-node": "node-gyp rebuild",
-    "start-node": "cd demo && node node.js",
-    "build-demo": "node scripts/build-demo",
-    "start-demo": "http-server demo -o",
-    "clean": "rimraf ./build ./pages ./web/dist"
+    "clean": "rimraf ./build ./web/dist"
   },
   "files": [
     "include",

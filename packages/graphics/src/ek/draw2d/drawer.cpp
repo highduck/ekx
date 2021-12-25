@@ -172,10 +172,10 @@ void Context::drawBatch() {
     sg_update_buffer(vb, {vertexData_, vertexDataSize});
     sg_update_buffer(ib, {indexData_, indexDataSize});
 
-    const auto* fbColor = renderTarget != nullptr ? renderTarget : framebufferColor;
-    const auto* fbDepthStencil = renderDepthStencil != nullptr ? renderDepthStencil : framebufferDepthStencil;
+    const sg_image fbColor = renderTarget.id ? renderTarget : framebufferColor;
+    const sg_image fbDepthStencil = renderDepthStencil.id ? renderDepthStencil : framebufferDepthStencil;
 
-    auto pip = getPipeline(curr.shader, fbColor != nullptr, fbDepthStencil != nullptr);
+    auto pip = getPipeline(curr.shader, fbColor.id != 0, fbDepthStencil.id != 0);
     if (pip.id != selectedPipeline.id) {
         selectedPipeline = pip;
         sg_apply_pipeline(pip);
@@ -214,7 +214,7 @@ void Context::drawBatch() {
 void Context::allocTriangles(uint32_t vertex_count, uint32_t index_count) {
     if (checkFlags != 0) {
         if (checkFlags & Context::Check_Texture) {
-            setNextTexture(texture->image);
+            setNextTexture(texture);
         }
         if (checkFlags & Context::Check_Shader) {
             setNextShader(program->shader, program->numFSImages);
@@ -255,7 +255,7 @@ Context::Context() :
 }
 
 Context::~Context() {
-    Res<Texture>{"empty"}.reset(nullptr);
+    ek_texture_reg_assign(ek_texture_reg_named("empty"), {SG_INVALID_ID});
     Res<Shader>{"draw2d"}.reset(nullptr);
     Res<Shader>{"draw2d_alpha"}.reset(nullptr);
     Res<Shader>{"draw2d_color"}.reset(nullptr);
@@ -446,14 +446,14 @@ Context& Context::setEmptyTexture() {
     return *this;
 }
 
-Context& Context::setTexture(const Texture* texture_) {
-    texture = texture_;
+Context& Context::setTexture(const sg_image image) {
+    texture = image;
     checkFlags |= Check_Texture;
     return *this;
 }
 
-Context& Context::setTextureRegion(const Texture* texture_, const Rect2f& region) {
-    texture = texture_ != nullptr ? texture_ : emptyTexture;
+Context& Context::setTextureRegion(sg_image image, const Rect2f& region) {
+    texture = image.id ? image : emptyTexture;
     checkFlags |= Check_Texture;
     uv = region;
     return *this;
@@ -495,11 +495,12 @@ Context& Context::restoreProgram() {
 void Context::createDefaultResources() {
     EK_DEBUG("draw2d: create default resources");
     const auto backend = sg_query_backend();
-    emptyTexture = Texture::solid(4, 4, 0xFFFFFFFFu);
+    emptyTexture = ek_gfx_make_color_image(4, 4, 0xFFFFFFFFu);
+    ek_texture_reg_assign(ek_texture_reg_named("empty"), emptyTexture);
+
     defaultShader = new Shader(draw2d_shader_desc(backend));
     alphaMapShader = new Shader(draw2d_alpha_shader_desc(backend));
     solidColorShader = new Shader(draw2d_color_shader_desc(backend));
-    Res<Texture>{"empty"}.reset(emptyTexture);
     Res<Shader>{"draw2d"}.reset(defaultShader);
     Res<Shader>{"draw2d_alpha"}.reset(alphaMapShader);
     Res<Shader>{"draw2d_color"}.reset(solidColorShader);
@@ -511,7 +512,7 @@ void beginNewFrame() {
 }
 
 /*** drawings ***/
-void begin(Rect2f viewport, const Matrix3x2f& view, const Texture* renderTarget, const Texture* depthStencilTarget) {
+void begin(Rect2f viewport, const Matrix3x2f& view, const sg_image renderTarget, const sg_image depthStencilTarget) {
     EK_ASSERT(!state.active);
     state.texture = state.emptyTexture;
     state.program = state.defaultShader;
@@ -525,7 +526,7 @@ void begin(Rect2f viewport, const Matrix3x2f& view, const Texture* renderTarget,
     state.curr = {};
     state.next.shader = state.program->shader;
     state.next.shaderTexturesCount = 1;
-    state.next.texture = state.texture->image;
+    state.next.texture = state.texture;
     state.next.scissors = Rect2i{viewport};
     state.selectedPipeline.id = SG_INVALID_ID;
     state.stateChanged = true;
@@ -536,7 +537,7 @@ void begin(Rect2f viewport, const Matrix3x2f& view, const Texture* renderTarget,
 #if EK_IOS || EK_MACOS
     state.mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;
 #else
-    if (state.renderTarget) {
+    if (state.renderTarget.id) {
         state.mvp = ortho_2d<float>(viewport.x, viewport.bottom(), viewport.width, -viewport.height) * view;
     } else {
         state.mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;

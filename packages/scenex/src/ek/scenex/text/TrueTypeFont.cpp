@@ -122,7 +122,7 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         auto sprite = atlas->addBitmap(bitmapWidth, bitmapHeight, bmp, bmpSize);
         //free(bmp);
 
-        glyph.texture = sprite.texture;
+        glyph.image = sprite.image;
         glyph.texCoord = sprite.texCoords;
 
         glyph.rect.x = x0;

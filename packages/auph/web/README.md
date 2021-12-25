@@ -11,7 +11,7 @@ Load library:
 
 Write some JavaScript
 ```javascript
-auph.init();
+auph.setup();
 auph.resume();
 var data = auph.load("https://eliasku.github.io/auph/assets/wav/HiHat_Closed.wav", 0);
 setInterval(()=>{

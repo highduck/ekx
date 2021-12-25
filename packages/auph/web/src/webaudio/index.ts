@@ -40,7 +40,7 @@ import {
 import {_bufferDestroy, _bufferLoad, _bufferMemory, _getBufferObj, buffers, getNextBufferObj} from "./Buffer";
 import {len, resize, setAudioParamValue} from "./common";
 
-export function init(): void {
+export function setup(): void {
     const ctx = initContext();
     if (ctx) {
         initBusPool(ctx);

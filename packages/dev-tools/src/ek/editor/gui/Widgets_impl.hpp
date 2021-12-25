@@ -161,8 +161,9 @@ void guiSprite(const Sprite& sprite) {
     auto rc = sprite.rect;
     auto uv0 = sprite.tex.position;
     auto uv1 = sprite.tex.right_bottom();
-    if (sprite.texture) {
-        void* tex_id = (void*)(uintptr_t)sprite.texture->image.id;
+    const sg_image sprite_image = ek_texture_reg_get(sprite.texture);
+    if (sprite_image.id) {
+        void* tex_id = (void*)(uintptr_t)sprite_image.id;
         if (sprite.rotated) {
             ImGui::BeginChild("s", ImVec2{rc.width, rc.height});
             ImDrawList* draw_list = ImGui::GetWindowDrawList();

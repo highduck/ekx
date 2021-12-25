@@ -125,7 +125,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
 
     draw2d::state.save_color().scaleColor(layer.color);
 
-    const Texture* prevTexture = nullptr;
+    sg_image prevTexture = {0};
     uint32_t prevCodepointOnLine = 0;
     Glyph gdata;
     uint32_t codepoint = 0;
@@ -138,10 +138,10 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
                 if (kerning && prevCodepointOnLine) {
                     current.x += gdata.source->getKerning(prevCodepointOnLine, codepoint) * size;
                 }
-                if (gdata.texture) {
-                    if (prevTexture != gdata.texture) {
-                        draw2d::state.setTexture(gdata.texture);
-                        prevTexture = gdata.texture;
+                if (gdata.image.id) {
+                    if (prevTexture.id != gdata.image.id) {
+                        draw2d::state.setTexture(gdata.image);
+                        prevTexture = gdata.image;
                     }
                     draw2d::state.setTextureCoords(gdata.texCoord);
                     gdata.rect = translate(gdata.rect * size, current);
@@ -160,7 +160,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
                     if (layer.showGlyphBounds) {
                         draw2d::state.setEmptyTexture();
                         draw2d::strokeRect(gdata.rect, 0xFFFFFF_rgb, 1);
-                        draw2d::state.setTexture(gdata.texture);
+                        draw2d::state.setTexture(gdata.image);
                     }
                 }
 

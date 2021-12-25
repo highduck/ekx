@@ -40,8 +40,8 @@ void GameDisplay::endGame() {
     if (simulated) {
         sg_end_pass();
 
-        draw2d::state.framebufferColor = nullptr;
-        draw2d::state.framebufferDepthStencil = nullptr;
+        draw2d::state.framebufferColor = {0};
+        draw2d::state.framebufferDepthStencil = {0};
     }
     sg_pop_debug_group();
 }
@@ -87,7 +87,7 @@ void GameDisplay::endOverlayDev() {
 //    }
 }
 
-Texture* createGameDisplayTexture(int w, int h, bool isColor, const char* label) {
+sg_image createGameDisplayTexture(int w, int h, bool isColor, const char* label) {
     sg_image_desc desc{};
     desc.type = SG_IMAGETYPE_2D;
     desc.render_target = true;
@@ -102,7 +102,7 @@ Texture* createGameDisplayTexture(int w, int h, bool isColor, const char* label)
     desc.wrap_u = SG_WRAP_CLAMP_TO_EDGE;
     desc.wrap_v = SG_WRAP_CLAMP_TO_EDGE;
     desc.label = label;
-    return new Texture(desc);
+    return sg_make_image(desc);
 }
 
 void GameDisplay::update() {
@@ -116,13 +116,13 @@ void GameDisplay::update() {
 
         int color_img_width = 0;
         int color_img_height = 0;
-        if(color) {
-            const auto color_image_info = sg_query_image_info(color->image);
+        if(color.id) {
+            const auto color_image_info = sg_query_image_info(color);
             color_img_width = color_image_info.width;
             color_img_height = color_image_info.height;
         }
-        if (color == nullptr || color_img_width != w || color_img_height != h) {
-            delete color;
+        if (color.id == 0 || color_img_width != w || color_img_height != h) {
+            sg_destroy_image(color);
             color = createGameDisplayTexture(w, h, true, "game-display-color");
             color_img_width = w;
             color_img_height = h;
@@ -130,15 +130,15 @@ void GameDisplay::update() {
             colorFirstClearFlag = true;
 
             if (ek_app.config.need_depth) {
-                delete depthStencil;
+                sg_destroy_image(depthStencil);
                 depthStencil = createGameDisplayTexture(w, h, false, "game-display-depth");
             }
 
             sg_destroy_pass(pass);
             sg_pass_desc passDesc{};
-            passDesc.color_attachments[0].image = color->image;
-            if (depthStencil) {
-                passDesc.depth_stencil_attachment.image = depthStencil->image;
+            passDesc.color_attachments[0].image = color;
+            if (depthStencil.id) {
+                passDesc.depth_stencil_attachment.image = depthStencil;
             }
             pass = sg_make_pass(passDesc);
 
@@ -160,6 +160,7 @@ void GameDisplay::update() {
 }
 
 void GameDisplay::screenshot(const char* filename) const {
+    (void) filename;
 #ifdef EK_UITEST
     if (simulated && screenshotBuffer) {
         const auto wi = color->desc.width;

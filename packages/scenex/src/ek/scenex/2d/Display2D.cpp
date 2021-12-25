@@ -14,9 +14,9 @@ IDrawable2D::~IDrawable2D() = default;
 void Quad2D::draw() {
     const Sprite* spr = src.get();
     if (spr) {
-        const auto* texture = spr->texture.get();
-        if (texture) {
-            draw2d::state.setTextureRegion(texture, spr->tex);
+        const sg_image image = ek_texture_reg_get(spr->texture);
+        if (image.id) {
+            draw2d::state.setTextureRegion(image, spr->tex);
         }
     } else {
         draw2d::state.setEmptyTexture();
@@ -117,8 +117,8 @@ Text2D::Text2D() : Drawable2D<Text2D>(),
 }
 
 Text2D::Text2D(String text, TextFormat format) : Drawable2D<Text2D>(),
-                                                      text{std::move(text)},
-                                                      format{format} {
+                                                 text{std::move(text)},
+                                                 format{format} {
 }
 
 float findTextScale(Vec2f textSize, Rect2f rect) {
@@ -246,16 +246,20 @@ Rect2f Bounds2D::getScreenRect(Matrix3x2f viewMatrix, Matrix3x2f worldMatrix) co
 
 void Arc2D::draw() {
     Res<Sprite> f{sprite};
-    if (f && f->texture) {
-        auto& tex = f->tex;
-        draw2d::state.setTextureRegion(
-                f->texture.get(),
-                {tex.center_x(), tex.y, 0.0f, tex.height}
-        );
-
-        float off = -Math::pi * 0.5f;
-        draw2d::line_arc(0, 0, radius, 0 + off, angle + off, line_width, segments, color_inner, color_outer);
+    if (!f) {
+        return;
     }
+
+    const sg_image image = ek_texture_reg_get(f->texture);
+    if (!image.id) {
+        return;
+    }
+    
+    auto& tex = f->tex;
+    draw2d::state.setTextureRegion(image, {tex.center_x(), tex.y, 0.0f, tex.height});
+
+    float off = -Math::pi * 0.5f;
+    draw2d::line_arc(0, 0, radius, 0 + off, angle + off, line_width, segments, color_inner, color_outer);
 }
 
 Rect2f Arc2D::getBounds() const {

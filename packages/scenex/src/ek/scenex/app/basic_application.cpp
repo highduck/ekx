@@ -99,7 +99,7 @@ basic_application::~basic_application() {
 
     delete asset_manager_;
 
-    ek_audio_shutdown();
+    auph_shutdown();
     ek_gfx_shutdown();
 }
 
@@ -142,7 +142,7 @@ void basic_application::initialize() {
     // init default empty sprite data
     {
         auto* spr = new Sprite();
-        spr->texture.setID("empty");
+        spr->texture = ek_texture_reg_named("empty");
         Res<Sprite>{"empty"}.reset(spr);
     }
 
@@ -356,7 +356,7 @@ void launcher_on_frame() {
 #else
                     const int drawCalls = 128;
 #endif
-                    ek_gfx_init(drawCalls);
+                    ek_gfx_setup(drawCalls);
                 }
 #ifdef EK_DEV_TOOLS
                 if (Editor::inspectorEnabled) {

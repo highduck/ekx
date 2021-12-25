@@ -88,8 +88,8 @@ sg_image_desc renderTargetDesc(int w, int h) {
 }
 
 struct ShadowMapRes {
-    Texture* rt = nullptr;
-    Texture* rtColor = nullptr;
+    sg_image rt = {0};
+    sg_image rtColor = {0};
     Shader* shader = nullptr;
     sg_pass pass{};
     sg_pass_action clear{};
@@ -106,10 +106,10 @@ struct ShadowMapRes {
         auto depthImageDesc = renderTargetDesc(w, h);
         depthImageDesc.pixel_format = SG_PIXELFORMAT_DEPTH;
         depthImageDesc.label = "shadows_depth";
-        rt = new Texture(depthImageDesc);
+        rt = sg_make_image(depthImageDesc);
         auto depthColorDesc = renderTargetDesc(w, h);
         depthColorDesc.label = "shadows_tex";
-        rtColor = new Texture(depthColorDesc);
+        rtColor = sg_make_image(depthColorDesc);
         sg_pipeline_desc pipDesc{};
         pipDesc.shader = shader->shader;
         pipDesc.index_type = SG_INDEXTYPE_UINT16;
@@ -131,14 +131,14 @@ struct ShadowMapRes {
         clear.depth.value = 1.0f;
 
         sg_pass_desc passDesc{};
-        passDesc.color_attachments[0].image = rtColor->image;
-        passDesc.depth_stencil_attachment.image = rt->image;
+        passDesc.color_attachments[0].image = rtColor;
+        passDesc.depth_stencil_attachment.image = rt;
         passDesc.label = "shadow-map-pass";
         pass = sg_make_pass(passDesc);
     }
 
     void begin() {
-        auto info = sg_query_image_info(rt->image);
+        auto info = sg_query_image_info(rt);
         auto w = info.width;
         auto h = info.height;
         sg_begin_pass(pass, clear);
@@ -267,9 +267,9 @@ struct RenderSkyBoxRes {
         pip = sg_make_pipeline(pipDesc);
     }
 
-    void render(const Texture* cubeMapTexture, const Matrix4f& view, const Matrix4f& projection) {
+    void render(const sg_image cubeMapTexture, const Matrix4f& view, const Matrix4f& projection) {
         Res<StaticMesh> mesh{"cube"};
-        if (cubeMapTexture && mesh) {
+        if (cubeMapTexture.id && mesh) {
             sg_apply_pipeline(pip);
 
             Matrix4f model{};
@@ -286,7 +286,7 @@ struct RenderSkyBoxRes {
             const Matrix4f mvp = projection * view3 * model;
 
             sg_bindings bind{};
-            bind.fs_images[0] = cubeMapTexture->image;
+            bind.fs_images[0] = cubeMapTexture;
             bind.vertex_buffers[0] = mesh->vb;
             bind.index_buffer = mesh->ib;
             sg_apply_bindings(bind);
@@ -313,9 +313,9 @@ RenderSystem3D::~RenderSystem3D() {
 }
 
 void RenderSystem3D::renderObjects(const Matrix4f& proj, const Matrix4f& view) {
-    Res<Texture> texEmpty{"empty"};
-    main->bind.fs_images[SLOT_uImage0] = texEmpty->image;
-    main->bind.fs_images[SLOT_u_image_shadow_map] = shadows->rtColor->image;
+    const sg_image empty = ek_texture_reg_get(ek_texture_reg_named("empty"));
+    main->bind.fs_images[SLOT_uImage0] = empty;
+    main->bind.fs_images[SLOT_u_image_shadow_map] = shadows->rtColor;
 
     for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
         const auto& filter = e.get<MeshRenderer>();
@@ -461,7 +461,7 @@ void RenderSystem3D::render(float width, float height) {
     sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_light2_params, SG_RANGE(main->pointLightParams));
 
     renderObjects(cameraProjection, cameraView);
-    skybox->render(cameraData.cubeMap.get(), cameraView, cameraProjection);
+    skybox->render(ek_texture_reg_get(cameraData.cubeMap), cameraView, cameraProjection);
 }
 
 }

@@ -1,6 +1,6 @@
 import {AuphBuffer, AuphBus, AuphVoice, Name, Param, u31} from "../protocol/interface";
 
-export function init(): void {
+export function setup(): void {
 }
 
 export function shutdown(): void {

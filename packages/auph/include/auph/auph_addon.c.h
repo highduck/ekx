@@ -99,3 +99,21 @@ void auph_pause(int name) {
 void auph_resume(int name) {
     auph_set_pause(name, false);
 }
+
+int auph_global_mutes = 0;
+
+void auph_mute_push() {
+    AUPH_ASSERT(auph_global_mutes >= 0);
+    if (auph_global_mutes == 0) {
+        auph_set_gain(AUPH_BUS_MASTER.id, 0.0f);
+    }
+    ++auph_global_mutes;
+}
+
+void auph_mute_pop() {
+    --auph_global_mutes;
+    AUPH_ASSERT(auph_global_mutes >= 0);
+    if (auph_global_mutes == 0) {
+        auph_set_gain(AUPH_BUS_MASTER.id, 1.0f);
+    }
+}

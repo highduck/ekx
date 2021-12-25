@@ -8,6 +8,10 @@
 #include "native/device.c.h"
 #include "native/mixer.c.h"
 
+#if defined(__ANDROID__) && defined(AUPH_SETUP_EK_APP)
+#include <ek/app_native.h>
+#endif
+
 enum {
     AUPH_BUFFERS_MAX_COUNT = 128,
     AUPH_VOICES_MAX_COUNT = 64,
@@ -108,7 +112,13 @@ auph_bus_obj* auph_get_bus_obj(int name) {
     return NULL;
 }
 
-void auph_init(void) {
+void auph_setup(void) {
+    AUPH_LOG("auph setup");
+
+#if defined(__ANDROID__) && defined(AUPH_SETUP_EK_APP)
+    auph_android_setup(ek_android_jni, ek_android_activity(), ek_android_assets_object());
+#endif
+
     auph_context* ctx = &auph_ctx;
     ctx->state = AUPH_FLAG_ACTIVE;
     auph_audio_device_init(&ctx->device);
@@ -128,6 +138,8 @@ void auph_init(void) {
 }
 
 void auph_shutdown(void) {
+    AUPH_LOG("auph shutdown");
+
     auph_audio_device_term(&auph_ctx.device);
     auph_ctx.state = 0;
 }

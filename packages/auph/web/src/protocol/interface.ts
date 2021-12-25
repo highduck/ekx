@@ -1,5 +1,5 @@
 export interface IAuph {
-    init(): void;
+    setup(): void;
 
     shutdown(): void;
 

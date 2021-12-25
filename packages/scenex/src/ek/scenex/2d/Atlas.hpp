@@ -21,7 +21,7 @@ public:
     void clear();
 
     Array<Res<Sprite>> sprites;
-    Array<Res<Texture>> pages;
+    Array<ek_texture_reg_id> pages;
 
     // loading routine
     Array<ek_texture_loader*> loaders;

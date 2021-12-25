@@ -33,8 +33,8 @@ enum class BlendMode : uint8_t {
 };
 
 struct BatchState {
-    sg_shader shader{0};
-    sg_image texture{0};
+    sg_shader shader = {0};
+    sg_image texture = {0};
     Rect2i scissors{};
     BlendMode blend = BlendMode::PremultipliedAlpha;
     uint8_t shaderTexturesCount = 0;
@@ -201,9 +201,9 @@ struct Context : private NoCopyAssign {
 
     Context& setEmptyTexture();
 
-    Context& setTexture(const Texture* texture_);
+    Context& setTexture(sg_image image);
 
-    Context& setTextureRegion(const Texture* texture_ = nullptr,
+    Context& setTextureRegion(sg_image image = {0},
                               const Rect2f& region = Rect2f{0.0f, 0.0f, 1.0f, 1.0f});
 
     Context& restoreTexture();
@@ -248,10 +248,10 @@ public:
     Shader* defaultShader = nullptr;
     Shader* alphaMapShader = nullptr;
     Shader* solidColorShader = nullptr;
-    Texture* emptyTexture = nullptr;
+    sg_image emptyTexture = {0};
 
     // Current drawing state
-    const Texture* texture = nullptr;
+    sg_image texture = {0};
     const Shader* program = nullptr;
     Matrix3x2f matrix{};
     Rect2f uv{0.0f, 0.0f, 1.0f, 1.0f};
@@ -260,13 +260,13 @@ public:
 
     // Current pass state
     bool active = false;
-    const Texture* renderTarget = nullptr;
-    const Texture* renderDepthStencil = nullptr;
+    sg_image renderTarget = {0};
+    sg_image renderDepthStencil = {0};
 
     //// Offscreen rendering
     // framebuffer target could be also render target or null as default
-    const Texture* framebufferColor = nullptr;
-    const Texture* framebufferDepthStencil = nullptr;
+    sg_image framebufferColor = {0};
+    sg_image framebufferDepthStencil = {0};
 
     Matrix4f mvp{};
 
@@ -275,7 +275,7 @@ public:
     Array<ColorMod32> colorStack{};
     Array<Rect2f> scissorsStack{};
     Array<const Shader*> programStack{};
-    Array<const Texture*> textureStack{};
+    Array<sg_image> textureStack{};
     Array<Rect2f> texCoordStack{};
 
     // Checking what states could be potentially changed
@@ -321,8 +321,8 @@ extern Context& state;
 
 void beginNewFrame();
 
-void begin(Rect2f viewport, const Matrix3x2f& view = Matrix3x2f{}, const Texture* renderTarget = nullptr,
-           const Texture* depthStencilTarget = nullptr);
+void begin(Rect2f viewport, const Matrix3x2f& view = Matrix3x2f{}, sg_image renderTarget = {0},
+           sg_image depthStencilTarget = {0});
 
 void end();
 

@@ -5,10 +5,9 @@
 #include <ek/util/Res.hpp>
 #include <ek/util/Type.hpp>
 #include <ecxx/ecxx_fwd.hpp>
+#include <ek/temp_res_man.h>
 
 namespace ek {
-
-class Texture;
 
 struct Camera3D {
     // clip plane near-far
@@ -31,7 +30,7 @@ struct Camera3D {
     Vec4f clearColor{0.5f, 0.5f, 0.5f, 1.0f};
     float clearDepth = 1.0f;
 
-    Res<Texture> cubeMap;
+    ek_texture_reg_id cubeMap;
 };
 
 ECX_TYPE(29, Camera3D);

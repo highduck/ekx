@@ -288,17 +288,18 @@ const char *convertToText(FromType) {
 
 #endif //OBOE_ENABLE_LOGGING
 
-std::string getPropertyString(const char * name) {
-    std::string result;
+void getPropertyString(const char * name, char* out) {
+    out[0] = 0;
 #ifdef __ANDROID__
-    char valueText[PROP_VALUE_MAX] = {0};
-    if (__system_property_get(name, valueText) != 0) {
-        result = valueText;
+    if (__system_property_get(name, out) != 0) {
+
+    }
+    else {
+        out[0] = 0;
     }
 #else
     (void) name;
 #endif
-    return result;
 }
 
 int getPropertyInteger(const char * name, int defaultValue) {

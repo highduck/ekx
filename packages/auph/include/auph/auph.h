@@ -83,7 +83,7 @@ enum auph_flag {
 extern "C" {
 #endif
 
-void auph_init(void);
+void auph_setup(void);
 
 void auph_shutdown(void);
 
@@ -148,6 +148,10 @@ float auph_get_duration(int bufferOrVoice);
 void auph_pause(int name);
 
 void auph_resume(int name);
+
+void auph_mute_push();
+
+void auph_mute_pop();
 
 #ifdef __cplusplus
 }
