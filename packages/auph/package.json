@@ -30,7 +30,7 @@
     "url": "ssh://git@github.com/eliasku/auph.git"
   },
   "devDependencies": {
-    "@rollup/plugin-replace": "^3.0.0",
+    "@rollup/plugin-replace": "^3.0.1",
     "follow-redirects": "^1.14.4",
     "http-server": "^14.0.0",
     "rimraf": "^3.0.2",
