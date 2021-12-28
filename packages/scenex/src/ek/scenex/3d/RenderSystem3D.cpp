@@ -25,7 +25,8 @@ namespace ek {
 
 const auto DEFAULT_FACE_WINDING = SG_FACEWINDING_CCW;
 
-Rect<3, float> get_shadow_map_box(const Matrix4f& camera_projection, const Matrix4f& camera_view, const Matrix4f& light_view) {
+Rect<3, float>
+get_shadow_map_box(const Matrix4f& camera_projection, const Matrix4f& camera_view, const Matrix4f& light_view) {
     const Matrix4f inv_proj_view = inverse(camera_projection * camera_view);
     Vec3f corners[8] = {
             Vec3f{-1, -1, -1},
@@ -90,7 +91,7 @@ sg_image_desc renderTargetDesc(int w, int h) {
 struct ShadowMapRes {
     sg_image rt = {0};
     sg_image rtColor = {0};
-    Shader* shader = nullptr;
+    ek_shader shader{};
     sg_pass pass{};
     sg_pass_action clear{};
     sg_pipeline pip{};
@@ -100,7 +101,7 @@ struct ShadowMapRes {
 
     void init() {
 
-        shader = new Shader(render3d_shadow_map_shader_desc(sg_query_backend()));
+        shader = ek_shader_make(render3d_shadow_map_shader_desc(sg_query_backend()));
         const uint32_t w = 2048;
         const uint32_t h = 2048;
         auto depthImageDesc = renderTargetDesc(w, h);
@@ -111,7 +112,7 @@ struct ShadowMapRes {
         depthColorDesc.label = "shadows_tex";
         rtColor = sg_make_image(depthColorDesc);
         sg_pipeline_desc pipDesc{};
-        pipDesc.shader = shader->shader;
+        pipDesc.shader = shader.shader;
         pipDesc.index_type = SG_INDEXTYPE_UINT16;
         pipDesc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
         pipDesc.cull_mode = SG_CULLMODE_FRONT;
@@ -151,7 +152,7 @@ struct ShadowMapRes {
         // find directional light
         Vec3f light_position{0, 0, 1};
         Light3D light_data{};
-        for (auto e : ecs::view<Light3D, Transform3D>()) {
+        for (auto e: ecs::view<Light3D, Transform3D>()) {
             auto& l = e.get<Light3D>();
             auto& transform = e.get<Transform3D>();
             if (l.type == Light3DType::Directional) {
@@ -201,7 +202,7 @@ struct ShadowMapRes {
 };
 
 struct Main3DRes {
-    Shader* shader = nullptr;
+    ek_shader shader{};
     sg_pipeline pip{};
     sg_bindings bind{};
 
@@ -209,11 +210,11 @@ struct Main3DRes {
     light2_params_t pointLightParams{};
 
     void init() {
-        shader = new Shader(render3d_shader_desc(sg_query_backend()));
+        shader = ek_shader_make(render3d_shader_desc(sg_query_backend()));
 
         sg_pipeline_desc pipDesc{};
         pipDesc.label = "3d-main";
-        pipDesc.shader = shader->shader;
+        pipDesc.shader = shader.shader;
         pipDesc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
         pipDesc.index_type = SG_INDEXTYPE_UINT16;
         pipDesc.depth.pixel_format = SG_PIXELFORMAT_DEPTH_STENCIL;
@@ -245,14 +246,14 @@ struct Main3DRes {
 };
 
 struct RenderSkyBoxRes {
-    Shader* shader = nullptr;
+    ek_shader shader{};
     sg_pipeline pip{};
 
     void init() {
-        shader = new Shader(render3d_skybox_shader_desc(sg_query_backend()));
+        shader = ek_shader_make(render3d_skybox_shader_desc(sg_query_backend()));
 
         sg_pipeline_desc pipDesc{};
-        pipDesc.shader = shader->shader;
+        pipDesc.shader = shader.shader;
         pipDesc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
         pipDesc.index_type = SG_INDEXTYPE_UINT16;
         pipDesc.label = "3d-skybox";
@@ -313,7 +314,7 @@ RenderSystem3D::~RenderSystem3D() {
 }
 
 void RenderSystem3D::renderObjects(const Matrix4f& proj, const Matrix4f& view) {
-    const sg_image empty = ek_image_reg_get(ek_image_reg_named("empty"));
+    const sg_image empty = draw2d::state.empty_image;
     main->bind.fs_images[SLOT_uImage0] = empty;
     main->bind.fs_images[SLOT_u_image_shadow_map] = shadows->rtColor;
 
@@ -381,7 +382,7 @@ void RenderSystem3D::prepare() {
 
     Vec3f directional_light_pos{0, 0, -1};
     Light3D directional_light{};
-    for (auto e : ecs::view<Light3D, Transform3D>()) {
+    for (auto e: ecs::view<Light3D, Transform3D>()) {
         auto& l = e.get<Light3D>();
         auto& transform = e.get<Transform3D>();
         if (l.type == Light3DType::Point) {

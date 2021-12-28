@@ -56,8 +56,7 @@ void ek_gfx_setup(int max_draw_calls) {
     sg_setup(&desc);
     ek_gfx_log_backend();
 
-
-    ek_image_reg_setup();
+    ek_gfx_res_setup();
 }
 
 void ek_gfx_shutdown(void) {
@@ -201,4 +200,11 @@ void ek_gfx_update_image_0(sg_image image, void* data, size_t size) {
     image_data.subimage[0][0].ptr = data;
     image_data.subimage[0][0].size = size;
     sg_update_image(image, &image_data);
+}
+
+ek_shader ek_shader_make(const sg_shader_desc* desc) {
+    return (ek_shader){
+        .shader = sg_make_shader(desc),
+        .images_num = desc->fs.images[0].name ? 1 : 0
+    };
 }

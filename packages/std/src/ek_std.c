@@ -9,6 +9,10 @@
 #include "std/string.c.h"
 #include "std/time.c.h"
 #include "std/utf8.c.h"
+#include "std/handle.c.h"
+
+#define EK_HANDLE_2_IMPLEMENTATION
+#include <ek/handle2.h>
 
 #ifdef __EMSCRIPTEN__
 #include "std/sparse_array.c.h"

@@ -1,6 +1,7 @@
 #include "TextEngine.hpp"
 #include "TrueTypeFont.hpp"
 #include "Font.hpp"
+#include "ek/temp_res_man.h"
 #include <cstdarg>
 #include <ek/utf8.h>
 #include <ek/print.h>
@@ -44,7 +45,7 @@ void TextBlockInfo::reset() {
 
 void TextBlockInfo::scale(float factor) {
     size *= factor;
-    for (auto& line : lines) {
+    for (auto& line: lines) {
         line.size *= factor;
         // for first-line position
         line.ascender *= factor;
@@ -54,7 +55,7 @@ void TextBlockInfo::scale(float factor) {
 
 bool TextBlockInfo::checkIsValid() const {
     int pos = 0;
-    for (auto& line : lines) {
+    for (auto& line: lines) {
         if (line.end < line.begin) {
             EK_ASSERT(false);
             return false;
@@ -88,14 +89,15 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
     }
     //auto alignment = format.alignment;
 
-    draw2d::state.pushProgram("draw2d_alpha");
+    draw2d::state.pushProgram(draw2d::state.alphaMapShader);
     // render effects first
     for (int i = format.layersCount - 1; i >= 0; --i) {
         auto& layer = format.layers[i];
         if (!layer.visible) {
             continue;
         }
-        if (font->getFontType() == FontType::Bitmap && layer.blurRadius > 0.0f && length_sqr(layer.offset) <= 0.1f) {
+        if (font->getFontType() == FontType::Bitmap && layer.blurRadius > 0.0f &&
+            length_sqr(layer.offset) <= 0.1f) {
             // skip {0;0} strokes for bitmap fonts
             continue;
         }

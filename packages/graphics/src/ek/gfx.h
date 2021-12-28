@@ -56,7 +56,6 @@
 #include <sokol_gfx.h>
 
 #include <stdint.h>
-#include "temp_res_man.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -80,6 +79,13 @@ sg_image ek_gfx_make_color_image(int width, int height, uint32_t color);
 sg_image ek_gfx_make_render_target(int width, int height, const char* label);
 
 void ek_gfx_update_image_0(sg_image image, void* data, size_t size);
+
+typedef struct ek_shader {
+    sg_shader shader;
+    uint32_t images_num;
+} ek_shader;
+
+ek_shader ek_shader_make(const sg_shader_desc* desc);
 
 #ifdef __cplusplus
 }

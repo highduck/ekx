@@ -3,8 +3,7 @@
 #include <ek/util/NoCopyAssign.hpp>
 #include <ek/math/Rect.hpp>
 #include <ek/util/Type.hpp>
-#include <ek/util/Res.hpp>
-#include <ek/graphics/graphics.hpp>
+#include <ek/temp_res_man.h>
 
 namespace ek {
 

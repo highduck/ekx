@@ -43,9 +43,9 @@ void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTr
     bool programChanged = false;
     auto* display = w.tryGet<Display2D>(e);
     if (display) {
-        if (display->program) {
+        if (display->program.id) {
             programChanged = true;
-            draw2d::state.saveProgram().setProgram(display->program.get());
+            draw2d::state.saveProgram().setProgram(ek_shader_get(display->program));
         }
         if (display->drawable) {
             draw2d::state.matrix = worldTransform->matrix;
@@ -108,9 +108,9 @@ void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
     bool programChanged = false;
     auto* display = w.tryGet<Display2D>(e);
     if (display) {
-        if (display->program) {
+        if (display->program.id) {
             programChanged = true;
-            draw2d::state.saveProgram().setProgram(display->program.get());
+            draw2d::state.saveProgram().setProgram(ek_shader_get(display->program));
         }
         if (display->drawable) {
             display->drawable->draw();

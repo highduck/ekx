@@ -81,7 +81,7 @@ void Camera2D::render() {
         sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.width, camera.screenRect.height,
                            true);
         if (camera.clearColorEnabled) {
-            draw2d::state.pushProgram("draw2d_color");
+            draw2d::state.pushProgram(draw2d::state.solidColorShader);
             draw2d::state.color = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};
             draw2d::quad(camera.worldRect);
             draw2d::state.color = {};

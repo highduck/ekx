@@ -156,9 +156,9 @@ void drawAssetsListByType() {
 void ResourcesWindow::onDraw() {
     // TODO: somehow generic draw manual registries
     // drawAssetsListByType<Texture>();
+    // drawAssetsListByType<Shader>();
 
     if (ImGui::BeginTabBar("res_by_type", 0)) {
-        drawAssetsListByType<Shader>();
         drawAssetsListByType<Sprite>();
         drawAssetsListByType<Atlas>();
         drawAssetsListByType<DynamicAtlas>();

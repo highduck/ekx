@@ -4,6 +4,7 @@
 #include <ek/util/StaticStorage.hpp>
 #include <ek/math/MatrixCamera.hpp>
 #include "draw2d_shader.h"
+#include "ek/temp_res_man.h"
 #include <ek/log.h>
 #include <ek/assert.h>
 
@@ -40,11 +41,11 @@ void Context::setNextBlending(BlendMode blending) {
     next.blend = blending;
 }
 
-void Context::setNextImage(sg_image image) {
-    if (curr.image.id != image.id) {
+void Context::setNextImage(sg_image image_) {
+    if (curr.image.id != image_.id) {
         stateChanged = true;
     }
-    next.image = image;
+    next.image = image_;
 }
 
 void Context::setNextShader(sg_shader shader, uint8_t images_count) {
@@ -144,7 +145,7 @@ void Context::drawUserBatch(sg_pipeline pip, uint32_t images_count) {
     sg_draw(0, (int) indicesCount_, 1);
 
 #ifndef NDEBUG
-    stats.fillArea += getTriangleArea(vertexData_, indexData_, indicesCount_);
+    stats.fillArea += getTriangleArea(vertexData_, indexData_, (int)indicesCount_);
 #endif
     stats.triangles += indicesCount_ / 3;
     ++stats.drawCalls;
@@ -195,7 +196,7 @@ void Context::drawBatch() {
     sg_draw(0, (int) indicesCount_, 1);
 
 #ifndef NDEBUG
-    stats.fillArea += getTriangleArea(vertexData_, indexData_, indicesCount_);
+    stats.fillArea += getTriangleArea(vertexData_, indexData_, (int)indicesCount_);
 #endif
     stats.triangles += indicesCount_ / 3;
     ++stats.drawCalls;
@@ -217,7 +218,7 @@ void Context::allocTriangles(uint32_t vertex_count, uint32_t index_count) {
             setNextImage(image);
         }
         if (checkFlags & Context::Check_Shader) {
-            setNextShader(program->shader, program->numFSImages);
+            setNextShader(program.shader, program.images_num);
         }
         if (checkFlags & Context::Check_Scissors) {
             setNextScissors(Rect2i{scissors});
@@ -256,9 +257,9 @@ Context::Context() :
 
 Context::~Context() {
     ek_image_reg_assign(ek_image_reg_named("empty"), {SG_INVALID_ID});
-    Res<Shader>{"draw2d"}.reset(nullptr);
-    Res<Shader>{"draw2d_alpha"}.reset(nullptr);
-    Res<Shader>{"draw2d_color"}.reset(nullptr);
+    ek_shader_register(ek_shader_named("draw2d"), {});
+    ek_shader_register(ek_shader_named("draw2d_alpha"), {});
+    ek_shader_register(ek_shader_named("draw2d_color"), {});
     free(vertexData_);
 }
 
@@ -446,14 +447,14 @@ Context& Context::set_empty_image() {
     return *this;
 }
 
-Context& Context::set_image(sg_image image) {
-    image = image;
+Context& Context::set_image(sg_image image_) {
+    image = image_;
     checkFlags |= CHECK_IMAGE;
     return *this;
 }
 
-Context& Context::set_image_region(sg_image image, const Rect2f& region) {
-    image = image.id ? image : empty_image;
+Context& Context::set_image_region(sg_image image_, const Rect2f& region) {
+    image = image_.id ? image_ : empty_image;
     checkFlags |= CHECK_IMAGE;
     uv = region;
     return *this;
@@ -466,16 +467,14 @@ Context& Context::restore_image() {
     return *this;
 }
 
-Context& Context::pushProgram(const char* name) {
+Context& Context::pushProgram(const ek_shader program_) {
     programStack.push_back(program);
-    Res<Shader> pr{name};
-    program = pr.empty() ? defaultShader : pr.get();
-    checkFlags |= Check_Shader;
+    setProgram(program_);
     return *this;
 }
 
-Context& Context::setProgram(const Shader* program_) {
-    program = program_ ? program_ : defaultShader;
+Context& Context::setProgram(const ek_shader program_) {
+    program = program_.shader.id ? program_ : defaultShader;
     checkFlags |= Check_Shader;
     return *this;
 }
@@ -498,12 +497,12 @@ void Context::createDefaultResources() {
     empty_image = ek_gfx_make_color_image(4, 4, 0xFFFFFFFFu);
     ek_image_reg_assign(ek_image_reg_named("empty"), empty_image);
 
-    defaultShader = new Shader(draw2d_shader_desc(backend));
-    alphaMapShader = new Shader(draw2d_alpha_shader_desc(backend));
-    solidColorShader = new Shader(draw2d_color_shader_desc(backend));
-    Res<Shader>{"draw2d"}.reset(defaultShader);
-    Res<Shader>{"draw2d_alpha"}.reset(alphaMapShader);
-    Res<Shader>{"draw2d_color"}.reset(solidColorShader);
+    defaultShader = ek_shader_make(draw2d_shader_desc(backend));
+    alphaMapShader = ek_shader_make(draw2d_alpha_shader_desc(backend));
+    solidColorShader = ek_shader_make(draw2d_color_shader_desc(backend));
+    ek_shader_register(ek_shader_named("draw2d"), defaultShader);
+    ek_shader_register(ek_shader_named("draw2d_alpha"), alphaMapShader);
+    ek_shader_register(ek_shader_named("draw2d_color"), solidColorShader);
 }
 
 void beginNewFrame() {
@@ -524,7 +523,7 @@ void begin(Rect2f viewport, const Matrix3x2f& view, const sg_image renderTarget,
     state.active = true;
 
     state.curr = {};
-    state.next.shader = state.program->shader;
+    state.next.shader = state.program.shader;
     state.next.shader_images_count = 1;
     state.next.image = state.image;
     state.next.scissors = Rect2i{viewport};
@@ -629,7 +628,7 @@ void fill_circle(const CircleF& circle, abgr32_t inner_color, abgr32_t outer_col
     auto outer_cm = state.color.scale * outer_color;
     write_vertex(x, y, 0.0f, 0.0f, inner_cm, co);
 
-    const float da = Math::fPI2 / segments;
+    const float da = Math::fPI2 / (float)segments;
     float a = 0.0f;
     while (a < Math::pi2) {
         write_vertex(x + r * cosf(a), y + r * sinf(a), 1, 1, outer_cm, co);
@@ -698,7 +697,7 @@ void draw_indexed_triangles(const Array<Vec2f>& positions, const Array<abgr32_t>
                             const Array<uint16_t>& indices, Vec2f offset, Vec2f scale) {
 
     int verticesTotal = static_cast<int>(positions.size());
-    triangles(verticesTotal, indices.size());
+    triangles(verticesTotal, (int)indices.size());
     Vec2f loc_uv;
 
     for (int i = 0; i < verticesTotal; ++i) {

@@ -208,9 +208,9 @@ struct Context : private NoCopyAssign {
 
     Context& restore_image();
 
-    Context& pushProgram(const char* id);
+    Context& pushProgram(ek_shader program_);
 
-    Context& setProgram(const Shader* program_);
+    Context& setProgram(ek_shader program_);
 
     Context& saveProgram();
 
@@ -245,14 +245,14 @@ public:
     constexpr static int MaxVertex = 0xFFFF;
 
     // Default resources
-    Shader* defaultShader = nullptr;
-    Shader* alphaMapShader = nullptr;
-    Shader* solidColorShader = nullptr;
+    ek_shader defaultShader = {};
+    ek_shader alphaMapShader = {};
+    ek_shader solidColorShader = {};
     sg_image empty_image = {0};
 
     // Current drawing state
     sg_image image = {0};
-    const Shader* program = nullptr;
+    ek_shader program = {};
     Matrix3x2f matrix{};
     Rect2f uv{0.0f, 0.0f, 1.0f, 1.0f};
     ColorMod32 color{};
@@ -274,7 +274,7 @@ public:
     Array<Matrix3x2f> matrixStack{};
     Array<ColorMod32> colorStack{};
     Array<Rect2f> scissorsStack{};
-    Array<const Shader*> programStack{};
+    Array<ek_shader> programStack{};
     Array<sg_image> image_stack{};
     Array<Rect2f> texCoordStack{};
 

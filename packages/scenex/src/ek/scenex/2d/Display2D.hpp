@@ -79,7 +79,7 @@ struct Display2D {
     Pointer<IDrawable2D> drawable;
 
     // state management
-    Res<Shader> program;
+    ek_shader_ref program = {0};
 
     // 1 - draw debug bounds
     int flags = 0;
