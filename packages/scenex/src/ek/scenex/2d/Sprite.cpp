@@ -19,7 +19,7 @@ static unsigned short nine_patch_indices[] = {
 };
 
 bool Sprite::select() const {
-    const sg_image image = ek_image_reg_get(image_id);
+    const sg_image image = ek_ref_content(sg_image, image_id);
     if (image.id) {
         draw2d::state.set_image_region(image, tex);
         return true;
@@ -32,7 +32,7 @@ void Sprite::draw() const {
 }
 
 void Sprite::draw(const Rect2f& rc) const {
-    const sg_image image = ek_image_reg_get(image_id);
+    const sg_image image = ek_ref_content(sg_image, image_id);
     if (image.id) {
         draw2d::state.set_image_region(image, tex);
         if (rotated) {
@@ -44,7 +44,7 @@ void Sprite::draw(const Rect2f& rc) const {
 }
 
 void Sprite::draw_grid(const Rect2f& grid, const Rect2f& target) const {
-    const sg_image image = ek_image_reg_get(image_id);
+    const sg_image image = ek_ref_content(sg_image, image_id);
     if (image.id == SG_INVALID_ID) {
         return;
     }
@@ -80,8 +80,8 @@ void Sprite::draw_grid(const Rect2f& grid, const Rect2f& target) const {
     float v3 = 1;
 
     draw2d::triangles(4 * 4, 6 * 9);
-    auto cm = draw2d::state.color.scale;
-    auto co = draw2d::state.color.offset;
+    auto cm = draw2d::state.color[0].scale;
+    auto co = draw2d::state.color[0].offset;
     /////
     draw2d::write_vertex(x0, y0, u0, v0, cm, co);
     draw2d::write_vertex(x1, y0, u1, v0, cm, co);
@@ -108,7 +108,7 @@ void Sprite::draw_grid(const Rect2f& grid, const Rect2f& target) const {
 
 bool Sprite::hit_test(const Vec2f& position) const {
     (void) position;
-    const sg_image image = ek_image_reg_get(image_id);
+    const sg_image image = ek_ref_content(sg_image, image_id);
     if (image.id) {
         return true;
     }

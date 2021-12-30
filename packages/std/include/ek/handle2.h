@@ -37,12 +37,14 @@ void ek_handle2_destroy(ek_handle2_state h, uint32_t id, ek_handle2_data layout)
 }
 #endif
 
+#endif // EK_HANDLE_2_H
+
+
 
 #ifdef EK_HANDLE_2_IMPLEMENTATION
 
 #include <ek/assert.h>
 #include <string.h>
-
 
 #ifndef NDEBUG
 
@@ -146,6 +148,4 @@ void ek_handle2_destroy(ek_handle2_state h, uint32_t id, ek_handle2_data layout)
     }
 }
 
-#endif EK_HANDLE_2_IMPLEMENTATION
-
-#endif // EK_HANDLE_2_H
+#endif // EK_HANDLE_2_IMPLEMENTATION

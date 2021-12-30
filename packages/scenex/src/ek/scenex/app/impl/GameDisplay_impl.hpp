@@ -21,8 +21,8 @@ bool GameDisplay::beginGame(sg_pass_action& passAction, const char* debugLabel) 
     sg_push_debug_group(debugLabel);
 
     if (simulated) {
-        draw2d::state.framebufferColor = color;
-        draw2d::state.framebufferDepthStencil = depthStencil;
+        ek_canvas_.framebuffer_color = color;
+        ek_canvas_.framebuffer_depth = depthStencil;
 
         if (colorFirstClearFlag) {
             passAction.colors[0].action = SG_ACTION_CLEAR;
@@ -40,8 +40,8 @@ void GameDisplay::endGame() {
     if (simulated) {
         sg_end_pass();
 
-        draw2d::state.framebufferColor = {0};
-        draw2d::state.framebufferDepthStencil = {0};
+        ek_canvas_.framebuffer_color = {0};
+        ek_canvas_.framebuffer_depth = {0};
     }
     sg_pop_debug_group();
 }

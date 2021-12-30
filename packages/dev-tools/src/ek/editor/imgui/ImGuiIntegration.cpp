@@ -4,7 +4,7 @@
 #include <ek/app.h>
 #include <IconsFontAwesome5.h>
 
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
 
 #define SOKOL_IMGUI_IMPL
 #define SOKOL_IMGUI_NO_SOKOL_APP

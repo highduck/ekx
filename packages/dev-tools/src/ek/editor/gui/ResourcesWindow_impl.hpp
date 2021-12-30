@@ -53,7 +53,7 @@ void drawAssetItem<Atlas>(const Atlas& asset) {
     static float pageScale = 0.25f;
     ImGui::SliderFloat("Scale", &pageScale, 0.0f, 1.0f);
     for (int i = 0; i < pagesCount; ++i) {
-        const sg_image page = ek_image_reg_get(asset.pages[i]);
+        const sg_image page = ek_ref_content(sg_image, asset.pages[i]);
         if (page.id) {
             ImGui::Text("Page #%d", i);
             const auto info = sg_query_image_info(page);
@@ -153,7 +153,31 @@ void drawAssetsListByType() {
     }
 }
 
+void draw_buffer_chain_stats(const char* name, ek_canvas_buffers* buffers) {
+    for(int line = 0; line < 4; ++line) {
+        int c = 0;
+        for(int i = 0; i < EK_CANVAS_BUFFERS_MAX_COUNT; ++i) {
+            if(buffers->lines[line][i].id == 0) {
+                i = EK_CANVAS_BUFFERS_MAX_COUNT;
+            }
+            else {
+                ++c;
+            }
+        }
+        ImGui::Text("%s[%d] count %d", name, line, c);
+    }
+}
+
 void ResourcesWindow::onDraw() {
+
+    ImGui::Text("ek_canvas size: %lu", sizeof ek_canvas_);
+    ImGui::Text("ek_canvas vb chain size: %lu", sizeof ek_canvas_.vbs);
+    ImGui::Text("ek_canvas ib chain size: %lu", sizeof ek_canvas_.ibs);
+    ImGui::Text("ek_canvas vb mem size: %lu", sizeof ek_canvas_.vertex);
+    ImGui::Text("ek_canvas ib mem size: %lu", sizeof ek_canvas_.index);
+    draw_buffer_chain_stats("VB", &ek_canvas_.vbs);
+    draw_buffer_chain_stats("IB", &ek_canvas_.ibs);
+
     // TODO: somehow generic draw manual registries
     // drawAssetsListByType<Texture>();
     // drawAssetsListByType<Shader>();

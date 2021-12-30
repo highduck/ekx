@@ -10,7 +10,7 @@
 #include <ek/scenex/SceneFactory.hpp>
 #include <ek/log.h>
 #include <ek/scenex/asset2/Asset.hpp>
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
 
@@ -95,7 +95,7 @@ basic_application::~basic_application() {
 
     ecs::the_world.shutdown();
 
-    draw2d::shutdown();
+    ek_canvas_shutdown();
 
     delete asset_manager_;
 
@@ -142,7 +142,7 @@ void basic_application::initialize() {
     // init default empty sprite data
     {
         auto* spr = new Sprite();
-        spr->image_id = ek_image_reg_named("empty");
+        spr->image_id = ek_ref_find(sg_image, "empty");
         Res<Sprite>{"empty"}.reset(spr);
     }
 
@@ -219,7 +219,7 @@ void basic_application::onFrame() {
     profiler.addTime("UPDATE", (float) (elapsed * 1000));
     profiler.addTime("FRAME", (float) (elapsed * 1000));
 
-    draw2d::beginNewFrame();
+    ek_canvas_new_frame();
 
     /// PRE-RENDER
     onPreRender();
@@ -279,8 +279,6 @@ void basic_application::onFrame() {
 
             display.endOverlayDev(); // display.beginOverlayDev()
         }
-
-        draw2d::endFrame();
     }
     sg_commit();
 
@@ -366,7 +364,7 @@ void launcher_on_frame() {
                 break;
             case 1:
                 ++_initializeSubSystemsState;
-                draw2d::initialize();
+                ek_canvas_setup();
                 break;
             case 2:
                 ++_initializeSubSystemsState;
@@ -403,11 +401,10 @@ void launcher_on_frame() {
             sg_begin_default_pass(&pass_action, (int) width, (int) height);
 
             if (_initializeSubSystemsState > 2) {
-                draw2d::beginNewFrame();
+                ek_canvas_new_frame();
                 draw2d::begin({0, 0, width, height});
                 drawPreloader(0.1f * (float) _initializeSubSystemsState / steps, width, height);
                 draw2d::end();
-                draw2d::endFrame();
             }
 
             sg_end_pass();

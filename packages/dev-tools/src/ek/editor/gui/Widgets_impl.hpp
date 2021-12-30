@@ -156,12 +156,11 @@ void guiTextLayerEffect(TextLayerEffect& layer) {
     ImGui::PopID();
 }
 
-
 void guiSprite(const Sprite& sprite) {
     auto rc = sprite.rect;
     auto uv0 = sprite.tex.position;
     auto uv1 = sprite.tex.right_bottom();
-    const sg_image sprite_image = ek_image_reg_get(sprite.image_id);
+    const auto sprite_image = ek_ref_content(sg_image, sprite.image_id);
     if (sprite_image.id) {
         void* tex_id = (void*)(uintptr_t)sprite_image.id;
         if (sprite.rotated) {

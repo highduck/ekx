@@ -7,8 +7,7 @@
 #include <ek/serialize/serialize.hpp>
 #include <ek/util/Path.hpp>
 #include <ek/local_res.h>
-#include <ek/graphics/graphics.hpp>
-#include <ek/bitmap.h>
+#include <ek/gfx.h>
 #include <ek/print.h>
 
 namespace ek {
@@ -63,17 +62,15 @@ struct AtlasInfo {
     }
 };
 
-static const char* kSuffixes[] = {"@1x", "@2x", "@3x", "@4x"};
-
-const char* get_scale_suffix(float scale) {
+int get_scale_num(float scale) {
     if (scale <= 1.0f) {
-        return kSuffixes[0];
+        return 1;
     } else if (scale <= 2.0f) {
-        return kSuffixes[1];
+        return 2;
     } else if (scale <= 3.0f) {
-        return kSuffixes[2];
+        return 3;
     }
-    return kSuffixes[3];
+    return 4;
 }
 
 Atlas::Atlas() = default;
@@ -99,7 +96,7 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
     atlas->loaders.clear();
 
     for (const auto& page: atlasInfo.pages) {
-        auto image_asset = ek_image_reg_named(page.imagePath.c_str());
+        auto image_asset = ek_ref_find(sg_image, page.imagePath.c_str());
         atlas->pages.push_back(image_asset);
         atlas->loaders.emplace_back(ek_texture_loader_create());
         for (auto& spr_data: page.sprites) {
@@ -118,11 +115,11 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
     for (uint32_t i = 0; i < atlasInfo.pages.size(); ++i) {
         const auto& pageInfo = atlasInfo.pages[i];
         const auto& pageImagePath = pageInfo.imagePath;
-        const ek_image_reg_id image_id = ek_image_reg_named(pageImagePath.c_str());
-        const sg_image image = ek_image_reg_get(image_id);
+        const auto image_id = ek_ref_find(sg_image, pageImagePath.c_str());
+        const sg_image image = ek_ref_content(sg_image, image_id);
         if (image.id) {
             EK_DEBUG("Destroy old page image %s", pageImagePath.c_str());
-            ek_image_reg_assign(image_id, {SG_INVALID_ID});
+            ek_ref_reset(sg_image, image_id);
         }
 
         EK_DEBUG("Load atlas page %s/%s", atlas->base_path.c_str(), pageImagePath.c_str());
@@ -138,7 +135,7 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
 
 void Atlas::load(const char* path, float scaleFactor) {
     char meta_file_path[1024];
-    ek_snprintf(meta_file_path, sizeof meta_file_path, "%s%s.atlas", path, get_scale_suffix(scaleFactor));
+    ek_snprintf(meta_file_path, sizeof meta_file_path, "%s@%dx.atlas", path, get_scale_num(scaleFactor));
     base_path = Path::directory(path);
     ek_local_res_load(
             meta_file_path,
@@ -162,8 +159,12 @@ int Atlas::pollLoading() {
                 ek_texture_loader_update(loader);
                 if (!loader->loading) {
                     if (loader->status == 0) {
-                        ek_image_reg_id res = ek_image_reg_named(loader->urls[0].path);
-                        ek_image_reg_assign(res, loader->image);
+                        // ref = ek_ref_make(sg_image, loader->urls[0].path)
+                        // ek_ref_clear(ref)
+                        // item = ek_ref_get_item(ref)
+                        // item->handle = loader->image;
+                        // item->finalizer = sg_image_REF_finalizer
+                        ek_ref_assign_s(sg_image, loader->urls[0].path, loader->image);
                         ek_texture_loader_destroy(loader);
                         loaders[i] = nullptr;
                     }
@@ -206,7 +207,7 @@ void Atlas::clear() {
 //    }
 
     for (auto page: pages) {
-        ek_image_reg_assign(page, {SG_INVALID_ID});
+        ek_ref_reset(sg_image,page);
     }
 
     for (auto& spr: sprites) {

@@ -1,7 +1,7 @@
 #include "TextEngine.hpp"
 #include "TrueTypeFont.hpp"
 #include "Font.hpp"
-#include "ek/temp_res_man.h"
+#include <ek/gfx.h>
 #include <cstdarg>
 #include <ek/utf8.h>
 #include <ek/print.h>
@@ -89,7 +89,7 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
     }
     //auto alignment = format.alignment;
 
-    draw2d::state.pushProgram(draw2d::state.alphaMapShader);
+    draw2d::state.pushProgram(ek_canvas_.shader_alpha_map);
     // render effects first
     for (int i = format.layersCount - 1; i >= 0; --i) {
         auto& layer = format.layers[i];

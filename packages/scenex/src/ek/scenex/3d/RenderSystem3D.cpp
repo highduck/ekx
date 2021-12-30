@@ -4,7 +4,7 @@
 #include "Light3D.hpp"
 #include "RenderSystem3D.hpp"
 
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
 #include "render3d_shader.h"
 
 #include <ek/time.h>
@@ -314,7 +314,7 @@ RenderSystem3D::~RenderSystem3D() {
 }
 
 void RenderSystem3D::renderObjects(const Matrix4f& proj, const Matrix4f& view) {
-    const sg_image empty = draw2d::state.empty_image;
+    const sg_image empty = ek_canvas_.image_empty;
     main->bind.fs_images[SLOT_uImage0] = empty;
     main->bind.fs_images[SLOT_u_image_shadow_map] = shadows->rtColor;
 
@@ -462,7 +462,7 @@ void RenderSystem3D::render(float width, float height) {
     sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_light2_params, SG_RANGE(main->pointLightParams));
 
     renderObjects(cameraProjection, cameraView);
-    skybox->render(ek_image_reg_get(cameraData.cubeMap), cameraView, cameraProjection);
+    skybox->render(ek_ref_content(sg_image, cameraData.cubeMap), cameraView, cameraProjection);
 }
 
 }

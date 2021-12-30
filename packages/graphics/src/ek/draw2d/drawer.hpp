@@ -1,138 +1,158 @@
 #pragma once
 
-#include <ek/ds/Array.hpp>
-#include <ek/ds/Hash.hpp>
-#include <ek/util/NoCopyAssign.hpp>
-#include <ek/util/Res.hpp>
 #include <ek/math/Matrix3x2.hpp>
 #include <ek/math/Matrix4.hpp>
 #include <ek/math/Color32.hpp>
 #include <ek/math/Circle.hpp>
 #include <ek/math/Rect.hpp>
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
+
+typedef enum ek_canvas_blend {
+    EK_CANVAS_BLEND_PMA = 0
+} ek_canvas_blend;
+
+typedef struct ek_canvas_frame_stats {
+    uint32_t triangles;
+    uint32_t draw_calls;
+    float fill_area;
+} ek_canvas_frame_stats;
+
+typedef struct ek_canvas_scissors {
+    union {
+        struct {
+            int16_t x;
+            int16_t y;
+            int16_t w;
+            int16_t h;
+        };
+        uint64_t packed;
+    };
+} ek_canvas_scissors;
+
+typedef struct ek_canvas_batch_state {
+    ek_shader shader;
+    sg_image image;
+    ek_canvas_scissors scissors;
+    uint8_t blend;
+} ek_canvas_batch_state;
+
+enum {
+    EK_CANVAS_PIPELINE_CACHE_MAX_COUNT = 8,
+    EK_CANVAS_STACK_MAX_DEPTH = 8,
+    EK_CANVAS_BUFFERS_MAX_COUNT = 128,
+    EK_CANVAS_INDEX_MAX_COUNT = 0x100000,
+    EK_CANVAS_VERTEX_MAX_COUNT = 0x10000,
+};
+
+// region Buffers Chain
+
+typedef sg_buffer ek_canvas_buffers_line[EK_CANVAS_BUFFERS_MAX_COUNT];
+
+typedef struct ek_canvas_buffers {
+    ek_canvas_buffers_line lines[4];
+    uint16_t pos[4];
+    // each bucket buffer size
+    uint32_t cap[4];
+    sg_buffer_type type;
+} ek_canvas_buffers;
+
+// endregion
+
+#define EK_CANVAS_INDEX_LIMIT (EK_CANVAS_INDEX_MAX_COUNT - 1)
+#define EK_CANVAS_VERTEX_LIMIT (EK_CANVAS_VERTEX_MAX_COUNT - 1)
+
+sg_layout_desc ek_vertex2d_layout_desc(void);
+
+typedef struct ek_vertex2d {
+    float x;
+    float y;
+    float u;
+    float v;
+    uint32_t cm;
+    uint32_t co;
+} ek_vertex2d;
+
+typedef enum ek_canvas_state_flags {
+    EK_CANVAS_CHECK_IMAGE = 0x1,
+    EK_CANVAS_CHECK_SHADER = 0x2,
+    EK_CANVAS_CHECK_SCISSORS = 0x4,
+    EK_CANVAS_STATE_CHANGED = 0x8,
+    EK_CANVAS_PASS_ACTIVE = 0x10,
+    EK_CANVAS_CHECK_MASK = EK_CANVAS_CHECK_SCISSORS | EK_CANVAS_CHECK_SHADER | EK_CANVAS_CHECK_IMAGE,
+    _EK_CANVAS_STATE_FLAGS_FORCE_U32 = 0x7FFFFFFFu
+} ek_canvas_state_flags;
+
+typedef struct ek_canvas_pipeline_item {
+    sg_shader shader;
+    uint32_t mode;
+    sg_pipeline pipeline;
+} ek_canvas_pipeline_item;
+
+typedef struct ek_canvas_context {
+    // Scratch memory
+    ek_vertex2d vertex[EK_CANVAS_VERTEX_MAX_COUNT];
+    uint16_t index[EK_CANVAS_INDEX_MAX_COUNT];
+
+    // Buffers
+    ek_canvas_buffers ibs;
+    ek_canvas_buffers vbs;
+
+    // iterators and next position in scratch memory (vertex and index data)
+    ek_vertex2d* vertex_it;
+    uint16_t* index_it;
+
+    ek_vertex2d* vertex_end;
+    uint16_t* index_end;
+
+    uint32_t vertex_num;
+    uint32_t index_num;
+
+    uint16_t vertex_base;
+
+    // Stats during frame
+    ek_canvas_frame_stats stats;
+
+    // Current begin/end pass state
+    // Checking what states could be potentially changed
+    uint32_t state;
+
+    // Batch state tracking
+    ek_canvas_batch_state curr;
+    ek_canvas_batch_state next;
+
+    // render destination or offscreen framebuffer (framebuffer target could be also render target or null as default)
+    sg_image render_target_color;
+    sg_image render_target_depth;
+    sg_image framebuffer_color;
+    sg_image framebuffer_depth;
+
+    sg_pipeline pipeline;
+    sg_bindings bind;
+
+    // Pipeline cache
+    ek_canvas_pipeline_item pipelines[EK_CANVAS_PIPELINE_CACHE_MAX_COUNT];
+    int pipelines_num;
+
+    // Default resources
+    ek_shader shader_default;
+    ek_shader shader_alpha_map;
+    ek_shader shader_solid_color;
+    sg_image image_empty;
+
+} ek_canvas_context;
+
+extern ek_canvas_context ek_canvas_;
 
 namespace ek::draw2d {
-
-struct FrameStats {
-    uint32_t triangles = 0u;
-    uint32_t drawCalls = 0u;
-    float fillArea = 0.0f;
-};
 
 struct Vertex2D {
     Vec2f position;
     Vec2f uv;
     abgr32_t cm;
     abgr32_t co;
-
-    static sg_layout_desc layout();
 };
 
-enum class BlendMode : uint8_t {
-    PremultipliedAlpha = 0
-};
-
-struct BatchState {
-    sg_shader shader = {0};
-    sg_image image = {0};
-    Rect2i scissors{};
-    BlendMode blend = BlendMode::PremultipliedAlpha;
-    uint8_t shader_images_count = 0;
-
-    bool operator==(const BatchState& a) const {
-        return (blend == a.blend && shader.id == a.shader.id && image.id == a.image.id);
-    }
-
-    bool operator!=(const BatchState& a) const {
-        return (blend != a.blend || shader.id != a.shader.id || image.id != a.image.id);
-    }
-};
-
-class BufferChain {
-public:
-    BufferChain(sg_buffer_type type, uint32_t elementsMaxCount, uint32_t elementMaxSize) :
-            type_{type},
-            caps{0x10 * elementMaxSize,
-                 0x100 * elementMaxSize,
-                 0x400 * elementMaxSize,
-                 elementsMaxCount * elementMaxSize} {
-    }
-
-    uint32_t calcSizeBucket(uint32_t requiredSize) {
-        if (requiredSize < caps[0]) {
-            return 0;
-        } else if (requiredSize < caps[1]) {
-            return 1;
-        } else if (requiredSize < caps[2]) {
-            return 2;
-        }
-        return 3;
-    }
-
-    sg_buffer nextBuffer(uint32_t requiredSize) {
-        sg_buffer buf = {};
-        const auto index = calcSizeBucket(requiredSize);
-        auto& v = buffers_[index];
-        auto position = pos[index];
-        if (position >= v.size()) {
-            sg_buffer_desc desc{};
-            desc.usage = SG_USAGE_STREAM;
-            desc.type = (sg_buffer_type) type_;
-            desc.size = caps[index];
-            buf = sg_make_buffer(&desc);
-            EK_ASSERT(buf.id != 0);
-            v.push_back(buf);
-        } else {
-            buf = v[position];
-        }
-        ++position;
-        pos[index] = position;
-        return buf;
-    }
-
-    void nextFrame() {
-        resetPositions();
-    }
-
-    void resetPositions() {
-        pos[0] = 0;
-        pos[1] = 0;
-        pos[2] = 0;
-        pos[3] = 0;
-    }
-
-    void disposeBuffers() {
-        for (auto& chain: buffers_) {
-            for (sg_buffer buffer: chain) {
-                sg_destroy_buffer(buffer);
-            }
-            chain.resize(0);
-        }
-    }
-
-    void reset() {
-        disposeBuffers();
-        resetPositions();
-    }
-
-    ~BufferChain() {
-        disposeBuffers();
-    }
-
-private:
-    sg_buffer_type type_;
-    Array<sg_buffer> buffers_[4]{};
-    uint16_t pos[4] = {0, 0, 0, 0};
-    // each bucket buffer size
-    uint32_t caps[4];
-};
-
-struct Context : private NoCopyAssign {
-
-    Context();
-
-    ~Context();
-
+struct Context {
     /** Scissors **/
 
     void pushClipRect(const Rect2f& rc);
@@ -152,7 +172,7 @@ struct Context : private NoCopyAssign {
     Context& restore_transform();
 
     Context& transform_pivot(Vec2f position, float rotation, Vec2f scale, Vec2f pivot) {
-        matrix.translate(position.x + pivot.x, position.y + pivot.y)
+        matrix[0].translate(position.x + pivot.x, position.y + pivot.y)
                 .scale(scale.x, scale.y)
                 .rotate(rotation)
                 .translate(-pivot.x, -pivot.y);
@@ -217,15 +237,15 @@ struct Context : private NoCopyAssign {
     Context& restoreProgram();
 
     // do extra checking and clear states stack
-    void finish();
+    void check_and_reset_stack();
 
     void setNextScissors(Rect2i rc);
 
-    void setNextBlending(BlendMode blending);
+    void setNextBlending(ek_canvas_blend blend);
 
     void setNextImage(sg_image image);
 
-    void setNextShader(sg_shader shader, uint8_t images_count);
+    void setNextShader(ek_shader shader);
 
     void applyNextState();
 
@@ -237,100 +257,33 @@ public:
 
     void allocTriangles(uint32_t vertex_count, uint32_t index_count);
 
-    sg_pipeline getPipeline(sg_shader shader, bool useRenderTarget, bool depthStencilPass);
-
 public:
+    // Current and saved state values
+    sg_image image[EK_CANVAS_STACK_MAX_DEPTH]; // 1 * 4
+    ek_shader shader[EK_CANVAS_STACK_MAX_DEPTH]; // 2 * 4
+    Matrix3x2f matrix[EK_CANVAS_STACK_MAX_DEPTH]; // 6 * 4
+    ColorMod32 color[EK_CANVAS_STACK_MAX_DEPTH]; // 2 * 4
+    Rect2f uv[EK_CANVAS_STACK_MAX_DEPTH]; // 4 * 4
+    Rect2f scissors[EK_CANVAS_STACK_MAX_DEPTH]; // 4 * 4
 
-    constexpr static int MaxIndex = 0xFFFFF;
-    constexpr static int MaxVertex = 0xFFFF;
+    int image_top;
+    int shader_top;
+    int matrix_top;
+    int color_top;
+    int uv_top;
+    int scissors_top;
 
-    // Default resources
-    ek_shader defaultShader = {};
-    ek_shader alphaMapShader = {};
-    ek_shader solidColorShader = {};
-    sg_image empty_image = {0};
-
-    // Current drawing state
-    sg_image image = {0};
-    ek_shader program = {};
-    Matrix3x2f matrix{};
-    Rect2f uv{0.0f, 0.0f, 1.0f, 1.0f};
-    ColorMod32 color{};
-    Rect2f scissors{};
-
-    // Current pass state
-    bool active = false;
-    sg_image renderTarget = {0};
-    sg_image renderDepthStencil = {0};
-
-    //// Offscreen rendering
-    // framebuffer target could be also render target or null as default
-    sg_image framebufferColor = {0};
-    sg_image framebufferDepthStencil = {0};
-
-    Matrix4f mvp{};
-
-    // Stacks for save-restore states
-    Array<Matrix3x2f> matrixStack{};
-    Array<ColorMod32> colorStack{};
-    Array<Rect2f> scissorsStack{};
-    Array<ek_shader> programStack{};
-    Array<sg_image> image_stack{};
-    Array<Rect2f> texCoordStack{};
-
-    // Checking what states could be potentially changed
-    enum CheckFlags : uint8_t {
-        Check_Scissors = 1,
-        Check_Shader = 4,
-        CHECK_IMAGE = 8
-    };
-    uint8_t checkFlags = 0;
-
-    // Batch state tracking
-    BatchState curr{};
-    BatchState next{};
-    bool stateChanged = true;
-
-    // Stats during frame
-    FrameStats stats;
-
-    // Index data buffers
-    BufferChain indexBuffers_;
-    uint16_t* indexData_ = nullptr;
-    uint16_t* indexDataPos_ = nullptr;
-    uint16_t* indexDataNext_ = nullptr;
-    uint32_t indicesCount_ = 0;
-
-    // Vertex data buffers
-    BufferChain vertexBuffers_;
-    Vertex2D* vertexData_ = nullptr;
-    Vertex2D* vertexDataPos_ = nullptr;
-    Vertex2D* vertexDataNext_ = nullptr;
-    uint32_t verticesCount_ = 0;
-    uint16_t baseVertex_ = 0;
-
-    // Batch rendering
-    sg_pipeline selectedPipeline{};
-    sg_bindings bind{};
-    Hash<sg_pipeline> pipelines{};
-
-    void createDefaultResources();
+    Matrix4f mvp;
 };
 
 extern Context& state;
-
-void beginNewFrame();
 
 void begin(Rect2f viewport, const Matrix3x2f& view = Matrix3x2f{}, sg_image renderTarget = {0},
            sg_image depthStencilTarget = {0});
 
 void end();
 
-void endFrame();
-
 void write_index(uint16_t index);
-
-FrameStats getDrawStats();
 
 void triangles(int vertex_count, int index_count);
 
@@ -364,11 +317,6 @@ inline void write_indices_quad(const uint16_t base_index = 0) {
 
 void write_indices(const uint16_t* source, uint16_t count, uint16_t base_vertex = 0);
 
-void draw_indexed_triangles(const Array<Vec2f>& positions,
-                            const Array<abgr32_t>& colors,
-                            const Array<uint16_t>& indices,
-                            Vec2f offset, Vec2f scale);
-
 void line(const Vec2f& start, const Vec2f& end,
           abgr32_t color1, abgr32_t color2,
           float lineWidth1, float lineWidth2);
@@ -384,9 +332,10 @@ void strokeRect(const Rect2f& rc, abgr32_t color, float lineWidth);
 
 void strokeCircle(const CircleF& circle, abgr32_t color, float lineWidth, int segments);
 
-
-void initialize();
-
-void shutdown();
-
 }
+
+void ek_canvas_setup(void);
+
+void ek_canvas_shutdown(void);
+
+void ek_canvas_new_frame(void);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
 #include <ek/app.h>
 #include <ek/math/Vec.hpp>
 #include <ek/util/Res.hpp>

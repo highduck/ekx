@@ -2,7 +2,6 @@
 #include <ek/assert.h>
 #include <ek/log.h>
 #include <ek/app.h>
-#include "temp_res_man.h"
 
 #define SOKOL_GFX_IMPL
 
@@ -208,3 +207,29 @@ ek_shader ek_shader_make(const sg_shader_desc* desc) {
         .images_num = desc->fs.images[0].name ? 1 : 0
     };
 }
+
+// region Global references for `image` and `shader`
+
+ek_ref_implement(ek_shader)
+ek_ref_implement(sg_image)
+
+void ek_gfx_res_setup(void) {
+    sg_image_refs_init();
+    ek_shader_refs_init();
+}
+
+void sg_image_REF_DESTROY(sg_image* p) {
+    if (p && p->id) {
+        sg_destroy_image(*p);
+        p->id = 0;
+    }
+}
+
+void ek_shader_REF_DESTROY(ek_shader* p) {
+    if (p && p->shader.id) {
+        sg_destroy_shader(p->shader);
+        p->shader.id = 0;
+        p->images_num = 0;
+    }
+}
+

@@ -75,7 +75,7 @@ void draw(Profiler& profiler, const GameDisplayInfo& displayInfo) {
     const auto scale = displayInfo.dpiScale;
     const auto x = displayInfo.insets.x;
     const auto y = displayInfo.insets.y;
-    draw2d::state.matrix = Matrix3x2f{scale, 0, 0, scale, x, y};
+    draw2d::state.matrix[0] = Matrix3x2f{scale, 0, 0, scale, x, y};
     draw2d::state.set_empty_image();
 
     draw2d::state.save_matrix();
@@ -186,24 +186,24 @@ void Profiler::addTime(const char* name, float time) {
 
 void Profiler::beginRender(float drawableArea_) {
 #ifdef ENABLE_PROFILER
-    auto stats = draw2d::getDrawStats();
+    auto stats = ek_canvas_.stats;
     drawableArea = drawableArea_;
-    FR = stats.fillArea;
-    DC = stats.drawCalls;
+    FR = stats.fill_area;
+    DC = stats.draw_calls;
     TR = stats.triangles;
 #endif
 }
 
 void Profiler::endRender() {
 #ifdef ENABLE_PROFILER
-    const auto stats = draw2d::getDrawStats();
-    DC = stats.drawCalls - DC;
-    FR = stats.fillArea - FR;
+    const auto stats = ek_canvas_.stats;
+    DC = stats.draw_calls - DC;
+    FR = stats.fill_area - FR;
     TR = stats.triangles - TR;
-    tracks[Track_DrawCalls].history.write(DC);
-    tracks[Track_DrawCalls].value = DC;
-    tracks[Track_Triangles].history.write(TR);
-    tracks[Track_Triangles].value = TR;
+    tracks[Track_DrawCalls].history.write((float)DC);
+    tracks[Track_DrawCalls].value = (float)DC;
+    tracks[Track_Triangles].history.write((float)TR);
+    tracks[Track_Triangles].value = (float)TR;
 
     {
         const auto fillRate = FR / drawableArea;

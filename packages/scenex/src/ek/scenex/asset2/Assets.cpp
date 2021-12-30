@@ -11,7 +11,7 @@
 #include <ek/texture_loader.h>
 
 #include <ek/scenex/data/ImageData.hpp>
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
 
 #include <ek/scenex/SceneFactory.hpp>
 #include <ek/scenex/data/SGFile.hpp>
@@ -117,7 +117,7 @@ public:
                 const auto totalPages = (float) res->pages.size();
                 float loadedPages = 0.0f;
                 for (auto page: res->pages) {
-                    if (ek_image_reg_get(page).id) {
+                    if (ek_ref_content(sg_image, page).id) {
                         loadedPages += 1.0f;
                     }
                 }
@@ -236,7 +236,7 @@ public:
 class ImageAsset : public Asset {
 public:
     ImageAsset(const char* name, ImageData data) :
-            res{ek_image_reg_named(name)},
+            res{ek_ref_find(sg_image, name)},
             data_{std::move(data)} {
         weight_ = (float) data_.images.size();
     }
@@ -267,7 +267,7 @@ public:
             if (!loader->loading) {
                 error = loader->status;
                 if (error == 0) {
-                    ek_image_reg_assign(res, loader->image);
+                    ek_ref_assign(sg_image, res, loader->image);
                 }
                 state = AssetState::Ready;
                 ek_texture_loader_destroy(loader);
@@ -285,10 +285,10 @@ public:
     }
 
     void do_unload() override {
-        ek_image_reg_assign(res, {0});
+        ek_ref_reset(sg_image, res);
     }
 
-    ek_image_reg_id res;
+    ek_ref(sg_image) res;
     ek_texture_loader* loader = nullptr;
     ImageData data_{};
     // by default always premultiply alpha,

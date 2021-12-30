@@ -5,7 +5,7 @@
 #include <ek/util/Res.hpp>
 #include <ek/util/Type.hpp>
 #include <ecxx/ecxx_fwd.hpp>
-#include <ek/temp_res_man.h>
+#include <ek/gfx.h>
 
 namespace ek {
 
@@ -30,7 +30,7 @@ struct Camera3D {
     Vec4f clearColor{0.5f, 0.5f, 0.5f, 1.0f};
     float clearDepth = 1.0f;
 
-    ek_image_reg_id cubeMap;
+    ek_ref(sg_image) cubeMap;
 };
 
 ECX_TYPE(29, Camera3D);

@@ -1,7 +1,7 @@
 #include <ek/app.h>
 #include <ek/core.hpp>
 //#include <ek/audio/audio.hpp>
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/time.h>
 
@@ -38,7 +38,7 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
 
 void on_ready() {
     ek_gfx_setup(128);
-    draw2d::initialize();
+    ek_canvas_setup();
 }
 
 void on_frame() {
@@ -54,13 +54,12 @@ void on_frame() {
         pass_action.colors[0].value.a = 1.0f;
         sg_begin_default_pass(&pass_action, (int) width, (int) height);
 
-        draw2d::beginNewFrame();
+        ek_canvas_new_frame();
         draw2d::begin({0, 0, width, height});
 
         const auto pr = 0.5 + 0.5 * sin(ek_time_now());
         drawPreloader((float) pr, width, height);
         draw2d::end();
-        draw2d::endFrame();
 
         sg_end_pass();
         sg_commit();

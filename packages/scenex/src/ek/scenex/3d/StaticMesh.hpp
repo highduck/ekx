@@ -3,7 +3,7 @@
 #include "Material3D.hpp"
 #include <ek/ds/Array.hpp>
 #include <ek/ds/String.hpp>
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
 #include <ek/scenex/data/Model3D.hpp>
 #include <ek/util/Type.hpp>
 
@@ -19,13 +19,16 @@ struct StaticMesh {
         sg_buffer_desc desc{};
         desc.usage = SG_USAGE_IMMUTABLE;
         desc.type = SG_BUFFERTYPE_VERTEXBUFFER;
-        desc.size = model.vertices.size() * sizeof(ModelVertex3D);
+        desc.data.ptr = model.vertices.data();
+        desc.data.size = model.vertices.size() * sizeof(ModelVertex3D);
         vb = sg_make_buffer(&desc);
         EK_ASSERT(vb.id != 0);
 
         desc.usage = SG_USAGE_IMMUTABLE;
         desc.type = SG_BUFFERTYPE_INDEXBUFFER;
-        desc.size = model.indices.size() * sizeof(uint16_t);
+        //desc.size = model.indices.size() * sizeof(uint16_t);
+        desc.data.ptr = model.indices.data();
+        desc.data.size = model.indices.size() * sizeof(uint16_t);
         ib = sg_make_buffer(&desc);
         EK_ASSERT(ib.id != 0);
 

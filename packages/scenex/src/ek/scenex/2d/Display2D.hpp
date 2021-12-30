@@ -7,7 +7,7 @@
 #include <ek/util/Type.hpp>
 #include <ek/ds/Pointer.hpp>
 #include <ecxx/ecxx.hpp>
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
 #include "Sprite.hpp"
 #include <ek/log.h>
 #include <ek/assert.h>
@@ -79,7 +79,7 @@ struct Display2D {
     Pointer<IDrawable2D> drawable;
 
     // state management
-    ek_shader_ref program = {0};
+    ek_ref(ek_shader) program = {0};
 
     // 1 - draw debug bounds
     int flags = 0;
@@ -97,7 +97,7 @@ struct Display2D {
         }
         if (!drawable->matchType<T>()) {
             EK_WARN("Drawable2D TypeID mismatch: required %d, got %d", TypeIndex<T, IDrawable2D>::value,
-                      drawable->getTypeID());
+                    drawable->getTypeID());
         }
         EK_ASSERT(!!drawable);
         EK_ASSERT(drawable->matchType<T>());

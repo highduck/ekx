@@ -17,8 +17,8 @@ void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTr
 
     auto* uglyFilter = w.tryGet<UglyFilter2D>(e);
     if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {
-        draw2d::state.matrix = worldTransform->matrix;
-        draw2d::state.color = worldTransform->color;
+        draw2d::state.matrix[0] = worldTransform->matrix;
+        draw2d::state.color[0] = worldTransform->color;
         if (uglyFilter->pass(w, e)) {
             // discard
             return;
@@ -30,7 +30,7 @@ void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTr
         const auto* camera = Camera2D::getCurrentRenderingCamera();
         auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, worldTransform->matrix);
         if (Camera2D::getCurrentRenderingCamera()->occlusionEnabled) {
-            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors)) {
+            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors[0])) {
                 // discard
                 return;
             }
@@ -45,11 +45,11 @@ void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTr
     if (display) {
         if (display->program.id) {
             programChanged = true;
-            draw2d::state.saveProgram().setProgram(ek_shader_get(display->program));
+            draw2d::state.saveProgram().setProgram(ek_ref_content(ek_shader, display->program));
         }
         if (display->drawable) {
-            draw2d::state.matrix = worldTransform->matrix;
-            draw2d::state.color = worldTransform->color;
+            draw2d::state.matrix[0] = worldTransform->matrix;
+            draw2d::state.color[0] = worldTransform->color;
             display->drawable->draw();
         }
     }
@@ -92,9 +92,9 @@ void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
     auto* bounds = w.tryGet<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
-        auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, draw2d::state.matrix);
+        auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, draw2d::state.matrix[0]);
         if (Camera2D::getCurrentRenderingCamera()->occlusionEnabled) {
-            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors)) {
+            if (!rc.overlaps(camera->screenRect) || !rc.overlaps(draw2d::state.scissors[0])) {
                 // discard
                 return;
             }
@@ -110,7 +110,7 @@ void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
     if (display) {
         if (display->program.id) {
             programChanged = true;
-            draw2d::state.saveProgram().setProgram(ek_shader_get(display->program));
+            draw2d::state.saveProgram().setProgram(ek_ref_content(ek_shader, display->program));
         }
         if (display->drawable) {
             display->drawable->draw();
@@ -127,7 +127,7 @@ void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
                 draw2d::state.concat(childTransform->matrix);
                 draw2d::state.concat(childTransform->color);
             }
-            if (draw2d::state.color.scale.a > 0) {
+            if (draw2d::state.color[0].scale.a != 0) {
                 drawStack(w, it.index);
             }
             if (childTransform) {

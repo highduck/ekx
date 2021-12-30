@@ -189,7 +189,7 @@ void drawBox2(const Rect2f& rc, const Matrix3x2f& m, argb32_t color1, argb32_t c
     draw2d::state.set_empty_image();
     if (fillColor != argb32_t::zero) {
         draw2d::state.save_matrix();
-        draw2d::state.matrix = m;
+        draw2d::state.matrix[0] = m;
         draw2d::quad(rc, fillColor);
         draw2d::state.restore_matrix();
     }
@@ -216,11 +216,11 @@ void SceneWindow::drawSceneNode(ecs::EntityApi e) {
     if (disp && disp->drawable) {
         auto* transform = e.tryGet<WorldTransform2D>();
         if (transform) {
-            draw2d::state.matrix = transform->matrix;
-            draw2d::state.color = transform->color;
+            draw2d::state.matrix[0] = transform->matrix;
+            draw2d::state.color[0] = transform->color;
         } else {
-            draw2d::state.matrix = Matrix3x2f{};
-            draw2d::state.color = ColorMod32{};
+            draw2d::state.matrix[0] = Matrix3x2f{};
+            draw2d::state.color[0] = ColorMod32{};
         }
         disp->drawable->draw();
     }
@@ -238,8 +238,8 @@ void SceneWindow::drawSceneNodeBounds(ecs::EntityApi e) {
 
     auto* disp = e.tryGet<Display2D>();
     if (disp) {
-        draw2d::state.matrix = Matrix3x2f{};
-        draw2d::state.color = ColorMod32{};
+        draw2d::state.matrix[0] = Matrix3x2f{};
+        draw2d::state.color[0] = ColorMod32{};
 
         Matrix3x2f m = view.view2.matrix;
         auto* transform = e.tryGet<WorldTransform2D>();

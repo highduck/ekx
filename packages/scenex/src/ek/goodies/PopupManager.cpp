@@ -101,7 +101,7 @@ bool contains(const Array<EntityApi>& list, const EntityApi e) {
 
 void PopupManager::updateAll() {
     auto dt = TimeLayer::UI->dt;
-    for (auto e : ecs::view<PopupManager>()) {
+    for (auto e: ecs::view<PopupManager>()) {
         auto& p = e.get<PopupManager>();
         bool needFade = !p.active.empty();
         if (p.active.size() == 1 && p.active.back() == p.closingLast) {
@@ -213,7 +213,7 @@ void close_all_popups() {
     auto& state = pm.get<PopupManager>();
 
     auto copy_vec = state.active;
-    for (auto p : copy_vec) {
+    for (auto p: copy_vec) {
         close_popup(p);
     }
 }
@@ -222,7 +222,7 @@ ecs::EntityApi createBackQuad() {
     auto e = createNode2D("back");
     auto& display = e.assign<Display2D>();
     display.makeDrawable<Quad2D>().setColor(argb32_t::black);
-    display.program = ek_shader_named("draw2d_color");
+    display.program = ek_ref_find(ek_shader, "draw2d_color");
     e.assign<LayoutRect>()
             .fill(true, true)
             .setInsetsMode(false);
@@ -236,7 +236,7 @@ ecs::EntityApi createBackQuad() {
     // if touch outside of popups, simulate back-button behavior
     auto& interactive = e.assign<Interactive>();
     interactive.onEvent += [e](auto event) {
-        if(event == PointerEvent::Down) {
+        if (event == PointerEvent::Down) {
             const auto* state = findComponentInParent<PopupManager>(e);
             if (state && !state->active.empty()) {
                 Locator::ref<InteractionSystem>().sendBackButton();

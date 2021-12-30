@@ -14,7 +14,7 @@ IDrawable2D::~IDrawable2D() = default;
 void Quad2D::draw() {
     const Sprite* spr = src.get();
     if (spr) {
-        const sg_image image = ek_image_reg_get(spr->image_id);
+        const sg_image image = ek_ref_content(sg_image, spr->image_id);
         if (image.id) {
             draw2d::state.set_image_region(image, spr->tex);
         }
@@ -250,7 +250,7 @@ void Arc2D::draw() {
         return;
     }
 
-    const sg_image image = ek_image_reg_get(f->image_id);
+    const sg_image image = ek_ref_content(sg_image, f->image_id);
     if (!image.id) {
         return;
     }

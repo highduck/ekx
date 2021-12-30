@@ -56,6 +56,7 @@
 #include <sokol_gfx.h>
 
 #include <stdint.h>
+#include <ek/ref.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,6 +87,11 @@ typedef struct ek_shader {
 } ek_shader;
 
 ek_shader ek_shader_make(const sg_shader_desc* desc);
+
+ek_ref_declare(ek_shader)
+ek_ref_declare(sg_image)
+
+void ek_gfx_res_setup();
 
 #ifdef __cplusplus
 }

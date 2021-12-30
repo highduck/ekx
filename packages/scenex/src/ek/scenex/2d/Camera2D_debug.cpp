@@ -32,7 +32,7 @@ void drawBox(const Rect2f& rc, const Matrix3x2f& m, argb32_t color1, argb32_t co
     draw2d::state.set_empty_image();
     if (fillColor != argb32_t::zero) {
         draw2d::state.save_matrix();
-        draw2d::state.matrix = m;
+        draw2d::state.matrix[0] = m;
         draw2d::quad(rc, fillColor);
         draw2d::state.restore_matrix();
     }
@@ -105,7 +105,7 @@ void traverseVisibleNodes(ecs::EntityApi e, const WorldTransform2D* parentTransf
 void drawFills(Camera2D& camera) {
 
     draw2d::state.save_transform();
-    draw2d::state.color = {};
+    draw2d::state.color[0] = {};
     draw2d::state.set_empty_image();
 
     traverseVisibleNodes<Display2D>(
@@ -144,7 +144,7 @@ void drawFills(Camera2D& camera) {
 void drawOcclusion(Camera2D& camera) {
 
     draw2d::state.save_transform();
-    draw2d::state.color = {};
+    draw2d::state.color[0] = {};
     draw2d::state.set_empty_image();
     auto cameraRect = camera.worldRect;
     traverseVisibleNodes<Bounds2D>(camera.root.ent(), nullptr,
@@ -181,8 +181,8 @@ void debugCameraGizmo(Camera2D& camera) {
 }
 
 void Camera2D::drawGizmo(Camera2D& camera) {
-    draw2d::state.matrix.set_identity();
-    draw2d::state.color = {};
+    draw2d::state.matrix[0].set_identity();
+    draw2d::state.color[0] = {};
 
     if (camera.debugVisibleBounds) {
         drawFills(camera);
@@ -197,16 +197,16 @@ void Camera2D::drawGizmo(Camera2D& camera) {
         debugDrawPointer(camera);
     }
     if (camera.debugGizmoSelf) {
-        draw2d::state.matrix.set_identity();
-        draw2d::state.color = {};
+        draw2d::state.matrix[0].set_identity();
+        draw2d::state.color[0] = {};
         debugCameraGizmo(camera);
     }
     if (camera.debugDrawScriptGizmo) {
         for (auto e : ecs::view<ScriptHolder>()) {
             auto* worldTransform = findComponentInParent<WorldTransform2D>(e);
             if (worldTransform) {
-                draw2d::state.matrix = worldTransform->matrix;
-                draw2d::state.color = worldTransform->color;
+                draw2d::state.matrix[0] = worldTransform->matrix;
+                draw2d::state.color[0] = worldTransform->color;
                 for (auto& script : e.get<ScriptHolder>().list) {
                     script->gui_gizmo();
                 }

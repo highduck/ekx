@@ -1,6 +1,6 @@
 #include <ek/app.h>
 #include <ek/core.hpp>
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
 #include <ek/draw2d/drawer.hpp>
 #include <ek/math/Random.hpp>
 #include <ek/bitset.h>
@@ -68,7 +68,7 @@ random_estimator_t estimator;
 
 void on_ready() {
     ek_gfx_setup(128);
-    draw2d::initialize();
+    ek_canvas_setup();
 
     estimator_init(&estimator);
 }
@@ -100,14 +100,13 @@ void on_frame() {
 
         estimator_update_pixels(&estimator);
 
-        draw2d::beginNewFrame();
+        ek_canvas_new_frame();
         draw2d::begin({0, 0, width, height});
 
         draw2d::state.set_image_region(estimator.image);
         draw2d::quad(0, 0, estimator.image_size, estimator.image_size);
 
         draw2d::end();
-        draw2d::endFrame();
 
         sg_end_pass();
         sg_commit();

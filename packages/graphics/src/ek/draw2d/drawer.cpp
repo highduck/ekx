@@ -4,17 +4,81 @@
 #include <ek/util/StaticStorage.hpp>
 #include <ek/math/MatrixCamera.hpp>
 #include "draw2d_shader.h"
-#include "ek/temp_res_man.h"
 #include <ek/log.h>
 #include <ek/assert.h>
 
-namespace ek::draw2d {
+/// region Buffers Chain
 
-StaticStorage<Context> context;
-Context& state = context.ref();
+void ek_canvas_buffers_init(ek_canvas_buffers* buffers, sg_buffer_type type, uint32_t elements_max_count,
+                            uint32_t element_max_size) {
+    EK_ASSERT(elements_max_count > 0x400);
+    buffers->type = type;
+    const uint32_t c = 0x10 * element_max_size;
+    buffers->cap[0] = c;
+    buffers->cap[1] = c << 4;
+    buffers->cap[2] = c << 6;
+    buffers->cap[3] = elements_max_count * element_max_size;
+}
 
-sg_layout_desc Vertex2D::layout() {
-    sg_layout_desc layout{};
+int ek_canvas_buffers_get_bucket(ek_canvas_buffers* buffers, uint32_t required_size) {
+    uint32_t* cap = buffers->cap;
+    if (required_size < cap[0]) {
+        return 0;
+    } else if (required_size < cap[1]) {
+        return 1;
+    } else if (required_size < cap[2]) {
+        return 2;
+    }
+    return 3;
+}
+
+sg_buffer ek_canvas_buffers_get(ek_canvas_buffers* buffers, uint32_t required_size) {
+
+    const int bucket = ek_canvas_buffers_get_bucket(buffers, required_size);
+    sg_buffer* line = buffers->lines[bucket];
+    uint16_t index = buffers->pos[bucket];
+    if (index == EK_CANVAS_BUFFERS_MAX_COUNT) {
+        return (sg_buffer) {0};
+    }
+    sg_buffer buf = line[index];
+    if (buf.id == 0) {
+        sg_buffer_desc desc = (sg_buffer_desc) {
+                .size = buffers->cap[bucket],
+                .type = buffers->type,
+                .usage = SG_USAGE_STREAM,
+                .label = buffers->type == SG_BUFFERTYPE_VERTEXBUFFER ? "canvas-vbs" : "canvas-ibs"
+        };
+        buf = sg_make_buffer(&desc);
+        line[index] = buf;
+    }
+    if (buf.id) {
+        ++buffers->pos[bucket];
+    }
+    return buf;
+}
+
+void ek_canvas_buffers_rewind(ek_canvas_buffers* buffers) {
+    uint16_t* positions = buffers->pos;
+    for (int i = 0; i < 4; ++i) {
+        positions[i] = 0;
+    }
+}
+
+void ek_canvas_buffers_destroy(ek_canvas_buffers* buffers) {
+    for (int bucket = 0; bucket < 4; ++bucket) {
+        sg_buffer* line = buffers->lines[bucket];
+        int count = buffers->pos[bucket];
+        for (int i = 0; i < count; ++i) {
+            sg_destroy_buffer(line[i]);
+        }
+    }
+}
+
+/// endregion
+
+sg_layout_desc ek_vertex2d_layout_desc(void) {
+    using ek::draw2d::Vertex2D;
+    sg_layout_desc layout = {};
     layout.buffers[0].stride = sizeof(Vertex2D);
     layout.attrs[0].offset = offsetof(Vertex2D, position);
     layout.attrs[0].format = SG_VERTEXFORMAT_FLOAT2;
@@ -27,45 +91,69 @@ sg_layout_desc Vertex2D::layout() {
     return layout;
 }
 
-void Context::setNextScissors(Rect2i rc) {
-    if (rc != curr.scissors) {
-        stateChanged = true;
-    }
-    next.scissors = rc;
+ek_canvas_context ek_canvas_;
+
+static void ek_canvas__reset_stream(void) {
+    // just verify that we alloc before write
+    ek_canvas_.vertex_it = NULL;
+    ek_canvas_.index_it = NULL;
+
+    ek_canvas_.vertex_end = ek_canvas_.vertex;
+    ek_canvas_.index_end = ek_canvas_.index;
+
+    ek_canvas_.vertex_num = 0;
+    ek_canvas_.index_num = 0;
 }
 
-void Context::setNextBlending(BlendMode blending) {
-    if (curr.blend != blending) {
-        stateChanged = true;
+namespace ek::draw2d {
+
+StaticStorage<Context> context;
+Context& state = context.ref();
+
+void Context::setNextScissors(Rect2i rc) {
+    const ek_canvas_scissors r = {
+            (int16_t) rc.x,
+            (int16_t) rc.y,
+            (int16_t) rc.width,
+            (int16_t) rc.height
+    };
+    if (r.packed != ek_canvas_.curr.scissors.packed) {
+        ek_canvas_.state |= EK_CANVAS_STATE_CHANGED;
     }
-    next.blend = blending;
+    ek_canvas_.next.scissors = r;
+}
+
+void Context::setNextBlending(ek_canvas_blend blend) {
+    if (ek_canvas_.curr.blend != blend) {
+        ek_canvas_.state |= EK_CANVAS_STATE_CHANGED;
+    }
+    ek_canvas_.next.blend = blend;
 }
 
 void Context::setNextImage(sg_image image_) {
-    if (curr.image.id != image_.id) {
-        stateChanged = true;
+    if (ek_canvas_.curr.image.id != image_.id) {
+        ek_canvas_.state |= EK_CANVAS_STATE_CHANGED;
     }
-    next.image = image_;
+    ek_canvas_.next.image = image_;
 }
 
-void Context::setNextShader(sg_shader shader, uint8_t images_count) {
-    if (curr.shader.id != shader.id) {
-        stateChanged = true;
+void Context::setNextShader(ek_shader shader_) {
+    if (ek_canvas_.curr.shader.shader.id != shader_.shader.id) {
+        ek_canvas_.state |= EK_CANVAS_STATE_CHANGED;
     }
-    next.shader = shader;
-    next.shader_images_count = images_count;
+    ek_canvas_.next.shader = shader_;
 }
 
 void Context::applyNextState() {
-    if (stateChanged) {
-        curr = next;
-        stateChanged = false;
+    if (ek_canvas_.state & EK_CANVAS_STATE_CHANGED) {
+        ek_canvas_.curr = ek_canvas_.next;
+        ek_canvas_.state ^= EK_CANVAS_STATE_CHANGED;
     }
 }
 
-sg_pipeline createPipeline(sg_shader shader, bool useRenderTarget, bool depthStencil) {
+sg_pipeline create_pipeline_for_cache(sg_shader shader, bool useRenderTarget, bool depthStencil) {
     sg_pipeline_desc pip_desc{};
-    pip_desc.layout = Vertex2D::layout();
+    pip_desc.layout = ek_vertex2d_layout_desc();
     pip_desc.shader = shader;
     pip_desc.index_type = SG_INDEXTYPE_UINT16;
     pip_desc.colors[0].write_mask = SG_COLORMASK_RGB;
@@ -88,226 +176,214 @@ sg_pipeline createPipeline(sg_shader shader, bool useRenderTarget, bool depthSte
     return sg_make_pipeline(pip_desc);
 }
 
-sg_pipeline Context::getPipeline(sg_shader shader, bool useRenderTarget, bool depthStencilPass) {
-    uint64_t key{shader.id};
+sg_pipeline get_pipeline(sg_shader shader, bool useRenderTarget, bool depthStencilPass) {
+    uint32_t mode = 0;
     if (useRenderTarget) {
-        key = key | (1ull << 32ull);
+        mode |= 0x1;
     }
     if (depthStencilPass) {
-        key = key | (1ull << 33ull);
+        mode |= 0x2;
     }
-    auto pip = pipelines.get(key, {SG_INVALID_ID});
-    if (pip.id == SG_INVALID_ID) {
-        pip = createPipeline(shader, useRenderTarget, depthStencilPass);
-        pipelines.set(key, pip);
-        log_debug("pipelines: %d", pipelines.size());
+    for (int i = 0; i < ek_canvas_.pipelines_num; ++i) {
+        ek_canvas_pipeline_item item = ek_canvas_.pipelines[i];
+        if (item.shader.id == shader.id && item.mode == mode) {
+            return item.pipeline;
+        }
     }
-    return pip;
+    EK_ASSERT(ek_canvas_.pipelines_num != EK_CANVAS_PIPELINE_CACHE_MAX_COUNT);
+    ek_canvas_pipeline_item item;
+    item.mode = mode;
+    item.shader = shader;
+    item.pipeline = create_pipeline_for_cache(shader, useRenderTarget, depthStencilPass);
+
+    ek_canvas_.pipelines[ek_canvas_.pipelines_num++] = item;
+    log_debug("pipelines: %d", ek_canvas_.pipelines_num);
+
+    return item.pipeline;
 }
 
-float getTriangleArea(const Vertex2D* vertices, const uint16_t* indices, int count) {
+float triangle_area(const ek_vertex2d* vertices, const uint16_t* indices, int count) {
     float sum = 0.0f;
     for (int i = 0; i < count;) {
-        const Vec2f a = vertices[indices[i++]].position;
-        const Vec2f b = vertices[indices[i++]].position;
-        const Vec2f c = vertices[indices[i++]].position;
+        const ek_vertex2d a = vertices[indices[i++]];
+        const ek_vertex2d b = vertices[indices[i++]];
+        const ek_vertex2d c = vertices[indices[i++]];
         sum += a.x * b.y + b.x * c.y + c.x * a.y - a.x * c.y - b.x * a.y - c.x * b.y;
     }
     return sum / 2.0f;
 }
 
 void Context::drawUserBatch(sg_pipeline pip, uint32_t images_count) {
-    if (indicesCount_ == 0) {
+    int index_num = (int) ek_canvas_.index_num;
+    if (index_num == 0) {
         return;
     }
 
-    const uint32_t vertexDataSize = verticesCount_ * static_cast<uint32_t>(sizeof(Vertex2D));
-    const uint32_t indexDataSize = indicesCount_ << 1u;
-    sg_buffer vb = vertexBuffers_.nextBuffer(vertexDataSize);
-    sg_buffer ib = indexBuffers_.nextBuffer(indexDataSize);
-    sg_update_buffer(vb, (sg_range) {vertexData_, vertexDataSize});
-    sg_update_buffer(ib, (sg_range) {indexData_, indexDataSize});
+    const uint32_t vertexDataSize = (uint32_t) (ek_canvas_.vertex_num * sizeof(ek_vertex2d));
+    const uint32_t indexDataSize = (uint32_t) index_num << 1u;
+    const sg_buffer vb = ek_canvas_buffers_get(&ek_canvas_.vbs, vertexDataSize);
+    const sg_buffer ib = ek_canvas_buffers_get(&ek_canvas_.ibs, indexDataSize);
+    EK_ASSERT(vb.id != 0);
+    EK_ASSERT(ib.id != 0);
+    sg_update_buffer(vb, (sg_range) {ek_canvas_.vertex, vertexDataSize});
+    sg_update_buffer(ib, (sg_range) {ek_canvas_.index, indexDataSize});
 
     // reset current pipeline
-    selectedPipeline = pip;
+    ek_canvas_.pipeline = pip;
 
-    bind.vertex_buffers[0] = vb;
-    bind.index_buffer = ib;
-    bind.fs_images[0].id = images_count == 1 ? curr.image.id : SG_INVALID_ID;
-    sg_apply_bindings(bind);
+    ek_canvas_.bind.vertex_buffers[0] = vb;
+    ek_canvas_.bind.index_buffer = ib;
+    ek_canvas_.bind.fs_images[0].id = images_count == 1 ? ek_canvas_.curr.image.id : SG_INVALID_ID;
+    sg_apply_bindings(ek_canvas_.bind);
 
     {
-        const auto rc = curr.scissors;
+        const ek_canvas_scissors rc = ek_canvas_.curr.scissors;
         //sg_apply_viewportf(rc.x, rc.y, rc.width, rc.height, true);
-        sg_apply_scissor_rect(rc.x, rc.y, rc.width, rc.height, true);
+        sg_apply_scissor_rect(rc.x, rc.y, rc.w, rc.h, true);
     }
 
-    sg_draw(0, (int) indicesCount_, 1);
+    sg_draw(0, index_num, 1);
 
 #ifndef NDEBUG
-    stats.fillArea += getTriangleArea(vertexData_, indexData_, (int)indicesCount_);
+    ek_canvas_.stats.fill_area += triangle_area(ek_canvas_.vertex, ek_canvas_.index, index_num);
 #endif
-    stats.triangles += indicesCount_ / 3;
-    ++stats.drawCalls;
+    ek_canvas_.stats.triangles += index_num / 3;
+    ++ek_canvas_.stats.draw_calls;
 
-    indicesCount_ = 0;
-    verticesCount_ = 0;
-
-    vertexDataNext_ = vertexData_;
-    indexDataNext_ = indexData_;
-
-    // just verify that we alloc before write
-    vertexDataPos_ = nullptr;
-    indexDataPos_ = nullptr;
+    ek_canvas__reset_stream();
 }
 
 void Context::drawBatch() {
-    if (indicesCount_ == 0) {
+    int index_num = (int) ek_canvas_.index_num;
+    if (index_num == 0) {
         return;
     }
 
-    const uint32_t vertexDataSize = verticesCount_ * static_cast<uint32_t>(sizeof(Vertex2D));
-    const uint32_t indexDataSize = indicesCount_ << 1u;
-    sg_buffer vb = vertexBuffers_.nextBuffer(vertexDataSize);
-    sg_buffer ib = indexBuffers_.nextBuffer(indexDataSize);
-    sg_update_buffer(vb, {vertexData_, vertexDataSize});
-    sg_update_buffer(ib, {indexData_, indexDataSize});
+    const uint32_t vertexDataSize = (uint32_t) (ek_canvas_.vertex_num * sizeof(ek_vertex2d));
+    const uint32_t indexDataSize = index_num << 1u;
+    const sg_buffer vb = ek_canvas_buffers_get(&ek_canvas_.vbs, vertexDataSize);
+    const sg_buffer ib = ek_canvas_buffers_get(&ek_canvas_.ibs, indexDataSize);
+    EK_ASSERT(vb.id != 0);
+    EK_ASSERT(ib.id != 0);
+    sg_update_buffer(vb, {ek_canvas_.vertex, vertexDataSize});
+    sg_update_buffer(ib, {ek_canvas_.index, indexDataSize});
 
-    const sg_image fbColor = renderTarget.id ? renderTarget : framebufferColor;
-    const sg_image fbDepthStencil = renderDepthStencil.id ? renderDepthStencil : framebufferDepthStencil;
+    const sg_image fb_color = ek_canvas_.render_target_color.id ? ek_canvas_.render_target_color
+                                                                : ek_canvas_.framebuffer_color;
+    const sg_image fb_depth = ek_canvas_.render_target_depth.id ? ek_canvas_.render_target_depth
+                                                                : ek_canvas_.framebuffer_depth;
 
-    auto pip = getPipeline(curr.shader, fbColor.id != 0, fbDepthStencil.id != 0);
-    if (pip.id != selectedPipeline.id) {
-        selectedPipeline = pip;
+    auto pip = get_pipeline(ek_canvas_.curr.shader.shader, fb_color.id != 0, fb_depth.id != 0);
+    if (pip.id != ek_canvas_.pipeline.id) {
+        ek_canvas_.pipeline = pip;
         sg_apply_pipeline(pip);
         sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
     }
-    bind.vertex_buffers[0] = vb;
-    bind.index_buffer = ib;
-    bind.fs_images[0].id = curr.shader_images_count == 1 ? curr.image.id : SG_INVALID_ID;
-    sg_apply_bindings(bind);
+    ek_canvas_.bind.vertex_buffers[0] = vb;
+    ek_canvas_.bind.index_buffer = ib;
+    ek_canvas_.bind.fs_images[0].id = ek_canvas_.curr.shader.images_num == 1 ? ek_canvas_.curr.image.id : SG_INVALID_ID;
+    sg_apply_bindings(ek_canvas_.bind);
 
     {
-        const auto rc = curr.scissors;
+        const auto rc = ek_canvas_.curr.scissors;
         //sg_apply_viewportf(rc.x, rc.y, rc.width, rc.height, true);
-        sg_apply_scissor_rect(rc.x, rc.y, rc.width, rc.height, true);
+        sg_apply_scissor_rect(rc.x, rc.y, rc.w, rc.h, true);
     }
 
-    sg_draw(0, (int) indicesCount_, 1);
+    sg_draw(0, index_num, 1);
 
 #ifndef NDEBUG
-    stats.fillArea += getTriangleArea(vertexData_, indexData_, (int)indicesCount_);
+    // TODO: add mvp matrix and viewport to get real pixels
+    ek_canvas_.stats.fill_area += triangle_area(ek_canvas_.vertex, ek_canvas_.index, index_num);
 #endif
-    stats.triangles += indicesCount_ / 3;
-    ++stats.drawCalls;
+    ek_canvas_.stats.triangles += index_num / 3;
+    ++ek_canvas_.stats.draw_calls;
 
-    indicesCount_ = 0;
-    verticesCount_ = 0;
-
-    vertexDataNext_ = vertexData_;
-    indexDataNext_ = indexData_;
-
-    // just verify that we alloc before write
-    vertexDataPos_ = nullptr;
-    indexDataPos_ = nullptr;
+    ek_canvas__reset_stream();
 }
 
 void Context::allocTriangles(uint32_t vertex_count, uint32_t index_count) {
-    if (checkFlags != 0) {
-        if (checkFlags & Context::CHECK_IMAGE) {
-            setNextImage(image);
+    if (ek_canvas_.state & EK_CANVAS_CHECK_MASK) {
+        if (ek_canvas_.state & EK_CANVAS_CHECK_IMAGE) {
+            setNextImage(image[0]);
+            ek_canvas_.state ^= EK_CANVAS_CHECK_IMAGE;
         }
-        if (checkFlags & Context::Check_Shader) {
-            setNextShader(program.shader, program.images_num);
+        if (ek_canvas_.state & EK_CANVAS_CHECK_SHADER) {
+            setNextShader(shader[0]);
+            ek_canvas_.state ^= EK_CANVAS_CHECK_SHADER;
         }
-        if (checkFlags & Context::Check_Scissors) {
-            setNextScissors(Rect2i{scissors});
+        if (ek_canvas_.state & EK_CANVAS_CHECK_SCISSORS) {
+            setNextScissors(Rect2i{scissors[0]});
+            ek_canvas_.state ^= EK_CANVAS_CHECK_SCISSORS;
         }
-        checkFlags = 0;
     }
 
-    if (stateChanged || (verticesCount_ + vertex_count) > 0xFFFF) {
+    if ((ek_canvas_.state & EK_CANVAS_STATE_CHANGED) ||
+        (ek_canvas_.vertex_num + vertex_count) > EK_CANVAS_VERTEX_LIMIT) {
         drawBatch();
         applyNextState();
     }
 
-    indexDataPos_ = indexDataNext_;
-    indexDataNext_ = indexDataPos_ + index_count;
-    indicesCount_ += index_count;
+    ek_canvas_.vertex_it = ek_canvas_.vertex_end;
+    ek_canvas_.index_it = ek_canvas_.index_end;
 
-    baseVertex_ = verticesCount_;
-    vertexDataPos_ = vertexDataNext_;
-    vertexDataNext_ = vertexDataPos_ + vertex_count;
-    verticesCount_ += vertex_count;
+    ek_canvas_.vertex_end += vertex_count;
+    ek_canvas_.index_end += index_count;
+
+    ek_canvas_.vertex_base = ek_canvas_.vertex_num;
+    ek_canvas_.vertex_num += vertex_count;
+    ek_canvas_.index_num += index_count;
 }
 
-Context::Context() :
-        vertexBuffers_{SG_BUFFERTYPE_VERTEXBUFFER, MaxVertex + 1, (uint32_t) sizeof(Vertex2D)},
-        indexBuffers_{SG_BUFFERTYPE_INDEXBUFFER, MaxIndex + 1, (uint32_t) sizeof(uint16_t)} {
-    EK_DEBUG("draw2d: allocate memory buffers");
-    size_t vertex_mem_size = sizeof(Vertex2D) * (MaxVertex + 1);
-    size_t index_mem_size = sizeof(uint16_t) * (MaxIndex + 1);
-    void* mem = malloc(vertex_mem_size + index_mem_size);
-    vertexData_ = (Vertex2D*) mem;
-    indexData_ = (uint16_t*) ((char*) mem + vertex_mem_size);
-
-    vertexDataNext_ = vertexData_;
-    indexDataNext_ = indexData_;
-}
-
-Context::~Context() {
-    ek_image_reg_assign(ek_image_reg_named("empty"), {SG_INVALID_ID});
-    ek_shader_register(ek_shader_named("draw2d"), {});
-    ek_shader_register(ek_shader_named("draw2d_alpha"), {});
-    ek_shader_register(ek_shader_named("draw2d_color"), {});
-    free(vertexData_);
-}
-
-void Context::finish() {
+void Context::check_and_reset_stack() {
     // debug checks
-    EK_ASSERT(scissorsStack.empty());
-    EK_ASSERT(matrixStack.empty());
-    EK_ASSERT(colorStack.empty());
-    EK_ASSERT(programStack.empty());
-    EK_ASSERT(image_stack.empty());
-    EK_ASSERT(texCoordStack.empty());
+    EK_ASSERT(image_top == 0);
+    EK_ASSERT(shader_top == 0);
+    EK_ASSERT(scissors_top == 0);
+    EK_ASSERT(matrix_top == 0);
+    EK_ASSERT(color_top == 0);
+    EK_ASSERT(uv_top == 0);
 
-    scissorsStack.clear();
-    matrixStack.clear();
-    colorStack.clear();
-    programStack.clear();
-    image_stack.clear();
-    texCoordStack.clear();
+    image_top = 0;
+    shader_top = 0;
+    scissors_top = 0;
+    matrix_top = 0;
+    color_top = 0;
+    uv_top = 0;
 }
 
 /** Scissors **/
 
 Context& Context::saveScissors() {
-    scissorsStack.push_back(scissors);
+    ++scissors_top;
+    EK_ASSERT(scissors_top != EK_CANVAS_STACK_MAX_DEPTH);
+    scissors[scissors_top] = scissors[0];
     return *this;
 }
 
 void Context::setScissors(const Rect2f& rc) {
-    scissors = rc;
-    checkFlags |= Check_Scissors;
+    scissors[0] = rc;
+    ek_canvas_.state |= EK_CANVAS_CHECK_SCISSORS;
 }
 
 void Context::pushClipRect(const Rect2f& rc) {
     saveScissors();
-    setScissors(clamp_bounds(scissors, rc));
+    setScissors(clamp_bounds(scissors[0], rc));
 }
 
 Context& Context::popClipRect() {
-    scissors = scissorsStack.back();
-    scissorsStack.pop_back();
-    checkFlags |= Check_Scissors;
+    EK_ASSERT(scissors_top != 0);
+    scissors[0] = scissors[scissors_top--];
+    ek_canvas_.state |= EK_CANVAS_CHECK_SCISSORS;
     return *this;
 }
 
 /** Matrix Transform **/
 
 Context& Context::save_matrix() {
-    matrixStack.push_back(matrix);
+    ++matrix_top;
+    EK_ASSERT(matrix_top != EK_CANVAS_STACK_MAX_DEPTH);
+    matrix[matrix_top] = matrix[0];
     return *this;
 }
 
@@ -324,75 +400,78 @@ Context& Context::restore_transform() {
 }
 
 Context& Context::translate(float tx, float ty) {
-    matrix.translate(tx, ty);
+    matrix[0].translate(tx, ty);
     return *this;
 }
 
 Context& Context::translate(const Vec2f& v) {
-    matrix.translate(v);
+    matrix[0].translate(v);
     return *this;
 }
 
 Context& Context::scale(float sx, float sy) {
-    matrix.scale(sx, sy);
+    matrix[0].scale(sx, sy);
     return *this;
 }
 
 Context& Context::scale(const Vec2f& v) {
-    matrix.scale(v);
+    matrix[0].scale(v);
     return *this;
 }
 
 Context& Context::rotate(float radians) {
-    matrix.rotate(radians);
+    matrix[0].rotate(radians);
     return *this;
 }
 
 Context& Context::concat(const Matrix3x2f& r) {
-    matrix = matrix * r;
+    matrix[0] = matrix[0] * r;
     return *this;
 }
 
 Context& Context::restore_matrix() {
-    matrix = matrixStack.back();
-    matrixStack.pop_back();
+    EK_ASSERT(matrix_top != 0);
+    matrix[0] = matrix[matrix_top--];
     return *this;
 }
 
 /** Color Transform **/
 
 Context& Context::save_color() {
-    colorStack.push_back(color);
+    ++color_top;
+    EK_ASSERT(color_top != EK_CANVAS_STACK_MAX_DEPTH);
+    color[color_top] = color[0];
     return *this;
 }
 
 Context& Context::restore_color() {
-    color = colorStack.back();
-    colorStack.pop_back();
+    EK_ASSERT(color_top != 0);
+    color[0] = color[color_top--];
     return *this;
 }
 
 Context& Context::scaleAlpha(float alpha) {
-    auto a = (uint8_t) ((color.scale.a * ((int) (alpha * 255)) * 258u) >> 16u);
-    color.scale.a = a;
+    auto a = (uint8_t) ((color[0].scale.a * ((int) (alpha * 255)) * 258u) >> 16u);
+    color[0].scale.a = a;
     return *this;
 }
 
 Context& Context::scaleColor(abgr32_t multiplier) {
-    color.scale = color.scale * multiplier;
+    color[0].scale = color[0].scale * multiplier;
     return *this;
 }
 
 Context& Context::concat(abgr32_t scale, abgr32_t offset) {
     if (offset.abgr != 0) {
-        color.offset = abgr32_t{sat_add_u8(color.offset.r, ((offset.r * color.scale.r * 258u) >> 16u)),
-                                sat_add_u8(color.offset.g, ((offset.g * color.scale.g * 258u) >> 16u)),
-                                sat_add_u8(color.offset.b, ((offset.b * color.scale.b * 258u) >> 16u)),
-                                sat_add_u8(color.offset.a, offset.a)};
+        ColorMod32 color_ = color[0];
+        color[0].offset = abgr32_t{sat_add_u8(color_.offset.r, ((offset.r * color_.scale.r * 258u) >> 16u)),
+                                   sat_add_u8(color_.offset.g, ((offset.g * color_.scale.g * 258u) >> 16u)),
+                                   sat_add_u8(color_.offset.b, ((offset.b * color_.scale.b * 258u) >> 16u)),
+                                   sat_add_u8(color_.offset.a, offset.a)};
     }
 
     if (scale.abgr != 0xFFFFFFFF) {
-        color.scale = color.scale * scale;
+        color[0].scale = color[0].scale * scale;
     }
 
     return *this;
@@ -404,10 +483,11 @@ Context& Context::concat(ColorMod32 colorMod) {
 
 Context& Context::offset_color(abgr32_t offset) {
     if (offset.abgr != 0) {
-        color.offset = abgr32_t{sat_add_u8(color.offset.r, ((offset.r * color.scale.r * 258u) >> 16u)),
-                                sat_add_u8(color.offset.g, ((offset.g * color.scale.g * 258u) >> 16u)),
-                                sat_add_u8(color.offset.b, ((offset.b * color.scale.b * 258u) >> 16u)),
-                                sat_add_u8(color.offset.a, offset.a)};
+        ColorMod32 color_ = color[0];
+        color[0].offset = abgr32_t{sat_add_u8(color_.offset.r, ((offset.r * color_.scale.r * 258u) >> 16u)),
+                                   sat_add_u8(color_.offset.g, ((offset.g * color_.scale.g * 258u) >> 16u)),
+                                   sat_add_u8(color_.offset.b, ((offset.b * color_.scale.b * 258u) >> 16u)),
+                                   sat_add_u8(color_.offset.a, offset.a)};
     }
     return *this;
 }
@@ -415,148 +495,139 @@ Context& Context::offset_color(abgr32_t offset) {
 /** STATES **/
 
 Context& Context::save_image_rect() {
-    texCoordStack.push_back(uv);
+    ++uv_top;
+    EK_ASSERT(uv_top != EK_CANVAS_STACK_MAX_DEPTH);
+    uv[uv_top] = uv[0];
     return *this;
 }
 
 Context& Context::set_image_rect(float u0, float v0, float du, float dv) {
-    uv.set(u0, v0, du, dv);
+    uv[0].set(u0, v0, du, dv);
     return *this;
 }
 
 Context& Context::set_image_rect(const Rect2f& uv_rect) {
-    uv = uv_rect;
+    uv[0] = uv_rect;
     return *this;
 }
 
 Context& Context::restore_image_rect() {
-    uv = texCoordStack.back();
-    texCoordStack.pop_back();
+    EK_ASSERT(uv_top != 0);
+    uv[0] = uv[uv_top--];
     return *this;
 }
 
 Context& Context::save_image() {
-    image_stack.push_back(image);
+    ++image_top;
+    EK_ASSERT(image_top != EK_CANVAS_STACK_MAX_DEPTH);
+    image[image_top] = image[0];
+
     return *this;
 }
 
 Context& Context::set_empty_image() {
-    image = empty_image;
-    checkFlags |= CHECK_IMAGE;
+    image[0] = ek_canvas_.image_empty;
+    ek_canvas_.state |= EK_CANVAS_CHECK_IMAGE;
     set_image_rect(0, 0, 1, 1);
     return *this;
 }
 
 Context& Context::set_image(sg_image image_) {
-    image = image_;
-    checkFlags |= CHECK_IMAGE;
+    image[0] = image_;
+    ek_canvas_.state |= EK_CANVAS_CHECK_IMAGE;
     return *this;
 }
 
 Context& Context::set_image_region(sg_image image_, const Rect2f& region) {
-    image = image_.id ? image_ : empty_image;
-    checkFlags |= CHECK_IMAGE;
-    uv = region;
+    image[0] = image_.id ? image_ : ek_canvas_.image_empty;
+    ek_canvas_.state |= EK_CANVAS_CHECK_IMAGE;
+    uv[0] = region;
     return *this;
 }
 
 Context& Context::restore_image() {
-    image = image_stack.back();
-    checkFlags |= CHECK_IMAGE;
-    image_stack.pop_back();
+    EK_ASSERT(image_top != 0);
+    image[0] = image[image_top--];
+    ek_canvas_.state |= EK_CANVAS_CHECK_IMAGE;
     return *this;
 }
 
 Context& Context::pushProgram(const ek_shader program_) {
-    programStack.push_back(program);
+    saveProgram();
     setProgram(program_);
     return *this;
 }
 
 Context& Context::setProgram(const ek_shader program_) {
-    program = program_.shader.id ? program_ : defaultShader;
-    checkFlags |= Check_Shader;
+    shader[0] = program_.shader.id ? program_ : ek_canvas_.shader_default;
+    ek_canvas_.state |= EK_CANVAS_CHECK_SHADER;
     return *this;
 }
 
 Context& Context::saveProgram() {
-    programStack.push_back(program);
+    ++shader_top;
+    EK_ASSERT(shader_top != EK_CANVAS_STACK_MAX_DEPTH);
+    shader[shader_top] = shader[0];
     return *this;
 }
 
 Context& Context::restoreProgram() {
-    program = programStack.back();
-    checkFlags |= Check_Shader;
-    programStack.pop_back();
+    EK_ASSERT(shader_top != 0);
+    shader[0] = shader[shader_top--];
+    ek_canvas_.state |= EK_CANVAS_CHECK_SHADER;
     return *this;
-}
-
-void Context::createDefaultResources() {
-    EK_DEBUG("draw2d: create default resources");
-    const auto backend = sg_query_backend();
-    empty_image = ek_gfx_make_color_image(4, 4, 0xFFFFFFFFu);
-    ek_image_reg_assign(ek_image_reg_named("empty"), empty_image);
-
-    defaultShader = ek_shader_make(draw2d_shader_desc(backend));
-    alphaMapShader = ek_shader_make(draw2d_alpha_shader_desc(backend));
-    solidColorShader = ek_shader_make(draw2d_color_shader_desc(backend));
-    ek_shader_register(ek_shader_named("draw2d"), defaultShader);
-    ek_shader_register(ek_shader_named("draw2d_alpha"), alphaMapShader);
-    ek_shader_register(ek_shader_named("draw2d_color"), solidColorShader);
-}
-
-void beginNewFrame() {
-    EK_ASSERT(!state.active);
-    state.stats = {};
 }
 
 /*** drawings ***/
 void begin(Rect2f viewport, const Matrix3x2f& view, const sg_image renderTarget, const sg_image depthStencilTarget) {
-    EK_ASSERT(!state.active);
-    state.image = state.empty_image;
-    state.program = state.defaultShader;
-    state.scissors = viewport;
-    state.checkFlags = 0;
-    state.matrix.set_identity();
-    state.color = {};
-    state.uv.set(0, 0, 1, 1);
-    state.active = true;
+    EK_ASSERT(!(ek_canvas_.state & EK_CANVAS_PASS_ACTIVE));
+    // reset all bits and set Active mode / dirty state flag
+    ek_canvas_.state = EK_CANVAS_PASS_ACTIVE | EK_CANVAS_STATE_CHANGED;
 
-    state.curr = {};
-    state.next.shader = state.program.shader;
-    state.next.shader_images_count = 1;
-    state.next.image = state.image;
-    state.next.scissors = Rect2i{viewport};
-    state.selectedPipeline.id = SG_INVALID_ID;
-    state.stateChanged = true;
+    state.image[0] = ek_canvas_.image_empty;
+    state.shader[0] = ek_canvas_.shader_default;
+    state.scissors[0] = viewport;
+    state.matrix[0].set_identity();
+    state.color[0] = {};
+    state.uv[0].set(0, 0, 1, 1);
 
-    state.renderTarget = renderTarget;
-    state.renderDepthStencil = depthStencilTarget;
+    ek_canvas_.curr = {};
+    ek_canvas_.next.shader = state.shader[0];
+    ek_canvas_.next.image = state.image[0];
+    ek_canvas_.next.scissors = {
+            (int16_t) viewport.x,
+            (int16_t) viewport.y,
+            (int16_t) viewport.width,
+            (int16_t) viewport.height,
+    };
+    ek_canvas_.pipeline.id = SG_INVALID_ID;
 
+    ek_canvas_.render_target_color = renderTarget;
+    ek_canvas_.render_target_depth = depthStencilTarget;
+
+    Matrix4f proj;
 #if EK_IOS || EK_MACOS
-    state.mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;
+    proj = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height);
 #else
-    if (state.renderTarget.id) {
-        state.mvp = ortho_2d<float>(viewport.x, viewport.bottom(), viewport.width, -viewport.height) * view;
+    if (ek_canvas_.render_target_color.id) {
+        proj = ortho_2d<float>(viewport.x, viewport.bottom(), viewport.width, -viewport.height);
     } else {
-        state.mvp = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height) * view;
+        proj = ortho_2d<float>(viewport.x, viewport.y, viewport.width, viewport.height);
     }
 #endif
+
+    state.mvp = proj * view;
 }
 
 void end() {
-    EK_ASSERT(state.active);
+    EK_ASSERT(ek_canvas_.state & EK_CANVAS_PASS_ACTIVE);
     state.drawBatch();
-    state.finish();
-    state.active = false;
+    state.check_and_reset_stack();
+    ek_canvas_.state ^= EK_CANVAS_PASS_ACTIVE;
 }
 
 void write_index(uint16_t index) {
-    *(state.indexDataPos_++) = state.baseVertex_ + index;
-}
-
-FrameStats getDrawStats() {
-    return state.stats;
+    *(ek_canvas_.index_it++) = ek_canvas_.vertex_base + index;
 }
 
 void triangles(int vertex_count, int index_count) {
@@ -566,8 +637,8 @@ void triangles(int vertex_count, int index_count) {
 void quad(float x, float y, float w, float h) {
     triangles(4, 6);
 
-    const auto cm = state.color.scale;
-    const auto co = state.color.offset;
+    const auto cm = state.color[0].scale;
+    const auto co = state.color[0].offset;
     write_vertex(x, y, 0, 0.0f, cm, co);
     write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
     write_vertex(x + w, y + h, 1.0f, 1.0f, cm, co);
@@ -579,8 +650,8 @@ void quad(float x, float y, float w, float h) {
 void quad(float x, float y, float w, float h, abgr32_t color) {
     triangles(4, 6);
 
-    const auto cm = state.color.scale * color;
-    const auto co = state.color.offset;
+    const auto cm = state.color[0].scale * color;
+    const auto co = state.color[0].offset;
     write_vertex(x, y, 0, 0.0f, cm, co);
     write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
     write_vertex(x + w, y + h, 1.0f, 1.0f, cm, co);
@@ -592,8 +663,8 @@ void quad(float x, float y, float w, float h, abgr32_t color) {
 void quad(float x, float y, float w, float h, abgr32_t c1, abgr32_t c2, abgr32_t c3, abgr32_t c4) {
     triangles(4, 6);
 
-    const auto cm = state.color.scale;
-    const auto co = state.color.offset;
+    const auto cm = state.color[0].scale;
+    const auto co = state.color[0].offset;
     write_vertex(x, y, 0, 0.0f, cm * c1, co);
     write_vertex(x + w, y, 1.0f, 0.0f, cm * c2, co);
     write_vertex(x + w, y + h, 1.0f, 1.0f, cm * c3, co);
@@ -605,8 +676,8 @@ void quad(float x, float y, float w, float h, abgr32_t c1, abgr32_t c2, abgr32_t
 void quad_rotated(float x, float y, float w, float h) {
     triangles(4, 6);
 
-    const auto cm = state.color.scale;
-    const auto co = state.color.offset;
+    const auto cm = state.color[0].scale;
+    const auto co = state.color[0].offset;
     write_vertex(x, y, 0, 1, cm, co);
     write_vertex(x + w, y, 0, 0, cm, co);
     write_vertex(x + w, y + h, 1, 0, cm, co);
@@ -623,12 +694,12 @@ void fill_circle(const CircleF& circle, abgr32_t inner_color, abgr32_t outer_col
     const float y = circle.center.y;
     const float r = circle.radius;
 
-    const auto co = state.color.offset;
-    auto inner_cm = state.color.scale * inner_color;
-    auto outer_cm = state.color.scale * outer_color;
+    const auto co = state.color[0].offset;
+    auto inner_cm = state.color[0].scale * inner_color;
+    auto outer_cm = state.color[0].scale * outer_color;
     write_vertex(x, y, 0.0f, 0.0f, inner_cm, co);
 
-    const float da = Math::fPI2 / (float)segments;
+    const float da = Math::fPI2 / (float) segments;
     float a = 0.0f;
     while (a < Math::pi2) {
         write_vertex(x + r * cosf(a), y + r * sinf(a), 1, 1, outer_cm, co);
@@ -648,24 +719,26 @@ void fill_circle(const CircleF& circle, abgr32_t inner_color, abgr32_t outer_col
 
 void write_vertex(float x, float y, float u, float v, abgr32_t cm, abgr32_t co) {
     // could be cached before draw2d
-    const auto& m = state.matrix;
-    const auto& uv = state.uv;
+    const auto m = state.matrix[0];
+    const auto uv = state.uv[0];
 
-    auto* ptr = state.vertexDataPos_++;
-    ptr->position.x = x * m.a + y * m.c + m.tx;
-    ptr->position.y = x * m.b + y * m.d + m.ty;
-    ptr->uv.x = uv.x + u * uv.width;
-    ptr->uv.y = uv.y + v * uv.height;
-    ptr->cm = cm;
-    ptr->co = co;
+    auto* ptr = ek_canvas_.vertex_it++;
+    ptr->x = x * m.a + y * m.c + m.tx;
+    ptr->y = x * m.b + y * m.d + m.ty;
+    ptr->u = uv.x + u * uv.width;
+    ptr->v = uv.y + v * uv.height;
+    ptr->cm = cm.abgr;
+    ptr->co = co.abgr;
 }
 
 void write_raw_vertex(const Vec2f& pos, const Vec2f& tex_coord, abgr32_t cm, abgr32_t co) {
-    auto* ptr = state.vertexDataPos_++;
-    ptr->position = pos;
-    ptr->uv = tex_coord;
-    ptr->cm = cm;
-    ptr->co = co;
+    auto* ptr = ek_canvas_.vertex_it++;
+    ptr->x = pos.x;
+    ptr->y = pos.y;
+    ptr->u = tex_coord.x;
+    ptr->v = tex_coord.y;
+    ptr->cm = cm.abgr;
+    ptr->co = co.abgr;
 }
 
 void write_indices_quad(const uint16_t i0,
@@ -673,46 +746,25 @@ void write_indices_quad(const uint16_t i0,
                         const uint16_t i2,
                         const uint16_t i3,
                         const uint16_t baseVertex) {
-    const uint16_t index = state.baseVertex_ + baseVertex;
-    *(state.indexDataPos_++) = index + i0;
-    *(state.indexDataPos_++) = index + i1;
-    *(state.indexDataPos_++) = index + i2;
-    *(state.indexDataPos_++) = index + i2;
-    *(state.indexDataPos_++) = index + i3;
-    *(state.indexDataPos_++) = index + i0;
+    const uint16_t index = ek_canvas_.vertex_base + baseVertex;
+    *(ek_canvas_.index_it++) = index + i0;
+    *(ek_canvas_.index_it++) = index + i1;
+    *(ek_canvas_.index_it++) = index + i2;
+    *(ek_canvas_.index_it++) = index + i2;
+    *(ek_canvas_.index_it++) = index + i3;
+    *(ek_canvas_.index_it++) = index + i0;
 }
 
 void write_indices(const uint16_t* source,
                    uint16_t count,
                    uint16_t baseVertex) {
-    const uint16_t index = state.baseVertex_ + baseVertex;
+    const uint16_t index = ek_canvas_.vertex_base + baseVertex;
     for (int i = 0; i < count; ++i) {
-        *(state.indexDataPos_++) = *(source++) + index;
+        *(ek_canvas_.index_it++) = *(source++) + index;
     }
 }
 
 /////
-
-void draw_indexed_triangles(const Array<Vec2f>& positions, const Array<abgr32_t>& colors,
-                            const Array<uint16_t>& indices, Vec2f offset, Vec2f scale) {
-
-    int verticesTotal = static_cast<int>(positions.size());
-    triangles(verticesTotal, (int)indices.size());
-    Vec2f loc_uv;
-
-    for (int i = 0; i < verticesTotal; ++i) {
-        Vec2f local_position = positions[i] * scale + offset;
-        write_vertex(
-                local_position.x,
-                local_position.y,
-                loc_uv.x,
-                loc_uv.y,
-                state.color.scale * colors[i],
-                state.color.offset
-        );
-    }
-    write_indices(indices.data(), indices.size());
-}
 
 void line(const Vec2f& start, const Vec2f& end, abgr32_t color1, abgr32_t color2, float lineWidth1,
           float lineWidth2) {
@@ -726,9 +778,9 @@ void line(const Vec2f& start, const Vec2f& end, abgr32_t color1, abgr32_t color2
 
     triangles(4, 6);
 
-    auto m1 = state.color.scale * color1;
-    auto m2 = state.color.scale * color2;
-    auto co = state.color.offset;
+    auto m1 = state.color[0].scale * color1;
+    auto m2 = state.color[0].scale * color2;
+    auto co = state.color[0].offset;
 
     write_vertex(start.x + t2sina1, start.y - t2cosa1, 0, 0, m1, co);
     write_vertex(end.x + t2sina2, end.y - t2cosa2, 1, 0, m2, co);
@@ -752,9 +804,9 @@ void line_arc(float x, float y, float r,
     auto pi2 = static_cast<float>(Math::pi2);
     float da = pi2 / float(segments);
     float a0 = angle_from;
-    auto m1 = state.color.scale * color_inner;
-    auto m2 = state.color.scale * color_outer;
-    auto co = state.color.offset;
+    auto m1 = state.color[0].scale * color_inner;
+    auto m2 = state.color[0].scale * color_outer;
+    auto co = state.color[0].offset;
     auto hw = line_width / 2.0f;
     auto r0 = r - hw;
     auto r1 = r + hw;
@@ -802,21 +854,53 @@ void strokeCircle(const CircleF& circle, abgr32_t color, float lineWidth, int se
     line(pen, {x, y - r}, color, lineWidth);
 }
 
-void endFrame() {
-    state.vertexBuffers_.nextFrame();
-    state.indexBuffers_.nextFrame();
 }
 
-void initialize() {
-    EK_DEBUG("draw2d initialize");
-    context.initialize();
-    state.createDefaultResources();
-    EK_DEBUG("draw2d initialized");
+void ek_canvas_resources_create(void) {
+    EK_DEBUG("draw2d: create default resources");
+    const sg_backend backend = sg_query_backend();
+    ek_canvas_.image_empty = ek_gfx_make_color_image(4, 4, 0xFFFFFFFFu);
+    ek_canvas_.shader_default = ek_shader_make(draw2d_shader_desc(backend));
+    ek_canvas_.shader_alpha_map = ek_shader_make(draw2d_alpha_shader_desc(backend));
+    ek_canvas_.shader_solid_color = ek_shader_make(draw2d_color_shader_desc(backend));
+    ek_ref_assign_s(sg_image, "empty", ek_canvas_.image_empty);
+    ek_ref_assign_s(ek_shader, "draw2d", ek_canvas_.shader_default);
+    ek_ref_assign_s(ek_shader, "draw2d_alpha", ek_canvas_.shader_alpha_map);
+    ek_ref_assign_s(ek_shader, "draw2d_color", ek_canvas_.shader_solid_color);
 }
 
-void shutdown() {
-    EK_DEBUG("draw2d shutdown");
-    context.shutdown();
+void ek_canvas_resources_destroy(void) {
+    ek_ref_reset_s(sg_image, "empty");
+    ek_ref_reset_s(ek_shader, "draw2d");
+    ek_ref_reset_s(ek_shader, "draw2d_alpha");
+    ek_ref_reset_s(ek_shader, "draw2d_color");
 }
 
+void ek_canvas_setup(void) {
+    EK_DEBUG("canvas setup");
+
+    //memset(&ek_canvas_, 0, sizeof ek_canvas_);
+
+    ek_canvas_buffers_init(&ek_canvas_.vbs, SG_BUFFERTYPE_VERTEXBUFFER, EK_CANVAS_VERTEX_MAX_COUNT,
+                           sizeof(ek_vertex2d));
+    ek_canvas_buffers_init(&ek_canvas_.ibs, SG_BUFFERTYPE_INDEXBUFFER, EK_CANVAS_INDEX_MAX_COUNT,
+                           sizeof(uint16_t));
+    ek::draw2d::context.initialize();
+
+    ek_canvas__reset_stream();
+
+    ek_canvas_resources_create();
+}
+
+void ek_canvas_shutdown(void) {
+    EK_DEBUG("canvas shutdown");
+    ek_canvas_resources_destroy();
+    ek::draw2d::context.shutdown();
+}
+
+void ek_canvas_new_frame(void) {
+    EK_ASSERT(!(ek_canvas_.state & EK_CANVAS_PASS_ACTIVE));
+    ek_canvas_.stats = {};
+    ek_canvas_buffers_rewind(&ek_canvas_.vbs);
+    ek_canvas_buffers_rewind(&ek_canvas_.ibs);
 }

@@ -17,13 +17,13 @@ static float getterProfilerTrackValue(void* data, int idx) {
 
 void StatsWindow::onDraw() {
     auto& app = Locator::ref<basic_application>();
-    auto stats = draw2d::state.stats;
+    auto stats = ek_canvas_.stats;
     const float drawableArea = ek_app.viewport.width * ek_app.viewport.height;
     ImGui::Text("%ld µs | dc: %u | tri: %u | fill: %d%%",
                 (long)(app.frameTimer.deltaTime * 1000000.0f),
-                stats.drawCalls,
+                stats.draw_calls,
                 stats.triangles,
-                (int)(100.0f * stats.fillArea / drawableArea)
+                (int)(100.0f * stats.fill_area / drawableArea)
     );
     auto entitiesCount = ecs::the_world.size;
     auto entitiesAvailable = ecs::ENTITIES_MAX_COUNT - entitiesCount;

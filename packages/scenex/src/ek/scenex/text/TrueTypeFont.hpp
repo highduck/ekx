@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FontImplBase.hpp"
+#include <ek/util/Res.hpp>
 #include <ek/math/Vec.hpp>
 #include <ek/math/Color32.hpp>
 #include <ek/math/Rect.hpp>

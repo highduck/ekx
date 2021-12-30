@@ -21,8 +21,8 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
     for (auto& filter : filters) {
         if (filter.type == SGFilterType::DropShadow) {
             processing = true;
-            draw2d::state.matrix = parentMatrix;
-            draw2d::state.color = parentColor;
+            draw2d::state.matrix[0] = parentMatrix;
+            draw2d::state.color[0] = parentColor;
 
             draw2d::state.concat(argb32_t{0x0u, filter.color.af()}, argb32_t{filter.color.argb, 0.0f});
             draw2d::state.translate(filter.offset);
@@ -36,7 +36,7 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
             processing = false;
         } else if (filter.type == SGFilterType::Glow) {
             processing = true;
-            draw2d::state.color = parentColor;
+            draw2d::state.color[0] = parentColor;
             draw2d::state.concat(argb32_t{0x0u, filter.color.af()}, argb32_t{filter.color.argb, 0.0f});
 
             const int segments = std::min(12,
@@ -44,7 +44,7 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
             const auto da = float(Math::pi2 / segments);
             auto a = 0.0f;
             for (int i = 0; i < segments; ++i) {
-                draw2d::state.matrix = parentMatrix;
+                draw2d::state.matrix[0] = parentMatrix;
 
                 draw2d::state.translate(filter.blur * Vec2f{std::cos(a), std::sin(a)});
                 if (localTransform) {

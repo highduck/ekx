@@ -3,15 +3,15 @@
 #include <ek/util/NoCopyAssign.hpp>
 #include <ek/math/Rect.hpp>
 #include <ek/util/Type.hpp>
-#include <ek/temp_res_man.h>
+#include <ek/gfx.h>
 
 namespace ek {
 
 class Sprite : private NoCopyAssign {
 public:
-    ek_image_reg_id image_id = {0};
     Rect2f rect{0, 0, 1, 1};
     Rect2f tex{0, 0, 1, 1};
+    ek_ref(sg_image) image_id = {0};
     bool rotated = false;
 
     Sprite() = default;

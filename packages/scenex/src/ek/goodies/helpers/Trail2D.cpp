@@ -79,7 +79,7 @@ void TrailRenderer2D::draw() {
     if (spr == nullptr) {
         return;
     }
-    const sg_image image = ek_image_reg_get(spr->image_id);
+    const sg_image image = ek_ref_content(sg_image, spr->image_id);
     if (image.id == SG_INVALID_ID) {
         return;
     }
@@ -92,8 +92,8 @@ void TrailRenderer2D::draw() {
 
     auto node_idx = trail.nodes.first;
 
-    const auto co = drawer.color.offset;
-    const auto cm = drawer.color.scale;
+    const auto co = drawer.color[0].offset;
+    const auto cm = drawer.color[0].scale;
     auto texCoordU0 = spr->tex.center_x();
     auto texCoordV0 = spr->tex.y;
     auto texCoordU1 = spr->tex.center_x();
@@ -107,7 +107,7 @@ void TrailRenderer2D::draw() {
 
     //const auto m = drawer.matrix;
     //drawer.matrix.set
-    auto* ptr = drawer.vertexDataPos_;
+    auto* ptr = (draw2d::Vertex2D*)ek_canvas_.vertex_it;
 
     // we could generate vertices right into destination buffer :)
     for (int i = 0; i < columns; ++i) {
@@ -146,8 +146,8 @@ void TrailRenderer2D::draw() {
     }
 
     {
-        uint16_t v = drawer.baseVertex_;
-        uint16_t* indices = drawer.indexDataPos_;
+        uint16_t v = ek_canvas_.vertex_base;
+        uint16_t* indices = ek_canvas_.index_it;
         for (int i = 0; i < quads; ++i) {
             *(indices++) = v;
             *(indices++) = v + 2;

@@ -1,5 +1,5 @@
 #include "DynamicAtlas.hpp"
-#include <ek/graphics/graphics.hpp>
+#include <ek/gfx.h>
 #include <ek/math/Math.hpp>
 #include <ek/assert.h>
 

@@ -49,7 +49,7 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         if (spr) {
             outGlyph.rect = spr->rect / baseFontSize;
             outGlyph.texCoord = spr->tex;
-            outGlyph.image = ek_image_reg_get(spr->image_id);
+            outGlyph.image = ek_ref_content(sg_image, spr->image_id);
             outGlyph.rotated = spr->rotated;
         } else {
             outGlyph.rect = g->box / unitsPerEM;

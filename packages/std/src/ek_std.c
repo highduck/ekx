@@ -14,9 +14,25 @@
 #define EK_HANDLE_2_IMPLEMENTATION
 #include <ek/handle2.h>
 
+#define EK_REF_IMPLEMENTATION
+#include <ek/ref.h>
+
 #ifdef __EMSCRIPTEN__
 #include "std/sparse_array.c.h"
 #else
 #include "std/sparse_array_vm.c.h"
 #endif
+
+// non-standard
+#ifndef NDEBUG
+// TODO:
+static void ek_slowdown_(const char* msg) {
+    EK_WARN("SLOWDOWN: %s", msg);
+    nanosleep(&(struct timespec) {
+            .tv_sec = 0,
+            .tv_nsec = 16 * 1000000
+    }, NULL);
+}
+#endif
+
 
