@@ -3,12 +3,14 @@
 // Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 // See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
 
-enum utf8_state_ {
+enum {
     UTF8_STATE_ACCEPT = 0,
-    // UTF8_STATE_REJECT = 1
+    UTF8_STATE_REJECT = 1
 };
 
-static uint32_t utf8_decode_(uint32_t* state, uint32_t* codepoint, uint32_t byte) {
+typedef uint32_t utf8_state_t;
+
+static codepoint_t utf8_decode_(utf8_state_t* state, codepoint_t* codepoint, uint32_t byte) {
     static const uint8_t utf8d[] = {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 00..1f
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20..3f
@@ -28,15 +30,15 @@ static uint32_t utf8_decode_(uint32_t* state, uint32_t* codepoint, uint32_t byte
 
     const uint32_t type = utf8d[byte];
     *codepoint = (*state != UTF8_STATE_ACCEPT) ?
-                 (byte & 0x3Fu) | (*codepoint << 6) :
-                 (0xFF >> type) & (byte);
-    *state = utf8d[256 + *state * 16 + type];
+                 (byte & 0x3Fu) | (*codepoint << 6u) :
+                 (0xFFu >> type) & (byte);
+    *state = utf8d[256 + (*state << 4u) + type];
     return *state;
 }
 
-uint32_t ek_utf8_next(const char** iter) {
-    uint32_t state = 0;
-    uint32_t codepoint = 0;
+codepoint_t utf8_next(const char** iter) {
+    utf8_state_t state = 0;
+    codepoint_t codepoint = 0;
     const uint8_t* i = (const uint8_t*) *iter;
     if (utf8_decode_(&state, &codepoint, *(i++)) != 0) {
         if (utf8_decode_(&state, &codepoint, *(i++)) != 0) {

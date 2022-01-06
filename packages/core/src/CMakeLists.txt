@@ -18,14 +18,11 @@ add_library(${PROJECT_NAME} STATIC
         ek/math/Matrix3.hpp
         ek/math/Matrix4.hpp
         ek/math/MatrixInverse.hpp
-        ek/math/MatrixCamera.hpp
         ek/math/MatrixTransform.hpp
         ek/math/MatrixTranspose.hpp
         ek/math/Quaternion.hpp
 
         ek/math/Rect.hpp
-        ek/math/Circle.hpp
-        ek/math/BoundsBuilder.hpp
 
         ek/math/HSVColor.hpp
         ek/math/ColorTransform.hpp

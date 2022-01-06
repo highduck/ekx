@@ -1,7 +1,7 @@
 #include "profiler.hpp"
 
 #include <ek/scenex/app/basic_application.hpp>
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/app.h>
 
 // TODO: EK_DEV_BUILD
@@ -48,17 +48,17 @@ void drawGraph(const Profiler::Track& track) {
     float x = 0.0f;
     float x0 = 0.0f;
     float prev = track.calculateY(track.history.at(0));
-    draw2d::state.set_empty_image();
-    draw2d::quad(0, 0, width, track.height, 0x77000000_argb);
+    canvas_set_empty_image();
+    canvas_quad_color(0, 0, width, track.height, 0x77000000_argb);
     for (int i = 0; i < samples; ++i) {
         float val = track.history.at(i);
         float curr = track.calculateY(val);
         if (curr != prev || i + 1 == samples) {
             if (x > x0) {
-                draw2d::quad(x0, track.height - prev, x - x0, 1, track.calculateColor(prev));
+                canvas_quad_color(x0, track.height - prev, x - x0, 1, track.calculateColor(prev));
             }
             if (curr != prev) {
-                draw2d::quad(x, track.height - curr, 1, curr - prev, track.calculateColor(curr));
+                canvas_quad_color(x, track.height - curr, 1, curr - prev, track.calculateColor(curr));
             }
             x0 = x + 1;
         }
@@ -75,22 +75,23 @@ void draw(Profiler& profiler, const GameDisplayInfo& displayInfo) {
     const auto scale = displayInfo.dpiScale;
     const auto x = displayInfo.insets.x;
     const auto y = displayInfo.insets.y;
-    draw2d::state.matrix[0] = Matrix3x2f{scale, 0, 0, scale, x, y};
-    draw2d::state.set_empty_image();
+    canvas.matrix[0].rot = {scale, 0, 0, scale};
+    canvas.matrix[0].pos = displayInfo.insets.xy;
+    canvas_set_empty_image();
 
-    draw2d::state.save_matrix();
+    canvas_save_matrix();
     for (auto& track : profiler.tracks) {
         drawGraph(track);
-        draw2d::state.translate(0, 35);
+        canvas_translate({0, 35});
     }
-    draw2d::state.restore_matrix();
+    canvas_restore_matrix();
 
-    draw2d::state.save_matrix();
+    canvas_save_matrix();
     for (auto& track : profiler.tracks) {
         drawText(track, profiler.textFormat);
-        draw2d::state.translate(0, 35);
+        canvas_translate({0, 35});
     }
-    draw2d::state.restore_matrix();
+    canvas_restore_matrix();
 #endif
 }
 
@@ -186,7 +187,7 @@ void Profiler::addTime(const char* name, float time) {
 
 void Profiler::beginRender(float drawableArea_) {
 #ifdef ENABLE_PROFILER
-    auto stats = ek_canvas_.stats;
+    auto stats = canvas.stats;
     drawableArea = drawableArea_;
     FR = stats.fill_area;
     DC = stats.draw_calls;
@@ -196,7 +197,7 @@ void Profiler::beginRender(float drawableArea_) {
 
 void Profiler::endRender() {
 #ifdef ENABLE_PROFILER
-    const auto stats = ek_canvas_.stats;
+    const auto stats = canvas.stats;
     DC = stats.draw_calls - DC;
     FR = stats.fill_area - FR;
     TR = stats.triangles - TR;

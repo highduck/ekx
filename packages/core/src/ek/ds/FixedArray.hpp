@@ -65,6 +65,15 @@ struct FixedArray {
     constexpr void clear() {
         _size = 0;
     }
+
+    const T* find(const T& v) const {
+        for(uint32_t i = 0; i < _size; ++i) {
+            if(_data[i] == v) {
+                return _data + i;
+            }
+        }
+        return nullptr;
+    }
 };
 
 }

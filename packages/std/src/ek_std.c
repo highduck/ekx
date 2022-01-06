@@ -9,13 +9,11 @@
 #include "std/string.c.h"
 #include "std/time.c.h"
 #include "std/utf8.c.h"
-#include "std/handle.c.h"
+//#include "std/handle.c.h"
 
-#define EK_HANDLE_2_IMPLEMENTATION
-#include <ek/handle2.h>
-
-#define EK_REF_IMPLEMENTATION
-#include <ek/ref.h>
+#include <ek/ref.c>
+#include <ek/handle2.c>
+#include <ek/math.c>
 
 #ifdef __EMSCRIPTEN__
 #include "std/sparse_array.c.h"
@@ -26,13 +24,14 @@
 // non-standard
 #ifndef NDEBUG
 // TODO:
-static void ek_slowdown_(const char* msg) {
-    EK_WARN("SLOWDOWN: %s", msg);
-    nanosleep(&(struct timespec) {
-            .tv_sec = 0,
-            .tv_nsec = 16 * 1000000
-    }, NULL);
-}
+//static void perf_penalty(long ms, const char* msg) {
+//    EK_WARN("SLOWDOWN: %s", msg);
+//    const long ns = ms * 1000000L;
+//    nanosleep(&(struct timespec) {
+//            .tv_sec = 0,
+//            .tv_nsec = ns
+//    }, NULL);
+//}
 #endif
 
 

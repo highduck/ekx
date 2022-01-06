@@ -2,9 +2,6 @@
 
 #include <cstdint>
 #include <string>
-#include <ek/math/Vec.hpp>
-#include <ek/math/Rect.hpp>
-#include <ek/math/Matrix3x2.hpp>
 #include <ek/math/ColorTransform.hpp>
 
 namespace pugi {
@@ -27,15 +24,15 @@ T parse_xml_node(const xml_node& node) {
     return r;
 }
 
-Rect2f read_rect(const xml_node& node);
+rect_t read_rect(const xml_node& node);
 
-Rect2f read_scale_grid(const xml_node& node);
+rect_t read_scale_grid(const xml_node& node);
 
-Vec2f read_point(const xml_node& node);
+vec2_t read_point(const xml_node& node);
 
-Vec2f read_transformation_point(const xml_node& node);
+vec2_t read_transformation_point(const xml_node& node);
 
-Matrix3x2f& operator<<(Matrix3x2f& r, const xml_node& node);
+mat3x2_t& operator<<(mat3x2_t& r, const xml_node& node);
 
 ColorTransformF& operator<<(ColorTransformF& color, const xml_node& node);
 

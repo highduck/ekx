@@ -39,7 +39,7 @@ void TextBlockInfo::addLine(TextBlockInfo::Line line) {
 }
 
 void TextBlockInfo::reset() {
-    size = Vec2f::zero;
+    size = {};
     lines.clear();
 }
 
@@ -89,7 +89,7 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
     }
     //auto alignment = format.alignment;
 
-    draw2d::state.pushProgram(ek_canvas_.shader_alpha_map);
+    canvas_push_program(canvas.shader_alpha_map);
     // render effects first
     for (int i = format.layersCount - 1; i >= 0; --i) {
         auto& layer = format.layers[i];
@@ -97,13 +97,13 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
             continue;
         }
         if (font->getFontType() == FontType::Bitmap && layer.blurRadius > 0.0f &&
-            length_sqr(layer.offset) <= 0.1f) {
+            vec2_length_sqr(layer.offset) <= 0.1f) {
             // skip {0;0} strokes for bitmap fonts
             continue;
         }
         drawLayer(text, layer, info);
     }
-    draw2d::state.restoreProgram();
+    canvas_restore_program();
 }
 
 void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const TextBlockInfo& info) const {
@@ -118,14 +118,15 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
 
     font->setBlur(layer.blurRadius, layer.blurIterations, layer.strength);
 
-    Vec2f current = position + layer.offset;
+    vec2_t current = position + layer.offset;
     const float startX = current.x;
     int lineIndex = 0;
     int numLines = info.lines.size();
 
     current.x += (info.size.x - info.lines[lineIndex].size.x) * alignment.x;
 
-    draw2d::state.save_color().scaleColor(layer.color);
+    canvas_save_color();
+    canvas_scale_color(layer.color);
 
     uint32_t prev_image_id = SG_INVALID_ID;
     uint32_t prevCodepointOnLine = 0;
@@ -135,34 +136,34 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
         const char* it = text + info.lines[lineIndex].begin;
         const auto* end = text + info.lines[lineIndex].end;
         while (it != end) {
-            codepoint = ek_utf8_next(&it);
+            codepoint = utf8_next(&it);
             if (font->getGlyph(codepoint, gdata)) {
                 if (kerning && prevCodepointOnLine) {
                     current.x += gdata.source->getKerning(prevCodepointOnLine, codepoint) * size;
                 }
                 if (gdata.image.id) {
                     if (prev_image_id != gdata.image.id) {
-                        draw2d::state.set_image(gdata.image);
+                        canvas_set_image(gdata.image);
                         prev_image_id = gdata.image.id;
                     }
-                    draw2d::state.set_image_rect(gdata.texCoord);
-                    gdata.rect = translate(gdata.rect * size, current);
+                    canvas_set_image_rect(gdata.texCoord);
+                    gdata.rect = rect_translate(rect_scale_f(gdata.rect, size), current);
                     if (!gdata.rotated) {
-                        draw2d::quad(gdata.rect.x,
+                        canvas_quad(gdata.rect.x,
                                      gdata.rect.y,
-                                     gdata.rect.width,
-                                     gdata.rect.height);
+                                     gdata.rect.w,
+                                     gdata.rect.h);
                     } else {
-                        draw2d::quad_rotated(gdata.rect.x,
+                        canvas_quad_rotated(gdata.rect.x,
                                              gdata.rect.y,
-                                             gdata.rect.width,
-                                             gdata.rect.height);
+                                             gdata.rect.w,
+                                             gdata.rect.h);
                     }
                     // only for DEV mode
                     if (layer.showGlyphBounds) {
-                        draw2d::state.set_empty_image();
-                        draw2d::strokeRect(gdata.rect, 0xFFFFFF_rgb, 1);
-                        draw2d::state.set_image(gdata.image);
+                        canvas_set_empty_image();
+                        canvas_stroke_rect(gdata.rect, 0xFFFFFF_rgb, 1);
+                        canvas_set_image(gdata.image);
                     }
                 }
 
@@ -180,7 +181,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
         }
     }
 
-    draw2d::state.restore_color();
+    canvas_restore_color();
 }
 
 struct TextEngineUtils {
@@ -193,10 +194,10 @@ struct TextEngineUtils {
 
     static const char* skip(const char* it, const char* range) {
         const auto* prev = it;
-        uint32_t c = ek_utf8_next(&it);
+        uint32_t c = utf8_next(&it);
         while (inRangeASCII(c, range)) {
             prev = it;
-            c = ek_utf8_next(&it);
+            c = utf8_next(&it);
         }
         return prev;
     }
@@ -241,7 +242,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
     uint32_t prevCodepointOnLine = 0;
     uint32_t codepoint = 0;
     TextBlockInfo::Line line;
-    codepoint = ek_utf8_next(&it);
+    codepoint = utf8_next(&it);
     while (codepoint) {
         if (codepoint == '\n') {
             line.close(size, static_cast<int>(prev - text));
@@ -254,7 +255,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
             // next char
             prevCodepointOnLine = 0;
             prev = it;
-            codepoint = ek_utf8_next(&it);
+            codepoint = utf8_next(&it);
             continue;
         }
         // wordwrap
@@ -273,7 +274,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
             const auto kern = (kerning && prevCodepointOnLine) ?
                               metrics.source->getKerning(prevCodepointOnLine, codepoint) * size :
                               0.0f;
-            auto right = x + kern + size * fmax(metrics.rect.right(), metrics.advanceWidth);
+            auto right = x + kern + size * fmax(RECT_R(metrics.rect), metrics.advanceWidth);
             if (format.wordWrap && right > maxWidth && maxWidth > 0) {
                 if (lastWrapLine.end != 0) {
                     info.addLine(lastWrapLine);
@@ -284,7 +285,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
                     lastWrapLine = {};
                     prevCodepointOnLine = 0;
                     prev = it;
-                    codepoint = ek_utf8_next(&it);
+                    codepoint = utf8_next(&it);
                     continue;
                 }
                     // at least one symbol added to line
@@ -312,7 +313,7 @@ void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
         }
         prevCodepointOnLine = codepoint;
         prev = it;
-        codepoint = ek_utf8_next(&it);
+        codepoint = utf8_next(&it);
     }
     line.close(size, static_cast<int>(prev - text));
     info.addLine(line);

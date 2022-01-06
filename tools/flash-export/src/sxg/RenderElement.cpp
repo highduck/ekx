@@ -10,7 +10,7 @@
 
 namespace ek::xfl {
 
-SpriteData renderMultiSample(const Rect2f& bounds,
+SpriteData renderMultiSample(rect_t bounds,
                              const Array<RenderCommandsBatch>& batches,
                              const RenderElementOptions& options) {
     // x4 super-sampling
@@ -21,15 +21,12 @@ SpriteData renderMultiSample(const Rect2f& bounds,
 
     auto rc = bounds;
     if (!options.trim) {
-        rc.x -= 1;
-        rc.y -= 1;
-        rc.width += 2;
-        rc.height += 2;
+        rc = rect_expand(rc, 1);
     }
 
     ek_bitmap bitmap{0, 0, nullptr};
-    const auto w = static_cast<int>(fixed ? options.width : ceil(rc.width * scale));
-    const auto h = static_cast<int>(fixed ? options.height : ceil(rc.height * scale));
+    const auto w = static_cast<int>(fixed ? options.width : ceil(rc.w * scale));
+    const auto h = static_cast<int>(fixed ? options.height : ceil(rc.h * scale));
     const int stride = w * 4;
 
     if (w > 0 && h > 0) {
@@ -43,13 +40,13 @@ SpriteData renderMultiSample(const Rect2f& bounds,
         cairo_set_antialias(cr, CAIRO_ANTIALIAS_BEST);
         cairo_set_source_surface(cr, surf, 0, 0);
 
-        const Vec2i up_scaled_size{static_cast<int>(w * upscale),
-                                   static_cast<int>(h * upscale)};
+        const int upscale_w = (int)(w * upscale);
+        const int upscale_h = (int)(h * upscale);
 
         auto sub_surf = cairo_surface_create_similar(surf,
                                                      CAIRO_CONTENT_COLOR_ALPHA,
-                                                     up_scaled_size.x,
-                                                     up_scaled_size.y);
+                                                     upscale_w,
+                                                     upscale_h);
         auto sub_cr = cairo_create(sub_surf);
         cairo_set_antialias(sub_cr, CAIRO_ANTIALIAS_NONE);
 
@@ -71,7 +68,7 @@ SpriteData renderMultiSample(const Rect2f& bounds,
 
             cairo_surface_flush(sub_surf);
 
-            blit_downsample(cr, sub_surf, up_scaled_size.x, up_scaled_size.y, upscale);
+            blit_downsample(cr, sub_surf, upscale_w, upscale_h, upscale);
             cairo_surface_flush(surf);
         }
 
@@ -87,13 +84,14 @@ SpriteData renderMultiSample(const Rect2f& bounds,
 
     SpriteData data;
     data.rc = rc;
-    data.source = {0, 0, w, h};
+    // TODO: recti_wh(w, h)
+    data.source = {{0, 0, w, h}};
     data.bitmap = bitmap;
 
     return data;
 }
 
-SpriteData renderLowQuality(const Rect2f& bounds,
+SpriteData renderLowQuality(rect_t bounds,
                             const Array<RenderCommandsBatch>& batches,
                             const RenderElementOptions& options) {
     const double scale = options.scale;
@@ -101,15 +99,12 @@ SpriteData renderLowQuality(const Rect2f& bounds,
 
     auto rc = bounds;
     if (!options.trim) {
-        rc.x -= 1;
-        rc.y -= 1;
-        rc.width += 2;
-        rc.height += 2;
+        rc = rect_expand(rc, 1);
     }
 
     ek_bitmap bitmap = {0, 0,nullptr};
-    const auto w = static_cast<int>(fixed ? options.width : ceil(rc.width * scale));
-    const auto h = static_cast<int>(fixed ? options.height : ceil(rc.height * scale));
+    const auto w = static_cast<int>(fixed ? options.width : ceil(rc.w * scale));
+    const auto h = static_cast<int>(fixed ? options.height : ceil(rc.h * scale));
     const int stride = w * 4;
 
     if (w > 0 && h > 0) {
@@ -149,7 +144,8 @@ SpriteData renderLowQuality(const Rect2f& bounds,
 
     SpriteData data;
     data.rc = rc;
-    data.source = {0, 0, w, h};
+    // TODO: recti_wh
+    data.source = {{0, 0, w, h}};
     data.bitmap = bitmap;
 
     return data;
@@ -166,7 +162,7 @@ bool checkContainsOnlyBitmapOperations(const Array<RenderCommandsBatch>& batches
     return true;
 }
 
-SpriteData renderElementBatches(const Rect2f& bounds,
+SpriteData renderElementBatches(rect_t bounds,
                                 const Array<RenderCommandsBatch>& batches,
                                 const RenderElementOptions& options) {
     if (checkContainsOnlyBitmapOperations(batches)) {
@@ -179,7 +175,7 @@ SpriteData renderElement(const Doc& doc, const Element& el, const RenderElementO
     Scanner scanner{};
     scanner.draw(doc, el);
 
-    auto spr = renderElementBatches(scanner.bounds.rect(), scanner.batches, options);
+    auto spr = renderElementBatches(brect_get_rect(scanner.bounds), scanner.batches, options);
     spr.name = el.item.name;
     return spr;
 }

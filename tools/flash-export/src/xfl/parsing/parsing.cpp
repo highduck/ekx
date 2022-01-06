@@ -27,40 +27,41 @@ static uint32_t parse_css_color(const char* str) {
     return col;
 }
 
-Rect2f read_rect(const xml_node& node) {
-    return {
+rect_t read_rect(const xml_node& node) {
+    return {{
             node.attribute("left").as_float(),
             node.attribute("top").as_float(),
             node.attribute("width").as_float(),
             node.attribute("height").as_float()
-    };
+    }};
 }
 
-static Rect2f read_rect_bounds(const xml_node& node, const std::array<const char*, 4>& nn) {
-    return min_max_box<float, 2>(
-            {node.attribute(nn[0]).as_float(), node.attribute(nn[1]).as_float()},
-            {node.attribute(nn[2]).as_float(), node.attribute(nn[3]).as_float()}
+static rect_t read_rect_bounds(const xml_node& node, const char* nn[4]) {
+    return rect_minmax(
+            {{node.attribute(nn[0]).as_float(), node.attribute(nn[1]).as_float()}},
+            {{node.attribute(nn[2]).as_float(), node.attribute(nn[3]).as_float()}}
     );
 }
 
-Rect2f read_scale_grid(const xml_node& node) {
-    return read_rect_bounds(node, {
+rect_t read_scale_grid(const xml_node& node) {
+    const char* tags[4] = {
             "scaleGridLeft",
             "scaleGridTop",
             "scaleGridRight",
             "scaleGridBottom"
-    });
+    };
+    return read_rect_bounds(node, tags);
 }
 
-Vec2f read_point(const xml_node& node) {
-    return {node.attribute("x").as_float(), node.attribute("y").as_float()};
+vec2_t read_point(const xml_node& node) {
+    return {{node.attribute("x").as_float(), node.attribute("y").as_float()}};
 }
 
-Vec2f read_transformation_point(const xml_node& node) {
+vec2_t read_transformation_point(const xml_node& node) {
     return read_point(node.child("transformationPoint").child("Point"));
 }
 
-Matrix3x2f& operator<<(Matrix3x2f& r, const xml_node& node) {
+mat3x2_t& operator<<(mat3x2_t& r, const xml_node& node) {
     const auto& m = node.child("matrix").child("Matrix");
     r.a = m.attribute("a").as_float(1.0f);
     r.b = m.attribute("b").as_float();
@@ -91,7 +92,7 @@ ColorTransformF& operator<<(ColorTransformF& color, const xml_node& node) {
     }
 
     // default: 0, values: -1 ... 1
-    const auto br = Math::clamp(ct.attribute("brightness").as_float(0.0f), -1.0f, 1.0f);
+    const auto br = clamp_f32(ct.attribute("brightness").as_float(0.0f), -1.0f, 1.0f);
     if (br < 0.0f) {
         color.scale.x =
         color.scale.y =
@@ -105,14 +106,14 @@ ColorTransformF& operator<<(ColorTransformF& color, const xml_node& node) {
     return color;
 }
 
-static Vec4f read_color(const xml_node& node, const char* color_tag = "color", const char* alpha_tag = "alpha") {
+static vec4_t read_color(const xml_node& node, const char* color_tag = "color", const char* alpha_tag = "alpha") {
     const auto c = parse_css_color(node.attribute(color_tag).value());
-    return {
-            static_cast<float>((c >> 16u) & 0xFFu) / 255.0f,
-            static_cast<float>((c >> 8u) & 0xFFu) / 255.0f,
-            static_cast<float>(c & 0xFFu) / 255.0f,
-            node.attribute(alpha_tag).as_float(1.0f)
-    };
+    return {{
+                    (float) ((c >> 16u) & 0xFFu) / 255.0f,
+                    (float) ((c >> 8u) & 0xFFu) / 255.0f,
+                    (float) (c & 0xFFu) / 255.0f,
+                    node.attribute(alpha_tag).as_float(1.0f)
+            }};
 }
 
 /** Element parsing **/
@@ -205,8 +206,8 @@ FolderItem& operator<<(FolderItem& r, const xml_node& node) {
     return r;
 }
 
-Vec2f read_alignment(const xml_node& node) {
-    Vec2f r{0.0f, 0.0f};
+vec2_t read_alignment(const xml_node& node) {
+    vec2_t r = {{0.0f, 0.0f}};
     const char* alignment = node.attribute("alignment").value();
     if (equals(alignment, "center")) {
         r.x = 0.5f;
@@ -224,7 +225,7 @@ TextAttributes& operator<<(TextAttributes& r, const xml_node& node) {
     r.size = node.attribute("size").as_float(12.0f);
     r.lineHeight = node.attribute("lineHeight").as_float(r.size);
     r.lineSpacing = node.attribute("lineSpacing").as_float(0.0f);
-    r.bitmapSize = node.attribute("bitmapSize").as_int(static_cast<uint32_t>(r.size * 20u));
+    r.bitmapSize = node.attribute("bitmapSize").as_uint((uint32_t)(r.size * 20));
     r.autoKern = node.attribute("autoKern").as_bool(true);
 
     r.face = node.attribute("face").value();

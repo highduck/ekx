@@ -22,7 +22,7 @@ RenderCommand ShapeEdge::to_command() const {
     }
 }
 
-ShapeEdge ShapeEdge::curve(int style, const Vec2f& p0, const Vec2f& c, const Vec2f& p1) {
+ShapeEdge ShapeEdge::curve(int style, vec2_t p0, vec2_t c, vec2_t p1) {
     ShapeEdge result;
     result.fill_style_idx = style;
     result.p0 = p0;
@@ -32,7 +32,7 @@ ShapeEdge ShapeEdge::curve(int style, const Vec2f& p0, const Vec2f& c, const Vec
     return result;
 }
 
-ShapeEdge ShapeEdge::line(int style, const Vec2f& p0, const Vec2f& p1) {
+ShapeEdge ShapeEdge::line(int style, vec2_t p0, vec2_t p1) {
     ShapeEdge result;
     result.fill_style_idx = style;
     result.p0 = p0;
@@ -54,7 +54,7 @@ void ShapeDecoder::decode(const Element& el) {
     read_fill_styles(el);
     read_line_styles(el);
 
-    Vec2f pen{0.0f, 0.0f};
+    vec2_t pen = {{0.0f, 0.0f}};
 
     int current_fill_0;
     int current_fill_1;
@@ -90,15 +90,15 @@ void ShapeDecoder::decode(const Element& el) {
 
         int valueIndex = 0;
 
-        for (char cmd : edgeCommands) {
+        for (char cmd: edgeCommands) {
 
             if (cmd == '!') {
-                const auto v1 = values[valueIndex++];
-                const auto v2 = values[valueIndex++];
-                const auto p = matrix.transform(v1, v2);
+                const auto v1 = (float) values[valueIndex++];
+                const auto v2 = (float) values[valueIndex++];
+                const auto p = vec2_transform({{v1, v2}}, matrix);
 
                 //if (px != penX || py != penY) {
-                if (current_line > 0 && !(line_started && equals(pen, p))) {
+                if (current_line > 0 && !(line_started && almost_eq_vec2(pen, p, MATH_F32_EPSILON))) {
                     extend(p, radius);
                     edges.emplace_back(Op::move_to, p);
                     line_started = true;
@@ -107,9 +107,9 @@ void ShapeDecoder::decode(const Element& el) {
 
                 pen = p;
             } else if (cmd == '|' || cmd == '/') {
-                const auto v1 = values[valueIndex++];
-                const auto v2 = values[valueIndex++];
-                const auto p = matrix.transform(v1, v2);
+                const auto v1 = (float) values[valueIndex++];
+                const auto v2 = (float) values[valueIndex++];
+                const auto p = vec2_transform({{v1, v2}}, matrix);
 
                 extend(p, radius);
 
@@ -129,12 +129,12 @@ void ShapeDecoder::decode(const Element& el) {
 
                 pen = p;
             } else if (cmd == '[' || cmd == ']') {
-                const auto v1 = values[valueIndex++];
-                const auto v2 = values[valueIndex++];
-                const auto v3 = values[valueIndex++];
-                const auto v4 = values[valueIndex++];
-                const auto c = matrix.transform(v1, v2);
-                const auto p = matrix.transform(v3, v4);
+                const auto v1 = (float) values[valueIndex++];
+                const auto v2 = (float) values[valueIndex++];
+                const auto v3 = (float) values[valueIndex++];
+                const auto v4 = (float) values[valueIndex++];
+                const auto c = vec2_transform({{v1, v2}}, matrix);
+                const auto p = vec2_transform({{v3, v4}}, matrix);
                 extend(c, radius);
                 extend(p, radius);
 
@@ -167,7 +167,7 @@ void ShapeDecoder::decode(const Element& el) {
                 }
             }
         }
-        for(auto& fill : back_fills) {
+        for (auto& fill: back_fills) {
             fills.push_back(fill);
         }
     }
@@ -236,7 +236,7 @@ void ShapeDecoder::flush_commands(const Array<RenderCommand>& edges, Array<Shape
             current_fill = first.fill_style_idx;
         }
 //          }
-        const Vec2f& m = first.p0;
+        const vec2_t m = first.p0;
 
         commands_.emplace_back(Op::move_to, m);
         commands_.push_back(first.to_command());
@@ -283,12 +283,12 @@ void ShapeDecoder::flush_commands(const Array<RenderCommand>& edges, Array<Shape
     }
 }
 
-void ShapeDecoder::extend(Vec2f p, float r) {
-    bounds_builder_.add(p, r);
+void ShapeDecoder::extend(vec2_t p, float r) {
+    bounds_builder_ = brect_extend_circle(bounds_builder_, circle(p.x, p.y, r));
 }
 
 bool ShapeDecoder::empty() const {
-    return bounds_builder_.empty() || total_ == 0;
+    return brect_is_empty(bounds_builder_) || total_ == 0;
 }
 
 RenderCommandsBatch ShapeDecoder::result() const {

@@ -1,15 +1,15 @@
 #ifndef EK_UTF8_H
 #define EK_UTF8_H
 
-#include <ek/pre.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//uint32_t ek_utf8_decode(uint32_t* state, uint32_t* codepoint, uint32_t byte);
+typedef uint32_t codepoint_t;
 
-uint32_t ek_utf8_next(const char** iter);
+codepoint_t utf8_next(const char** iter);
 
 #ifdef __cplusplus
 }

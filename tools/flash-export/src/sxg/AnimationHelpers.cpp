@@ -12,11 +12,11 @@ inline float sign(float a) {
 }
 
 static SGKeyFrameTransform createKeyFrameTransform(const Element& el) {
-    const auto m = el.transform.matrix;
+    const mat3x2_t m = el.transform.matrix;
     SGKeyFrameTransform r;
-    r.position = m.transform(el.transformationPoint);
-    r.scale = m.scale();
-    r.skew = m.skew();
+    r.position = vec2_transform(el.transformationPoint, m);
+    r.scale = mat3x2_get_scale(m);
+    r.skew = mat3x2_get_skew(m);
     r.pivot = el.transformationPoint;
     r.color = el.transform.color;
     return r;
@@ -107,4 +107,5 @@ void setupFrameFromElement(SGMovieFrameData& target, const Element& el) {
         target.firstFrame = el.firstFrame;
     }
 }
+
 }

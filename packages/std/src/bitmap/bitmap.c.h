@@ -89,7 +89,7 @@ void ek_bitmap_un_premultiply(ek_bitmap* bitmap) {
 //                                      int desired_channels) ;
 //
 void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool pma) {
-    log_debug("decode bitmap: begin");
+    log_debug("decode bitmap: canvas_begin");
     EK_ASSERT(size > 0);
     EK_ASSERT(bitmap != 0);
     EK_ASSERT(bitmap->pixels == 0);

@@ -9,7 +9,7 @@ class FontImplBase;
 
 struct Glyph {
     // multiply by fontSize
-    Rect2f rect{};
+    rect_t rect = {};
     float advanceWidth{};
     float bearingX{};
     float lineHeight{};
@@ -17,7 +17,7 @@ struct Glyph {
     float descender = 0.0f;
 
     // sprite part
-    Rect2f texCoord{};
+    rect_t texCoord = {};
     sg_image image = {0};
     bool rotated = false;
 

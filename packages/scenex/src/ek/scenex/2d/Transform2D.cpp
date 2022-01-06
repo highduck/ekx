@@ -5,32 +5,32 @@
 
 namespace ek {
 
-Vec2f Transform2D::transformUp(ecs::EntityApi it, ecs::EntityApi top, Vec2f pos) {
-    Vec2f result = pos;
+vec2_t Transform2D::transformUp(ecs::EntityApi it, ecs::EntityApi top, vec2_t pos) {
+    vec2_t result = pos;
     while (it && it != top) {
         const auto* transform = it.tryGet<Transform2D>();
         if (transform) {
-            result = transform->matrix.transform(result);
+            result = vec2_transform(result, transform->matrix);
         }
         it = it.get<Node>().parent;
     }
     return result;
 }
 
-Vec2f Transform2D::transformDown(ecs::EntityApi top, ecs::EntityApi it, Vec2f pos) {
-    Vec2f result = pos;
+vec2_t Transform2D::transformDown(ecs::EntityApi top, ecs::EntityApi it, vec2_t pos) {
+    vec2_t result = pos;
     while (it != top && it != nullptr) {
         const auto* transform = it.tryGet<Transform2D>();
         if (transform) {
-            transform->matrix.transform_inverse(result, result);
+            vec2_transform_inverse(result, transform->matrix, &result);
         }
         it = it.get<Node>().parent;
     }
     return result;
 }
 
-Vec2f Transform2D::localToLocal(ecs::EntityApi src, ecs::EntityApi dst, Vec2f pos) {
-    Vec2f result = pos;
+vec2_t Transform2D::localToLocal(ecs::EntityApi src, ecs::EntityApi dst, vec2_t pos) {
+    vec2_t result = pos;
     const auto lca = Node::findLowerCommonAncestor(src, dst);
     if (lca) {
         result = Transform2D::transformUp(src, lca, result);
@@ -39,26 +39,26 @@ Vec2f Transform2D::localToLocal(ecs::EntityApi src, ecs::EntityApi dst, Vec2f po
     return result;
 }
 
-Vec2f Transform2D::localToGlobal(ecs::EntityApi local, Vec2f localPos) {
-    Vec2f pos = localPos;
+vec2_t Transform2D::localToGlobal(ecs::EntityApi local, vec2_t localPos) {
+    vec2_t pos = localPos;
     auto it = local;
     while (it) {
         auto* transform = it.tryGet<Transform2D>();
         if (transform) {
-            pos = transform->matrix.transform(pos);
+            pos = vec2_transform(pos, transform->matrix);
         }
         it = it.get<Node>().parent;
     }
     return pos;
 }
 
-Vec2f Transform2D::globalToLocal(ecs::EntityApi local, Vec2f globalPos) {
-    Vec2f pos = globalPos;
+vec2_t Transform2D::globalToLocal(ecs::EntityApi local, vec2_t globalPos) {
+    vec2_t pos = globalPos;
     auto it = local;
     while (it) {
         auto* transform = it.tryGet<Transform2D>();
         if (transform) {
-            transform->matrix.transform_inverse(pos, pos);
+            vec2_transform_inverse(pos, transform->matrix, &pos);
         }
 
         it = it.get<Node>().parent;
@@ -68,9 +68,9 @@ Vec2f Transform2D::globalToLocal(ecs::EntityApi local, Vec2f globalPos) {
 
 
 /** transformations after invalidation (already have world matrix) **/
-void Transform2D::fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, Vec2f pos, Vec2f& out) {
-    pos = src.get<WorldTransform2D>().matrix.transform(pos);
-    dst.get<WorldTransform2D>().matrix.transform_inverse(pos, out);
+void Transform2D::fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, vec2_t pos, vec2_t* out) {
+    pos = vec2_transform(pos, src.get<WorldTransform2D>().matrix);
+    vec2_transform_inverse(pos, dst.get<WorldTransform2D>().matrix, out);
 }
 
 /** Invalidate Transform2D **/
@@ -142,8 +142,8 @@ void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root) {
             while (it) {
                 auto& tw = worldTransforms->get(it);
                 auto& tl = localTransforms->get(it);
-                Matrix3x2f::multiply(tp.matrix, tl.matrix, tw.matrix);
-                ColorMod32::multiply(tp.color, tl.color, tw.color);
+                tw.matrix = mat3x2_mul(tp.matrix, tl.matrix);
+                color_mod_mul(&tw.color, tp.color, tl.color);
 
                 out.push_back(it);
                 it = nodes->get(it).sibling_next.index;

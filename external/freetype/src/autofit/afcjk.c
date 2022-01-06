@@ -1019,7 +1019,7 @@
 
     /**********************************************************************
      *
-     * We begin by generating a sorted table of edges for the current
+     * We canvas_begin by generating a sorted table of edges for the current
      * direction.  To do so, we simply scan each segment and try to find
      * an edge in our table that corresponds to its position.
      *

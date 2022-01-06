@@ -87,7 +87,7 @@ public:
         }
 
         sprite.image = image;
-        sprite.texCoords.set(invWidth * placeX, invHeight * placeY, invWidth * spriteWidth, invHeight * spriteHeight);
+        sprite.texCoords = rect(invWidth * placeX, invHeight * placeY, invWidth * spriteWidth, invHeight * spriteHeight);
 
         //texture->updateRect(placeX, placeY, spriteWidth, spriteHeight, pixels.data());
 

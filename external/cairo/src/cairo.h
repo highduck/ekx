@@ -1562,7 +1562,7 @@ cairo_font_face_status (cairo_font_face_t *font_face);
  * The various #cairo_scaled_font_t functions can be used with scaled
  * fonts of any type, but some font backends also provide
  * type-specific functions that must only be called with a scaled font
- * of the appropriate type. These functions have names that begin with
+ * of the appropriate type. These functions have names that canvas_begin with
  * <function>cairo_<emphasis>type</emphasis>_scaled_font(<!-- -->)</function>
  * such as cairo_ft_scaled_font_lock_face().
  *
@@ -2153,7 +2153,7 @@ cairo_device_reference (cairo_device_t *device);
  * The various #cairo_device_t functions can be used with devices of
  * any type, but some backends also provide type-specific functions
  * that must only be called with a device of the appropriate
- * type. These functions have names that begin with
+ * type. These functions have names that canvas_begin with
  * <literal>cairo_<emphasis>type</emphasis>_device</literal> such as
  * cairo_xcb_device_debug_cap_xrender_version().
  *
@@ -2388,7 +2388,7 @@ cairo_surface_status (cairo_surface_t *surface);
  * The various #cairo_surface_t functions can be used with surfaces of
  * any type, but some backends also provide type-specific functions
  * that must only be called with a surface of the appropriate
- * type. These functions have names that begin with
+ * type. These functions have names that canvas_begin with
  * <literal>cairo_<emphasis>type</emphasis>_surface</literal> such as cairo_image_surface_get_width().
  *
  * The behavior of calling a type-specific function with a surface of

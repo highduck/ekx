@@ -5,7 +5,7 @@
 #include <ek/util/Res.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/text/Font.hpp>
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 
 namespace ek {
 
@@ -13,13 +13,13 @@ struct Particle {
     Res<Sprite> sprite;
     //int draw_layer = 0;
     //const char* text = nullptr;
-    Vec2f pivot = Vec2f::zero;
+    vec2_t pivot = {};
 
     float time = 0.0f;
     float time_total = 0.0f;
-    Vec2f position = Vec2f::zero;
-    Vec2f velocity = Vec2f::zero;
-    Vec2f acc = Vec2f::zero;
+    vec2_t position = {};
+    vec2_t velocity = {};
+    vec2_t acc = {};
 
     float acc_x_phase{Math::pi / 2.0f};
     float acc_x_speed = 0.0f;
@@ -35,8 +35,8 @@ struct Particle {
     // initial alpha
     ParticleAlphaMode alpha_mode = ParticleAlphaMode::None;
     float alpha = 1.0f;
-    argb32_t color{0xFFFFFFFF};
-    argb32_t offset{0x0};
+    rgba_t color = rgba_u32(0xFFFFFFFFu);
+    rgba_t offset = rgba_u32(0);
 
     ParticleScaleMode scale_mode = ParticleScaleMode::None;
     float scale_off_time = 0.0f;
@@ -44,11 +44,11 @@ struct Particle {
     float scale_end = 0.0f;
 
     // current state
-    Vec2f scale = Vec2f::one;
+    vec2_t scale = vec2(1,1);
 
     bool reflector = false;
 
-    Rect2f bounds = Rect2f::zero_one;
+    rect_t bounds = rect_01();
 public:
 
     void init() {
@@ -67,7 +67,7 @@ public:
 
     void update_current_values();
 
-    Rect2f get_bounds();
+    rect_t get_bounds();
 
     void draw();
 };

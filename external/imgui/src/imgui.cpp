@@ -16809,7 +16809,7 @@ void ImGui::ShowMetricsWindow(bool* p_open)
         SameLine();
         MetricsHelpMarker("You can also call ImGui::ShowStackToolWindow() from your code.");
 
-        Checkbox("Show windows begin order", &cfg->ShowWindowsBeginOrder);
+        Checkbox("Show windows canvas_begin order", &cfg->ShowWindowsBeginOrder);
         Checkbox("Show windows rectangles", &cfg->ShowWindowsRects);
         SameLine();
         SetNextItemWidth(GetFontSize() * 12);

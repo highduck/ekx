@@ -11,10 +11,10 @@ namespace ek {
 
 struct touch_state_t {
     uint64_t id = 0;
-    Vec2f position;
-    Vec2f start_position;
+    vec2_t position = {};
+    vec2_t start_position = {};
+    vec2_t end_position = {};
     bool is_started_event = false;
-    Vec2f end_position;
     bool is_ended_event = false;
     bool pressed = false;
     bool active = false;
@@ -65,7 +65,7 @@ public:
     bool hovered_by_editor_gui = false;
     bool emulateTouch = false;
 private:
-    [[nodiscard]] Vec2f screenCoordToGameDisplay(Vec2f pos) const;
+    [[nodiscard]] vec2_t screenCoordToGameDisplay(vec2_t pos) const;
 
     void emulate_mouse_as_touch(const ek_app_event& event, touch_state_t& data);
 

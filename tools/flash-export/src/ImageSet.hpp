@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/math/Rect.hpp>
+#include <ek/math.h>
 #include <ek/ds/String.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/bitmap.h>
@@ -12,15 +12,15 @@ struct SpriteData {
     String name;
 
     // physical rect
-    Rect2f rc;
+    rect_t rc;
 
     // rect in source image
-    Rect2i source;
-
-    uint8_t padding = 1;
+    recti_t source;
 
     // reference image;
     ek_bitmap bitmap{0, 0, nullptr};
+
+    uint8_t padding = 1;
 
     // TODO:
     bool trim = false;
@@ -37,8 +37,9 @@ struct ImageSet {
     Array<Resolution> resolutions;
 };
 
+// TODO: move to ek/bitmap.h
 void ek_bitmap_save_png(const ek_bitmap* bitmap, const char* path, bool alpha);
-
+// TODO: move to ek/bitmap.h
 void ek_bitmap_save_jpg(const ek_bitmap* bitmap, const char* path, bool alpha);
 
 void save(ImageSet& bitmaps, const char* output);

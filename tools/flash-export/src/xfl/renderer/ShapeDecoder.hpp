@@ -7,9 +7,9 @@ namespace ek::xfl {
 struct ShapeEdge {
 
     int fill_style_idx = -1;
-    Vec2f p0;
-    Vec2f c;
-    Vec2f p1;
+    vec2_t p0 = {};
+    vec2_t c = {};
+    vec2_t p1 = {};
     bool is_quadratic = false;
 
     [[nodiscard]]
@@ -17,12 +17,13 @@ struct ShapeEdge {
 
     [[nodiscard]]
     bool connects(const ShapeEdge& next) const {
-        return fill_style_idx == next.fill_style_idx && equals(p1, next.p0);
+        return fill_style_idx == next.fill_style_idx &&
+               almost_eq_vec2(p1, next.p0, MATH_F32_EPSILON);
     }
 
-    static ShapeEdge curve(int style, const Vec2f& p0, const Vec2f& c, const Vec2f& p1);
+    static ShapeEdge curve(int style, vec2_t p0, vec2_t c, vec2_t p1);
 
-    static ShapeEdge line(int style, const Vec2f& p0, const Vec2f& p1);
+    static ShapeEdge line(int style, vec2_t p0, vec2_t p1);
 };
 
 class ShapeDecoder {
@@ -37,7 +38,7 @@ public:
 
 private:
 
-    void extend(Vec2f p, float r = 0.0f);
+    void extend(vec2_t p, float r = 0.0f);
 
     void read_fill_styles(const Element& el);
 
@@ -50,7 +51,7 @@ private:
     Array<RenderCommand> line_styles_{};
 
     TransformModel transform_;
-    BoundsBuilder2f bounds_builder_{};
+    brect_t bounds_builder_ = brect_inf();
     int total_ = 0;
 };
 

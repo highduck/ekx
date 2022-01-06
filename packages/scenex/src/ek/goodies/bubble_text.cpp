@@ -43,14 +43,14 @@ void BubbleText::updateAll() {
 
         auto& transform = e.get<Transform2D>();
         transform.setScale(sc);
-        Vec2f fly_pos{0.0f, delta_y * easing::P3_OUT.calculate(r)};
+        vec2_t fly_pos = {0.0f, delta_y * easing::P3_OUT.calculate(r)};
         transform.setPosition(state.start + off + fly_pos);
-        transform.color.setAlpha(1.0f - (r * r * r));
-        transform.color.setAdditive(r * r * r);
+        transform.color.scale.a = unorm8_f32_clamped(1.0f - (r * r * r));
+        transform.color.offset.a = unorm8_f32_clamped(r * r * r);
     }
 }
 
-ecs::EntityApi BubbleText::create(const char* fontName, const String& text, const Vec2f& pos, float delay) {
+ecs::EntityApi BubbleText::create(const char* fontName, const String& text, vec2_t pos, float delay) {
     auto e = createNode2D();
     auto& c = e.assign<BubbleText>();
     c.delay = delay;
@@ -64,7 +64,7 @@ ecs::EntityApi BubbleText::create(const char* fontName, const String& text, cons
 
     e.assign<Display2D>(new Text2D(text, format));
     setTouchable(e, false);
-    setScale(e, Vec2f::zero);
+    setScale(e, {});
     return e;
 }
 

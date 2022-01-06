@@ -37,7 +37,7 @@ SincResampler::SincResampler(const MultiChannelResampler::Builder &builder)
 
 void SincResampler::readFrame(float *frame) {
     // Clear accumulator for mixing.
-    std::fill(mSingleFrame.begin(), mSingleFrame.end(), 0.0);
+    std::fill(mSingleFrame.canvas_begin(), mSingleFrame.end(), 0.0);
     std::fill(mSingleFrame2.begin(), mSingleFrame2.end(), 0.0);
 
     // Determine indices into coefficients table.

@@ -22,10 +22,10 @@ struct SpriteInfo {
     String name;
 
     // physical rect
-    Rect2f rc;
+    rect_t rc;
 
     // coords in atlas image
-    Rect2f uv;
+    rect_t uv;
 
     // flags in atlas image
     uint8_t flags = 0u;

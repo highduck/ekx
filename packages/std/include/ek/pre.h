@@ -50,4 +50,7 @@ typedef double ek_f64;
 #define EK_DISABLE_WARNING(option) EK_PRAGMA(clang diagnostic ignored option)
 #define EK_DISABLE_WARNING_END() EK_PRAGMA(clang diagnostic pop)
 
+#define UNUSED(x) (void)(x)
+#define UNREACHABLE() __buildin_unreachable()
+
 #endif // EK_PRE_H

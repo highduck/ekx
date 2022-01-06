@@ -1,8 +1,7 @@
 #pragma once
 
 #include <ek/ds/Array.hpp>
-#include <string>
-#include <ek/math/BoundsBuilder.hpp>
+#include <ek/math.h>
 #include "../types.hpp"
 #include "RenderCommand.hpp"
 
@@ -28,7 +27,7 @@ public:
 
     void drawSymbolItem(const Doc& doc, const Element& element);
 
-    static Rect2f getBounds(const Doc& doc, const Array<Element>& elements);
+    static rect_t getBounds(const Doc& doc, const Array<Element>& elements);
 
 /** Covert concrete objects to render commands **/
 
@@ -42,7 +41,7 @@ public:
 
 public:
     Array<RenderCommandsBatch> batches;
-    BoundsBuilder2f bounds{};
+    brect_t bounds = brect_inf();
 
 private:
     Array<TransformModel> stack_;

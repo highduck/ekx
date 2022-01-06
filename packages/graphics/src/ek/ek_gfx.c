@@ -4,16 +4,9 @@
 #include <ek/app.h>
 
 #define SOKOL_GFX_IMPL
-
 #define SOKOL_ASSERT(x) EK_ASSERT(x)
 #define SOKOL_LOG(msg) EK_DEBUG("sg: %s", msg);
-
-EK_DISABLE_WARNING_BEGIN()
-EK_DISABLE_WARNING("-Wc99-extensions")
-
 #include <sokol_gfx.h>
-
-EK_DISABLE_WARNING_END()
 
 static void ek_gfx_log_backend() {
 #ifndef NDEBUG

@@ -1,8 +1,9 @@
 #include <ek/app.h>
 #include <ek/core.hpp>
 #include <ek/gfx.h>
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/math/Random.hpp>
+#include <ek/math/Color32.hpp>
 #include <ek/bitset.h>
 #include <ek/time.h>
 
@@ -68,7 +69,7 @@ random_estimator_t estimator;
 
 void on_ready() {
     ek_gfx_setup(128);
-    ek_canvas_setup();
+    canvas_setup();
 
     estimator_init(&estimator);
 }
@@ -79,7 +80,7 @@ void on_frame() {
     if (width > 0 && height > 0) {
         static sg_pass_action pass_action{};
         pass_action.colors[0].action = SG_ACTION_CLEAR;
-        const Vec4f fillColor = static_cast<Vec4f>(argb32_t{ek_app.config.background_color});
+        const vec4_t fillColor = vec4_rgba(argb32_t{ek_app.config.background_color});
         pass_action.colors[0].value.r = fillColor.x;
         pass_action.colors[0].value.g = fillColor.y;
         pass_action.colors[0].value.b = fillColor.z;
@@ -100,13 +101,13 @@ void on_frame() {
 
         estimator_update_pixels(&estimator);
 
-        ek_canvas_new_frame();
-        draw2d::begin({0, 0, width, height});
+        canvas_new_frame();
+        canvas_begin(width, height);
 
-        draw2d::state.set_image_region(estimator.image);
-        draw2d::quad(0, 0, estimator.image_size, estimator.image_size);
+        canvas_set_image_region(estimator.image, rect_01());
+        canvas_quad(0, 0, estimator.image_size, estimator.image_size);
 
-        draw2d::end();
+        canvas_end();
 
         sg_end_pass();
         sg_commit();

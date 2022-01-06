@@ -20,8 +20,8 @@ struct ParticleEmitter2D {
     typedef void SpawnCallback(ecs::EntityApi, Particle&);
 
     EmitterData data;
-    Vec2f position = Vec2f::zero;
-    Vec2f velocity = Vec2f::zero;
+    vec2_t position = {};
+    vec2_t velocity = {};
     SpawnCallback* on_spawn = nullptr;
     Res<ParticleDecl> particle;
     ecs::EntityRef layer;
@@ -43,12 +43,12 @@ public:
     void draw() override;
 
     [[nodiscard]]
-    Rect2f getBounds() const override {
-        return Rect2f{};
+    rect_t getBounds() const override {
+        return (rect_t){};
     }
 
     [[nodiscard]]
-    bool hitTest(Vec2f pos) const override {
+    bool hitTest(vec2_t pos) const override {
         (void) pos;
         return false;
     }

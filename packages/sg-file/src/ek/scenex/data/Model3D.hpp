@@ -1,17 +1,16 @@
 #pragma once
 
-#include <ek/math/Color32.hpp>
-#include <ek/math/Vec.hpp>
+#include <ek/math.h>
 #include <ek/serialize/serialize.hpp>
 
 namespace ek {
 
 struct ModelVertex3D {
-    Vec3f position;
-    Vec3f normal;
-    Vec2f uv;
-    abgr32_t color;
-    abgr32_t color2;
+    vec3_t position;
+    vec3_t normal;
+    vec2_t uv;
+    rgba_t color;
+    rgba_t color2;
 };
 
 template<>
@@ -27,13 +26,13 @@ struct Model3D {
         io(vertices, indices);
     }
 
-    static Model3D createCube(const Vec3f& position, const Vec3f& size, argb32_t color = 0xFFFFFF_rgb);
+    static Model3D createCube(vec3_t position, vec3_t size, argb32_t color = 0xFFFFFF_rgb);
 
-    static Model3D createPlane(const Vec3f& position, const Vec2f& size, argb32_t color = 0xFFFFFF_rgb);
+    static Model3D createPlane(vec3_t position, vec2_t size, argb32_t color = 0xFFFFFF_rgb);
 };
 
 
-inline Model3D Model3D::createCube(const Vec3f& position, const Vec3f& size, argb32_t color) {
+inline Model3D Model3D::createCube(const vec3_t position, const vec3_t size, argb32_t color) {
     Model3D result{};
 
     // 6 sides
@@ -42,47 +41,47 @@ inline Model3D Model3D::createCube(const Vec3f& position, const Vec3f& size, arg
     result.vertices.resize(6 * 4);
     result.indices.resize(6 * 2 * 3);
 
-    Vec3f n;
+    vec3_t n;
     const float u = 0.5f;
     const auto color1 = color.abgr();
     const abgr32_t color2 = 0x0;
 
     // Top +Z
-    n = {0, 0, 1};
-    result.vertices[0] = {{-u, -u, u}, n, {0, 0}, color1, color2};
-    result.vertices[1] = {{u, -u, u}, n, {0, 1}, color1, color2};
-    result.vertices[2] = {{u, u, u}, n, {1, 1}, color1, color2};
-    result.vertices[3] = {{-u, u, u}, n, {1, 0}, color1, color2};
+    n = vec3(0, 0, 1);
+    result.vertices[0] = {vec3(-u, -u,u), n, vec2(0, 0), color1, color2};
+    result.vertices[1] = {vec3(u, -u, u), n, vec2(0, 1), color1, color2};
+    result.vertices[2] = {vec3(u, u,  u), n, vec2(1, 1), color1, color2};
+    result.vertices[3] = {vec3(-u, u, u), n, vec2(1, 0), color1, color2};
 
-    n = {0, 0, -1};
-    result.vertices[4] = {{-u, -u, -u}, n, {0, 0}, color1, color2};
-    result.vertices[5] = {{-u, u, -u}, n, {0, 1}, color1, color2};
-    result.vertices[6] = {{u, u, -u}, n, {1, 1}, color1, color2};
-    result.vertices[7] = {{u, -u, -u}, n, {1, 0}, color1, color2};
+    n = vec3(0, 0, -1);
+    result.vertices[4] = {vec3(-u, -u,-u), n,vec2(0, 0), color1, color2};
+    result.vertices[5] = {vec3(-u, u, -u), n,vec2(0, 1), color1, color2};
+    result.vertices[6] = {vec3(u, u,  -u), n,vec2(1, 1), color1, color2};
+    result.vertices[7] = {vec3(u, -u, -u), n,vec2(1, 0), color1, color2};
 
-    n = {1, 0, 0};
-    result.vertices[8] = {{u, -u, u}, n, {0, 0}, color1, color2};
-    result.vertices[9] = {{u, -u, -u}, n, {0, 1}, color1, color2};
-    result.vertices[10] = {{u, u, -u}, n, {1, 1}, color1, color2};
-    result.vertices[11] = {{u, u, u}, n, {1, 0}, color1, color2};
+    n = vec3(1, 0, 0);
+    result.vertices[8] =  {vec3(u, -u,  u), n, vec2(0, 0), color1, color2};
+    result.vertices[9] =  {vec3(u, -u, -u), n, vec2(0, 1), color1, color2};
+    result.vertices[10] = {vec3(u, u, -u), n, vec2(1, 1), color1, color2};
+    result.vertices[11] = {vec3(u, u,  u), n, vec2(1, 0), color1, color2};
 
-    n = {-1, 0, 0};
-    result.vertices[12] = {{-u, u, u}, n, {0, 0}, color1, color2};
-    result.vertices[13] = {{-u, u, -u}, n, {0, 1}, color1, color2};
-    result.vertices[14] = {{-u, -u, -u}, n, {1, 1}, color1, color2};
-    result.vertices[15] = {{-u, -u, u}, n, {1, 0}, color1, color2};
+    n = vec3(-1, 0, 0);
+    result.vertices[12] = {vec3(-u, u,   u), n, vec2(0, 0), color1, color2};
+    result.vertices[13] = {vec3(-u, u,  -u), n, vec2(0, 1), color1, color2};
+    result.vertices[14] = {vec3(-u, -u, -u), n, vec2(1, 1), color1, color2};
+    result.vertices[15] = {vec3(-u, -u,  u), n, vec2(1, 0), color1, color2};
 
-    n = {0, -1, 0};
-    result.vertices[16] = {{-u, -u, u}, n, {0, 0}, color1, color2};
-    result.vertices[17] = {{-u, -u, -u}, n, {0, 1}, color1, color2};
-    result.vertices[18] = {{u, -u, -u}, n, {1, 1}, color1, color2};
-    result.vertices[19] = {{u, -u, u}, n, {1, 0}, color1, color2};
+    n = vec3(0, -1, 0);
+    result.vertices[16] = {vec3(-u, -u, u), n, vec2(0, 0), color1, color2};
+    result.vertices[17] = {vec3(-u, -u, -u), n, vec2(0, 1), color1, color2};
+    result.vertices[18] = {vec3(u, -u, -u), n, vec2(1, 1), color1, color2};
+    result.vertices[19] = {vec3(u, -u, u), n, vec2(1, 0), color1, color2};
 
-    n = {0, 1, 0};
-    result.vertices[20] = {{u, u, u}, n, {0, 0}, color1, color2};
-    result.vertices[21] = {{u, u, -u}, n, {0, 1}, color1, color2};
-    result.vertices[22] = {{-u, u, -u}, n, {1, 1}, color1, color2};
-    result.vertices[23] = {{-u, u, u}, n, {1, 0}, color1, color2};
+    n = vec3(0, 1, 0);
+    result.vertices[20] = {vec3(u, u, u), n, vec2(0, 0), color1, color2};
+    result.vertices[21] = {vec3(u, u, -u), n, vec2(0, 1), color1, color2};
+    result.vertices[22] = {vec3(-u, u, -u), n, vec2(1, 1), color1, color2};
+    result.vertices[23] = {vec3(-u, u, u), n, vec2(1, 0), color1, color2};
 
     // 12 * 3 = 36
     uint16_t indices[36]{
@@ -102,25 +101,27 @@ inline Model3D Model3D::createCube(const Vec3f& position, const Vec3f& size, arg
     memcpy(result.indices.data(), indices, sizeof(uint16_t) * 36);
 
     for (auto& v : result.vertices) {
-        v.position = position + v.position * size;
+        v.position.x = position.x + v.position.x * size.x;
+        v.position.y = position.y + v.position.y * size.y;
+        v.position.z = position.z + v.position.z * size.z;
     }
 
     return result;
 }
 
-inline Model3D Model3D::createPlane(const Vec3f& position, const Vec2f& size, argb32_t color) {
+inline Model3D Model3D::createPlane(const vec3_t position, const vec2_t size, argb32_t color) {
     Model3D result{};
 
     const float u = 0.5f;
     const auto color1 = color.abgr();
     const abgr32_t color2 = 0x0;
-    const Vec3f n{0, 0, 1};
+    const vec3_t n = vec3(0, 0, 1);
 
     result.vertices.resize(4);
-    result.vertices[0] = {{-u, -u, 0.0f}, n, {0, 0}, color1, color2};
-    result.vertices[1] = {{u, -u, 0.0f}, n, {1, 0}, color1, color2};
-    result.vertices[2] = {{u, u, 0.0f}, n, {1, 1}, color1, color2};
-    result.vertices[3] = {{-u, u, 0.0f}, n, {0, 1}, color1, color2};
+    result.vertices[0] = {vec3(-u, -u, 0), n, vec2(0, 0), color1, color2};
+    result.vertices[1] = {vec3(u, -u,  0), n, vec2(1, 0), color1, color2};
+    result.vertices[2] = {vec3(u, u,   0), n, vec2(1, 1), color1, color2};
+    result.vertices[3] = {vec3(-u, u,  0), n, vec2(0, 1), color1, color2};
 
     result.indices.resize(2 * 3);
     result.indices[0] = 0;
@@ -131,7 +132,9 @@ inline Model3D Model3D::createPlane(const Vec3f& position, const Vec2f& size, ar
     result.indices[5] = 0;
 
     for (auto& v : result.vertices) {
-        v.position = position + v.position * Vec3f{size.x, size.y, 1.0f};
+        v.position.x = position.x + v.position.x * size.x;
+        v.position.y = position.y + v.position.y * size.y;
+        v.position.z = position.z + v.position.z;
     }
 
     return result;

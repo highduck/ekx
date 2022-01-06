@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ek/math/Vec.hpp>
 #include <ek/math/Color32.hpp>
 #include <ek/util/Type.hpp>
 
@@ -8,20 +7,20 @@ namespace ek {
 
 struct Material3D {
     constexpr static float k = 0.8f;
-    Vec3f ambient = k * Vec3f::one;
-    Vec3f diffuse = k * Vec3f::one;
-    Vec3f specular = k * Vec3f::one;
-    Vec3f emission = Vec3f::zero;
+    vec3_t ambient = vec3(k, k, k);
+    vec3_t diffuse = vec3(k, k, k);
+    vec3_t specular = vec3(k, k, k);
+    vec3_t emission = vec3(0, 0, 0);
     float shininess = 32.0f;
     float roughness = 0.05f;
 
     inline void set_base_color(argb32_t color, float ao = 0.5f) {
-        diffuse = Vec3f{
-                static_cast<float>(color.r) / 255.0f,
-                static_cast<float>(color.g) / 255.0f,
-                static_cast<float>(color.b) / 255.0f
-        };
-        ambient = ao * diffuse;
+        diffuse = vec3(
+                (float) color.r / 255.0f,
+                (float) color.g / 255.0f,
+                (float) color.b / 255.0f
+        );
+        ambient = vec3_scale(diffuse, ao);
     }
 };
 

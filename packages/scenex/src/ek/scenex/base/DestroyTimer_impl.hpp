@@ -19,16 +19,17 @@ void destroyChildrenDelay(ecs::EntityApi e, float delay, TimeLayer timer) {
 }
 
 void DestroyTimer::updateAll() {
-    FixedArray<ecs::EntityApi, 1024> destroy_queue;
-
-    for (auto e : ecs::view<DestroyTimer>()) {
+    FixedArray<ecs::EntityApi, 4096> destroy_queue;
+    uint32_t num = 0;
+    for (auto e: ecs::view<DestroyTimer>()) {
         auto& c = e.get<DestroyTimer>();
         c.delay -= c.timer->dt;
-        if (c.delay <= 0.0f) {
+        if (c.delay <= 0.0f && num != 4096) {
             destroy_queue.push_back(e);
+            ++num;
         }
     }
-    for (auto e : destroy_queue) {
+    for (auto e: destroy_queue) {
         if (e.isAlive()) {
             if (e.has<Node>()) {
                 destroyNode(e);

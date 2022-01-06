@@ -14,7 +14,7 @@ struct TextBlockInfo {
     struct Line {
         int begin = 0;
         int end = 0;
-        Vec2f size{};
+        vec2_t size = {};
         float ascender = 0.0f;
         float descender = 0.0f;
         float leading = 0.0f;
@@ -25,7 +25,7 @@ struct TextBlockInfo {
     };
 
     // {max length; total height}
-    Vec2f size{};
+    vec2_t size = {};
     ek::Array<Line> lines{};
 
     void addLine(Line line);
@@ -47,14 +47,14 @@ public:
     float maxWidth = 0.0f;
 
     // current pen position
-    Vec2f position{};
+    vec2_t position = {};
 
     // drawing zone
-    Rect2f bounds{};
+    rect_t bounds = {};
 
     // alignment for rect
     // TODO:
-    Vec2f boundsAlignment{};
+    vec2_t boundsAlignment = {};
 
     void draw(const char* text);
 

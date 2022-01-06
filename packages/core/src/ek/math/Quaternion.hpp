@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vec.hpp"
+#include "Matrix.hpp"
 #include <ek/assert.h>
 
 namespace ek {

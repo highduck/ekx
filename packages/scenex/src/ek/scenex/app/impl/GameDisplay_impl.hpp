@@ -2,7 +2,7 @@
 
 #include "../GameDisplay.hpp"
 
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/app.h>
 
 #ifdef EK_UITEST
@@ -21,8 +21,8 @@ bool GameDisplay::beginGame(sg_pass_action& passAction, const char* debugLabel) 
     sg_push_debug_group(debugLabel);
 
     if (simulated) {
-        ek_canvas_.framebuffer_color = color;
-        ek_canvas_.framebuffer_depth = depthStencil;
+        canvas.framebuffer_color = color;
+        canvas.framebuffer_depth = depthStencil;
 
         if (colorFirstClearFlag) {
             passAction.colors[0].action = SG_ACTION_CLEAR;
@@ -40,8 +40,8 @@ void GameDisplay::endGame() {
     if (simulated) {
         sg_end_pass();
 
-        ek_canvas_.framebuffer_color = {0};
-        ek_canvas_.framebuffer_depth = {0};
+        canvas.framebuffer_color = {0};
+        canvas.framebuffer_depth = {0};
     }
     sg_pop_debug_group();
 }
@@ -67,10 +67,11 @@ bool GameDisplay::beginOverlayDev() {
 
         sg_push_debug_group("Game viewport");
 // todo: temp disable
-        draw2d::begin({0, 0, fw, fh});
-        draw2d::state.set_image_region(color, Rect2f::zero_one);
-        draw2d::quad(0, 0, scale * info.size.x, scale * info.size.y);
-        draw2d::end();
+        canvas_begin(fw, fh);
+        canvas_set_image(color);
+        canvas_set_image_rect(rect_01());
+        canvas_quad(0, 0, scale * info.size.x, scale * info.size.y);
+        canvas_end();
 
         sg_pop_debug_group();
     }
@@ -150,7 +151,7 @@ void GameDisplay::update() {
         info.size.y = ek_app.viewport.height;
         info.window.x = ek_app.viewport.width / ek_app.viewport.scale;
         info.window.y = ek_app.viewport.height / ek_app.viewport.scale;
-        info.insets = *(const Vec4f*)ek_app.viewport.insets;
+        info.insets = *(vec4_t*)ek_app.viewport.insets;
         info.dpiScale = ek_app.viewport.scale;
 
         info.destinationViewport.position = Vec2f::zero;

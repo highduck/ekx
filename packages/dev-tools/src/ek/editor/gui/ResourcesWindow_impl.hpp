@@ -91,10 +91,10 @@ void drawAssetItem<Font>(const Font& asset) {
 template<>
 void drawAssetItem<Material3D>(const Material3D& asset) {
     auto& m = const_cast<Material3D&>(asset);
-    ImGui::ColorEdit3("Ambient", m.ambient.data());
-    ImGui::ColorEdit3("Diffuse", m.diffuse.data());
-    ImGui::ColorEdit3("Specular", m.specular.data());
-    ImGui::ColorEdit3("Emission", m.emission.data());
+    ImGui::ColorEdit3("Ambient", m.ambient.data);
+    ImGui::ColorEdit3("Diffuse", m.diffuse.data);
+    ImGui::ColorEdit3("Specular", m.specular.data);
+    ImGui::ColorEdit3("Emission", m.emission.data);
     ImGui::DragFloat("Shininess", &m.shininess, 0.1f, 1.0f, 128.0f);
     ImGui::DragFloat("Roughness", &m.roughness, 0.01f, 0.001f, 1.0f);
 }
@@ -156,9 +156,9 @@ void drawAssetsListByType() {
 void draw_buffer_chain_stats(const char* name, ek_canvas_buffers* buffers) {
     for(int line = 0; line < 4; ++line) {
         int c = 0;
-        for(int i = 0; i < EK_CANVAS_BUFFERS_MAX_COUNT; ++i) {
+        for(int i = 0; i < CANVAS_BUFFERS_MAX_COUNT; ++i) {
             if(buffers->lines[line][i].id == 0) {
-                i = EK_CANVAS_BUFFERS_MAX_COUNT;
+                i = CANVAS_BUFFERS_MAX_COUNT;
             }
             else {
                 ++c;
@@ -170,13 +170,13 @@ void draw_buffer_chain_stats(const char* name, ek_canvas_buffers* buffers) {
 
 void ResourcesWindow::onDraw() {
 
-    ImGui::Text("ek_canvas size: %lu", sizeof ek_canvas_);
-    ImGui::Text("ek_canvas vb chain size: %lu", sizeof ek_canvas_.vbs);
-    ImGui::Text("ek_canvas ib chain size: %lu", sizeof ek_canvas_.ibs);
-    ImGui::Text("ek_canvas vb mem size: %lu", sizeof ek_canvas_.vertex);
-    ImGui::Text("ek_canvas ib mem size: %lu", sizeof ek_canvas_.index);
-    draw_buffer_chain_stats("VB", &ek_canvas_.vbs);
-    draw_buffer_chain_stats("IB", &ek_canvas_.ibs);
+    ImGui::Text("ek_canvas size: %lu", sizeof canvas);
+    ImGui::Text("ek_canvas vb chain size: %lu", sizeof canvas.vbs);
+    ImGui::Text("ek_canvas ib chain size: %lu", sizeof canvas.ibs);
+    ImGui::Text("ek_canvas vb mem size: %lu", sizeof canvas.vertex);
+    ImGui::Text("ek_canvas ib mem size: %lu", sizeof canvas.index);
+    draw_buffer_chain_stats("VB", &canvas.vbs);
+    draw_buffer_chain_stats("IB", &canvas.ibs);
 
     // TODO: somehow generic draw manual registries
     // drawAssetsListByType<Texture>();

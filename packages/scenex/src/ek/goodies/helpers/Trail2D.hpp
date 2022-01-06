@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ek/math/Vec.hpp>
 #include <ek/scenex/base/Script.hpp>
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
@@ -62,30 +61,30 @@ struct VectorDequeue {
 
 struct Trail2D {
     struct Node {
-        Vec2f position{};
+        vec2_t position = {};
         float energy = 1.0f;
         float scale = 1.0f;
     };
 
     TimeLayer timer;
-    Vec2f offset;
+    vec2_t offset = {};
     float drain_speed = 2.0f;
     float segment_distance_max = 10.0f;
 //    float particles_per_second = 15.0f;
 
     Trail2D() = default;
 
-    void update(const Matrix3x2f& m);
+    void update(mat3x2_t m);
 
     static void updateAll();
 
 private:
 
-    void update_position(Vec2f newPosition);
+    void update_position(vec2_t newPosition);
 
 public:
     float scale = 1.0f;
-    Vec2f lastPosition;
+    vec2_t lastPosition = {};
     VectorDequeue<Node> nodes;
     bool initialized = false;
 };
@@ -103,13 +102,13 @@ public:
     void draw() override;
 
     [[nodiscard]]
-    bool hitTest(Vec2f point) const override {
+    bool hitTest(vec2_t point) const override {
         (void) point;
         return false;
     }
 
     [[nodiscard]]
-    Rect2f getBounds() const override { return Rect2f{}; }
+    rect_t getBounds() const override { return {}; }
 
 public:
     ecs::World* w = nullptr;

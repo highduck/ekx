@@ -6,8 +6,6 @@
 #include <ek/util/Type.hpp>
 #include <ek/math/MathSerialize.hpp>
 #include <ek/math/Color32.hpp>
-#include <ek/math/Matrix3x2.hpp>
-#include <ek/math/Rect.hpp>
 #include <ek/math/ColorTransform.hpp>
 
 #include <ek/serialize/serialize.hpp>
@@ -24,8 +22,8 @@ struct SGFilter {
     SGFilterType type = SGFilterType::None;
     uint32_t quality = 1;
     argb32_t color = argb32_t::one;
-    Vec2f blur;
-    Vec2f offset;
+    vec2_t blur;
+    vec2_t offset;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -35,7 +33,7 @@ struct SGFilter {
 
 struct SGTextLayerData {
     argb32_t color = 0xFFFFFFFF_argb;
-    Vec2f offset{};
+    vec2_t offset{};
     float blurRadius = 0.0f;
     int blurIterations = 0;
     int strength = 0;
@@ -50,8 +48,8 @@ struct SGDynamicTextData {
     String text;
     String font;
     float size;
-    Vec2f alignment;
-    Rect2f rect;
+    vec2_t alignment;
+    rect_t rect;
     float lineSpacing = 0.0f;
     float lineHeight = 0.0f;
 
@@ -70,7 +68,7 @@ struct SGDynamicTextData {
 struct SGEasingData {
     uint8_t attribute = 0;
     float ease = 0.0f;
-    Array<Vec2f> curve{};
+    Array<vec2_t> curve{};
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -79,10 +77,10 @@ struct SGEasingData {
 };
 
 struct SGKeyFrameTransform {
-    Vec2f position;
-    Vec2f scale{1.0f, 1.0f};
-    Vec2f skew;
-    Vec2f pivot;
+    vec2_t position;
+    vec2_t scale = {{1.0f, 1.0f}};
+    vec2_t skew;
+    vec2_t pivot;
     ColorTransformF color;
 
     template<typename S>
@@ -181,7 +179,7 @@ struct SGMovieData {
 
 struct SGNodeData {
 
-    Matrix3x2f matrix{};
+    mat3x2_t matrix = mat3x2_identity();
     ColorTransformF color{};
 
     // instance name
@@ -199,8 +197,8 @@ struct SGNodeData {
     bool scissorsEnabled = false;
     bool hitAreaEnabled = false;
     bool boundsEnabled = false;
-    Rect2f boundingRect;
-    Rect2f scaleGrid;
+    rect_t boundingRect;
+    rect_t scaleGrid;
     Array<SGNodeData> children;
     Array<SGFilter> filters;
     Array<SGDynamicTextData> dynamicText;
@@ -261,7 +259,7 @@ public:
     }
 };
 
-EK_DECLARE_TYPE(SGFile);
+//EK_DECLARE_TYPE(SGFile);
 EK_TYPE_INDEX(SGFile, 11);
 
 }

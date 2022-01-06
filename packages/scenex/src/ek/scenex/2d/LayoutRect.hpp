@@ -1,24 +1,21 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/math/Vec.hpp>
-#include <ek/math/Rect.hpp>
 #include "Transform2D.hpp"
 
 namespace ek {
 
 struct LayoutRect {
-    Vec2f x;
-    Vec2f y;
-    Rect2f fill_extra;
+    vec2_t x = {};
+    vec2_t y = {};
+    rect_t fill_extra = {};
+    rect_t rect = {};
+    rect_t safeRect = {};
     bool fill_x = false;
     bool fill_y = false;
     bool align_x = false;
     bool align_y = false;
     bool doSafeInsets = true;
-
-    Rect2f rect;
-    Rect2f safeRect;
 
     LayoutRect& aligned(float relativeX, float absoluteX, float relativeY, float absoluteY) {
         enableAlignX(relativeX, absoluteX);
@@ -55,8 +52,8 @@ struct LayoutRect {
         if(e) {
             const auto pos = e.get_or_create<Transform2D>().getPosition();
             e.get_or_create<LayoutRect>().aligned(
-                    x, pos.x - (DesignCanvasRect.x + DesignCanvasRect.width * x),
-                    y, pos.y - (DesignCanvasRect.y + DesignCanvasRect.height * y)
+                    x, pos.x - (DesignCanvasRect.x + DesignCanvasRect.w * x),
+                    y, pos.y - (DesignCanvasRect.y + DesignCanvasRect.h * y)
             );
         }
     }
@@ -64,25 +61,25 @@ struct LayoutRect {
     static void hardX(ecs::EntityApi e, float x = 0.0f) {
         const auto pos = e.get_or_create<Transform2D>().getPosition();
         e.get_or_create<LayoutRect>().enableAlignX(
-                x, pos.x - (DesignCanvasRect.x + DesignCanvasRect.width * x)
+                x, pos.x - (DesignCanvasRect.x + DesignCanvasRect.w * x)
         );
     }
 
     static void hardY(ecs::EntityApi e, float y = 0.0f) {
         const auto pos = e.get_or_create<Transform2D>().getPosition();
         e.get_or_create<LayoutRect>().enableAlignY(
-                y, pos.y - (DesignCanvasRect.y + DesignCanvasRect.height * y)
+                y, pos.y - (DesignCanvasRect.y + DesignCanvasRect.h * y)
         );
     }
 
     static void updateAll();
 
-    static Rect2f DesignCanvasRect;
+    inline static rect_t DesignCanvasRect = rect_01();
 };
 
 ECX_TYPE(12, LayoutRect);
 
-Rect2f find_parent_layout_rect(ecs::EntityApi e, bool safe);
+rect_t find_parent_layout_rect(ecs::EntityApi e, bool safe);
 
 
 // wrapper
@@ -125,7 +122,7 @@ public:
         return *this;
     }
 
-    layout_wrapper& fill_extra(const Rect2f& rc) {
+    layout_wrapper& fill_extra(const rect_t rc) {
         l_.fill_extra = rc;
         return *this;
     }

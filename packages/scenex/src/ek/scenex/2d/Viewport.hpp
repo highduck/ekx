@@ -9,27 +9,27 @@ namespace ek {
 /*** Scale Camera viewport to Screen ***/
 struct ViewportScaleOptions {
     // logical resolution size,
-    Vec2f baseResolution = Vec2f::one;
-    Vec2f alignment{0.5f, 0.5f};
-    Vec2f safeAreaFit = Vec2f::one;
+    vec2_t baseResolution = vec2(1, 1);
+    vec2_t alignment = vec2(0.5f, 0.5f);
+    vec2_t safeAreaFit = vec2(1, 1);
     // modes
-    Vec2f pixelRatio = Vec2f::one;
+    vec2_t pixelRatio = vec2(1, 1);
+    rect_t viewport = rect_wh(1, 1);
     bool scaleToResolution = true;
-    Rect2f viewport = Rect2f::zero_one;
 };
 
 struct ViewportScaleInput {
     // screen metrics
-    Rect2f fullRect;
-    Rect2f safeRect;
+    rect_t fullRect;
+    rect_t safeRect;
     float dpiScale;
 };
 
 struct ViewportScaleOutput {
-    Rect2f screenRect;
-    Rect2f fullRect;
-    Rect2f safeRect;
-    Vec2f offset;
+    rect_t screenRect;
+    rect_t fullRect;
+    rect_t safeRect;
+    vec2_t offset;
     float scale;
 };
 

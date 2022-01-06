@@ -14,7 +14,7 @@ typedef struct ek_handles_desc {
     uint32_t num;
 } ek_handles_desc;
 
-typedef struct ek_handles_data_layout{
+typedef struct ek_handles_data_layout {
     void* data;
     uint32_t stride;
 } ek_handles_data_layout;

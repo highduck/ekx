@@ -2,9 +2,8 @@
 
 #include "FontImplBase.hpp"
 
-#include <ek/math/Vec.hpp>
+#include <ek/math.h>
 #include <ek/math/Color32.hpp>
-#include <ek/math/Rect.hpp>
 #include <ek/util/NoCopyAssign.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/util/Type.hpp>

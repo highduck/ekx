@@ -1,7 +1,6 @@
 #include "InteractionSystem.hpp"
 
 #include <ecxx/ecxx.hpp>
-#include <ek/math/Vec.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
 #include <ek/scenex/systems/hitTest.hpp>
@@ -90,7 +89,7 @@ void InteractionSystem::fireInteraction(PointerEvent event, bool prev, bool only
     }
 }
 
-void InteractionSystem::handle_mouse_event(const ek_app_event& ev, Vec2f pos) {
+void InteractionSystem::handle_mouse_event(const ek_app_event& ev, vec2_t pos) {
 
     if (ev.type == EK_APP_EVENT_MOUSE_DOWN) {
         mousePosition0_ = pos;
@@ -112,7 +111,7 @@ void InteractionSystem::handle_mouse_event(const ek_app_event& ev, Vec2f pos) {
     }
 }
 
-void InteractionSystem::handle_touch_event(const ek_app_event& ev, Vec2f pos) {
+void InteractionSystem::handle_touch_event(const ek_app_event& ev, vec2_t pos) {
     if (ev.type == EK_APP_EVENT_TOUCH_START) {
         if (touchID_ == 0) {
             touchID_ = ev.touch.id;
@@ -127,7 +126,7 @@ void InteractionSystem::handle_touch_event(const ek_app_event& ev, Vec2f pos) {
     if (touchID_ == ev.touch.id) {
         if (ev.type == EK_APP_EVENT_TOUCH_END) {
             touchID_ = 0;
-            touchPosition0_ = Vec2f::zero;
+            touchPosition0_ = {};
             pointerDown_ = false;
             fireInteraction(PointerEvent::Up);
         } else {
@@ -148,19 +147,19 @@ void InteractionSystem::handle_system_pause() {
     broadcast(root_, interactive_event::system_pause);
 }
 
-ecs::EntityApi InteractionSystem::globalHitTest(Vec2f& worldSpacePointer, ecs::EntityRef& capturedCamera) {
+ecs::EntityApi InteractionSystem::globalHitTest(vec2_t* worldSpacePointer, ecs::EntityRef* capturedCamera) {
     auto& cameras = Camera2D::getCameraQueue();
     for (int i = static_cast<int>(cameras.size()) - 1; i >= 0; --i) {
         auto e = cameras[i];
         if (e.valid()) {
             auto* camera = e.get().tryGet<Camera2D>();
             if (camera && camera->enabled && camera->interactive &&
-                camera->screenRect.contains(pointerScreenPosition_)) {
-                const auto pointerWorldPosition = camera->screenToWorldMatrix.transform(pointerScreenPosition_);
+                    rect_contains(camera->screenRect, pointerScreenPosition_)) {
+                const auto pointerWorldPosition = vec2_transform(pointerScreenPosition_, camera->screenToWorldMatrix);
                 auto target = hitTest2D(ecs::the_world, camera->root.index(), pointerWorldPosition);
                 if (target != 0) {
-                    worldSpacePointer = pointerWorldPosition;
-                    capturedCamera = e;
+                    *worldSpacePointer = pointerWorldPosition;
+                    *capturedCamera = e;
                     return ecs::EntityApi{target};
                 }
             }
@@ -170,7 +169,7 @@ ecs::EntityApi InteractionSystem::globalHitTest(Vec2f& worldSpacePointer, ecs::E
 }
 
 ek_mouse_cursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& list) {
-    Vec2f pointer{};
+    vec2_t pointer = {};
     ecs::EntityApi it;
     ecs::EntityRef camera;
     if (dragEntity_.valid()) {
@@ -178,10 +177,10 @@ ek_mouse_cursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi
         auto* interactive = it.tryGet<Interactive>();
         if (interactive && interactive->camera.valid()) {
             camera = interactive->camera;
-            pointer = camera.get().get<Camera2D>().screenToWorldMatrix.transform(pointerScreenPosition_);
+            pointer = vec2_transform(pointerScreenPosition_, camera.get().get<Camera2D>().screenToWorldMatrix);
         }
     } else {
-        it = globalHitTest(pointer, camera);
+        it = globalHitTest(&pointer, &camera);
     }
     hitTarget_ = ecs::EntityRef{it};
 

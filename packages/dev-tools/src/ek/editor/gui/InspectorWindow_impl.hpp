@@ -97,42 +97,42 @@ inline void guiTransform2D(Transform2D& transform) {
     auto pos = transform.getPosition();
     auto scale = transform.getScale();
     auto skew = transform.getSkew();
-    if (ImGui::DragFloat2("Position", pos.data(), 1.0f, 0.0f, 0.0f, "%.1f")) {
+    if (ImGui::DragFloat2("Position", pos.data, 1.0f, 0.0f, 0.0f, "%.1f")) {
         transform.setPosition(pos);
     }
-    if (ImGui::DragFloat2("Scale", scale.data(), 0.1f, 0.0f, 0.0f, "%.2f")) {
+    if (ImGui::DragFloat2("Scale", scale.data, 0.1f, 0.0f, 0.0f, "%.2f")) {
         transform.setScale(scale);
     }
-    if (ImGui::DragFloat2("Skew", skew.data(), 0.1f, 0.0f, 0.0f, "%.2f")) {
+    if (ImGui::DragFloat2("Skew", skew.data, 0.1f, 0.0f, 0.0f, "%.2f")) {
         transform.setSkew(skew);
     }
 //    ImGui::DragFloat2("Origin", transform.origin.data(), 0.1f, 0.0f, 0.0f, "%.2f");
 //    ImGui::DragFloat2("Pivot", transform.pivot.data(), 0.1f, 0.0f, 0.0f, "%.2f");
 
-    auto color = static_cast<Vec4f>(transform.color.scale);
-    if (ImGui::ColorEdit4("Color Scale", color.data())) {
-        transform.color.scale = argb32_t{color};
+    auto color = vec4_rgba(transform.color.scale);
+    if (ImGui::ColorEdit4("Color Scale", color.data)) {
+        transform.color.scale = rgba_vec4(color);
     }
 
-    color = static_cast<Vec4f>(transform.color.offset);
-    if (ImGui::ColorEdit4("Color Offset", color.data())) {
-        transform.color.offset = argb32_t{color};
+    color = vec4_rgba(transform.color.offset);
+    if (ImGui::ColorEdit4("Color Offset", color.data)) {
+        transform.color.offset = rgba_vec4(color);
     }
 }
 
 inline void guiViewport(Viewport& vp) {
-    ImGui::EditRect("Viewport", vp.options.viewport.data());
-    ImGui::DragFloat2("Alignment", vp.options.alignment.data());
-    ImGui::DragFloat2("Base Resolution", vp.options.baseResolution.data());
-    ImGui::DragFloat2("Pixel Ratio", vp.options.pixelRatio.data());
-    ImGui::DragFloat2("Safe Area Fit", vp.options.safeAreaFit.data());
+    ImGui::EditRect("Viewport", vp.options.viewport.data);
+    ImGui::DragFloat2("Alignment", vp.options.alignment.data);
+    ImGui::DragFloat2("Base Resolution", vp.options.baseResolution.data);
+    ImGui::DragFloat2("Pixel Ratio", vp.options.pixelRatio.data);
+    ImGui::DragFloat2("Safe Area Fit", vp.options.safeAreaFit.data);
     ImGui::Checkbox("Scale To Resolution", &vp.options.scaleToResolution);
     if (ImGui::CollapsingHeader("Debug Output")) {
         ImGui::Indent();
-        ImGui::EditRect("Screen Rect", vp.output.screenRect.data());
-        ImGui::EditRect("Full Rect", vp.output.fullRect.data());
-        ImGui::EditRect("Safe Rect", vp.output.safeRect.data());
-        ImGui::InputFloat2("Offset", vp.output.offset.data());
+        ImGui::EditRect("Screen Rect", vp.output.screenRect.data);
+        ImGui::EditRect("Full Rect", vp.output.fullRect.data);
+        ImGui::EditRect("Safe Rect", vp.output.safeRect.data);
+        ImGui::InputFloat2("Offset", vp.output.offset.data);
         ImGui::InputFloat("Scale", &vp.output.scale);
         ImGui::Unindent();
     }
@@ -147,10 +147,10 @@ inline void guiCamera2D(Camera2D& camera) {
     guiEntityRef("Root Entity", camera.root);
     ImGui::DragFloat("Content Scale", &camera.contentScale);
     ImGui::Checkbox("Clear Color", &camera.clearColorEnabled);
-    ImGui::ColorEdit4("Clear Color", camera.clearColor.data());
-    ImGui::ColorEdit4("Clear Color+", camera.clearColor2.data());
+    ImGui::ColorEdit4("Clear Color", camera.clearColor.data);
+    ImGui::ColorEdit4("Clear Color+", camera.clearColor2.data);
     //ImGui::EditRect("viewport", camera.viewport.data());
-    ImGui::DragFloat2("relativeOrigin", camera.relativeOrigin.data());
+    ImGui::DragFloat2("relativeOrigin", camera.relativeOrigin.data);
 
     ImGui::Separator();
     ImGui::Checkbox("Draw Occlusion", &camera.debugOcclusion);
@@ -164,11 +164,11 @@ inline void guiCamera2D(Camera2D& camera) {
 }
 
 inline void guiTransform3D(Transform3D& transform) {
-    ImGui::DragFloat3("Position", transform.position.data(), 1.0f, 0.0f, 0.0f, "%.1f");
-    ImGui::DragFloat3("Scale", transform.scale.data(), 0.1f, 0.0f, 0.0f, "%.2f");
-    Vec3f euler_angles = transform.rotation * 180.0f / ek::Math::pi;
-    if (ImGui::DragFloat3("Rotation", euler_angles.data(), 0.1f, 0.0f, 0.0f, "%.2f")) {
-        transform.rotation = euler_angles * ek::Math::pi / 180.0f;
+    ImGui::DragFloat3("Position", transform.position.data, 1.0f, 0.0f, 0.0f, "%.1f");
+    ImGui::DragFloat3("Scale", transform.scale.data, 0.1f, 0.0f, 0.0f, "%.2f");
+    vec3_t euler_angles = vec3_scale(transform.rotation, 180.0f / MATH_PI);
+    if (ImGui::DragFloat3("Rotation", euler_angles.data, 0.1f, 0.0f, 0.0f, "%.2f")) {
+        transform.rotation = vec3_scale(euler_angles, MATH_PI / 180.0f);
     }
 }
 
@@ -183,7 +183,7 @@ inline void guiCamera3D(Camera3D& camera) {
     ImGui::DragFloat("Ortho Size", &camera.orthogonalSize, 1.0f, 0.0f, 0.0f, "%.1f");
 
     ImGui::Checkbox("Clear Color Enabled", &camera.clearColorEnabled);
-    ImGui::ColorEdit4("Clear Color", camera.clearColor.data());
+    ImGui::ColorEdit4("Clear Color", camera.clearColor.data);
     ImGui::Checkbox("Clear Depth Enabled", &camera.clearDepthEnabled);
     ImGui::DragFloat("Clear Depth", &camera.clearDepth, 1.0f, 0.0f, 0.0f, "%.1f");
 }
@@ -201,16 +201,16 @@ inline void guiLight3D(Light3D& light) {
     } else if (light.type == Light3DType::Spot) {
         ImGui::Text("Spot Light");
     }
-    ImGui::ColorEdit3("Ambient", light.ambient.data());
-    ImGui::ColorEdit3("Diffuse", light.diffuse.data());
-    ImGui::ColorEdit3("Specular", light.specular.data());
+    ImGui::ColorEdit3("Ambient", light.ambient.data);
+    ImGui::ColorEdit3("Diffuse", light.diffuse.data);
+    ImGui::ColorEdit3("Specular", light.specular.data);
 
     ImGui::DragFloat("Radius", &light.radius, 1.0f, 0.0f, 0.0f, "%.1f");
     ImGui::DragFloat("Falloff", &light.falloff, 0.1f, 0.0f, 0.0f, "%.1f");
 }
 
 inline void guiBounds2D(Bounds2D& bounds) {
-    ImGui::EditRect("Rect", bounds.rect.data());
+    ImGui::EditRect("Rect", bounds.rect.data);
     ImGui::Checkbox("Hit Area", &bounds.hitArea);
     ImGui::Checkbox("Scissors", &bounds.scissors);
     ImGui::Checkbox("Culling (WIP)", &bounds.culling);
@@ -236,11 +236,11 @@ inline void editDisplayNinePatch(NinePatch2D& ninePatch) {
 }
 
 inline void editDisplayRectangle(Quad2D& quad) {
-    ImGui::EditRect("Bounds", quad.rect.data());
-    ImGui::Color32Edit("Color LT", quad.colors[0]);
-    ImGui::Color32Edit("Color RT", quad.colors[1]);
-    ImGui::Color32Edit("Color RB", quad.colors[2]);
-    ImGui::Color32Edit("Color LB", quad.colors[3]);
+    ImGui::EditRect("Bounds", quad.rect.data);
+    ImGui::Color32Edit("Color LT", &quad.colors[0]);
+    ImGui::Color32Edit("Color RT", &quad.colors[1]);
+    ImGui::Color32Edit("Color RB", &quad.colors[2]);
+    ImGui::Color32Edit("Color LB", &quad.colors[3]);
 }
 
 inline void editDisplayArc(Arc2D& arc) {
@@ -249,8 +249,8 @@ inline void editDisplayArc(Arc2D& arc) {
     ImGui::DragFloat("Radius", &arc.radius);
     ImGui::DragFloat("Line Width", &arc.line_width);
     ImGui::DragInt("Segments", &arc.segments);
-    ImGui::Color32Edit("Color Inner", arc.color_inner);
-    ImGui::Color32Edit("Color Outer", arc.color_outer);
+    ImGui::Color32Edit("Color Inner", &arc.color_inner);
+    ImGui::Color32Edit("Color Outer", &arc.color_outer);
 }
 
 inline void editParticleRenderer2D(ParticleRenderer2D& p) {
@@ -262,7 +262,7 @@ inline void guiTextFormat(TextFormat& format) {
     ImGui::DragFloat("Size", &format.size, 1, 8, 128, "%f");
     ImGui::DragFloat("Leading", &format.leading, 1, 0, 128, "%f");
     ImGui::DragFloat("Spacing", &format.letterSpacing, 1, -128, 128, "%f");
-    ImGui::DragFloat2("Alignment", format.alignment.data(), 0.5f, 0.0f, 1.0f);
+    ImGui::DragFloat2("Alignment", format.alignment.data, 0.5f, 0.0f, 1.0f);
     ImGui::Checkbox("Kerning", &format.kerning);
     ImGui::Checkbox("Underline", &format.underline);
     ImGui::Checkbox("Strikethrough", &format.strikethrough);
@@ -285,9 +285,9 @@ inline void guiTextFormat(TextFormat& format) {
 
 inline void editDisplayText(Text2D& tf) {
     ImGui::InputTextMultiline("Text", &tf.text);
-    ImGui::EditRect("Bounds", tf.rect.data());
-    ImGui::Color32Edit("Border Color", tf.borderColor);
-    ImGui::Color32Edit("Fill Color", tf.fillColor);
+    ImGui::EditRect("Bounds", tf.rect.data);
+    ImGui::Color32Edit("Border Color", &tf.borderColor);
+    ImGui::Color32Edit("Fill Color", &tf.fillColor);
     ImGui::Checkbox("Hit Full Bounds", &tf.hitFullBounds);
     ImGui::Checkbox("Show Text Bounds", &tf.showTextBounds);
     guiTextFormat(tf.format);
@@ -299,12 +299,12 @@ inline void guiLayout(LayoutRect& layout) {
     ImGui::Checkbox("Align X", &layout.align_x);
     ImGui::Checkbox("Align Y", &layout.align_y);
     ImGui::Checkbox("Use Safe Insets", &layout.doSafeInsets);
-    ImGui::EditRect("Extra Fill", layout.fill_extra.data());
-    ImGui::DragFloat2("Align X (rel, abs)", layout.x.data());
-    ImGui::DragFloat2("Align Y (rel, abs)", layout.y.data());
+    ImGui::EditRect("Extra Fill", layout.fill_extra.data);
+    ImGui::DragFloat2("Align X (rel, abs)", layout.x.data);
+    ImGui::DragFloat2("Align Y (rel, abs)", layout.y.data);
 
-    ImGui::EditRect("Rect", layout.rect.data());
-    ImGui::EditRect("Safe Rect", layout.safeRect.data());
+    ImGui::EditRect("Rect", layout.rect.data);
+    ImGui::EditRect("Safe Rect", layout.safeRect.data);
 }
 
 inline void guiUglyFilter2D(UglyFilter2D& filters) {
@@ -314,8 +314,8 @@ inline void guiUglyFilter2D(UglyFilter2D& filters) {
         ImGui::PushID(filters.filters.data() + i);
         ImGui::LabelText("Type", "%d", filter.type);
         ImGui::Color32Edit("Color", filter.color);
-        ImGui::DragFloat2("Offset", filter.offset.data());
-        ImGui::DragFloat2("Blur", filter.blur.data());
+        ImGui::DragFloat2("Offset", filter.offset.data);
+        ImGui::DragFloat2("Blur", filter.blur.data);
         ImGui::DragInt("Quality", (int*) &filter.quality);
         ImGui::PopID();
     }
@@ -326,12 +326,12 @@ inline void guiParticleEmitter2D(ParticleEmitter2D& emitter) {
     ImGui::Text("_Time: %f", emitter.time);
     guiEntityRef("Layer", emitter.layer);
     ImGui::LabelText("Particle ID", "%s", emitter.particle.getID());
-    ImGui::DragFloat2("Offset", emitter.position.data());
+    ImGui::DragFloat2("Offset", emitter.position.data);
     ImGui::Separator();
 
     // data
-    ImGui::EditRect("Rect", emitter.data.rect.data());
-    ImGui::DragFloat2("Offset", emitter.data.offset.data());
+    ImGui::EditRect("Rect", emitter.data.rect.data);
+    ImGui::DragFloat2("Offset", emitter.data.offset.data);
     ImGui::DragInt("Burst", &emitter.data.burst);
     ImGui::DragFloat("Interval", &emitter.data.interval);
     ImGui::Separator();

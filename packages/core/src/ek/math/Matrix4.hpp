@@ -25,6 +25,7 @@ struct Matrix<4, 4, T> {
         };
         T data_[4][4];
         T m[16];
+        mat4_t cdata;
     };
 
 #include <ek/math/internal/compiler_unsafe_end.h>
@@ -94,7 +95,7 @@ struct Matrix<4, 4, T> {
     }
 
     void set_identity(T v = 1) {
-        for (T& value : m) {
+        for (T& value: m) {
             value = 0;
         }
         m00 = v;
@@ -151,6 +152,29 @@ struct Matrix<4, 4, T> {
     inline mat4x4& operator-=(const mat4x4& v) {
         *this = *this - v;
         return *this;
+    }
+
+    Matrix(const mat4_t& mat) {
+        m00 = mat.m00;
+        m01 = mat.m01;
+        m02 = mat.m02;
+        m03 = mat.m03;
+        m10 = mat.m10;
+        m11 = mat.m11;
+        m12 = mat.m12;
+        m13 = mat.m13;
+        m20 = mat.m20;
+        m21 = mat.m21;
+        m22 = mat.m22;
+        m23 = mat.m23;
+        m30 = mat.m30;
+        m31 = mat.m31;
+        m32 = mat.m32;
+        m33 = mat.m33;
+    }
+
+    constexpr operator mat4_t() const {
+        return cdata;
     }
 };
 
@@ -243,9 +267,9 @@ template<typename T>
 Vec<4, T>
 operator*(const Matrix<4, 4, T>& m, const Vec<4, T>& v) {
     return Vec<4, T>(v.x * m.m00 + v.y * m.m01 + v.z * m.m02 + v.w * m.m03,
-                       v.x * m.m10 + v.y * m.m11 + v.z * m.m12 + v.w * m.m13,
-                       v.x * m.m20 + v.y * m.m21 + v.z * m.m22 + v.w * m.m23,
-                       v.x * m.m30 + v.y * m.m31 + v.z * m.m32 + v.w * m.m33);
+                     v.x * m.m10 + v.y * m.m11 + v.z * m.m12 + v.w * m.m13,
+                     v.x * m.m20 + v.y * m.m21 + v.z * m.m22 + v.w * m.m23,
+                     v.x * m.m30 + v.y * m.m31 + v.z * m.m32 + v.w * m.m33);
 }
 
 template<typename T>
@@ -253,24 +277,24 @@ Vec<3, T>
 operator*(const Matrix<4, 4, T>& m, const Vec<3, T>& v) {
     const float w = v.x * m.m30 + v.y * m.m31 + v.z * m.m32 + m.m33;
     return Vec<3, T>(v.x * m.m00 + v.y * m.m01 + v.z * m.m02 + w * m.m03,
-                       v.x * m.m10 + v.y * m.m11 + v.z * m.m12 + w * m.m13,
-                       v.x * m.m20 + v.y * m.m21 + v.z * m.m22 + w * m.m23);
+                     v.x * m.m10 + v.y * m.m11 + v.z * m.m12 + w * m.m13,
+                     v.x * m.m20 + v.y * m.m21 + v.z * m.m22 + w * m.m23);
 }
 
 //! Pre-multiply.
 template<typename T>
 Vec<4, T> operator*(const Vec<4, T>& v, const Matrix<4, 4, T>& m) {
     return Vec<4, T>(v.x * m.m00 + v.y * m.m10 + v.z * m.m20 + v.w * m.m30,
-                       v.x * m.m01 + v.y * m.m11 + v.z * m.m21 + v.w * m.m31,
-                       v.x * m.m02 + v.y * m.m12 + v.z * m.m22 + v.w * m.m32,
-                       v.x * m.m03 + v.y * m.m13 + v.z * m.m23 + v.w * m.m33);
+                     v.x * m.m01 + v.y * m.m11 + v.z * m.m21 + v.w * m.m31,
+                     v.x * m.m02 + v.y * m.m12 + v.z * m.m22 + v.w * m.m32,
+                     v.x * m.m03 + v.y * m.m13 + v.z * m.m23 + v.w * m.m33);
 }
 
 template<typename T>
 Vec<3, T> operator*(const Vec<3, T>& v, const Matrix<4, 4, T>& m) {
     return Vec<3, T>(v.x * m.m00 + v.y * m.m10 + v.z * m.m20 + m.m30,
-                       v.x * m.m01 + v.y * m.m11 + v.z * m.m21 + m.m31,
-                       v.x * m.m02 + v.y * m.m12 + v.z * m.m22 + m.m32);
+                     v.x * m.m01 + v.y * m.m11 + v.z * m.m21 + m.m31,
+                     v.x * m.m02 + v.y * m.m12 + v.z * m.m22 + m.m32);
 }
 
 template<typename T>

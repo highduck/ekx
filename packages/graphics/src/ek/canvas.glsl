@@ -81,6 +81,6 @@ void main() {
 
 #pragma sokol @end
 
-#pragma sokol @program draw2d vs_2d fs_2d
-#pragma sokol @program draw2d_alpha vs_2d fs_2d_alpha
-#pragma sokol @program draw2d_color vs_2d_color fs_2d_color
+#pragma sokol @program canvas vs_2d fs_2d
+#pragma sokol @program canvas_alpha vs_2d fs_2d_alpha
+#pragma sokol @program canvas_color vs_2d_color fs_2d_color

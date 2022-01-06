@@ -2,8 +2,6 @@
 
 #include <ek/ds/String.hpp>
 #include <ek/scenex/text/TextFormat.hpp>
-#include <ek/math/Rect.hpp>
-#include <ek/math/Matrix3x2.hpp>
 #include <ek/util/Type.hpp>
 #include <ek/ds/Pointer.hpp>
 #include <ecxx/ecxx.hpp>
@@ -27,10 +25,10 @@ public:
     virtual void draw() = 0;
 
     [[nodiscard]]
-    virtual bool hitTest(Vec2f point) const = 0;
+    virtual bool hitTest(vec2_t point) const = 0;
 
     [[nodiscard]]
-    virtual Rect2f getBounds() const = 0;
+    virtual rect_t getBounds() const = 0;
 
     [[nodiscard]]
     uint32_t getTypeID() const {
@@ -62,17 +60,17 @@ struct Bounds2D {
 //        Scissors,
 //        Bounds
 //    };
-    Rect2f rect;
+    rect_t rect;
 
     bool hitArea = false;
     bool scissors = false;
     bool culling = false;
 
     [[nodiscard]]
-    Rect2f getWorldRect(const Matrix3x2f& worldMatrix) const;
+    rect_t getWorldRect(mat3x2_t worldMatrix) const;
 
     [[nodiscard]]
-    Rect2f getScreenRect(Matrix3x2f viewMatrix, Matrix3x2f worldMatrix) const;
+    rect_t getScreenRect(mat3x2_t viewMatrix, mat3x2_t worldMatrix) const;
 };
 
 struct Display2D {
@@ -120,13 +118,13 @@ struct Display2D {
     }
 
     [[nodiscard]]
-    inline bool hitTest(Vec2f local) const {
+    inline bool hitTest(vec2_t local) const {
         return drawable && drawable->hitTest(local);
     }
 
     [[nodiscard]]
-    inline Rect2f getBounds() const {
-        return drawable ? drawable->getBounds() : Rect2f{};
+    inline rect_t getBounds() const {
+        return drawable ? drawable->getBounds() : rect_t{};
     }
 
     template<typename T, typename ...Args>
@@ -162,30 +160,35 @@ struct Display2D {
 class Quad2D : public Drawable2D<Quad2D> {
 public:
     Res<Sprite> src{"empty"};
-    Rect2f rect{0.0f, 0.0f, 1.0f, 1.0f};
-    argb32_t colors[4]{argb32_t::one, argb32_t::one, argb32_t::one, argb32_t::one};
+    rect_t rect = rect_01();
+    rgba_t colors[4] = {
+            rgba_u32(0xFFFFFFFFu),
+            rgba_u32(0xFFFFFFFFu),
+            rgba_u32(0xFFFFFFFFu),
+            rgba_u32(0xFFFFFFFFu)
+    };
 
     void draw() override;
 
     [[nodiscard]]
-    Rect2f getBounds() const override;
+    rect_t getBounds() const override;
 
     [[nodiscard]]
-    bool hitTest(Vec2f point) const override;
+    bool hitTest(vec2_t point) const override;
 
-    inline Quad2D& setGradientVertical(argb32_t top, argb32_t bottom) {
+    inline Quad2D& setGradientVertical(rgba_t top, rgba_t bottom) {
         colors[0] = colors[1] = top;
         colors[2] = colors[3] = bottom;
         return *this;
     };
 
-    inline Quad2D& setColor(argb32_t color) {
+    inline Quad2D& setColor(rgba_t color) {
         colors[0] = colors[1] = colors[2] = colors[3] = color;
         return *this;
     };
 
     inline Quad2D& setHalfExtents(float hw, float hh) {
-        rect.set(-hw, -hh, 2.0f * hw, 2.0f * hh);
+        this->rect = ::rect(-hw, -hh, 2.0f * hw, 2.0f * hh);
         return *this;
     }
 };
@@ -203,33 +206,32 @@ public:
     void draw() override;
 
     [[nodiscard]]
-    Rect2f getBounds() const override;
+    rect_t getBounds() const override;
 
     [[nodiscard]]
-    bool hitTest(Vec2f point) const override;
+    bool hitTest(vec2_t point) const override;
 };
 
 // 8 + 16 + 16 + 8 + 1 = 49 bytes
 class NinePatch2D : public Drawable2D<NinePatch2D> {
 public:
     Res<Sprite> src;
+    rect_t scale_grid;
+    rect_t manual_target = {};
+    vec2_t scale;
     bool hit_pixels = true;
-
-    Rect2f scale_grid;
-    Vec2f scale;
-    Rect2f manual_target;
 
     NinePatch2D();
 
-    explicit NinePatch2D(const char* spriteId, Rect2f aScaleGrid = Rect2f::zero);
+    explicit NinePatch2D(const char* spriteId, rect_t aScaleGrid = {});
 
     void draw() override;
 
     [[nodiscard]]
-    Rect2f getBounds() const override;
+    rect_t getBounds() const override;
 
     [[nodiscard]]
-    bool hitTest(Vec2f point) const override;
+    bool hitTest(vec2_t point) const override;
 };
 
 // 8 + 136 + 16 + 8 + 4 = 172 bytes
@@ -237,10 +239,10 @@ class Text2D : public Drawable2D<Text2D> {
 public:
     String text;
     TextFormat format;
-    Rect2f rect;
+    rect_t rect = {};
 
-    argb32_t borderColor = 0x00FF0000_argb;
-    argb32_t fillColor = 0x00000000_argb;
+    rgba_t borderColor = 0x00FF0000_argb;
+    rgba_t fillColor = 0x00000000_argb;
 
     bool localize = false;
 
@@ -260,13 +262,13 @@ public:
     void draw() override;
 
     [[nodiscard]]
-    Rect2f getBounds() const override;
+    rect_t getBounds() const override;
 
     [[nodiscard]]
-    Rect2f getTextBounds() const;
+    rect_t getTextBounds() const;
 
     [[nodiscard]]
-    bool hitTest(Vec2f point) const override;
+    bool hitTest(vec2_t point) const override;
 };
 
 // 4 + 4 + 4 + 4 + 4 + 4 + 8 = 32 bytes
@@ -276,24 +278,24 @@ public:
     float radius = 10.0f;
     float line_width = 10.0f;
     int segments = 50;
-    argb32_t color_inner = argb32_t::one;
-    argb32_t color_outer = argb32_t::one;
+    rgba_t color_inner = rgba_u32(0xFFFFFFFFu);
+    rgba_t color_outer = rgba_u32(0xFFFFFFFFu);
     Res<Sprite> sprite;
 
     void draw() override;
 
     [[nodiscard]]
-    Rect2f getBounds() const override;
+    rect_t getBounds() const override;
 
     [[nodiscard]]
-    bool hitTest(Vec2f point) const override;
+    bool hitTest(vec2_t point) const override;
 };
 
 
 /** utilities **/
-void set_gradient_quad(ecs::EntityApi e, const Rect2f& rc, argb32_t top, argb32_t bottom);
+void set_gradient_quad(ecs::EntityApi e, rect_t rc, rgba_t top, rgba_t bottom);
 
-inline void set_color_quad(ecs::EntityApi e, const Rect2f& rc, argb32_t color) {
+inline void set_color_quad(ecs::EntityApi e, rect_t rc, rgba_t color) {
     set_gradient_quad(e, rc, color, color);
 }
 

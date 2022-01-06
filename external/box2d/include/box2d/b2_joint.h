@@ -144,7 +144,7 @@ public:
 
 	/// Get collide connected.
 	/// Note: modifying the collide connect flag won't work correctly because
-	/// the flag is only checked when fixture AABBs begin to overlap.
+	/// the flag is only checked when fixture AABBs canvas_begin to overlap.
 	bool GetCollideConnected() const;
 
 	/// Dump this joint to the log file.

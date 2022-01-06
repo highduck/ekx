@@ -13,7 +13,6 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 #include <ek/util/Res.hpp>
-#include <ek/math/BoundsBuilder.hpp>
 #include <ek/scenex/Localization.hpp>
 
 namespace ek {
@@ -79,8 +78,8 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
     {
         auto& transform = entity.get<Transform2D>();
         transform.setMatrix(data->matrix);
-        transform.color.scale = argb32_t(data->color.scale);
-        transform.color.offset = argb32_t(data->color.offset);
+        transform.color.scale = argb32_t(data->color.scale.data);
+        transform.color.offset = argb32_t(data->color.offset.data);
     }
 
     {
@@ -139,7 +138,7 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
         if (!display) {
             display = &entity.assign<Display2D>();
         }
-        if (data->scaleGrid.empty()) {
+        if (rect_is_empty(data->scaleGrid)) {
             sprite = new Sprite2D(data->sprite.c_str());
             display->drawable.reset(sprite);
         } else {
@@ -149,7 +148,7 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
     }
 
     if (ninePatch) {
-        ninePatch->scale = data->matrix.scale();
+        ninePatch->scale = mat3x2_get_scale(data->matrix);
     }
 
     if (data->scissorsEnabled || data->hitAreaEnabled || data->boundsEnabled) {
@@ -191,15 +190,15 @@ ecs::EntityApi create_and_merge(const SGFile& sg, SGFileRes asset,
     return entity;
 }
 
-void extend_bounds(const SGFile& file, const SGNodeData& data, BoundsBuilder2f& boundsBuilder,
-                   const Matrix3x2f& matrix) {
+void extend_bounds(const SGFile& file, const SGNodeData& data, brect_t* boundsBuilder,
+                   const mat3x2_t matrix) {
     const Res<Sprite> spr{data.sprite.c_str()};
     if (spr) {
-        boundsBuilder.add(spr->rect, matrix);
+        *boundsBuilder = brect_extend_transformed_rect(*boundsBuilder, spr->rect, matrix);
     }
     for (const auto& child: data.children) {
         const auto& symbol = child.libraryName.empty() ? child : *sg_get(file, child.libraryName.c_str());
-        extend_bounds(file, symbol, boundsBuilder, matrix * child.matrix);
+        extend_bounds(file, symbol, boundsBuilder, mat3x2_mul(matrix, child.matrix));
     }
 }
 
@@ -222,14 +221,14 @@ ecs::EntityApi sg_create(const char* library, const char* name, ecs::EntityApi p
     return result;
 }
 
-Rect2f sg_get_bounds(const char* library, const char* name) {
+rect_t sg_get_bounds(const char* library, const char* name) {
     SGFileRes file{library};
     if (file) {
         const SGNodeData* data = sg_get(*file, name);
         if (data) {
-            BoundsBuilder2f bb{};
-            extend_bounds(*file, *data, bb, data->matrix);
-            return bb.rect();
+            brect_t bb = brect_inf();
+            extend_bounds(*file, *data, &bb, data->matrix);
+            return brect_get_rect(bb);
         }
     }
     return {};

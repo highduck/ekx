@@ -121,7 +121,7 @@ static void handleQuitRequest() {
 }
 
 - (void)applicationWillFinishLaunching:(__unused NSNotification*)notification {
-    log_debug("applicationWillFinishLaunching begin");
+    log_debug("applicationWillFinishLaunching canvas_begin");
 
     ek_app_delegate = self;
 
@@ -142,7 +142,7 @@ static void handleQuitRequest() {
 }
 
 - (void)applicationDidFinishLaunching:(__unused NSNotification*)notification {
-    log_debug("app macOS: applicationDidFinishLaunching begin");
+    log_debug("app macOS: applicationDidFinishLaunching canvas_begin");
     [self.application activateIgnoringOtherApps:YES];
     ek_app__notify_ready();
 }

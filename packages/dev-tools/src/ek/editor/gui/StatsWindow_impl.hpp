@@ -3,7 +3,7 @@
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/util/ServiceLocator.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include "Widgets.hpp"
@@ -17,7 +17,7 @@ static float getterProfilerTrackValue(void* data, int idx) {
 
 void StatsWindow::onDraw() {
     auto& app = Locator::ref<basic_application>();
-    auto stats = ek_canvas_.stats;
+    auto stats = canvas.stats;
     const float drawableArea = ek_app.viewport.width * ek_app.viewport.height;
     ImGui::Text("%ld µs | dc: %u | tri: %u | fill: %d%%",
                 (long)(app.frameTimer.deltaTime * 1000000.0f),

@@ -38,7 +38,7 @@ void AudioManager::play_sound(const char* name, float vol, float pitch) const {
     }
 }
 
-void AudioManager::play_sound_at(const char* name, const Vec2f& position, float volume, float pitch) const {
+void AudioManager::play_sound_at(const char* name, const vec2_t position, float volume, float pitch) const {
     if (sound.enabled()) {
         auto relVolume = volume;
         //auto spatialPanning = -1 .. 1;

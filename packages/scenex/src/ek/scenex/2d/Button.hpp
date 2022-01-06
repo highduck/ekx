@@ -2,7 +2,6 @@
 
 #include <ek/math/Easings.hpp>
 #include <ek/util/Signal.hpp>
-#include <ek/math/Vec.hpp>
 #include <ek/math/Color32.hpp>
 #include "MovieClip.hpp"
 #include "../base/TimeLayer.hpp"
@@ -36,16 +35,14 @@ struct Button {
     float timePush = 0.0f;
     float timePost = 0.0f;
 
-    Vec2f baseSkew{};
-    Vec2f baseScale = Vec2f::one;
-    ColorMod32 baseColor{};
+    vec2_t baseSkew = {};
+    vec2_t baseScale = vec2(1,1);
+    color_mod_t baseColor = color_mod_identity();
 
     TimeLayer time = TimeLayer::UI;
 
     static void updateAll();
 };
-
-ECX_TYPE(9, Button);
 
 }
 

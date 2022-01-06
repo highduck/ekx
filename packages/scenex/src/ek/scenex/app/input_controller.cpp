@@ -148,7 +148,7 @@ void input_controller::reset_keyboard() {
     reset_keys_ = true;
 }
 
-Vec2f input_controller::screenCoordToGameDisplay(Vec2f screenPos) const {
+vec2_t input_controller::screenCoordToGameDisplay(const vec2_t screenPos) const {
     const auto size = display_.info.destinationViewport.size;
     const auto offset = display_.info.destinationViewport.position;
     const auto displaySize = display_.info.size;

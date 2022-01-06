@@ -8,13 +8,13 @@
 #include "render3d_shader.h"
 
 #include <ek/time.h>
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/app.h>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/math/MatrixTransform.hpp>
 #include <ek/math/MatrixTranspose.hpp>
 #include <ek/math/MatrixInverse.hpp>
-#include <ek/math/MatrixCamera.hpp>
+#include <ek/math/Rect.hpp>
 
 #include <cstring>
 
@@ -26,26 +26,28 @@ namespace ek {
 const auto DEFAULT_FACE_WINDING = SG_FACEWINDING_CCW;
 
 Rect<3, float>
-get_shadow_map_box(const Matrix4f& camera_projection, const Matrix4f& camera_view, const Matrix4f& light_view) {
-    const Matrix4f inv_proj_view = inverse(camera_projection * camera_view);
-    Vec3f corners[8] = {
-            Vec3f{-1, -1, -1},
-            Vec3f{-1, -1, 1},
-            Vec3f{1, -1, -1},
-            Vec3f{1, -1, 1},
-            Vec3f{-1, 1, -1},
-            Vec3f{-1, 1, 1},
-            Vec3f{1, 1, -1},
-            Vec3f{1, 1, 1}
+get_shadow_map_box(const mat4_t& camera_projection, const mat4_t& camera_view, const mat4_t& light_view) {
+    const mat4_t inv_proj_view = mat4_inverse(mat4_mul(camera_projection, camera_view));
+    vec3_t corners[8] = {
+            vec3(-1, -1, -1),
+            vec3(-1, -1, 1),
+            vec3(1, -1, -1),
+            vec3(1, -1, 1),
+            vec3(-1, 1, -1),
+            vec3(-1, 1, 1),
+            vec3(1, 1, -1),
+            vec3(1, 1, 1),
     };
-    Vec3f bb_min{100000, 100000, 100000};
-    Vec3f bb_max{-100000, -100000, -100000};
+    vec3_t bb_min = vec3(100000, 100000, 100000);
+    vec3_t bb_max = vec3(-100000, -100000, -100000);
 
     for (size_t i = 0; i < 8; ++i) {
-        Vec4<float> c{corners[i], 1.0f};
-        Vec4<float> v2 = inv_proj_view * c;
-        auto len = length(v2);
-        Vec3<float> v = len * normalize(Vec3<float>{v2.x, v2.y, v2.z});
+        vec4_t c;
+        c.xyz = corners[i];
+        c.w = 1;
+        vec4_t v2 = mat4_mul_vec4(inv_proj_view, c);
+        auto len = vec4_length(v2);
+        vec3_t v = vec3_scale(vec3_normalize(v2.xyz), len);
         if (v.x < bb_min.x) bb_min.x = v.x;
         if (v.y < bb_min.y) bb_min.y = v.y;
         if (v.z < bb_min.z) bb_min.z = v.z;
@@ -53,7 +55,7 @@ get_shadow_map_box(const Matrix4f& camera_projection, const Matrix4f& camera_vie
         if (v.y > bb_max.y) bb_max.y = v.y;
         if (v.z > bb_max.z) bb_max.z = v.z;
     }
-    return {bb_min, bb_max - bb_min};
+    return {bb_min, vec3_sub(bb_max, bb_min)};
 }
 
 sg_layout_desc getVertex3DLayout() {
@@ -96,8 +98,8 @@ struct ShadowMapRes {
     sg_pass_action clear{};
     sg_pipeline pip{};
 
-    Matrix4f projection{};
-    Matrix4f view{};
+    mat4_t projection = mat4_identity();
+    mat4_t view = mat4_identity();
 
     void init() {
 
@@ -148,35 +150,36 @@ struct ShadowMapRes {
         sg_apply_pipeline(pip);
     }
 
-    void updateLightDirection(const Matrix4f& cameraProjection, const Matrix4f& cameraView) {
+    void updateLightDirection(const mat4_t& cameraProjection, const mat4_t& cameraView) {
         // find directional light
-        Vec3f light_position{0, 0, 1};
+        vec3_t light_position = vec3(0, 0, 1);
         Light3D light_data{};
         for (auto e: ecs::view<Light3D, Transform3D>()) {
             auto& l = e.get<Light3D>();
             auto& transform = e.get<Transform3D>();
             if (l.type == Light3DType::Directional) {
                 light_data = l;
-                light_position = normalize(extract_translation(transform.world));
+                light_position = vec3_normalize(mat4_get_position(&transform.world));
             }
         }
 
-        const Vec3f light_target = Vec3f::zero;
+        const vec3_t light_target = {};
 //    auto light_dir = normalize(light_target - light_position);
 
         auto bb = get_shadow_map_box(cameraProjection, cameraView, view);
         const float shadow_zone_size = 200.0f;
-        view = look_at_rh(light_position, light_target, Vec3f{0, 0, 1});
-        projection = ortho_projection_rh<float>(-shadow_zone_size,
+        view = mat4_look_at_rh(light_position, light_target, vec3(0, 0, 1));
+        projection = mat4_orthographic_rh(-shadow_zone_size,
                                                 shadow_zone_size,
                                                 shadow_zone_size,
                                                 -shadow_zone_size,
-                                                -shadow_zone_size, shadow_zone_size);
+                                                -shadow_zone_size,
+                                                shadow_zone_size);
     }
 
     void renderObjects() {
         sg_bindings bindings{};
-        Matrix4f mvp;
+        mat4_t mvp;
 
         Res<StaticMesh> resMesh{};
         for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
@@ -188,7 +191,7 @@ struct ShadowMapRes {
                     bindings.index_buffer = mesh->ib;
                     bindings.vertex_buffers[0] = mesh->vb;
                     sg_apply_bindings(bindings);
-                    mvp = projection * view * e.get<Transform3D>().world;
+                    mvp = mat4_mul(mat4_mul(projection, view), e.get<Transform3D>().world);
                     sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
                     sg_draw(0, mesh->indices_count, 1);
                 }
@@ -228,18 +231,18 @@ struct Main3DRes {
         pip = sg_make_pipeline(pipDesc);
     }
 
-    void setDirectionalLightInfo(Vec3f pos, const Light3D& data) {
-        memcpy(directionalLightParams.light_position, pos.data(), sizeof(float) * 3);
-        memcpy(directionalLightParams.light_ambient, data.ambient.data(), sizeof(float) * 3);
-        memcpy(directionalLightParams.light_diffuse, data.diffuse.data(), sizeof(float) * 3);
-        memcpy(directionalLightParams.light_specular, data.specular.data(), sizeof(float) * 3);
+    void setDirectionalLightInfo(vec3_t pos, const Light3D& data) {
+        memcpy(directionalLightParams.light_position, pos.data, sizeof(vec3_t));
+        memcpy(directionalLightParams.light_ambient, data.ambient.data, sizeof(vec3_t));
+        memcpy(directionalLightParams.light_diffuse, data.diffuse.data, sizeof(vec3_t));
+        memcpy(directionalLightParams.light_specular, data.specular.data, sizeof(vec3_t));
     }
 
-    void setPointLightInfo(Vec3f pos, const Light3D& data) {
-        memcpy(pointLightParams.light2_position, pos.data(), sizeof(float) * 3);
-        memcpy(pointLightParams.light2_ambient, data.ambient.data(), sizeof(float) * 3);
-        memcpy(pointLightParams.light2_diffuse, data.diffuse.data(), sizeof(float) * 3);
-        memcpy(pointLightParams.light2_specular, data.specular.data(), sizeof(float) * 3);
+    void setPointLightInfo(vec3_t pos, const Light3D& data) {
+        memcpy(pointLightParams.light2_position, pos.data, sizeof(vec3_t));
+        memcpy(pointLightParams.light2_ambient, data.ambient.data, sizeof(vec3_t));
+        memcpy(pointLightParams.light2_diffuse, data.diffuse.data, sizeof(vec3_t));
+        memcpy(pointLightParams.light2_specular, data.specular.data, sizeof(vec3_t));
         pointLightParams.light2_radius = data.radius;
         pointLightParams.light2_falloff = data.falloff;
     }
@@ -268,14 +271,14 @@ struct RenderSkyBoxRes {
         pip = sg_make_pipeline(pipDesc);
     }
 
-    void render(const sg_image cubemap, const Matrix4f& view, const Matrix4f& projection) {
+    void render(const sg_image cubemap, const mat4_t& view, const mat4_t& projection) {
         Res<StaticMesh> mesh{"cube"};
         if (cubemap.id && mesh) {
             sg_apply_pipeline(pip);
 
-            Matrix4f model{};
+            mat4_t model{};
 
-            Matrix4f view3 = view;
+            mat4_t view3 = view;
             view3.m03 = 0;
             view3.m13 = 0;
             view3.m23 = 0;
@@ -284,7 +287,7 @@ struct RenderSkyBoxRes {
             view3.m31 = 0;
             view3.m32 = 0;
 
-            const Matrix4f mvp = projection * view3 * model;
+            const mat4_t mvp = mat4_mul(mat4_mul(projection, view3), model);
 
             sg_bindings bind{};
             bind.fs_images[0] = cubemap;
@@ -313,8 +316,8 @@ RenderSystem3D::~RenderSystem3D() {
     delete skybox;
 }
 
-void RenderSystem3D::renderObjects(const Matrix4f& proj, const Matrix4f& view) {
-    const sg_image empty = ek_canvas_.image_empty;
+void RenderSystem3D::renderObjects(mat4_t proj, mat4_t view) {
+    const sg_image empty = canvas.image_empty;
     main->bind.fs_images[SLOT_uImage0] = empty;
     main->bind.fs_images[SLOT_u_image_shadow_map] = shadows->rtColor;
 
@@ -322,9 +325,9 @@ void RenderSystem3D::renderObjects(const Matrix4f& proj, const Matrix4f& view) {
         const auto& filter = e.get<MeshRenderer>();
         auto* mesh = Res<StaticMesh>{filter.mesh.c_str()}.get_or(filter.meshPtr);
         if (mesh && e.get_or_default<Node>().visible()) {
-            Matrix4f model = e.get<Transform3D>().world;
+            mat4_t model = e.get<Transform3D>().world;
             Matrix3f nm = transpose(inverse(Matrix3f{model}));
-            Matrix4f nm4{};
+            mat4_t nm4 = mat4_identity();
             nm4.m00 = nm.m00;
             nm4.m01 = nm.m01;
             nm4.m02 = nm.m02;
@@ -335,21 +338,21 @@ void RenderSystem3D::renderObjects(const Matrix4f& proj, const Matrix4f& view) {
             nm4.m21 = nm.m21;
             nm4.m22 = nm.m22;
 
-            const Matrix4f depth_mvp = shadows->projection * shadows->view * model;
+            const mat4_t depth_mvp = mat4_mul(mat4_mul(shadows->projection, shadows->view), model);
 
             const auto& material = *(Res<Material3D>{filter.material.c_str()}.get_or(&defaultMaterial));
             vs_params_t params;
-            memcpy(params.uModelViewProjection, (proj * view * model).data_, sizeof(float) * 16);
-            memcpy(params.uModel, model.data_, sizeof(float) * 16);
-            memcpy(params.u_depth_mvp, depth_mvp.data_, sizeof(float) * 16);
-            memcpy(params.u_normal_matrix, nm4.data_, sizeof(float) * 16);
+            memcpy(params.uModelViewProjection, mat4_mul(mat4_mul(proj, view), model).data, sizeof(mat4_t));
+            memcpy(params.uModel, model.data, sizeof(mat4_t));
+            memcpy(params.u_depth_mvp, depth_mvp.data, sizeof(mat4_t));
+            memcpy(params.u_normal_matrix, nm4.data, sizeof(mat4_t));
             sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_vs_params, SG_RANGE(params));
 
             material_params_t matParams;
-            memcpy(matParams.mat_diffuse, material.diffuse.data(), sizeof(float) * 3);
-            memcpy(matParams.mat_ambient, material.ambient.data(), sizeof(float) * 3);
-            memcpy(matParams.mat_specular, material.specular.data(), sizeof(float) * 3);
-            memcpy(matParams.mat_emission, material.emission.data(), sizeof(float) * 3);
+            memcpy(matParams.mat_diffuse, material.diffuse.data, sizeof(vec3_t));
+            memcpy(matParams.mat_ambient, material.ambient.data, sizeof(vec3_t));
+            memcpy(matParams.mat_specular, material.specular.data, sizeof(vec3_t));
+            memcpy(matParams.mat_emission, material.emission.data, sizeof(vec3_t));
             matParams.mat_shininess = (1.f / material.roughness) - 1.f;
             matParams.mat_roughness = material.roughness;
             sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_material_params, SG_RANGE(matParams));
@@ -377,37 +380,39 @@ void RenderSystem3D::prepare() {
     const auto& cameraData = camera.get<Camera3D>();
     const auto& cameraTransform = camera.get<Transform3D>();
 
-    Vec3f point_light_pos{0, 15, 0};
+    vec3_t point_light_pos = vec3(0, 15, 0);
     Light3D point_light{};
 
-    Vec3f directional_light_pos{0, 0, -1};
+    vec3_t directional_light_pos = vec3(0, 0, -1);
     Light3D directional_light{};
     for (auto e: ecs::view<Light3D, Transform3D>()) {
         auto& l = e.get<Light3D>();
         auto& transform = e.get<Transform3D>();
         if (l.type == Light3DType::Point) {
             point_light = l;
-            point_light_pos = extract_translation(transform.world);
+            point_light_pos = mat4_get_position(&transform.world);
         } else if (l.type == Light3DType::Directional) {
             directional_light = l;
-            directional_light_pos = normalize(extract_translation(transform.world));
+            directional_light_pos = vec3_normalize(mat4_get_position(&transform.world));
         }
     }
 
-    Matrix4f view = inverse(cameraTransform.world);
+    mat4_t view = mat4_inverse(cameraTransform.world);
 
     const float width = ek_app.viewport.width;
     const float height = ek_app.viewport.height;
-    Matrix4f proj{};
+    mat4_t proj;
     const auto aspect = (float) width / height;
     if (cameraData.orthogonal) {
         const auto ortho_size = cameraData.orthogonalSize;
-        proj = ortho_projection_rh(-ortho_size * aspect, ortho_size * aspect,
-                                   -ortho_size, ortho_size,
-                                   cameraData.zNear,
-                                   cameraData.zFar);
+        proj = mat4_orthographic_rh(-ortho_size * aspect,
+                                          ortho_size * aspect,
+                                          -ortho_size,
+                                          ortho_size,
+                                          cameraData.zNear,
+                                          cameraData.zFar);
     } else {
-        proj = perspective_rh(cameraData.fov, aspect, cameraData.zNear, cameraData.zFar);
+        proj = mat4_perspective_rh(cameraData.fov, aspect, cameraData.zNear, cameraData.zFar);
     }
     cameraProjection = proj;
     cameraView = view;
@@ -454,8 +459,8 @@ void RenderSystem3D::render(float width, float height) {
     fs_params.u_resolution[1] = height;
     fs_params.u_resolution[2] = 1.0f / width;
     fs_params.u_resolution[3] = 1.0f / height;
-    auto viewPos = extract_translation(cameraTransform.world);
-    memcpy(fs_params.uViewPos, viewPos.data(), sizeof(float) * 3);
+    auto viewPos = mat4_get_position(&cameraTransform.world);
+    memcpy(fs_params.uViewPos, viewPos.data, sizeof(float) * 3);
 
     sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_fs_params, SG_RANGE(fs_params));
     sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_light_params, SG_RANGE(main->directionalLightParams));

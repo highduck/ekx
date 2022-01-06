@@ -42,11 +42,11 @@ endif ()
 
 #target_compile_definitions(${PROJECT_NAME} PUBLIC)
 
-target_compile_options(${PROJECT_NAME} PRIVATE
-        -fno-exceptions
-        -fno-rtti
-        -fno-strict-aliasing
-        -Wstrict-aliasing=2
+target_compile_options(${PROJECT_NAME}
+        PRIVATE -fno-exceptions
+        PRIVATE -fno-rtti
+        PRIVATE -fno-strict-aliasing
+        PRIVATE -Wstrict-aliasing=2
         ${EK_COMPILE_WARNINGS}
         )
 

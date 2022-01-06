@@ -35,7 +35,7 @@ Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl) {
     p.alpha = decl.alpha_start.random();
     p.set_life_time(decl.life_time.random());
     p.offset = decl.color_offset;
-    p.offset.af(decl.additive);
+    p.offset.a = unorm8_f32_clamped(decl.additive);
     return p;
 }
 
@@ -53,8 +53,8 @@ void particles_burst(ecs::EntityApi e, int count, Vec2f relativeVelocity) {
     while (count > 0) {
         auto& p = produce_particle(layer, *decl);
         Vec2f pos = position;
-        pos.x += random(data.rect.x, data.rect.right());
-        pos.y += random(data.rect.y, data.rect.bottom());
+        pos.x += random(data.rect.x, RECT_R(data.rect));
+        pos.y += random(data.rect.y, RECT_B(data.rect));
         p.position = pos;
         float speed = data.speed.random();
         float acc = data.acc.random();
@@ -90,8 +90,8 @@ void update_emitters() {
             while (count > 0) {
                 auto& p = produce_particle(layer, *decl);
                 Vec2f pos = position + data.offset;
-                pos.x += random(data.rect.x, data.rect.right());
-                pos.y += random(data.rect.y, data.rect.bottom());
+                pos.x += random(data.rect.x, RECT_R(data.rect));
+                pos.y += random(data.rect.y, RECT_B(data.rect));
                 p.position = pos;
                 float speed = data.speed.random();
                 float acc = data.acc.random();
@@ -130,12 +130,12 @@ void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const Particle
     auto& layerComp = toLayer.get<ParticleLayer2D>();
     while (count > 0) {
         auto& p = produce_particle(layerComp, decl);
-        const Vec2f position = data.offset + data.rect.position + data.rect.size * Vec2f{random(), random()};
-        const Vec2f dir{cosf(a), sinf(a)};
+        const vec2_t position = data.offset + data.rect.position + data.rect.size * vec2_t{{random(), random()}};
+        const vec2_t dir{cosf(a), sinf(a)};
         const auto speed = data.speed.random();
         const auto acc = data.acc.random();
         p.position = Transform2D::localToLocal(src, toLayer, position);
-        p.velocity = speed * dir + emitter.velocity;
+        p.velocity = dir * speed + emitter.velocity;
         p.acc += dir * acc;
         if (emitter.on_spawn) {
             // TODO: EMITTER ENTITY!? and not `src` entity or `layer` entity?

@@ -44,10 +44,10 @@ void Particle::update_current_values() {
 
     switch (alpha_mode) {
         case ParticleAlphaMode::ByScale:
-            color.af(Math::clamp(alpha * length(scale)));
+            color.a = unorm8_f32_clamped(alpha * vec2_length(scale));
             break;
         case ParticleAlphaMode::LifeSin:
-            color.af(alpha * sinf(float(Math::pi) * time / time_total));
+            color.a = unorm8_f32_clamped(alpha * sinf(MATH_PI * time / time_total));
             break;
         case ParticleAlphaMode::DCBlink: {
             float a = 0.25f;
@@ -62,16 +62,16 @@ void Particle::update_current_values() {
             break;
         case ParticleAlphaMode::QuadOut: {
             float x = 1.0f - time / time_total;
-            color.af(alpha * (1.0f - x * x));
+            color.a = unorm8_f32_clamped(alpha * (1.0f - x * x));
         }
             break;
         default:
-            color.af(alpha);
+            color.a = unorm8_f32_clamped(alpha);
             break;
     }
 }
 
-Rect2f Particle::get_bounds() {
+rect_t Particle::get_bounds() {
     if (sprite) {
         bounds = sprite->rect;
     }
@@ -81,13 +81,13 @@ Rect2f Particle::get_bounds() {
 void Particle::draw() {
     float vis_angle = angle_base + rotation + angle_velocity_factor * atan2f(velocity.y, velocity.x);
 
-    draw2d::state.save_transform()
-            .transform_pivot(position, vis_angle, scale, pivot)
-            .concat(color, offset);
+    canvas_save_transform();
+    canvas_transform_pivot(position, vis_angle, scale, pivot);
+    canvas_concat_color({color, offset});
     if (sprite) {
         sprite->draw();
     }
-    draw2d::state.restore_transform();
+    canvas_restore_transform();
 }
 
 }

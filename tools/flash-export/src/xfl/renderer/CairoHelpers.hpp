@@ -30,7 +30,7 @@ void set_line_cap(cairo_t* ctx, LineCaps cap);
 
 void set_line_join(cairo_t* ctx, LineJoints join);
 
-void set_solid_fill(cairo_t* context, const Vec4f& color);
+void set_solid_fill(cairo_t* context, vec4_t color);
 
 void set_blend_mode(cairo_t* ctx, BlendMode blend_mode);
 
@@ -38,12 +38,12 @@ void cairo_quadratic_curve_to(cairo_t* context, float x1, float y1, float x2, fl
 
 void add_color_stops(cairo_pattern_t* pattern,
                      const Array<GradientEntry>& entries,
-                     const Vec4f& color_multiplier);
+                     vec4_t color_multiplier);
 
 // https://github.com/lightspark/lightspark/blob/master/src/backends/graphics.cpp
-cairo_pattern_t* create_linear_pattern(const Matrix3x2f& matrix);
+cairo_pattern_t* create_linear_pattern(const mat3x2_t& matrix);
 
-cairo_pattern_t* create_radial_pattern(const Matrix3x2f& matrix);
+cairo_pattern_t* create_radial_pattern(const mat3x2_t& matrix);
 
 fill_pattern_data_t create_fill_pattern(const FillStyle& fill, const TransformModel& transform);
 
@@ -51,7 +51,7 @@ void cairo_round_rectangle(cairo_t* cr, const double* values);
 
 void cairo_oval(cairo_t* cr, const double* values);
 
-void cairo_transform(cairo_t* cr, const Matrix3x2f& m);
+void cairo_transform(cairo_t* cr, const mat3x2_t& m);
 
 }
 

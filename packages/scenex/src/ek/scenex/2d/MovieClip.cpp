@@ -49,11 +49,11 @@ SGKeyFrameTransform lerp(const SGKeyFrameTransform& begin,
                          const SGKeyFrameTransform& end,
                          const easing_progress_t& progress) {
     return {
-            lerp(begin.position, end.position, progress.position),
-            lerp(begin.scale, end.scale, progress.scale),
-            lerp(begin.skew, end.skew, progress.skew),
+            vec2_lerp(begin.position, end.position, progress.position),
+            vec2_lerp(begin.scale, end.scale, progress.scale),
+            vec2_lerp(begin.skew, end.skew, progress.skew),
             begin.pivot,
-            lerp(begin.color, end.color, progress.color)
+            lerp_color_mod_f(begin.color, end.color, progress.color)
     };
 }
 
@@ -85,8 +85,8 @@ easing_progress_t get_easing_progress(const float t, const Array<SGEasingData>& 
 void apply_transform(EntityApi e, const SGKeyFrameTransform& keyframe) {
     auto& transform = e.get_or_create<Transform2D>();
     transform.setTransform(keyframe.position, keyframe.scale, keyframe.skew, keyframe.pivot);
-    transform.color.scale = argb32_t{keyframe.color.scale};
-    transform.color.offset = argb32_t{keyframe.color.offset};
+    transform.color.scale = argb32_t{keyframe.color.scale.data};
+    transform.color.offset = argb32_t{keyframe.color.offset.data};
 }
 
 void update_target(float time, EntityApi e, const SGMovieLayerData& layer) {
@@ -231,7 +231,7 @@ float get_bezier_value_normalized(float t, float a, float b, float c, float d) {
     return (t * t * (d - a) + 3 * (1 - t) * (t * (c - a) + (1 - t) * (b - a))) * t + a;
 }
 
-float get_bezier_y(const Vec2f* curve, float x) {
+float get_bezier_y(const vec2_t* curve, float x) {
     const float eps = 0.000001f;
     const float a = curve[0].x;
     const float b = curve[1].x;

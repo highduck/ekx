@@ -1,6 +1,6 @@
 #include "Font.hpp"
 
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include "FontImplBase.hpp"
 
 namespace ek {
@@ -24,8 +24,8 @@ void Font::draw(const char* text,
     Vec2f current = position;
     Vec2f start = position;
 
-    draw2d::state.save_color()
-            .scaleColor(color);
+    canvas_save_color();
+    canvas_scale_color(color);
 
     uint32_t prev_image_id = SG_INVALID_ID;
     Glyph gdata;
@@ -40,29 +40,29 @@ void Font::draw(const char* text,
         if (impl->getGlyph(code, gdata)) {
             if (gdata.image.id) {
                 if (prev_image_id != gdata.image.id) {
-                    draw2d::state.set_image(gdata.image);
+                    canvas_set_image(gdata.image);
                     prev_image_id = gdata.image.id;
                 }
-                draw2d::state.set_image_rect(gdata.texCoord);
-                gdata.rect *= size;
+                canvas_set_image_rect(gdata.texCoord);
+                gdata.rect = rect_scale_f(gdata.rect, size);
                 if (gdata.rotated) {
-                    draw2d::quad_rotated(gdata.rect.x + current.x,
+                    canvas_quad_rotated(gdata.rect.x + current.x,
                                          gdata.rect.y + current.y,
-                                         gdata.rect.width,
-                                         gdata.rect.height);
+                                         gdata.rect.w,
+                                         gdata.rect.h);
 
                 } else {
-                    draw2d::quad(gdata.rect.x + current.x,
+                    canvas_quad(gdata.rect.x + current.x,
                                  gdata.rect.y + current.y,
-                                 gdata.rect.width,
-                                 gdata.rect.height);
+                                 gdata.rect.w,
+                                 gdata.rect.h);
                 }
             }
 
             current.x += size * gdata.advanceWidth;
         }
     }
-    draw2d::state.restore_color();
+    canvas_restore_color();
 }
 
 float Font::get_text_segment_width(const char* text, float size, int begin, int end) const {

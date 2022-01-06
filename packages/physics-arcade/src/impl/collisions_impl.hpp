@@ -5,59 +5,57 @@
 namespace ek {
 
 /** Collision test functions **/
-
-bool test_point_triangle(const Vec2f& point,
-                         const Vec2f& v0,
-                         const Vec2f& v1,
-                         const Vec2f& v2) {
-    const auto m = sign(point, v1, v2) < 0.0f;
-    return m == (sign(point, v0, v1) < 0.0f) && m == (sign(point, v2, v0) < 0.0f);
+inline float vec2_sign(const vec2_t p1, const vec2_t p2, const vec2_t p3) {
+    return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 }
 
-bool test_line_line(const Vec2f& a,
-                    const Vec2f& b,
-                    const Vec2f& c,
-                    const Vec2f& d,
-                    bool segment_mode,
-                    Vec2f& intersection) {
-    auto a1 = b.y - a.y;
-    auto a2 = d.y - c.y;
-    auto b1 = a.x - b.x;
-    auto b2 = c.x - d.x;
-    auto c1 = b.x * a.y - a.x * b.y;
-    auto c2 = d.x * c.y - c.x * d.y;
+bool test_point_triangle(const vec2_t point, const vec2_t v0, const vec2_t v1, const vec2_t v2) {
+    const bool m = vec2_sign(point, v1, v2) < 0.0f;
+    return m == (vec2_sign(point, v0, v1) < 0.0f) && m == (vec2_sign(point, v2, v0) < 0.0f);
+}
 
-    auto denom = a1 * b2 - a2 * b1;
+bool test_line_line(const vec2_t a, const vec2_t b, const vec2_t c, const vec2_t d, bool segment_mode,
+                    vec2_t* intersection) {
+    const float a1 = b.y - a.y;
+    const float a2 = d.y - c.y;
+    const float b1 = a.x - b.x;
+    const float b2 = c.x - d.x;
+    const float c1 = b.x * a.y - a.x * b.y;
+    const float c2 = d.x * c.y - c.x * d.y;
+
+    const float denom = a1 * b2 - a2 * b1;
     if (denom == 0.0f) {
         return false;
     }
 
-    Vec2f ip{(b1 * c2 - b2 * c1) / denom, (a2 * c1 - a1 * c2) / denom};
+    const vec2_t ip{(b1 * c2 - b2 * c1) / denom, (a2 * c1 - a1 * c2) / denom};
 
     if (segment_mode) {
-        float len = distance_sqr(a, b);
-        if (distance_sqr(ip, b) > len || distance_sqr(ip, a) > len) {
+        float len = vec2_distance_sqr(a, b);
+        if (vec2_distance_sqr(ip, b) > len || vec2_distance_sqr(ip, a) > len) {
             return false;
         }
 
-        len = distance_sqr(c, d);
-        if (distance_sqr(ip, d) > len || distance_sqr(ip, c) > len) {
+        len = vec2_distance_sqr(c, d);
+        if (vec2_distance_sqr(ip, d) > len || vec2_distance_sqr(ip, c) > len) {
             return false;
         }
     }
 
-    intersection = ip;
+    if (intersection) {
+        *intersection = ip;
+    }
     return true;
 }
 
-bool test_rect_line(const Rect2f& rect, const Vec2f& p0, const Vec2f& p1) {
+bool test_rect_line(const rect_t rect, const vec2_t p0, const vec2_t p1) {
 
 // Calculate m and c for the equation for the line (y = mx+c)
     auto m = (p1.y - p0.y) / (p1.x - p0.x);
     auto c = p0.y - (m * p0.x);
 
-    auto l = rect.left();
-    auto r = rect.right();
+    auto l = rect.x;
+    auto r = RECT_R(rect);
 
     float top_intersection;
     float bottom_intersection;
@@ -87,16 +85,16 @@ bool test_rect_line(const Rect2f& rect, const Vec2f& p0, const Vec2f& p1) {
 // If the bottom overlap is higher than the top of the rectangle or the top overlap is
 // lower than the bottom of the rectangle we don't have intersection. So return the negative
 // of that. Much faster than checking each of the points is within the bounds of the rectangle.
-    return top_overlap < bottom_overlap
-           && bottom_overlap >= rect.y
-           && top_overlap <= rect.bottom();
+    return top_overlap < bottom_overlap &&
+           bottom_overlap >= rect.y &&
+           top_overlap <= RECT_B(rect);
 }
 
 
-bool test_rect_triangle(const Rect2f& rect,
-                        const Vec2f& v0,
-                        const Vec2f& v1,
-                        const Vec2f& v2) {
+bool test_rect_triangle(const rect_t rect,
+                        const vec2_t v0,
+                        const vec2_t v1,
+                        const vec2_t v2) {
     return test_rect_line(rect, v0, v1)
            || test_rect_line(rect, v1, v2)
            || test_rect_line(rect, v2, v0);
@@ -105,40 +103,38 @@ bool test_rect_triangle(const Rect2f& rect,
 
 /** Collision sweep functions **/
 
-sweep_test_result_t sweep_rects(const Rect2f& a0, const Rect2f& a1, const Rect2f& b0, const Rect2f& b1) {
+sweep_test_result_t sweep_rects(const rect_t a0, const rect_t a1, const rect_t b0, const rect_t b1) {
     sweep_test_result_t result;
     float dx = (a1.x - a0.x) - (b1.x - b0.x);
     float dy = (a1.y - a0.y) - (b1.y - b0.y);
     float cx0, cy0, cx1, cy1;
     float u0_x, u0_y, u1_x, u1_y;
 
-    if (a0.overlaps(b0)) {
+    if (rect_overlaps(a0, b0)) {
         result.u0 = 0.0f;
         result.u1 = 0.0f;
-        result.normal = {
-                a0.center_x() < b0.center_x() ? 1.0f : -1.0f,
-                a0.center_y() < b0.center_y() ? 1.0f : -1.0f
-        };
-//			result.x = a0.centerX + 0.5 * (b0.centerX - a0.centerX);
-//			result.y = a0.centerY + 0.5 * (b0.centerY - a0.centerY);
+        result.normal.x = RECT_CENTER_X(a0) < RECT_CENTER_X(b0) ? 1.0f : -1.0f;
+        result.normal.y = RECT_CENTER_Y(a0) < RECT_CENTER_Y(b0) ? 1.0f : -1.0f;
+        // result.x = a0.centerX + 0.5 * (b0.centerX - a0.centerX);
+        // result.y = a0.centerY + 0.5 * (b0.centerY - a0.centerY);
         result.hit = true;
         return result;
     }
 
     if (dx > 0.0f) {
-        cx0 = b0.x - a0.right();
-        cx1 = b0.right() - a0.x;
+        cx0 = b0.x - RECT_R(a0);
+        cx1 = RECT_R(b0) - a0.x;
     } else {
-        cx0 = b0.right() - a0.x;
-        cx1 = b0.x - a0.right();
+        cx0 = RECT_R(b0) - a0.x;
+        cx1 = b0.x - RECT_R(a0);
     }
 
     if (dy > 0.0f) {
-        cy0 = b0.y - a0.bottom();
-        cy1 = b0.bottom() - a0.y;
+        cy0 = b0.y - RECT_B(a0);
+        cy1 = RECT_B(b0) - a0.y;
     } else {
-        cy0 = b0.bottom() - a0.y;
-        cy1 = b0.y - a0.bottom();
+        cy0 = RECT_B(b0) - a0.y;
+        cy1 = b0.y - RECT_B(a0);
     }
 
     if (dx == 0.0f) {
@@ -164,7 +160,7 @@ sweep_test_result_t sweep_rects(const Rect2f& a0, const Rect2f& a1, const Rect2f
                  && (result.u0 <= 1.0f)
                  && (result.u0 >= 0.0f);
 
-    result.normal = Vec2f::zero;
+    result.normal = vec2(0.0f, 0.0f);
 
     if (u0_x == result.u0) {
         result.normal.x = dx > 0.0f ? 1.0f : -1.0f;
@@ -177,20 +173,20 @@ sweep_test_result_t sweep_rects(const Rect2f& a0, const Rect2f& a1, const Rect2f
     return result;
 }
 
-sweep_test_result_t intersect_ray_rect(const Rect2f& rc, const Vec2f& origin, const Vec2f& dir) {
+sweep_test_result_t intersect_ray_rect(const rect_t rc, const vec2_t origin, const vec2_t dir) {
     sweep_test_result_t result;
     result.u0 = 0.0f;
     result.u1 = 1000000.0f;
     result.hit = false;
     result.ray = false;
-    if (fabsf(dir.x) < Math::epsilon<float>()) {
-        if (origin.x < rc.x || origin.x > rc.right()) {
+    if (fabsf(dir.x) < MATH_F32_EPSILON) {
+        if ((origin.x < rc.x) || (origin.x > RECT_R(rc))) {
             return result;
         }
     } else {
         float ood = 1.0f / dir.x;
         float t1 = ood * (rc.x - origin.x);
-        float t2 = ood * (rc.right() - origin.x);
+        float t2 = ood * (RECT_R(rc) - origin.x);
         if (t1 > t2) {
             float tmp = t1;
             t1 = t2;
@@ -204,14 +200,14 @@ sweep_test_result_t intersect_ray_rect(const Rect2f& rc, const Vec2f& origin, co
         }
     }
 
-    if (fabsf(dir.y) < Math::epsilon<float>()) {
-        if (origin.y < rc.y || origin.y > rc.bottom()) {
+    if (fabsf(dir.y) < MATH_F32_EPSILON) {
+        if ((origin.y < rc.y) || (origin.y > RECT_B(rc))) {
             return result;
         }
     } else {
         float ood = 1.0f / dir.y;
         float t1 = ood * (rc.y - origin.y);
-        float t2 = ood * (rc.bottom() - origin.y);
+        float t2 = ood * (RECT_B(rc) - origin.y);
 
         if (t1 > t2) {
             float tmp = t1;
@@ -232,23 +228,23 @@ sweep_test_result_t intersect_ray_rect(const Rect2f& rc, const Vec2f& origin, co
 }
 
 // d = v1 - v0
-sweep_test_result_t sweep_circles(const CircleF& c0,
-                                  const CircleF& c1,
-                                  const Vec2f& delta) {
+sweep_test_result_t sweep_circles(const circle_t c0,
+                                  const circle_t c1,
+                                  const vec2_t delta) {
     sweep_test_result_t result;
-    const Vec2f s = c1.center - c0.center;
+    const vec2_t s = c1.center - c0.center;
     const float r = c1.radius + c0.radius;
-    const float c = dot(s, s) - r * r;
+    const float c = vec2_dot(s, s) - r * r;
     if (c < 0.0f) {
         result.hit = true;
         result.u0 = 0.0f;
         return result;
     }
-    const float a = dot(delta, delta);
-    if (a <= Math::epsilon<float>()) {
+    const float a = vec2_dot(delta, delta);
+    if (a <= MATH_F32_EPSILON) {
         return result;
     }
-    const float b = dot(delta, s);
+    const float b = vec2_dot(delta, s);
     if (b >= 0) {
         return result;
     }
@@ -263,10 +259,10 @@ sweep_test_result_t sweep_circles(const CircleF& c0,
 
 // d = box_v - c_v
 
-sweep_test_result_t sweep_circle_rect(const CircleF& circle,
-                                      const Vec2f& circle_delta,
-                                      const Rect2f& rect,
-                                      const Vec2f& rect_delta) {
+sweep_test_result_t sweep_circle_rect(const circle_t circle,
+                                      const vec2_t circle_delta,
+                                      const rect_t rect,
+                                      const vec2_t rect_delta) {
 // TODO: optimize allocation
 //		var e = new rect_f(b.x - r, b.y - r, b.width + r * 2, b.height + r * 2);
 //		var ii = intersectRayRect(e, x, y, dx, dy);
@@ -286,35 +282,35 @@ sweep_test_result_t sweep_circle_rect(const CircleF& circle,
 
 //    float x = circle.center.x;
 //    float y = circle.center.y;
-    Vec2f origin = circle.center;
-    Vec2f dir = rect_delta - circle_delta;
+    vec2_t origin = circle.center;
+    vec2_t dir = rect_delta - circle_delta;
     float r = circle.radius;
 //    float dx = rect_delta.x - circle_delta.x;
 //    float dy = rect_delta.y - circle_delta.y;
-    Vec2f cp = Vec2f::zero;
+    vec2_t cp = {};
     bool corner = false;
 
     float t0 = 1000000.0f;
-    Rect2f e{rect.x - r, rect.y - r, rect.width + r * 2.0f, rect.height + r * 2.0f};
+    rect_t e{{rect.x - r, rect.y - r, rect.w + r * 2.0f, rect.h + r * 2.0f}};
 
     auto ii = intersect_ray_rect(e, origin, -dir);
     if (!ii.hit) {
         return ii;
     }
 
-    e.set(rect.x - r, rect.y, rect.width + r * 2.0f, rect.height);
+    e = {{rect.x - r, rect.y, rect.w + r * 2.0f, rect.h}};
     ii = intersect_ray_rect(e, origin, -dir);
     if (ii.hit && ii.u0 <= 1.0f) {
         t0 = fmin(ii.u0, t0);
     }
 
-    e.set(rect.x, rect.y - r, rect.width, rect.height + 2.0f * r);
+    e = {{rect.x, rect.y - r, rect.w, rect.h + 2.0f * r}};
     ii = intersect_ray_rect(e, origin, -dir);
     if (ii.hit && ii.u0 <= 1.0f) {
         t0 = fmin(ii.u0, t0);
     }
 
-    CircleF origin_circle{origin, 0};
+    circle_t origin_circle{origin, 0};
     ii = sweep_circles(origin_circle, {rect.x, rect.y, r}, dir);
     if (ii.hit && ii.u0 < t0) {
         t0 = ii.u0;
@@ -322,65 +318,62 @@ sweep_test_result_t sweep_circle_rect(const CircleF& circle,
         corner = true;
     }
 
-    ii = sweep_circles(origin_circle, {rect.right(), rect.y, r}, dir);
+    ii = sweep_circles(origin_circle, {RECT_R(rect), rect.y, r}, dir);
     if (ii.hit && ii.u0 < t0) {
         t0 = ii.u0;
-        cp.x = rect.right();
+        cp.x = RECT_R(rect);
         cp.y = rect.y;
         corner = true;
     }
 
-    ii = sweep_circles(origin_circle, {rect.x, rect.bottom(), r}, dir);
+    ii = sweep_circles(origin_circle, {rect.x, RECT_B(rect), r}, dir);
     if (ii.hit && ii.u0 < t0) {
         t0 = ii.u0;
         cp.x = rect.x;
-        cp.y = rect.bottom();
+        cp.y = RECT_B(rect);
         corner = true;
     }
 
-    ii = sweep_circles(origin_circle, {rect.right(), rect.bottom(), r}, dir);
+    ii = sweep_circles(origin_circle, {rect_rb(rect), r}, dir);
     if (ii.hit && ii.u0 < t0) {
         t0 = ii.u0;
-        cp.x = rect.right();
-        cp.y = rect.bottom();
+        cp = rect_rb(rect);
         corner = true;
     }
 
     ii.hit = t0 <= 1 && t0 >= 0;
     if (ii.hit) {
         origin += circle_delta * t0;
-        Vec2f b = rect.position + rect_delta * t0;
+        vec2_t b = rect.position + rect_delta * t0;
         if (corner) {
             ii.normal = origin - cp - rect_delta * t0;
-        } else if (origin.x >= b.x && origin.x <= b.x + rect.width) {
-            ii.normal = {0.0f,
-                         origin.y <= (b.y + rect.height * 0.5f) ? -1.0f : 1.0f};
-        } else if (origin.y <= b.y + rect.height && origin.y >= b.y) {
-            ii.normal = {origin.x <= (b.x + rect.width * 0.5) ? -1.0f : 1.0f,
-                         0.0f};
+        } else if (origin.x >= b.x && origin.x <= b.x + rect.w) {
+            ii.normal = {0.0f, origin.y <= (b.y + rect.h * 0.5f) ? -1.0f : 1.0f};
+        } else if (origin.y <= b.y + rect.h && origin.y >= b.y) {
+            ii.normal = {origin.x <= (b.x + rect.w * 0.5f) ? -1.0f : 1.0f, 0.0f};
         }
     }
     ii.u0 = t0;
     return ii;
 }
 
-float distance_to_rect(const Rect2f& rc, const Vec2f& p) {
+float distance_to_rect(const rect_t rc, const vec2_t p) {
     float s = 0.0f;
     float d = 0.0f;
 
     if (p.x < rc.x) {
         s = p.x - rc.x;
         d += s * s;
-    } else if (p.x > rc.right()) {
-        s = p.x - rc.right();
+    } else if (p.x > RECT_R(rc)) {
+        s = p.x - RECT_R(rc);
         d += s * s;
     }
 
     if (p.y < rc.y) {
         s = p.y - rc.y;
         d += s * s;
-    } else if (p.y > rc.bottom()) {
-        s = p.y - rc.bottom();
+    } else if (p.y > RECT_B(rc)) {
+        s = p.y - RECT_B(rc);
         d += s * s;
     }
 

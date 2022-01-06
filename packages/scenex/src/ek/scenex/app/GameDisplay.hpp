@@ -1,19 +1,18 @@
 #pragma once
 
 #include <ek/gfx.h>
-#include <ek/math/Vec.hpp>
-#include <ek/math/Rect.hpp>
+#include <ek/math.h>
 
 namespace ek {
 
 struct GameDisplayInfo {
     // when game drawing inside window viewport
-    Rect2f destinationViewport{};
-    Vec2f size{1.0f};
-    Vec2f window{1.0f};
-    Vec4f insets{};
-    Vec4f userInsetsAbsolute{};
-    Vec4f userInsetsRelative{};
+    rect_t destinationViewport = {};
+    vec2_t size = vec2(1,1);
+    vec2_t window = vec2(1,1);
+    vec4_t insets = {};
+    vec4_t userInsetsAbsolute = {};
+    vec4_t userInsetsRelative = {};
     float dpiScale = 1.0f;
 };
 

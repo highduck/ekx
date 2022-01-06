@@ -2,7 +2,7 @@
 
 #include <ek/admob_wrapper.hpp>
 #include <ek/scenex/app/GameAppListener.hpp>
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/app.h>
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/audio/audio.hpp>
@@ -21,8 +21,8 @@ public:
         const argb32_t color = activeRewardedAd ? 0x77FF00FF_argb : 0x7700FF00_argb;
 
         if (splash) {
-            draw2d::state.set_empty_image();
-            draw2d::quad(0, 0, ek_app.viewport.width, ek_app.viewport.height, color);
+            canvas_set_empty_image();
+            canvas_quad_color(0, 0, ek_app.viewport.width, ek_app.viewport.height, color);
         }
     }
 

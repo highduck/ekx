@@ -17,15 +17,8 @@ struct Matrix<3, 2, T> {
     union {
         struct {
             T a, b, c, d, tx, ty;
-//            T a, b, tx, ty;
-//            T c, d;
-//            T
         };
-        struct {
-            T m00, m01, m02;
-            T m10, m11, m12;
-        };
-        T data_[2][3];
+        mat3x2_t cdata;
     };
 
 //    tx = m20
@@ -150,22 +143,7 @@ struct Matrix<3, 2, T> {
     // NOTES: to do `concat` style method - just swap right and left matrices,
     // it will act like `this` is right, `m` is left (premultiplication)
     Matrix3x2 operator*(const Matrix3x2& right) const {
-        //return multiply(right);
-        Matrix3x2 m;
-        m.a = a * right.a + c * right.b;
-        m.b = b * right.a + d * right.b;
-        m.c = a * right.c + c * right.d;
-        m.d = b * right.c + d * right.d;
-        m.tx = a * right.tx + c * right.ty + tx;
-        m.ty = b * right.tx + d * right.ty + ty;
-        return m;
-
-//        r.m00 * l.m00 + r.m01 * l.m10
-//        r.m00 * l.m01 + r.m01 * l.m11
-//        r.m00 * l.m02 + r.m01 * l.m12
-//        r.m00 * l.m03 + r.m01 * l.m13
-//        r.m10 * l.m00 + r.m11 * l.m10
-//        r.m10 * l.m01 + r.m11 * l.m11
+        return mat3x2_mul(cdata, right.cdata);
     }
 
     void apply_transform(const vec2& scale, T rotation) {
@@ -231,12 +209,20 @@ struct Matrix<3, 2, T> {
     }
 
     inline static void multiply(const Matrix3x2& l, const Matrix3x2& r, Matrix3x2& out) {
-        out.a = l.a * r.a + l.c * r.b;
-        out.b = l.b * r.a + l.d * r.b;
-        out.c = l.a * r.c + l.c * r.d;
-        out.d = l.b * r.c + l.d * r.d;
-        out.tx = l.a * r.tx + l.c * r.ty + l.tx;
-        out.ty = l.b * r.tx + l.d * r.ty + l.ty;
+        out.cdata = mat3x2_mul( l.cdata, r.cdata);
+    }
+
+    constexpr Matrix(const mat3x2_t& m) :
+            a{(T) m.a},
+            b{(T) m.b},
+            c{(T) m.c},
+            d{(T) m.d},
+            tx{(T) m.tx},
+            ty{(T) m.ty} {
+    }
+
+    constexpr operator mat3x2_t() const {
+        return cdata;
     }
 };
 

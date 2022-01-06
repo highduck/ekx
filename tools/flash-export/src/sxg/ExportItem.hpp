@@ -52,7 +52,7 @@ struct ExportItem {
 
     void inc_ref(ExportItem& lib);
 
-    void update_scale(ExportItem& lib, const Matrix3x2f& parent_matrix);
+    void update_scale(ExportItem& lib, mat3x2_t parent_matrix);
 
 };
 

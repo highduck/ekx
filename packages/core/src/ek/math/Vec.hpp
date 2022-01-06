@@ -66,6 +66,9 @@ struct Vec<2, T> {
     constexpr Vec() noexcept: x{0}, y{0} {
     }
 
+    constexpr Vec(const vec2_t v) noexcept: x{v.x}, y{v.y} {
+    }
+
     constexpr explicit Vec(T xy) noexcept: x{xy}, y{xy} {
     }
 
@@ -119,6 +122,10 @@ struct Vec<2, T> {
         return x != a.x || y != a.y;
     }
 
+    constexpr operator vec2_t() const {
+        return vec2((float) x, (float) y);
+    }
+
     MAKE_ARRAY_ACCESS
 };
 
@@ -149,6 +156,12 @@ struct Vec<3, T> {
     constexpr Vec() noexcept: x{0},
                               y{0},
                               z{0} {
+
+    }
+
+    constexpr Vec(const vec3_t v) noexcept: x{v.x},
+                              y{v.y},
+                              z{v.z} {
 
     }
 
@@ -217,6 +230,10 @@ struct Vec<3, T> {
     [[nodiscard]]
     constexpr Vec<2, T> xy() const {
         return Vec<2, T>{x, y};
+    }
+
+    constexpr operator vec3_t() const {
+        return vec3((float)x, (float)y, (float)z);
     }
 
     MAKE_ARRAY_ACCESS
@@ -427,10 +444,7 @@ inline Vec<3, T> cross(const Vec<3, T>& a, const Vec<3, T>& b) {
     };
 }
 
-template<typename T>
-inline T sign(const Vec<2, T>& p_1, const Vec<2, T>& p_2, const Vec<2, T>& p_3) {
-    return (p_1.x - p_3.x) * (p_2.y - p_3.y) - (p_2.x - p_3.x) * (p_1.y - p_3.y);
-}
+
 
 template<typename T, unsigned N>
 constexpr Vec<N, T> min_components(const Vec<N, T>& a, const Vec<N, T>& b) noexcept {

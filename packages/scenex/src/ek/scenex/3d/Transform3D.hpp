@@ -1,8 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx_fwd.hpp>
-#include <ek/math/Matrix4.hpp>
-#include <ek/math/Vec.hpp>
+#include <ek/math.h>
 #include <ek/util/Type.hpp>
 
 namespace ecs {
@@ -12,11 +11,11 @@ class World;
 namespace ek {
 
 struct Transform3D {
-    Matrix4f local{};
-    Matrix4f world{};
-    Vec3f position{};
-    Vec3f scale = Vec3f::one;
-    Vec3f rotation{};
+    mat4_t local = mat4_identity();
+    mat4_t world = mat4_identity();
+    vec3_t position = {};
+    vec3_t scale = vec3(1,1,1);
+    vec3_t rotation = {};
 
 //    inline void set_euler_angles(const float3& angles) {
 //        mat4f m = euler_angles(angles);

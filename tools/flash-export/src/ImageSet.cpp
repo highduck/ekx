@@ -167,8 +167,8 @@ void save(ImageSet& images, const char* output) {
                 nodeSprite.append_attribute("name").set_value(image.name.c_str());
                 nodeSprite.append_attribute("x").set_value(image.rc.x);
                 nodeSprite.append_attribute("y").set_value(image.rc.y);
-                nodeSprite.append_attribute("w").set_value(image.rc.width);
-                nodeSprite.append_attribute("h").set_value(image.rc.height);
+                nodeSprite.append_attribute("w").set_value(image.rc.w);
+                nodeSprite.append_attribute("h").set_value(image.rc.h);
                 nodeSprite.append_attribute("p").set_value(image.padding);
             }
         }

@@ -2,21 +2,23 @@
 
 #include "SceneWindow.hpp"
 #include <ImGuizmo/ImGuizmo.h>
-#include <ek/math/MatrixCamera.hpp>
-#include <ek/math/MatrixTranspose.hpp>
-#include <ek/math/MatrixInverse.hpp>
 
 namespace ek {
 
 // matrix 2d utility
-Matrix3x2f matrix3Dto2D(const Matrix4f& m) {
-    return Matrix3x2f{m.m00, m.m01,
-                      m.m10, m.m11,
-                      m.m30, m.m31};
+mat3x2_t matrix3Dto2D(const mat4_t m) {
+    mat3x2_t result;
+    result.a = m.m00;
+    result.b = m.m01;
+    result.c = m.m10;
+    result.d = m.m11;
+    result.tx = m.m30;
+    result.ty = m.m31;
+    return result;
 }
 
-Matrix4f matrix2Dto3D(const Matrix3x2f& m) {
-    Matrix4f result{};
+mat4_t matrix2Dto3D(const mat3x2_t m) {
+    mat4_t result = mat4_identity();
     result.m00 = m.a;
     result.m01 = m.b;
     result.m10 = m.c;
@@ -26,25 +28,27 @@ Matrix4f matrix2Dto3D(const Matrix3x2f& m) {
     return result;
 }
 
-Vec2f SceneView2D::getMouseWorldPos(Vec2f pos) const {
-    return matrix.transformInverse(pos);
+vec2_t SceneView2D::getMouseWorldPos(vec2_t pos) const {
+    const bool ok = vec2_transform_inverse(pos, matrix, &pos);
+    EK_ASSERT(ok);
+    return pos;
 }
 
 void SceneView2D::reset() {
-    matrix = Matrix3x2f{};
-    position = Vec2f{};
+    matrix = mat3x2_identity();
+    position = {};
     scale = 1.0f;
-    translation = Vec2f::zero;
+    translation = {};
 }
 
-void SceneView2D::manipulateView(Vec2f mouseWorldPosition, const Rect2f& viewport) {
+void SceneView2D::manipulateView(vec2_t mouseWorldPosition, const rect_t viewport) {
     if (ImGui::IsMouseDragging(ImGuiPopupFlags_MouseButtonRight)) {
         const auto delta = ImGui::GetMouseDragDelta(ImGuiPopupFlags_MouseButtonRight);
         translation.x = delta.x;
         translation.y = delta.y;
     } else {
         position += translation;
-        translation = Vec2f::zero;
+        translation = {};
     }
 
     const auto wheel = ImGui::GetIO().MouseWheel;
@@ -55,37 +59,41 @@ void SceneView2D::manipulateView(Vec2f mouseWorldPosition, const Rect2f& viewpor
         position -= mouseWorldPosition * deltaScale;
     }
 
-    matrix.set(position + translation, Vec2f{scale, scale}, Vec2f::zero);
-    projectionMatrix = ortho_2d<float>(0, 0, viewport.width, viewport.height, -1000.0f, 1000.0f);
-    viewMatrix3D.setTransform2D(position + translation, scale);
+    const vec2_t ps = position + translation;
+    const vec2_t sc = vec2(scale, scale);
+    const vec2_t rt = vec2(0, 0);
+    matrix.pos = ps;
+    matrix.rot = mat2_scale_skew(sc, rt);
+    projectionMatrix = mat4_orthographic_2d(0, 0, viewport.w, viewport.h, -1000.0f, 1000.0f);
+
+    viewMatrix3D = mat4_2d_transform(ps, sc, rt);
 }
 
 void SceneView3D::reset() {
-    position = Vec3f::zero;
-    translation = Vec3f::zero;
+    position = {};
+    translation = {};
 }
 
-Vec2f SceneView3D::getMouseWorldPos(Vec2f viewportMousePosition) const {
+vec2_t SceneView3D::getMouseWorldPos(vec2_t viewportMousePosition) const {
     // TODO:
     return viewportMousePosition;
 }
 
-Vec2f SceneView::getMouseWorldPos() const {
+vec2_t SceneView::getMouseWorldPos() const {
     const auto mousePos = ImGui::GetMousePos();
-    const Vec2f pos{mousePos.x - rect.position.x,
-                     mousePos.y - rect.position.y};
+    const vec2_t pos = vec2(mousePos.x, mousePos.y) - rect.position;
 
-    if(mode2D) return view2.getMouseWorldPos(pos);
+    if (mode2D) return view2.getMouseWorldPos(pos);
     return view3.getMouseWorldPos(pos);
 }
 
 void SceneView::reset() {
-    if(mode2D) view2.reset();
+    if (mode2D) view2.reset();
     else view3.reset();
 }
 
 void SceneView::manipulateView() {
-    if(mode2D) view2.manipulateView(getMouseWorldPos(), rect);
+    if (mode2D) view2.manipulateView(getMouseWorldPos(), rect);
     else {
         // TODO:
     }
@@ -105,17 +113,17 @@ void SceneWindow::onDraw() {
     const bool canManipulateView = mouseInView && !ImGuizmo::IsUsing();
     const bool canSelectObjects = mouseInView && !(ImGuizmo::IsUsing() || ImGuizmo::IsOver());
 
-    view.rect.set(displayPos.x, displayPos.y, displaySize.x, displaySize.y);
+    view.rect = rect(displayPos.x, displayPos.y, displaySize.x, displaySize.y);
     if (canManipulateView) {
         view.manipulateView();
     }
 
     // update size
     const float k = display.info.dpiScale;
-    display.info.destinationViewport = Rect2f{
+    display.info.destinationViewport = rect(
             k * displayPos.x, k * displayPos.y,
             k * displaySize.x, k * displaySize.y
-    };
+    );
     display.info.window.x = displaySize.x;
     display.info.window.y = displaySize.y;
     display.info.size.x = k * displaySize.x;
@@ -127,8 +135,8 @@ void SceneWindow::onDraw() {
         auto texId = (void*) static_cast<uintptr_t>(display.color.id);
 
         const auto info = sg_query_image_info(display.color);
-        const float texCoordX1 = display.info.size.x / (float)info.width;
-        const float texCoordY1 = display.info.size.y / (float)info.height;
+        const float texCoordX1 = display.info.size.x / (float) info.width;
+        const float texCoordY1 = display.info.size.y / (float) info.height;
 
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         drawList->AddImage(texId, {displayPos.x, displayPos.y},
@@ -143,16 +151,17 @@ void SceneWindow::onDraw() {
     ImGuizmo::SetDrawlist();
     ImGuizmo::SetRect(displayPos.x, displayPos.y, displaySize.x, displaySize.y);
 
-    if(!view.mode2D) {
-        ImGuizmo::ViewManipulate(view.view3.viewMatrix.m, 100.0f, ImVec2(displayPos.x + displaySize.x - 128.0f, displayPos.y), ImVec2(100.0f, 100.0f), 0x10101010);
+    if (!view.mode2D) {
+        ImGuizmo::ViewManipulate(view.view3.viewMatrix.data, 100.0f,
+                                 ImVec2(displayPos.x + displaySize.x - 128.0f, displayPos.y), ImVec2(100.0f, 100.0f),
+                                 0x10101010);
     }
 
     bool manipulationToolSelected = currentTool >= 2 && currentTool <= 6;
     if (manipulationToolSelected) {
-        if(view.mode2D) {
+        if (view.mode2D) {
             manipulateObject2D();
-        }
-        else {
+        } else {
             manipulateObject3D();
         }
     }
@@ -178,37 +187,37 @@ SceneWindow::SceneWindow() {
     display.info.window = {120, 120};
     display.info.dpiScale = 1.0f;
 
-    view.view3.projectionMatrix = perspective_rh(Math::to_radians(45.0f), 4.0f / 3.0f, 10.0f, 1000.0f);
-    view.view3.viewMatrix = look_at_rh(Vec3f{0.0f, 0.0f, 100.0f}, Vec3f::zero, Vec3f{0.0f, 1.0f, 0.0f});
+    view.view3.projectionMatrix = mat4_perspective_rh(Math::to_radians(45.0f), 4.0f / 3.0f, 10.0f, 1000.0f);
+    view.view3.viewMatrix = mat4_look_at_rh(vec3(0, 0, 100), {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
 }
 
+void drawBox2(rect_t rc, mat3x2_t m, rgba_t color1, rgba_t color2,
+              bool cross = true, rgba_t fillColor = 0_argb) {
 
-void drawBox2(const Rect2f& rc, const Matrix3x2f& m, argb32_t color1, argb32_t color2,
-              bool cross = true, argb32_t fillColor = 0_argb) {
-
-    draw2d::state.set_empty_image();
-    if (fillColor != argb32_t::zero) {
-        draw2d::state.save_matrix();
-        draw2d::state.matrix[0] = m;
-        draw2d::quad(rc, fillColor);
-        draw2d::state.restore_matrix();
+    canvas_set_empty_image();
+    if (fillColor.value != 0) {
+        canvas_save_matrix();
+        canvas.matrix[0] = m;
+        canvas_fill_rect(rc, fillColor);
+        canvas_restore_matrix();
     }
-    auto v1 = m.transform(rc.x, rc.y);
-    auto v2 = m.transform(rc.right(), rc.y);
-    auto v3 = m.transform(rc.right(), rc.bottom());
-    auto v4 = m.transform(rc.x, rc.bottom());
-    draw2d::line(v1, v2, color1, color2, 1, 1);
-    draw2d::line(v2, v3, color1, color2, 1, 1);
-    draw2d::line(v3, v4, color1, color2, 1, 1);
-    draw2d::line(v4, v1, color1, color2, 1, 1);
+    auto bb = brect_from_rect(rc);
+    auto v1 = vec2_transform(bb.min, m);
+    auto v2 = vec2_transform(vec2(bb.x1, bb.y0), m);
+    auto v3 = vec2_transform(bb.max, m);
+    auto v4 = vec2_transform(vec2(bb.x0, bb.y1), m);
+    canvas_line_ex(v1, v2, color1, color2, 1, 1);
+    canvas_line_ex(v2, v3, color1, color2, 1, 1);
+    canvas_line_ex(v3, v4, color1, color2, 1, 1);
+    canvas_line_ex(v4, v1, color1, color2, 1, 1);
     if (cross) {
-        draw2d::line(v1, v3, color1, color2, 1, 1);
-        draw2d::line(v2, v4, color1, color2, 1, 1);
+        canvas_line_ex(v1, v3, color1, color2, 1, 1);
+        canvas_line_ex(v2, v4, color1, color2, 1, 1);
     }
 }
 
 void SceneWindow::drawSceneNode(ecs::EntityApi e) {
-    if(!e.get<Node>().visible()) {
+    if (!e.get<Node>().visible()) {
         return;
     }
 
@@ -216,11 +225,11 @@ void SceneWindow::drawSceneNode(ecs::EntityApi e) {
     if (disp && disp->drawable) {
         auto* transform = e.tryGet<WorldTransform2D>();
         if (transform) {
-            draw2d::state.matrix[0] = transform->matrix;
-            draw2d::state.color[0] = transform->color;
+            canvas.matrix[0] = transform->matrix;
+            canvas.color[0] = transform->color;
         } else {
-            draw2d::state.matrix[0] = Matrix3x2f{};
-            draw2d::state.color[0] = ColorMod32{};
+            canvas.matrix[0] = mat3x2_identity();
+            canvas.color[0] = color_mod_identity();
         }
         disp->drawable->draw();
     }
@@ -232,21 +241,21 @@ void SceneWindow::drawSceneNode(ecs::EntityApi e) {
 }
 
 void SceneWindow::drawSceneNodeBounds(ecs::EntityApi e) {
-    if(!e.get<Node>().visible()) {
+    if (!e.get<Node>().visible()) {
         return;
     }
 
     auto* disp = e.tryGet<Display2D>();
     if (disp) {
-        draw2d::state.matrix[0] = Matrix3x2f{};
-        draw2d::state.color[0] = ColorMod32{};
+        canvas.matrix[0] = mat3x2_identity();
+        canvas.color[0] = color_mod_identity();
 
-        Matrix3x2f m = view.view2.matrix;
+        mat3x2_t m = view.view2.matrix;
         auto* transform = e.tryGet<WorldTransform2D>();
         if (transform) {
-            m = view.view2.matrix * transform->matrix;
+            m = mat3x2_mul(view.view2.matrix, transform->matrix);
         }
-        Rect2f b = disp->getBounds();
+        rect_t b = disp->getBounds();
         if (Locator::get<Editor>()->hierarchy.isSelectedInHierarchy(e)) {
             drawBox2(b, m, 0xFFFFFFFF_argb, 0xFF000000_argb, true, 0x77FFFFFF_argb);
         }
@@ -281,24 +290,24 @@ void SceneWindow::drawScene() {
         root = ecs::EntityRef{Locator::get<basic_application>()->root};
     }
 
-    draw2d::begin({0, 0, display.info.size.x, display.info.size.y}, view.view2.matrix);
-    if(!view.mode2D) {
-        draw2d::state.mvp = view.view3.projectionMatrix * view.view3.viewMatrix;
+    canvas_begin_ex({0, 0, display.info.size.x, display.info.size.y}, view.view2.matrix, {0}, {0});
+    if (!view.mode2D) {
+        canvas.mvp = mat4_mul(view.view3.projectionMatrix, view.view3.viewMatrix);
     }
     drawSceneNode(root.get());
-    draw2d::end();
+    canvas_end();
 
-    draw2d::begin({0, 0, display.info.size.x, display.info.size.y});
-    if(!view.mode2D) {
-        draw2d::state.mvp = view.view3.projectionMatrix * view.view3.viewMatrix;
+    canvas_begin(display.info.size.x, display.info.size.y);
+    if (!view.mode2D) {
+        canvas.mvp = mat4_mul(view.view3.projectionMatrix, view.view3.viewMatrix);
     }
     drawSceneNodeBounds(root.get());
-    draw2d::end();
+    canvas_end();
 }
 
-ecs::EntityApi SceneWindow::hitTest(ecs::EntityApi e, Vec2f worldPos) {
+ecs::EntityApi SceneWindow::hitTest(ecs::EntityApi e, vec2_t worldPos) {
     const auto& node = e.get<Node>();
-    if(!node.visible() || !node.touchable()) {
+    if (!node.visible() || !node.touchable()) {
         return nullptr;
     }
     auto it = node.child_last;
@@ -313,8 +322,9 @@ ecs::EntityApi SceneWindow::hitTest(ecs::EntityApi e, Vec2f worldPos) {
     if (disp) {
         auto* wt = e.tryGet<WorldTransform2D>();
         if (wt) {
-            auto lp = wt->matrix.transformInverse(worldPos);
-            if (disp->getBounds().contains(lp)) {
+            vec2_t lp;
+            if (vec2_transform_inverse(worldPos, wt->matrix, &lp) &&
+                rect_contains(disp->getBounds(), lp)) {
                 return e;
             }
         }
@@ -382,7 +392,7 @@ void SceneWindow::manipulateObject2D() {
     if (selection.size() > 0 && selection[0].valid()) {
         ecs::EntityApi sel = selection[0].get();
         auto worldMatrix2D = sel.get<WorldTransform2D>().matrix;
-        Matrix4f worldMatrix3D = matrix2Dto3D(worldMatrix2D);
+        mat4_t worldMatrix3D = matrix2Dto3D(worldMatrix2D);
         ImGuizmo::OPERATION op = ImGuizmo::OPERATION::BOUNDS;
         if (currentTool == 2) {
             op = ImGuizmo::OPERATION::TRANSLATE_X | ImGuizmo::OPERATION::TRANSLATE_Y;
@@ -395,9 +405,9 @@ void SceneWindow::manipulateObject2D() {
                  ImGuizmo::OPERATION::TRANSLATE_Y;
         }
         ImGuizmo::MODE mode = (localGlobal == 0 && currentTool != 4) ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
-        ImGuizmo::Manipulate(view.view2.viewMatrix3D.m, view.view2.projectionMatrix.m,
+        ImGuizmo::Manipulate(view.view2.viewMatrix3D.data, view.view2.projectionMatrix.data,
                              op, mode,
-                             worldMatrix3D.m,
+                             worldMatrix3D.data,
                              nullptr,
                              nullptr,
                              nullptr,
@@ -406,8 +416,8 @@ void SceneWindow::manipulateObject2D() {
         auto& localTransform = sel.get<Transform2D>();
         const auto parentWorldMatrix2D = sel.get<Node>().parent.get<WorldTransform2D>().matrix;
         const auto parentWorldMatrix3D = matrix2Dto3D(parentWorldMatrix2D);
-        const auto inverseParentWorldMatrix3D = inverse(parentWorldMatrix3D);
-        const auto newLocalMatrix3D = inverseParentWorldMatrix3D * worldMatrix3D;
+        const auto inverseParentWorldMatrix3D = mat4_inverse(parentWorldMatrix3D);
+        const auto newLocalMatrix3D = mat4_mul(inverseParentWorldMatrix3D, worldMatrix3D);
         localTransform.setMatrix(matrix3Dto2D(newLocalMatrix3D));
     }
 }
@@ -417,7 +427,7 @@ void SceneWindow::manipulateObject3D() {
     if (selection.size() > 0 && selection[0].valid()) {
         ecs::EntityApi sel = selection[0].get();
         auto worldMatrix2D = sel.get<WorldTransform2D>().matrix;
-        Matrix4f worldMatrix3D = matrix2Dto3D(worldMatrix2D);
+        mat4_t worldMatrix3D = matrix2Dto3D(worldMatrix2D);
         ImGuizmo::OPERATION op = ImGuizmo::OPERATION::BOUNDS;
         if (currentTool == 2) {
             op = ImGuizmo::OPERATION::TRANSLATE_X | ImGuizmo::OPERATION::TRANSLATE_Y;
@@ -430,9 +440,9 @@ void SceneWindow::manipulateObject3D() {
                  ImGuizmo::OPERATION::TRANSLATE_Y;
         }
         ImGuizmo::MODE mode = (localGlobal == 0 && currentTool != 4) ? ImGuizmo::LOCAL : ImGuizmo::WORLD;
-        ImGuizmo::Manipulate(view.view3.viewMatrix.m, view.view3.projectionMatrix.m,
+        ImGuizmo::Manipulate(view.view3.viewMatrix.data, view.view3.projectionMatrix.data,
                              op, mode,
-                             worldMatrix3D.m,
+                             worldMatrix3D.data,
                              nullptr,
                              nullptr,
                              nullptr,

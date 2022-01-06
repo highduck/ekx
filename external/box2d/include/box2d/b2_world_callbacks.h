@@ -60,7 +60,7 @@ public:
 	virtual ~b2ContactFilter() {}
 
 	/// Return true if contact calculations should be performed between these two shapes.
-	/// @warning for performance reasons this is only called when the AABBs begin to overlap.
+	/// @warning for performance reasons this is only called when the AABBs canvas_begin to overlap.
 	virtual bool ShouldCollide(b2Fixture* fixtureA, b2Fixture* fixtureB);
 };
 
@@ -88,7 +88,7 @@ class B2_API b2ContactListener
 public:
 	virtual ~b2ContactListener() {}
 
-	/// Called when two fixtures begin to touch.
+	/// Called when two fixtures canvas_begin to touch.
 	virtual void BeginContact(b2Contact* contact) { B2_NOT_USED(contact); }
 
 	/// Called when two fixtures cease to touch.

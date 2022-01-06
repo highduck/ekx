@@ -1,7 +1,7 @@
 #include "target_follow_script.hpp"
 
 #include <ecxx/ecxx.hpp>
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/base/Node.hpp>
 
@@ -17,13 +17,13 @@ void target_follow_script::update(float dt) {
         if (target_entity.valid()) {
             auto parent = entity_.get<Node>().parent;
             if(parent) {
-                target = Transform2D::localToLocal(target_entity.ent(), parent, Vec2f::zero);
+                target = Transform2D::localToLocal(target_entity.ent(), parent, {});
             }
         } else {
             target_entity = nullptr;
         }
 
-        auto current = tr.getPosition() - offset;
+        auto current = vec2_t(tr.getPosition()) - offset;
         if (integration == integration_mode::Exp) {
             const float c = ::logf(1.0f - k) * fixed_frame_rate;
             current = current + (target - current) * (1.0f - exp(c * time_accum));
@@ -45,7 +45,7 @@ void target_follow_script::update(float dt) {
 }
 
 void target_follow_script::gui_gizmo() {
-    draw2d::fill_circle(CircleF{100.0f}, 0x00FFFFFF_argb, 0x77FFFFFF_argb, 10);
+    canvas_fill_circle({0.0f, 0.0f, 100.0f}, 0x00FFFFFF_argb, 0x77FFFFFF_argb, 10);
 }
 
 void target_follow_script::gui_inspector() {

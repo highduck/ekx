@@ -1,16 +1,16 @@
 #include "Trail2D.hpp"
 
 #include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/math/Easings.hpp>
 
 namespace ek {
 
-void Trail2D::update(const Matrix3x2f& m) {
+void Trail2D::update(const mat3x2_t m) {
     float dt = timer->dt;
-    auto scale2 = m.scale();
+    auto scale2 = mat2_get_scale(m.rot);
     scale = fminf(scale2.x, scale2.y);
-    update_position(m.transform(offset));
+    update_position(vec2_transform(offset, m));
 
     for (uint32_t i = nodes.first; i < nodes.end; ++i) {
         auto& node = nodes.data[i];
@@ -24,7 +24,7 @@ void Trail2D::update(const Matrix3x2f& m) {
     }
 }
 
-void Trail2D::update_position(Vec2f newPosition) {
+void Trail2D::update_position(vec2_t newPosition) {
 
     if (!initialized) {
         initialized = true;
@@ -35,7 +35,7 @@ void Trail2D::update_position(Vec2f newPosition) {
     //nextPosition.x += FastMath.Range(-10f, 10f);
     //nextPosition.y += FastMath.Range(-10f, 10f);
 //    auto pos = lastPosition;
-    const auto distanceSqr = length_sqr(newPosition - lastPosition);
+    const auto distanceSqr = vec2_length_sqr(newPosition - lastPosition);
 
 //    direction *= 1.0f / distance;
 
@@ -85,69 +85,70 @@ void TrailRenderer2D::draw() {
     }
 
     const uint32_t quads = columns - 1;
-    auto& drawer = draw2d::state;
 
-    drawer.set_image(image);
-    drawer.allocTriangles(columns * 2, quads * 6);
+    canvas_set_image(image);
+    canvas_triangles(columns * 2, quads * 6);
 
     auto node_idx = trail.nodes.first;
 
-    const auto co = drawer.color[0].offset;
-    const auto cm = drawer.color[0].scale;
-    auto texCoordU0 = spr->tex.center_x();
+    const auto co = canvas.color[0].offset;
+    const auto cm = canvas.color[0].scale;
+    auto texCoordU0 = RECT_CENTER_X(spr->tex);
     auto texCoordV0 = spr->tex.y;
-    auto texCoordU1 = spr->tex.center_x();
-    auto texCoordV1 = spr->tex.bottom();
+    auto texCoordU1 = RECT_CENTER_X(spr->tex);
+    auto texCoordV1 = RECT_B(spr->tex);
     if(spr->rotated) {
         texCoordU0 = spr->tex.x;
-        texCoordV0 = spr->tex.center_y();
-        texCoordU1 = spr->tex.right();
-        texCoordV1 = spr->tex.center_y();
+        texCoordV0 = RECT_CENTER_Y(spr->tex);
+        texCoordU1 = RECT_R(spr->tex);
+        texCoordV1 = RECT_CENTER_Y(spr->tex);
     }
 
     //const auto m = drawer.matrix;
     //drawer.matrix.set
-    auto* ptr = (draw2d::Vertex2D*)ek_canvas_.vertex_it;
+    ek_vertex2d* ptr = canvas.vertex_it;
 
     // we could generate vertices right into destination buffer :)
     for (int i = 0; i < columns; ++i) {
-        const Vec2f p = nodeArray[node_idx].position;
-        Vec2f perp{};
+        const auto p = nodeArray[node_idx].position;
+        vec2_t perp = {};
         if (i > 0/* node_idx > begin */) {
             perp = normalize_2f(nodeArray[node_idx - 1].position - p);
             if (i + 1 < columns) {
-                perp = normalize_2f(lerp(perp, normalize_2f(p - nodeArray[node_idx + 1].position), 0.5f));
+                perp = normalize_2f(vec2_lerp(perp, normalize_2f(p - nodeArray[node_idx + 1].position), 0.5f));
             }
         } else if (i + 1 < columns) {
             perp = normalize_2f(p - nodeArray[node_idx + 1].position);
         }
-        perp = perpendicular(perp);
+        perp = vec2_perp(perp);
 
         const auto energy = nodeArray[node_idx].energy;
         const auto easedEnergy = easing::P2_OUT.calculate(energy);
-        const auto r = Math::lerp(minWidth, width, easedEnergy);
+        const auto r = f32_lerp(minWidth, width, easedEnergy);
         const auto nodeScale = nodeArray[node_idx].scale;
         perp *= nodeScale * r;
 
-        const auto cm0 = cm.scaleAlpha(energy);
-        ptr->position = p - perp;
-        ptr->uv.x = texCoordU0;
-        ptr->uv.y = texCoordV0;
-        ptr->cm = cm0;
-        ptr->co = co;
+        const rgba_t cm0 = rgba_alpha_scale_f(cm, energy);
+        ptr->x = p.x - perp.x;
+        ptr->y = p.y - perp.y;
+        ptr->u = texCoordU0;
+        ptr->v = texCoordV0;
+        ptr->cm = cm0.value;
+        ptr->co = co.value;
         ++ptr;
-        ptr->position = p + perp;
-        ptr->uv.x = texCoordU1;
-        ptr->uv.y = texCoordV1;
-        ptr->cm = cm0;
-        ptr->co = co;
+        ptr->x = p.x + perp.x;
+        ptr->y = p.y + perp.y;
+        ptr->u = texCoordU1;
+        ptr->v = texCoordV1;
+        ptr->cm = cm0.value;
+        ptr->co = co.value;
         ++ptr;
         ++node_idx;
     }
 
     {
-        uint16_t v = ek_canvas_.vertex_base;
-        uint16_t* indices = ek_canvas_.index_it;
+        uint16_t v = canvas.vertex_base;
+        uint16_t* indices = canvas.index_it;
         for (int i = 0; i < quads; ++i) {
             *(indices++) = v;
             *(indices++) = v + 2;

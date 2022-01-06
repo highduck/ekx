@@ -10,7 +10,7 @@
 namespace ek {
 
 struct DynamicAtlasSprite {
-    Rect2f texCoords{0, 0, 1, 1};
+    rect_t texCoords = rect_01();
     sg_image image = {0};
 };
 

@@ -3,9 +3,9 @@
 #include <ek/scenex/StorageVariable.hpp>
 #include <ek/audio/audio.hpp>
 #include <ek/ds/String.hpp>
+#include <ek/math.h>
 #include <ek/util/Path.hpp>
 #include <ek/util/Type.hpp>
-#include <ek/math/Vec.hpp>
 
 namespace ek {
 
@@ -23,7 +23,7 @@ public:
 
     void setMusicParams(float volume = 1.0f, float pitch = 1.0f);
     void play_sound(const char* name, float vol = 1.0f, float pitch = 1.0f) const;
-    void play_sound_at(const char* name, const Vec2f& position, float vol = 1.0f, float pitch = 1.0f) const;
+    void play_sound_at(const char* name, vec2_t position, float vol = 1.0f, float pitch = 1.0f) const;
 
     void vibrate(int length) const;
 

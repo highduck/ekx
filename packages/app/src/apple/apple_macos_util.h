@@ -115,6 +115,8 @@ static void setViewMouseCursor(NSView* view) {
         case EK_MOUSE_CURSOR_PARENT:
             cursor = NSCursor.arrowCursor;
             break;
+        default:
+            __builtin_unreachable();
     }
 
     if (cursor) {

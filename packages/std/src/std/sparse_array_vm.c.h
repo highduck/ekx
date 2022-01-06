@@ -54,6 +54,7 @@ void ek_sparse_array_clear(ek_sparse_array* sa, const uint32_t num) {
 }
 
 void ek_sparse_array_free(ek_sparse_array* sa, const uint32_t num) {
+    (void)num;
     EK_ASSERT_R2(sa != 0);
     EK_ASSERT_R2(sa->data != 0);
     free(sa->data);

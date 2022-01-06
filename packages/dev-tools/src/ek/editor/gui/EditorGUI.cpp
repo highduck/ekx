@@ -47,10 +47,11 @@ void Editor::drawGUI() {
             auto* baseApp = Locator::get<basic_application>();
             if (baseApp) {
                 ImGui::Text("User Insets Absolute");
-                ImGui::DragFloat4("##userInsetsAbsolute", baseApp->display.info.userInsetsAbsolute.data());
+                ImGui::DragFloat4("##userInsetsAbsolute",
+                                  baseApp->display.info.userInsetsAbsolute.data);
                 ImGui::Text("User Insets Relative");
-                ImGui::SliderFloat4("##userInsetsRelative", baseApp->display.info.userInsetsRelative.data(), 0.0f,
-                                    1.0f);
+                ImGui::SliderFloat4("##userInsetsRelative",
+                                    baseApp->display.info.userInsetsRelative.data, 0.0f,1.0f);
             }
 
             ImGui::Separator();

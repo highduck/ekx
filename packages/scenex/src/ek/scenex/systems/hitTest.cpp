@@ -6,19 +6,24 @@
 
 namespace ek {
 
-ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, const Node& node, Vec2f parentPosition) {
+ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, const Node& node, vec2_t parentPosition) {
     if ((node.flags & Node::VisibleAndTouchable) != Node::VisibleAndTouchable) {
         return 0;
     }
 
-    Vec2f local = parentPosition;
+    vec2_t local = parentPosition;
     const auto* transform = w.tryGet<Transform2D>(e);
     if (transform) {
-        transform->matrix.transform_inverse(local, local);
+        const bool ok = vec2_transform_inverse(local, transform->matrix, &local);
+        // TODO: unlikely
+        if(!ok) {
+            // invalid transform, break
+            return 0;
+        }
     }
 
     auto* bounds = w.tryGet<Bounds2D>(e);
-    if (bounds && !bounds->rect.contains(local)) {
+    if (bounds && !rect_contains(bounds->rect, local)) {
         return 0;
     }
 
@@ -37,14 +42,14 @@ ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, const Node& 
         return e;
     }
 
-    if (bounds && bounds->hitArea && bounds->rect.contains(local)) {
+    if (bounds && bounds->hitArea && rect_contains(bounds->rect, local)) {
         return e;
     }
 
     return 0;
 }
 
-ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, Vec2f parentPosition) {
+ecs::EntityIndex hitTest2D(const ecs::World& w, ecs::EntityIndex e, vec2_t parentPosition) {
     return hitTest2D(w, e, w.get<Node>(e), parentPosition);
 }
 

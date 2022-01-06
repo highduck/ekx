@@ -49,14 +49,14 @@ void ExportItem::inc_ref(ExportItem& lib) {
     }
 }
 
-void ExportItem::update_scale(ExportItem& lib, const Matrix3x2f& parent_matrix) {
-    if (!node.scaleGrid.empty()) {
+void ExportItem::update_scale(ExportItem& lib, const mat3x2_t parent_matrix) {
+    if (!rect_is_empty(node.scaleGrid)) {
         estimated_scale = 1.0f;
         return;
     }
 
-    const auto global_matrix = parent_matrix * node.matrix;
-    const auto scale = global_matrix.scale();
+    const auto global_matrix = mat3x2_mul(parent_matrix, node.matrix);
+    const auto scale = mat3x2_get_scale(global_matrix);
     const auto s = std::max(scale.x, scale.y);
     estimated_scale = std::max(s, estimated_scale);
     if (ref && ref->elementType == ElementType::bitmap_item) {

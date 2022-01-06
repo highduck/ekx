@@ -77,7 +77,7 @@ bool shouldConvertItemToSprite(ExportItem& item) {
     } else if (!item.node.labels.empty() && item.node.labels[0].name == "*static") {
         // special user TAG
         return true;
-    } else if (!item.node.scaleGrid.empty()) {
+    } else if (!rect_is_empty(item.node.scaleGrid)) {
         // scale 9 grid items
         return true;
     }
@@ -94,12 +94,12 @@ void process_filters(const Element& el, ExportItem& item) {
     for (auto& filter: el.filters) {
         SGFilter fd;
         fd.type = SGFilterType::None;
-        fd.color = argb32_t{filter.color};
+        fd.color = argb32_t{filter.color.data};
         fd.blur = filter.blur;
         fd.quality = filter.quality;
 
         float a = Math::to_radians(filter.angle);
-        fd.offset = filter.distance * Vec2f{cosf(a), sinf(a)};
+        fd.offset = filter.distance * vec2(cosf(a), sinf(a));
 
         if (filter.type == FilterType::drop_shadow) {
             fd.type = SGFilterType::DropShadow;
@@ -137,24 +137,24 @@ void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
     if (el.lineType == TextLineType::Multiline) {
         tf.wordWrap = true;
     }
-    tf.rect = expand(el.rect, 2.0f);
+    tf.rect = rect_expand(el.rect, 2.0f);
 //    tf.rect = el.rect;
     tf.alignment = textRun.attributes.alignment;
     tf.lineHeight = textRun.attributes.lineHeight;
     tf.lineSpacing = textRun.attributes.lineSpacing;
 
     SGTextLayerData layer;
-    layer.color = argb32_t{textRun.attributes.color};
+    layer.color = argb32_t{textRun.attributes.color.data};
     tf.layers.push_back(layer);
 
     for (auto& filter: el.filters) {
-        layer.color = argb32_t{filter.color};
+        layer.color = argb32_t{filter.color.data};
         layer.blurRadius = std::fmin(filter.blur.x, filter.blur.y);
         layer.blurIterations = filter.quality;
         layer.offset = {};
         if (filter.type == FilterType::drop_shadow) {
             const float a = Math::to_radians(filter.angle);
-            layer.offset = filter.distance * Vec2f{cosf(a), sinf(a)};
+            layer.offset = filter.distance * vec2(cosf(a), sinf(a));
         }
         layer.strength = int(filter.strength);
         tf.layers.push_back(layer);
@@ -216,10 +216,7 @@ SGFile SGBuilder::export_library() {
     for (auto& item: library.node.children) {
         for (auto& child: item.children) {
             const auto* ref = library.find_library_item(child.libraryName);
-            if (ref &&
-                ref->node.sprite == ref->node.libraryName &&
-                ref->node.scaleGrid.empty()
-                    ) {
+            if (ref && ref->node.sprite == ref->node.libraryName && rect_is_empty(ref->node.scaleGrid)) {
                 child.sprite = ref->node.sprite;
                 child.libraryName = "";
             }
@@ -246,7 +243,7 @@ SGFile SGBuilder::export_library() {
 
     for (auto& item: library.node.children) {
         if (item.sprite == item.libraryName
-            && item.scaleGrid.empty()
+            && rect_is_empty(item.scaleGrid)
             && !isInLinkages(item.libraryName)) {
             continue;
         }
@@ -500,7 +497,7 @@ void SGBuilder::render(const ExportItem& item, ImageSet& toImageSet) const {
         );
         auto res = renderElement(doc, el, options);
         res.name = spriteID;
-        res.trim = item.node.scaleGrid.empty();
+        res.trim = rect_is_empty(item.node.scaleGrid);
         resolution.sprites.push_back(res);
     }
 }
@@ -511,7 +508,7 @@ void SGBuilder::build_sprites(ImageSet& toImageSet) const {
             item->node.sprite = item->ref->item.name;
             render(*item, toImageSet);
         }
-        if (!item->node.scaleGrid.empty()) {
+        if (!rect_is_empty(item->node.scaleGrid)) {
 
         }
     }

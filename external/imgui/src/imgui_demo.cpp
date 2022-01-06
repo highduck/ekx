@@ -2429,8 +2429,8 @@ static void ShowDemoWindowWidgets()
                 ImGui::EndPopup();
             }
             ImGui::Text(
-                "IsItemHovered() after begin = %d (== is title bar hovered)\n"
-                "IsItemActive() after begin = %d (== is window being clicked/moved)\n",
+                "IsItemHovered() after canvas_begin = %d (== is title bar hovered)\n"
+                "IsItemActive() after canvas_begin = %d (== is window being clicked/moved)\n",
                 ImGui::IsItemHovered(), ImGui::IsItemActive());
             ImGui::End();
         }
@@ -2458,7 +2458,7 @@ static void ShowDemoWindowLayout()
 
     if (ImGui::TreeNode("Child windows"))
     {
-        HelpMarker("Use child windows to begin into a self-contained independent scrolling/clipping regions within a host window.");
+        HelpMarker("Use child windows to canvas_begin into a self-contained independent scrolling/clipping regions within a host window.");
         static bool disable_mouse_wheel = false;
         static bool disable_menu = false;
         ImGui::Checkbox("Disable Mouse Wheel", &disable_mouse_wheel);

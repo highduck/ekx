@@ -1,8 +1,7 @@
 #pragma once
 
 #include <ek/ds/Array.hpp>
-#include <ek/ds/Hash.hpp>
-#include <ek/math/Rect.hpp>
+#include <ek/math.h>
 
 #include <ek/serialize/serialize.hpp>
 
@@ -10,7 +9,7 @@ namespace ek {
 
 class BMFontGlyph {
 public:
-    Rect2<int32_t> box;
+    recti_t box;
     int32_t advanceWidth;
     String sprite;
 
@@ -31,7 +30,7 @@ public:
     Array <BMFontGlyph> glyphs;
 
     // (codepoint: u32 | glyph_index: u32)
-    Array<uint32_t> codepoints;
+    Array <uint32_t> codepoints;
 
     template<typename S>
     void serialize(IO <S>& io) {

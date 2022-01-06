@@ -6,7 +6,7 @@
 
 namespace ek::xfl {
 
-cairo_matrix_t create_matrix(const Matrix3x2f& m) {
+cairo_matrix_t create_matrix(const mat3x2_t& m) {
     cairo_matrix_t cm;
     cm.xx = m.a;
     cm.yx = m.b;
@@ -17,7 +17,7 @@ cairo_matrix_t create_matrix(const Matrix3x2f& m) {
     return cm;
 }
 
-void cairo_transform(cairo_t* cr, const Matrix3x2f& m) {
+void cairo_transform(cairo_t* cr, const mat3x2_t& m) {
     cairo_matrix_t transform_matrix = create_matrix(m);
     cairo_transform(cr, &transform_matrix);
 }
@@ -52,7 +52,7 @@ void set_line_join(cairo_t* ctx, LineJoints join) {
     cairo_set_line_join(ctx, convert_line_join(join));
 }
 
-void set_solid_fill(cairo_t* context, const Vec4f& color) {
+void set_solid_fill(cairo_t* context, const vec4_t color) {
     cairo_set_source_rgba(context, color.x, color.y, color.z, color.w);
 }
 
@@ -131,16 +131,16 @@ void add_color_stops(cairo_pattern_t* pattern,
 }
 
 // https://github.com/lightspark/lightspark/blob/master/src/backends/graphics.cpp
-cairo_pattern_t* create_linear_pattern(const Matrix3x2f& matrix) {
-    const auto p0 = matrix.transform(-819.2f, 0.0f);
-    const auto p1 = matrix.transform(819.2f, 0.0f);
+cairo_pattern_t* create_linear_pattern(const mat3x2_t& matrix) {
+    const auto p0 = vec2_transform({{-819.2f, 0.0f}}, matrix);
+    const auto p1 = vec2_transform({{819.2f, 0.0f}}, matrix);
     return cairo_pattern_create_linear(p0.x, p0.y, p1.x, p1.y);
 }
 
-cairo_pattern_t* create_radial_pattern(const Matrix3x2f& matrix) {
-    const auto p0 = matrix.transform(0.0f, 0.0f);
-    const auto p1 = matrix.transform(819.2f, 0.0f);
-    const auto radius = length(p1 - p0);
+cairo_pattern_t* create_radial_pattern(const mat3x2_t& matrix) {
+    const auto p0 = vec2_transform({{0.0f, 0.0f}}, matrix);
+    const auto p1 = vec2_transform({{819.2f, 0.0f}}, matrix);
+    const auto radius = vec2_distance(p0, p1);
     return cairo_pattern_create_radial(p0.x, p0.y, 0.0, p0.x, p0.y, radius);
 }
 
@@ -180,7 +180,7 @@ fill_pattern_data_t create_fill_pattern(const FillStyle& fill, const TransformMo
     }
 
     if (pattern) {
-        auto matrix = create_matrix(transform.matrix * fill.matrix);
+        auto matrix = create_matrix(mat3x2_mul(transform.matrix, fill.matrix));
         cairo_matrix_invert(&matrix);
         cairo_pattern_set_matrix(pattern, &matrix);
 

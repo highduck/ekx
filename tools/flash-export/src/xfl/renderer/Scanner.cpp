@@ -15,7 +15,7 @@ void Scanner::reset() {
     stack_.clear();
     stack_.emplace_back();
     batches.clear();
-    bounds = {};
+    bounds = brect_inf();
 }
 
 void Scanner::drawInstance(const Doc& doc, const Element& element) {
@@ -91,12 +91,12 @@ void Scanner::popTransform() {
     stack_.pop_back();
 }
 
-Rect2f Scanner::getBounds(const Doc& doc, const Array<Element>& elements) {
+rect_t Scanner::getBounds(const Doc& doc, const Array<Element>& elements) {
     Scanner scanner{};
     for (auto& el: elements) {
         scanner.draw(doc, el);
     }
-    return scanner.bounds.rect();
+    return brect_get_rect(scanner.bounds);
 }
 
 // Convert concrete objects to render commands
@@ -116,24 +116,8 @@ bool Scanner::render(const Element& el, const TransformModel& world) {
     return !decoder.empty() && render(decoder.result());
 }
 
-Rect2f transform(const Matrix3x2f& m, const Rect2f& rc) {
-    const Vec2f corners[4] = {
-            m.transform(rc.x, rc.y),
-            m.transform(rc.right(), rc.y),
-            m.transform(rc.right(), rc.bottom()),
-            m.transform(rc.x, rc.bottom())
-    };
-    float xMin = corners[0].x;
-    float yMin = corners[0].y;
-    float xMax = corners[0].x;
-    float yMax = corners[0].y;
-    for (int i = 1; i < 4; ++i) {
-        xMin = fmin(xMin, corners[i].x);
-        yMin = fmin(yMin, corners[i].y);
-        xMax = fmax(xMax, corners[i].x);
-        yMax = fmax(yMax, corners[i].y);
-    }
-    return {xMin, yMin, xMax - xMin, yMax - yMin};
+rect_t transform(const mat3x2_t m, const rect_t rc) {
+    return rect_transform(rc, m);
 }
 
 bool Scanner::render(const BitmapData* bitmap, const TransformModel& world) {
@@ -143,19 +127,17 @@ bool Scanner::render(const BitmapData* bitmap, const TransformModel& world) {
     cmd.bitmap = bitmap;
     batch.commands.push_back(cmd);
 
-    const Rect2f rc{0.0f, 0.0f,
-                    static_cast<float>(bitmap->width),
-                    static_cast<float>(bitmap->height)};
-    batch.bounds.add(rc, world.matrix);
+    const rect_t rc = rect_wh((float)bitmap->width, (float)bitmap->height);
+    batch.bounds = brect_extend_transformed_rect(batch.bounds, rc, world.matrix);
 
     return render(batch);
 }
 
 
 bool Scanner::render(const RenderCommandsBatch& batch) {
-    if (!batch.commands.empty() && !batch.bounds.empty()) {
+    if (!batch.commands.empty() && !brect_is_empty(batch.bounds)) {
         batches.push_back(batch);
-        bounds.add(batch.bounds.rect());
+        bounds = brect_extend_rect(bounds, brect_get_rect(batch.bounds));
         return true;
     }
     return false;
@@ -166,14 +148,14 @@ bool Scanner::renderShapeObject(const Element& el, const TransformModel& world) 
         return false;
     }
     const auto& shape = *el.shape;
-    Rect2f rc{shape.x, shape.y, shape.objectWidth, shape.objectHeight};
+    rect_t rc = rect(shape.x, shape.y, shape.objectWidth, shape.objectHeight);
     Op op = el.elementType == ElementType::object_rectangle ? Op::rectangle : Op::oval;
 
     RenderCommand cmd{op};
     cmd.v[0] = rc.x;
     cmd.v[1] = rc.y;
-    cmd.v[2] = rc.right();
-    cmd.v[3] = rc.bottom();
+    cmd.v[2] = RECT_R(rc);
+    cmd.v[3] = RECT_B(rc);
     switch (el.elementType) {
         case ElementType::object_rectangle:
             cmd.v[4] = shape.topLeftRadius;
@@ -199,7 +181,7 @@ bool Scanner::renderShapeObject(const Element& el, const TransformModel& world) 
     batch.commands.push_back(cmd);
 
     const float hw = cmd.stroke ? (cmd.stroke->weight / 2.0f) : 0.0f;
-    batch.bounds.add(rc, world.matrix, hw);
+    batch.bounds = brect_extend_transformed_rect(batch.bounds, rect_expand(rc, hw), world.matrix);
     return render(batch);
 }
 

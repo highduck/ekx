@@ -29,11 +29,11 @@ enum class RandColorMode {
 
 class RandColorData {
 public:
-    Array <argb32_t> colors{argb32_t{0xFFFFFFFF}};
+    Array <rgba_t> colors{rgba_u32(0xFFFFFFFF)};
     RandColorMode mode = RandColorMode::RandElement;
     mutable int state = 0;
 
-    argb32_t next() const {
+    rgba_t next() const {
         ++state;
         int index_max = int(colors.size() - 1);
         if (colors.empty()) {
@@ -45,27 +45,27 @@ public:
                 float t = rand_fx.random(0.0f, float(index_max));
                 int i = int(t);
                 t = Math::fract(t);
-                return lerp(colors[i], colors[i + 1], t);
+                return rgba_lerp(colors[i], colors[i + 1], t);
             }
             case RandColorMode::RandElement:
                 return colors[rand_fx.random_int(0, index_max)];
             case RandColorMode::Continuous:
                 return colors[state % colors.size()];
         }
-        return argb32_t{0xFFFFFFFF};
+        return rgba_u32(0xFFFFFFFF);
     }
 
-    void set_gradient(argb32_t color1, argb32_t color2) {
+    void set_gradient(rgba_t color1, rgba_t color2) {
         colors = {color1, color2};
         mode = RandColorMode::RandLerp;
     }
 
-    void set_steps(argb32_t color1, argb32_t color2) {
+    void set_steps(rgba_t color1, rgba_t color2) {
         colors = {color1, color2};
         mode = RandColorMode::Continuous;
     }
 
-    void set_solid(argb32_t color) {
+    void set_solid(rgba_t color) {
         colors = {color};
         mode = RandColorMode::Continuous;
     }
@@ -120,7 +120,7 @@ struct ParticleDecl {
     ParticleScaleMode scale_mode = ParticleScaleMode::None;
     ParticleAlphaMode alpha_mode = ParticleAlphaMode::None;
     FloatRange alpha_start{1.0};
-    Vec2f acceleration = Vec2f::zero;
+    vec2_t acceleration = {};
     bool use_reflector = false;
 
     FloatRange life_time{1.0f};
@@ -132,7 +132,7 @@ struct ParticleDecl {
     FloatRange scale_end{0.0f};
 
     RandColorData color;
-    argb32_t color_offset{0x0};
+    argb32_t color_offset{0x0u};
     float additive = 0.0f;
 
     FloatRange rotation{0.0f};
@@ -145,8 +145,8 @@ struct ParticleDecl {
 struct EmitterData {
     float interval = 0.5f;
     int burst = 1;
-    Rect2f rect;
-    Vec2f offset;
+    rect_t rect = {};
+    vec2_t offset = {};
 
     FloatRange burst_rotation_delta{1.0f, 1.5f};
 

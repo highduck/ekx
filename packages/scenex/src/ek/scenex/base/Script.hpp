@@ -107,16 +107,16 @@ public:
         }
         auto* holder = entity_.tryGet<ScriptHolder>();
         EK_ASSERT(holder);
-        for (auto& script : holder->list) {
+        for (auto& script: holder->list) {
             script->draw();
         }
     }
 
     [[nodiscard]]
-    Rect2f getBounds() const override { return delegate ? delegate->getBounds() : Rect2f{}; }
+    rect_t getBounds() const override { return delegate ? delegate->getBounds() : rect_t{}; }
 
     [[nodiscard]]
-    bool hitTest(Vec2f point) const override { return delegate && delegate->hitTest(point); }
+    bool hitTest(vec2_t point) const override { return delegate && delegate->hitTest(point); }
 };
 
 template<typename S>
@@ -127,16 +127,15 @@ inline S& assignScript(ecs::EntityApi e) {
 }
 
 template<typename S>
-inline S& findScript(ecs::EntityApi e) {
+inline S* findScript(ecs::EntityApi e) {
     const auto interest_type_id = TypeIndex<S, ScriptBase>::value;
     auto& h = e.get<ScriptHolder>();
-    for (auto& script : h.list) {
+    for (auto& script: h.list) {
         if (script && script->get_type_id() == interest_type_id) {
-            return static_cast<S&>(*script);
+            return (S*) script.get();
         }
     }
-    // unreachable
-    EK_ASSERT(false);
+    return nullptr;
 }
 
 void updateScripts();
@@ -145,5 +144,5 @@ EK_TYPE_INDEX_T(IDrawable2D, ScriptDrawable2D, 6);
 
 }
 
-#define EK_DECL_SCRIPT_CPP(Tp,...) class Tp : public ek::Script<Tp>
+#define EK_DECL_SCRIPT_CPP(Tp, ...) class Tp : public ek::Script<Tp>
 

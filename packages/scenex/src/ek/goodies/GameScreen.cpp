@@ -225,22 +225,23 @@ void GameScreenManager::defaultTransitionEffect(GameScreenManager* gsm) {
         const auto t = state.getPrevProgress();
         auto& transform = prev.get<Transform2D>();
         float r = easing::P2_IN.calculate(t);
-        transform.color.setAlpha(1.0f - r);
+
+        transform.color.scale.a = unorm8_f32_clamped(1.0f - r);
         //transform.color.setAdditive(r * r);
         float s = 1.0f + r * 0.3f;
         transform.setScale(s);
-        transform.setPosition(Vec2f::zero, Vec2f::zero, state.screenRect.center());
+        transform.setPosition({}, {}, rect_center(state.screenRect));
     }
 
     if (next) {
         const auto t = state.getNextProgress();
         auto& transform = next.get<Transform2D>();
         float r = easing::P2_OUT.calculate(t);
-        transform.color.setAlpha(r);
-        //transform.color.setAdditive((1.0f - r) * (1.0f - r));
+        transform.color.scale.a = unorm8_f32_clamped(r);
+        //transform.color.offset.a = unorm8_f32_clamped(((1.0f - r) * (1.0f - r)));
         float s = 1.0f + (1.0f - r) * 0.3f;
         transform.setScale(s);
-        transform.setPosition(Vec2f::zero, Vec2f::zero, state.screenRect.center());
+        transform.setPosition({}, {}, rect_center(state.screenRect));
     }
 }
 }

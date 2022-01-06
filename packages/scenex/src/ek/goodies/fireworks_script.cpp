@@ -30,11 +30,11 @@ void fireworks_script::update(float dt) {
         auto& emitter = entity_.get<ParticleEmitter2D>();
 
         auto rect = find_parent_layout_rect(entity_, true);
-        rect.height = rect.height * 0.5f;
+        rect.h *= 0.5f;
 
         emitter.position = {
-                random(rect.x, rect.right()),
-                random(rect.y, rect.bottom())
+                random(rect.x, RECT_R(rect)),
+                random(rect.y, RECT_B(rect))
         };
 
         Locator::ref<AudioManager>().play_sound("sfx/firework", random(0.5f, 1.0f));

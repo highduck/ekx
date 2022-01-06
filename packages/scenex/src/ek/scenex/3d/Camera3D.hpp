@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ek/math/Math.hpp>
-#include <ek/math/Vec.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/util/Type.hpp>
 #include <ecxx/ecxx_fwd.hpp>
@@ -22,12 +21,12 @@ struct Camera3D {
     float fov = Math::to_radians(45.0f);
 
     // camera up vector
-    Vec3f up{0.0f, 0.0f, 1.0f};
+    vec3_t up = vec3(0, 0,1);
 
     bool clearColorEnabled = true;
     bool clearDepthEnabled = true;
 
-    Vec4f clearColor{0.5f, 0.5f, 0.5f, 1.0f};
+    vec4_t clearColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
     float clearDepth = 1.0f;
 
     ek_ref(sg_image) cubeMap;

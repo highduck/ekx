@@ -2,27 +2,23 @@
 
 #include <cstdint>
 #include "Vec.hpp"
+#include <ek/math.h>
 
 namespace ek {
 
-inline uint8_t sat_add_u8(uint8_t a, uint8_t b) {
-    uint8_t c;
-    return __builtin_add_overflow(a, b, &c) ? 0xFF : c;
-}
-
 struct abgr32_t final {
 
-    static const abgr32_t zero;
-    static const abgr32_t one;
-    static const abgr32_t black;
+//    static const abgr32_t zero;
+//    static const abgr32_t one;
+//    static const abgr32_t black;
 
 #include <ek/math/internal/compiler_unsafe_begin.h>
 
     union {
-        uint32_t abgr;
         struct {
             uint8_t r, g, b, a;
         };
+        uint32_t abgr;
     };
 
 #include <ek/math/internal/compiler_unsafe_end.h>
@@ -31,7 +27,7 @@ struct abgr32_t final {
     abgr32_t() noexcept {
     }
 
-    constexpr abgr32_t(uint32_t abgr_) noexcept : abgr{abgr_} {
+    constexpr abgr32_t(uint32_t abgr_) noexcept: abgr{abgr_} {
 
     }
 
@@ -39,12 +35,11 @@ struct abgr32_t final {
             : r{r_}, g{g_}, b{b_}, a{a_} {}
 
     constexpr abgr32_t operator*(abgr32_t multiplier) const {
-        return abgr32_t{
-                static_cast<uint8_t>((r * multiplier.r * 258u) >> 16u),
-                static_cast<uint8_t>((g * multiplier.g * 258u) >> 16u),
-                static_cast<uint8_t>((b * multiplier.b * 258u) >> 16u),
-                static_cast<uint8_t>((a * multiplier.a * 258u) >> 16u)
-        };
+        return rgba_mul(*this, multiplier).value;
+    }
+
+    constexpr operator rgba_t() const noexcept {
+        return {.value = abgr};
     }
 
     abgr32_t& operator*=(const abgr32_t multiplier) {
@@ -58,10 +53,7 @@ struct abgr32_t final {
     }
 
     abgr32_t operator+(const abgr32_t offset) const {
-        return {sat_add_u8(r, offset.r),
-                sat_add_u8(g, offset.g),
-                sat_add_u8(b, offset.b),
-                sat_add_u8(a, offset.a)};
+        return rgba_add(*this, offset).value;
     }
 
     constexpr abgr32_t operator|(uint32_t mask) const {
@@ -77,7 +69,7 @@ struct abgr32_t final {
     constexpr void af(float value) { a = uint8_t(static_cast<uint16_t>(value * 255.0f) & 0xFFu); }
 
     [[nodiscard]] constexpr abgr32_t scaleAlpha(float scale) const {
-        return abgr32_t{(static_cast<uint8_t>(scale * a) << 24u) | (abgr & 0xFFFFFFu)};
+        return rgba_alpha_scale_f(*this, scale).value;
     }
 
     template<typename T>
@@ -95,10 +87,10 @@ struct argb32_t final {
 #include <ek/math/internal/compiler_unsafe_begin.h>
 
     union {
-        uint32_t argb;
         struct {
             uint8_t b, g, r, a;
         };
+        uint32_t argb;
     };
 
 #include <ek/math/internal/compiler_unsafe_end.h>
@@ -118,6 +110,10 @@ struct argb32_t final {
               g{static_cast<uint8_t>(int(g_ * 255) & 0xFFu)},
               r{static_cast<uint8_t>(int(r_ * 255) & 0xFFu)},
               a{static_cast<uint8_t>(int(a_ * 255) & 0xFFu)} {
+    }
+
+    constexpr explicit argb32_t(const float v[4]) :
+            argb32_t(v[0], v[1], v[2], v[3]) {
     }
 
     template<typename T>
@@ -143,7 +139,12 @@ struct argb32_t final {
     }
 
     [[nodiscard]] constexpr abgr32_t abgr() const noexcept {
-        return abgr32_t{(argb & 0xFF00FF00u) | (static_cast<uint32_t>(b) << 16u) | r};
+        return abgr32_t{(argb & 0xFF00FF00u) | ((uint32_t) (b) << 16u) | r};
+    }
+
+    constexpr operator rgba_t() const noexcept {
+//        return {{r, g, b, a}};
+        return {.value = COL32_SWAP_RB(argb)};
     }
 
     constexpr operator abgr32_t() const noexcept {
@@ -170,10 +171,10 @@ struct argb32_t final {
     }
 
     argb32_t operator+(const argb32_t offset) const {
-        return {sat_add_u8(r, offset.r),
-                sat_add_u8(g, offset.g),
-                sat_add_u8(b, offset.b),
-                sat_add_u8(a, offset.a)};
+        return {u8_add_sat(r, offset.r),
+                u8_add_sat(g, offset.g),
+                u8_add_sat(b, offset.b),
+                u8_add_sat(a, offset.a)};
     }
 
     constexpr argb32_t operator|(uint32_t mask) const {
@@ -217,9 +218,9 @@ inline constexpr argb32_t argb32_t::zero{0x0u};
 inline constexpr argb32_t argb32_t::one{0xFFFFFFFFu};
 inline constexpr argb32_t argb32_t::black{0xFF000000u};
 
-inline constexpr abgr32_t abgr32_t::zero{0x0u};
-inline constexpr abgr32_t abgr32_t::one{0xFFFFFFFFu};
-inline constexpr abgr32_t abgr32_t::black{0xFF000000u};
+//inline constexpr abgr32_t abgr32_t::zero{0x0u};
+//inline constexpr abgr32_t abgr32_t::one{0xFFFFFFFFu};
+//inline constexpr abgr32_t abgr32_t::black{0xFF000000u};
 
 constexpr argb32_t operator "" _argb(unsigned long long n) noexcept {
     return argb32_t(0xFFFFFFFFu & n);
@@ -249,37 +250,27 @@ inline abgr32_t lerp(abgr32_t begin, abgr32_t end, float t) {
 
 
 struct ColorMod32 {
-    abgr32_t scale = abgr32_t::one;
-    abgr32_t offset = abgr32_t::zero;
+    abgr32_t scale = 0xFFFFFFFFu;
+    abgr32_t offset = 0x0;
 
-    ColorMod32() = default;
+//    ColorMod32() = default;
+//
+//    explicit ColorMod32(argb32_t scale_, argb32_t offset_ = argb32_t::zero) :
+//            scale{scale_},
+//            offset{offset_} {
+//    }
+//
+//    explicit ColorMod32(abgr32_t scale_, abgr32_t offset_ = abgr32_t::zero) :
+//            scale{scale_},
+//            offset{offset_} {
+//    }
 
-    explicit ColorMod32(argb32_t scale_, argb32_t offset_ = argb32_t::zero) :
-            scale{scale_},
-            offset{offset_} {
-    }
-
-    explicit ColorMod32(abgr32_t scale_, abgr32_t offset_ = abgr32_t::zero) :
-            scale{scale_},
-            offset{offset_} {
-    }
-
-    ColorMod32 operator*(ColorMod32 r) const {
-        return ColorMod32{
-                r.scale.abgr != 0xFFFFFFFF ? scale * r.scale : scale,
-                r.offset.abgr != 0 ? abgr32_t{sat_add_u8(offset.r, ((r.offset.r * scale.r * 258u) >> 16u)),
-                                              sat_add_u8(offset.g, ((r.offset.g * scale.g * 258u) >> 16u)),
-                                              sat_add_u8(offset.b, ((r.offset.b * scale.b * 258u) >> 16u)),
-                                              sat_add_u8(offset.a, r.offset.a)} : offset
-        };
+    constexpr operator color_mod_t() const {
+        return {scale, offset};
     }
 
     inline static void multiply(ColorMod32 l, ColorMod32 r, ColorMod32& out) {
-        out.scale = l.scale * r.scale;
-        out.offset = {sat_add_u8(l.offset.r, ((r.offset.r * l.scale.r * 258u) >> 16u)),
-                      sat_add_u8(l.offset.g, ((r.offset.g * l.scale.g * 258u) >> 16u)),
-                      sat_add_u8(l.offset.b, ((r.offset.b * l.scale.b * 258u) >> 16u)),
-                      sat_add_u8(l.offset.a, r.offset.a)};
+        color_mod_mul((color_mod_t*) &out, l, r);
     }
 
     inline void setAlpha(float alpha) {

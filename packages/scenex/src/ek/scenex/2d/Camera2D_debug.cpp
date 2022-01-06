@@ -1,4 +1,4 @@
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/util/ServiceLocator.hpp>
 #include <ek/time.h>
@@ -8,45 +8,45 @@
 #include "Transform2D.hpp"
 #include "Display2D.hpp"
 #include <ek/scenex/base/Script.hpp>
-#include <ek/math/BoundsBuilder.hpp>
 
 namespace ek {
 
 void debugDrawPointer(Camera2D& camera) {
     auto& im = Locator::ref<InteractionSystem>();
-    auto ptr = im.pointerScreenPosition_;
-    auto v = camera.screenToWorldMatrix.transform(ptr.x, ptr.y);
+    auto v = im.pointerScreenPosition_;
+    v = vec2_transform(v, camera.screenToWorldMatrix);
     float t = TimeLayer::Root->total;
-    draw2d::state.set_empty_image();
+    canvas_set_empty_image();
     if (im.pointerDown_) {
-        draw2d::fill_circle({v.x, v.y, 12 + 2 * sinf(t * 8)}, 0x00FFFF00_argb, 0x77FF0000_argb, 10);
+        canvas_fill_circle(circle(v.x, v.y, 12 + 2 * sinf(t * 8)), 0x00FFFF00_argb, 0x77FF0000_argb, 10);
     }
     else {
-        draw2d::fill_circle({v.x, v.y, 12 + 2 * sinf(t)}, 0x0_argb, 0x77FFFFFF_argb, 10);
+        canvas_fill_circle(circle(v.x, v.y, 12 + 2 * sinf(t)), 0x0_argb, 0x77FFFFFF_argb, 10);
     }
 }
 
-void drawBox(const Rect2f& rc, const Matrix3x2f& m, argb32_t color1, argb32_t color2,
+void drawBox(const rect_t rc, const mat3x2_t m, argb32_t color1, argb32_t color2,
              bool cross = true, argb32_t fillColor = 0_argb) {
 
-    draw2d::state.set_empty_image();
+    canvas_set_empty_image();
     if (fillColor != argb32_t::zero) {
-        draw2d::state.save_matrix();
-        draw2d::state.matrix[0] = m;
-        draw2d::quad(rc, fillColor);
-        draw2d::state.restore_matrix();
+        canvas_save_matrix();
+        canvas.matrix[0] = m;
+        canvas_fill_rect(rc, fillColor);
+        canvas_restore_matrix();
     }
-    auto v1 = m.transform(rc.x, rc.y);
-    auto v2 = m.transform(rc.right(), rc.y);
-    auto v3 = m.transform(rc.right(), rc.bottom());
-    auto v4 = m.transform(rc.x, rc.bottom());
-    draw2d::line(v1, v2, color1, color2, 2, 1);
-    draw2d::line(v2, v3, color1, color2, 1, 2);
-    draw2d::line(v3, v4, color1, color2, 2, 1);
-    draw2d::line(v4, v1, color1, color2, 1, 2);
+    const auto bb = brect_from_rect(rc);
+    const auto v1 = vec2_transform(bb.min, m);
+    const auto v2 = vec2_transform(vec2(bb.x1, bb.y0), m);
+    const auto v3 = vec2_transform(bb.max, m);
+    const auto v4 = vec2_transform(vec2(bb.x0, bb.y1), m);
+    canvas_line_ex(v1, v2, color1, color2, 2, 1);
+    canvas_line_ex(v2, v3, color1, color2, 1, 2);
+    canvas_line_ex(v3, v4, color1, color2, 2, 1);
+    canvas_line_ex(v4, v1, color1, color2, 1, 2);
     if (cross) {
-        draw2d::line(v1, v3, color1, color2, 2, 2);
-        draw2d::line(v2, v4, color1, color2, 1, 1);
+        canvas_line_ex(v1, v3, color1, color2, 2, 2);
+        canvas_line_ex(v2, v4, color1, color2, 1, 1);
     }
 }
 
@@ -56,7 +56,7 @@ void debugDrawHitTarget(Camera2D& camera) {
     if (!target) {
         return;
     }
-    Matrix3x2f matrix{};
+    mat3x2_t matrix = mat3x2_identity();
     auto* worldTransform = findComponentInParent<WorldTransform2D>(target);
     if (worldTransform) {
         matrix = worldTransform->matrix;
@@ -104,20 +104,21 @@ void traverseVisibleNodes(ecs::EntityApi e, const WorldTransform2D* parentTransf
 
 void drawFills(Camera2D& camera) {
 
-    draw2d::state.save_transform();
-    draw2d::state.color[0] = {};
-    draw2d::state.set_empty_image();
+    canvas_save_transform();
+    canvas.color[0] = color_mod_identity();
+    canvas_set_empty_image();
 
     traverseVisibleNodes<Display2D>(
             camera.root.ent(),
             nullptr,
             [](Display2D& display, const WorldTransform2D* transform) {
                 if (display.drawable) {
-                    draw2d::quad(display.getBounds(), 0x33FFFFFF_argb);
+                    canvas_fill_rect(display.getBounds(), 0x33FFFFFF_argb);
                     drawBox(display.getBounds(), transform->matrix, argb32_t::black, argb32_t::one,
                             false, 0x33FFFFFF_argb);
                 } else {
-                    draw2d::fill_circle({transform->matrix.transform(0, 0), 20.0f}, 0xFFFF0000_argb,
+                    const auto v = vec2_transform(vec2(0, 0), transform->matrix);
+                    canvas_fill_circle(circle(v.x, v.y, 20.0f), 0xFFFF0000_argb,
                                         0x77FF0000_argb, 7);
                 }
             });
@@ -138,31 +139,30 @@ void drawFills(Camera2D& camera) {
                 }
             });
 
-    draw2d::state.restore_transform();
+    canvas_restore_transform();
 }
 
 void drawOcclusion(Camera2D& camera) {
 
-    draw2d::state.save_transform();
-    draw2d::state.color[0] = {};
-    draw2d::state.set_empty_image();
+    canvas_save_transform();
+    canvas.color[0] = color_mod_identity();
+    canvas_set_empty_image();
     auto cameraRect = camera.worldRect;
     traverseVisibleNodes<Bounds2D>(camera.root.ent(), nullptr,
                                    [cameraRect](const Bounds2D& bounds, const WorldTransform2D* transform) {
-                                       const auto worldRect = BoundsBuilder2f::transform(bounds.rect,
-                                                                                         transform->matrix);
-                                       const bool occluded = !worldRect.overlaps(cameraRect);
+                                       const rect_t worldRect = rect_transform(bounds.rect,transform->matrix);
+                                       const bool occluded = !rect_overlaps(worldRect, cameraRect);
                                        const auto worldColor = occluded ? 0x77FF0000_argb : 0x7700FF00_argb;
-                                       drawBox(worldRect, Matrix3x2f{}, worldColor, worldColor, false);
+                                       drawBox(worldRect, mat3x2_identity(), worldColor, worldColor, false);
                                        const auto boundsColor = occluded ? 0x77770000_argb : 0x77007700_argb;
                                        drawBox(bounds.rect, transform->matrix, boundsColor, boundsColor, false);
                                    });
-    draw2d::state.restore_transform();
+    canvas_restore_transform();
 }
 
 void debugCameraGizmo(Camera2D& camera) {
-    auto rc = expand(camera.worldRect, -10.0f);
-    drawBox(rc, Matrix3x2f{}, 0xFFFFFFFF_argb, 0xFF000000_argb);
+    auto rc = rect_expand(camera.worldRect, -10.0f);
+    drawBox(rc, mat3x2_identity(), 0xFFFFFFFF_argb, 0xFF000000_argb);
 
     {
         // it's not correct because:
@@ -170,19 +170,19 @@ void debugCameraGizmo(Camera2D& camera) {
         // - viewport's MVP matrix
         // TODO: make display-space debug drawing for all viewports via inspector
         const auto& vp = camera.viewportNode.get().get<Viewport>();
-        draw2d::quad(vp.output.safeRect, 0x77FF00FF_argb);
-        draw2d::quad(0.0f, 0.0f, vp.options.baseResolution.x, vp.options.baseResolution.y, 0x7700FFFF_argb);
+        canvas_fill_rect(vp.output.safeRect, 0x77FF00FF_argb);
+        canvas_quad_color(0, 0, vp.options.baseResolution.x, vp.options.baseResolution.y, 0x7700FFFF_argb);
     }
-    auto v = camera.screenToWorldMatrix.transform(camera.screenRect.relative(camera.relativeOrigin));
-
-    draw2d::fill_circle({v, 10.0f}, 0x00FFFFFF_argb, 0x44FFFFFF_argb, 7);
-    draw2d::line(v - Vec2f{20, 0}, v + Vec2f{20, 0}, 0xFF000000_argb, 0xFFFFFFFF_argb, 1, 3);
-    draw2d::line(v - Vec2f{0, 20}, v + Vec2f{0, 20}, 0xFF000000_argb, 0xFFFFFFFF_argb, 3, 1);
+    auto v = camera.screenRect.position + camera.relativeOrigin * camera.screenRect.size;
+    v = vec2_transform(v, camera.screenToWorldMatrix);
+    canvas_fill_circle(circle(v.x, v.y, 10.0f), 0x00FFFFFF_argb, 0x44FFFFFF_argb, 7);
+    canvas_line_ex(v - vec2(20, 0), v + vec2(20, 0), 0xFF000000_argb, 0xFFFFFFFF_argb, 1, 3);
+    canvas_line_ex(v - vec2(0, 20), v + vec2(0, 20), 0xFF000000_argb, 0xFFFFFFFF_argb, 3, 1);
 }
 
 void Camera2D::drawGizmo(Camera2D& camera) {
-    draw2d::state.matrix[0].set_identity();
-    draw2d::state.color[0] = {};
+    canvas.matrix[0] = mat3x2_identity();
+    canvas.color[0] = color_mod_identity();
 
     if (camera.debugVisibleBounds) {
         drawFills(camera);
@@ -197,16 +197,16 @@ void Camera2D::drawGizmo(Camera2D& camera) {
         debugDrawPointer(camera);
     }
     if (camera.debugGizmoSelf) {
-        draw2d::state.matrix[0].set_identity();
-        draw2d::state.color[0] = {};
+        canvas.matrix[0] = mat3x2_identity();
+        canvas.color[0] = color_mod_identity();
         debugCameraGizmo(camera);
     }
     if (camera.debugDrawScriptGizmo) {
         for (auto e : ecs::view<ScriptHolder>()) {
             auto* worldTransform = findComponentInParent<WorldTransform2D>(e);
             if (worldTransform) {
-                draw2d::state.matrix[0] = worldTransform->matrix;
-                draw2d::state.color[0] = worldTransform->color;
+                canvas.matrix[0] = worldTransform->matrix;
+                canvas.color[0] = worldTransform->color;
                 for (auto& script : e.get<ScriptHolder>().list) {
                     script->gui_gizmo();
                 }

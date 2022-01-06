@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/math/Vec.hpp>
+#include <ek/math.h>
 #include <ek/ds/String.hpp>
 
 namespace ek {
@@ -9,12 +9,12 @@ namespace ek {
 struct BubbleText {
     float delay = 0.0f;
     float time = 0.0f;
-    Vec2f start{};
-    Vec2f offset{};
+    vec2_t start = {};
+    vec2_t offset = {};
 
     static void updateAll();
 
-    static ecs::EntityApi create(const char* fontName, const String& text, const Vec2f& pos, float delay = 0.0f);
+    static ecs::EntityApi create(const char* fontName, const String& text, vec2_t pos, float delay = 0.0f);
 };
 
 ECX_TYPE(20, BubbleText);

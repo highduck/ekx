@@ -27,14 +27,9 @@ void GameWindow::onDraw() {
         {
             // update size;
             const float k = display.info.dpiScale;
-            display.info.destinationViewport = Rect2f{
-                    k * displayPos.x, k * displayPos.y,
-                    k * displaySize.x, k * displaySize.y
-            };
-            display.info.window.x = displaySize.x;
-            display.info.window.y = displaySize.y;
-            display.info.size.x = k * displaySize.x;
-            display.info.size.y = k * displaySize.y;
+            display.info.destinationViewport = k * rect(displayPos.x, displayPos.y,displaySize.x, displaySize.y);
+            display.info.window = vec2(displaySize.x, displaySize.y);
+            display.info.size = k * vec2(displaySize.x, displaySize.y);
         }
     }
     auto* ic = Locator::get<input_controller>();

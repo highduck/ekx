@@ -5,7 +5,7 @@
 #include <ek/ds/String.hpp>
 #include <ek/util/Signal.hpp>
 #include <ek/util/Type.hpp>
-#include <ek/math/Rect.hpp>
+#include <ek/math.h>
 
 namespace ek {
 
@@ -65,7 +65,7 @@ struct ScreenTransitionState {
     float delay = 0.15f;
     float delayTimer = 0.0f;
 
-    Rect2f screenRect{};
+    rect_t screenRect = {};
 
     void checkStates();
 

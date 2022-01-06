@@ -42,6 +42,12 @@ struct Rect<2, T> final {
 
 #include <ek/math/internal/compiler_unsafe_end.h>
 
+    constexpr Rect(const rect_t rc) : x{rc.x},
+                                y{rc.y},
+                                width{rc.w},
+                                height{rc.h} {
+    }
+
     constexpr Rect() noexcept: x{0},
                                y{0},
                                width{0},
@@ -57,10 +63,10 @@ struct Rect<2, T> final {
     }
 
     template<typename S>
-    constexpr Rect(S x_, S y_ = 0, S width_ = 0, S height_ = 0) noexcept: x{(T)x_},
-                                                                          y{(T)y_},
-                                                                          width{(T)width_},
-                                                                          height{(T)height_} {
+    constexpr Rect(S x_, S y_ = 0, S width_ = 0, S height_ = 0) noexcept: x{(T) x_},
+                                                                          y{(T) y_},
+                                                                          width{(T) width_},
+                                                                          height{(T) height_} {
 
     }
 
@@ -236,6 +242,14 @@ struct Rect<2, T> final {
 
     static const self_type zero_one;
     static const self_type zero;
+
+    constexpr operator rect_t() const {
+        return {{(float) x, (float) y, (float) width, (float) height}};
+    }
+
+    constexpr operator rect_i16_t() const {
+        return {{(int16_t) x, (int16_t) y, (int16_t) width, (int16_t) height}};
+    }
 };
 
 template<typename T>

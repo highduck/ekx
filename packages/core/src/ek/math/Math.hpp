@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <ek/math.h>
 
 namespace ek::Math {
 

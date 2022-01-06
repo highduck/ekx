@@ -216,7 +216,7 @@ void DocParser::parse(const xml_node& node, FillStyle& r) const {
             case FillType::bitmap:
                 r.spreadMethod = SpreadMethod::repeat;
                 r.matrix << el;
-                r.matrix = r.matrix.scale(1.0f / 20.0f, 1.0f / 20.0f);
+                mat3x2_scale(&r.matrix, vec2(1.0f / 20.0f, 1.0f / 20.0f));
                 r.bitmapPath = el.attribute("bitmapPath").value();
                 {
                     const auto* item = doc.find(r.bitmapPath, ElementType::bitmap_item);
@@ -231,7 +231,7 @@ void DocParser::parse(const xml_node& node, FillStyle& r) const {
                 EK_ERROR("Fill Style has unknown type!");
                 break;
         }
-        if (Math::equals(det(r.matrix), 0.0f)) {
+        if (almost_eq_f32(mat3x2_det(r.matrix), 0, MATH_F32_EPSILON)) {
             r.type = FillType::solid;
         }
     }

@@ -1,12 +1,20 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/math/Rect.hpp>
-#include <ek/math/Vec.hpp>
+#include <ek/math.h>
 #include <ek/ds/Hash.hpp>
 #include <ek/assert.h>
 
 namespace ek {
+
+inline recti_t rect_to_recti(const rect_t rc) {
+    return {{
+       (int)rc.x,
+       (int)rc.y,
+       (int)rc.w,
+       (int)rc.h,
+    }};
+}
 
 // based on cool tutorial: https://thatgamesguy.co.uk/cpp-game-dev-16/
 // and very good explanation for optimizations: https://stackoverflow.com/a/48330314/4223136
@@ -25,34 +33,34 @@ struct QuadTreeNode {
     int objects = -1;
     int objectsCount = 0;
 
-    [[nodiscard]] int getChildIndex(const Rect2i& objectBounds, Rect2i& nodeBounds) const {
-        const int subWidth = nodeBounds.width >> 1u;
-        const int subHeight = nodeBounds.height >> 1u;
-        const int splitX = nodeBounds.x + subWidth;
-        const int splitY = nodeBounds.y + subHeight;
+    [[nodiscard]] uint32_t getChildIndex(const recti_t objectBounds, const recti_t inNodeBounds, recti_t* outNodeBounds) const {
+        const int subWidth = inNodeBounds.w >> 1u;
+        const int subHeight = inNodeBounds.h >> 1u;
+        const int splitX = inNodeBounds.x + subWidth;
+        const int splitY = inNodeBounds.y + subHeight;
         // Right
         if (objectBounds.x >= splitX) {
             // Top
-            if (objectBounds.bottom() <= splitY) {
-                nodeBounds.set(splitX, nodeBounds.y, subWidth, subHeight);
+            if (RECT_B(objectBounds) <= splitY) {
+                *outNodeBounds = {{splitX, inNodeBounds.y, subWidth, subHeight}};
                 return RightTop;
             }
                 // Bottom
             else if (objectBounds.y >= splitY) {
-                nodeBounds.set(splitX, splitY, subWidth, subHeight);
+                *outNodeBounds = {{splitX, splitY, subWidth, subHeight}};
                 return RightBottom;
             }
         }
             // Left
-        else if (objectBounds.right() <= splitX) {
+        else if (RECT_R(objectBounds) <= splitX) {
             // Top
-            if (objectBounds.bottom() <= splitY) {
-                nodeBounds.set(nodeBounds.x, nodeBounds.y, subWidth, subHeight);
+            if (RECT_B(objectBounds) <= splitY) {
+                *outNodeBounds = {{inNodeBounds.x, inNodeBounds.y, subWidth, subHeight}};
                 return LeftTop;
             }
                 // Bottom
             else if (objectBounds.y >= splitY) {
-                nodeBounds.set(nodeBounds.x, splitY, subWidth, subHeight);
+                *outNodeBounds = {{inNodeBounds.x, splitY, subWidth, subHeight}};
                 return LeftBottom;
             }
         }
@@ -81,12 +89,12 @@ struct QuadTreeNode {
 class QuadTree {
 public:
     // pools part
-    Array<QuadTreeNode> nodes;
+    Array <QuadTreeNode> nodes;
     int nextFreeNode = 0;
 
     Array<int> objectNext;
-    Array<ecs::EntityIndex> objectEntity;
-    Array<Rect2i> objectsBoundsArray;
+    Array <ecs::EntityIndex> objectEntity;
+    Array <recti_t> objectsBoundsArray;
     int nextFreeObject = -1;
 
     int allocNode() {
@@ -138,21 +146,24 @@ public:
     // starting from the base node (0) how many times can it (and its children) split
     int maxLevels = 5;
 
-    Rect2i bounds;
+    recti_t bounds;
 
-    explicit QuadTree(Rect2i bounds_) : bounds{bounds_} {
+    explicit QuadTree(recti_t bounds_) : bounds{bounds_} {
         nodes.emplace_back();
     }
 
-    void search(const Rect2f& area, Hash<int>& outNodesList) {
-        search(0, Rect2i{area}, outNodesList, bounds);
+    void search(const rect_t area, Hash<int>& outNodesList) {
+        search(0, rect_to_recti(area), outNodesList, bounds);
     }
 
-    int insert(ecs::EntityIndex entity, const Rect2f& objectBounds) {
+    int insert(ecs::EntityIndex entity, const rect_t objectBounds) {
         int objectId = allocObject();
         objectNext[objectId] = -1;
         objectEntity[objectId] = entity;
-        objectsBoundsArray[objectId] = Rect2i{objectBounds};
+        objectsBoundsArray[objectId] = {{(int) objectBounds.x,
+                                         (int) objectBounds.y,
+                                         (int) objectBounds.w,
+                                         (int) objectBounds.h}};
         insert(0, objectId, 0, bounds);
         return objectId;
     }
@@ -178,8 +189,8 @@ public:
         }
     }
 
-    void queryEntities(const Hash<int>& nodeIds, Array<ecs::EntityIndex>& outEntityList) {
-        for (auto hashEntry : nodeIds._data) {
+    void queryEntities(const Hash<int>& nodeIds, Array <ecs::EntityIndex>& outEntityList) {
+        for (auto hashEntry: nodeIds._data) {
             auto& node = nodes[hashEntry.key];
             // add all entities
             auto objectId = node.objects;
@@ -190,10 +201,10 @@ public:
         }
     }
 
-    static Rect2i getChildBounds(Rect2i bb, int childIndex) {
-        const int w = bb.width >> 1;
-        const int h = bb.height >> 1;
-        Rect2i result{bb.x, bb.y, w, h};
+    static recti_t getChildBounds(recti_t bb, int childIndex) {
+        const int w = bb.w >> 1;
+        const int h = bb.h >> 1;
+        recti_t result = {{bb.x, bb.y, w, h}};
         switch (childIndex) {
             case QuadTreeNode::RightTop:
                 result.x += w;
@@ -225,14 +236,14 @@ private:
         nodes[nodeId].firstChildNode = allocNode();
     }
 
-    void insert(int nodeId, int objectId, int nodeLevel, Rect2i nodeBounds) {
+    void insert(int nodeId, int objectId, int nodeLevel, recti_t nodeBounds) {
         auto& node = nodes[nodeId];
         // Needs to check if it has any children nodes.
         if (node.firstChildNode) {
             // We assume if the first child node is present then all four nodes are because
             // when we split the node we create the four children together.
             // If this node has child nodes then we find the index of the node that the object should belong to
-            int indexToPlaceObject = node.getChildIndex(objectsBoundsArray[objectId], nodeBounds);
+            int indexToPlaceObject = node.getChildIndex(objectsBoundsArray[objectId], nodeBounds, &nodeBounds);
             if (indexToPlaceObject != -1) {
                 insert(node.firstChildNode + indexToPlaceObject, objectId, nodeLevel + 1, nodeBounds);
             } else {
@@ -254,8 +265,8 @@ private:
                 auto prevId = -1;
                 while (objId >= 0) {
                     const auto nextObj = objectNext[objId];
-                    auto subBounds = nodeBounds;
-                    int indexToPlaceObject = nodeAfterSplit.getChildIndex(objectsBoundsArray[objId], subBounds);
+                    recti_t subBounds;
+                    int indexToPlaceObject = nodeAfterSplit.getChildIndex(objectsBoundsArray[objId], nodeBounds, &subBounds);
                     if (indexToPlaceObject != -1) {
                         if (prevId >= 0) {
                             objectNext[prevId] = nextObj;
@@ -277,14 +288,14 @@ private:
         }
     }
 
-    void search(int nodeId, const Rect2i& area, Hash<int>& outNodesList, Rect2i nodeBounds) {
+    void search(int nodeId, const recti_t area, Hash<int>& outNodesList, const recti_t nodeBounds) {
         auto& node = nodes[nodeId];
         if (node.objectsCount) {
             outNodesList.set(nodeId, 1);
         }
         if (node.firstChildNode) {
-            const int childWidth = nodeBounds.width >> 1;
-            const int childHeight = nodeBounds.height >> 1;
+            const int childWidth = nodeBounds.w >> 1;
+            const int childHeight = nodeBounds.h >> 1;
             const int splitX = nodeBounds.x + childWidth;
             const int splitY = nodeBounds.y + childHeight;
             // top
@@ -292,25 +303,25 @@ private:
                 // left
                 if (area.x < splitX) {
                     search(node.firstChildNode + QuadTreeNode::LeftTop, area, outNodesList,
-                           {nodeBounds.x, nodeBounds.y, childWidth, childHeight});
+                           {{nodeBounds.x, nodeBounds.y, childWidth, childHeight}});
                 }
                 // right
-                if (area.right() > splitX) {
+                if (RECT_R(area) > splitX) {
                     search(node.firstChildNode + QuadTreeNode::RightTop, area, outNodesList,
-                           {nodeBounds.x + childWidth, nodeBounds.y, childWidth, childHeight});
+                           {{nodeBounds.x + childWidth, nodeBounds.y, childWidth, childHeight}});
                 }
             }
             // bottom
-            if (area.bottom() > splitY) {
+            if (RECT_B(area) > splitY) {
                 // right
-                if (area.right() > splitX) {
+                if (RECT_R(area) > splitX) {
                     search(node.firstChildNode + QuadTreeNode::RightBottom, area, outNodesList,
-                           {nodeBounds.x + childWidth, nodeBounds.y + childHeight, childWidth, childHeight});
+                           {{nodeBounds.x + childWidth, nodeBounds.y + childHeight, childWidth, childHeight}});
                 }
                 // Left
                 if (area.x < splitX) {
                     search(node.firstChildNode + QuadTreeNode::LeftBottom, area, outNodesList,
-                           {nodeBounds.x, nodeBounds.y + childHeight, childWidth, childHeight});
+                           {{nodeBounds.x, nodeBounds.y + childHeight, childWidth, childHeight}});
                 }
             }
         }

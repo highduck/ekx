@@ -29,8 +29,8 @@ int convertObjModel(const char* input, const char* output) {
             vertex.normal.z = n[2];
             vertex.uv.x = t[0];
             vertex.uv.y = t[1];
-            vertex.color = 0xFFFFFFFF;
-            vertex.color2 = 0x0;
+            vertex.color = rgba_u32(0xFFFFFFFF);
+            vertex.color2 = rgba_u32(0x0);
 
             model.vertices.emplace_back(vertex);
             model.indices.emplace_back(vi);

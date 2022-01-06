@@ -3,8 +3,7 @@
 #include "RenderSystem2D.hpp"
 #include "Viewport.hpp"
 
-#include <ek/math/BoundsBuilder.hpp>
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/scenex/base/Node.hpp>
 
@@ -14,13 +13,13 @@ void drawEntity(ecs::EntityApi e, const Transform2D* transform);
 
 ecs::EntityApi Camera2D::Main{};
 
-Matrix3x2f
-Camera2D::getMatrix(ecs::EntityApi root_, float scale, const Vec2f& screenOffset, const Vec2f& screenSize) const {
-//    auto screen = screenRect;
-    auto m = root_.get<WorldTransform2D>().matrix;
-    float invScale = 1.0f / (scale * contentScale);
-//    m.scale(invScale, invScale).translate( -screen.position - relativeOrigin * screen.size - screenOffset);
-    m.translate(-relativeOrigin * screenSize).scale(invScale, invScale).translate(-screenOffset);
+mat3x2_t
+Camera2D::getMatrix(ecs::EntityApi root_, float scale, vec2_t screenOffset, vec2_t screenSize) const {
+    const float inv_scale = 1.0f / (scale * contentScale);
+    mat3x2_t m = root_.get<WorldTransform2D>().matrix;
+    mat3x2_translate(&m, -relativeOrigin * screenSize);
+    mat3x2_scale(&m, vec2(inv_scale, inv_scale));
+    mat3x2_translate(&m, -screenOffset);
     return m;
 }
 
@@ -45,14 +44,14 @@ void Camera2D::updateQueue() {
         // maybe we need region from not 0,0 started input rect
         camera.screenRect = vp.output.screenRect;
         camera.screenToWorldMatrix = camera.getMatrix(e, vp.output.scale, vp.output.offset, vp.options.baseResolution);
-        camera.worldRect = BoundsBuilder2f::transform(camera.screenRect, camera.screenToWorldMatrix);
+        camera.worldRect = rect_transform(camera.screenRect, camera.screenToWorldMatrix);
 
         camera.worldToScreenMatrix = camera.screenToWorldMatrix;
-        if (camera.worldToScreenMatrix.inverse()) {
+        if (mat3x2_inverse(&camera.worldToScreenMatrix)) {
             activeCameras.push_back(ecs::EntityRef{e});
         } else {
             // please debug camera setup
-            //EK_ASSERT(false);
+            EK_ASSERT(false);
         }
     }
     qsort(activeCameras.data(), activeCameras.size(), sizeof(ecs::EntityRef), [](void const* _a, void const* _b) {
@@ -68,7 +67,7 @@ void Camera2D::render() {
             continue;
         }
         auto& camera = e.get().get<Camera2D>();
-        if (camera.screenRect.empty()) {
+        if (rect_is_empty(camera.screenRect)) {
             continue;
         }
 
@@ -77,15 +76,15 @@ void Camera2D::render() {
         currentLayerMask = camera.layerMask;
 
         sg_push_debug_group("Camera");
-        draw2d::begin(camera.screenRect, camera.worldToScreenMatrix);
-        sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.width, camera.screenRect.height,
+        canvas_begin_ex(camera.screenRect, camera.worldToScreenMatrix, {0}, {0});
+        sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.w, camera.screenRect.h,
                            true);
         if (camera.clearColorEnabled) {
-            draw2d::state.pushProgram(ek_canvas_.shader_solid_color);
-            draw2d::state.color[0] = ColorMod32{argb32_t{camera.clearColor}, argb32_t{camera.clearColor2}};
-            draw2d::quad(camera.worldRect);
-            draw2d::state.color[0] = {};
-            draw2d::state.restoreProgram();
+            canvas_push_program(canvas.shader_solid_color);
+            canvas.color[0] = {rgba_vec4(camera.clearColor), rgba_vec4(camera.clearColor2)};
+            canvas_fill_rect(camera.worldRect, COLOR_WHITE);
+            canvas.color[0] = color_mod_identity();
+            canvas_restore_program();
         }
 
         if (camera.root.valid() && camera.root.get().get_or_default<Node>().visible()) {
@@ -98,7 +97,7 @@ void Camera2D::render() {
         //        sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.width, camera.screenRect.height, true);
 #endif
 
-        draw2d::end();
+        canvas_end();
         sg_pop_debug_group();
     }
 }

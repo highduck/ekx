@@ -11,7 +11,7 @@
 #include <ek/log.h>
 #include <ek/scenex/asset2/Asset.hpp>
 #include <ek/gfx.h>
-#include <ek/draw2d/drawer.hpp>
+#include <ek/canvas.h>
 #include <ek/scenex/2d/Camera2D.hpp>
 
 #include <ek/scenex/2d/Button.hpp>
@@ -54,15 +54,15 @@ void logDisplayInfo() {
 }
 
 void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
-    draw2d::state.set_empty_image();
+    canvas_set_empty_image();
     auto pad = 40.0f;
     auto w = zoneWidth - pad * 2.0f;
     auto h = 16.0f;
     auto y = (zoneHeight - h) / 2.0f;
 
-    draw2d::quad(pad, y, w, h, 0xFFFFFFFF_argb);
-    draw2d::quad(pad + 2, y + 2, w - 4, h - 4, 0xFF000000_argb);
-    draw2d::quad(pad + 4, y + 4, (w - 8) * progress, h - 8, 0xFFFFFFFF_argb);
+    canvas_quad_color(pad, y, w, h, 0xFFFFFFFF_argb);
+    canvas_quad_color(pad + 2, y + 2, w - 4, h - 4, 0xFF000000_argb);
+    canvas_quad_color(pad + 4, y + 4, (w - 8) * progress, h - 8, 0xFFFFFFFF_argb);
 
     {
         float sz = zoneWidth < zoneHeight ? zoneWidth : zoneHeight;
@@ -79,7 +79,7 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
             float oy = sinf(r * 3.14f * 2 + 3.14f);
             float R = (sh / 10.0f) *
                       (1.8f - 0.33f * speed - 0.33f * ((cosf(r * 3.14f) + 2.0f * cosf(r * 3.14f * 2 + 3.14f))));
-            draw2d::fill_circle({cx + ox * sw, cy - 2.0f * sh + oy * sh, R}, 0xFFFFFFFF_argb, 0xFFFFFFFF_argb, 16);
+            canvas_fill_circle({cx + ox * sw, cy - 2.0f * sh + oy * sh, R}, 0xFFFFFFFF_argb, 0xFFFFFFFF_argb, 16);
         }
     }
 }
@@ -95,7 +95,7 @@ basic_application::~basic_application() {
 
     ecs::the_world.shutdown();
 
-    ek_canvas_shutdown();
+    canvas_shutdown();
 
     delete asset_manager_;
 
@@ -152,7 +152,7 @@ void basic_application::initialize() {
     EK_DEBUG("base application: initialize scene root");
     root = createNode2D("root");
 
-    const Vec2f baseResolution{ek_app.config.width, ek_app.config.height};
+    const vec2_t baseResolution = vec2(ek_app.config.width, ek_app.config.height);
     root.assign<Viewport>(baseResolution.x, baseResolution.y);
 
     root.assign<LayoutRect>();
@@ -175,7 +175,7 @@ void basic_application::initialize() {
     Camera2D::Main = camera;
     append(root, camera);
 
-    LayoutRect::DesignCanvasRect = {Vec2f::zero, baseResolution};
+    LayoutRect::DesignCanvasRect = rect_size(baseResolution);
 }
 
 void basic_application::preload() {
@@ -219,7 +219,7 @@ void basic_application::onFrame() {
     profiler.addTime("UPDATE", (float) (elapsed * 1000));
     profiler.addTime("FRAME", (float) (elapsed * 1000));
 
-    ek_canvas_new_frame();
+    canvas_new_frame();
 
     /// PRE-RENDER
     onPreRender();
@@ -227,7 +227,7 @@ void basic_application::onFrame() {
 
     sg_pass_action pass_action{};
     pass_action.colors[0].action = started_ ? SG_ACTION_DONTCARE : SG_ACTION_CLEAR;
-    const Vec4f fillColor = static_cast<Vec4f>(argb32_t{ek_app.config.background_color});
+    const vec4_t fillColor = vec4_rgba(argb32_t{ek_app.config.background_color});
     pass_action.colors[0].value.r = fillColor.x;
     pass_action.colors[0].value.g = fillColor.y;
     pass_action.colors[0].value.b = fillColor.z;
@@ -246,7 +246,7 @@ void basic_application::onFrame() {
 
         doRenderFrame();
 
-        draw2d::begin({0, 0, display.info.size.x, display.info.size.y});
+        canvas_begin(display.info.size.x, display.info.size.y);
 
         if (!started_ && rootAssetObject) {
             drawPreloader(0.1f + 0.9f * rootAssetObject->getProgress(), display.info.size.x, display.info.size.y);
@@ -261,7 +261,7 @@ void basic_application::onFrame() {
         profiler.endRender();
         draw(profiler, display.info);
 
-        draw2d::end();
+        canvas_end();
 
         display.endGame(); // beginGame()
 
@@ -269,9 +269,9 @@ void basic_application::onFrame() {
 
             dispatcher.onRenderOverlay();
 
-            draw2d::begin({0, 0, ek_app.viewport.width, ek_app.viewport.height});
+            canvas_begin(ek_app.viewport.width, ek_app.viewport.height);
             onFrameEnd();
-            draw2d::end();
+            canvas_end();
 
             elapsed = ek_ticks_to_sec(ek_ticks(&timer));
             profiler.addTime("OVERLAY", (float) (elapsed * 1000));
@@ -364,7 +364,7 @@ void launcher_on_frame() {
                 break;
             case 1:
                 ++_initializeSubSystemsState;
-                ek_canvas_setup();
+                canvas_setup();
                 break;
             case 2:
                 ++_initializeSubSystemsState;
@@ -393,7 +393,7 @@ void launcher_on_frame() {
             //EK_PROFILE_SCOPE("init frame");
             sg_pass_action pass_action{};
             pass_action.colors[0].action = SG_ACTION_CLEAR;
-            const Vec4f fillColor = static_cast<Vec4f>(argb32_t{ek_app.config.background_color});
+            const vec4_t fillColor = vec4_rgba(argb32_t{ek_app.config.background_color});
             pass_action.colors[0].value.r = fillColor.x;
             pass_action.colors[0].value.g = fillColor.y;
             pass_action.colors[0].value.b = fillColor.z;
@@ -401,10 +401,10 @@ void launcher_on_frame() {
             sg_begin_default_pass(&pass_action, (int) width, (int) height);
 
             if (_initializeSubSystemsState > 2) {
-                ek_canvas_new_frame();
-                draw2d::begin({0, 0, width, height});
+                canvas_new_frame();
+                canvas_begin(width, height);
                 drawPreloader(0.1f * (float) _initializeSubSystemsState / steps, width, height);
-                draw2d::end();
+                canvas_end();
             }
 
             sg_end_pass();

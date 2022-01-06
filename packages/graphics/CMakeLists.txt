@@ -5,7 +5,7 @@ project(graphics)
 
 add_library(${PROJECT_NAME} STATIC
         src/ek/ek_gfx.c
-        src/ek/draw2d/drawer.cpp
+        src/ek/ek_canvas.c
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)

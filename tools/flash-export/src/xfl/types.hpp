@@ -4,9 +4,7 @@
 #include <ek/ds/Array.hpp>
 #include <memory>
 #include <optional>
-#include <ek/math/Rect.hpp>
 #include <ek/math/ColorTransform.hpp>
-#include <ek/math/Matrix3x2.hpp>
 #include <ek/util/Path.hpp>
 
 namespace ek::xfl {
@@ -35,8 +33,8 @@ enum class FilterType {
 struct Filter {
     FilterType type = FilterType::none;
 
-    Vec4f color;
-    Vec2f blur;
+    vec4_t color = {};
+    vec2_t blur = {};
     float distance = 0.0f;
     float angle = 0.0f; // degrees
     uint8_t quality = 1; // TODO: check
@@ -91,11 +89,11 @@ struct Edge {
 };
 
 struct TextAttributes {
-    Vec2f alignment{};// alignment = "left"; / center / right
+    vec2_t alignment = {};// alignment = "left"; / center / right
     bool aliasText = false;
     bool bold = false;
     bool italic = false;
-    Vec4f color{0.0f, 0.0f, 0.0f, 1.0f};
+    vec4_t color = {{0, 0, 0, 1}};
     String face; // face="Font 1*"
     float lineHeight = 20; // 20
     float lineSpacing = 0; // "-14";
@@ -164,12 +162,12 @@ enum class SpreadMethod {
 };
 
 struct GradientEntry {
-    Vec4f color;
+    vec4_t color = {};
     float ratio = 0.0f;
 
     GradientEntry() = default;
 
-    explicit GradientEntry(const Vec4f& color, float ratio = 0.0f) : color{color},
+    explicit GradientEntry(const vec4_t& color, float ratio = 0.0f) : color{color},
                                                                      ratio{ratio} {
     }
 };
@@ -180,7 +178,7 @@ struct FillStyle {
     FillType type = FillType::solid;
     SpreadMethod spreadMethod = SpreadMethod::repeat;
     Array<GradientEntry> entries{};
-    Matrix3x2f matrix{};
+    mat3x2_t matrix = mat3x2_identity();
     String bitmapPath;
     std::shared_ptr<BitmapData> bitmap;
 };
@@ -216,7 +214,7 @@ enum class TweenTarget {
 struct TweenObject {
     TweenTarget target = TweenTarget::all;
     int intensity; // <Ease intensity="-100...100" />
-    Array<Vec2f> custom_ease;
+    Array<vec2_t> custom_ease;
 };
 
 struct Frame {
@@ -254,7 +252,7 @@ enum class LayerType {
 struct Layer {
     String name;
     LayerType layerType = LayerType::normal;
-    Vec4f color;
+    vec4_t color = {};
 
     bool autoNamed = false;
     bool current = false;
@@ -372,13 +370,13 @@ struct ItemProperties {
 };
 
 struct TransformModel {
-    Matrix3x2f matrix{};
+    mat3x2_t matrix = mat3x2_identity();
     ColorTransformF color{};
     BlendMode blendMode{BlendMode::normal};
 
     TransformModel() = default;
 
-    TransformModel(const Matrix3x2f& matrix_, const ColorTransformF& color_, BlendMode blend_mode_ = BlendMode::last) :
+    TransformModel(const mat3x2_t& matrix_, const ColorTransformF& color_, BlendMode blend_mode_ = BlendMode::last) :
             matrix{matrix_},
             color{color_},
             blendMode{blend_mode_} {
@@ -386,7 +384,7 @@ struct TransformModel {
 
     inline TransformModel operator*(const TransformModel& right) const {
         return {
-                matrix * right.matrix,
+                mat3x2_mul(matrix, right.matrix),
                 color * right.color,
                 right.blendMode == BlendMode::last ? blendMode : right.blendMode
         };
@@ -400,13 +398,13 @@ struct Element {
 
     /** Transform point (Free Transform Tool) for current element, in LOCAL SPACE (do not applicate matrix) **/
     TransformModel transform;
-    Vec2f transformationPoint;
-    Rect2f rect;
+    vec2_t transformationPoint = {};
+    rect_t rect = {};
 
     /// SYMBOL ITEM
     Timeline timeline{};
 
-    Rect2f scaleGrid; //scaleGridLeft="-2" scaleGridRight="2" scaleGridTop="-2" scaleGridBottom="2"
+    rect_t scaleGrid = {}; //scaleGridLeft="-2" scaleGridRight="2" scaleGridTop="-2" scaleGridBottom="2"
 
 /// ref to item
     String libraryItemName;
@@ -493,7 +491,7 @@ struct DocInfo {
     int height = 400;
     float xflVersion = 0.0f;
     int frameRate = 24;
-    int backgroundColor = 0;
+    uint32_t backgroundColor = 0u;
     int buildNumber = 0;
     int currentTimeline = 0;
     int majorVersion = 0;

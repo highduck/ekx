@@ -2,7 +2,6 @@
 
 #include <ek/gfx.h>
 #include <ek/app.h>
-#include <ek/math/Vec.hpp>
 #include <ek/util/Res.hpp>
 #include <ek/ds/String.hpp>
 

@@ -101,11 +101,11 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
 
     transform.setScale(btn.baseScale * Vec2f(sx, sy));
 
-    auto color = lerp(0xFFFFFFFF_argb, 0xFF888888_argb, push);
-    transform.color.scale = btn.baseColor.scale * color;
+    const auto color = rgba_lerp(0xFFFFFFFF_argb, 0xFF888888_argb, push);
+    transform.color.scale = rgba_mul(btn.baseColor.scale, color);
 
     const float h = 0.1f * over;
-    transform.color.offset = btn.baseColor.offset + argb32_t{h, h, h, 0.0f};
+    transform.color.offset = rgba_add(btn.baseColor.offset, rgba_4f(h, h, h, 0));
 }
 
 void update_movie_frame(ecs::EntityApi entity, const Interactive& interactive) {
