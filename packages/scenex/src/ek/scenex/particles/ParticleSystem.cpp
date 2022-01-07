@@ -39,7 +39,7 @@ Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl) {
     return p;
 }
 
-void particles_burst(ecs::EntityApi e, int count, Vec2f relativeVelocity) {
+void particles_burst(ecs::EntityApi e, int count, vec2_t relativeVelocity) {
     if(count < 0) {
         return;
     }
@@ -52,13 +52,13 @@ void particles_burst(ecs::EntityApi e, int count, Vec2f relativeVelocity) {
     auto* decl = emitter.particle.get();
     while (count > 0) {
         auto& p = produce_particle(layer, *decl);
-        Vec2f pos = position;
+        vec2_t pos = position;
         pos.x += random(data.rect.x, RECT_R(data.rect));
         pos.y += random(data.rect.y, RECT_B(data.rect));
         p.position = pos;
         float speed = data.speed.random();
         float acc = data.acc.random();
-        const Vec2f dir{cosf(a), sinf(a)};
+        const vec2_t dir = vec2(cosf(a), sinf(a));
         p.velocity = speed * dir + relativeVelocity;
         p.acc += dir * acc;
         if (emitter.on_spawn) {
@@ -89,13 +89,13 @@ void update_emitters() {
             float a = data.dir.random();
             while (count > 0) {
                 auto& p = produce_particle(layer, *decl);
-                Vec2f pos = position + data.offset;
+                vec2_t pos = position + data.offset;
                 pos.x += random(data.rect.x, RECT_R(data.rect));
                 pos.y += random(data.rect.y, RECT_B(data.rect));
                 p.position = pos;
                 float speed = data.speed.random();
                 float acc = data.acc.random();
-                const Vec2f dir{cosf(a), sinf(a)};
+                const vec2_t dir = vec2(cosf(a), sinf(a));
                 p.velocity = speed * dir;
                 p.acc = acc * dir;
 
@@ -130,8 +130,8 @@ void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const Particle
     auto& layerComp = toLayer.get<ParticleLayer2D>();
     while (count > 0) {
         auto& p = produce_particle(layerComp, decl);
-        const vec2_t position = data.offset + data.rect.position + data.rect.size * vec2_t{{random(), random()}};
-        const vec2_t dir{cosf(a), sinf(a)};
+        const vec2_t position = data.offset + data.rect.position + data.rect.size * vec2(random(), random());
+        const vec2_t dir = vec2(cosf(a), sinf(a));
         const auto speed = data.speed.random();
         const auto acc = data.acc.random();
         p.position = Transform2D::localToLocal(src, toLayer, position);

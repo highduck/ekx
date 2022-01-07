@@ -385,6 +385,7 @@ recti_t recti_clamp_bounds(recti_t a, recti_t b);
 //#define rectangle_clamp_bounds(A, B) {{MAX((A).x, (B).x),MAX((A).y, (B).y),MIN((A).r, (B).r),MIN((A).b, (B).b)}}
 
 rect_t rect_combine(rect_t a, rect_t b);
+recti_t recti_combine(recti_t a, recti_t b);
 bool rect_overlaps(rect_t a, rect_t b);
 bool recti_overlaps(recti_t a, recti_t b);
 rect_t rect_scale(rect_t a, vec2_t s);
@@ -423,7 +424,8 @@ bool brect_is_empty(brect_t bb);
 
 #ifdef __cplusplus
 }
-#include <ek/math.hpp>
+#include "math/math_vec.hpp"
+#include "math/math_rect.hpp"
 #endif
 
 #endif // EK_MATH_H

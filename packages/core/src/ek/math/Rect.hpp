@@ -261,9 +261,9 @@ constexpr Rect<2, T> Rect<2, T>::zero{0, 0, 0, 0};
 template<typename T>
 using Rect2 = Rect<2, T>;
 
-using Rect2f = Rect2<float>;
-using Rect2i = Rect2<int>;
-using Rect2u = Rect2<unsigned>;
+//using Rect2f = Rect2<float>;
+//using Rect2i = Rect2<int>;
+//using Rect2u = Rect2<unsigned>;
 
 template<typename T, unsigned N>
 inline Rect<N, T> translate(const Rect<N, T>& box, const Vec <N, T>& offset) {
@@ -287,7 +287,7 @@ bool Rect<2, T>::overlaps(const Rect<2, T>& other) const {
 
 template<typename T>
 Rect<2, T> Rect<2, T>::scale(float sx, float sy) const {
-    Rect2f r{x * sx, y * sy, width * sx, height * sy};
+    Rect2<T> r{x * sx, y * sy, width * sx, height * sy};
     if (r.width < 0) {
         r.x += r.width;
         r.width = -r.width;

@@ -99,7 +99,7 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
     float sx = 1.0f + 0.2f * sinf((1.0f - post) * pi * 5.0f) * post;
     float sy = 1.0f + 0.2f * sinf((1.0f - post) * pi) * cosf((1.0f - post) * pi * 5.0f) * post;
 
-    transform.setScale(btn.baseScale * Vec2f(sx, sy));
+    transform.setScale(btn.baseScale * vec2(sx, sy));
 
     const auto color = rgba_lerp(0xFFFFFFFF_argb, 0xFF888888_argb, push);
     transform.color.scale = rgba_mul(btn.baseColor.scale, color);

@@ -20,8 +20,8 @@ public:
 
     void draw(const char* text,
               float size,
-              const Vec2f& position,
-              argb32_t color,
+              vec2_t position,
+              rgba_t color,
               float line_height,
               float line_spacing = 0.0f) const;
 

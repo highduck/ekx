@@ -16,13 +16,13 @@ Font::~Font() {
 
 void Font::draw(const char* text,
                 float size,
-                const Vec2f& position,
-                argb32_t color,
+                vec2_t position,
+                rgba_t color,
                 float line_height,
                 float line_spacing) const {
 
-    Vec2f current = position;
-    Vec2f start = position;
+    vec2_t current = position;
+    vec2_t start = position;
 
     canvas_save_color();
     canvas_scale_color(color);

@@ -60,7 +60,7 @@ public:
 EK_DECLARE_TYPE(ParticleRenderer2D);
 EK_TYPE_INDEX_T(IDrawable2D, ParticleRenderer2D, IDrawable2D_ParticleRenderer2D);
 
-void particles_burst(ecs::EntityApi e, int count, Vec2f relativeVelocity = Vec2f::zero);
+void particles_burst(ecs::EntityApi e, int count, vec2_t relativeVelocity = {});
 
 Particle* spawn_particle(ecs::EntityApi e, const char* particle_id);
 

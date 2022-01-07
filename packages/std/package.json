@@ -2,7 +2,8 @@
   "name": "@ekx/std",
   "version": "0.0.2",
   "scripts": {
-    "postinstall": "cmake-build || exit 0"
+    "postinstall": "cmake-build || exit 0",
+    "generate": "node scripts/gen_math_hpp.js"
   },
   "publishConfig": {
     "access": "public"

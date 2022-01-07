@@ -154,7 +154,7 @@ void GameDisplay::update() {
         info.insets = *(vec4_t*)ek_app.viewport.insets;
         info.dpiScale = ek_app.viewport.scale;
 
-        info.destinationViewport.position = Vec2f::zero;
+        info.destinationViewport.position = {};
         info.destinationViewport.size.x = ek_app.viewport.width;
         info.destinationViewport.size.y = ek_app.viewport.height;
     }

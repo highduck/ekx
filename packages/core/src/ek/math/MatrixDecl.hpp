@@ -24,11 +24,11 @@ struct Matrix<3, 3, T>;
 template<typename T>
 using Matrix4 = Matrix<4, 4, T>;
 
-template<typename T>
-using Matrix3x2 = Matrix<3, 2, T>;
+//template<typename T>
+//using Matrix3x2 = Matrix<3, 2, T>;
 
-using Matrix3x2f = Matrix<3, 2, float>;
-using Matrix4f = Matrix<4, 4, float>;
+//using Matrix3x2f = Matrix<3, 2, float>;
+//using Matrix4f = Matrix<4, 4, float>;
 using Matrix3f = Matrix<3, 3, float>;
 
 }

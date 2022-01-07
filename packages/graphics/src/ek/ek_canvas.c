@@ -463,10 +463,10 @@ void canvas_line_arc(float x, float y, float r,
 void canvas_stroke_rect(const rect_t rc, rgba_t color, float lineWidth) {
     const float r = rc.x + rc.w;
     const float b = rc.y + rc.h;
-    canvas_line((vec2_t) {rc.x, rc.y}, (vec2_t) {r, rc.y}, color, lineWidth);
-    canvas_line((vec2_t) {r, rc.y}, (vec2_t) {r, b}, color, lineWidth);
-    canvas_line((vec2_t) {r, b}, (vec2_t) {rc.x, b}, color, lineWidth);
-    canvas_line((vec2_t) {rc.x, b}, (vec2_t) {rc.x, rc.y}, color, lineWidth);
+    canvas_line(vec2(rc.x, rc.y), vec2(r, rc.y), color, lineWidth);
+    canvas_line(vec2(r, rc.y), vec2 (r, b), color, lineWidth);
+    canvas_line(vec2(r, b), vec2(rc.x, b), color, lineWidth);
+    canvas_line(vec2(rc.x, b), vec2(rc.x, rc.y), color, lineWidth);
 }
 
 void canvas_stroke_circle(const circle_t circle, rgba_t color, float lineWidth, int segments) {
@@ -476,14 +476,14 @@ void canvas_stroke_circle(const circle_t circle, rgba_t color, float lineWidth, 
 
     const float da = CANVAS_PI_2 / (float) segments;
     float a = 0.0f;
-    vec2_t pen = {x, y - r};
+    vec2_t pen = vec2(x, y - r);
     while (a < CANVAS_PI_2) {
-        const vec2_t next = {x + r * cosf(a), y + r * sinf(a)};
+        const vec2_t next = vec2(x + r * cosf(a), y + r * sinf(a));
         canvas_line(pen, next, color, lineWidth);
         pen = next;
         a += da;
     }
-    canvas_line(pen, (vec2_t) {x, y - r}, color, lineWidth);
+    canvas_line(pen, vec2(x, y - r), color, lineWidth);
 }
 
 static float triangle_area(const ek_vertex2d* vertices, const uint16_t* indices, int count) {

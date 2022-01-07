@@ -942,6 +942,15 @@ rect_t rect_combine(const rect_t a, const rect_t b) {
                        vec2_max(rect_rb(a), rect_rb(b)));
 }
 
+recti_t recti_combine(const recti_t a, const recti_t b) {
+    recti_t result;
+    result.x = MIN(a.x, b.x);
+    result.y = MIN(a.y, b.y);
+    result.w = MAX(RECT_R(a), RECT_R(b)) - result.x;
+    result.h = MAX(RECT_B(a), RECT_B(b)) - result.y;
+    return result;
+}
+
 bool rect_overlaps(const rect_t a, const rect_t b) {
     return a.x <= RECT_R(b) && b.x <= RECT_R(a) && a.y <= RECT_B(b) && b.y <= RECT_B(a);
 }

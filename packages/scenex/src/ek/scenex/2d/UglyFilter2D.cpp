@@ -52,7 +52,7 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
             for (int i = 0; i < segments; ++i) {
                 canvas.matrix[0] = parentMatrix;
 
-                canvas_translate(filter.blur * Vec2f{std::cos(a), std::sin(a)});
+                canvas_translate(filter.blur * vec2(cosf(a), sinf(a)));
                 if (localTransform) {
                     canvas_concat_matrix(localTransform->matrix);
                 }

@@ -61,7 +61,7 @@ public:
 
     void reset() {
         memset(data, 0u, dataSize);
-        dirtyRect.set(0, 0, width, height);
+        dirtyRect = {{0, 0, width, height}};
         dirty = true;
         x = padding;
         y = padding;
@@ -98,9 +98,9 @@ public:
                 memcpy(data + placeX + (placeY + cy) * destStride, pixelsData + cy * srcStride, srcStride);
             }
             if (!dirty) {
-                dirtyRect.set(placeX, placeY, spriteWidth, spriteHeight);
+                dirtyRect = {{placeX, placeY, spriteWidth, spriteHeight}};
             } else {
-                dirtyRect = combine(dirtyRect, {placeX, placeY, spriteWidth, spriteHeight});
+                dirtyRect = recti_combine(dirtyRect, {{placeX, placeY, spriteWidth, spriteHeight}});
             }
             dirty = true;
         }
@@ -137,7 +137,7 @@ public:
 
     uint8_t* data = nullptr;
     size_t dataSize = 0;
-    Rect2i dirtyRect;
+    recti_t dirtyRect;
     bool dirty;
 
 

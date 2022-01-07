@@ -27,18 +27,18 @@ void Particle::update_current_values() {
     switch (scale_mode) {
         case ParticleScaleMode::CosOut: {
             float s = cosf(0.5f * float(Math::pi) * (1.0f - time / time_total));
-            scale = Vec2f(s, s);
+            scale = vec2(s, s);
         }
             break;
         case ParticleScaleMode::Range: {
             float time_max = scale_off_time > 0.0f ? scale_off_time : time_total;
             float ratio = 1.0f - Math::clamp(time / time_max);
-            float s = Math::lerp(scale_start, scale_end, ratio);
-            scale = Vec2f(s, s);
+            float s = f32_lerp(scale_start, scale_end, ratio);
+            scale = vec2(s, s);
         }
             break;
         default:
-            scale = Vec2f(scale_start, scale_start);
+            scale = vec2(scale_start, scale_start);
             break;
     }
 
