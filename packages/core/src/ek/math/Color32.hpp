@@ -6,6 +6,11 @@
 
 namespace ek {
 
+inline uint8_t sat_add_u8(uint8_t a, uint8_t b) {
+    uint8_t c;
+    return __builtin_add_overflow(a, b, &c) ? 0xFF : c;
+}
+
 struct abgr32_t final {
 
 //    static const abgr32_t zero;
@@ -35,7 +40,12 @@ struct abgr32_t final {
             : r{r_}, g{g_}, b{b_}, a{a_} {}
 
     constexpr abgr32_t operator*(abgr32_t multiplier) const {
-        return rgba_mul(*this, multiplier).value;
+        return abgr32_t{
+                (uint8_t) ((r * multiplier.r * 258u) >> 16u),
+                (uint8_t) ((g * multiplier.g * 258u) >> 16u),
+                (uint8_t) ((b * multiplier.b * 258u) >> 16u),
+                (uint8_t) ((a * multiplier.a * 258u) >> 16u)
+        };
     }
 
     constexpr operator rgba_t() const noexcept {
@@ -69,7 +79,7 @@ struct abgr32_t final {
     constexpr void af(float value) { a = uint8_t(static_cast<uint16_t>(value * 255.0f) & 0xFFu); }
 
     [[nodiscard]] constexpr abgr32_t scaleAlpha(float scale) const {
-        return rgba_alpha_scale_f(*this, scale).value;
+        return abgr32_t{((uint32_t) (scale * (float) (abgr >> 24u)) << 24u) | (abgr & 0xFFFFFFu)};
     }
 
     template<typename T>
