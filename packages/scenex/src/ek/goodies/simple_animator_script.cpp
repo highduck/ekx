@@ -2,6 +2,7 @@
 
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/math/HSVColor.hpp>
+#include <ek/math/Math.hpp>
 
 namespace ek {
 

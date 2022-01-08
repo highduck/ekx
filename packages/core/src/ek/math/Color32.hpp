@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include "Vec.hpp"
 #include <ek/math.h>
 
 namespace ek {
@@ -82,10 +81,10 @@ struct abgr32_t final {
         return abgr32_t{((uint32_t) (scale * (float) (abgr >> 24u)) << 24u) | (abgr & 0xFFFFFFu)};
     }
 
-    template<typename T>
-    explicit operator Vec<4, T>() {
-        return Vec<4, T>{T(r) / 255, T(g) / 255, T(b) / 255, T(a) / 255};
-    }
+//    template<typename T>
+//    explicit operator Vec<4, T>() {
+//        return Vec<4, T>{T(r) / 255, T(g) / 255, T(b) / 255, T(a) / 255};
+//    }
 };
 
 struct argb32_t final {
@@ -126,15 +125,15 @@ struct argb32_t final {
             argb32_t(v[0], v[1], v[2], v[3]) {
     }
 
-    template<typename T>
-    constexpr explicit argb32_t(const Vec<4, T>& vector)
-            :argb32_t(vector.x, vector.y, vector.z, vector.w) {
-    }
+//    template<typename T>
+//    constexpr explicit argb32_t(const Vec<4, T>& vector)
+//            :argb32_t(vector.x, vector.y, vector.z, vector.w) {
+//    }
 
-    template<typename T>
-    constexpr explicit argb32_t(const Vec<3, T>& vector, float alpha = 1.0f)
-            :argb32_t(vector.x, vector.y, vector.z, alpha) {
-    }
+//    template<typename T>
+//    constexpr explicit argb32_t(const Vec<3, T>& vector, float alpha = 1.0f)
+//            :argb32_t(vector.x, vector.y, vector.z, alpha) {
+//    }
 
     constexpr explicit argb32_t(uint32_t argb_) noexcept
             : argb{argb_} {}
@@ -205,15 +204,15 @@ struct argb32_t final {
 //        return *this;
 //    }
 
-    template<typename T>
-    explicit operator Vec<4, T>() {
-        return Vec<4, T>{T(r) / 255, T(g) / 255, T(b) / 255, T(a) / 255};
-    }
+//    template<typename T>
+//    explicit operator Vec<4, T>() {
+//        return Vec<4, T>{T(r) / 255, T(g) / 255, T(b) / 255, T(a) / 255};
+//    }
 
-    template<typename T>
-    explicit operator Vec<3, T>() {
-        return Vec<3, T>{T(r) / 255, T(g) / 255, T(b) / 255};
-    }
+//    template<typename T>
+//    explicit operator Vec<3, T>() {
+//        return Vec<3, T>{T(r) / 255, T(g) / 255, T(b) / 255};
+//    }
 
     constexpr bool operator==(const argb32_t& v) const {
         return argb == v.argb;

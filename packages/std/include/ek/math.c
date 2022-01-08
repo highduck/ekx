@@ -1319,6 +1319,14 @@ rect_t rect_01(void) {
     return (rect_t) {{0, 0, 1, 1}};
 }
 
+vec2i_t vec2i(int x, int y) {
+    return (vec2i_t) {{x, y}};
+}
+
+vec3i_t vec3i(int x, int y, int z) {
+    return (vec3i_t) {{x, y, z}};
+}
+
 vec2_t vec2(float x, float y) {
     return (vec2_t) {{x, y}};
 }
@@ -1552,6 +1560,15 @@ bool almost_eq_vec4(const vec4_t a, const vec4_t b, const float eps) {
            almost_eq_f32(a.z, b.z, eps) &&
            almost_eq_f32(a.w, b.w, eps);
 }
+
+// TODO: reflect_*
+#define VEC_T_REFLECT_IMPL(T) T##_t T##_reflect(T##_t dir, T##_t normal) { \
+    return T##_sub(dir, T##_scale(normal, T##_dot(dir, normal)));                 \
+}
+
+VEC_T_REFLECT_IMPL(vec2)
+
+VEC_T_REFLECT_IMPL(vec3)
 
 #ifdef __cplusplus
 }

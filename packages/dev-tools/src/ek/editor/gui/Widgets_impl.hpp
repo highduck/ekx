@@ -164,7 +164,7 @@ void guiTextLayerEffect(TextLayerEffect& layer) {
 
         ImGui::DragFloat2("Offset", layer.offset.data, 1, 0, 8);
 
-        ImGui::Color32Edit("Color", layer.color);
+        ImGui::Color32Edit("Color", &layer.color);
     }
     ImGui::PopID();
 }

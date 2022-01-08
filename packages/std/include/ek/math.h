@@ -77,6 +77,57 @@ typedef union vec4_t {
 #endif
 } vec4_t;
 
+
+typedef union vec2i_t {
+    struct {
+        int x;
+        int y;
+    };
+    int data[2];
+#ifdef __cplusplus
+
+    inline int& operator[](const int index) { return data[index]; }
+
+#endif
+} vec2i_t;
+
+typedef union vec3i_t {
+    struct {
+        int x;
+        int y;
+        int z;
+    };
+    int data[3];
+#ifdef __cplusplus
+
+    inline int& operator[](const int index) { return data[index]; }
+
+#endif
+} vec3i_t;
+
+typedef union vec4i_t {
+    struct {
+        int x;
+        int y;
+        int z;
+        int w;
+    };
+    int data[4];
+    struct {
+        vec3i_t xyz;
+        int _w;
+    };
+    struct {
+        vec2i_t xy;
+        vec2i_t zw;
+    };
+#ifdef __cplusplus
+
+    inline int& operator[](const int index) { return data[index]; }
+
+#endif
+} vec4i_t;
+
 typedef union quat_t {
     struct {
         float x;
@@ -276,6 +327,9 @@ typedef struct color_mod_t {
     rgba_t offset;
 } color_mod_t;
 
+vec2i_t vec2i(int x, int y);
+vec3i_t vec3i(int x, int y, int z);
+
 vec2_t vec2(float x, float y);
 vec3_t vec3(float x, float y, float z);
 vec4_t vec4(float x, float y, float z, float w);
@@ -439,9 +493,11 @@ uint8_t u8_norm_mul(uint8_t a, uint8_t b);
 uint8_t u8_add_sat(uint8_t a, uint8_t b);
 
 #define COL32_SWAP_RB(x) (((x) & 0xFF00FF00u) | (((x) >> 16u) & 0xFFu) | (((x) & 0xFFu) << 16u))
-#define ARGB(x) (rgba_u32(COL32_SWAP_RB(x)))
-#define RGB(x) (rgba_u32(0xFF000000u | COL32_SWAP_RB(x)))
-#define COLOR_WHITE (rgba_u32(0xFFFFFFFFu))
+#define ARGB(x) (rgba_u32(COL32_SWAP_RB((uint32_t)(x))))
+#define RGB(x) (rgba_u32(0xFF000000u | COL32_SWAP_RB((uint32_t)(x))))
+#define COLOR_WHITE ARGB(0xFFFFFFFF)
+#define COLOR_BLACK ARGB(0xFF000000)
+#define COLOR_ZERO ARGB(0x00000000)
 
 rgba_t rgba_u32(uint32_t value);
 rgba_t rgba_4f(float r, float g, float b, float a);

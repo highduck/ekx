@@ -1,4 +1,4 @@
-function generate_vec_float_cxx_operators(name, fields) {
+function generate_vec_cxx_operators(name, fields, scalar_type = "float") {
     const name_t = name + "_t";
     function list(pattern, del = ", ") {
         let values = [];
@@ -30,29 +30,28 @@ inline static ${name_t} operator/(const ${name_t} a, const ${name_t} b) {
     return {{ ${list("a.$ / b.$")} }};
 }
 
-inline static ${name_t} operator*(const ${name_t} a, float s) {
+inline static ${name_t} operator*(const ${name_t} a, const ${scalar_type} s) {
     return {{ ${list("s * a.$")} }};
 }
 
-inline static ${name_t} operator*(float s, const ${name_t} a) {
+inline static ${name_t} operator*(const ${scalar_type} s, const ${name_t} a) {
     return operator*(a, s);
 }
 
-inline static ${name_t} operator/(const ${name_t} a, float s) {
+inline static ${name_t} operator/(const ${name_t} a, const ${scalar_type} s) {
     EK_ASSERT(s != 0);
-    const float inv = 1.0f / s;
-    return {{ ${list("inv * a.$")} }};
+    return {{ ${list("a.$ / s")} }};
 }
 
-inline static ${name_t}& operator*=(${name_t}& a, const float s) {
+inline static ${name_t}& operator*=(${name_t}& a, const ${scalar_type} s) {
     ${list("a.$ *= s;", " ")}
     return a;
 }
 
-inline static ${name_t}& operator/=(${name_t}& a, const float s) {
+inline static ${name_t}& operator/=(${name_t}& a, const ${scalar_type} s) {
     EK_ASSERT(s != 0);
-    const float inv = 1.0f / s;
-    return operator*=(a, inv);
+    ${list("a.$ /= s;", " ")}
+    return a;
 }
 
 inline static ${name_t}& operator+=(${name_t}& a, const ${name_t} b) {
@@ -88,9 +87,12 @@ inline static bool operator!=(const ${name_t} a, const ${name_t} b) {
 }
 
 let code = "#ifdef __cplusplus\n\n";
-code += generate_vec_float_cxx_operators("vec2", ["x", "y"]);
-code += generate_vec_float_cxx_operators("vec3", ["x", "y", "z"]);
-code += generate_vec_float_cxx_operators("vec4", ["x", "y", "z", "w"]);
+code += generate_vec_cxx_operators("vec2", ["x", "y"]);
+code += generate_vec_cxx_operators("vec3", ["x", "y", "z"]);
+code += generate_vec_cxx_operators("vec4", ["x", "y", "z", "w"]);
+code += generate_vec_cxx_operators("vec2i", ["x", "y"], "int");
+code += generate_vec_cxx_operators("vec3i", ["x", "y", "z"], "int");
+code += generate_vec_cxx_operators("vec4i", ["x", "y", "z", "w"], "int");
 code += "#endif // __cplusplus\n";
 
 require("fs").writeFileSync("include/ek/math/math_vec.hpp", code);

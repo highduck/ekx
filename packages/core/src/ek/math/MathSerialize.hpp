@@ -1,11 +1,8 @@
 #pragma once
 
 #include <ek/serialize/serialize.hpp>
-
 #include <ek/math/ColorTransform.hpp>
 #include <ek/math/Color32.hpp>
-#include <ek/math/Vec.hpp>
-#include <ek/math/Rect.hpp>
 
 namespace ek {
 
@@ -15,6 +12,10 @@ DEF_POD(rect_t);
 DEF_POD(rect_i16_t);
 DEF_POD(recti_t);
 DEF_POD(brect_t);
+DEF_POD(aabb_t);
+DEF_POD(vec2i_t);
+DEF_POD(vec3i_t);
+DEF_POD(vec4i_t);
 DEF_POD(vec2_t);
 DEF_POD(vec3_t);
 DEF_POD(vec4_t);
@@ -32,13 +33,5 @@ DEF_POD(abgr32_t);
 DEF_POD(argb32_t);
 
 #undef DEF_POD
-
-//template<typename T, unsigned N>
-//struct declared_as_pod_type<Rect<N, T>> : public std::true_type {
-//};
-
-template<typename T, unsigned N>
-struct declared_as_pod_type<Vec<N, T>> : public std::true_type {
-};
 
 }

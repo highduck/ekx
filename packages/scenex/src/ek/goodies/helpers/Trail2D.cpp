@@ -113,12 +113,12 @@ void TrailRenderer2D::draw() {
         const auto p = nodeArray[node_idx].position;
         vec2_t perp = {};
         if (i > 0/* node_idx > begin */) {
-            perp = normalize_2f(nodeArray[node_idx - 1].position - p);
+            perp = vec2_normalize(nodeArray[node_idx - 1].position - p);
             if (i + 1 < columns) {
-                perp = normalize_2f(vec2_lerp(perp, normalize_2f(p - nodeArray[node_idx + 1].position), 0.5f));
+                perp = vec2_normalize(vec2_lerp(perp, vec2_normalize(p - nodeArray[node_idx + 1].position), 0.5f));
             }
         } else if (i + 1 < columns) {
-            perp = normalize_2f(p - nodeArray[node_idx + 1].position);
+            perp = vec2_normalize(p - nodeArray[node_idx + 1].position);
         }
         perp = vec2_perp(perp);
 

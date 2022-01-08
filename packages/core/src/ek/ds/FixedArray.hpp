@@ -37,6 +37,19 @@ struct FixedArray {
     }
 
     [[nodiscard]]
+    constexpr bool empty() const {
+        return _size == 0;
+    }
+
+    void erase_at(unsigned index) {
+        EK_ASSERT(index < size());
+        --_size;
+        for (unsigned i = index; i < _size; ++i) {
+            _data[i] = std::move(_data[i + 1]);
+        }
+    }
+
+    [[nodiscard]]
     constexpr const T* data() const {
         return _data;
     }
@@ -67,8 +80,8 @@ struct FixedArray {
     }
 
     const T* find(const T& v) const {
-        for(uint32_t i = 0; i < _size; ++i) {
-            if(_data[i] == v) {
+        for (uint32_t i = 0; i < _size; ++i) {
+            if (_data[i] == v) {
                 return _data + i;
             }
         }

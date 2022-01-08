@@ -3,7 +3,6 @@
 #include <doctest.h>
 
 #include <ek/math/Color32.test.hpp>
-#include <ek/math/Vec.test.hpp>
 #include <ek/serialize/serialize.test.hpp>
 #include "Path.test.hpp"
 #include <ek/ds/Array.test.hpp>

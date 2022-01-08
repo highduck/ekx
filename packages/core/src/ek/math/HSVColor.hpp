@@ -65,7 +65,7 @@ private:
     constexpr static unsigned table_max_ = 6u;
 
     static uint8_t lerp_channel(uint8_t value, float x, float y) {
-        return uint8_t(Math::lerp(0.0f, Math::lerp(255.0f, float(value), x), y));
+        return unorm8_f32(f32_lerp(0.0f, f32_lerp(255.0f, (float)value, x), y));
     }
 
     static float calc_hue(float max, float delta, float r, float g, float b) {
@@ -78,7 +78,7 @@ private:
             hue = 4.0f + (r - g) / delta;
         }
 
-        hue /= float(table_max_);
+        hue /= (float)table_max_;
         if (hue < 0.0f) {
             hue += 1.0f;
         }
