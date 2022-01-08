@@ -12,8 +12,8 @@ void simple_animator_script::update(float dt) {
 
     auto& transform = get<Transform2D>();
     transform.setRotation(rotation);
-    transform.color.scale = lerp(
-            HSVColor4f::getHueColor(Math::reduce(hue, 1.0f, 0.0f)),
+    transform.color.scale = rgba_lerp(
+            HSVColor::getHueColor(Math::reduce(hue, 1.0f, 0.0f)),
             base_color,
             1.0f - hue_mixup_factor
     );

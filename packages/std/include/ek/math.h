@@ -493,8 +493,8 @@ uint8_t u8_norm_mul(uint8_t a, uint8_t b);
 uint8_t u8_add_sat(uint8_t a, uint8_t b);
 
 #define COL32_SWAP_RB(x) (((x) & 0xFF00FF00u) | (((x) >> 16u) & 0xFFu) | (((x) & 0xFFu) << 16u))
-#define ARGB(x) (rgba_u32(COL32_SWAP_RB((uint32_t)(x))))
-#define RGB(x) (rgba_u32(0xFF000000u | COL32_SWAP_RB((uint32_t)(x))))
+#define ARGB(x) ((rgba_t){.value=(COL32_SWAP_RB((uint32_t)(x)))})
+#define RGB(x) ((rgba_t){.value=(0xFF000000u | COL32_SWAP_RB((uint32_t)(x)))})
 #define COLOR_WHITE ARGB(0xFFFFFFFF)
 #define COLOR_BLACK ARGB(0xFF000000)
 #define COLOR_ZERO ARGB(0x00000000)

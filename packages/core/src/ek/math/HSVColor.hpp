@@ -4,14 +4,13 @@
 
 namespace ek {
 
-template<typename T>
 struct HSVColor {
-    T hue;
-    T saturation;
-    T value;
-    T alpha;
+    float hue;
+    float saturation;
+    float value;
+    float alpha;
 
-    explicit HSVColor(T hue = T(1), T saturation = T(1), T value = T(1), T alpha = T(1)) :
+    explicit HSVColor(float hue = 1.0f, float saturation = 1.0f, float value = 1.0f, float alpha = 1.0f) :
             hue{hue},
             saturation{saturation},
             value{value},
@@ -19,21 +18,23 @@ struct HSVColor {
     }
 
     [[nodiscard]]
-    argb32_t argb32() const {
-        argb32_t hue_color = getHueColor(hue);
-        uint8_t r = lerp_channel(hue_color.r, saturation, value);
-        uint8_t g = lerp_channel(hue_color.g, saturation, value);
-        uint8_t b = lerp_channel(hue_color.b, saturation, value);
-        return {r, g, b, uint8_t(alpha * 255.0f)};
+    rgba_t rgba() const {
+        const rgba_t hue_color = getHueColor(hue);
+        rgba_t result;
+        result.r = lerp_channel(hue_color.r, saturation, value);
+        result.g = lerp_channel(hue_color.g, saturation, value);
+        result.b = lerp_channel(hue_color.b, saturation, value);
+        result.a = (uint8_t)(alpha * 255.0f);
+        return result;
     }
 
-    void set_argb32(argb32_t color) {
-        auto r = color.r;
-        auto g = color.g;
-        auto b = color.b;
-        auto min = float(std::min(r, std::min(g, b)));
-        auto max = float(std::max(r, std::max(g, b)));
-        float delta = max - min;
+    void set_argb32(rgba_t color) {
+        const uint8_t r = color.r;
+        const uint8_t g = color.g;
+        const uint8_t b = color.b;
+        const float min = (float)(MIN(r, MIN(g, b)));
+        const float max = (float)(MAX(r, MAX(g, b)));
+        const float delta = max - min;
         value = max / 255.0f;
         if (max > 0.0f && delta > 0.0f) {
             saturation = delta / max;
@@ -42,24 +43,24 @@ struct HSVColor {
             saturation = 0.0f;
             hue = -1.0f;
         }
-        alpha = color.af();
+        alpha = (float)color.a / 255.0f;
     }
 
-    static argb32_t getHueColor(float hueNormalized) {
+    static rgba_t getHueColor(float hueNormalized) {
         const float t = table_max_ * saturate(hueNormalized);
-        const auto index = static_cast<int>(t);
-        return lerp(table_[index], table_[index + 1], t - (float)index);
+        const int index = (int)t;
+        return rgba_lerp(table_[index], table_[index + 1], t - (float)index);
     }
 
 private:
-    constexpr static argb32_t table_[7] = {
-            0xFF0000_rgb,
-            0xFFFF00_rgb,
-            0x00FF00_rgb,
-            0x00FFFF_rgb,
-            0x0000FF_rgb,
-            0xFF00FF_rgb,
-            0xFF0000_rgb
+    constexpr static rgba_t table_[7] = {
+            RGB(0xFF0000),
+            RGB(0xFFFF00),
+            RGB(0x00FF00),
+            RGB(0x00FFFF),
+            RGB(0x0000FF),
+            RGB(0xFF00FF),
+            RGB(0xFF0000),
     };
 
     constexpr static unsigned table_max_ = 6u;
@@ -86,8 +87,6 @@ private:
         return hue;
     }
 };
-
-using HSVColor4f = HSVColor<float>;
 
 }
 

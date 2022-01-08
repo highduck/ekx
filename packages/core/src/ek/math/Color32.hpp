@@ -44,16 +44,6 @@ struct argb32_t final {
             argb32_t(v[0], v[1], v[2], v[3]) {
     }
 
-//    template<typename T>
-//    constexpr explicit argb32_t(const Vec<4, T>& vector)
-//            :argb32_t(vector.x, vector.y, vector.z, vector.w) {
-//    }
-
-//    template<typename T>
-//    constexpr explicit argb32_t(const Vec<3, T>& vector, float alpha = 1.0f)
-//            :argb32_t(vector.x, vector.y, vector.z, alpha) {
-//    }
-
     constexpr explicit argb32_t(uint32_t argb_) noexcept
             : argb{argb_} {}
 
@@ -63,8 +53,7 @@ struct argb32_t final {
     }
 
     constexpr operator rgba_t() const noexcept {
-//        return {{r, g, b, a}};
-        return {.value = COL32_SWAP_RB(argb)};
+        return ARGB(argb);
     }
 
     constexpr argb32_t operator*(argb32_t multiplier) const {
@@ -106,21 +95,6 @@ struct argb32_t final {
 
     constexpr void af(float value) { a = uint8_t(static_cast<uint16_t>(value * 255.0f) & 0xFFu); }
 
-//    inline argb32_t& operator=(const argb32_t& rhs) {
-//        argb = rhs.argb;
-//        return *this;
-//    }
-
-//    template<typename T>
-//    explicit operator Vec<4, T>() {
-//        return Vec<4, T>{T(r) / 255, T(g) / 255, T(b) / 255, T(a) / 255};
-//    }
-
-//    template<typename T>
-//    explicit operator Vec<3, T>() {
-//        return Vec<3, T>{T(r) / 255, T(g) / 255, T(b) / 255};
-//    }
-
     constexpr bool operator==(const argb32_t& v) const {
         return argb == v.argb;
     }
@@ -133,10 +107,6 @@ struct argb32_t final {
 inline constexpr argb32_t argb32_t::zero{0x0u};
 inline constexpr argb32_t argb32_t::one{0xFFFFFFFFu};
 inline constexpr argb32_t argb32_t::black{0xFF000000u};
-
-//inline constexpr abgr32_t abgr32_t::zero{0x0u};
-//inline constexpr abgr32_t abgr32_t::one{0xFFFFFFFFu};
-//inline constexpr abgr32_t abgr32_t::black{0xFF000000u};
 
 constexpr argb32_t operator "" _argb(unsigned long long n) noexcept {
     return argb32_t(0xFFFFFFFFu & n);
