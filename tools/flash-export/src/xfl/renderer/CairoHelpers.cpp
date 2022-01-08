@@ -2,7 +2,7 @@
 #include <cairo.h>
 
 #include "../types.hpp"
-#include <ek/math/Math.hpp>
+#include <ek/math.h>
 
 namespace ek::xfl {
 
@@ -232,12 +232,12 @@ void cairo_round_rectangle(cairo_t* cr, const double* values) {
 
     const double maxRadius = fmin((b - t) / 2, (r - l) / 2);
 
-    const double r0 = Math::clamp(values[4], -maxRadius, maxRadius);
-    const double r1 = Math::clamp(values[5], -maxRadius, maxRadius);
-    const double r2 = Math::clamp(values[6], -maxRadius, maxRadius);
-    const double r3 = Math::clamp(values[7], -maxRadius, maxRadius);
+    const double r0 = CLAMP(values[4], -maxRadius, maxRadius);
+    const double r1 = CLAMP(values[5], -maxRadius, maxRadius);
+    const double r2 = CLAMP(values[6], -maxRadius, maxRadius);
+    const double r3 = CLAMP(values[7], -maxRadius, maxRadius);
 
-    double degrees = Math::pi / 180.0;
+    double degrees = MATH_PI / 180.0;
 
     cairo_new_sub_path(cr);
     if (r1 >= 0) {
@@ -266,7 +266,7 @@ void cairo_round_rectangle(cairo_t* cr, const double* values) {
 }
 
 void cairo_oval(cairo_t* cr, const double* values) {
-    const double degrees = Math::pi / 180.0;
+    const double degrees = MATH_PI / 180.0;
 
     const double a0 = values[4];
     double a1 = values[5];

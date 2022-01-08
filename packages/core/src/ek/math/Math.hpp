@@ -5,13 +5,6 @@
 
 namespace ek::Math {
 
-constexpr double pi = 3.141592653589793238462643383279502884;
-constexpr double pi2 = pi * 2.0;
-
-constexpr float fPI = 3.141592653589793238462643383279502884f;
-constexpr float fPI2 = fPI * 2.0f;
-constexpr float fPI_2 = fPI / 2.0f;
-
 template<typename T>
 T epsilon();
 
@@ -31,26 +24,6 @@ inline bool equals(T a, T b) {
     return std::abs(a - b) < epsilon<T>();
     // carefully with these bugs
     // return a < b + epsilon<T>() && a > b - epsilon<T>();
-}
-
-template<typename T>
-inline T clamp(T x, T begin = T(0), T end = T(1)) {
-    return x < begin ? begin : (x > end ? end : x);
-}
-
-template<typename T>
-inline constexpr T to_radians(T degrees) noexcept {
-    return degrees * pi / T(180);
-}
-
-template<typename T>
-inline constexpr T to_degrees(T radians) noexcept {
-    return radians * T(180) / pi;
-}
-
-template<typename T>
-inline T saturate(T x) {
-    return clamp(x);
 }
 
 template<typename T>
@@ -106,7 +79,7 @@ T fract_positive_fast(T x) {
 }
 
 inline float osc_sine(float time, float min, float max, float frequency) {
-    float t = 0.5f + 0.5f * sinf(pi2 * (frequency * time - 0.25f));
+    float t = 0.5f + 0.5f * sinf(2 * MATH_PI * (frequency * time - 0.25f));
     return min + (max - min) * t;
 }
 
@@ -134,17 +107,6 @@ inline float Q_rsqrt(float x) {
     return 1.0f / sqrtf(x);
 }
 
-/* Thanks to good old Bit Twiddling Hacks for this one: http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2 */
-inline unsigned int nextPowerOf2(unsigned int x) {
-    x--;
-    x |= x >> 1;
-    x |= x >> 2;
-    x |= x >> 4;
-    x |= x >> 8;
-    x |= x >> 16;
-    x++;
-    return x;
-}
 //
 //union FloatInt {
 //    int32_t i;
@@ -169,7 +131,7 @@ inline float integrateExp(float k, float dt, float fps = 60.0f) {
 // normSin(0.50) = 0
 // normSin(0.75) = -1
 inline float normSin(float x){
-    return sinf(fPI2 * x);
+    return sinf(2 * MATH_PI * x);
 }
 
 // normCos(0.00) = 1
@@ -177,7 +139,7 @@ inline float normSin(float x){
 // normCos(0.50) = -1
 // normCos(0.75) = 0
 inline float normCos(float x){
-    return cosf(fPI2 * x);
+    return cosf(2 * MATH_PI * x);
 }
 
 // unit sin/cos: (0 ... 1) => (0 ~ 1 ~ 0)

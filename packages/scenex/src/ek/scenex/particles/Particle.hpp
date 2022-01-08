@@ -21,7 +21,7 @@ struct Particle {
     vec2_t velocity = {};
     vec2_t acc = {};
 
-    float acc_x_phase{Math::pi / 2.0f};
+    float acc_x_phase{MATH_PI / 2.0f};
     float acc_x_speed = 0.0f;
 
     // angle state

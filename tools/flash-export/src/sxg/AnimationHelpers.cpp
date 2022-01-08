@@ -23,15 +23,15 @@ static SGKeyFrameTransform createKeyFrameTransform(const Element& el) {
 }
 
 static void fixRotation(SGKeyFrameTransform& curr, const SGKeyFrameTransform& prev) {
-    if (prev.skew.x + Math::pi < curr.skew.x) {
-        curr.skew.x -= 2 * Math::pi;
-    } else if (prev.skew.x - Math::pi > curr.skew.x) {
-        curr.skew.x += 2 * Math::pi;
+    if (prev.skew.x + MATH_PI < curr.skew.x) {
+        curr.skew.x -= 2 * MATH_PI;
+    } else if (prev.skew.x - MATH_PI > curr.skew.x) {
+        curr.skew.x += 2 * MATH_PI;
     }
-    if (prev.skew.y + Math::pi < curr.skew.y) {
-        curr.skew.y -= 2 * Math::pi;
-    } else if (prev.skew.y - Math::pi > curr.skew.y) {
-        curr.skew.y += 2 * Math::pi;
+    if (prev.skew.y + MATH_PI < curr.skew.y) {
+        curr.skew.y -= 2 * MATH_PI;
+    } else if (prev.skew.y - MATH_PI > curr.skew.y) {
+        curr.skew.y += 2 * MATH_PI;
     }
 }
 
@@ -46,20 +46,20 @@ static void addRotation(SGKeyFrameTransform& curr, const Frame& frame, const SGK
         direction *= sign(curr.scale.x) * sign(curr.scale.y);
 
         while (direction < 0 && prev.skew.x < curr.skew.x) {
-            curr.skew.x -= 2 * Math::pi;
+            curr.skew.x -= 2 * MATH_PI;
         }
         while (direction > 0 && prev.skew.x > curr.skew.x) {
-            curr.skew.x += 2 * Math::pi;
+            curr.skew.x += 2 * MATH_PI;
         }
         while (direction < 0 && prev.skew.y < curr.skew.y) {
-            curr.skew.y -= 2 * Math::pi;
+            curr.skew.y -= 2 * MATH_PI;
         }
         while (direction > 0 && prev.skew.y > curr.skew.y) {
-            curr.skew.y += 2 * Math::pi;
+            curr.skew.y += 2 * MATH_PI;
         }
 
 // additional rotations specified?
-        additionalRotation += 2.0 * Math::pi * direction * times;
+        additionalRotation += 2.0 * MATH_PI * direction * times;
     }
 
     curr.skew.x += additionalRotation;

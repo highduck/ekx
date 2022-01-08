@@ -11,10 +11,6 @@
 #include <ek/canvas.h>
 #include <ek/app.h>
 #include <ek/scenex/base/Node.hpp>
-#include <ek/math/MatrixTransform.hpp>
-#include <ek/math/MatrixTranspose.hpp>
-#include <ek/math/MatrixInverse.hpp>
-#include <ek/math/Rect.hpp>
 
 #include <cstring>
 
@@ -25,10 +21,10 @@ namespace ek {
 
 const auto DEFAULT_FACE_WINDING = SG_FACEWINDING_CCW;
 
-Rect<3, float>
+aabb_t
 get_shadow_map_box(const mat4_t& camera_projection, const mat4_t& camera_view, const mat4_t& light_view) {
     const mat4_t inv_proj_view = mat4_inverse(mat4_mul(camera_projection, camera_view));
-    vec3_t corners[8] = {
+    const vec3_t corners[8] = {
             vec3(-1, -1, -1),
             vec3(-1, -1, 1),
             vec3(1, -1, -1),
@@ -38,24 +34,25 @@ get_shadow_map_box(const mat4_t& camera_projection, const mat4_t& camera_view, c
             vec3(1, 1, -1),
             vec3(1, 1, 1),
     };
-    vec3_t bb_min = vec3(100000, 100000, 100000);
-    vec3_t bb_max = vec3(-100000, -100000, -100000);
+    aabb_t bb;
+    bb.min = vec3(100000, 100000, 100000);
+    bb.max = vec3(-100000, -100000, -100000);
 
-    for (size_t i = 0; i < 8; ++i) {
+    for (uint32_t i = 0; i < 8; ++i) {
         vec4_t c;
         c.xyz = corners[i];
         c.w = 1;
         vec4_t v2 = mat4_mul_vec4(inv_proj_view, c);
         auto len = vec4_length(v2);
         vec3_t v = vec3_scale(vec3_normalize(v2.xyz), len);
-        if (v.x < bb_min.x) bb_min.x = v.x;
-        if (v.y < bb_min.y) bb_min.y = v.y;
-        if (v.z < bb_min.z) bb_min.z = v.z;
-        if (v.x > bb_max.x) bb_max.x = v.x;
-        if (v.y > bb_max.y) bb_max.y = v.y;
-        if (v.z > bb_max.z) bb_max.z = v.z;
+        if (v.x < bb.min.x) bb.min.x = v.x;
+        if (v.y < bb.min.y) bb.min.y = v.y;
+        if (v.z < bb.min.z) bb.min.z = v.z;
+        if (v.x > bb.max.x) bb.max.x = v.x;
+        if (v.y > bb.max.y) bb.max.y = v.y;
+        if (v.z > bb.max.z) bb.max.z = v.z;
     }
-    return {bb_min, vec3_sub(bb_max, bb_min)};
+    return bb;
 }
 
 sg_layout_desc getVertex3DLayout() {
@@ -163,18 +160,18 @@ struct ShadowMapRes {
             }
         }
 
-        const vec3_t light_target = {};
+        const vec3_t light_target = vec3(0, 0, 0);
 //    auto light_dir = normalize(light_target - light_position);
 
         auto bb = get_shadow_map_box(cameraProjection, cameraView, view);
         const float shadow_zone_size = 200.0f;
         view = mat4_look_at_rh(light_position, light_target, vec3(0, 0, 1));
         projection = mat4_orthographic_rh(-shadow_zone_size,
-                                                shadow_zone_size,
-                                                shadow_zone_size,
-                                                -shadow_zone_size,
-                                                -shadow_zone_size,
-                                                shadow_zone_size);
+                                          shadow_zone_size,
+                                          shadow_zone_size,
+                                          -shadow_zone_size,
+                                          -shadow_zone_size,
+                                          shadow_zone_size);
     }
 
     void renderObjects() {
@@ -232,10 +229,10 @@ struct Main3DRes {
     }
 
     void setDirectionalLightInfo(vec3_t pos, const Light3D& data) {
-        memcpy(directionalLightParams.light_position, pos.data, sizeof(vec3_t));
-        memcpy(directionalLightParams.light_ambient, data.ambient.data, sizeof(vec3_t));
-        memcpy(directionalLightParams.light_diffuse, data.diffuse.data, sizeof(vec3_t));
-        memcpy(directionalLightParams.light_specular, data.specular.data, sizeof(vec3_t));
+        memcpy(directionalLightParams.light_position, &pos, sizeof(vec3_t));
+        memcpy(directionalLightParams.light_ambient, &data.ambient, sizeof(vec3_t));
+        memcpy(directionalLightParams.light_diffuse, &data.diffuse, sizeof(vec3_t));
+        memcpy(directionalLightParams.light_specular, &data.specular, sizeof(vec3_t));
     }
 
     void setPointLightInfo(vec3_t pos, const Light3D& data) {
@@ -276,16 +273,16 @@ struct RenderSkyBoxRes {
         if (cubemap.id && mesh) {
             sg_apply_pipeline(pip);
 
-            mat4_t model{};
+            mat4_t model = mat4_identity();
 
             mat4_t view3 = view;
             view3.m03 = 0;
             view3.m13 = 0;
             view3.m23 = 0;
-            view3.m33 = 1;
             view3.m30 = 0;
             view3.m31 = 0;
             view3.m32 = 0;
+            view3.m33 = 1;
 
             const mat4_t mvp = mat4_mul(mat4_mul(projection, view3), model);
 
@@ -326,17 +323,9 @@ void RenderSystem3D::renderObjects(mat4_t proj, mat4_t view) {
         auto* mesh = Res<StaticMesh>{filter.mesh.c_str()}.get_or(filter.meshPtr);
         if (mesh && e.get_or_default<Node>().visible()) {
             mat4_t model = e.get<Transform3D>().world;
-            Matrix3f nm = transpose(inverse(Matrix3f{model}));
-            mat4_t nm4 = mat4_identity();
-            nm4.m00 = nm.m00;
-            nm4.m01 = nm.m01;
-            nm4.m02 = nm.m02;
-            nm4.m10 = nm.m10;
-            nm4.m11 = nm.m11;
-            nm4.m12 = nm.m12;
-            nm4.m20 = nm.m20;
-            nm4.m21 = nm.m21;
-            nm4.m22 = nm.m22;
+//            mat3_t nm = mat3_transpose(mat3_inverse(mat4_get_mat3(&model)));
+//            mat4_t nm4 = mat4_mat3(nm);
+            mat4_t nm4 = mat4_transpose(mat4_inverse(mat4_mat3(mat4_get_mat3(&model))));
 
             const mat4_t depth_mvp = mat4_mul(mat4_mul(shadows->projection, shadows->view), model);
 
@@ -366,7 +355,7 @@ void RenderSystem3D::renderObjects(mat4_t proj, mat4_t view) {
 }
 
 void RenderSystem3D::prepare() {
-    defaultMaterial.set_base_color(0xFF00FF_rgb, 0.2f);
+    defaultMaterial.set_base_color(RGB(0xFF00FF), 0.2f);
 
     if (!camera.isAlive() || !scene.isAlive()) {
         camera = nullptr;
@@ -383,7 +372,7 @@ void RenderSystem3D::prepare() {
     vec3_t point_light_pos = vec3(0, 15, 0);
     Light3D point_light{};
 
-    vec3_t directional_light_pos = vec3(0, 0, -1);
+    vec3_t directional_light_pos = vec3(0, 0, 1);
     Light3D directional_light{};
     for (auto e: ecs::view<Light3D, Transform3D>()) {
         auto& l = e.get<Light3D>();
@@ -406,11 +395,11 @@ void RenderSystem3D::prepare() {
     if (cameraData.orthogonal) {
         const auto ortho_size = cameraData.orthogonalSize;
         proj = mat4_orthographic_rh(-ortho_size * aspect,
-                                          ortho_size * aspect,
-                                          -ortho_size,
-                                          ortho_size,
-                                          cameraData.zNear,
-                                          cameraData.zFar);
+                                    ortho_size * aspect,
+                                    -ortho_size,
+                                    ortho_size,
+                                    cameraData.zNear,
+                                    cameraData.zFar);
     } else {
         proj = mat4_perspective_rh(cameraData.fov, aspect, cameraData.zNear, cameraData.zFar);
     }

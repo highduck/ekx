@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "scripts": {
     "postinstall": "cmake-build || exit 0",
-    "generate": "node scripts/gen_math_hpp.js"
+    "generate": "node scripts/gen_math.js"
   },
   "publishConfig": {
     "access": "public"

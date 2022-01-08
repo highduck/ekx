@@ -45,9 +45,9 @@ public:
             return roundf(height * (val - min) / (max - min));
         }
 
-        [[nodiscard]] argb32_t calculateColor(float val) const {
-            return lerp(0x00FF00_rgb, 0xFF0000_rgb,
-                        Math::clamp((val - thMin) / (thMax - thMin), 0.0f, 1.0f));
+        [[nodiscard]] rgba_t calculateColor(float val) const {
+            return rgba_lerp(RGB(0x00FF00), RGB(0xFF0000),
+                        clamp((val - thMin) / (thMax - thMin), 0, 1));
         }
     };
 

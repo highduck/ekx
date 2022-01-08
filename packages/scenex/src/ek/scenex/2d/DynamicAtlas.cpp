@@ -196,9 +196,9 @@ void DynamicAtlas::reset() {
 }
 
 int DynamicAtlas::estimateBetterSize(float scaleFactor, unsigned baseSize, unsigned maxSize) {
-    auto scaledSize = static_cast<unsigned>(ceilf(static_cast<float>(baseSize) * scaleFactor));
-    auto potSize = Math::nextPowerOf2(scaledSize);
-    return std::min(potSize, maxSize);
+    auto scaledSize = (uint32_t)ceilf((float)baseSize * scaleFactor);
+    auto potSize = next_power_of_2(scaledSize);
+    return MIN(potSize, maxSize);
 }
 
 void DynamicAtlas::invalidate() {

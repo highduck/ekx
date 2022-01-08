@@ -37,7 +37,7 @@ void on_popup_opening(EntityApi e) {
 }
 
 void on_popup_open_animation(float t, EntityApi e) {
-    t = Math::clamp(t, 0.0f, 1.0f);
+    t = saturate(t);
     float scale = easing::BACK_OUT.calculate(t);
     float fly = easing::P3_OUT.calculate(t);
     auto& transform = e.get<Transform2D>();
@@ -75,7 +75,7 @@ void on_popup_closed(EntityApi e) {
 }
 
 void on_popup_close_animation(float t, EntityApi e) {
-    t = Math::clamp(1.0f - t, 0.0f, 1.0f);
+    t = saturate(1 - t);
     float scale = easing::BACK_OUT.calculate(t);
     float fly = easing::P3_OUT.calculate(t);
     auto& transform = e.get<Transform2D>();

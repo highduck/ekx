@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/math/Rect.hpp>
+#include <ek/math.h>
 #include <ek/util/Type.hpp>
 #include <ecxx/ecxx_fwd.hpp>
 

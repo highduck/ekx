@@ -98,7 +98,7 @@ void process_filters(const Element& el, ExportItem& item) {
         fd.blur = filter.blur;
         fd.quality = filter.quality;
 
-        float a = Math::to_radians(filter.angle);
+        float a = to_radians(filter.angle);
         fd.offset = filter.distance * vec2(cosf(a), sinf(a));
 
         if (filter.type == FilterType::drop_shadow) {
@@ -153,7 +153,7 @@ void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
         layer.blurIterations = filter.quality;
         layer.offset = {};
         if (filter.type == FilterType::drop_shadow) {
-            const float a = Math::to_radians(filter.angle);
+            const float a = to_radians(filter.angle);
             layer.offset = filter.distance * vec2(cosf(a), sinf(a));
         }
         layer.strength = int(filter.strength);

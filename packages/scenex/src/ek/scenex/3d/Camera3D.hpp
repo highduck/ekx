@@ -18,7 +18,7 @@ struct Camera3D {
     float orthogonalSize = 30.0f;
 
     // field of view in radians
-    float fov = Math::to_radians(45.0f);
+    float fov = to_radians(45.0f);
 
     // camera up vector
     vec3_t up = vec3(0, 0,1);

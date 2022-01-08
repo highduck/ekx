@@ -1,10 +1,6 @@
 #include "Transform3D.hpp"
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/base/Node.hpp>
-#include <ek/math/Matrix.hpp>
-#include <ek/math/Vec.hpp>
-#include <ek/math/MatrixTransform.hpp>
-#include <ek/math/Quaternion.hpp>
 
 namespace ek {
 
@@ -28,9 +24,16 @@ void Transform3D::updateAll() {
     // TODO: correct hierarchy update
     for (auto e: ecs::view<Transform3D>()) {
         auto& tr = e.get<Transform3D>();
-        tr.local = (translate_transform((Vec3f)tr.position)
-                   * rotation_transform(Quaternion<float>((Vec3f)tr.rotation))
-                   * scale_transform((Vec3f)tr.scale)).cdata;
+        tr.local = //mat4_translate_transform(tr.position);
+                mat4_mul(
+                        mat4_mul(
+                                mat4_translate_transform(tr.position),
+                                mat4_rotation_transform_quat(
+                                        quat_normalize(quat_euler_angles(tr.rotation))
+                                )
+                        ),
+                        mat4_scale_transform(tr.scale)
+                );
     }
     static mat4_t identity = mat4_identity();
     for (auto e: ecs::view<Transform3D>()) {

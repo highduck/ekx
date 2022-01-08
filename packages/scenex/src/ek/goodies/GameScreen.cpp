@@ -83,11 +83,11 @@ void ScreenTransitionState::completeNext() {
 }
 
 float ScreenTransitionState::getPrevProgress() const {
-    return Math::clamp((t - prevTimeStart) / (prevTimeEnd - prevTimeStart));
+    return saturate((t - prevTimeStart) / (prevTimeEnd - prevTimeStart));
 }
 
 float ScreenTransitionState::getNextProgress() const {
-    return Math::clamp((t - nextTimeStart) / (nextTimeEnd - nextTimeStart));
+    return saturate((t - nextTimeStart) / (nextTimeEnd - nextTimeStart));
 }
 
 /** GameScreenManager **/

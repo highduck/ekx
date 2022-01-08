@@ -20,6 +20,12 @@ extern "C" {
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define CLAMP(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
+
+float to_radians(float degrees);
+float to_degrees(float radians);
+
+uint32_t next_power_of_2(uint32_t x);
 
 typedef union vec2_t {
     struct {
@@ -56,9 +62,9 @@ typedef union vec4_t {
         float w;
     };
     float data[4];
-
     struct {
         vec3_t xyz;
+        float _w;
     };
     struct {
         vec2_t xy;
@@ -71,9 +77,28 @@ typedef union vec4_t {
 #endif
 } vec4_t;
 
+typedef union quat_t {
+    struct {
+        float x;
+        float y;
+        float z;
+        float w;
+    };
+    vec4_t xyzw;
+    struct {
+        vec3_t xyz;
+        float _w;
+    };
+    float data[4];
+} quat_t;
+
 typedef union mat2_t {
     struct {
         float a, b, c, d;
+    };
+    struct {
+        float m00, m01;
+        float m10, m11;
     };
     vec4_t v;
     float data[4];
@@ -100,6 +125,16 @@ typedef union mat3x2_t {
 
 #endif
 } mat3x2_t;
+
+typedef union mat3_t {
+    struct {
+        float m00, m01, m02;
+        float m10, m11, m12;
+        float m20, m21, m22;
+    };
+    float data[9];
+    vec3_t columns[3];
+} mat3_t;
 
 typedef union mat4_t {
     struct {
@@ -199,6 +234,27 @@ typedef union circle_t {
 #endif
 } circle_t;
 
+typedef union aabb_t {
+    struct {
+        float x0;
+        float y0;
+        float z0;
+        float x1;
+        float y1;
+        float z1;
+    };
+    struct {
+        vec3_t min;
+        vec3_t max;
+    };
+    float data[6];
+#ifdef __cplusplus
+
+    inline float& operator[](const int index) { return data[index]; }
+
+#endif
+} aabb_t;
+
 typedef union rgba_t {
     struct {
         uint8_t r;
@@ -223,6 +279,7 @@ typedef struct color_mod_t {
 vec2_t vec2(float x, float y);
 vec3_t vec3(float x, float y, float z);
 vec4_t vec4(float x, float y, float z, float w);
+vec4_t vec4_v(vec3_t v, float w);
 vec4_t vec4_rgba(rgba_t rgba);
 
 vec2_t vec2_max(vec2_t a, vec2_t b);
@@ -278,6 +335,7 @@ vec4_t vec4_mul(vec4_t a, vec4_t b);
 vec2_t vec2_normalize(vec2_t a);
 vec3_t vec3_normalize(vec3_t a);
 vec4_t vec4_normalize(vec4_t a);
+quat_t quat_normalize(quat_t a);
 
 vec2_t vec2_transform(vec2_t point, mat3x2_t matrix);
 vec2_t vec2_perp(vec2_t v);
@@ -294,8 +352,12 @@ bool almost_eq_vec2(vec2_t a, vec2_t b, float eps);
 bool almost_eq_vec3(vec3_t a, vec3_t b, float eps);
 bool almost_eq_vec4(vec4_t a, vec4_t b, float eps);
 
-inline static float clamp_f32(float x, float min, float max) {
+inline static float clamp(float x, float min, float max) {
     return x > max ? max : (x < min ? min : x);
+}
+
+inline static float saturate(float x) {
+    return clamp(x, 0, 1);
 }
 
 /** mat2 **/
@@ -307,6 +369,7 @@ vec2_t mat2_get_scale(mat2_t m);
 vec2_t mat2_get_skew(mat2_t m);
 float mat2_get_rotation(mat2_t m);
 float mat2_det(mat2_t m);
+mat2_t mat2_affine_inverse(mat2_t m);
 
 /** mat3x2 **/
 void mat3x2_translate(mat3x2_t* mat, vec2_t v);
@@ -323,6 +386,8 @@ bool mat3x2_inverse(mat3x2_t* m);
 
 /** mat4x4 **/
 mat4_t mat4_identity(void);
+mat4_t mat4_d(float d);
+mat4_t mat4_mat3(mat3_t m);
 mat4_t mat4_2d_transform(vec2_t pos, vec2_t scale, vec2_t skew);
 mat4_t mat4_perspective_rh(float fov_y, float aspect, float z_near, float z_far);
 mat4_t mat4_perspective_lh(float fov_y, float aspect, float z_near, float z_far);
@@ -334,7 +399,19 @@ mat4_t mat4_look_at_lh(vec3_t eye, vec3_t center, vec3_t up);
 mat4_t mat4_mul(mat4_t l, mat4_t r);
 mat4_t mat4_mul_mat3x2(mat4_t l, mat3x2_t r);
 mat4_t mat4_inverse(mat4_t m);
+
+mat3_t mat4_get_mat3(mat4_t* m);
+mat3_t mat3_inverse(mat3_t m);
+mat3_t mat3_transpose(mat3_t m);
+mat4_t mat4_transpose(mat4_t m);
+
 vec3_t mat4_get_position(const mat4_t* m);
+
+mat4_t mat4_rotate(mat4_t m, float angle, vec3_t v);
+mat4_t mat4_rotation_transform_xzy(vec3_t v);
+mat4_t mat4_rotation_transform_quat(quat_t q);
+mat4_t mat4_translate_transform(vec3_t translation);
+mat4_t mat4_scale_transform(vec3_t scale);
 
 // Post-multiply
 vec4_t mat4_mul_vec4(mat4_t m, vec4_t v);
@@ -343,6 +420,16 @@ vec3_t mat4_mul_vec3(mat4_t m, vec3_t v);
 // Pre-multiply
 vec4_t vec4_mul_mat4(vec4_t v, mat4_t m);
 vec3_t vec3_mul_mat4(vec3_t v, mat4_t m);
+
+/** quaternion **/
+
+quat_t quat_euler_angles(vec3_t angles);
+vec3_t quat_to_euler_angles(quat_t q);
+quat_t quat_mat4(mat4_t m);
+quat_t quat_look_at_rh(vec3_t direction, vec3_t up);
+float quat_roll(quat_t q);
+float quat_pitch(quat_t q);
+float quat_yaw(quat_t q);
 
 /** u8 functions **/
 
@@ -424,8 +511,10 @@ bool brect_is_empty(brect_t bb);
 
 #ifdef __cplusplus
 }
+
 #include "math/math_vec.hpp"
 #include "math/math_rect.hpp"
+
 #endif
 
 #endif // EK_MATH_H

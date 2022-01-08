@@ -92,11 +92,12 @@ ColorTransformF& operator<<(ColorTransformF& color, const xml_node& node) {
     }
 
     // default: 0, values: -1 ... 1
-    const auto br = clamp_f32(ct.attribute("brightness").as_float(0.0f), -1.0f, 1.0f);
-    if (br < 0.0f) {
+    float br = ct.attribute("brightness").as_float(0.0f);
+    br = clamp(br, -1, 1);
+    if (br < 0) {
         color.scale.x =
         color.scale.y =
-        color.scale.z = 1.0f + br;
+        color.scale.z = 1 + br;
     } else if (br > 0.0f) {
         color.offset.x =
         color.offset.y =

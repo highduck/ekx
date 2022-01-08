@@ -53,10 +53,10 @@ struct Elastic {
             a = 1.0f;
             s = period / 4.0f;
         } else {
-            s = period / (Math::fPI2 * asinf(1.0f / a));
+            s = period / (MATH_PI * 2 * asinf(1.0f / a));
         }
         const float tm1 = t - 1.0f;
-        return -(a * powf(2.0f, 10.0f * tm1) * sinf((tm1 - s) * Math::fPI2 / period));
+        return -(a * powf(2.0f, 10.0f * tm1) * sinf((tm1 - s) * (MATH_PI * 2) / period));
     }
 };
 
@@ -88,7 +88,7 @@ struct Polynomial {
 struct Sine {
     [[nodiscard]]
     float calculate(float t) const {
-        return t < 1.0f ? (1.0f - ::cos(t * Math::fPI_2)) : 1.0f;
+        return t < 1.0f ? (1.0f - ::cos(t * MATH_PI * 2)) : 1.0f;
     }
 };
 

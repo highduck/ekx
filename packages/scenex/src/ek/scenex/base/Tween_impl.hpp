@@ -15,7 +15,7 @@ void handle_end(ecs::EntityApi e) {
 }
 
 void update_frame(Tween& tween) {
-    const float t = Math::clamp(tween.time / tween.duration, 0.0f, 1.0f);
+    const float t = saturate(tween.time / tween.duration);
     tween.advanced(t);
 }
 

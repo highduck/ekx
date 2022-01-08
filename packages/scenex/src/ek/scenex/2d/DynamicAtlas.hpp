@@ -3,7 +3,7 @@
 #include <ek/ds/Array.hpp>
 #include <ek/util/NoCopyAssign.hpp>
 #include <ek/util/Type.hpp>
-#include <ek/math/Rect.hpp>
+#include <ek/math.h>
 #include <cstring>
 #include <sokol_gfx.h>
 

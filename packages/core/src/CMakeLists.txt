@@ -11,17 +11,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/math/MathSerialize.hpp
 
         ek/math/Vec.hpp
-        ek/math/MatrixDecl.hpp
-        ek/math/Matrix.hpp
-        ek/math/Matrix2.hpp
-        ek/math/Matrix3x2.hpp
-        ek/math/Matrix3.hpp
-        ek/math/Matrix4.hpp
-        ek/math/MatrixInverse.hpp
-        ek/math/MatrixTransform.hpp
-        ek/math/MatrixTranspose.hpp
-        ek/math/Quaternion.hpp
-
         ek/math/Rect.hpp
 
         ek/math/HSVColor.hpp

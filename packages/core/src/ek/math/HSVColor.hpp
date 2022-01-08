@@ -46,7 +46,7 @@ struct HSVColor {
     }
 
     static argb32_t getHueColor(float hueNormalized) {
-        const float t = table_max_ * Math::clamp(hueNormalized);
+        const float t = table_max_ * saturate(hueNormalized);
         const auto index = static_cast<int>(t);
         return lerp(table_[index], table_[index + 1], t - (float)index);
     }

@@ -94,7 +94,7 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
     const float over = btn.timeOver;
     const float push = btn.timePush;
     const float post = btn.timePost;
-    const float pi = Math::pi;
+    const float pi = MATH_PI;
 
     float sx = 1.0f + 0.2f * sinf((1.0f - post) * pi * 5.0f) * post;
     float sy = 1.0f + 0.2f * sinf((1.0f - post) * pi) * cosf((1.0f - post) * pi * 5.0f) * post;

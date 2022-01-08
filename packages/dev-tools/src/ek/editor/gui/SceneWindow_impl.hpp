@@ -187,7 +187,7 @@ SceneWindow::SceneWindow() {
     display.info.window = {120, 120};
     display.info.dpiScale = 1.0f;
 
-    view.view3.projectionMatrix = mat4_perspective_rh(Math::to_radians(45.0f), 4.0f / 3.0f, 10.0f, 1000.0f);
+    view.view3.projectionMatrix = mat4_perspective_rh(to_radians(45.0f), 4.0f / 3.0f, 10.0f, 1000.0f);
     view.view3.viewMatrix = mat4_look_at_rh(vec3(0, 0, 100), {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
 }
 

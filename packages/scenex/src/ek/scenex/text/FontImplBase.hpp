@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/math/Rect.hpp>
+#include <ek/math.h>
 #include <sokol_gfx.h>
 
 namespace ek {

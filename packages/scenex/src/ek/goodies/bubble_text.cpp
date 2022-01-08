@@ -31,7 +31,7 @@ void BubbleText::updateAll() {
             continue;
         }
 
-        float r = Math::clamp(state.time / time_max);
+        float r = saturate(state.time / time_max);
         float sc = 1.0f;
         float sct;
         auto off = state.offset;

@@ -26,13 +26,13 @@ void Particle::update(float dt) {
 void Particle::update_current_values() {
     switch (scale_mode) {
         case ParticleScaleMode::CosOut: {
-            float s = cosf(0.5f * float(Math::pi) * (1.0f - time / time_total));
+            float s = cosf(0.5f * float(MATH_PI) * (1.0f - time / time_total));
             scale = vec2(s, s);
         }
             break;
         case ParticleScaleMode::Range: {
             float time_max = scale_off_time > 0.0f ? scale_off_time : time_total;
-            float ratio = 1.0f - Math::clamp(time / time_max);
+            float ratio = 1.0f - saturate(time / time_max);
             float s = f32_lerp(scale_start, scale_end, ratio);
             scale = vec2(s, s);
         }
@@ -57,7 +57,7 @@ void Particle::update_current_values() {
                 a = time;
             }
             a *= 4.0f;
-            color.a = alpha * a;
+            color.a = unorm8_f32_clamped(alpha * a);
         }
             break;
         case ParticleAlphaMode::QuadOut: {

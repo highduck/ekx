@@ -174,9 +174,9 @@ inline void guiTransform3D(Transform3D& transform) {
 
 inline void guiCamera3D(Camera3D& camera) {
     ImGui::DragFloatRange2("Clip Plane", &camera.zNear, &camera.zFar, 1.0f, 0.0f, 0.0f, "%.1f");
-    float fov_degree = ek::Math::to_degrees(camera.fov);
+    float fov_degree = to_degrees(camera.fov);
     if (ImGui::DragFloat("FOV", &fov_degree, 1.0f, 0.0f, 0.0f, "%.1f")) {
-        camera.fov = ek::Math::to_radians(fov_degree);
+        camera.fov = to_radians(fov_degree);
     }
 
     ImGui::Checkbox("Orthogonal", &camera.orthogonal);

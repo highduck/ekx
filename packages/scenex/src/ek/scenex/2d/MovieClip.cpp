@@ -214,9 +214,9 @@ int get_cubic_roots(float* out_roots, float a = 0.0f, float b = 0.0f, float c = 
         const float theta = acos(r / sqrt(q_cubed)); // will change because r changes
         const float q_sqrt = sqrt(q); // won't change
 
-        out_roots[0] = -2.0f * q_sqrt * cos(theta / 3.0f) - b / 3.0f;
-        out_roots[1] = -2.0f * q_sqrt * cos((theta + 2.0f * Math::fPI) / 3.0f) - b / 3.0f;
-        out_roots[2] = -2.0f * q_sqrt * cos((theta + 4.0f * Math::fPI) / 3.0f) - b / 3.0f;
+        out_roots[0] = -2 * q_sqrt * cos(theta / 3.0f) - b / 3.0f;
+        out_roots[1] = -2 * q_sqrt * cos((theta + 2 * MATH_PI) / 3.0f) - b / 3.0f;
+        out_roots[2] = -2 * q_sqrt * cos((theta + 4 * MATH_PI) / 3.0f) - b / 3.0f;
 
         return 3;
     }

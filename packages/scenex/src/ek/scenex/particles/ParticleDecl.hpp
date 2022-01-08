@@ -124,7 +124,7 @@ struct ParticleDecl {
     bool use_reflector = false;
 
     FloatRange life_time{1.0f};
-    FloatRange acc_x_phase{0.5f * Math::pi};
+    FloatRange acc_x_phase{0.5f * MATH_PI};
     FloatRange acc_x_speed{0.0f};
 
     float scale_off_time = 0.0f;
@@ -152,7 +152,7 @@ struct EmitterData {
 
     FloatRange speed{10, 100};
     FloatRange acc{0.0f};
-    FloatRange dir{0.0f, Math::pi2};
+    FloatRange dir{0.0f, (2 * MATH_PI)};
 };
 
 EK_DECLARE_TYPE(ParticleDecl);

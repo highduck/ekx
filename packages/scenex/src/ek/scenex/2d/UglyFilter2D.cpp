@@ -47,7 +47,7 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
 
             const int segments = std::min(12,
                                           8 * std::max(int(std::ceil((filter.blur.x + filter.blur.y)) / 2.0f), 1));
-            const auto da = float(Math::pi2 / segments);
+            const auto da = float((2 * MATH_PI) / segments);
             auto a = 0.0f;
             for (int i = 0; i < segments; ++i) {
                 canvas.matrix[0] = parentMatrix;
