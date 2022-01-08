@@ -251,11 +251,11 @@ void HierarchyWindow::onDraw() {
         } else {
             drawEntityInTree(root.get(), true, true);
         }
-        for(auto e3d: ecs::view<Transform3D>()) {
-            if(e3d.get<NodeName>().name == "scene 3d") {
-                drawEntityInTree(e3d, true, true);
-            }
-        }
+//        for(auto e3d: ecs::view<Transform3D>()) {
+//            if(e3d.get<NodeName>().name == "scene 3d") {
+//                drawEntityInTree(e3d, true, true);
+//            }
+//        }
         ImGui::Unindent(40.0f);
     }
 }
