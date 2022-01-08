@@ -129,7 +129,7 @@ typedef struct ek_canvas_context {
     sg_image image[CANVAS_STACK_DEPTH]; // 1 * 4
     ek_shader shader[CANVAS_STACK_DEPTH]; // 2 * 4
     mat3x2_t matrix[CANVAS_STACK_DEPTH]; // 6 * 4
-    color_mod_t color[CANVAS_STACK_DEPTH]; // 2 * 4
+    color2_t color[CANVAS_STACK_DEPTH]; // 2 * 4
     rect_t uv[CANVAS_STACK_DEPTH]; // 4 * 4
     rect_t scissors[CANVAS_STACK_DEPTH]; // 4 * 4
 
@@ -189,7 +189,7 @@ void canvas_scale_alpha(float alpha);
 
 void canvas_scale_color(rgba_t multiplier);
 
-void canvas_concat_color(color_mod_t color);
+void canvas_concat_color(color2_t color);
 
 void canvas_offset_color(rgba_t offset);
 

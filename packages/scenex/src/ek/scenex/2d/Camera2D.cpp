@@ -83,7 +83,7 @@ void Camera2D::render() {
             canvas_push_program(canvas.shader_solid_color);
             canvas.color[0] = {rgba_vec4(camera.clearColor), rgba_vec4(camera.clearColor2)};
             canvas_fill_rect(camera.worldRect, COLOR_WHITE);
-            canvas.color[0] = color_mod_identity();
+            canvas.color[0] = color2_identity();
             canvas_restore_program();
         }
 

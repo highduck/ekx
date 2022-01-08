@@ -123,9 +123,9 @@ void cairo_quadratic_curve_to(cairo_t* context, float x1, float y1, float x2, fl
 
 void add_color_stops(cairo_pattern_t* pattern,
                      const Array<GradientEntry>& entries,
-                     const ColorTransformF& color_transform) {
+                     const color2f_t color_transform) {
     for (const auto& entry: entries) {
-        const auto& color = color_transform.transform(entry.color);
+        const auto& color = color2f_transform(color_transform, entry.color);
         cairo_pattern_add_color_stop_rgba(pattern, entry.ratio, color.x, color.y, color.z, color.w);
     }
 }
@@ -321,7 +321,7 @@ void cairo_oval(cairo_t* cr, const double* values) {
 fill_pattern_data_t set_fill_style(cairo_t* cr, const FillStyle& fill, const TransformModel& transform) {
     fill_pattern_data_t pattern{};
     if (fill.type == FillType::solid) {
-        set_solid_fill(cr, transform.color.transform(fill.entries[0].color));
+        set_solid_fill(cr, color2f_transform(transform.color, fill.entries[0].color));
     } else {
         pattern = create_fill_pattern(fill, transform);
     }

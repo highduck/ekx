@@ -363,185 +363,11 @@ mat4_t mat4_orthographic_2d(float x, float y, float w, float h, float z_near, fl
     return mat4_orthographic_rh(x, x + w, y + h, y, z_near, z_far);
 }
 
-float vec2_dot(vec2_t a, vec2_t b) {
-    return (a.x * b.x) + (a.y * b.y);
-}
-
-float vec3_dot(vec3_t a, vec3_t b) {
-    return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
-}
-
-float vec4_dot(vec4_t a, vec4_t b) {
-    return (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w);
-}
-
-float vec2_distance_sqr(const vec2_t a, const vec2_t b) {
-    return vec2_length_sqr(vec2_sub(a, b));
-}
-
-float vec3_distance_sqr(const vec3_t a, const vec3_t b) {
-    return vec3_length_sqr(vec3_sub(a, b));
-}
-
-float vec4_distance_sqr(const vec4_t a, const vec4_t b) {
-    return vec4_length_sqr(vec4_sub(a, b));
-}
-
-float vec2_distance(vec2_t a, vec2_t b) {
-    return vec2_length(vec2_sub(a, b));
-}
-
-float vec3_distance(vec3_t a, vec3_t b) {
-    return vec3_length(vec3_sub(a, b));
-}
-
-float vec4_distance(vec4_t a, vec4_t b) {
-    return vec4_length(vec4_sub(a, b));
-}
-
-float vec2_length_sqr(vec2_t a) {
-    return vec2_dot(a, a);
-}
-
-float vec3_length_sqr(vec3_t a) {
-    return vec3_dot(a, a);
-}
-
-float vec4_length_sqr(vec4_t a) {
-    return vec4_dot(a, a);
-}
-
-float vec2_length(vec2_t a) {
-    return sqrtf(vec2_length_sqr(a));
-}
-
-float vec3_length(vec3_t a) {
-    return sqrtf(vec3_length_sqr(a));
-}
-
-float vec4_length(vec4_t a) {
-    return sqrtf(vec4_length_sqr(a));
-}
-
-vec2_t vec2_add(vec2_t a, vec2_t b) {
-    return (vec2_t) {{a.x + b.x, a.y + b.y}};
-}
-
-vec3_t vec3_add(vec3_t a, vec3_t b) {
-    return (vec3_t) {{a.x + b.x, a.y + b.y, a.z + b.z}};
-}
-
-vec4_t vec4_add(vec4_t a, vec4_t b) {
-    return (vec4_t) {{a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w}};
-}
-
-vec2_t vec2_sub(vec2_t a, vec2_t b) {
-    return (vec2_t) {{a.x - b.x, a.y - b.y}};
-}
-
-vec3_t vec3_sub(vec3_t a, vec3_t b) {
-    return (vec3_t) {{a.x - b.x, a.y - b.y, a.z - b.z}};
-}
-
-vec4_t vec4_sub(vec4_t a, vec4_t b) {
-    return (vec4_t) {{a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w}};
-}
-
-vec2_t vec2_neg(vec2_t a) {
-    return (vec2_t) {{-a.x, -a.y}};
-}
-
-vec3_t vec3_neg(vec3_t a) {
-    return (vec3_t) {{-a.x, -a.y, -a.z}};
-}
-
-vec4_t vec4_neg(vec4_t a) {
-    return (vec4_t) {{-a.x, -a.y, -a.z, -a.w}};
-}
-
-vec3_t vec3_cross(vec3_t a, vec3_t b) {
-    return (vec3_t) {
-            .x = a.y * b.z - a.z * b.y,
-            .y = a.z * b.x - a.x * b.z,
-            .z = a.x * b.y - a.y * b.x
-    };
-}
-
-vec2_t vec2_scale(vec2_t a, float s) {
-    return (vec2_t) {{a.x * s, a.y * s}};
-}
-
-vec3_t vec3_scale(vec3_t a, float s) {
-    return (vec3_t) {{a.x * s, a.y * s, a.z * s}};
-}
-
-vec4_t vec4_scale(vec4_t a, float s) {
-    return (vec4_t) {{a.x * s, a.y * s, a.z * s, a.w * s}};
-}
-
-vec2_t vec2_mul(vec2_t a, vec2_t b) {
-    vec2_t r;
-    r.x = a.x * b.x;
-    r.y = a.y * b.y;
-    return r;
-}
-
-vec3_t vec3_mul(vec3_t a, vec3_t b) {
-    vec3_t r;
-    r.x = a.x * b.x;
-    r.y = a.y * b.y;
-    r.z = a.z * b.z;
-    return r;
-}
-
-vec4_t vec4_mul(vec4_t a, vec4_t b) {
-    vec4_t r;
-    r.x = a.x * b.x;
-    r.y = a.y * b.y;
-    r.z = a.z * b.z;
-    r.w = a.w * b.w;
-    return r;
-}
-
-vec2_t vec2_normalize(vec2_t a) {
-    vec2_t result = {};
-    const float ls = vec2_length(a);
-    if (ls != 0.0f) {
-        result = vec2_scale(a, 1.0f / ls);
-    }
-    return result;
-}
-
-vec3_t vec3_normalize(vec3_t a) {
-    vec3_t result = {};
-    const float ls = vec3_length(a);
-    if (ls != 0.0f) {
-        result = vec3_scale(a, 1.0f / ls);
-    }
-    return result;
-}
-
-vec4_t vec4_normalize(vec4_t a) {
-    vec4_t result = {};
-    const float ls = vec4_length(a);
-    if (ls != 0.0f) {
-        result = vec4_scale(a, 1.0f / ls);
-    }
-    return result;
-}
-
 vec2_t vec2_transform(const vec2_t point, const mat3x2_t matrix) {
     return (vec2_t) {{
                              point.x * matrix.a + point.y * matrix.c + matrix.tx,
                              point.x * matrix.b + point.y * matrix.d + matrix.ty
                      }};
-}
-
-vec2_t vec2_perp(vec2_t v) {
-    vec2_t r;
-    r.x = -v.y;
-    r.y = v.x;
-    return r;
 }
 
 bool vec2_transform_inverse(vec2_t p, mat3x2_t m, vec2_t* out) {
@@ -563,33 +389,6 @@ bool vec2_transform_inverse(vec2_t p, mat3x2_t m, vec2_t* out) {
 
 float f32_lerp(float a, float b, float t) {
     return (1.0f - t) * a + t * b;
-}
-
-vec2_t vec2_lerp(const vec2_t a, const vec2_t b, float t) {
-    const float inv = 1.0f - t;
-    return (vec2_t) {{
-                             inv * a.x + t * b.x,
-                             inv * a.y + t * b.y,
-                     }};
-}
-
-vec3_t vec3_lerp(const vec3_t a, const vec3_t b, float t) {
-    const float inv = 1.0f - t;
-    return (vec3_t) {{
-                             inv * a.x + t * b.x,
-                             inv * a.y + t * b.y,
-                             inv * a.z + t * b.z,
-                     }};
-}
-
-vec4_t vec4_lerp(const vec4_t a, const vec4_t b, float t) {
-    const float inv = 1.0f - t;
-    return (vec4_t) {{
-                             inv * a.x + t * b.x,
-                             inv * a.y + t * b.y,
-                             inv * a.z + t * b.z,
-                             inv * a.w + t * b.w,
-                     }};
 }
 
 // TODO:  look at view matrix calc
@@ -1190,106 +989,6 @@ uint8_t u8_add_sat(uint8_t a, uint8_t b) {
     return __builtin_add_overflow(a, b, &c) ? 0xFF : c;
 }
 
-rgba_t rgba_u32(uint32_t value) {
-    return (rgba_t) {.value = value};
-}
-
-rgba_t rgba_4f(const float r, const float g, const float b, const float a) {
-    EK_ASSERT_R2(r >= 0.0f && r <= 1.0f);
-    EK_ASSERT_R2(g >= 0.0f && g <= 1.0f);
-    EK_ASSERT_R2(b >= 0.0f && b <= 1.0f);
-    EK_ASSERT_R2(a >= 0.0f && a <= 1.0f);
-    return (rgba_t) {
-            .r = (uint8_t) (r * 255.0f),
-            .g = (uint8_t) (g * 255.0f),
-            .b = (uint8_t) (b * 255.0f),
-            .a = (uint8_t) (a * 255.0f),
-    };
-}
-
-rgba_t rgba_vec4(const vec4_t rgba) {
-    return rgba_4f(rgba.x, rgba.y, rgba.z, rgba.w);
-}
-
-rgba_t rgba_mul(const rgba_t color, const rgba_t multiplier) {
-    return (rgba_t) {
-            .r = u8_norm_mul(color.r, multiplier.r),
-            .g = u8_norm_mul(color.g, multiplier.g),
-            .b = u8_norm_mul(color.b, multiplier.b),
-            .a = u8_norm_mul(color.a, multiplier.a)
-    };
-}
-
-rgba_t rgba_scale(const rgba_t color, const uint8_t multiplier) {
-    return (rgba_t) {
-            .r = u8_norm_mul(color.r, multiplier),
-            .g = u8_norm_mul(color.g, multiplier),
-            .b = u8_norm_mul(color.b, multiplier),
-            .a = u8_norm_mul(color.a, multiplier)
-    };
-}
-
-rgba_t rgba_add(const rgba_t color, const rgba_t add) {
-    return (rgba_t) {
-            .r = u8_add_sat(color.r, add.r),
-            .g = u8_add_sat(color.g, add.g),
-            .b = u8_add_sat(color.b, add.b),
-            .a = u8_add_sat(color.a, add.a)
-    };
-}
-
-rgba_t rgba_lerp(const rgba_t a, const rgba_t b, const float t) {
-    const uint32_t r = (uint32_t) (t * 1024);
-    const uint32_t ri = 1024u - r;
-    return (rgba_t) {
-            .r = (uint8_t) ((ri * a.r + r * b.r) >> 10u),
-            .g = (uint8_t) ((ri * a.g + r * b.g) >> 10u),
-            .b = (uint8_t) ((ri * a.b + r * b.b) >> 10u),
-            .a = (uint8_t) ((ri * a.a + r * b.a) >> 10u)
-    };
-}
-
-rgba_t rgba_alpha_scale_f(rgba_t color, const float alpha_multiplier) {
-    color.a = (uint8_t) ((float) color.a * alpha_multiplier);
-    return color;
-}
-
-color_mod_t color_mod_identity() {
-    color_mod_t result;
-    result.scale.value = 0xFFFFFFFFu;
-    result.offset.value = 0;
-    return result;
-}
-
-rgba_t color_mod_get_offset(rgba_t base_scale, rgba_t offset) {
-    return (rgba_t) {
-            .r = u8_norm_mul(offset.r, base_scale.r),
-            .g = u8_norm_mul(offset.g, base_scale.g),
-            .b = u8_norm_mul(offset.b, base_scale.b),
-            .a = offset.a
-    };
-}
-
-void color_mod_add(color_mod_t* color, rgba_t offset) {
-    if (offset.value != 0) {
-        color->offset = rgba_add(color->offset, color_mod_get_offset(color->scale, offset));
-    }
-}
-
-void color_mod_concat(color_mod_t* color, const rgba_t scale, const rgba_t offset) {
-    if (offset.value != 0) {
-        color->offset = rgba_add(color->offset, color_mod_get_offset(color->scale, offset));
-    }
-    if (scale.value != 0xFFFFFFFF) {
-        color->scale = rgba_mul(color->scale, scale);
-    }
-}
-
-void color_mod_mul(color_mod_t* out, color_mod_t l, color_mod_t r) {
-    out->scale = (~r.scale.value) != 0 ? rgba_mul(l.scale, r.scale) : l.scale;
-    out->offset = r.offset.value != 0 ? rgba_add(l.offset, color_mod_get_offset(l.scale, r.offset)) : l.offset;
-}
-
 rect_t rect(float x, float y, float w, float h) {
     return (rect_t) {{x, y, w, h}};
 }
@@ -1317,63 +1016,6 @@ rect_t rect_minmax(const vec2_t min, const vec2_t max) {
 
 rect_t rect_01(void) {
     return (rect_t) {{0, 0, 1, 1}};
-}
-
-vec2i_t vec2i(int x, int y) {
-    return (vec2i_t) {{x, y}};
-}
-
-vec3i_t vec3i(int x, int y, int z) {
-    return (vec3i_t) {{x, y, z}};
-}
-
-vec2_t vec2(float x, float y) {
-    return (vec2_t) {{x, y}};
-}
-
-vec3_t vec3(float x, float y, float z) {
-    return (vec3_t) {{x, y, z}};
-}
-
-vec4_t vec4(float x, float y, float z, float w) {
-    return (vec4_t) {{x, y, z, w}};
-}
-
-vec4_t vec4_v(vec3_t v, float w) {
-    return vec4(v.x, v.y, v.z, w);
-}
-
-vec4_t vec4_rgba(const rgba_t rgba) {
-    vec4_t v;
-    v.x = (float) rgba.r / 255.0f;
-    v.y = (float) rgba.g / 255.0f;
-    v.z = (float) rgba.b / 255.0f;
-    v.w = (float) rgba.a / 255.0f;
-    return v;
-}
-
-vec2_t vec2_max(const vec2_t a, const vec2_t b) {
-    return (vec2_t) {{MAX(a.x, b.x), MAX(a.y, b.y)}};
-}
-
-vec3_t vec3_max(const vec3_t a, const vec3_t b) {
-    return (vec3_t) {{MAX(a.x, b.x), MAX(a.y, b.y), MAX(a.z, b.z)}};
-}
-
-vec4_t vec4_max(const vec4_t a, const vec4_t b) {
-    return (vec4_t) {{MAX(a.x, b.x), MAX(a.y, b.y), MAX(a.z, b.z), MAX(a.w, b.w)}};
-}
-
-vec2_t vec2_min(const vec2_t a, const vec2_t b) {
-    return (vec2_t) {{MIN(a.x, b.x), MIN(a.y, b.y)}};
-}
-
-vec3_t vec3_min(const vec3_t a, const vec3_t b) {
-    return (vec3_t) {{MIN(a.x, b.x), MIN(a.y, b.y), MIN(a.z, b.z)}};
-}
-
-vec4_t vec4_min(const vec4_t a, const vec4_t b) {
-    return (vec4_t) {{MIN(a.x, b.x), MIN(a.y, b.y), MIN(a.z, b.z), MIN(a.w, b.w)}};
 }
 
 vec2_t rect_rb(const rect_t rc) {
@@ -1543,33 +1185,9 @@ bool almost_eq_f32(float a, float b, float eps) {
     return lhs <= rhs;
 }
 
-bool almost_eq_vec2(const vec2_t a, const vec2_t b, const float eps) {
-    return almost_eq_f32(a.x, b.x, eps) &&
-           almost_eq_f32(a.y, b.y, eps);
-}
-
-bool almost_eq_vec3(const vec3_t a, const vec3_t b, const float eps) {
-    return almost_eq_f32(a.x, b.x, eps) &&
-           almost_eq_f32(a.y, b.y, eps) &&
-           almost_eq_f32(a.z, b.z, eps);
-}
-
-bool almost_eq_vec4(const vec4_t a, const vec4_t b, const float eps) {
-    return almost_eq_f32(a.x, b.x, eps) &&
-           almost_eq_f32(a.y, b.y, eps) &&
-           almost_eq_f32(a.z, b.z, eps) &&
-           almost_eq_f32(a.w, b.w, eps);
-}
-
-// TODO: reflect_*
-#define VEC_T_REFLECT_IMPL(T) T##_t T##_reflect(T##_t dir, T##_t normal) { \
-    return T##_sub(dir, T##_scale(normal, T##_dot(dir, normal)));                 \
-}
-
-VEC_T_REFLECT_IMPL(vec2)
-
-VEC_T_REFLECT_IMPL(vec3)
-
 #ifdef __cplusplus
 }
 #endif
+
+#include "math/vec.c"
+#include "math/color.c"

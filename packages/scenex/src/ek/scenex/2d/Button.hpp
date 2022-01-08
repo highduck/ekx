@@ -37,7 +37,7 @@ struct Button {
 
     vec2_t baseSkew = {};
     vec2_t baseScale = vec2(1,1);
-    color_mod_t baseColor = color_mod_identity();
+    color2_t baseColor = color2_identity();
 
     TimeLayer time = TimeLayer::UI;
 

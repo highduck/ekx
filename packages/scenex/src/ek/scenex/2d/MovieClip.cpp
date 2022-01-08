@@ -53,7 +53,7 @@ SGKeyFrameTransform lerp(const SGKeyFrameTransform& begin,
             vec2_lerp(begin.scale, end.scale, progress.scale),
             vec2_lerp(begin.skew, end.skew, progress.skew),
             begin.pivot,
-            lerp_color_mod_f(begin.color, end.color, progress.color)
+            lerp_color2f(begin.color, end.color, progress.color)
     };
 }
 

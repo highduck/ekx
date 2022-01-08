@@ -8,7 +8,7 @@ namespace ek {
 // 32 bytes
 struct WorldTransform2D {
     mat3x2_t matrix = mat3x2_identity(); // 4 * 6 = 24
-    color_mod_t color = color_mod_identity(); // 2 * 4 = 8
+    color2_t color = color2_identity(); // 2 * 4 = 8
 };
 
 // TODO: mat2x2, position,
@@ -17,7 +17,7 @@ struct Transform2D {
     mat3x2_t matrix= mat3x2_identity();
 
     // 8
-    color_mod_t color = color_mod_identity();
+    color2_t color = color2_identity();
 
     // 16
     vec2_t cachedScale = vec2(1,1);

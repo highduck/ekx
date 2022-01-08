@@ -229,12 +229,12 @@ void canvas_scale_color(rgba_t multiplier) {
     canvas.color[0].scale = rgba_mul(canvas.color[0].scale, multiplier);
 }
 
-void canvas_concat_color(const color_mod_t color) {
-    color_mod_concat(canvas.color, color.scale, color.offset);
+void canvas_concat_color(const color2_t color) {
+    color2_concat(canvas.color, color.scale, color.offset);
 }
 
 void canvas_offset_color(rgba_t offset) {
-    color_mod_add(canvas.color, offset);
+    color2_add(canvas.color, offset);
 }
 
 /** STATES **/
@@ -725,7 +725,7 @@ void canvas_begin_ex(const rect_t viewport, const mat3x2_t view, sg_image render
     canvas.shader[0] = canvas.shader_default;
     canvas.scissors[0] = viewport;
     canvas.matrix[0] = mat3x2_identity();
-    canvas.color[0] = color_mod_identity();
+    canvas.color[0] = color2_identity();
     canvas.uv[0] = rect_01();
 
     canvas.curr = (ek_canvas_batch_state) {};

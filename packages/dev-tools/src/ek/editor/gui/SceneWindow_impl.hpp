@@ -229,7 +229,7 @@ void SceneWindow::drawSceneNode(ecs::EntityApi e) {
             canvas.color[0] = transform->color;
         } else {
             canvas.matrix[0] = mat3x2_identity();
-            canvas.color[0] = color_mod_identity();
+            canvas.color[0] = color2_identity();
         }
         disp->drawable->draw();
     }
@@ -248,7 +248,7 @@ void SceneWindow::drawSceneNodeBounds(ecs::EntityApi e) {
     auto* disp = e.tryGet<Display2D>();
     if (disp) {
         canvas.matrix[0] = mat3x2_identity();
-        canvas.color[0] = color_mod_identity();
+        canvas.color[0] = color2_identity();
 
         mat3x2_t m = view.view2.matrix;
         auto* transform = e.tryGet<WorldTransform2D>();

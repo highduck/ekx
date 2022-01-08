@@ -72,7 +72,7 @@ mat3x2_t& operator<<(mat3x2_t& r, const xml_node& node) {
     return r;
 }
 
-ColorTransformF& operator<<(ColorTransformF& color, const xml_node& node) {
+color2f_t& operator<<(color2f_t& color, const xml_node& node) {
     const auto& ct = node.child("color").child("Color");
 
     color.scale.x = ct.attribute("redMultiplier").as_float(1.0f);
@@ -88,7 +88,11 @@ ColorTransformF& operator<<(ColorTransformF& color, const xml_node& node) {
     auto tint_multiplier = ct.attribute("tintMultiplier").as_float();
     auto tint_color = parse_css_color(ct.attribute("tintColor").value());
     if (tint_multiplier > 0.0f) {
-        color.tint(tint_color, tint_multiplier);
+        float alpha = color.alpha;
+        float additive = color.additive;
+        color = color2f_tint(ARGB(tint_color), tint_multiplier);
+        color.alpha = alpha;
+        color.additive = additive;
     }
 
     // default: 0, values: -1 ... 1

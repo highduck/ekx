@@ -6,7 +6,7 @@
 #include <ek/util/Type.hpp>
 #include <ek/math/MathSerialize.hpp>
 #include <ek/math/Color32.hpp>
-#include <ek/math/ColorTransform.hpp>
+
 
 #include <ek/serialize/serialize.hpp>
 
@@ -81,7 +81,7 @@ struct SGKeyFrameTransform {
     vec2_t scale = {{1.0f, 1.0f}};
     vec2_t skew;
     vec2_t pivot;
-    ColorTransformF color;
+    color2f_t color = color2f();
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -180,7 +180,7 @@ struct SGMovieData {
 struct SGNodeData {
 
     mat3x2_t matrix = mat3x2_identity();
-    ColorTransformF color{};
+    color2f_t color = color2f();
 
     // instance name
     String name;

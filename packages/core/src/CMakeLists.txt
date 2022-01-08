@@ -9,7 +9,6 @@ add_library(${PROJECT_NAME} STATIC
         ek/math/MathSerialize.hpp
 
         ek/math/HSVColor.hpp
-        ek/math/ColorTransform.hpp
         ek/math/Color32.hpp
 
         ek/math/Easings.hpp

@@ -143,7 +143,7 @@ void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root) {
                 auto& tw = worldTransforms->get(it);
                 auto& tl = localTransforms->get(it);
                 tw.matrix = mat3x2_mul(tp.matrix, tl.matrix);
-                color_mod_mul(&tw.color, tp.color, tl.color);
+                color2_mul(&tw.color, tp.color, tl.color);
 
                 out.push_back(it);
                 it = nodes->get(it).sibling_next.index;

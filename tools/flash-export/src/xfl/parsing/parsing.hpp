@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <string>
-#include <ek/math/ColorTransform.hpp>
+#include <ek/math.h>
 
 namespace pugi {
 
@@ -34,7 +34,7 @@ vec2_t read_transformation_point(const xml_node& node);
 
 mat3x2_t& operator<<(mat3x2_t& r, const xml_node& node);
 
-ColorTransformF& operator<<(ColorTransformF& color, const xml_node& node);
+color2f_t& operator<<(color2f_t& color, const xml_node& node);
 
 enum class BlendMode;
 enum class ScaleMode;

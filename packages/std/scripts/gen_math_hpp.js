@@ -95,4 +95,4 @@ code += generate_vec_cxx_operators("vec3i", ["x", "y", "z"], "int");
 code += generate_vec_cxx_operators("vec4i", ["x", "y", "z", "w"], "int");
 code += "#endif // __cplusplus\n";
 
-require("fs").writeFileSync("include/ek/math/math_vec.hpp", code);
+require("fs").writeFileSync("include/ek/math/vec.hpp", code);

@@ -105,7 +105,7 @@ void traverseVisibleNodes(ecs::EntityApi e, const WorldTransform2D* parentTransf
 void drawFills(Camera2D& camera) {
 
     canvas_save_transform();
-    canvas.color[0] = color_mod_identity();
+    canvas.color[0] = color2_identity();
     canvas_set_empty_image();
 
     traverseVisibleNodes<Display2D>(
@@ -145,7 +145,7 @@ void drawFills(Camera2D& camera) {
 void drawOcclusion(Camera2D& camera) {
 
     canvas_save_transform();
-    canvas.color[0] = color_mod_identity();
+    canvas.color[0] = color2_identity();
     canvas_set_empty_image();
     auto cameraRect = camera.worldRect;
     traverseVisibleNodes<Bounds2D>(camera.root.ent(), nullptr,
@@ -182,7 +182,7 @@ void debugCameraGizmo(Camera2D& camera) {
 
 void Camera2D::drawGizmo(Camera2D& camera) {
     canvas.matrix[0] = mat3x2_identity();
-    canvas.color[0] = color_mod_identity();
+    canvas.color[0] = color2_identity();
 
     if (camera.debugVisibleBounds) {
         drawFills(camera);
@@ -198,7 +198,7 @@ void Camera2D::drawGizmo(Camera2D& camera) {
     }
     if (camera.debugGizmoSelf) {
         canvas.matrix[0] = mat3x2_identity();
-        canvas.color[0] = color_mod_identity();
+        canvas.color[0] = color2_identity();
         debugCameraGizmo(camera);
     }
     if (camera.debugDrawScriptGizmo) {

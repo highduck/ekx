@@ -1,10 +1,11 @@
 #pragma once
 
 #include <string>
+#include <ek/math.h>
 #include <ek/ds/Array.hpp>
 #include <memory>
 #include <optional>
-#include <ek/math/ColorTransform.hpp>
+
 #include <ek/util/Path.hpp>
 
 namespace ek::xfl {
@@ -371,12 +372,12 @@ struct ItemProperties {
 
 struct TransformModel {
     mat3x2_t matrix = mat3x2_identity();
-    ColorTransformF color{};
-    BlendMode blendMode{BlendMode::normal};
+    color2f_t color = color2f();
+    BlendMode blendMode = BlendMode::normal;
 
     TransformModel() = default;
 
-    TransformModel(const mat3x2_t& matrix_, const ColorTransformF& color_, BlendMode blend_mode_ = BlendMode::last) :
+    TransformModel(const mat3x2_t matrix_, const color2f_t color_, BlendMode blend_mode_ = BlendMode::last) :
             matrix{matrix_},
             color{color_},
             blendMode{blend_mode_} {
