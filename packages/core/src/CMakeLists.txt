@@ -5,12 +5,8 @@ project(core)
 add_library(${PROJECT_NAME} STATIC
         ek/ek_core_module.cpp
 
-        ek/math/internal/compiler_unsafe_begin.h
-        ek/math/internal/compiler_unsafe_end.h
         ek/math/Math.hpp
         ek/math/MathSerialize.hpp
-
-        ek/math/Vec.hpp
 
         ek/math/HSVColor.hpp
         ek/math/ColorTransform.hpp

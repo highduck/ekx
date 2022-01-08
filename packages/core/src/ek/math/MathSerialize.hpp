@@ -29,7 +29,6 @@ DEF_POD(circle_t);
 DEF_POD(color_mod_t);
 
 DEF_POD(ColorTransformF);
-DEF_POD(abgr32_t);
 DEF_POD(argb32_t);
 
 #undef DEF_POD

@@ -15,13 +15,13 @@ TEST_CASE("BGR") {
     REQUIRE_EQ(blue.argb, 0xFF0000FFu);
     REQUIRE_EQ(yellow.argb, 0xFFFFFF00u);
 
-    auto red_bgr = red.bgr();
-    auto blue_bgr = blue.bgr();
-    auto yellow_bgr = yellow.bgr();
+    rgba_t red_bgr = red;
+    rgba_t blue_bgr = blue;
+    rgba_t yellow_bgr = yellow;
 
-    REQUIRE_EQ(red_bgr.abgr, 0x0000FFu);
-    REQUIRE_EQ(blue_bgr.abgr, 0xFF0000u);
-    REQUIRE_EQ(yellow_bgr.abgr, 0x00FFFFu);
+    REQUIRE_EQ(red_bgr.value, 0x0000FFu);
+    REQUIRE_EQ(blue_bgr.value, 0xFF0000u);
+    REQUIRE_EQ(yellow_bgr.value, 0x00FFFFu);
 }
 
 TEST_SUITE_END();
