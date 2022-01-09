@@ -59,8 +59,8 @@ ecs::EntityApi BubbleText::create(const char* fontName, const String& text, vec2
     c.offset.x = rand_fx.random(-spread, spread);
     TextFormat format{fontName, 32.0f};
     format.setAlignment(Alignment::Center);
-    format.setTextColor(0xFFFFFFFF_argb);
-    format.addShadow(0xFF000000_argb, 4, {0.0f, 1.5f});
+    format.setTextColor(COLOR_WHITE);
+    format.addShadow(COLOR_BLACK, 4, vec2(0.0f, 1.5f));
 
     e.assign<Display2D>(new Text2D(text, format));
     setTouchable(e, false);

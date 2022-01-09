@@ -38,10 +38,7 @@ typedef union vec3_t {
 
 typedef union vec4_t {
     struct {
-        float x;
-        float y;
-        float z;
-        float w;
+        float x, y, z, w;
     };
     float data[4];
     struct {
@@ -51,6 +48,15 @@ typedef union vec4_t {
     struct {
         vec2_t xy;
         vec2_t zw;
+    };
+    struct {
+        float r, g, b, a;
+    };
+    struct {
+        float hue;
+        float saturation;
+        float value;
+        float alpha;
     };
 #ifdef __cplusplus
 
@@ -118,65 +124,65 @@ vec4_t vec4(float x, float y, float z, float w);
 vec3_t vec3_v(vec2_t v, float z);
 vec4_t vec4_v(vec3_t v, float w);
 
-vec2_t vec2_max(vec2_t a, vec2_t b);
-vec3_t vec3_max(vec3_t a, vec3_t b);
-vec4_t vec4_max(vec4_t a, vec4_t b);
+vec2_t max_vec2(vec2_t a, vec2_t b);
+vec3_t max_vec3(vec3_t a, vec3_t b);
+vec4_t max_vec4(vec4_t a, vec4_t b);
 
-vec2_t vec2_min(vec2_t a, vec2_t b);
-vec3_t vec3_min(vec3_t a, vec3_t b);
-vec4_t vec4_min(vec4_t a, vec4_t b);
+vec2_t min_vec2(vec2_t a, vec2_t b);
+vec3_t min_vec3(vec3_t a, vec3_t b);
+vec4_t min_vec4(vec4_t a, vec4_t b);
 
-float vec2_dot(vec2_t a, vec2_t b);
-float vec3_dot(vec3_t a, vec3_t b);
-float vec4_dot(vec4_t a, vec4_t b);
+float dot_vec2(vec2_t a, vec2_t b);
+float dot_vec3(vec3_t a, vec3_t b);
+float dot_vec4(vec4_t a, vec4_t b);
 
-float vec2_distance_sqr(vec2_t a, vec2_t b);
-float vec3_distance_sqr(vec3_t a, vec3_t b);
-float vec4_distance_sqr(vec4_t a, vec4_t b);
+float distance_sqr_vec2(vec2_t a, vec2_t b);
+float distance_sqr_vec3(vec3_t a, vec3_t b);
+float distance_sqr_vec4(vec4_t a, vec4_t b);
 
-float vec2_distance(vec2_t a, vec2_t b);
-float vec3_distance(vec3_t a, vec3_t b);
-float vec4_distance(vec4_t a, vec4_t b);
+float distance_vec2(vec2_t a, vec2_t b);
+float distance_vec3(vec3_t a, vec3_t b);
+float distance_vec4(vec4_t a, vec4_t b);
 
-float vec2_length_sqr(vec2_t a);
-float vec3_length_sqr(vec3_t a);
-float vec4_length_sqr(vec4_t a);
+float length_sqr_vec2(vec2_t a);
+float length_sqr_vec3(vec3_t a);
+float length_sqr_vec4(vec4_t a);
 
-float vec2_length(vec2_t a);
-float vec3_length(vec3_t a);
-float vec4_length(vec4_t a);
+float length_vec2(vec2_t a);
+float length_vec3(vec3_t a);
+float length_vec4(vec4_t a);
 
-vec2_t vec2_add(vec2_t a, vec2_t b);
-vec3_t vec3_add(vec3_t a, vec3_t b);
-vec4_t vec4_add(vec4_t a, vec4_t b);
+vec2_t add_vec2(vec2_t a, vec2_t b);
+vec3_t add_vec3(vec3_t a, vec3_t b);
+vec4_t add_vec4(vec4_t a, vec4_t b);
 
-vec2_t vec2_sub(vec2_t a, vec2_t b);
-vec3_t vec3_sub(vec3_t a, vec3_t b);
-vec4_t vec4_sub(vec4_t a, vec4_t b);
+vec2_t sub_vec2(vec2_t a, vec2_t b);
+vec3_t sub_vec3(vec3_t a, vec3_t b);
+vec4_t sub_vec4(vec4_t a, vec4_t b);
 
-vec2_t vec2_neg(vec2_t a);
-vec3_t vec3_neg(vec3_t a);
-vec4_t vec4_neg(vec4_t a);
+vec2_t neg_vec2(vec2_t a);
+vec3_t neg_vec3(vec3_t a);
+vec4_t neg_vec4(vec4_t a);
 
-vec3_t vec3_cross(vec3_t a, vec3_t b);
+vec3_t cross_vec3(vec3_t a, vec3_t b);
 
-vec2_t vec2_scale(vec2_t a, float s);
-vec3_t vec3_scale(vec3_t a, float s);
-vec4_t vec4_scale(vec4_t a, float s);
+vec2_t scale_vec2(vec2_t a, float s);
+vec3_t scale_vec3(vec3_t a, float s);
+vec4_t scale_vec4(vec4_t a, float s);
 
-vec2_t vec2_mul(vec2_t a, vec2_t b);
-vec3_t vec3_mul(vec3_t a, vec3_t b);
-vec4_t vec4_mul(vec4_t a, vec4_t b);
+vec2_t mul_vec2(vec2_t a, vec2_t b);
+vec3_t mul_vec3(vec3_t a, vec3_t b);
+vec4_t mul_vec4(vec4_t a, vec4_t b);
 
-vec2_t vec2_normalize(vec2_t a);
-vec3_t vec3_normalize(vec3_t a);
-vec4_t vec4_normalize(vec4_t a);
+vec2_t normalize_vec2(vec2_t a);
+vec3_t normalize_vec3(vec3_t a);
+vec4_t normalize_vec4(vec4_t a);
 
-vec2_t vec2_perp(vec2_t v);
+vec2_t perp_vec2(vec2_t v);
 
-vec2_t vec2_lerp(vec2_t a, vec2_t b, float t);
-vec3_t vec3_lerp(vec3_t a, vec3_t b, float t);
-vec4_t vec4_lerp(vec4_t a, vec4_t b, float t);
+vec2_t lerp_vec2(vec2_t a, vec2_t b, float t);
+vec3_t lerp_vec3(vec3_t a, vec3_t b, float t);
+vec4_t lerp_vec4(vec4_t a, vec4_t b, float t);
 
 bool almost_eq_vec2(vec2_t a, vec2_t b, float eps);
 bool almost_eq_vec3(vec3_t a, vec3_t b, float eps);

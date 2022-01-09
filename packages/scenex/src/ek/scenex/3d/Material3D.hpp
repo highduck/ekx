@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/math/Color32.hpp>
+#include <ek/math.h>
 #include <ek/util/Type.hpp>
 
 namespace ek {
@@ -16,7 +16,7 @@ struct Material3D {
 
     inline void set_base_color(rgba_t color, float ao = 0.5f) {
         diffuse = vec4_rgba(color).xyz;
-        ambient = vec3_scale(diffuse, ao);
+        ambient = scale_vec3(diffuse, ao);
     }
 };
 

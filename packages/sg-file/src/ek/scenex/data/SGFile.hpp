@@ -4,8 +4,8 @@
 #include <ek/ds/Array.hpp>
 #include <ek/ds/String.hpp>
 #include <ek/util/Type.hpp>
-#include <ek/math/MathSerialize.hpp>
-#include <ek/math/Color32.hpp>
+
+#include <ek/math.h>
 
 
 #include <ek/serialize/serialize.hpp>
@@ -21,9 +21,9 @@ enum class SGFilterType {
 struct SGFilter {
     SGFilterType type = SGFilterType::None;
     uint32_t quality = 1;
-    argb32_t color = argb32_t::one;
-    vec2_t blur;
-    vec2_t offset;
+    rgba_t color = COLOR_WHITE;
+    vec2_t blur = {};
+    vec2_t offset = {};
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -32,8 +32,8 @@ struct SGFilter {
 };
 
 struct SGTextLayerData {
-    argb32_t color = 0xFFFFFFFF_argb;
-    vec2_t offset{};
+    rgba_t color = COLOR_WHITE;
+    vec2_t offset = {};
     float blurRadius = 0.0f;
     int blurIterations = 0;
     int strength = 0;
@@ -48,8 +48,8 @@ struct SGDynamicTextData {
     String text;
     String font;
     float size;
-    vec2_t alignment;
-    rect_t rect;
+    vec2_t alignment = {};
+    rect_t rect = {};
     float lineSpacing = 0.0f;
     float lineHeight = 0.0f;
 

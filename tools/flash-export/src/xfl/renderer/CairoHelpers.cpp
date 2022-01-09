@@ -140,7 +140,7 @@ cairo_pattern_t* create_linear_pattern(const mat3x2_t& matrix) {
 cairo_pattern_t* create_radial_pattern(const mat3x2_t& matrix) {
     const auto p0 = vec2_transform({{0.0f, 0.0f}}, matrix);
     const auto p1 = vec2_transform({{819.2f, 0.0f}}, matrix);
-    const auto radius = vec2_distance(p0, p1);
+    const auto radius = distance_vec2(p0, p1);
     return cairo_pattern_create_radial(p0.x, p0.y, 0.0, p0.x, p0.y, radius);
 }
 

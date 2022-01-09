@@ -2,7 +2,7 @@
 
 #include <ek/ds/StaticHistoryBuffer.hpp>
 #include <ek/ds/Array.hpp>
-#include <ek/math/Color32.hpp>
+#include <ek/math.h>
 #include <ek/time.h>
 #include <ek/scenex/text/TextEngine.hpp>
 #include "GameDisplay.hpp"
@@ -46,8 +46,8 @@ public:
         }
 
         [[nodiscard]] rgba_t calculateColor(float val) const {
-            return rgba_lerp(RGB(0x00FF00), RGB(0xFF0000),
-                        clamp((val - thMin) / (thMax - thMin), 0, 1));
+            return lerp_rgba(RGB(0x00FF00), RGB(0xFF0000),
+                             clamp((val - thMin) / (thMax - thMin), 0, 1));
         }
     };
 

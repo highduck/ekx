@@ -4,7 +4,7 @@
 #include <ek/gfx.h>
 #include <ek/canvas.h>
 #include <ek/time.h>
-#include <ek/math/Color32.hpp>
+#include <ek/math.h>
 
 using namespace ek;
 
@@ -15,9 +15,9 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
     auto h = 16.0f;
     auto y = (zoneHeight - h) * 0.5f + h;
 
-    canvas_quad_color(pad, y, w, h, 0xFFFFFFFF_argb);
-    canvas_quad_color(pad + 2, y + 2, w - 4, h - 4, 0xFF000000_argb);
-    canvas_quad_color(pad + 4, y + 4, (w - 8) * progress, h - 8, 0xFFFFFFFF_argb);
+    canvas_quad_color(pad, y, w, h, COLOR_WHITE);
+    canvas_quad_color(pad + 2, y + 2, w - 4, h - 4, COLOR_BLACK);
+    canvas_quad_color(pad + 4, y + 4, (w - 8) * progress, h - 8, COLOR_WHITE);
 
     float sz = zoneWidth < zoneHeight ? zoneWidth : zoneHeight;
     float cx = zoneWidth / 2.0f;
@@ -34,7 +34,7 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
         float R = (sh / 10.0f) *
                   (1.8f - 0.33f * speed - 0.33f * ((cosf(r * 3.14f) + 2.0f * cosf(r * 3.14f * 2 + 3.14f))));
         vec3_t circ = vec3(cx + ox * sw, cy - 2.0f * sh + oy * sh, R);
-        canvas_fill_circle(circ, 0xFFFFFFFF_argb, 0xFFFFFFFF_argb, 16);
+        canvas_fill_circle(circ, COLOR_WHITE, COLOR_WHITE, 16);
     }
 }
 
@@ -49,7 +49,7 @@ void on_frame() {
     if (width > 0 && height > 0) {
         static sg_pass_action pass_action{};
         pass_action.colors[0].action = SG_ACTION_CLEAR;
-        const vec4_t fillColor = vec4_rgba(argb32_t{ek_app.config.background_color});
+        const vec4_t fillColor = vec4_rgba(ARGB(ek_app.config.background_color));
         pass_action.colors[0].value.r = fillColor.x;
         pass_action.colors[0].value.g = fillColor.y;
         pass_action.colors[0].value.b = fillColor.z;

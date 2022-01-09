@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Math.hpp"
 #include <ek/assert.h>
 #include <ek/rnd.h>
 #include <ek/time.h>
-#include <cstdint>
+#include <ek/math.h>
 
 namespace ek {
 
@@ -40,7 +39,7 @@ public:
     }
 
     float random(float min, float max) {
-        return Math::lerp(min, max, random());
+        return lerp_f32(min, max, random());
     }
 
     int random_int(int min, int max) {

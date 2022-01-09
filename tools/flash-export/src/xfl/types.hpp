@@ -94,7 +94,7 @@ struct TextAttributes {
     bool aliasText = false;
     bool bold = false;
     bool italic = false;
-    vec4_t color = {{0, 0, 0, 1}};
+    vec4_t color = vec4(0, 0, 0, 1);
     String face; // face="Font 1*"
     float lineHeight = 20; // 20
     float lineSpacing = 0; // "-14";

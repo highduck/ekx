@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/scenex/base/Script.hpp>
-#include <ek/math/Color32.hpp>
+#include <ek/math.h>
 
 namespace ek {
 

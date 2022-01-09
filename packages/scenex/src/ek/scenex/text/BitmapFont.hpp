@@ -3,7 +3,7 @@
 #include "FontImplBase.hpp"
 #include <ek/ds/Array.hpp>
 #include <ek/ds/Hash.hpp>
-#include <ek/math/MathSerialize.hpp>
+
 #include <ek/util/NoCopyAssign.hpp>
 #include <ek/scenex/data/BMFont.hpp>
 #include <ek/util/Type.hpp>

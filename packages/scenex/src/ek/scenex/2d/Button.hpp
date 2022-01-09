@@ -2,7 +2,7 @@
 
 #include <ek/math/Easings.hpp>
 #include <ek/util/Signal.hpp>
-#include <ek/math/Color32.hpp>
+#include <ek/math.h>
 #include "MovieClip.hpp"
 #include "../base/TimeLayer.hpp"
 

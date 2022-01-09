@@ -97,7 +97,7 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
             continue;
         }
         if (font->getFontType() == FontType::Bitmap && layer.blurRadius > 0.0f &&
-            vec2_length_sqr(layer.offset) <= 0.1f) {
+            length_sqr_vec2(layer.offset) <= 0.1f) {
             // skip {0;0} strokes for bitmap fonts
             continue;
         }
@@ -162,7 +162,7 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
                     // only for DEV mode
                     if (layer.showGlyphBounds) {
                         canvas_set_empty_image();
-                        canvas_stroke_rect(gdata.rect, 0xFFFFFF_rgb, 1);
+                        canvas_stroke_rect(gdata.rect, COLOR_WHITE, 1);
                         canvas_set_image(gdata.image);
                     }
                 }

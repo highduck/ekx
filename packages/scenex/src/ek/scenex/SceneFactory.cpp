@@ -78,8 +78,8 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
     {
         auto& transform = entity.get<Transform2D>();
         transform.setMatrix(data->matrix);
-        transform.color.scale = argb32_t(data->color.scale.data);
-        transform.color.offset = argb32_t(data->color.offset.data);
+        transform.color.scale = rgba_vec4(data->color.scale);
+        transform.color.offset = rgba_vec4(data->color.offset);
     }
 
     {

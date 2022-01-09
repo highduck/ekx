@@ -188,7 +188,7 @@ void Text2D::draw() {
         rect_t bounds;
         bounds.position = position;
         bounds.size = blockInfo.size;
-        canvas_stroke_rect(rect_expand(bounds, 1.0f), 0xFF0000_rgb, 1);
+        canvas_stroke_rect(rect_expand(bounds, 1.0f), RGB(0xFF0000), 1);
     }
 }
 
@@ -261,7 +261,7 @@ rect_t Arc2D::getBounds() const {
 }
 
 bool Arc2D::hitTest(vec2_t point) const {
-    const float len = vec2_length(point);
+    const float len = length_vec2(point);
     return len >= radius && len <= (radius + line_width);
 }
 

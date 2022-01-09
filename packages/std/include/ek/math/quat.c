@@ -149,15 +149,15 @@ quat_t quat_mat4(mat4_t m) {
     return result;
 }
 
-quat_t quat_normalize(quat_t a) {
+quat_t normalize_quat(quat_t a) {
     quat_t result;
-    result.xyzw = vec4_normalize(a.xyzw);
+    result.xyzw = normalize_vec4(a.xyzw);
     return result;
 }
 
 quat_t quat_between(const vec3_t u, const vec3_t v) {
-    float norm_u_norm_v = sqrtf(vec3_dot(u, u) * vec3_dot(v, v));
-    float real_part = norm_u_norm_v + vec3_dot(u, v);
+    float norm_u_norm_v = sqrtf(dot_vec3(u, u) * dot_vec3(v, v));
+    float real_part = norm_u_norm_v + dot_vec3(u, v);
     vec3_t t;
 
     if (real_part < 1.e-6f * norm_u_norm_v) {
@@ -168,20 +168,20 @@ quat_t quat_between(const vec3_t u, const vec3_t v) {
         t = fabsf(u.x) > fabsf(u.z) ? vec3(-u.y, u.x, 0) : vec3(0, -u.z, u.y);
     } else {
         // Otherwise, build quaternion the standard way.
-        t = vec3_cross(u, v);
+        t = cross_vec3(u, v);
     }
 
     quat_t q;
     q.w = real_part;
     q.xyz = t;
 
-    return quat_normalize(q);
+    return normalize_quat(q);
 }
 
 quat_t quat_look_at_rh(vec3_t direction, vec3_t up) {
-    const vec3_t u2 = vec3_neg(direction);
-    const vec3_t u0 = vec3_normalize(vec3_cross(up, u2));
-    const vec3_t u1 = vec3_cross(u2, u0);
+    const vec3_t u2 = neg_vec3(direction);
+    const vec3_t u0 = normalize_vec3(cross_vec3(up, u2));
+    const vec3_t u1 = cross_vec3(u2, u0);
 
     const mat3_t m = {
             .columns[0] = u0,

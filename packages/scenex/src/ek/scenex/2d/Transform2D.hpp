@@ -197,15 +197,15 @@ struct Transform2D {
     }
 
     void lerpScale(vec2_t target, float t) {
-        setScale(vec2_lerp(getScale(), target, t));
+        setScale(lerp_vec2(getScale(), target, t));
     }
 
     void lerpPosition(vec2_t target, float t) {
-        setPosition(vec2_lerp(getPosition(), target, t));
+        setPosition(lerp_vec2(getPosition(), target, t));
     }
 
     void lerpRotation(float target, float t) {
-        setRotation(f32_lerp(getRotation(), target, t));
+        setRotation(lerp_f32(getRotation(), target, t));
     }
 
     inline void updateMatrix2x2() {

@@ -5,12 +5,6 @@ project(core)
 add_library(${PROJECT_NAME} STATIC
         ek/ek_core_module.cpp
 
-        ek/math/Math.hpp
-        ek/math/MathSerialize.hpp
-
-        ek/math/HSVColor.hpp
-        ek/math/Color32.hpp
-
         ek/math/Easings.hpp
         ek/math/Random.hpp
 

@@ -192,7 +192,7 @@ SceneWindow::SceneWindow() {
 }
 
 void drawBox2(rect_t rc, mat3x2_t m, rgba_t color1, rgba_t color2,
-              bool cross = true, rgba_t fillColor = 0_argb) {
+              bool cross = true, rgba_t fillColor = COLOR_ZERO) {
 
     canvas_set_empty_image();
     if (fillColor.value != 0) {
@@ -257,10 +257,10 @@ void SceneWindow::drawSceneNodeBounds(ecs::EntityApi e) {
         }
         rect_t b = disp->getBounds();
         if (Locator::get<Editor>()->hierarchy.isSelectedInHierarchy(e)) {
-            drawBox2(b, m, 0xFFFFFFFF_argb, 0xFF000000_argb, true, 0x77FFFFFF_argb);
+            drawBox2(b, m, COLOR_WHITE, COLOR_BLACK, true, ARGB(0x77FFFFFF));
         }
         if (hoverTarget.check(e)) {
-            drawBox2(b, m, 0x77FFFFFF_argb, 0x77000000_argb, false);
+            drawBox2(b, m, ARGB(0x77FFFFFF), ARGB(0x77000000), false);
         }
     }
     auto it = e.get<Node>().child_first;

@@ -29,7 +29,7 @@ void Transform3D::updateAll() {
                         mat4_mul(
                                 mat4_translate_transform(tr.position),
                                 mat4_rotation_transform_quat(
-                                        quat_normalize(quat_euler_angles(tr.rotation))
+                                        normalize_quat(quat_euler_angles(tr.rotation))
                                 )
                         ),
                         mat4_scale_transform(tr.scale)

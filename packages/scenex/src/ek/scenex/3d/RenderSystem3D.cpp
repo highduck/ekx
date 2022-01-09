@@ -43,8 +43,8 @@ get_shadow_map_box(const mat4_t& camera_projection, const mat4_t& camera_view, c
         c.xyz = corners[i];
         c.w = 1;
         vec4_t v2 = mat4_mul_vec4(inv_proj_view, c);
-        auto len = vec4_length(v2);
-        vec3_t v = vec3_scale(vec3_normalize(v2.xyz), len);
+        auto len = length_vec4(v2);
+        vec3_t v = scale_vec3(normalize_vec3(v2.xyz), len);
         if (v.x < bb.min.x) bb.min.x = v.x;
         if (v.y < bb.min.y) bb.min.y = v.y;
         if (v.z < bb.min.z) bb.min.z = v.z;
@@ -156,7 +156,7 @@ struct ShadowMapRes {
             auto& transform = e.get<Transform3D>();
             if (l.type == Light3DType::Directional) {
                 light_data = l;
-                light_position = vec3_normalize(mat4_get_position(&transform.world));
+                light_position = normalize_vec3(mat4_get_position(&transform.world));
             }
         }
 
@@ -382,7 +382,7 @@ void RenderSystem3D::prepare() {
             point_light_pos = mat4_get_position(&transform.world);
         } else if (l.type == Light3DType::Directional) {
             directional_light = l;
-            directional_light_pos = vec3_normalize(mat4_get_position(&transform.world));
+            directional_light_pos = normalize_vec3(mat4_get_position(&transform.world));
         }
     }
 
@@ -441,7 +441,7 @@ void RenderSystem3D::render(float width, float height) {
 
     fs_params_t fs_params;
     fs_params.u_time[0] = time;
-    fs_params.u_time[1] = Math::fract(time);
+    fs_params.u_time[1] = fract(time);
     fs_params.u_time[2] = fc_;
     fs_params.u_time[3] = 0.0f;
     fs_params.u_resolution[0] = width;

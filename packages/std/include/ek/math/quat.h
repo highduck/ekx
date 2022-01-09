@@ -21,7 +21,7 @@ typedef union quat_t {
     float data[4];
 } quat_t;
 
-quat_t quat_normalize(quat_t a);
+quat_t normalize_quat(quat_t a);
 quat_t quat_euler_angles(vec3_t angles);
 vec3_t quat_to_euler_angles(quat_t q);
 quat_t quat_mat4(mat4_t m);

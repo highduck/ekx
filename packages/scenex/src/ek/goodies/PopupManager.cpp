@@ -107,7 +107,7 @@ void PopupManager::updateAll() {
         if (p.active.size() == 1 && p.active.back() == p.closingLast) {
             needFade = false;
         }
-        p.fade_progress = Math::reach(p.fade_progress,
+        p.fade_progress = reach(p.fade_progress,
                                       needFade ? 1.0f : 0.0f,
                                       dt / p.fade_duration);
 
@@ -221,7 +221,7 @@ void close_all_popups() {
 ecs::EntityApi createBackQuad() {
     auto e = createNode2D("back");
     auto& display = e.assign<Display2D>();
-    display.makeDrawable<Quad2D>().setColor(argb32_t::black);
+    display.makeDrawable<Quad2D>().setColor(COLOR_BLACK);
     display.program = ek_ref_find(ek_shader, "canvas_color");
     e.assign<LayoutRect>()
             .fill(true, true)

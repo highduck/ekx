@@ -41,16 +41,16 @@ void fireworks_script::update(float dt) {
         Res<ParticleDecl> part{"firework_star"};
         switch (random_int(0, 3)) {
             case 0:
-                part->color.set_gradient(0xffffff00_argb, 0xffff7f00_argb);
+                part->color.set_gradient(ARGB(0xffffff00), ARGB(0xffff7f00));
                 break;
             case 1:
-                part->color.set_gradient(0xfffea7f9_argb, 0xffff006c_argb);
+                part->color.set_gradient(ARGB(0xfffea7f9), ARGB(0xffff006c));
                 break;
             case 2:
-                part->color.set_gradient(0xffd5fdfd_argb, 0xff00c0ff_argb);
+                part->color.set_gradient(ARGB(0xffd5fdfd), ARGB(0xff00c0ff));
                 break;
             case 3:
-                part->color.set_gradient(0xff2e0678_argb, 0xffb066cf_argb);
+                part->color.set_gradient(ARGB(0xff2e0678), ARGB(0xffb066cf));
                 break;
             default:
                 break;

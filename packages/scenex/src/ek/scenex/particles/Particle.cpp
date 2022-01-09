@@ -33,7 +33,7 @@ void Particle::update_current_values() {
         case ParticleScaleMode::Range: {
             float time_max = scale_off_time > 0.0f ? scale_off_time : time_total;
             float ratio = 1.0f - saturate(time / time_max);
-            float s = f32_lerp(scale_start, scale_end, ratio);
+            float s = lerp_f32(scale_start, scale_end, ratio);
             scale = vec2(s, s);
         }
             break;
@@ -44,7 +44,7 @@ void Particle::update_current_values() {
 
     switch (alpha_mode) {
         case ParticleAlphaMode::ByScale:
-            color.a = unorm8_f32_clamped(alpha * vec2_length(scale));
+            color.a = unorm8_f32_clamped(alpha * length_vec2(scale));
             break;
         case ParticleAlphaMode::LifeSin:
             color.a = unorm8_f32_clamped(alpha * sinf(MATH_PI * time / time_total));

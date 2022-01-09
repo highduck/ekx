@@ -3,7 +3,7 @@
 #include "FontImplBase.hpp"
 
 #include <ek/math.h>
-#include <ek/math/Color32.hpp>
+#include <ek/math.h>
 #include <ek/util/NoCopyAssign.hpp>
 #include <ek/serialize/serialize.hpp>
 #include <ek/util/Type.hpp>

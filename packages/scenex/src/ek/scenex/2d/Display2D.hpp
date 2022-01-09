@@ -241,8 +241,8 @@ public:
     TextFormat format;
     rect_t rect = {};
 
-    rgba_t borderColor = 0x00FF0000_argb;
-    rgba_t fillColor = 0x00000000_argb;
+    rgba_t borderColor = ARGB(0x00FF0000);
+    rgba_t fillColor = ARGB(0x00000000);
 
     bool localize = false;
 
@@ -278,8 +278,8 @@ public:
     float radius = 10.0f;
     float line_width = 10.0f;
     int segments = 50;
-    rgba_t color_inner = rgba_u32(0xFFFFFFFFu);
-    rgba_t color_outer = rgba_u32(0xFFFFFFFFu);
+    rgba_t color_inner = COLOR_WHITE;
+    rgba_t color_outer = COLOR_WHITE;
     Res<Sprite> sprite;
 
     void draw() override;

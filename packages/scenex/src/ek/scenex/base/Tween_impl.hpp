@@ -1,6 +1,6 @@
 #include "Tween.hpp"
 #include "DestroyTimer.hpp"
-#include <ek/math/Math.hpp>
+#include <ek/math.h>
 
 namespace ek {
 

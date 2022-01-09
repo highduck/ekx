@@ -3,7 +3,7 @@
 #include <ek/gfx.h>
 #include <ek/canvas.h>
 #include <ek/math/Random.hpp>
-#include <ek/math/Color32.hpp>
+#include <ek/math.h>
 #include <ek/bitset.h>
 #include <ek/time.h>
 
@@ -80,7 +80,7 @@ void on_frame() {
     if (width > 0 && height > 0) {
         static sg_pass_action pass_action{};
         pass_action.colors[0].action = SG_ACTION_CLEAR;
-        const vec4_t fillColor = vec4_rgba(argb32_t{ek_app.config.background_color});
+        const vec4_t fillColor = vec4_rgba(ARGB(ek_app.config.background_color));
         pass_action.colors[0].value.r = fillColor.x;
         pass_action.colors[0].value.g = fillColor.y;
         pass_action.colors[0].value.b = fillColor.z;

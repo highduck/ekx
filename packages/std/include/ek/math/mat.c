@@ -90,10 +90,10 @@ void mat3x2_rotate(mat3x2_t* mat, float radians) {
 }
 
 void mat3x2_transform_pivot(mat3x2_t* mat, vec2_t pos, float rot, vec2_t scale, vec2_t pivot) {
-    mat3x2_translate(mat, vec2_add(pos, pivot));
+    mat3x2_translate(mat, add_vec2(pos, pivot));
     mat3x2_scale(mat, scale);
     mat3x2_rotate(mat, rot);
-    mat3x2_translate(mat, vec2_neg(pivot));
+    mat3x2_translate(mat, neg_vec2(pivot));
 }
 
 // NOTES: to do `concat` style method - just swap right and left matrices,
@@ -361,9 +361,9 @@ bool vec2_transform_inverse(vec2_t p, mat3x2_t m, vec2_t* out) {
 
 // TODO:  look at view matrix calc
 mat4_t mat4_look_at_rh(const vec3_t eye, const vec3_t center, const vec3_t up) {
-    const vec3_t f = vec3_normalize(vec3_sub(center, eye));
-    const vec3_t s = vec3_normalize(vec3_cross(f, up));
-    const vec3_t u = vec3_cross(s, f);
+    const vec3_t f = normalize_vec3(sub_vec3(center, eye));
+    const vec3_t s = normalize_vec3(cross_vec3(f, up));
+    const vec3_t u = cross_vec3(s, f);
 
     mat4_t m = mat4_identity();
     m.m00 = s.x;
@@ -375,16 +375,16 @@ mat4_t mat4_look_at_rh(const vec3_t eye, const vec3_t center, const vec3_t up) {
     m.m02 = -f.x;
     m.m12 = -f.y;
     m.m22 = -f.z;
-    m.m30 = -vec3_dot(s, eye);
-    m.m31 = -vec3_dot(u, eye);
-    m.m32 = vec3_dot(f, eye);
+    m.m30 = -dot_vec3(s, eye);
+    m.m31 = -dot_vec3(u, eye);
+    m.m32 = dot_vec3(f, eye);
     return m;
 }
 
 mat4_t mat4_look_at_lh(const vec3_t eye, const vec3_t center, const vec3_t up) {
-    const vec3_t f = vec3_normalize(vec3_sub(center, eye));
-    const vec3_t s = vec3_normalize(vec3_cross(up, f));
-    const vec3_t u = vec3_cross(f, s);
+    const vec3_t f = normalize_vec3(sub_vec3(center, eye));
+    const vec3_t s = normalize_vec3(cross_vec3(up, f));
+    const vec3_t u = cross_vec3(f, s);
 
     mat4_t m = mat4_identity();
     m.m00 = s.x;
@@ -396,9 +396,9 @@ mat4_t mat4_look_at_lh(const vec3_t eye, const vec3_t center, const vec3_t up) {
     m.m02 = f.x;
     m.m12 = f.y;
     m.m22 = f.z;
-    m.m30 = -vec3_dot(s, eye);
-    m.m31 = -vec3_dot(u, eye);
-    m.m32 = -vec3_dot(f, eye);
+    m.m30 = -dot_vec3(s, eye);
+    m.m31 = -dot_vec3(u, eye);
+    m.m32 = -dot_vec3(f, eye);
     return m;
 }
 
@@ -493,21 +493,21 @@ mat4_t mat4_inverse(mat4_t m) {
     vec4_t v_2 = vec4(m.m12, m.m02, m.m02, m.m02);
     vec4_t v_3 = vec4(m.m13, m.m03, m.m03, m.m03);
 
-    vec4_t inv_0 = vec4_add(vec4_sub(vec4_mul(v_1, fac_0), vec4_mul(v_2, fac_1)), vec4_mul(v_3, fac_2));
-    vec4_t inv_1 = vec4_add(vec4_sub(vec4_mul(v_0, fac_0), vec4_mul(v_2, fac_3)), vec4_mul(v_3, fac_4));
-    vec4_t inv_2 = vec4_add(vec4_sub(vec4_mul(v_0, fac_1), vec4_mul(v_1, fac_3)), vec4_mul(v_3, fac_5));
-    vec4_t inv_3 = vec4_add(vec4_sub(vec4_mul(v_0, fac_2), vec4_mul(v_1, fac_4)), vec4_mul(v_2, fac_5));
+    vec4_t inv_0 = add_vec4(sub_vec4(mul_vec4(v_1, fac_0), mul_vec4(v_2, fac_1)), mul_vec4(v_3, fac_2));
+    vec4_t inv_1 = add_vec4(sub_vec4(mul_vec4(v_0, fac_0), mul_vec4(v_2, fac_3)), mul_vec4(v_3, fac_4));
+    vec4_t inv_2 = add_vec4(sub_vec4(mul_vec4(v_0, fac_1), mul_vec4(v_1, fac_3)), mul_vec4(v_3, fac_5));
+    vec4_t inv_3 = add_vec4(sub_vec4(mul_vec4(v_0, fac_2), mul_vec4(v_1, fac_4)), mul_vec4(v_2, fac_5));
 
     vec4_t sign_a = vec4(+1, -1, +1, -1);
     vec4_t sign_b = vec4(-1, +1, -1, +1);
     mat4_t inv_m;
-    inv_m.columns[0] = vec4_mul(inv_0, sign_a);
-    inv_m.columns[1] = vec4_mul(inv_1, sign_b);
-    inv_m.columns[2] = vec4_mul(inv_2, sign_a);
-    inv_m.columns[3] = vec4_mul(inv_3, sign_b);
+    inv_m.columns[0] = mul_vec4(inv_0, sign_a);
+    inv_m.columns[1] = mul_vec4(inv_1, sign_b);
+    inv_m.columns[2] = mul_vec4(inv_2, sign_a);
+    inv_m.columns[3] = mul_vec4(inv_3, sign_b);
 
     // mult components inv_m.col(0) * m.row(0)
-    vec4_t dot_0 = vec4_mul(m.columns[0], mat4_row(&inv_m, 0));
+    vec4_t dot_0 = mul_vec4(m.columns[0], mat4_row(&inv_m, 0));
     float dot_1 = (dot_0.x + dot_0.y) + (dot_0.z + dot_0.w);
     EK_ASSERT(dot_1 != 0.0f);
     pmat4_scale(inv_m.data, 1.0f / dot_1);
@@ -593,8 +593,8 @@ mat4_t mat4_rotate(const mat4_t m, float angle, const vec3_t v) {
     const float c = cosf(angle);
     const float s = sinf(angle);
 
-    vec3_t axis = vec3_normalize(v);
-    vec3_t temp = vec3_scale(axis, 1 - c);
+    vec3_t axis = normalize_vec3(v);
+    vec3_t temp = scale_vec3(axis, 1 - c);
 
     mat4_t r = mat4_identity();
     r.m00 = c + temp.x * axis.x;
@@ -608,12 +608,12 @@ mat4_t mat4_rotate(const mat4_t m, float angle, const vec3_t v) {
     r.m22 = c + temp.z * axis.z;
 
     mat4_t result;
-    result.columns[0] = vec4_add(vec4_add(vec4_scale(m.columns[0], r.m00), vec4_scale(m.columns[1], r.m01)),
-                                 vec4_scale(m.columns[2], r.m02));
-    result.columns[1] = vec4_add(vec4_add(vec4_scale(m.columns[0], r.m10), vec4_scale(m.columns[1], r.m11)),
-                                 vec4_scale(m.columns[2], r.m12));
-    result.columns[2] = vec4_add(vec4_add(vec4_scale(m.columns[0], r.m20), vec4_scale(m.columns[1], r.m21)),
-                                 vec4_scale(m.columns[2], r.m22));
+    result.columns[0] = add_vec4(add_vec4(scale_vec4(m.columns[0], r.m00), scale_vec4(m.columns[1], r.m01)),
+                                 scale_vec4(m.columns[2], r.m02));
+    result.columns[1] = add_vec4(add_vec4(scale_vec4(m.columns[0], r.m10), scale_vec4(m.columns[1], r.m11)),
+                                 scale_vec4(m.columns[2], r.m12));
+    result.columns[2] = add_vec4(add_vec4(scale_vec4(m.columns[0], r.m20), scale_vec4(m.columns[1], r.m21)),
+                                 scale_vec4(m.columns[2], r.m22));
     result.columns[3] = m.columns[3];
     return result;
 }

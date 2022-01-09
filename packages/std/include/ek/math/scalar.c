@@ -17,7 +17,7 @@ float to_degrees(float radians) {
  * Thanks to good old Bit Twiddling Hacks for this one:
  * http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
  */
-uint32_t next_power_of_2(uint32_t x) {
+uint32_t round_up_pow2(uint32_t x) {
     EK_ASSERT(x <= 0x40000000u);
     x--;
     x |= x >> 1u;
@@ -43,7 +43,7 @@ bool almost_eq_f32(float a, float b, float eps) {
     return lhs <= rhs;
 }
 
-float f32_lerp(float a, float b, float t) {
+float lerp_f32(float a, float b, float t) {
     return (1.0f - t) * a + t * b;
 }
 

@@ -31,13 +31,13 @@ bool test_line_line(const vec2_t a, const vec2_t b, const vec2_t c, const vec2_t
     const vec2_t ip{(b1 * c2 - b2 * c1) / denom, (a2 * c1 - a1 * c2) / denom};
 
     if (segment_mode) {
-        float len = vec2_distance_sqr(a, b);
-        if (vec2_distance_sqr(ip, b) > len || vec2_distance_sqr(ip, a) > len) {
+        float len = distance_sqr_vec2(a, b);
+        if (distance_sqr_vec2(ip, b) > len || distance_sqr_vec2(ip, a) > len) {
             return false;
         }
 
-        len = vec2_distance_sqr(c, d);
-        if (vec2_distance_sqr(ip, d) > len || vec2_distance_sqr(ip, c) > len) {
+        len = distance_sqr_vec2(c, d);
+        if (distance_sqr_vec2(ip, d) > len || distance_sqr_vec2(ip, c) > len) {
             return false;
         }
     }
@@ -234,17 +234,17 @@ sweep_test_result_t sweep_circles(const vec3_t c0,
     sweep_test_result_t result;
     const vec2_t s = c1.xy - c0.xy;
     const float r = c1.z + c0.z;
-    const float c = vec2_dot(s, s) - r * r;
+    const float c = dot_vec2(s, s) - r * r;
     if (c < 0.0f) {
         result.hit = true;
         result.u0 = 0.0f;
         return result;
     }
-    const float a = vec2_dot(delta, delta);
+    const float a = dot_vec2(delta, delta);
     if (a <= MATH_F32_EPSILON) {
         return result;
     }
-    const float b = vec2_dot(delta, s);
+    const float b = dot_vec2(delta, s);
     if (b >= 0) {
         return result;
     }

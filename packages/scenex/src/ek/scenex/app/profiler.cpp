@@ -49,7 +49,7 @@ void drawGraph(const Profiler::Track& track) {
     float x0 = 0.0f;
     float prev = track.calculateY(track.history.at(0));
     canvas_set_empty_image();
-    canvas_quad_color(0, 0, width, track.height, 0x77000000_argb);
+    canvas_quad_color(0, 0, width, track.height, ARGB(0x77000000));
     for (int i = 0; i < samples; ++i) {
         float val = track.history.at(i);
         float curr = track.calculateY(val);

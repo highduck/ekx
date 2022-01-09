@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/math.h>
-#include <ek/math/Color32.hpp>
+#include <ek/math.h>
 #include <ek/util/Res.hpp>
 #include "Font.hpp"
 

@@ -29,7 +29,7 @@ enum class RandColorMode {
 
 class RandColorData {
 public:
-    Array <rgba_t> colors{rgba_u32(0xFFFFFFFF)};
+    Array <rgba_t> colors{COLOR_WHITE};
     RandColorMode mode = RandColorMode::RandElement;
     mutable int state = 0;
 
@@ -37,22 +37,22 @@ public:
         ++state;
         int index_max = int(colors.size() - 1);
         if (colors.empty()) {
-            return argb32_t{0xFFFFFFFF};
+            return COLOR_WHITE;
         }
         if (colors.size() == 1) return colors[0];
         switch (mode) {
             case RandColorMode::RandLerp: {
                 float t = rand_fx.random(0.0f, float(index_max));
                 int i = int(t);
-                t = Math::fract(t);
-                return rgba_lerp(colors[i], colors[i + 1], t);
+                t = fract(t);
+                return lerp_rgba(colors[i], colors[i + 1], t);
             }
             case RandColorMode::RandElement:
                 return colors[rand_fx.random_int(0, index_max)];
             case RandColorMode::Continuous:
                 return colors[state % colors.size()];
         }
-        return rgba_u32(0xFFFFFFFF);
+        return COLOR_WHITE;
     }
 
     void set_gradient(rgba_t color1, rgba_t color2) {
@@ -132,7 +132,7 @@ struct ParticleDecl {
     FloatRange scale_end{0.0f};
 
     RandColorData color;
-    argb32_t color_offset{0x0u};
+    rgba_t color_offset = COLOR_ZERO;
     float additive = 0.0f;
 
     FloatRange rotation{0.0f};
@@ -152,7 +152,7 @@ struct EmitterData {
 
     FloatRange speed{10, 100};
     FloatRange acc{0.0f};
-    FloatRange dir{0.0f, (2 * MATH_PI)};
+    FloatRange dir{0.0f, MATH_TAU};
 };
 
 EK_DECLARE_TYPE(ParticleDecl);

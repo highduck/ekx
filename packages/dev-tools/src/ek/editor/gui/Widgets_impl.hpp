@@ -68,19 +68,6 @@ void HelpMarker(const char* desc)
     }
 }
 
-bool Color32Edit(const char* label, ek::argb32_t& argb) {
-    vec4_t v = vec4_rgba(argb);
-    const bool changed = ImGui::ColorEdit4(label, v.data);
-    if (changed) {
-        const rgba_t col = rgba_vec4(v);
-        argb.r = col.r;
-        argb.g = col.g;
-        argb.b = col.b;
-        argb.a = col.a;
-    }
-    return changed;
-}
-
 bool Color32Edit(const char* label, rgba_t* color) {
     vec4_t v = vec4_rgba(*color);
     const bool changed = ImGui::ColorEdit4(label, v.data);

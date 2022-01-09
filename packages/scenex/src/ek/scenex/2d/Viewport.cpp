@@ -19,7 +19,7 @@ void doScale(const ViewportScaleInput& input, const ViewportScaleOptions& option
         output.offset = options.alignment * (rc.size - scale * options.baseResolution);
         output.scale = scale;
     } else {
-        output.scale = vec2_length(options.pixelRatio);
+        output.scale = length_vec2(options.pixelRatio);
         rect_t rc;
         rc.position = fullRect.position + (safeRect.position - fullRect.position) * options.safeAreaFit;
         rc.size = fullRect.size + (safeRect.size - fullRect.size) * options.safeAreaFit;

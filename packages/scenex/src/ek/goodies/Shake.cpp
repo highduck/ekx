@@ -41,16 +41,16 @@ void Shaker::updateAll() {
     for (auto e: ecs::view<Shaker>()) {
         auto& data = e.get<Shaker>();
         const auto dt = data.timer->dt;
-        data.state = Math::reach(data.state, 0.0f, dt);
-        const auto r = Math::integrateExp(0.9f, dt);
+        data.state = reach(data.state, 0.0f, dt);
+        const auto r = integrate_exp(0.9f, dt, 0);
 
         const auto posTarget = randomF2(0.0f, 1.0f) * data.maxOffset * data.state;
         const auto rotTarget = random(-0.5f, 0.5f) * data.maxRotation * data.state;
         const auto scaleTarget = vec2(1, 1) + randomF2(-0.5f, 0.5f) * data.maxScale * data.state;
         auto& pos = e.get<Transform2D>();
-        pos.setRotation(f32_lerp(pos.getRotation(), rotTarget, r));
-        pos.setScale(vec2_lerp(pos.getScale(), scaleTarget, r));
-        pos.setPosition(vec2_lerp(pos.getPosition(), posTarget, r));
+        pos.setRotation(lerp_f32(pos.getRotation(), rotTarget, r));
+        pos.setScale(lerp_vec2(pos.getScale(), scaleTarget, r));
+        pos.setPosition(lerp_vec2(pos.getPosition(), posTarget, r));
     }
 }
 

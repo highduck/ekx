@@ -45,7 +45,7 @@ void target_follow_script::update(float dt) {
 }
 
 void target_follow_script::gui_gizmo() {
-    canvas_fill_circle({0.0f, 0.0f, 100.0f}, 0x00FFFFFF_argb, 0x77FFFFFF_argb, 10);
+    canvas_fill_circle({0.0f, 0.0f, 100.0f}, ARGB(0x00FFFFFF), ARGB(0x77FFFFFF), 10);
 }
 
 void target_follow_script::gui_inspector() {

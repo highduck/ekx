@@ -6,7 +6,6 @@
 
 /// region Buffers Chain
 
-#define CANVAS_PI_2 (MATH_PI * 2.0f)
 #define CANVAS_INDEX_LIMIT (CANVAS_INDEX_MAX_COUNT - 1)
 #define CANVAS_VERTEX_LIMIT (CANVAS_VERTEX_MAX_COUNT - 1)
 
@@ -226,7 +225,7 @@ void canvas_scale_alpha(float alpha) {
 }
 
 void canvas_scale_color(rgba_t multiplier) {
-    canvas.color[0].scale = rgba_mul(canvas.color[0].scale, multiplier);
+    canvas.color[0].scale = mul_rgba(canvas.color[0].scale, multiplier);
 }
 
 void canvas_concat_color(const color2_t color) {
@@ -323,7 +322,7 @@ void canvas_quad(float x, float y, float w, float h) {
 void canvas_quad_color(float x, float y, float w, float h, rgba_t color) {
     canvas_triangles(4, 6);
 
-    const rgba_t cm = rgba_mul(canvas.color[0].scale, color);
+    const rgba_t cm = mul_rgba(canvas.color[0].scale, color);
     const rgba_t co = canvas.color[0].offset;
     canvas_write_vertex(x, y, 0, 0.0f, cm, co);
     canvas_write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
@@ -338,10 +337,10 @@ void canvas_quad_color4(float x, float y, float w, float h, rgba_t c1, rgba_t c2
 
     const rgba_t cm = canvas.color[0].scale;
     const rgba_t co = canvas.color[0].offset;
-    c1 = rgba_mul(cm, c1);
-    c2 = rgba_mul(cm, c2);
-    c3 = rgba_mul(cm, c3);
-    c4 = rgba_mul(cm, c4);
+    c1 = mul_rgba(cm, c1);
+    c2 = mul_rgba(cm, c2);
+    c3 = mul_rgba(cm, c3);
+    c4 = mul_rgba(cm, c4);
     canvas_write_vertex(x, y, 0, 0.0f, c1, co);
     canvas_write_vertex(x + w, y, 1.0f, 0.0f, c2, co);
     canvas_write_vertex(x + w, y + h, 1.0f, 1.0f, c3, co);
@@ -376,13 +375,13 @@ void canvas_fill_circle(const vec3_t circle, rgba_t inner_color, rgba_t outer_co
     const float r = circle.z;
 
     const rgba_t co = canvas.color[0].offset;
-    const rgba_t inner_cm = rgba_mul(canvas.color[0].scale, inner_color);
-    const rgba_t outer_cm = rgba_mul(canvas.color[0].scale, outer_color);
+    const rgba_t inner_cm = mul_rgba(canvas.color[0].scale, inner_color);
+    const rgba_t outer_cm = mul_rgba(canvas.color[0].scale, outer_color);
     canvas_write_vertex(x, y, 0.0f, 0.0f, inner_cm, co);
 
-    const float da = CANVAS_PI_2 / (float) segments;
+    const float da = MATH_TAU / (float) segments;
     float a = 0.0f;
-    while (a < CANVAS_PI_2) {
+    while (a < MATH_TAU) {
         canvas_write_vertex(x + r * cosf(a), y + r * sinf(a), 1, 1, outer_cm, co);
         a += da;
     }
@@ -411,8 +410,8 @@ void canvas_line_ex(const vec2_t start, const vec2_t end, rgba_t color1, rgba_t 
     const float t2sina2 = sn * width2;
     const float t2cosa2 = cs * width2;
 
-    const rgba_t m1 = rgba_mul(canvas.color[0].scale, color1);
-    const rgba_t m2 = rgba_mul(canvas.color[0].scale, color2);
+    const rgba_t m1 = mul_rgba(canvas.color[0].scale, color1);
+    const rgba_t m2 = mul_rgba(canvas.color[0].scale, color2);
     const rgba_t co = canvas.color[0].offset;
 
     canvas_write_vertex(start.x + t2sina1, start.y - t2cosa1, 0, 0, m1, co);
@@ -431,9 +430,9 @@ void canvas_line_arc(float x, float y, float r,
                      float angle_from, float angle_to,
                      float line_width, int segments,
                      rgba_t color_inner, rgba_t color_outer) {
-    const float da = CANVAS_PI_2 / (float) segments;
-    const rgba_t m1 = rgba_mul(canvas.color[0].scale, color_inner);
-    const rgba_t m2 = rgba_mul(canvas.color[0].scale, color_outer);
+    const float da = MATH_TAU / (float) segments;
+    const rgba_t m1 = mul_rgba(canvas.color[0].scale, color_inner);
+    const rgba_t m2 = mul_rgba(canvas.color[0].scale, color_outer);
     const rgba_t co = canvas.color[0].offset;
     const float hw = line_width / 2.0f;
     const float r0 = r - hw;
@@ -474,10 +473,10 @@ void canvas_stroke_circle(const vec3_t circle, rgba_t color, float lineWidth, in
     const float y = circle.y;
     const float r = circle.z;
 
-    const float da = CANVAS_PI_2 / (float) segments;
+    const float da = MATH_TAU / (float) segments;
     float a = 0.0f;
     vec2_t pen = vec2(x, y - r);
-    while (a < CANVAS_PI_2) {
+    while (a < MATH_TAU) {
         const vec2_t next = vec2(x + r * cosf(a), y + r * sinf(a));
         canvas_line(pen, next, color, lineWidth);
         pen = next;

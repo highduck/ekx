@@ -94,7 +94,7 @@ void process_filters(const Element& el, ExportItem& item) {
     for (auto& filter: el.filters) {
         SGFilter fd;
         fd.type = SGFilterType::None;
-        fd.color = argb32_t{filter.color.data};
+        fd.color = rgba_vec4(filter.color);
         fd.blur = filter.blur;
         fd.quality = filter.quality;
 
@@ -144,11 +144,11 @@ void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
     tf.lineSpacing = textRun.attributes.lineSpacing;
 
     SGTextLayerData layer;
-    layer.color = argb32_t{textRun.attributes.color.data};
+    layer.color = rgba_vec4(textRun.attributes.color);
     tf.layers.push_back(layer);
 
     for (auto& filter: el.filters) {
-        layer.color = argb32_t{filter.color.data};
+        layer.color = rgba_vec4(filter.color);
         layer.blurRadius = std::fmin(filter.blur.x, filter.blur.y);
         layer.blurIterations = filter.quality;
         layer.offset = {};

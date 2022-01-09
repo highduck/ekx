@@ -1,6 +1,6 @@
 #include "DynamicAtlas.hpp"
 #include <ek/gfx.h>
-#include <ek/math/Math.hpp>
+#include <ek/math.h>
 #include <ek/assert.h>
 
 namespace ek {
@@ -197,7 +197,7 @@ void DynamicAtlas::reset() {
 
 int DynamicAtlas::estimateBetterSize(float scaleFactor, unsigned baseSize, unsigned maxSize) {
     auto scaledSize = (uint32_t)ceilf((float)baseSize * scaleFactor);
-    auto potSize = next_power_of_2(scaledSize);
+    auto potSize = round_up_pow2(scaledSize);
     return MIN(potSize, maxSize);
 }
 

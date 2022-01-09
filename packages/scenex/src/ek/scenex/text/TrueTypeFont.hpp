@@ -2,7 +2,7 @@
 
 #include "FontImplBase.hpp"
 #include <ek/util/Res.hpp>
-#include <ek/math/Color32.hpp>
+#include <ek/math.h>
 #include <ek/ds/Hash.hpp>
 #include <ek/canvas.h>
 #include <ek/local_res.h>

@@ -166,9 +166,9 @@ inline void guiCamera2D(Camera2D& camera) {
 inline void guiTransform3D(Transform3D& transform) {
     ImGui::DragFloat3("Position", transform.position.data, 1.0f, 0.0f, 0.0f, "%.1f");
     ImGui::DragFloat3("Scale", transform.scale.data, 0.1f, 0.0f, 0.0f, "%.2f");
-    vec3_t euler_angles = vec3_scale(transform.rotation, 180.0f / MATH_PI);
+    vec3_t euler_angles = scale_vec3(transform.rotation, 180.0f / MATH_PI);
     if (ImGui::DragFloat3("Rotation", euler_angles.data, 0.1f, 0.0f, 0.0f, "%.2f")) {
-        transform.rotation = vec3_scale(euler_angles, MATH_PI / 180.0f);
+        transform.rotation = scale_vec3(euler_angles, MATH_PI / 180.0f);
     }
 }
 
@@ -313,7 +313,7 @@ inline void guiUglyFilter2D(UglyFilter2D& filters) {
         auto& filter = filters.filters[i];
         ImGui::PushID(filters.filters.data() + i);
         ImGui::LabelText("Type", "%d", filter.type);
-        ImGui::Color32Edit("Color", filter.color);
+        ImGui::Color32Edit("Color", &filter.color);
         ImGui::DragFloat2("Offset", filter.offset.data);
         ImGui::DragFloat2("Blur", filter.blur.data);
         ImGui::DragInt("Quality", (int*) &filter.quality);

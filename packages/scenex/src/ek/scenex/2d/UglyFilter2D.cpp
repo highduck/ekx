@@ -2,7 +2,6 @@
 #include "RenderSystem2D.hpp"
 #include "Transform2D.hpp"
 
-#include <ek/math/Math.hpp>
 #include <ek/canvas.h>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/data/SGFile.hpp>
@@ -18,16 +17,16 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
 
     canvas_save_transform();
 
-    for (auto& filter : filters) {
+    for (auto& filter: filters) {
         if (filter.type == SGFilterType::DropShadow) {
             processing = true;
             canvas.matrix[0] = parentMatrix;
             canvas.color[0] = parentColor;
 
             canvas_concat_color({
-                argb32_t{0x0u, filter.color.af()},
-                argb32_t{filter.color.argb, 0.0f}
-            });
+                                        rgba_4u(0, 0, 0, filter.color.a),
+                                        rgba_4u(filter.color.r, filter.color.g, filter.color.b, 0)
+                                });
             canvas_translate(filter.offset);
 
             if (localTransform) {
@@ -41,13 +40,15 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
             processing = true;
             canvas.color[0] = parentColor;
             canvas_concat_color({
-                argb32_t{0x0u, filter.color.af()},
-                argb32_t{filter.color.argb, 0.0f}
-            });
+                                        rgba_4u(0, 0, 0, filter.color.a),
+                                        rgba_4u(filter.color.r, filter.color.g, filter.color.b, 0)
+                                });
 
-            const int segments = std::min(12,
-                                          8 * std::max(int(std::ceil((filter.blur.x + filter.blur.y)) / 2.0f), 1));
-            const auto da = float((2 * MATH_PI) / segments);
+            // begin 8 to inf
+            const int _r = (int) (8 * fmaxf((ceilf((filter.blur.x + filter.blur.y)) / 2.0f), 1.0f));
+            // clamp segments from 8 to 12
+            const int segments = MIN(12, _r);
+            const auto da = MATH_TAU / (float) segments;
             auto a = 0.0f;
             for (int i = 0; i < segments; ++i) {
                 canvas.matrix[0] = parentMatrix;

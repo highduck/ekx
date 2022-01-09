@@ -49,9 +49,9 @@ SGKeyFrameTransform lerp(const SGKeyFrameTransform& begin,
                          const SGKeyFrameTransform& end,
                          const easing_progress_t& progress) {
     return {
-            vec2_lerp(begin.position, end.position, progress.position),
-            vec2_lerp(begin.scale, end.scale, progress.scale),
-            vec2_lerp(begin.skew, end.skew, progress.skew),
+            lerp_vec2(begin.position, end.position, progress.position),
+            lerp_vec2(begin.scale, end.scale, progress.scale),
+            lerp_vec2(begin.skew, end.skew, progress.skew),
             begin.pivot,
             lerp_color2f(begin.color, end.color, progress.color)
     };
@@ -85,8 +85,8 @@ easing_progress_t get_easing_progress(const float t, const Array<SGEasingData>& 
 void apply_transform(EntityApi e, const SGKeyFrameTransform& keyframe) {
     auto& transform = e.get_or_create<Transform2D>();
     transform.setTransform(keyframe.position, keyframe.scale, keyframe.skew, keyframe.pivot);
-    transform.color.scale = argb32_t{keyframe.color.scale.data};
-    transform.color.offset = argb32_t{keyframe.color.offset.data};
+    transform.color.scale = rgba_vec4(keyframe.color.scale);
+    transform.color.offset = rgba_vec4(keyframe.color.offset);
 }
 
 void update_target(float time, EntityApi e, const SGMovieLayerData& layer) {
@@ -215,7 +215,7 @@ int get_cubic_roots(float* out_roots, float a = 0.0f, float b = 0.0f, float c = 
         const float q_sqrt = sqrt(q); // won't change
 
         out_roots[0] = -2 * q_sqrt * cos(theta / 3.0f) - b / 3.0f;
-        out_roots[1] = -2 * q_sqrt * cos((theta + 2 * MATH_PI) / 3.0f) - b / 3.0f;
+        out_roots[1] = -2 * q_sqrt * cos((theta + MATH_TAU) / 3.0f) - b / 3.0f;
         out_roots[2] = -2 * q_sqrt * cos((theta + 4 * MATH_PI) / 3.0f) - b / 3.0f;
 
         return 3;

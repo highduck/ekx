@@ -59,8 +59,14 @@ typedef union color2f_t {
 } color2f_t;
 
 #define COL32_SWAP_RB(x) (((x) & 0xFF00FF00u) | (((x) >> 16u) & 0xFFu) | (((x) & 0xFFu) << 16u))
-#define ARGB(x) ((rgba_t){.value=(COL32_SWAP_RB((uint32_t)(x)))})
-#define RGB(x) ((rgba_t){.value=(0xFF000000u | COL32_SWAP_RB((uint32_t)(x)))})
+//#define ARGB(x) ((rgba_t){.value=(COL32_SWAP_RB((uint32_t)(x)))})
+#ifdef __cplusplus
+#define ARGB(x) (rgba_t{{(uint8_t)(((x) >> 16u) & 0xFFu),(uint8_t)(((x) >> 8u) & 0xFFu),(uint8_t)((x) & 0xFFu),(uint8_t)((x) >> 24u)}})
+#define RGB(x) (rgba_t{{(uint8_t)(((x) >> 16u) & 0xFFu),(uint8_t)(((x) >> 8u) & 0xFFu),(uint8_t)((x) & 0xFFu),0xFFu}})
+#else
+#define ARGB(x) ((rgba_t){{(uint8_t)(((x) >> 16u) & 0xFFu),(uint8_t)(((x) >> 8u) & 0xFFu),(uint8_t)((x) & 0xFFu),(uint8_t)((x) >> 24u)}})
+#define RGB(x) ((rgba_t){{(uint8_t)(((x) >> 16u) & 0xFFu),(uint8_t)(((x) >> 8u) & 0xFFu),(uint8_t)((x) & 0xFFu),0xFFu}})
+#endif
 #define COLOR_WHITE ARGB(0xFFFFFFFF)
 #define COLOR_BLACK ARGB(0xFF000000)
 #define COLOR_ZERO ARGB(0x00000000)
@@ -79,11 +85,17 @@ vec4_t color2f_transform(color2f_t mod, vec4_t color);
 
 rgba_t rgba_u32(uint32_t value);
 rgba_t rgba_4f(float r, float g, float b, float a);
+rgba_t rgba_4u(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 rgba_t rgba_vec4(vec4_t rgba);
-rgba_t rgba_mul(rgba_t color, rgba_t multiplier);
-rgba_t rgba_scale(rgba_t color, uint8_t multiplier);
-rgba_t rgba_add(rgba_t color, rgba_t add);
-rgba_t rgba_lerp(rgba_t a, rgba_t b, float t);
+rgba_t color_hue(float hue_unorm);
+vec4_t colorf_hue(float hue_unorm);
+rgba_t rgba_hsv(vec4_t hsv);
+vec4_t hsv_to_rgba(rgba_t rgba);
+
+rgba_t mul_rgba(rgba_t color, rgba_t multiplier);
+rgba_t scale_rgba(rgba_t color, uint8_t multiplier);
+rgba_t add_rgba(rgba_t color, rgba_t add);
+rgba_t lerp_rgba(rgba_t a, rgba_t b, float t);
 rgba_t rgba_alpha_scale_f(rgba_t color, float alpha_multiplier);
 
 color2_t color2_identity();

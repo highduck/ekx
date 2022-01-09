@@ -30,127 +30,127 @@ vec3_t vec3_v(vec2_t v, float z) {
     return vec3(v.x, v.y, z);
 }
 
-vec2_t vec2_max(const vec2_t a, const vec2_t b) {
+vec2_t max_vec2(vec2_t a, vec2_t b) {
     return (vec2_t) {{MAX(a.x, b.x), MAX(a.y, b.y)}};
 }
 
-vec3_t vec3_max(const vec3_t a, const vec3_t b) {
+vec3_t max_vec3(vec3_t a, vec3_t b) {
     return (vec3_t) {{MAX(a.x, b.x), MAX(a.y, b.y), MAX(a.z, b.z)}};
 }
 
-vec4_t vec4_max(const vec4_t a, const vec4_t b) {
+vec4_t max_vec4(vec4_t a, vec4_t b) {
     return (vec4_t) {{MAX(a.x, b.x), MAX(a.y, b.y), MAX(a.z, b.z), MAX(a.w, b.w)}};
 }
 
-vec2_t vec2_min(const vec2_t a, const vec2_t b) {
+vec2_t min_vec2(vec2_t a, vec2_t b) {
     return (vec2_t) {{MIN(a.x, b.x), MIN(a.y, b.y)}};
 }
 
-vec3_t vec3_min(const vec3_t a, const vec3_t b) {
+vec3_t min_vec3(vec3_t a, vec3_t b) {
     return (vec3_t) {{MIN(a.x, b.x), MIN(a.y, b.y), MIN(a.z, b.z)}};
 }
 
-vec4_t vec4_min(const vec4_t a, const vec4_t b) {
+vec4_t min_vec4(vec4_t a, vec4_t b) {
     return (vec4_t) {{MIN(a.x, b.x), MIN(a.y, b.y), MIN(a.z, b.z), MIN(a.w, b.w)}};
 }
 
-float vec2_dot(vec2_t a, vec2_t b) {
+float dot_vec2(vec2_t a, vec2_t b) {
     return (a.x * b.x) + (a.y * b.y);
 }
 
-float vec3_dot(vec3_t a, vec3_t b) {
+float dot_vec3(vec3_t a, vec3_t b) {
     return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 }
 
-float vec4_dot(vec4_t a, vec4_t b) {
+float dot_vec4(vec4_t a, vec4_t b) {
     return (a.x * b.x) + (a.y * b.y) + (a.z * b.z) + (a.w * b.w);
 }
 
-float vec2_distance_sqr(const vec2_t a, const vec2_t b) {
-    return vec2_length_sqr(vec2_sub(a, b));
+float distance_sqr_vec2(const vec2_t a, const vec2_t b) {
+    return length_sqr_vec2(sub_vec2(a, b));
 }
 
-float vec3_distance_sqr(const vec3_t a, const vec3_t b) {
-    return vec3_length_sqr(vec3_sub(a, b));
+float distance_sqr_vec3(const vec3_t a, const vec3_t b) {
+    return length_sqr_vec3(sub_vec3(a, b));
 }
 
-float vec4_distance_sqr(const vec4_t a, const vec4_t b) {
-    return vec4_length_sqr(vec4_sub(a, b));
+float distance_sqr_vec4(const vec4_t a, const vec4_t b) {
+    return length_sqr_vec4(sub_vec4(a, b));
 }
 
-float vec2_distance(vec2_t a, vec2_t b) {
-    return vec2_length(vec2_sub(a, b));
+float distance_vec2(vec2_t a, vec2_t b) {
+    return length_vec2(sub_vec2(a, b));
 }
 
-float vec3_distance(vec3_t a, vec3_t b) {
-    return vec3_length(vec3_sub(a, b));
+float distance_vec3(vec3_t a, vec3_t b) {
+    return length_vec3(sub_vec3(a, b));
 }
 
-float vec4_distance(vec4_t a, vec4_t b) {
-    return vec4_length(vec4_sub(a, b));
+float distance_vec4(vec4_t a, vec4_t b) {
+    return length_vec4(sub_vec4(a, b));
 }
 
-float vec2_length_sqr(vec2_t a) {
-    return vec2_dot(a, a);
+float length_sqr_vec2(vec2_t a) {
+    return dot_vec2(a, a);
 }
 
-float vec3_length_sqr(vec3_t a) {
-    return vec3_dot(a, a);
+float length_sqr_vec3(vec3_t a) {
+    return dot_vec3(a, a);
 }
 
-float vec4_length_sqr(vec4_t a) {
-    return vec4_dot(a, a);
+float length_sqr_vec4(vec4_t a) {
+    return dot_vec4(a, a);
 }
 
-float vec2_length(vec2_t a) {
-    return sqrtf(vec2_length_sqr(a));
+float length_vec2(vec2_t a) {
+    return sqrtf(length_sqr_vec2(a));
 }
 
-float vec3_length(vec3_t a) {
-    return sqrtf(vec3_length_sqr(a));
+float length_vec3(vec3_t a) {
+    return sqrtf(length_sqr_vec3(a));
 }
 
-float vec4_length(vec4_t a) {
-    return sqrtf(vec4_length_sqr(a));
+float length_vec4(vec4_t a) {
+    return sqrtf(length_sqr_vec4(a));
 }
 
-vec2_t vec2_add(vec2_t a, vec2_t b) {
+vec2_t add_vec2(vec2_t a, vec2_t b) {
     return (vec2_t) {{a.x + b.x, a.y + b.y}};
 }
 
-vec3_t vec3_add(vec3_t a, vec3_t b) {
+vec3_t add_vec3(vec3_t a, vec3_t b) {
     return (vec3_t) {{a.x + b.x, a.y + b.y, a.z + b.z}};
 }
 
-vec4_t vec4_add(vec4_t a, vec4_t b) {
+vec4_t add_vec4(vec4_t a, vec4_t b) {
     return (vec4_t) {{a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w}};
 }
 
-vec2_t vec2_sub(vec2_t a, vec2_t b) {
+vec2_t sub_vec2(vec2_t a, vec2_t b) {
     return (vec2_t) {{a.x - b.x, a.y - b.y}};
 }
 
-vec3_t vec3_sub(vec3_t a, vec3_t b) {
+vec3_t sub_vec3(vec3_t a, vec3_t b) {
     return (vec3_t) {{a.x - b.x, a.y - b.y, a.z - b.z}};
 }
 
-vec4_t vec4_sub(vec4_t a, vec4_t b) {
+vec4_t sub_vec4(vec4_t a, vec4_t b) {
     return (vec4_t) {{a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w}};
 }
 
-vec2_t vec2_neg(vec2_t a) {
+vec2_t neg_vec2(vec2_t a) {
     return (vec2_t) {{-a.x, -a.y}};
 }
 
-vec3_t vec3_neg(vec3_t a) {
+vec3_t neg_vec3(vec3_t a) {
     return (vec3_t) {{-a.x, -a.y, -a.z}};
 }
 
-vec4_t vec4_neg(vec4_t a) {
+vec4_t neg_vec4(vec4_t a) {
     return (vec4_t) {{-a.x, -a.y, -a.z, -a.w}};
 }
 
-vec3_t vec3_cross(vec3_t a, vec3_t b) {
+vec3_t cross_vec3(vec3_t a, vec3_t b) {
     return (vec3_t) {
             .x = a.y * b.z - a.z * b.y,
             .y = a.z * b.x - a.x * b.z,
@@ -158,26 +158,26 @@ vec3_t vec3_cross(vec3_t a, vec3_t b) {
     };
 }
 
-vec2_t vec2_scale(vec2_t a, float s) {
+vec2_t scale_vec2(vec2_t a, float s) {
     return (vec2_t) {{a.x * s, a.y * s}};
 }
 
-vec3_t vec3_scale(vec3_t a, float s) {
+vec3_t scale_vec3(vec3_t a, float s) {
     return (vec3_t) {{a.x * s, a.y * s, a.z * s}};
 }
 
-vec4_t vec4_scale(vec4_t a, float s) {
+vec4_t scale_vec4(vec4_t a, float s) {
     return (vec4_t) {{a.x * s, a.y * s, a.z * s, a.w * s}};
 }
 
-vec2_t vec2_mul(vec2_t a, vec2_t b) {
+vec2_t mul_vec2(vec2_t a, vec2_t b) {
     vec2_t r;
     r.x = a.x * b.x;
     r.y = a.y * b.y;
     return r;
 }
 
-vec3_t vec3_mul(vec3_t a, vec3_t b) {
+vec3_t mul_vec3(vec3_t a, vec3_t b) {
     vec3_t r;
     r.x = a.x * b.x;
     r.y = a.y * b.y;
@@ -185,7 +185,7 @@ vec3_t vec3_mul(vec3_t a, vec3_t b) {
     return r;
 }
 
-vec4_t vec4_mul(vec4_t a, vec4_t b) {
+vec4_t mul_vec4(vec4_t a, vec4_t b) {
     vec4_t r;
     r.x = a.x * b.x;
     r.y = a.y * b.y;
@@ -194,42 +194,42 @@ vec4_t vec4_mul(vec4_t a, vec4_t b) {
     return r;
 }
 
-vec2_t vec2_normalize(vec2_t a) {
+vec2_t normalize_vec2(vec2_t a) {
     vec2_t result = {};
-    const float ls = vec2_length(a);
+    const float ls = length_vec2(a);
     if (ls != 0.0f) {
-        result = vec2_scale(a, 1.0f / ls);
+        result = scale_vec2(a, 1.0f / ls);
     }
     return result;
 }
 
-vec3_t vec3_normalize(vec3_t a) {
+vec3_t normalize_vec3(vec3_t a) {
     vec3_t result = {};
-    const float ls = vec3_length(a);
+    const float ls = length_vec3(a);
     if (ls != 0.0f) {
-        result = vec3_scale(a, 1.0f / ls);
+        result = scale_vec3(a, 1.0f / ls);
     }
     return result;
 }
 
-vec4_t vec4_normalize(vec4_t a) {
+vec4_t normalize_vec4(vec4_t a) {
     vec4_t result = {};
-    const float ls = vec4_length(a);
+    const float ls = length_vec4(a);
     if (ls != 0.0f) {
-        result = vec4_scale(a, 1.0f / ls);
+        result = scale_vec4(a, 1.0f / ls);
     }
     return result;
 }
 
 
-vec2_t vec2_perp(vec2_t v) {
+vec2_t perp_vec2(vec2_t v) {
     vec2_t r;
     r.x = -v.y;
     r.y = v.x;
     return r;
 }
 
-vec2_t vec2_lerp(const vec2_t a, const vec2_t b, float t) {
+vec2_t lerp_vec2(vec2_t a, vec2_t b, float t) {
     const float inv = 1.0f - t;
     return (vec2_t) {{
                              inv * a.x + t * b.x,
@@ -237,7 +237,7 @@ vec2_t vec2_lerp(const vec2_t a, const vec2_t b, float t) {
                      }};
 }
 
-vec3_t vec3_lerp(const vec3_t a, const vec3_t b, float t) {
+vec3_t lerp_vec3(vec3_t a, vec3_t b, float t) {
     const float inv = 1.0f - t;
     return (vec3_t) {{
                              inv * a.x + t * b.x,
@@ -246,7 +246,7 @@ vec3_t vec3_lerp(const vec3_t a, const vec3_t b, float t) {
                      }};
 }
 
-vec4_t vec4_lerp(const vec4_t a, const vec4_t b, float t) {
+vec4_t lerp_vec4(vec4_t a, vec4_t b, float t) {
     const float inv = 1.0f - t;
     return (vec4_t) {{
                              inv * a.x + t * b.x,
@@ -255,7 +255,6 @@ vec4_t vec4_lerp(const vec4_t a, const vec4_t b, float t) {
                              inv * a.w + t * b.w,
                      }};
 }
-
 
 bool almost_eq_vec2(const vec2_t a, const vec2_t b, const float eps) {
     return almost_eq_f32(a.x, b.x, eps) &&
@@ -276,8 +275,8 @@ bool almost_eq_vec4(const vec4_t a, const vec4_t b, const float eps) {
 }
 
 // TODO: reflect_*
-#define VEC_T_REFLECT_IMPL(T) T##_t T##_reflect(T##_t dir, T##_t normal) { \
-    return T##_sub(dir, T##_scale(normal, T##_dot(dir, normal)));                 \
+#define VEC_T_REFLECT_IMPL(T) T##_t reflect_##T(T##_t dir, T##_t normal) { \
+    return sub_##T(dir, scale_##T(normal, dot_##T(dir, normal)));          \
 }
 
 VEC_T_REFLECT_IMPL(vec2)

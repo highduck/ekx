@@ -18,18 +18,18 @@ void debugDrawPointer(Camera2D& camera) {
     float t = TimeLayer::Root->total;
     canvas_set_empty_image();
     if (im.pointerDown_) {
-        canvas_fill_circle(vec3_v(v, 12 + 2 * sinf(t * 8)), 0x00FFFF00_argb, 0x77FF0000_argb, 10);
+        canvas_fill_circle(vec3_v(v, 12 + 2 * sinf(t * 8)), ARGB(0x00FFFF00), ARGB(0x77FF0000), 10);
     }
     else {
-        canvas_fill_circle(vec3_v(v, 12 + 2 * sinf(t)), 0x0_argb, 0x77FFFFFF_argb, 10);
+        canvas_fill_circle(vec3_v(v, 12 + 2 * sinf(t)), ARGB(0x0), ARGB(0x77FFFFFF), 10);
     }
 }
 
-void drawBox(const rect_t rc, const mat3x2_t m, argb32_t color1, argb32_t color2,
-             bool cross = true, argb32_t fillColor = 0_argb) {
+void drawBox(const rect_t rc, const mat3x2_t m, rgba_t color1, rgba_t color2,
+             bool cross = true, rgba_t fillColor = COLOR_ZERO) {
 
     canvas_set_empty_image();
-    if (fillColor != argb32_t::zero) {
+    if (fillColor.value) {
         canvas_save_matrix();
         canvas.matrix[0] = m;
         canvas_fill_rect(rc, fillColor);
@@ -63,15 +63,15 @@ void debugDrawHitTarget(Camera2D& camera) {
     }
     auto* display = target.tryGet<Display2D>();
     if (display && display->drawable) {
-        drawBox(display->getBounds(), matrix, 0xFF000000_argb, argb32_t::one, true);
+        drawBox(display->getBounds(), matrix, COLOR_BLACK, COLOR_WHITE, true);
     }
     auto* bounds = target.tryGet<Bounds2D>();
     if (bounds) {
         if (bounds->hitArea) {
-            drawBox(bounds->rect, matrix, 0xFF99FF00_argb, argb32_t::one, false);
+            drawBox(bounds->rect, matrix, RGB(0x99FF00), COLOR_WHITE, false);
         }
         if (bounds->scissors) {
-            drawBox(bounds->rect, matrix, 0xFFFFFF00_argb, argb32_t::one, false);
+            drawBox(bounds->rect, matrix, RGB(0xFFFF00), COLOR_WHITE, false);
         }
     }
 }
@@ -113,13 +113,13 @@ void drawFills(Camera2D& camera) {
             nullptr,
             [](Display2D& display, const WorldTransform2D* transform) {
                 if (display.drawable) {
-                    canvas_fill_rect(display.getBounds(), 0x33FFFFFF_argb);
-                    drawBox(display.getBounds(), transform->matrix, argb32_t::black, argb32_t::one,
-                            false, 0x33FFFFFF_argb);
+                    canvas_fill_rect(display.getBounds(), ARGB(0x33FFFFFF));
+                    drawBox(display.getBounds(), transform->matrix, COLOR_BLACK, COLOR_WHITE,
+                            false, ARGB(0x33FFFFFF));
                 } else {
                     const auto v = vec2_transform(vec2(0, 0), transform->matrix);
-                    canvas_fill_circle(vec3_v(v, 20.0f), 0xFFFF0000_argb,
-                                        0x77FF0000_argb, 7);
+                    canvas_fill_circle(vec3_v(v, 20.0f), ARGB(0xFFFF0000),
+                                        ARGB(0x77FF0000), 7);
                 }
             });
 
@@ -128,14 +128,14 @@ void drawFills(Camera2D& camera) {
             nullptr,
             [](Bounds2D& bounds, const WorldTransform2D* transform) {
                 if (bounds.scissors) {
-                    drawBox(bounds.rect, transform->matrix, 0xFFFFFF00_argb, argb32_t::one, true,
-                            0x55FFFF00_argb);
+                    drawBox(bounds.rect, transform->matrix, ARGB(0xFFFFFF00), COLOR_WHITE, true,
+                            ARGB(0x55FFFF00));
                 } else if (bounds.hitArea) {
-                    drawBox(bounds.rect, transform->matrix, 0xFF00FF00_argb, argb32_t::one, true,
-                            0x5500FF00_argb);
+                    drawBox(bounds.rect, transform->matrix, ARGB(0xFF00FF00), COLOR_WHITE, true,
+                            ARGB(0x5500FF00));
                 } else if (bounds.culling) {
-                    drawBox(bounds.rect, transform->matrix, 0xFF00FFFF_argb, argb32_t::one, true,
-                            0x5500FFFF_argb);
+                    drawBox(bounds.rect, transform->matrix, ARGB(0xFF00FFFF), COLOR_WHITE, true,
+                            ARGB(0x5500FFFF));
                 }
             });
 
@@ -152,9 +152,9 @@ void drawOcclusion(Camera2D& camera) {
                                    [cameraRect](const Bounds2D& bounds, const WorldTransform2D* transform) {
                                        const rect_t worldRect = rect_transform(bounds.rect,transform->matrix);
                                        const bool occluded = !rect_overlaps(worldRect, cameraRect);
-                                       const auto worldColor = occluded ? 0x77FF0000_argb : 0x7700FF00_argb;
+                                       const auto worldColor = occluded ? ARGB(0x77FF0000) : ARGB(0x7700FF00);
                                        drawBox(worldRect, mat3x2_identity(), worldColor, worldColor, false);
-                                       const auto boundsColor = occluded ? 0x77770000_argb : 0x77007700_argb;
+                                       const auto boundsColor = occluded ? ARGB(0x77770000) : ARGB(0x77007700);
                                        drawBox(bounds.rect, transform->matrix, boundsColor, boundsColor, false);
                                    });
     canvas_restore_transform();
@@ -162,7 +162,7 @@ void drawOcclusion(Camera2D& camera) {
 
 void debugCameraGizmo(Camera2D& camera) {
     auto rc = rect_expand(camera.worldRect, -10.0f);
-    drawBox(rc, mat3x2_identity(), 0xFFFFFFFF_argb, 0xFF000000_argb);
+    drawBox(rc, mat3x2_identity(), COLOR_WHITE, COLOR_BLACK);
 
     {
         // it's not correct because:
@@ -170,14 +170,14 @@ void debugCameraGizmo(Camera2D& camera) {
         // - viewport's MVP matrix
         // TODO: make display-space debug drawing for all viewports via inspector
         const auto& vp = camera.viewportNode.get().get<Viewport>();
-        canvas_fill_rect(vp.output.safeRect, 0x77FF00FF_argb);
-        canvas_quad_color(0, 0, vp.options.baseResolution.x, vp.options.baseResolution.y, 0x7700FFFF_argb);
+        canvas_fill_rect(vp.output.safeRect, ARGB(0x77FF00FF));
+        canvas_quad_color(0, 0, vp.options.baseResolution.x, vp.options.baseResolution.y, ARGB(0x7700FFFF));
     }
     auto v = camera.screenRect.position + camera.relativeOrigin * camera.screenRect.size;
     v = vec2_transform(v, camera.screenToWorldMatrix);
-    canvas_fill_circle(vec3_v(v, 10.0f), 0x00FFFFFF_argb, 0x44FFFFFF_argb, 7);
-    canvas_line_ex(v - vec2(20, 0), v + vec2(20, 0), 0xFF000000_argb, 0xFFFFFFFF_argb, 1, 3);
-    canvas_line_ex(v - vec2(0, 20), v + vec2(0, 20), 0xFF000000_argb, 0xFFFFFFFF_argb, 3, 1);
+    canvas_fill_circle(vec3_v(v, 10.0f), ARGB(0x00FFFFFF), ARGB(0x44FFFFFF), 7);
+    canvas_line_ex(v - vec2(20, 0), v + vec2(20, 0), COLOR_BLACK, COLOR_WHITE, 1, 3);
+    canvas_line_ex(v - vec2(0, 20), v + vec2(0, 20), COLOR_BLACK, COLOR_WHITE, 3, 1);
 }
 
 void Camera2D::drawGizmo(Camera2D& camera) {

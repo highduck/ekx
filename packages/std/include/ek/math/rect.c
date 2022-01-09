@@ -42,8 +42,8 @@ vec2_t rect_center(rect_t rc) {
 }
 
 rect_t rect_clamp_bounds(const rect_t a, const rect_t b) {
-    return rect_minmax(vec2_max(a.position, b.position),
-                       vec2_min(rect_rb(a), rect_rb(b)));
+    return rect_minmax(max_vec2(a.position, b.position),
+                       min_vec2(rect_rb(a), rect_rb(b)));
 }
 
 recti_t recti_clamp_bounds(const recti_t a, const recti_t b) {
@@ -55,8 +55,8 @@ recti_t recti_clamp_bounds(const recti_t a, const recti_t b) {
 }
 
 rect_t rect_combine(const rect_t a, const rect_t b) {
-    return rect_minmax(vec2_min(a.position, b.position),
-                       vec2_max(rect_rb(a), rect_rb(b)));
+    return rect_minmax(min_vec2(a.position, b.position),
+                       max_vec2(rect_rb(a), rect_rb(b)));
 }
 
 recti_t recti_combine(const recti_t a, const recti_t b) {

@@ -2,7 +2,6 @@
 //#define DOCTEST_CONFIG_NO_EXCEPTIONS
 #include <doctest.h>
 
-#include <ek/math/Color32.test.hpp>
 #include <ek/serialize/serialize.test.hpp>
 #include "Path.test.hpp"
 #include <ek/ds/Array.test.hpp>

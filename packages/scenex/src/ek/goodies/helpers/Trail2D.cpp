@@ -35,7 +35,7 @@ void Trail2D::update_position(vec2_t newPosition) {
     //nextPosition.x += FastMath.Range(-10f, 10f);
     //nextPosition.y += FastMath.Range(-10f, 10f);
 //    auto pos = lastPosition;
-    const auto distanceSqr = vec2_length_sqr(newPosition - lastPosition);
+    const auto distanceSqr = length_sqr_vec2(newPosition - lastPosition);
 
 //    direction *= 1.0f / distance;
 
@@ -113,18 +113,18 @@ void TrailRenderer2D::draw() {
         const auto p = nodeArray[node_idx].position;
         vec2_t perp = {};
         if (i > 0/* node_idx > begin */) {
-            perp = vec2_normalize(nodeArray[node_idx - 1].position - p);
+            perp = normalize_vec2(nodeArray[node_idx - 1].position - p);
             if (i + 1 < columns) {
-                perp = vec2_normalize(vec2_lerp(perp, vec2_normalize(p - nodeArray[node_idx + 1].position), 0.5f));
+                perp = normalize_vec2(lerp_vec2(perp, normalize_vec2(p - nodeArray[node_idx + 1].position), 0.5f));
             }
         } else if (i + 1 < columns) {
-            perp = vec2_normalize(p - nodeArray[node_idx + 1].position);
+            perp = normalize_vec2(p - nodeArray[node_idx + 1].position);
         }
-        perp = vec2_perp(perp);
+        perp = perp_vec2(perp);
 
         const auto energy = nodeArray[node_idx].energy;
         const auto easedEnergy = easing::P2_OUT.calculate(energy);
-        const auto r = f32_lerp(minWidth, width, easedEnergy);
+        const auto r = lerp_f32(minWidth, width, easedEnergy);
         const auto nodeScale = nodeArray[node_idx].scale;
         perp *= nodeScale * r;
 

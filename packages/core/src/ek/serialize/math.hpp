@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ek/serialize/serialize.hpp>
-#include <ek/math/Color32.hpp>
+#include "core.hpp"
+#include <ek/math.h>
 
 namespace ek {
 
@@ -26,8 +26,6 @@ DEF_POD(mat4_t);
 DEF_POD(rgba_t);
 DEF_POD(color2_t);
 DEF_POD(color2f_t);
-
-DEF_POD(argb32_t);
 
 #undef DEF_POD
 
