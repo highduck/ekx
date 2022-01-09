@@ -18,10 +18,10 @@ void debugDrawPointer(Camera2D& camera) {
     float t = TimeLayer::Root->total;
     canvas_set_empty_image();
     if (im.pointerDown_) {
-        canvas_fill_circle(circle(v.x, v.y, 12 + 2 * sinf(t * 8)), 0x00FFFF00_argb, 0x77FF0000_argb, 10);
+        canvas_fill_circle(vec3_v(v, 12 + 2 * sinf(t * 8)), 0x00FFFF00_argb, 0x77FF0000_argb, 10);
     }
     else {
-        canvas_fill_circle(circle(v.x, v.y, 12 + 2 * sinf(t)), 0x0_argb, 0x77FFFFFF_argb, 10);
+        canvas_fill_circle(vec3_v(v, 12 + 2 * sinf(t)), 0x0_argb, 0x77FFFFFF_argb, 10);
     }
 }
 
@@ -118,7 +118,7 @@ void drawFills(Camera2D& camera) {
                             false, 0x33FFFFFF_argb);
                 } else {
                     const auto v = vec2_transform(vec2(0, 0), transform->matrix);
-                    canvas_fill_circle(circle(v.x, v.y, 20.0f), 0xFFFF0000_argb,
+                    canvas_fill_circle(vec3_v(v, 20.0f), 0xFFFF0000_argb,
                                         0x77FF0000_argb, 7);
                 }
             });
@@ -175,7 +175,7 @@ void debugCameraGizmo(Camera2D& camera) {
     }
     auto v = camera.screenRect.position + camera.relativeOrigin * camera.screenRect.size;
     v = vec2_transform(v, camera.screenToWorldMatrix);
-    canvas_fill_circle(circle(v.x, v.y, 10.0f), 0x00FFFFFF_argb, 0x44FFFFFF_argb, 7);
+    canvas_fill_circle(vec3_v(v, 10.0f), 0x00FFFFFF_argb, 0x44FFFFFF_argb, 7);
     canvas_line_ex(v - vec2(20, 0), v + vec2(20, 0), 0xFF000000_argb, 0xFFFFFFFF_argb, 1, 3);
     canvas_line_ex(v - vec2(0, 20), v + vec2(0, 20), 0xFF000000_argb, 0xFFFFFFFF_argb, 3, 1);
 }

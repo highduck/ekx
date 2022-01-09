@@ -33,7 +33,7 @@ void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
         float oy = sinf(r * 3.14f * 2 + 3.14f);
         float R = (sh / 10.0f) *
                   (1.8f - 0.33f * speed - 0.33f * ((cosf(r * 3.14f) + 2.0f * cosf(r * 3.14f * 2 + 3.14f))));
-        circle_t circ = circle(cx + ox * sw, cy - 2.0f * sh + oy * sh, R);
+        vec3_t circ = vec3(cx + ox * sw, cy - 2.0f * sh + oy * sh, R);
         canvas_fill_circle(circ, 0xFFFFFFFF_argb, 0xFFFFFFFF_argb, 16);
     }
 }

@@ -284,7 +284,7 @@ void ShapeDecoder::flush_commands(const Array<RenderCommand>& edges, Array<Shape
 }
 
 void ShapeDecoder::extend(vec2_t p, float r) {
-    bounds_builder_ = brect_extend_circle(bounds_builder_, circle(p.x, p.y, r));
+    bounds_builder_ = brect_extend_circle(bounds_builder_, vec3_v(p, r));
 }
 
 bool ShapeDecoder::empty() const {

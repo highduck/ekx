@@ -26,6 +26,10 @@ vec4_t vec4_v(vec3_t v, float w) {
     return vec4(v.x, v.y, v.z, w);
 }
 
+vec3_t vec3_v(vec2_t v, float z) {
+    return vec3(v.x, v.y, z);
+}
+
 vec2_t vec2_max(const vec2_t a, const vec2_t b) {
     return (vec2_t) {{MAX(a.x, b.x), MAX(a.y, b.y)}};
 }

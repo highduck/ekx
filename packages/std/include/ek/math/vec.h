@@ -25,6 +25,10 @@ typedef union vec3_t {
         float z;
     };
     float data[3];
+    struct {
+        vec2_t xy;
+        float _z;
+    };
 #ifdef __cplusplus
 
     inline float& operator[](const int index) { return data[index]; }
@@ -111,6 +115,7 @@ vec3i_t vec3i(int x, int y, int z);
 vec2_t vec2(float x, float y);
 vec3_t vec3(float x, float y, float z);
 vec4_t vec4(float x, float y, float z, float w);
+vec3_t vec3_v(vec2_t v, float z);
 vec4_t vec4_v(vec3_t v, float w);
 
 vec2_t vec2_max(vec2_t a, vec2_t b);

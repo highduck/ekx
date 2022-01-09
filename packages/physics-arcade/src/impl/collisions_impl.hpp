@@ -228,12 +228,12 @@ sweep_test_result_t intersect_ray_rect(const rect_t rc, const vec2_t origin, con
 }
 
 // d = v1 - v0
-sweep_test_result_t sweep_circles(const circle_t c0,
-                                  const circle_t c1,
+sweep_test_result_t sweep_circles(const vec3_t c0,
+                                  const vec3_t c1,
                                   const vec2_t delta) {
     sweep_test_result_t result;
-    const vec2_t s = c1.center - c0.center;
-    const float r = c1.radius + c0.radius;
+    const vec2_t s = c1.xy - c0.xy;
+    const float r = c1.z + c0.z;
     const float c = vec2_dot(s, s) - r * r;
     if (c < 0.0f) {
         result.hit = true;
@@ -259,7 +259,7 @@ sweep_test_result_t sweep_circles(const circle_t c0,
 
 // d = box_v - c_v
 
-sweep_test_result_t sweep_circle_rect(const circle_t circle,
+sweep_test_result_t sweep_circle_rect(const vec3_t circle,
                                       const vec2_t circle_delta,
                                       const rect_t rect,
                                       const vec2_t rect_delta) {
@@ -282,9 +282,9 @@ sweep_test_result_t sweep_circle_rect(const circle_t circle,
 
 //    float x = circle.center.x;
 //    float y = circle.center.y;
-    vec2_t origin = circle.center;
+    vec2_t origin = circle.xy;
     vec2_t dir = rect_delta - circle_delta;
-    float r = circle.radius;
+    float r = circle.z;
 //    float dx = rect_delta.x - circle_delta.x;
 //    float dy = rect_delta.y - circle_delta.y;
     vec2_t cp = {};
@@ -310,15 +310,15 @@ sweep_test_result_t sweep_circle_rect(const circle_t circle,
         t0 = fmin(ii.u0, t0);
     }
 
-    circle_t origin_circle{origin, 0};
-    ii = sweep_circles(origin_circle, {rect.x, rect.y, r}, dir);
+    vec3_t origin_circle = vec3_v(origin, 0);
+    ii = sweep_circles(origin_circle, vec3_v(rect.position, r), dir);
     if (ii.hit && ii.u0 < t0) {
         t0 = ii.u0;
         cp = rect.position;
         corner = true;
     }
 
-    ii = sweep_circles(origin_circle, {RECT_R(rect), rect.y, r}, dir);
+    ii = sweep_circles(origin_circle, vec3(RECT_R(rect), rect.y, r), dir);
     if (ii.hit && ii.u0 < t0) {
         t0 = ii.u0;
         cp.x = RECT_R(rect);
@@ -326,7 +326,7 @@ sweep_test_result_t sweep_circle_rect(const circle_t circle,
         corner = true;
     }
 
-    ii = sweep_circles(origin_circle, {rect.x, RECT_B(rect), r}, dir);
+    ii = sweep_circles(origin_circle, vec3(rect.x, RECT_B(rect), r), dir);
     if (ii.hit && ii.u0 < t0) {
         t0 = ii.u0;
         cp.x = rect.x;
@@ -334,7 +334,7 @@ sweep_test_result_t sweep_circle_rect(const circle_t circle,
         corner = true;
     }
 
-    ii = sweep_circles(origin_circle, {rect_rb(rect), r}, dir);
+    ii = sweep_circles(origin_circle, vec3_v(rect_rb(rect), r), dir);
     if (ii.hit && ii.u0 < t0) {
         t0 = ii.u0;
         cp = rect_rb(rect);

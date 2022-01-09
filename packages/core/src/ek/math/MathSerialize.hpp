@@ -24,7 +24,6 @@ DEF_POD(mat3x2_t);
 DEF_POD(mat3_t);
 DEF_POD(mat4_t);
 DEF_POD(rgba_t);
-DEF_POD(circle_t);
 DEF_POD(color2_t);
 DEF_POD(color2f_t);
 

@@ -368,12 +368,12 @@ void canvas_fill_rect(const rect_t rc, rgba_t color) {
 }
 
 // This function should be moved to the dedicated `indexed draw` mode
-void canvas_fill_circle(const circle_t circle, rgba_t inner_color, rgba_t outer_color, int segments) {
+void canvas_fill_circle(const vec3_t circle, rgba_t inner_color, rgba_t outer_color, int segments) {
     canvas_triangles(1 + segments, 3 * segments);
 
     const float x = circle.x;
     const float y = circle.y;
-    const float r = circle.r;
+    const float r = circle.z;
 
     const rgba_t co = canvas.color[0].offset;
     const rgba_t inner_cm = rgba_mul(canvas.color[0].scale, inner_color);
@@ -469,10 +469,10 @@ void canvas_stroke_rect(const rect_t rc, rgba_t color, float lineWidth) {
     canvas_line(vec2(rc.x, b), vec2(rc.x, rc.y), color, lineWidth);
 }
 
-void canvas_stroke_circle(const circle_t circle, rgba_t color, float lineWidth, int segments) {
+void canvas_stroke_circle(const vec3_t circle, rgba_t color, float lineWidth, int segments) {
     const float x = circle.x;
     const float y = circle.y;
-    const float r = circle.r;
+    const float r = circle.z;
 
     const float da = CANVAS_PI_2 / (float) segments;
     float a = 0.0f;

@@ -30,13 +30,13 @@ sweep_test_result_t
 intersect_ray_rect(rect_t rc, vec2_t origin, vec2_t dir);
 
 sweep_test_result_t
-sweep_circles(circle_t c0, circle_t c1, vec2_t delta);
+sweep_circles(vec3_t c0, vec3_t c1, vec2_t delta);
 
 sweep_test_result_t
 sweep_rects(rect_t a0, rect_t a1, rect_t b0, rect_t b1);
 
 sweep_test_result_t
-sweep_circle_rect(circle_t circle, vec2_t circle_delta, rect_t rect, vec2_t rect_delta);
+sweep_circle_rect(vec3_t circle, vec2_t circle_delta, rect_t rect, vec2_t rect_delta);
 
 /*** Tests ***/
 bool test_rect_triangle(rect_t rect, vec2_t v0, vec2_t v1, vec2_t v2);

@@ -229,7 +229,7 @@ void canvas_quad_color4(float x, float y, float w, float h, rgba_t c1, rgba_t c2
 
 void canvas_fill_rect(rect_t rc, rgba_t color);
 
-void canvas_fill_circle(circle_t circle, rgba_t inner_color, rgba_t outer_color, int segments);
+void canvas_fill_circle(vec3_t circle, rgba_t inner_color, rgba_t outer_color, int segments);
 
 void canvas_line_ex(vec2_t start, vec2_t end, rgba_t color1, rgba_t color2, float lineWidth1, float lineWidth2);
 
@@ -242,7 +242,7 @@ void canvas_line_arc(float x, float y, float r,
 
 void canvas_stroke_rect(rect_t rc, rgba_t color, float lineWidth);
 
-void canvas_stroke_circle(circle_t circle, rgba_t color, float lineWidth, int segments);
+void canvas_stroke_circle(vec3_t circle, rgba_t color, float lineWidth, int segments);
 
 void canvas_setup(void);
 
