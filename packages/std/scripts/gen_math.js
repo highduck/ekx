@@ -1,2 +1,2 @@
 require("./gen_math_vec_test");
-require("./gen_math_hpp");
+require("./gen_math_vec_hpp");

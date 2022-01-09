@@ -7,14 +7,18 @@
 #include <ek/math/Easings.hpp>
 #include <ek/math/Random.hpp>
 #include <ek/scenex/base/TimeLayer.hpp>
+#include <ek/math.h>
 
 namespace ek {
+
+float ease_back5(float t) {
+    return ease_back(t, 5.0f);
+}
 
 void BubbleText::updateAll() {
     float dt = TimeLayer::HUD->dt;
     const float time_max = 2.0f;
     const float delta_y = -100.0f;
-    const EaseOut<Back> back_out_5{Back{5.0f}};
 
     for (auto e: ecs::view_backward<BubbleText>()) {
         auto& state = e.get<BubbleText>();
@@ -37,7 +41,7 @@ void BubbleText::updateAll() {
         auto off = state.offset;
         if (r < 0.5f) {
             sct = r * 2.0f;
-            sc = back_out_5.calculate(easing::P3_OUT.calculate(sct));
+            sc = ease_out(ease_p3_out(sct), ease_back5);
             off = state.offset * easing::P3_OUT.calculate(sct);
         }
 

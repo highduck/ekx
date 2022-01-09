@@ -22,7 +22,7 @@ export class FlashAsset extends Asset {
 
     async build() {
         makeDirs(path.join(this.owner.cache, this.name));
-        const configPath = path.join(this.owner.cache, this.name, "_config.xml");
+        const configPath = path.join(this.owner.cache, this.name, "_flash_export_config.xml");
         const sgOutput = path.join(this.owner.output, this.name + ".sg");
         const imagesOutput = path.join(this.owner.cache, this.name, this.targetAtlas);
         const atlasAsset = this.owner.find(MultiResAtlasAsset.typeName, this.targetAtlas) as MultiResAtlasAsset;

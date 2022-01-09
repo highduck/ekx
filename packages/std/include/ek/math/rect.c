@@ -178,8 +178,9 @@ rect_t brect_get_rect(const brect_t brc) {
     return r;
 }
 
+// TODO: simple test
 bool brect_is_empty(brect_t bb) {
-    return bb.x1 > bb.x0 && bb.y1 > bb.y0;
+    return bb.x0 >= bb.x1 || bb.y0 >= bb.y1;
 }
 
 #ifdef __cplusplus

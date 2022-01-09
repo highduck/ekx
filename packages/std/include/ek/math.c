@@ -15,3 +15,4 @@ extern "C" {
 #include "math/color.c"
 #include "math/quat.c"
 #include "math/rect.c"
+#include "math/easing.c"

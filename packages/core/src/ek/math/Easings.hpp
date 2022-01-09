@@ -64,7 +64,7 @@ struct Expo {
 
     [[nodiscard]]
     float calculate(float t) const {
-        return t <= 0.0f ? 0.0f : ::pow(2.0f, 10.0f * (t - 1.0f));
+        return t <= 0.0f ? 0.0f : powf(2.0f, 10.0f * (t - 1.0f));
     }
 };
 
@@ -81,7 +81,7 @@ struct Polynomial {
 
     [[nodiscard]]
     float calculate(float t) const {
-        return ::pow(t, degree);
+        return powf(t, degree);
     }
 };
 

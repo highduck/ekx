@@ -12,10 +12,10 @@ struct SpriteData {
     String name;
 
     // physical rect
-    rect_t rc;
+    rect_t rc = {};
 
     // rect in source image
-    recti_t source;
+    recti_t source = {};
 
     // reference image;
     ek_bitmap bitmap{0, 0, nullptr};

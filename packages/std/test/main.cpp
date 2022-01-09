@@ -7,5 +7,4 @@
 #include "rnd_test.h"
 #include "string_test.h"
 #include "math/math_test.h"
-#include "math/math_vec_test.h"
 

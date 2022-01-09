@@ -16,6 +16,7 @@
 #include "math/mat.h"
 #include "math/quat.h"
 #include "math/rect.h"
+#include "math/easing.h"
 
 #ifdef __cplusplus
 extern "C" {

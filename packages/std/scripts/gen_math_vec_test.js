@@ -1,19 +1,23 @@
-function f32_trunc(x) {
-    return ((x * 10) | 0) / 10.0;
+function f32_trunc(x, digits_after_point) {
+    const mult = Math.pow(10, digits_after_point);
+    return Math.round(x * mult) / mult;
 }
 
-function f32_literal(x) {
-    if ((x | 0) === x) return `${x}.0f`;
-    return x + "f";
-}
-
-function generate_vec_test_suite(name, fields) {
+function generate_vec_test_suite(name, fields, T) {
     const name_t = name + "_t";
     const a_values = [];
     const b_values = [];
+    const digits_after_point = T === "float" ? 6 : 0;
     for (let i = 0; i < fields.length; ++i) {
-        a_values[i] = f32_trunc(100 * Math.random() - 50);
-        b_values[i] = f32_trunc(100 * Math.random() - 50);
+        a_values[i] = f32_trunc(100 * Math.random() - 50, digits_after_point);
+        b_values[i] = f32_trunc(100 * Math.random() - 50, digits_after_point);
+    }
+
+    function number_literal(x) {
+        if (T === "float") {
+            return (x | 0) === x ? `${x}.0f` : `${x}f`;
+        }
+        return `${x | 0}`;
     }
 
     function list(pattern, del = ", ") {
@@ -25,18 +29,18 @@ function generate_vec_test_suite(name, fields) {
     }
 
     function a() {
-        return `${name_t} a = ${name}(${a_values.map(f32_literal).join(" ,")});`;
+        return `${name_t} a = ${name}(${a_values.map(number_literal).join(" ,")});`;
     }
 
     function b() {
-        return `${name_t} b = ${name}(${b_values.map(f32_literal).join(" ,")});`;
+        return `${name_t} b = ${name}(${b_values.map(number_literal).join(" ,")});`;
     }
 
     function checks(op) {
         let values = [];
         for (let i = 0; i < fields.length; ++i) {
             const field = fields[i];
-            values.push(`   CHECK_NEAR_EQ(r.${field}, ${f32_literal(op(a_values, b_values, i))});`);
+            values.push(`   CHECK_NEAR_EQ(r.${field}, ${number_literal(f32_trunc(op(a_values, b_values, i), digits_after_point))});`);
         }
         return values.join("\n");
     }
@@ -107,7 +111,7 @@ function generate_vec_test_suite(name, fields) {
                 `TEST_CASE("${name}_${cop}") {
 ${a()}
 ${b()}
-    ${name_t} r = ${name}_${cop}(${arg_list});
+    ${name_t} r = ${cop}_${name}(${arg_list});
 ${checks(simple_test._eval)}
 }`);
         }
@@ -144,9 +148,12 @@ let code = `
 #include "math_test_common.h"
 
 `;
-code += generate_vec_test_suite("vec2", ["x", "y"]);
-code += generate_vec_test_suite("vec3", ["x", "y", "z"]);
-code += generate_vec_test_suite("vec4", ["x", "y", "z", "w"]);
+code += generate_vec_test_suite("vec2", ["x", "y"], "float");
+code += generate_vec_test_suite("vec3", ["x", "y", "z"], "float");
+code += generate_vec_test_suite("vec4", ["x", "y", "z", "w"], "float");
+// code += generate_vec_test_suite("vec2i", ["x", "y"], "int");
+// code += generate_vec_test_suite("vec3i", ["x", "y", "z"], "int");
+// code += generate_vec_test_suite("vec4i", ["x", "y", "z", "w"], "int");
 code += "#endif // MATH_VEC_TEST_H\n";
 
 require("fs").writeFileSync("test/math/math_vec_test.h", code);
