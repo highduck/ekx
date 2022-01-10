@@ -2,7 +2,7 @@
 
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/canvas.h>
-#include <ek/math/Easings.hpp>
+
 
 namespace ek {
 
@@ -123,7 +123,7 @@ void TrailRenderer2D::draw() {
         perp = perp_vec2(perp);
 
         const auto energy = nodeArray[node_idx].energy;
-        const auto easedEnergy = easing::P2_OUT.calculate(energy);
+        const auto easedEnergy = ease_p2_out(energy);
         const auto r = lerp_f32(minWidth, width, easedEnergy);
         const auto nodeScale = nodeArray[node_idx].scale;
         perp *= nodeScale * r;

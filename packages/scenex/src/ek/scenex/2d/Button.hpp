@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ek/math/Easings.hpp>
 #include <ek/util/Signal.hpp>
 #include <ek/math.h>
 #include "MovieClip.hpp"
@@ -19,9 +18,6 @@ struct ButtonSkin {
     float overSpeedBackward = 8.0f;
     float pushSpeedForward = 8.0f;
     float pushSpeedBackward = 8.0f;
-
-    //const basic_ease_t& over_ease{easing::P3_OUT};
-    //const basic_ease_t& push_ease{easing::P3_OUT};
 };
 
 struct Button {

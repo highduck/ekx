@@ -6,7 +6,7 @@
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
-#include <ek/math/Easings.hpp>
+
 #include <ek/util/ServiceLocator.hpp>
 #include <ek/scenex/base/Tween.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
@@ -38,8 +38,8 @@ void on_popup_opening(EntityApi e) {
 
 void on_popup_open_animation(float t, EntityApi e) {
     t = saturate(t);
-    float scale = easing::BACK_OUT.calculate(t);
-    float fly = easing::P3_OUT.calculate(t);
+    float scale = ease_back_out(t);
+    float fly = ease_p3_out(t);
     auto& transform = e.get<Transform2D>();
     transform.setScale(scale);
     transform.setY(animationVertDistance * (1.0f - fly));
@@ -76,8 +76,8 @@ void on_popup_closed(EntityApi e) {
 
 void on_popup_close_animation(float t, EntityApi e) {
     t = saturate(1 - t);
-    float scale = easing::BACK_OUT.calculate(t);
-    float fly = easing::P3_OUT.calculate(t);
+    float scale = ease_back_out(t);
+    float fly = ease_p3_out(t);
     auto& transform = e.get<Transform2D>();
     transform.setScale(scale);
     transform.setY(animationVertDistance * (fly - 1.0f));

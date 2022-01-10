@@ -63,7 +63,7 @@ inline static float p4(float t) { return t * t * t * t; }
 inline static float p5(float t) { return t * t * t * t * t; }
 
 inline static float sine(float t) {
-    return t < 1.0f ? (1.0f - cosf(t * MATH_TAU)) : 1.0f;
+    return t < 1.0f ? (1.0f - cosf(0.5f * MATH_PI * t)) : 1.0f;
 }
 
 inline static float step(float t) {

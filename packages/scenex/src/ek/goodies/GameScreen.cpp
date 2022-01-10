@@ -1,6 +1,6 @@
 #include "GameScreen.hpp"
 
-#include <ek/math/Easings.hpp>
+
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/log.h>
@@ -224,7 +224,7 @@ void GameScreenManager::defaultTransitionEffect(GameScreenManager* gsm) {
     if (prev) {
         const auto t = state.getPrevProgress();
         auto& transform = prev.get<Transform2D>();
-        float r = easing::P2_IN.calculate(t);
+        float r = ease_p2_in(t);
 
         transform.color.scale.a = unorm8_f32_clamped(1.0f - r);
         //transform.color.setAdditive(r * r);
@@ -236,7 +236,7 @@ void GameScreenManager::defaultTransitionEffect(GameScreenManager* gsm) {
     if (next) {
         const auto t = state.getNextProgress();
         auto& transform = next.get<Transform2D>();
-        float r = easing::P2_OUT.calculate(t);
+        float r = ease_p2_out(t);
         transform.color.scale.a = unorm8_f32_clamped(r);
         //transform.color.offset.a = unorm8_f32_clamped(((1.0f - r) * (1.0f - r)));
         float s = 1.0f + (1.0f - r) * 0.3f;

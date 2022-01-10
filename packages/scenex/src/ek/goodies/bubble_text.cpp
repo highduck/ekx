@@ -4,7 +4,7 @@
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/SceneFactory.hpp>
-#include <ek/math/Easings.hpp>
+
 #include <ek/math/Random.hpp>
 #include <ek/scenex/base/TimeLayer.hpp>
 #include <ek/math.h>
@@ -12,7 +12,7 @@
 namespace ek {
 
 float ease_back5(float t) {
-    return ease_back(t, 5.0f);
+    return ease_back(t, 5);
 }
 
 void BubbleText::updateAll() {
@@ -38,16 +38,16 @@ void BubbleText::updateAll() {
         float r = saturate(state.time / time_max);
         float sc = 1.0f;
         float sct;
-        auto off = state.offset;
+        vec2_t off = state.offset;
         if (r < 0.5f) {
             sct = r * 2.0f;
             sc = ease_out(ease_p3_out(sct), ease_back5);
-            off = state.offset * easing::P3_OUT.calculate(sct);
+            off = state.offset * ease_p3_out(sct);
         }
 
         auto& transform = e.get<Transform2D>();
         transform.setScale(sc);
-        vec2_t fly_pos = {0.0f, delta_y * easing::P3_OUT.calculate(r)};
+        vec2_t fly_pos = vec2(0, delta_y * ease_p3_out(r));
         transform.setPosition(state.start + off + fly_pos);
         transform.color.scale.a = unorm8_f32_clamped(1.0f - (r * r * r));
         transform.color.offset.a = unorm8_f32_clamped(r * r * r);

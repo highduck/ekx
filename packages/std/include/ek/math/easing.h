@@ -28,6 +28,16 @@ DECLARE_EASE_FUNC(expo)
 
 #undef DECLARE_EASE_FUNC
 
+// http://robertpenner.com/easing/
+
+inline static float smoothstep(float x) {
+    return x * x * (3.0f - 2.0f * x);
+}
+
+inline static float smootherstep(float x) {
+    return x * x * x * (x * (x * 6 - 15) + 10);
+}
+
 inline static float ease_back(float t, float overshoot) {
     return t >= 1.0f ? 1.0f : t * t * ((overshoot + 1.0f) * t - overshoot);
 }
