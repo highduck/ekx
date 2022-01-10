@@ -30,7 +30,7 @@
     "chalk": "^4.1.2",
     "cmake-build": "0.0.4",
     "glob": "^7.2.0",
-    "http-server": "^14.0.0",
+    "http-server": "^14.1.0",
     "mustache": "^4.2.0",
     "node-emoji": "^1.11.0",
     "plist": "^3.0.4",
