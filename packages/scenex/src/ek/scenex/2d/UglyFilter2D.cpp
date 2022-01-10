@@ -23,10 +23,7 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
             canvas.matrix[0] = parentMatrix;
             canvas.color[0] = parentColor;
 
-            canvas_concat_color({
-                                        rgba_4u(0, 0, 0, filter.color.a),
-                                        rgba_4u(filter.color.r, filter.color.g, filter.color.b, 0)
-                                });
+            canvas_concat_color(color2_tint(filter.color, 255u));
             canvas_translate(filter.offset);
 
             if (localTransform) {
@@ -39,10 +36,7 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
         } else if (filter.type == SGFilterType::Glow) {
             processing = true;
             canvas.color[0] = parentColor;
-            canvas_concat_color({
-                                        rgba_4u(0, 0, 0, filter.color.a),
-                                        rgba_4u(filter.color.r, filter.color.g, filter.color.b, 0)
-                                });
+            canvas_concat_color(color2_tint(filter.color, 255u));
 
             // begin 8 to inf
             const int _r = (int) (8 * fmaxf((ceilf((filter.blur.x + filter.blur.y)) / 2.0f), 1.0f));
@@ -53,7 +47,7 @@ bool UglyFilter2D::pass(const ecs::World& w, ecs::EntityIndex e) {
             for (int i = 0; i < segments; ++i) {
                 canvas.matrix[0] = parentMatrix;
 
-                canvas_translate(filter.blur * vec2(cosf(a), sinf(a)));
+                canvas_translate(filter.blur * vec2_cs(a));
                 if (localTransform) {
                     canvas_concat_matrix(localTransform->matrix);
                 }

@@ -100,7 +100,7 @@ public:
             if (!dirty) {
                 dirtyRect = {{placeX, placeY, spriteWidth, spriteHeight}};
             } else {
-                dirtyRect = recti_combine(dirtyRect, {{placeX, placeY, spriteWidth, spriteHeight}});
+                dirtyRect = irect_combine(dirtyRect, {{placeX, placeY, spriteWidth, spriteHeight}});
             }
             dirty = true;
         }
@@ -137,7 +137,7 @@ public:
 
     uint8_t* data = nullptr;
     size_t dataSize = 0;
-    recti_t dirtyRect;
+    irect_t dirtyRect;
     bool dirty;
 
 

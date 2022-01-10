@@ -10,7 +10,7 @@ namespace ek {
 
 class RegularGrid {
 public:
-    recti_t bounds;
+    irect_t bounds;
     uint32_t cellSize;
     uint32_t power;
     uint32_t columns;
@@ -24,7 +24,7 @@ public:
     Hash <ecs::EntityIndex> filter{};
     Array <ecs::EntityIndex> query{};
 
-    RegularGrid(recti_t bounds_, uint32_t power_) :
+    RegularGrid(irect_t bounds_, uint32_t power_) :
             bounds{bounds_},
             cellSize{1u << power_},
             power{power_},
@@ -48,7 +48,7 @@ public:
     }
 
     void insert(ecs::EntityIndex entity, const rect_t rc) {
-        insert(entity, (recti_t) {{
+        insert(entity, (irect_t) {{
                                           (int) rc.x,
                                           (int) rc.y,
                                           (int) rc.w,
@@ -56,12 +56,12 @@ public:
                                   }});
     }
 
-    void insert(ecs::EntityIndex entity, const recti_t rc) {
-        if (!recti_overlaps(bounds, rc)) {
+    void insert(ecs::EntityIndex entity, const irect_t rc) {
+        if (!irect_overlaps(bounds, rc)) {
             return;
         }
 
-        recti_t clamped = recti_clamp_bounds(rc, bounds);
+        irect_t clamped = irect_clamp_bounds(rc, bounds);
         if (clamped.w <= 0 || clamped.h <= 0) {
             return;
         }
@@ -90,7 +90,7 @@ public:
     }
 
     const Array <ecs::EntityIndex>& search(const rect_t rc) {
-        return search((recti_t) {{
+        return search((irect_t) {{
                                          (int) rc.x,
                                          (int) rc.y,
                                          (int) rc.w,
@@ -98,11 +98,11 @@ public:
                                  }});
     }
 
-    const Array <ecs::EntityIndex>& search(const recti_t rc) {
-        if (!recti_overlaps(bounds, rc)) {
+    const Array <ecs::EntityIndex>& search(const irect_t rc) {
+        if (!irect_overlaps(bounds, rc)) {
             return query;
         }
-        recti_t clamped = recti_clamp_bounds(rc, bounds);
+        irect_t clamped = irect_clamp_bounds(rc, bounds);
         if (clamped.w <= 0 || clamped.h <= 0) {
             return query;
         }

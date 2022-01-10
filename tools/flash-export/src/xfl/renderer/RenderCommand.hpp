@@ -49,11 +49,11 @@ struct RenderCommand {
 struct RenderCommandsBatch {
     TransformModel transform;
     Array<RenderCommand> commands;
-    brect_t bounds = brect_inf();
+    aabb2_t bounds = aabb2_empty();
     int total = 0;
 
     [[nodiscard]] bool empty() const {
-        return commands.empty() || brect_is_empty(bounds) || total == 0;
+        return commands.empty() || aabb2_is_empty(bounds) || total == 0;
     }
 };
 

@@ -65,7 +65,7 @@ typedef union vec4_t {
 #endif
 } vec4_t;
 
-typedef union vec2i_t {
+typedef union ivec2_t {
     struct {
         int x;
         int y;
@@ -76,13 +76,17 @@ typedef union vec2i_t {
     inline int& operator[](const int index) { return data[index]; }
 
 #endif
-} vec2i_t;
+} ivec2_t;
 
-typedef union vec3i_t {
+typedef union ivec3_t {
     struct {
         int x;
         int y;
         int z;
+    };
+    struct {
+        ivec2_t xy;
+        int _z;
     };
     int data[3];
 #ifdef __cplusplus
@@ -90,9 +94,9 @@ typedef union vec3i_t {
     inline int& operator[](const int index) { return data[index]; }
 
 #endif
-} vec3i_t;
+} ivec3_t;
 
-typedef union vec4i_t {
+typedef union ivec4_t {
     struct {
         int x;
         int y;
@@ -101,24 +105,25 @@ typedef union vec4i_t {
     };
     int data[4];
     struct {
-        vec3i_t xyz;
+        ivec3_t xyz;
         int _w;
     };
     struct {
-        vec2i_t xy;
-        vec2i_t zw;
+        ivec2_t xy;
+        ivec2_t zw;
     };
 #ifdef __cplusplus
 
     inline int& operator[](const int index) { return data[index]; }
 
 #endif
-} vec4i_t;
+} ivec4_t;
 
-vec2i_t vec2i(int x, int y);
-vec3i_t vec3i(int x, int y, int z);
+ivec2_t ivec2(int x, int y);
+ivec3_t ivec3(int x, int y, int z);
 
 vec2_t vec2(float x, float y);
+vec2_t vec2_cs(float angle);
 vec3_t vec3(float x, float y, float z);
 vec4_t vec4(float x, float y, float z, float w);
 vec3_t vec3_v(vec2_t v, float z);

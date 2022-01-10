@@ -224,15 +224,15 @@ void canvas_scale_alpha(float alpha) {
     canvas.color[0].scale.a = u8_norm_mul(canvas.color[0].scale.a, (uint8_t) (alpha * 255));
 }
 
-void canvas_scale_color(rgba_t multiplier) {
-    canvas.color[0].scale = mul_rgba(canvas.color[0].scale, multiplier);
+void canvas_scale_color(color_t multiplier) {
+    canvas.color[0].scale = mul_color(canvas.color[0].scale, multiplier);
 }
 
 void canvas_concat_color(const color2_t color) {
     color2_concat(canvas.color, color.scale, color.offset);
 }
 
-void canvas_offset_color(rgba_t offset) {
+void canvas_offset_color(color_t offset) {
     color2_add(canvas.color, offset);
 }
 
@@ -309,8 +309,8 @@ void canvas_restore_program(void) {
 void canvas_quad(float x, float y, float w, float h) {
     canvas_triangles(4, 6);
 
-    const rgba_t cm = canvas.color[0].scale;
-    const rgba_t co = canvas.color[0].offset;
+    const color_t cm = canvas.color[0].scale;
+    const color_t co = canvas.color[0].offset;
     canvas_write_vertex(x, y, 0, 0.0f, cm, co);
     canvas_write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
     canvas_write_vertex(x + w, y + h, 1.0f, 1.0f, cm, co);
@@ -319,11 +319,11 @@ void canvas_quad(float x, float y, float w, float h) {
     canvas_write_quad_indices();
 }
 
-void canvas_quad_color(float x, float y, float w, float h, rgba_t color) {
+void canvas_quad_color(float x, float y, float w, float h, color_t color) {
     canvas_triangles(4, 6);
 
-    const rgba_t cm = mul_rgba(canvas.color[0].scale, color);
-    const rgba_t co = canvas.color[0].offset;
+    const color_t cm = mul_color(canvas.color[0].scale, color);
+    const color_t co = canvas.color[0].offset;
     canvas_write_vertex(x, y, 0, 0.0f, cm, co);
     canvas_write_vertex(x + w, y, 1.0f, 0.0f, cm, co);
     canvas_write_vertex(x + w, y + h, 1.0f, 1.0f, cm, co);
@@ -332,15 +332,15 @@ void canvas_quad_color(float x, float y, float w, float h, rgba_t color) {
     canvas_write_quad_indices();
 }
 
-void canvas_quad_color4(float x, float y, float w, float h, rgba_t c1, rgba_t c2, rgba_t c3, rgba_t c4) {
+void canvas_quad_color4(float x, float y, float w, float h, color_t c1, color_t c2, color_t c3, color_t c4) {
     canvas_triangles(4, 6);
 
-    const rgba_t cm = canvas.color[0].scale;
-    const rgba_t co = canvas.color[0].offset;
-    c1 = mul_rgba(cm, c1);
-    c2 = mul_rgba(cm, c2);
-    c3 = mul_rgba(cm, c3);
-    c4 = mul_rgba(cm, c4);
+    const color_t cm = canvas.color[0].scale;
+    const color_t co = canvas.color[0].offset;
+    c1 = mul_color(cm, c1);
+    c2 = mul_color(cm, c2);
+    c3 = mul_color(cm, c3);
+    c4 = mul_color(cm, c4);
     canvas_write_vertex(x, y, 0, 0.0f, c1, co);
     canvas_write_vertex(x + w, y, 1.0f, 0.0f, c2, co);
     canvas_write_vertex(x + w, y + h, 1.0f, 1.0f, c3, co);
@@ -352,8 +352,8 @@ void canvas_quad_color4(float x, float y, float w, float h, rgba_t c1, rgba_t c2
 void canvas_quad_rotated(float x, float y, float w, float h) {
     canvas_triangles(4, 6);
 
-    const rgba_t cm = canvas.color[0].scale;
-    const rgba_t co = canvas.color[0].offset;
+    const color_t cm = canvas.color[0].scale;
+    const color_t co = canvas.color[0].offset;
     canvas_write_vertex(x, y, 0, 1, cm, co);
     canvas_write_vertex(x + w, y, 0, 0, cm, co);
     canvas_write_vertex(x + w, y + h, 1, 0, cm, co);
@@ -362,21 +362,21 @@ void canvas_quad_rotated(float x, float y, float w, float h) {
     canvas_write_quad_indices();
 }
 
-void canvas_fill_rect(const rect_t rc, rgba_t color) {
+void canvas_fill_rect(const rect_t rc, color_t color) {
     canvas_quad_color(rc.x, rc.y, rc.w, rc.h, color);
 }
 
 // This function should be moved to the dedicated `indexed draw` mode
-void canvas_fill_circle(const vec3_t circle, rgba_t inner_color, rgba_t outer_color, int segments) {
+void canvas_fill_circle(const vec3_t circle, color_t inner_color, color_t outer_color, int segments) {
     canvas_triangles(1 + segments, 3 * segments);
 
     const float x = circle.x;
     const float y = circle.y;
     const float r = circle.z;
 
-    const rgba_t co = canvas.color[0].offset;
-    const rgba_t inner_cm = mul_rgba(canvas.color[0].scale, inner_color);
-    const rgba_t outer_cm = mul_rgba(canvas.color[0].scale, outer_color);
+    const color_t co = canvas.color[0].offset;
+    const color_t inner_cm = mul_color(canvas.color[0].scale, inner_color);
+    const color_t outer_cm = mul_color(canvas.color[0].scale, outer_color);
     canvas_write_vertex(x, y, 0.0f, 0.0f, inner_cm, co);
 
     const float da = MATH_TAU / (float) segments;
@@ -399,7 +399,7 @@ void canvas_fill_circle(const vec3_t circle, rgba_t inner_color, rgba_t outer_co
 
 /////
 
-void canvas_line_ex(const vec2_t start, const vec2_t end, rgba_t color1, rgba_t color2, float width1, float width2) {
+void canvas_line_ex(const vec2_t start, const vec2_t end, color_t color1, color_t color2, float width1, float width2) {
     canvas_triangles(4, 6);
 
     const float angle = atan2f(end.y - start.y, end.x - start.x);
@@ -410,9 +410,9 @@ void canvas_line_ex(const vec2_t start, const vec2_t end, rgba_t color1, rgba_t 
     const float t2sina2 = sn * width2;
     const float t2cosa2 = cs * width2;
 
-    const rgba_t m1 = mul_rgba(canvas.color[0].scale, color1);
-    const rgba_t m2 = mul_rgba(canvas.color[0].scale, color2);
-    const rgba_t co = canvas.color[0].offset;
+    const color_t m1 = mul_color(canvas.color[0].scale, color1);
+    const color_t m2 = mul_color(canvas.color[0].scale, color2);
+    const color_t co = canvas.color[0].offset;
 
     canvas_write_vertex(start.x + t2sina1, start.y - t2cosa1, 0, 0, m1, co);
     canvas_write_vertex(end.x + t2sina2, end.y - t2cosa2, 1, 0, m2, co);
@@ -422,18 +422,18 @@ void canvas_line_ex(const vec2_t start, const vec2_t end, rgba_t color1, rgba_t 
     canvas_write_quad_indices();
 }
 
-void canvas_line(const vec2_t start, const vec2_t end, rgba_t color, float line_width) {
+void canvas_line(const vec2_t start, const vec2_t end, color_t color, float line_width) {
     canvas_line_ex(start, end, color, color, line_width, line_width);
 }
 
 void canvas_line_arc(float x, float y, float r,
                      float angle_from, float angle_to,
                      float line_width, int segments,
-                     rgba_t color_inner, rgba_t color_outer) {
+                     color_t color_inner, color_t color_outer) {
     const float da = MATH_TAU / (float) segments;
-    const rgba_t m1 = mul_rgba(canvas.color[0].scale, color_inner);
-    const rgba_t m2 = mul_rgba(canvas.color[0].scale, color_outer);
-    const rgba_t co = canvas.color[0].offset;
+    const color_t m1 = mul_color(canvas.color[0].scale, color_inner);
+    const color_t m2 = mul_color(canvas.color[0].scale, color_outer);
+    const color_t co = canvas.color[0].offset;
     const float hw = line_width / 2.0f;
     const float r0 = r - hw;
     const float r1 = r + hw;
@@ -459,7 +459,7 @@ void canvas_line_arc(float x, float y, float r,
     }
 }
 
-void canvas_stroke_rect(const rect_t rc, rgba_t color, float lineWidth) {
+void canvas_stroke_rect(const rect_t rc, color_t color, float lineWidth) {
     const float r = rc.x + rc.w;
     const float b = rc.y + rc.h;
     canvas_line(vec2(rc.x, rc.y), vec2(r, rc.y), color, lineWidth);
@@ -468,7 +468,7 @@ void canvas_stroke_rect(const rect_t rc, rgba_t color, float lineWidth) {
     canvas_line(vec2(rc.x, b), vec2(rc.x, rc.y), color, lineWidth);
 }
 
-void canvas_stroke_circle(const vec3_t circle, rgba_t color, float lineWidth, int segments) {
+void canvas_stroke_circle(const vec3_t circle, color_t color, float lineWidth, int segments) {
     const float x = circle.x;
     const float y = circle.y;
     const float r = circle.z;
@@ -547,7 +547,7 @@ static sg_pipeline get_pipeline(sg_shader shader, bool useRenderTarget, bool dep
     return item.pipeline;
 }
 
-static void canvas_set_next_scissors(const rect_i16_t rc) {
+static void canvas_set_next_scissors(const i16rect_t rc) {
     if (rc.value != canvas.curr.scissors.value) {
         canvas.state |= EK_CANVAS_STATE_CHANGED;
     }
@@ -593,7 +593,7 @@ void canvas_triangles(uint32_t vertex_count, uint32_t index_count) {
             canvas.state ^= EK_CANVAS_CHECK_SHADER;
         }
         if (canvas.state & EK_CANVAS_CHECK_SCISSORS) {
-            canvas_set_next_scissors((rect_i16_t) {
+            canvas_set_next_scissors((i16rect_t) {
                     (int16_t) canvas.scissors[0].x,
                     (int16_t) canvas.scissors[0].y,
                     (int16_t) canvas.scissors[0].w,
@@ -644,7 +644,7 @@ int canvas__prepare_draw(uint32_t images_num) {
 void canvas__draw(int index_num) {
     sg_apply_bindings(&canvas.bind);
 
-    const rect_i16_t rc = canvas.curr.scissors;
+    const i16rect_t rc = canvas.curr.scissors;
     sg_apply_scissor_rect(rc.x, rc.y, rc.w, rc.h, true);
 
     sg_draw(0, index_num, 1);
@@ -730,7 +730,7 @@ void canvas_begin_ex(const rect_t viewport, const mat3x2_t view, sg_image render
     canvas.curr = (ek_canvas_batch_state) {};
     canvas.next.shader = canvas.shader[0];
     canvas.next.image = canvas.image[0];
-    canvas.next.scissors = (rect_i16_t) {
+    canvas.next.scissors = (i16rect_t) {
             (int16_t) viewport.x,
             (int16_t) viewport.y,
             (int16_t) viewport.w,
@@ -761,7 +761,7 @@ void canvas_end(void) {
     canvas.state ^= EK_CANVAS_PASS_ACTIVE;
 }
 
-void canvas_write_vertex(float x, float y, float u, float v, rgba_t cm, rgba_t co) {
+void canvas_write_vertex(float x, float y, float u, float v, color_t cm, color_t co) {
     // could be cached before draw2d
     const mat3x2_t m = canvas.matrix[0];
     const rect_t uv = canvas.uv[0];
@@ -775,7 +775,7 @@ void canvas_write_vertex(float x, float y, float u, float v, rgba_t cm, rgba_t c
     ptr->co = co.value;
 }
 
-void canvas_write_raw_vertex(const vec2_t pos, const vec2_t tex_coord, rgba_t cm, rgba_t co) {
+void canvas_write_raw_vertex(const vec2_t pos, const vec2_t tex_coord, color_t cm, color_t co) {
     ek_vertex2d* ptr = canvas.vertex_it++;
     ptr->x = pos.x;
     ptr->y = pos.y;

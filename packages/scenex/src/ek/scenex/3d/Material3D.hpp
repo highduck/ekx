@@ -14,8 +14,8 @@ struct Material3D {
     float shininess = 32.0f;
     float roughness = 0.05f;
 
-    inline void set_base_color(rgba_t color, float ao = 0.5f) {
-        diffuse = vec4_rgba(color).xyz;
+    inline void set_base_color(color_t color, float ao = 0.5f) {
+        diffuse = vec4_color(color).xyz;
         ambient = scale_vec3(diffuse, ao);
     }
 };

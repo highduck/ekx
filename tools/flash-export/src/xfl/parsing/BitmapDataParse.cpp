@@ -58,7 +58,7 @@ void reverse_color_components(uint8_t* data, size_t size) {
 }
 
 // abgr_to_argb / vica versa
-void convert_rgba_to_bgra(uint8_t* data, size_t size) {
+void convert_color_to_bgra(uint8_t* data, size_t size) {
     for (size_t i = 0; i < size; i += 4) {
         const auto r = data[i + 0];
         const auto b = data[i + 2];
@@ -137,7 +137,7 @@ void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
         colorTable[i] = input.read<uint32_t>();
     }
     // convert color table to our cairo format
-    convert_rgba_to_bgra(reinterpret_cast<uint8_t*>(colorTable), nColors * 4);
+    convert_color_to_bgra(reinterpret_cast<uint8_t*>(colorTable), nColors * 4);
 
     if ((desc.flags & 0x1) != 0) {
         // transparent
@@ -175,7 +175,7 @@ void readBitmapJPEG(const void* data, uint32_t size, BitmapData& bitmap) {
         bitmap.data.resize(bitmap.width * bitmap.height * bitmap.bpp);
         memcpy(bitmap.data.data(), imageData, bitmap.data.size());
         free(imageData);
-        convert_rgba_to_bgra(bitmap.data.data(), bitmap.data.size());
+        convert_color_to_bgra(bitmap.data.data(), bitmap.data.size());
     }
 }
 

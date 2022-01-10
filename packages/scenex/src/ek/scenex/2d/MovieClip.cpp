@@ -85,8 +85,8 @@ easing_progress_t get_easing_progress(const float t, const Array<SGEasingData>& 
 void apply_transform(EntityApi e, const SGKeyFrameTransform& keyframe) {
     auto& transform = e.get_or_create<Transform2D>();
     transform.setTransform(keyframe.position, keyframe.scale, keyframe.skew, keyframe.pivot);
-    transform.color.scale = rgba_vec4(keyframe.color.scale);
-    transform.color.offset = rgba_vec4(keyframe.color.offset);
+    transform.color.scale = color_vec4(keyframe.color.scale);
+    transform.color.offset = color_vec4(keyframe.color.offset);
 }
 
 void update_target(float time, EntityApi e, const SGMovieLayerData& layer) {

@@ -25,8 +25,8 @@ void debugDrawPointer(Camera2D& camera) {
     }
 }
 
-void drawBox(const rect_t rc, const mat3x2_t m, rgba_t color1, rgba_t color2,
-             bool cross = true, rgba_t fillColor = COLOR_ZERO) {
+void drawBox(const rect_t rc, const mat3x2_t m, color_t color1, color_t color2,
+             bool cross = true, color_t fillColor = COLOR_ZERO) {
 
     canvas_set_empty_image();
     if (fillColor.value) {
@@ -35,7 +35,7 @@ void drawBox(const rect_t rc, const mat3x2_t m, rgba_t color1, rgba_t color2,
         canvas_fill_rect(rc, fillColor);
         canvas_restore_matrix();
     }
-    const auto bb = brect_from_rect(rc);
+    const auto bb = aabb2_from_rect(rc);
     const auto v1 = vec2_transform(bb.min, m);
     const auto v2 = vec2_transform(vec2(bb.x1, bb.y0), m);
     const auto v3 = vec2_transform(bb.max, m);

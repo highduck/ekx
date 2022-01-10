@@ -246,11 +246,11 @@ inline void setAlpha(ecs::EntityApi e, float alpha) {
     e.get_or_create<Transform2D>().color.scale.a = unorm8_f32_clamped(alpha);
 }
 
-inline void setColorScale(ecs::EntityApi e, rgba_t color_multiplier) {
+inline void setColorScale(ecs::EntityApi e, color_t color_multiplier) {
     e.get_or_create<Transform2D>().color.scale = color_multiplier;
 }
 
-inline void setColorOffset(ecs::EntityApi e, rgba_t color_offset) {
+inline void setColorOffset(ecs::EntityApi e, color_t color_offset) {
     e.get_or_create<Transform2D>().color.offset = color_offset;
 }
 

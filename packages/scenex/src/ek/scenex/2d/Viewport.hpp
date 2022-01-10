@@ -14,7 +14,7 @@ struct ViewportScaleOptions {
     vec2_t safeAreaFit = vec2(1, 1);
     // modes
     vec2_t pixelRatio = vec2(1, 1);
-    rect_t viewport = rect_wh(1, 1);
+    rect_t viewport = rect_01();
     bool scaleToResolution = true;
 };
 
@@ -25,12 +25,13 @@ struct ViewportScaleInput {
     float dpiScale;
 };
 
+// NOTE: we need default initialization because could be not updated after recreating viewports on camera processing
 struct ViewportScaleOutput {
-    rect_t screenRect;
-    rect_t fullRect;
-    rect_t safeRect;
-    vec2_t offset;
-    float scale;
+    rect_t screenRect = rect_01();
+    rect_t fullRect = rect_01();
+    rect_t safeRect = rect_01();
+    vec2_t offset = {};
+    float scale = 1.0f;
 };
 
 struct GameDisplayInfo;

@@ -21,7 +21,7 @@ namespace ek {
 
 const auto DEFAULT_FACE_WINDING = SG_FACEWINDING_CCW;
 
-aabb_t
+aabb3_t
 get_shadow_map_box(const mat4_t& camera_projection, const mat4_t& camera_view, const mat4_t& light_view) {
     const mat4_t inv_proj_view = mat4_inverse(mat4_mul(camera_projection, camera_view));
     const vec3_t corners[8] = {
@@ -34,7 +34,7 @@ get_shadow_map_box(const mat4_t& camera_projection, const mat4_t& camera_view, c
             vec3(1, 1, -1),
             vec3(1, 1, 1),
     };
-    aabb_t bb;
+    aabb3_t bb;
     bb.min = vec3(100000, 100000, 100000);
     bb.max = vec3(-100000, -100000, -100000);
 

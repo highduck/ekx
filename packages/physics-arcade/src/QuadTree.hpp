@@ -7,7 +7,7 @@
 
 namespace ek {
 
-inline recti_t rect_to_recti(const rect_t rc) {
+inline irect_t rect_to_recti(const rect_t rc) {
     return {{
        (int)rc.x,
        (int)rc.y,
@@ -33,7 +33,7 @@ struct QuadTreeNode {
     int objects = -1;
     int objectsCount = 0;
 
-    [[nodiscard]] uint32_t getChildIndex(const recti_t objectBounds, const recti_t inNodeBounds, recti_t* outNodeBounds) const {
+    [[nodiscard]] uint32_t getChildIndex(const irect_t objectBounds, const irect_t inNodeBounds, irect_t* outNodeBounds) const {
         const int subWidth = inNodeBounds.w >> 1u;
         const int subHeight = inNodeBounds.h >> 1u;
         const int splitX = inNodeBounds.x + subWidth;
@@ -94,7 +94,7 @@ public:
 
     Array<int> objectNext;
     Array <ecs::EntityIndex> objectEntity;
-    Array <recti_t> objectsBoundsArray;
+    Array <irect_t> objectsBoundsArray;
     int nextFreeObject = -1;
 
     int allocNode() {
@@ -146,9 +146,9 @@ public:
     // starting from the base node (0) how many times can it (and its children) split
     int maxLevels = 5;
 
-    recti_t bounds;
+    irect_t bounds;
 
-    explicit QuadTree(recti_t bounds_) : bounds{bounds_} {
+    explicit QuadTree(irect_t bounds_) : bounds{bounds_} {
         nodes.emplace_back();
     }
 
@@ -201,10 +201,10 @@ public:
         }
     }
 
-    static recti_t getChildBounds(recti_t bb, int childIndex) {
+    static irect_t getChildBounds(irect_t bb, int childIndex) {
         const int w = bb.w >> 1;
         const int h = bb.h >> 1;
-        recti_t result = {{bb.x, bb.y, w, h}};
+        irect_t result = {{bb.x, bb.y, w, h}};
         switch (childIndex) {
             case QuadTreeNode::RightTop:
                 result.x += w;
@@ -236,7 +236,7 @@ private:
         nodes[nodeId].firstChildNode = allocNode();
     }
 
-    void insert(int nodeId, int objectId, int nodeLevel, recti_t nodeBounds) {
+    void insert(int nodeId, int objectId, int nodeLevel, irect_t nodeBounds) {
         auto& node = nodes[nodeId];
         // Needs to check if it has any children nodes.
         if (node.firstChildNode) {
@@ -265,7 +265,7 @@ private:
                 auto prevId = -1;
                 while (objId >= 0) {
                     const auto nextObj = objectNext[objId];
-                    recti_t subBounds;
+                    irect_t subBounds;
                     int indexToPlaceObject = nodeAfterSplit.getChildIndex(objectsBoundsArray[objId], nodeBounds, &subBounds);
                     if (indexToPlaceObject != -1) {
                         if (prevId >= 0) {
@@ -288,7 +288,7 @@ private:
         }
     }
 
-    void search(int nodeId, const recti_t area, Hash<int>& outNodesList, const recti_t nodeBounds) {
+    void search(int nodeId, const irect_t area, Hash<int>& outNodesList, const irect_t nodeBounds) {
         auto& node = nodes[nodeId];
         if (node.objectsCount) {
             outNodesList.set(nodeId, 1);

@@ -36,14 +36,15 @@ void Camera2D::updateQueue() {
 
     for (auto e: ecs::view<Camera2D>()) {
         auto& camera = e.get<Camera2D>();
-        const auto& vp = camera.viewportNode.get().get<Viewport>();
-        if (!camera.enabled) {
+        const auto* vp = camera.viewportNode.get().tryGet<Viewport>();
+        if (!camera.enabled || !vp) {
             continue;
         }
 
         // maybe we need region from not 0,0 started input rect
-        camera.screenRect = vp.output.screenRect;
-        camera.screenToWorldMatrix = camera.getMatrix(e, vp.output.scale, vp.output.offset, vp.options.baseResolution);
+        camera.screenRect = vp->output.screenRect;
+        camera.screenToWorldMatrix = camera.getMatrix(e, vp->output.scale, vp->output.offset,
+                                                      vp->options.baseResolution);
         camera.worldRect = rect_transform(camera.screenRect, camera.screenToWorldMatrix);
 
         camera.worldToScreenMatrix = camera.screenToWorldMatrix;
@@ -81,7 +82,7 @@ void Camera2D::render() {
                            true);
         if (camera.clearColorEnabled) {
             canvas_push_program(canvas.shader_solid_color);
-            canvas.color[0] = {rgba_vec4(camera.clearColor), rgba_vec4(camera.clearColor2)};
+            canvas.color[0] = {color_vec4(camera.clearColor), color_vec4(camera.clearColor2)};
             canvas_fill_rect(camera.worldRect, COLOR_WHITE);
             canvas.color[0] = color2_identity();
             canvas_restore_program();

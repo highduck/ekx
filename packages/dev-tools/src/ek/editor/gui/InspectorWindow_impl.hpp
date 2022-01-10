@@ -109,14 +109,14 @@ inline void guiTransform2D(Transform2D& transform) {
 //    ImGui::DragFloat2("Origin", transform.origin.data(), 0.1f, 0.0f, 0.0f, "%.2f");
 //    ImGui::DragFloat2("Pivot", transform.pivot.data(), 0.1f, 0.0f, 0.0f, "%.2f");
 
-    auto color = vec4_rgba(transform.color.scale);
+    auto color = vec4_color(transform.color.scale);
     if (ImGui::ColorEdit4("Color Scale", color.data)) {
-        transform.color.scale = rgba_vec4(color);
+        transform.color.scale = color_vec4(color);
     }
 
-    color = vec4_rgba(transform.color.offset);
+    color = vec4_color(transform.color.offset);
     if (ImGui::ColorEdit4("Color Offset", color.data)) {
-        transform.color.offset = rgba_vec4(color);
+        transform.color.offset = color_vec4(color);
     }
 }
 

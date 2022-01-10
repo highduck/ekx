@@ -21,7 +21,7 @@ enum class SGFilterType {
 struct SGFilter {
     SGFilterType type = SGFilterType::None;
     uint32_t quality = 1;
-    rgba_t color = COLOR_WHITE;
+    color_t color = COLOR_WHITE;
     vec2_t blur = {};
     vec2_t offset = {};
 
@@ -32,7 +32,7 @@ struct SGFilter {
 };
 
 struct SGTextLayerData {
-    rgba_t color = COLOR_WHITE;
+    color_t color = COLOR_WHITE;
     vec2_t offset = {};
     float blurRadius = 0.0f;
     int blurIterations = 0;

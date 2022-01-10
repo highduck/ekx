@@ -15,7 +15,7 @@ void Scanner::reset() {
     stack_.clear();
     stack_.emplace_back();
     batches.clear();
-    bounds = brect_inf();
+    bounds = aabb2_empty();
 }
 
 void Scanner::drawInstance(const Doc& doc, const Element& element) {
@@ -96,7 +96,7 @@ rect_t Scanner::getBounds(const Doc& doc, const Array<Element>& elements) {
     for (auto& el: elements) {
         scanner.draw(doc, el);
     }
-    return brect_get_rect(scanner.bounds);
+    return aabb2_get_rect(scanner.bounds);
 }
 
 // Convert concrete objects to render commands
@@ -128,16 +128,16 @@ bool Scanner::render(const BitmapData* bitmap, const TransformModel& world) {
     batch.commands.push_back(cmd);
 
     const rect_t rc = rect_wh((float)bitmap->width, (float)bitmap->height);
-    batch.bounds = brect_extend_transformed_rect(batch.bounds, rc, world.matrix);
+    batch.bounds = aabb2_add_transformed_rect(batch.bounds, rc, world.matrix);
 
     return render(batch);
 }
 
 
 bool Scanner::render(const RenderCommandsBatch& batch) {
-    if (!batch.commands.empty() && !brect_is_empty(batch.bounds)) {
+    if (!batch.commands.empty() && !aabb2_is_empty(batch.bounds)) {
         batches.push_back(batch);
-        bounds = brect_extend_rect(bounds, brect_get_rect(batch.bounds));
+        bounds = aabb2_add_rect(bounds, aabb2_get_rect(batch.bounds));
         return true;
     }
     return false;
@@ -181,7 +181,7 @@ bool Scanner::renderShapeObject(const Element& el, const TransformModel& world) 
     batch.commands.push_back(cmd);
 
     const float hw = cmd.stroke ? (cmd.stroke->weight / 2.0f) : 0.0f;
-    batch.bounds = brect_extend_transformed_rect(batch.bounds, rect_expand(rc, hw), world.matrix);
+    batch.bounds = aabb2_add_transformed_rect(batch.bounds, rect_expand(rc, hw), world.matrix);
     return render(batch);
 }
 

@@ -25,7 +25,7 @@ typedef union rect_t {
 #endif
 } rect_t;
 
-typedef union recti {
+typedef union irect_t {
     struct {
         int x;
         int y;
@@ -38,9 +38,9 @@ typedef union recti {
     inline int& operator[](const int index) { return data[index]; }
 
 #endif
-} recti_t;
+} irect_t;
 
-typedef union rect_i16_t {
+typedef union i16rect_t {
     struct {
         int16_t x;
         int16_t y;
@@ -54,9 +54,9 @@ typedef union rect_i16_t {
     inline int16_t& operator[](const int index) { return data[index]; }
 
 #endif
-} rect_i16_t;
+} i16rect_t;
 
-typedef union brect_t {
+typedef union aabb2_t {
     struct {
         float x0;
         float y0;
@@ -73,9 +73,9 @@ typedef union brect_t {
     inline float& operator[](const int index) { return data[index]; }
 
 #endif
-} brect_t;
+} aabb2_t;
 
-typedef union aabb_t {
+typedef union aabb3_t {
     struct {
         float x0;
         float y0;
@@ -94,10 +94,10 @@ typedef union aabb_t {
     inline float& operator[](const int index) { return data[index]; }
 
 #endif
-} aabb_t;
+} aabb3_t;
 
 rect_t rect(float x, float y, float w, float h);
-rect_t recti_to_rect(recti_t irc);
+rect_t irect_to_rect(irect_t irc);
 rect_t rect_size(vec2_t size);
 rect_t rect_minmax(vec2_t min, vec2_t max);
 rect_t rect_01(void);
@@ -105,14 +105,14 @@ rect_t rect_wh(float w, float h);
 vec2_t rect_rb(rect_t rc);
 vec2_t rect_center(rect_t rc);
 rect_t rect_clamp_bounds(rect_t a, rect_t b);
-recti_t recti_clamp_bounds(recti_t a, recti_t b);
+irect_t irect_clamp_bounds(irect_t a, irect_t b);
 //#define rect_clamp_bounds(A, B) {{MAX((A).x, (B).x),MAX((A).y, (B).y),MIN(RECT_R(A), RECT_R(B)) - MAX((A).x, (B).x),MIN(RECT_B(A), RECT_B(B)) - MAX((A).y, (B).y)}}
 //#define rectangle_clamp_bounds(A, B) {{MAX((A).x, (B).x),MAX((A).y, (B).y),MIN((A).r, (B).r),MIN((A).b, (B).b)}}
 
 rect_t rect_combine(rect_t a, rect_t b);
-recti_t recti_combine(recti_t a, recti_t b);
+irect_t irect_combine(irect_t a, irect_t b);
 bool rect_overlaps(rect_t a, rect_t b);
-bool recti_overlaps(recti_t a, recti_t b);
+bool irect_overlaps(irect_t a, irect_t b);
 rect_t rect_scale(rect_t a, vec2_t s);
 rect_t rect_scale_f(rect_t a, float s);
 rect_t rect_translate(rect_t a, vec2_t t);
@@ -131,19 +131,19 @@ rect_t rect_expand(rect_t a, float w);
 
 #define RECT_R(rc) ((rc).x + (rc).w)
 #define RECT_B(rc) ((rc).y + (rc).h)
-#define RECT_CENTER_X(rc) ((rc).x + (rc).w * 0.5f)
-#define RECT_CENTER_Y(rc) ((rc).y + (rc).h * 0.5f)
+#define RECT_CENTER_X(rc) ((rc).x + (rc).w / 2)
+#define RECT_CENTER_Y(rc) ((rc).y + (rc).h / 2)
 //#define rect_overlaps(a, b) ((a).x <= RECT_R(b) && (b).x <= RECT_R(a) && (a).y <= RECT_B(b) && (b).y <= RECT_B(a))
 
-brect_t brect_from_rect(rect_t rc);
-brect_t brect_inf(void);
-brect_t brect_extend_circle(brect_t bb, vec3_t circle);
-brect_t brect_extend_rect(brect_t bb, rect_t rc);
-brect_t brect_extend_transformed_rect(brect_t bb, rect_t rc, mat3x2_t matrix);
-brect_t brect_extend_point(brect_t bb, vec2_t point);
-rect_t brect_get_rect(brect_t bb);
+aabb2_t aabb2_from_rect(rect_t rc);
+aabb2_t aabb2_empty(void);
+aabb2_t aabb2_add_circle(aabb2_t bb, vec3_t circle);
+aabb2_t aabb2_add_rect(aabb2_t bb, rect_t rc);
+aabb2_t aabb2_add_transformed_rect(aabb2_t bb, rect_t rc, mat3x2_t matrix);
+aabb2_t aabb2_add_point(aabb2_t bb, vec2_t point);
+rect_t aabb2_get_rect(aabb2_t bb);
 
-bool brect_is_empty(brect_t bb);
+bool aabb2_is_empty(aabb2_t bb);
 
 #ifdef __cplusplus
 }

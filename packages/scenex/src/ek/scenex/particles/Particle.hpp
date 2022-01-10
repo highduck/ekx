@@ -35,8 +35,8 @@ struct Particle {
     // initial alpha
     ParticleAlphaMode alpha_mode = ParticleAlphaMode::None;
     float alpha = 1.0f;
-    rgba_t color = rgba_u32(0xFFFFFFFFu);
-    rgba_t offset = rgba_u32(0);
+    color_t color = COLOR_WHITE;
+    color_t offset = COLOR_ZERO;
 
     ParticleScaleMode scale_mode = ParticleScaleMode::None;
     float scale_off_time = 0.0f;

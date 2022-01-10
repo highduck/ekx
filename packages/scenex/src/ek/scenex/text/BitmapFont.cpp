@@ -52,7 +52,7 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
             outGlyph.image = ek_ref_content(sg_image, spr->image_id);
             outGlyph.rotated = spr->rotated;
         } else {
-            outGlyph.rect = recti_to_rect(g->box) / unitsPerEM;
+            outGlyph.rect = irect_to_rect(g->box) / unitsPerEM;
         }
         outGlyph.source = this;
         return true;
@@ -67,7 +67,7 @@ bool BitmapFont::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
         outGlyph.lineHeight = lineHeightMultiplier;
         outGlyph.ascender = ascender;
         outGlyph.descender = descender;
-        outGlyph.rect = recti_to_rect(g->box) / unitsPerEM;
+        outGlyph.rect = irect_to_rect(g->box) / unitsPerEM;
         outGlyph.source = this;
         return true;
     }

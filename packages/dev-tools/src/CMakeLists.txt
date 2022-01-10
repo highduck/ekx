@@ -11,11 +11,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/editor/Editor.cpp
         ek/editor/Editor.hpp
-
-        ImGuizmo/ImCurveEdit.cpp
-        ImGuizmo/ImGradient.cpp
-        ImGuizmo/ImGuizmo.cpp
-        ImGuizmo/ImSequencer.cpp
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

@@ -78,8 +78,8 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
     {
         auto& transform = entity.get<Transform2D>();
         transform.setMatrix(data->matrix);
-        transform.color.scale = rgba_vec4(data->color.scale);
-        transform.color.offset = rgba_vec4(data->color.offset);
+        transform.color.scale = color_vec4(data->color.scale);
+        transform.color.offset = color_vec4(data->color.offset);
     }
 
     {
@@ -190,11 +190,11 @@ ecs::EntityApi create_and_merge(const SGFile& sg, SGFileRes asset,
     return entity;
 }
 
-void extend_bounds(const SGFile& file, const SGNodeData& data, brect_t* boundsBuilder,
+void extend_bounds(const SGFile& file, const SGNodeData& data, aabb2_t* boundsBuilder,
                    const mat3x2_t matrix) {
     const Res<Sprite> spr{data.sprite.c_str()};
     if (spr) {
-        *boundsBuilder = brect_extend_transformed_rect(*boundsBuilder, spr->rect, matrix);
+        *boundsBuilder = aabb2_add_transformed_rect(*boundsBuilder, spr->rect, matrix);
     }
     for (const auto& child: data.children) {
         const auto& symbol = child.libraryName.empty() ? child : *sg_get(file, child.libraryName.c_str());
@@ -226,9 +226,9 @@ rect_t sg_get_bounds(const char* library, const char* name) {
     if (file) {
         const SGNodeData* data = sg_get(*file, name);
         if (data) {
-            brect_t bb = brect_inf();
+            aabb2_t bb = aabb2_empty();
             extend_bounds(*file, *data, &bb, data->matrix);
-            return brect_get_rect(bb);
+            return aabb2_get_rect(bb);
         }
     }
     return {};

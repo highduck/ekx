@@ -151,9 +151,9 @@ let code = `
 code += generate_vec_test_suite("vec2", ["x", "y"], "float");
 code += generate_vec_test_suite("vec3", ["x", "y", "z"], "float");
 code += generate_vec_test_suite("vec4", ["x", "y", "z", "w"], "float");
-// code += generate_vec_test_suite("vec2i", ["x", "y"], "int");
-// code += generate_vec_test_suite("vec3i", ["x", "y", "z"], "int");
-// code += generate_vec_test_suite("vec4i", ["x", "y", "z", "w"], "int");
+// code += generate_vec_test_suite("ivec2", ["x", "y"], "int");
+// code += generate_vec_test_suite("ivec3", ["x", "y", "z"], "int");
+// code += generate_vec_test_suite("ivec4", ["x", "y", "z", "w"], "int");
 code += "#endif // MATH_VEC_TEST_H\n";
 
 require("fs").writeFileSync("test/math/math_vec_test.h", code);

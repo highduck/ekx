@@ -8,7 +8,7 @@ rect_t rect(float x, float y, float w, float h) {
     return (rect_t) {{x, y, w, h}};
 }
 
-rect_t recti_to_rect(const recti_t irc) {
+rect_t irect_to_rect(irect_t irc) {
     return (rect_t) {{
                              (float) irc.x,
                              (float) irc.y,
@@ -46,12 +46,12 @@ rect_t rect_clamp_bounds(const rect_t a, const rect_t b) {
                        min_vec2(rect_rb(a), rect_rb(b)));
 }
 
-recti_t recti_clamp_bounds(const recti_t a, const recti_t b) {
+irect_t irect_clamp_bounds(irect_t a, irect_t b) {
     const int x0 = MAX(a.x, b.x);
     const int y0 = MAX(a.y, b.y);
     const int x1 = MIN(RECT_R(a), RECT_R(b));
     const int y1 = MIN(RECT_B(a), RECT_B(b));
-    return (recti_t) {{x0, y0, x1 - x0, y1 - y0}};
+    return (irect_t) {{x0, y0, x1 - x0, y1 - y0}};
 }
 
 rect_t rect_combine(const rect_t a, const rect_t b) {
@@ -59,8 +59,8 @@ rect_t rect_combine(const rect_t a, const rect_t b) {
                        max_vec2(rect_rb(a), rect_rb(b)));
 }
 
-recti_t recti_combine(const recti_t a, const recti_t b) {
-    recti_t result;
+irect_t irect_combine(irect_t a, irect_t b) {
+    irect_t result;
     result.x = MIN(a.x, b.x);
     result.y = MIN(a.y, b.y);
     result.w = MAX(RECT_R(a), RECT_R(b)) - result.x;
@@ -72,7 +72,7 @@ bool rect_overlaps(const rect_t a, const rect_t b) {
     return a.x <= RECT_R(b) && b.x <= RECT_R(a) && a.y <= RECT_B(b) && b.y <= RECT_B(a);
 }
 
-bool recti_overlaps(const recti_t a, const recti_t b) {
+bool irect_overlaps(irect_t a, irect_t b) {
     return a.x <= RECT_R(b) && b.x <= RECT_R(a) && a.y <= RECT_B(b) && b.y <= RECT_B(a);
 }
 
@@ -82,7 +82,7 @@ rect_t rect_scale(const rect_t a, const vec2_t s) {
         r.x += r.w;
         r.w = -r.w;
     }
-    if (r.h < 0) {
+    if (r.h < 0.0f) {
         r.y += r.h;
         r.h = -r.h;
     }
@@ -98,8 +98,8 @@ rect_t rect_translate(const rect_t a, const vec2_t t) {
 }
 
 rect_t rect_transform(const rect_t rc, const mat3x2_t matrix) {
-    return brect_get_rect(
-            brect_extend_transformed_rect(brect_inf(), rc, matrix)
+    return aabb2_get_rect(
+            aabb2_add_transformed_rect(aabb2_empty(), rc, matrix)
     );
 }
 
@@ -115,12 +115,11 @@ bool rect_is_empty(rect_t a) {
 }
 
 rect_t rect_expand(rect_t a, float w) {
-    const float w2 = 2.0f * w;
-    return (rect_t) {{a.x - w, a.y - w, a.w + w2, a.h + w2}};
+    return (rect_t) {{a.x - w, a.y - w, a.w + w + w, a.h + w + w}};
 }
 
-brect_t brect_from_rect(rect_t rc) {
-    brect_t br;
+aabb2_t aabb2_from_rect(rect_t rc) {
+    aabb2_t br;
     br.x0 = rc.x;
     br.y0 = rc.y;
     br.x1 = rc.x + rc.w;
@@ -128,8 +127,8 @@ brect_t brect_from_rect(rect_t rc) {
     return br;
 }
 
-brect_t brect_inf(void) {
-    brect_t br;
+aabb2_t aabb2_empty(void) {
+    aabb2_t br;
     br.x0 = 1.0e24f;
     br.y0 = 1.0e24f;
     br.x1 = -1.0e24f;
@@ -137,7 +136,7 @@ brect_t brect_inf(void) {
     return br;
 }
 
-static brect_t brect_push(brect_t br, float e0, float e1, float e2, float e3) {
+static aabb2_t brect_push(aabb2_t br, float e0, float e1, float e2, float e3) {
     if (e0 < br.data[0]) br.data[0] = e0;
     if (e1 < br.data[1]) br.data[1] = e1;
     if (e2 > br.data[2]) br.data[2] = e2;
@@ -145,7 +144,7 @@ static brect_t brect_push(brect_t br, float e0, float e1, float e2, float e3) {
     return br;
 }
 
-brect_t brect_extend_circle(brect_t bb, const vec3_t circle) {
+aabb2_t aabb2_add_circle(aabb2_t bb, vec3_t circle) {
     return brect_push(bb,
                       circle.x - circle.z,
                       circle.y - circle.z,
@@ -153,33 +152,33 @@ brect_t brect_extend_circle(brect_t bb, const vec3_t circle) {
                       circle.y + circle.z);
 }
 
-brect_t brect_extend_rect(brect_t br, const rect_t rc) {
-    return brect_push(br, rc.x, rc.y, rc.x + rc.w, rc.y + rc.h);
+aabb2_t aabb2_add_rect(aabb2_t bb, rect_t rc) {
+    return brect_push(bb, rc.x, rc.y, rc.x + rc.w, rc.y + rc.h);
 }
 
-brect_t brect_extend_point(brect_t br, const vec2_t point) {
-    return brect_push(br, point.x, point.y, point.x, point.y);
+aabb2_t aabb2_add_point(aabb2_t bb, vec2_t point) {
+    return brect_push(bb, point.x, point.y, point.x, point.y);
 }
 
-brect_t brect_extend_transformed_rect(brect_t bb, const rect_t rc, const mat3x2_t matrix) {
-    bb = brect_extend_point(bb, vec2_transform(vec2(rc.x, rc.y), matrix));
-    bb = brect_extend_point(bb, vec2_transform(vec2(rc.x + rc.w, rc.y), matrix));
-    bb = brect_extend_point(bb, vec2_transform(vec2(rc.x, rc.y + rc.h), matrix));
-    bb = brect_extend_point(bb, vec2_transform(vec2(rc.x + rc.w, rc.y + rc.h), matrix));
+aabb2_t aabb2_add_transformed_rect(aabb2_t bb, rect_t rc, mat3x2_t matrix) {
+    bb = aabb2_add_point(bb, vec2_transform(vec2(rc.x, rc.y), matrix));
+    bb = aabb2_add_point(bb, vec2_transform(vec2(rc.x + rc.w, rc.y), matrix));
+    bb = aabb2_add_point(bb, vec2_transform(vec2(rc.x, rc.y + rc.h), matrix));
+    bb = aabb2_add_point(bb, vec2_transform(vec2(rc.x + rc.w, rc.y + rc.h), matrix));
     return bb;
 }
 
-rect_t brect_get_rect(const brect_t brc) {
+rect_t aabb2_get_rect(aabb2_t bb) {
     rect_t r;
-    r.x = brc.x0;
-    r.y = brc.y0;
-    r.w = brc.x1 > brc.x0 ? (brc.x1 - brc.x0) : 0.0f;
-    r.h = brc.y1 > brc.y0 ? (brc.y1 - brc.y0) : 0.0f;
+    r.x = bb.x0;
+    r.y = bb.y0;
+    r.w = bb.x1 > bb.x0 ? (bb.x1 - bb.x0) : 0.0f;
+    r.h = bb.y1 > bb.y0 ? (bb.y1 - bb.y0) : 0.0f;
     return r;
 }
 
 // TODO: simple test
-bool brect_is_empty(brect_t bb) {
+bool aabb2_is_empty(aabb2_t bb) {
     return bb.x0 >= bb.x1 || bb.y0 >= bb.y1;
 }
 

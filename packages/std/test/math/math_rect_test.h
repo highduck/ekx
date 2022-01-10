@@ -12,13 +12,13 @@ TEST_CASE("is empty") {
     CHECK(rect_is_empty(rect(0, 0, 1, 0)));
     CHECK_FALSE(rect_is_empty(rect(0, 0, 1, 1)));
 
-    CHECK(brect_is_empty({{0, 0, 0, 0}}));
-    CHECK(brect_is_empty(brect_inf()));
-    CHECK(brect_is_empty({{1, 1, 1, 1}}));
-    CHECK(brect_is_empty({{1, -1, 1, 1}}));
-    CHECK(brect_is_empty({{-1, 1, 1, 1}}));
-    CHECK(brect_is_empty({{-1, -1, -1, -1}}));
-    CHECK_FALSE(brect_is_empty({{-1, -1, 1, 1}}));
+    CHECK(aabb2_is_empty({{0, 0, 0, 0}}));
+    CHECK(aabb2_is_empty(aabb2_empty()));
+    CHECK(aabb2_is_empty({{1, 1, 1, 1}}));
+    CHECK(aabb2_is_empty({{1, -1, 1, 1}}));
+    CHECK(aabb2_is_empty({{-1, 1, 1, 1}}));
+    CHECK(aabb2_is_empty({{-1, -1, -1, -1}}));
+    CHECK_FALSE(aabb2_is_empty({{-1, -1, 1, 1}}));
 }
 
 TEST_SUITE_END();

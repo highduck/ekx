@@ -13,8 +13,12 @@ inline static color2f_t operator*(const color2f_t a, const color2f_t b) {
     return mul_color2f(a, b);
 }
 
-inline static rgba_t operator*(const rgba_t a, const rgba_t b) {
-    return mul_rgba(a, b);
+inline static color_t operator*(const color_t a, const color_t b) {
+    return mul_color(a, b);
+}
+
+inline static color_t operator+(const color_t a, const color_t b) {
+    return add_color(a, b);
 }
 
 #endif

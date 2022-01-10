@@ -90,8 +90,6 @@ IMPL_EASE_FUNC(elastic)
 
 IMPL_EASE_FUNC(step)
 
-IMPL_EASE_FUNC(linear)
-
 IMPL_EASE_FUNC(circ)
 
 IMPL_EASE_FUNC(sine)

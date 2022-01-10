@@ -21,7 +21,7 @@ public:
     void draw(const char* text,
               float size,
               vec2_t position,
-              rgba_t color,
+              color_t color,
               float line_height,
               float line_spacing = 0.0f) const;
 

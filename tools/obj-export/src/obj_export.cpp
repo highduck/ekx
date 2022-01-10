@@ -2,7 +2,6 @@
 #include <ek/scenex/data/Model3D.hpp>
 
 #define FAST_OBJ_IMPLEMENTATION
-
 #include "fast_obj.h"
 
 int convertObjModel(const char* input, const char* output) {
@@ -29,8 +28,8 @@ int convertObjModel(const char* input, const char* output) {
             vertex.normal.z = n[2];
             vertex.uv.x = t[0];
             vertex.uv.y = t[1];
-            vertex.color = rgba_u32(0xFFFFFFFF);
-            vertex.color2 = rgba_u32(0x0);
+            vertex.color = COLOR_WHITE;
+            vertex.color2 = COLOR_ZERO;
 
             model.vertices.emplace_back(vertex);
             model.indices.emplace_back(vi);

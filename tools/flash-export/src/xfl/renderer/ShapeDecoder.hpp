@@ -51,7 +51,7 @@ private:
     Array<RenderCommand> line_styles_{};
 
     TransformModel transform_;
-    brect_t bounds_builder_ = brect_inf();
+    aabb2_t bounds_builder_ = aabb2_empty();
     int total_ = 0;
 };
 

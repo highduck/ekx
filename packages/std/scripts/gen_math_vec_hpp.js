@@ -30,6 +30,11 @@ inline static ${name_t} operator/(const ${name_t} a, const ${name_t} b) {
     return {{ ${list("a.$ / b.$")} }};
 }
 
+inline static ${name_t} operator/(const ${scalar_type} a, const ${name_t} b) {
+    EK_ASSERT( ${list("b.$ != 0", " && ")} );
+    return {{ ${list("a / b.$")} }};
+}
+
 inline static ${name_t} operator*(const ${name_t} a, const ${scalar_type} s) {
     return {{ ${list("s * a.$")} }};
 }
@@ -90,9 +95,9 @@ let code = "#ifdef __cplusplus\n\n";
 code += generate_vec_cxx_operators("vec2", ["x", "y"]);
 code += generate_vec_cxx_operators("vec3", ["x", "y", "z"]);
 code += generate_vec_cxx_operators("vec4", ["x", "y", "z", "w"]);
-code += generate_vec_cxx_operators("vec2i", ["x", "y"], "int");
-code += generate_vec_cxx_operators("vec3i", ["x", "y", "z"], "int");
-code += generate_vec_cxx_operators("vec4i", ["x", "y", "z", "w"], "int");
+code += generate_vec_cxx_operators("ivec2", ["x", "y"], "int");
+code += generate_vec_cxx_operators("ivec3", ["x", "y", "z"], "int");
+code += generate_vec_cxx_operators("ivec4", ["x", "y", "z", "w"], "int");
 code += "#endif // __cplusplus\n";
 
 require("fs").writeFileSync("include/ek/math/vec.hpp", code);

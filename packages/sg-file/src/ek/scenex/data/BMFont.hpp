@@ -9,7 +9,7 @@ namespace ek {
 
 class BMFontGlyph {
 public:
-    recti_t box;
+    irect_t box;
     int32_t advanceWidth;
     String sprite;
 

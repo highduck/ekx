@@ -16,6 +16,16 @@ add_library(${PROJECT_NAME} STATIC
         src/imgui_stdlib.cpp
         src/misc/freetype/imgui_freetype.cpp
         src/misc/freetype/imgui_freetype.h
+
+        src/implot.cpp
+        src/implot_items.cpp
+        src/implot_demo.cpp
+
+        src/ImGuizmo/GraphEditor.cpp
+        src/ImGuizmo/ImCurveEdit.cpp
+        src/ImGuizmo/ImGradient.cpp
+        src/ImGuizmo/ImGuizmo.cpp
+        src/ImGuizmo/ImSequencer.cpp
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ./src)

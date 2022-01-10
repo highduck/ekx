@@ -77,11 +77,11 @@ void NinePatch2D::draw() {
     }
     auto& spr = *src;
     canvas_save_matrix();
-    canvas_scale({1.0f / scale.x, 1.0f / scale.y});
+    canvas_scale(1.0f / scale);
     // TODO: rotated
     rect_t target = manual_target;
     if (rect_is_empty(target)) {
-        target = rect_scale(rect_expand(spr.rect, 1), scale);
+        target = rect_scale(rect_expand(spr.rect, -1), scale);
     }
     spr.draw_grid(scale_grid, target);
     canvas_restore_matrix();
@@ -224,14 +224,14 @@ bool Text2D::hitTest(vec2_t point) const {
 }
 
 rect_t Bounds2D::getWorldRect(mat3x2_t world_matrix) const {
-    const auto bb = brect_extend_transformed_rect(brect_inf(), rect, world_matrix);
-    return brect_get_rect(bb);
+    const auto bb = aabb2_add_transformed_rect(aabb2_empty(), rect, world_matrix);
+    return aabb2_get_rect(bb);
 }
 
 rect_t Bounds2D::getScreenRect(mat3x2_t viewMatrix, mat3x2_t worldMatrix) const {
     const auto g = mat3x2_mul(viewMatrix, worldMatrix);
-    const auto bb = brect_extend_transformed_rect(brect_inf(), rect, g);
-    return brect_get_rect(bb);
+    const auto bb = aabb2_add_transformed_rect(aabb2_empty(), rect, g);
+    return aabb2_get_rect(bb);
 }
 
 //// arc
@@ -266,7 +266,7 @@ bool Arc2D::hitTest(vec2_t point) const {
 }
 
 /** utilities **/
-void set_gradient_quad(ecs::EntityApi e, rect_t rc, rgba_t top, rgba_t bottom) {
+void set_gradient_quad(ecs::EntityApi e, rect_t rc, color_t top, color_t bottom) {
     auto q = Pointer<Quad2D>::make();
     q->rect = rc;
     q->colors[0] = top;

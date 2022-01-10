@@ -29,11 +29,11 @@ enum class RandColorMode {
 
 class RandColorData {
 public:
-    Array <rgba_t> colors{COLOR_WHITE};
+    Array <color_t> colors{COLOR_WHITE};
     RandColorMode mode = RandColorMode::RandElement;
     mutable int state = 0;
 
-    rgba_t next() const {
+    color_t next() const {
         ++state;
         int index_max = int(colors.size() - 1);
         if (colors.empty()) {
@@ -45,7 +45,7 @@ public:
                 float t = rand_fx.random(0.0f, float(index_max));
                 int i = int(t);
                 t = fract(t);
-                return lerp_rgba(colors[i], colors[i + 1], t);
+                return lerp_color(colors[i], colors[i + 1], t);
             }
             case RandColorMode::RandElement:
                 return colors[rand_fx.random_int(0, index_max)];
@@ -55,17 +55,17 @@ public:
         return COLOR_WHITE;
     }
 
-    void set_gradient(rgba_t color1, rgba_t color2) {
+    void set_gradient(color_t color1, color_t color2) {
         colors = {color1, color2};
         mode = RandColorMode::RandLerp;
     }
 
-    void set_steps(rgba_t color1, rgba_t color2) {
+    void set_steps(color_t color1, color_t color2) {
         colors = {color1, color2};
         mode = RandColorMode::Continuous;
     }
 
-    void set_solid(rgba_t color) {
+    void set_solid(color_t color) {
         colors = {color};
         mode = RandColorMode::Continuous;
     }
@@ -132,7 +132,7 @@ struct ParticleDecl {
     FloatRange scale_end{0.0f};
 
     RandColorData color;
-    rgba_t color_offset = COLOR_ZERO;
+    color_t color_offset = COLOR_ZERO;
     float additive = 0.0f;
 
     FloatRange rotation{0.0f};

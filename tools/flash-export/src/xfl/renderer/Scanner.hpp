@@ -41,7 +41,7 @@ public:
 
 public:
     Array<RenderCommandsBatch> batches;
-    brect_t bounds = brect_inf();
+    aabb2_t bounds = aabb2_empty();
 
 private:
     Array<TransformModel> stack_;

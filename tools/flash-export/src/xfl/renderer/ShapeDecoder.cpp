@@ -284,11 +284,11 @@ void ShapeDecoder::flush_commands(const Array<RenderCommand>& edges, Array<Shape
 }
 
 void ShapeDecoder::extend(vec2_t p, float r) {
-    bounds_builder_ = brect_extend_circle(bounds_builder_, vec3_v(p, r));
+    bounds_builder_ = aabb2_add_circle(bounds_builder_, vec3_v(p, r));
 }
 
 bool ShapeDecoder::empty() const {
-    return brect_is_empty(bounds_builder_) || total_ == 0;
+    return aabb2_is_empty(bounds_builder_) || total_ == 0;
 }
 
 RenderCommandsBatch ShapeDecoder::result() const {

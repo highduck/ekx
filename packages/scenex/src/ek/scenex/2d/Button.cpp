@@ -45,7 +45,7 @@ void initialize_events(ecs::EntityApi e) {
     interactive.onEvent += [e](auto event) {
         auto& btn = e.get<Button>();
         const auto& skin = get_skin(btn);
-        switch(event) {
+        switch (event) {
             case PointerEvent::Over:
                 play_sound(skin.sfxOver);
                 break;
@@ -101,11 +101,11 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
 
     transform.setScale(btn.baseScale * vec2(sx, sy));
 
-    const auto color = lerp_rgba(COLOR_WHITE, ARGB(0xFF888888), push);
-    transform.color.scale = mul_rgba(btn.baseColor.scale, color);
+    const auto color = lerp_color(COLOR_WHITE, ARGB(0xFF888888), push);
+    transform.color.scale = mul_color(btn.baseColor.scale, color);
 
     const float h = 0.1f * over;
-    transform.color.offset = add_rgba(btn.baseColor.offset, rgba_4f(h, h, h, 0));
+    transform.color.offset = btn.baseColor.offset + color_4f(h, h, h, 0);
 }
 
 void update_movie_frame(ecs::EntityApi entity, const Interactive& interactive) {
@@ -138,14 +138,14 @@ void Button::updateAll() {
         const auto& skin = get_skin(btn);
 
         btn.timeOver = reach_delta(btn.timeOver,
-                                         interactive.over ? 1.0f : 0.0f,
-                                         dt * skin.overSpeedForward,
-                                         -dt * skin.overSpeedBackward);
+                                   interactive.over ? 1.0f : 0.0f,
+                                   dt * skin.overSpeedForward,
+                                   -dt * skin.overSpeedBackward);
 
         btn.timePush = reach_delta(btn.timePush,
-                                         interactive.pushed ? 1.0f : 0.0f,
-                                         dt * skin.pushSpeedForward,
-                                         -dt * skin.pushSpeedBackward);
+                                   interactive.pushed ? 1.0f : 0.0f,
+                                   dt * skin.pushSpeedForward,
+                                   -dt * skin.pushSpeedBackward);
 
         btn.timePost = reach(btn.timePost, 0.0f, 2.0f * dt);
 

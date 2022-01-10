@@ -94,12 +94,12 @@ void process_filters(const Element& el, ExportItem& item) {
     for (auto& filter: el.filters) {
         SGFilter fd;
         fd.type = SGFilterType::None;
-        fd.color = rgba_vec4(filter.color);
+        fd.color = color_vec4(filter.color);
         fd.blur = filter.blur;
         fd.quality = filter.quality;
 
         float a = to_radians(filter.angle);
-        fd.offset = filter.distance * vec2(cosf(a), sinf(a));
+        fd.offset = filter.distance * vec2_cs(a);
 
         if (filter.type == FilterType::drop_shadow) {
             fd.type = SGFilterType::DropShadow;
@@ -144,17 +144,17 @@ void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
     tf.lineSpacing = textRun.attributes.lineSpacing;
 
     SGTextLayerData layer;
-    layer.color = rgba_vec4(textRun.attributes.color);
+    layer.color = color_vec4(textRun.attributes.color);
     tf.layers.push_back(layer);
 
     for (auto& filter: el.filters) {
-        layer.color = rgba_vec4(filter.color);
+        layer.color = color_vec4(filter.color);
         layer.blurRadius = std::fmin(filter.blur.x, filter.blur.y);
         layer.blurIterations = filter.quality;
         layer.offset = {};
         if (filter.type == FilterType::drop_shadow) {
             const float a = to_radians(filter.angle);
-            layer.offset = filter.distance * vec2(cosf(a), sinf(a));
+            layer.offset = filter.distance * vec2_cs(a);
         }
         layer.strength = int(filter.strength);
         tf.layers.push_back(layer);

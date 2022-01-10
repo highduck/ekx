@@ -15,6 +15,7 @@
 #include "ConsoleWindow_impl.hpp"
 #include "ResourcesWindow_impl.hpp"
 #include "Widgets_impl.hpp"
+#include "test_window.hpp"
 
 namespace ek {
 
@@ -26,6 +27,7 @@ void Editor::drawGUI() {
 
     static bool fontIconsWindow = false;
     static bool imGuiDemoWindow = false;
+    static bool testWindow = false;
     auto& settings = Editor::settings;
     bool resetLayout = false;
     if (ImGui::BeginMainMenuBar()) {
@@ -73,6 +75,7 @@ void Editor::drawGUI() {
                 ImGui::MenuItem("Editor Font Icons", nullptr, &fontIconsWindow);
                 ImGui::EndMenu();
             }
+            ImGui::MenuItem("Functions", nullptr, &testWindow);
 
             ImGui::EndMenu();
         }
@@ -153,6 +156,7 @@ void Editor::drawGUI() {
 
     if (imGuiDemoWindow) ImGui::ShowDemoWindow(&imGuiDemoWindow);
     if (fontIconsWindow) showFontIconsPreview(&fontIconsWindow);
+    if (testWindow) showTestWindow(&testWindow);
 }
 
 }

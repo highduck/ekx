@@ -3,9 +3,9 @@ const fs = require("fs");
 
 async function run() {
     console.info("imgui");
-    const branch = "docking";
+    const imgui_branch = "docking";
     await downloadFiles({
-        srcBaseUrl: `https://github.com/ocornut/imgui/raw/${branch}`,
+        srcBaseUrl: `https://github.com/ocornut/imgui/raw/${imgui_branch}`,
         destPath: "src",
         fileList: [
             "imconfig.h",
@@ -35,6 +35,38 @@ async function run() {
 
 ` + imguiconfig;
     fs.writeFileSync("src/imconfig.h", imguiconfig);
+
+    const implot_branch = "master";
+    await downloadFiles({
+        srcBaseUrl: `https://github.com/epezent/implot/raw/${implot_branch}`,
+        destPath: "src",
+        fileList: [
+            "implot.cpp",
+            "implot.h",
+            "implot_internal.h",
+            "implot_items.cpp",
+            "implot_demo.cpp"
+        ]
+    });
+
+    const imguizmo_branch = "master";
+    await downloadFiles({
+        srcBaseUrl: `https://github.com/CedricGuillemet/ImGuizmo/raw/${imguizmo_branch}`,
+        destPath: "src/ImGuizmo",
+        fileList: [
+            "GraphEditor.cpp",
+            "GraphEditor.h",
+            "ImCurveEdit.cpp",
+            "ImCurveEdit.h",
+            "ImGradient.cpp",
+            "ImGradient.h",
+            "ImGuizmo.cpp",
+            "ImGuizmo.h",
+            "ImSequencer.cpp",
+            "ImSequencer.h",
+            "ImZoomSlider.h",
+        ]
+    });
 }
 
 run().catch(() => process.exit(1));

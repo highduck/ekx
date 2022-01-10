@@ -175,7 +175,7 @@ SpriteData renderElement(const Doc& doc, const Element& el, const RenderElementO
     Scanner scanner{};
     scanner.draw(doc, el);
 
-    auto spr = renderElementBatches(brect_get_rect(scanner.bounds), scanner.batches, options);
+    auto spr = renderElementBatches(aabb2_get_rect(scanner.bounds), scanner.batches, options);
     spr.name = el.item.name;
     return spr;
 }

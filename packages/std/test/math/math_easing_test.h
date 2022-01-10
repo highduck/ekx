@@ -23,16 +23,10 @@ static void check_easing_eq(easing_t ease_func, bool in_bounds) {
     }
 }
 
-TEST_CASE("smooth step") {
+TEST_CASE("simple") {
     check_easing_eq(smoothstep, true);
     check_easing_eq(smootherstep, true);
-}
-
-TEST_CASE("linear") {
-    check_easing_eq(ease_linear_in, true);
-    check_easing_eq(ease_linear_inout, true);
-    check_easing_eq(ease_linear_out, true);
-    check_easing_eq(ease_linear_outin, true);
+    check_easing_eq(ease_linear, true);
 }
 
 TEST_CASE("step") {
@@ -83,6 +77,7 @@ TEST_CASE("expo") {
     check_easing_eq(ease_expo_out, true);
     check_easing_eq(ease_expo_outin, true);
 }
+
 TEST_CASE("sine") {
     check_easing_eq(ease_sine_in, true);
     check_easing_eq(ease_sine_inout, true);

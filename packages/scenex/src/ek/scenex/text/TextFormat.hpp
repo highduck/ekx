@@ -63,7 +63,7 @@ enum class TextLayerType {
 // Total: 24 bytes
 struct TextLayerEffect {
     TextLayerType type = TextLayerType::Text;
-    rgba_t color = COLOR_WHITE;
+    color_t color = COLOR_WHITE;
     vec2_t offset = {};
     float blurRadius = 0.0f;
     uint8_t blurIterations = 0;
@@ -97,11 +97,11 @@ struct TextFormat {
     int layersCount = 1;
     int textLayerIndex = 0;
 
-    void setTextColor(rgba_t color) {
+    void setTextColor(color_t color) {
         layers[textLayerIndex].color = color;
     }
 
-    [[nodiscard]] rgba_t getTextColor() const {
+    [[nodiscard]] color_t getTextColor() const {
         return layers[textLayerIndex].color;
     }
 
@@ -120,7 +120,7 @@ struct TextFormat {
         alignment = align.anchor();
     }
 
-    void addShadow(rgba_t color, float radius, vec2_t offset = {}, float hardness = 0.2f /* 0..1 */) {
+    void addShadow(color_t color, float radius, vec2_t offset = {}, float hardness = 0.2f /* 0..1 */) {
         auto& layer = layers[layersCount++];
         layer.type = TextLayerType::Shadow;
         layer.color = color;

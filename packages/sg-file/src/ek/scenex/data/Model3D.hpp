@@ -9,8 +9,8 @@ struct ModelVertex3D {
     vec3_t position;
     vec3_t normal;
     vec2_t uv;
-    rgba_t color;
-    rgba_t color2;
+    color_t color;
+    color_t color2;
 };
 
 template<>
@@ -26,13 +26,13 @@ struct Model3D {
         io(vertices, indices);
     }
 
-    static Model3D createCube(vec3_t position, vec3_t size, rgba_t color = COLOR_WHITE);
+    static Model3D createCube(vec3_t position, vec3_t size, color_t color = COLOR_WHITE);
 
-    static Model3D createPlane(vec3_t position, vec2_t size, rgba_t color = COLOR_WHITE);
+    static Model3D createPlane(vec3_t position, vec2_t size, color_t color = COLOR_WHITE);
 };
 
 
-inline Model3D Model3D::createCube(const vec3_t position, const vec3_t size, rgba_t color) {
+inline Model3D Model3D::createCube(const vec3_t position, const vec3_t size, color_t color) {
     Model3D result{};
 
     // 6 sides
@@ -43,8 +43,8 @@ inline Model3D Model3D::createCube(const vec3_t position, const vec3_t size, rgb
 
     vec3_t n;
     const float u = 0.5f;
-    const rgba_t color1 = color;
-    const rgba_t color2 = COLOR_ZERO;
+    const color_t color1 = color;
+    const color_t color2 = COLOR_ZERO;
 
     // Top +Z
     n = vec3(0, 0, 1);
@@ -109,12 +109,12 @@ inline Model3D Model3D::createCube(const vec3_t position, const vec3_t size, rgb
     return result;
 }
 
-inline Model3D Model3D::createPlane(const vec3_t position, const vec2_t size, rgba_t color) {
+inline Model3D Model3D::createPlane(const vec3_t position, const vec2_t size, color_t color) {
     Model3D result{};
 
     const float u = 0.5f;
-    const rgba_t color1 = color;
-    const rgba_t color2 = COLOR_ZERO;
+    const color_t color1 = color;
+    const color_t color2 = COLOR_ZERO;
     const vec3_t n = vec3(0, 0, 1);
 
     result.vertices.resize(4);

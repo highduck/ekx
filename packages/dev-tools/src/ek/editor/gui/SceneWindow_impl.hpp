@@ -191,8 +191,8 @@ SceneWindow::SceneWindow() {
     view.view3.viewMatrix = mat4_look_at_rh(vec3(0, 0, 100), {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
 }
 
-void drawBox2(rect_t rc, mat3x2_t m, rgba_t color1, rgba_t color2,
-              bool cross = true, rgba_t fillColor = COLOR_ZERO) {
+void drawBox2(rect_t rc, mat3x2_t m, color_t color1, color_t color2,
+              bool cross = true, color_t fillColor = COLOR_ZERO) {
 
     canvas_set_empty_image();
     if (fillColor.value != 0) {
@@ -201,7 +201,7 @@ void drawBox2(rect_t rc, mat3x2_t m, rgba_t color1, rgba_t color2,
         canvas_fill_rect(rc, fillColor);
         canvas_restore_matrix();
     }
-    auto bb = brect_from_rect(rc);
+    auto bb = aabb2_from_rect(rc);
     auto v1 = vec2_transform(bb.min, m);
     auto v2 = vec2_transform(vec2(bb.x1, bb.y0), m);
     auto v3 = vec2_transform(bb.max, m);

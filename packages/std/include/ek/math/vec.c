@@ -2,16 +2,20 @@
 extern "C" {
 #endif
 
-vec2i_t vec2i(int x, int y) {
-    return (vec2i_t) {{x, y}};
+ivec2_t ivec2(int x, int y) {
+    return (ivec2_t) {{x, y}};
 }
 
-vec3i_t vec3i(int x, int y, int z) {
-    return (vec3i_t) {{x, y, z}};
+ivec3_t ivec3(int x, int y, int z) {
+    return (ivec3_t) {{x, y, z}};
 }
 
 vec2_t vec2(float x, float y) {
     return (vec2_t) {{x, y}};
+}
+
+vec2_t vec2_cs(float angle) {
+    return vec2(cosf(angle), sinf(angle));
 }
 
 vec3_t vec3(float x, float y, float z) {

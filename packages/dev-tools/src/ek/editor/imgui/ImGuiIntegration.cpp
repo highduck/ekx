@@ -48,9 +48,11 @@ ImGuiIntegration::ImGuiIntegration() {
     init_font_image();
 
     ImGui::StyleColorsDark();
+    ImPlot::CreateContext();
 }
 
 ImGuiIntegration::~ImGuiIntegration() {
+    ImPlot::DestroyContext();
     sg_imgui_discard(&sokol_gfx_gui_state);
     simgui_shutdown();
 }

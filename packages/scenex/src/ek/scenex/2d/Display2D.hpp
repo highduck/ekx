@@ -161,11 +161,11 @@ class Quad2D : public Drawable2D<Quad2D> {
 public:
     Res<Sprite> src{"empty"};
     rect_t rect = rect_01();
-    rgba_t colors[4] = {
-            rgba_u32(0xFFFFFFFFu),
-            rgba_u32(0xFFFFFFFFu),
-            rgba_u32(0xFFFFFFFFu),
-            rgba_u32(0xFFFFFFFFu)
+    color_t colors[4] = {
+            COLOR_WHITE,
+            COLOR_WHITE,
+            COLOR_WHITE,
+            COLOR_WHITE,
     };
 
     void draw() override;
@@ -176,13 +176,13 @@ public:
     [[nodiscard]]
     bool hitTest(vec2_t point) const override;
 
-    inline Quad2D& setGradientVertical(rgba_t top, rgba_t bottom) {
+    inline Quad2D& setGradientVertical(color_t top, color_t bottom) {
         colors[0] = colors[1] = top;
         colors[2] = colors[3] = bottom;
         return *this;
     };
 
-    inline Quad2D& setColor(rgba_t color) {
+    inline Quad2D& setColor(color_t color) {
         colors[0] = colors[1] = colors[2] = colors[3] = color;
         return *this;
     };
@@ -241,8 +241,8 @@ public:
     TextFormat format;
     rect_t rect = {};
 
-    rgba_t borderColor = ARGB(0x00FF0000);
-    rgba_t fillColor = ARGB(0x00000000);
+    color_t borderColor = ARGB(0x00FF0000);
+    color_t fillColor = ARGB(0x00000000);
 
     bool localize = false;
 
@@ -278,8 +278,8 @@ public:
     float radius = 10.0f;
     float line_width = 10.0f;
     int segments = 50;
-    rgba_t color_inner = COLOR_WHITE;
-    rgba_t color_outer = COLOR_WHITE;
+    color_t color_inner = COLOR_WHITE;
+    color_t color_outer = COLOR_WHITE;
     Res<Sprite> sprite;
 
     void draw() override;
@@ -293,9 +293,9 @@ public:
 
 
 /** utilities **/
-void set_gradient_quad(ecs::EntityApi e, rect_t rc, rgba_t top, rgba_t bottom);
+void set_gradient_quad(ecs::EntityApi e, rect_t rc, color_t top, color_t bottom);
 
-inline void set_color_quad(ecs::EntityApi e, rect_t rc, rgba_t color) {
+inline void set_color_quad(ecs::EntityApi e, rect_t rc, color_t color) {
     set_gradient_quad(e, rc, color, color);
 }
 

@@ -128,7 +128,7 @@ void TrailRenderer2D::draw() {
         const auto nodeScale = nodeArray[node_idx].scale;
         perp *= nodeScale * r;
 
-        const rgba_t cm0 = rgba_alpha_scale_f(cm, energy);
+        const color_t cm0 = color_alpha_scale_f(cm, energy);
         ptr->x = p.x - perp.x;
         ptr->y = p.y - perp.y;
         ptr->u = texCoordU0;

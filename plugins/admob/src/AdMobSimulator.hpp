@@ -18,7 +18,7 @@ public:
 
     void onRenderFrame() override {
         const bool splash = activeInterstitial || activeRewardedAd;
-        const rgba_t color = activeRewardedAd ? ARGB(0x77FF00FF) : ARGB(0x7700FF00);
+        const color_t color = activeRewardedAd ? ARGB(0x77FF00FF) : ARGB(0x7700FF00);
 
         if (splash) {
             canvas_set_empty_image();

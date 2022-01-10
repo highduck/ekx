@@ -21,7 +21,7 @@ typedef struct ek_canvas_frame_stats {
 typedef struct ek_canvas_batch_state {
     ek_shader shader;
     sg_image image;
-    rect_i16_t scissors;
+    i16rect_t scissors;
     uint8_t blend;
 } ek_canvas_batch_state;
 
@@ -65,7 +65,7 @@ typedef enum ek_canvas_state_flags {
     EK_CANVAS_STATE_CHANGED = 0x8,
     EK_CANVAS_PASS_ACTIVE = 0x10,
     EK_CANVAS_CHECK_MASK = EK_CANVAS_CHECK_SCISSORS | EK_CANVAS_CHECK_SHADER | EK_CANVAS_CHECK_IMAGE,
-    _EK_CANVAS_STATE_FLAGS_FORCE_U32 = 0x7FFFFFFFu
+    _EK_CANVAS_STATE_FLAGS_FORCE_U32 = 0xFFFFFFFFu
 } ek_canvas_state_flags;
 
 typedef struct ek_canvas_pipeline_item {
@@ -187,11 +187,11 @@ void canvas_restore_color(void);
 
 void canvas_scale_alpha(float alpha);
 
-void canvas_scale_color(rgba_t multiplier);
+void canvas_scale_color(color_t multiplier);
 
 void canvas_concat_color(color2_t color);
 
-void canvas_offset_color(rgba_t offset);
+void canvas_offset_color(color_t offset);
 
 void canvas_save_image_rect(void);
 
@@ -223,26 +223,26 @@ void canvas_quad(float x, float y, float w, float h);
 
 void canvas_quad_rotated(float x, float y, float w, float h);
 
-void canvas_quad_color(float x, float y, float w, float h, rgba_t color);
+void canvas_quad_color(float x, float y, float w, float h, color_t color);
 
-void canvas_quad_color4(float x, float y, float w, float h, rgba_t c1, rgba_t c2, rgba_t c3, rgba_t c4);
+void canvas_quad_color4(float x, float y, float w, float h, color_t c1, color_t c2, color_t c3, color_t c4);
 
-void canvas_fill_rect(rect_t rc, rgba_t color);
+void canvas_fill_rect(rect_t rc, color_t color);
 
-void canvas_fill_circle(vec3_t circle, rgba_t inner_color, rgba_t outer_color, int segments);
+void canvas_fill_circle(vec3_t circle, color_t inner_color, color_t outer_color, int segments);
 
-void canvas_line_ex(vec2_t start, vec2_t end, rgba_t color1, rgba_t color2, float lineWidth1, float lineWidth2);
+void canvas_line_ex(vec2_t start, vec2_t end, color_t color1, color_t color2, float lineWidth1, float lineWidth2);
 
-void canvas_line(vec2_t start, vec2_t end, rgba_t color, float line_width);
+void canvas_line(vec2_t start, vec2_t end, color_t color, float line_width);
 
 void canvas_line_arc(float x, float y, float r,
                      float angle_from, float angle_to,
                      float line_width, int segments,
-                     rgba_t color_inner, rgba_t color_outer);
+                     color_t color_inner, color_t color_outer);
 
-void canvas_stroke_rect(rect_t rc, rgba_t color, float lineWidth);
+void canvas_stroke_rect(rect_t rc, color_t color, float lineWidth);
 
-void canvas_stroke_circle(vec3_t circle, rgba_t color, float lineWidth, int segments);
+void canvas_stroke_circle(vec3_t circle, color_t color, float lineWidth, int segments);
 
 void canvas_setup(void);
 
@@ -262,9 +262,9 @@ void canvas_draw_batch_pipeline(sg_pipeline pip, uint32_t images_count);
 
 void canvas_draw_batch(void);
 
-void canvas_write_vertex(float x, float y, float u, float v, rgba_t cm, rgba_t co);
+void canvas_write_vertex(float x, float y, float u, float v, color_t cm, color_t co);
 
-void canvas_write_raw_vertex(vec2_t pos, vec2_t tex_coord, rgba_t cm, rgba_t co);
+void canvas_write_raw_vertex(vec2_t pos, vec2_t tex_coord, color_t cm, color_t co);
 
 void canvas_write_index(uint16_t index);
 
