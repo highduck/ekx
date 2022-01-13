@@ -18,11 +18,15 @@ typedef struct ek_bitmap {
 } ek_bitmap;
 
 void ek_bitmap_alloc(ek_bitmap* bitmap, int width, int height);
+
 void ek_bitmap_free(ek_bitmap* bitmap);
 
-#define EK_PIXEL_SWAP_RB(pixel) (((pixel) & 0xFF00FF00u) | (((pixel) >> 16u) & 0xFFu) | (((pixel) & 0xFFu) << 16u))
+// swizzle XYZW <-> XWZY, useful to convert between RGBA and BGRA pixel formats
+inline static uint32_t swizzle_xwzy_byte4(uint32_t a) {
+    return (a & 0xFF00FF00u) | (((a << 16u) | (a >> 16u)) & 0x00FF00FFu);
+}
 
-void ek_bitmap_swap_rb(ek_bitmap* bitmap);
+void ek_bitmap_swizzle_xwzy(ek_bitmap* bitmap);
 
 void ek_bitmap_fill(ek_bitmap* bitmap, uint32_t color);
 
@@ -34,7 +38,7 @@ void ek_bitmap_premultiply(ek_bitmap* bitmap);
 
 // convert back all color components using alpha:
 // r = r' / a
-void ek_bitmap_un_premultiply(ek_bitmap* bitmap);
+void ek_bitmap_unpremultiply(ek_bitmap* bitmap);
 
 void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool pma);
 

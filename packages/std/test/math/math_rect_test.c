@@ -1,6 +1,3 @@
-#ifndef MATH_RECT_TEST_H
-#define MATH_RECT_TEST_H
-
 #include "math_test_common.h"
 
 TEST_SUITE_BEGIN("math: rects");
@@ -22,5 +19,3 @@ TEST_CASE("is empty") {
 }
 
 TEST_SUITE_END();
-
-#endif // MATH_RECT_TEST_H

@@ -37,9 +37,35 @@
 
 namespace ek {
 
+bool frame_timer_update_hrts(FrameTimer* ft, double* delta) {
+    if (ek_app.frame_callback_timestamp > 0) {
+        const double ts = ek_app.frame_callback_timestamp;
+        const double prev = ft->prev_frame_high_res_ts;
+        ft->prev_frame_high_res_ts = ts;
+        if (prev > 0.0) {
+            *delta = ts - prev;
+            return true;
+        }
+    }
+    return false;
+}
+
 double FrameTimer::update() {
-    ++frameIndex;
-    return deltaTime = ek_ticks_to_sec(ek_ticks(&timer_));
+    double delta;
+    if(frame_timer_update_hrts(this, &delta)) {
+        deltaTime = delta;
+        return delta;
+    }
+    delta = ek_ticks_to_sec(ek_ticks(&timer_));
+    deltas[(frameIndex++) % 256] = delta;
+    const uint32_t num = LIKELY(deltas_num == 256u) ? 256u : ++deltas_num;
+    delta = 0.0;
+    for (uint32_t i = 0; i < num; ++i) {
+        delta += deltas[i];
+    }
+    delta /= (double) num;
+    deltaTime = delta;
+    return delta;
 }
 
 void logDisplayInfo() {

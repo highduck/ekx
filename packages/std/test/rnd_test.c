@@ -1,9 +1,11 @@
-#ifndef RND_TEST_H
-#define RND_TEST_H
-
 #include <doctest.h>
+
 #include <ek/rnd.h>
 #include <ek/time.h>
+#include <ek/math.h>
+
+#include <float.h>
+#include <stdio.h>
 
 TEST_SUITE_BEGIN("random");
 
@@ -13,7 +15,7 @@ enum {
 };
 
 static uint32_t frange(uint32_t v, uint32_t mod) {
-    return (uint32_t) (ek_norm_f32_from_u32(v) * (float) mod);
+    return (uint32_t) (unorm_f32_from_u32(v) * (float) mod);
 }
 
 static void print_stats(const int* buckets) {
@@ -68,6 +70,36 @@ TEST_CASE("distribution") {
     printf("repeats: %d\n", repeats);
 }
 
+DOCTEST_TEST_CASE("ranges") {
+
+    const uint32_t N = 5;
+
+    for (uint32_t i = 0; i < N; ++i) {
+        int n = random_range_i(-100, 100);
+        CHECK(n >= -100);
+        CHECK(n <= 100);
+        n = random_range_i(100, -100);
+        CHECK(n >= -100);
+        CHECK(n <= 100);
+
+        float f = random_range_f(-100, 100);
+        CHECK(f >= -100.0f);
+        CHECK(f < 100.0f);
+
+        f = random_range_f(100, -100);
+        CHECK(f > -100.0f);
+        CHECK(f <= 100.0f);
+
+        // always true
+        CHECK(random_chance(1.0f));
+        // always false
+        CHECK_FALSE(random_chance(0.0f));
+
+        CHECK_EQ(random_n(1), 0);
+
+        CHECK(random_f() < 1.0f);
+    }
+}
+
 TEST_SUITE_END();
 
-#endif // RND_TEST_H

@@ -174,6 +174,30 @@ vec4_t scale_vec4(vec4_t a, float s) {
     return (vec4_t) {{a.x * s, a.y * s, a.z * s, a.w * s}};
 }
 
+vec2_t add_scale_vec2(vec2_t a, vec2_t b, float s) {
+    return (vec2_t) {{
+                             a.x + b.x * s,
+                             a.y + b.y * s,
+                     }};
+}
+
+vec3_t add_scale_vec3(vec3_t a, vec3_t b, float s) {
+    return (vec3_t) {{
+                             a.x + b.x * s,
+                             a.y + b.y * s,
+                             a.z + b.z * s,
+                     }};
+}
+
+vec4_t add_scale_vec4(vec4_t a, vec4_t b, float s) {
+    return (vec4_t) {{
+                             a.x + b.x * s,
+                             a.y + b.y * s,
+                             a.z + b.z * s,
+                             a.w + b.w * s,
+                     }};
+}
+
 vec2_t mul_vec2(vec2_t a, vec2_t b) {
     vec2_t r;
     r.x = a.x * b.x;

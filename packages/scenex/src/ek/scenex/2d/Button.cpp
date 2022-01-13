@@ -2,7 +2,7 @@
 
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/math.h>
-#include <ek/math/Random.hpp>
+#include <ek/rnd.h>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/AudioManager.hpp>
@@ -18,7 +18,7 @@ void play_sound(const char* id) {
 }
 
 void start_post_tween(Button& btn) {
-    btn.timePost = fmaxf(random(0.7f, 1.0f), btn.timePost);
+    btn.timePost = fmaxf(random_range_f(0.7f, 1.0f), btn.timePost);
 }
 
 void handle_back_button(Button& btn, const NodeEventData& ev) {

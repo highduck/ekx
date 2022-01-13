@@ -52,5 +52,7 @@ typedef double ek_f64;
 
 #define UNUSED(x) (void)(x)
 #define UNREACHABLE() __buildin_unreachable()
+#define UNLIKELY(x) __builtin_expect(!!(x), 0)
+#define LIKELY(x) __builtin_expect(!!(x), 1)
 
 #endif // EK_PRE_H

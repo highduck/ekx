@@ -1,7 +1,3 @@
-
-#ifndef MATH_VEC_TEST_H
-#define MATH_VEC_TEST_H
-
 #include "math_test_common.h"
 
 TEST_SUITE_BEGIN("vec2");
@@ -175,4 +171,3 @@ vec4_t b = vec4(16.553662f ,-28.483541f ,-47.156044f ,-47.322734f);
 }
 
 TEST_SUITE_END();
-#endif // MATH_VEC_TEST_H

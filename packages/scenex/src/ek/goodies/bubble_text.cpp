@@ -5,7 +5,7 @@
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/SceneFactory.hpp>
 
-#include <ek/math/Random.hpp>
+#include <ek/rnd.h>
 #include <ek/scenex/base/TimeLayer.hpp>
 #include <ek/math.h>
 
@@ -60,7 +60,7 @@ ecs::EntityApi BubbleText::create(const char* fontName, const String& text, vec2
     c.delay = delay;
     c.start = pos;
     float spread = 10.0f;
-    c.offset.x = rand_fx.random(-spread, spread);
+    c.offset.x = random_range_f(-spread, spread);
     TextFormat format{fontName, 32.0f};
     format.setAlignment(Alignment::Center);
     format.setTextColor(COLOR_WHITE);

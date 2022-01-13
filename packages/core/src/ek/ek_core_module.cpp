@@ -1,9 +1,6 @@
-#include "math/Random.hpp"
-
-//#include "util/Res.hpp"
-
 #include <ek/log.h>
 #include <ek/time.h>
+#include <ek/rnd.h>
 
 namespace ek::core {
 
@@ -13,10 +10,9 @@ void setup() {
     ek_time_init();
     ek_timers_init();
 
-    auto seed = ek_time_seed32();
-    rand_default.setSeed(seed++);
-    rand_fx.setSeed(seed++);
-    rand_game.setSeed(seed++);
+    uint32_t seed = ek_time_seed32();
+    random_seed = seed++;
+    game_random_seed = seed;
 }
 
 }

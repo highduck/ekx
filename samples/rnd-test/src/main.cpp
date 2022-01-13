@@ -2,7 +2,7 @@
 #include <ek/core.hpp>
 #include <ek/gfx.h>
 #include <ek/canvas.h>
-#include <ek/math/Random.hpp>
+#include <ek/rnd.h>
 #include <ek/math.h>
 #include <ek/bitset.h>
 #include <ek/time.h>
@@ -88,10 +88,8 @@ void on_frame() {
         sg_begin_default_pass(&pass_action, (int) width, (int) height);
 
         for (int i = 0; i < 5000000; ++i) {
-            const uint32_t cx = (uint32_t) (rand_default.random() *
-                                            (float) estimator.bitset_size);// % bitset_segments;
-            const uint32_t cy = (uint32_t) (rand_default.random() *
-                                            (float) estimator.bitset_size);// % bitset_segments;
+            const uint32_t cx = (uint32_t) random_range_f(0, (float) estimator.bitset_size);
+            const uint32_t cy = (uint32_t) random_range_f(0, (float) estimator.bitset_size);
 //                uint32_t cx = (uint32_t) (rand_default.next() % estimator.bitset_size);
 //                uint32_t cy = (uint32_t) (rand_default.next() % estimator.bitset_size);
 //                const uint32_t cx = rand() % bitset_segments;

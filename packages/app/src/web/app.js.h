@@ -47,7 +47,7 @@ bool ek_app_js__on_resize(float w, float h, float dpr);
 
 void ek_app_js__on_focus(int flags);
 
-void ek_app_js__loop(void);
+void ek_app_js__loop(double high_res_timestamp);
 
 
 

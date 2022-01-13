@@ -70,7 +70,8 @@ EMSCRIPTEN_KEEPALIVE void ek_app_js__on_focus(int flags) {
     ek_app__process_event(event);
 }
 
-EMSCRIPTEN_KEEPALIVE void ek_app_js__loop(void) {
+EMSCRIPTEN_KEEPALIVE void ek_app_js__loop(double high_res_timestamp) {
+    ek_app.frame_callback_timestamp = high_res_timestamp;
     ek_app__process_frame();
     update_mouse_cursor();
     if (ek_app.state & EK_APP_STATE_EXIT_PENDING) {

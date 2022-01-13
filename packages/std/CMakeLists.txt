@@ -59,35 +59,9 @@ else ()
     error("Platform: UNKNOWN")
 endif ()
 
-
 #if (EKX_BUILD_TESTS)
-    project(std-tests)
+    add_subdirectory(test)
 
-    add_executable(${PROJECT_NAME}
-            test/main.cpp
-            )
-
-    add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
-
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-            C_STANDARD 11
-            CXX_STANDARD 17
-            )
-
-    target_compile_options(${PROJECT_NAME}
-            PUBLIC -g
-            #PUBLIC -flto
-            PUBLIC -Os
-            PUBLIC -fno-strict-aliasing
-            PUBLIC -fno-exceptions
-            PUBLIC -fno-rtti
-            PUBLIC -ffast-math
-            PUBLIC -Wstrict-aliasing=2
-#            PUBLIC -fshort-enums
-            )
-
-    target_link_libraries(${PROJECT_NAME}
-            PUBLIC ekx::std
-            PUBLIC doctest
-            )
+    add_executable(bitmap-test include/ek/_bitmap/bitmap_test.c)
+    target_link_libraries(bitmap-test PRIVATE ekx::std)
 #endif ()

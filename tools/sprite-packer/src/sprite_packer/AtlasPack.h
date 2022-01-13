@@ -6,6 +6,8 @@
 #include "MaxRects.hpp"
 #include "sprpk_image.h"
 #include "Writer.h"
+#include "ek/log.h"
+#include "ek/print.h"
 #include <cstdio>
 
 namespace sprite_packer {
@@ -16,7 +18,7 @@ void formatAtlasFileName(char* buffer, int bufferSize, const char* name, float s
     char pageSuffix[8];
     *pageSuffix = 0;
     if (pageIndex != 0) {
-        snprintf(pageSuffix, 8, "_%d", pageIndex);
+        ek_snprintf(pageSuffix, 8, "_%d", pageIndex);
     }
     const char* scaleSuffix = "";
     if (scale <= 1) scaleSuffix = "@1x";
@@ -24,11 +26,11 @@ void formatAtlasFileName(char* buffer, int bufferSize, const char* name, float s
     else if (scale <= 3) scaleSuffix = "@3x";
     else if (scale <= 4) scaleSuffix = "@4x";
     else {
-        SPRITE_PACKER_LOG("atlas more than 4x scale-factor! %d %%\n", (int) (100 * scale));
+        log_warn("atlas more than 4x scale-factor! %d %%\n", (int) (100 * scale));
         // to support bigger density
         scaleSuffix = "@4x";
     }
-    snprintf(buffer, bufferSize, "%s%s%s.%s", name, pageSuffix, scaleSuffix, ext);
+    ek_snprintf(buffer, bufferSize, "%s%s%s.%s", name, pageSuffix, scaleSuffix, ext);
 }
 
 void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const char* name) {
@@ -39,7 +41,7 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
     char imagePath[1024];
     int page_index = 0;
     for (auto& page: resolution.pages) {
-        assert(page.bitmap.pixels != nullptr);
+        EK_ASSERT(page.bitmap.pixels != nullptr);
         formatAtlasFileName(imagePath, 1024, name, resolution.resolution_scale, page_index, "png");
         bytes_write_u16(&writer, page.w);
         bytes_write_u16(&writer, page.h);
@@ -54,7 +56,7 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
         }
 
         char absImagePath[1024];
-        snprintf(absImagePath, 1024, "%s/%s", outputPath, imagePath);
+        ek_snprintf(absImagePath, 1024, "%s/%s", outputPath, imagePath);
 
         //page.image_path = name + get_atlas_suffix(resolution.resolution_scale, page_index) + ".png";
         sprite_pack_image_save(&page.bitmap, absImagePath, SPRITE_PACK_ALPHA | SPRITE_PACK_PNG);
@@ -65,7 +67,7 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
     char atlasPath[1024];
     formatAtlasFileName(atlasPath, 1024, name, resolution.resolution_scale, 0, "atlas");
     char absAtlasPath[1024];
-    snprintf(absAtlasPath, 1024, "%s/%s", outputPath, atlasPath);
+    ek_snprintf(absAtlasPath, 1024, "%s/%s", outputPath, atlasPath);
     auto f = fopen(absAtlasPath, "wb");
     fwrite(writer.data, 1, writer.pos, f);
     fclose(f);
@@ -75,9 +77,9 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
 
 static void packAtlasThread(const char* name, const char* outputPath, AtlasData& resolution) {
     resolution.pages = packSprites(resolution.sprites, resolution.maxWidth, resolution.maxHeight);
-    SPRITE_PACKER_LOG("  - '%s-%d' packed\n", name, resolution.resolution_index);
+    log_info("  - '%s-%d' packed\n", name, resolution.resolution_index);
     save_atlas_resolution(resolution, outputPath, name);
-    SPRITE_PACKER_LOG("  - '%s-%d' encoded\n", name, resolution.resolution_index);
+    log_info("  - '%s-%d' encoded\n", name, resolution.resolution_index);
 }
 
 void Atlas::packAndSaveMultiThreaded(const char* outputPath) {
@@ -91,32 +93,31 @@ void Atlas::packAndSaveMultiThreaded(const char* outputPath) {
     for (auto& th: threads) {
         th.join();
     }
-    SPRITE_PACKER_LOG("'%s' atlas build completed\n", name.c_str());
+    log_info("'%s' atlas build completed\n", name.c_str());
 }
 
 /*** Pack Sprites ***/
 
-ek_img_rect no_pack_padding(ek::binpack::rect_t rect, int pad) {
-    return {
+irect_t no_pack_padding(ek::binpack::rect_t rect, int pad) {
+    return {{
             rect.x + pad,
             rect.y + pad,
             rect.width - 2 * pad,
             rect.height - 2 * pad
-    };
+    }};
 }
 
-ek_img_rect_f calc_uv(ek_img_rect source, float w, float h, bool rotated) {
+rect_t calc_uv(irect_t source, float w, float h, bool rotated) {
     if (rotated) {
         std::swap(source.w, source.h);
     }
-    return {
+    return {{
             (float) source.x / w,
             (float) source.y / h,
             (float) source.w / w,
             (float) source.h / h
-    };
+    }};
 }
-
 
 std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int maxWidth, const int maxHeight) {
     std::vector<PageData> pages;
@@ -129,7 +130,7 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
         ek::binpack::packer_state_t packer_state{maxWidth, maxHeight};
 
         for (auto& sprite: sprites) {
-            if (!sprite.is_packed()) {
+            if (!(sprite.flags & SPRITE_FLAG_PACKED)) {
                 packer_state.add(
                         sprite.source.w,
                         sprite.source.h,
@@ -156,23 +157,22 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
                         continue;
                     }
                     auto& sprite = packer_state.get_user_data<SpriteData>(i);
-                    sprite.enable(SpriteFlag::Packed);
-                    if (packer_state.is_rotated(i)) {
-                        sprite.enable(SpriteFlag::Rotated);
-                    }
+                    sprite.flags |= SPRITE_FLAG_PACKED;
 
-                    const ek_img_rect packed_rect = no_pack_padding(packer_state.get_rect(i), sprite.padding);
-                    if (sprite.is_rotated()) {
-                        copyPixels_CCW_90(&page.bitmap, packed_rect.x, packed_rect.y, &sprite.bitmap,
-                                          sprite.source.x, sprite.source.y, sprite.source.w, sprite.source.h);
-                    } else {
-                        copyPixels(&page.bitmap, packed_rect.x, packed_rect.y, &sprite.bitmap,
-                                   sprite.source.x, sprite.source.y, sprite.source.w, sprite.source.h);
+                    const irect_t packed_rect = no_pack_padding(packer_state.get_rect(i), sprite.padding);
+                    if (packer_state.is_rotated(i)) {
+                        sprite.flags |= SPRITE_FLAG_ROTATED;
+                        copy_pixels_ccw_90(&page.bitmap, packed_rect.x, packed_rect.y, &sprite.bitmap,
+                                           sprite.source.x, sprite.source.y, sprite.source.w, sprite.source.h);
+                    }
+                    else {
+                        copy_pixels(&page.bitmap, packed_rect.x, packed_rect.y, &sprite.bitmap,
+                                    sprite.source.x, sprite.source.y, sprite.source.w, sprite.source.h);
                     }
                     ek_bitmap_free(&sprite.bitmap);
                     sprite.bitmap = page.bitmap;
                     sprite.source = packed_rect;
-                    sprite.uv = calc_uv(packed_rect, fw, fh, sprite.is_rotated());
+                    sprite.uv = calc_uv(packed_rect, fw, fh, sprite.flags & SPRITE_FLAG_ROTATED);
 
                     page.sprites.emplace_back(sprite);
                 }

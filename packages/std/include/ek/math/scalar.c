@@ -72,6 +72,20 @@ uint8_t u8_add_sat(uint8_t a, uint8_t b) {
     return __builtin_add_overflow(a, b, &c) ? 0xFF : c;
 }
 
+float unorm_f32_from_u32(uint32_t value) {
+    uint32_t exponent = 127;
+    uint32_t mantissa = value & ((1u << 23u) - 1u);
+    union {
+        uint32_t u32;
+        float f32;
+    } bits;
+    bits.u32 = (exponent << 23u) | mantissa;
+    const float f = bits.f32 - 1.0f;
+    EK_ASSERT_R2(f >= 0.0f);
+    EK_ASSERT_R2(f < 1.0f);
+    return f;
+}
+
 #ifdef __cplusplus
 }
 #endif

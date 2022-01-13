@@ -4,43 +4,19 @@
 #include <stdint.h>
 #include <stb/stb_image.h>
 #include <stb/stb_image_write.h>
+#include <ek/math.h>
+#include <ek/bitmap.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct ek_img_rect {
-    int x;
-    int y;
-    int w;
-    int h;
-} ek_img_rect;
+void clip_rects(irect_t src_bounds, irect_t dest_bounds,
+                irect_t* src_rect, irect_t* dest_rect);
 
-typedef struct ek_img_rect_f {
-    float x;
-    float y;
-    float w;
-    float h;
-} ek_img_rect_f;
+uint32_t get_pixel_unsafe(const ek_bitmap* image, int x, int y);
 
-typedef struct ek_image {
-    int w;
-    int h;
-    uint32_t* pixels;
-} ek_image;
-
-void ek_bitmap_alloc(ek_image* img, int w, int h);
-
-void ek_bitmap_free(ek_image* img);
-
-ek_img_rect clampBounds(ek_img_rect a, ek_img_rect b);
-
-void clipRects(ek_img_rect src_bounds, ek_img_rect dest_bounds,
-               ek_img_rect* src_rect, ek_img_rect* dest_rect);
-
-uint32_t get_pixel_unsafe(const ek_image* image, int x, int y);
-
-void set_pixel_unsafe(ek_image* image, int x, int y, uint32_t pixel);
+void set_pixel_unsafe(ek_bitmap* image, int x, int y, uint32_t pixel);
 
 /// 1 2 3 4
 /// 1 2 3 4
@@ -50,11 +26,11 @@ void set_pixel_unsafe(ek_image* image, int x, int y, uint32_t pixel);
 //  2 2
 //  1 1
 
-void copyPixels_CCW_90(ek_image* dest, int dx, int dy,
-                       const ek_image* src, int sx, int sy, int sw, int sh);
+void copy_pixels_ccw_90(ek_bitmap* dest, int dx, int dy,
+                        const ek_bitmap* src, int sx, int sy, int sw, int sh);
 
-void copyPixels(ek_image* dest, int dx, int dy,
-                const ek_image* src, int sx, int sy, int sw, int sh);
+void copy_pixels(ek_bitmap* dest, int dx, int dy,
+                 const ek_bitmap* src, int sx, int sy, int sw, int sh);
 
 typedef enum sprite_pack_format {
     SPRITE_PACK_AUTO = 0,
@@ -64,7 +40,7 @@ typedef enum sprite_pack_format {
     SPRITE_PACK_ALPHA = 0x10
 } sprite_pack_format;
 
-void sprite_pack_image_save(const ek_image* bitmap, const char* path, uint32_t format_flags);
+void sprite_pack_image_save(const ek_bitmap* bitmap, const char* path, uint32_t format_flags);
 
 
 #ifdef __cplusplus

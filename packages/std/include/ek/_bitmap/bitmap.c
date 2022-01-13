@@ -2,6 +2,10 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void ek_bitmap_alloc(ek_bitmap* bitmap, int width, int height) {
     EK_ASSERT(bitmap != 0);
     EK_ASSERT(width > 0);
@@ -9,7 +13,7 @@ void ek_bitmap_alloc(ek_bitmap* bitmap, int width, int height) {
     free(bitmap->pixels);
     bitmap->w = width;
     bitmap->h = height;
-    bitmap->pixels = malloc(width * height * 4);
+    bitmap->pixels = calloc(1, width * height * 4);
 }
 
 void ek_bitmap_free(ek_bitmap* bitmap) {
@@ -17,12 +21,12 @@ void ek_bitmap_free(ek_bitmap* bitmap) {
     bitmap->pixels = NULL;
 }
 
-void ek_bitmap_swap_rb(ek_bitmap* bitmap) {
-    uint32_t* pixels = bitmap->pixels;
-    const int size = bitmap->w * bitmap->h;
-    for (int i = 0; i < size; ++i) {
-        const uint32_t c = pixels[i];
-        pixels[i] = EK_PIXEL_SWAP_RB(c);
+void ek_bitmap_swizzle_xwzy(ek_bitmap* bitmap) {
+    uint32_t* it = bitmap->pixels;
+    const uint32_t* end = it + (bitmap->w * bitmap->h);
+    while (it != end) {
+        *it = swizzle_xwzy_byte4(*it);
+        ++it;
     }
 }
 
@@ -54,19 +58,19 @@ void ek_bitmap_premultiply(ek_bitmap* bitmap) {
         if (!a) {
             it->u32 = 0;
         } else if (a ^ 0xFF) {
-            it->r = (it->r * a) / 0xFF;
-            it->g = (it->g * a) / 0xFF;
-            it->b = (it->b * a) / 0xFF;
+            it->r = ((uint16_t)it->r * a) / 0xFFu;
+            it->g = ((uint16_t)it->g * a) / 0xFFu;
+            it->b = ((uint16_t)it->b * a) / 0xFFu;
         }
         ++it;
     }
 }
 
-inline static uint8_t saturate_u8(int v) {
+inline static uint8_t saturate_u8(uint16_t v) {
     return v < 255 ? v : 255;
 }
 
-void ek_bitmap_un_premultiply(ek_bitmap* bitmap) {
+void ek_bitmap_unpremultiply(ek_bitmap* bitmap) {
     ek_pix_* it = (ek_pix_*) bitmap->pixels;
     const ek_pix_* end = it + (bitmap->w * bitmap->h);
 
@@ -74,9 +78,9 @@ void ek_bitmap_un_premultiply(ek_bitmap* bitmap) {
         const uint8_t a = it->a;
         if (a && (a ^ 0xFF)) {
             const uint8_t half = a / 2;
-            it->r = saturate_u8((it->r * 0xFF + half) / a);
-            it->g = saturate_u8((it->g * 0xFF + half) / a);
-            it->b = saturate_u8((it->b * 0xFF + half) / a);
+            it->r = saturate_u8(((uint16_t)it->r * 0xFFu + half) / a);
+            it->g = saturate_u8(((uint16_t)it->g * 0xFFu + half) / a);
+            it->b = saturate_u8(((uint16_t)it->b * 0xFFu + half) / a);
         }
         ++it;
     }
@@ -118,3 +122,7 @@ void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool p
     }
     log_debug("decode bitmap: end");
 }
+
+#ifdef __cplusplus
+}
+#endif

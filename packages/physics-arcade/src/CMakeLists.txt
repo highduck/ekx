@@ -1,6 +1,5 @@
 add_library(${PROJECT_NAME} STATIC
         ArcadePhysicsModule.cpp
-        collisions.hpp
         QuadTree.hpp
         RegularGrid.hpp)
 

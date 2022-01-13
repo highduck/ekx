@@ -4,15 +4,14 @@
 #include "std/buf.c.h"
 #include "std/log.c.h"
 #include "std/murmur.c.h"
-#include "std/rnd.c.h"
 #include "std/print.c.h"
 #include "std/string.c.h"
 #include "std/time.c.h"
 #include "std/utf8.c.h"
-//#include "std/handle.c.h"
 
+#include <ek/rnd.c>
 #include <ek/ref.c>
-#include <ek/handle2.c>
+#include <ek/ids.c>
 #include <ek/math.c>
 
 #ifdef __EMSCRIPTEN__

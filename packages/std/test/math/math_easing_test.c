@@ -1,15 +1,13 @@
-#ifndef EK_MATH_EASING_TEST_H
-#define EK_MATH_EASING_TEST_H
-
 #include "math_test_common.h"
 
 TEST_SUITE_BEGIN("math: easing");
+
+const int N = 25;
 
 static void check_easing_eq(easing_t ease_func, bool in_bounds) {
     CHECK(ease_func);
     CHECK_NEAR_EQ(0.0f, ease_func(0));
     CHECK_NEAR_EQ(1.0f, ease_func(1));
-    const int N = 100;
     for(int i = 0; i <= N; ++i) {
         float x = (float)i / (float)N;
         const float R = ease_func(x);
@@ -105,5 +103,3 @@ TEST_CASE("elastic") {
     check_easing_eq(ease_elastic_out, false);
     check_easing_eq(ease_elastic_outin, false);
 }
-
-#endif // EK_MATH_EASING_TEST_H

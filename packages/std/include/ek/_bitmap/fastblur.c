@@ -5,6 +5,10 @@
 
 // Exponential blur, Jani Huhtanen, 2006
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define APREC 12
 #define ZPREC 10
 
@@ -47,8 +51,8 @@ static void blur_rows(uint8_t* data, int width, int height, int stride, int alph
 
 static void exp_blur_alpha(uint8_t* data, int width, int height, int stride, float radius, int iterations) {
     EK_ASSERT(radius >= 1.0f && iterations > 0);
-    float sigma = radius * (1.0f / sqrtf((float)iterations)); // 1 / sqrt(3)
-    int alpha = (int) ((1 << APREC) * (1.0f - powf((float)iterations * 5.0f / 255.0f, 1.0f / sigma)));
+    float sigma = radius * (1.0f / sqrtf((float) iterations)); // 1 / sqrt(3)
+    int alpha = (int) ((1 << APREC) * (1.0f - powf((float) iterations * 5.0f / 255.0f, 1.0f / sigma)));
     for (int i = 0; i < iterations; ++i) {
         blur_rows(data, width, height, stride, alpha);
         blur_cols(data, width, height, stride, alpha);
@@ -57,7 +61,7 @@ static void exp_blur_alpha(uint8_t* data, int width, int height, int stride, flo
 
 static uint8_t shl_saturate(int x, int bits) {
     x <<= bits;
-    return x > 0xFF ? 0xFF : (uint8_t)x;
+    return x > 0xFF ? 0xFF : (uint8_t) x;
 }
 
 static void saturate_alpha(uint8_t* data, int width, int height, int stride, int shift) {
@@ -89,3 +93,7 @@ void ek_bitmap_blur_gray(uint8_t* data, int width, int height, int stride, float
         saturate_alpha(data, width, height, stride, strength);
     }
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -5,8 +5,6 @@ project(core)
 add_library(${PROJECT_NAME} STATIC
         ek/ek_core_module.cpp
 
-        ek/math/Random.hpp
-
         ek/serialize/streams.hpp
         ek/serialize/core.hpp
         ek/serialize/types.hpp

@@ -31,57 +31,32 @@ struct AtlasConfig {
     }
 };
 
-
-enum class SpriteFlag {
-    None = 0u,
-    Rotated = 1u,
-    Packed = 2u,
-    Trim = 4u
-};
+typedef enum sprite_flag_t {
+    SPRITE_FLAG_ROTATED = 1u,
+    SPRITE_FLAG_PACKED = 2u,
+    SPRITE_FLAG_TRIM = 4u
+} sprite_flag_t;
 
 struct SpriteData {
 
     std::string name;
 
     // physical rect
-    ek_img_rect_f rc;
+    rect_t rc;
 
     // coords in atlas image
-    ek_img_rect_f uv;
+    rect_t uv;
 
     // flags in atlas image
     uint8_t flags = 0u;
 
     // rect in source image
-    ek_img_rect source;
+    irect_t source;
 
     uint8_t padding = 1;
 
     // reference image;
-    ek_image bitmap = {0, 0, nullptr};
-
-    [[nodiscard]]
-    bool is_packed() const {
-        return (flags & static_cast<uint8_t>(SpriteFlag::Packed)) != 0;
-    }
-
-    [[nodiscard]]
-    bool is_rotated() const {
-        return (flags & static_cast<uint8_t>(SpriteFlag::Rotated)) != 0;
-    }
-
-    void enable(SpriteFlag flag) {
-        flags |= static_cast<uint8_t>(flag);
-    }
-
-    void disable(SpriteFlag flag) {
-        flags &= ~static_cast<uint8_t>(flag);
-    }
-
-//    template<typename S>
-//    void serialize(IO <S>& io) {
-//        io(name, rc, uv, flags);
-//    }
+    ek_bitmap bitmap = {0, 0, nullptr};
 };
 
 struct PageData {
@@ -89,7 +64,7 @@ struct PageData {
     uint16_t h;
     std::vector<SpriteData> sprites;
     std::string image_path;
-    ek_image bitmap;
+    ek_bitmap bitmap;
 
 //    template<typename S>
 //    void serialize(IO <S>& io) {

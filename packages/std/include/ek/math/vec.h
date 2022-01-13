@@ -175,6 +175,11 @@ vec2_t scale_vec2(vec2_t a, float s);
 vec3_t scale_vec3(vec3_t a, float s);
 vec4_t scale_vec4(vec4_t a, float s);
 
+// r = a + s * b;
+vec2_t add_scale_vec2(vec2_t a, vec2_t b, float s);
+vec3_t add_scale_vec3(vec3_t a, vec3_t b, float s);
+vec4_t add_scale_vec4(vec4_t a, vec4_t b, float s);
+
 vec2_t mul_vec2(vec2_t a, vec2_t b);
 vec3_t mul_vec3(vec3_t a, vec3_t b);
 vec4_t mul_vec4(vec4_t a, vec4_t b);

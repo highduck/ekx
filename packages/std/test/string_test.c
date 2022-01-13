@@ -1,6 +1,3 @@
-#ifndef STRING_TEST_H
-#define STRING_TEST_H
-
 #include <doctest.h>
 #include <ek/string.h>
 
@@ -29,5 +26,3 @@ TEST_CASE("format_mm_ss") {
 }
 
 TEST_SUITE_END();
-
-#endif // STRING_TEST_H

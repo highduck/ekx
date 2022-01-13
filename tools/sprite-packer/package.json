@@ -13,7 +13,7 @@
   "dependencies": {
     "@ekx/miniz": "0.0.5",
     "@ekx/pugixml": "0.0.7",
-    "@ekx/stb": "0.0.8",
+    "@ekx/std": "0.0.2",
     "cmake-build": "0.0.4"
   }
 }

@@ -29,7 +29,7 @@ void ek_handle_assert(const char* e, const char* file, int line);
 }
 #endif
 
-#define EK_ASSERT(e) (!(e) ? ek_handle_assert(#e, EK_CURRENT_FILE, EK_CURRENT_LINE) : ((void)0))
+#define EK_ASSERT(e) (UNLIKELY(!(e)) ? ek_handle_assert(#e, EK_CURRENT_FILE, EK_CURRENT_LINE) : ((void)0))
 
 #else
 

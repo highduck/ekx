@@ -32,7 +32,7 @@ public:
             x{1},
             y{1},
             lineHeight{0},
-            dirtyRect{0, 0, width_, height_},
+            dirtyRect{{0, 0, width_, height_}},
             dirty{true},
             alphaMap{alphaMap_},
             mipmaps{mipmaps_} {

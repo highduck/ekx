@@ -14,6 +14,13 @@ extern "C" {
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define CLAMP(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 
+/**
+ * Constructs `f32` value in range [0; 1) from full `u32` bits representation
+ * @param x - any `u32` value
+ * @return unorm `f32` value in range [0; 1)
+ */
+float unorm_f32_from_u32(uint32_t x);
+
 float to_radians(float degrees);
 float to_degrees(float radians);
 

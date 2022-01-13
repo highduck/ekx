@@ -32,14 +32,10 @@ void fireworks_script::update(float dt) {
         auto rect = find_parent_layout_rect(entity_, true);
         rect.h *= 0.5f;
 
-        emitter.position = {
-                random(rect.x, RECT_R(rect)),
-                random(rect.y, RECT_B(rect))
-        };
-
-        Locator::ref<AudioManager>().play_sound("sfx/firework", random(0.5f, 1.0f));
+        emitter.position = rect.position + rect.size * vec2(random_f(), random_f());
+        Locator::ref<AudioManager>().play_sound("sfx/firework", random_range_f(0.5f, 1.0f));
         Res<ParticleDecl> part{"firework_star"};
-        switch (random_int(0, 3)) {
+        switch (random_n(4)) {
             case 0:
                 part->color.set_gradient(ARGB(0xffffff00), ARGB(0xffff7f00));
                 break;
@@ -59,15 +55,15 @@ void fireworks_script::update(float dt) {
         emitter.particle.setID("firework_spark");
         emitter.data.acc.set(0, 100);
         emitter.data.speed.set(50, 100);
-        particles_burst(entity_, random_int(20, 30));
+        particles_burst(entity_, random_range_i(20, 30));
 
         emitter.particle.setID("firework_star");
         emitter.data.speed.set(10, 100);
         emitter.data.acc.set(0, -50);
-        particles_burst(entity_, random_int(60, 80));
+        particles_burst(entity_, random_range_i(60, 80));
 
-        timer_ = random(0.1f, 1.0f);
-//            _timer = random(0.01f, 0.1f);
+        timer_ = random_range_f(0.1f, 1.0f);
+//            _timer = random_range_f(0.01f, 0.1f);
     }
 }
 

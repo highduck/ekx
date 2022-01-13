@@ -1,3 +1,3 @@
-#include "bitmap/fastblur.c.h"
-#include "bitmap/bitmap.c.h"
-#include "bitmap/stbi.c.h"
+#include <ek/_bitmap/fastblur.c>
+#include <ek/_bitmap/bitmap.c>
+#include <ek/_bitmap/stbi.c>

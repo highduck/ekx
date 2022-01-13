@@ -155,7 +155,7 @@ void save(ImageSet& images, const char* output) {
             if (image.bitmap.pixels) {
                 auto* bitmap = &image.bitmap;
                 // require RGBA non-premultiplied alpha
-                ek_bitmap_un_premultiply(bitmap);
+                ek_bitmap_unpremultiply(bitmap);
 
                 auto nodeSprite = nodeResolution.append_child("image");
 //                snprintf(path, 1024, "%s/%d.png", output, idx++);

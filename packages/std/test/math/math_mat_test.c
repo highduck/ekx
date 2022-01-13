@@ -1,6 +1,3 @@
-#ifndef MATH_MAT_TEST_H
-#define MATH_MAT_TEST_H
-
 #include "math_test_common.h"
 
 // Tests are from [HMM](https://github.com/HandmadeMath/Handmade-Math) and adapted
@@ -126,5 +123,3 @@ TEST_CASE("Projection: Perspective") {
 }
 
 TEST_SUITE_END();
-
-#endif // MATH_MAT_TEST_H

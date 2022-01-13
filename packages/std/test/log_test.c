@@ -1,6 +1,3 @@
-#ifndef LOG_TEST_H
-#define LOG_TEST_H
-
 #include <doctest.h>
 #include <ek/log.h>
 
@@ -33,5 +30,3 @@ TEST_CASE("print") {
 }
 
 TEST_SUITE_END();
-
-#endif // LOG_TEST_H

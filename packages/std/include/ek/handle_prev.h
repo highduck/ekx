@@ -1,5 +1,7 @@
-#ifndef EK_HANDLE_H
-#define EK_HANDLE_H
+#ifndef EK_HANDLE_PREV_H
+#define EK_HANDLE_PREV_H
+
+#warning use handles.h instead
 
 #include <stdint.h>
 
@@ -37,4 +39,4 @@ uint16_t ek_handles__get_slot_index(ek_handles_desc h, uint16_t index);
 }
 #endif
 
-#endif // EK_HANDLE_H
+#endif // EK_HANDLE_PREV_H

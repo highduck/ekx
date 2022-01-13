@@ -21,10 +21,3 @@ static unsigned char* sprite_pack_compress(unsigned char* data, int data_len, in
 #include <stb/stb_image_write.h>
 
 #endif
-
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-
-#include <stb/stb_image.h>
-
-#endif

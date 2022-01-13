@@ -17,6 +17,7 @@
 #include "math/quat.h"
 #include "math/rect.h"
 #include "math/easing.h"
+#include "math/col2d.h"
 
 #ifdef __cplusplus
 extern "C" {

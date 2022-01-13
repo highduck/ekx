@@ -284,11 +284,11 @@ mergeInto(LibraryManager.library, {
         return true;
     },
     ek_app_js_run: function () {
-        var loop = function () {
+        var loop = function (time) {
             requestAnimationFrame(loop);
-            _ek_app_js__loop();
+            _ek_app_js__loop(time / 1000.0);
         };
-        loop();
+        loop(-1.0);
     },
     ek_app_js_close: function () {
         window.close();

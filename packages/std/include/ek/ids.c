@@ -1,10 +1,14 @@
-#include "handle2.h"
-#include "assert.h"
+#include <ek/ids.h>
+#include <ek/assert.h>
 #include <string.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef NDEBUG
 
-void ek_handle2_check_state(ek_handle2_state h) {
+static void ids_sanitize_state(ids_t h) {
     EK_ASSERT(h.dense);
     const uint16_t* info = (uint16_t*) h.dense;
     const uint32_t cnt = info[0] ? info[0] : 0x10000;
@@ -20,12 +24,12 @@ void ek_handle2_check_state(ek_handle2_state h) {
     }
 }
 
-#define EK_HANDLE_2_CHECK_STATE(h) do { ek_handle2_check_state(h); } while(0)
+#define IDS_SANITIZE_STATE(h) do { ids_sanitize_state(h); } while(0)
 #else
-#define EK_HANDLE_2_CHECK_STATE(h) do { } while(0)
+#define IDS_SANITIZE_STATE(h) do { } while(0)
 #endif
 
-void ek_handle2_init(ek_handle2_state h, uint32_t capacity) {
+void ids_init(ids_t h, uint32_t capacity) {
     EK_ASSERT(capacity > 0);
     EK_ASSERT(capacity - 1 <= 0xFFFFu);
     EK_ASSERT(h.dense);
@@ -38,13 +42,18 @@ void ek_handle2_init(ek_handle2_state h, uint32_t capacity) {
     info[0] = 1;
     info[1] = (uint16_t) (capacity & 0xFFFFu);
 
-    EK_HANDLE_2_CHECK_STATE(h);
+    IDS_SANITIZE_STATE(h);
 }
 
-#define UNLIKELY(x) __builtin_expect(!!(x), 0)
+int ids_count(ids_t h) {
+    IDS_SANITIZE_STATE(h);
+    const uint16_t* info = (const uint16_t*) h.dense;
+    const uint16_t num = info[0] - 1;
+    return ((int) num) + 1;
+}
 
-uint32_t ek_handle2_new(ek_handle2_state h) {
-    EK_HANDLE_2_CHECK_STATE(h);
+uint32_t id_new(ids_t h) {
+    IDS_SANITIZE_STATE(h);
     uint16_t* info = (uint16_t*) h.dense;
     if (UNLIKELY(info[0] == info[1])) {
         // end of capacity: returns invalid id 0
@@ -57,27 +66,20 @@ uint32_t ek_handle2_new(ek_handle2_state h) {
     return id;
 }
 
-int ek_handle2_count(ek_handle2_state h) {
-    EK_HANDLE_2_CHECK_STATE(h);
-    const uint16_t* info = (const uint16_t*) h.dense;
-    const uint16_t num = info[0] - 1;
-    return ((int) num) + 1;
-}
-
-bool ek_handle2_valid(ek_handle2_state h, uint32_t id) {
-    EK_HANDLE_2_CHECK_STATE(h);
+bool id_valid(ids_t h, uint32_t id) {
+    IDS_SANITIZE_STATE(h);
     const uint16_t slot_index = h.sparse[id & 0xFFFFu];
 #ifndef NDEBUG
-    // check if you use uninitialized handle, or sort of pool memory corruption
+    // check if you use uninitialized ID, or sort of pool memory corruption
     const uint16_t* info = (uint16_t*) h.dense;
     EK_ASSERT(!info[0] || slot_index < info[0]);
 #endif
     return h.dense[slot_index] == id;
 }
 
-void ek_handle2_destroy(ek_handle2_state h, uint32_t id, ek_handle2_data layout) {
-    EK_HANDLE_2_CHECK_STATE(h);
-    EK_ASSERT(ek_handle2_valid(h, id));
+void id_destroy(ids_t h, uint32_t id, id_data_t layout) {
+    IDS_SANITIZE_STATE(h);
+    EK_ASSERT(id_valid(h, id));
     const uint16_t current_index = id & 0xFFFFu;
 
     const uint32_t slot_index = h.sparse[current_index];
@@ -103,3 +105,7 @@ void ek_handle2_destroy(ek_handle2_state h, uint32_t id, ek_handle2_data layout)
         }
     }
 }
+
+#ifdef __cplusplus
+}
+#endif

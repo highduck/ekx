@@ -15,11 +15,6 @@
 #define STBI_NO_THREAD_LOCALS
 #define STBI_NO_LINEAR
 
-#ifndef EK_TOOLS
-#define STBI_ONLY_JPEG
-#define STBI_ONLY_PNG
-#endif
-
 #ifndef NDEBUG
 #define STBI_NO_FAILURE_STRINGS
 #else // DEBUG

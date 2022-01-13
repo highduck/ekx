@@ -16,3 +16,4 @@ extern "C" {
 #include "math/quat.c"
 #include "math/rect.c"
 #include "math/easing.c"
+#include "math/col2d.c"

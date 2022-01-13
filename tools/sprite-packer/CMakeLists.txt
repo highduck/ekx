@@ -29,8 +29,8 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC pugixml
-        PUBLIC stb
         PUBLIC miniz
+        PUBLIC ekx::std
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

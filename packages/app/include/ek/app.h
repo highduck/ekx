@@ -211,6 +211,8 @@ typedef struct ek_app_context {
      */
     char lang[8];
 
+    double frame_callback_timestamp;
+
 } ek_app_context;
 
 extern ek_app_context ek_app;

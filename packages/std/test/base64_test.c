@@ -1,6 +1,3 @@
-#ifndef BASE64_TEST_H
-#define BASE64_TEST_H
-
 #include <doctest.h>
 #include <ek/base64.h>
 
@@ -10,6 +7,7 @@ void check(const char* data, unsigned N, const char* str) {
     char encoded_str[1024 + 1];
     auto encoded_str_len = base64_encode(encoded_str, 1024, data, N);
     encoded_str[encoded_str_len] = 0;
+    CHECK_EQ(strlen(str), encoded_str_len);
     CHECK_FALSE(strncmp(str, encoded_str, encoded_str_len));
     uint8_t decoded_bytes[1024 + 1];
     auto decoded_bytes_len = base64_decode(decoded_bytes, 1024, encoded_str, encoded_str_len);
@@ -32,5 +30,3 @@ TEST_CASE("encode/decode") {
 }
 
 TEST_SUITE_END();
-
-#endif // BASE64_TEST_H

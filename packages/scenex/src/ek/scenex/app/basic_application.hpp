@@ -32,12 +32,15 @@ class Asset;
 
 class FrameTimer final {
 public:
+    double prev_frame_high_res_ts = 0.0;
     double deltaTime = 0.0;
     uint64_t frameIndex = 0;
 
+    double deltas[256] = {};
+    uint64_t deltas_num = 0;
+
     double update();
 
-private:
     uint64_t timer_ = ek_ticks(nullptr);
 };
 

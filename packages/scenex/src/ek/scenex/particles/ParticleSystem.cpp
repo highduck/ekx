@@ -53,8 +53,8 @@ void particles_burst(ecs::EntityApi e, int count, vec2_t relativeVelocity) {
     while (count > 0) {
         auto& p = produce_particle(layer, *decl);
         vec2_t pos = position;
-        pos.x += random(data.rect.x, RECT_R(data.rect));
-        pos.y += random(data.rect.y, RECT_B(data.rect));
+        pos.x += random_range_f(data.rect.x, RECT_R(data.rect));
+        pos.y += random_range_f(data.rect.y, RECT_B(data.rect));
         p.position = pos;
         float speed = data.speed.random();
         float acc = data.acc.random();
@@ -90,8 +90,8 @@ void update_emitters() {
             while (count > 0) {
                 auto& p = produce_particle(layer, *decl);
                 vec2_t pos = position + data.offset;
-                pos.x += random(data.rect.x, RECT_R(data.rect));
-                pos.y += random(data.rect.y, RECT_B(data.rect));
+                pos.x += random_range_f(data.rect.x, RECT_R(data.rect));
+                pos.y += random_range_f(data.rect.y, RECT_B(data.rect));
                 p.position = pos;
                 float speed = data.speed.random();
                 float acc = data.acc.random();
@@ -130,7 +130,7 @@ void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const Particle
     auto& layerComp = toLayer.get<ParticleLayer2D>();
     while (count > 0) {
         auto& p = produce_particle(layerComp, decl);
-        const vec2_t position = data.offset + data.rect.position + data.rect.size * vec2(random(), random());
+        const vec2_t position = data.offset + data.rect.position + data.rect.size * vec2(random_f(), random_f());
         const vec2_t dir = vec2_cs(a);
         const auto speed = data.speed.random();
         const auto acc = data.acc.random();

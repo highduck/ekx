@@ -3,7 +3,8 @@
   "version": "0.0.2",
   "scripts": {
     "postinstall": "cmake-build || exit 0",
-    "generate": "node scripts/gen_math.js"
+    "generate": "node scripts/gen_math.js",
+    "_test:native": "node scripts/run-test-native.js"
   },
   "publishConfig": {
     "access": "public"

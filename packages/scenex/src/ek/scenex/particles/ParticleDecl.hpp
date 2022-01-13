@@ -3,7 +3,7 @@
 #include <ek/util/Res.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/text/Font.hpp>
-#include <ek/math/Random.hpp>
+#include <ek/rnd.h>
 
 namespace ek {
 
@@ -31,24 +31,25 @@ class RandColorData {
 public:
     Array <color_t> colors{COLOR_WHITE};
     RandColorMode mode = RandColorMode::RandElement;
-    mutable int state = 0;
+    mutable uint32_t state = 0;
 
     color_t next() const {
         ++state;
-        int index_max = int(colors.size() - 1);
-        if (colors.empty()) {
+        uint32_t size = colors.size();
+        if (!size) {
             return COLOR_WHITE;
         }
-        if (colors.size() == 1) return colors[0];
+        if (size == 1) {
+            return colors[0];
+        }
         switch (mode) {
             case RandColorMode::RandLerp: {
-                float t = rand_fx.random(0.0f, float(index_max));
-                int i = int(t);
-                t = fract(t);
+                float t = random_f();
+                uint32_t i = random_n(size - 1);
                 return lerp_color(colors[i], colors[i + 1], t);
             }
             case RandColorMode::RandElement:
-                return colors[rand_fx.random_int(0, index_max)];
+                return colors[random_n(colors.size())];
             case RandColorMode::Continuous:
                 return colors[state % colors.size()];
         }
@@ -103,7 +104,7 @@ struct FloatRange {
     }
 
     [[nodiscard]] inline float random() const {
-        return rand_fx.random(min, max);
+        return random_range_f(min, max);
     }
 
     [[nodiscard]] const float* data() const {
