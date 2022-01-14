@@ -42,6 +42,23 @@ void ek_bitmap_unpremultiply(ek_bitmap* bitmap);
 
 void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool pma);
 
+
+/**
+ *
+ *          Rotate CCW 90
+ * -----------         -------
+ * | 1 2 3 4 |  ---->  | 4 4 |
+ * | 1 2 3 4 |         | 3 3 |
+ * -----------         | 2 2 |
+ *                     | 1 1 |
+ *                     -------
+ */
+void bitmap_copy_ccw90(ek_bitmap* dest, int dx, int dy,
+                       const ek_bitmap* src, int sx, int sy, int sw, int sh);
+
+void bitmap_copy(ek_bitmap* dest, int dx, int dy,
+                 const ek_bitmap* src, int sx, int sy, int sw, int sh);
+
 #ifdef __cplusplus
 }
 #endif

@@ -5,7 +5,7 @@ project(sprite-packer)
 add_executable(${PROJECT_NAME}
         src/sprite_packer/sprpk_image.c
         src/sprite_packer.cpp
-        src/sprite_packer/MaxRects.cpp
+        src/sprite_packer/binpack.c
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)

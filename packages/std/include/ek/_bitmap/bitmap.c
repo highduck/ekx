@@ -123,6 +123,80 @@ void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool p
     log_debug("decode bitmap: end");
 }
 
+
+
+#include <ek/math.h>
+
+irect_t irect_clamp_size(irect_t a, int w, int h) {
+    const int x0 = MAX(a.x, 0);
+    const int y0 = MAX(a.y, 0);
+    const int x1 = MIN(RECT_R(a), w);
+    const int y1 = MIN(RECT_B(a), h);
+    return (irect_t) {{x0, y0, x1 - x0, y1 - y0}};
+}
+
+static void clip_rects(int src_w, int src_h, int dest_w, int dest_h,
+                irect_t* src_rect, irect_t* dest_rect) {
+    const irect_t src_rc = irect_clamp_size( *src_rect, src_w, src_h);
+    const irect_t dest_rc = irect_clamp_size( *dest_rect, dest_w, dest_h);
+    src_rect->x = src_rc.x + dest_rc.x - dest_rect->x;
+    src_rect->y = src_rc.y + dest_rc.y - dest_rect->y;
+    src_rect->w = dest_rc.w;
+    src_rect->h = dest_rc.h;
+    *dest_rect = dest_rc;
+}
+
+static uint32_t get_pixel_unsafe(const ek_bitmap* bitmap, int x, int y) {
+    //EK_ASSERT(pixel_in_bounds(image, pos));
+    return bitmap->pixels[y * bitmap->w + x];
+}
+
+static void set_pixel_unsafe(ek_bitmap* bitmap, int x, int y, uint32_t pixel) {
+    //EK_ASSERT(pixel_in_bounds(image, pos));
+    bitmap->pixels[y * bitmap->w + x] = pixel;
+}
+
+
+void bitmap_copy_ccw90(ek_bitmap* dest, int dx, int dy,
+                        const ek_bitmap* src, int sx, int sy, int sw, int sh) {
+    irect_t dest_rc = {{dx, dy, /* swap w/h here */ sh, sw}};
+    irect_t src_rc = {{sx, sy, sw, sh}};
+    clip_rects(src->w, src->h,
+               dest->w, dest->h,
+               &src_rc, &dest_rc);
+    src_rc = (irect_t){{
+                               src_rc.x + dest_rc.x - dx,
+                               src_rc.y + dest_rc.y - dy,
+                               dest_rc.h,
+                               dest_rc.w
+                       }};
+
+    for (int32_t y = 0; y < src_rc.h; ++y) {
+        for (int32_t x = 0; x < src_rc.w; ++x) {
+            const uint32_t pixel = get_pixel_unsafe(src, src_rc.x + x, src_rc.y + y);
+            const int tx = dest_rc.x + y;
+            const int ty = dest_rc.y + src_rc.w - x;
+            set_pixel_unsafe(dest, tx, ty, pixel);
+        }
+    }
+}
+
+void bitmap_copy(ek_bitmap* dest, int dx, int dy,
+                 const ek_bitmap* src, int sx, int sy, int sw, int sh) {
+    irect_t dest_rc = {{dx, dy, sw, sh}};
+    irect_t src_rc = {{sx, sy, sw, sh}};
+    clip_rects(src->w, src->h,
+               dest->w, dest->h,
+               &src_rc, &dest_rc);
+
+    for (int y = 0; y < src_rc.h; ++y) {
+        for (int x = 0; x < src_rc.w; ++x) {
+            const uint32_t pixel = get_pixel_unsafe(src, src_rc.x + x, src_rc.y + y);
+            set_pixel_unsafe(dest, dest_rc.x + x, dest_rc.y + y, pixel);
+        }
+    }
+}
+
 #ifdef __cplusplus
 }
 #endif

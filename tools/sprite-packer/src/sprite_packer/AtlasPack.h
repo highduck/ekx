@@ -3,7 +3,7 @@
 #include "Atlas.h"
 #include <pugixml.hpp>
 #include <thread>
-#include "MaxRects.hpp"
+#include "binpack.h"
 #include "sprpk_image.h"
 #include "Writer.h"
 #include "ek/log.h"
@@ -98,25 +98,26 @@ void Atlas::packAndSaveMultiThreaded(const char* outputPath) {
 
 /*** Pack Sprites ***/
 
-irect_t no_pack_padding(ek::binpack::rect_t rect, int pad) {
-    return {{
-            rect.x + pad,
-            rect.y + pad,
-            rect.width - 2 * pad,
-            rect.height - 2 * pad
-    }};
+irect_t no_pack_padding(binpack_rect_t rect, int pad) {
+    rect.x += pad;
+    rect.y += pad;
+    rect.r -= pad;
+    rect.b -= pad;
+    return {{rect.x, rect.y, rect.r - rect.x, rect.b - rect.y}};
 }
 
-rect_t calc_uv(irect_t source, float w, float h, bool rotated) {
+rect_t calc_uv(irect_t source, float tex_w, float tex_h, bool rotated) {
     if (rotated) {
-        std::swap(source.w, source.h);
+        const int sw = source.w;
+        source.w = source.h;
+        source.h = sw;
     }
     return {{
-            (float) source.x / w,
-            (float) source.y / h,
-            (float) source.w / w,
-            (float) source.h / h
-    }};
+                    (float) source.x / tex_w,
+                    (float) source.y / tex_h,
+                    (float) source.w / tex_w,
+                    (float) source.h / tex_h
+            }};
 }
 
 std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int maxWidth, const int maxHeight) {
@@ -124,57 +125,59 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
 
 //    timer timer{};
 //    EK_DEBUG("Packing %lu sprites...", sprites.size());
-
+    binpack_t binpack;
     bool need_to_pack = true;
     while (need_to_pack) {
-        ek::binpack::packer_state_t packer_state{maxWidth, maxHeight};
+        binpack_init(&binpack, maxWidth, maxHeight);
 
         for (auto& sprite: sprites) {
             if (!(sprite.flags & SPRITE_FLAG_PACKED)) {
-                packer_state.add(
-                        sprite.source.w,
-                        sprite.source.h,
-                        sprite.padding,
-                        &sprite);
+                binpack_add(&binpack,
+                            sprite.source.w,
+                            sprite.source.h,
+                            sprite.padding,
+                            &sprite);
             }
         }
 
-        need_to_pack = !packer_state.empty();
+        // check if any rects added to pack
+        need_to_pack = !!binpack.rects_num;
         if (need_to_pack) {
-            pack_nodes(packer_state);
+            binpack_run(&binpack);
 
             PageData page{};
-            page.w = packer_state.canvas.width;
-            page.h = packer_state.canvas.height;
+            page.w = binpack.canvas.w;
+            page.h = binpack.canvas.h;
             ek_bitmap_alloc(&page.bitmap, page.w, page.h);
             const auto fw = (float) page.w;
             const auto fh = (float) page.h;
 
             {
                 //atlas_renderer_cairo renderer{*page.image};
-                for (int i = 0; i < (int)packer_state.rects.size(); ++i) {
-                    if (!packer_state.is_packed(i)) {
+                for (uint32_t i = 0; i < binpack.rects_num; ++i) {
+                    if (!(binpack.flags[i] & BINPACK_PACKED)) {
                         continue;
                     }
-                    auto& sprite = packer_state.get_user_data<SpriteData>(i);
-                    sprite.flags |= SPRITE_FLAG_PACKED;
+                    auto* sprite = (SpriteData*) binpack.user_data[i];
+                    sprite->flags |= SPRITE_FLAG_PACKED;
 
-                    const irect_t packed_rect = no_pack_padding(packer_state.get_rect(i), sprite.padding);
-                    if (packer_state.is_rotated(i)) {
-                        sprite.flags |= SPRITE_FLAG_ROTATED;
-                        copy_pixels_ccw_90(&page.bitmap, packed_rect.x, packed_rect.y, &sprite.bitmap,
-                                           sprite.source.x, sprite.source.y, sprite.source.w, sprite.source.h);
+                    irect_t packed_rect = no_pack_padding(binpack.rects[i], sprite->padding);
+                    if (binpack.flags[i] & BINPACK_ROTATED) {
+                        sprite->flags |= SPRITE_FLAG_ROTATED;
+                        bitmap_copy_ccw90(&page.bitmap, packed_rect.x, packed_rect.y, &sprite->bitmap,
+                                          sprite->source.x, sprite->source.y, sprite->source.w, sprite->source.h);
+                    } else {
+                        sprite->flags &= ~SPRITE_FLAG_ROTATED;
+                        bitmap_copy(&page.bitmap, packed_rect.x, packed_rect.y, &sprite->bitmap,
+                                    sprite->source.x, sprite->source.y, sprite->source.w, sprite->source.h);
                     }
-                    else {
-                        copy_pixels(&page.bitmap, packed_rect.x, packed_rect.y, &sprite.bitmap,
-                                    sprite.source.x, sprite.source.y, sprite.source.w, sprite.source.h);
-                    }
-                    ek_bitmap_free(&sprite.bitmap);
-                    sprite.bitmap = page.bitmap;
-                    sprite.source = packed_rect;
-                    sprite.uv = calc_uv(packed_rect, fw, fh, sprite.flags & SPRITE_FLAG_ROTATED);
+                    ek_bitmap_free(&sprite->bitmap);
+                    sprite->bitmap = page.bitmap;
+                    // now packed_rect is rotated, so do not copy the original rect dimensions
+                    sprite->source = packed_rect;
+                    sprite->uv = calc_uv(packed_rect, fw, fh, sprite->flags & SPRITE_FLAG_ROTATED );
 
-                    page.sprites.emplace_back(sprite);
+                    page.sprites.emplace_back(*sprite);
                 }
             }
             pages.emplace_back(std::move(page));
