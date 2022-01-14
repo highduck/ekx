@@ -55,6 +55,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    target_link_libraries(${PROJECT_NAME}
+            PUBLIC m
+            )
 else ()
     error("Platform: UNKNOWN")
 endif ()

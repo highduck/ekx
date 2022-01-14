@@ -14,6 +14,7 @@
 #define STBI_NO_STDIO
 #define STBI_NO_THREAD_LOCALS
 #define STBI_NO_LINEAR
+#define STBI_NO_HDR
 
 #ifndef NDEBUG
 #define STBI_NO_FAILURE_STRINGS
