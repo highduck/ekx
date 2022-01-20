@@ -16,6 +16,23 @@ void ek_bitmap_alloc(ek_bitmap* bitmap, int width, int height) {
     bitmap->pixels = calloc(1, width * height * 4);
 }
 
+void ek_bitmap_copy(ek_bitmap dest, ek_bitmap src) {
+    EK_ASSERT(dest.w == src.w && dest.h == src.h);
+    EK_ASSERT(dest.pixels);
+    EK_ASSERT(src.pixels);
+    uint32_t size = src.w * src.h * 4;
+    memcpy(dest.pixels, src.pixels, size);
+}
+
+void ek_bitmap_clone(ek_bitmap* dest, ek_bitmap src) {
+    free(dest->pixels);
+    dest->w = src.w;
+    dest->h = src.h;
+    uint32_t size = src.w * src.h * 4;
+    dest->pixels = malloc(size);
+    memcpy(dest->pixels, src.pixels, size);
+}
+
 void ek_bitmap_free(ek_bitmap* bitmap) {
     free(bitmap->pixels);
     bitmap->pixels = NULL;
@@ -58,9 +75,9 @@ void ek_bitmap_premultiply(ek_bitmap* bitmap) {
         if (!a) {
             it->u32 = 0;
         } else if (a ^ 0xFF) {
-            it->r = ((uint16_t)it->r * a) / 0xFFu;
-            it->g = ((uint16_t)it->g * a) / 0xFFu;
-            it->b = ((uint16_t)it->b * a) / 0xFFu;
+            it->r = ((uint16_t) it->r * a) / 0xFFu;
+            it->g = ((uint16_t) it->g * a) / 0xFFu;
+            it->b = ((uint16_t) it->b * a) / 0xFFu;
         }
         ++it;
     }
@@ -78,9 +95,9 @@ void ek_bitmap_unpremultiply(ek_bitmap* bitmap) {
         const uint8_t a = it->a;
         if (a && (a ^ 0xFF)) {
             const uint8_t half = a / 2;
-            it->r = saturate_u8(((uint16_t)it->r * 0xFFu + half) / a);
-            it->g = saturate_u8(((uint16_t)it->g * 0xFFu + half) / a);
-            it->b = saturate_u8(((uint16_t)it->b * 0xFFu + half) / a);
+            it->r = saturate_u8(((uint16_t) it->r * 0xFFu + half) / a);
+            it->g = saturate_u8(((uint16_t) it->g * 0xFFu + half) / a);
+            it->b = saturate_u8(((uint16_t) it->b * 0xFFu + half) / a);
         }
         ++it;
     }
@@ -124,7 +141,6 @@ void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool p
 }
 
 
-
 #include <ek/math.h>
 
 irect_t irect_clamp_size(irect_t a, int w, int h) {
@@ -136,9 +152,9 @@ irect_t irect_clamp_size(irect_t a, int w, int h) {
 }
 
 static void clip_rects(int src_w, int src_h, int dest_w, int dest_h,
-                irect_t* src_rect, irect_t* dest_rect) {
-    const irect_t src_rc = irect_clamp_size( *src_rect, src_w, src_h);
-    const irect_t dest_rc = irect_clamp_size( *dest_rect, dest_w, dest_h);
+                       irect_t* src_rect, irect_t* dest_rect) {
+    const irect_t src_rc = irect_clamp_size(*src_rect, src_w, src_h);
+    const irect_t dest_rc = irect_clamp_size(*dest_rect, dest_w, dest_h);
     src_rect->x = src_rc.x + dest_rc.x - dest_rect->x;
     src_rect->y = src_rc.y + dest_rc.y - dest_rect->y;
     src_rect->w = dest_rc.w;
@@ -158,18 +174,18 @@ static void set_pixel_unsafe(ek_bitmap* bitmap, int x, int y, uint32_t pixel) {
 
 
 void bitmap_copy_ccw90(ek_bitmap* dest, int dx, int dy,
-                        const ek_bitmap* src, int sx, int sy, int sw, int sh) {
+                       const ek_bitmap* src, int sx, int sy, int sw, int sh) {
     irect_t dest_rc = {{dx, dy, /* swap w/h here */ sh, sw}};
     irect_t src_rc = {{sx, sy, sw, sh}};
     clip_rects(src->w, src->h,
                dest->w, dest->h,
                &src_rc, &dest_rc);
-    src_rc = (irect_t){{
-                               src_rc.x + dest_rc.x - dx,
-                               src_rc.y + dest_rc.y - dy,
-                               dest_rc.h,
-                               dest_rc.w
-                       }};
+    src_rc = (irect_t) {{
+                                src_rc.x + dest_rc.x - dx,
+                                src_rc.y + dest_rc.y - dy,
+                                dest_rc.h,
+                                dest_rc.w
+                        }};
 
     for (int32_t y = 0; y < src_rc.h; ++y) {
         for (int32_t x = 0; x < src_rc.w; ++x) {

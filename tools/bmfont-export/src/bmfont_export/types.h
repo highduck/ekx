@@ -2,6 +2,7 @@
 
 #include <ek/math.h>
 #include "Bitmap.h"
+#include "ek/bitmap.h"
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>
@@ -32,8 +33,8 @@ struct Filter {
     float blurY = 0.0f;
     float strength = 1.0f;
     int quality = 1;
-    Color color0{0, 0, 0, 1};
-    Color color1{1, 1, 1, 1};
+    vec4_t color0 = vec4(0, 0, 0, 1);
+    vec4_t color1 = vec4(1, 1, 1, 1);
 
     // TODO: check we change it from radian to degree in serialization, we need change calculations for usages
     float angle = 0.0f;
@@ -67,7 +68,7 @@ struct Image {
     uint8_t padding = 1;
 
     // reference image;
-    Bitmap* bitmap = nullptr;
+    ek_bitmap bitmap = {};
 };
 
 struct Resolution {
@@ -131,7 +132,7 @@ irect_t get_filtered_rect(const irect_t rc, const std::vector<Filter>& filters);
 
 std::vector<Filter> apply_scale(const std::vector<Filter>& filters, float scale);
 
-void apply(Bitmap& image, const Filter& filter, const irect_t bounds);
+void apply(ek_bitmap* bitmap, const Filter& filter, const irect_t bounds);
 
 void apply(const std::vector<Filter>& filters, Image& image, float scale);
 

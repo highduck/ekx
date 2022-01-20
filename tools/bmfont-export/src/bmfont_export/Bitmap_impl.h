@@ -5,36 +5,12 @@
 
 namespace bmfont_export {
 
-Bitmap::Bitmap() = default;
-
-Bitmap::Bitmap(int width, int height) {
-    data = (uint32_t*) malloc(width * height * 4);
-    w = width;
-    h = height;
-}
-
-Bitmap::~Bitmap() {
-    free(data);
-}
-
-const Rgba* Bitmap::row(int y) const {
-    return (const Rgba*) (data + w * y);
-}
-
-Rgba* Bitmap::row(int y) {
-    return (Rgba*) (data + w * y);
-}
-
-void Bitmap::assign(const Bitmap& source) {
-    memcpy(data, source.data, source.w * source.h * 4);
-}
-
 irect_t clampBounds(const irect_t& a, const irect_t& b) {
     const int l = a.x > b.x ? a.x : b.x;
     const int t = a.y > b.y ? a.y : b.y;
     const int r = (a.x + a.w) < (b.x + b.w) ? (a.x + a.w) : (b.x + b.w);
     const int bo = (a.y + a.h) < (b.y + b.h) ? (a.y + a.h) : (b.y + b.h);
-    return {l, t, r - l, bo - t};
+    return {{l, t, r - l, bo - t}};
 }
 
 void clipRects(const irect_t& src_bounds, const irect_t& dest_bounds,
@@ -47,37 +23,24 @@ void clipRects(const irect_t& src_bounds, const irect_t& dest_bounds,
     dest_rect = dest_rc;
 }
 
-inline uint32_t get_pixel_unsafe(const Bitmap& image, int x, int y) {
+inline uint32_t get_pixel_unsafe(const ek_bitmap bitmap, int x, int y) {
     //EK_ASSERT(pixel_in_bounds(image, pos));
-    return image.data[y * image.w + x];
+    return bitmap.pixels[y * bitmap.w + x];
 }
 
-inline void set_pixel_unsafe(Bitmap& image, int x, int y, uint32_t pixel) {
+inline void set_pixel_unsafe(ek_bitmap bitmap, int x, int y, uint32_t pixel) {
     //EK_ASSERT(pixel_in_bounds(image, pos));
-    image.data[y * image.w + x] = pixel;
+    bitmap.pixels[y * bitmap.w + x] = pixel;
 }
 
-void copyPixels(Bitmap& dest, int dx, int dy,
-                const Bitmap& src, int sx, int sy, int sw, int sh) {
-    irect_t dest_rc = {{dx, dy, sw, sh}};
-    irect_t src_rc = {{sx, sy, sw, sh}};
-    clipRects({{0, 0, src.w, src.h}},
-              {{0, 0, dest.w, dest.h}},
-              src_rc, dest_rc);
-
-    for (int y = 0; y < src_rc.h; ++y) {
-        for (int x = 0; x < src_rc.w; ++x) {
-            const auto pixel = get_pixel_unsafe(src, src_rc.x + x, src_rc.y + y);
-            set_pixel_unsafe(dest, dest_rc.x + x, dest_rc.y + y, pixel);
-        }
-    }
-}
-
-
-void blit(Bitmap& dest, const Bitmap& src) {
+void blit(ek_bitmap dest, const ek_bitmap src) {
+    EK_ASSERT(dest.w >= src.w);
+    EK_ASSERT(dest.h >= src.h);
+    EK_ASSERT(dest.pixels);
+    EK_ASSERT(src.pixels);
     for (int y = 0; y < src.h; ++y) {
-        const auto* src_row = src.row(y);
-        auto* dst_row = dest.row(y);
+        const auto* src_row = ek_bitmap_row(src, y);
+        auto* dst_row = ek_bitmap_row(dest, y);
         for (int x = 0; x < src.w; ++x) {
             auto* d = dst_row + x;
             const auto* s = src_row + x;
@@ -88,10 +51,10 @@ void blit(Bitmap& dest, const Bitmap& src) {
             } else {
                 const auto alpha_inv = (0xFFu - a) * 258u;
                 //t->r = (r+1 + (r >> 8)) >> 8; // fast way to divide by 255
-                d->a = s->a + static_cast<uint8_t>((d->a * alpha_inv) >> 16u);
-                d->r = s->r + static_cast<uint8_t>((d->r * alpha_inv) >> 16u);
-                d->g = s->g + static_cast<uint8_t>((d->g * alpha_inv) >> 16u);
-                d->b = s->b + static_cast<uint8_t>((d->b * alpha_inv) >> 16u);
+                d->a = u8_add_sat(s->a, (uint8_t)((d->a * alpha_inv) >> 16u));
+                d->r = u8_add_sat(s->r, (uint8_t)((d->r * alpha_inv) >> 16u));
+                d->g = u8_add_sat(s->g, (uint8_t)((d->g * alpha_inv) >> 16u));
+                d->b = u8_add_sat(s->b, (uint8_t)((d->b * alpha_inv) >> 16u));
             }
         }
     }
@@ -116,22 +79,6 @@ void convert_a8_to_argb32(uint8_t const* source_a8_buf,
         *dest_argb32_buf = (a << 24) | 0xFFFFFF;
         ++dest_argb32_buf;
         ++source_a8_buf;
-    }
-}
-
-void undoPremultiplyAlpha(Bitmap& bitmap) {
-    auto* it = (Rgba*) bitmap.data;
-    const auto* end = it + bitmap.w * bitmap.h;
-
-    while (it < end) {
-        const uint8_t a = it->a;
-        if (a && (a ^ 0xFF)) {
-            const uint8_t half = a / 2;
-            it->r = std::min(255, (it->r * 0xFF + half) / a);
-            it->g = std::min(255, (it->g * 0xFF + half) / a);
-            it->b = std::min(255, (it->b * 0xFF + half) / a);
-        }
-        ++it;
     }
 }
 

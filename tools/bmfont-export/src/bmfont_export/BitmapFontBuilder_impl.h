@@ -223,23 +223,24 @@ Glyph buildGlyphData(const FontFace& fontFace, uint32_t glyph_index, const char*
     return data;
 }
 
-Bitmap* render_glyph_image(const FontFace& fontFace, uint32_t glyphIndex, irect_t& outRect) {
+ek_bitmap render_glyph_image(const FontFace& fontFace, uint32_t glyphIndex, irect_t& outRect) {
     if (!fontFace.loadGlyph(glyphIndex)) {
-        return nullptr;
+        return {};
     }
 
     uint32_t width = 0;
     uint32_t height = 0;
     uint8_t* buffer = nullptr;
     if (!fontFace.renderGlyph(&buffer, &width, &height)) {
-        return nullptr;
+        return {};
     }
 
     outRect = fontFace.getGlyphBounds();
 
     auto pixels_count = width * height;
-    auto* img = new Bitmap(width, height);
-    convert_a8_to_argb32pma(buffer, img->data, pixels_count);
+    ek_bitmap img = {};
+    ek_bitmap_alloc(&img, width, height);
+    convert_a8_to_argb32pma(buffer, img.pixels, pixels_count);
 
     return img;
 }
@@ -258,8 +259,8 @@ void glyph_build_sprites(FontFace& fontFace,
         const auto filters_scaled = apply_scale(filters, filter_scale);
 
         irect_t rect;
-        Bitmap* data = render_glyph_image(fontFace, glyph_index, rect);
-        if (data) {
+        ek_bitmap data = render_glyph_image(fontFace, glyph_index, rect);
+        if (data.pixels) {
             Image image;
             image.name = ref;
             image.bitmap = data;

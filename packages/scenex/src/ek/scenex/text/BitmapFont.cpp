@@ -45,7 +45,7 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     if (g) {
         outGlyph.advanceWidth = static_cast<float>(g->advanceWidth) / unitsPerEM;
         outGlyph.lineHeight = lineHeightMultiplier;
-        Sprite* spr = &REF_RESOLVE(res_sprite, g->sprite);
+        Sprite* spr = &RES_NAME_RESOLVE(res_sprite, g->sprite);
         if (spr->state & SPRITE_LOADED) {
             outGlyph.rect = spr->rect / baseFontSize;
             outGlyph.texCoord = spr->tex;

@@ -21,13 +21,13 @@ void save(ImageCollection& images, const char* output) {
     for (auto& resolution: images.resolutions) {
         auto nodeResolution = nodeAtlas.append_child("resolution");
         for (auto& image: resolution.images) {
-            if (image.bitmap) {
-                auto& bitmap = *image.bitmap;
+            if (image.bitmap.pixels) {
+                auto bitmap = image.bitmap;
                 auto nodeSprite = nodeResolution.append_child("image");
                 snprintf(path, 1024, "%s/%d.bmp", output, idx++);
                 // require RGBA non-premultiplied alpha
-                undoPremultiplyAlpha(bitmap);
-                stbi_write_bmp(path, bitmap.w, bitmap.h, 4, bitmap.data);
+                ek_bitmap_unpremultiply(&bitmap);
+                stbi_write_bmp(path, bitmap.w, bitmap.h, 4, bitmap.pixels);
 
                 nodeSprite.append_attribute("path").set_value(path);
                 nodeSprite.append_attribute("name").set_value(image.name.c_str());

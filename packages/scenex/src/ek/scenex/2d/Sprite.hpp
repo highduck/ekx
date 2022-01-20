@@ -20,8 +20,8 @@ struct Sprite {
 };
 
 struct res_sprite {
-    string_hash_t names[128];
-    Sprite data[128];
+    string_hash_t names[256];
+    Sprite data[256];
     rr_man_t rr;
 };
 

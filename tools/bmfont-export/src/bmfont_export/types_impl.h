@@ -29,10 +29,10 @@ const char* toCString(FilterType type) {
     return "bypass";
 }
 
-Color parseColor(const char* str) {
+vec4_t parseColor(const char* str) {
     uint32_t c = 0x0;
     sscanf(str, "#%08x", &c);
-    return toColor(toRGBA(c));
+    return vec4_color(color_u32(c));
 }
 
 void Filter::readFromXML(const pugi::xml_node& node) {

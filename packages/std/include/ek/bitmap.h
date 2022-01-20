@@ -11,6 +11,7 @@
 extern "C" {
 #endif
 
+// bitmap memory container, could be passed by value, only pixels are heap allocated
 typedef struct ek_bitmap {
     int w;
     int h;
@@ -18,6 +19,10 @@ typedef struct ek_bitmap {
 } ek_bitmap;
 
 void ek_bitmap_alloc(ek_bitmap* bitmap, int width, int height);
+
+void ek_bitmap_copy(ek_bitmap dest, ek_bitmap src);
+
+void ek_bitmap_clone(ek_bitmap* dest, ek_bitmap src);
 
 void ek_bitmap_free(ek_bitmap* bitmap);
 
@@ -53,6 +58,7 @@ void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool p
  *                     | 1 1 |
  *                     -------
  */
+ // TODO: rename to "*blit_copy*"
 void bitmap_copy_ccw90(ek_bitmap* dest, int dx, int dy,
                        const ek_bitmap* src, int sx, int sy, int sw, int sh);
 

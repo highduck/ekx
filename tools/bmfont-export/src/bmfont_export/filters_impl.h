@@ -1,8 +1,5 @@
 #pragma once
 
-//#define _USE_MATH_DEFINES
-//#include <cmath>
-
 #include "types.h"
 
 namespace bmfont_export {
@@ -35,8 +32,8 @@ std::vector<Filter> apply_scale(const std::vector<Filter>& filters, float scale)
 
 inline ivec2_t round_blur_radius(float rx, float ry) {
     return ivec2(
-            MAX(0, MIN(256, (int)rx - 1)),
-            MAX(0, MIN(256, (int)ry - 1))
+            MAX(0, MIN(256, (int) rx - 1)),
+            MAX(0, MIN(256, (int) ry - 1))
     );
 }
 
@@ -90,11 +87,11 @@ irect_t get_filtered_rect(const irect_t rc, const std::vector<Filter>& filters) 
     for (auto& filter: filters) {
         res = extend_filter_rect(res, filter);
     }
-    const auto l = (int32_t)(floor(res.x));
-    const auto t = (int32_t)(floor(res.y));
-    const auto r = (int32_t)(ceil(res.x + res.w));
-    const auto b = (int32_t)(ceil(res.y + res.h));
-    return (irect_t){{l, t, r - l, b - t}};
+    const auto l = (int32_t) (floor(res.x));
+    const auto t = (int32_t) (floor(res.y));
+    const auto r = (int32_t) (ceil(res.x + res.w));
+    const auto b = (int32_t) (ceil(res.y + res.h));
+    return (irect_t) {{l, t, r - l, b - t}};
 }
 
 uint32_t convert_strength(float value) {
@@ -102,7 +99,7 @@ uint32_t convert_strength(float value) {
     return std::min(strength, 0x10000u);
 }
 
-void apply_strength(Bitmap& surf, uint32_t strength) {
+void apply_strength(ek_bitmap surf, uint32_t strength) {
     if (strength == 0x100) {
         return;
     }
@@ -113,37 +110,37 @@ void apply_strength(Bitmap& surf, uint32_t strength) {
         lut[a] = v < 255u ? v : 255u;
     }
 
-    for (uint32_t y = 0u; y < surf.h; ++y) {
-        auto* r = surf.row(y);
-        for (uint32_t x = 0u; x < surf.w; ++x) {
+    for (int y = 0; y < surf.h; ++y) {
+        color_t* r = ek_bitmap_row(surf, y);
+        for (int x = 0; x < surf.w; ++x) {
             const auto a0 = r[x].a;
             if (a0 != 0) {
                 const auto a1 = lut[a0];
                 const float k = static_cast<float>(a1) / static_cast<float>(a0);
                 r[x].a = a1;
-                r[x].r = static_cast<uint8_t>(r[x].r * k);
-                r[x].g = static_cast<uint8_t>(r[x].g * k);
-                r[x].b = static_cast<uint8_t>(r[x].b * k);
+                r[x].r = (uint8_t) ((float) r[x].r * k);
+                r[x].g = (uint8_t) ((float) r[x].g * k);
+                r[x].b = (uint8_t) ((float) r[x].b * k);
             }
         }
     }
 }
 
-void apply_color(Bitmap& surf, Color color) {
+void apply_color(ek_bitmap surf, vec4_t color) {
     color.r *= color.a;
     color.g *= color.a;
     color.b *= color.a;
-    const Rgba pmaRgba = toRGBA(color);
+    const color_t pmaRgba = color_vec4(color);
 
     for (int y = 0u; y < surf.h; ++y) {
-        auto* r = surf.row(y);
+        color_t* r = ek_bitmap_row(surf, y);
         for (int x = 0u; x < surf.w; ++x) {
-            const auto a = static_cast<uint32_t>(r->a) * 258u;
+            const auto a = ((uint32_t) r->a) * 258u;
             if (a != 0u) {
-                r->r = static_cast<uint8_t>((a * pmaRgba.r) >> 16u);
-                r->g = static_cast<uint8_t>((a * pmaRgba.g) >> 16u);
-                r->b = static_cast<uint8_t>((a * pmaRgba.b) >> 16u);
-                r->a = static_cast<uint8_t>((a * pmaRgba.a) >> 16u);
+                r->r = (uint8_t) ((a * pmaRgba.r) >> 16u);
+                r->g = (uint8_t) ((a * pmaRgba.g) >> 16u);
+                r->b = (uint8_t) ((a * pmaRgba.b) >> 16u);
+                r->a = (uint8_t) ((a * pmaRgba.a) >> 16u);
             }
             ++r;
         }
@@ -163,8 +160,8 @@ void apply_color(Bitmap& surf, Color color) {
   inFilterSize - total filter size
   inPixelsLeft - number of valid pixels on left
 */
-void BlurRow(const Rgba* inSrc, int inDS, int inSrcW, int inFilterLeft,
-             Rgba* inDest, int inDD, int inDestW, int inFilterSize, int inPixelsLeft) {
+void BlurRow(const color_t* inSrc, int inDS, int inSrcW, int inFilterLeft,
+             color_t* inDest, int inDD, int inDestW, int inFilterSize, int inPixelsLeft) {
 
     int sr = 0;
     int sg = 0;
@@ -173,14 +170,14 @@ void BlurRow(const Rgba* inSrc, int inDS, int inSrcW, int inFilterLeft,
 
     // loop over destination pixels with kernel    -xxx+
     // At each pixel, we - the trailing pixel and + the leading pixel
-    const Rgba* prev = inSrc - inFilterLeft * inDS;
-    const Rgba* first = std::max(prev, inSrc - inPixelsLeft * inDS);
-    const Rgba* src = prev + inFilterSize * inDS;
-    const Rgba* src_end = inSrc + inSrcW * inDS;
+    const color_t* prev = inSrc - inFilterLeft * inDS;
+    const color_t* first = std::max(prev, inSrc - inPixelsLeft * inDS);
+    const color_t* src = prev + inFilterSize * inDS;
+    const color_t* src_end = inSrc + inSrcW * inDS;
 
-    Rgba* dest = inDest;
+    color_t* dest = inDest;
 
-    for (const Rgba* s = first; s < src; s += inDS) {
+    for (const color_t* s = first; s < src; s += inDS) {
         sa += s->a;
         sr += s->r;
         sg += s->g;
@@ -224,8 +221,8 @@ void BlurRow(const Rgba* inSrc, int inDS, int inSrcW, int inFilterLeft,
     }
 }
 
-void DoApply(const Bitmap& inSrc,
-             Bitmap& outDest,
+void DoApply(const ek_bitmap inSrc,
+             ek_bitmap outDest,
              ivec2_t inSrc0,
              ivec2_t inDiff,
              uint32_t inPass,
@@ -238,7 +235,8 @@ void DoApply(const Bitmap& inSrc,
     int blurred_w = std::min(sw + blurRadius.x, w);
     int blurred_h = std::min(sh + blurRadius.y, h);
     // TODO: tmp height is potentially less (h+mBlurY) than sh ...
-    Bitmap tmp{blurred_w, sh};
+    ek_bitmap tmp = {};
+    ek_bitmap_alloc(&tmp, blurred_w, sh);
 
     int ox = blurRadius.x / 2;
     int oy = blurRadius.y / 2;
@@ -250,9 +248,9 @@ void DoApply(const Bitmap& inSrc,
     {
         // Blur rows ...
         int sx0 = inSrc0.x + inDiff.x;
-        for (uint32_t y = 0; y < sh; y++) {
-            auto* dest = tmp.row(y);
-            const auto* src = inSrc.row(y) + sx0;
+        for (int y = 0; y < sh; y++) {
+            auto* dest = ek_bitmap_row(tmp, y);
+            const auto* src = ek_bitmap_row(inSrc, y) + sx0;
 
             BlurRow(src, 1, sw - sx0, ox, dest, 1, blurred_w, blurRadius.x + 1, sx0);
         }
@@ -263,21 +261,21 @@ void DoApply(const Bitmap& inSrc,
     int d_stride = outDest.w;
     // Blur cols ...
     int sy0 = inSrc0.y + inDiff.y;
-    for (uint32_t x = 0; x < blurred_w; x++) {
-        auto* dest = outDest.row(0) + x;
-        const auto* src = tmp.row(sy0) + x;
+    for (int x = 0; x < blurred_w; x++) {
+        auto* dest = ek_bitmap_row(outDest, 0) + x;
+        const auto* src = ek_bitmap_row(tmp, sy0) + x;
 
         BlurRow(src, s_stride, sh - sy0, oy, dest, d_stride, blurred_h, blurRadius.y + 1, sy0);
     }
 }
 
-void scroll(const Bitmap& src, Bitmap& dst, ivec2_t offset) {
-    for (uint32_t y = 0u; y < src.h; ++y) {
-        auto* r = src.row(y);
+void scroll(const ek_bitmap src, ek_bitmap dst, ivec2_t offset) {
+    for (int y = 0u; y < src.h; ++y) {
+        auto* r = ek_bitmap_row(src, y);
         auto dstY = y + offset.y;
         if (dstY < 0 || dstY >= dst.h) continue;
-        auto* dstRow = dst.row(y + offset.y);
-        for (uint32_t x = 0u; x < src.w; ++x) {
+        auto* dstRow = ek_bitmap_row(dst, y + offset.y);
+        for (int x = 0u; x < src.w; ++x) {
             auto dstX = x + offset.x;
             if (dstX < 0 || dstX >= dst.w) continue;
             dstRow[dstX] = r[x];
@@ -285,58 +283,63 @@ void scroll(const Bitmap& src, Bitmap& dst, ivec2_t offset) {
     }
 }
 
-void blur(Bitmap& src, const Filter& filter) {
+void blur(ek_bitmap src, const Filter& filter) {
     const auto radius = round_blur_radius(filter.blurX, filter.blurY);
-    Bitmap tmp{src.w, src.h};
-    Bitmap* chainSrc = &src;
-    Bitmap* chainDst = &tmp;
+    ek_bitmap tmp = {};
+    ek_bitmap_alloc(&tmp, src.w, src.h);
+    ek_bitmap chainSrc = src;
+    ek_bitmap chainDst = tmp;
     for (int q = 0; q < filter.quality; ++q) {
-        DoApply(*chainSrc, *chainDst, {0, 0}, {0, 0}, q, radius);
+        DoApply(chainSrc, chainDst, {}, {}, q, radius);
         std::swap(chainDst, chainSrc);
     }
-    if (chainSrc == &tmp) {
-        src.assign(tmp);
+    if (chainSrc.pixels == tmp.pixels) {
+        ek_bitmap_copy(src, tmp);
     }
+    ek_bitmap_free(&tmp);
 }
 
-void gradient(Bitmap& src, const Filter& filter, const irect_t& bounds) {
+void gradient(ek_bitmap src, const Filter& filter, const irect_t& bounds) {
     for (int y = 0; y < src.h; ++y) {
         const float distance = filter.bottom - filter.top;
-        const float coord = static_cast<float>(y) + bounds.y;
+        const float coord = (float) y + (float) bounds.y;
         const float t = (coord - filter.top) / distance;
-        const Rgba m = toRGBA(lerp(filter.color0, filter.color1, saturate(t)));
-        auto* r = src.row(y);
+        const color_t m = color_vec4(lerp_vec4(filter.color0, filter.color1, saturate(t)));
+        color_t* r = ek_bitmap_row(src, y);
         for (int x = 0; x < src.w; ++x) {
-            r[x] *= m;
+            r[x] = r[x] * m;
         }
     }
 }
 
-void apply(Bitmap& bitmap, const Filter& filter, const irect_t bounds) {
+void apply(ek_bitmap bitmap, const Filter& filter, const irect_t bounds) {
     switch (filter.type) {
         case FilterType::ReFill:
             gradient(bitmap, filter, bounds);
             break;
         case FilterType::Glow: {
-            Bitmap tmp{bitmap.w, bitmap.h};
-            tmp.assign(bitmap);
-            blur(tmp, filter);
-            apply_strength(tmp, convert_strength(filter.strength));
-            apply_color(tmp, filter.color0);
-            blit(tmp, bitmap);
-            bitmap.assign(tmp);
+            ek_bitmap tmp = {};
+            ek_bitmap_clone(&tmp, bitmap);
+            blur(bitmap, filter);
+            apply_strength(bitmap, convert_strength(filter.strength));
+            apply_color(bitmap, filter.color0);
+            blit(bitmap, tmp);
+            ek_bitmap_free(&tmp);
         }
             break;
         case FilterType::Shadow: {
-            Bitmap tmp{bitmap.w, bitmap.h};
+            ek_bitmap tmp = {};
+            ek_bitmap_alloc(&tmp, bitmap.w, bitmap.h);
+
             vec2_t offset = filter.distance * vec2_cs(to_radians(filter.angle));
-            ivec2_t ioffset = {{(int)offset.x, (int)offset.y}};
+            ivec2_t ioffset = {{(int) offset.x, (int) offset.y}};
             scroll(bitmap, tmp, ioffset);
             blur(tmp, filter);
             apply_strength(tmp, convert_strength(filter.strength));
             apply_color(tmp, filter.color0);
             blit(tmp, bitmap);
-            bitmap.assign(tmp);
+            ek_bitmap_copy(bitmap, tmp);
+            ek_bitmap_free(&tmp);
         }
             break;
         default:
@@ -347,30 +350,24 @@ void apply(Bitmap& bitmap, const Filter& filter, const irect_t bounds) {
 void apply(const std::vector<Filter>& filters, Image& image, float scale) {
     const irect_t bounds = get_filtered_rect(image.source, filters);
     auto res = image;
-    auto* dest = new Bitmap(bounds.w, bounds.h);
+    ek_bitmap dest = {};
+    ek_bitmap_alloc(&dest, bounds.w, bounds.h);
     const ivec2_t dest_pos = ivec2(
             image.source.x - bounds.x,
             image.source.y - bounds.y
     );
-    Bitmap* idata = image.bitmap;
-    copyPixels(*dest, dest_pos.x, dest_pos.y, *idata, 0, 0, idata->w, idata->h);
+    ek_bitmap idata = image.bitmap;
+    bitmap_copy(&dest, dest_pos.x, dest_pos.y, &idata, 0, 0, idata.w, idata.h);
 
     for (auto& filter: filters) {
-        apply(*dest, filter, bounds);
+        apply(dest, filter, bounds);
     }
 
-    res.rc = {
-            (float) bounds.x / scale,
-            (float) bounds.y / scale,
-            (float) bounds.w / scale,
-            (float) bounds.h / scale,
-    };
+    res.rc = irect_to_rect(bounds) / scale;
     res.source = bounds;
-
     res.bitmap = dest;
     // TODO: preserved pixels?
-    delete image.bitmap;
-    image.bitmap = nullptr;
+    ek_bitmap_free(&image.bitmap);
     image = res;
 }
 
