@@ -1,4 +1,5 @@
 #include "PopupManager.hpp"
+#include "ek/canvas.h"
 
 #include <ek/scenex/base/DestroyTimer.hpp>
 #include <ek/scenex/SceneFactory.hpp>
@@ -84,7 +85,7 @@ void on_popup_close_animation(float t, EntityApi e) {
 }
 
 void init_basic_popup(EntityApi e) {
-    auto node_close = find(e, "btn_close");
+    auto node_close = find(e, H("btn_close"));
     if (node_close && node_close.has<Button>()) {
         auto& btn_close = node_close.get<Button>();
         btn_close.clicked += [e] {
@@ -219,10 +220,10 @@ void close_all_popups() {
 }
 
 ecs::EntityApi createBackQuad() {
-    auto e = createNode2D("back");
+    auto e = createNode2D(H("back"));
     auto& display = e.assign<Display2D>();
     display.makeDrawable<Quad2D>().setColor(COLOR_BLACK);
-    display.program = ek_ref_find(ek_shader, "canvas_color");
+    display.program = RES_SHADER_SOLID_COLOR;
     e.assign<LayoutRect>()
             .fill(true, true)
             .setInsetsMode(false);
@@ -248,12 +249,12 @@ ecs::EntityApi createBackQuad() {
 }
 
 ecs::EntityApi PopupManager::make() {
-    auto e = createNode2D("popups");
+    auto e = createNode2D(H("popups"));
     auto& pm = e.assign<PopupManager>();
     pm.back = createBackQuad();
     append(e, pm.back);
 
-    pm.layer = createNode2D("layer");
+    pm.layer = createNode2D(H("layer"));
     pm.layer.assign<LayoutRect>()
             .enableAlignX(0.5f)
             .enableAlignY(0.5f)
@@ -261,7 +262,7 @@ ecs::EntityApi PopupManager::make() {
     append(e, pm.layer);
 
     // initially popup manager is deactivated
-    auto& st = e.get_or_create<Node>();
+    auto& st = e.get<Node>();
     st.setTouchable(false);
     st.setVisible(false);
 

@@ -231,8 +231,8 @@ struct Transform2D {
     static void fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, vec2_t pos, vec2_t* out);
 };
 
-ECX_TYPE(14, WorldTransform2D);
-ECX_TYPE(15, Transform2D);
+
+
 
 /** system to invalidate matrix and color in world space **/
 //void updateWorldTransform2D(ecs::EntityApi root);

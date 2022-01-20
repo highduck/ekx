@@ -8,6 +8,7 @@ import * as glob from "glob";
 import {spritePackerAsync} from "./helpers/spritePacker";
 import {BytesWriter} from "./helpers/BytesWriter";
 import {XmlElement} from "xmldoc";
+import {H} from "../utility/hash";
 
 class MRAResolution {
     scale = 1.0;
@@ -92,7 +93,7 @@ export class MultiResAtlasAsset extends Asset {
         }
 
         const header = new BytesWriter();
-        header.writeString("atlas");
+        header.writeU32(H("atlas"));
         header.writeString(this.name);
         // variants
         let formatMask = 1;

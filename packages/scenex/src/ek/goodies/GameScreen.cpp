@@ -10,12 +10,11 @@
 namespace ek {
 
 /** GameScreen component **/
-GameScreen& GameScreen::init(ecs::EntityApi e, const char* name) {
-    if (name) {
-        e.get_or_create<NodeName>().name = name;
-    }
-    e.get<Node>().setVisible(false);
-    e.get<Node>().setTouchable(false);
+GameScreen& GameScreen::init(ecs::EntityApi e, string_hash_t name) {
+    auto& node = e.get<Node>();
+    node.tag = name;
+    node.setVisible(false);
+    node.setTouchable(false);
     return e.reassign<GameScreen>();
 }
 
@@ -96,7 +95,7 @@ GameScreenManager::GameScreenManager(ecs::EntityApi layer_) :
         layer{layer_} {
 }
 
-void GameScreenManager::setScreen(const char* name) {
+void GameScreenManager::setScreen(string_hash_t name) {
     if (transition.active) {
         return;
     }
@@ -138,19 +137,16 @@ void GameScreenManager::setScreen(const char* name) {
     }
 }
 
-ecs::EntityApi GameScreenManager::findScreen(const char* name) const {
-    auto it = layer.get<Node>().child_first;
-    while (it) {
-        if (it.has<GameScreen>() && it.get_or_default<NodeName>().name == name) {
-            return it;
-        }
-        it = it.get<Node>().sibling_next;
+ecs::EntityApi GameScreenManager::findScreen(string_hash_t name) const {
+    auto e = find(layer, name);
+    if(e && e.has<GameScreen>()) {
+        return e;
     }
-    EK_DEBUG("could not find screen: %s", name);
-    return nullptr;
+    EK_DEBUG("could not find screen: %u (%s)", name, hsp_get(name));
+    return 0;
 }
 
-void GameScreenManager::changeScreen(const char* name) {
+void GameScreenManager::changeScreen(string_hash_t name) {
     if (transition.active) {
         return;
     }

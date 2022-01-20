@@ -4,7 +4,7 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 #include <ek/time.h>
-#include <ek/audio/audio.hpp>
+#include <ek/audio.h>
 #include <ek/local_res.h>
 
 // texture loading
@@ -33,22 +33,22 @@ namespace ek {
 
 class AudioAsset : public Asset {
 public:
-    AudioAsset(const char* name, String filepath, uint32_t flags) :
-            res{name},
+    AudioAsset(string_hash_t name, String filepath, uint32_t flags) :
+            res{rr_named(&res_audio.rr, name)},
             path_{std::move(filepath)},
             streaming{flags != 0} {
     }
 
     void do_load() override {
-        auto* audio = new AudioResource();
-
         fullPath_ = manager_->base_path / path_;
-        audio->load(fullPath_.c_str(), streaming);
-        res.reset(audio);
+        auph_buffer* buffer = &REF_RESOLVE(res_audio, res);
+        // if assertion is triggering - implement cleaning up the slot before loading
+        EK_ASSERT(buffer->id == 0);
+        *buffer = auph_load(fullPath_.c_str(), streaming ? AUPH_FLAG_STREAM : 0);
     }
 
     void poll() override {
-        auto buffer = res->buffer;
+        auto buffer = REF_RESOLVE(res_audio, res);
         auto failed = !auph_is_active(buffer.id);
         auto completed = auph_is_buffer_loaded(buffer);
         if (failed || completed) {
@@ -57,13 +57,16 @@ public:
     }
 
     void do_unload() override {
-        if (!res.empty()) {
-            res->unload();
-            res.reset(nullptr);
+        if (res) {
+            auph_buffer* audio = &REF_RESOLVE(res_audio, res);
+            if (audio->id && auph_is_active(audio->id)) {
+                auph_unload(*audio);
+            }
+            audio->id = 0;
         }
     }
 
-    Res<AudioResource> res;
+    REF_TO(auph_buffer) res;
     String path_;
     String fullPath_;
     bool streaming = false;
@@ -71,7 +74,8 @@ public:
 
 class AtlasAsset : public Asset {
 public:
-    AtlasAsset(const char* name, uint32_t formatMask_) : res{name} {
+    AtlasAsset(const char* name_, uint32_t formatMask_) : res{H(name_)},
+                                                          name{name_} {
         // we need to load atlas image and atlas meta
         weight_ = 2;
         formatMask = formatMask_;
@@ -83,7 +87,7 @@ public:
 
             res.reset(nullptr);
 
-            fullPath_ = manager_->base_path / res.getID();
+            fullPath_ = manager_->base_path / name;
 
             if (!res) {
                 res.reset(new Atlas);
@@ -117,7 +121,7 @@ public:
                 const auto totalPages = (float) res->pages.size();
                 float loadedPages = 0.0f;
                 for (auto page: res->pages) {
-                    if (ek_ref_content(sg_image, page).id) {
+                    if (REF_RESOLVE(res_image, page).id) {
                         loadedPages += 1.0f;
                     }
                 }
@@ -137,6 +141,7 @@ public:
     }
 
     Res<Atlas> res;
+    String name;
     uint8_t loaded_scale_ = 0;
     String fullPath_;
     uint32_t formatMask = 1;
@@ -144,7 +149,7 @@ public:
 
 class DynamicAtlasAsset : public Asset {
 public:
-    DynamicAtlasAsset(const char* name, uint32_t flags) : res{name}, flags_{flags} {
+    DynamicAtlasAsset(string_hash_t name, uint32_t flags) : res{name}, flags_{flags} {
     }
 
     // do not reload dynamic atlas, because references to texture* should be invalidated,
@@ -174,7 +179,7 @@ public:
 
 class SceneAsset : public Asset {
 public:
-    explicit SceneAsset(const char* name, String path) :
+    explicit SceneAsset(string_hash_t name, String path) :
             res{name},
             path_{std::move(path)} {
     }
@@ -203,7 +208,7 @@ public:
 
 class BitmapFontAsset : public Asset {
 public:
-    BitmapFontAsset(const char* name, String path) :
+    BitmapFontAsset(string_hash_t name, String path) :
             res{name},
             path_{std::move(path)} {
     }
@@ -235,8 +240,8 @@ public:
 
 class ImageAsset : public Asset {
 public:
-    ImageAsset(const char* name, ImageData data) :
-            res{ek_ref_find(sg_image, name)},
+    ImageAsset(string_hash_t name, ImageData data) :
+            res{rr_named(&res_image.rr, name)},
             data_{std::move(data)} {
         weight_ = (float) data_.images.size();
     }
@@ -267,7 +272,7 @@ public:
             if (!loader->loading) {
                 error = loader->status;
                 if (error == 0) {
-                    ek_ref_assign(sg_image, res, loader->image);
+                    REF_RESOLVE(res_image, res) = loader->image;
                 }
                 state = AssetState::Ready;
                 ek_texture_loader_destroy(loader);
@@ -285,10 +290,16 @@ public:
     }
 
     void do_unload() override {
-        ek_ref_reset(sg_image, res);
+        if (res) {
+            sg_image* image = &REF_RESOLVE(res_image, res);
+            if (image->id) {
+                sg_destroy_image(*image);
+                *image = {SG_INVALID_ID};
+            }
+        }
     }
 
-    ek_ref(sg_image) res;
+    REF_TO(sg_image) res;
     ek_texture_loader* loader = nullptr;
     ImageData data_{};
     // by default always premultiply alpha,
@@ -366,7 +377,7 @@ public:
                         IO io{input};
                         Model3D model;
                         io(model);
-                        Res<StaticMesh>{this_->name_.c_str()}.reset(new StaticMesh(model));
+                        Res<StaticMesh>{H(this_->name_.c_str())}.reset(new StaticMesh(model));
                         ek_local_res_close(lr);
                     } else {
                         EK_ERROR("MODEL resource not found: %s", this_->fullPath_.c_str());
@@ -379,7 +390,7 @@ public:
     }
 
     void do_unload() override {
-        Res<StaticMesh>{name_.c_str()}.reset(nullptr);
+        Res<StaticMesh>{H(name_.c_str())}.reset(nullptr);
     }
 
     String name_;
@@ -516,11 +527,11 @@ public:
 class TrueTypeFontAsset : public Asset {
 public:
 
-    TrueTypeFontAsset(const char* name, String path, String glyphCache, float baseFontSize) :
+    TrueTypeFontAsset(string_hash_t name, String path, string_hash_t glyphCache, float baseFontSize) :
             res{name},
             baseFontSize_{baseFontSize},
             path_{std::move(path)},
-            glyphCache_{std::move(glyphCache)} {
+            glyphCache_{glyphCache} {
     }
 
     void do_load() override {
@@ -530,7 +541,7 @@ public:
                 [](ek_local_res* lr) {
                     TrueTypeFontAsset* this_ = (TrueTypeFontAsset*) lr->userdata;
                     TrueTypeFont* ttfFont = new TrueTypeFont(this_->manager_->scale_factor, this_->baseFontSize_,
-                                                             this_->glyphCache_.c_str());
+                                                             this_->glyphCache_);
                     ttfFont->loadFromMemory(lr);
                     this_->res.reset(new Font(ttfFont));
                     this_->state = AssetState::Ready;
@@ -545,7 +556,7 @@ public:
     float baseFontSize_;
     String path_;
     String fullPath_;
-    String glyphCache_;
+    string_hash_t glyphCache_;
 };
 
 Asset* DefaultAssetsResolver::create_from_file(const String& path, const String& type) const {
@@ -567,56 +578,56 @@ bool io_string_view_equals(IOStringView view, const char* lit) {
 Asset* DefaultAssetsResolver::create_for_type(const void* data, uint32_t size) const {
     input_memory_stream stream{data, size};
     IO io{stream};
-    IOStringView type;
+    string_hash_t type;
     io(type);
-    if (io_string_view_equals(type, "audio")) {
-        IOStringView name;
-        String path;
+    if (type == H("audio")) {
+        string_hash_t name;
         uint32_t flags = 0;
-        io(name, path, flags);
-        return new AudioAsset(name.data, path, flags);
-    } else if (io_string_view_equals(type, "scene")) {
-        IOStringView name;
+        String path;
+        io(name, flags, path);
+        return new AudioAsset(name, path, flags);
+    } else if (type == H("scene")) {
+        string_hash_t name;
         String path;
         io(name, path);
-        return new SceneAsset(name.data, path);
-    } else if (io_string_view_equals(type, "bmfont")) {
-        IOStringView name;
+        return new SceneAsset(name, path);
+    } else if (type == H("bmfont")) {
+        string_hash_t name;
         String path;
         io(name, path);
-        return new BitmapFontAsset(name.data, path);
-    } else if (io_string_view_equals(type, "ttf")) {
-        IOStringView name;
+        return new BitmapFontAsset(name, path);
+    } else if (type == H("ttf")) {
+        string_hash_t name;
         String path;
-        String glyphCache;
+        string_hash_t glyphCache;
         float baseFontSize;
         io(name, path, glyphCache, baseFontSize);
-        return new TrueTypeFontAsset(name.data, path, glyphCache, baseFontSize);
-    } else if (io_string_view_equals(type, "atlas")) {
+        return new TrueTypeFontAsset(name, path, glyphCache, baseFontSize);
+    } else if (type == H("atlas")) {
         IOStringView name;
         uint32_t formatMask = 1;
         io(name, formatMask);
         return new AtlasAsset(name.data, formatMask);
-    } else if (io_string_view_equals(type, "dynamic_atlas")) {
-        IOStringView name;
+    } else if (type == H("dynamic_atlas")) {
+        string_hash_t name;
         uint32_t flags;
         io(name, flags);
-        return new DynamicAtlasAsset(name.data, flags);
-    } else if (io_string_view_equals(type, "model")) {
+        return new DynamicAtlasAsset(name, flags);
+    } else if (type == H("model")) {
         String name;
         io(name);
         return new ModelAsset(name);
-    } else if (io_string_view_equals(type, "texture")) {
-        IOStringView name;
+    } else if (type == H("texture")) {
+        string_hash_t name;
         ImageData texData;
         io(name, texData);
-        return new ImageAsset(name.data, texData);
-    } else if (io_string_view_equals(type, "strings")) {
+        return new ImageAsset(name, texData);
+    } else if (type == H("strings")) {
         String name;
         Array<String> langs;
         io(name, langs);
         return new StringsAsset(name, langs);
-    } else if (io_string_view_equals(type, "pack")) {
+    } else if (type == H("pack")) {
         String name;
         io(name);
         return new PackAsset(name);

@@ -23,7 +23,7 @@ struct Light3D {
     bool cast_shadows = true;
 };
 
-ECX_TYPE(28, Light3D);
+
 
 }
 

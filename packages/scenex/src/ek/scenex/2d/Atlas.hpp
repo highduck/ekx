@@ -5,6 +5,7 @@
 #include <ek/util/Res.hpp>
 #include <ek/util/Type.hpp>
 #include <cstdint>
+#include <ek/ds/String.hpp>
 #include <ek/ds/Array.hpp>
 #include <functional>
 #include <ek/texture_loader.h>
@@ -20,8 +21,8 @@ public:
 
     void clear();
 
-    Array<Res<Sprite>> sprites;
-    Array<ek_ref(sg_image)> pages;
+    Array<REF_TO(Sprite)> sprites;
+    Array<REF_TO(sg_image)> pages;
 
     // loading routine
     Array<ek_texture_loader*> loaders;

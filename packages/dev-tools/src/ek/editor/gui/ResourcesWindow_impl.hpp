@@ -15,6 +15,32 @@
 
 namespace ek {
 
+/// canvas stats
+void draw_buffer_chain_stats(const char* name, ek_canvas_buffers* buffers) {
+    for (int line = 0; line < 4; ++line) {
+        int c = 0;
+        for (int i = 0; i < CANVAS_BUFFERS_MAX_COUNT; ++i) {
+            if (buffers->lines[line][i].id == 0) {
+                i = CANVAS_BUFFERS_MAX_COUNT;
+            } else {
+                ++c;
+            }
+        }
+        ImGui::Text("%s[%d] count %d", name, line, c);
+    }
+}
+
+void draw_canvas_stats() {
+    ImGui::Text("size: %lu", sizeof canvas);
+    ImGui::Text("vb chain size: %lu", sizeof canvas.vbs);
+    ImGui::Text("ib chain size: %lu", sizeof canvas.ibs);
+    ImGui::Text("vb mem size: %lu", sizeof canvas.vertex);
+    ImGui::Text("ib mem size: %lu", sizeof canvas.index);
+    draw_buffer_chain_stats("VB", &canvas.vbs);
+    draw_buffer_chain_stats("IB", &canvas.ibs);
+}
+
+/// assets
 template<typename T>
 void drawAssetItem(const T& asset) {
 
@@ -53,7 +79,7 @@ void drawAssetItem<Atlas>(const Atlas& asset) {
     static float pageScale = 0.25f;
     ImGui::SliderFloat("Scale", &pageScale, 0.0f, 1.0f);
     for (int i = 0; i < pagesCount; ++i) {
-        const sg_image page = ek_ref_content(sg_image, asset.pages[i]);
+        const sg_image page = REF_RESOLVE(res_image, asset.pages[i]);
         if (page.id) {
             ImGui::Text("Page #%d", i);
             const auto info = sg_query_image_info(page);
@@ -65,22 +91,20 @@ void drawAssetItem<Atlas>(const Atlas& asset) {
         }
     }
 
-    for (const auto& spr: asset.sprites) {
-        const auto* sprite = spr.get();
-        const auto* id = spr.getID();
-        if (sprite) {
-            ImGui::TextUnformatted(id);
-            guiSprite(*sprite);
+    for (const auto spr: asset.sprites) {
+        const auto* sprite = &REF_RESOLVE(res_sprite, spr);
+        ImGui::Text("%s (GID: %u)", hsp_get(res_sprite.names[spr]), spr);
+        if (sprite->state & SPRITE_LOADED) {
+            guiSprite(sprite);
         } else {
-            ImGui::TextDisabled("Sprite %s is null", id);
+            ImGui::TextDisabled("Unloaded");
         }
         ImGui::Separator();
     }
 }
 
-template<>
-void drawAssetItem<Sprite>(const Sprite& asset) {
-    guiSprite(asset);
+void draw_sprite_info(void* asset) {
+    guiSprite((const Sprite*)asset);
 }
 
 template<>
@@ -103,20 +127,21 @@ template<>
 void drawAssetItem<SGFile>(const SGFile& asset) {
     if (ImGui::TreeNode("##scene-list", "Scenes (%u)", asset.scenes.size())) {
         for (auto& sceneName: asset.scenes) {
-            ImGui::TextUnformatted(sceneName.c_str());
+            ImGui::Text("%u %s", sceneName, hsp_get(sceneName));
         }
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("##linkages-list", "Linkages (%u)", static_cast<uint32_t>(asset.linkages.size()))) {
         for (auto& info: asset.linkages) {
-            auto* node = sg_get(asset, info.linkage.c_str());
-            if (node) {
-                if (ImGui::TreeNode(node, "%s -> %s", info.name.c_str(), info.linkage.c_str())) {
-                    ImGui::TextDisabled("todo:");
-                    ImGui::TreePop();
-                }
-            } else {
-                ImGui::TextDisabled("%s -> %s (not found)", info.name.c_str(), info.linkage.c_str());
+            auto* node = sg_get(asset, info.linkage);
+            if (ImGui::TreeNode(node, "%u %s -> %u %s", info.name, hsp_get(info.name), info.linkage,
+                                hsp_get(info.linkage))) {
+                if (node) {
+                    ImGui::TextUnformatted("todo:");
+                } else {
+                    ImGui::TextDisabled("Not found");
+                };
+                ImGui::TreePop();
             }
         }
         ImGui::TreePop();
@@ -125,70 +150,63 @@ void drawAssetItem<SGFile>(const SGFile& asset) {
 
 template<typename T>
 void drawAssetsListByType() {
-    FixedArray<ResourceDB::Slot*, 1024> list;
-    // TODO:
-    //for (auto& it: ResourceDB::getMap) {
-//        if (it.second.key.type == TypeIndex<T>::value) {
-//            list.push_back(&it.second);
-//        }
-    //}
-
     const char* typeName = TypeName<T>::value;
+    auto& list = ResourceDB::list(TypeIndex<T>::value);
     const auto count = list.size();
     char buff[128];
     sprintf(buff, "%s (%u)###%s", typeName, count, typeName);
     if (ImGui::BeginTabItem(buff)) {
         for (const auto& slot: list) {
-            const T* content = (const T*) slot->content;
+            const T* content = (const T*) slot.content;
+            const char* name = hsp_get(slot.name);
             if (content) {
-                if (ImGui::TreeNode(slot->name.c_str())) {
+                if (ImGui::TreeNode(&slot, "%s (0x%08X)", name, slot.name)) {
                     drawAssetItem<T>(*content);
                     ImGui::TreePop();
                 }
             } else {
-                ImGui::TextDisabled("%s", slot->name.c_str());
+                ImGui::TextDisabled("%s (0x%08X)", name, slot.name);
             }
         }
         ImGui::EndTabItem();
     }
 }
 
-void draw_buffer_chain_stats(const char* name, ek_canvas_buffers* buffers) {
-    for(int line = 0; line < 4; ++line) {
-        int c = 0;
-        for(int i = 0; i < CANVAS_BUFFERS_MAX_COUNT; ++i) {
-            if(buffers->lines[line][i].id == 0) {
-                i = CANVAS_BUFFERS_MAX_COUNT;
+
+//template<typename T>
+void draw_rr_items(const char* type_name, rr_man_t* rr, void (* fn)(void* item)) {
+    char buff[128];
+    sprintf(buff, "%s (%u / %u)###%s", type_name, rr->num, rr->max, type_name);
+    if (ImGui::BeginTabItem(buff)) {
+        uint8_t* item_data = (uint8_t*) rr->data;
+        for (uint32_t i = 0; i < rr->num; ++i) {
+            string_hash_t name = rr->names[i];
+            ImGui::BeginDisabled(!fn);
+            if (ImGui::TreeNode(item_data, "%s (0x%08X)", hsp_get(name), name)) {
+                if (fn) {
+                    fn(item_data);
+                }
+                ImGui::TreePop();
             }
-            else {
-                ++c;
-            }
+            ImGui::EndDisabled();
+            item_data += rr->data_size;
         }
-        ImGui::Text("%s[%d] count %d", name, line, c);
+        ImGui::EndTabItem();
     }
 }
 
 void ResourcesWindow::onDraw() {
-
-    ImGui::Text("ek_canvas size: %lu", sizeof canvas);
-    ImGui::Text("ek_canvas vb chain size: %lu", sizeof canvas.vbs);
-    ImGui::Text("ek_canvas ib chain size: %lu", sizeof canvas.ibs);
-    ImGui::Text("ek_canvas vb mem size: %lu", sizeof canvas.vertex);
-    ImGui::Text("ek_canvas ib mem size: %lu", sizeof canvas.index);
-    draw_buffer_chain_stats("VB", &canvas.vbs);
-    draw_buffer_chain_stats("IB", &canvas.ibs);
-
-    // TODO: somehow generic draw manual registries
-    // drawAssetsListByType<Texture>();
-    // drawAssetsListByType<Shader>();
-
     if (ImGui::BeginTabBar("res_by_type", 0)) {
-        drawAssetsListByType<Sprite>();
+        draw_rr_items("image", &res_image.rr, 0);
+        draw_rr_items("shader", &res_shader.rr, 0);
+        draw_rr_items("sprite", &res_sprite.rr, draw_sprite_info);
+        draw_rr_items("particle", &res_particle.rr, 0);
+        draw_rr_items("audio", &res_audio.rr, 0);
+
         drawAssetsListByType<Atlas>();
         drawAssetsListByType<DynamicAtlas>();
         drawAssetsListByType<Font>();
         drawAssetsListByType<SGFile>();
-        drawAssetsListByType<AudioResource>();
         drawAssetsListByType<ParticleDecl>();
         drawAssetsListByType<Material3D>();
         drawAssetsListByType<StaticMesh>();

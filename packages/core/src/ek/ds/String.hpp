@@ -4,7 +4,7 @@
 #include <cstring>
 #include <functional>
 #include <ek/buf.h>
-#include <ek/murmur.h>
+#include <ek/hash.h>
 #include <ek/string.h>
 #include <ek/print.h>
 #include <ek/assert.h>
@@ -165,7 +165,13 @@ public:
 
     [[nodiscard]]
     constexpr uint64_t hash() const noexcept {
-        return _buffer ? ek_murmur64(_buffer, ek_buf_length(_buffer), EK_MURMUR_DEFAULT_SEED) : 0;
+        //return _buffer ? hash_murmur2_64(_buffer, ek_buf_length(_buffer), HASH_MURMUR2_64_DEFAULT_SEED) : 0;
+        return _buffer ? hash_fnv64(_buffer, HASH_FNV64_INIT) : 0;
+    }
+
+    constexpr uint32_t hash32() const noexcept {
+        //return _buffer ? hash_murmur2_64(_buffer, ek_buf_length(_buffer), HASH_MURMUR2_64_DEFAULT_SEED) : 0;
+        return _buffer ? hash_fnv32(_buffer, HASH_FNV32_INIT) : 0;
     }
 
     void clear() {
@@ -232,14 +238,10 @@ public:
 
     static String format(const char* fmt, ...) {
         char buf[1024];
-//        int result;
         va_list va;
         va_start(va, fmt);
-
-//        result =
         ek_vsnprintf(buf, 1024, fmt, va);
         va_end(va);
-
         return buf;
     }
 };
@@ -253,6 +255,10 @@ public:
 template<>
 struct std::hash<ek::String> {
     std::size_t operator()(const ek::String& s) const noexcept {
-        return (std::size_t) s.hash();
+        if (sizeof(std::size_t) == 4) {
+            return s.hash32();
+        } else {
+            return s.hash();
+        }
     }
 };

@@ -30,8 +30,8 @@ struct Shaker {
     static void updateAll();
 };
 
-ECX_TYPE(24, Shake);
-ECX_TYPE(25, Shaker);
+
+
 }
 
 

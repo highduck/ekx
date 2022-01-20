@@ -25,6 +25,6 @@ struct Tween {
     }
 };
 
-ECX_TYPE(6, Tween);
+
 
 }

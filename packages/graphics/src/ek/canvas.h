@@ -74,6 +74,14 @@ typedef struct ek_canvas_pipeline_item {
     sg_pipeline pipeline;
 } ek_canvas_pipeline_item;
 
+/// Default resources
+enum {
+    RES_IMAGE_EMPTY = 1,
+    RES_SHADER_BLEND = 1,
+    RES_SHADER_ALPHA_MAP = 2,
+    RES_SHADER_SOLID_COLOR = 3,
+};
+
 typedef struct ek_canvas_context {
     // Scratch memory
     ek_vertex2d vertex[CANVAS_VERTEX_MAX_COUNT];
@@ -118,12 +126,6 @@ typedef struct ek_canvas_context {
     // Pipeline cache
     ek_canvas_pipeline_item pipelines[CANVAS_PIPELINE_LOOKUP_SIZE];
     int pipelines_num;
-
-    // Default resources
-    ek_shader shader_default;
-    ek_shader shader_alpha_map;
-    ek_shader shader_solid_color;
-    sg_image image_empty;
 
     // Current and saved state values
     sg_image image[CANVAS_STACK_DEPTH]; // 1 * 4

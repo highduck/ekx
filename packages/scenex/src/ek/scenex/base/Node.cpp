@@ -266,37 +266,49 @@ ecs::EntityApi Node::findLowerCommonAncestor(ecs::EntityApi e1, ecs::EntityApi e
 }
 
 
-ecs::EntityApi find(ecs::EntityApi e, const char* childName) {
+ecs::EntityApi find(ecs::EntityApi e, string_hash_t tag) {
     auto it = e.get<Node>().child_first;
     while (it) {
-        const auto* nodeName = it.tryGet<NodeName>();
-        if (nodeName && nodeName->name == childName) {
+        const auto& n = it.get<Node>();
+        if (n.tag == tag) {
             return it;
         }
-        it = it.get<Node>().sibling_next;
+        it = n.sibling_next;
     }
     return nullptr;
 }
 
-ecs::EntityApi findByPath(const ecs::EntityApi e, const Array<String>& path) {
+ecs::EntityApi findByPath(const ecs::EntityApi e, ...) {
+    va_list argp;
+    va_start(argp, e);
+
     auto it = e;
-    for (const auto& p : path) {
-        it = find(it, p.c_str());
+    string_hash_t p = va_arg(argp, string_hash_t);
+    while(p != 0) {
+        it = find(it, p);
         if (!it) {
-            return nullptr;
+            break;
         }
+        p = va_arg(argp, string_hash_t);
     }
+    va_end(argp);
     return it;
 }
 
-Array<ecs::EntityApi> findMany(const ecs::EntityApi e, const Array<String>& names) {
+Array<ecs::EntityApi> findMany(const ecs::EntityApi e, ...) {
+    va_list argp;
+    va_start(argp, e);
+
     Array<ecs::EntityApi> entities;
-    for (const auto& name : names) {
-        auto f = find(e, name.c_str());
+    string_hash_t p = va_arg(argp, string_hash_t);
+    while(p != 0) {
+        auto f = find(e, p);
         if (f) {
             entities.push_back(f);
         }
+        p = va_arg(argp, string_hash_t);
     }
+    va_end(argp);
     return entities;
 }
 

@@ -6,6 +6,7 @@ import {copyFile, makeDirs} from "../utils";
 import * as fs from "fs";
 import {BytesWriter} from "./helpers/BytesWriter";
 import {XmlElement} from "xmldoc";
+import {H} from "../utility/hash";
 
 const enum TextureDataType {
     Normal = 0,
@@ -76,10 +77,10 @@ export class TextureAsset extends Asset {
         }
 
         const header = new BytesWriter();
-        header.writeString(this.typeName);
+        header.writeU32(H(this.typeName));
 
         // res-name
-        header.writeString(this.name);
+        header.writeU32(H(this.name));
 
         // texture data
         header.writeU32(this.type);

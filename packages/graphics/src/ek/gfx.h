@@ -56,7 +56,7 @@
 #include <sokol_gfx.h>
 
 #include <stdint.h>
-#include <ek/ref.h>
+#include <ek/rr.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,8 +88,29 @@ typedef struct ek_shader {
 
 ek_shader ek_shader_make(const sg_shader_desc* desc);
 
-ek_ref_declare(ek_shader)
-ek_ref_declare(sg_image)
+struct res_shader {
+    ek_shader data[16];
+    string_hash_t names[16];
+    uint16_t name_to_id[16];
+    rr_man_t rr;
+};
+
+enum {
+    RES_IMAGE_NAME_MAX_SIZE = 16,
+    RES_IMAGE_MAX_NAMES = 8,
+};
+
+struct res_image {
+    sg_image data[16];
+    string_hash_t names[RES_IMAGE_MAX_NAMES];
+    uint16_t name_to_id[RES_IMAGE_MAX_NAMES];
+    rr_man_t rr;
+};
+
+extern struct res_shader res_shader;
+extern struct res_image res_image;
+//ek_ref_declare(ek_shader)
+//ek_ref_declare(sg_image)
 
 void ek_gfx_res_setup();
 

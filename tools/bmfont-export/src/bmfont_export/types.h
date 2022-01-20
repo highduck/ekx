@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ek/math.h>
 #include "Bitmap.h"
 #include <cstdint>
 #include <cstdlib>
@@ -17,30 +18,6 @@ class xml_node;
 }
 
 namespace bmfont_export {
-
-struct RectI {
-    int x;
-    int y;
-    int w;
-    int h;
-};
-
-struct Rect {
-    float x;
-    float y;
-    float w;
-    float h;
-};
-
-struct Vec2 {
-    float x;
-    float y;
-};
-
-struct Vec2I {
-    int x;
-    int y;
-};
 
 enum class FilterType {
     None,
@@ -83,9 +60,9 @@ struct Image {
     std::string name;
 
     // source rectangle in base physical units
-    Rect rc;
+    rect_t rc = {};
 
-    RectI source;
+    irect_t source = {};
 
     uint8_t padding = 1;
 
@@ -133,9 +110,9 @@ struct BuildBitmapFontSettings {
 class Glyph {
 public:
     std::vector<uint32_t> codepoints;
-    RectI box;
+    irect_t box;
     int32_t advanceWidth;
-    std::string sprite;
+    std::string sprite_name;
 };
 
 class Font {
@@ -150,11 +127,11 @@ public:
 };
 
 /// filters functions
-RectI get_filtered_rect(const RectI& rc, const std::vector<Filter>& filters);
+irect_t get_filtered_rect(const irect_t rc, const std::vector<Filter>& filters);
 
 std::vector<Filter> apply_scale(const std::vector<Filter>& filters, float scale);
 
-void apply(Bitmap& image, const Filter& filter, const RectI& bounds);
+void apply(Bitmap& image, const Filter& filter, const irect_t bounds);
 
 void apply(const std::vector<Filter>& filters, Image& image, float scale);
 

@@ -75,11 +75,8 @@ void TrailRenderer2D::draw() {
     if(columns < 2) {
         return;
     }
-    const auto* spr = sprite.get();
-    if (spr == nullptr) {
-        return;
-    }
-    const sg_image image = ek_ref_content(sg_image, spr->image_id);
+    const auto* spr = &REF_RESOLVE(res_sprite, sprite);
+    const sg_image image = REF_RESOLVE(res_image, spr->image_id);
     if (image.id == SG_INVALID_ID) {
         return;
     }
@@ -97,7 +94,7 @@ void TrailRenderer2D::draw() {
     auto texCoordV0 = spr->tex.y;
     auto texCoordU1 = RECT_CENTER_X(spr->tex);
     auto texCoordV1 = RECT_B(spr->tex);
-    if(spr->rotated) {
+    if(spr->state & SPRITE_ROTATED) {
         texCoordU0 = spr->tex.x;
         texCoordV0 = RECT_CENTER_Y(spr->tex);
         texCoordU1 = RECT_R(spr->tex);

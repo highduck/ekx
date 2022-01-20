@@ -29,7 +29,7 @@ void Bitmap::assign(const Bitmap& source) {
     memcpy(data, source.data, source.w * source.h * 4);
 }
 
-RectI clampBounds(const RectI& a, const RectI& b) {
+irect_t clampBounds(const irect_t& a, const irect_t& b) {
     const int l = a.x > b.x ? a.x : b.x;
     const int t = a.y > b.y ? a.y : b.y;
     const int r = (a.x + a.w) < (b.x + b.w) ? (a.x + a.w) : (b.x + b.w);
@@ -37,16 +37,13 @@ RectI clampBounds(const RectI& a, const RectI& b) {
     return {l, t, r - l, bo - t};
 }
 
-void clipRects(const RectI& src_bounds, const RectI& dest_bounds,
-               RectI& src_rect, RectI& dest_rect) {
-    const RectI src_rc = clampBounds(src_bounds, src_rect);
-    const RectI dest_rc = clampBounds(dest_bounds, dest_rect);
-    src_rect = {
-            src_rc.x + dest_rc.x - dest_rect.x,
-            src_rc.y + dest_rc.y - dest_rect.y,
-            dest_rc.w,
-            dest_rc.h
-    };
+void clipRects(const irect_t& src_bounds, const irect_t& dest_bounds,
+               irect_t& src_rect, irect_t& dest_rect) {
+    const irect_t src_rc = clampBounds(src_bounds, src_rect);
+    const irect_t dest_rc = clampBounds(dest_bounds, dest_rect);
+    src_rect = dest_rc;
+    src_rect.x += src_rc.x - dest_rect.x;
+    src_rect.y += src_rc.y - dest_rect.y;
     dest_rect = dest_rc;
 }
 
@@ -62,10 +59,10 @@ inline void set_pixel_unsafe(Bitmap& image, int x, int y, uint32_t pixel) {
 
 void copyPixels(Bitmap& dest, int dx, int dy,
                 const Bitmap& src, int sx, int sy, int sw, int sh) {
-    RectI dest_rc{dx, dy, sw, sh};
-    RectI src_rc{sx, sy, sw, sh};
-    clipRects({0, 0, src.w, src.h},
-              {0, 0, dest.w, dest.h},
+    irect_t dest_rc = {{dx, dy, sw, sh}};
+    irect_t src_rc = {{sx, sy, sw, sh}};
+    clipRects({{0, 0, src.w, src.h}},
+              {{0, 0, dest.w, dest.h}},
               src_rc, dest_rc);
 
     for (int y = 0; y < src_rc.h; ++y) {

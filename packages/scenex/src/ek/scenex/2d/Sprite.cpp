@@ -4,9 +4,22 @@
 
 namespace ek {
 
+struct res_sprite res_sprite;
+
+void setup_res_sprite(void) {
+    struct res_sprite* R = &res_sprite;
+    rr_man_t* rr = &R->rr;
+
+    rr->names = R->names;
+    rr->data = R->data;
+    rr->max = sizeof(R->data) / sizeof(R->data[0]);
+    rr->num = 1;
+    rr->data_size = sizeof(R->data[0]);
+}
+
 /**** draw routines ****/
 
-static unsigned short nine_patch_indices[] = {
+static uint16_t nine_patch_indices[] = {
         0, 1, 5, 5, 4, 0,
         1, 1 + 1, 1 + 5, 1 + 5, 1 + 4, 1,
         2, 2 + 1, 2 + 5, 2 + 5, 2 + 4, 2,
@@ -18,25 +31,25 @@ static unsigned short nine_patch_indices[] = {
         10, 10 + 1, 10 + 5, 10 + 5, 10 + 4, 10
 };
 
-bool Sprite::select() const {
-    const sg_image image = ek_ref_content(sg_image, image_id);
+bool select(const Sprite* sprite) {
+    const sg_image image = REF_RESOLVE(res_image, sprite->image_id);
     if (image.id) {
-        canvas_set_image_region(image, tex);
+        canvas_set_image_region(image, sprite->tex);
         return true;
     }
     return false;
 }
 
-void Sprite::draw() const {
-    draw(rect);
+void draw(const Sprite* sprite) {
+    draw(sprite, sprite->rect);
 }
 
-void Sprite::draw(const rect_t rc) const {
-    const sg_image image = ek_ref_content(sg_image, image_id);
+void draw(const Sprite* sprite, const rect_t rc) {
+    const sg_image image = REF_RESOLVE(res_image, sprite->image_id);
     if (image.id) {
         canvas_set_image(image);
-        canvas_set_image_rect(tex);
-        if (rotated) {
+        canvas_set_image_rect(sprite->tex);
+        if (UNLIKELY(sprite->state & SPRITE_ROTATED)) {
             canvas_quad_rotated(rc.x, rc.y, rc.w, rc.h);
         } else {
             canvas_quad(rc.x, rc.y, rc.w, rc.h);
@@ -44,13 +57,14 @@ void Sprite::draw(const rect_t rc) const {
     }
 }
 
-void Sprite::draw_grid(const rect_t grid, const rect_t target) const {
-    const sg_image image = ek_ref_content(sg_image, image_id);
+void draw_grid(const Sprite* sprite, const rect_t grid, const rect_t target) {
+    const sg_image image = REF_RESOLVE(res_image, sprite->image_id);
     if (image.id == SG_INVALID_ID) {
         return;
     }
 
-    canvas_set_image_region(image, tex);
+    rect_t rect = sprite->rect;
+    canvas_set_image_region(image, sprite->tex);
 
     float x = rect.x;
     float y = rect.y;
@@ -107,9 +121,9 @@ void Sprite::draw_grid(const rect_t grid, const rect_t target) const {
     canvas_write_indices(nine_patch_indices, 9 * 6, 0);
 }
 
-bool Sprite::hit_test(const vec2_t position) const {
+bool hit_test(const Sprite* sprite, const vec2_t position) {
     (void) position;
-    const sg_image image = ek_ref_content(sg_image, image_id);
+    const sg_image image = REF_RESOLVE(res_image, sprite->image_id);
     if (image.id) {
         return true;
     }

@@ -206,10 +206,4 @@ using world = World;
 
 using entity = EntityApi;
 
-//#define ECX_TYPE(Idx,Type) \
-//template<> struct TypeIndex<Type,ecs::World>{constexpr static int value = (Idx);}; \
-//template<> struct TypeName<Type>{constexpr static const char* value = #Type;};
-
-#define ECX_TYPE(Idx,Type)
-
 }

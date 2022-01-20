@@ -4,6 +4,7 @@ import {copyFile, makeDirs} from "../utils";
 import {BytesWriter} from "./helpers/BytesWriter";
 import * as glob from "glob";
 import {XmlElement} from "xmldoc";
+import {H} from "../utility/hash";
 
 class AudioFile {
     filepath: string;
@@ -53,11 +54,11 @@ export class AudioAsset extends Asset {
             const p = path.join(this.name, path.basename(audio.filepath));
             copyFile(audio.filepath, path.join(this.owner.output, p));
             const header = new BytesWriter();
-            header.writeString("audio");
+            header.writeU32(H("audio"));
             // remove extension for resource name
-            header.writeString(p.substring(0, p.length - 4));
-            header.writeString(p);
+            header.writeU32(H(p.substring(0, p.length - 4)));
             header.writeU32(audio.streaming ? 1 : 0);
+            header.writeString(p);
             this.owner.writer.writeSection(header);
         }
         return null;

@@ -7,30 +7,37 @@
 
 namespace ek {
 
-class Sprite : private NoCopyAssign {
-public:
-    rect_t rect = rect_01();
-    rect_t tex = rect_01();
-    ek_ref(sg_image) image_id = {0};
-    bool rotated = false;
-
-    Sprite() = default;
-
-    ~Sprite() = default;
-
-    void draw() const;
-
-    void draw(rect_t rc) const;
-
-    void draw_grid(rect_t grid, rect_t target) const;
-
-    [[nodiscard]] bool hit_test(vec2_t position) const;
-
-    [[nodiscard]] bool select() const;
+enum sprite_flags_t {
+    SPRITE_LOADED = 1,
+    SPRITE_ROTATED = 2
 };
 
-EK_DECLARE_TYPE(Sprite);
-EK_TYPE_INDEX(Sprite, 4);
+struct Sprite {
+    uint32_t state = 0;
+    REF_TO(sg_image) image_id = 0;
+    rect_t rect = rect_01();
+    rect_t tex = rect_01();
+};
+
+struct res_sprite {
+    string_hash_t names[128];
+    Sprite data[128];
+    rr_man_t rr;
+};
+
+extern struct res_sprite res_sprite;
+
+void setup_res_sprite(void);
+
+void draw(const Sprite* sprite);
+
+void draw(const Sprite* sprite, rect_t rc);
+
+void draw_grid(const Sprite* sprite, rect_t grid, rect_t target);
+
+[[nodiscard]] bool hit_test(const Sprite* sprite, vec2_t position);
+
+[[nodiscard]] bool select(const Sprite* sprite);
 
 }
 

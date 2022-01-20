@@ -1,3 +1,5 @@
+#include <ek/hash.h>
+
 #include "bmfont_export/types_impl.h"
 #include "bmfont_export/filters_impl.h"
 #include "bmfont_export/Bitmap_impl.h"
@@ -61,7 +63,7 @@ int main(int argc, char** argv) {
         bytes_write_i32(&writer, glyph.box.w);
         bytes_write_i32(&writer, glyph.box.h);
         bytes_write_i32(&writer, glyph.advanceWidth);
-        bytes_write_string(&writer, glyph.sprite.c_str(), (int) glyph.sprite.size());
+        bytes_write_u32(&writer, H(glyph.sprite_name.c_str()));
     }
     bytes_write_i32(&writer, dictSize * 2);
     for (uint32_t i = 0; i < fontData.glyphs.size(); ++i) {

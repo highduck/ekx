@@ -44,7 +44,7 @@ private:
     Signal<const NodeEventData&> signal;
 };
 
-ECX_TYPE(3, NodeEventHandler);
+
 
 /*** events functions ***/
 

@@ -42,9 +42,9 @@ void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTr
     bool programChanged = false;
     auto* display = w.tryGet<Display2D>(e);
     if (display) {
-        if (display->program.id) {
+        if (display->program) {
             programChanged = true;
-            canvas_push_program(ek_ref_content(ek_shader, display->program));
+            canvas_push_program(REF_RESOLVE(res_shader, display->program));
         }
         if (display->drawable) {
             canvas.matrix[0] = worldTransform->matrix;
@@ -107,9 +107,9 @@ void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
     bool programChanged = false;
     auto* display = w.tryGet<Display2D>(e);
     if (display) {
-        if (display->program.id) {
+        if (display->program) {
             programChanged = true;
-            canvas_push_program(ek_ref_content(ek_shader, display->program));
+            canvas_push_program(REF_RESOLVE(res_shader, display->program));
         }
         if (display->drawable) {
             display->drawable->draw();

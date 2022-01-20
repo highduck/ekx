@@ -14,21 +14,20 @@ namespace ek {
 
 /**** DTO *****/
 struct SpriteInfo {
-    enum Flags : uint8_t {
-        None = 0u,
+    enum Flags {
         Rotated = 1u
     };
 
-    String name;
+    string_hash_t name;
+
+    // flags in atlas image
+    uint32_t flags;
 
     // physical rect
     rect_t rc;
 
     // coords in atlas image
     rect_t uv;
-
-    // flags in atlas image
-    uint8_t flags = 0u;
 
     [[nodiscard]]
     inline bool isRotated() const {
@@ -37,7 +36,7 @@ struct SpriteInfo {
 
     template<typename S>
     void serialize(IO<S>& io) {
-        io(name, rc, uv, flags);
+        io(name, flags, rc, uv);
     }
 };
 
@@ -96,31 +95,36 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
     atlas->loaders.clear();
 
     for (const auto& page: atlasInfo.pages) {
-        auto image_asset = ek_ref_find(sg_image, page.imagePath.c_str());
+        auto image_asset = rr_named(&res_image.rr, H(page.imagePath.c_str()));
+
+        sg_image* image = &REF_RESOLVE(res_image, image_asset);
+        if (image->id) {
+            EK_DEBUG("Destroy old page image %s", page.imagePath.c_str());
+            sg_destroy_image(*image);
+            *image = {SG_INVALID_ID};
+        }
+
         atlas->pages.push_back(image_asset);
         atlas->loaders.emplace_back(ek_texture_loader_create());
         for (auto& spr_data: page.sprites) {
-            auto sprite = new Sprite();
-            sprite->rotated = spr_data.isRotated();
+            auto ref = REF_NAME(res_sprite, spr_data.name);
+            atlas->sprites.push_back(ref);
+
+            auto* sprite = &REF_RESOLVE(res_sprite, ref);
+            EK_ASSERT(!(sprite->state & SPRITE_LOADED));
+            sprite->state = SPRITE_LOADED;
+            if(spr_data.flags & SpriteInfo::Rotated) {
+                sprite->state |= SPRITE_ROTATED;
+            }
+            sprite->image_id = image_asset;
             sprite->rect = spr_data.rc;
             sprite->tex = spr_data.uv;
-            sprite->image_id = image_asset;
-
-            Res<Sprite> asset_spr{spr_data.name.c_str()};
-            asset_spr.reset(sprite);
-            atlas->sprites.push_back(asset_spr);
         }
     }
 
     for (uint32_t i = 0; i < atlasInfo.pages.size(); ++i) {
         const auto& pageInfo = atlasInfo.pages[i];
         const auto& pageImagePath = pageInfo.imagePath;
-        const auto image_id = ek_ref_find(sg_image, pageImagePath.c_str());
-        const sg_image image = ek_ref_content(sg_image, image_id);
-        if (image.id) {
-            EK_DEBUG("Destroy old page image %s", pageImagePath.c_str());
-            ek_ref_reset(sg_image, image_id);
-        }
 
         EK_DEBUG("Load atlas page %s/%s", atlas->base_path.c_str(), pageImagePath.c_str());
 
@@ -164,7 +168,8 @@ int Atlas::pollLoading() {
                         // item = ek_ref_get_item(ref)
                         // item->handle = loader->image;
                         // item->finalizer = sg_image_REF_finalizer
-                        ek_ref_assign_s(sg_image, loader->urls[0].path, loader->image);
+                        const res_id image_id = rr_named(&res_image.rr, H(loader->urls[0].path));
+                        REF_RESOLVE(res_image, image_id) = loader->image;
                         ek_texture_loader_destroy(loader);
                         loaders[i] = nullptr;
                     }
@@ -202,16 +207,19 @@ int Atlas::getLoadingImagesCount() const {
 
 void Atlas::clear() {
     // TODO: idea with ref counting and when we can unload - just delete all unreferenced resources
-//    for (const auto& texture : mPrivate->textures) {
-//        asset_t<texture_t>::unload(texture);
-//    }
 
     for (auto page: pages) {
-        ek_ref_reset(sg_image,page);
+        sg_image* image = &REF_RESOLVE(res_image, page);
+        if (image->id) {
+            sg_destroy_image(*image);
+            *image = {SG_INVALID_ID};
+        }
     }
 
-    for (auto& spr: sprites) {
-        spr.reset(nullptr);
+    for (auto ref: sprites) {
+        auto* spr = &REF_RESOLVE(res_sprite, ref);
+        spr->image_id = 0;
+        spr->state = 0;
     }
 }
 

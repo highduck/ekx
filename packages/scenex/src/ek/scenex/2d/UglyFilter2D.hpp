@@ -16,7 +16,7 @@ struct UglyFilter2D {
     bool pass(const ecs::World& w, ecs::EntityIndex e);
 };
 
-ECX_TYPE(16, UglyFilter2D);
+
 
 }
 

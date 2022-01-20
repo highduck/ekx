@@ -48,7 +48,7 @@ struct ExportItem {
     void append_to(ExportItem* parent_);
 
     [[nodiscard]]
-    ExportItem* find_library_item(const String& libraryName) const;
+    ExportItem* find_library_item(const string_hash_t libraryName) const;
 
     void inc_ref(ExportItem& lib);
 

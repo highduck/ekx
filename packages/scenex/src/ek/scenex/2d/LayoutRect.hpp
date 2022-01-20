@@ -77,7 +77,7 @@ struct LayoutRect {
     inline static rect_t DesignCanvasRect = rect_01();
 };
 
-ECX_TYPE(12, LayoutRect);
+
 
 rect_t find_parent_layout_rect(ecs::EntityApi e, bool safe);
 

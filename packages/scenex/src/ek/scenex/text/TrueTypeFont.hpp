@@ -18,7 +18,7 @@ class MapFile;
 // TODO: how to generate outlines?
 class TrueTypeFont : public FontImplBase {
 public:
-    TrueTypeFont(float dpiScale, float fontSize, const char* dynamicAtlasName);
+    TrueTypeFont(float dpiScale, float fontSize, string_hash_t dynamicAtlasName);
 
     ~TrueTypeFont() override;
 

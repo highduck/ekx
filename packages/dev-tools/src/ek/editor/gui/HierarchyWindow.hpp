@@ -40,8 +40,6 @@ public:
 
     const char* getEntityIcon(ecs::EntityApi e);
 
-    static const char* getEntityTitle(ecs::EntityApi e);
-
     bool isSelectedInHierarchy(ecs::EntityApi e);
 
     static const void* getEntityID(ecs::EntityApi e);

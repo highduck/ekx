@@ -18,7 +18,7 @@ public class BillingBridge {
 
     @Keep
     public static String getName() {
-        return plugin.getName();
+        return plugin.get_tag();
     }
 
     @Keep

@@ -203,26 +203,53 @@ ek_shader ek_shader_make(const sg_shader_desc* desc) {
 
 // region Global references for `image` and `shader`
 
-ek_ref_implement(ek_shader)
-ek_ref_implement(sg_image)
+//ek_ref_implement(ek_shader)
+//ek_ref_implement(sg_image)
+
+struct res_shader res_shader;
+struct res_image res_image;
+
+static void setup_res_shader(void) {
+    struct res_shader* R = &res_shader;
+    rr_man_t* rr = &R->rr;
+
+    rr->names = R->names;
+    rr->data = R->data;
+    rr->max = sizeof(R->data) / sizeof(R->data[0]);
+    rr->num = 1;
+    rr->data_size = sizeof(R->data[0]);
+}
+
+static void setup_res_image(void) {
+    struct res_image* R = &res_image;
+    rr_man_t* rr = &R->rr;
+
+    rr->names = R->names;
+    rr->data = R->data;
+    rr->max = sizeof(R->data) / sizeof(R->data[0]);
+    rr->num = 1;
+    rr->data_size = sizeof(R->data[0]);
+}
 
 void ek_gfx_res_setup(void) {
-    sg_image_refs_init();
-    ek_shader_refs_init();
+    //sg_image_refs_init();
+    //ek_shader_refs_init();
+    setup_res_shader();
+    setup_res_image();
 }
 
-void sg_image_REF_DESTROY(sg_image* p) {
-    if (p && p->id) {
-        sg_destroy_image(*p);
-        p->id = 0;
-    }
-}
-
-void ek_shader_REF_DESTROY(ek_shader* p) {
-    if (p && p->shader.id) {
-        sg_destroy_shader(p->shader);
-        p->shader.id = 0;
-        p->images_num = 0;
-    }
-}
+//void sg_image_REF_DESTROY(sg_image* p) {
+//    if (p && p->id) {
+//        sg_destroy_image(*p);
+//        p->id = 0;
+//    }
+//}
+//
+//void ek_shader_REF_DESTROY(ek_shader* p) {
+//    if (p && p->shader.id) {
+//        sg_destroy_shader(p->shader);
+//        p->shader.id = 0;
+//        p->images_num = 0;
+//    }
+//}
 

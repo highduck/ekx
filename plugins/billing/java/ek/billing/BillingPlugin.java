@@ -25,5 +25,5 @@ public abstract class BillingPlugin extends EkPlugin {
 
     public abstract void consume(String token);
 
-    public abstract String getName();
+    public abstract String get_tag();
 }

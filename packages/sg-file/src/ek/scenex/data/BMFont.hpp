@@ -11,7 +11,7 @@ class BMFontGlyph {
 public:
     irect_t box;
     int32_t advanceWidth;
-    String sprite;
+    string_hash_t sprite;
 
     template<typename S>
     void serialize(IO <S>& io) {

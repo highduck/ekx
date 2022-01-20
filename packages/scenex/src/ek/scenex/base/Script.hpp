@@ -15,7 +15,7 @@ struct Updater {
     TimeLayer timeLayer = TimeLayer::Root;
 };
 
-ECX_TYPE(5, Updater);
+
 
 class ScriptBase {
 public:
@@ -56,7 +56,7 @@ public:
         return entity_.get_or_create<Component>();
     }
 
-    [[nodiscard]] ecs::EntityApi find_child(const char* name) const;
+    [[nodiscard]] ecs::EntityApi find_child(string_hash_t name) const;
 
 protected:
     ecs::EntityApi entity_;
@@ -87,7 +87,7 @@ struct ScriptHolder {
     }
 };
 
-ECX_TYPE(4, ScriptHolder);
+
 
 class ScriptDrawable2D : public Drawable2D<ScriptDrawable2D> {
 public:

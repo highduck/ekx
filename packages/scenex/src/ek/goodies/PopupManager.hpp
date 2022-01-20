@@ -23,8 +23,8 @@ struct PopupManager {
     static ecs::EntityApi Main;
 };
 
-ECX_TYPE(22, close_timeout);
-ECX_TYPE(23, PopupManager);
+
+
 
 void init_basic_popup(ecs::EntityApi e);
 

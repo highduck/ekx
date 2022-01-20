@@ -182,7 +182,7 @@ struct ShadowMapRes {
         for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
             const auto& filter = e.get<MeshRenderer>();
             if (filter.castShadows && e.get_or_default<Node>().visible()) {
-                resMesh.setID(filter.mesh.c_str());
+                resMesh.setID(filter.mesh);
                 auto* mesh = resMesh.get_or(filter.meshPtr);
                 if (mesh) {
                     bindings.index_buffer = mesh->ib;
@@ -269,7 +269,7 @@ struct RenderSkyBoxRes {
     }
 
     void render(const sg_image cubemap, const mat4_t& view, const mat4_t& projection) {
-        Res<StaticMesh> mesh{"cube"};
+        Res<StaticMesh> mesh{H("cube")};
         if (cubemap.id && mesh) {
             sg_apply_pipeline(pip);
 
@@ -314,13 +314,13 @@ RenderSystem3D::~RenderSystem3D() {
 }
 
 void RenderSystem3D::renderObjects(mat4_t proj, mat4_t view) {
-    const sg_image empty = canvas.image_empty;
+    const sg_image empty = res_image.data[RES_IMAGE_EMPTY];
     main->bind.fs_images[SLOT_uImage0] = empty;
     main->bind.fs_images[SLOT_u_image_shadow_map] = shadows->rtColor;
 
     for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
         const auto& filter = e.get<MeshRenderer>();
-        auto* mesh = Res<StaticMesh>{filter.mesh.c_str()}.get_or(filter.meshPtr);
+        auto* mesh = Res<StaticMesh>{filter.mesh}.get_or(filter.meshPtr);
         if (mesh && e.get_or_default<Node>().visible()) {
             mat4_t model = e.get<Transform3D>().world;
 //            mat3_t nm = mat3_transpose(mat3_inverse(mat4_get_mat3(&model)));
@@ -329,7 +329,7 @@ void RenderSystem3D::renderObjects(mat4_t proj, mat4_t view) {
 
             const mat4_t depth_mvp = mat4_mul(mat4_mul(shadows->projection, shadows->view), model);
 
-            const auto& material = *(Res<Material3D>{filter.material.c_str()}.get_or(&defaultMaterial));
+            const auto& material = *(Res<Material3D>{filter.material}.get_or(&defaultMaterial));
             vs_params_t params;
             memcpy(params.uModelViewProjection, mat4_mul(mat4_mul(proj, view), model).data, sizeof(mat4_t));
             memcpy(params.uModel, model.data, sizeof(mat4_t));
@@ -456,7 +456,7 @@ void RenderSystem3D::render(float width, float height) {
     sg_apply_uniforms(SG_SHADERSTAGE_FS, SLOT_light2_params, SG_RANGE(main->pointLightParams));
 
     renderObjects(cameraProjection, cameraView);
-    skybox->render(ek_ref_content(sg_image, cameraData.cubeMap), cameraView, cameraProjection);
+    skybox->render(REF_RESOLVE(res_image, cameraData.cubeMap), cameraView, cameraProjection);
 }
 
 }

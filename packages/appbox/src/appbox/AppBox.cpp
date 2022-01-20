@@ -30,10 +30,10 @@ AppBox::AppBox(AppBoxConfig config_) :
     // TODO: wtf
     char lang_buf[sizeof(ek_app.lang)];
     int n = ek_ls_get_s("selected_lang", lang_buf, sizeof(lang_buf));
-    if(n < 2) {
+    if (n < 2) {
         memcpy(lang_buf, ek_app.lang, sizeof(lang_buf));
     }
-    if(lang_buf[0] == 0) {
+    if (lang_buf[0] == 0) {
         lang_buf[0] = 'e';
         lang_buf[1] = 'n';
     }
@@ -41,23 +41,17 @@ AppBox::AppBox(AppBoxConfig config_) :
     Localization::instance.setLanguage(lang_buf);
 }
 
-void set_state_by_name(ecs::EntityApi e, const char* state) {
-    eachChild(e, [&state](ecs::EntityApi child) {
-        const auto& name = child.get_or_default<NodeName>().name;
-        if (name.startsWith("state_")) {
-            setVisible(child, name == state);
-        }
-    });
-}
-
 void set_state_on_off(ecs::EntityApi e, bool enabled) {
-    set_state_by_name(e, enabled ? "state_on" : "state_off");
+    auto on = find(e, H("state_on"));
+    auto off = find(e, H("state_off"));
+    setVisible(on, enabled);
+    setVisible(off, !enabled);
 }
 
 void AppBox::initDefaultControls(ecs::EntityApi e) {
     {
         // VERSION
-        auto e_version = find(e, "version");
+        auto e_version = find(e, H("version"));
         if (e_version) {
             auto* txt = Display2D::tryGet<Text2D>(e_version);
             if (txt) {
@@ -67,9 +61,9 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
     }
     {
         // PRIVACY POLICY
-        auto e_pp = find(e, "privacy_policy");
+        auto e_pp = find(e, H("privacy_policy"));
         if (e_pp) {
-            auto lbl = find(e_pp, "label");
+            auto lbl = find(e_pp, H("label"));
             if (lbl) {
                 auto* txt = Display2D::tryGet<Text2D>(lbl);
                 if (txt) {
@@ -85,7 +79,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
 
     // Purchases
     {
-        auto btn = find(e, "remove_ads");
+        auto btn = find(e, H("remove_ads"));
         if (btn) {
             auto& ads = Locator::ref<Ads>();
             if (ads.isRemoved()) {
@@ -103,7 +97,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
         }
     }
     {
-        auto btn = find(e, "restore_purchases");
+        auto btn = find(e, H("restore_purchases"));
         if (btn) {
             btn.get<Button>().clicked += [] {
                 billing::getPurchases();
@@ -115,7 +109,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
     {
         auto& audio = Locator::ref<AudioManager>();
         {
-            auto btn = find(e, "sound");
+            auto btn = find(e, H("sound"));
             if (btn) {
                 btn.get<Button>().clicked += [btn, &audio] {
                     set_state_on_off(btn, audio.sound.toggle());
@@ -124,7 +118,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
             }
         }
         {
-            auto btn = find(e, "music");
+            auto btn = find(e, H("music"));
             if (btn) {
                 btn.get<Button>().clicked += [btn, &audio] {
                     set_state_on_off(btn, audio.music.toggle());
@@ -133,7 +127,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
             }
         }
         {
-            auto btn = find(e, "vibro");
+            auto btn = find(e, H("vibro"));
             if (btn) {
                 btn.get<Button>().clicked += [btn, &audio] {
                     set_state_on_off(btn, audio.vibro.toggle());
@@ -167,15 +161,16 @@ void AppBox::rateUs() const {
 
 #ifdef __APPLE__
     char buf[1024];
-    ek_snprintf(buf, 1024, "itms-apps://itunes.apple.com/us/app/apple-store/id%s?mt=8&action=write-review", config.appID.c_str());
+    ek_snprintf(buf, 1024, "itms-apps://itunes.apple.com/us/app/apple-store/id%s?mt=8&action=write-review",
+                config.appID.c_str());
     ek_app_open_url(buf);
 #endif // __APPLE__
 }
 
 /// download app feature
 
-void wrap_button(ecs::EntityApi e, const char* name, const char* link) {
-    auto x = find(e, name);
+void wrap_button(ecs::EntityApi e, string_hash_t tag, const char* link) {
+    auto x = find(e, tag);
     if (link && *link) {
         x.get_or_create<Button>().clicked.add([link] {
             ek_app_open_url(link);
@@ -197,7 +192,7 @@ void AppBox::initDownloadAppButtons(ecs::EntityApi) {
 }
 
 void AppBox::initLanguageButton(ecs::EntityApi e) {
-    auto btn = find(e, "language");
+    auto btn = find(e, H("language"));
     if (btn) {
         btn.get<Button>().clicked += [] {
             auto& lm = Localization::instance;

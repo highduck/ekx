@@ -7,12 +7,12 @@
 
 namespace bmfont_export {
 
-Rect combineBounds(const Rect& a, const Rect& b) {
+rect_t combineBounds(const rect_t a, const rect_t b) {
     const float l = a.x < b.x ? a.x : b.x;
     const float t = a.y < b.y ? a.y : b.y;
     const float r = (a.x + a.w) > (b.x + b.w) ? (a.x + a.w) : (b.x + b.w);
     const float bo = (a.y + a.h) > (b.y + b.h) ? (a.y + a.h) : (b.y + b.h);
-    return {l, t, r - l, bo - t};
+    return rect(l, t, r - l, bo - t);
 }
 
 inline Filter apply_scale(const Filter& filter, float scale) {
@@ -33,14 +33,14 @@ std::vector<Filter> apply_scale(const std::vector<Filter>& filters, float scale)
     return res;
 }
 
-inline Vec2I round_blur_radius(float rx, float ry) {
-    return Vec2I{
-            std::max(0, std::min(256, static_cast<int>(rx) - 1)),
-            std::max(0, std::min(256, static_cast<int>(ry) - 1))
-    };
+inline ivec2_t round_blur_radius(float rx, float ry) {
+    return ivec2(
+            MAX(0, MIN(256, (int)rx - 1)),
+            MAX(0, MIN(256, (int)ry - 1))
+    );
 }
 
-inline void extend_blur_rect(Rect& rect, const float blurX, const float blurY, int pass) {
+inline void extend_blur_rect(rect_t& rect, const float blurX, const float blurY, int pass) {
     auto radius = round_blur_radius(blurX, blurY);
     // Distination pixels can "move" more left, as these left pixels can take extra from the right
     int extra_x1 = radius.x / 2;
@@ -59,16 +59,16 @@ inline void extend_blur_rect(Rect& rect, const float blurX, const float blurY, i
     rect.h += (float) radius.y;
 }
 
-inline Rect extend_blur_rect(const Rect& rect, const Filter& filter) {
-    Rect res{rect};
+inline rect_t extend_blur_rect(const rect_t rect, const Filter& filter) {
+    rect_t res = rect;
     for (int q = 0; q < filter.quality; ++q) {
         extend_blur_rect(res, filter.blurX, filter.blurY, q);
     }
     return res;
 }
 
-inline Rect extend_filter_rect(const Rect& rect, const Filter& filter) {
-    Rect res{rect};
+inline rect_t extend_filter_rect(const rect_t rect, const Filter& filter) {
+    rect_t res{rect};
     switch (filter.type) {
         case FilterType::Glow:
         case FilterType::Shadow: {
@@ -87,21 +87,16 @@ inline Rect extend_filter_rect(const Rect& rect, const Filter& filter) {
     return res;
 }
 
-RectI get_filtered_rect(const RectI& rc, const std::vector<Filter>& filters) {
-    Rect res{
-            static_cast<float>(rc.x),
-            static_cast<float>(rc.y),
-            static_cast<float>(rc.w),
-            static_cast<float>(rc.h)
-    };
+irect_t get_filtered_rect(const irect_t rc, const std::vector<Filter>& filters) {
+    rect_t res = irect_to_rect(rc);
     for (auto& filter: filters) {
         res = extend_filter_rect(res, filter);
     }
-    const auto l = static_cast<int32_t>(floor(res.x));
-    const auto t = static_cast<int32_t>(floor(res.y));
-    const auto r = static_cast<int32_t>(ceil(res.x + res.w));
-    const auto b = static_cast<int32_t>(ceil(res.y + res.h));
-    return {l, t, r - l, b - t};
+    const auto l = (int32_t)(floor(res.x));
+    const auto t = (int32_t)(floor(res.y));
+    const auto r = (int32_t)(ceil(res.x + res.w));
+    const auto b = (int32_t)(ceil(res.y + res.h));
+    return (irect_t){{l, t, r - l, b - t}};
 }
 
 uint32_t convert_strength(float value) {
@@ -233,10 +228,10 @@ void BlurRow(const Rgba* inSrc, int inDS, int inSrcW, int inFilterLeft,
 
 void DoApply(const Bitmap& inSrc,
              Bitmap& outDest,
-             Vec2I inSrc0,
-             Vec2I inDiff,
+             ivec2_t inSrc0,
+             ivec2_t inDiff,
              uint32_t inPass,
-             Vec2I blurRadius) {
+             ivec2_t blurRadius) {
     int w = outDest.w;
     int h = outDest.h;
     int sw = inSrc.w;
@@ -278,7 +273,7 @@ void DoApply(const Bitmap& inSrc,
     }
 }
 
-void scroll(const Bitmap& src, Bitmap& dst, Vec2I offset) {
+void scroll(const Bitmap& src, Bitmap& dst, ivec2_t offset) {
     for (uint32_t y = 0u; y < src.h; ++y) {
         auto* r = src.row(y);
         auto dstY = y + offset.y;
@@ -306,7 +301,7 @@ void blur(Bitmap& src, const Filter& filter) {
     }
 }
 
-void gradient(Bitmap& src, const Filter& filter, const RectI& bounds) {
+void gradient(Bitmap& src, const Filter& filter, const irect_t& bounds) {
     for (int y = 0; y < src.h; ++y) {
         const float distance = filter.bottom - filter.top;
         const float coord = static_cast<float>(y) + bounds.y;
@@ -319,7 +314,7 @@ void gradient(Bitmap& src, const Filter& filter, const RectI& bounds) {
     }
 }
 
-void apply(Bitmap& bitmap, const Filter& filter, const RectI& bounds) {
+void apply(Bitmap& bitmap, const Filter& filter, const irect_t bounds) {
     switch (filter.type) {
         case FilterType::ReFill:
             gradient(bitmap, filter, bounds);
@@ -336,7 +331,7 @@ void apply(Bitmap& bitmap, const Filter& filter, const RectI& bounds) {
             break;
         case FilterType::Shadow: {
             Bitmap tmp{bitmap.w, bitmap.h};
-            Vec2I offset{
+            ivec2_t offset{
                     static_cast<int>(filter.distance * cos(filter.angle)),
                     static_cast<int>(filter.distance * sin(filter.angle))
             };
@@ -354,13 +349,13 @@ void apply(Bitmap& bitmap, const Filter& filter, const RectI& bounds) {
 }
 
 void apply(const std::vector<Filter>& filters, Image& image, float scale) {
-    const RectI bounds = get_filtered_rect(image.source, filters);
+    const irect_t bounds = get_filtered_rect(image.source, filters);
     auto res = image;
     auto* dest = new Bitmap(bounds.w, bounds.h);
-    const Vec2I dest_pos{
+    const ivec2_t dest_pos = ivec2(
             image.source.x - bounds.x,
             image.source.y - bounds.y
-    };
+    );
     Bitmap* idata = image.bitmap;
     copyPixels(*dest, dest_pos.x, dest_pos.y, *idata, 0, 0, idata->w, idata->h);
 

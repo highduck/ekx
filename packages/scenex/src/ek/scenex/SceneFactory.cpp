@@ -17,16 +17,14 @@
 
 namespace ek {
 
-ecs::EntityApi createNode2D(const char* name) {
+ecs::EntityApi createNode2D(string_hash_t tag) {
     auto e = ecs::create<Node, Transform2D, WorldTransform2D>();
-    if (name) {
-        e.assign<NodeName>(name);
-    }
+    e.get<Node>().tag = tag;
     return e;
 }
 
-ecs::EntityApi createNode2D(ecs::EntityApi parent, const char* name, int index) {
-    auto e = createNode2D(name);
+ecs::EntityApi createNode2D(ecs::EntityApi parent, string_hash_t tag, int index) {
+    auto e = createNode2D(tag);
     if (index == -1) {
         append(parent, e);
     } else if (index == 0) {
@@ -54,7 +52,7 @@ SGFile* sg_load(const void* data, uint32_t size) {
     return sg;
 }
 
-const SGNodeData* sg_get(const SGFile& sg, const char* library_name) {
+const SGNodeData* sg_get(const SGFile& sg, string_hash_t library_name) {
     // TODO: optimize access!
     for (auto& item: sg.library) {
         if (item.libraryName == library_name) {
@@ -67,10 +65,6 @@ const SGNodeData* sg_get(const SGFile& sg, const char* library_name) {
 using SGFileRes = Res<SGFile>;
 
 void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
-    if (!data->name.empty()) {
-        entity.get_or_create<NodeName>().name = data->name.c_str();
-    }
-
     if (data->movieTargetId >= 0) {
         entity.get_or_create<MovieClipTargetIndex>() = {data->movieTargetId};
     }
@@ -86,11 +80,15 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
         auto& node = entity.get<Node>();
         node.setTouchable(data->touchable);
         node.setVisible(data->visible);
+        if(data->name) {
+            // override
+            node.tag = data->name;
+        }
     }
 
     if (!data->dynamicText.empty()) {
         const auto& dynamicText = data->dynamicText[0];
-        TextFormat format{dynamicText.font.c_str(), dynamicText.size};
+        TextFormat format{dynamicText.font, dynamicText.size};
         format.alignment = dynamicText.alignment;
         format.leading = dynamicText.lineSpacing;
         format.wordWrap = dynamicText.wordWrap;
@@ -119,7 +117,7 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
         auto& mov = entity.assign<MovieClip>();
         if (asset) {
             mov.library_asset = asset;
-            mov.movie_data_symbol = data->libraryName.c_str();
+            mov.movie_data_symbol = data->libraryName;
         } else {
             mov.data = &data->movie[0];
         }
@@ -134,15 +132,15 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
         ninePatch = display->tryGet<NinePatch2D>();
     }
 
-    if (!data->sprite.empty() && !sprite) {
+    if (data->sprite && !sprite) {
         if (!display) {
             display = &entity.assign<Display2D>();
         }
         if (rect_is_empty(data->scaleGrid)) {
-            sprite = new Sprite2D(data->sprite.c_str());
+            sprite = new Sprite2D(data->sprite);
             display->drawable.reset(sprite);
         } else {
-            ninePatch = new NinePatch2D(data->sprite.c_str(), data->scaleGrid);
+            ninePatch = new NinePatch2D(data->sprite, data->scaleGrid);
             display->drawable.reset(ninePatch);
         }
     }
@@ -182,7 +180,7 @@ ecs::EntityApi create_and_merge(const SGFile& sg, SGFileRes asset,
     }
     if (data) {
         for (const auto& child: data->children) {
-            auto child_entity = create_and_merge(sg, asset, sg_get(sg, child.libraryName.c_str()), &child);
+            auto child_entity = create_and_merge(sg, asset, sg_get(sg, child.libraryName), &child);
             appendStrict(entity, child_entity);
         }
     }
@@ -192,17 +190,17 @@ ecs::EntityApi create_and_merge(const SGFile& sg, SGFileRes asset,
 
 void extend_bounds(const SGFile& file, const SGNodeData& data, aabb2_t* boundsBuilder,
                    const mat3x2_t matrix) {
-    const Res<Sprite> spr{data.sprite.c_str()};
-    if (spr) {
+    Sprite* spr = &REF_RESOLVE(res_sprite, data.sprite);
+    if (spr->state & SPRITE_LOADED) {
         *boundsBuilder = aabb2_add_transformed_rect(*boundsBuilder, spr->rect, matrix);
     }
     for (const auto& child: data.children) {
-        const auto& symbol = child.libraryName.empty() ? child : *sg_get(file, child.libraryName.c_str());
+        const auto& symbol = child.libraryName ? *sg_get(file, child.libraryName) : child;
         extend_bounds(file, symbol, boundsBuilder, mat3x2_mul(matrix, child.matrix));
     }
 }
 
-ecs::EntityApi sg_create(const char* library, const char* name, ecs::EntityApi parent) {
+ecs::EntityApi sg_create(string_hash_t library, string_hash_t name, ecs::EntityApi parent) {
     ecs::EntityApi result = nullptr;
     SGFileRes file{library};
     if (file) {
@@ -213,15 +211,15 @@ ecs::EntityApi sg_create(const char* library, const char* name, ecs::EntityApi p
                 appendStrict(parent, result);
             }
         } else {
-            EK_WARN("SG Object %s not found in library %s", name, library);
+            EK_WARN("SG Object (%s) not found in library %s", hsp_get(name), hsp_get(library));
         }
     } else {
-        EK_WARN("SG not found: %s", library);
+        EK_WARN("SG not found: (%s)", hsp_get(library));
     }
     return result;
 }
 
-rect_t sg_get_bounds(const char* library, const char* name) {
+rect_t sg_get_bounds(string_hash_t library, string_hash_t name) {
     SGFileRes file{library};
     if (file) {
         const SGNodeData* data = sg_get(*file, name);

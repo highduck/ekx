@@ -7,6 +7,7 @@ import {BytesWriter} from "./helpers/BytesWriter";
 import {Project} from "../project";
 import * as fs from "fs";
 import * as glob from "glob";
+import {H} from "../utility/hash";
 
 interface AssetInfoHeader {
     type: string;
@@ -85,7 +86,7 @@ export class AssetBuilder {
 
     meta(typeName: string, filepath: string) {
         const header = new BytesWriter();
-        header.writeString(typeName);
+        header.writeU32(H(typeName));
         header.writeString(filepath);
         this.writer.writeSection(header);
     }

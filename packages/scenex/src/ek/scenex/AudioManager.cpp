@@ -1,44 +1,47 @@
 #include "AudioManager.hpp"
 
-#include <ek/app.h>
-#include <ek/util/Res.hpp>
-
 namespace ek {
 
 AudioManager::AudioManager() = default;
 
 AudioManager::~AudioManager() = default;
 
-void AudioManager::play_music(const char* name) {
-    if (music_ != name) {
+void AudioManager::play_music(string_hash_t name) {
+    res_id next_music = name ? rr_named(&res_audio.rr, name) : 0;
+    if (music_ != next_music) {
         if (auph_is_active(musicVoice_.id)) {
             auph_stop(musicVoice_.id);
             musicVoice_ = {};
         }
 
-        Res<AudioResource> audioRes{name};
-        if (audioRes) {
-            if (auph_is_buffer_loaded(audioRes->buffer) && !auph_is_active(musicVoice_.id)) {
-                musicVoice_ = auph_play_f(audioRes->buffer,
-                                         musicVolume_, 0.0f, musicPitch_,
-                                         true, false,
-                                         AUPH_BUS_MUSIC);
+        if (next_music) {
+            auph_buffer buffer = REF_RESOLVE(res_audio, next_music);
+            if (buffer.id) {
+                if (auph_is_buffer_loaded(buffer) && !auph_is_active(musicVoice_.id)) {
+                    musicVoice_ = auph_play_f(buffer,
+                                              musicVolume_, 0.0f, musicPitch_,
+                                              true, false,
+                                              AUPH_BUS_MUSIC);
+                }
             }
         }
-        music_ = name;
+        music_ = next_music;
     }
 }
 
-void AudioManager::play_sound(const char* name, float vol, float pitch) const {
-    if (sound.enabled()) {
-        Res<AudioResource> snd{name};
-        if (snd) {
-            auph_play_f(snd->buffer, vol, 0.0f, pitch, false, false, AUPH_BUS_SOUND);
+void AudioManager::play_sound(string_hash_t name, float vol, float pitch) const {
+    if (sound.enabled() && name) {
+        const res_id id = rr_named(&res_audio.rr, name);
+        if (id) {
+            auph_buffer snd = REF_RESOLVE(res_audio, id);
+            if (snd.id) {
+                auph_play_f(snd, vol, 0.0f, pitch, false, false, AUPH_BUS_SOUND);
+            }
         }
     }
 }
 
-void AudioManager::play_sound_at(const char* name, const vec2_t position, float volume, float pitch) const {
+void AudioManager::play_sound_at(string_hash_t name, const vec2_t position, float volume, float pitch) const {
     if (sound.enabled()) {
         auto relVolume = volume;
         //auto spatialPanning = -1 .. 1;
@@ -56,12 +59,11 @@ void AudioManager::update(float) {
     auph_set_gain(AUPH_BUS_MUSIC.id, music.enabled() ? 1.0f : 0.0f);
     auph_set_gain(AUPH_BUS_SOUND.id, sound.enabled() ? 1.0f : 0.0f);
 
-    if (music_.empty()) {
-        return;
-    }
-    Res<AudioResource> audioRes{music_.c_str()};
-    if (audioRes && auph_is_buffer_loaded(audioRes->buffer) && !auph_is_active(musicVoice_.id)) {
-        musicVoice_ = auph_play_f(audioRes->buffer, musicVolume_, 0.0f, musicPitch_, true, false, AUPH_BUS_MUSIC);
+    if (music_) {
+        const auph_buffer buff = REF_RESOLVE(res_audio, music_);
+        if (buff.id && auph_is_buffer_loaded(buff) && !auph_is_active(musicVoice_.id)) {
+            musicVoice_ = auph_play_f(buff, musicVolume_, 0.0f, musicPitch_, true, false, AUPH_BUS_MUSIC);
+        }
     }
 }
 

@@ -132,7 +132,7 @@ void processTextField(const Element& el, ExportItem& item, const Doc& doc) {
     // we need only LF to not check twice when drawing the text
     tf.text = textRun.characters;
     ek_cstr_replace(tf.text.data(), '\r', '\n');
-    tf.font = faceName;
+    tf.font = H(faceName.c_str());
     tf.size = textRun.attributes.size;
     if (el.lineType == TextLineType::Multiline) {
         tf.wordWrap = true;
@@ -208,7 +208,7 @@ SGFile SGBuilder::export_library() {
 
         // if item should be in global registry,
         // but if it's inline sprite - it's ok to throw it away
-        if (!item->node.libraryName.empty()) {
+        if (item->node.libraryName) {
             library.node.children.push_back(item->node);
         }
     }
@@ -218,7 +218,7 @@ SGFile SGBuilder::export_library() {
             const auto* ref = library.find_library_item(child.libraryName);
             if (ref && ref->node.sprite == ref->node.libraryName && rect_is_empty(ref->node.scaleGrid)) {
                 child.sprite = ref->node.sprite;
-                child.libraryName = "";
+                child.libraryName = 0;
             }
         }
     }
@@ -235,10 +235,10 @@ SGFile SGBuilder::export_library() {
 
     SGFile sg;
     for (auto& pair: linkages) {
-        sg.linkages.emplace_back(SGSceneInfo{pair.first, pair.second});
+        sg.linkages.emplace_back(SGSceneInfo{H(pair.first.c_str()), H(pair.second.c_str())});
     }
     for (auto& info: doc.scenes) {
-        sg.scenes.push_back(info.item);
+        sg.scenes.push_back(H(info.item.c_str()));
     }
 
     for (auto& item: library.node.children) {
@@ -259,8 +259,8 @@ void SGBuilder::process_symbol_instance(const Element& el, ExportItem* parent, p
     auto* item = new ExportItem();
     item->ref = &el;
     process_transform(el, *item);
-    item->node.name = el.item.name;
-    item->node.libraryName = el.libraryItemName;
+    item->node.name = H(el.item.name.c_str());
+    item->node.libraryName = H(el.libraryItemName.c_str());
     item->node.button = el.symbolType == SymbolType::button;
     item->node.touchable = !el.silent;
 
@@ -278,8 +278,8 @@ void SGBuilder::process_bitmap_instance(const Element& el, ExportItem* parent, p
     auto* item = new ExportItem;
     item->ref = &el;
     process_transform(el, *item);
-    item->node.name = el.item.name;
-    item->node.libraryName = el.libraryItemName;
+    item->node.name = H(el.item.name.c_str());
+    item->node.libraryName = H(el.libraryItemName.c_str());
 
     process_filters(el, *item);
 
@@ -292,7 +292,7 @@ void SGBuilder::process_bitmap_instance(const Element& el, ExportItem* parent, p
 void SGBuilder::process_bitmap_item(const Element& el, ExportItem* parent, processing_bag_t* bag) {
     auto* item = new ExportItem();
     item->ref = &el;
-    item->node.libraryName = el.item.name;
+    item->node.libraryName = H(el.item.name.c_str());
     item->renderThis = true;
     item->append_to(parent);
     if (bag) {
@@ -306,7 +306,7 @@ void SGBuilder::process_dynamic_text(const Element& el, ExportItem* parent, proc
     auto* item = new ExportItem();
     item->ref = &el;
     process_transform(el, *item);
-    item->node.name = el.item.name;
+    item->node.name = H(el.item.name.c_str());
 
     processTextField(el, *item, doc);
 
@@ -323,7 +323,7 @@ void SGBuilder::process_symbol_item(const Element& el, ExportItem* parent, proce
     auto* item = new ExportItem();
     item->ref = &el;
     process_transform(el, *item);
-    item->node.libraryName = el.item.name;
+    item->node.libraryName = H(el.item.name.c_str());
     EK_ASSERT(el.libraryItemName.empty());
     item->node.scaleGrid = el.scaleGrid;
 
@@ -423,7 +423,7 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
 
     auto* layer = new ExportItem();
     layer->ref = shapeItem.get();
-    layer->node.libraryName = shapeName;
+    layer->node.libraryName = H(shapeName);
     layer->renderThis = true;
     layer->animationSpan0 = _animationSpan0;
     layer->animationSpan1 = _animationSpan1;
@@ -505,7 +505,7 @@ void SGBuilder::render(const ExportItem& item, ImageSet& toImageSet) const {
 void SGBuilder::build_sprites(ImageSet& toImageSet) const {
     for (auto* item: library.children) {
         if (item->renderThis) {
-            item->node.sprite = item->ref->item.name;
+            item->node.sprite = H(item->ref->item.name.c_str());
             render(*item, toImageSet);
         }
         if (!rect_is_empty(item->node.scaleGrid)) {
@@ -514,9 +514,9 @@ void SGBuilder::build_sprites(ImageSet& toImageSet) const {
     }
 }
 
-bool SGBuilder::isInLinkages(const String& id) const {
+bool SGBuilder::isInLinkages(const string_hash_t id) const {
     for (const auto& pair: linkages) {
-        if (pair.second == id) {
+        if (H(pair.second.c_str()) == id) {
             return true;
         }
     }

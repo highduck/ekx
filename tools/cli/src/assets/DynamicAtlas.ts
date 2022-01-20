@@ -2,6 +2,7 @@ import {Asset} from "./Asset";
 import {parseBoolean} from "./helpers/parse";
 import {BytesWriter} from "./helpers/BytesWriter";
 import {XmlElement} from "xmldoc";
+import {H} from "../utility/hash";
 
 export class DynamicAtlasAsset extends Asset {
     static typeName = "dynamic_atlas";
@@ -24,8 +25,8 @@ export class DynamicAtlasAsset extends Asset {
         if (this.mipmaps) flags |= 2;
 
         const writer = new BytesWriter(8);
-        writer.writeString(DynamicAtlasAsset.typeName);
-        writer.writeString(this.name);
+        writer.writeU32(H(DynamicAtlasAsset.typeName));
+        writer.writeU32(H(this.name));
         writer.writeU32(flags);
 
         this.owner.writer.writeSection(writer);

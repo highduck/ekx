@@ -37,11 +37,11 @@
 
 namespace ek {
 
-bool frame_timer_update_hrts(FrameTimer* ft, double* delta) {
+bool frame_timer_update_from_display_ts(FrameTimer* ft, double* delta) {
     if (ek_app.frame_callback_timestamp > 0) {
         const double ts = ek_app.frame_callback_timestamp;
-        const double prev = ft->prev_frame_high_res_ts;
-        ft->prev_frame_high_res_ts = ts;
+        const double prev = ft->app_fts_prev;
+        ft->app_fts_prev = ts;
         if (prev > 0.0) {
             *delta = ts - prev;
             return true;
@@ -51,20 +51,12 @@ bool frame_timer_update_hrts(FrameTimer* ft, double* delta) {
 }
 
 double FrameTimer::update() {
-    double delta;
-    if(frame_timer_update_hrts(this, &delta)) {
-        deltaTime = delta;
-        return delta;
-    }
-    delta = ek_ticks_to_sec(ek_ticks(&timer_));
-    deltas[(frameIndex++) % 256] = delta;
-    const uint32_t num = LIKELY(deltas_num == 256u) ? 256u : ++deltas_num;
-    delta = 0.0;
-    for (uint32_t i = 0; i < num; ++i) {
-        delta += deltas[i];
-    }
-    delta /= (double) num;
+    // anyway we need update stopwatch state, it could be useful for another functions
+    double delta = ek_ticks_to_sec(ek_ticks(&stopwatch));
+    // if available, upgrade delta with timestamp from app's display-link
+    frame_timer_update_from_display_ts(this, &delta);
     deltaTime = delta;
+    ++frameIndex;
     return delta;
 }
 
@@ -133,7 +125,6 @@ void registerSceneXComponents() {
     //// basic scene
     using ecs::the_world;
     ECX_COMPONENT_RESERVE(Node, 512);
-    ECX_COMPONENT_RESERVE(NodeName, 512);
     ECX_COMPONENT_RESERVE(Transform2D, 512);
     ECX_COMPONENT_RESERVE(WorldTransform2D, 512);
     ECX_COMPONENT_RESERVE(Display2D, 256);
@@ -167,16 +158,22 @@ void basic_application::initialize() {
     EK_DEBUG("base application: initialize");
     // init default empty sprite data
     {
-        auto* spr = new Sprite();
-        spr->image_id = ek_ref_find(sg_image, "empty");
-        Res<Sprite>{"empty"}.reset(spr);
+        setup_res_particle();
+
+        setup_res_sprite();
+        auto spr_id = rr_named(&res_sprite.rr, H("empty"));
+        auto* spr = &REF_RESOLVE(res_sprite, spr_id);
+        spr->rect = rect_01();
+        spr->tex = rect_01();
+        spr->state = SPRITE_LOADED;
+        spr->image_id = RES_IMAGE_EMPTY;
     }
 
     logDisplayInfo();
     display.update();
 
     EK_DEBUG("base application: initialize scene root");
-    root = createNode2D("root");
+    root = createNode2D(H("root"));
 
     const vec2_t baseResolution = vec2(ek_app.config.width, ek_app.config.height);
     root.assign<Viewport>(baseResolution.x, baseResolution.y);
@@ -194,7 +191,7 @@ void basic_application::initialize() {
     Locator::create<AudioManager>();
 
     EK_DEBUG("base application: initialize Scene");
-    auto camera = createNode2D("camera");
+    auto camera = createNode2D(H("camera"));
     auto& defaultCamera = camera.assign<Camera2D>(root);
     defaultCamera.order = 1;
     defaultCamera.viewportNode = ecs::EntityRef{root};
@@ -205,7 +202,7 @@ void basic_application::initialize() {
 }
 
 void basic_application::preload() {
-    EK_DEBUG("base application: preloading, content scale: %d perc.", (int) (100 * scale_factor));
+    EK_DEBUG("base application: preloading, content scale: %d%%.", (int) (100 * scale_factor));
     asset_manager_->set_scale_factor(scale_factor);
 
     dispatcher.onPreload();

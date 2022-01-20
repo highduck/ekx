@@ -38,13 +38,13 @@ struct StaticMesh {
 
 struct MeshRenderer /* Component */ {
     StaticMesh* meshPtr = nullptr;
-    String mesh;
-    String material;
+    string_hash_t mesh;
+    string_hash_t material;
     bool castShadows = true;
     bool receiveShadows = true;
 };
 
-ECX_TYPE(33, MeshRenderer);
+
 
 EK_DECLARE_TYPE(StaticMesh);
 EK_TYPE_INDEX(StaticMesh, 5);

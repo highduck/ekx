@@ -162,9 +162,9 @@ public:
         return false;
     }
 
-    RectI getGlyphBounds() const {
+    irect_t getGlyphBounds() const {
         auto const& glyph = ftFace->glyph;
-        return RectI{glyph->bitmap_left,
+        return irect_t{glyph->bitmap_left,
                      -glyph->bitmap_top,
                      (int) glyph->bitmap.width,
                      (int) glyph->bitmap.rows};
@@ -219,11 +219,11 @@ Glyph buildGlyphData(const FontFace& fontFace, uint32_t glyph_index, const char*
     int r = box[2];
     int b = -box[1];
     data.box = {l, t, r - l, b - t};
-    data.sprite = std::string{name} + std::to_string(glyph_index);
+    data.sprite_name = std::string{name} + std::to_string(glyph_index);
     return data;
 }
 
-Bitmap* render_glyph_image(const FontFace& fontFace, uint32_t glyphIndex, RectI& outRect) {
+Bitmap* render_glyph_image(const FontFace& fontFace, uint32_t glyphIndex, irect_t& outRect) {
     if (!fontFace.loadGlyph(glyphIndex)) {
         return nullptr;
     }
@@ -257,18 +257,13 @@ void glyph_build_sprites(FontFace& fontFace,
         const auto filter_scale = scale;
         const auto filters_scaled = apply_scale(filters, filter_scale);
 
-        RectI rect;
+        irect_t rect;
         Bitmap* data = render_glyph_image(fontFace, glyph_index, rect);
         if (data) {
             Image image;
             image.name = ref;
             image.bitmap = data;
-            image.rc = {
-                    (float) rect.x / scale,
-                    (float) rect.y / scale,
-                    (float) rect.w / scale,
-                    (float) rect.h / scale,
-            };
+            image.rc = rect_scale_f(irect_to_rect(rect), 1.0f / scale);
 
             // TODO: preserve RC / SOURCE
 //                sprite.source = {

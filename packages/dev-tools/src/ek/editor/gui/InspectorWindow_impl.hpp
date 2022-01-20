@@ -40,7 +40,8 @@ inline void guiEntityRef(const char* label, ecs::EntityRef ref) {
     if (ref == nullptr) {
         ImGui::TextDisabled("%s: null", label);
     } else if (ref.valid()) {
-        ImGui::LabelText(label, "%s", ref.get().get_or_default<NodeName>().name.c_str());
+        auto tag = ref.get().get_or_default<Node>().tag;
+        ImGui::LabelText(label, "%s [0x%08X]", hsp_get(tag), tag);
     } else {
         ImGui::TextColored({1, 0, 0, 1}, "%s: invalid", label);
     }
@@ -81,7 +82,7 @@ inline void guiDisplayComponent(ecs::EntityApi e, const char* name, Func fn) {
 }
 
 inline void guiMovieClip(MovieClip& mc) {
-    ImGui::LabelText("movie_data_symbol", "%s", mc.movie_data_symbol.c_str());
+    ImGui::LabelText("movie_data_symbol", "%s", hsp_get(mc.movie_data_symbol));
     const auto* data = mc.get_movie_data();
     if (data) {
         ImGui::LabelText("Total Frames", "%u", data->frames);
@@ -223,13 +224,21 @@ inline void guiInteractive(Interactive& inter) {
     ImGui::LabelText("cursor", inter.cursor == EK_MOUSE_CURSOR_BUTTON ? "button" : "?");
 }
 
+inline void spriteRefInfo(REF_TO(Sprite) ref) {
+    Sprite spr = REF_RESOLVE(res_sprite, ref);
+    ImGui::LabelText("Image", "ref: %u", spr.image_id);
+    ImGui::LabelText("Loaded", "%u", !!(spr.state & SPRITE_LOADED));
+    ImGui::LabelText("Rotated", "%u", !!(spr.state & SPRITE_ROTATED));
+    ImGui::TextDisabled("TODO: select sprite res %u", ref);
+}
+
 inline void editDisplaySprite(Sprite2D& sprite) {
-    selectAsset<Sprite>("Sprite", sprite.src);
+    spriteRefInfo(sprite.src);
     ImGui::Checkbox("Hit Pixels", &sprite.hit_pixels);
 }
 
 inline void editDisplayNinePatch(NinePatch2D& ninePatch) {
-    selectAsset<Sprite>("Sprite", ninePatch.src);
+    spriteRefInfo(ninePatch.src);
     // TODO: scale, size
     //ImGui::Checkbox("Scale Grid", &ninePatch.scale_grid_mode);
     ImGui::Checkbox("Hit Pixels", &ninePatch.hit_pixels);
@@ -244,7 +253,7 @@ inline void editDisplayRectangle(Quad2D& quad) {
 }
 
 inline void editDisplayArc(Arc2D& arc) {
-    selectAsset<Sprite>("Sprite", arc.sprite);
+    spriteRefInfo(arc.sprite);
     ImGui::DragFloat("Angle", &arc.angle);
     ImGui::DragFloat("Radius", &arc.radius);
     ImGui::DragFloat("Line Width", &arc.line_width);
@@ -325,7 +334,7 @@ inline void guiParticleEmitter2D(ParticleEmitter2D& emitter) {
     ImGui::Checkbox("Enabled", &emitter.enabled);
     ImGui::Text("_Time: %f", emitter.time);
     guiEntityRef("Layer", emitter.layer);
-    ImGui::LabelText("Particle ID", "%s", emitter.particle.getID());
+    ImGui::LabelText("Particle", "SID: %u ( %s )", emitter.particle, hsp_get(res_particle.names[emitter.particle]));
     ImGui::DragFloat2("Offset", emitter.position.data);
     ImGui::Separator();
 
@@ -351,15 +360,13 @@ void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
     ImGui::PushID(reinterpret_cast<const void*>(entity.passport));
     ecs::EntityApi e = entity.ent();
     ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index, ecs::the_world.generation(e.index));
-    if (e.has<NodeName>()) {
-        //ImGui::InputText("Name", &e.get<NodeName>().name);
-    }
     if (e.has<Node>()) {
         auto& node = e.get<Node>();
         int flags = node.flags;
+        ImGui::LabelText("Tag", "%s [0x%08X]", hsp_get(node.tag), node.tag);
         ImGui::CheckboxFlags("Visible", &flags, Node::Visible);
         ImGui::CheckboxFlags("Touchable", &flags, Node::Touchable);
-        ImGui::LabelText("Layers", "%x", node.layersMask());
+        ImGui::LabelText("Layers", "0x%02X", node.layersMask());
         node.flags = flags;
     }
 
@@ -370,7 +377,7 @@ void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
     guiComponentPanel<Camera2D>(e, "Camera2D", guiCamera2D);
     guiComponentPanel<Bounds2D>(e, "Bounds2D", guiBounds2D);
 
-    if(ecs::the_world.hasComponent<Transform3D>()) {
+    if (ecs::the_world.hasComponent<Transform3D>()) {
         guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
         guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
         guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);
@@ -396,7 +403,7 @@ void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
 
     if (e.has<ScriptHolder>()) {
         auto& scripts = e.get<ScriptHolder>().list;
-        for (auto& script : scripts) {
+        for (auto& script: scripts) {
             script->gui_inspector();
         }
     }

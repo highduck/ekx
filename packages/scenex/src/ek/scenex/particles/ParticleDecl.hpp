@@ -1,9 +1,9 @@
 #pragma once
 
-#include <ek/util/Res.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
-#include <ek/scenex/text/Font.hpp>
 #include <ek/rnd.h>
+#include <ek/rr.h>
+#include <ek/ds/Array.hpp>
 
 namespace ek {
 
@@ -117,31 +117,61 @@ struct FloatRange {
 };
 
 struct ParticleDecl {
-    Res <Sprite> sprite;
-    ParticleScaleMode scale_mode = ParticleScaleMode::None;
-    ParticleAlphaMode alpha_mode = ParticleAlphaMode::None;
-    FloatRange alpha_start{1.0};
-    vec2_t acceleration = {};
-    bool use_reflector = false;
+    REF_TO(Sprite) sprite;
+    ParticleScaleMode scale_mode;
+    ParticleAlphaMode alpha_mode;
+    FloatRange alpha_start;
+    vec2_t acceleration;
+    bool use_reflector;
 
-    FloatRange life_time{1.0f};
-    FloatRange acc_x_phase{0.5f * MATH_PI};
-    FloatRange acc_x_speed{0.0f};
+    FloatRange life_time;
+    FloatRange acc_x_phase;
+    FloatRange acc_x_speed;
 
-    float scale_off_time = 0.0f;
-    FloatRange scale_start{1.0f};
-    FloatRange scale_end{0.0f};
+    float scale_off_time;
+    FloatRange scale_start;
+    FloatRange scale_end;
 
     RandColorData color;
-    color_t color_offset = COLOR_ZERO;
-    float additive = 0.0f;
+    color_t color_offset;
+    float additive;
 
-    FloatRange rotation{0.0f};
-    float rotation_speed{0.0f};
-
-    float angle_velocity_factor = 0.0f;
-    float angle_base = 0.0f;
+    FloatRange rotation;
+    float rotation_speed;
+    float angle_velocity_factor;
+    float angle_base;
 };
+
+struct res_particle {
+    string_hash_t names[32];
+    ParticleDecl data[32];
+    rr_man_t rr;
+};
+
+inline struct res_particle res_particle;
+
+inline void setup_res_particle(void) {
+    struct res_particle* R = &res_particle;
+    rr_man_t* rr = &R->rr;
+
+    rr->names = R->names;
+    rr->data = R->data;
+    rr->max = sizeof(R->data) / sizeof(R->data[0]);
+    rr->num = 1;
+    rr->data_size = sizeof(R->data[0]);
+}
+
+inline void particle_decl_init(ParticleDecl* decl) {
+    memset(decl, 0, sizeof(ParticleDecl));
+    decl->alpha_start = FloatRange{1.0};
+    decl->life_time = FloatRange{1.0f};
+    decl->acc_x_phase = FloatRange{0.5f * MATH_PI};
+    decl->acc_x_speed = FloatRange{0.0f};
+    decl->scale_start = FloatRange{1.0f};
+    decl->scale_end = FloatRange{0.0f};
+    decl->color = RandColorData{};
+    decl->rotation = FloatRange{0.0f};
+}
 
 struct EmitterData {
     float interval = 0.5f;
@@ -155,9 +185,6 @@ struct EmitterData {
     FloatRange acc{0.0f};
     FloatRange dir{0.0f, MATH_TAU};
 };
-
-EK_DECLARE_TYPE(ParticleDecl);
-EK_TYPE_INDEX(ParticleDecl, 10);
 
 }
 

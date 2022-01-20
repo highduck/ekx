@@ -55,14 +55,14 @@ function renderCMakeFile(ctx:Project, buildType): string {
     };
 
     if (buildType === "Release") {
-        // const releaseExpFlags = [
-        //     "-fno-stack-protector",
-        //     "-fno-align-functions",
-        //     "-fno-strict-overflow",
-        //     "-fno-strict-aliasing"
-        // ];
+        const releaseExpFlags = [
+            // "-fno-stack-protector",
+            // "-fno-align-functions",
+            "-fno-strict-overflow",
+            // "-fno-strict-aliasing"
+        ];
         // const releaseExpFlags = ["-fno-vectorize", "-fno-slp-vectorize", "-fno-tree-vectorize", "-fno-unroll-loops"];
-        const releaseExpFlags = [];
+        // const releaseExpFlags = [];
         cmakeTarget.linkOptions.push("-Oz", "-flto", ...releaseExpFlags);
         cmakeTarget.compileOptions.push("-Oz", "-flto", ...releaseExpFlags);
         if (1) {

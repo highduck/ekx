@@ -48,11 +48,18 @@ const char* HierarchyWindow::getEntityIcon(ecs::EntityApi e) {
     return ICON_FA_BORDER_STYLE;
 }
 
-const char* HierarchyWindow::getEntityTitle(ecs::EntityApi e) {
-    if (e.has<NodeName>()) {
-        return e.get<NodeName>().name.c_str();
+void getEntityTitle(ecs::EntityApi e, char buffer[64]) {
+    auto tag = e.get<Node>().tag;
+    if (tag) {
+        const char* str = hsp_get(tag);
+        if (*str) {
+            strcpy(buffer, str);
+        } else {
+            ek_snprintf(buffer, 64, "[0x%08X]", tag);
+        }
+    } else {
+        strcpy(buffer, "Entity");
     }
-    return "Entity";
 }
 
 bool HierarchyWindow::isSelectedInHierarchy(ecs::EntityApi e) {
@@ -137,14 +144,16 @@ void HierarchyWindow::drawEntityInTree(ecs::EntityApi e, bool parentedVisible, b
     }
 
     ImGui::PushStyleColor(ImGuiCol_Text, nodeVisible ? 0xFFFFFFFF : 0x77FFFFFF);
-    if(openList.has(e.index)) {
+    if (openList.has(e.index)) {
         ImGui::SetNextItemOpen(true);
     }
-    if(scrollToList.has(e.index)) {
+    if (scrollToList.has(e.index)) {
         ImGui::SetScrollHereY();
         scrollToList.remove(e.index);
     }
-    bool opened = ImGui::TreeNodeEx("entity", flags, "%s %s", getEntityIcon(e), getEntityTitle(e));
+    char buffer[64];
+    getEntityTitle(e, buffer);
+    bool opened = ImGui::TreeNodeEx("entity", flags, "%s %s", getEntityIcon(e), buffer);
     if (!opened) {
         openList.remove(e.index);
     }
@@ -179,7 +188,7 @@ void HierarchyWindow::drawEntityFiltered(ecs::EntityApi e, bool parentedVisible,
         return;
     }
     auto* node = e.tryGet<Node>();
-    auto* name = e.tryGet<NodeName>();
+    const char* name = node ? hsp_get(node->tag) : 0;
     auto nodeVisible = parentedVisible;
     auto nodeTouchable = parentedTouchable;
     if (node) {
@@ -187,7 +196,7 @@ void HierarchyWindow::drawEntityFiltered(ecs::EntityApi e, bool parentedVisible,
         nodeTouchable = nodeTouchable && node->touchable();
     }
 
-    if (name && filter.PassFilter(name->name.c_str())) {
+    if (name && *name && filter.PassFilter(name)) {
         ImGui::PushID(static_cast<int>(ecs::EntityRef{e}.passport));
         ImGui::BeginGroup();
 
@@ -203,7 +212,9 @@ void HierarchyWindow::drawEntityFiltered(ecs::EntityApi e, bool parentedVisible,
         flags |= ImGuiTreeNodeFlags_Leaf;
 
         ImGui::PushStyleColor(ImGuiCol_Text, nodeVisible ? 0xFFFFFFFF : 0x77FFFFFF);
-        const bool opened = ImGui::TreeNodeEx("hierarchy_node", flags, "%s%s", getEntityIcon(e), getEntityTitle(e));
+        char buffer[64];
+        getEntityTitle(e, buffer);
+        const bool opened = ImGui::TreeNodeEx("hierarchy_node", flags, "%s%s", getEntityIcon(e), buffer);
         ImGui::PopStyleColor();
 
         if (ImGui::IsItemClicked()) {
@@ -280,7 +291,7 @@ void HierarchyWindow::select(ecs::EntityApi e) {
 }
 
 void HierarchyWindow::focus(ecs::EntityApi e) {
-    if(e) {
+    if (e) {
         // open parents in hierarchy
         auto parent = e.get<Node>().parent;
         while (parent) {

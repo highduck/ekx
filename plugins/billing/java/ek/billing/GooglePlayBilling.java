@@ -64,7 +64,7 @@ public class GooglePlayBilling extends BillingPlugin implements PurchasesUpdated
     }
 
     @Override
-    public String getName() {
+    public String get_tag() {
         return "GooglePlay";
     }
 

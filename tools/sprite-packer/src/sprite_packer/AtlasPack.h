@@ -8,6 +8,7 @@
 #include "Writer.h"
 #include "ek/log.h"
 #include "ek/print.h"
+#include "ek/hash.h"
 #include <cstdio>
 
 namespace sprite_packer {
@@ -46,13 +47,13 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
         bytes_write_u16(&writer, page.w);
         bytes_write_u16(&writer, page.h);
         bytes_write_string(&writer, imagePath, (int) strnlen(imagePath, 1024));
-        bytes_write_i32(&writer, (int32_t) page.sprites.size());
+        bytes_write_u32(&writer, page.sprites.size());
         for (auto& spr: page.sprites) {
-            bytes_write_string(&writer, spr.name.c_str(), (int) spr.name.size());
+            bytes_write_u32(&writer, H(spr.name.c_str()));
+            // keep only rotation flag in output
+            bytes_write_u32(&writer, spr.flags & 1);
             bytes_writer_push(&writer, &spr.rc, sizeof(spr.rc));
             bytes_writer_push(&writer, &spr.uv, sizeof(spr.uv));
-            // keep only rotation flag in output
-            bytes_write_u8(&writer, spr.flags & 1);
         }
 
         char absImagePath[1024];

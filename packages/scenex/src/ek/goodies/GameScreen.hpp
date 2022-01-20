@@ -39,10 +39,10 @@ struct GameScreen {
     // do not create/destroy content
     //bool persistent = true;
 
-    static GameScreen& init(ecs::EntityApi e, const char* name = nullptr);
+    static GameScreen& init(ecs::EntityApi e, string_hash_t name = 0);
 };
 
-ECX_TYPE(21, GameScreen);
+
 
 struct ScreenTransitionState {
     bool active = false;
@@ -95,12 +95,12 @@ public:
 
     explicit GameScreenManager(ecs::EntityApi layer_);
 
-    void setScreen(const char* name);
+    void setScreen(string_hash_t name);
 
     [[nodiscard]]
-    ecs::EntityApi findScreen(const char* name) const;
+    ecs::EntityApi findScreen(string_hash_t name) const;
 
-    void changeScreen(const char* name);
+    void changeScreen(string_hash_t name);
 
     void update();
 

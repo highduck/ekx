@@ -77,7 +77,7 @@ struct Display2D {
     Pointer<IDrawable2D> drawable;
 
     // state management
-    ek_ref(ek_shader) program = {0};
+    REF_TO(ek_shader) program = 0;
 
     // 1 - draw debug bounds
     int flags = 0;
@@ -159,7 +159,7 @@ struct Display2D {
 // 16 + 16 = 32 bytes
 class Quad2D : public Drawable2D<Quad2D> {
 public:
-    Res<Sprite> src{"empty"};
+    REF_TO(Sprite) src = REF_NAME(res_sprite, H("empty"));
     rect_t rect = rect_01();
     color_t colors[4] = {
             COLOR_WHITE,
@@ -196,12 +196,12 @@ public:
 // 8 + 1 = 9 bytes
 class Sprite2D : public Drawable2D<Sprite2D> {
 public:
-    Res<Sprite> src;
+    REF_TO(Sprite) src = 0;
     bool hit_pixels = true;
 
     Sprite2D();
 
-    explicit Sprite2D(const char* spriteId);
+    explicit Sprite2D(string_hash_t spriteId);
 
     void draw() override;
 
@@ -215,7 +215,7 @@ public:
 // 8 + 16 + 16 + 8 + 1 = 49 bytes
 class NinePatch2D : public Drawable2D<NinePatch2D> {
 public:
-    Res<Sprite> src;
+    REF_TO(Sprite) src = 0;
     rect_t scale_grid;
     rect_t manual_target = {};
     vec2_t scale;
@@ -223,7 +223,7 @@ public:
 
     NinePatch2D();
 
-    explicit NinePatch2D(const char* spriteId, rect_t aScaleGrid = {});
+    explicit NinePatch2D(string_hash_t spriteId, rect_t aScaleGrid = {});
 
     void draw() override;
 
@@ -280,7 +280,7 @@ public:
     int segments = 50;
     color_t color_inner = COLOR_WHITE;
     color_t color_outer = COLOR_WHITE;
-    Res<Sprite> sprite;
+    REF_TO(Sprite) sprite = 0;
 
     void draw() override;
 
@@ -314,8 +314,8 @@ inline void setText(ecs::EntityApi e, const String& v) {
     }
 }
 
-ECX_TYPE(11, Display2D);
-ECX_TYPE(32, Bounds2D);
+
+
 
 EK_DECLARE_TYPE(IDrawable2D);
 EK_TYPE_INDEX_T(IDrawable2D, Sprite2D, IDrawable2D_Sprite2D);

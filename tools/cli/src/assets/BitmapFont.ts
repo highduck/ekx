@@ -6,6 +6,7 @@ import {bmfontAsync} from "./helpers/bmfont";
 import {BytesWriter} from "./helpers/BytesWriter";
 import {XmlDocument, XmlElement} from "xmldoc";
 import {MultiResAtlasAsset} from "./Atlas";
+import {H} from "../utility/hash";
 
 export class BitmapFontAsset extends Asset {
     static typeName = "bmfont";
@@ -48,8 +49,8 @@ ${this.font}
         atlasAsset.inputs.push(path.join(imagesOutput, "_images.xml"));
 
         const header = new BytesWriter();
-        header.writeString(BitmapFontAsset.typeName);
-        header.writeString(this.name);
+        header.writeU32(H(BitmapFontAsset.typeName));
+        header.writeU32(H(this.name));
         header.writeString(this.name + ".font");
         this.owner.writer.writeSection(header);
     }

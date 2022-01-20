@@ -10,7 +10,7 @@
 namespace ek {
 
 struct Particle {
-    Res<Sprite> sprite;
+    REF_TO(Sprite) sprite = 0;
     //int draw_layer = 0;
     //const char* text = nullptr;
     vec2_t pivot = {};

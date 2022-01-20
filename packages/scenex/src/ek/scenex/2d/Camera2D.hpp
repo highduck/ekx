@@ -62,6 +62,6 @@ public:
     static const Camera2D* getCurrentRenderingCamera();
 };
 
-ECX_TYPE(10, Camera2D);
+
 }
 

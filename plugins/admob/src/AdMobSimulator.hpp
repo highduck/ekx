@@ -5,7 +5,7 @@
 #include <ek/canvas.h>
 #include <ek/app.h>
 #include <ek/scenex/app/basic_application.hpp>
-#include <ek/audio/audio.hpp>
+#include <ek/audio.h>
 #include <ek/time.hpp>
 
 namespace ek {

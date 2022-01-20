@@ -105,13 +105,13 @@ struct TextFormat {
         return layers[textLayerIndex].color;
     }
 
-    void setFontName(const char* fontName) {
+    void setFontName(string_hash_t fontName) {
         font.setID(fontName);
     }
 
     TextFormat() = default;
 
-    TextFormat(const char* fontName, float fontSize) :
+    TextFormat(string_hash_t fontName, float fontSize) :
             font{fontName},
             size{fontSize} {
     }

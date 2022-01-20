@@ -6,6 +6,7 @@ import {flashExportAsync} from "./helpers/flashExport";
 import {BytesWriter} from "./helpers/BytesWriter";
 import {XmlDocument, XmlElement} from "xmldoc";
 import {MultiResAtlasAsset} from "./Atlas";
+import {H} from "../utility/hash";
 
 export class FlashAsset extends Asset {
     static typeName = "flash";
@@ -40,8 +41,8 @@ export class FlashAsset extends Asset {
 
         // header for .sg file
         const sceneHeader = new BytesWriter();
-        sceneHeader.writeString("scene");
-        sceneHeader.writeString(this.name);
+        sceneHeader.writeU32(H("scene"));
+        sceneHeader.writeU32(H(this.name));
         sceneHeader.writeString(this.name + ".sg");
         this.owner.writer.writeSection(sceneHeader);
     }

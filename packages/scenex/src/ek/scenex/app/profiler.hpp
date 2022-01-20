@@ -58,7 +58,7 @@ public:
         Track_FillRate = 3,
         DefaultTracks_Count = 4
     };
-    TextFormat textFormat{"Cousine-Regular", 10};
+    TextFormat textFormat{H("Cousine-Regular"), 10};
     FpsMeter fpsMeter{};
     Array<Track> tracks{};
     bool enabled = true;

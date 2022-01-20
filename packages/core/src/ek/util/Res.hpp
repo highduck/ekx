@@ -1,9 +1,10 @@
 #pragma once
 
 #include <ek/log.h>
-#include <ek/ds/String.hpp>
+#include <ek/hash.h>
 #include <ek/ds/Array.hpp>
 #include <ek/util/Type.hpp>
+
 #include "StaticStorage.hpp"
 
 namespace ek {
@@ -12,7 +13,7 @@ namespace ResourceDB {
 
 struct Slot final {
     // stored unique access key
-    String name{};
+    string_hash_t name = 0;
     void* content = nullptr;
 
     Slot() = default;
@@ -32,7 +33,7 @@ inline Array<Slot>& list(int type) {
     return *(s_map.get() + type);
 }
 
-inline uint32_t getSlotPointer(int type, const char* name) {
+inline uint32_t getSlotPointer(int type, string_hash_t name) {
 #if 0
     static int maxsize = 0;
         if(maxsize < key.name.size()) {
@@ -52,7 +53,7 @@ inline uint32_t getSlotPointer(int type, const char* name) {
     return i;
 }
 
-inline uint32_t inject(int type, const char* name) {
+inline uint32_t inject(int type, string_hash_t name) {
     return getSlotPointer(type, name);
 }
 
@@ -73,7 +74,9 @@ inline void* getContent(int type, uint32_t handle) {
 }
 
 inline const char* getName(int type, uint32_t handle) {
-    return get(type, handle)->name.c_str();
+    const string_hash_t name = get(type, handle)->name;
+    const char* str = hsp_get(name);
+    return str ? str : "";
 }
 
 inline void init() {
@@ -85,14 +88,14 @@ inline void init() {
 template<typename T>
 class Res {
 public:
-    constexpr Res() noexcept: h{ResourceDB::inject(TypeIndex<T>::value, nullptr)} {}
+    constexpr Res() noexcept: h{ResourceDB::inject(TypeIndex<T>::value, 0)} {}
 
-    explicit Res(const char* id);
+    explicit Res(string_hash_t id);
 
-    void setID(const char* id);
+    void setID(string_hash_t id);
 
-    [[nodiscard]]
-    const char* getID() const;
+    // WARNING: please use it only for debugging
+    [[nodiscard]] const char* getID() const;
 
     static void deleter(void* obj) {
         delete (T*)obj;
@@ -157,12 +160,12 @@ private:
 };
 
 template<typename T>
-Res<T>::Res(const char* id) :
+Res<T>::Res(string_hash_t id) :
         h{ResourceDB::inject(TypeIndex<T>::value, id)} {
 }
 
 template<typename T>
-void Res<T>::setID(const char* id) {
+void Res<T>::setID(string_hash_t id) {
     h = ResourceDB::inject(TypeIndex<T>::value, id);
 }
 

@@ -15,7 +15,7 @@ void fireworks_script::start() {
     Display2D::make<ParticleRenderer2D>(entity_).target = ecs::EntityRef{entity_};
     auto& emitter = entity_.assign<ParticleEmitter2D>();
     emitter.data.burst = 0;
-    emitter.particle.setID("firework_star");
+    emitter.particle = REF_NAME(res_particle, H("firework_star"));
     emitter.layer = ecs::EntityRef{entity_};
     setTouchable(entity_, false);
 }
@@ -33,8 +33,8 @@ void fireworks_script::update(float dt) {
         rect.h *= 0.5f;
 
         emitter.position = rect.position + rect.size * vec2(random_f(), random_f());
-        Locator::ref<AudioManager>().play_sound("sfx/firework", random_range_f(0.5f, 1.0f));
-        Res<ParticleDecl> part{"firework_star"};
+        Locator::ref<AudioManager>().play_sound(H("sfx/firework"), random_range_f(0.5f, 1.0f));
+        ParticleDecl* part = &RES_NAME_RESOLVE(res_particle, H("firework_star"));
         switch (random_n(4)) {
             case 0:
                 part->color.set_gradient(ARGB(0xffffff00), ARGB(0xffff7f00));
@@ -52,12 +52,12 @@ void fireworks_script::update(float dt) {
                 break;
         }
 
-        emitter.particle.setID("firework_spark");
+        emitter.particle = REF_NAME(res_particle, H("firework_spark"));
         emitter.data.acc.set(0, 100);
         emitter.data.speed.set(50, 100);
         particles_burst(entity_, random_range_i(20, 30));
 
-        emitter.particle.setID("firework_star");
+        emitter.particle = REF_NAME(res_particle, H("firework_star"));
         emitter.data.speed.set(10, 100);
         emitter.data.acc.set(0, -50);
         particles_burst(entity_, random_range_i(60, 80));

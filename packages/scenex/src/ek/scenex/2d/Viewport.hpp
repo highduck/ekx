@@ -50,6 +50,6 @@ struct Viewport {
     static void updateAll(const GameDisplayInfo& display0);
 };
 
-ECX_TYPE(17, Viewport);
+
 
 }

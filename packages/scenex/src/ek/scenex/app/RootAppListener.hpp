@@ -2,7 +2,7 @@
 
 #include <ek/app.h>
 #include <ek/time.h>
-#include <ek/audio/audio.hpp>
+#include <ek/audio.h>
 #include <ek/log.h>
 #include <ek/assert.h>
 #include <sokol_gfx.h>

@@ -4,6 +4,7 @@ import * as glob from "glob";
 import {executeAsync, makeDirs} from "../utils";
 import {BytesWriter} from "./helpers/BytesWriter";
 import {XmlElement} from "xmldoc";
+import {H} from "../utility/hash";
 
 export class TranslationsAsset extends Asset {
     static typeName = "translations";
@@ -36,7 +37,7 @@ export class TranslationsAsset extends Asset {
         }
 
         const header = new BytesWriter();
-        header.writeString("strings");
+        header.writeU32(H("strings"));
         header.writeString(this.name);
         header.writeU32(langs.length);
         for (let i = 0; i < langs.length; ++i) {

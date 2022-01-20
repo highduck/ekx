@@ -41,6 +41,6 @@ struct Interactive {
     void handle(PointerEvent event);
 };
 
-ECX_TYPE(7, Interactive);
+
 
 }

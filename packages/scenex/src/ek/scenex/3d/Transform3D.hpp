@@ -30,7 +30,7 @@ struct Transform3D {
     static void updateAll();
 };
 
-ECX_TYPE(27, Transform3D);
+
 
 }
 

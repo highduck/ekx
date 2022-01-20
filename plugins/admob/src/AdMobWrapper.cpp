@@ -1,5 +1,5 @@
 #include <ek/admob_wrapper.hpp>
-#include <ek/audio/audio.hpp>
+#include <ek/audio.h>
 #include "AdMobNull.hpp"
 
 // implementation

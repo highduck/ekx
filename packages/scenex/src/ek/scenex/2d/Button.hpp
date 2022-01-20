@@ -8,11 +8,11 @@
 namespace ek {
 
 struct ButtonSkin {
-    const char* sfxOver = "sfx/btn_over";
-    const char* sfxDown = "sfx/btn_down";
-    const char* sfxClick = "sfx/btn_click";
-    const char* sfxOut = "sfx/btn_out";
-    const char* sfxCancel = "sfx/btn_cancel";
+    string_hash_t sfxOver = H("sfx/btn_over");
+    string_hash_t sfxDown = H("sfx/btn_down");
+    string_hash_t sfxClick = H("sfx/btn_click");
+    string_hash_t sfxOut = H("sfx/btn_out");
+    string_hash_t sfxCancel = H("sfx/btn_cancel");
 
     float overSpeedForward = 8.0f;
     float overSpeedBackward = 8.0f;

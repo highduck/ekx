@@ -7,10 +7,6 @@
 
 namespace ek {
 
-struct NodeName {
-    String name;
-};
-
 struct Node {
     enum Flags {
         Visible = 1,
@@ -26,6 +22,7 @@ struct Node {
     ecs::EntityApi parent;
 
     uint16_t flags = LayerMask | VisibleAndTouchable;
+    string_hash_t tag;
 
     [[nodiscard]] bool visible() const {
         return (flags & Visible) != 0;
@@ -56,8 +53,6 @@ struct Node {
     static ecs::EntityApi findLowerCommonAncestor(ecs::EntityApi e1, ecs::EntityApi e2);
 };
 
-ECX_TYPE(1, NodeName);
-ECX_TYPE(2, Node);
 
 template<typename Func>
 inline void eachChild(ecs::EntityApi e, Func func) {
@@ -166,12 +161,12 @@ ecs::EntityApi getChildAt(ecs::EntityApi e, int index);
 
 /** utility functions **/
 
-inline void setName(ecs::EntityApi e, const String& name) {
-    e.get_or_create<NodeName>().name = name;
+inline void set_tag(ecs::EntityApi e, string_hash_t tag) {
+    e.get_or_create<Node>().tag = tag;
 }
 
-inline const String& getName(ecs::EntityApi e) {
-    return e.get_or_default<NodeName>().name;
+inline string_hash_t get_tag(ecs::EntityApi e) {
+    return e.get_or_default<Node>().tag;
 }
 
 inline bool isVisible(ecs::EntityApi e) {
@@ -212,14 +207,10 @@ Comp* findComponentInParent(ecs::EntityApi e) {
 
 /** search functions **/
 
-ecs::EntityApi find(ecs::EntityApi e, const char* childName);
+ecs::EntityApi find(ecs::EntityApi e, string_hash_t tag);
 
-inline ecs::EntityApi find(const ecs::EntityApi e, const String& childName) {
-    return find(e, childName.c_str());
-}
+ecs::EntityApi findByPath(ecs::EntityApi e, ...);
 
-ecs::EntityApi findByPath(ecs::EntityApi e, const Array<String>& path);
-
-Array<ecs::EntityApi> findMany(ecs::EntityApi e, const Array<String>& names);
+Array <ecs::EntityApi> findMany(ecs::EntityApi e, ...);
 
 }

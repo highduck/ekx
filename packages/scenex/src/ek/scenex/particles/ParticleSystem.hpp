@@ -14,7 +14,7 @@ struct ParticleLayer2D {
     TimeLayer timer;
 };
 
-ECX_TYPE(19, ParticleLayer2D);
+
 
 struct ParticleEmitter2D {
     typedef void SpawnCallback(ecs::EntityApi, Particle&);
@@ -23,14 +23,14 @@ struct ParticleEmitter2D {
     vec2_t position = {};
     vec2_t velocity = {};
     SpawnCallback* on_spawn = nullptr;
-    Res<ParticleDecl> particle;
+    REF_TO(ParticleDecl) particle;
     ecs::EntityRef layer;
     float time = 0.0f;
     TimeLayer timer;
     bool enabled = true;
 };
 
-ECX_TYPE(18, ParticleEmitter2D);
+
 
 class ParticleRenderer2D : public Drawable2D<ParticleRenderer2D> {
 public:
@@ -62,9 +62,9 @@ EK_TYPE_INDEX_T(IDrawable2D, ParticleRenderer2D, IDrawable2D_ParticleRenderer2D)
 
 void particles_burst(ecs::EntityApi e, int count, vec2_t relativeVelocity = {});
 
-Particle* spawn_particle(ecs::EntityApi e, const char* particle_id);
+Particle* spawn_particle(ecs::EntityApi e, string_hash_t particle_id);
 
-void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const ParticleDecl& decl, ParticleEmitter2D& emitter,
+void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const ParticleDecl* decl, ParticleEmitter2D& emitter,
                       int count);
 
 void update_emitters();
@@ -75,7 +75,7 @@ void draw_particle_layer(ecs::EntityApi e);
 
 ParticleLayer2D& find_particle_layer(ecs::EntityApi e);
 
-Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl& decl);
+Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl* decl);
 
 }
 

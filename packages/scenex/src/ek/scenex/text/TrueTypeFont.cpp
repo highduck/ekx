@@ -22,7 +22,7 @@
 
 namespace ek {
 
-TrueTypeFont::TrueTypeFont(float dpiScale_, float fontSize, const char* dynamicAtlasName) :
+TrueTypeFont::TrueTypeFont(float dpiScale_, float fontSize, string_hash_t dynamicAtlasName) :
         FontImplBase(FontType::TrueType),
         baseFontSize{fontSize},
         dpiScale{dpiScale_},

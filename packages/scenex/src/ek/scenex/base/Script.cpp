@@ -7,7 +7,7 @@ namespace ek {
 
 ScriptBase::~ScriptBase() = default;
 
-ecs::EntityApi ScriptBase::find_child(const char* name) const {
+ecs::EntityApi ScriptBase::find_child(string_hash_t name) const {
     return find(entity_, name);
 }
 

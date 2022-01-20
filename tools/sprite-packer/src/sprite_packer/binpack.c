@@ -203,7 +203,6 @@ static bool binpack_choose(binpack_t* context,
             placement->w = size.h;
             placement->h = size.w;
         }
-        VALIDATE_SIZE(*placement);
         return true;
     }
     return false;

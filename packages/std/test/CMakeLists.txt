@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}
         path_test.c
         rnd_test.c
         string_test.c
+        hash_test.c
         )
 
 enable_testing()

@@ -14,10 +14,10 @@ struct BubbleText {
 
     static void updateAll();
 
-    static ecs::EntityApi create(const char* fontName, const String& text, vec2_t pos, float delay = 0.0f);
+    static ecs::EntityApi create(string_hash_t fontName, const String& text, vec2_t pos, float delay = 0.0f);
 };
 
-ECX_TYPE(20, BubbleText);
+
 
 }
 

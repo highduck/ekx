@@ -45,12 +45,12 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     if (g) {
         outGlyph.advanceWidth = static_cast<float>(g->advanceWidth) / unitsPerEM;
         outGlyph.lineHeight = lineHeightMultiplier;
-        Res<Sprite> spr{g->sprite.c_str()};
-        if (spr) {
+        Sprite* spr = &REF_RESOLVE(res_sprite, g->sprite);
+        if (spr->state & SPRITE_LOADED) {
             outGlyph.rect = spr->rect / baseFontSize;
             outGlyph.texCoord = spr->tex;
-            outGlyph.image = ek_ref_content(sg_image, spr->image_id);
-            outGlyph.rotated = spr->rotated;
+            outGlyph.image = REF_RESOLVE(res_image, spr->image_id);
+            outGlyph.rotated = spr->state & SPRITE_ROTATED;
         } else {
             outGlyph.rect = irect_to_rect(g->box) / unitsPerEM;
         }

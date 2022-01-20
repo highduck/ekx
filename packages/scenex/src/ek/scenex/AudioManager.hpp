@@ -1,10 +1,8 @@
 #pragma once
 
 #include <ek/scenex/StorageVariable.hpp>
-#include <ek/audio/audio.hpp>
-#include <ek/ds/String.hpp>
+#include <ek/audio.h>
 #include <ek/math.h>
-#include <ek/util/Path.hpp>
 #include <ek/util/Type.hpp>
 
 namespace ek {
@@ -19,11 +17,11 @@ public:
 
     ~AudioManager();
 
-    void play_music(const char* name);
+    void play_music(string_hash_t name);
 
     void setMusicParams(float volume = 1.0f, float pitch = 1.0f);
-    void play_sound(const char* name, float vol = 1.0f, float pitch = 1.0f) const;
-    void play_sound_at(const char* name, vec2_t position, float vol = 1.0f, float pitch = 1.0f) const;
+    void play_sound(string_hash_t name, float vol = 1.0f, float pitch = 1.0f) const;
+    void play_sound_at(string_hash_t name, vec2_t position, float vol = 1.0f, float pitch = 1.0f) const;
 
     void vibrate(int length) const;
 
@@ -32,7 +30,7 @@ public:
     void disable_all();
 
 private:
-    String music_;
+    REF_TO(auph_buffer) music_ = 0;
     auph_voice musicVoice_{};
     float musicVolume_ = 1.0f;
     float musicPitch_ = 1.0f;

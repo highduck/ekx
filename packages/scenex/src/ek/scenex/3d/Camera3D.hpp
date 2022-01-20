@@ -29,10 +29,10 @@ struct Camera3D {
     vec4_t clearColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
     float clearDepth = 1.0f;
 
-    ek_ref(sg_image) cubeMap;
+    REF_TO(sg_image) cubeMap;
 };
 
-ECX_TYPE(29, Camera3D);
+
 
 }
 

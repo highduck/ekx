@@ -46,7 +46,7 @@ struct SGTextLayerData {
 
 struct SGDynamicTextData {
     String text;
-    String font;
+    string_hash_t font;
     float size;
     vec2_t alignment = {};
     rect_t rect = {};
@@ -60,7 +60,6 @@ struct SGDynamicTextData {
     template<typename S>
     void serialize(IO<S>& io) {
         io(text, font, size, alignment, rect, lineSpacing, lineHeight, layers, wordWrap);
-        //log_info("layers size: %u", layers.size());
     }
 };
 
@@ -183,13 +182,13 @@ struct SGNodeData {
     color2f_t color = color2f();
 
     // instance name
-    String name;
+    string_hash_t name;
 
     // name in library
-    String libraryName;
+    string_hash_t libraryName;
 
     // sprite id
-    String sprite;
+    string_hash_t sprite;
 
     bool button = false;
     bool touchable = true;
@@ -238,8 +237,10 @@ struct SGNodeData {
 };
 
 struct SGSceneInfo {
-    String name;
-    String linkage;
+    // public export linkage name
+    string_hash_t name;
+    // internal symbol name
+    string_hash_t linkage;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -249,7 +250,7 @@ struct SGSceneInfo {
 
 class SGFile {
 public:
-    Array<String> scenes;
+    Array<string_hash_t> scenes;
     Array<SGSceneInfo> linkages;
     Array<SGNodeData> library;
 

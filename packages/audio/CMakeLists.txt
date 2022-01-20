@@ -3,9 +3,8 @@ include(npm.cmake)
 project(audio)
 
 add_library(${PROJECT_NAME} STATIC
-        src/ek/audio/audio_auph_impl.c
-        src/ek/audio/audio.cpp
-#        src/ek/audio/audio.mm
+        src/ek_audio_auph.c
+        src/ek_audio.c
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -36,17 +35,17 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
 
-set_source_files_properties("src/ek/audio/audio_auph_impl.c" PROPERTIES
+set_source_files_properties("src/ek_audio_auph.c" PROPERTIES
         COMPILE_FLAGS "-x objective-c")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-set_source_files_properties("src/ek/audio/audio_auph_impl.c" PROPERTIES
+set_source_files_properties("src/ek_audio_auph.c" PROPERTIES
         COMPILE_FLAGS "-x objective-c")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
 
-    set_source_files_properties("src/ek/audio/audio_auph_impl.c" PROPERTIES
+    set_source_files_properties("src/ek_audio_auph.c" PROPERTIES
             COMPILE_FLAGS "-xc++ -std=c++17")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")

@@ -89,7 +89,7 @@ public:
     bool initialized = false;
 };
 
-ECX_TYPE(26, Trail2D);
+
 
 class TrailRenderer2D : public Drawable2D<TrailRenderer2D> {
 public:
@@ -116,7 +116,7 @@ public:
     // max width
     float width = 20.0f;
     float minWidth = 5.0f;
-    Res <Sprite> sprite{"empty"};
+    REF_TO(Sprite) sprite = REF_NAME(res_sprite, H("empty"));
 };
 
 EK_TYPE_INDEX_T(IDrawable2D, TrailRenderer2D, IDrawable2D_TrailRenderer2D);

@@ -3,6 +3,7 @@ import * as path from "path";
 import {copyFile, makeDirs} from "../utils";
 import {BytesWriter} from "./helpers/BytesWriter";
 import {XmlElement} from "xmldoc";
+import {H} from "../utility/hash";
 
 export class TTFAsset extends Asset {
     static typeName = "ttf";
@@ -27,10 +28,10 @@ export class TTFAsset extends Asset {
         copyFile(path.resolve(this.owner.basePath, this.resourcePath), outputPath + ".ttf");
 
         const header = new BytesWriter(32);
-        header.writeString(this.typeName);
-        header.writeString(this.name);
+        header.writeU32(H(this.typeName));
+        header.writeU32(H(this.name));
         header.writeString(this.name + ".ttf");
-        header.writeString(this.glyphCache);
+        header.writeU32(H(this.glyphCache));
         header.writeF32(this.baseFontSize);
 
         this.owner.writer.writeSection(header);

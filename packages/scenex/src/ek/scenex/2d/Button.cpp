@@ -13,7 +13,7 @@
 
 namespace ek {
 
-void play_sound(const char* id) {
+void play_sound(string_hash_t id) {
     Locator::ref<AudioManager>().play_sound(id);
 }
 

@@ -95,21 +95,20 @@ ek_canvas_context canvas;
 static void canvas__resources_create(void) {
     EK_DEBUG("canvas: create default resources");
     const sg_backend backend = sg_query_backend();
-    canvas.image_empty = ek_gfx_make_color_image(4, 4, 0xFFFFFFFFu);
-    canvas.shader_default = ek_shader_make(canvas_shader_desc(backend));
-    canvas.shader_alpha_map = ek_shader_make(canvas_alpha_shader_desc(backend));
-    canvas.shader_solid_color = ek_shader_make(canvas_color_shader_desc(backend));
-    ek_ref_assign_s(sg_image, "empty", canvas.image_empty);
-    ek_ref_assign_s(ek_shader, "canvas", canvas.shader_default);
-    ek_ref_assign_s(ek_shader, "canvas_alpha", canvas.shader_alpha_map);
-    ek_ref_assign_s(ek_shader, "canvas_color", canvas.shader_solid_color);
+    res_shader.data[RES_SHADER_BLEND] = ek_shader_make(canvas_shader_desc(backend));
+    res_shader.data[RES_SHADER_ALPHA_MAP] = ek_shader_make(canvas_alpha_shader_desc(backend));
+    res_shader.data[RES_SHADER_SOLID_COLOR] = ek_shader_make(canvas_color_shader_desc(backend));
+    res_shader.rr.num += 4;
+
+    res_image.data[RES_IMAGE_EMPTY] = ek_gfx_make_color_image(4, 4, 0xFFFFFFFFu);
+    res_image.rr.num += 2;
 }
 
 static void canvas__resources_destroy(void) {
-    ek_ref_reset_s(sg_image, "empty");
-    ek_ref_reset_s(ek_shader, "canvas");
-    ek_ref_reset_s(ek_shader, "canvas_alpha");
-    ek_ref_reset_s(ek_shader, "canvas_color");
+    sg_destroy_shader(res_shader.data[RES_SHADER_BLEND].shader);
+    sg_destroy_shader(res_shader.data[RES_SHADER_ALPHA_MAP].shader);
+    sg_destroy_shader(res_shader.data[RES_SHADER_SOLID_COLOR].shader);
+    sg_destroy_image(res_image.data[RES_IMAGE_EMPTY]);
 }
 
 static void canvas__reset_stack(void) {
@@ -260,7 +259,7 @@ void canvas_save_image(void) {
 }
 
 void canvas_set_empty_image(void) {
-    canvas.image[0] = canvas.image_empty;
+    canvas.image[0] = res_image.data[RES_IMAGE_EMPTY];
     canvas.state |= EK_CANVAS_CHECK_IMAGE;
     canvas_set_image_rect(rect_01());
 }
@@ -271,7 +270,7 @@ void canvas_set_image(sg_image image_) {
 }
 
 void canvas_set_image_region(sg_image image_, const rect_t region) {
-    canvas.image[0] = image_.id ? image_ : canvas.image_empty;
+    canvas.image[0] = image_.id ? image_ : res_image.data[RES_IMAGE_EMPTY];
     canvas.state |= EK_CANVAS_CHECK_IMAGE;
     canvas.uv[0] = region;
 }
@@ -288,7 +287,7 @@ void canvas_push_program(const ek_shader program_) {
 }
 
 void canvas_set_program(const ek_shader program_) {
-    canvas.shader[0] = program_.shader.id ? program_ : canvas.shader_default;
+    canvas.shader[0] = program_.shader.id ? program_ : res_shader.data[RES_SHADER_BLEND];
     canvas.state |= EK_CANVAS_CHECK_SHADER;
 }
 
@@ -463,7 +462,7 @@ void canvas_stroke_rect(const rect_t rc, color_t color, float lineWidth) {
     const float r = rc.x + rc.w;
     const float b = rc.y + rc.h;
     canvas_line(vec2(rc.x, rc.y), vec2(r, rc.y), color, lineWidth);
-    canvas_line(vec2(r, rc.y), vec2 (r, b), color, lineWidth);
+    canvas_line(vec2(r, rc.y), vec2(r, b), color, lineWidth);
     canvas_line(vec2(r, b), vec2(rc.x, b), color, lineWidth);
     canvas_line(vec2(rc.x, b), vec2(rc.x, rc.y), color, lineWidth);
 }
@@ -720,8 +719,8 @@ void canvas_begin_ex(const rect_t viewport, const mat3x2_t view, sg_image render
     // reset all bits and set Active mode / dirty state flag
     canvas.state = EK_CANVAS_PASS_ACTIVE | EK_CANVAS_STATE_CHANGED;
 
-    canvas.image[0] = canvas.image_empty;
-    canvas.shader[0] = canvas.shader_default;
+    canvas.image[0] = res_image.data[RES_IMAGE_EMPTY];
+    canvas.shader[0] = res_shader.data[RES_SHADER_BLEND];
     canvas.scissors[0] = viewport;
     canvas.matrix[0] = mat3x2_identity();
     canvas.color[0] = color2_identity();

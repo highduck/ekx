@@ -89,7 +89,7 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
     }
     //auto alignment = format.alignment;
 
-    canvas_push_program(canvas.shader_alpha_map);
+    canvas_push_program(res_shader.data[RES_SHADER_ALPHA_MAP]);
     // render effects first
     for (int i = format.layersCount - 1; i >= 0; --i) {
         auto& layer = format.layers[i];

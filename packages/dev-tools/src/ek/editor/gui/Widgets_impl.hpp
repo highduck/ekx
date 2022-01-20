@@ -102,22 +102,22 @@ bool ToolbarButton(const char* label, bool active, const char* tooltip) {
 namespace ek {
 
 String getDebugNodePath(ecs::EntityApi e) {
-    const String* names[32];
+    const char* names[32];
     int depth = 0;
     String result;
     while (e && depth < 32) {
-        names[depth++] = &(e.get_or_default<NodeName>().name);
-        //result = e.get_or_default<NodeName>().name + "/" + result;
+        const auto tag = e.get_or_default<Node>().tag;
+        names[depth++] = tag ? hsp_get(tag) : "_";
         e = e.get<Node>().parent;
     }
     char buf[1024];
     uint32_t len = 0;
     while(depth-- > 0) {
         buf[len++] = '/';
-        auto* str = names[depth];
-        uint32_t size = str->size();
+        const char* str = names[depth];
+        uint32_t size = strlen(str);
         if(size > 0) {
-            memcpy(buf + len, str->data(), size);
+            memcpy(buf + len, str, size);
             len += size;
         }
     }
@@ -156,38 +156,46 @@ void guiTextLayerEffect(TextLayerEffect& layer) {
     ImGui::PopID();
 }
 
-void guiSprite(const Sprite& sprite) {
-    auto rc = sprite.rect;
-    auto uv0 = sprite.tex.position;
-    auto uv1 = rect_rb(sprite.tex);
-    const auto sprite_image = ek_ref_content(sg_image, sprite.image_id);
-    if (sprite_image.id) {
-        void* tex_id = (void*)(uintptr_t)sprite_image.id;
-        if (sprite.rotated) {
-            ImGui::BeginChild("s", ImVec2{rc.w, rc.h});
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            auto pos = ImGui::GetCursorScreenPos();
-            draw_list->AddImageQuad(tex_id,
-                                    pos,
-                                    ImVec2{pos.x + rc.w, pos.y},
-                                    ImVec2{pos.x + rc.w, pos.y + rc.h},
-                                    ImVec2{pos.x, pos.y + rc.h},
-                                    ImVec2{uv0.x, uv1.y},
-                                    ImVec2{uv0.x, uv0.y},
-                                    ImVec2{uv1.x, uv0.y},
-                                    ImVec2{uv1.x, uv1.y},
-                                    IM_COL32_WHITE);
-            ImGui::EndChild();
-        } else {
-            ImGui::Image(
-                    tex_id,
-                    ImVec2{rc.w, rc.h},
-                    ImVec2{uv0.x, uv0.y},
-                    ImVec2{uv1.x, uv1.y}
-            );
-        }
+void guiSprite(const Sprite* sprite) {
+    if(!sprite) {
+        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "null");
+        return;
+    }
+    if(!sprite->image_id || !(sprite->state & SPRITE_LOADED)) {
+        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "sprite is not loaded");
+        return;
+    }
+    const auto sprite_image = REF_RESOLVE(res_image, sprite->image_id);
+    if (!sprite_image.id) {
+        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "sprite image is not available");
+        return;
+    }
+    auto rc = sprite->rect;
+    auto uv0 = sprite->tex.position;
+    auto uv1 = rect_rb(sprite->tex);
+    void* tex_id = (void*)(uintptr_t)sprite_image.id;
+    if (sprite->state & SPRITE_ROTATED) {
+        ImGui::BeginChild("s", ImVec2{rc.w, rc.h});
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        auto pos = ImGui::GetCursorScreenPos();
+        draw_list->AddImageQuad(tex_id,
+                                pos,
+                                ImVec2{pos.x + rc.w, pos.y},
+                                ImVec2{pos.x + rc.w, pos.y + rc.h},
+                                ImVec2{pos.x, pos.y + rc.h},
+                                ImVec2{uv0.x, uv1.y},
+                                ImVec2{uv0.x, uv0.y},
+                                ImVec2{uv1.x, uv0.y},
+                                ImVec2{uv1.x, uv1.y},
+                                IM_COL32_WHITE);
+        ImGui::EndChild();
     } else {
-        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "sprite has no image");
+        ImGui::Image(
+                tex_id,
+                ImVec2{rc.w, rc.h},
+                ImVec2{uv0.x, uv0.y},
+                ImVec2{uv1.x, uv1.y}
+        );
     }
 }
 

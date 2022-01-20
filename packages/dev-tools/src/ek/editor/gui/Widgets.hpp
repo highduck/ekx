@@ -26,7 +26,7 @@ struct TextLayerEffect;
 
 void guiTextLayerEffect(TextLayerEffect& layer);
 
-void guiSprite(const Sprite& sprite);
+void guiSprite(const Sprite* sprite);
 
 void guiFont(const Font& font);
 

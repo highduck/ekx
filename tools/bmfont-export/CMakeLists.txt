@@ -29,6 +29,7 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC pugixml
         PUBLIC freetype
         PUBLIC stb
+        PUBLIC ekx::std
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

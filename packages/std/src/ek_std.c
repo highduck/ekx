@@ -3,16 +3,17 @@
 #include "std/bitset.c.h"
 #include "std/buf.c.h"
 #include "std/log.c.h"
-#include "std/murmur.c.h"
 #include "std/print.c.h"
 #include "std/string.c.h"
 #include "std/time.c.h"
 #include "std/utf8.c.h"
 
 #include <ek/rnd.c>
-#include <ek/ref.c>
 #include <ek/ids.c>
 #include <ek/math.c>
+#include <ek/rr.c>
+#include <ek/hash/murmur.c>
+#include <ek/hash/hsp.c>
 
 #ifdef __EMSCRIPTEN__
 #include "std/sparse_array.c.h"

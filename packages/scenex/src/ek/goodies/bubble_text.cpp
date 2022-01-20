@@ -54,7 +54,7 @@ void BubbleText::updateAll() {
     }
 }
 
-ecs::EntityApi BubbleText::create(const char* fontName, const String& text, vec2_t pos, float delay) {
+ecs::EntityApi BubbleText::create(string_hash_t fontName, const String& text, vec2_t pos, float delay) {
     auto e = createNode2D();
     auto& c = e.assign<BubbleText>();
     c.delay = delay;

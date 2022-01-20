@@ -12,7 +12,7 @@ struct DestroyTimer {
     static void updateAll();
 };
 
-ECX_TYPE(8, DestroyTimer);
+
 
 void destroyDelay(ecs::EntityApi e, float delay = 0.0f, TimeLayer timer = {});
 

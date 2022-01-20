@@ -13,7 +13,7 @@
 #include <ek/assert.h>
 #include <ek/time.h>
 #include <ek/util/ServiceLocator.hpp>
-#include <ek/audio/audio.hpp>
+#include <ek/audio.h>
 #include <ek/util/Signal.hpp>
 #include <utility>
 #include "profiler.hpp"
@@ -32,16 +32,13 @@ class Asset;
 
 class FrameTimer final {
 public:
-    double prev_frame_high_res_ts = 0.0;
     double deltaTime = 0.0;
     uint64_t frameIndex = 0;
 
-    double deltas[256] = {};
-    uint64_t deltas_num = 0;
-
     double update();
 
-    uint64_t timer_ = ek_ticks(nullptr);
+    double app_fts_prev = 0.0;
+    uint64_t stopwatch = ek_ticks(nullptr);
 };
 
 
@@ -124,7 +121,7 @@ inline void run_app() {
 #endif
 
     // audio should be initialized before "Resume" event, so the best place is "On Create" event
-    auph_setup();
+    audio_setup();
 
     ek_app.on_ready = []{Locator::create<basic_application, T>();};
     ek_app.on_frame = launcher_on_frame;

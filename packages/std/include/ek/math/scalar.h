@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #define MATH_PI (3.141592653589793238462643383279502884f)
-#define MATH_TAU ( MATH_PI * 2 )
+#define MATH_TAU ( MATH_PI * 2.0f )
 #define MATH_F32_EPSILON (1.0e-6f)
 #define MATH_F64_EPSILON (1.0e-8)
 

@@ -13,6 +13,8 @@ class SGBuilder : private NoCopyAssign {
 public:
     const Doc& doc;
     ExportItem library;
+
+    // Map export public linkage class name to internal symbol name
     std::unordered_map<String, String> linkages;
 
 private:
@@ -52,7 +54,7 @@ public:
     ExportItem* addElementToDrawingLayer(ExportItem* item, const Element& el);
 
 private:
-    [[nodiscard]] bool isInLinkages(const String& id) const;
+    [[nodiscard]] bool isInLinkages(const string_hash_t id) const;
 
     void processTimeline(const Element& Element, ExportItem* PItem);
 };

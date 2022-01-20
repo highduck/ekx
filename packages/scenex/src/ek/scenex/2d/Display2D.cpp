@@ -11,9 +11,9 @@ namespace ek {
 IDrawable2D::~IDrawable2D() = default;
 
 void Quad2D::draw() {
-    const Sprite* spr = src.get();
-    if (spr) {
-        const sg_image image = ek_ref_content(sg_image, spr->image_id);
+    const Sprite* spr = &REF_RESOLVE(res_sprite, src);
+    if (spr->state & SPRITE_LOADED) {
+        const sg_image image = REF_RESOLVE(res_image, spr->image_id);
         if (image.id) {
             canvas_set_image_region(image, spr->tex);
         }
@@ -34,28 +34,31 @@ bool Quad2D::hitTest(vec2_t point) const {
 /** Sprite2D **/
 Sprite2D::Sprite2D() = default;
 
-Sprite2D::Sprite2D(const char* spriteId) :
-        src{spriteId} {
+Sprite2D::Sprite2D(string_hash_t spriteId) :
+        src{REF_NAME(res_sprite, spriteId)} {
 }
 
 void Sprite2D::draw() {
     if (!src) {
         return;
     }
-    src->draw();
+    const Sprite* sprite = &REF_RESOLVE(res_sprite, src);
+    ::ek::draw(sprite);
 }
 
 rect_t Sprite2D::getBounds() const {
     if (src) {
-        return src->rect;
+        const Sprite* sprite = &REF_RESOLVE(res_sprite, src);
+        return sprite->rect;
     }
-    return (rect_t){};
+    return (rect_t) {};
 }
 
 bool Sprite2D::hitTest(vec2_t point) const {
     if (rect_contains(getBounds(), point)) {
         if (hit_pixels && src) {
-            return src->hit_test(point);
+            const Sprite* sprite = &REF_RESOLVE(res_sprite, src);
+            return ::ek::hit_test(sprite, point);
         }
         return true;
     }
@@ -66,8 +69,8 @@ bool Sprite2D::hitTest(vec2_t point) const {
 
 NinePatch2D::NinePatch2D() = default;
 
-NinePatch2D::NinePatch2D(const char* spriteId, rect_t aScaleGrid) :
-        src{spriteId},
+NinePatch2D::NinePatch2D(string_hash_t spriteId, rect_t aScaleGrid) :
+        src{REF_NAME(res_sprite, spriteId)},
         scale_grid{aScaleGrid} {
 }
 
@@ -75,29 +78,29 @@ void NinePatch2D::draw() {
     if (!src) {
         return;
     }
-    auto& spr = *src;
+    auto* spr = &REF_RESOLVE(res_sprite, src);
     canvas_save_matrix();
     canvas_scale(1.0f / scale);
     // TODO: rotated
     rect_t target = manual_target;
     if (rect_is_empty(target)) {
-        target = rect_scale(rect_expand(spr.rect, -1), scale);
+        target = rect_scale(rect_expand(spr->rect, -1), scale);
     }
-    spr.draw_grid(scale_grid, target);
+    ek::draw_grid(spr, scale_grid, target);
     canvas_restore_matrix();
 }
 
 rect_t NinePatch2D::getBounds() const {
     if (src) {
-        return src->rect;
+        return REF_RESOLVE(res_sprite, src).rect;
     }
-    return (rect_t){};
+    return (rect_t) {};
 }
 
 bool NinePatch2D::hitTest(vec2_t point) const {
     if (rect_contains(getBounds(), point)) {
         if (hit_pixels && src) {
-            return src->hit_test(point);
+            return hit_test(&REF_RESOLVE(res_sprite, src), point);
         }
         return true;
     }
@@ -108,7 +111,7 @@ bool NinePatch2D::hitTest(vec2_t point) const {
 
 Text2D::Text2D() : Drawable2D<Text2D>(),
                    text{},
-                   format{"mini", 16.0f} {
+                   format{H("mini"), 16.0f} {
 
 }
 
@@ -237,18 +240,18 @@ rect_t Bounds2D::getScreenRect(mat3x2_t viewMatrix, mat3x2_t worldMatrix) const 
 //// arc
 
 void Arc2D::draw() {
-    Res<Sprite> f{sprite};
-    if (!f) {
+    if (!sprite) {
         return;
     }
 
-    const sg_image image = ek_ref_content(sg_image, f->image_id);
+    const Sprite* spr = &REF_RESOLVE(res_sprite, sprite);
+    const sg_image image = REF_RESOLVE(res_image, spr->image_id);
     if (!image.id) {
         return;
     }
 
     canvas_set_image(image);
-    const rect_t tex = f->tex;
+    const rect_t tex = spr->tex;
     canvas_set_image_rect({RECT_CENTER_X(tex), tex.y, 0.0f, tex.h});
 
     float off = -0.5f * MATH_PI;
