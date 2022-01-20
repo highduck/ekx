@@ -1,7 +1,7 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-#include <cmath>
+//#define _USE_MATH_DEFINES
+//#include <cmath>
 
 #include "types.h"
 
@@ -72,12 +72,10 @@ inline rect_t extend_filter_rect(const rect_t rect, const Filter& filter) {
     switch (filter.type) {
         case FilterType::Glow:
         case FilterType::Shadow: {
-            const auto rads = (float)(filter.angle * M_PI / 180.0);
-            const auto offsetX = filter.distance * cosf(rads);
-            const auto offsetY = filter.distance * sinf(rads);
+            const vec2_t offset = vec2_cs(to_radians(filter.angle));
             auto r2 = extend_blur_rect(res, filter);
-            r2.x += offsetX;
-            r2.y += offsetY;
+            r2.x += offset.x;
+            r2.y += offset.y;
             res = combineBounds(res, r2);
         }
             break;
@@ -331,11 +329,9 @@ void apply(Bitmap& bitmap, const Filter& filter, const irect_t bounds) {
             break;
         case FilterType::Shadow: {
             Bitmap tmp{bitmap.w, bitmap.h};
-            ivec2_t offset{
-                    static_cast<int>(filter.distance * cos(filter.angle)),
-                    static_cast<int>(filter.distance * sin(filter.angle))
-            };
-            scroll(bitmap, tmp, offset);
+            vec2_t offset = filter.distance * vec2_cs(to_radians(filter.angle));
+            ivec2_t ioffset = {{(int)offset.x, (int)offset.y}};
+            scroll(bitmap, tmp, ioffset);
             blur(tmp, filter);
             apply_strength(tmp, convert_strength(filter.strength));
             apply_color(tmp, filter.color0);
