@@ -12,7 +12,9 @@ namespace ek {
 /** GameScreen component **/
 GameScreen& GameScreen::init(ecs::EntityApi e, string_hash_t name) {
     auto& node = e.get<Node>();
-    node.tag = name;
+    if(name) {
+        node.tag = name;
+    }
     node.setVisible(false);
     node.setTouchable(false);
     return e.reassign<GameScreen>();
@@ -142,7 +144,7 @@ ecs::EntityApi GameScreenManager::findScreen(string_hash_t name) const {
     if(e && e.has<GameScreen>()) {
         return e;
     }
-    EK_DEBUG("could not find screen: %u (%s)", name, hsp_get(name));
+    EK_DEBUG("could not find screen %s (%08X)", hsp_get(name), name);
     return 0;
 }
 
