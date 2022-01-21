@@ -26,9 +26,9 @@ struct TextLayerEffect;
 
 void guiTextLayerEffect(TextLayerEffect& layer);
 
-void guiSprite(const Sprite* sprite);
+void guiSprite(const sprite_t* sprite);
 
-void guiFont(const Font& font);
+void guiFont(const Font* font);
 
 String getDebugNodePath(ecs::EntityApi e);
 

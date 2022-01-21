@@ -1,11 +1,13 @@
 #pragma once
 
 #include <ek/math.h>
-#include <ek/util/Type.hpp>
+#include <ek/rr.h>
 
 namespace ek {
 
 struct Material3D {
+    // for c++ currently we are auto init bulk data, so this header is for `rr` debug checks
+    uint32_t zero_header = 0;
     constexpr static float k = 0.8f;
     vec3_t ambient = vec3(k, k, k);
     vec3_t diffuse = vec3(k, k, k);
@@ -20,8 +22,15 @@ struct Material3D {
     }
 };
 
-EK_DECLARE_TYPE(Material3D);
-EK_TYPE_INDEX(Material3D, 9);
-
 }
+
+struct res_material3d {
+    string_hash_t names[32];
+    ek::Material3D data[32];
+    rr_man_t rr;
+};
+
+extern struct res_material3d res_material3d;
+
+void setup_res_material3d(void);
 

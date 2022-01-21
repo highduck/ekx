@@ -19,6 +19,8 @@ struct res_audio {
 
 extern struct res_audio res_audio;
 
+#define R_AUDIO(name) REF_NAME(res_audio, name)
+
 #ifdef __cplusplus
 }
 #endif

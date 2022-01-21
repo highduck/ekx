@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FontImplBase.hpp"
-#include <ek/util/Res.hpp>
+
 #include <ek/math.h>
 #include <ek/ds/Hash.hpp>
 #include <ek/canvas.h>
@@ -45,7 +45,7 @@ public:
 
     float baseFontSize;
     float dpiScale;
-    Res<DynamicAtlas> atlas;
+    R(dynamic_atlas_ptr) atlas;
     unsigned atlasVersion = 0;
     Hash<Glyph> map;
     uint64_t effectKeyBits = 0;

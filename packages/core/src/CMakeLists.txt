@@ -10,11 +10,8 @@ add_library(${PROJECT_NAME} STATIC
         ek/serialize/types.hpp
         ek/serialize/serialize.hpp
 
-        ek/util/Res.hpp
         ek/util/ServiceLocator.hpp
         ek/util/Signal.hpp
-        ek/util/Platform.hpp
-        ek/util/NoCopyAssign.hpp
         ek/util/StringUtil.hpp
         ek/util/Path.hpp
 

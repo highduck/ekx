@@ -3,16 +3,20 @@
 #include <ek/canvas.h>
 #include "FontImplBase.hpp"
 
+struct res_font res_font;
+
+void setup_res_font(void) {
+    struct res_font* R = &res_font;
+    rr_man_t* rr = &R->rr;
+
+    rr->names = R->names;
+    rr->data = R->data;
+    rr->max = sizeof(R->data) / sizeof(R->data[0]);
+    rr->num = 1;
+    rr->data_size = sizeof(R->data[0]);
+}
+
 namespace ek {
-
-Font::Font(FontImplBase* impl_) :
-        impl{impl_} {
-
-}
-
-Font::~Font() {
-    delete impl;
-}
 
 void Font::draw(const char* text,
                 float size,
@@ -29,7 +33,7 @@ void Font::draw(const char* text,
 
     uint32_t prev_image_id = SG_INVALID_ID;
     Glyph gdata;
-    for(; *text; ++text) {
+    for (; *text; ++text) {
         char code = *text;
         if (code == '\n') {
             current.x = start.x;
@@ -47,15 +51,15 @@ void Font::draw(const char* text,
                 gdata.rect = rect_scale_f(gdata.rect, size);
                 if (gdata.rotated) {
                     canvas_quad_rotated(gdata.rect.x + current.x,
-                                         gdata.rect.y + current.y,
-                                         gdata.rect.w,
-                                         gdata.rect.h);
+                                        gdata.rect.y + current.y,
+                                        gdata.rect.w,
+                                        gdata.rect.h);
 
                 } else {
                     canvas_quad(gdata.rect.x + current.x,
-                                 gdata.rect.y + current.y,
-                                 gdata.rect.w,
-                                 gdata.rect.h);
+                                gdata.rect.y + current.y,
+                                gdata.rect.w,
+                                gdata.rect.h);
                 }
             }
 
@@ -88,29 +92,42 @@ FontType Font::getFontType() const {
     return impl->getFontType();
 }
 
-FontImplBase* Font::getImpl() {
-    return impl;
-}
-
-const FontImplBase* Font::getImpl() const {
-    return impl;
-}
-
 bool Font::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
-    return impl->getGlyph(codepoint, outGlyph) ||
-           (fallback && fallback->getGlyph(codepoint, outGlyph));
+    if (impl->getGlyph(codepoint, outGlyph)) {
+        return true;
+    }
+    if (fallback) {
+        auto* fb = &REF_RESOLVE(res_font, fallback);
+        if (fb->getGlyph(codepoint, outGlyph)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void Font::setBlur(float radius, int iterations, int strengthPower) {
     impl->setBlur(radius, iterations, strengthPower);
     if (fallback) {
-        fallback->setBlur(radius, iterations, strengthPower);
+        auto* fb = &REF_RESOLVE(res_font, fallback);
+        fb->setBlur(radius, iterations, strengthPower);
     }
 }
 
 bool Font::getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph) {
-    return impl->getGlyphMetrics(codepoint, outGlyph) ||
-           (fallback && fallback->getGlyphMetrics(codepoint, outGlyph));
+    if (impl->getGlyphMetrics(codepoint, outGlyph)) {
+        return true;
+    }
+    if (fallback) {
+        auto* fb = &REF_RESOLVE(res_font, fallback);
+        if (fb->getGlyphMetrics(codepoint, outGlyph)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Font::setFallbackFont(string_hash_t fallbackFont) {
+    fallback = R_FONT(fallbackFont);
 }
 
 }

@@ -116,7 +116,7 @@ public:
     // max width
     float width = 20.0f;
     float minWidth = 5.0f;
-    REF_TO(Sprite) sprite = REF_NAME(res_sprite, H("empty"));
+    R(sprite_t) sprite = R_SPRITE_EMPTY;
 };
 
 EK_TYPE_INDEX_T(IDrawable2D, TrailRenderer2D, IDrawable2D_TrailRenderer2D);

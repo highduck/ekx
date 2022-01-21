@@ -1,11 +1,11 @@
 #pragma once
 
 #include <ek/ds/Array.hpp>
-#include <ek/util/NoCopyAssign.hpp>
-#include <ek/util/Type.hpp>
 #include <ek/math.h>
 #include <cstring>
 #include <sokol_gfx.h>
+#include <ek/hash.h>
+#include <ek/rr.h>
 
 namespace ek {
 
@@ -14,7 +14,7 @@ struct DynamicAtlasSprite {
     sg_image image = {0};
 };
 
-class DynamicAtlas : private NoCopyAssign {
+class DynamicAtlas {
 public:
     class Page;
 
@@ -44,8 +44,21 @@ public:
 private:
 };
 
-EK_DECLARE_TYPE(DynamicAtlas);
-EK_TYPE_INDEX(DynamicAtlas, 6);
-
 }
+
+typedef ek::DynamicAtlas* dynamic_atlas_ptr;
+
+struct res_dynamic_atlas {
+    string_hash_t names[16];
+    dynamic_atlas_ptr data[16];
+    rr_man_t rr;
+};
+
+extern struct res_dynamic_atlas res_dynamic_atlas;
+
+void setup_res_dynamic_atlas(void);
+void update_res_dynamic_atlas(void);
+
+#define R_DYNAMIC_ATLAS(name) REF_NAME(res_dynamic_atlas, name)
+
 

@@ -8,7 +8,17 @@
 
 namespace ek {
 
-StaticStorage<TextEngineSharedContext> gTextEngine{};
+TextEngineSharedContext* gTextEngine = nullptr;
+
+void setup_text_engine(void) {
+    EK_ASSERT(!gTextEngine && "double init");
+    gTextEngine = new TextEngineSharedContext();
+}
+
+TextEngineSharedContext* get_text_engine(void) {
+    EK_ASSERT(gTextEngine && "setup first");
+    return gTextEngine;
+}
 
 void TextBlockInfo::Line::updateSize(float length, float height) {
     if (size.x < length) {
@@ -77,19 +87,23 @@ void TextEngine::draw(const char* text) {
     if (!format.font) {
         return;
     }
-    auto& info = gTextEngine.get().textBlockInfo;
+    auto& info = get_text_engine()->textBlockInfo;
     getTextSize(text, info);
     drawWithBlockInfo(text, info);
 }
 
+Font* get_font_data(R(Font) ref) {
+    return ref ? &REF_RESOLVE(res_font, ref) : nullptr;
+}
+
 void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) {
-    auto font = format.font;
+    const Font* font = get_font_data(format.font);
     if (!font) {
         return;
     }
     //auto alignment = format.alignment;
 
-    canvas_push_program(res_shader.data[RES_SHADER_ALPHA_MAP]);
+    canvas_push_program(res_shader.data[R_SHADER_ALPHA_MAP]);
     // render effects first
     for (int i = format.layersCount - 1; i >= 0; --i) {
         auto& layer = format.layers[i];
@@ -107,10 +121,11 @@ void TextEngine::drawWithBlockInfo(const char* text, const TextBlockInfo& info) 
 }
 
 void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const TextBlockInfo& info) const {
-    auto font = format.font;
+    Font* font = get_font_data(format.font);
     if (!font) {
         return;
     }
+
     auto alignment = format.alignment;
     auto size = format.size;
     auto letterSpacing = format.letterSpacing;
@@ -150,14 +165,14 @@ void TextEngine::drawLayer(const char* text, const TextLayerEffect& layer, const
                     gdata.rect = rect_translate(rect_scale_f(gdata.rect, size), current);
                     if (!gdata.rotated) {
                         canvas_quad(gdata.rect.x,
-                                     gdata.rect.y,
-                                     gdata.rect.w,
-                                     gdata.rect.h);
+                                    gdata.rect.y,
+                                    gdata.rect.w,
+                                    gdata.rect.h);
                     } else {
                         canvas_quad_rotated(gdata.rect.x,
-                                             gdata.rect.y,
-                                             gdata.rect.w,
-                                             gdata.rect.h);
+                                            gdata.rect.y,
+                                            gdata.rect.w,
+                                            gdata.rect.h);
                     }
                     // only for DEV mode
                     if (layer.showGlyphBounds) {
@@ -221,11 +236,11 @@ const char* TextEngineUtils::punctuations = ".,!?:";
 void TextEngine::getTextSize(const char* text, TextBlockInfo& info) const {
     info.reset();
 
-    if (!format.font) {
+    Font* font = get_font_data(format.font);
+    if (!font) {
         return;
     }
 
-    auto font = format.font;
     auto size = format.size;
     auto leading = format.leading;
     auto kerning = format.kerning;

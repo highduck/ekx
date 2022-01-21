@@ -95,20 +95,20 @@ ek_canvas_context canvas;
 static void canvas__resources_create(void) {
     EK_DEBUG("canvas: create default resources");
     const sg_backend backend = sg_query_backend();
-    res_shader.data[RES_SHADER_BLEND] = ek_shader_make(canvas_shader_desc(backend));
-    res_shader.data[RES_SHADER_ALPHA_MAP] = ek_shader_make(canvas_alpha_shader_desc(backend));
-    res_shader.data[RES_SHADER_SOLID_COLOR] = ek_shader_make(canvas_color_shader_desc(backend));
+    res_shader.data[R_SHADER_BLEND] = ek_shader_make(canvas_shader_desc(backend));
+    res_shader.data[R_SHADER_ALPHA_MAP] = ek_shader_make(canvas_alpha_shader_desc(backend));
+    res_shader.data[R_SHADER_SOLID_COLOR] = ek_shader_make(canvas_color_shader_desc(backend));
     res_shader.rr.num += 4;
 
-    res_image.data[RES_IMAGE_EMPTY] = ek_gfx_make_color_image(4, 4, 0xFFFFFFFFu);
+    res_image.data[R_IMAGE_EMPTY] = ek_gfx_make_color_image(4, 4, 0xFFFFFFFFu);
     res_image.rr.num += 2;
 }
 
 static void canvas__resources_destroy(void) {
-    sg_destroy_shader(res_shader.data[RES_SHADER_BLEND].shader);
-    sg_destroy_shader(res_shader.data[RES_SHADER_ALPHA_MAP].shader);
-    sg_destroy_shader(res_shader.data[RES_SHADER_SOLID_COLOR].shader);
-    sg_destroy_image(res_image.data[RES_IMAGE_EMPTY]);
+    sg_destroy_shader(res_shader.data[R_SHADER_BLEND].shader);
+    sg_destroy_shader(res_shader.data[R_SHADER_ALPHA_MAP].shader);
+    sg_destroy_shader(res_shader.data[R_SHADER_SOLID_COLOR].shader);
+    sg_destroy_image(res_image.data[R_IMAGE_EMPTY]);
 }
 
 static void canvas__reset_stack(void) {
@@ -259,7 +259,7 @@ void canvas_save_image(void) {
 }
 
 void canvas_set_empty_image(void) {
-    canvas.image[0] = res_image.data[RES_IMAGE_EMPTY];
+    canvas.image[0] = res_image.data[R_IMAGE_EMPTY];
     canvas.state |= EK_CANVAS_CHECK_IMAGE;
     canvas_set_image_rect(rect_01());
 }
@@ -270,7 +270,7 @@ void canvas_set_image(sg_image image_) {
 }
 
 void canvas_set_image_region(sg_image image_, const rect_t region) {
-    canvas.image[0] = image_.id ? image_ : res_image.data[RES_IMAGE_EMPTY];
+    canvas.image[0] = image_.id ? image_ : res_image.data[R_IMAGE_EMPTY];
     canvas.state |= EK_CANVAS_CHECK_IMAGE;
     canvas.uv[0] = region;
 }
@@ -287,7 +287,7 @@ void canvas_push_program(const ek_shader program_) {
 }
 
 void canvas_set_program(const ek_shader program_) {
-    canvas.shader[0] = program_.shader.id ? program_ : res_shader.data[RES_SHADER_BLEND];
+    canvas.shader[0] = program_.shader.id ? program_ : res_shader.data[R_SHADER_BLEND];
     canvas.state |= EK_CANVAS_CHECK_SHADER;
 }
 
@@ -719,8 +719,8 @@ void canvas_begin_ex(const rect_t viewport, const mat3x2_t view, sg_image render
     // reset all bits and set Active mode / dirty state flag
     canvas.state = EK_CANVAS_PASS_ACTIVE | EK_CANVAS_STATE_CHANGED;
 
-    canvas.image[0] = res_image.data[RES_IMAGE_EMPTY];
-    canvas.shader[0] = res_shader.data[RES_SHADER_BLEND];
+    canvas.image[0] = res_image.data[R_IMAGE_EMPTY];
+    canvas.shader[0] = res_shader.data[R_SHADER_BLEND];
     canvas.scissors[0] = viewport;
     canvas.matrix[0] = mat3x2_identity();
     canvas.color[0] = color2_identity();

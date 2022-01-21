@@ -1,11 +1,12 @@
 #include <ek/app.h>
-#include <ek/core.hpp>
+
 #include <ek/gfx.h>
 #include <ek/canvas.h>
 #include <ek/rnd.h>
 #include <ek/math.h>
 #include <ek/bitset.h>
 #include <ek/time.h>
+#include "ek/log.h"
 
 using namespace ek;
 
@@ -113,8 +114,10 @@ void on_frame() {
 }
 
 void ek_app_main() {
-    core::setup();
-    srand(ek_time_seed32());
+    log_init();
+    ek_time_init();
+    random_seed = ek_time_seed32();
+    srand(ek_time_seed32() + 1);
 
     ek_app.config.title = "rnd test";
     ek_app.on_frame = on_frame;

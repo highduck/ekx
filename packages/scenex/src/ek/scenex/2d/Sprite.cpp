@@ -2,8 +2,6 @@
 
 #include <ek/canvas.h>
 
-namespace ek {
-
 struct res_sprite res_sprite;
 
 void setup_res_sprite(void) {
@@ -13,11 +11,24 @@ void setup_res_sprite(void) {
     rr->names = R->names;
     rr->data = R->data;
     rr->max = sizeof(R->data) / sizeof(R->data[0]);
-    rr->num = 1;
+    rr->num = 1; //
     rr->data_size = sizeof(R->data[0]);
+
+    // init default empty sprite data
+    {
+        auto* spr = &res_sprite.data[R_SPRITE_EMPTY];
+        spr->state = SPRITE_LOADED;
+        spr->image_id = R_IMAGE_EMPTY;
+        spr->rect = rect_01();
+        spr->tex = rect_01();
+        res_sprite.names[R_SPRITE_EMPTY] = H("empty");
+        ++rr->num;
+    }
 }
 
 /**** draw routines ****/
+
+namespace ek {
 
 static uint16_t nine_patch_indices[] = {
         0, 1, 5, 5, 4, 0,
@@ -31,7 +42,7 @@ static uint16_t nine_patch_indices[] = {
         10, 10 + 1, 10 + 5, 10 + 5, 10 + 4, 10
 };
 
-bool select(const Sprite* sprite) {
+bool select(const sprite_t* sprite) {
     const sg_image image = REF_RESOLVE(res_image, sprite->image_id);
     if (image.id) {
         canvas_set_image_region(image, sprite->tex);
@@ -40,11 +51,11 @@ bool select(const Sprite* sprite) {
     return false;
 }
 
-void draw(const Sprite* sprite) {
+void draw(const sprite_t* sprite) {
     draw(sprite, sprite->rect);
 }
 
-void draw(const Sprite* sprite, const rect_t rc) {
+void draw(const sprite_t* sprite, const rect_t rc) {
     const sg_image image = REF_RESOLVE(res_image, sprite->image_id);
     if (image.id) {
         canvas_set_image(image);
@@ -57,7 +68,7 @@ void draw(const Sprite* sprite, const rect_t rc) {
     }
 }
 
-void draw_grid(const Sprite* sprite, const rect_t grid, const rect_t target) {
+void draw_grid(const sprite_t* sprite, const rect_t grid, const rect_t target) {
     const sg_image image = REF_RESOLVE(res_image, sprite->image_id);
     if (image.id == SG_INVALID_ID) {
         return;
@@ -121,7 +132,7 @@ void draw_grid(const Sprite* sprite, const rect_t grid, const rect_t target) {
     canvas_write_indices(nine_patch_indices, 9 * 6, 0);
 }
 
-bool hit_test(const Sprite* sprite, const vec2_t position) {
+bool hit_test(const sprite_t* sprite, const vec2_t position) {
     (void) position;
     const sg_image image = REF_RESOLVE(res_image, sprite->image_id);
     if (image.id) {

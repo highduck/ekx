@@ -19,10 +19,10 @@
 #include "profiler.hpp"
 #include "GameDisplay.hpp"
 #include "GameAppDispatcher.hpp"
-#include "../text/TextEngine.hpp"
 #include "RootAppListener.hpp"
+#include "ek/rnd.h"
 
-#include "ek/core.hpp"
+
 
 namespace ek {
 
@@ -106,10 +106,19 @@ EK_DECLARE_TYPE(basic_application);
 
 void launcher_on_frame();
 
+void setup_resource_managers();
+
 template<typename T>
 inline void run_app() {
-    ek::core::setup();
-    gTextEngine.initialize();
+    log_init();
+    ek_time_init();
+    ek_timers_init();
+
+    uint32_t seed = ek_time_seed32();
+    random_seed = seed++;
+    game_random_seed = seed;
+
+    setup_text_engine();
 
 #ifdef EK_DEV_TOOLS
     Editor::inspectorEnabled = true;
@@ -122,6 +131,9 @@ inline void run_app() {
 
     // audio should be initialized before "Resume" event, so the best place is "On Create" event
     audio_setup();
+
+    // setup resources before app constructor, for example because Profiler requires font id resolving
+    setup_resource_managers();
 
     ek_app.on_ready = []{Locator::create<basic_application, T>();};
     ek_app.on_frame = launcher_on_frame;

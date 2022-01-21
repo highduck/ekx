@@ -3,14 +3,14 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/data/SGFile.hpp>
 #include <ek/scenex/SceneFactory.hpp>
-#include <ek/util/Res.hpp>
+
 #include <ek/ds/String.hpp>
 #include "../base/TimeLayer.hpp"
 
 namespace ek {
 
 struct MovieClip {
-    Res<SGFile> library_asset;
+    R(SGFile) library_asset;
     string_hash_t movie_data_symbol = 0;
     const SGMovieData* data = nullptr;
     TimeLayer timer;
@@ -19,7 +19,7 @@ struct MovieClip {
     const SGMovieData* get_movie_data() const {
         const SGMovieData* result = data;
         if (!data && library_asset) {
-            auto* symbol_data = sg_get(*library_asset, movie_data_symbol);
+            auto* symbol_data = sg_get(&REF_RESOLVE(res_sg, library_asset), movie_data_symbol);
             if (symbol_data && !symbol_data->movie.empty()) {
                 result = &symbol_data->movie[0];
             }

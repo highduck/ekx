@@ -178,12 +178,15 @@ struct ShadowMapRes {
         sg_bindings bindings{};
         mat4_t mvp;
 
-        Res<StaticMesh> resMesh{};
+        R(StaticMesh) resMesh = 0;
         for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
             const auto& filter = e.get<MeshRenderer>();
             if (filter.castShadows && e.get_or_default<Node>().visible()) {
-                resMesh.setID(filter.mesh);
-                auto* mesh = resMesh.get_or(filter.meshPtr);
+                resMesh = R_MESH3D(filter.mesh);
+                auto* mesh = resMesh ? REF_RESOLVE(res_mesh3d, resMesh) : nullptr;
+                if(!mesh) {
+                    mesh = filter.meshPtr;
+                }
                 if (mesh) {
                     bindings.index_buffer = mesh->ib;
                     bindings.vertex_buffers[0] = mesh->vb;
@@ -269,7 +272,7 @@ struct RenderSkyBoxRes {
     }
 
     void render(const sg_image cubemap, const mat4_t& view, const mat4_t& projection) {
-        Res<StaticMesh> mesh{H("cube")};
+        StaticMesh* mesh = RES_NAME_RESOLVE(res_mesh3d, H("cube"));
         if (cubemap.id && mesh) {
             sg_apply_pipeline(pip);
 
@@ -314,13 +317,14 @@ RenderSystem3D::~RenderSystem3D() {
 }
 
 void RenderSystem3D::renderObjects(mat4_t proj, mat4_t view) {
-    const sg_image empty = res_image.data[RES_IMAGE_EMPTY];
+    const sg_image empty = res_image.data[R_IMAGE_EMPTY];
     main->bind.fs_images[SLOT_uImage0] = empty;
     main->bind.fs_images[SLOT_u_image_shadow_map] = shadows->rtColor;
 
     for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
         const auto& filter = e.get<MeshRenderer>();
-        auto* mesh = Res<StaticMesh>{filter.mesh}.get_or(filter.meshPtr);
+        auto* mesh = filter.mesh ? RES_NAME_RESOLVE(res_mesh3d, filter.mesh) : nullptr;
+        if(!mesh) mesh = filter.meshPtr;
         if (mesh && e.get_or_default<Node>().visible()) {
             mat4_t model = e.get<Transform3D>().world;
 //            mat3_t nm = mat3_transpose(mat3_inverse(mat4_get_mat3(&model)));
@@ -329,7 +333,7 @@ void RenderSystem3D::renderObjects(mat4_t proj, mat4_t view) {
 
             const mat4_t depth_mvp = mat4_mul(mat4_mul(shadows->projection, shadows->view), model);
 
-            const auto& material = *(Res<Material3D>{filter.material}.get_or(&defaultMaterial));
+            const auto& material = RES_NAME_RESOLVE(res_material3d, filter.material);
             vs_params_t params;
             memcpy(params.uModelViewProjection, mat4_mul(mat4_mul(proj, view), model).data, sizeof(mat4_t));
             memcpy(params.uModel, model.data, sizeof(mat4_t));
@@ -459,4 +463,32 @@ void RenderSystem3D::render(float width, float height) {
     skybox->render(REF_RESOLVE(res_image, cameraData.cubeMap), cameraView, cameraProjection);
 }
 
+}
+
+
+//// resources
+
+struct res_material3d res_material3d;
+struct res_mesh3d res_mesh3d;
+
+void setup_res_material3d(void) {
+    struct res_material3d* R = &res_material3d;
+    rr_man_t* rr = &R->rr;
+
+    rr->names = R->names;
+    rr->data = R->data;
+    rr->max = sizeof(R->data) / sizeof(R->data[0]);
+    rr->num = 1;
+    rr->data_size = sizeof(R->data[0]);
+}
+
+void setup_res_mesh3d(void) {
+    struct res_mesh3d* R = &res_mesh3d;
+    rr_man_t* rr = &R->rr;
+
+    rr->names = R->names;
+    rr->data = R->data;
+    rr->max = sizeof(R->data) / sizeof(R->data[0]);
+    rr->num = 1;
+    rr->data_size = sizeof(R->data[0]);
 }

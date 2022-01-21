@@ -1,4 +1,5 @@
-#pragma once
+#ifndef EK_BASE_TARGET_H
+#define EK_BASE_TARGET_H
 
 #if defined(__APPLE__)
 
@@ -37,3 +38,5 @@
 #endif
 
 #endif
+
+#endif // EK_BASE_TARGET_H

@@ -18,6 +18,9 @@ void initScene3D() {
     ECX_COMPONENT(MeshRenderer);
 
     Locator::create<RenderSystem3D>();
+
+    setup_res_material3d();
+    setup_res_mesh3d();
 }
 
 // onPreRender

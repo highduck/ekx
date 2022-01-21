@@ -3,20 +3,11 @@
 #include "FontImplBase.hpp"
 
 #include <ek/math.h>
-#include <ek/math.h>
-#include <ek/util/NoCopyAssign.hpp>
-#include <ek/serialize/serialize.hpp>
-#include <ek/util/Type.hpp>
-
-#include <ek/ds/String.hpp>
+#include <ek/rr.h>
 
 namespace ek {
 
-class Font : private NoCopyAssign {
-public:
-    explicit Font(FontImplBase* impl);
-
-    ~Font();
+struct Font {
 
     void draw(const char* text,
               float size,
@@ -30,25 +21,28 @@ public:
 
     [[nodiscard]] FontType getFontType() const;
 
-    [[nodiscard]] FontImplBase* getImpl();
-
-    [[nodiscard]] const FontImplBase* getImpl() const;
-
-    void setFallbackFont(Font* fallbackFont) {
-        fallback = fallbackFont;
-    }
+    void setFallbackFont(string_hash_t fallbackFont);
 
     bool getGlyph(uint32_t codepoint, Glyph& outGlyph);
 
     bool getGlyphMetrics(uint32_t codepoint, Glyph& outGlyph);
 
     void setBlur(float radius, int iterations, int strengthPower);
-private:
+
     FontImplBase* impl = nullptr;
-    Font* fallback = nullptr;
+    R(Font) fallback = 0;
 };
 
-EK_DECLARE_TYPE(Font);
-EK_TYPE_INDEX(Font, 3);
-
 }
+
+struct res_font {
+    string_hash_t names[16];
+    ek::Font data[16];
+    rr_man_t rr;
+};
+
+extern struct res_font res_font;
+
+void setup_res_font(void);
+
+#define R_FONT(name) REF_NAME(res_font, name)

@@ -223,7 +223,7 @@ ecs::EntityApi createBackQuad() {
     auto e = createNode2D(H("back"));
     auto& display = e.assign<Display2D>();
     display.makeDrawable<Quad2D>().setColor(COLOR_BLACK);
-    display.program = RES_SHADER_SOLID_COLOR;
+    display.program = R_SHADER_SOLID_COLOR;
     e.assign<LayoutRect>()
             .fill(true, true)
             .setInsetsMode(false);

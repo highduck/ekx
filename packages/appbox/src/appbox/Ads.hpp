@@ -1,7 +1,7 @@
 #pragma once
 
 #include <billing.hpp>
-#include <ek/util/Platform.hpp>
+#include <ek/core/target.h>
 #include <ek/scenex/app/GameAppListener.hpp>
 #include <ek/util/Type.hpp>
 #include <ek/ds/Pointer.hpp>

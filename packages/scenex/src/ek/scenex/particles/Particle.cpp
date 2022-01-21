@@ -73,7 +73,7 @@ void Particle::update_current_values() {
 
 rect_t Particle::get_bounds() {
     if (sprite) {
-        const Sprite* spr = &REF_RESOLVE(res_sprite, sprite);
+        const sprite_t* spr = &REF_RESOLVE(res_sprite, sprite);
         bounds = spr->rect;
     }
     return bounds;
@@ -86,7 +86,7 @@ void Particle::draw() {
     canvas_transform_pivot(position, vis_angle, scale, pivot);
     canvas_concat_color({color, offset});
     if (sprite) {
-        const Sprite* spr = &REF_RESOLVE(res_sprite, sprite);
+        const sprite_t* spr = &REF_RESOLVE(res_sprite, sprite);
         ::ek::draw(spr);
     }
     canvas_restore_transform();

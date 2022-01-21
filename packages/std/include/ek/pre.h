@@ -33,16 +33,16 @@
 //#define EK_STR_ALIGN_64(S) ((const char s[((sizeof (S) / 8) + 1) * 8]){S})
 #define EK_UTF8_NEW(UTF8) EK_STR_ALIGN_64(u8##UTF8)
 
-typedef uint8_t ek_u8;
-typedef uint16_t ek_u16;
-typedef uint32_t ek_u32;
-typedef uint64_t ek_u64;
-typedef int8_t ek_i8;
-typedef int16_t ek_i16;
-typedef int32_t ek_i32;
-typedef int64_t ek_i64;
-typedef float ek_f32;
-typedef double ek_f64;
+//typedef uint8_t ek_u8;
+//typedef uint16_t ek_u16;
+//typedef uint32_t ek_u32;
+//typedef uint64_t ek_u64;
+//typedef int8_t ek_i8;
+//typedef int16_t ek_i16;
+//typedef int32_t ek_i32;
+//typedef int64_t ek_i64;
+//typedef float ek_f32;
+//typedef double ek_f64;
 
 #define EK_PRAGMA(x) _Pragma(#x)
 

@@ -30,7 +30,7 @@ public:
     void disable_all();
 
 private:
-    REF_TO(auph_buffer) music_ = 0;
+    R(auph_buffer) music_ = 0;
     auph_voice musicVoice_{};
     float musicVolume_ = 1.0f;
     float musicPitch_ = 1.0f;

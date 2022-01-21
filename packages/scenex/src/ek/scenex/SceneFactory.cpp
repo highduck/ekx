@@ -1,5 +1,4 @@
 #include "SceneFactory.hpp"
-#include <ek/scenex/data/SGFile.hpp>
 
 #include <ek/serialize/streams.hpp>
 #include <ek/scenex/2d/Sprite.hpp>
@@ -12,8 +11,20 @@
 #include <ek/scenex/2d/UglyFilter2D.hpp>
 #include <ek/log.h>
 #include <ek/assert.h>
-#include <ek/util/Res.hpp>
 #include <ek/scenex/Localization.hpp>
+
+struct res_sg res_sg;
+
+void setup_res_sg(void) {
+    struct res_sg* R = &res_sg;
+    rr_man_t* rr = &R->rr;
+
+    rr->names = R->names;
+    rr->data = R->data;
+    rr->max = sizeof(R->data) / sizeof(R->data[0]);
+    rr->num = 1;
+    rr->data_size = sizeof(R->data[0]);
+}
 
 namespace ek {
 
@@ -36,25 +47,19 @@ ecs::EntityApi createNode2D(ecs::EntityApi parent, string_hash_t tag, int index)
     return e;
 }
 
-SGFile* sg_load(const void* data, uint32_t size) {
-    SGFile* sg = nullptr;
-
+void sg_load(SGFile* out, const void* data, uint32_t size) {
     if (size > 0) {
         input_memory_stream input{data, size};
         IO io{input};
-
-        sg = new SGFile();
-        io(*sg);
+        io(*out);
     } else {
         EK_ERROR("SCENE LOAD: empty buffer");
     }
-
-    return sg;
 }
 
-const SGNodeData* sg_get(const SGFile& sg, string_hash_t library_name) {
+const SGNodeData* sg_get(const SGFile* sg, string_hash_t library_name) {
     // TODO: optimize access!
-    for (auto& item: sg.library) {
+    for (auto& item: sg->library) {
         if (item.libraryName == library_name) {
             return &item;
         }
@@ -62,9 +67,7 @@ const SGNodeData* sg_get(const SGFile& sg, string_hash_t library_name) {
     return nullptr;
 }
 
-using SGFileRes = Res<SGFile>;
-
-void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
+void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
     if (data->movieTargetId >= 0) {
         entity.get_or_create<MovieClipTargetIndex>() = {data->movieTargetId};
     }
@@ -80,7 +83,7 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
         auto& node = entity.get<Node>();
         node.setTouchable(data->touchable);
         node.setVisible(data->visible);
-        if(data->name) {
+        if (data->name) {
             // override
             node.tag = data->name;
         }
@@ -168,7 +171,7 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, SGFileRes asset) {
     }
 }
 
-ecs::EntityApi create_and_merge(const SGFile& sg, SGFileRes asset,
+ecs::EntityApi create_and_merge(const SGFile* sg, R(SGFile) asset,
                                 const SGNodeData* data,
                                 const SGNodeData* over = nullptr) {
     auto entity = ecs::create<Node, Transform2D, WorldTransform2D>();
@@ -188,9 +191,9 @@ ecs::EntityApi create_and_merge(const SGFile& sg, SGFileRes asset,
     return entity;
 }
 
-void extend_bounds(const SGFile& file, const SGNodeData& data, aabb2_t* boundsBuilder,
+void extend_bounds(const SGFile* file, const SGNodeData& data, aabb2_t* boundsBuilder,
                    const mat3x2_t matrix) {
-    Sprite* spr = &REF_RESOLVE(res_sprite, data.sprite);
+    sprite_t* spr = &REF_RESOLVE(res_sprite, data.sprite);
     if (spr->state & SPRITE_LOADED) {
         *boundsBuilder = aabb2_add_transformed_rect(*boundsBuilder, spr->rect, matrix);
     }
@@ -202,11 +205,12 @@ void extend_bounds(const SGFile& file, const SGNodeData& data, aabb2_t* boundsBu
 
 ecs::EntityApi sg_create(string_hash_t library, string_hash_t name, ecs::EntityApi parent) {
     ecs::EntityApi result = nullptr;
-    SGFileRes file{library};
-    if (file) {
-        const SGNodeData* data = sg_get(*file, name);
+    R(SGFile) file_ref = R_SG(library);
+    if (file_ref) {
+        const SGFile* file = &REF_RESOLVE(res_sg, file_ref);
+        const SGNodeData* data = sg_get(file, name);
         if (data) {
-            result = create_and_merge(*file, file, data);
+            result = create_and_merge(file, file_ref, data);
             if (result && parent) {
                 appendStrict(parent, result);
             }
@@ -220,12 +224,13 @@ ecs::EntityApi sg_create(string_hash_t library, string_hash_t name, ecs::EntityA
 }
 
 rect_t sg_get_bounds(string_hash_t library, string_hash_t name) {
-    SGFileRes file{library};
-    if (file) {
-        const SGNodeData* data = sg_get(*file, name);
+    R(SGFile) file_ref = R_SG(library);
+    if (file_ref) {
+        SGFile* file = &REF_RESOLVE(res_sg, file_ref);
+        const SGNodeData* data = sg_get(file, name);
         if (data) {
             aabb2_t bb = aabb2_empty();
-            extend_bounds(*file, *data, &bb, data->matrix);
+            extend_bounds(file, *data, &bb, data->matrix);
             return aabb2_get_rect(bb);
         }
     }

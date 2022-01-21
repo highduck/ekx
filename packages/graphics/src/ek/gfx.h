@@ -109,8 +109,9 @@ struct res_image {
 
 extern struct res_shader res_shader;
 extern struct res_image res_image;
-//ek_ref_declare(ek_shader)
-//ek_ref_declare(sg_image)
+
+#define R_IMAGE(name) REF_NAME(res_image, name)
+#define R_SHADER(name) REF_NAME(res_shader, name)
 
 void ek_gfx_res_setup();
 

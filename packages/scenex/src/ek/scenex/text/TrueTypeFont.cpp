@@ -26,7 +26,7 @@ TrueTypeFont::TrueTypeFont(float dpiScale_, float fontSize, string_hash_t dynami
         FontImplBase(FontType::TrueType),
         baseFontSize{fontSize},
         dpiScale{dpiScale_},
-        atlas{dynamicAtlasName} {
+        atlas{R_DYNAMIC_ATLAS(dynamicAtlasName)} {
 }
 
 TrueTypeFont::~TrueTypeFont() {
@@ -55,15 +55,16 @@ void TrueTypeFont::unload() {
 // store pre-rendered glyph for baseFontSize and upscaled by dpiScale
 // quad scale just multiplier to get fontSize relative to baseFontSize
 bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
-    if (!loaded_) {
+    if (!loaded_ || !atlas) {
         return false;
     }
 
-    if (!atlas) {
+    dynamic_atlas_ptr atlas_instance = REF_RESOLVE(res_dynamic_atlas, atlas);
+    if (!atlas_instance) {
         resetGlyphs();
         // not ready to fill dynamic atlas :(
         return false;
-    } else if (atlasVersion != atlas->version) {
+    } else if (atlasVersion != atlas_instance->version) {
         resetGlyphs();
     }
 
@@ -117,9 +118,9 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
                               dpiScale * scale, dpiScale * scale, glyphIndex);
 
         ek_bitmap_blur_gray(bmp, bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_,
-                              strengthPower_);
+                            strengthPower_);
 
-        auto sprite = atlas->addBitmap(bitmapWidth, bitmapHeight, bmp, bmpSize);
+        auto sprite = atlas_instance->addBitmap(bitmapWidth, bitmapHeight, bmp, bmpSize);
         //free(bmp);
 
         glyph.image = sprite.image;
@@ -245,7 +246,10 @@ float TrueTypeFont::getKerning(uint32_t codepoint1, uint32_t codepoint2) {
 void TrueTypeFont::resetGlyphs() {
     map.clear();
     if (atlas) {
-        atlasVersion = atlas->version;
+        dynamic_atlas_ptr atlas_instance = REF_RESOLVE(res_dynamic_atlas, atlas);
+        if (atlas_instance) {
+            atlasVersion = atlas_instance->version;
+        }
     }
 }
 

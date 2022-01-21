@@ -23,7 +23,7 @@ struct ParticleEmitter2D {
     vec2_t position = {};
     vec2_t velocity = {};
     SpawnCallback* on_spawn = nullptr;
-    REF_TO(ParticleDecl) particle;
+    R(ParticleDecl) particle;
     ecs::EntityRef layer;
     float time = 0.0f;
     TimeLayer timer;

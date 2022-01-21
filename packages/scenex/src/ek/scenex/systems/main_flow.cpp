@@ -61,31 +61,12 @@ void scene_post_update(ecs::EntityApi root) {
 }
 
 void scene_render(ecs::EntityApi root) {
-//    FixedArray<Atlas*, 64> atlases;
-    for (auto& it: ResourceDB::list(TypeIndex<DynamicAtlas>::value)) {
-        auto* content = it.content;
-        if (content) {
-            ((DynamicAtlas*) content)->invalidate();
-        }
-    }
-
-    for (auto& it: ResourceDB::list(TypeIndex<Atlas>::value)) {
-        auto* content = it.content;
-        if (content) {
-            ((Atlas*)content)->pollLoading();
-        }
-    }
+    update_res_dynamic_atlas();
+    update_res_atlas();
 
     Camera2D::render();
 //    drawScene2D(root);
     //drawSceneGizmos(root);
-
-//    for (auto& it : Res<DynamicAtlas>::map()) {
-//        auto* atlas = const_cast<DynamicAtlas*>(it.second->content);
-//        if (atlas) {
-//            atlas->reset();
-//        }
-//    }
 }
 
 }

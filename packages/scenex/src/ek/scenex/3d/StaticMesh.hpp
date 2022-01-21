@@ -44,10 +44,16 @@ struct MeshRenderer /* Component */ {
     bool receiveShadows = true;
 };
 
-
-
-EK_DECLARE_TYPE(StaticMesh);
-EK_TYPE_INDEX(StaticMesh, 5);
-
 }
 
+struct res_mesh3d {
+    string_hash_t names[32];
+    ek::StaticMesh* data[32];
+    rr_man_t rr;
+};
+
+extern struct res_mesh3d res_mesh3d;
+
+void setup_res_mesh3d(void);
+
+#define R_MESH3D(name) REF_NAME(res_mesh3d, name)

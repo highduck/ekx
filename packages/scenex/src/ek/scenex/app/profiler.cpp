@@ -35,7 +35,7 @@ using namespace std;
 
 void drawText(const Profiler::Track& track, TextFormat textFormat) {
     textFormat.leading = 1;
-    auto& textEngine = gTextEngine.get().engine;
+    auto& textEngine = get_text_engine()->engine;
     textEngine.format = textFormat;
     textEngine.position = {2.0f, 2.0f + textFormat.size};
     textEngine.drawFormat(track.titleFormat, track.name, (int)track.value);

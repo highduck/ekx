@@ -2,7 +2,7 @@
 #include <ek/canvas.h>
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/text/Font.hpp>
-#include <ek/util/Res.hpp>
+
 #include <ek/scenex/text/TextEngine.hpp>
 #include <ek/scenex/Localization.hpp>
 
@@ -11,7 +11,7 @@ namespace ek {
 IDrawable2D::~IDrawable2D() = default;
 
 void Quad2D::draw() {
-    const Sprite* spr = &REF_RESOLVE(res_sprite, src);
+    const sprite_t* spr = &REF_RESOLVE(res_sprite, src);
     if (spr->state & SPRITE_LOADED) {
         const sg_image image = REF_RESOLVE(res_image, spr->image_id);
         if (image.id) {
@@ -35,20 +35,20 @@ bool Quad2D::hitTest(vec2_t point) const {
 Sprite2D::Sprite2D() = default;
 
 Sprite2D::Sprite2D(string_hash_t spriteId) :
-        src{REF_NAME(res_sprite, spriteId)} {
+        src{R_SPRITE(spriteId)} {
 }
 
 void Sprite2D::draw() {
     if (!src) {
         return;
     }
-    const Sprite* sprite = &REF_RESOLVE(res_sprite, src);
+    const sprite_t* sprite = &REF_RESOLVE(res_sprite, src);
     ::ek::draw(sprite);
 }
 
 rect_t Sprite2D::getBounds() const {
     if (src) {
-        const Sprite* sprite = &REF_RESOLVE(res_sprite, src);
+        const sprite_t* sprite = &REF_RESOLVE(res_sprite, src);
         return sprite->rect;
     }
     return (rect_t) {};
@@ -57,7 +57,7 @@ rect_t Sprite2D::getBounds() const {
 bool Sprite2D::hitTest(vec2_t point) const {
     if (rect_contains(getBounds(), point)) {
         if (hit_pixels && src) {
-            const Sprite* sprite = &REF_RESOLVE(res_sprite, src);
+            const sprite_t* sprite = &REF_RESOLVE(res_sprite, src);
             return ::ek::hit_test(sprite, point);
         }
         return true;
@@ -70,7 +70,7 @@ bool Sprite2D::hitTest(vec2_t point) const {
 NinePatch2D::NinePatch2D() = default;
 
 NinePatch2D::NinePatch2D(string_hash_t spriteId, rect_t aScaleGrid) :
-        src{REF_NAME(res_sprite, spriteId)},
+        src{R_SPRITE(spriteId)},
         scale_grid{aScaleGrid} {
 }
 
@@ -132,7 +132,7 @@ float findTextScale(vec2_t textSize, rect_t rc) {
 }
 
 void adjustFontSize(TextEngine& engine, const char* text, rect_t bounds) {
-    auto& info = gTextEngine.get().textBlockInfo;
+    auto& info = get_text_engine()->textBlockInfo;
     const float minFontSize = 10.0f;
 
     engine.format.allowLetterWrap = false;
@@ -158,8 +158,8 @@ void adjustFontSize(TextEngine& engine, const char* text, rect_t bounds) {
 }
 
 void Text2D::draw() {
-    auto& textDrawer = gTextEngine.get().engine;
-    auto& blockInfo = gTextEngine.get().textBlockInfo;
+    auto& textDrawer = get_text_engine()->engine;
+    auto& blockInfo = get_text_engine()->textBlockInfo;
     textDrawer.format = format;
     textDrawer.maxWidth = format.wordWrap ? rect.w : 0.0f;
     if (fillColor.a > 0) {
@@ -203,8 +203,8 @@ rect_t Text2D::getBounds() const {
 }
 
 rect_t Text2D::getTextBounds() const {
-    auto& textDrawer = gTextEngine.get().engine;
-    auto& blockInfo = gTextEngine.get().textBlockInfo;
+    auto& textDrawer = get_text_engine()->engine;
+    auto& blockInfo = get_text_engine()->textBlockInfo;
     textDrawer.format = format;
 
     const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
@@ -244,7 +244,7 @@ void Arc2D::draw() {
         return;
     }
 
-    const Sprite* spr = &REF_RESOLVE(res_sprite, sprite);
+    const sprite_t* spr = &REF_RESOLVE(res_sprite, sprite);
     const sg_image image = REF_RESOLVE(res_image, spr->image_id);
     if (!image.id) {
         return;

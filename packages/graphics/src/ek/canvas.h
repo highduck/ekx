@@ -76,10 +76,10 @@ typedef struct ek_canvas_pipeline_item {
 
 /// Default resources
 enum {
-    RES_IMAGE_EMPTY = 1,
-    RES_SHADER_BLEND = 1,
-    RES_SHADER_ALPHA_MAP = 2,
-    RES_SHADER_SOLID_COLOR = 3,
+    R_IMAGE_EMPTY = 1,
+    R_SHADER_BLEND = 1,
+    R_SHADER_ALPHA_MAP = 2,
+    R_SHADER_SOLID_COLOR = 3,
 };
 
 typedef struct ek_canvas_context {

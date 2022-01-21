@@ -77,7 +77,7 @@ struct Display2D {
     Pointer<IDrawable2D> drawable;
 
     // state management
-    REF_TO(ek_shader) program = 0;
+    R(ek_shader) program = 0;
 
     // 1 - draw debug bounds
     int flags = 0;
@@ -159,7 +159,7 @@ struct Display2D {
 // 16 + 16 = 32 bytes
 class Quad2D : public Drawable2D<Quad2D> {
 public:
-    REF_TO(Sprite) src = REF_NAME(res_sprite, H("empty"));
+    R(sprite_t) src = R_SPRITE_EMPTY;
     rect_t rect = rect_01();
     color_t colors[4] = {
             COLOR_WHITE,
@@ -196,7 +196,7 @@ public:
 // 8 + 1 = 9 bytes
 class Sprite2D : public Drawable2D<Sprite2D> {
 public:
-    REF_TO(Sprite) src = 0;
+    R(sprite_t) src = 0;
     bool hit_pixels = true;
 
     Sprite2D();
@@ -215,7 +215,7 @@ public:
 // 8 + 16 + 16 + 8 + 1 = 49 bytes
 class NinePatch2D : public Drawable2D<NinePatch2D> {
 public:
-    REF_TO(Sprite) src = 0;
+    R(sprite_t) src = 0;
     rect_t scale_grid;
     rect_t manual_target = {};
     vec2_t scale;
@@ -280,7 +280,7 @@ public:
     int segments = 50;
     color_t color_inner = COLOR_WHITE;
     color_t color_outer = COLOR_WHITE;
-    REF_TO(Sprite) sprite = 0;
+    R(sprite_t) sprite = 0;
 
     void draw() override;
 

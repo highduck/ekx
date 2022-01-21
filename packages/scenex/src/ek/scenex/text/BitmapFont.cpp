@@ -1,6 +1,6 @@
 #include "BitmapFont.hpp"
 #include <ek/scenex/2d/Sprite.hpp>
-#include <ek/util/Res.hpp>
+
 
 namespace ek {
 
@@ -45,7 +45,7 @@ bool BitmapFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
     if (g) {
         outGlyph.advanceWidth = static_cast<float>(g->advanceWidth) / unitsPerEM;
         outGlyph.lineHeight = lineHeightMultiplier;
-        Sprite* spr = &RES_NAME_RESOLVE(res_sprite, g->sprite);
+        sprite_t* spr = &RES_NAME_RESOLVE(res_sprite, g->sprite);
         if (spr->state & SPRITE_LOADED) {
             outGlyph.rect = spr->rect / baseFontSize;
             outGlyph.texCoord = spr->tex;

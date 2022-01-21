@@ -22,16 +22,18 @@
 
 namespace ek {
 
-template<typename T>
-inline void selectAsset(const char* label, Res<T>& asset) {
-    if (ImGui::BeginCombo(label, asset.getID())) {
+inline void select_ref_asset(const char* label, rr_man_t* man, res_id* sid) {
+    if (ImGui::BeginCombo(label, hsp_get(man->names[*sid]))) {
         // TODO:
-//        for (auto& it : ResourceDB::instance.get().map) {
-//            auto& key = it.second.key;
-//            if (ImGui::Selectable(key.name.c_str(), key.name == asset.getID())) {
-//                asset.setID(key.name);
-//            }
-//        }
+        for (res_id i = 0; i < man->num; ++i) {
+            string_hash_t name_hash = man->names[i];
+            if(name_hash != 0) {
+                const char* name = hsp_get(name_hash);
+                if (ImGui::Selectable(name, i == *sid)) {
+                    *sid = i;
+                }
+            }
+        }
         ImGui::EndCombo();
     }
 }
@@ -41,7 +43,7 @@ inline void guiEntityRef(const char* label, ecs::EntityRef ref) {
         ImGui::TextDisabled("%s: null", label);
     } else if (ref.valid()) {
         auto tag = ref.get().get_or_default<Node>().tag;
-        ImGui::LabelText(label, "%s [0x%08X]", hsp_get(tag), tag);
+        ImGui::LabelText(label, "%s [%08X]", hsp_get(tag), tag);
     } else {
         ImGui::TextColored({1, 0, 0, 1}, "%s: invalid", label);
     }
@@ -224,8 +226,8 @@ inline void guiInteractive(Interactive& inter) {
     ImGui::LabelText("cursor", inter.cursor == EK_MOUSE_CURSOR_BUTTON ? "button" : "?");
 }
 
-inline void spriteRefInfo(REF_TO(Sprite) ref) {
-    Sprite spr = REF_RESOLVE(res_sprite, ref);
+inline void spriteRefInfo(R(sprite_t) ref) {
+    sprite_t spr = REF_RESOLVE(res_sprite, ref);
     ImGui::LabelText("Image", "ref: %u", spr.image_id);
     ImGui::LabelText("Loaded", "%u", !!(spr.state & SPRITE_LOADED));
     ImGui::LabelText("Rotated", "%u", !!(spr.state & SPRITE_ROTATED));
@@ -267,7 +269,7 @@ inline void editParticleRenderer2D(ParticleRenderer2D& p) {
 }
 
 inline void guiTextFormat(TextFormat& format) {
-    selectAsset<Font>("Font", format.font);
+    select_ref_asset("Font", &res_font.rr, &format.font);
     ImGui::DragFloat("Size", &format.size, 1, 8, 128, "%f");
     ImGui::DragFloat("Leading", &format.leading, 1, 0, 128, "%f");
     ImGui::DragFloat("Spacing", &format.letterSpacing, 1, -128, 128, "%f");

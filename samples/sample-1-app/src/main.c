@@ -2,6 +2,7 @@
 #include <ek/log.h>
 #include <ek/time.h>
 #include <ek/rnd.h>
+#include "config/build_info.h"
 
 static uint32_t rnd;
 
@@ -118,6 +119,9 @@ void ek_app_main() {
     ek_time_init();
     log_init();
     rnd = ek_time_seed32();
+
+    log_info("Hello, /e/k/x/");
+    log_info("Version: %s #%s", APP_VERSION_NAME, APP_VERSION_CODE);
 
     ek_app.config.title = "Test";
     ek_app.config.width = 640;

@@ -10,7 +10,7 @@ extern "C" {
 
 typedef uint16_t res_id;
 
-#define REF_TO(x) res_id
+#define R(x) res_id
 
 // array of data and names indexed by `static id`
 // array is only glowing up

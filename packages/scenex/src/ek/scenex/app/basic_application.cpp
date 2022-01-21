@@ -2,12 +2,20 @@
 
 #include "input_controller.hpp"
 
+/** resource managers include **/
+#include <ek/scenex/particles/ParticleDecl.hpp>
+#include <ek/scenex/SceneFactory.hpp>
+#include <ek/scenex/text/Font.hpp>
+#include <ek/scenex/2d/DynamicAtlas.hpp>
+#include <ek/scenex/2d/Atlas.hpp>
+#include <ek/scenex/particles/ParticleSystem.hpp>
+
+/** systems **/
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/AudioManager.hpp>
 #include <ek/scenex/2d/Viewport.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
-#include <ek/scenex/SceneFactory.hpp>
 #include <ek/log.h>
 #include <ek/scenex/asset2/Asset.hpp>
 #include <ek/gfx.h>
@@ -26,7 +34,6 @@
 #include <ek/goodies/GameScreen.hpp>
 #include <ek/goodies/helpers/Trail2D.hpp>
 #include <ek/scenex/base/DestroyTimer.hpp>
-#include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
 
 #include "impl/GameDisplay_impl.hpp"
@@ -156,18 +163,6 @@ void registerSceneXComponents() {
 
 void basic_application::initialize() {
     EK_DEBUG("base application: initialize");
-    // init default empty sprite data
-    {
-        setup_res_particle();
-
-        setup_res_sprite();
-        auto spr_id = rr_named(&res_sprite.rr, H("empty"));
-        auto* spr = &REF_RESOLVE(res_sprite, spr_id);
-        spr->rect = rect_01();
-        spr->tex = rect_01();
-        spr->state = SPRITE_LOADED;
-        spr->image_id = RES_IMAGE_EMPTY;
-    }
 
     logDisplayInfo();
     display.update();
@@ -434,6 +429,15 @@ void launcher_on_frame() {
             sg_commit();
         }
     }
+}
+
+void setup_resource_managers() {
+    setup_res_sprite();
+    setup_res_particle();
+    setup_res_dynamic_atlas();
+    setup_res_atlas();
+    setup_res_font();
+    setup_res_sg();
 }
 
 }

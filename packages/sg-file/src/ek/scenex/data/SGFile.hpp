@@ -260,8 +260,5 @@ public:
     }
 };
 
-//EK_DECLARE_TYPE(SGFile);
-EK_TYPE_INDEX(SGFile, 11);
-
 }
 

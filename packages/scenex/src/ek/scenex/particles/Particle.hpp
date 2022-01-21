@@ -2,7 +2,7 @@
 
 #include "ParticleDecl.hpp"
 
-#include <ek/util/Res.hpp>
+
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/canvas.h>
@@ -10,7 +10,7 @@
 namespace ek {
 
 struct Particle {
-    REF_TO(Sprite) sprite = 0;
+    R(sprite_t) sprite = 0;
     //int draw_layer = 0;
     //const char* text = nullptr;
     vec2_t pivot = {};

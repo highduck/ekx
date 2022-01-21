@@ -1,9 +1,8 @@
 #pragma once
 
-#include <ek/util/Res.hpp>
 #include "Font.hpp"
 #include "TextFormat.hpp"
-#include <ek/util/StaticStorage.hpp>
+#include <ek/ds/Array.hpp>
 
 namespace ek {
 
@@ -26,7 +25,7 @@ struct TextBlockInfo {
 
     // {max length; total height}
     vec2_t size = {};
-    ek::Array<Line> lines{};
+    Array<Line> lines{};
 
     void addLine(Line line);
 
@@ -73,7 +72,9 @@ struct TextEngineSharedContext {
     TextBlockInfo textBlockInfo{};
 };
 
-extern StaticStorage<TextEngineSharedContext> gTextEngine;
+extern TextEngineSharedContext* gTextEngine;
+void setup_text_engine(void);
+TextEngineSharedContext* get_text_engine(void);
 
 }
 

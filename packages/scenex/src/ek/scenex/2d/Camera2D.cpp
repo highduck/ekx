@@ -81,7 +81,7 @@ void Camera2D::render() {
         sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.w, camera.screenRect.h,
                            true);
         if (camera.clearColorEnabled) {
-            canvas_push_program(res_shader.data[RES_SHADER_SOLID_COLOR]);
+            canvas_push_program(res_shader.data[R_SHADER_SOLID_COLOR]);
             canvas.color[0] = {color_vec4(camera.clearColor), color_vec4(camera.clearColor2)};
             canvas_fill_rect(camera.worldRect, COLOR_WHITE);
             canvas.color[0] = color2_identity();

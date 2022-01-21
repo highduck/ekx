@@ -2,13 +2,36 @@
 #include "Sprite.hpp"
 
 #include <ek/log.h>
-#include <ek/util/Res.hpp>
+
 
 #include <ek/serialize/serialize.hpp>
 #include <ek/util/Path.hpp>
 #include <ek/local_res.h>
 #include <ek/gfx.h>
 #include <ek/print.h>
+
+struct res_atlas res_atlas;
+
+void setup_res_atlas(void) {
+    struct res_atlas* R = &res_atlas;
+    rr_man_t* rr = &R->rr;
+
+    rr->names = R->names;
+    rr->data = R->data;
+    rr->max = sizeof(R->data) / sizeof(R->data[0]);
+    rr->num = 1;
+    rr->data_size = sizeof(R->data[0]);
+}
+
+void update_res_atlas(void) {
+    for (res_id id = 0; id < res_atlas.rr.num; ++id) {
+        atlas_ptr content = res_atlas.data[id];
+        if (content) {
+            content->pollLoading();
+        }
+    }
+}
+
 
 namespace ek {
 
@@ -95,7 +118,7 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
     atlas->loaders.clear();
 
     for (const auto& page: atlasInfo.pages) {
-        auto image_asset = rr_named(&res_image.rr, H(page.imagePath.c_str()));
+        auto image_asset = R_IMAGE(H(page.imagePath.c_str()));
 
         sg_image* image = &REF_RESOLVE(res_image, image_asset);
         if (image->id) {
@@ -107,7 +130,7 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
         atlas->pages.push_back(image_asset);
         atlas->loaders.emplace_back(ek_texture_loader_create());
         for (auto& spr_data: page.sprites) {
-            auto ref = REF_NAME(res_sprite, spr_data.name);
+            auto ref = R_SPRITE(spr_data.name);
             atlas->sprites.push_back(ref);
 
             auto* sprite = &REF_RESOLVE(res_sprite, ref);
@@ -168,7 +191,7 @@ int Atlas::pollLoading() {
                         // item = ek_ref_get_item(ref)
                         // item->handle = loader->image;
                         // item->finalizer = sg_image_REF_finalizer
-                        const res_id image_id = rr_named(&res_image.rr, H(loader->urls[0].path));
+                        const res_id image_id = R_IMAGE(H(loader->urls[0].path));
                         REF_RESOLVE(res_image, image_id) = loader->image;
                         ek_texture_loader_destroy(loader);
                         loaders[i] = nullptr;

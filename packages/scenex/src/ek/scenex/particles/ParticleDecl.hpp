@@ -117,7 +117,7 @@ struct FloatRange {
 };
 
 struct ParticleDecl {
-    REF_TO(Sprite) sprite;
+    R(sprite_t) sprite;
     ParticleScaleMode scale_mode;
     ParticleAlphaMode alpha_mode;
     FloatRange alpha_start;
@@ -147,6 +147,8 @@ struct res_particle {
     ParticleDecl data[32];
     rr_man_t rr;
 };
+
+#define R_PARTICLE(name) REF_NAME(res_particle, name)
 
 inline struct res_particle res_particle;
 

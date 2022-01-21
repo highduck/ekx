@@ -1,16 +1,13 @@
 #pragma once
 
 #include "FontImplBase.hpp"
+#include <ek/scenex/data/BMFont.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/Hash.hpp>
 
-#include <ek/util/NoCopyAssign.hpp>
-#include <ek/scenex/data/BMFont.hpp>
-#include <ek/util/Type.hpp>
-
 namespace ek {
 
-class BitmapFont : public FontImplBase, private NoCopyAssign {
+class BitmapFont : public FontImplBase {
 public:
 
     BitmapFont();

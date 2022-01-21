@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/math.h>
-#include <ek/util/Res.hpp>
+
 #include <ek/util/Type.hpp>
 #include <ecxx/ecxx_fwd.hpp>
 #include <ek/gfx.h>
@@ -29,7 +29,7 @@ struct Camera3D {
     vec4_t clearColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
     float clearDepth = 1.0f;
 
-    REF_TO(sg_image) cubeMap;
+    R(sg_image) cubeMap;
 };
 
 

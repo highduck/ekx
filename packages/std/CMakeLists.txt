@@ -63,8 +63,8 @@ else ()
 endif ()
 
 #if (EKX_BUILD_TESTS)
-    add_subdirectory(test)
+#    add_subdirectory(test)
 
-    add_executable(bitmap-test include/ek/_bitmap/bitmap_test.c)
-    target_link_libraries(bitmap-test PUBLIC ekx::std)
+#    add_executable(bitmap-test include/ek/_bitmap/bitmap_test.c)
+#    target_link_libraries(bitmap-test PUBLIC ekx::std)
 #endif ()

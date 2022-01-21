@@ -3,6 +3,28 @@
 #include <ek/math.h>
 #include <ek/assert.h>
 
+struct res_dynamic_atlas res_dynamic_atlas;
+
+void setup_res_dynamic_atlas(void) {
+    struct res_dynamic_atlas* R = &res_dynamic_atlas;
+    rr_man_t* rr = &R->rr;
+
+    rr->names = R->names;
+    rr->data = R->data;
+    rr->max = sizeof(R->data) / sizeof(R->data[0]);
+    rr->num = 1;
+    rr->data_size = sizeof(R->data[0]);
+}
+
+void update_res_dynamic_atlas(void) {
+    for (res_id id = 0; id < res_dynamic_atlas.rr.num; ++id) {
+        dynamic_atlas_ptr content = res_dynamic_atlas.data[id];
+        if (content) {
+            content->invalidate();
+        }
+    }
+}
+
 namespace ek {
 
 //void copy_pixels_normal(image_t& dest, int2 dest_position,
@@ -20,7 +42,7 @@ namespace ek {
 //    }
 //}
 
-class DynamicAtlas::Page : private NoCopyAssign {
+class DynamicAtlas::Page {
 public:
     Page(int width_, int height_, bool alphaMap_, bool mipmaps_) :
             width{width_},

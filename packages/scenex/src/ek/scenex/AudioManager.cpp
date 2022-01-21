@@ -7,7 +7,7 @@ AudioManager::AudioManager() = default;
 AudioManager::~AudioManager() = default;
 
 void AudioManager::play_music(string_hash_t name) {
-    res_id next_music = name ? rr_named(&res_audio.rr, name) : 0;
+    res_id next_music = name ? R_AUDIO(name) : 0;
     if (music_ != next_music) {
         if (auph_is_active(musicVoice_.id)) {
             auph_stop(musicVoice_.id);
@@ -31,7 +31,7 @@ void AudioManager::play_music(string_hash_t name) {
 
 void AudioManager::play_sound(string_hash_t name, float vol, float pitch) const {
     if (sound.enabled() && name) {
-        const res_id id = rr_named(&res_audio.rr, name);
+        const res_id id = R_AUDIO(name);
         if (id) {
             auph_buffer snd = REF_RESOLVE(res_audio, id);
             if (snd.id) {

@@ -2,7 +2,7 @@
 
 #include <ek/gfx.h>
 #include <ek/app.h>
-#include <ek/util/Res.hpp>
+
 #include <ek/ds/String.hpp>
 
 #include <util/sokol_gfx_imgui.h>

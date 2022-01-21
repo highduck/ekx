@@ -2,7 +2,7 @@
 
 #include <ek/math.h>
 #include <ek/math.h>
-#include <ek/util/Res.hpp>
+
 #include "Font.hpp"
 
 namespace ek {
@@ -49,7 +49,7 @@ private:
     uint8_t flags_ = 0u;
 };
 
-class Font;
+struct Font;
 
 enum class TextLayerType {
     Text,
@@ -77,7 +77,7 @@ struct TextLayerEffect {
 // count / indx = 8
 // Total = 136 bytes
 struct TextFormat {
-    Res <Font> font;
+    R(Font) font = 0;
     float size = 16.0f;
     float leading = 0.0f;
     float letterSpacing = 0.0f;
@@ -106,13 +106,13 @@ struct TextFormat {
     }
 
     void setFontName(string_hash_t fontName) {
-        font.setID(fontName);
+        font = R_FONT(fontName);
     }
 
     TextFormat() = default;
 
     TextFormat(string_hash_t fontName, float fontSize) :
-            font{fontName},
+            font{R_FONT(fontName)},
             size{fontSize} {
     }
 

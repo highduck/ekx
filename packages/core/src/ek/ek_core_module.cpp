@@ -1,21 +1,5 @@
-#include <ek/log.h>
-#include <ek/time.h>
-#include <ek/rnd.h>
 
-namespace ek::core {
-
-void setup() {
-    //ResourceDB::init();
-    log_init();
-    ek_time_init();
-    ek_timers_init();
-
-    uint32_t seed = ek_time_seed32();
-    random_seed = seed++;
-    game_random_seed = seed;
-}
-
-}
+static void ek_legacy_core_stub() {}
 
 ////#ifdef EK_ALLOCATION_TRACKER
 //

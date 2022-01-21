@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ExportItem.hpp"
-#include <ek/util/NoCopyAssign.hpp>
 #include "../ImageSet.hpp"
 #include <unordered_map>
 
@@ -9,7 +8,7 @@ namespace ek::xfl {
 
 class Doc;
 
-class SGBuilder : private NoCopyAssign {
+class SGBuilder {
 public:
     const Doc& doc;
     ExportItem library;
@@ -25,6 +24,14 @@ public:
     explicit SGBuilder(const Doc& doc);
 
     ~SGBuilder();
+
+    SGBuilder(const SGBuilder& v) = delete;
+
+    SGBuilder& operator=(const SGBuilder& v) = delete;
+
+    SGBuilder(SGBuilder&& v) = delete;
+
+    SGBuilder& operator=(SGBuilder&& v) = delete;
 
     void build_library();
 

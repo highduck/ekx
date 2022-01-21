@@ -156,9 +156,9 @@ void guiTextLayerEffect(TextLayerEffect& layer) {
     ImGui::PopID();
 }
 
-void guiSprite(const Sprite* sprite) {
+void guiSprite(const sprite_t* sprite) {
     if(!sprite) {
-        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "null");
+        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "ERROR: sprite resource slot could not be null");
         return;
     }
     if(!sprite->image_id || !(sprite->state & SPRITE_LOADED)) {
@@ -199,16 +199,24 @@ void guiSprite(const Sprite* sprite) {
     }
 }
 
-void guiFont(const Font& font) {
-    switch (font.getFontType()) {
+void guiFont(const Font* font) {
+    if(!font) {
+        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "ERROR: font resource slot could not be null");
+        return;
+    }
+    if(!font->impl) {
+        ImGui::TextColored(ImColor{1.0f, 0.0f, 0.0f}, "null");
+        return;
+    }
+    switch (font->impl->getFontType()) {
         case FontType::Bitmap: {
-            auto* bm = reinterpret_cast<const BitmapFont*>(font.getImpl());
+            auto* bm = (const BitmapFont*)font->impl;
             ImGui::Text("Font Type: Bitmap");
             ImGui::Text("Glyphs: %u", bm->map._data.size());
         }
             break;
         case FontType::TrueType: {
-            auto* ttf = reinterpret_cast<const TrueTypeFont*>(font.getImpl());
+            auto* ttf = (const TrueTypeFont*)font->impl;
             ImGui::Text("Font Type: TrueType");
             ImGui::Text("Glyphs: %u", ttf->map.size());
         }
