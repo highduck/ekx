@@ -1,5 +1,5 @@
 #include <ek/math.h>
-#include <ek/scenex/data/Model3D.hpp>
+#include <ek/format/Model3D.hpp>
 
 #define FAST_OBJ_IMPLEMENTATION
 #include "fast_obj.h"

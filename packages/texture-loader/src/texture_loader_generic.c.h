@@ -90,8 +90,8 @@ void ek_texture_loader_update(ek_texture_loader* loader) {
         if (result == 0) {
             ++loader->imagesLoaded;
             loader->progress = (float) loader->imagesLoaded / (float) loader->imagesToLoad;
-            ek_bitmap bitmap = {0};
-            ek_bitmap_decode(&bitmap, buffer, bufferSize, loader->premultiplyAlpha);
+            bitmap_t bitmap = {0};
+            bitmap_decode(&bitmap, buffer, bufferSize, loader->premultiplyAlpha);
             if (bitmap.pixels) {
                 loader->imageData.subImages[idx].data = bitmap.pixels;
                 loader->imageData.subImages[idx].width = (int) bitmap.w;

@@ -75,7 +75,7 @@ static void saturate_alpha(uint8_t* data, int width, int height, int stride, int
     }
 }
 
-void ek_bitmap_blur_gray(uint8_t* data, int width, int height, int stride, float radius, int iterations, int strength) {
+void bitmap_blur_gray(uint8_t* data, int width, int height, int stride, float radius, int iterations, int strength) {
     EK_ASSERT(width > 0 && height > 0 && stride > 0);
     if (radius >= 1.0f && iterations > 0) {
         if (iterations > 3) {

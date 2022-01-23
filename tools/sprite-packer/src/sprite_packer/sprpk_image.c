@@ -1,11 +1,11 @@
 #include "sprpk_image.h"
 
 #include "sprpk_stb_impl.c.h"
-#include "ek/print.h"
+#include <ek/print.h>
 
 #include <stdlib.h>
 
-void sprite_pack_image_save(const ek_bitmap* bitmap, const char* path, uint32_t format_flags) {
+void sprite_pack_image_save(const bitmap_t* bitmap, const char* path, uint32_t format_flags) {
     uint32_t alpha = format_flags & SPRITE_PACK_ALPHA;
     if(format_flags & SPRITE_PACK_PNG) {
         stbi_write_png_compression_level = 10;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ek/scenex/data/SGFile.hpp>
+#include <ek/format/SGFile.hpp>
 #include <ek/ds/Array.hpp>
 #include <memory>
 

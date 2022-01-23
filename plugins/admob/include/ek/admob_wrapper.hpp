@@ -34,7 +34,7 @@ public:
         return isAvailable_;
     }
 
-    static Pointer<AdMobWrapper> create(bool devMode);
+    static AdMobWrapper* create(bool devMode);
 };
 
 }

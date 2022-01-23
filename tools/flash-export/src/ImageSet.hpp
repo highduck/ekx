@@ -18,7 +18,7 @@ struct SpriteData {
     irect_t source = {};
 
     // reference image;
-    ek_bitmap bitmap{0, 0, nullptr};
+    bitmap_t bitmap{0, 0, nullptr};
 
     uint8_t padding = 1;
 
@@ -38,9 +38,9 @@ struct ImageSet {
 };
 
 // TODO: move to ek/bitmap.h
-void ek_bitmap_save_png(const ek_bitmap* bitmap, const char* path, bool alpha);
+void ek_bitmap_save_png(const bitmap_t* bitmap, const char* path, bool alpha);
 // TODO: move to ek/bitmap.h
-void ek_bitmap_save_jpg(const ek_bitmap* bitmap, const char* path, bool alpha);
+void ek_bitmap_save_jpg(const bitmap_t* bitmap, const char* path, bool alpha);
 
 void save(ImageSet& bitmaps, const char* output);
 

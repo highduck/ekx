@@ -117,8 +117,8 @@ bool TrueTypeFont::getGlyph(uint32_t codepoint, Glyph& outGlyph) {
         stbtt_MakeGlyphBitmap(info, bmp + pad * bitmapWidth + pad, glyphWidth, glyphHeight, bitmapWidth,
                               dpiScale * scale, dpiScale * scale, glyphIndex);
 
-        ek_bitmap_blur_gray(bmp, bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_,
-                            strengthPower_);
+        bitmap_blur_gray(bmp, bitmapWidth, bitmapHeight, bitmapWidth, blurRadius_, blurIterations_,
+                         strengthPower_);
 
         auto sprite = atlas_instance->addBitmap(bitmapWidth, bitmapHeight, bmp, bmpSize);
         //free(bmp);

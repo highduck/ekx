@@ -7,57 +7,57 @@ if((x) != (y)) { puts("FAILED: CHECK_EQ(" #x ", " #y ")\n"); abort(); } \
 
 int main(int argc, char** argv) {
     uint32_t pixel;
-    ek_bitmap bmp = {1, 1, &pixel};
+    bitmap_t bmp = {1, 1, (color_t*)&pixel};
 
     /// RGBA <-> BGRA
     pixel = 0xFF112233u;
-    ek_bitmap_swizzle_xwzy(&bmp);
+    bitmap_swizzle_xwzy(&bmp);
     CHECK_EQ(pixel, 0xFF332211u);
 
     pixel = 0x0u;
-    ek_bitmap_swizzle_xwzy(&bmp);
+    bitmap_swizzle_xwzy(&bmp);
     CHECK_EQ(pixel, 0x0u);
 
     pixel = 0xFFAA00AAu;
-    ek_bitmap_swizzle_xwzy(&bmp);
+    bitmap_swizzle_xwzy(&bmp);
     CHECK_EQ(pixel, 0xFFAA00AAu);
 
     /// premultiply
     pixel = 0xFF112233u;
-    ek_bitmap_premultiply(&bmp);
+    bitmap_premultiply(&bmp);
     CHECK_EQ(pixel, 0xFF112233u);
 
     pixel = 0x00FFEEDDu;
-    ek_bitmap_premultiply(&bmp);
+    bitmap_premultiply(&bmp);
     CHECK_EQ(pixel, 0x00000000u);
 
     pixel = 0x77FFFFFF;
-    ek_bitmap_premultiply(&bmp);
+    bitmap_premultiply(&bmp);
     CHECK_EQ(pixel, 0x77777777u);
 
     /// un-premultiply
     pixel = 0xFF112233u;
-    ek_bitmap_unpremultiply(&bmp);
+    bitmap_unpremultiply(&bmp);
     CHECK_EQ(pixel, 0xFF112233u);
 
     pixel = 0x00000000u;
-    ek_bitmap_unpremultiply(&bmp);
+    bitmap_unpremultiply(&bmp);
     CHECK_EQ(pixel, 0x00000000u);
 
     pixel = 0x77777777;
-    ek_bitmap_unpremultiply(&bmp);
+    bitmap_unpremultiply(&bmp);
     CHECK_EQ(pixel, 0x77FFFFFFu);
 
     /// fill
     uint32_t pixels[4] = {};
-    ek_bitmap bmp2x2 = {2, 2, pixels};
+    bitmap_t bmp2x2 = {2, 2, (color_t*)pixels};
 
     CHECK_EQ(pixels[0], 0u);
     CHECK_EQ(pixels[1], 0u);
     CHECK_EQ(pixels[2], 0u);
     CHECK_EQ(pixels[3], 0u);
 
-    ek_bitmap_fill(&bmp2x2, 0xDEADBABEu);
+    bitmap_fill(&bmp2x2, color_u32(0xDEADBABEu));
 
     CHECK_EQ(pixels[0], 0xDEADBABEu);
     CHECK_EQ(pixels[1], 0xDEADBABEu);

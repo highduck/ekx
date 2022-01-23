@@ -24,13 +24,13 @@ SpriteData renderMultiSample(rect_t bounds,
         rc = rect_expand(rc, 1);
     }
 
-    ek_bitmap bitmap{0, 0, nullptr};
+    bitmap_t bitmap{0, 0, nullptr};
     const auto w = static_cast<int>(fixed ? options.width : ceil(rc.w * scale));
     const auto h = static_cast<int>(fixed ? options.height : ceil(rc.h * scale));
     const int stride = w * 4;
 
     if (w > 0 && h > 0) {
-        ek_bitmap_alloc(&bitmap, w, h);
+        bitmap_alloc(&bitmap, w, h);
 
         auto surf = cairo_image_surface_create_for_data((uint8_t*)bitmap.pixels,
                                                         CAIRO_FORMAT_ARGB32,
@@ -78,7 +78,7 @@ SpriteData renderMultiSample(rect_t bounds,
         cairo_surface_destroy(sub_surf);
 
         // convert ARGB to ABGR
-        ek_bitmap_swizzle_xwzy(&bitmap);
+        bitmap_swizzle_xwzy(&bitmap);
     }
 
     SpriteData data;
@@ -101,14 +101,13 @@ SpriteData renderLowQuality(rect_t bounds,
         rc = rect_expand(rc, 1);
     }
 
-    ek_bitmap bitmap = {0, 0,nullptr};
+    bitmap_t bitmap = {0, 0, nullptr};
     const auto w = static_cast<int>(fixed ? options.width : ceil(rc.w * scale));
     const auto h = static_cast<int>(fixed ? options.height : ceil(rc.h * scale));
     const int stride = w * 4;
 
     if (w > 0 && h > 0) {
-        ek_bitmap_alloc(&bitmap, w, h);
-        ek_bitmap_fill(&bitmap, 0);
+        bitmap_alloc(&bitmap, w, h);
 
         auto surf = cairo_image_surface_create_for_data((uint8_t*)bitmap.pixels,
                                                         CAIRO_FORMAT_ARGB32,
@@ -138,7 +137,7 @@ SpriteData renderLowQuality(rect_t bounds,
         cairo_surface_destroy(surf);
 
         // convert ARGB to ABGR
-        ek_bitmap_swizzle_xwzy(&bitmap);
+        bitmap_swizzle_xwzy(&bitmap);
     }
 
     SpriteData data;

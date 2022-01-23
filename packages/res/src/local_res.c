@@ -1,11 +1,11 @@
 #include <ek/local_res.h>
 
 bool ek_local_res_success(const ek_local_res* lr) {
-    return lr->status == 0;
+    return lr && lr->status == 0;
 }
 
 void ek_local_res_close(ek_local_res* lr) {
-    if (lr->closeFunc) {
+    if (lr && lr->closeFunc) {
         lr->closeFunc(lr);
     }
 }

@@ -4,6 +4,7 @@
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/local_storage.h>
 #include <ek/admob_wrapper.hpp>
+#include <utility>
 
 namespace ek {
 
@@ -109,4 +110,14 @@ bool Ads::isSupported() const {
     return ek_admob_supported();
 }
 
+Ads::~Ads() {
+    delete wrapper;
+}
+
+}
+
+ek::Ads* ads_instance = nullptr;
+void ads_init(ek::Ads::Config config) {
+    EK_ASSERT(ads_instance == nullptr);
+    ads_instance = new ek::Ads(std::move(config));
 }

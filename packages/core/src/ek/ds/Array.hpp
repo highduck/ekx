@@ -48,10 +48,10 @@ inline void constructDefault(T* begin, T* end) {
 //         NOOP
 //         TODO: zero init case
 //    } else {
-        EK_ASSERT_R2(begin <= end);
-        for (T* it = begin; it != end; ++it) {
-            new(it)T();
-        }
+    EK_ASSERT_R2(begin <= end);
+    for (T* it = begin; it != end; ++it) {
+        new(it)T();
+    }
 //    }
 }
 
@@ -262,13 +262,7 @@ public:
     }
 
     [[nodiscard]]
-    const T& get(SizeType i) const {
-        EK_ASSERT_R2(i < size());
-        return *(begin() + i);
-    }
-
-    [[nodiscard]]
-    T& get(SizeType i) {
+    T& get(SizeType i) const {
         EK_ASSERT_R2(i < size());
         return *(begin() + i);
     }
@@ -310,51 +304,26 @@ public:
     }
 
     [[nodiscard]]
-    const T& back() const {
+    T& back() const {
         EK_ASSERT(!empty());
         return *(end() - 1);
     }
 
     [[nodiscard]]
-    T& back() {
-        EK_ASSERT(!empty());
-        return *(end() - 1);
-    }
-
-    [[nodiscard]]
-    const T& front() const {
+    T& front() const {
         EK_ASSERT(!empty());
         return *begin();
     }
 
-    [[nodiscard]]
-    T& front() {
-        EK_ASSERT(!empty());
-        return *begin();
-    }
-
-    const T* begin() const {
-        return (const T*) buffer;
-    }
-
-    const T* end() const {
-        return begin() + size();
-    }
-
-    T* begin() {
+    T* begin() const {
         return (T*) buffer;
     }
 
-    T* end() {
+    T* end() const {
         return begin() + size();
     }
 
-    T& operator[](SizeType i) {
-        EK_ASSERT_R2(i < size());
-        return *(begin() + i);
-    }
-
-    const T& operator[](SizeType i) const {
+    T& operator[](SizeType i) const {
         EK_ASSERT_R2(i < size());
         return *(begin() + i);
     }
@@ -370,13 +339,19 @@ public:
     }
 
     [[nodiscard]]
-    T* data() {
+    T* data() const {
         return (T*) buffer;
     }
 
-    [[nodiscard]]
-    const T* data() const {
-        return (const T*) buffer;
+    T* find(const T& v) const {
+        const uint32_t total = size();
+        for (uint32_t i = 0; i < total; ++i) {
+            T* it = (T*) buffer + i;
+            if (v == *it) {
+                return it;
+            }
+        }
+        return nullptr;
     }
 };
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstring>
-#include <cassert>
+#include <ek/assert.h>
 #include "types.h"
 
 #include <ft2build.h>
@@ -20,7 +20,7 @@ struct FreeType2 {
     FreeType2() noexcept {
         auto err = FT_Init_FreeType(&ft);
         if (err != 0) {
-            BMFE_LOG_F("FreeType2 init error: %d", err);
+            log_error("FreeType2 init error: %d", err);
         }
     }
 
@@ -53,7 +53,7 @@ public:
     FontFace(const FreeType2& lib, const std::string& path) {
         int err = FT_New_Face(lib.ft, path.c_str(), 0, &ftFace);
         if (err != 0) {
-            BMFE_LOG_F("FT2 new face error: %d (%s)", err, FT_Error_String(err));
+            log_error("FT2 new face error: %d (%s)", err, FT_Error_String(err));
         }
     }
 
@@ -146,7 +146,8 @@ public:
 //            auto bitmap = ftFace->glyph->bitmap;
             auto bitmap = ((FT_BitmapGlyph) glyph)->bitmap;
             if (bitmap.buffer) {
-                assert(bitmap.width != 0 && bitmap.rows != 0);
+                EK_ASSERT(bitmap.width != 0);
+                EK_ASSERT(bitmap.rows != 0);
                 if (buffer) {
                     *buffer = bitmap.buffer;
                 }
@@ -211,19 +212,23 @@ inline V* try_get(std::unordered_map<K, V>& map, const K& key) {
 }
 
 Glyph buildGlyphData(const FontFace& fontFace, uint32_t glyph_index, const char* name) {
-    Glyph data{};
     int32_t box[4]{};
-    fontFace.getGlyphMetrics(glyph_index, box, &data.advanceWidth);
-    int l = box[0];
-    int t = -box[3];
-    int r = box[2];
-    int b = -box[1];
-    data.box = {l, t, r - l, b - t};
+    int advance_x = 0;
+    fontFace.getGlyphMetrics(glyph_index, box, &advance_x);
+    float units_per_em = (float)fontFace.ftFace->units_per_EM;
+
+    Glyph data;
+    data.advance_x = (float)advance_x / units_per_em;
+    const float l = (float)box[0];
+    const float t = (float)-box[3];
+    const float r = (float)box[2];
+    const float b = (float)-box[1];
+    data.box = rect(l, t, r - l, b - t) / units_per_em;
     data.sprite_name = std::string{name} + std::to_string(glyph_index);
     return data;
 }
 
-ek_bitmap render_glyph_image(const FontFace& fontFace, uint32_t glyphIndex, irect_t& outRect) {
+bitmap_t render_glyph_image(const FontFace& fontFace, uint32_t glyphIndex, irect_t& outRect) {
     if (!fontFace.loadGlyph(glyphIndex)) {
         return {};
     }
@@ -238,9 +243,9 @@ ek_bitmap render_glyph_image(const FontFace& fontFace, uint32_t glyphIndex, irec
     outRect = fontFace.getGlyphBounds();
 
     auto pixels_count = width * height;
-    ek_bitmap img = {};
-    ek_bitmap_alloc(&img, width, height);
-    convert_a8_to_argb32pma(buffer, img.pixels, pixels_count);
+    bitmap_t img = {};
+    bitmap_alloc(&img, width, height);
+    convert_a8_to_argb32pma(buffer, (uint32_t*)img.pixels, pixels_count);
 
     return img;
 }
@@ -259,7 +264,7 @@ void glyph_build_sprites(FontFace& fontFace,
         const auto filters_scaled = apply_scale(filters, filter_scale);
 
         irect_t rect;
-        ek_bitmap data = render_glyph_image(fontFace, glyph_index, rect);
+        bitmap_t data = render_glyph_image(fontFace, glyph_index, rect);
         if (data.pixels) {
             Image image;
             image.name = ref;
@@ -346,11 +351,10 @@ Font buildBitmapFont(const BuildBitmapFontSettings& decl,
     }
 
     Font result{};
-    result.unitsPerEM = info.unitsPerEM;
-    result.ascender = info.ascender;
-    result.descender = info.descender;
-    result.lineHeight = info.lineHeight;
-    result.fontSize = decl.fontSize;
+    result.ascender = (float)info.ascender / (float)info.unitsPerEM;
+    result.descender = (float)info.descender / (float)info.unitsPerEM;
+    result.lineHeight = (float)info.lineHeight / (float)info.unitsPerEM;
+    result.fontSize = (float)decl.fontSize;
     for (auto& pair: dataByGlyphIndex) {
         result.glyphs.push_back(pair.second);
     }

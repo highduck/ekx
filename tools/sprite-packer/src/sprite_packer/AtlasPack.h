@@ -1,14 +1,15 @@
 #pragma once
 
+#include <ek/io.h>
+
 #include "Atlas.h"
 #include <pugixml.hpp>
 #include <thread>
 #include "binpack.h"
 #include "sprpk_image.h"
-#include "Writer.h"
-#include "ek/log.h"
-#include "ek/print.h"
-#include "ek/hash.h"
+#include <ek/log.h>
+#include <ek/print.h>
+#include <ek/hash.h>
 #include <cstdio>
 
 namespace sprite_packer {
@@ -35,25 +36,25 @@ void formatAtlasFileName(char* buffer, int bufferSize, const char* name, float s
 }
 
 void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const char* name) {
-    bytes_writer writer;
-    bytes_writer_alloc(&writer, 100);
-    bytes_write_i32(&writer, (int32_t) resolution.pages.size());
+    io_t io;
+    io_alloc(&io, 100);
+    io_write_i32(&io, (int32_t) resolution.pages.size());
 
     char imagePath[1024];
     int page_index = 0;
     for (auto& page: resolution.pages) {
         EK_ASSERT(page.bitmap.pixels != nullptr);
         formatAtlasFileName(imagePath, 1024, name, resolution.resolution_scale, page_index, "png");
-        bytes_write_u16(&writer, page.w);
-        bytes_write_u16(&writer, page.h);
-        bytes_write_string(&writer, imagePath, (int) strnlen(imagePath, 1024));
-        bytes_write_u32(&writer, page.sprites.size());
+        io_write_u16(&io, page.w);
+        io_write_u16(&io, page.h);
+        io_write_string(&io, imagePath, (int) strnlen(imagePath, 1024));
+        io_write_u32(&io, page.sprites.size());
         for (auto& spr: page.sprites) {
-            bytes_write_u32(&writer, H(spr.name.c_str()));
+            io_write_u32(&io, H(spr.name.c_str()));
             // keep only rotation flag in output
-            bytes_write_u32(&writer, spr.flags & 1);
-            bytes_writer_push(&writer, &spr.rc, sizeof(spr.rc));
-            bytes_writer_push(&writer, &spr.uv, sizeof(spr.uv));
+            io_write_u32(&io, spr.flags & 1);
+            io_push(&io, &spr.rc, sizeof(spr.rc));
+            io_push(&io, &spr.uv, sizeof(spr.uv));
         }
 
         char absImagePath[1024];
@@ -70,10 +71,10 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
     char absAtlasPath[1024];
     ek_snprintf(absAtlasPath, 1024, "%s/%s", outputPath, atlasPath);
     auto f = fopen(absAtlasPath, "wb");
-    fwrite(writer.data, 1, writer.pos, f);
+    fwrite(io.data, 1, io.pos, f);
     fclose(f);
 
-    bytes_writer_free(&writer);
+    io_free(&io);
 }
 
 static void packAtlasThread(const char* name, const char* outputPath, AtlasData& resolution) {
@@ -149,7 +150,7 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
             PageData page{};
             page.w = binpack.canvas.w;
             page.h = binpack.canvas.h;
-            ek_bitmap_alloc(&page.bitmap, page.w, page.h);
+            bitmap_alloc(&page.bitmap, page.w, page.h);
             const auto fw = (float) page.w;
             const auto fh = (float) page.h;
 
@@ -165,14 +166,14 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
                     irect_t packed_rect = no_pack_padding(binpack.rects[i], sprite->padding);
                     if (binpack.flags[i] & BINPACK_ROTATED) {
                         sprite->flags |= SPRITE_FLAG_ROTATED;
-                        bitmap_copy_ccw90(&page.bitmap, packed_rect.x, packed_rect.y, &sprite->bitmap,
-                                          sprite->source.x, sprite->source.y, sprite->source.w, sprite->source.h);
+                        bitmap_blit_copy_ccw90(&page.bitmap, packed_rect.x, packed_rect.y, &sprite->bitmap,
+                                               sprite->source.x, sprite->source.y, sprite->source.w, sprite->source.h);
                     } else {
                         sprite->flags &= ~SPRITE_FLAG_ROTATED;
-                        bitmap_copy(&page.bitmap, packed_rect.x, packed_rect.y, &sprite->bitmap,
-                                    sprite->source.x, sprite->source.y, sprite->source.w, sprite->source.h);
+                        bitmap_blit_copy(&page.bitmap, packed_rect.x, packed_rect.y, &sprite->bitmap,
+                                         sprite->source.x, sprite->source.y, sprite->source.w, sprite->source.h);
                     }
-                    ek_bitmap_free(&sprite->bitmap);
+                    bitmap_free(&sprite->bitmap);
                     sprite->bitmap = page.bitmap;
                     // now packed_rect is rotated, so do not copy the original rect dimensions
                     sprite->source = packed_rect;

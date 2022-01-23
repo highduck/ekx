@@ -3,8 +3,6 @@
 #include <billing.hpp>
 #include <ek/core/target.h>
 #include <ek/scenex/app/GameAppListener.hpp>
-#include <ek/util/Type.hpp>
-#include <ek/ds/Pointer.hpp>
 #include <functional>
 
 namespace ek {
@@ -25,7 +23,7 @@ public:
     void onStart() override;
 
     explicit Ads(Config config);
-    ~Ads() override = default;
+    ~Ads() override;
 
     void onPurchaseChanged(const billing::PurchaseData& purchase);
 
@@ -62,10 +60,10 @@ private:
     bool removed = false;
     Config config_;
 
-    Pointer<AdMobWrapper> wrapper;
+    AdMobWrapper* wrapper = nullptr;
 };
-
-EK_DECLARE_TYPE(Ads);
 
 }
 
+extern ek::Ads* ads_instance;
+void ads_init(ek::Ads::Config config);

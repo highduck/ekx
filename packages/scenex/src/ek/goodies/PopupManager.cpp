@@ -1,5 +1,5 @@
 #include "PopupManager.hpp"
-#include "ek/canvas.h"
+#include <ek/canvas.h>
 
 #include <ek/scenex/base/DestroyTimer.hpp>
 #include <ek/scenex/SceneFactory.hpp>
@@ -57,9 +57,8 @@ void on_popup_closing(EntityApi e) {
 void on_popup_closed(EntityApi e) {
     auto pm = PopupManager::Main;
     auto& state = pm.get<PopupManager>();
-
-    auto* it = std::find(state.active.begin(), state.active.end(), e);
-    if (it != state.active.end()) {
+    EntityApi* it = state.active.find(e);
+    if (it) {
         state.active.eraseIterator(it);
     }
 
@@ -93,11 +92,6 @@ void init_basic_popup(EntityApi e) {
         };
         btn_close.back_button = true;
     }
-}
-
-bool contains(const Array<EntityApi>& list, const EntityApi e) {
-    const auto it = std::find(list.begin(), list.end(), e);
-    return it != list.end();
 }
 
 void PopupManager::updateAll() {
@@ -134,7 +128,8 @@ void open_popup(EntityApi e) {
 
     state.closingLast = nullptr;
 
-    if (contains(state.active, e)) {
+    // if we have entity in active list - do nothing
+    if (state.active.find(e) != nullptr) {
         return;
     }
 
@@ -168,7 +163,8 @@ void close_popup(EntityApi e) {
     auto pm = PopupManager::Main;
     auto& state = pm.get<PopupManager>();
 
-    if (!contains(state.active, e)) {
+    // we cannot close entity if it is not active
+    if (state.active.find(e) == nullptr) {
         return;
     }
 

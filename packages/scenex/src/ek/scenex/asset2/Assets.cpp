@@ -10,14 +10,14 @@
 // texture loading
 #include <ek/texture_loader.h>
 
-#include <ek/scenex/data/ImageData.hpp>
+#include <ek/format/ImageData.hpp>
 #include <ek/gfx.h>
 
 #include <ek/scenex/SceneFactory.hpp>
-#include <ek/scenex/data/SGFile.hpp>
+#include <ek/format/SGFile.hpp>
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/3d/StaticMesh.hpp>
-#include <ek/scenex/data/Model3D.hpp>
+#include <ek/format/Model3D.hpp>
 
 #include <ek/scenex/text/Font.hpp>
 #include <ek/scenex/text/TrueTypeFont.hpp>
@@ -241,11 +241,15 @@ public:
                             EK_ASSERT(false && "Font is not unloaded before");
                             delete fnt->impl;
                         }
+                        // keep lr instance
+                        this_->lr = lr;
                         auto* bmFont = new BitmapFont();
                         bmFont->load(lr->buffer, lr->length);
                         fnt->impl = bmFont;
                     }
-                    ek_local_res_close(lr);
+                    else {
+                        ek_local_res_close(lr);
+                    }
                     this_->state = AssetState::Ready;
                 }, this);
     }
@@ -256,11 +260,16 @@ public:
             delete fnt->impl;
             fnt->impl = nullptr;
         }
+        ek_local_res_close(lr);
+        lr = nullptr;
     }
 
+    // keep data instance
+    ek_local_res* lr = nullptr;
     R(Font) res;
     String path_;
     String fullPath_;
+
 };
 
 class ImageAsset : public Asset {
@@ -577,13 +586,15 @@ public:
                     }
 
                     // `lr` ownership moves to font impl
-//                    if (ek_local_res_success(lr)) {
-                    TrueTypeFont* ttfFont = new TrueTypeFont(this_->manager_->scale_factor, this_->baseFontSize_,
-                                                             this_->glyphCache_);
-                    ttfFont->loadFromMemory(lr);
-                    fnt->impl = ttfFont;
-//                    }
-//                    ek_local_res_close(lr);
+                    if (ek_local_res_success(lr)) {
+                        TrueTypeFont* ttfFont = new TrueTypeFont(this_->manager_->scale_factor, this_->baseFontSize_,
+                                                                 this_->glyphCache_);
+                        ttfFont->loadFromMemory(lr);
+                        fnt->impl = ttfFont;
+                    }
+                    else {
+                        ek_local_res_close(lr);
+                    }
 
                     this_->state = AssetState::Ready;
                 }, this);

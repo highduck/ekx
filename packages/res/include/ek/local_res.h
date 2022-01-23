@@ -23,7 +23,10 @@ typedef struct ek_local_res {
     ek_local_res_callback callback;
 } ek_local_res;
 
+// when lr is null - false
 bool ek_local_res_success(const ek_local_res* lr);
+
+// when lr is null - nothing
 void ek_local_res_close(ek_local_res* lr);
 
 void ek_local_res_load(const char* path, ek_local_res_callback callback, void* userdata);

@@ -8,6 +8,7 @@
 #include "std/time.c.h"
 #include "std/utf8.c.h"
 
+#include <ek/io.c>
 #include <ek/rnd.c>
 #include <ek/ids.c>
 #include <ek/math.c>

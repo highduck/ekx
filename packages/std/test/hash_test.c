@@ -1,7 +1,7 @@
 #include <doctest.h>
 #include <ek/pre.h>
 #include <ek/hash.h>
-#include "ek/assert.h"
+#include <ek/assert.h>
 
 TEST_SUITE_BEGIN("hash");
 

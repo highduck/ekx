@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <ek/math.h>
 
 // expose stb_image API
 #include <stb/stb_image.h>
@@ -12,41 +13,47 @@ extern "C" {
 #endif
 
 // bitmap memory container, could be passed by value, only pixels are heap allocated
-typedef struct ek_bitmap {
+typedef struct bitmap_t {
     int w;
     int h;
-    uint32_t* pixels;
-} ek_bitmap;
+    color_t* pixels;
+} bitmap_t;
 
-void ek_bitmap_alloc(ek_bitmap* bitmap, int width, int height);
+void bitmap_alloc(bitmap_t* bitmap, int width, int height);
 
-void ek_bitmap_copy(ek_bitmap dest, ek_bitmap src);
+void bitmap_copy(bitmap_t dest, bitmap_t src);
 
-void ek_bitmap_clone(ek_bitmap* dest, ek_bitmap src);
+void bitmap_clone(bitmap_t* dest, bitmap_t src);
 
-void ek_bitmap_free(ek_bitmap* bitmap);
+void bitmap_free(bitmap_t* bitmap);
+
+inline static color_t* bitmap_row(const bitmap_t bitmap, int y) {
+    return bitmap.pixels + (bitmap.w * y);
+}
 
 // swizzle XYZW <-> XWZY, useful to convert between RGBA and BGRA pixel formats
-inline static uint32_t swizzle_xwzy_byte4(uint32_t a) {
+inline static uint32_t swizzle_xwzy_u8(uint32_t a) {
     return (a & 0xFF00FF00u) | (((a << 16u) | (a >> 16u)) & 0x00FF00FFu);
 }
 
-void ek_bitmap_swizzle_xwzy(ek_bitmap* bitmap);
+void bitmap_swizzle_xwzy(bitmap_t* bitmap);
 
-void ek_bitmap_fill(ek_bitmap* bitmap, uint32_t color);
+void bitmap_fill(bitmap_t* bitmap, color_t color);
 
-void ek_bitmap_blur_gray(uint8_t* data, int width, int height, int stride, float radius, int iterations, int strength);
+void bitmap_blur_gray(uint8_t* data, int width, int height, int stride, float radius, int iterations, int strength);
 
 // multiply all color components by alpha:
 // r' = r * a
-void ek_bitmap_premultiply(ek_bitmap* bitmap);
+void bitmap_premultiply(bitmap_t* bitmap);
 
 // convert back all color components using alpha:
 // r = r' / a
-void ek_bitmap_unpremultiply(ek_bitmap* bitmap);
+void bitmap_unpremultiply(bitmap_t* bitmap);
 
-void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool pma);
+void bitmap_decode(bitmap_t* bitmap, const void* data, uint32_t size, bool pma);
 
+// blit one on another
+void bitmap_blit(bitmap_t dest, bitmap_t src);
 
 /**
  *
@@ -58,12 +65,11 @@ void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool p
  *                     | 1 1 |
  *                     -------
  */
- // TODO: rename to "*blit_copy*"
-void bitmap_copy_ccw90(ek_bitmap* dest, int dx, int dy,
-                       const ek_bitmap* src, int sx, int sy, int sw, int sh);
+void bitmap_blit_copy_ccw90(bitmap_t* dest, int dx, int dy,
+                            const bitmap_t* src, int sx, int sy, int sw, int sh);
 
-void bitmap_copy(ek_bitmap* dest, int dx, int dy,
-                 const ek_bitmap* src, int sx, int sy, int sw, int sh);
+void bitmap_blit_copy(bitmap_t* dest, int dx, int dy,
+                      const bitmap_t* src, int sx, int sy, int sw, int sh);
 
 #ifdef __cplusplus
 }

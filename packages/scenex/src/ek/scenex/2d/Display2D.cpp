@@ -123,10 +123,10 @@ Text2D::Text2D(String text, TextFormat format) : Drawable2D<Text2D>(),
 float findTextScale(vec2_t textSize, rect_t rc) {
     auto textScale = 1.0f;
     if (rc.w > 0.0f && textSize.x > 0.0f) {
-        textScale = std::min(textScale, rc.w / textSize.x);
+        textScale = MIN(textScale, rc.w / textSize.x);
     }
     if (rc.h > 0.0f && textSize.y > 0.0f) {
-        textScale = std::min(textScale, rc.h / textSize.y);
+        textScale = MIN(textScale, rc.h / textSize.y);
     }
     return textScale;
 }

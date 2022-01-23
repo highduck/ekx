@@ -3,7 +3,7 @@
 #include <ek/math.h>
 #include <ek/hash.h>
 #include <ek/rr.h>
-#include <ek/scenex/data/SGFile.hpp>
+#include <ek/format/SGFile.hpp>
 #include <ecxx/ecxx_fwd.hpp>
 
 namespace ek {

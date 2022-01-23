@@ -2,7 +2,6 @@
 
 #include "world.hpp"
 #include <ek/ds/FixedArray.hpp>
-#include <algorithm>
 
 namespace ecs {
 

@@ -23,7 +23,7 @@ AppBox::AppBox(AppBoxConfig config_) :
 
     billing::initialize(config.billingKey.c_str());
     ek_admob_init(config.admob);
-    Locator::create<Ads>(config.ads);
+    ads_init(config.ads);
     ek_game_services_init();
 
     // initialize translations
@@ -197,8 +197,8 @@ void AppBox::initLanguageButton(ecs::EntityApi e) {
         btn.get<Button>().clicked += [] {
             auto& lm = Localization::instance;
             auto& locales = lm.getAvailableLanguages();
-            auto locale = std::find(locales.begin(), locales.end(), lm.getLanguage());
-            if (locale != locales.end()) {
+            String* locale = locales.find(lm.getLanguage());
+            if (locale) {
                 ++locale;
                 if (locale == locales.end()) {
                     locale = locales.begin();

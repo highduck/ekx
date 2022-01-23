@@ -20,7 +20,7 @@
 #include "GameDisplay.hpp"
 #include "GameAppDispatcher.hpp"
 #include "RootAppListener.hpp"
-#include "ek/rnd.h"
+#include <ek/rnd.h>
 
 
 

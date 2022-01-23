@@ -4,7 +4,7 @@
 
 #include <ek/canvas.h>
 #include <ek/scenex/base/Node.hpp>
-#include <ek/scenex/data/SGFile.hpp>
+#include <ek/format/SGFile.hpp>
 
 namespace ek {
 

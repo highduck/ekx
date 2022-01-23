@@ -41,7 +41,7 @@ namespace ek {
 
 /*** Save Image ***/
 
-void ek_bitmap_save_png(const ek_bitmap* bitmap, const char* path, bool alpha) {
+void ek_bitmap_save_png(const bitmap_t* bitmap, const char* path, bool alpha) {
     EK_ASSERT(bitmap != NULL);
     EK_ASSERT(bitmap->pixels != NULL);
 
@@ -75,7 +75,7 @@ void ek_bitmap_save_png(const ek_bitmap* bitmap, const char* path, bool alpha) {
     }
 }
 
-void ek_bitmap_save_jpg(const ek_bitmap* bitmap, const char* path, bool alpha) {
+void ek_bitmap_save_jpg(const bitmap_t* bitmap, const char* path, bool alpha) {
     // require RGBA non-premultiplied alpha
     //undo_premultiply_image(img);
     const int w = (int) bitmap->w;
@@ -155,7 +155,7 @@ void save(ImageSet& images, const char* output) {
             if (image.bitmap.pixels) {
                 auto* bitmap = &image.bitmap;
                 // require RGBA non-premultiplied alpha
-                ek_bitmap_unpremultiply(bitmap);
+                bitmap_unpremultiply(bitmap);
 
                 auto nodeSprite = nodeResolution.append_child("image");
 //                snprintf(path, 1024, "%s/%d.png", output, idx++);

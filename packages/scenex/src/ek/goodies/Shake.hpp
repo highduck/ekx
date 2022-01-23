@@ -24,7 +24,7 @@ struct Shaker {
     vec2_t maxScale = vec2(0.25f, 0.25f);
 
     void start(float v = 1.0f) {
-        state = std::max(v, state);
+        state = MAX(v, state);
     }
 
     static void updateAll();

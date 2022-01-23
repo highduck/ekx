@@ -19,7 +19,7 @@ typedef enum sprite_pack_format {
     SPRITE_PACK_ALPHA = 0x10
 } sprite_pack_format;
 
-void sprite_pack_image_save(const ek_bitmap* bitmap, const char* path, uint32_t format_flags);
+void sprite_pack_image_save(const bitmap_t* bitmap, const char* path, uint32_t format_flags);
 
 #ifdef __cplusplus
 }

@@ -80,19 +80,19 @@ void AdMobWrapper::onAdmobEvent(ek_admob_event_type event) {
     }
 }
 
-Pointer<AdMobWrapper> AdMobWrapper::create(bool devMode) {
+AdMobWrapper* AdMobWrapper::create(bool devMode) {
     (void) devMode;
 
 #if EK_ADMOB_SIMULATOR
     if (devMode) {
-        return Pointer<AdMobSimulator>::make();
+        return new AdMobSimulator();
     }
 #endif
 
     if (ek_admob_supported()) {
-        return Pointer<AdMobWrapper>::make();
+        return new AdMobWrapper();
     }
-    return Pointer<AdMobNull>::make();
+    return new AdMobNull();
 }
 
 }

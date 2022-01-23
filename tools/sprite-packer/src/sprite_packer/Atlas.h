@@ -5,8 +5,6 @@
 
 namespace sprite_packer {
 
-class Bitmap;
-
 struct ResolutionConfig {
     float scale = 1.0f;
     int maxWidth = 2048;
@@ -56,7 +54,7 @@ struct SpriteData {
     uint8_t padding = 1;
 
     // reference image;
-    ek_bitmap bitmap = {0, 0, nullptr};
+    bitmap_t bitmap = {0, 0, nullptr};
 };
 
 struct PageData {
@@ -64,7 +62,7 @@ struct PageData {
     uint16_t h;
     std::vector<SpriteData> sprites;
     std::string image_path;
-    ek_bitmap bitmap;
+    bitmap_t bitmap;
 
 //    template<typename S>
 //    void serialize(IO <S>& io) {
@@ -120,7 +118,7 @@ struct Atlas {
     ~Atlas() {
         for (auto& res: resolutions) {
             for (auto& page: res.pages) {
-                ek_bitmap_free(&page.bitmap);
+                bitmap_free(&page.bitmap);
             }
         }
     }

@@ -1,7 +1,7 @@
 #include <vector>
 #include <pugixml.hpp>
 #include "xfl/Doc.hpp"
-#include <ek/scenex/data/SGFile.hpp>
+#include <ek/format/SGFile.hpp>
 #include <ek/log.h>
 #include "sxg/SGBuilder.hpp"
 #include "sxg/RenderElement.hpp"
@@ -78,7 +78,7 @@ void runFlashFilePrerender(int argc, char** argv) {
             auto spr = renderElement(doc, *item, opts);
             ek_bitmap_save_png(&spr.bitmap, output, alpha);
             if (spr.bitmap.pixels) {
-                ek_bitmap_free(&spr.bitmap);
+                bitmap_free(&spr.bitmap);
             }
             i += 6;
         }

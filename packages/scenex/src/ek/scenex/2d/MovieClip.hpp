@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/scenex/data/SGFile.hpp>
+#include <ek/format/SGFile.hpp>
 #include <ek/scenex/SceneFactory.hpp>
 
 #include <ek/ds/String.hpp>

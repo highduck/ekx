@@ -6,9 +6,7 @@
 #include <ek/math.h>
 #include <ek/bitset.h>
 #include <ek/time.h>
-#include "ek/log.h"
-
-using namespace ek;
+#include <ek/log.h>
 
 struct random_estimator_t {
     uint64_t* bitset;

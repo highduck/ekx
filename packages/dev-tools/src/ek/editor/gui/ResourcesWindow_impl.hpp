@@ -8,7 +8,7 @@
 #include <ek/scenex/2d/Atlas.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/scenex/2d/DynamicAtlas.hpp>
-#include <ek/scenex/data/SGFile.hpp>
+#include <ek/format/SGFile.hpp>
 #include <ek/scenex/text/Font.hpp>
 #include <ek/scenex/text/TrueTypeFont.hpp>
 #include <ek/scenex/text/BitmapFont.hpp>

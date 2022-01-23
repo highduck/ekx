@@ -2,15 +2,13 @@
 
 #include <ek/math.h>
 #include "Bitmap.h"
-#include "ek/bitmap.h"
+#include <ek/bitmap.h>
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
 #include <string>
 #include <unordered_map>
-
-#define BMFE_LOG_F(x, ...) printf(x, __VA_ARGS__)
 
 namespace pugi {
 
@@ -68,7 +66,7 @@ struct Image {
     uint8_t padding = 1;
 
     // reference image;
-    ek_bitmap bitmap = {};
+    bitmap_t bitmap = {};
 };
 
 struct Resolution {
@@ -111,28 +109,26 @@ struct BuildBitmapFontSettings {
 class Glyph {
 public:
     std::vector<uint32_t> codepoints;
-    irect_t box;
-    int32_t advanceWidth;
+    rect_t box;
+    float advance_x;
     std::string sprite_name;
 };
 
 class Font {
 public:
-    // 16 bits, but we need align memory for reading buffer
-    int32_t unitsPerEM;
-    int32_t fontSize;
-    int32_t lineHeight;
-    int32_t ascender;
-    int32_t descender;
+    float fontSize;
+    float lineHeight;
+    float ascender;
+    float descender;
     std::vector<Glyph> glyphs;
 };
 
 /// filters functions
-irect_t get_filtered_rect(const irect_t rc, const std::vector<Filter>& filters);
+irect_t get_filtered_rect(irect_t rc, const std::vector<Filter>& filters);
 
 std::vector<Filter> apply_scale(const std::vector<Filter>& filters, float scale);
 
-void apply(ek_bitmap* bitmap, const Filter& filter, const irect_t bounds);
+void apply(bitmap_t* bitmap, const Filter& filter, irect_t bounds);
 
 void apply(const std::vector<Filter>& filters, Image& image, float scale);
 

@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-void ek_bitmap_alloc(ek_bitmap* bitmap, int width, int height) {
+void bitmap_alloc(bitmap_t* bitmap, int width, int height) {
     EK_ASSERT(bitmap != 0);
     EK_ASSERT(width > 0);
     EK_ASSERT(height > 0);
@@ -16,7 +16,7 @@ void ek_bitmap_alloc(ek_bitmap* bitmap, int width, int height) {
     bitmap->pixels = calloc(1, width * height * 4);
 }
 
-void ek_bitmap_copy(ek_bitmap dest, ek_bitmap src) {
+void bitmap_copy(bitmap_t dest, bitmap_t src) {
     EK_ASSERT(dest.w == src.w && dest.h == src.h);
     EK_ASSERT(dest.pixels);
     EK_ASSERT(src.pixels);
@@ -24,7 +24,7 @@ void ek_bitmap_copy(ek_bitmap dest, ek_bitmap src) {
     memcpy(dest.pixels, src.pixels, size);
 }
 
-void ek_bitmap_clone(ek_bitmap* dest, ek_bitmap src) {
+void bitmap_clone(bitmap_t* dest, bitmap_t src) {
     free(dest->pixels);
     dest->w = src.w;
     dest->h = src.h;
@@ -33,47 +33,36 @@ void ek_bitmap_clone(ek_bitmap* dest, ek_bitmap src) {
     memcpy(dest->pixels, src.pixels, size);
 }
 
-void ek_bitmap_free(ek_bitmap* bitmap) {
+void bitmap_free(bitmap_t* bitmap) {
     free(bitmap->pixels);
     bitmap->pixels = NULL;
 }
 
-void ek_bitmap_swizzle_xwzy(ek_bitmap* bitmap) {
-    uint32_t* it = bitmap->pixels;
-    const uint32_t* end = it + (bitmap->w * bitmap->h);
+void bitmap_swizzle_xwzy(bitmap_t* bitmap) {
+    color_t* it = bitmap->pixels;
+    const color_t* end = it + (bitmap->w * bitmap->h);
     while (it != end) {
-        *it = swizzle_xwzy_byte4(*it);
+        it->value = swizzle_xwzy_u8(it->value);
         ++it;
     }
 }
 
-void ek_bitmap_fill(ek_bitmap* bitmap, uint32_t color) {
-    uint32_t* pixels = bitmap->pixels;
+void bitmap_fill(bitmap_t* bitmap, color_t color) {
+    color_t* pixels = bitmap->pixels;
     const int size = bitmap->w * bitmap->h;
     for (int i = 0; i < size; ++i) {
         pixels[i] = color;
     }
 }
 
-typedef union ek_pix_ {
-    uint32_t u32;
-
-    struct {
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
-        uint8_t a;
-    };
-} ek_pix_;
-
-void ek_bitmap_premultiply(ek_bitmap* bitmap) {
-    ek_pix_* it = (ek_pix_*) bitmap->pixels;
-    const ek_pix_* end = it + (bitmap->w * bitmap->h);
+void bitmap_premultiply(bitmap_t* bitmap) {
+    color_t* it = (color_t*) bitmap->pixels;
+    const color_t* end = it + (bitmap->w * bitmap->h);
 
     while (it < end) {
         const uint8_t a = it->a;
         if (!a) {
-            it->u32 = 0;
+            it->value = 0;
         } else if (a ^ 0xFF) {
             it->r = ((uint16_t) it->r * a) / 0xFFu;
             it->g = ((uint16_t) it->g * a) / 0xFFu;
@@ -87,9 +76,9 @@ inline static uint8_t saturate_u8(uint16_t v) {
     return v < 255 ? v : 255;
 }
 
-void ek_bitmap_unpremultiply(ek_bitmap* bitmap) {
-    ek_pix_* it = (ek_pix_*) bitmap->pixels;
-    const ek_pix_* end = it + (bitmap->w * bitmap->h);
+void bitmap_unpremultiply(bitmap_t* bitmap) {
+    color_t* it = (color_t*) bitmap->pixels;
+    const color_t* end = it + (bitmap->w * bitmap->h);
 
     while (it < end) {
         const uint8_t a = it->a;
@@ -109,7 +98,7 @@ void ek_bitmap_unpremultiply(ek_bitmap* bitmap) {
 //extern stbi_uc* stbi_load_from_memory(stbi_uc const* buffer, int len, int* x, int* y, int* channels_in_file,
 //                                      int desired_channels) ;
 //
-void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool pma) {
+void bitmap_decode(bitmap_t* bitmap, const void* data, uint32_t size, bool pma) {
     log_debug("decode bitmap: canvas_begin");
     EK_ASSERT(size > 0);
     EK_ASSERT(bitmap != 0);
@@ -130,7 +119,7 @@ void ek_bitmap_decode(ek_bitmap* bitmap, const void* data, uint32_t size, bool p
         if (pma) {
             log_debug("decode image: premultiply alpha");
             EK_PROFILE_SCOPE("pma");
-            ek_bitmap_premultiply(bitmap);
+            bitmap_premultiply(bitmap);
         }
     } else {
 #ifndef NDEBUG
@@ -162,19 +151,19 @@ static void clip_rects(int src_w, int src_h, int dest_w, int dest_h,
     *dest_rect = dest_rc;
 }
 
-static uint32_t get_pixel_unsafe(const ek_bitmap* bitmap, int x, int y) {
+static color_t get_pixel_unsafe(const bitmap_t* bitmap, int x, int y) {
     //EK_ASSERT(pixel_in_bounds(image, pos));
     return bitmap->pixels[y * bitmap->w + x];
 }
 
-static void set_pixel_unsafe(ek_bitmap* bitmap, int x, int y, uint32_t pixel) {
+static void set_pixel_unsafe(bitmap_t* bitmap, int x, int y, color_t pixel) {
     //EK_ASSERT(pixel_in_bounds(image, pos));
     bitmap->pixels[y * bitmap->w + x] = pixel;
 }
 
 
-void bitmap_copy_ccw90(ek_bitmap* dest, int dx, int dy,
-                       const ek_bitmap* src, int sx, int sy, int sw, int sh) {
+void bitmap_blit_copy_ccw90(bitmap_t* dest, int dx, int dy,
+                            const bitmap_t* src, int sx, int sy, int sw, int sh) {
     irect_t dest_rc = {{dx, dy, /* swap w/h here */ sh, sw}};
     irect_t src_rc = {{sx, sy, sw, sh}};
     clip_rects(src->w, src->h,
@@ -189,7 +178,7 @@ void bitmap_copy_ccw90(ek_bitmap* dest, int dx, int dy,
 
     for (int32_t y = 0; y < src_rc.h; ++y) {
         for (int32_t x = 0; x < src_rc.w; ++x) {
-            const uint32_t pixel = get_pixel_unsafe(src, src_rc.x + x, src_rc.y + y);
+            const color_t pixel = get_pixel_unsafe(src, src_rc.x + x, src_rc.y + y);
             const int tx = dest_rc.x + y;
             const int ty = dest_rc.y + src_rc.w - x;
             set_pixel_unsafe(dest, tx, ty, pixel);
@@ -197,8 +186,8 @@ void bitmap_copy_ccw90(ek_bitmap* dest, int dx, int dy,
     }
 }
 
-void bitmap_copy(ek_bitmap* dest, int dx, int dy,
-                 const ek_bitmap* src, int sx, int sy, int sw, int sh) {
+void bitmap_blit_copy(bitmap_t* dest, int dx, int dy,
+                      const bitmap_t* src, int sx, int sy, int sw, int sh) {
     irect_t dest_rc = {{dx, dy, sw, sh}};
     irect_t src_rc = {{sx, sy, sw, sh}};
     clip_rects(src->w, src->h,
@@ -207,8 +196,35 @@ void bitmap_copy(ek_bitmap* dest, int dx, int dy,
 
     for (int y = 0; y < src_rc.h; ++y) {
         for (int x = 0; x < src_rc.w; ++x) {
-            const uint32_t pixel = get_pixel_unsafe(src, src_rc.x + x, src_rc.y + y);
+            const color_t pixel = get_pixel_unsafe(src, src_rc.x + x, src_rc.y + y);
             set_pixel_unsafe(dest, dest_rc.x + x, dest_rc.y + y, pixel);
+        }
+    }
+}
+
+void bitmap_blit(bitmap_t dest, const bitmap_t src) {
+    EK_ASSERT(dest.w >= src.w);
+    EK_ASSERT(dest.h >= src.h);
+    EK_ASSERT(dest.pixels);
+    EK_ASSERT(src.pixels);
+    for (int y = 0; y < src.h; ++y) {
+        const color_t* src_row = bitmap_row(src, y);
+        color_t* dst_row = bitmap_row(dest, y);
+        for (int x = 0; x < src.w; ++x) {
+            color_t* d = dst_row + x;
+            const color_t* s = src_row + x;
+            const uint8_t a = s->a;
+            if (a == 0) {
+            } else if (a == 0xFFu) {
+                *d = *s;
+            } else {
+                const uint32_t alpha_inv = (0xFFu - a) * 258u;
+                //t->r = (r+1 + (r >> 8)) >> 8; // fast way to divide by 255
+                d->a = u8_add_sat(s->a, (uint8_t) ((d->a * alpha_inv) >> 16u));
+                d->r = u8_add_sat(s->r, (uint8_t) ((d->r * alpha_inv) >> 16u));
+                d->g = u8_add_sat(s->g, (uint8_t) ((d->g * alpha_inv) >> 16u));
+                d->b = u8_add_sat(s->b, (uint8_t) ((d->b * alpha_inv) >> 16u));
+            }
         }
     }
 }

@@ -62,7 +62,7 @@ bool GameDisplay::beginOverlayDev() {
 
         sg_begin_default_pass(pass_action, w, h);
 
-        const float scale = std::min(fw / info.size.x, fh / info.size.y);
+        const float scale = MIN(fw / info.size.x, fh / info.size.y);
         // draw offscreen
 
         sg_push_debug_group("Game viewport");

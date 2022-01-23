@@ -26,7 +26,7 @@ void save(ImageCollection& images, const char* output) {
                 auto nodeSprite = nodeResolution.append_child("image");
                 snprintf(path, 1024, "%s/%d.bmp", output, idx++);
                 // require RGBA non-premultiplied alpha
-                ek_bitmap_unpremultiply(&bitmap);
+                bitmap_unpremultiply(&bitmap);
                 stbi_write_bmp(path, bitmap.w, bitmap.h, 4, bitmap.pixels);
 
                 nodeSprite.append_attribute("path").set_value(path);

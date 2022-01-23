@@ -4,7 +4,7 @@
 #include <ek/ds/Array.hpp>
 #include <ek/ds/String.hpp>
 #include <ek/gfx.h>
-#include <ek/scenex/data/Model3D.hpp>
+#include <ek/format/Model3D.hpp>
 #include <ek/util/Type.hpp>
 
 namespace ek {

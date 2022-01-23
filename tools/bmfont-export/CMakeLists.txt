@@ -30,6 +30,7 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC freetype
         PUBLIC stb
         PUBLIC ekx::std
+        PUBLIC ekx::sg-file
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

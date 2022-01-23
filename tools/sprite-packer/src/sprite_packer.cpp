@@ -1,15 +1,15 @@
 #include "sprite_packer/AtlasPack.h"
-#include "ek/log.h"
+#include <ek/log.h>
 
 namespace sprite_packer {
 
-uint32_t* cast_pU8_to_pU32(uint8_t* p) {
+uint32_t* cast_align_4(void* p) {
     EK_ASSERT(((uintptr_t) p % 4u) == 0);
     return (uint32_t*) p;
 }
 
-ek_bitmap load_bitmap32(const char* filepath) {
-    ek_bitmap result = {};
+bitmap_t load_bitmap32(const char* filepath) {
+    bitmap_t result = {};
     FILE* stream = fopen(filepath, "rb");
     if (!stream) {
         return result;
@@ -23,9 +23,10 @@ ek_bitmap load_bitmap32(const char* filepath) {
     fclose(stream);
     if (success) {
         int channels = 0;
-        uint8_t* pixels = stbi_load_from_memory(buf, (int) (size & 0x7FFFFFFFu), &result.w, &result.h, &channels,
+        void* pixels = stbi_load_from_memory(buf, (int) (size & 0x7FFFFFFFu), &result.w, &result.h, &channels,
                                                 STBI_rgb_alpha);
-        result.pixels = cast_pU8_to_pU32(pixels);
+        result.pixels = (color_t*)pixels;
+        //result.pixels = (color_t*)cast_align_4(pixels);
     }
     free(buf);
     return result;
