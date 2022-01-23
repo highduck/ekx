@@ -5,8 +5,8 @@
 #endif
 
 #include "native/native.h"
-#include "native/device.c.h"
-#include "native/mixer.c.h"
+#include "native/device.c"
+#include "native/mixer.c"
 
 #if defined(__ANDROID__) && defined(AUPH_SETUP_EK_APP)
 #include <ek/app_native.h>
@@ -113,8 +113,6 @@ auph_bus_obj* auph_get_bus_obj(int name) {
 }
 
 void auph_setup(void) {
-    AUPH_LOG("auph setup");
-
 #if defined(__ANDROID__) && defined(AUPH_SETUP_EK_APP)
     auph_android_setup(ek_android_jni, ek_android_activity(), ek_android_assets_object());
 #endif
@@ -138,8 +136,6 @@ void auph_setup(void) {
 }
 
 void auph_shutdown(void) {
-    AUPH_LOG("auph shutdown");
-
     auph_audio_device_term(&auph_ctx.device);
     auph_ctx.state = 0;
 }

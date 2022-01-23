@@ -15,4 +15,4 @@
 #define AUPH_LOG(x) EK_DEBUG(x)
 #define AUPH_SETUP_EK_APP
 
-#include <auph/auph.c.h>
+#include <auph/auph.c>

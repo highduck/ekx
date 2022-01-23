@@ -10,19 +10,19 @@
 
 #ifdef AUPH_WAV
 
-#include "buffer_wav.c.h"
+#include "buffer_wav.c"
 
 #endif
 
 #ifdef AUPH_MP3
 
-#include "buffer_mp3.c.h"
+#include "buffer_mp3.c"
 
 #endif
 
 #ifdef AUPH_OGG
 
-#include "buffer_ogg.c.h"
+#include "buffer_ogg.c"
 
 #endif
 

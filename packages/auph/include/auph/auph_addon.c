@@ -5,6 +5,7 @@
 #endif
 
 #include <auph/auph.h>
+#include <ek/assert.h>
 
 static int F2U(float x) {
     return (int) (x * AUPH_UNIT);
@@ -103,7 +104,7 @@ void auph_resume(int name) {
 int auph_global_mutes = 0;
 
 void auph_mute_push() {
-    AUPH_ASSERT(auph_global_mutes >= 0);
+    EK_ASSERT(auph_global_mutes >= 0);
     if (auph_global_mutes == 0) {
         auph_set_gain(AUPH_BUS_MASTER.id, 0.0f);
     }
@@ -112,7 +113,7 @@ void auph_mute_push() {
 
 void auph_mute_pop() {
     --auph_global_mutes;
-    AUPH_ASSERT(auph_global_mutes >= 0);
+    EK_ASSERT(auph_global_mutes >= 0);
     if (auph_global_mutes == 0) {
         auph_set_gain(AUPH_BUS_MASTER.id, 1.0f);
     }

@@ -1,13 +1,12 @@
-#include "std/assert.c.h"
-#include "std/base64.c.h"
-#include "std/bitset.c.h"
-#include "std/buf.c.h"
-#include "std/log.c.h"
-#include "std/print.c.h"
-#include "std/string.c.h"
-#include "std/time.c.h"
-#include "std/utf8.c.h"
-
+#include <ek/assert.c>
+#include <ek/base64.c>
+#include <ek/bitset.c>
+#include <ek/buf.c>
+#include <ek/log.c>
+#include <ek/print.c>
+#include <ek/string.c>
+#include <ek/time.c>
+#include <ek/utf8.c>
 #include <ek/io.c>
 #include <ek/rnd.c>
 #include <ek/ids.c>
@@ -17,9 +16,9 @@
 #include <ek/hash/hsp.c>
 
 #ifdef __EMSCRIPTEN__
-#include "std/sparse_array.c.h"
+#include <ek/sparse_array.c>
 #else
-#include "std/sparse_array_vm.c.h"
+#include <ek/sparse_array_vm.c>
 #endif
 
 // non-standard
