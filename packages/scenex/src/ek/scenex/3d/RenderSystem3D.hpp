@@ -34,7 +34,6 @@ public:
     ecs::EntityApi camera;
 };
 
-EK_DECLARE_TYPE(RenderSystem3D);
-
 }
 
+extern ek::RenderSystem3D* g_render_system_3d;

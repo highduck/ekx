@@ -1,6 +1,6 @@
 #include <ek/canvas.h>
 #include <ek/scenex/InteractionSystem.hpp>
-#include <ek/util/ServiceLocator.hpp>
+
 #include <ek/time.h>
 #include <ek/scenex/base/Node.hpp>
 #include "Camera2D.hpp"
@@ -12,12 +12,12 @@
 namespace ek {
 
 void debugDrawPointer(Camera2D& camera) {
-    auto& im = Locator::ref<InteractionSystem>();
-    auto v = im.pointerScreenPosition_;
+    auto* im = g_interaction_system;
+    auto v = im->pointerScreenPosition_;
     v = vec2_transform(v, camera.screenToWorldMatrix);
     float t = TimeLayer::Root->total;
     canvas_set_empty_image();
-    if (im.pointerDown_) {
+    if (im->pointerDown_) {
         canvas_fill_circle(vec3_v(v, 12 + 2 * sinf(t * 8)), ARGB(0x00FFFF00), ARGB(0x77FF0000), 10);
     }
     else {
@@ -51,8 +51,7 @@ void drawBox(const rect_t rc, const mat3x2_t m, color_t color1, color_t color2,
 }
 
 void debugDrawHitTarget(Camera2D& camera) {
-    auto& im = Locator::ref<InteractionSystem>();
-    auto target = im.getHitTarget();
+    auto target = g_interaction_system->getHitTarget();
     if (!target) {
         return;
     }

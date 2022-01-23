@@ -12,7 +12,7 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 #include <ek/time.h>
-#include <ek/util/ServiceLocator.hpp>
+
 #include <ek/audio.h>
 #include <ek/util/Signal.hpp>
 #include <utility>
@@ -22,7 +22,13 @@
 #include "RootAppListener.hpp"
 #include <ek/rnd.h>
 
+namespace ek {
+class basic_application;
+}
 
+extern ek::basic_application* g_game_app;
+
+void init_game_app(ek::basic_application* game);
 
 namespace ek {
 
@@ -72,6 +78,7 @@ public:
     virtual void preload();
 
     void onFrame();
+
     void onEvent(ek_app_event event);
 
 public:
@@ -102,8 +109,6 @@ protected:
     virtual void onFrameEnd() {}
 };
 
-EK_DECLARE_TYPE(basic_application);
-
 void launcher_on_frame();
 
 void setup_resource_managers();
@@ -121,11 +126,10 @@ inline void run_app() {
     setup_text_engine();
 
 #ifdef EK_DEV_TOOLS
-    Editor::inspectorEnabled = true;
-    Editor::settings.load();
-    if (Editor::settings.width > 0 && Editor::settings.height > 0) {
-        ek_app.config.window_width = Editor::settings.width;
-        ek_app.config.window_height = Editor::settings.height;
+    init_editor_config();
+    if (g_editor_config->width > 0 && g_editor_config->height > 0) {
+        ek_app.config.window_width = g_editor_config->width;
+        ek_app.config.window_height = g_editor_config->height;
     }
 #endif
 
@@ -135,11 +139,9 @@ inline void run_app() {
     // setup resources before app constructor, for example because Profiler requires font id resolving
     setup_resource_managers();
 
-    ek_app.on_ready = []{Locator::create<basic_application, T>();};
+    ek_app.on_ready = [] { init_game_app(new T()); };
     ek_app.on_frame = launcher_on_frame;
     ek_app.on_event = root_app_on_event;
 }
 
 }
-
-

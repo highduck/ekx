@@ -492,3 +492,5 @@ void setup_res_mesh3d(void) {
     rr->num = 1;
     rr->data_size = sizeof(R->data[0]);
 }
+
+ek::RenderSystem3D* g_render_system_3d = nullptr;

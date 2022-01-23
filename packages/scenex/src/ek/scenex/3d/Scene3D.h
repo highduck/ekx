@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ecxx/ecxx.hpp>
-#include <ek/util/ServiceLocator.hpp>
+
 #include <ek/scenex/app/GameDisplay.hpp>
 #include "Camera3D.hpp"
 #include "StaticMesh.hpp"
@@ -12,12 +12,14 @@
 namespace ek {
 
 void initScene3D() {
+    EK_ASSERT(!g_render_system_3d);
+
     ECX_COMPONENT(Transform3D);
     ECX_COMPONENT(Camera3D);
     ECX_COMPONENT(Light3D);
     ECX_COMPONENT(MeshRenderer);
 
-    Locator::create<RenderSystem3D>();
+    g_render_system_3d = new ek::RenderSystem3D();
 
     setup_res_material3d();
     setup_res_mesh3d();
@@ -25,19 +27,17 @@ void initScene3D() {
 
 // onPreRender
 void preRenderScene3D() {
-    auto* r3d = Locator::get<RenderSystem3D>();
-    if (r3d) {
+    if (g_render_system_3d) {
         Transform3D::updateAll();
-        r3d->prepare();
-        r3d->prerender();
+        g_render_system_3d->prepare();
+        g_render_system_3d->prerender();
     }
 }
 
 // onRenderSceneBefore
 void renderScene3D(GameDisplay& display) {
-    auto* r3d = Locator::get<RenderSystem3D>();
-    if (r3d) {
-        r3d->render(display.info.size.x, display.info.size.y);
+    if (g_render_system_3d) {
+        g_render_system_3d->render(display.info.size.x, display.info.size.y);
     }
 }
 

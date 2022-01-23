@@ -93,9 +93,7 @@ float ScreenTransitionState::getNextProgress() const {
 
 /** GameScreenManager **/
 
-GameScreenManager::GameScreenManager(ecs::EntityApi layer_) :
-        layer{layer_} {
-}
+GameScreenManager::GameScreenManager() = default;
 
 void GameScreenManager::setScreen(string_hash_t name) {
     if (transition.active) {
@@ -242,4 +240,10 @@ void GameScreenManager::defaultTransitionEffect(GameScreenManager* gsm) {
         transform.setPosition({}, {}, rect_center(state.screenRect));
     }
 }
+}
+
+ek::GameScreenManager* g_game_screen_manager = nullptr;
+void init_game_screen_manager(void) {
+    EK_ASSERT(!g_game_screen_manager);
+    g_game_screen_manager = new ek::GameScreenManager();
 }

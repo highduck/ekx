@@ -7,10 +7,8 @@
 #include <ek/scenex/base/Interactive.hpp>
 #include <billing.hpp>
 #include <ek/scenex/AudioManager.hpp>
-#include <ek/util/ServiceLocator.hpp>
 #include <utility>
 #include <ek/game_services.h>
-#include <ek/goodies/GameScreen.hpp>
 #include <ek/scenex/Localization.hpp>
 #include "Ads.hpp"
 
@@ -81,17 +79,16 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
     {
         auto btn = find(e, H("remove_ads"));
         if (btn) {
-            auto& ads = Locator::ref<Ads>();
-            if (ads.isRemoved()) {
+            if (g_ads->removed) {
                 btn.get<Node>().setVisible(false);
             } else {
-                ads.onRemoved << [btn] {
+                g_ads->onRemoved << [btn] {
                     if (btn.isAlive()) {
                         btn.get<Node>().setVisible(false);
                     }
                 };
                 btn.get<Button>().clicked += [] {
-                    Locator::ref<Ads>().purchaseRemoveAds();
+                    g_ads->purchaseRemoveAds();
                 };
             }
         }
@@ -107,35 +104,34 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
 
     // Settings
     {
-        auto& audio = Locator::ref<AudioManager>();
         {
             auto btn = find(e, H("sound"));
             if (btn) {
-                btn.get<Button>().clicked += [btn, &audio] {
-                    set_state_on_off(btn, audio.sound.toggle());
+                btn.get<Button>().clicked += [btn] {
+                    set_state_on_off(btn, g_audio->sound.toggle());
                 };
-                set_state_on_off(btn, audio.sound.enabled());
+                set_state_on_off(btn, g_audio->sound.enabled());
             }
         }
         {
             auto btn = find(e, H("music"));
             if (btn) {
-                btn.get<Button>().clicked += [btn, &audio] {
-                    set_state_on_off(btn, audio.music.toggle());
+                btn.get<Button>().clicked += [btn] {
+                    set_state_on_off(btn, g_audio->music.toggle());
                 };
-                set_state_on_off(btn, audio.music.enabled());
+                set_state_on_off(btn, g_audio->music.enabled());
             }
         }
         {
             auto btn = find(e, H("vibro"));
             if (btn) {
-                btn.get<Button>().clicked += [btn, &audio] {
-                    set_state_on_off(btn, audio.vibro.toggle());
-                    if (audio.vibro.enabled()) {
-                        audio.vibrate(50);
+                btn.get<Button>().clicked += [btn] {
+                    set_state_on_off(btn, g_audio->vibro.toggle());
+                    if (g_audio->vibro.enabled()) {
+                        g_audio->vibrate(50);
                     }
                 };
-                set_state_on_off(btn, audio.vibro.enabled());
+                set_state_on_off(btn, g_audio->vibro.enabled());
             }
         }
 
@@ -237,4 +233,10 @@ void Achievement::run() const {
     ek_achievement_update(code_.c_str(), count_);
 }
 
+}
+
+ek::AppBox* g_app_box = nullptr;
+void init_app_box(ek::AppBoxConfig config) {
+    EK_ASSERT(!g_app_box);
+    g_app_box = new ek::AppBox(config);
 }

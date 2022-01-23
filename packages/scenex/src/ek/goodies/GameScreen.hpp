@@ -93,7 +93,7 @@ public:
 
     void(*transitionEffect)(GameScreenManager* gsm) = defaultTransitionEffect;
 
-    explicit GameScreenManager(ecs::EntityApi layer_);
+    GameScreenManager();
 
     void setScreen(string_hash_t name);
 
@@ -109,7 +109,7 @@ public:
     static void defaultTransitionEffect(GameScreenManager* gsm);
 };
 
-EK_DECLARE_TYPE(GameScreenManager);
-
 }
 
+extern ek::GameScreenManager* g_game_screen_manager;
+void init_game_screen_manager();

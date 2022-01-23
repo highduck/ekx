@@ -27,11 +27,11 @@ public:
     }
 
     AdMobSimulator() {
-        Locator::ref<basic_application>().dispatcher.listeners.push_back(this);
+        g_game_app->dispatcher.listeners.push_back(this);
     }
 
     ~AdMobSimulator() override {
-        Locator::ref<basic_application>().dispatcher.listeners.remove(this);
+        g_game_app->dispatcher.listeners.remove(this);
     }
 
     void showInterstitial(std::function<void()> callback) override {

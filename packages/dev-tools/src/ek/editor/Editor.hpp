@@ -16,6 +16,8 @@
 namespace ek {
 
 struct EditorSettings {
+    int auto_save_counter = 0;
+
     bool notifyAssetsOnScaleFactorChanged = true;
     bool showEditor = true;
     int width = 0;
@@ -31,7 +33,7 @@ class basic_application;
 
 class Editor : public GameAppListener {
 public:
-    explicit Editor(basic_application& app);
+    Editor();
 
     ~Editor() override;
 
@@ -47,9 +49,6 @@ public:
     void onPreRender() override;
 
     void drawGUI();
-
-    static EditorSettings settings;
-    inline static bool inspectorEnabled = false;
 
     static void invalidateSettings();
 
@@ -67,13 +66,12 @@ public:
 
     void load();
     void save();
-
-    basic_application& app;
-public:
-
-    static void initialize();
 };
 
-EK_DECLARE_TYPE(Editor);
-
 }
+
+extern ek::EditorSettings* g_editor_config;
+void init_editor_config(void);
+
+extern ek::Editor* g_editor;
+void init_editor(void);

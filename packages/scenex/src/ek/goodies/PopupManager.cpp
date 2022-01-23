@@ -8,7 +8,7 @@
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
 
-#include <ek/util/ServiceLocator.hpp>
+
 #include <ek/scenex/base/Tween.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
@@ -236,7 +236,7 @@ ecs::EntityApi createBackQuad() {
         if (event == PointerEvent::Down) {
             const auto* state = findComponentInParent<PopupManager>(e);
             if (state && !state->active.empty()) {
-                Locator::ref<InteractionSystem>().sendBackButton();
+                g_interaction_system->sendBackButton();
             }
         }
     };

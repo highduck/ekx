@@ -83,3 +83,9 @@ void AudioManager::setMusicParams(float volume, float pitch) {
 }
 
 }
+
+ek::AudioManager* g_audio = nullptr;
+void init_audio_manager(void) {
+    EK_ASSERT(!g_audio);
+    g_audio = new ek::AudioManager();
+}

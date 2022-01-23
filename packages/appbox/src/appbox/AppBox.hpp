@@ -52,8 +52,6 @@ public:
 private:
 };
 
-EK_DECLARE_TYPE(AppBox);
-
 class Leaderboard {
 public:
     Leaderboard() = delete;
@@ -83,4 +81,7 @@ private:
 };
 
 }
+
+extern ek::AppBox* g_app_box;
+void init_app_box(ek::AppBoxConfig config);
 

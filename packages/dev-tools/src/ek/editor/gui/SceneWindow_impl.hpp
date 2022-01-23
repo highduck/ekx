@@ -171,9 +171,8 @@ void SceneWindow::onDraw() {
         auto target = hitTest(root.get(), wp);
         hoverTarget = ecs::EntityRef{target};
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            auto& hierarchy = Locator::get<Editor>()->hierarchy;
-            hierarchy.select(target);
-            hierarchy.focus(target);
+            g_editor->hierarchy.select(target);
+            g_editor->hierarchy.focus(target);
         }
     }
 }
@@ -256,7 +255,7 @@ void SceneWindow::drawSceneNodeBounds(ecs::EntityApi e) {
             m = mat3x2_mul(view.view2.matrix, transform->matrix);
         }
         rect_t b = disp->getBounds();
-        if (Locator::get<Editor>()->hierarchy.isSelectedInHierarchy(e)) {
+        if (g_editor->hierarchy.isSelectedInHierarchy(e)) {
             drawBox2(b, m, COLOR_WHITE, COLOR_BLACK, true, ARGB(0x77FFFFFF));
         }
         if (hoverTarget.check(e)) {
@@ -287,7 +286,7 @@ void SceneWindow::onPreRender() {
 
 void SceneWindow::drawScene() {
     if (!root.valid()) {
-        root = ecs::EntityRef{Locator::get<basic_application>()->root};
+        root = ecs::EntityRef{g_game_app->root};
     }
 
     canvas_begin_ex({0, 0, display.info.size.x, display.info.size.y}, view.view2.matrix, {0}, {0});
@@ -388,7 +387,7 @@ void SceneWindow::drawToolbar() {
 }
 
 void SceneWindow::manipulateObject2D() {
-    auto& selection = Locator::get<Editor>()->hierarchy.selection;
+    auto& selection = g_editor->hierarchy.selection;
     if (selection.size() > 0 && selection[0].valid()) {
         ecs::EntityApi sel = selection[0].get();
         auto worldMatrix2D = sel.get<WorldTransform2D>().matrix;
@@ -423,7 +422,7 @@ void SceneWindow::manipulateObject2D() {
 }
 
 void SceneWindow::manipulateObject3D() {
-    auto& selection = Locator::get<Editor>()->hierarchy.selection;
+    auto& selection = g_editor->hierarchy.selection;
     if (selection.size() > 0 && selection[0].valid()) {
         ecs::EntityApi sel = selection[0].get();
         auto worldMatrix2D = sel.get<WorldTransform2D>().matrix;

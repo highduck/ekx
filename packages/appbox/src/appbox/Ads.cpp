@@ -33,7 +33,7 @@ Ads::Ads(Ads::Config config) :
 
     removed = checkRemoveAdsPurchase();
     if (!removed) {
-        Locator::ref<basic_application>().dispatcher.listeners.push_back(this);
+        g_game_app->dispatcher.listeners.push_back(this);
     }
 }
 
@@ -116,8 +116,8 @@ Ads::~Ads() {
 
 }
 
-ek::Ads* ads_instance = nullptr;
+ek::Ads* g_ads = nullptr;
 void ads_init(ek::Ads::Config config) {
-    EK_ASSERT(ads_instance == nullptr);
-    ads_instance = new ek::Ads(std::move(config));
+    EK_ASSERT(g_ads == nullptr);
+    g_ads = new ek::Ads(std::move(config));
 }

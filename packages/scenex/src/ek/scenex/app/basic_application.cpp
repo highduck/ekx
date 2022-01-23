@@ -42,6 +42,13 @@
 #include "impl/uitest_impl.hpp"
 #endif
 
+ek::basic_application* g_game_app = nullptr;
+void init_game_app(ek::basic_application* app) {
+    EK_ASSERT(!g_game_app);
+    EK_ASSERT(app);
+    g_game_app = app;
+}
+
 namespace ek {
 
 bool frame_timer_update_from_display_ts(FrameTimer* ft, double* delta) {
@@ -179,11 +186,13 @@ void basic_application::initialize() {
     scale_factor = root.get<Viewport>().output.scale;
 
     EK_DEBUG("base application: initialize InteractionSystem");
-    auto& im = Locator::create<InteractionSystem>(root);
+    init_interaction_system();
+    g_interaction_system->root_ = root;
     EK_DEBUG("base application: initialize input_controller");
-    Locator::create<input_controller>(im, display);
+    init_input_controller();
+    g_input_controller->display_ = &display;
     EK_DEBUG("base application: initialize AudioManager");
-    Locator::create<AudioManager>();
+    init_audio_manager();
 
     EK_DEBUG("base application: initialize Scene");
     auto camera = createNode2D(H("camera"));
@@ -209,11 +218,11 @@ void basic_application::preload() {
 }
 
 void basic_app_on_frame() {
-    Locator::get<basic_application>()->onFrame();
+    g_game_app->onFrame();
 }
 
 void basic_app_on_event(const ek_app_event ev) {
-    Locator::get<basic_application>()->onEvent(ev);
+    g_game_app->onEvent(ev);
 }
 
 void basic_application::onFrame() {
@@ -307,7 +316,7 @@ void basic_application::onFrame() {
         started_ = true;
     }
 
-    Locator::ref<input_controller>().onPostFrame();
+    g_input_controller->onPostFrame();
     dispatcher.onPostFrame();
 
     elapsed = ek_ticks_to_sec(ek_ticks(&timer));
@@ -332,7 +341,7 @@ void basic_application::onEvent(const ek_app_event event) {
         display.update();
     }
 
-    Locator::ref<input_controller>().onEvent(event);
+    g_input_controller->onEvent(event);
 
     dispatcher.onEvent(event);
 
@@ -375,8 +384,8 @@ void launcher_on_frame() {
                     ek_gfx_setup(drawCalls);
                 }
 #ifdef EK_DEV_TOOLS
-                if (Editor::inspectorEnabled) {
-                    Editor::initialize();
+                if (g_editor_config) {
+                    init_editor();
                 }
 #endif
                 break;
@@ -391,11 +400,11 @@ void launcher_on_frame() {
                 break;
             case 3:
                 ++_initializeSubSystemsState;
-                Locator::ref<basic_application>().initialize();
+                g_game_app->initialize();
                 break;
             case 4:
                 ++_initializeSubSystemsState;
-                Locator::ref<basic_application>().preload();
+                g_game_app->preload();
                 break;
             default:
                 ek_app.on_frame = basic_app_on_frame;

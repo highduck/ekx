@@ -6,7 +6,7 @@
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/AudioManager.hpp>
-#include <ek/util/ServiceLocator.hpp>
+
 //#include <ek/firebase/Firebase.h>
 #include <ek/scenex/base/NodeEvents.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
@@ -14,7 +14,7 @@
 namespace ek {
 
 void play_sound(string_hash_t id) {
-    Locator::ref<AudioManager>().play_sound(id);
+    g_audio->play_sound(id);
 }
 
 void start_post_tween(Button& btn) {

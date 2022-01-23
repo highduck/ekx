@@ -27,10 +27,6 @@ public:
 
     void onPurchaseChanged(const billing::PurchaseData& purchase);
 
-    [[nodiscard]] bool isRemoved() const {
-        return removed;
-    }
-
     void purchaseRemoveAds() const;
 
     // TODO: rename, try start commercial break
@@ -48,22 +44,18 @@ public:
     [[nodiscard]] bool isSupported() const;
 
     String price{};
-
+    bool removed = false;
+    Config config_;
+    AdMobWrapper* wrapper = nullptr;
 private:
     void setRemoveAdsPurchaseCache(bool adsRemoved) const;
 
     [[nodiscard]] bool checkRemoveAdsPurchase() const;
 
     void onRemoveAdsPurchased();
-
-private:
-    bool removed = false;
-    Config config_;
-
-    AdMobWrapper* wrapper = nullptr;
 };
 
 }
 
-extern ek::Ads* ads_instance;
+extern ek::Ads* g_ads;
 void ads_init(ek::Ads::Config config);

@@ -4,7 +4,7 @@
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/canvas.h>
-#include <ek/util/ServiceLocator.hpp>
+
 #include <ek/editor/imgui/imgui.hpp>
 #include "Widgets.hpp"
 
@@ -16,11 +16,15 @@ static float getterProfilerTrackValue(void* data, int idx) {
 }
 
 void StatsWindow::onDraw() {
-    auto& app = Locator::ref<basic_application>();
+    auto* base_app = g_game_app;
+    if(!base_app) {
+        return;
+    }
+
     auto stats = canvas.stats;
     const float drawableArea = ek_app.viewport.width * ek_app.viewport.height;
     ImGui::Text("%ld µs | dc: %u | tri: %u | fill: %d%%",
-                (long)(app.frameTimer.deltaTime * 1000000.0f),
+                (long)(base_app->frameTimer.deltaTime * 1000000.0f),
                 stats.draw_calls,
                 stats.triangles,
                 (int)(100.0f * stats.fill_area / drawableArea)
@@ -29,21 +33,18 @@ void StatsWindow::onDraw() {
     auto entitiesAvailable = ecs::ENTITIES_MAX_COUNT - entitiesCount;
     ImGui::Text("%u entities | %u free", entitiesCount - 1, entitiesAvailable);
 
-    auto hitTarget = Locator::ref<InteractionSystem>().getHitTarget();
+    auto hitTarget = g_interaction_system->getHitTarget();
     if (hitTarget) {
         ImGui::Text("Hit Target: %u %s", hitTarget.index, getDebugNodePath(hitTarget).c_str());
     }
 
-    auto* baseApp = Locator::get<basic_application>();
-    if(baseApp) {
-        auto& profiler = baseApp->profiler;
-        for(auto& track : profiler.tracks) {
-            ImGui::PushID(&track);
-            ImGui::PlotLines("", &getterProfilerTrackValue, &track, track.history.size());
-            ImGui::SameLine();
-            ImGui::Text(track.titleFormat, track.name, (int)track.value);
-            ImGui::PopID();
-        }
+    auto& profiler = base_app->profiler;
+    for(auto& track : profiler.tracks) {
+        ImGui::PushID(&track);
+        ImGui::PlotLines("", &getterProfilerTrackValue, &track, track.history.size());
+        ImGui::SameLine();
+        ImGui::Text(track.titleFormat, track.name, (int)track.value);
+        ImGui::PopID();
     }
 }
 

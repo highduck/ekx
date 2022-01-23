@@ -25,24 +25,22 @@ void Editor::onRenderFrame() {
 
 void Editor::onUpdate() {
     //project.update_scale_factor(app_->scale_factor, settings.notifyAssetsOnScaleFactorChanged);
-    gui_.begin_frame(app.frameTimer.deltaTime);
-    if (settings.showEditor) {
+    gui_.begin_frame((float)g_game_app->frameTimer.deltaTime);
+    if (g_editor_config->showEditor) {
         drawGUI();
     }
 }
 
 void Editor::onBeforeFrameBegin() {
-    auto& display = Locator::ref<basic_application>().display;
-    if (settings.showEditor && !display.simulated) {
+    auto& display = g_game_app->display;
+    if (g_editor_config->showEditor && !display.simulated) {
         display.simulated = true;
-    } else if (!settings.showEditor && display.simulated) {
+    } else if (!g_editor_config->showEditor && display.simulated) {
         display.simulated = false;
     }
 }
 
-Editor::Editor(basic_application& app_) :
-        app{app_} {
-
+Editor::Editor() {
     windows.push_back(&scene);
     windows.push_back(&game);
     windows.push_back(&inspector);
@@ -54,11 +52,11 @@ Editor::Editor(basic_application& app_) :
     windows.push_back(&memory);
 
     load();
-    app.dispatcher.listeners.push_back(this);
+    g_game_app->dispatcher.listeners.push_back(this);
 }
 
 Editor::~Editor() {
-    app.dispatcher.listeners.remove(this);
+    g_game_app->dispatcher.listeners.remove(this);
 }
 
 void Editor::load() {
@@ -88,6 +86,8 @@ void Editor::onPostFrame() {
 }
 
 void Editor::onEvent(const ek_app_event& event) {
+    EK_ASSERT(g_editor_config);
+    auto& settings = *g_editor_config;
     switch (event.type) {
         case EK_APP_EVENT_KEY_DOWN:
             if (event.key.code == EK_KEYCODE_A &&
@@ -113,13 +113,7 @@ void Editor::onEvent(const ek_app_event& event) {
     gui_.on_event(event);
 }
 
-void Editor::initialize() {
-    Locator::create<Editor>(Locator::ref<basic_application>());
-}
-
 const char* editorSettingsPath = "editor_settings.xml";
-
-EditorSettings Editor::settings{};
 
 void EditorSettings::save() const {
     pugi::xml_document xml;
@@ -152,12 +146,11 @@ void EditorSettings::load() {
 }
 
 void Editor::invalidateSettings() {
-    static int autoSaveCounter = 0;
-
+    auto& settings = *g_editor_config;
     if (settings.dirty) {
-        ++autoSaveCounter;
-        if (autoSaveCounter > 20) {
-            autoSaveCounter = 0;
+        ++settings.auto_save_counter;
+        if (settings.auto_save_counter > 20) {
+            settings.auto_save_counter = 0;
             settings.save();
             settings.dirty = false;
         }
@@ -168,4 +161,16 @@ void Editor::onPreRender() {
     scene.onPreRender();
 }
 
+}
+
+ek::Editor* g_editor = nullptr;
+void init_editor(void) {
+    EK_ASSERT(!g_editor);
+    g_editor = new ek::Editor();
+}
+
+ek::EditorSettings* g_editor_config = nullptr;
+void init_editor_config(void) {
+    g_editor_config = new ek::EditorSettings();
+    g_editor_config->load();
 }

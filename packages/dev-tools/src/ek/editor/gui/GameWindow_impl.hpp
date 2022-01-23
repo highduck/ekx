@@ -5,7 +5,7 @@
 namespace ek {
 
 void GameWindow::onDraw() {
-    auto& display = Locator::ref<basic_application>().display;
+    auto& display = g_game_app->display;
     const ImVec2 displayPos = ImGui::GetCursorScreenPos();
     const ImVec2 displaySize = ImGui::GetContentRegionAvail();
     if (display.color.id && displaySize.x > 0 && displaySize.y > 0) {
@@ -32,9 +32,8 @@ void GameWindow::onDraw() {
             display.info.size = k * vec2(displaySize.x, displaySize.y);
         }
     }
-    auto* ic = Locator::get<input_controller>();
-    if (ic) {
-        ic->hovered_by_editor_gui = !ImGui::IsWindowHovered(0);
+    if (g_input_controller) {
+        g_input_controller->hovered_by_editor_gui = !ImGui::IsWindowHovered(0);
     }
 }
 

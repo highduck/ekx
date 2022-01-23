@@ -23,7 +23,7 @@ public:
     vec2_t pointerScreenPosition_ = {};
     bool pointerDown_ = false;
 
-    explicit InteractionSystem(ecs::EntityApi root);
+    explicit InteractionSystem();
 
     ~InteractionSystem() = delete;
 
@@ -60,12 +60,12 @@ private:
         targetListIndex = (++targetListIndex) & 1;
     }
 
-private:
+public:
     Array<ecs::EntityApi> targetLists[2]{};
     int targetListIndex = 0;
 
+    ecs::EntityApi root_ = nullptr;
     ecs::EntityRef hitTarget_;
-    ecs::EntityApi root_;
 
     bool mouseActive_ = false;
     uint64_t touchID_ = 0ull;
@@ -75,8 +75,7 @@ private:
     ecs::EntityRef dragEntity_;
 };
 
-EK_DECLARE_TYPE(InteractionSystem);
-
 }
 
-
+extern ek::InteractionSystem* g_interaction_system;
+void init_interaction_system(void);

@@ -36,8 +36,7 @@ private:
     float musicPitch_ = 1.0f;
 };
 
-EK_DECLARE_TYPE(AudioManager);
-
 }
 
-
+extern ek::AudioManager* g_audio;
+void init_audio_manager(void);

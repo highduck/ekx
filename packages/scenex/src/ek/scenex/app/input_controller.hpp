@@ -29,7 +29,7 @@ struct touch_state_t {
 class input_controller final {
 public:
 
-    input_controller(InteractionSystem& interactions, GameDisplay& display);
+    input_controller();
 
     ~input_controller();
 
@@ -64,6 +64,8 @@ public:
 
     bool hovered_by_editor_gui = false;
     bool emulateTouch = false;
+
+    GameDisplay* display_ = nullptr;
 private:
     [[nodiscard]] vec2_t screenCoordToGameDisplay(vec2_t pos) const;
 
@@ -77,8 +79,6 @@ private:
         bool down = false;
     };
 
-    GameDisplay& display_;
-    InteractionSystem& interactions_;
     //int keyboard_modifiers_{};
     bool reset_keys_ = false;
 
@@ -87,8 +87,7 @@ private:
     Array<touch_state_t> touches_;
 };
 
-EK_DECLARE_TYPE(input_controller);
-
 }
 
-
+extern ek::input_controller* g_input_controller;
+void init_input_controller(void);

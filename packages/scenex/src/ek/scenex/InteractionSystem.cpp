@@ -10,19 +10,7 @@
 
 namespace ek {
 
-InteractionSystem::InteractionSystem(ecs::EntityApi root) :
-        root_{root} {
-
-}
-
-template<typename T>
-inline bool contains(const Array<T>& vec, const T& value) {
-    for (auto e : vec) {
-        if (e == value) {
-            return true;
-        }
-    }
-    return false;
+InteractionSystem::InteractionSystem() {
 }
 
 bool dispatch_interactive_event(ecs::EntityApi e, const NodeEventData& data) {
@@ -82,7 +70,7 @@ void InteractionSystem::fireInteraction(PointerEvent event, bool prev, bool only
     for (auto target : targets) {
         if (target.isAlive()) {
             auto* interactive = target.tryGet<Interactive>();
-            if (interactive && !(onlyIfChanged && contains(oppositeTargets, target))) {
+            if (interactive && !(onlyIfChanged && oppositeTargets.find(target) != nullptr)) {
                 interactive->handle(event);
             }
         }
@@ -212,4 +200,10 @@ ecs::EntityApi InteractionSystem::getHitTarget() const {
     return hitTarget_.valid() ? hitTarget_.ent() : nullptr;
 }
 
+}
+
+ek::InteractionSystem* g_interaction_system = nullptr;
+void init_interaction_system() {
+    EK_ASSERT(!g_interaction_system);
+    g_interaction_system = new ek::InteractionSystem();
 }

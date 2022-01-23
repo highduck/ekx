@@ -1,5 +1,5 @@
 #include <ek/editor/Editor.hpp>
-#include <ek/util/ServiceLocator.hpp>
+
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/scenex/app/input_controller.hpp>
@@ -20,7 +20,7 @@
 namespace ek {
 
 void Editor::drawGUI() {
-    auto* baseApp = Locator::get<basic_application>();
+    auto* baseApp = g_game_app;
     if (baseApp) {
         hierarchy.root = ecs::EntityRef{baseApp->root};
     }
@@ -28,7 +28,7 @@ void Editor::drawGUI() {
     static bool fontIconsWindow = false;
     static bool imGuiDemoWindow = false;
     static bool testWindow = false;
-    auto& settings = Editor::settings;
+    auto& settings = *g_editor_config;
     bool resetLayout = false;
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
@@ -40,20 +40,18 @@ void Editor::drawGUI() {
                                               &settings.notifyAssetsOnScaleFactorChanged);
             ///
             ImGui::Separator();
-            auto* ic = Locator::get<input_controller>();
-            if (ic) {
-                ImGui::MenuItem("Emulate Touch Input", nullptr, &ic->emulateTouch);
+            if (g_input_controller) {
+                ImGui::MenuItem("Emulate Touch Input", nullptr, &g_input_controller->emulateTouch);
             }
             ///
             ImGui::Separator();
-            auto* baseApp = Locator::get<basic_application>();
-            if (baseApp) {
+            if (g_game_app) {
                 ImGui::Text("User Insets Absolute");
                 ImGui::DragFloat4("##userInsetsAbsolute",
-                                  baseApp->display.info.userInsetsAbsolute.data);
+                                  g_game_app->display.info.userInsetsAbsolute.data);
                 ImGui::Text("User Insets Relative");
                 ImGui::SliderFloat4("##userInsetsRelative",
-                                    baseApp->display.info.userInsetsRelative.data, 0.0f,1.0f);
+                                    g_game_app->display.info.userInsetsRelative.data, 0.0f,1.0f);
             }
 
             ImGui::Separator();
@@ -107,7 +105,7 @@ void Editor::drawGUI() {
         ImGui::SameLine();
         game.dirty |= ImGui::Checkbox(ICON_FA_STOPWATCH, &game.profiler);
 
-        Locator::ref<basic_application>().profiler.enabled = game.profiler;
+        g_game_app->profiler.enabled = game.profiler;
         TimeLayer::Root->scale = game.paused ? 0.0f : game.timeScale;
 
         ImGui::EndMainMenuBar();

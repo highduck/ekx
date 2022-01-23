@@ -2,11 +2,7 @@
 
 namespace ek {
 
-input_controller::input_controller(InteractionSystem& interactions, GameDisplay& display) :
-        display_{display},
-        interactions_{interactions} {
-}
-
+input_controller::input_controller() = default;
 input_controller::~input_controller() = default;
 
 void input_controller::emulate_mouse_as_touch(const ek_app_event& event, touch_state_t& data) {
@@ -53,7 +49,7 @@ void input_controller::onEvent(const ek_app_event& event) {
         case EK_APP_EVENT_TOUCH_MOVE:
         case EK_APP_EVENT_TOUCH_END:
             if (!hovered_by_editor_gui) {
-                interactions_.handle_touch_event(event, screenCoordToGameDisplay({event.touch.x, event.touch.y}));
+                g_interaction_system->handle_touch_event(event, screenCoordToGameDisplay({event.touch.x, event.touch.y}));
             }
             update_touch(event, get_or_create_touch(event.touch.id));
             break;
@@ -63,7 +59,7 @@ void input_controller::onEvent(const ek_app_event& event) {
         case EK_APP_EVENT_MOUSE_ENTER:
         case EK_APP_EVENT_MOUSE_EXIT:
             if (!hovered_by_editor_gui) {
-                interactions_.handle_mouse_event(event, screenCoordToGameDisplay({event.mouse.x, event.mouse.y}));
+                g_interaction_system->handle_mouse_event(event, screenCoordToGameDisplay({event.mouse.x, event.mouse.y}));
             }
             if (emulateTouch) {
                 emulate_mouse_as_touch(event, get_or_create_touch(1u));
@@ -74,7 +70,7 @@ void input_controller::onEvent(const ek_app_event& event) {
         case EK_APP_EVENT_KEY_UP:
         case EK_APP_EVENT_KEY_DOWN:
             if (event.type == EK_APP_EVENT_KEY_DOWN && event.key.code == EK_KEYCODE_ESCAPE) {
-                interactions_.sendBackButton();
+                g_interaction_system->sendBackButton();
             }
             if (event.key.code != EK_KEYCODE_UNKNOWN) {
                 auto& key = keys_[static_cast<size_t>(event.key.code)];
@@ -91,10 +87,10 @@ void input_controller::onEvent(const ek_app_event& event) {
             }
             break;
         case EK_APP_EVENT_BACK_BUTTON:
-            interactions_.sendBackButton();
+            g_interaction_system->sendBackButton();
             break;
         case EK_APP_EVENT_PAUSE:
-            interactions_.handle_system_pause();
+            g_interaction_system->handle_system_pause();
             break;
         default:
             break;
@@ -149,11 +145,17 @@ void input_controller::reset_keyboard() {
 }
 
 vec2_t input_controller::screenCoordToGameDisplay(const vec2_t screenPos) const {
-    const auto size = display_.info.destinationViewport.size;
-    const auto offset = display_.info.destinationViewport.position;
-    const auto displaySize = display_.info.size;
+    const auto size = display_->info.destinationViewport.size;
+    const auto offset = display_->info.destinationViewport.position;
+    const auto displaySize = display_->info.size;
     const float invScale = 1.0f / fmin(size.x / displaySize.x, size.y / displaySize.y);
     return invScale * (screenPos - offset);
 }
 
+}
+
+ek::input_controller* g_input_controller = nullptr;
+void init_input_controller(void) {
+    EK_ASSERT(!g_input_controller);
+    g_input_controller = new ek::input_controller();
 }
