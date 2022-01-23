@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ek/util/Type.hpp>
 #include <ek/gfx.h>
 #include <ek/math.h>
 

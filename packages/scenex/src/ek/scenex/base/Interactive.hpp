@@ -5,7 +5,6 @@
 
 #include <ek/util/Signal.hpp>
 #include <ecxx/ecxx_fwd.hpp>
-#include <ek/util/Type.hpp>
 
 namespace ek {
 
@@ -40,7 +39,5 @@ struct Interactive {
 
     void handle(PointerEvent event);
 };
-
-
 
 }

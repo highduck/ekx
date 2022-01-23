@@ -62,18 +62,23 @@ bool GameDisplay::beginOverlayDev() {
 
         sg_begin_default_pass(pass_action, w, h);
 
-        const float scale = MIN(fw / info.size.x, fh / info.size.y);
-        // draw offscreen
+        // todo: temp disable
+        // fixme:
+        if(1) {
+            // draw offscreen
+            sg_push_debug_group("Game viewport");
 
-        sg_push_debug_group("Game viewport");
-// todo: temp disable
-        canvas_begin(fw, fh);
-        canvas_set_image(color);
-        canvas_set_image_rect(rect_01());
-        canvas_quad(0, 0, scale * info.size.x, scale * info.size.y);
-        canvas_end();
+            const float scalex = fw / info.size.x;
+            const float scaley = fh / info.size.y;
+            const float scale = MIN(scalex, scaley);
+            canvas_begin(fw, fh);
+            canvas_set_image(color);
+            canvas_set_image_rect(rect_01());
+            canvas_quad(0, 0, scale * info.size.x, scale * info.size.y);
+            canvas_end();
 
-        sg_pop_debug_group();
+            sg_pop_debug_group();
+        }
     }
 
     return true;
@@ -82,7 +87,7 @@ bool GameDisplay::beginOverlayDev() {
 void GameDisplay::endOverlayDev() {
 
     sg_end_pass();
-    //sg_commit();
+//    sg_commit();
 //    if (simulated) {
 //        screenshot("screenshot.png");
 //    }

@@ -1,13 +1,9 @@
 #pragma once
 
 #include <ek/log.h>
+#include <ek/math.h>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/String.hpp>
-#include <ek/util/Type.hpp>
-
-#include <ek/math.h>
-
-
 #include <ek/serialize/serialize.hpp>
 
 namespace ek {

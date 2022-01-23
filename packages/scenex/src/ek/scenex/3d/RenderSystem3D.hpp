@@ -2,7 +2,6 @@
 
 #include <ecxx/ecxx.hpp>
 #include "Material3D.hpp"
-#include <ek/util/Type.hpp>
 
 namespace ek {
 

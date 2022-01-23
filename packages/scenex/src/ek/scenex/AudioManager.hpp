@@ -3,7 +3,6 @@
 #include <ek/scenex/StorageVariable.hpp>
 #include <ek/audio.h>
 #include <ek/math.h>
-#include <ek/util/Type.hpp>
 
 namespace ek {
 

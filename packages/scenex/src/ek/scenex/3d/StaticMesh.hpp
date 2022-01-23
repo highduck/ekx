@@ -5,7 +5,6 @@
 #include <ek/ds/String.hpp>
 #include <ek/gfx.h>
 #include <ek/format/Model3D.hpp>
-#include <ek/util/Type.hpp>
 
 namespace ek {
 

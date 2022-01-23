@@ -2,7 +2,6 @@
 
 #include <ek/ds/Array.hpp>
 #include <ek/assert.h>
-#include <ek/util/Type.hpp>
 #include <ek/sparse_array.h>
 #include "../ecxx_fwd.hpp"
 

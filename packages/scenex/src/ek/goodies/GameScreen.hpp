@@ -4,7 +4,6 @@
 #include <ek/ds/Array.hpp>
 #include <ek/ds/String.hpp>
 #include <ek/util/Signal.hpp>
-#include <ek/util/Type.hpp>
 #include <ek/math.h>
 
 namespace ek {

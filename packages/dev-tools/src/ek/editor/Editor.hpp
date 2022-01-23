@@ -10,7 +10,6 @@
 #include "gui/SceneWindow.hpp"
 #include "gui/ConsoleWindow.hpp"
 #include "gui/ResourcesWindow.hpp"
-#include <ek/util/Type.hpp>
 #include <ek/scenex/app/GameAppListener.hpp>
 
 namespace ek {

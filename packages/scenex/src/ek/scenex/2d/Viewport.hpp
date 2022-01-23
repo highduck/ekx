@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ek/math.h>
-#include <ek/util/Type.hpp>
 #include <ecxx/ecxx_fwd.hpp>
 
 namespace ek {
@@ -49,7 +48,5 @@ struct Viewport {
 
     static void updateAll(const GameDisplayInfo& display0);
 };
-
-
 
 }

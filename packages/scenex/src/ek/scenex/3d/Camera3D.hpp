@@ -2,7 +2,6 @@
 
 #include <ek/math.h>
 
-#include <ek/util/Type.hpp>
 #include <ecxx/ecxx_fwd.hpp>
 #include <ek/gfx.h>
 

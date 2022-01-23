@@ -6,7 +6,6 @@
 #include <ek/math.h>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/ds/Array.hpp>
-#include <ek/util/Type.hpp>
 
 namespace ek {
 

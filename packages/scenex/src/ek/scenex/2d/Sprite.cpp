@@ -56,19 +56,26 @@ void draw(const sprite_t* sprite) {
 }
 
 void draw(const sprite_t* sprite, const rect_t rc) {
+    if (!sprite->image_id) {
+        return;
+    }
     const sg_image image = REF_RESOLVE(res_image, sprite->image_id);
-    if (image.id) {
-        canvas_set_image(image);
-        canvas_set_image_rect(sprite->tex);
-        if (UNLIKELY(sprite->state & SPRITE_ROTATED)) {
-            canvas_quad_rotated(rc.x, rc.y, rc.w, rc.h);
-        } else {
-            canvas_quad(rc.x, rc.y, rc.w, rc.h);
-        }
+    if (!image.id) {
+        return;
+    }
+    canvas_set_image(image);
+    canvas_set_image_rect(sprite->tex);
+    if (UNLIKELY(sprite->state & SPRITE_ROTATED)) {
+        canvas_quad_rotated(rc.x, rc.y, rc.w, rc.h);
+    } else {
+        canvas_quad(rc.x, rc.y, rc.w, rc.h);
     }
 }
 
 void draw_grid(const sprite_t* sprite, const rect_t grid, const rect_t target) {
+    if (!sprite->image_id) {
+        return;
+    }
     const sg_image image = REF_RESOLVE(res_image, sprite->image_id);
     if (image.id == SG_INVALID_ID) {
         return;

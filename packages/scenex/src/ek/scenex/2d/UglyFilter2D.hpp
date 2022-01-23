@@ -2,7 +2,6 @@
 
 #include <ecxx/ecxx_fwd.hpp>
 #include <ek/ds/Array.hpp>
-#include <ek/util/Type.hpp>
 
 namespace ek {
 
@@ -15,8 +14,6 @@ struct UglyFilter2D {
 
     bool pass(const ecs::World& w, ecs::EntityIndex e);
 };
-
-
 
 }
 

@@ -2,7 +2,6 @@
 
 #include <ecxx/ecxx_fwd.hpp>
 #include <ek/math.h>
-#include <ek/util/Type.hpp>
 
 namespace ecs {
 class World;
