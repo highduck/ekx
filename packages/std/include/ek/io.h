@@ -1,6 +1,7 @@
 #ifndef EK_IO_H
 #define EK_IO_H
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
