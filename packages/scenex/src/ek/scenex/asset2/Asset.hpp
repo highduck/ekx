@@ -56,24 +56,6 @@ protected:
     AssetManager* manager_ = nullptr;
 };
 
-class AssetTypeResolver {
-    friend class AssetManager;
-
-public:
-    virtual ~AssetTypeResolver() = default;
-
-    [[nodiscard]]
-    virtual Asset* create_from_file(const String& path, const String& type) const = 0;
-
-    [[nodiscard]]
-    virtual Asset* create(const String& path) const = 0;
-
-    [[nodiscard]]
-    virtual Asset* create_for_type(const void* data, uint32_t size) const = 0;
-
-    AssetManager* manager = nullptr;
-};
-
 class AssetManager {
 public:
     void add(Asset* asset);

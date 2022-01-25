@@ -114,8 +114,10 @@ sg_image game_display_create_image(int w, int h, bool isColor, const char* label
 
 void game_display_update_simulated(game_display* display) {
     // limit min size
-    display->info.size.x = fmax(16.0f, display->info.size.x);
-    display->info.size.y = fmax(16.0f, display->info.size.y);
+    display->info.size.x = fmaxf(16.0f, display->info.size.x);
+    display->info.size.y = fmaxf(16.0f, display->info.size.y);
+    display->info.window.x = display->info.size.x;
+    display->info.window.y = display->info.size.y;
 
     const int w = (int) display->info.size.x;
     const int h = (int) display->info.size.y;

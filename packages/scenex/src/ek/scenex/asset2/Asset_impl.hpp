@@ -45,6 +45,7 @@ void AssetManager::set_scale_factor(float scale) {
     auto new_uid = get_scale_uid(scale);
     scale_factor = clamp(scale, 1, 4);
     if (scale_uid != new_uid) {
+        log_debug("asset manager: content scale changed to %d%%", (int) (100 * scale_factor));
         scale_uid = new_uid;
         // todo: maybe better naming `update`?
         load_all();

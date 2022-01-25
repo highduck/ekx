@@ -182,6 +182,7 @@ void basic_application::onFrame() {
 
     dispatcher.onBeforeFrameBegin();
     game_display_update(&display);
+    Viewport::updateAll(&display.info);
     scale_factor = root.get<Viewport>().output.scale;
     asset_manager.set_scale_factor(scale_factor);
 
@@ -302,7 +303,6 @@ void basic_application::onEvent(const ek_app_event event) {
 }
 
 void basic_application::doUpdateFrame(float dt) {
-    Viewport::updateAll(&display.info);
     dispatcher.onUpdate();
     scene_pre_update(root, dt);
     onUpdateFrame(dt);
