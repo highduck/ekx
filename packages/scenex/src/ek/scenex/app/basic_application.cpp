@@ -17,7 +17,6 @@
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
 #include <ek/log.h>
-#include <ek/scenex/asset2/Asset.hpp>
 #include <ek/gfx.h>
 #include <ek/canvas.h>
 #include <ek/scenex/2d/Camera2D.hpp>

@@ -20,9 +20,10 @@
 #include <ekx/app/profiler.h>
 #include <ekx/app/game_display.h>
 #include <ekx/app/frame_timer.h>
+#include <ek/scenex/text/TextEngine.hpp>
+#include <ek/scenex/asset2/Asset.hpp>
 #include "GameAppDispatcher.hpp"
 #include "RootAppListener.hpp"
-#include "ek/scenex/text/TextEngine.hpp"
 
 namespace ek {
 class basic_application;
