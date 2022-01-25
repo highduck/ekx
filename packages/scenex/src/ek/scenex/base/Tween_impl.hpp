@@ -22,7 +22,7 @@ void update_frame(Tween& tween) {
 void Tween::updateAll() {
     for (auto e : ecs::view_backward<Tween>()) {
         auto& tween = e.get<Tween>();
-        auto dt = tween.timer->dt;
+        auto dt = g_time_layers[tween.timer].dt;
         if (tween.delay > 0.0f) {
             tween.delay -= dt;
             continue;

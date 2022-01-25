@@ -97,7 +97,8 @@ export class TextureAsset extends Asset {
 
         header.writeU32(this.images.length);
         for (const image of this.images) {
-            header.writeString(image);
+            logger.assert(image.length < 128);
+            header.writeFixedASCII(image, 128);
         }
 
         this.owner.writer.writeSection(header);

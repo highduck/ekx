@@ -4,7 +4,7 @@
 #include <ek/scenex/text/Font.hpp>
 
 #include <ek/scenex/text/TextEngine.hpp>
-#include <ek/scenex/Localization.hpp>
+#include <ekx/app/localization.h>
 
 namespace ek {
 
@@ -171,7 +171,7 @@ void Text2D::draw() {
         canvas_stroke_rect(rect_expand(rect, 1.0f), borderColor, 1);
     }
 
-    const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
+    const char* str = localized ? localize(text.c_str()) : text.c_str();
     if (str == nullptr || *str == '\0') {
         return;
     }
@@ -207,7 +207,7 @@ rect_t Text2D::getTextBounds() const {
     auto& blockInfo = get_text_engine()->textBlockInfo;
     textDrawer.format = format;
 
-    const char* str = localize ? Localization::instance.getText(text.c_str()) : text.c_str();
+    const char* str = localized ? localize(text.c_str()) : text.c_str();
 
     if (adjustsFontSizeToFitBounds) {
         adjustFontSize(textDrawer, str, rect);

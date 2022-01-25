@@ -61,6 +61,14 @@ export class BytesWriter {
         this.bytes[this.size++] = 0;
     }
 
+    // fixed-buffer ascii encoded string
+    writeFixedASCII(s: string, cap: number) {
+        this.ensureSize(this.size + cap);
+        for(let i = 0; i < cap; ++i) {
+            this.bytes[this.size++] = i < s.length ? s.charCodeAt(i) : 0;
+        }
+    }
+
     writeUtf8(s: string, destOffset: number): number {
         let i = 0;
         let p = destOffset;

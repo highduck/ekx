@@ -8,10 +8,9 @@
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/base/Interactive.hpp>
-#include <ek/scenex/2d/UglyFilter2D.hpp>
 #include <ek/log.h>
 #include <ek/assert.h>
-#include <ek/scenex/Localization.hpp>
+#include <ekx/app/localization.h>
 
 struct res_sg res_sg;
 
@@ -53,7 +52,7 @@ void sg_load(SGFile* out, const void* data, uint32_t size) {
         IO io{input};
         io(*out);
     } else {
-        EK_ERROR("SCENE LOAD: empty buffer");
+        log_error("SCENE LOAD: empty buffer");
     }
 }
 
@@ -110,8 +109,8 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
 
         auto& display = entity.get_or_create<Display2D>();
         auto dtext = Pointer<Text2D>::make(dynamicText.text, format);
-        dtext->localize = Localization::instance.has(dynamicText.text.c_str());
-        dtext->adjustsFontSizeToFitBounds = dtext->localize;
+        dtext->localized = is_localized(dynamicText.text.c_str());
+        dtext->adjustsFontSizeToFitBounds = dtext->localized;
         dtext->rect = dynamicText.rect;
         display.drawable = std::move(dtext);
     }
@@ -164,11 +163,12 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
         entity.reassign<Button>();
     }
 
-    if (!data->filters.empty()) {
-        auto& filters_comp = entity.reassign<UglyFilter2D>();
-        filters_comp.filters = data->filters;
+    // TODO: remove ugly filters
+//    if (!data->filters.empty()) {
+//        auto& filters_comp = entity.reassign<UglyFilter2D>();
+//        filters_comp.filters = data->filters;
 //        ecs::replace_or_assign<node_filters_t>(entity);
-    }
+//    }
 }
 
 ecs::EntityApi create_and_merge(const SGFile* sg, R(SGFile) asset,
@@ -215,10 +215,10 @@ ecs::EntityApi sg_create(string_hash_t library, string_hash_t name, ecs::EntityA
                 appendStrict(parent, result);
             }
         } else {
-            EK_WARN("SG Object (%s) not found in library %s", hsp_get(name), hsp_get(library));
+            log_warn("SG Object (%s) not found in library %s", hsp_get(name), hsp_get(library));
         }
     } else {
-        EK_WARN("SG not found: (%s)", hsp_get(library));
+        log_warn("SG not found: (%s)", hsp_get(library));
     }
     return result;
 }

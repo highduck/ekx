@@ -9,7 +9,7 @@ void Shake::updateAll() {
 
     for (auto e: ecs::view_backward<Shake>()) {
         auto& state = e.get<Shake>();
-        auto dt = state.timer->dt;
+        auto dt = g_time_layers[state.timer].dt;
         state.time += dt;
 
         float r = fmaxf(0.0f, 1.0f - state.time / state.time_total);
@@ -40,7 +40,7 @@ inline vec2_t randomF2(float min, float max) {
 void Shaker::updateAll() {
     for (auto e: ecs::view<Shaker>()) {
         auto& data = e.get<Shaker>();
-        const auto dt = data.timer->dt;
+        const auto dt = g_time_layers[data.timer].dt;
         data.state = reach(data.state, 0.0f, dt);
         const auto r = integrate_exp(0.9f, dt, 0);
 

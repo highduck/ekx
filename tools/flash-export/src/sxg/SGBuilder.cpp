@@ -90,6 +90,7 @@ void process_transform(const Element& el, ExportItem& item) {
     item.node.visible = el.isVisible;
 }
 
+// TODO: remove ugly filters
 void process_filters(const Element& el, ExportItem& item) {
     for (auto& filter: el.filters) {
         SGFilter fd;
@@ -108,7 +109,7 @@ void process_filters(const Element& el, ExportItem& item) {
         }
 
         if (fd.type != SGFilterType::None) {
-            item.node.filters.push_back(fd);
+            //item.node.filters.push_back(fd);
         }
     }
 }
@@ -400,7 +401,7 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
             child->drawingLayerItem &&
             child->animationSpan0 == _animationSpan0 &&
             child->animationSpan1 == _animationSpan1) {
-            // EK_DEBUG("Found drawing layer " << child->ref->item.name);
+            // log_debug("Found drawing layer " << child->ref->item.name);
             auto& timeline = child->drawingLayerItem->timeline;
             EK_ASSERT(!timeline.layers.empty());
             EK_ASSERT(!timeline.layers[0].frames.empty());
@@ -440,7 +441,7 @@ ExportItem* SGBuilder::addElementToDrawingLayer(ExportItem* item, const Element&
     drawingLayerInstance->drawingLayerItem = std::move(shapeItem);
     item->drawingLayerChild = drawingLayerInstance;
     item->shapes++;
-    // EK_DEBUG("Created drawing layer " << newElement->item.name);
+    // log_debug("Created drawing layer " << newElement->item.name);
     return drawingLayerInstance;
 }
 
@@ -475,11 +476,11 @@ void SGBuilder::process(const Element& el, ExportItem* parent, processing_bag_t*
         case ElementType::font_item:
         case ElementType::sound_item:
         case ElementType::static_text:
-            EK_WARN("element type is not supported yet: %d", static_cast<int>(type));
+            log_warn("element type is not supported yet: %d", static_cast<int>(type));
             break;
 
         case ElementType::unknown:
-            EK_WARN("unknown element type: %d", static_cast<int>(type));
+            log_warn("unknown element type: %d", static_cast<int>(type));
             break;
     }
 }

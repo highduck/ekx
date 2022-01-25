@@ -1,6 +1,6 @@
 #include "basic_application.hpp"
 
-#include "input_controller.hpp"
+#include <ekx/app/input_state.h>
 
 /** resource managers include **/
 #include <ek/scenex/particles/ParticleDecl.hpp>
@@ -12,7 +12,7 @@
 
 /** systems **/
 #include <ek/scenex/InteractionSystem.hpp>
-#include <ek/scenex/AudioManager.hpp>
+#include <ekx/app/audio_manager.h>
 #include <ek/scenex/2d/Viewport.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/systems/main_flow.hpp>
@@ -25,7 +25,6 @@
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
-#include <ek/scenex/2d/UglyFilter2D.hpp>
 #include <ek/scenex/base/Tween.hpp>
 #include <ek/scenex/base/Script.hpp>
 #include <ek/goodies/Shake.hpp>
@@ -36,12 +35,6 @@
 #include <ek/scenex/base/DestroyTimer.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
 
-#include "impl/GameDisplay_impl.hpp"
-
-#ifdef EK_UITEST
-#include "impl/uitest_impl.hpp"
-#endif
-
 ek::basic_application* g_game_app = nullptr;
 void init_game_app(ek::basic_application* app) {
     EK_ASSERT(!g_game_app);
@@ -50,40 +43,6 @@ void init_game_app(ek::basic_application* app) {
 }
 
 namespace ek {
-
-bool frame_timer_update_from_display_ts(FrameTimer* ft, double* delta) {
-    if (ek_app.frame_callback_timestamp > 0) {
-        const double ts = ek_app.frame_callback_timestamp;
-        const double prev = ft->app_fts_prev;
-        ft->app_fts_prev = ts;
-        if (prev > 0.0) {
-            *delta = ts - prev;
-            return true;
-        }
-    }
-    return false;
-}
-
-double FrameTimer::update() {
-    // anyway we need update stopwatch state, it could be useful for another functions
-    double delta = ek_ticks_to_sec(ek_ticks(&stopwatch));
-    // if available, upgrade delta with timestamp from app's display-link
-    frame_timer_update_from_display_ts(this, &delta);
-    deltaTime = delta;
-    ++frameIndex;
-    return delta;
-}
-
-void logDisplayInfo() {
-#ifndef NDEBUG
-    EK_INFO("Display: %d x %d", (int) ek_app.viewport.width, (int) ek_app.viewport.height);
-    EK_INFO("Insets: %d, %d, %d, %d",
-            (int) ek_app.viewport.insets[0],
-            (int) ek_app.viewport.insets[1],
-            (int) ek_app.viewport.insets[2],
-            (int) ek_app.viewport.insets[3]);
-#endif
-}
 
 void drawPreloader(float progress, float zoneWidth, float zoneHeight) {
     canvas_set_empty_image();
@@ -120,7 +79,6 @@ basic_application::basic_application() {
 #ifdef EK_UITEST
     uitest::initialize(this);
 #endif
-    asset_manager_ = new AssetManager{};
 }
 
 basic_application::~basic_application() {
@@ -128,8 +86,6 @@ basic_application::~basic_application() {
     ecs::the_world.shutdown();
 
     canvas_shutdown();
-
-    delete asset_manager_;
 
     auph_shutdown();
     ek_gfx_shutdown();
@@ -165,16 +121,17 @@ void registerSceneXComponents() {
     ECX_COMPONENT(NodeEventHandler);
     ECX_COMPONENT(ParticleEmitter2D);
     ECX_COMPONENT(ParticleLayer2D);
-    ECX_COMPONENT(UglyFilter2D);
 }
 
 void basic_application::initialize() {
-    EK_DEBUG("base application: initialize");
+    log_debug("base application: initialize");
 
-    logDisplayInfo();
-    display.update();
+    profiler_init();
+    init_time_layers();
+    log_app_display_info();
+    game_display_update(&display);
 
-    EK_DEBUG("base application: initialize scene root");
+    log_debug("base application: initialize scene root");
     root = createNode2D(H("root"));
 
     const vec2_t baseResolution = vec2(ek_app.config.width, ek_app.config.height);
@@ -182,19 +139,16 @@ void basic_application::initialize() {
 
     root.assign<LayoutRect>();
     root.assign<NodeEventHandler>();
-    Viewport::updateAll(display.info);
+    Viewport::updateAll(&display.info);
     scale_factor = root.get<Viewport>().output.scale;
 
-    EK_DEBUG("base application: initialize InteractionSystem");
+    log_debug("base application: initialize InteractionSystem");
     init_interaction_system();
     g_interaction_system->root_ = root;
-    EK_DEBUG("base application: initialize input_controller");
-    init_input_controller();
-    g_input_controller->display_ = &display;
-    EK_DEBUG("base application: initialize AudioManager");
+    log_debug("base application: initialize AudioManager");
     init_audio_manager();
 
-    EK_DEBUG("base application: initialize Scene");
+    log_debug("base application: initialize Scene");
     auto camera = createNode2D(H("camera"));
     auto& defaultCamera = camera.assign<Camera2D>(root);
     defaultCamera.order = 1;
@@ -206,12 +160,9 @@ void basic_application::initialize() {
 }
 
 void basic_application::preload() {
-    EK_DEBUG("base application: preloading, content scale: %d%%.", (int) (100 * scale_factor));
-    asset_manager_->set_scale_factor(scale_factor);
-
+    log_debug("base application: preloading, content scale: %d%%.", (int) (100 * scale_factor));
+    asset_manager.set_scale_factor(scale_factor);
     dispatcher.onPreload();
-
-    asset_manager_->add_resolver(new DefaultAssetsResolver());
     if (preloadOnStart) {
         preload_root_assets_pack();
     }
@@ -231,20 +182,20 @@ void basic_application::onFrame() {
     root_app_on_frame();
 
     dispatcher.onBeforeFrameBegin();
-    display.update();
+    game_display_update(&display);
     scale_factor = root.get<Viewport>().output.scale;
-    asset_manager_->set_scale_factor(scale_factor);
+    asset_manager.set_scale_factor(scale_factor);
 
     /** base app BEGIN **/
 
-    const float dt = (float) fmin(frameTimer.update(), 0.3);
+    const float dt = fminf((float)update_frame_timer(&frame_timer), 0.3f);
     // fixed for GIF recorder
     //dt = 1.0f / 60.0f;
     doUpdateFrame(dt);
 
     double elapsed = ek_ticks_to_sec(ek_ticks(&timer));
-    profiler.addTime("UPDATE", (float) (elapsed * 1000));
-    profiler.addTime("FRAME", (float) (elapsed * 1000));
+    profiler_add_time(PROFILE_UPDATE, (float) (elapsed * 1000));
+    profiler_add_time(PROFILE_FRAME, (float) (elapsed * 1000));
 
     canvas_new_frame();
 
@@ -268,8 +219,8 @@ void basic_application::onFrame() {
         rootAssetObject->poll();
     }
 
-    if (display.beginGame(pass_action)) {
-        profiler.beginRender(display.info.size.x * display.info.size.y);
+    if (game_display_begin(&display, &pass_action, "game-view")) {
+        profiler_render_begin(display.info.size.x * display.info.size.y);
 
         doRenderFrame();
 
@@ -282,17 +233,17 @@ void basic_application::onFrame() {
         dispatcher.onRenderFrame();
 
         elapsed = ek_ticks_to_sec(ek_ticks(&timer));
-        profiler.addTime("RENDER", (float) (elapsed * 1000));
-        profiler.addTime("FRAME", (float) (elapsed * 1000));
+        profiler_add_time(PROFILE_RENDER, (float) (elapsed * 1000));
+        profiler_add_time(PROFILE_FRAME, (float) (elapsed * 1000));
 
-        profiler.endRender();
-        draw(profiler, display.info);
+        profiler_render_end();
+        profiler_draw(&display.info);
 
         canvas_end();
 
-        display.endGame(); // beginGame()
+        game_display_end(&display);
 
-        if (display.beginOverlayDev()) {
+        if (game_display_dev_begin(&display)) {
 
             dispatcher.onRenderOverlay();
 
@@ -301,33 +252,34 @@ void basic_application::onFrame() {
             canvas_end();
 
             elapsed = ek_ticks_to_sec(ek_ticks(&timer));
-            profiler.addTime("OVERLAY", (float) (elapsed * 1000));
-            profiler.addTime("FRAME", (float) (elapsed * 1000));
+            profiler_add_time(PROFILE_OVERLAY, (float) (elapsed * 1000));
+            profiler_add_time(PROFILE_FRAME, (float) (elapsed * 1000));
 
-            display.endOverlayDev(); // display.beginOverlayDev()
+            game_display_dev_end(&display);
         }
     }
     sg_commit();
 
-    if (!started_ && asset_manager_->is_assets_ready()) {
-        EK_DEBUG("Start Game");
+    if (!started_ && asset_manager.is_assets_ready()) {
+        log_debug("Start Game");
         onAppStart();
         dispatcher.onStart();
         started_ = true;
     }
 
-    g_input_controller->onPostFrame();
+    input_state_post_update();
     dispatcher.onPostFrame();
 
     elapsed = ek_ticks_to_sec(ek_ticks(&timer));
-    profiler.addTime("END", (float) (elapsed * 1000));
-    profiler.addTime("FRAME", (float) (elapsed * 1000));
+    profiler_add_time(PROFILE_END, (float) (elapsed * 1000));
+    profiler_add_time(PROFILE_FRAME, (float) (elapsed * 1000));
 
-    profiler.update((float) frameTimer.deltaTime);
+    profiler_update((float) frame_timer.dt);
 }
 
 void basic_application::preload_root_assets_pack() {
-    rootAssetObject = asset_manager_->add_file("pack.bin", "pack");
+    rootAssetObject = new PackAsset("pack.bin");
+    asset_manager.add(rootAssetObject);
     if (rootAssetObject) {
         rootAssetObject->load();
     }
@@ -338,20 +290,20 @@ void basic_application::onEvent(const ek_app_event event) {
 
     root_app_on_event(event);
     if (event.type == EK_APP_EVENT_RESIZE) {
-        display.update();
+        game_display_update(&display);
     }
 
-    g_input_controller->onEvent(event);
+    input_state_process_event(&event, &display.info);
 
     dispatcher.onEvent(event);
 
     double elapsed = ek_ticks_to_sec(ek_ticks(&timer));
-    profiler.addTime("EVENTS", (float) (elapsed * 1000));
-    profiler.addTime("FRAME", (float) (elapsed * 1000));
+    profiler_add_time(PROFILE_EVENTS, (float) (elapsed * 1000));
+    profiler_add_time(PROFILE_FRAME, (float) (elapsed * 1000));
 }
 
 void basic_application::doUpdateFrame(float dt) {
-    Viewport::updateAll(display.info);
+    Viewport::updateAll(&display.info);
     dispatcher.onUpdate();
     scene_pre_update(root, dt);
     onUpdateFrame(dt);
@@ -450,3 +402,4 @@ void setup_resource_managers() {
 }
 
 }
+

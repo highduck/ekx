@@ -12,7 +12,7 @@ ecs::EntityApi ScriptBase::find_child(string_hash_t name) const {
 }
 
 void updateScripts() {
-    float dt = TimeLayer::Root->dt;
+    float dt = g_time_layers[TIME_LAYER_ROOT].dt;
     ecs::view_backward<ScriptHolder>()
             .each([dt](ScriptHolder& scripts) {
                 for (auto& script : scripts.list) {

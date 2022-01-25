@@ -4,7 +4,7 @@
 
 #include <ek/scenex/SceneFactory.hpp>
 #include <ek/scenex/particles/ParticleSystem.hpp>
-#include <ek/scenex/AudioManager.hpp>
+#include <ekx/app/audio_manager.h>
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/base/Node.hpp>
 
@@ -33,7 +33,7 @@ void fireworks_script::update(float dt) {
         rect.h *= 0.5f;
 
         emitter.position = rect.position + rect.size * vec2(random_f(), random_f());
-        g_audio->play_sound(H("sfx/firework"), random_range_f(0.5f, 1.0f));
+        play_sound(H("sfx/firework"), random_range_f(0.5f, 1.0f));
         ParticleDecl* part = &RES_NAME_RESOLVE(res_particle, H("firework_star"));
         switch (random_n(4)) {
             case 0:

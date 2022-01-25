@@ -5,7 +5,7 @@
 #include <ek/rnd.h>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
-#include <ek/scenex/AudioManager.hpp>
+#include <ekx/app/audio_manager.h>
 
 //#include <ek/firebase/Firebase.h>
 #include <ek/scenex/base/NodeEvents.hpp>
@@ -13,8 +13,8 @@
 
 namespace ek {
 
-void play_sound(string_hash_t id) {
-    g_audio->play_sound(id);
+static inline void play_button_sound(string_hash_t id) {
+    play_sound(id);
 }
 
 void start_post_tween(Button& btn) {
@@ -47,23 +47,23 @@ void initialize_events(ecs::EntityApi e) {
         const auto& skin = get_skin(btn);
         switch (event) {
             case PointerEvent::Over:
-                play_sound(skin.sfxOver);
+                play_button_sound(skin.sfxOver);
                 break;
             case PointerEvent::Out:
                 if (e.get<Interactive>().pushed) {
                     start_post_tween(btn);
-                    play_sound(skin.sfxCancel);
+                    play_button_sound(skin.sfxCancel);
                 } else {
-                    play_sound(skin.sfxOut);
+                    play_button_sound(skin.sfxOut);
                 }
                 break;
             case PointerEvent::Down:
-                play_sound(skin.sfxDown);
+                play_button_sound(skin.sfxDown);
                 break;
             case PointerEvent::Tap:
                 btn.clicked.emit();
 
-                play_sound(skin.sfxClick);
+                play_button_sound(skin.sfxClick);
                 start_post_tween(btn);
 
                 // TODO:
@@ -126,7 +126,7 @@ void Button::updateAll() {
         auto& btn = e.get<Button>();
         auto& interactive = e.get<Interactive>();
         auto& transform = e.get<Transform2D>();
-        float dt = btn.time->dt;
+        float dt = g_time_layers[btn.time].dt;
 
         if (!btn.initialized) {
             btn.initialized = true;

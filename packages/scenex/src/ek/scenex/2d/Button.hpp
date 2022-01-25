@@ -3,7 +3,7 @@
 #include <ek/util/Signal.hpp>
 #include <ek/math.h>
 #include "MovieClip.hpp"
-#include "../base/TimeLayer.hpp"
+#include <ekx/app/time_layers.h>
 
 namespace ek {
 
@@ -35,7 +35,7 @@ struct Button {
     vec2_t baseScale = vec2(1,1);
     color2_t baseColor = color2_identity();
 
-    TimeLayer time = TimeLayer::UI;
+    TimeLayer time = TIME_LAYER_UI;
 
     static void updateAll();
 };

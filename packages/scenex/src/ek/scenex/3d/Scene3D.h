@@ -2,7 +2,7 @@
 
 #include <ecxx/ecxx.hpp>
 
-#include <ek/scenex/app/GameDisplay.hpp>
+#include <ekx/app/game_display.h>
 #include "Camera3D.hpp"
 #include "StaticMesh.hpp"
 #include "Light3D.hpp"
@@ -35,9 +35,9 @@ void preRenderScene3D() {
 }
 
 // onRenderSceneBefore
-void renderScene3D(GameDisplay& display) {
+void renderScene3D(game_display_info* display_info) {
     if (g_render_system_3d) {
-        g_render_system_3d->render(display.info.size.x, display.info.size.y);
+        g_render_system_3d->render(display_info->size.x, display_info->size.y);
     }
 }
 

@@ -93,7 +93,7 @@ sg_layout_desc ek_vertex2d_layout_desc(void) {
 ek_canvas_context canvas;
 
 static void canvas__resources_create(void) {
-    EK_DEBUG("canvas: create default resources");
+    log_debug("canvas: create default resources");
     const sg_backend backend = sg_query_backend();
     res_shader.data[R_SHADER_BLEND] = ek_shader_make(canvas_shader_desc(backend));
     res_shader.data[R_SHADER_ALPHA_MAP] = ek_shader_make(canvas_alpha_shader_desc(backend));
@@ -686,7 +686,7 @@ void canvas_draw_batch_pipeline(sg_pipeline pip, uint32_t images_count) {
 }
 
 void canvas_setup(void) {
-    EK_DEBUG("canvas setup");
+    log_debug("canvas setup");
 
     //memset(&ek_canvas_, 0, sizeof ek_canvas_);
 
@@ -699,7 +699,7 @@ void canvas_setup(void) {
 }
 
 void canvas_shutdown(void) {
-    EK_DEBUG("canvas shutdown");
+    log_debug("canvas shutdown");
     canvas__resources_destroy();
 }
 

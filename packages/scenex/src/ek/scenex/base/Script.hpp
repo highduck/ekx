@@ -6,16 +6,14 @@
 #include <ek/util/StaticSignal.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/ds/Pointer.hpp>
-#include "../base/TimeLayer.hpp"
+#include <ekx/app/time_layers.h>
 
 namespace ek {
 
 struct Updater {
     StaticSignal<ecs::EntityApi, TimeLayer> onUpdate{};
-    TimeLayer timeLayer = TimeLayer::Root;
+    TimeLayer timeLayer = 0;
 };
-
-
 
 class ScriptBase {
 public:
@@ -139,8 +137,6 @@ inline S* findScript(ecs::EntityApi e) {
 }
 
 void updateScripts();
-
-EK_TYPE_INDEX_T(IDrawable2D, ScriptDrawable2D, 6);
 
 }
 

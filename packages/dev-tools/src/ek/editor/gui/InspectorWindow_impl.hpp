@@ -15,7 +15,6 @@
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/LayoutRect.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
-#include <ek/scenex/2d/UglyFilter2D.hpp>
 #include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/scenex/2d/Viewport.hpp>
@@ -318,20 +317,6 @@ inline void guiLayout(LayoutRect& layout) {
     ImGui::EditRect("Safe Rect", layout.safeRect.data);
 }
 
-inline void guiUglyFilter2D(UglyFilter2D& filters) {
-    ImGui::Checkbox("Enabled", &filters.enabled);
-    for (int i = 0; i < filters.filters.size(); ++i) {
-        auto& filter = filters.filters[i];
-        ImGui::PushID(filters.filters.data() + i);
-        ImGui::LabelText("Type", "%d", filter.type);
-        ImGui::Color32Edit("Color", &filter.color);
-        ImGui::DragFloat2("Offset", filter.offset.data);
-        ImGui::DragFloat2("Blur", filter.blur.data);
-        ImGui::DragInt("Quality", (int*) &filter.quality);
-        ImGui::PopID();
-    }
-}
-
 inline void guiParticleEmitter2D(ParticleEmitter2D& emitter) {
     ImGui::Checkbox("Enabled", &emitter.enabled);
     ImGui::Text("_Time: %f", emitter.time);
@@ -372,7 +357,6 @@ void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
         node.flags = flags;
     }
 
-    guiComponentPanel<UglyFilter2D>(e, "UglyFilter2D", guiUglyFilter2D);
     guiComponentPanel<Transform2D>(e, "Transform2D", guiTransform2D);
     guiComponentPanel<Viewport>(e, "Viewport", guiViewport);
     guiComponentPanel<LayoutRect>(e, "Layout", guiLayout);

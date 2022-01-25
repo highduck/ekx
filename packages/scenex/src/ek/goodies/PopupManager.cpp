@@ -95,7 +95,7 @@ void init_basic_popup(EntityApi e) {
 }
 
 void PopupManager::updateAll() {
-    auto dt = TimeLayer::UI->dt;
+    auto dt = g_time_layers[TIME_LAYER_UI].dt;
     for (auto e: ecs::view<PopupManager>()) {
         auto& p = e.get<PopupManager>();
         bool needFade = !p.active.empty();

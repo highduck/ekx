@@ -5,7 +5,7 @@
 
 #define SOKOL_GFX_IMPL
 #define SOKOL_ASSERT(x) EK_ASSERT(x)
-#define SOKOL_LOG(msg) EK_DEBUG("sg: %s", msg);
+#define SOKOL_LOG(msg) log_debug("sg: %s", msg);
 #include <sokol_gfx.h>
 
 static void ek_gfx_log_backend() {
@@ -25,12 +25,12 @@ static void ek_gfx_log_backend() {
     const int backend = (int) sg_query_backend();
     EK_ASSERT(backend >= 0);
     EK_ASSERT(backend < (sizeof(backend_strings) / sizeof(backend_strings[0])));
-    EK_INFO("sg backend: %s", backend_strings[backend]);
+    log_info("sg backend: %s", backend_strings[backend]);
 #endif
 }
 
 void ek_gfx_setup(int max_draw_calls) {
-    EK_DEBUG("gfx init");
+    log_debug("gfx init");
     sg_desc desc = {0};
     // this size is 2x Draw Calls per frame (because of sokol internal double-buffering)
     if (max_draw_calls <= 0) {
@@ -52,7 +52,7 @@ void ek_gfx_setup(int max_draw_calls) {
 }
 
 void ek_gfx_shutdown(void) {
-    EK_DEBUG("gfx shutdown");
+    log_debug("gfx shutdown");
     sg_shutdown();
 }
 

@@ -126,7 +126,7 @@ std::vector<PageData> packSprites(std::vector<SpriteData> sprites, const int max
     std::vector<PageData> pages;
 
 //    timer timer{};
-//    EK_DEBUG("Packing %lu sprites...", sprites.size());
+//    log_debug("Packing %lu sprites...", sprites.size());
     binpack_t binpack;
     bool need_to_pack = true;
     while (need_to_pack) {

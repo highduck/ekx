@@ -109,7 +109,7 @@ void readBitmapARGB(input_memory_stream& input, BitmapData& bitmap) {
     if ((compressed & 1) != 0) {
         auto written = ekUncompress(input, bm_data, bm_size);
         if (written != bm_size) {
-            EK_ERROR("bitmap decompress error");
+            log_error("bitmap decompress error");
         }
     } else {
         input.read(bm_data, bm_size);
@@ -147,7 +147,7 @@ void readBitmapCLUT(input_memory_stream& input, BitmapData& bitmap) {
     buffer.resize(desc.stride * desc.height);
     auto written = ekUncompress(input, buffer.data(), buffer.size());
     if (written != buffer.size()) {
-        EK_ERROR("bitmap decompress error");
+        log_error("bitmap decompress error");
     }
     bitmap.width = desc.width;
     bitmap.height = desc.height;
@@ -193,7 +193,7 @@ BitmapData* BitmapData::parse(const void* data, uint32_t size) {
     } else if (sig == SIGNATURE_JPEG) {
         readBitmapJPEG(data, size, bitmap);
     } else {
-        EK_ERROR("unsupported dat");
+        log_error("unsupported dat");
     }
 
     return bitmap_ptr;

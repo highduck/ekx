@@ -48,6 +48,8 @@ ImGuiIntegration::ImGuiIntegration() {
     init_font_image();
 
     ImGui::StyleColorsDark();
+    ImGui::GetStyle().Alpha = 0.8f;
+
     ImPlot::CreateContext();
 }
 

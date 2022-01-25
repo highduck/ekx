@@ -25,7 +25,7 @@ void Editor::onRenderFrame() {
 
 void Editor::onUpdate() {
     //project.update_scale_factor(app_->scale_factor, settings.notifyAssetsOnScaleFactorChanged);
-    gui_.begin_frame((float)g_game_app->frameTimer.deltaTime);
+    gui_.begin_frame((float)g_game_app->frame_timer.dt);
     if (g_editor_config->showEditor) {
         drawGUI();
     }
@@ -60,7 +60,7 @@ Editor::~Editor() {
 }
 
 void Editor::load() {
-    EK_DEBUG("load editor layout state");
+    log_debug("load editor layout state");
     pugi::xml_document doc{};
     if (!doc.load_file("EditorLayoutState.xml")) {
         return;
@@ -125,15 +125,15 @@ void EditorSettings::save() const {
     wnd.append_attribute("width").set_value(width);
     wnd.append_attribute("height").set_value(height);
     if (!xml.save_file(editorSettingsPath)) {
-        EK_ERROR("Can't save editor settings");
+        log_error("Can't save editor settings");
     }
 }
 
 void EditorSettings::load() {
-    EK_DEBUG("loading editor settings");
+    log_debug("loading editor settings");
     pugi::xml_document doc{};
     if (!doc.load_file(editorSettingsPath)) {
-        EK_ERROR("Can't load editor settings");
+        log_error("Can't load editor settings");
         return;
     }
     auto node = doc.first_child();

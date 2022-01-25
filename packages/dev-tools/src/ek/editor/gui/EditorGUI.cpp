@@ -2,7 +2,7 @@
 
 #include <ek/scenex/app/basic_application.hpp>
 #include <ek/editor/imgui/imgui.hpp>
-#include <ek/scenex/app/input_controller.hpp>
+#include <ekx/app/input_state.h>
 #include "FontIconsPreview.hpp"
 
 // private impls:
@@ -40,9 +40,7 @@ void Editor::drawGUI() {
                                               &settings.notifyAssetsOnScaleFactorChanged);
             ///
             ImGui::Separator();
-            if (g_input_controller) {
-                ImGui::MenuItem("Emulate Touch Input", nullptr, &g_input_controller->emulateTouch);
-            }
+            ImGui::MenuItem("Emulate Touch Input", nullptr, &g_input_state.emulateTouch);
             ///
             ImGui::Separator();
             if (g_game_app) {
@@ -105,8 +103,8 @@ void Editor::drawGUI() {
         ImGui::SameLine();
         game.dirty |= ImGui::Checkbox(ICON_FA_STOPWATCH, &game.profiler);
 
-        g_game_app->profiler.enabled = game.profiler;
-        TimeLayer::Root->scale = game.paused ? 0.0f : game.timeScale;
+        s_profile_metrics.enabled = game.profiler;
+        g_time_layers[TIME_LAYER_ROOT].scale = game.paused ? 0.0f : game.timeScale;
 
         ImGui::EndMainMenuBar();
     }

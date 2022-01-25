@@ -23,7 +23,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         #UNITY_BUILD ON
         )
 
-target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_include_directories(${PROJECT_NAME}
+        PUBLIC src
+        PUBLIC include
+        )
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::graphics

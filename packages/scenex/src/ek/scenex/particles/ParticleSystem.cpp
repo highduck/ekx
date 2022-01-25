@@ -75,7 +75,7 @@ void update_emitters() {
         if (!emitter.enabled || !emitter.particle || !emitter.layer.invalidate()) {
             continue;
         }
-        const auto dt = emitter.timer->dt;
+        const auto dt = g_time_layers[emitter.timer].dt;
         emitter.time += dt;
         const auto& data = emitter.data;
         if (emitter.time >= data.interval) {
@@ -147,7 +147,7 @@ void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const Particle
 void update_particles() {
     for (auto e : ecs::view<ParticleLayer2D>()) {
         auto& layer = e.get<ParticleLayer2D>();
-        auto dt = layer.timer->dt;
+        auto dt = g_time_layers[layer.timer].dt;
         auto& particles = layer.particles;
         uint32_t i = 0;
         while(i < particles.size()) {

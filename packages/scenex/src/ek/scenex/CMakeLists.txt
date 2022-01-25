@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.19)
 
 target_sources(${PROJECT_NAME} PRIVATE
-        Localization.hpp
-        Localization.cpp
+
+        ekx_app.cpp
+        ekx_app.c
 
         base/Node.hpp
         base/Node.cpp
@@ -14,7 +15,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         base/NodeEvents.cpp
         base/Tween.hpp
         base/DestroyTimer.hpp
-        base/TimeLayer.hpp
         base/module.cpp
 
         3d/Transform3D.cpp
@@ -32,8 +32,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         2d/Transform2D.cpp
         2d/Display2D.cpp
-        2d/UglyFilter2D.cpp
-        2d/UglyFilter2D.hpp
         2d/RenderSystem2D.cpp
         2d/RenderSystem2D.hpp
         2d/Camera2D.hpp
@@ -55,8 +53,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         text/FontImplBase.hpp
         text/TextEngine.cpp
 
-        AudioManager.cpp
-        AudioManager.hpp
         InteractionSystem.cpp
         InteractionSystem.hpp
 
@@ -68,10 +64,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         app/basic_application.cpp
         app/basic_application.hpp
-        app/input_controller.hpp
-        app/input_controller.cpp
-        app/profiler.cpp
-
+        
         StorageVariable.hpp
 
         systems/hitTest.hpp

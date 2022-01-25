@@ -102,8 +102,8 @@ Atlas::~Atlas() {
 }
 
 void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
-    EK_DEBUG("Decoding Atlas META");
-    EK_DEBUG("Atlas Base Path: %s", atlas->base_path.c_str());
+    log_debug("Decoding Atlas META");
+    log_debug("Atlas Base Path: %s", atlas->base_path.c_str());
 
     input_memory_stream input{lr->buffer, lr->length};
     IO io{input};
@@ -122,7 +122,7 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
 
         sg_image* image = &REF_RESOLVE(res_image, image_asset);
         if (image->id) {
-            EK_DEBUG("Destroy old page image %s", page.imagePath.c_str());
+            log_debug("Destroy old page image %s", page.imagePath.c_str());
             sg_destroy_image(*image);
             *image = {SG_INVALID_ID};
         }
@@ -149,7 +149,7 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
         const auto& pageInfo = atlasInfo.pages[i];
         const auto& pageImagePath = pageInfo.imagePath;
 
-        EK_DEBUG("Load atlas page %s/%s", atlas->base_path.c_str(), pageImagePath.c_str());
+        log_debug("Load atlas page %s/%s", atlas->base_path.c_str(), pageImagePath.c_str());
 
         auto* loader = atlas->loaders[i];
         loader->formatMask = atlas->formatMask;

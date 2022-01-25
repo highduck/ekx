@@ -4,7 +4,7 @@
 #include "Particle.hpp"
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
-#include <ek/scenex/base/TimeLayer.hpp>
+#include <ekx/app/time_layers.h>
 
 namespace ek {
 
@@ -13,8 +13,6 @@ struct ParticleLayer2D {
     bool keepAlive = false;
     TimeLayer timer;
 };
-
-
 
 struct ParticleEmitter2D {
     typedef void SpawnCallback(ecs::EntityApi, Particle&);
@@ -58,7 +56,6 @@ public:
 };
 
 EK_DECLARE_TYPE(ParticleRenderer2D);
-EK_TYPE_INDEX_T(IDrawable2D, ParticleRenderer2D, IDrawable2D_ParticleRenderer2D);
 
 void particles_burst(ecs::EntityApi e, int count, vec2_t relativeVelocity = {});
 

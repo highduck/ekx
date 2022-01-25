@@ -1,6 +1,6 @@
-#pragma once
+#ifdef EK_UITEST
 
-#include "../uitest.hpp"
+#include "uitest.h"
 
 namespace ek::uitest {
 
@@ -52,7 +52,7 @@ void click(const std::vector<std::string>& path) {
 
 void runUITest() {
     if (!lang.empty()) {
-        Localization::instance.setLanguage(lang);
+        s_localization.setLanguage(lang);
     }
 
     if (_testToRun.empty()) {
@@ -61,11 +61,11 @@ void runUITest() {
     }
     auto it = _tests.find(_testToRun);
     if (it != _tests.end()) {
-        EK_INFO("UI test run: %s", _testToRun.c_str());
+        log_info("UI test run: %s", _testToRun.c_str());
         it->second();
         return;
     }
-    EK_ERROR("UI test %s not found", _testToRun.c_str());
+    log_error("UI test %s not found", _testToRun.c_str());
     fail();
 }
 
@@ -109,3 +109,5 @@ void initialize(basic_application* baseApp) {
 }
 
 }
+
+#endif // EK_UITEST

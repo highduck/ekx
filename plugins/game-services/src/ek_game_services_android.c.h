@@ -5,7 +5,7 @@
 #define CLASS_PATH "ek/GameServices"
 
 void ek_game_services_init() {
-    EK_DEBUG("game-services initialize");
+    log_debug("game-services initialize");
 
     JNIEnv* env = ek_android_jni();
     jclass class_ref = (*env)->FindClass(env, CLASS_PATH);

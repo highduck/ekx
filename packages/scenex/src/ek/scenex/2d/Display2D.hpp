@@ -1,15 +1,14 @@
 #pragma once
 
+#include <ek/gfx.h>
+#include <ek/log.h>
+#include <ek/assert.h>
 #include <ek/ds/String.hpp>
 #include <ek/scenex/text/TextFormat.hpp>
 #include <ek/util/Type.hpp>
 #include <ek/ds/Pointer.hpp>
 #include <ecxx/ecxx.hpp>
-#include <ek/gfx.h>
 #include "Sprite.hpp"
-#include <ek/log.h>
-#include <ek/assert.h>
-#include <ek/scenex/types.h>
 
 namespace ek {
 
@@ -91,10 +90,10 @@ struct Display2D {
     [[nodiscard]]
     inline T& get() const {
         if (!drawable) {
-            EK_WARN("Drawable2D required");
+            log_warn("Drawable2D required");
         }
         if (!drawable->matchType<T>()) {
-            EK_WARN("Drawable2D TypeID mismatch: required %d, got %d", TypeIndex<T, IDrawable2D>::value,
+            log_warn("Drawable2D TypeID mismatch: required %d, got %d", TypeIndex<T, IDrawable2D>::value,
                     drawable->getTypeID());
         }
         EK_ASSERT(!!drawable);
@@ -138,7 +137,7 @@ struct Display2D {
     static T& get(ecs::EntityApi e) {
         auto* display = e.tryGet<Display2D>();
         if (!display) {
-            EK_WARN("Display2D required");
+            log_warn("Display2D required");
         }
         return display->get<T>();
     }
@@ -244,7 +243,7 @@ public:
     color_t borderColor = ARGB(0x00FF0000);
     color_t fillColor = ARGB(0x00000000);
 
-    bool localize = false;
+    bool localized = false;
 
     // Reduce font-size until text fits to the field bounds (if bounds not empty)
     bool adjustsFontSizeToFitBounds = false;
@@ -314,15 +313,7 @@ inline void setText(ecs::EntityApi e, const String& v) {
     }
 }
 
-
-
-
 EK_DECLARE_TYPE(IDrawable2D);
-EK_TYPE_INDEX_T(IDrawable2D, Sprite2D, IDrawable2D_Sprite2D);
-EK_TYPE_INDEX_T(IDrawable2D, Quad2D, IDrawable2D_Quad2D);
-EK_TYPE_INDEX_T(IDrawable2D, Arc2D, IDrawable2D_Arc2D);
-EK_TYPE_INDEX_T(IDrawable2D, NinePatch2D, IDrawable2D_NinePatch2D);
-EK_TYPE_INDEX_T(IDrawable2D, Text2D, IDrawable2D_Text2D);
 
 }
 

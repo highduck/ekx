@@ -7,15 +7,15 @@ TEST_CASE("print") {
     log_init();
     {
         log_print(LOG_LEVEL_DEBUG, nullptr, 0, "hello");
-        EK_DEBUG("~Hey! => %d", 223);
-        EK_DEBUG("simple digits: %d", 54);
+        log_debug("~Hey! => %d", 223);
+        log_debug("simple digits: %d", 54);
 
-        EK_DEBUG("macro");
-        EK_DEBUG("and formatting %f", 4.0f);
+        log_debug("macro");
+        log_debug("and formatting %f", 4.0f);
 
         const char* p = "some/path/to/some/goodies";
-        EK_INFO("%s", p);
-        EK_DEBUG("%d", 2);
+        log_info("%s", p);
+        log_debug("%d", 2);
     }
     //log_term();
 

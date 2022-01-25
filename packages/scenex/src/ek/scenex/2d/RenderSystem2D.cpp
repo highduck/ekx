@@ -1,7 +1,6 @@
 #include "RenderSystem2D.hpp"
 #include "Display2D.hpp"
 #include "Transform2D.hpp"
-#include "UglyFilter2D.hpp"
 #include "Camera2D.hpp"
 
 #include <ek/canvas.h>
@@ -13,16 +12,6 @@ int RenderSystem2D::currentLayerMask = 0xFF;
 
 void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTransform2D* worldTransform) {
     EK_ASSERT(w.isValid(e));
-
-    auto* uglyFilter = w.tryGet<UglyFilter2D>(e);
-    if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {
-        canvas.matrix[0] = worldTransform->matrix;
-        canvas.color[0] = worldTransform->color;
-        if (uglyFilter->pass(w, e)) {
-            // discard
-            return;
-        }
-    }
 
     auto* bounds = w.tryGet<Bounds2D>(e);
     if (bounds) {
@@ -79,14 +68,6 @@ void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTr
 
 void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
     EK_ASSERT(w.isValid(e));
-
-    auto* uglyFilter = w.tryGet<UglyFilter2D>(e);
-    if (uglyFilter && uglyFilter->enabled && !uglyFilter->processing) {
-        if (uglyFilter->pass(w, e)) {
-            // discard
-            return;
-        }
-    }
 
     auto* bounds = w.tryGet<Bounds2D>(e);
     if (bounds) {

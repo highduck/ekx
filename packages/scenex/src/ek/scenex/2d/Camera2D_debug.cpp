@@ -15,7 +15,7 @@ void debugDrawPointer(Camera2D& camera) {
     auto* im = g_interaction_system;
     auto v = im->pointerScreenPosition_;
     v = vec2_transform(v, camera.screenToWorldMatrix);
-    float t = TimeLayer::Root->total;
+    float t = g_time_layers[TIME_LAYER_ROOT].total;
     canvas_set_empty_image();
     if (im->pointerDown_) {
         canvas_fill_circle(vec3_v(v, 12 + 2 * sinf(t * 8)), ARGB(0x00FFFF00), ARGB(0x77FF0000), 10);

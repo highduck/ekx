@@ -5,7 +5,7 @@
 #include <ek/scenex/base/Node.hpp>
 #include <ek/log.h>
 #include <ek/scenex/2d/LayoutRect.hpp>
-#include <ek/scenex/base/TimeLayer.hpp>
+#include <ekx/app/time_layers.h>
 
 namespace ek {
 
@@ -142,7 +142,7 @@ ecs::EntityApi GameScreenManager::findScreen(string_hash_t name) const {
     if(e && e.has<GameScreen>()) {
         return e;
     }
-    EK_DEBUG("could not find screen %s (%08X)", hsp_get(name), name);
+    log_debug("could not find screen %s (%08X)", hsp_get(name), name);
     return 0;
 }
 
@@ -184,7 +184,7 @@ void GameScreenManager::update() {
     if (!transition.active) {
         return;
     }
-    const auto dt = TimeLayer::UI->dt;
+    const auto dt = g_time_layers[TIME_LAYER_UI].dt;
     if (transition.delayTimer > 0.0f) {
         transition.delayTimer -= dt;
     } else if (transition.t <= 1.0f) {

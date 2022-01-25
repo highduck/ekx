@@ -41,7 +41,7 @@ export class TranslationsAsset extends Asset {
         header.writeString(this.name);
         header.writeU32(langs.length);
         for (let i = 0; i < langs.length; ++i) {
-            header.writeString(langs[i]);
+            header.writeFixedASCII(langs[i], 8);
         }
         this.owner.writer.writeSection(header);
     }

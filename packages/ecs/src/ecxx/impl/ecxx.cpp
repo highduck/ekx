@@ -91,7 +91,7 @@ bool World::check(EntityPassport passport) const {
 // World create / destroy
 
 void World::initialize() {
-    EK_DEBUG("ecs::world initialize");
+    log_debug("ecs::world initialize");
     resetEntityPool();
     memset(components, 0, COMPONENTS_MAX_COUNT * sizeof(void*));
     entityToHandle = ek_sparse_array_create(COMPONENTS_MAX_COUNT * ENTITIES_MAX_COUNT);
@@ -113,7 +113,7 @@ void World::reset() {
 }
 
 void World::shutdown() {
-    EK_DEBUG("ecs::world shutdown");
+    log_debug("ecs::world shutdown");
     // skip clearing entity pool, because we don't need it anymore
     auto** components_ = components;
     for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EditorWindow.hpp"
-#include <ek/scenex/app/GameDisplay.hpp>
+#include <ekx/app/game_display.h>
 
 namespace ek {
 
@@ -54,7 +54,7 @@ public:
 
     void onDraw() override;
 
-    GameDisplay display;
+    game_display display = {};
     SceneView view{};
 
     ecs::EntityRef root{};

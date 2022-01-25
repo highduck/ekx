@@ -94,7 +94,7 @@ SGMovieFrameData createFrameModel(const Frame& frame) {
         ef.rotate = (int) frame.motionTweenRotate;
         ef.rotateTimes = frame.motionTweenRotateTimes;
     } else if (frame.tweenType == TweenType::motion_object) {
-        EK_WARN("motion object is not supported");
+        log_warn("motion object is not supported");
     }
     return ef;
 }

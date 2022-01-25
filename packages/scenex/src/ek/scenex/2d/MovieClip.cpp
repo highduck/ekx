@@ -14,7 +14,7 @@ void apply_frame(EntityApi e, MovieClip& mov);
 void MovieClip::updateAll() {
     for (auto e : ecs::view<MovieClip>()) {
         auto& mov = e.get<MovieClip>();
-        auto dt = mov.timer->dt;
+        auto dt = g_time_layers[mov.timer].dt;
         if (mov.playing) {
             mov.time += dt * mov.fps;
             mov.trunc_time();

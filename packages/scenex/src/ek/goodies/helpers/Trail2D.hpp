@@ -4,7 +4,6 @@
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/time.h>
-#include <ek/scenex/types.h>
 
 namespace ek {
 
@@ -119,8 +118,4 @@ public:
     R(sprite_t) sprite = R_SPRITE_EMPTY;
 };
 
-EK_TYPE_INDEX_T(IDrawable2D, TrailRenderer2D, IDrawable2D_TrailRenderer2D);
-
 }
-
-

@@ -7,6 +7,7 @@ function setup(project) {
         name: "scenex",
         path: __dirname,
         cpp: "src",
+        cpp_include: "include",
         android: {
             android_permission: "android.permission.INTERNET"
         },

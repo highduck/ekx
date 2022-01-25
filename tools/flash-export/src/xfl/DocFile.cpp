@@ -37,7 +37,7 @@ public:
             xml_doc_ = new pugi::xml_document();
             auto res = xml_doc_->load(this->content().c_str());
             if (!res) {
-                EK_ERROR("XML PARSE ERROR: %s", res.description());
+                log_error("XML PARSE ERROR: %s", res.description());
                 delete xml_doc_;
                 xml_doc_ = nullptr;
             }
@@ -98,7 +98,7 @@ public:
 
                 fclose(stream);
             } else {
-                EK_ERROR("Error read XFL node: %s", path_.c_str());
+                log_error("Error read XFL node: %s", path_.c_str());
             }
         }
         return contents_;
@@ -123,7 +123,7 @@ public:
         // MZ_ZIP_FLAG_DO_NOT_SORT_CENTRAL_DIRECTORY
         auto status = mz_zip_reader_init_file(zip_, zip_file_path, 0);
         if (!status) {
-            EK_WARN("Error reading FLA zip archive: %s", zip_file_path);
+            log_warn("Error reading FLA zip archive: %s", zip_file_path);
         }
     }
 
@@ -180,12 +180,12 @@ std::unique_ptr<File> File::load(const char* path) {
             if (is_dir(tmp)) {
                 return std::make_unique<XFLNode>(tmp, nullptr);
             } else {
-                EK_ERROR("Import Flash: loading %s XFL file, but %s is not a dir", path, tmp);
+                log_error("Import Flash: loading %s XFL file, but %s is not a dir", path, tmp);
             }
         } else if (strncmp(ext, "fla", 3) == 0 || strncmp(ext, "zip", 3) == 0) {
             return std::make_unique<FLANode>(path);
         } else {
-            EK_ERROR("Import Flash: file is not xfl or fla: %s", path);
+            log_error("Import Flash: file is not xfl or fla: %s", path);
         }
     }
 
@@ -198,11 +198,11 @@ std::unique_ptr<File> File::load(const char* path) {
         if (is_file(tmp)) {
             return std::make_unique<XFLNode>(path, nullptr);
         } else {
-            EK_WARN("Import Flash: given dir doesn't contain .xfl file: %s", path);
+            log_warn("Import Flash: given dir doesn't contain .xfl file: %s", path);
         }
     }
 
-    EK_ERROR("Import Flash: file not found: %s", path);
+    log_error("Import Flash: file not found: %s", path);
     return nullptr;
 }
 

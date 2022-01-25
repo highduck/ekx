@@ -6,7 +6,7 @@
 #include <ek/scenex/SceneFactory.hpp>
 
 #include <ek/rnd.h>
-#include <ek/scenex/base/TimeLayer.hpp>
+#include <ekx/app/time_layers.h>
 #include <ek/math.h>
 
 namespace ek {
@@ -16,7 +16,7 @@ float ease_back5(float t) {
 }
 
 void BubbleText::updateAll() {
-    float dt = TimeLayer::HUD->dt;
+    float dt = g_time_layers[TIME_LAYER_HUD].dt;
     const float time_max = 2.0f;
     const float delta_y = -100.0f;
 

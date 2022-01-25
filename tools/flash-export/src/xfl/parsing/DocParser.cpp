@@ -223,12 +223,12 @@ void DocParser::parse(const xml_node& node, FillStyle& r) const {
                     if (item && item->bitmap) {
                         r.bitmap = item->bitmap;
                     } else {
-                        EK_WARN("[BitmapFill] bitmap item not found: %s", r.bitmapPath.c_str());
+                        log_warn("[BitmapFill] bitmap item not found: %s", r.bitmapPath.c_str());
                     }
                 }
                 break;
             case FillType::unknown:
-                EK_ERROR("Fill Style has unknown type!");
+                log_error("Fill Style has unknown type!");
                 break;
         }
         if (almost_eq_f32(mat3x2_det(r.matrix), 0, MATH_F32_EPSILON)) {

@@ -2,6 +2,7 @@
 
 #include <ek/math.h>
 #include <ecxx/ecxx_fwd.hpp>
+#include <ekx/app/game_display.h>
 
 namespace ek {
 
@@ -33,8 +34,6 @@ struct ViewportScaleOutput {
     float scale = 1.0f;
 };
 
-struct GameDisplayInfo;
-
 struct Viewport {
     ViewportScaleOptions options{};
     ViewportScaleOutput output{};
@@ -46,7 +45,7 @@ struct Viewport {
         options.baseResolution.y = height;
     }
 
-    static void updateAll(const GameDisplayInfo& display0);
+    static void updateAll(const game_display_info* display0);
 };
 
 }

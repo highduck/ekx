@@ -1,6 +1,6 @@
 #include "Viewport.hpp"
 #include "LayoutRect.hpp"
-#include "../app/GameDisplay.hpp"
+#include <ekx/app/game_display.h>
 
 namespace ek {
 
@@ -46,17 +46,17 @@ void updateViewport(ecs::EntityApi e, const ViewportScaleInput& input) {
     layout.safeRect = vp.output.safeRect;
 }
 
-void Viewport::updateAll(const GameDisplayInfo& display0) {
-    const float w = display0.size.x;
-    const float h = display0.size.y;
+void Viewport::updateAll(const game_display_info* display0) {
+    const float w = display0->size.x;
+    const float h = display0->size.y;
     const vec4_t insets =
-            display0.insets +
-            display0.userInsetsAbsolute +
-            vec4(w, h, w, h) * display0.userInsetsRelative;
+            display0->insets +
+            display0->userInsetsAbsolute +
+            vec4(w, h, w, h) * display0->userInsetsRelative;
     ViewportScaleInput input;
-    input.fullRect = rect_wh(display0.size.x, display0.size.y);
+    input.fullRect = rect_wh(display0->size.x, display0->size.y);
     input.safeRect = rect(insets.x, insets.y, w - insets.x - insets.z, h - insets.y - insets.w);
-    input.dpiScale = display0.dpiScale;
+    input.dpiScale = display0->dpiScale;
 
     for (auto e: ecs::view<Viewport>()) {
         updateViewport(e, input);

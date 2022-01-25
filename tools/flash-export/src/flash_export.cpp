@@ -14,7 +14,7 @@ namespace ek {
 void exportFlash(const char* xmlPath) {
     pugi::xml_document xml;
     if (!xml.load_file(xmlPath)) {
-        EK_ERROR("error parse xml %s", xmlPath);
+        log_error("error parse xml %s", xmlPath);
         return;
     }
     auto node = xml.first_child();

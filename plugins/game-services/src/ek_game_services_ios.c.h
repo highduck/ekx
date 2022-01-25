@@ -48,7 +48,7 @@ void GC_authenticateLocalPlayer() {
 }
 
 void ek_game_services_init() {
-    EK_DEBUG("game-services initialize");
+    log_debug("game-services initialize");
     GC_authenticateLocalPlayer();
 }
 

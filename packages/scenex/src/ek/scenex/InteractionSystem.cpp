@@ -77,21 +77,21 @@ void InteractionSystem::fireInteraction(PointerEvent event, bool prev, bool only
     }
 }
 
-void InteractionSystem::handle_mouse_event(const ek_app_event& ev, vec2_t pos) {
-
-    if (ev.type == EK_APP_EVENT_MOUSE_DOWN) {
+void InteractionSystem::handle_mouse_event(const ek_app_event* ev, vec2_t pos) {
+    const ek_app_event_type type = ev->type;
+    if (type == EK_APP_EVENT_MOUSE_DOWN) {
         mousePosition0_ = pos;
         pointerDown_ = true;
         fireInteraction(PointerEvent::Down);
-    } else if (ev.type == EK_APP_EVENT_MOUSE_UP) {
+    } else if (type == EK_APP_EVENT_MOUSE_UP) {
         mousePosition0_ = pos;
         pointerDown_ = false;
         fireInteraction(PointerEvent::Up);
-    } else if (ev.type == EK_APP_EVENT_MOUSE_MOVE) {
+    } else if (type == EK_APP_EVENT_MOUSE_MOVE) {
         mousePosition0_ = pos;
         mouseActive_ = true;
         process();
-    } else if (ev.type == EK_APP_EVENT_MOUSE_EXIT) {
+    } else if (type == EK_APP_EVENT_MOUSE_EXIT) {
         pointerDown_ = false;
         mouseActive_ = false;
         //update();
@@ -99,10 +99,12 @@ void InteractionSystem::handle_mouse_event(const ek_app_event& ev, vec2_t pos) {
     }
 }
 
-void InteractionSystem::handle_touch_event(const ek_app_event& ev, vec2_t pos) {
-    if (ev.type == EK_APP_EVENT_TOUCH_START) {
+void InteractionSystem::handle_touch_event(const ek_app_event* ev, vec2_t pos) {
+    const ek_app_event_type type = ev->type;
+    const uint64_t touch_id = ev->touch.id;
+    if (type == EK_APP_EVENT_TOUCH_START) {
         if (touchID_ == 0) {
-            touchID_ = ev.touch.id;
+            touchID_ = touch_id;
             touchPosition0_ = pos;
             mouseActive_ = false;
             pointerDown_ = true;
@@ -111,8 +113,8 @@ void InteractionSystem::handle_touch_event(const ek_app_event& ev, vec2_t pos) {
         }
     }
 
-    if (touchID_ == ev.touch.id) {
-        if (ev.type == EK_APP_EVENT_TOUCH_END) {
+    if (touchID_ == touch_id) {
+        if (type == EK_APP_EVENT_TOUCH_END) {
             touchID_ = 0;
             touchPosition0_ = {};
             pointerDown_ = false;

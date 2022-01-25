@@ -69,12 +69,6 @@ void log_set_levels(uint16_t mask);
 //#define EK_PROFILE_SCOPE(label) ((void)0)
 #endif
 
-#define EK_TRACE(...) log_trace(__VA_ARGS__)
-#define EK_DEBUG(...) log_debug(__VA_ARGS__)
-#define EK_INFO(...) log_info(__VA_ARGS__)
-#define EK_WARN(...) log_warn(__VA_ARGS__)
-#define EK_ERROR(...) log_error(__VA_ARGS__)
-
 // TODO:
 //#ifdef EK_CONFIG_PROFILING
 //#define EK_PROFILE_SCOPE(label) ek::ScopedTimeMeter _time_meter_label{#label, EK_CURRENT_LOCATION, ek::Verbosity::Trace}

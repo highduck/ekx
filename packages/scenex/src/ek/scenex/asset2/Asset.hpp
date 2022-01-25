@@ -76,15 +76,7 @@ public:
 
 class AssetManager {
 public:
-    AssetManager();
-
-    ~AssetManager();
-
-    Asset* add_file(const char* path, const char* type);
-
-    Asset* add_from_type(const void* data, uint32_t size);
-
-    void add_resolver(AssetTypeResolver* resolver);
+    void add(Asset* asset);
 
     void load_all();
 
@@ -94,26 +86,29 @@ public:
 
     void set_scale_factor(float scale);
 
-    bool is_assets_ready() const;
+    [[nodiscard]] bool is_assets_ready() const;
 
     String base_path{"assets"};
     Array<Asset*> assets;
-    Array<AssetTypeResolver*> resolvers;
     float scale_factor = 2.0f;
     uint8_t scale_uid = 2;
 };
 
-class DefaultAssetsResolver : public AssetTypeResolver {
+
+class PackAsset : public Asset {
 public:
+    explicit PackAsset(String name);
+    void do_load() override;
+    void do_unload() override;
 
-    [[nodiscard]]
-    Asset* create_from_file(const String& path, const String& type) const override;
+    void poll() override;
+    [[nodiscard]] float getProgress() const override;
 
-    [[nodiscard]]
-    Asset* create(const String& path) const override;
-
-    [[nodiscard]]
-    Asset* create_for_type(const void* data, uint32_t size) const override;
+    String name_;
+    String fullPath_;
+    Array<Asset*> assets;
+    unsigned assetsLoaded = 0;
+    bool assetListLoaded = false;
 };
 
 }

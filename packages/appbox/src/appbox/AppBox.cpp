@@ -6,10 +6,10 @@
 #include <ek/scenex/2d/Button.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <billing.hpp>
-#include <ek/scenex/AudioManager.hpp>
+#include <ekx/app/audio_manager.h>
 #include <utility>
 #include <ek/game_services.h>
-#include <ek/scenex/Localization.hpp>
+#include <ekx/app/localization.h>
 #include "Ads.hpp"
 
 namespace ek {
@@ -26,17 +26,19 @@ AppBox::AppBox(AppBoxConfig config_) :
 
     // initialize translations
     // TODO: wtf
-    char lang_buf[sizeof(ek_app.lang)];
-    int n = ek_ls_get_s("selected_lang", lang_buf, sizeof(lang_buf));
+    lang_name_t lang = {};
+    int n = ek_ls_get_s("selected_lang", lang.str, sizeof(lang_name_t));
+    EK_ASSERT(sizeof(lang_name_t) <= sizeof(ek_app.lang));
     if (n < 2) {
-        memcpy(lang_buf, ek_app.lang, sizeof(lang_buf));
+        memcpy(lang.str, ek_app.lang, sizeof(lang_name_t));
     }
-    if (lang_buf[0] == 0) {
-        lang_buf[0] = 'e';
-        lang_buf[1] = 'n';
+    if (lang.str[0] == 0) {
+        lang.str[0] = 'e';
+        lang.str[1] = 'n';
     }
-    lang_buf[2] = 0;
-    Localization::instance.setLanguage(lang_buf);
+    // trim to 2-wide code
+    lang.str[2] = 0;
+    set_language(lang);
 }
 
 void set_state_on_off(ecs::EntityApi e, bool enabled) {
@@ -108,30 +110,30 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
             auto btn = find(e, H("sound"));
             if (btn) {
                 btn.get<Button>().clicked += [btn] {
-                    set_state_on_off(btn, g_audio->sound.toggle());
+                    set_state_on_off(btn, audio_toggle_pref(AUDIO_PREF_SOUND));
                 };
-                set_state_on_off(btn, g_audio->sound.enabled());
+                set_state_on_off(btn, g_audio.prefs & AUDIO_PREF_SOUND);
             }
         }
         {
             auto btn = find(e, H("music"));
             if (btn) {
                 btn.get<Button>().clicked += [btn] {
-                    set_state_on_off(btn, g_audio->music.toggle());
+                    set_state_on_off(btn, audio_toggle_pref(AUDIO_PREF_MUSIC));
                 };
-                set_state_on_off(btn, g_audio->music.enabled());
+                set_state_on_off(btn, g_audio.prefs & AUDIO_PREF_MUSIC);
             }
         }
         {
             auto btn = find(e, H("vibro"));
             if (btn) {
                 btn.get<Button>().clicked += [btn] {
-                    set_state_on_off(btn, g_audio->vibro.toggle());
-                    if (g_audio->vibro.enabled()) {
-                        g_audio->vibrate(50);
+                    set_state_on_off(btn, audio_toggle_pref(AUDIO_PREF_VIBRO));
+                    if (g_audio.prefs & AUDIO_PREF_VIBRO) {
+                        vibrate(50);
                     }
                 };
-                set_state_on_off(btn, g_audio->vibro.enabled());
+                set_state_on_off(btn, g_audio.prefs & AUDIO_PREF_VIBRO);
             }
         }
 
@@ -191,17 +193,13 @@ void AppBox::initLanguageButton(ecs::EntityApi e) {
     auto btn = find(e, H("language"));
     if (btn) {
         btn.get<Button>().clicked += [] {
-            auto& lm = Localization::instance;
-            auto& locales = lm.getAvailableLanguages();
-            String* locale = locales.find(lm.getLanguage());
-            if (locale) {
-                ++locale;
-                if (locale == locales.end()) {
-                    locale = locales.begin();
-                }
-                auto& lang = *locale;
-                lm.setLanguage(lang.c_str());
-                ek_ls_set_s("selected_lang", lang.c_str());
+            uint32_t index = s_localization.lang_index;
+            uint32_t num = s_localization.lang_num;
+            // check if langs are available
+            if (index < num && num != 0 &&
+                set_language_index((index + 1) % num)) {
+                const char* lang_name = s_localization.languages[s_localization.lang_index].name.str;
+                ek_ls_set_s("selected_lang", lang_name);
             }
         };
     }
@@ -236,6 +234,7 @@ void Achievement::run() const {
 }
 
 ek::AppBox* g_app_box = nullptr;
+
 void init_app_box(ek::AppBoxConfig config) {
     EK_ASSERT(!g_app_box);
     g_app_box = new ek::AppBox(config);

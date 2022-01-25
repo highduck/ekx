@@ -48,7 +48,7 @@ int onConsoleInputCommandCallback(ImGuiInputTextCallbackData* data) {
 
             if (candidates.empty()) {
                 // No match
-                EK_INFO("No match for \"%.*s\"!\n", (int) (word_end - word_start), word_start);
+                log_info("No match for \"%.*s\"!\n", (int) (word_end - word_start), word_start);
             } else if (candidates.size() == 1) {
                 // Single match. Delete the beginning of the word and replace it entirely so we've got nice casing.
                 data->DeleteChars((int) (word_start - data->Buf), (int) (word_end - word_start));
@@ -77,9 +77,9 @@ int onConsoleInputCommandCallback(ImGuiInputTextCallbackData* data) {
                 }
 
                 // List matches
-                EK_INFO("Possible matches:");
+                log_info("Possible matches:");
                 for (auto& candidate: candidates) {
-                    EK_INFO("- %s", candidate);
+                    log_info("- %s", candidate);
                 }
             }
 
@@ -307,7 +307,7 @@ ConsoleWindow::ConsoleWindow() {
 }
 
 void ConsoleWindow::execute(const char* cmd) {
-    EK_INFO("$ %s", cmd);
+    log_info("$ %s", cmd);
 
     // Insert into history. First find match and delete it so it can be pushed to the back.
     // This isn't trying to be smart or optimal.
@@ -327,17 +327,17 @@ void ConsoleWindow::execute(const char* cmd) {
     if (strcasecmp(cmd, "CLEAR") == 0) {
         clear();
     } else if (strcasecmp(cmd, "HELP") == 0) {
-        EK_INFO("Commands:");
+        log_info("Commands:");
         for (auto* command: commands) {
-            EK_INFO("- %s", command);
+            log_info("- %s", command);
         }
     } else if (strcasecmp(cmd, "HISTORY") == 0) {
         int first = static_cast<int>(history.size()) - 10;
         for (int i = first > 0 ? first : 0; i < history.size(); ++i) {
-            EK_INFO("%3d: %s", i, history[i]);
+            log_info("%3d: %s", i, history[i]);
         }
     } else {
-        EK_INFO("Unknown command: %s", cmd);
+        log_info("Unknown command: %s", cmd);
     }
 
     // On command input, we scroll to bottom even if AutoScroll==false

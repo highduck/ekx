@@ -266,13 +266,13 @@ ScaleMode& operator<<(ScaleMode& r, const char* str) {
     else if (equals(str, "horizontal")) return r = ScaleMode::horizontal;
     else if (equals(str, "vertical")) return r = ScaleMode::vertical;
     else if (equals(str, "none")) return r = ScaleMode::none;
-    else if (str && *str) EK_WARN("unknown ScaleMode: %s", str);
+    else if (str && *str) log_warn("unknown ScaleMode: %s", str);
     return r = ScaleMode::none;
 }
 
 SolidStyleType& operator<<(SolidStyleType& r, const char* str) {
     if (equals(str, "hairline")) return r = SolidStyleType::hairline;
-    else if (str && *str) EK_WARN("unknown SolidStyle: %s", str);
+    else if (str && *str) log_warn("unknown SolidStyle: %s", str);
     return r = SolidStyleType::hairline;
 }
 
@@ -280,7 +280,7 @@ LineCaps& operator<<(LineCaps& r, const char* str) {
     if (equals(str, "none")) return r = LineCaps::none;
     else if (equals(str, "round")) return r = LineCaps::round;
     else if (equals(str, "square")) return r = LineCaps::square;
-    else if (str && *str) EK_WARN("unknown LineCaps: %s", str);
+    else if (str && *str) log_warn("unknown LineCaps: %s", str);
     return r = LineCaps::round;
 }
 
@@ -288,7 +288,7 @@ LineJoints& operator<<(LineJoints& r, const char* str) {
     if (equals(str, "miter")) return r = LineJoints::miter;
     else if (equals(str, "round")) return r = LineJoints::round;
     else if (equals(str, "bevel")) return r = LineJoints::bevel;
-    else if (str && *str) EK_WARN("unknown LineJoints: %s", str);
+    else if (str && *str) log_warn("unknown LineJoints: %s", str);
     return r = LineJoints::round;
 }
 
@@ -332,7 +332,7 @@ BlendMode& operator<<(BlendMode& r, const char* str) {
     else if (equals(str, "erase")) return r = BlendMode::erase;
     else if (equals(str, "overlay")) return r = BlendMode::overlay;
     else if (equals(str, "hardlight")) return r = BlendMode::hardlight;
-    EK_WARN("unknown BlendMode: %s", str);
+    log_warn("unknown BlendMode: %s", str);
     return r = BlendMode::normal;
 }
 

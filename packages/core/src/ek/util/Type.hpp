@@ -21,11 +21,3 @@ struct TypeIndex {
 
 }
 
-//#define EK_TYPE_INDEX_T(Bs, Tp, Idx) template<> struct TypeIndex<Tp,Bs>{constexpr static int value = (Idx);}
-//#define EK_TYPE_INDEX(Tp, Idx) template<> struct TypeIndex<Tp,void>{constexpr static int value = (Idx);}
-
-//#define EK_TYPE_INDEX_T(Bs, Tp, Idx) template<> struct TypeIndex<Tp,Bs>;
-//#define EK_TYPE_INDEX(Tp, Idx) template<> struct TypeIndex<Tp,void>;
-
-#define EK_TYPE_INDEX_T(Bs, Tp, Idx)
-#define EK_TYPE_INDEX(Tp, Idx)

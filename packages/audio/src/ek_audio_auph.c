@@ -12,7 +12,7 @@
 
 #define AUPH_MP3
 #define AUPH_ASSERT(x) EK_ASSERT(x)
-#define AUPH_LOG(x) EK_DEBUG(x)
+#define AUPH_LOG(x) log_debug(x)
 #define AUPH_SETUP_EK_APP
 
 #include <auph/auph.c>

@@ -128,7 +128,7 @@ void SceneWindow::onDraw() {
     display.info.window.y = displaySize.y;
     display.info.size.x = k * displaySize.x;
     display.info.size.y = k * displaySize.y;
-    display.update();
+    game_display_update(&display);
 
     // add pass to render imgui
     if (display.color.id && displaySize.x > 0 && displaySize.y > 0) {
@@ -278,9 +278,9 @@ void SceneWindow::onPreRender() {
     passAction.colors[0].value = {0.5f, 0.5f, 0.5f, 1.0f};
     passAction.depth.action = SG_ACTION_CLEAR;
     passAction.depth.value = 1.0f;
-    if (display.beginGame(passAction, "Scene")) {
+    if (game_display_begin(&display, &passAction, "scene-view")) {
         drawScene();
-        display.endGame();
+        game_display_end(&display);
     }
 }
 

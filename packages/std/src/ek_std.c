@@ -25,7 +25,7 @@
 #ifndef NDEBUG
 // TODO:
 //static void perf_penalty(long ms, const char* msg) {
-//    EK_WARN("SLOWDOWN: %s", msg);
+//    log_warn("SLOWDOWN: %s", msg);
 //    const long ns = ms * 1000000L;
 //    nanosleep(&(struct timespec) {
 //            .tv_sec = 0,

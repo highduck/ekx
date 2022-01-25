@@ -2,7 +2,7 @@
 
 
 
-#include <ek/scenex/AudioManager.hpp>
+#include <ekx/app/audio_manager.h>
 #include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
 #include <ek/scenex/base/DestroyTimer.hpp>
@@ -27,9 +27,9 @@ using namespace ecs;
 void scene_pre_update(EntityApi /*root*/, float dt) {
     g_interaction_system->process();
 
-    TimeLayer::updateTimers(dt);
+    update_time_layers(dt);
 
-    g_audio->update(dt);
+    audio_update(dt);
 
     if (g_game_screen_manager) {
         g_game_screen_manager->update();

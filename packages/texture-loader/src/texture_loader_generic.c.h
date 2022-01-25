@@ -83,7 +83,7 @@ void ek_texture_loader_update(ek_texture_loader* loader) {
     }
     if (loader->imagesStartLoading < loader->imagesToLoad) {
         const int idx = loader->imagesStartLoading++;
-        EK_DEBUG("poll loading image #%d / %d", idx, loader->imagesToLoad);
+        log_debug("poll loading image #%d / %d", idx, loader->imagesToLoad);
         void* buffer = NULL;
         size_t bufferSize = 0;
         int result = ek_texture_loader__load_bytes(loader->basePath.path, loader->urls[idx].path, &buffer, &bufferSize);
@@ -98,7 +98,7 @@ void ek_texture_loader_update(ek_texture_loader* loader) {
                 loader->imageData.subImages[idx].height = (int) bitmap.h;
                 loader->imageData.subImages[idx].stride = (int) (bitmap.w * 4u);
             }
-            EK_DEBUG("texture #%d loaded %d of %d", idx, loader->imagesLoaded, loader->imagesToLoad);
+            log_debug("texture #%d loaded %d of %d", idx, loader->imagesLoaded, loader->imagesToLoad);
         } else {
             EK_ASSERT(false);
         }

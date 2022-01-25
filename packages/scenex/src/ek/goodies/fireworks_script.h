@@ -19,8 +19,6 @@ private:
     float timer_ = 1.0f;
 };
 
-EK_TYPE_INDEX_T(ScriptBase, fireworks_script, 6);
-
 }
 
 

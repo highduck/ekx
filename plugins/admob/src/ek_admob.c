@@ -28,7 +28,7 @@ static void ek_admob__init(void) {
 }
 
 void ek_admob_shutdown(void) {
-    EK_DEBUG("admob shutdown");
+    log_debug("admob shutdown");
 }
 
 #if defined(__ANDROID__)

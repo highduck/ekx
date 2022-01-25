@@ -6,13 +6,12 @@
 #include <ek/time.h>
 #include <ek/audio.h>
 #include <ek/local_res.h>
+#include <ek/gfx.h>
 
 // texture loading
 #include <ek/texture_loader.h>
 
 #include <ek/format/ImageData.hpp>
-#include <ek/gfx.h>
-
 #include <ek/scenex/SceneFactory.hpp>
 #include <ek/format/SGFile.hpp>
 #include <ek/scenex/2d/Atlas.hpp>
@@ -27,9 +26,11 @@
 #include <ek/scenex/2d/DynamicAtlas.hpp>
 #include <ek/ds/Array.hpp>
 
-#include "../Localization.hpp"
+#include <ekx/app/localization.h>
 
 namespace ek {
+
+Asset* unpack_asset(const void* data, uint32_t size);
 
 class AudioAsset : public Asset {
 public:
@@ -86,7 +87,7 @@ public:
             loaded_scale_ = manager_->scale_uid;
 
             atlas_ptr* p_atlas = &REF_RESOLVE(res_atlas, res);
-            if(*p_atlas) {
+            if (*p_atlas) {
                 delete *p_atlas;
                 *p_atlas = nullptr;
             }
@@ -142,7 +143,7 @@ public:
 
     void do_unload() override {
         atlas_ptr* p_atlas = &REF_RESOLVE(res_atlas, res);
-        if(*p_atlas) {
+        if (*p_atlas) {
             delete *p_atlas;
             *p_atlas = nullptr;
         }
@@ -242,12 +243,11 @@ public:
                             delete fnt->impl;
                         }
                         // keep lr instance
-                        this_->lr = lr;
+                        this_->lr = *lr;
                         auto* bmFont = new BitmapFont();
                         bmFont->load(lr->buffer, lr->length);
                         fnt->impl = bmFont;
-                    }
-                    else {
+                    } else {
                         ek_local_res_close(lr);
                     }
                     this_->state = AssetState::Ready;
@@ -260,12 +260,12 @@ public:
             delete fnt->impl;
             fnt->impl = nullptr;
         }
-        ek_local_res_close(lr);
-        lr = nullptr;
+        ek_local_res_close(&lr);
+        lr.closeFunc = nullptr;
     }
 
     // keep data instance
-    ek_local_res* lr = nullptr;
+    ek_local_res lr;
     R(Font) res;
     String path_;
     String fullPath_;
@@ -274,21 +274,21 @@ public:
 
 class ImageAsset : public Asset {
 public:
-    ImageAsset(string_hash_t name, ImageData data) :
+    ImageAsset(string_hash_t name, image_data_t data) :
             res{R_IMAGE(name)},
-            data_{std::move(data)} {
-        weight_ = (float) data_.images.size();
+            data_{data} {
+        weight_ = (float) data_.images_num;
     }
 
     void do_load() override {
         loader = ek_texture_loader_create();
         ek_texture_loader_set_path(&loader->basePath, manager_->base_path.c_str());
-        EK_ASSERT(data_.images.size() <= EK_TEXTURE_LOADER_IMAGES_MAX_COUNT);
-        for (int i = 0; i < data_.images.size(); ++i) {
-            ek_texture_loader_set_path(loader->urls + i, data_.images[i].c_str());
+        EK_ASSERT(data_.images_num <= EK_TEXTURE_LOADER_IMAGES_MAX_COUNT);
+        for (int i = 0; i < data_.images_num; ++i) {
+            ek_texture_loader_set_path(loader->urls + i, data_.images[i].str);
         }
-        loader->imagesToLoad = (int) data_.images.size();
-        if (data_.type == ImageDataType::CubeMap) {
+        loader->imagesToLoad = (int) data_.images_num;
+        if (data_.type == IMAGE_DATA_CUBE_MAP) {
             loader->isCubeMap = true;
             loader->premultiplyAlpha = false;
             loader->formatMask = data_.formatMask;
@@ -335,7 +335,7 @@ public:
 
     R(sg_image) res;
     ek_texture_loader* loader = nullptr;
-    ImageData data_{};
+    image_data_t data_{};
     // by default always premultiply alpha,
     // currently for cube maps will be disabled
     // TODO: export level option
@@ -344,33 +344,35 @@ public:
 
 class StringsAsset : public Asset {
 public:
-    StringsAsset(String name, Array<String> langs) :
+    StringsAsset(String name, const lang_name_t* langs, uint32_t langs_num) :
             name_{std::move(name)} {
-        for (auto& l: langs) {
-            loaders_.push_back({this, std::move(l)});
+        total = langs_num;
+        for (uint32_t i = 0; i < langs_num; ++i) {
+            loaders_[i].lang = langs[i];
+            loaders_[i].asset = this;
         }
-        weight_ = (float) loaders_.size();
+        weight_ = (float) langs_num;
     }
 
     void do_load() override {
         loaded = 0;
-        for (int i = 0; i < loaders_.size(); ++i) {
+        for (int i = 0; i < total; ++i) {
             auto* loader = &loaders_[i];
-            auto langPath = (manager_->base_path / name_ / loader->lang) + ".mo";
+            auto langPath = (manager_->base_path / name_ / loader->lang.str) + ".mo";
             ek_local_res_load(
                     langPath.c_str(),
                     [](ek_local_res* lr) {
                         lang_loader* loader_ = (lang_loader*) lr->userdata;
-                        const char* lang = loader_->lang.c_str();
                         StringsAsset* asset = loader_->asset;
                         if (ek_local_res_success(lr)) {
-                            Localization::instance.load(lang, *lr);
+                            loader_->lr = *lr;
+                            add_lang(loader_->lang, lr->buffer, lr->length);
                         } else {
-                            EK_ERROR("Strings resource not found: %s", lang);
+                            log_error("Strings resource not found: %s", loader_->lang.str);
                             asset->error = 1;
                         }
                         ++asset->loaded;
-                        if (asset->loaded >= asset->loaders_.size()) {
+                        if (asset->loaded >= asset->total) {
                             asset->state = AssetState::Ready;
                         }
                     },
@@ -380,18 +382,20 @@ public:
     }
 
     void do_unload() override {
-
+        // run each lang loader and close LR:
+        // ek_local_res_close(&data);
     }
 
     struct lang_loader {
         StringsAsset* asset;
-        String lang;
+        lang_name_t lang;
+        ek_local_res lr;
     };
 
     String name_;
-    Array<lang_loader> loaders_;
+    lang_loader loaders_[LANG_MAX_COUNT];
     uint32_t loaded = 0;
-
+    uint32_t total = 0;
 };
 
 class ModelAsset : public Asset {
@@ -414,7 +418,7 @@ public:
                         RES_NAME_RESOLVE(res_mesh3d, H(this_->name_.c_str())) = new StaticMesh(model);
                         ek_local_res_close(lr);
                     } else {
-                        EK_ERROR("MODEL resource not found: %s", this_->fullPath_.c_str());
+                        log_error("MODEL resource not found: %s", this_->fullPath_.c_str());
                         this_->error = 1;
                     }
                     this_->state = AssetState::Ready;
@@ -425,7 +429,7 @@ public:
 
     void do_unload() override {
         StaticMesh** pp = &RES_NAME_RESOLVE(res_mesh3d, H(name_.c_str()));;
-        if(*pp) {
+        if (*pp) {
             delete *pp;
             *pp = nullptr;
         }
@@ -438,129 +442,6 @@ public:
 bool isTimeBudgetAllowStartNextJob(uint64_t since) {
     return ek_ticks_to_sec(ek_ticks(&since)) < 0.008;
 }
-
-class PackAsset : public Asset {
-public:
-
-    bool assetListLoaded = false;
-
-    explicit PackAsset(String name) :
-            name_{std::move(name)} {
-    }
-
-    void do_load() override {
-        assetListLoaded = false;
-        assetsLoaded = 0;
-        fullPath_ = manager_->base_path / name_;
-        ek_local_res_load(
-                fullPath_.c_str(),
-                [](ek_local_res* lr) {
-                    PackAsset* this_ = (PackAsset*) lr->userdata;
-                    if (ek_local_res_success(lr)) {
-                        input_memory_stream input{lr->buffer, lr->length};
-                        IO io{input};
-                        bool end = false;
-                        while (!end) {
-                            uint32_t headerSize = 0;
-                            io(headerSize);
-                            if (headerSize != 0) {
-                                auto* asset = this_->manager_->add_from_type(io.stream.dataAtPosition(), headerSize);
-                                if (asset) {
-                                    this_->assets.push_back(asset);
-                                }
-                                io.stream.seek((int32_t) headerSize);
-                            } else {
-                                end = true;
-                            }
-                        }
-                        ek_local_res_close(lr);
-                    }
-                    // ready for loading
-                    this_->assetListLoaded = true;
-                },
-                this
-        );
-    }
-
-    void do_unload() override {
-        for (auto asset: assets) {
-            asset->unload();
-        }
-        assets.clear();
-        assetsLoaded = 0;
-        assetListLoaded = false;
-    }
-
-    void poll() override {
-        if (state != AssetState::Loading || !assetListLoaded) {
-            return;
-        }
-
-        uint64_t timer = ek_ticks(nullptr);
-
-        unsigned numAssetsLoaded = 0;
-        for (auto asset: assets) {
-            const auto initialState = asset->state;
-            if (asset->state == AssetState::Initial) {
-                if (isTimeBudgetAllowStartNextJob(timer)) {
-//                    EK_DEBUG("Loading BEGIN: %s", asset->name_.c_str());
-                    asset->load();
-                }
-            }
-            if (asset->state == AssetState::Loading) {
-                if (isTimeBudgetAllowStartNextJob(timer)) {
-                    asset->poll();
-                }
-            }
-            if (asset->state == AssetState::Ready) {
-                if (initialState != AssetState::Ready) {
-//                    EK_DEBUG("Loading END: %s", asset->name_.c_str());
-                }
-                ++numAssetsLoaded;
-            }
-        }
-
-        if (!isTimeBudgetAllowStartNextJob(timer)) {
-            uint64_t since = timer;
-            double elapsed = ek_ticks_to_sec(ek_ticks(&since));
-            EK_INFO("Assets loading jobs spend %d ms", (int) (elapsed * 1000));
-        }
-
-        assetsLoaded = numAssetsLoaded;
-        if (numAssetsLoaded >= assets.size()) {
-            state = AssetState::Ready;
-        }
-    }
-
-    [[nodiscard]] float getProgress() const override {
-        switch (state) {
-            case AssetState::Ready:
-                return 1.0f;
-            case AssetState::Initial:
-                return 0.0f;
-            case AssetState::Loading:
-                // calculate sub-assets progress
-                if (!assets.empty()) {
-                    float acc = 0.0f;
-                    float total = 0.0f;
-                    for (auto asset: assets) {
-                        const float w = asset->weight_;
-                        acc += w * asset->getProgress();
-                        total += w;
-                    }
-                    if (total > 0.0f) {
-                        return acc / total;
-                    }
-                }
-        }
-        return 0.0f;
-    }
-
-    String name_;
-    String fullPath_;
-    Array<Asset*> assets;
-    unsigned assetsLoaded = 0;
-};
 
 class TrueTypeFontAsset : public Asset {
 public:
@@ -591,8 +472,7 @@ public:
                                                                  this_->glyphCache_);
                         ttfFont->loadFromMemory(lr);
                         fnt->impl = ttfFont;
-                    }
-                    else {
+                    } else {
                         ek_local_res_close(lr);
                     }
 
@@ -615,23 +495,7 @@ public:
     string_hash_t glyphCache_;
 };
 
-Asset* DefaultAssetsResolver::create_from_file(const String& path, const String& type) const {
-    if (type == "pack") {
-        return new PackAsset(path);
-    }
-    return nullptr;
-}
-
-Asset* DefaultAssetsResolver::create(const String& path) const {
-    (void) path;
-    return nullptr;
-}
-
-bool io_string_view_equals(IOStringView view, const char* lit) {
-    return strncmp(view.data, lit, view.size) == 0;
-}
-
-Asset* DefaultAssetsResolver::create_for_type(const void* data, uint32_t size) const {
+Asset* unpack_asset(const void* data, uint32_t size) {
     input_memory_stream stream{data, size};
     IO io{stream};
     string_hash_t type;
@@ -675,20 +539,140 @@ Asset* DefaultAssetsResolver::create_for_type(const void* data, uint32_t size) c
         return new ModelAsset(name);
     } else if (type == H("texture")) {
         string_hash_t name;
-        ImageData texData;
+        image_data_t texData;
         io(name, texData);
         return new ImageAsset(name, texData);
     } else if (type == H("strings")) {
         String name;
-        Array<String> langs;
-        io(name, langs);
-        return new StringsAsset(name, langs);
+        io(name);
+        uint32_t langs_num;
+        lang_name_t langs[LANG_MAX_COUNT];
+        io(langs_num);
+        for (uint32_t i = 0; i < langs_num; ++i) {
+            io.span(langs[i].str, sizeof(lang_name_t));
+        }
+        return new StringsAsset(name, langs, langs_num);
     } else if (type == H("pack")) {
         String name;
         io(name);
         return new PackAsset(name);
+    } else {
+        EK_ASSERT(false && "asset: unknown `type` name hash");
     }
     return nullptr;
+}
+
+PackAsset::PackAsset(String name) :
+        name_{std::move(name)} {
+}
+
+void PackAsset::do_load() {
+    assetListLoaded = false;
+    assetsLoaded = 0;
+    fullPath_ = manager_->base_path / name_;
+    ek_local_res_load(
+            fullPath_.c_str(),
+            [](ek_local_res* lr) {
+                PackAsset* this_ = (PackAsset*) lr->userdata;
+                if (ek_local_res_success(lr)) {
+                    input_memory_stream input{lr->buffer, lr->length};
+                    IO io{input};
+                    bool end = false;
+                    while (!end) {
+                        uint32_t headerSize = 0;
+                        io(headerSize);
+                        if (headerSize != 0) {
+                            auto* asset = unpack_asset(io.stream.dataAtPosition(), headerSize);
+                            if (asset) {
+                                this_->assets.push_back(asset);
+                                this_->manager_->add(asset);
+                            }
+                            io.stream.seek((int32_t) headerSize);
+                        } else {
+                            end = true;
+                        }
+                    }
+                    ek_local_res_close(lr);
+                }
+                // ready for loading
+                this_->assetListLoaded = true;
+            },
+            this
+    );
+}
+
+void PackAsset::do_unload() {
+    for (auto asset: assets) {
+        asset->unload();
+    }
+    assets.clear();
+    assetsLoaded = 0;
+    assetListLoaded = false;
+}
+
+void PackAsset::poll() {
+    if (state != AssetState::Loading || !assetListLoaded) {
+        return;
+    }
+
+    uint64_t timer = ek_ticks(nullptr);
+
+    unsigned numAssetsLoaded = 0;
+    for (auto asset: assets) {
+        const auto initialState = asset->state;
+        if (asset->state == AssetState::Initial) {
+            if (isTimeBudgetAllowStartNextJob(timer)) {
+//                    log_debug("Loading BEGIN: %s", asset->name_.c_str());
+                asset->load();
+            }
+        }
+        if (asset->state == AssetState::Loading) {
+            if (isTimeBudgetAllowStartNextJob(timer)) {
+                asset->poll();
+            }
+        }
+        if (asset->state == AssetState::Ready) {
+            if (initialState != AssetState::Ready) {
+//                    log_debug("Loading END: %s", asset->name_.c_str());
+            }
+            ++numAssetsLoaded;
+        }
+    }
+
+    if (!isTimeBudgetAllowStartNextJob(timer)) {
+        uint64_t since = timer;
+        double elapsed = ek_ticks_to_sec(ek_ticks(&since));
+        log_info("Assets loading jobs spend %d ms", (int) (elapsed * 1000));
+    }
+
+    assetsLoaded = numAssetsLoaded;
+    if (numAssetsLoaded >= assets.size()) {
+        state = AssetState::Ready;
+    }
+}
+
+float PackAsset::getProgress() const {
+    switch (state) {
+        case AssetState::Ready:
+            return 1.0f;
+        case AssetState::Initial:
+            return 0.0f;
+        case AssetState::Loading:
+            // calculate sub-assets progress
+            if (!assets.empty()) {
+                float acc = 0.0f;
+                float total = 0.0f;
+                for (auto asset: assets) {
+                    const float w = asset->weight_;
+                    acc += w * asset->getProgress();
+                    total += w;
+                }
+                if (total > 0.0f) {
+                    return acc / total;
+                }
+            }
+    }
+    return 0.0f;
 }
 
 }

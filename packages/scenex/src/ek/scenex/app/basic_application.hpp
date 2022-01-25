@@ -12,15 +12,17 @@
 #include <ek/log.h>
 #include <ek/assert.h>
 #include <ek/time.h>
-
+#include <ek/rnd.h>
 #include <ek/audio.h>
+
 #include <ek/util/Signal.hpp>
 #include <utility>
-#include "profiler.hpp"
-#include "GameDisplay.hpp"
+#include <ekx/app/profiler.h>
+#include <ekx/app/game_display.h>
+#include <ekx/app/frame_timer.h>
 #include "GameAppDispatcher.hpp"
 #include "RootAppListener.hpp"
-#include <ek/rnd.h>
+#include "ek/scenex/text/TextEngine.hpp"
 
 namespace ek {
 class basic_application;
@@ -36,38 +38,23 @@ class AssetManager;
 
 class Asset;
 
-class FrameTimer final {
-public:
-    double deltaTime = 0.0;
-    uint64_t frameIndex = 0;
-
-    double update();
-
-    double app_fts_prev = 0.0;
-    uint64_t stopwatch = ek_ticks(nullptr);
-};
-
-
 void basic_app_on_frame();
 
 void basic_app_on_event(ek_app_event);
 
 class basic_application {
 public:
-    GameDisplay display{};
-    /**** assets ***/
+    game_display display = {};
+    frame_timer_t frame_timer = {};
 
-    FrameTimer frameTimer{};
-
+/**** assets ***/
     float scale_factor = 1.0f;
 
     GameAppDispatcher dispatcher{};
 
     /////
     ecs::EntityApi root;
-
-    Profiler profiler{};
-    AssetManager* asset_manager_ = nullptr;
+    AssetManager asset_manager;
 
     basic_application();
 

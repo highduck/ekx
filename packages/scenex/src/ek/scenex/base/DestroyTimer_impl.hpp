@@ -23,7 +23,7 @@ void DestroyTimer::updateAll() {
     uint32_t num = 0;
     for (auto e: ecs::view<DestroyTimer>()) {
         auto& c = e.get<DestroyTimer>();
-        c.delay -= c.timer->dt;
+        c.delay -= g_time_layers[c.timer].dt;
         if (c.delay <= 0.0f && num != 4096) {
             destroy_queue.push_back(e);
             ++num;

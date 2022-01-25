@@ -32,9 +32,7 @@ void GameWindow::onDraw() {
             display.info.size = k * vec2(displaySize.x, displaySize.y);
         }
     }
-    if (g_input_controller) {
-        g_input_controller->hovered_by_editor_gui = !ImGui::IsWindowHovered(0);
-    }
+    g_input_state.hovered_by_editor_gui = !ImGui::IsWindowHovered(0);
 }
 
 void GameWindow::onLoad(const pugi::xml_node& xml) {

@@ -18,10 +18,6 @@ inline constexpr auto system_pause = "system_pause";
 
 class InteractionSystem {
 public:
-    // screen-space pointer position
-    vec2_t pointerScreenPosition_ = {};
-    bool pointerDown_ = false;
-
     explicit InteractionSystem();
 
     ~InteractionSystem() = delete;
@@ -35,9 +31,9 @@ public:
 
     void handle_system_pause();
 
-    void handle_mouse_event(const ek_app_event& ev, vec2_t pos);
+    void handle_mouse_event(const ek_app_event* ev, vec2_t pos);
 
-    void handle_touch_event(const ek_app_event& ev, vec2_t pos);
+    void handle_touch_event(const ek_app_event* ev, vec2_t pos);
 
     void drag(ecs::EntityApi entity);
 
@@ -60,6 +56,10 @@ private:
     }
 
 public:
+    // screen-space pointer position
+    vec2_t pointerScreenPosition_ = {};
+    bool pointerDown_ = false;
+
     Array<ecs::EntityApi> targetLists[2]{};
     int targetListIndex = 0;
 

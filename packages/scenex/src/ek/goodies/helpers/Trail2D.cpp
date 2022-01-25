@@ -7,7 +7,7 @@
 namespace ek {
 
 void Trail2D::update(const mat3x2_t m) {
-    float dt = timer->dt;
+    float dt = g_time_layers[timer].dt;
     auto scale2 = mat2_get_scale(m.rot);
     scale = fminf(scale2.x, scale2.y);
     update_position(vec2_transform(offset, m));

@@ -17,7 +17,4 @@ public:
     color_t base_color = COLOR_WHITE;
 };
 
-EK_TYPE_INDEX_T(ScriptBase, simple_animator_script, 5);
 }
-
-
