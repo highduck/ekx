@@ -2,6 +2,7 @@
 
 #include <ek/buf.h>
 #include <ek/assert.h>
+#include <ek/core_dbg.h>
 
 // for Array
 #include <initializer_list>
@@ -25,8 +26,11 @@ inline void constructMove(T* dest, T* src, uint32_t count) {
             memcpy(dest, src, count * sizeof(T));
         }
     } else {
+        static_assert(std::is_nothrow_move_constructible<T>::value, "move constructor required");
+#pragma nounroll
         for (uint32_t i = 0; i < count; ++i) {
             new(dest + i)T(std::move(src[i]));
+            src[i].~T();
         }
     }
 }
@@ -36,8 +40,9 @@ inline void constructCopy(T* dest, const T* src, uint32_t count) {
     if constexpr(std::is_trivial_v<T>) {
         memcpy(dest, src, count * sizeof(T));
     } else {
+#pragma nounroll
         for (uint32_t i = 0; i < count; ++i) {
-            new(dest + i)T(static_cast<const T&>(src[i]));
+            new(dest + i)T(src[i]);
         }
     }
 }
@@ -49,6 +54,7 @@ inline void constructDefault(T* begin, T* end) {
 //         TODO: zero init case
 //    } else {
     EK_ASSERT_R2(begin <= end);
+#pragma nounroll
     for (T* it = begin; it != end; ++it) {
         new(it)T();
     }
@@ -57,14 +63,15 @@ inline void constructDefault(T* begin, T* end) {
 
 template<typename T>
 inline void destruct(T* begin, T* end) {
-    if constexpr(std::is_trivial_v<T>) {
+//    if constexpr(std::is_trivial_v<T>) {
         // NOOP
-    } else {
+//    } else {
         EK_ASSERT_R2(begin <= end);
+#pragma nounroll
         for (T* it = begin; it != end; ++it) {
             it->~T();
         }
-    }
+//    }
 }
 
 template<typename T>
@@ -77,22 +84,27 @@ public:
     void* buffer = nullptr;
 
     Array(std::initializer_list<T> list) noexcept: buffer{nullptr} {
+        ek_core_dbg_inc(EK_CORE_DBG_ARRAY);
         _initCopyMem(list.begin(), (SizeType) list.size());
         // TODO: test length should be valid after initializer_list
     }
 
     explicit Array(SizeType capacity) noexcept: buffer{nullptr} {
+        ek_core_dbg_inc(EK_CORE_DBG_ARRAY);
         ek_buf_set_capacity(&buffer, capacity, ElementSize);
     }
 
-    constexpr Array() noexcept = default;
+    /*constexpr*/ Array() noexcept: buffer{nullptr} {
+        ek_core_dbg_inc(EK_CORE_DBG_ARRAY);
+    }
 
-    constexpr Array(Array&& m) noexcept {
-        buffer = m.buffer;
+    /*constexpr*/ Array(Array&& m) noexcept : buffer{m.buffer}{
+        ek_core_dbg_inc(EK_CORE_DBG_ARRAY);
         m.buffer = nullptr;
     }
 
     Array(const Array& m) noexcept: buffer{nullptr} {
+        ek_core_dbg_inc(EK_CORE_DBG_ARRAY);
         _initCopyMem((const T*) m.buffer, ek_buf_length(m.buffer));
     }
 
@@ -103,12 +115,20 @@ public:
 
     void reset() {
         if (buffer) {
-            reduceSize(0);
+            reduce_size(0);
             ek_buf_reset(&buffer);
         }
     }
 
     Array& operator=(Array&& m) noexcept {
+        if (this == &m) {
+            return *this;
+        }
+
+        if(buffer == m.buffer) {
+            return *this;
+        }
+
         // destruct all prev allocated elements
         // and free previous storage if allocated
         reset();
@@ -119,19 +139,20 @@ public:
     }
 
     Array& operator=(const Array& m) noexcept {
-        if (this == &m) {
-            return *this;
-        }
         // instances are literally the same,
         // also return on no-op empty to empty case
 
         // TODO: add test for assigning self to self
-        if (m.buffer == buffer) {
+        if (this == &m) {
+            return *this;
+        }
+
+        if(buffer == m.buffer) {
             return *this;
         }
 
         // destruct all prev allocated elements
-        reduceSize(0);
+        reduce_size(0);
         const auto otherSize = ek_buf_length(m.buffer);
         if (ek_buf_capacity(buffer) < otherSize) {
             // grow buffer
@@ -145,6 +166,7 @@ public:
     }
 
     ~Array() noexcept {
+        ek_core_dbg_dec(EK_CORE_DBG_ARRAY);
         reset();
     }
 
@@ -154,7 +176,7 @@ public:
     }
 
     void clear() {
-        reduceSize(0);
+        reduce_size(0);
     }
 
     void grow(SizeType capacity) {
@@ -195,7 +217,9 @@ public:
 
         // move constructor
         auto* buff = (T*) ek_buf_add_(buffer, ElementSize);
+        static_assert(std::is_nothrow_move_constructible<T>::value, "move constructor required");
         new(buff)T(std::move(el));
+        //el.~T();
         return *buff;
     }
 
@@ -208,7 +232,7 @@ public:
         return *buff;
     }
 
-    void reduceSize(SizeType smallerSize) {
+    void reduce_size(SizeType smallerSize) {
         // TODO: test reduceSize to 0 for empty buffer
         auto* elements = (T*) buffer;
         if (elements) {
@@ -222,7 +246,7 @@ public:
     void resize(SizeType newSize) {
         const auto len = ek_buf_length(buffer);
         if (newSize < len) {
-            reduceSize(newSize);
+            reduce_size(newSize);
         } else {
             const auto cap = ek_buf_capacity(buffer);
             if (newSize > cap) {
@@ -241,10 +265,10 @@ public:
     void eraseIterator(T* el) {
         EK_ASSERT_R2(el != nullptr);
         EK_ASSERT_R2(el >= begin());
-        eraseAt(el - begin());
+        erase_at(el - begin());
     }
 
-    void eraseAt(SizeType i) {
+    void erase_at(SizeType i) {
         EK_ASSERT(i < size());
 //        (begin() + i)->~T();
         // [A, A, A, X, B, B]
@@ -275,32 +299,24 @@ public:
     }
 
     bool remove(const T& el) {
+#pragma nounroll
         for (SizeType i = 0; i < size(); ++i) {
             if (el == begin()[i]) {
-                eraseAt(i);
+                erase_at(i);
                 return true;
             }
         }
         return false;
     }
 
-    void swapRemove(SizeType i) {
+    void swap_remove(SizeType i) {
         EK_ASSERT_R2(i < size());
         auto* removedSlot = (T*) ek_buf_remove_(buffer, i, ElementSize);
         removedSlot->~T();
         const auto len = ek_buf_length(buffer);
         if (i < len) {
-            constructMove<T, true>(removedSlot, begin() + len, 1);
+            constructMove<T>(removedSlot, begin() + len, 1);
         }
-    }
-
-    void swapRemoveFromMiddle(SizeType i) {
-        // element to remove SHOULD NOT be at the end of the list,
-        // to remove from the end you need another function!
-        EK_ASSERT_R2(i < (size() - 1));
-        auto* removedSlot = (T*) ek_buf_remove_(buffer, i, ElementSize);
-        removedSlot->~T();
-        constructMove(removedSlot, end(), 1);
     }
 
     [[nodiscard]]
@@ -345,6 +361,7 @@ public:
 
     T* find(const T& v) const {
         const uint32_t total = size();
+#pragma nounroll
         for (uint32_t i = 0; i < total; ++i) {
             T* it = (T*) buffer + i;
             if (v == *it) {

@@ -9,7 +9,7 @@
 namespace ek {
 
 struct ParticleLayer2D {
-    Array<Particle> particles;
+    PodArray<Particle> particles;
     bool keepAlive = false;
     TimeLayer timer;
 };
@@ -28,9 +28,7 @@ struct ParticleEmitter2D {
     bool enabled = true;
 };
 
-
-
-class ParticleRenderer2D : public Drawable2D<ParticleRenderer2D> {
+class ParticleRenderer2D {
 public:
     ParticleRenderer2D() = default;
 
@@ -38,24 +36,14 @@ public:
 
     explicit ParticleRenderer2D(ecs::EntityApi target_) : target{target_} {}
 
-    void draw() override;
-
-    [[nodiscard]]
-    rect_t getBounds() const override {
-        return (rect_t){};
-    }
-
-    [[nodiscard]]
-    bool hitTest(vec2_t pos) const override {
-        (void) pos;
-        return false;
-    }
+    void draw();
 
 public:
     ecs::EntityRef target{};
 };
 
-EK_DECLARE_TYPE(ParticleRenderer2D);
+ParticleRenderer2D* particle_renderer2d_setup(entity_t e);
+void particle_renderer2d_draw(entity_t e);
 
 void particles_burst(ecs::EntityApi e, int count, vec2_t relativeVelocity = {});
 
@@ -76,4 +64,4 @@ Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl* decl);
 
 }
 
-
+ECX_COMP_TYPE_CXX(ek::ParticleLayer2D)

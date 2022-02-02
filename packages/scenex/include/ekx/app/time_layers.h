@@ -19,11 +19,12 @@ enum {
     TIME_LAYER_GAME = 1,
     TIME_LAYER_HUD = 2,
     TIME_LAYER_UI = 3,
+    TIME_LAYER_MAX_COUNT = 4,
 };
 
 typedef uint8_t TimeLayer;
 
-extern time_layer_state_t g_time_layers[4];
+extern time_layer_state_t g_time_layers[TIME_LAYER_MAX_COUNT];
 
 void init_time_layers();
 void update_time_layers(float raw_dt);

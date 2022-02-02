@@ -1,13 +1,9 @@
 #pragma once
 
-#include <ek/scenex/base/Script.hpp>
 #include <ecxx/ecxx.hpp>
+#include <ek/math.h>
 
-namespace ek {
-
-EK_DECL_SCRIPT_CPP(target_follow_script) {
-public:
-
+struct target_follow_comp {
     enum class integration_mode {
         Exp = 0,
         Steps = 1,
@@ -29,19 +25,12 @@ public:
     int reset_in = 100;
 
     integration_mode integration = integration_mode::Exp;
-
-    void update(float dt) override;
-
-    void gui_gizmo() override;
-
-    void gui_inspector() override;
 };
 
+struct mouse_follow_comp {};
 
-//struct SyncPosition {
-//
-//};
+ECX_COMP_TYPE_SPARSE(mouse_follow_comp)
 
-}
-
+void update_target_follow_comps(float dt);
+void update_mouse_follow_comps(void);
 

@@ -16,8 +16,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/util/StaticStorage.hpp
 
-        ek/ds/StaticRingBuffer.hpp
-        ek/ds/StaticHistoryBuffer.hpp
         ek/ds/FixedArray.hpp
         ek/ds/Array.hpp
         ek/ds/Hash.hpp
@@ -26,7 +24,6 @@ add_library(${PROJECT_NAME} STATIC
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)
-target_include_directories(${PROJECT_NAME} PUBLIC ../include)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17

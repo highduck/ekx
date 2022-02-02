@@ -25,11 +25,10 @@
 #include <ek/scenex/2d/MovieClip.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/base/Tween.hpp>
-#include <ek/scenex/base/Script.hpp>
 #include <ek/goodies/Shake.hpp>
 #include <ek/goodies/PopupManager.hpp>
 #include <ek/goodies/bubble_text.hpp>
-#include <ek/goodies/GameScreen.hpp>
+#include <ek/scenex/base/Interactive.hpp>
 #include <ek/goodies/helpers/Trail2D.hpp>
 #include <ek/scenex/base/DestroyTimer.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
@@ -81,24 +80,27 @@ basic_application::basic_application() {
 }
 
 basic_application::~basic_application() {
+    terminate();
 
-    ecs::the_world.shutdown();
-
+    ecx_shutdown();
     canvas_shutdown();
-
     auph_shutdown();
     ek_gfx_shutdown();
 }
 
 void registerSceneXComponents() {
     //// basic scene
-    using ecs::the_world;
     ECX_COMPONENT_RESERVE(Node, 512);
     ECX_COMPONENT_RESERVE(Transform2D, 512);
     ECX_COMPONENT_RESERVE(WorldTransform2D, 512);
     ECX_COMPONENT_RESERVE(Display2D, 256);
-    ECX_COMPONENT(Camera2D);
     ECX_COMPONENT(Bounds2D);
+    ECX_COMPONENT(Quad2D);
+    ECX_COMPONENT(Sprite2D);
+    ECX_COMPONENT(NinePatch2D);
+    ECX_COMPONENT(Arc2D);
+    ECX_COMPONENT(Text2D);
+    ECX_COMPONENT(Camera2D);
     ECX_COMPONENT(MovieClip);
     ECX_COMPONENT(MovieClipTargetIndex);
 
@@ -107,19 +109,14 @@ void registerSceneXComponents() {
     ECX_COMPONENT(Button);
     ECX_COMPONENT(Interactive);
     ECX_COMPONENT(Tween);
-    ECX_COMPONENT(Shake);
     ECX_COMPONENT(Shaker);
-    ECX_COMPONENT(ScriptHolder);
-    ECX_COMPONENT(Updater);
     ECX_COMPONENT(BubbleText);
-    ECX_COMPONENT(PopupManager);
-    ECX_COMPONENT(close_timeout);
-    ECX_COMPONENT(GameScreen);
     ECX_COMPONENT(Trail2D);
-    ECX_COMPONENT(DestroyTimer);
+    ECX_COMPONENT(TrailRenderer2D);
     ECX_COMPONENT(NodeEventHandler);
     ECX_COMPONENT(ParticleEmitter2D);
     ECX_COMPONENT(ParticleLayer2D);
+    ECX_COMPONENT(ParticleRenderer2D);
 }
 
 void basic_application::initialize() {
@@ -134,7 +131,7 @@ void basic_application::initialize() {
     root = createNode2D(H("root"));
 
     const vec2_t baseResolution = vec2(ek_app.config.width, ek_app.config.height);
-    root.assign<Viewport>(baseResolution.x, baseResolution.y);
+    root.assign<Viewport>().options.baseResolution = baseResolution;
 
     root.assign<LayoutRect>();
     root.assign<NodeEventHandler>();
@@ -143,13 +140,14 @@ void basic_application::initialize() {
 
     log_debug("base application: initialize InteractionSystem");
     init_interaction_system();
-    g_interaction_system->root_ = root;
+    g_interaction_system.root_ = root.index;
     log_debug("base application: initialize AudioManager");
     init_audio_manager();
 
     log_debug("base application: initialize Scene");
     auto camera = createNode2D(H("camera"));
-    auto& defaultCamera = camera.assign<Camera2D>(root);
+    auto& defaultCamera = camera.assign<Camera2D>();
+    defaultCamera.root = ecs::EntityRef{root};
     defaultCamera.order = 1;
     defaultCamera.viewportNode = ecs::EntityRef{root};
     Camera2D::Main = camera;
@@ -315,6 +313,10 @@ void basic_application::doRenderFrame() {
     onRenderSceneAfter();
 }
 
+void basic_application::terminate() {
+
+}
+
 void launcher_on_frame() {
     root_app_on_frame();
 
@@ -346,7 +348,7 @@ void launcher_on_frame() {
                 break;
             case 2:
                 ++_initializeSubSystemsState;
-                ecs::the_world.initialize();
+                ecx_setup();
                 registerSceneXComponents();
                 break;
             case 3:

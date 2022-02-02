@@ -63,7 +63,8 @@ vec4_t colorf_hue(float hue_unorm) {
 }
 
 static float hsv_lerp_channel(float value, float x, float y) {
-    return unorm8_f32(lerp_f32(0.0f, lerp_f32(1.0f, value, x), y));
+    // y + x * y * (value - 1.0f);
+    return lerp_f32(1.0f, value, x) * y;
 }
 
 static float hsv_calc_hue(float max, float delta, float r, float g, float b) {

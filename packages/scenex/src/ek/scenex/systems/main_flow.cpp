@@ -1,7 +1,6 @@
 #include "main_flow.hpp"
 
-
-
+#include <ekx/ng/updater.h>
 #include <ekx/app/audio_manager.h>
 #include <ek/scenex/particles/ParticleSystem.hpp>
 #include <ek/scenex/InteractionSystem.hpp>
@@ -25,7 +24,7 @@ namespace ek {
 using namespace ecs;
 
 void scene_pre_update(EntityApi /*root*/, float dt) {
-    g_interaction_system->process();
+    update_interaction_system();
 
     update_time_layers(dt);
 
@@ -37,20 +36,21 @@ void scene_pre_update(EntityApi /*root*/, float dt) {
 
     LayoutRect::updateAll();
     Tween::updateAll();
-    Shake::updateAll();
+    Shaker::updateAll();
 
     BubbleText::updateAll();
-    PopupManager::updateAll();
+    popup_manager_update();
 
-    updateScripts();
+    updater_update();
+
     Button::updateAll();
     MovieClip::updateAll();
 }
 
 void scene_post_update(ecs::EntityApi root) {
-    DestroyTimer::updateAll();
+    destroy_manager_update();
 
-    updateWorldTransformAll2(&ecs::the_world, root);
+    updateWorldTransformAll2(root);
 
     Trail2D::updateAll();
     update_emitters();

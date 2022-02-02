@@ -76,7 +76,7 @@ void Transform2D::fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, vec2_
 /** Invalidate Transform2D **/
 
 // idea to keep index to level start and process entities from that index to next level
-//void traverseNodesBreathFirst(ecs::World* w, ecs::EntityApi root, std::vector<ecs::EntityIndex>& out) {
+//void traverseNodesBreathFirst(ecs::World* w, ecs::EntityApi root, std::vector<entity_t>& out) {
 //    ZoneScoped;
 //    out.push_back(root.index);
 //    uint32_t begin = 0;
@@ -99,7 +99,7 @@ void Transform2D::fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, vec2_
 //
 //void updateWorldTransformAll(ecs::World* w, ecs::EntityApi root) {
 //    ZoneScoped;
-//    static std::vector<ecs::EntityIndex> vec2{};
+//    static std::vector<entity_t> vec2{};
 //    vec2.clear();
 //    traverseNodesBreathFirst(w, root, vec2);
 //
@@ -117,36 +117,46 @@ void Transform2D::fastLocalToLocal(ecs::EntityApi src, ecs::EntityApi dst, vec2_
 //    }
 //}
 
-void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root) {
-    FixedArray<ecs::EntityIndex, ecs::ENTITIES_MAX_COUNT> out;
+void updateWorldTransformAll2(ecs::EntityApi root) {
+    FixedArray<entity_t, ECX_ENTITIES_MAX_COUNT> out;
     out.push_back(root.index);
 
     uint32_t begin = 0;
     uint32_t end = out.size();
-    const auto* nodes = w->getStorage<Node>();
-    const auto* localTransforms = w->getStorage<Transform2D>();
-    const auto* worldTransforms = w->getStorage<WorldTransform2D>();
+//    const auto* nodes = ecx.getStorage<Node>();
+//    const auto* localTransforms = ecx.getStorage<Transform2D>();
+//    const auto* worldTransforms = ecx.getStorage<WorldTransform2D>();
 
     /// copy transforms for all roots
-    worldTransforms->get(root.index).matrix = localTransforms->get(root.index).matrix;
-    worldTransforms->get(root.index).color = localTransforms->get(root.index).color;
+//    worldTransforms->get(root.index).matrix = localTransforms->get(root.index).matrix;
+//    worldTransforms->get(root.index).color = localTransforms->get(root.index).color;
+    ecs::C<WorldTransform2D>::get_by_entity(root.index)->matrix = ecs::C<Transform2D>::get_by_entity(
+            root.index)->matrix;
+    ecs::C<WorldTransform2D>::get_by_entity(root.index)->color = ecs::C<Transform2D>::get_by_entity(root.index)->color;
     ///
 
     while (begin < end) {
         for (uint32_t i = begin; i < end; ++i) {
             const auto parent = out[i];
-            const auto& tp = worldTransforms->get(parent);
-            const auto& node = nodes->get(parent);
+            const auto* tp = ecs::C<WorldTransform2D>::get_by_entity(parent);
+            const auto* node = ecs::C<Node>::get_by_entity(parent);
 
-            auto it = node.child_first.index;
+            auto it = node->child_first.index;
             while (it) {
-                auto& tw = worldTransforms->get(it);
-                auto& tl = localTransforms->get(it);
-                tw.matrix = mat3x2_mul(tp.matrix, tl.matrix);
-                color2_mul(&tw.color, tp.color, tl.color);
+                auto* tw = ecs::C<WorldTransform2D>::get_by_entity(it);
+                auto* tl = ecs::C<Transform2D>::get_by_entity(it);
+                tw->matrix = mat3x2_mul(tp->matrix, tl->matrix);
+                color2_mul(&tw->color, tp->color, tl->color);
 
                 out.push_back(it);
-                it = nodes->get(it).sibling_next.index;
+//                auto* node_data = ecs::C<Node>::get_by_entity(it);
+//                auto it_next = node_data->sibling_next.index;
+//                if(it_next == it) {
+//                    log_error("error invalid children in %s", hsp_get(node_data.tag));
+//                    it_next = 0;
+//                }
+//                it = it_next;
+                it = ecs::C<Node>::get_by_entity(it)->sibling_next.index;
             }
         }
         begin = end;

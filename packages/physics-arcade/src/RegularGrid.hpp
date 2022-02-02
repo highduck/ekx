@@ -17,12 +17,12 @@ public:
     uint32_t rows;
     uint32_t count;
 
-    Array <ecs::EntityIndex> refs{};
+    Array <entity_t> refs{};
     Array <uint16_t> next{};
     uint16_t* grid;
 
-    Hash <ecs::EntityIndex> filter{};
-    Array <ecs::EntityIndex> query{};
+    Hash <entity_t> filter{};
+    Array <entity_t> query{};
 
     RegularGrid(irect_t bounds_, uint32_t power_) :
             bounds{bounds_},
@@ -47,7 +47,7 @@ public:
         next.resize(1);
     }
 
-    void insert(ecs::EntityIndex entity, const rect_t rc) {
+    void insert(entity_t entity, const rect_t rc) {
         insert(entity, (irect_t) {{
                                           (int) rc.x,
                                           (int) rc.y,
@@ -56,7 +56,7 @@ public:
                                   }});
     }
 
-    void insert(ecs::EntityIndex entity, const irect_t rc) {
+    void insert(entity_t entity, const irect_t rc) {
         if (!irect_overlaps(bounds, rc)) {
             return;
         }
@@ -89,7 +89,7 @@ public:
         query.clear();
     }
 
-    const Array <ecs::EntityIndex>& search(const rect_t rc) {
+    const Array <entity_t>& search(const rect_t rc) {
         return search((irect_t) {{
                                          (int) rc.x,
                                          (int) rc.y,
@@ -98,7 +98,7 @@ public:
                                  }});
     }
 
-    const Array <ecs::EntityIndex>& search(const irect_t rc) {
+    const Array <entity_t>& search(const irect_t rc) {
         if (!irect_overlaps(bounds, rc)) {
             return query;
         }

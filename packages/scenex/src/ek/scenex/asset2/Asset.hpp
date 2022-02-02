@@ -3,6 +3,7 @@
 #include <ek/serialize/core.hpp>
 #include <ek/serialize/streams.hpp>
 #include <ek/ds/Array.hpp>
+#include <ek/ds/PodArray.hpp>
 #include <ek/util/Path.hpp>
 
 namespace ek {
@@ -71,7 +72,7 @@ public:
     [[nodiscard]] bool is_assets_ready() const;
 
     String base_path{"assets"};
-    Array<Asset*> assets;
+    PodArray<Asset*> assets;
     float scale_factor = 2.0f;
     uint8_t scale_uid = 2;
 };
@@ -88,7 +89,7 @@ public:
 
     String name_;
     String fullPath_;
-    Array<Asset*> assets;
+    PodArray<Asset*> assets;
     unsigned assetsLoaded = 0;
     bool assetListLoaded = false;
 };

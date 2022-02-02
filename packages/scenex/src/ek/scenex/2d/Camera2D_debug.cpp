@@ -1,18 +1,17 @@
 #include <ek/canvas.h>
 #include <ek/scenex/InteractionSystem.hpp>
 
-#include <ek/time.h>
 #include <ek/scenex/base/Node.hpp>
+#include <ekx/app/time_layers.h>
 #include "Camera2D.hpp"
 #include "Viewport.hpp"
 #include "Transform2D.hpp"
 #include "Display2D.hpp"
-#include <ek/scenex/base/Script.hpp>
 
 namespace ek {
 
 void debugDrawPointer(Camera2D& camera) {
-    auto* im = g_interaction_system;
+    auto* im = &g_interaction_system;
     auto v = im->pointerScreenPosition_;
     v = vec2_transform(v, camera.screenToWorldMatrix);
     float t = g_time_layers[TIME_LAYER_ROOT].total;
@@ -51,7 +50,7 @@ void drawBox(const rect_t rc, const mat3x2_t m, color_t color1, color_t color2,
 }
 
 void debugDrawHitTarget(Camera2D& camera) {
-    auto target = g_interaction_system->getHitTarget();
+    auto target = g_interaction_system.getHitTarget();
     if (!target) {
         return;
     }
@@ -61,15 +60,15 @@ void debugDrawHitTarget(Camera2D& camera) {
         matrix = worldTransform->matrix;
     }
     auto* display = target.tryGet<Display2D>();
-    if (display && display->drawable) {
-        drawBox(display->getBounds(), matrix, COLOR_BLACK, COLOR_WHITE, true);
+    if (display && display->get_bounds) {
+        drawBox(display->get_bounds(target.index), matrix, COLOR_BLACK, COLOR_WHITE, true);
     }
     auto* bounds = target.tryGet<Bounds2D>();
     if (bounds) {
-        if (bounds->hitArea) {
+        if (bounds->flags & BOUNDS_2D_HIT_AREA) {
             drawBox(bounds->rect, matrix, RGB(0x99FF00), COLOR_WHITE, false);
         }
-        if (bounds->scissors) {
+        if (bounds->flags & BOUNDS_2D_SCISSORS) {
             drawBox(bounds->rect, matrix, RGB(0xFFFF00), COLOR_WHITE, false);
         }
     }
@@ -91,7 +90,7 @@ void traverseVisibleNodes(ecs::EntityApi e, const WorldTransform2D* parentTransf
 
     Comp* component = e.tryGet<Comp>();
     if (component) {
-        callback(*component, parentTransform);
+        callback(e, *component, parentTransform);
     }
 
     auto it = e.get<Node>().child_first;
@@ -110,10 +109,11 @@ void drawFills(Camera2D& camera) {
     traverseVisibleNodes<Display2D>(
             camera.root.ent(),
             nullptr,
-            [](Display2D& display, const WorldTransform2D* transform) {
-                if (display.drawable) {
-                    canvas_fill_rect(display.getBounds(), ARGB(0x33FFFFFF));
-                    drawBox(display.getBounds(), transform->matrix, COLOR_BLACK, COLOR_WHITE,
+            [](ecs::EntityApi e, Display2D& display, const WorldTransform2D* transform) {
+                if (display.get_bounds) {
+                    auto rc = display.get_bounds(e.index);
+                    canvas_fill_rect(rc, ARGB(0x33FFFFFF));
+                    drawBox(rc, transform->matrix, COLOR_BLACK, COLOR_WHITE,
                             false, ARGB(0x33FFFFFF));
                 } else {
                     const auto v = vec2_transform(vec2(0, 0), transform->matrix);
@@ -125,14 +125,14 @@ void drawFills(Camera2D& camera) {
     traverseVisibleNodes<Bounds2D>(
             camera.root.ent(),
             nullptr,
-            [](Bounds2D& bounds, const WorldTransform2D* transform) {
-                if (bounds.scissors) {
+            [](ecs::EntityApi e, Bounds2D& bounds, const WorldTransform2D* transform) {
+                if (bounds.flags & BOUNDS_2D_SCISSORS) {
                     drawBox(bounds.rect, transform->matrix, ARGB(0xFFFFFF00), COLOR_WHITE, true,
                             ARGB(0x55FFFF00));
-                } else if (bounds.hitArea) {
+                } else if (bounds.flags & BOUNDS_2D_HIT_AREA) {
                     drawBox(bounds.rect, transform->matrix, ARGB(0xFF00FF00), COLOR_WHITE, true,
                             ARGB(0x5500FF00));
-                } else if (bounds.culling) {
+                } else if (bounds.flags & BOUNDS_2D_CULL) {
                     drawBox(bounds.rect, transform->matrix, ARGB(0xFF00FFFF), COLOR_WHITE, true,
                             ARGB(0x5500FFFF));
                 }
@@ -148,7 +148,7 @@ void drawOcclusion(Camera2D& camera) {
     canvas_set_empty_image();
     auto cameraRect = camera.worldRect;
     traverseVisibleNodes<Bounds2D>(camera.root.ent(), nullptr,
-                                   [cameraRect](const Bounds2D& bounds, const WorldTransform2D* transform) {
+                                   [cameraRect](ecs::EntityApi e, const Bounds2D& bounds, const WorldTransform2D* transform) {
                                        const rect_t worldRect = rect_transform(bounds.rect,transform->matrix);
                                        const bool occluded = !rect_overlaps(worldRect, cameraRect);
                                        const auto worldColor = occluded ? ARGB(0x77FF0000) : ARGB(0x7700FF00);
@@ -199,18 +199,6 @@ void Camera2D::drawGizmo(Camera2D& camera) {
         canvas.matrix[0] = mat3x2_identity();
         canvas.color[0] = color2_identity();
         debugCameraGizmo(camera);
-    }
-    if (camera.debugDrawScriptGizmo) {
-        for (auto e : ecs::view<ScriptHolder>()) {
-            auto* worldTransform = findComponentInParent<WorldTransform2D>(e);
-            if (worldTransform) {
-                canvas.matrix[0] = worldTransform->matrix;
-                canvas.color[0] = worldTransform->color;
-                for (auto& script : e.get<ScriptHolder>().list) {
-                    script->gui_gizmo();
-                }
-            }
-        }
     }
 }
 

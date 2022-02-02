@@ -40,8 +40,17 @@ function renderCMakeFile(ctx:Project, buildType): string {
         sources: cppSourceFiles,
         includeDirectories: cppSourceRoots.concat(cpp_include),
         linkLibraries: cpp_lib,
-        linkOptions: [],
-        compileOptions: ["-ffast-math", "-fno-exceptions", "-fno-rtti", "-Wall", "-Wextra"],
+        linkOptions: [
+            "-ffast-math",
+            "--no_exceptions"
+        ],
+        compileOptions: [
+            "-ffast-math",
+            "-fno-exceptions",
+            "-fno-rtti",
+            "-Wall",
+            "-Wextra",
+        ],
         compileDefinitions: cpp_define,
         sourceFileCompileFlags: cpp_flags
     };

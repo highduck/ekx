@@ -21,8 +21,6 @@ const float tweenDelay = 0.05f;
 const float tweenDuration = 0.3f;
 const float animationVertDistance = 200.0f;
 
-EntityApi PopupManager::Main{};
-
 void on_popup_pause(EntityApi e) {
     setTouchable(e, false);
 }
@@ -55,18 +53,17 @@ void on_popup_closing(EntityApi e) {
 }
 
 void on_popup_closed(EntityApi e) {
-    auto pm = PopupManager::Main;
-    auto& state = pm.get<PopupManager>();
-    EntityApi* it = state.active.find(e);
+    EntityApi* it = g_popup_manager.active.find(e);
     if (it) {
-        state.active.eraseIterator(it);
+        g_popup_manager.active.erase_ptr(it);
     }
 
-    if (state.active.empty()) {
+    if (g_popup_manager.active.empty()) {
+        ecs::EntityApi pm = g_popup_manager.entity;
         setTouchable(pm, false);
         setVisible(pm, false);
     } else {
-        on_popup_resume(state.active.back());
+        on_popup_resume(g_popup_manager.active.back());
     }
 
     setVisible(e, false);
@@ -85,62 +82,33 @@ void on_popup_close_animation(float t, EntityApi e) {
 
 void init_basic_popup(EntityApi e) {
     auto node_close = find(e, H("btn_close"));
-    if (node_close && node_close.has<Button>()) {
-        auto& btn_close = node_close.get<Button>();
-        btn_close.clicked += [e] {
-            close_popup(e);
-        };
-        btn_close.back_button = true;
-    }
-}
-
-void PopupManager::updateAll() {
-    auto dt = g_time_layers[TIME_LAYER_UI].dt;
-    for (auto e: ecs::view<PopupManager>()) {
-        auto& p = e.get<PopupManager>();
-        bool needFade = !p.active.empty();
-        if (p.active.size() == 1 && p.active.back() == p.closingLast) {
-            needFade = false;
-        }
-        p.fade_progress = reach(p.fade_progress,
-                                      needFade ? 1.0f : 0.0f,
-                                      dt / p.fade_duration);
-
-        setAlpha(p.back, p.fade_alpha * p.fade_progress);
-
-        if (!p.active.empty()) {
-            auto front = p.active.back();
-            if (front.has<close_timeout>()) {
-                auto& t = front.get<close_timeout>();
-                t.time -= dt;
-                if (t.time <= 0.0f) {
-                    front.remove<close_timeout>();
-                    close_popup(front);
-                }
-            }
+    if (node_close) {
+        auto* btn = node_close.tryGet<Button>();
+        if(btn) {
+            btn->back_button = true;
+            node_close.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [e](const NodeEventData& event) {
+                close_popup(e);
+            });
         }
     }
 }
 
 void open_popup(EntityApi e) {
-    auto pm = PopupManager::Main;
-    auto& state = pm.get<PopupManager>();
-
-    state.closingLast = nullptr;
+    g_popup_manager.closingLast = nullptr;
 
     // if we have entity in active list - do nothing
-    if (state.active.find(e) != nullptr) {
+    if (g_popup_manager.active.find(e) != nullptr) {
         return;
     }
 
-    if (e.get<Node>().parent == state.layer) {
+    if (e.get<Node>().parent == g_popup_manager.layer) {
         return;
     }
 
-    if (!state.active.empty()) {
-        on_popup_pause(state.active.back());
+    if (!g_popup_manager.active.empty()) {
+        on_popup_pause(g_popup_manager.active.back());
     }
-    state.active.push_back(e);
+    g_popup_manager.active.push_back(e);
     on_popup_opening(e);
 
     auto& tween = Tween::reset(e);
@@ -153,23 +121,20 @@ void open_popup(EntityApi e) {
         on_popup_open_animation(r, e);
     };
 
-    append(state.layer, e);
-    auto& st = pm.get_or_create<Node>();
+    append(g_popup_manager.layer, e);
+    auto& st = g_popup_manager.entity.get<Node>();
     st.setTouchable(true);
     st.setVisible(true);
 }
 
 void close_popup(EntityApi e) {
-    auto pm = PopupManager::Main;
-    auto& state = pm.get<PopupManager>();
-
     // we cannot close entity if it is not active
-    if (state.active.find(e) == nullptr) {
+    if (g_popup_manager.active.find(e) == nullptr) {
         return;
     }
 
-    if (state.active.back() == e) {
-        state.closingLast = e;
+    if (g_popup_manager.active.back() == e) {
+        g_popup_manager.closingLast = e;
     }
     on_popup_closing(e);
 
@@ -186,30 +151,25 @@ void close_popup(EntityApi e) {
 
 
 uint32_t count_active_popups() {
-    auto pm = PopupManager::Main;
-    auto& state = pm.get<PopupManager>();
-    return state.active.size();
+    return g_popup_manager.active.size();
 }
 
 void clear_popups() {
-    auto pm = PopupManager::Main;
-    auto& state = pm.get<PopupManager>();
 
-    state.closingLast = nullptr;
-    state.fade_progress = 0.0f;
-    setAlpha(state.back, 0.0f);
+    g_popup_manager.closingLast = nullptr;
+    g_popup_manager.fade_progress = 0.0f;
+    setAlpha(g_popup_manager.back, 0.0f);
 
-    destroyChildren(state.layer);
-    state.active.clear();
-    setTouchable(pm, false);
-    setVisible(pm, false);
+    destroyChildren(g_popup_manager.layer);
+    g_popup_manager.active.clear();
+
+    const ecs::EntityApi e = g_popup_manager.entity;
+    setTouchable(e, false);
+    setVisible(e, false);
 }
 
 void close_all_popups() {
-    auto pm = PopupManager::Main;
-    auto& state = pm.get<PopupManager>();
-
-    auto copy_vec = state.active;
+    auto copy_vec = g_popup_manager.active;
     for (auto p: copy_vec) {
         close_popup(p);
     }
@@ -218,35 +178,38 @@ void close_all_popups() {
 ecs::EntityApi createBackQuad() {
     auto e = createNode2D(H("back"));
     auto& display = e.assign<Display2D>();
-    display.makeDrawable<Quad2D>().setColor(COLOR_BLACK);
+    quad2d_setup(e.index)->setColor(COLOR_BLACK);
     display.program = R_SHADER_SOLID_COLOR;
     e.assign<LayoutRect>()
             .fill(true, true)
             .setInsetsMode(false);
 
     // intercept back-button if popup manager is active
+    e.assign<Interactive>();
     auto& eh = e.assign<NodeEventHandler>();
-    eh.on(interactive_event::back_button, [](const NodeEventData& ev) {
+    eh.on(INTERACTIVE_EVENT_BACK_BUTTON, [](const NodeEventData& ev) {
         ev.processed = true;
     });
 
     // if touch outside of popups, simulate back-button behavior
-    auto& interactive = e.assign<Interactive>();
-    interactive.onEvent += [e](auto event) {
-        if (event == PointerEvent::Down) {
-            const auto* state = findComponentInParent<PopupManager>(e);
-            if (state && !state->active.empty()) {
-                g_interaction_system->sendBackButton();
-            }
+    eh.on(POINTER_EVENT_DOWN, [](auto) {
+        if (!g_popup_manager.active.empty()) {
+            g_interaction_system.sendBackButton();
         }
-    };
+    });
 
     return e;
 }
 
-ecs::EntityApi PopupManager::make() {
+}
+
+ek::PopupManager g_popup_manager;
+
+void popup_manager_init() {
+    using namespace ek;
     auto e = createNode2D(H("popups"));
-    auto& pm = e.assign<PopupManager>();
+    g_popup_manager.entity = e;
+    auto& pm = g_popup_manager;
     pm.back = createBackQuad();
     append(e, pm.back);
 
@@ -261,11 +224,32 @@ ecs::EntityApi PopupManager::make() {
     auto& st = e.get<Node>();
     st.setTouchable(false);
     st.setVisible(false);
+}
 
-    // safe first default popup-manager
-    if (!Main) {
-        Main = e;
+void popup_manager_update() {
+    using namespace ek;
+    auto dt = g_time_layers[TIME_LAYER_UI].dt;
+    auto& p = g_popup_manager;
+    bool needFade = !p.active.empty();
+    if (p.active.size() == 1 && p.active.back() == p.closingLast) {
+        needFade = false;
     }
-    return e;
+    p.fade_progress = reach(p.fade_progress,
+                            needFade ? 1.0f : 0.0f,
+                            dt / p.fade_duration);
+
+    setAlpha(p.back, p.fade_alpha * p.fade_progress);
+
+//    if (!p.active.empty()) {
+//        auto front = p.active.back();
+//        if (front.has<close_timeout>()) {
+//            auto& t = front.get<close_timeout>();
+//            t.time -= dt;
+//            if (t.time <= 0.0f) {
+//                front.remove<close_timeout>();
+//                close_popup(front);
+//            }
+//        }
+//    }
 }
-}
+

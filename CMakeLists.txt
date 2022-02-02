@@ -15,6 +15,7 @@ if (EKX_BUILD_DEV_TOOLS)
     add_subdirectory(packages/dev-tools)
 endif ()
 
+add_subdirectory(samples/js-script-test)
 add_subdirectory(samples/rnd-test)
 add_subdirectory(samples/sample-1-app)
 add_subdirectory(samples/sample-2-drawing)

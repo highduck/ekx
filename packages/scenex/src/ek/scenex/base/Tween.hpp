@@ -25,6 +25,6 @@ struct Tween {
     }
 };
 
-
-
 }
+
+ECX_COMP_TYPE_CXX(ek::Tween)

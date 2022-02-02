@@ -38,12 +38,7 @@ struct Viewport {
     ViewportScaleOptions options{};
     ViewportScaleOutput output{};
 
-    Viewport() = default;
-
-    Viewport(float width, float height) {
-        options.baseResolution.x = width;
-        options.baseResolution.y = height;
-    }
+//    Viewport() = default;
 
     static void updateAll(const game_display_info* display0);
 };

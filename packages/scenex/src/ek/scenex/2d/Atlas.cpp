@@ -3,9 +3,9 @@
 
 #include <ek/log.h>
 
-
 #include <ek/serialize/serialize.hpp>
 #include <ek/util/Path.hpp>
+#include <ek/ds/PodArray.hpp>
 #include <ek/local_res.h>
 #include <ek/gfx.h>
 #include <ek/print.h>
@@ -56,18 +56,15 @@ struct SpriteInfo {
     inline bool isRotated() const {
         return (flags & Rotated) != 0;
     }
-
-    template<typename S>
-    void serialize(IO<S>& io) {
-        io(name, flags, rc, uv);
-    }
 };
+
+template<> struct declared_as_pod_type<SpriteInfo> : public std::true_type {};
 
 struct AtlasPageInfo {
     uint16_t width;
     uint16_t height;
     String imagePath;
-    Array<SpriteInfo> sprites;
+    PodArray<SpriteInfo> sprites;
 
     template<typename S>
     void serialize(IO<S>& io) {

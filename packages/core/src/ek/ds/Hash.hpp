@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "Array.hpp"
+#include "PodArray.hpp"
 #include <ek/assert.h>
 
 namespace ek {
@@ -28,10 +29,13 @@ struct Hash {
         T value;
     };
 
-    Array <uint32_t> _hash;
+    PodArray <uint32_t> _hash;
     Array <Entry> _data;
 
     constexpr Hash() noexcept;
+    ~Hash() noexcept {
+        ek_core_dbg_dec(EK_CORE_DBG_HASH);
+    }
 
     /// Returns true if the specified key exists in the hash.
     [[nodiscard]]
@@ -76,9 +80,11 @@ struct Hash {
 
     constexpr Hash(Hash&& m) noexcept: _hash{std::move(m._hash)},
                              _data{std::move(m._data)} {
+        ek_core_dbg_inc(EK_CORE_DBG_HASH);
     }
 
     Hash(const Hash& m) noexcept: _hash{m._hash}, _data{m._data} {
+        ek_core_dbg_inc(EK_CORE_DBG_HASH);
     }
 
     Hash& operator=(Hash&& m) noexcept {
@@ -96,6 +102,7 @@ struct Hash {
 
 template<typename T>
 constexpr Hash<T>::Hash() noexcept : _hash{}, _data{} {
+    ek_core_dbg_inc(EK_CORE_DBG_HASH);
 }
 
 namespace hash_internal {

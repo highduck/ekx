@@ -18,8 +18,8 @@ struct declared_as_pod_type<ModelVertex3D> : public std::true_type {
 };
 
 struct Model3D {
-    Array<ModelVertex3D> vertices;
-    Array<uint16_t> indices;
+    PodArray<ModelVertex3D> vertices;
+    PodArray<uint16_t> indices;
 
     template<typename S>
     void serialize(IO<S>& io) {

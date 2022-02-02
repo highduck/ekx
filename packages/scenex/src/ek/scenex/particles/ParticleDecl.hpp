@@ -29,9 +29,15 @@ enum class RandColorMode {
 
 class RandColorData {
 public:
-    Array <color_t> colors{COLOR_WHITE};
+    Array <color_t> colors;
     RandColorMode mode = RandColorMode::RandElement;
-    mutable uint32_t state = 0;
+    mutable uint32_t state;
+
+    RandColorData() {
+        colors.push_back(COLOR_WHITE);
+        mode = RandColorMode::RandElement;
+        state = 0;
+    }
 
     color_t next() const {
         ++state;
@@ -148,7 +154,7 @@ struct res_particle {
     rr_man_t rr;
 };
 
-#define R_PARTICLE(name) REF_NAME(res_particle, name)
+#define R_PARTICLE(name) REF_NAME(::ek::res_particle, name)
 
 inline struct res_particle res_particle;
 
@@ -164,14 +170,14 @@ inline void setup_res_particle(void) {
 }
 
 inline void particle_decl_init(ParticleDecl* decl) {
-    memset(decl, 0, sizeof(ParticleDecl));
+//    memset(decl, 0, sizeof(ParticleDecl));
     decl->alpha_start = FloatRange{1.0};
     decl->life_time = FloatRange{1.0f};
     decl->acc_x_phase = FloatRange{0.5f * MATH_PI};
     decl->acc_x_speed = FloatRange{0.0f};
     decl->scale_start = FloatRange{1.0f};
     decl->scale_end = FloatRange{0.0f};
-    decl->color = RandColorData{};
+//    decl->color = RandColorData();
     decl->rotation = FloatRange{0.0f};
 }
 

@@ -6,12 +6,12 @@
 extern "C" {
 #endif
 
-time_layer_state_t g_time_layers[4];
+time_layer_state_t g_time_layers[TIME_LAYER_MAX_COUNT];
 
 #define TIME_LAYER_DELTA_TIME_MAX (0.3f)
 
 time_layer_state_t time_layer(TimeLayer tl) {
-    EK_ASSERT(tl < 4);
+    EK_ASSERT(tl < TIME_LAYER_MAX_COUNT);
     return g_time_layers[tl];
 }
 
@@ -23,7 +23,7 @@ static float update_time_layer(time_layer_state_t* layer, float dt) {
 }
 
 void init_time_layers() {
-    for (uint32_t i = 0; i < 4; ++i) {
+    for (uint32_t i = 0; i < TIME_LAYER_MAX_COUNT; ++i) {
         g_time_layers[i].scale = 1.0f;
     }
 }

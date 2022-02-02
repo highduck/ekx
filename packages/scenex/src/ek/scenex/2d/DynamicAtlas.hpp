@@ -1,6 +1,7 @@
 #pragma once
 
-#include <ek/ds/Array.hpp>
+//#include <ek/ds/Array.hpp>
+#include <ek/ds/PodArray.hpp>
 #include <ek/math.h>
 #include <cstring>
 #include <sokol_gfx.h>
@@ -33,7 +34,7 @@ public:
     void invalidate();
 
 public:
-    Array<Page*> pages_;
+    PodArray<Page*> pages_;
     int pageWidth;
     int pageHeight;
     bool alphaMap;

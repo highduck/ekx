@@ -1,34 +1,35 @@
 #include "Interactive.hpp"
+#include "NodeEvents.hpp"
 
 namespace ek {
 
-void Interactive::handle(PointerEvent event) {
-    switch (event) {
-        case PointerEvent::Down:
-            pushed = true;
-            onEvent.emit(event);
-            break;
-        case PointerEvent::Up: {
-            bool shouldBeClicked = pushed && over;
-            pushed = false;
-            onEvent.emit(event);
+void Interactive::handle(entity_t e, string_hash_t type) {
+    NodeEventHandler* eh = e ? ecs::EntityApi{e}.tryGet<NodeEventHandler>(): nullptr;
+    bool shouldBeClicked = false;
+    if (type == POINTER_EVENT_DOWN) {
+        pushed = true;
+        if (eh) eh->emit({type, e});
+    } else if (type == POINTER_EVENT_UP) {
+        shouldBeClicked = pushed && over;
+        pushed = false;
+        if (eh) eh->emit({type, e});
+    } else if (type == POINTER_EVENT_OVER) {
+        over = true;
+        if (eh) eh->emit({type, e});
+    } else if (type == POINTER_EVENT_OUT) {
+        // keep order for now, later maybe unified at the end of function
+        if (eh) eh->emit({type, e});
+        over = false;
+        pushed = false;
+    } else {
+        return;
+    }
 
-            if (shouldBeClicked) {
-                onEvent.emit(PointerEvent::Tap);
-            }
+    if (eh) {
+        //eh->emit({type, e});
+        if(shouldBeClicked) {
+            eh->emit({POINTER_EVENT_TAP, e});
         }
-            break;
-        case PointerEvent::Over:
-            over = true;
-            onEvent.emit(event);
-            break;
-        case PointerEvent::Out:
-            onEvent.emit(event);
-            over = false;
-            pushed = false;
-            break;
-        case PointerEvent::Tap:
-            break;
     }
 }
 

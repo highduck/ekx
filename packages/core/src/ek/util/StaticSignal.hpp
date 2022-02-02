@@ -40,7 +40,7 @@ public:
             Slot slot = _slots[i];
             slot.fn(args...);
             if (slot.once) {
-                _slots.eraseAt(i);
+                _slots.erase_at(i);
             } else {
                 ++i;
             }

@@ -6,7 +6,6 @@
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/scenex/base/Script.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/3d/Light3D.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
@@ -25,23 +24,21 @@ ecs::EntityApi HierarchyWindow::getSiblingNext(ecs::EntityApi e) {
 const char* HierarchyWindow::getEntityIcon(ecs::EntityApi e) {
     if (e.has<Camera2D>()) return ICON_FA_VIDEO;
     if (e.has<Viewport>()) return ICON_FA_TV;
-    if (e.has<ScriptHolder>()) return ICON_FA_CODE;
+
     if (e.has<Bounds2D>()) return ICON_FA_EXPAND;
     if (e.has<Button>()) return ICON_FA_HAND_POINTER;
     if (e.has<Interactive>()) return ICON_FA_FINGERPRINT;
     if (e.has<MovieClip>()) return ICON_FA_FILM;
 
-    if (e.has<Display2D>()) {
-        const auto& disp = e.get<Display2D>();
-        if (disp.is<Sprite2D>()) return ICON_FA_IMAGE;
-        if (disp.is<NinePatch2D>()) return ICON_FA_COMPRESS;
-        if (disp.is<Quad2D>()) return ICON_FA_VECTOR_SQUARE;
-        if (disp.is<Text2D>()) return ICON_FA_FONT;
-        if (disp.is<Arc2D>()) return ICON_FA_CIRCLE_NOTCH;
-        return ICON_FA_PAINT_BRUSH;
-    }
+    if (e.has<Sprite2D>()) return ICON_FA_IMAGE;
+    if (e.has<NinePatch2D>()) return ICON_FA_COMPRESS;
+    if (e.has<Quad2D>()) return ICON_FA_VECTOR_SQUARE;
+    if (e.has<Text2D>()) return ICON_FA_FONT;
+    if (e.has<Arc2D>()) return ICON_FA_CIRCLE_NOTCH;
+    // other displays
+    if (e.has<Display2D>()) return ICON_FA_PAINT_BRUSH;
 
-    if (ecs::the_world.hasComponent<Transform3D>() && e.has<Transform3D>()) return ICON_FA_DICE_D20;
+    if (ecx.hasComponent<Transform3D>() && e.has<Transform3D>()) return ICON_FA_DICE_D20;
     if (e.has<Transform2D>()) return ICON_FA_DICE_D6;
     if (e.has<Node>()) return ICON_FA_BOX;
 
@@ -278,7 +275,7 @@ void HierarchyWindow::validateSelection() {
         if (selection[i].valid()) {
             ++i;
         } else {
-            selection.eraseAt(i);
+            selection.erase_at(i);
         }
     }
 }

@@ -4,6 +4,7 @@
 
 #include <ek/ds/String.hpp>
 #include <ek/ds/Array.hpp>
+#include <ek/ds/PodArray.hpp>
 #include <ek/rr.h>
 #include <ek/texture_loader.h>
 
@@ -18,11 +19,11 @@ public:
 
     void clear();
 
-    Array<R(sprite_t)> sprites;
-    Array<R(sg_image)> pages;
+    PodArray<R(sprite_t)> sprites;
+    PodArray<R(sg_image)> pages;
 
     // loading routine
-    Array<ek_texture_loader*> loaders;
+    PodArray<ek_texture_loader*> loaders;
     String base_path;
     uint32_t formatMask = 1;
 

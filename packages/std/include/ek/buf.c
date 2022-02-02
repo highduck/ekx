@@ -55,11 +55,13 @@ void ek_buf_set_capacity(void** ptr, uint32_t newCapacity, uint32_t elementSize)
     if (!prevHeader) {
         hdr->length = 0;
     }
-    *ptr = (void*)(hdr + 1);
+    *ptr = (void*) (hdr + 1);
 }
 
-void ek_buf_set_size(void** buf, uint32_t elementSize, uint32_t len, uint32_t cap) {
-    ek_buf_set_capacity(buf, cap, elementSize);
+void ek_buf_set_size(void** buf, uint32_t element_size, uint32_t len, uint32_t cap) {
+    if(ek_buf_capacity(*buf) < cap) {
+        ek_buf_set_capacity(buf, cap, element_size);
+    }
     if (*buf) {
         ek_buf_header(*buf)->length = len;
     }
@@ -85,3 +87,111 @@ void* ek_buf_pop_(void* ptr, uint32_t elementSize) {
     return (char*) ptr + elementSize * (--hdr->length);
 }
 
+// pod array
+
+/**
+ * ensure buffer size and copy `len` elements from `src` memory (count * el_size)
+ * @param buf
+ * @param element_size
+ * @param src
+ * @param len
+ */
+void arr_init_from(void** arr, uint32_t element_size, const void* src, uint32_t len) {
+    ek_buf_set_size(arr, element_size, len, len);
+    if (*arr && len) {
+        memcpy(*arr, src, len * element_size);
+    }
+}
+
+void arr_resize(void** p_arr, uint32_t element_size, uint32_t new_len) {
+    const uint32_t cap = ek_buf_capacity(*p_arr);
+    if (new_len > cap) {
+        arr_grow(p_arr, new_len, element_size);
+    }
+    if (*p_arr) {
+        ek_buf_header(*p_arr)->length = new_len;
+    }
+}
+
+void arr_grow(void** arr, uint32_t capacity, uint32_t element_size) {
+    EK_ASSERT_R2(capacity != 0);
+    const uint32_t sz = ek_buf_length(*arr);
+
+    void* new_buffer = 0;
+    ek_buf_set_size(&new_buffer, element_size, sz, capacity);
+    memcpy(new_buffer, *arr, sz * element_size);
+
+    ek_buf_reset(arr);
+    *arr = new_buffer;
+}
+
+void arr_maybe_grow(void** arr, uint32_t element_size) {
+    if (ek_buf_full(*arr)) {
+        arr_grow(arr, *arr ? (ek_buf_capacity(*arr) << 1) : 1, element_size);
+    }
+}
+
+void* arr_push_mem(void** arr, uint32_t element_size, const void* src) {
+    arr_maybe_grow(arr, element_size);
+    void* slot = ek_buf_add_(*arr, element_size);
+    memcpy(slot, src, element_size);
+    return slot;
+}
+
+void arr_assign(void** p_arr, uint32_t element_size, void* src_arr) {
+    const uint32_t other_size = ek_buf_length(src_arr);
+    if (other_size) {
+        if (ek_buf_capacity(*p_arr) < other_size) {
+            // grow buffer
+            ek_buf_set_capacity(p_arr, ek_buf_capacity(src_arr), element_size);
+        }
+        if (*p_arr) {
+            memcpy(*p_arr, src_arr, other_size * element_size);
+        }
+    }
+    if (*p_arr) {
+        ek_buf_header(*p_arr)->length = other_size;
+    }
+}
+
+void arr_remove(void* arr, uint32_t element_size, uint32_t at) {
+    EK_ASSERT(arr);
+    ek_buf_header_t* hdr = ek_buf_header(arr);
+    EK_ASSERT(at < hdr->length);
+    // [A, A, A, X, B, B]
+    // [A, A, A, B, B]
+    --hdr->length;
+    if (at != hdr->length) {
+        void* p = (char*) arr + at * element_size;
+        memmove(p, p + element_size, element_size * (hdr->length - at));
+    }
+}
+
+void arr_swap_remove(void* arr, uint32_t element_size, uint32_t at) {
+    EK_ASSERT(arr);
+    ek_buf_header_t* hdr = ek_buf_header(arr);
+    EK_ASSERT(at < hdr->length);
+    // [A, A, A, X, B, B]
+    // [A, A, A, B, B]
+    --hdr->length;
+    if (at != hdr->length) {
+        void* p = (char*) arr + at * element_size;
+        memcpy(p, (char*) arr + hdr->length * element_size, element_size);
+    }
+}
+
+void* arr_search(void* arr, uint32_t element_size, const void* el) {
+    EK_ASSERT(el);
+    EK_ASSERT(element_size);
+    if(arr) {
+        const ek_buf_header_t* hdr = ek_buf_header(arr);
+        const uint32_t len = hdr->length;
+        char* ptr = (char*)arr;
+        for(uint32_t i = 0; i < len; ++i) {
+            if(memcmp(ptr, el, element_size) == 0) {
+                return ptr;
+            }
+        }
+    }
+    return NULL;
+}

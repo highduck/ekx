@@ -1,11 +1,13 @@
 #pragma once
 
 #include "EditorWindow.hpp"
+#include <ek/ds/PodArray.hpp>
+#include <ek/ds/Array.hpp>
 
 namespace ek {
 
 struct ConsoleMsg {
-    Array<char> text;
+    PodArray<char> text;
     log_level_t verbosity;
     const char* file;
     int line;
@@ -39,9 +41,9 @@ public:
     void clear();
 
     Array<ConsoleMsg> messages;
-    Array<const char*> commands;
-    Array<const char*> candidates;
-    Array<char*> history;
+    PodArray<const char*> commands;
+    PodArray<const char*> candidates;
+    PodArray<char*> history;
     // -1: new line, 0..History.Size-1 browsing history
     int historyPos = 0;
 

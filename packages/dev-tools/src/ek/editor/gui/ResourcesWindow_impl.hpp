@@ -13,32 +13,8 @@
 #include <ek/scenex/text/TrueTypeFont.hpp>
 #include <ek/scenex/text/BitmapFont.hpp>
 
+
 namespace ek {
-
-/// canvas stats
-void draw_buffer_chain_stats(const char* name, ek_canvas_buffers* buffers) {
-    for (int line = 0; line < 4; ++line) {
-        int c = 0;
-        for (int i = 0; i < CANVAS_BUFFERS_MAX_COUNT; ++i) {
-            if (buffers->lines[line][i].id == 0) {
-                i = CANVAS_BUFFERS_MAX_COUNT;
-            } else {
-                ++c;
-            }
-        }
-        ImGui::Text("%s[%d] count %d", name, line, c);
-    }
-}
-
-void draw_canvas_stats() {
-    ImGui::Text("size: %lu", sizeof canvas);
-    ImGui::Text("vb chain size: %lu", sizeof canvas.vbs);
-    ImGui::Text("ib chain size: %lu", sizeof canvas.ibs);
-    ImGui::Text("vb mem size: %lu", sizeof canvas.vertex);
-    ImGui::Text("ib mem size: %lu", sizeof canvas.index);
-    draw_buffer_chain_stats("VB", &canvas.vbs);
-    draw_buffer_chain_stats("IB", &canvas.ibs);
-}
 
 /// assets
 

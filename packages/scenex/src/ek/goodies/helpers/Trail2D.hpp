@@ -1,9 +1,9 @@
 #pragma once
 
-#include <ek/scenex/base/Script.hpp>
 #include <ecxx/ecxx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/time.h>
+#include <ekx/app/time_layers.h>
 
 namespace ek {
 
@@ -14,7 +14,7 @@ struct VectorDequeue {
     uint32_t end = 0;
 
     uint32_t first = 0;
-    Array<T> data;
+    PodArray<T> data{};
 
     void move() {
         uint32_t dst = 0;
@@ -56,6 +56,14 @@ struct VectorDequeue {
     inline void erase_front() {
         ++first;
     }
+
+//    VectorDequeue() {
+//        ek_core_dbg_inc(EK_CORE_DBG_VD);
+//    }
+//
+//    ~VectorDequeue() {
+//        ek_core_dbg_dec(EK_CORE_DBG_VD);
+//    }
 };
 
 struct Trail2D {
@@ -65,13 +73,13 @@ struct Trail2D {
         float scale = 1.0f;
     };
 
-    TimeLayer timer;
+    TimeLayer timer = 0;
     vec2_t offset = {};
     float drain_speed = 2.0f;
     float segment_distance_max = 10.0f;
 //    float particles_per_second = 15.0f;
 
-    Trail2D() = default;
+    //Trail2D(Trail2D&& m) = default;
 
     void update(mat3x2_t m);
 
@@ -84,33 +92,15 @@ private:
 public:
     float scale = 1.0f;
     vec2_t lastPosition = {};
-    VectorDequeue<Node> nodes;
+    VectorDequeue<Node> nodes{};
     bool initialized = false;
 };
 
-
-
-class TrailRenderer2D : public Drawable2D<TrailRenderer2D> {
+class TrailRenderer2D {
 public:
-    explicit TrailRenderer2D(ecs::EntityApi target_) :
-    // TODO: inject world context
-            w{&ecs::the_world},
-            target{target_} {
-    }
-
-    void draw() override;
-
-    [[nodiscard]]
-    bool hitTest(vec2_t point) const override {
-        (void) point;
-        return false;
-    }
-
-    [[nodiscard]]
-    rect_t getBounds() const override { return {}; }
+    void draw();
 
 public:
-    ecs::World* w = nullptr;
     ecs::EntityApi target{};
     // max width
     float width = 20.0f;
@@ -118,4 +108,8 @@ public:
     R(sprite_t) sprite = R_SPRITE_EMPTY;
 };
 
+void trail_renderer2d_draw(entity_t e);
+
 }
+
+ECX_COMP_TYPE_CXX(ek::Trail2D)

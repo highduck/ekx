@@ -1,9 +1,11 @@
 #pragma once
 
 #include <functional>
+#include <utility>
 #include "../ds/Array.hpp"
 #include "../ds/FixedArray.hpp"
 #include <ek/assert.h>
+#include <ek/hash.h>
 
 namespace ek {
 
@@ -25,7 +27,7 @@ public:
 
     struct Slot {
         Function fn;
-        const char* type = nullptr;
+        string_hash_t type = 0;
         Listener id = 0;
         bool once = false;
     };
@@ -35,7 +37,7 @@ public:
     FixedArray<Slot, 64>* _acc = nullptr;
 
     template<typename Fn>
-    Listener push(Fn&& listener, const char* type, bool once) {
+    Listener push(Fn&& listener, string_hash_t type, bool once) {
         const auto id = _nextId++;
         Slot s{Function{listener}, type, id, once};
         if (_acc) {
@@ -47,12 +49,12 @@ public:
     }
 
     template<typename Fn>
-    Listener add(Fn&& listener, const char* type = nullptr) {
+    Listener add(Fn&& listener, string_hash_t type = 0) {
         return push(listener, type, false);
     }
 
     template<typename Fn>
-    Listener once(Fn&& listener, const char* type = nullptr) {
+    Listener once(Fn&& listener, string_hash_t type = 0) {
         return push(listener, type, true);
     }
 
@@ -60,14 +62,14 @@ public:
         for (uint32_t i = 0; i < _slots.size(); ++i) {
             auto& slot = _slots[i];
             if (slot.id == id) {
-                _slots.eraseAt(i);
+                _slots.erase_at(i);
                 return true;
             }
         }
         return false;
     }
 
-    void emit_(const char* type, Args... args) {
+    void emit_(string_hash_t type, Args... args) {
         FixedArray<Slot, 64> acc;
         _acc = &acc;
         uint32_t i = 0;
@@ -84,7 +86,7 @@ public:
             const bool once = slot.once;
             if (once) {
                 std::move(slot.fn)(args...);
-                _slots.eraseAt(i);
+                _slots.erase_at(i);
                 continue;
             }
             slot.fn(args...);
@@ -99,7 +101,7 @@ public:
     }
 
     void emit(Args... args) {
-        emit_(nullptr, args...);
+        emit_(0, args...);
     }
 
     void clear() {
@@ -108,13 +110,13 @@ public:
 
     template<typename Fn>
     auto& operator+=(Fn&& invocation) {
-        push(invocation, nullptr, false);
+        push(invocation, 0, false);
         return *this;
     }
 
     template<typename Fn>
     auto& operator<<(Fn&& invocation) {
-        push(invocation, nullptr, true);
+        push(invocation, 0, true);
         return *this;
     }
 
@@ -124,20 +126,23 @@ public:
     }
 
     void operator()(Args...args) {
-        emit_(nullptr, args...);
+        emit_(0, args...);
     }
 
-    constexpr Signal() noexcept = default;
+    constexpr Signal() noexcept {
+        ek_core_dbg_inc(EK_CORE_DBG_SIGNAL);
+    }
 
     constexpr Signal(Signal&& mf) noexcept: _slots{std::move(mf._slots)},
                                             _nextId{mf._nextId},
                                             _acc{mf._acc} {
+        ek_core_dbg_inc(EK_CORE_DBG_SIGNAL);
         mf._acc = nullptr;
     }
 
     Signal(const Signal& mf) noexcept: _slots{mf._slots},
                                        _nextId{mf._nextId} {
-
+        ek_core_dbg_inc(EK_CORE_DBG_SIGNAL);
     }
 
     Signal& operator=(Signal&& mf) noexcept {
@@ -149,11 +154,15 @@ public:
     }
 
     Signal& operator=(const Signal& mf) noexcept {
-        if(this != &mf) {
+        if (this != &mf) {
             _slots = mf._slots;
             _nextId = mf._nextId;
         }
         return *this;
+    }
+
+    ~Signal() noexcept {
+        ek_core_dbg_dec(EK_CORE_DBG_SIGNAL);
     }
 };
 

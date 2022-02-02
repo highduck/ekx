@@ -1,9 +1,9 @@
 #pragma once
 
+#include <utility>
 #include <ek/util/Signal.hpp>
 #include <ecxx/ecxx.hpp>
 #include <ek/ds/String.hpp>
-#include <utility>
 #include "Node.hpp"
 
 namespace ek {
@@ -18,20 +18,22 @@ union EventPayload {
 };
 
 struct NodeEventData {
-    const char* type;
-    ecs::EntityApi source;
+    string_hash_t type;
+    entity_t source;
     EventPayload payload{nullptr};
+    // TODO: make current target for dispatching
+    //mutable entity_t current;
     mutable bool processed = false;
 };
 
 struct NodeEventHandler {
     template<typename Fn>
-    void on(const char* type, Fn&& listener) {
+    void on(string_hash_t type, Fn&& listener) {
         signal.add(listener, type);
     }
 
     template<typename Fn>
-    void once(const char* type, Fn&& listener) {
+    void once(string_hash_t type, Fn&& listener) {
         signal.once(listener, type);
     }
 
@@ -40,7 +42,6 @@ struct NodeEventHandler {
         return event;
     }
 
-private:
     Signal<const NodeEventData&> signal;
 };
 
@@ -51,30 +52,32 @@ private:
 void dispatch_broadcast(ecs::EntityApi e, const NodeEventData& data);
 void dispatch_bubble(ecs::EntityApi e, const NodeEventData& data);
 
-inline void broadcast(ecs::EntityApi e, const char* event) {
-    dispatch_broadcast(e, {event, e, {nullptr}});
+inline void broadcast(ecs::EntityApi e, string_hash_t event) {
+    dispatch_broadcast(e, {event, e.index, {nullptr}});
 }
 
-inline void broadcast(ecs::EntityApi e, const char* event, float value) {
-    NodeEventData data{event, e};
+inline void broadcast(ecs::EntityApi e, string_hash_t event, float value) {
+    NodeEventData data{event, e.index};
     data.payload.f32 = value;
     dispatch_broadcast(e, data);
 }
 
-inline void broadcast(ecs::EntityApi e, const char* event, int value) {
-    NodeEventData data{event, e};
+inline void broadcast(ecs::EntityApi e, string_hash_t event, int value) {
+    NodeEventData data{event, e.index};
     data.payload.i32 = value;
     dispatch_broadcast(e, data);
 }
 
-inline void broadcast(ecs::EntityApi e, const char* event, const char* payload) {
-    NodeEventData data{event, e, {payload}};
+inline void broadcast(ecs::EntityApi e, string_hash_t event, const char* payload) {
+    NodeEventData data{event, e.index, {payload}};
     dispatch_broadcast(e, data);
 }
 
-inline void notify_parents(ecs::EntityApi e, const char* event, const char* payload = "") {
-    NodeEventData data{event, e, {payload}};
+inline void notify_parents(ecs::EntityApi e, string_hash_t event, const char* payload = "") {
+    NodeEventData data{event, e.index, {payload}};
     dispatch_bubble(e, data);
 }
 
 }
+
+ECX_COMP_TYPE_CXX(ek::NodeEventHandler);

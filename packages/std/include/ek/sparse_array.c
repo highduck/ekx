@@ -1,4 +1,6 @@
 #include <ek/sparse_array.h>
+#include <ek/assert.h>
+#include <stdlib.h>
 
 typedef struct ek_sparse_array_page {
     // 4096 bytes, page aligned
@@ -24,14 +26,6 @@ ek_sparse_array ek_sparse_array_create(const uint32_t num) {
     }
 
     return (ek_sparse_array) {.data = pages};
-}
-
-ek_sparse_array ek_sparse_array_offset(ek_sparse_array sa, const int off) {
-    EK_ASSERT((off & (EK_SPARSE_ARRAY_ELEMENTS_PER_PAGE - 1)) == 0);
-    int po = off / EK_SPARSE_ARRAY_ELEMENTS_PER_PAGE;
-    return (ek_sparse_array) {
-            .data = ((ek_sparse_array_page**)sa.data) + po
-    };
 }
 
 ek_sparse_array_val ek_sparse_array_get(const ek_sparse_array sa, const uint32_t key) {

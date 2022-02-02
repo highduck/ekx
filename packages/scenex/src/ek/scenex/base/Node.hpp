@@ -211,6 +211,6 @@ ecs::EntityApi find(ecs::EntityApi e, string_hash_t tag);
 
 ecs::EntityApi findByPath(ecs::EntityApi e, ...);
 
-Array <ecs::EntityApi> findMany(ecs::EntityApi e, ...);
+PodArray <ecs::EntityApi> findMany(ecs::EntityApi e, ...);
 
 }

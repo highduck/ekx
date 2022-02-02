@@ -221,7 +221,7 @@ void SceneWindow::drawSceneNode(ecs::EntityApi e) {
     }
 
     auto* disp = e.tryGet<Display2D>();
-    if (disp && disp->drawable) {
+    if (disp) {
         auto* transform = e.tryGet<WorldTransform2D>();
         if (transform) {
             canvas.matrix[0] = transform->matrix;
@@ -230,7 +230,12 @@ void SceneWindow::drawSceneNode(ecs::EntityApi e) {
             canvas.matrix[0] = mat3x2_identity();
             canvas.color[0] = color2_identity();
         }
-        disp->drawable->draw();
+        if (disp->draw) {
+            disp->draw(e.index);
+        }
+        if (disp->callback) {
+            disp->callback(e.index);
+        }
     }
     auto it = e.get<Node>().child_first;
     while (it) {
@@ -254,7 +259,7 @@ void SceneWindow::drawSceneNodeBounds(ecs::EntityApi e) {
         if (transform) {
             m = mat3x2_mul(view.view2.matrix, transform->matrix);
         }
-        rect_t b = disp->getBounds();
+        rect_t b = disp->get_bounds ? disp->get_bounds(e.index) : rect_wh(0,0);
         if (g_editor->hierarchy.isSelectedInHierarchy(e)) {
             drawBox2(b, m, COLOR_WHITE, COLOR_BLACK, true, ARGB(0x77FFFFFF));
         }
@@ -318,12 +323,12 @@ ecs::EntityApi SceneWindow::hitTest(ecs::EntityApi e, vec2_t worldPos) {
         it = it.get<Node>().sibling_prev;
     }
     auto* disp = e.tryGet<Display2D>();
-    if (disp) {
+    if (disp && disp->get_bounds) {
         auto* wt = e.tryGet<WorldTransform2D>();
         if (wt) {
             vec2_t lp;
             if (vec2_transform_inverse(worldPos, wt->matrix, &lp) &&
-                rect_contains(disp->getBounds(), lp)) {
+                rect_contains(disp->get_bounds(e.index), lp)) {
                 return e;
             }
         }

@@ -3,6 +3,7 @@
 #include "core.hpp"
 
 #include <ek/ds/Array.hpp>
+#include <ek/ds/PodArray.hpp>
 #include <ek/ds/Hash.hpp>
 #include <ek/ds/String.hpp>
 
@@ -39,6 +40,23 @@ inline void serialize(IO<S>& io, Array<T>& value) {
             io(el);
         }
     }
+}
+
+
+template<typename S, typename T>
+inline void serialize(IO<S>& io, PodArray<T>& value) {
+    uint32_t size;
+
+    if constexpr (is_readable_stream<S>()) {
+        io.value(size);
+        value.resize(size);
+    } else {
+        size = static_cast<uint32_t>(value.size());
+        io.value(size);
+    }
+
+    static_assert(is_pod_type<T>());
+    io.span(value.data(), size * sizeof(T));
 }
 
 template<typename S, typename V>

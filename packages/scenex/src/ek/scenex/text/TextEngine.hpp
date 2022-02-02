@@ -2,7 +2,8 @@
 
 #include "Font.hpp"
 #include "TextFormat.hpp"
-#include <ek/ds/Array.hpp>
+//#include <ek/ds/Array.hpp>
+#include <ek/ds/PodArray.hpp>
 
 namespace ek {
 
@@ -25,7 +26,7 @@ struct TextBlockInfo {
 
     // {max length; total height}
     vec2_t size = {};
-    Array<Line> lines{};
+    PodArray<Line> lines{};
 
     void addLine(Line line);
 

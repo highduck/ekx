@@ -29,7 +29,7 @@ void destroyChildren(ecs::EntityApi e) {
         destroyChildren(temp);
 
         childNode.parent = nullptr;
-        ecs::destroy(temp);
+        ecx_destroy(temp.index);
     }
     entityNode->child_first = nullptr;
     entityNode->child_last = nullptr;
@@ -221,7 +221,7 @@ uint32_t countChildren(ecs::EntityApi e) {
 void destroyNode(ecs::EntityApi e) {
     removeFromParent(e);
     destroyChildren(e);
-    ecs::destroy(e);
+    ecx_destroy(e.index);
 }
 
 ecs::EntityApi getRoot(ecs::EntityApi e) {
@@ -295,11 +295,11 @@ ecs::EntityApi findByPath(const ecs::EntityApi e, ...) {
     return it;
 }
 
-Array<ecs::EntityApi> findMany(const ecs::EntityApi e, ...) {
+PodArray<ecs::EntityApi> findMany(const ecs::EntityApi e, ...) {
     va_list argp;
     va_start(argp, e);
 
-    Array<ecs::EntityApi> entities;
+    PodArray<ecs::EntityApi> entities;
     string_hash_t p = va_arg(argp, string_hash_t);
     while(p != 0) {
         auto f = find(e, p);

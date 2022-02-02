@@ -2,7 +2,6 @@
 
 #include <ek/admob.h>
 #include <functional>
-#include <ek/ds/Pointer.hpp>
 
 namespace ek {
 

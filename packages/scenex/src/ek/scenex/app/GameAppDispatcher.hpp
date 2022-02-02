@@ -7,7 +7,7 @@ namespace ek {
 
 class GameAppDispatcher : public GameAppListener {
 public:
-    Array<GameAppListener*> listeners{};
+    PodArray<GameAppListener*> listeners{};
 
     ~GameAppDispatcher() override = default;
 

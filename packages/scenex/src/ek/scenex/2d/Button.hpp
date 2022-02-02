@@ -5,6 +5,8 @@
 #include "MovieClip.hpp"
 #include <ekx/app/time_layers.h>
 
+#define BUTTON_EVENT_CLICK H("button_click")
+
 namespace ek {
 
 struct ButtonSkin {
@@ -24,7 +26,6 @@ struct Button {
     ButtonSkin* skin{nullptr};
 
     bool back_button = false;
-    Signal<> clicked{};
 
     bool initialized = false;
     float timeOver = 0.0f;

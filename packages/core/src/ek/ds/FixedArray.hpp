@@ -23,12 +23,12 @@ struct FixedArray {
         _data[_size++] = std::move(el);
     }
 
-    constexpr T* begin() {
-        return _data;
+    constexpr T* begin() const {
+        return (T*)_data;
     }
 
-    constexpr T* end() {
-        return _data + _size;
+    constexpr T* end() const {
+        return (T*)_data + _size;
     }
 
     [[nodiscard]]
@@ -50,13 +50,8 @@ struct FixedArray {
     }
 
     [[nodiscard]]
-    constexpr const T* data() const {
-        return _data;
-    }
-
-    [[nodiscard]]
-    constexpr T* data() {
-        return _data;
+    constexpr T* data() const {
+        return (T*)_data;
     }
 
     [[nodiscard]]
@@ -65,14 +60,9 @@ struct FixedArray {
         return *(_data + _size - 1);
     }
 
-    constexpr T& operator[](unsigned i) {
+    constexpr T& operator[](unsigned i) const {
         EK_ASSERT(i < _size);
-        return _data[i];
-    }
-
-    constexpr const T& operator[](unsigned i) const {
-        EK_ASSERT(i < _size);
-        return _data[i];
+        return (T&)_data[i];
     }
 
     constexpr void clear() {

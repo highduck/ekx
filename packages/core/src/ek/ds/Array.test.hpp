@@ -41,7 +41,7 @@ TEST_CASE("move and copy") {
     {
         Array<NonTrivialStruct> a;
         a.push_back(NonTrivialStruct());
-        a.eraseAt(0u);
+        a.erase_at(0u);
         a.push_back(NonTrivialStruct());
     }
     {
@@ -96,13 +96,13 @@ TEST_CASE("push, erase, insert") {
         arr.push_back(2);
         arr.push_back(3);
         arr.push_back(4);
-        arr.eraseAt(i);
+        arr.erase_at(i);
         arr.reset();
         arr.push_back(1);
         arr.push_back(2);
         arr.push_back(3);
         arr.push_back(4);
-        arr.swapRemove(i);
+        arr.swap_remove(i);
         arr.reset();
     }
 

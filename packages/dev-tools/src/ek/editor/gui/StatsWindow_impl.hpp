@@ -29,11 +29,11 @@ void StatsWindow::onDraw() {
                 stats.triangles,
                 (int) (100.0f * stats.fill_area / drawableArea)
     );
-    auto entitiesCount = ecs::the_world.size;
-    auto entitiesAvailable = ecs::ENTITIES_MAX_COUNT - entitiesCount;
+    auto entitiesCount = ecx.size;
+    auto entitiesAvailable = ECX_ENTITIES_MAX_COUNT - entitiesCount;
     ImGui::Text("%u entities | %u free", entitiesCount - 1, entitiesAvailable);
 
-    auto hitTarget = g_interaction_system->getHitTarget();
+    auto hitTarget = g_interaction_system.getHitTarget();
     if (hitTarget) {
         ImGui::Text("Hit Target: %u %s", hitTarget.index, getDebugNodePath(hitTarget).c_str());
     }

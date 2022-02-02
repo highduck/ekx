@@ -238,7 +238,7 @@ struct Transform2D {
 //void updateWorldTransform2D(ecs::EntityApi root);
 //void updateWorldTransformAll(ecs::World* w, ecs::EntityApi root);
 
-void updateWorldTransformAll2(ecs::World* w, ecs::EntityApi root);
+void updateWorldTransformAll2(ecs::EntityApi root);
 
 /** utility functions **/
 

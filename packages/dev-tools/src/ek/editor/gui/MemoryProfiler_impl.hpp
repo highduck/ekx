@@ -3,7 +3,49 @@
 #include "MemoryProfiler.hpp"
 #include "Widgets.hpp"
 
+#include <ek/core_dbg.h>
+
 namespace ek {
+
+
+/// canvas stats
+void draw_buffer_chain_stats(const char* name, ek_canvas_buffers* buffers) {
+    for (int line = 0; line < 4; ++line) {
+        int c = 0;
+        for (int i = 0; i < CANVAS_BUFFERS_MAX_COUNT; ++i) {
+            if (buffers->lines[line][i].id == 0) {
+                i = CANVAS_BUFFERS_MAX_COUNT;
+            } else {
+                ++c;
+            }
+        }
+        ImGui::Text("%s[%d] count %d", name, line, c);
+    }
+}
+
+void draw_canvas_stats() {
+    ImGui::Text("size: %lu", sizeof canvas);
+    ImGui::Text("vb chain size: %lu", sizeof canvas.vbs);
+    ImGui::Text("ib chain size: %lu", sizeof canvas.ibs);
+    ImGui::Text("vb mem size: %lu", sizeof canvas.vertex);
+    ImGui::Text("ib mem size: %lu", sizeof canvas.index);
+    draw_buffer_chain_stats("VB", &canvas.vbs);
+    draw_buffer_chain_stats("IB", &canvas.ibs);
+
+    ImGui::Separator();
+
+    ImGui::Text("C++ Arrays: %d", ek_core_dbg_get(EK_CORE_DBG_ARRAY));
+    ImGui::Text("Pod Arrays: %d", ek_core_dbg_get(EK_CORE_DBG_POD_ARRAY));
+    ImGui::Text("Signals: %d", ek_core_dbg_get(EK_CORE_DBG_SIGNAL));
+    ImGui::Text("Hashes: %d", ek_core_dbg_get(EK_CORE_DBG_HASH));
+    ImGui::Text("Strings: %d", ek_core_dbg_get(EK_CORE_DBG_STRING));
+
+    ImGui::Text("EK_CORE_DBG_INTERACTIVE: %d", ek_core_dbg_get(EK_CORE_DBG_INTERACTIVE));
+    ImGui::Text("EK_CORE_DBG_VD: %d", ek_core_dbg_get(EK_CORE_DBG_VD));
+
+    ImGui::Separator();
+}
+
 
 inline double toMB(uint64_t bytes) {
     return static_cast<double>(bytes / 1024) / 1024.0;
@@ -162,22 +204,22 @@ void DrawAllocatorsTree() {
 }
 
 void drawECSMemoryStats() {
-    ImGui::Text("ECS World Struct Size: %lu", sizeof(ecs::World));
+    ImGui::Text("ECS World Struct Size: %lu", sizeof ecx);
     uint32_t totalUsed = 0;
     uint32_t totalReserved = 0;
     uint32_t lookupSize = 0 /* TODO */;
-    for (auto* header : ecs::the_world.components) {
+    for (uint32_t i = 0; i < ECX_COMPONENTS_MAX_COUNT; ++i) {
+        auto* header = ecx.components[i];
         if (header) {
-            const char* name = header->name;
-            auto h2eSizeReserved = header->handleToEntity.capacity() * sizeof(ecs::EntityIndex);
-            auto h2eSizeUsed = header->handleToEntity.size() * sizeof(ecs::EntityIndex);
-            auto dataSizeUsed = header->count() * header->storageElementSize;
+            const char* name = header->debug_name;
+            auto h2eSizeReserved = header->handleToEntity.capacity() * sizeof(entity_t);
+            auto h2eSizeUsed = header->handleToEntity.size() * sizeof(entity_t);
+            auto dataSizeUsed = header->handleToEntity.size() * header->debug_data_stride;
             auto dataSizeReserved = dataSizeUsed;
             totalUsed += lookupSize + h2eSizeUsed + dataSizeUsed;
             totalReserved += lookupSize + h2eSizeReserved + dataSizeReserved;
             if (ImGui::TreeNode(header, "#%u. %s | %0.2lf KB",
-                                header->typeId,
-                                name ? name : "Component",
+                                i, name ? name : "Component",
                                 toKB(h2eSizeReserved + dataSizeReserved))) {
                 ImGui::Text("Handle-2-Entity Array: %u / %u | %0.2lf of %0.2lf KB", header->handleToEntity.size(),
                             header->handleToEntity.capacity(),
@@ -192,6 +234,8 @@ void drawECSMemoryStats() {
 }
 
 void MemoryProfiler::onDraw() {
+    draw_canvas_stats();
+
     if (ImGui::BeginTabBar("Memory Stats")) {
         if (ImGui::BeginTabItem("Allocators")) {
             // TODO:

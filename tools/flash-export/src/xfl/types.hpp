@@ -3,6 +3,7 @@
 #include <string>
 #include <ek/math.h>
 #include <ek/ds/Array.hpp>
+#include <ek/ds/PodArray.hpp>
 #include <memory>
 #include <optional>
 
@@ -215,7 +216,7 @@ enum class TweenTarget {
 struct TweenObject {
     TweenTarget target = TweenTarget::all;
     int intensity; // <Ease intensity="-100...100" />
-    Array<vec2_t> custom_ease;
+    PodArray<vec2_t> custom_ease;
 };
 
 struct Frame {

@@ -52,20 +52,6 @@ public:
 private:
 };
 
-class Leaderboard {
-public:
-    Leaderboard() = delete;
-
-    explicit Leaderboard(const char* id);
-
-    void show() const;
-
-    void submit(int score) const;
-
-private:
-    String id_;
-};
-
 class Achievement {
 public:
 
@@ -76,7 +62,7 @@ public:
     void run() const;
 
 private:
-    String code_;
+    const char* code_;
     int count_;
 };
 

@@ -3,128 +3,99 @@
 #include <ek/assert.h>
 #include <cstring>
 
-namespace ecs {
+ecs::World ecx;
 
-World the_world;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/** World **/
-
-void resetEntityPoolArrays(EntityIndex* entities, EntityGeneration* generations) {
-    memset(generations, 0, sizeof(EntityGeneration) * ENTITIES_MAX_COUNT);
-    {
-        auto* it = entities;
+static void ecx_reset_entity_pool() {
+    // reset pool ids
+    auto* it = ecx.indices;
 #pragma nounroll
-        for (uint32_t i = 1; i <= ENTITIES_MAX_COUNT; ++i) {
-            *(it++) = i;
-        }
+    for (uint32_t i = 1; i <= ECX_ENTITIES_MAX_COUNT; ++i) {
+        *(it++) = i;
     }
-}
-
-void World::resetEntityPool() {
-    resetEntityPoolArrays(entityPool, generations);
 
     // reserve null entity
-    entityPool[0] = 0;
-    next = 1;
-    size = 1;
-}
+    ecx.indices[0] = 0;
+    // is invalid
+    ecx.generations[0] = 1;
 
-void World::create(EntityIndex* outEntities, uint32_t count_) {
-    auto* indices = entityPool;
-    auto next_ = next;
-
-#pragma nounroll
-    for (uint32_t i = 0; i < count_; ++i) {
-        const auto nextIndex = indices[next_];
-        indices[next_] = next_;
-        outEntities[i] = next_;
-        next_ = nextIndex;
-    }
-    next = next_;
-    size += count_;
-}
-
-void World::destroy(const EntityIndex* entitiesToDestroy, uint32_t count) {
-    {
-        // destroy from POOL
-        auto* indices = entityPool;
-        auto* generations_ = generations;
-        auto next_ = next;
-#pragma nounroll
-        for (uint32_t i = 0; i < count; ++i) {
-            const auto index = entitiesToDestroy[i];
-            indices[index] = next_;
-            ++generations_[index];
-            next_ = index;
-        }
-        next = next_;
-        size -= count;
-    }
-    {
-        // destroy components
-        auto** components_ = components;
-#pragma nounroll
-        for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {
-            auto* component = components_[i];
-            // TODO: we can know all components ahead of time and register/init them and not check every case...
-            if (component) {
-                auto* run = component->run;
-                auto entity2handle = component->entityToHandle;
-                for (uint32_t j = 0; j < count; ++j) {
-                    const auto entity = entitiesToDestroy[j];
-                    const auto handle = ek_sparse_array_get(entity2handle, entity);
-                    if (handle != 0) {
-                        run(StorageCommand::Erase, component, entity);
-                    }
-                }
-            }
-        }
-    }
-}
-
-bool World::check(EntityPassport passport) const {
-    const auto index = passport & INDEX_MASK;
-    const auto generation = (passport >> INDEX_BITS) & GENERATION_MASK;
-    return generation == generations[index];
+    ecx.next = 1;
+    ecx.size = 1;
 }
 
 // World create / destroy
 
-void World::initialize() {
+void ecx_setup(void) {
     log_debug("ecs::world initialize");
-    resetEntityPool();
-    memset(components, 0, COMPONENTS_MAX_COUNT * sizeof(void*));
-    entityToHandle = ek_sparse_array_create(COMPONENTS_MAX_COUNT * ENTITIES_MAX_COUNT);
+    ecx_reset_entity_pool();
 }
 
-void World::reset() {
-    resetEntityPool();
-    ek_sparse_array_clear(&entityToHandle, COMPONENTS_MAX_COUNT * ENTITIES_MAX_COUNT);
-    auto** components_ = components;
-    for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {
-        auto* component = components_[i];
-        if (component) {
-            component->run(StorageCommand::Clear, component, 0);
-            component->entityToHandle = ek_sparse_array_offset(entityToHandle, i * ENTITIES_MAX_COUNT);
-            //ek_sparse_array_clear(&component->entityToHandle);
-            component->handleToEntity.reduceSize(1);
-        }
-    }
-}
-
-void World::shutdown() {
+void ecx_shutdown(void) {
     log_debug("ecs::world shutdown");
-    // skip clearing entity pool, because we don't need it anymore
-    auto** components_ = components;
-    for (uint32_t i = 0; i < COMPONENTS_MAX_COUNT; ++i) {
-        auto* component = components_[i];
-        if (component) {
-            component->run(StorageCommand::Shutdown, component, 0);
-            //ek_sparse_array_free(&component->entityToHandle);
-            free(component->data);
-        }
+#pragma nounroll
+    for(uint32_t i = 0; i < ecx.callbacks_shutdown_num; ++i) {
+        ecx.callbacks_shutdown[i]();
     }
-    ek_sparse_array_free(&entityToHandle, COMPONENTS_MAX_COUNT * ENTITIES_MAX_COUNT);
+    ecx.callbacks_shutdown_num = 0;
+    ecx.callbacks_erase_num = 0;
 }
 
+entity_passport_t get_entity_passport(entity_t entity) {
+    return entity | (ecx.generations[entity] << ECX_INDEX_BITS);
 }
+
+bool check_entity_passport(entity_passport_t passport) {
+    const entity_gen_t i = ecx.generations[passport & ECX_INDEX_MASK];
+    const entity_gen_t j = (passport >> ECX_INDEX_BITS) & ECX_GENERATION_MASK;
+    return i == j;
+}
+
+bool check_entity_alive(entity_t entity) {
+    return entity && ecx.indices[entity] == entity;
+}
+
+void add_ecs_erase_callback(ecs_erase_callback_t callback) {
+    EK_ASSERT(ecx.callbacks_erase_num < ECX_COMPONENTS_MAX_COUNT);
+    ecx.callbacks_erase[ecx.callbacks_erase_num++] = callback;
+}
+
+void add_ecs_shutdown_callback(ecs_shutdown_callback_t callback) {
+    EK_ASSERT(ecx.callbacks_shutdown_num < ECX_COMPONENTS_MAX_COUNT);
+    ecx.callbacks_shutdown[ecx.callbacks_shutdown_num++] = callback;
+}
+
+// entity create / destroy
+
+entity_t ecx_create(void) {
+    EK_ASSERT(ecx.size < ECX_ENTITIES_MAX_COUNT);
+    const entity_t next = ecx.next;
+    entity_t* index = ecx.indices + next;
+    ecx.next = *index;
+    *index = next;
+    ++ecx.size;
+    return next;
+}
+
+void ecx_destroy(entity_t entity) {
+    EK_ASSERT_R2(check_entity_alive(entity));
+
+    // destroy from POOL
+    EK_ASSERT(ecx.size > 1);
+    ecx.indices[entity] = ecx.next;
+    ++ecx.generations[entity];
+    ecx.next = entity;
+    --ecx.size;
+
+    // destroy components
+#pragma nounroll
+    for (uint32_t i = 0; i < ecx.callbacks_erase_num; ++i) {
+        ecx.callbacks_erase[i](entity);
+    }
+}
+
+#ifdef __cplusplus
+}
+#endif

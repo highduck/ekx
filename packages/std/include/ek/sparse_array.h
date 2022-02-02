@@ -27,7 +27,6 @@ typedef uint32_t ek_sparse_array_key;
 typedef uint16_t ek_sparse_array_val;
 
 ek_sparse_array ek_sparse_array_create(uint32_t num);
-ek_sparse_array ek_sparse_array_offset(ek_sparse_array sa, int off);
 void ek_sparse_array_clear(ek_sparse_array* sa, uint32_t num);
 void ek_sparse_array_free(ek_sparse_array* sa, uint32_t num);
 

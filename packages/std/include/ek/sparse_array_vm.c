@@ -1,4 +1,6 @@
 #include <ek/sparse_array.h>
+#include <ek/assert.h>
+#include <stdlib.h>
 
 static ek_sparse_array_val* ek_sparse_array__alloc_data(const uint32_t num) {
     return (ek_sparse_array_val*)calloc(1, num * sizeof(ek_sparse_array_val));
@@ -7,12 +9,6 @@ static ek_sparse_array_val* ek_sparse_array__alloc_data(const uint32_t num) {
 ek_sparse_array ek_sparse_array_create(const uint32_t num) {
     return (ek_sparse_array) {
         .data = ek_sparse_array__alloc_data(num)
-    };
-}
-
-ek_sparse_array ek_sparse_array_offset(ek_sparse_array sa, const int off) {
-    return (ek_sparse_array) {
-            .data = ((ek_sparse_array_val*)sa.data) + off
     };
 }
 

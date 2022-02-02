@@ -242,7 +242,7 @@ void ConsoleWindow::onMessageWrite(log_msg_t msg) {
     }
 
     ConsoleMsg cmsg{
-            Array<char>(len + 1),
+            PodArray<char>(len + 1),
             (log_level_t) msg.level,
             msg.file,
             msg.line,
@@ -315,7 +315,7 @@ void ConsoleWindow::execute(const char* cmd) {
     for (int i = static_cast<int>(history.size()) - 1; i >= 0; --i) {
         if (strcasecmp(history[i], cmd) == 0) {
             free(history[i]);
-            history.eraseAt(i);
+            history.erase_at(i);
             break;
         }
     }

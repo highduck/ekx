@@ -8,40 +8,12 @@
 
 namespace ek {
 
-class GameScreenHandler {
-public:
-    virtual ~GameScreenHandler() = default;
-
-    virtual void onScreenCreate() = 0;
-
-    virtual void onScreenEnter() = 0;
-    virtual void onScreenEnterBegin() = 0;
-    virtual void onScreenExit() = 0;
-    virtual void onScreenExitBegin() = 0;
-
-    // by default just destroy all children
-    virtual void onScreenDestroy() = 0;
-};
-
-enum class GameScreenEvent {
-    Create,
-    Destroy,
-    Enter,
-    EnterBegin,
-    Exit,
-    ExitBegin
-};
-
-struct GameScreen {
-    Signal<GameScreenEvent> onEvent;
-
-    // do not create/destroy content
-    //bool persistent = true;
-
-    static GameScreen& init(ecs::EntityApi e, string_hash_t name = 0);
-};
-
-
+#define GAME_SCREEN_EVENT_CREATE H("game-screen-create")
+#define GAME_SCREEN_EVENT_DESTROY H("game-screen-destroy")
+#define GAME_SCREEN_EVENT_ENTER H("game-screen-enter")
+#define GAME_SCREEN_EVENT_ENTER_BEGIN H("game-screen-enter-begin")
+#define GAME_SCREEN_EVENT_EXIT H("game-screen-exit")
+#define GAME_SCREEN_EVENT_EXIT_BEGIN H("game-screen-exit-begin")
 
 struct ScreenTransitionState {
     bool active = false;
@@ -82,11 +54,10 @@ struct ScreenTransitionState {
 
 };
 
-class GameScreenManager {
-public:
+struct GameScreenManager {
     ecs::EntityApi layer;
 
-    Array<ecs::EntityApi> stack;
+    PodArray<ecs::EntityApi> stack;
 
     ScreenTransitionState transition;
 
@@ -106,7 +77,10 @@ public:
     void applyTransitionEffect();
 
     static void defaultTransitionEffect(GameScreenManager* gsm);
+
 };
+
+void init_game_screen(ecs::EntityApi e, string_hash_t name = 0);
 
 }
 

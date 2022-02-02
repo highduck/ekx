@@ -33,12 +33,9 @@ struct SGTextLayerData {
     float blurRadius = 0.0f;
     int blurIterations = 0;
     int strength = 0;
-
-    template<typename S>
-    void serialize(IO<S>& io) {
-        io(color, offset, blurRadius, blurIterations, strength);
-    }
 };
+
+template<> struct declared_as_pod_type<SGTextLayerData> : public std::true_type {};
 
 struct SGDynamicTextData {
     String text;
@@ -49,7 +46,7 @@ struct SGDynamicTextData {
     float lineSpacing = 0.0f;
     float lineHeight = 0.0f;
 
-    Array<SGTextLayerData> layers;
+    PodArray<SGTextLayerData> layers;
 
     bool wordWrap = false;
 
@@ -63,7 +60,7 @@ struct SGDynamicTextData {
 struct SGEasingData {
     uint8_t attribute = 0;
     float ease = 0.0f;
-    Array<vec2_t> curve{};
+    PodArray<vec2_t> curve{};
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -142,7 +139,7 @@ struct SGMovieLayerData {
     Array<SGMovieFrameData> frames;
 
     // temp for restoring target ID
-    Array<SGNodeData*> targets;
+    PodArray<SGNodeData*> targets;
 
     template<typename S>
     void serialize(IO<S>& io) {
@@ -237,17 +234,14 @@ struct SGSceneInfo {
     string_hash_t name;
     // internal symbol name
     string_hash_t linkage;
-
-    template<typename S>
-    void serialize(IO<S>& io) {
-        io(name, linkage);
-    }
 };
+
+template<> struct declared_as_pod_type<SGSceneInfo> : public std::true_type {};
 
 class SGFile {
 public:
-    Array<string_hash_t> scenes;
-    Array<SGSceneInfo> linkages;
+    PodArray<string_hash_t> scenes;
+    PodArray<SGSceneInfo> linkages;
     Array<SGNodeData> library;
 
     template<typename S>

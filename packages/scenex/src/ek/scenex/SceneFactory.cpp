@@ -107,12 +107,12 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
             format.layers[i].strength = layer.strength;
         }
 
-        auto& display = entity.get_or_create<Display2D>();
-        auto dtext = Pointer<Text2D>::make(dynamicText.text, format);
+        auto* dtext = text2d_setup(entity.index);
+        dtext->text = dynamicText.text;
+        dtext->format = format;
         dtext->localized = is_localized(dynamicText.text.c_str());
         dtext->adjustsFontSizeToFitBounds = dtext->localized;
         dtext->rect = dynamicText.rect;
-        display.drawable = std::move(dtext);
     }
 
     if (!data->movie.empty()) {
@@ -126,24 +126,17 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
         mov.fps = data->movie[0].fps;
     }
 
-    auto* display = entity.tryGet<Display2D>();
-    Sprite2D* sprite = nullptr;
-    NinePatch2D* ninePatch = nullptr;
-    if (display) {
-        sprite = display->tryGet<Sprite2D>();
-        ninePatch = display->tryGet<NinePatch2D>();
-    }
+    Sprite2D* sprite = entity.tryGet<Sprite2D>();
+    NinePatch2D* ninePatch = entity.tryGet<NinePatch2D>();
 
     if (data->sprite && !sprite) {
-        if (!display) {
-            display = &entity.assign<Display2D>();
-        }
         if (rect_is_empty(data->scaleGrid)) {
-            sprite = new Sprite2D(data->sprite);
-            display->drawable.reset(sprite);
+            sprite = sprite2d_setup(entity.index);new Sprite2D();
+            sprite->src = R_SPRITE(data->sprite);
         } else {
-            ninePatch = new NinePatch2D(data->sprite, data->scaleGrid);
-            display->drawable.reset(ninePatch);
+            ninePatch = ninepatch2d_setup(entity.index);
+            ninePatch->src = R_SPRITE(data->sprite);
+            ninePatch->scale_grid = data->scaleGrid;
         }
     }
 
@@ -152,10 +145,17 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
     }
 
     if (data->scissorsEnabled || data->hitAreaEnabled || data->boundsEnabled) {
-        auto& bounds = entity.reassign<Bounds2D>(data->boundingRect);
-        bounds.scissors = data->scissorsEnabled;
-        bounds.hitArea = data->hitAreaEnabled;
-        bounds.culling = data->boundsEnabled;
+        auto& bounds = entity.reassign<Bounds2D>();
+        bounds.rect = data->boundingRect;
+        if (data->scissorsEnabled) {
+            bounds.flags |= BOUNDS_2D_SCISSORS;
+        }
+        if (data->hitAreaEnabled) {
+            bounds.flags |= BOUNDS_2D_HIT_AREA;
+        }
+        if (data->boundsEnabled) {
+            bounds.flags |= BOUNDS_2D_CULL;
+        }
     }
 
     if (data->button) {

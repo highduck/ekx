@@ -59,7 +59,7 @@ public:
     SceneWindow scene{};
     ConsoleWindow console{};
     ResourcesWindow resources{};
-    Array<EditorWindow*> windows{};
+    PodArray<EditorWindow*> windows{};
 
     ImGuiIntegration gui_;
 

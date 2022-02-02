@@ -5,65 +5,20 @@
 #include <ek/assert.h>
 #include <ek/ds/String.hpp>
 #include <ek/scenex/text/TextFormat.hpp>
-#include <ek/util/Type.hpp>
-#include <ek/ds/Pointer.hpp>
 #include <ecxx/ecxx.hpp>
 #include "Sprite.hpp"
 
 namespace ek {
 
-class IDrawable2D {
-public:
-    IDrawable2D() = delete;
-
-    constexpr explicit IDrawable2D(int type_id) noexcept: typeID_{type_id} {
-    }
-
-    virtual ~IDrawable2D();
-
-    virtual void draw() = 0;
-
-    [[nodiscard]]
-    virtual bool hitTest(vec2_t point) const = 0;
-
-    [[nodiscard]]
-    virtual rect_t getBounds() const = 0;
-
-    [[nodiscard]]
-    uint32_t getTypeID() const {
-        return typeID_;
-    }
-
-    template<typename T>
-    [[nodiscard]] bool matchType() const {
-        return typeID_ == TypeIndex<T, IDrawable2D>::value;
-    }
-
-protected:
-
-    int typeID_;
-};
-
-template<typename T>
-class Drawable2D : public IDrawable2D {
-public:
-    Drawable2D() : IDrawable2D{TypeIndex<T, IDrawable2D>::value} {
-    }
-
-    ~Drawable2D() override = default;
+enum Bounds2DFlags {
+    BOUNDS_2D_HIT_AREA = 1,
+    BOUNDS_2D_SCISSORS = 2,
+    BOUNDS_2D_CULL = 4,
 };
 
 struct Bounds2D {
-//    enum Flags {
-//        HitArea,
-//        Scissors,
-//        Bounds
-//    };
-    rect_t rect;
-
-    bool hitArea = false;
-    bool scissors = false;
-    bool culling = false;
+    rect_t rect = rect_01();
+    uint32_t flags = 0;
 
     [[nodiscard]]
     rect_t getWorldRect(mat3x2_t worldMatrix) const;
@@ -73,90 +28,21 @@ struct Bounds2D {
 };
 
 struct Display2D {
-    Pointer<IDrawable2D> drawable;
-
     // state management
     R(ek_shader) program = 0;
 
     // 1 - draw debug bounds
-    int flags = 0;
+    uint32_t flags = 0;
 
-    Display2D() = default;
-
-    explicit Display2D(IDrawable2D* ptr) : drawable(ptr) {
-    }
-
-    template<typename T>
-    [[nodiscard]]
-    inline T& get() const {
-        if (!drawable) {
-            log_warn("Drawable2D required");
-        }
-        if (!drawable->matchType<T>()) {
-            log_warn("Drawable2D TypeID mismatch: required %d, got %d", TypeIndex<T, IDrawable2D>::value,
-                    drawable->getTypeID());
-        }
-        EK_ASSERT(!!drawable);
-        EK_ASSERT(drawable->matchType<T>());
-        return *(T*) drawable.get();
-    }
-
-    template<typename T>
-    [[nodiscard]]
-    inline T* tryGet() const {
-        if (drawable && drawable->matchType<T>()) {
-            return (T*) drawable.get();
-        }
-        return nullptr;
-    }
-
-    template<typename T>
-    [[nodiscard]]
-    inline bool is() const {
-        return drawable && drawable->matchType<T>();
-    }
-
-    [[nodiscard]]
-    inline bool hitTest(vec2_t local) const {
-        return drawable && drawable->hitTest(local);
-    }
-
-    [[nodiscard]]
-    inline rect_t getBounds() const {
-        return drawable ? drawable->getBounds() : rect_t{};
-    }
-
-    template<typename T, typename ...Args>
-    inline static T& make(ecs::EntityApi e, Args&& ...args) {
-        auto& d = e.get_or_create<Display2D>();
-        d.drawable = std::move(Pointer<T>::make(args...));
-        return static_cast<T&>(*d.drawable);
-    }
-
-    template<typename T>
-    static T& get(ecs::EntityApi e) {
-        auto* display = e.tryGet<Display2D>();
-        if (!display) {
-            log_warn("Display2D required");
-        }
-        return display->get<T>();
-    }
-
-    template<typename T>
-    static T* tryGet(ecs::EntityApi e) {
-        auto* display = e.tryGet<Display2D>();
-        return display ? display->tryGet<T>() : nullptr;
-    }
-
-    template<typename T>
-    T& makeDrawable() {
-        drawable = Pointer<T>::make();
-        return static_cast<T&>(*drawable);
-    }
+    void (* draw)(entity_t e) = nullptr;
+    // TODO: rename as post draw
+    void (* callback)(entity_t e) = nullptr;
+    bool (* hit_test)(entity_t e, vec2_t local_pos) = nullptr;
+    rect_t (* get_bounds)(entity_t e) = nullptr;
 };
 
 // 16 + 16 = 32 bytes
-class Quad2D : public Drawable2D<Quad2D> {
+class Quad2D {
 public:
     R(sprite_t) src = R_SPRITE_EMPTY;
     rect_t rect = rect_01();
@@ -166,14 +52,6 @@ public:
             COLOR_WHITE,
             COLOR_WHITE,
     };
-
-    void draw() override;
-
-    [[nodiscard]]
-    rect_t getBounds() const override;
-
-    [[nodiscard]]
-    bool hitTest(vec2_t point) const override;
 
     inline Quad2D& setGradientVertical(color_t top, color_t bottom) {
         colors[0] = colors[1] = top;
@@ -192,8 +70,29 @@ public:
     }
 };
 
+void quad2d_draw(entity_t e);
+rect_t quad2d_get_bounds(entity_t e);
+bool quad2d_hit_test(entity_t e, vec2_t lp);
+
+void sprite2d_draw(entity_t e);
+rect_t sprite2d_get_bounds(entity_t e);
+bool sprite2d_hit_test(entity_t e, vec2_t lp);
+
+void ninepatch2d_draw(entity_t e);
+rect_t ninepatch2d_get_bounds(entity_t e);
+bool ninepatch2d_hit_test(entity_t e, vec2_t lp);
+
+void text2d_draw(entity_t e);
+rect_t text2d_get_bounds(entity_t e);
+bool text2d_hit_test(entity_t e, vec2_t lp);
+
+void arc2d_draw(entity_t e);
+rect_t arc2d_get_bounds(entity_t e);
+bool arc2d_hit_test(entity_t e, vec2_t lp);
+
+
 // 8 + 1 = 9 bytes
-class Sprite2D : public Drawable2D<Sprite2D> {
+class Sprite2D {
 public:
     R(sprite_t) src = 0;
     bool hit_pixels = true;
@@ -201,18 +100,10 @@ public:
     Sprite2D();
 
     explicit Sprite2D(string_hash_t spriteId);
-
-    void draw() override;
-
-    [[nodiscard]]
-    rect_t getBounds() const override;
-
-    [[nodiscard]]
-    bool hitTest(vec2_t point) const override;
 };
 
 // 8 + 16 + 16 + 8 + 1 = 49 bytes
-class NinePatch2D : public Drawable2D<NinePatch2D> {
+class NinePatch2D {
 public:
     R(sprite_t) src = 0;
     rect_t scale_grid;
@@ -223,18 +114,10 @@ public:
     NinePatch2D();
 
     explicit NinePatch2D(string_hash_t spriteId, rect_t aScaleGrid = {});
-
-    void draw() override;
-
-    [[nodiscard]]
-    rect_t getBounds() const override;
-
-    [[nodiscard]]
-    bool hitTest(vec2_t point) const override;
 };
 
 // 8 + 136 + 16 + 8 + 4 = 172 bytes
-class Text2D : public Drawable2D<Text2D> {
+class Text2D {
 public:
     String text;
     TextFormat format;
@@ -258,20 +141,12 @@ public:
 
     Text2D(String text, TextFormat format);
 
-    void draw() override;
-
-    [[nodiscard]]
-    rect_t getBounds() const override;
-
     [[nodiscard]]
     rect_t getTextBounds() const;
-
-    [[nodiscard]]
-    bool hitTest(vec2_t point) const override;
 };
 
 // 4 + 4 + 4 + 4 + 4 + 4 + 8 = 32 bytes
-class Arc2D : public Drawable2D<Arc2D> {
+class Arc2D {
 public:
     float angle = 0.0f;
     float radius = 10.0f;
@@ -280,16 +155,7 @@ public:
     color_t color_inner = COLOR_WHITE;
     color_t color_outer = COLOR_WHITE;
     R(sprite_t) sprite = 0;
-
-    void draw() override;
-
-    [[nodiscard]]
-    rect_t getBounds() const override;
-
-    [[nodiscard]]
-    bool hitTest(vec2_t point) const override;
 };
-
 
 /** utilities **/
 void set_gradient_quad(ecs::EntityApi e, rect_t rc, color_t top, color_t bottom);
@@ -298,23 +164,20 @@ inline void set_color_quad(ecs::EntityApi e, rect_t rc, color_t color) {
     set_gradient_quad(e, rc, color, color);
 }
 
-template<typename T>
-inline T& getDrawable(ecs::EntityApi e) {
-    return e.get<Display2D>().get<T>();
-}
-
 inline void setText(ecs::EntityApi e, const String& v) {
-    auto* d = e.tryGet<Display2D>();
-    if (d) {
-        auto* txt = d->tryGet<Text2D>();
-        if (txt) {
-            txt->text = v;
-        }
+    auto* txt = e.tryGet<Text2D>();
+    if (txt) {
+        txt->text = v;
     }
 }
 
-EK_DECLARE_TYPE(IDrawable2D);
+Quad2D* quad2d_setup(entity_t e);
+Sprite2D* sprite2d_setup(entity_t e);
+NinePatch2D* ninepatch2d_setup(entity_t e);
+Text2D* text2d_setup(entity_t e);
+Text2D* text2d_setup_ex(entity_t e, const String& text, TextFormat format);
+Arc2D* arc2d_setup(entity_t e);
 
 }
 
-
+ECX_COMP_TYPE_CXX(ek::Text2D)

@@ -89,12 +89,12 @@ struct QuadTreeNode {
 class QuadTree {
 public:
     // pools part
-    Array <QuadTreeNode> nodes;
+    PodArray <QuadTreeNode> nodes;
     int nextFreeNode = 0;
 
-    Array<int> objectNext;
-    Array <ecs::EntityIndex> objectEntity;
-    Array <irect_t> objectsBoundsArray;
+    PodArray<int> objectNext;
+    PodArray <entity_t> objectEntity;
+    PodArray <irect_t> objectsBoundsArray;
     int nextFreeObject = -1;
 
     int allocNode() {
@@ -156,7 +156,7 @@ public:
         search(0, rect_to_recti(area), outNodesList, bounds);
     }
 
-    int insert(ecs::EntityIndex entity, const rect_t objectBounds) {
+    int insert(entity_t entity, const rect_t objectBounds) {
         int objectId = allocObject();
         objectNext[objectId] = -1;
         objectEntity[objectId] = entity;
@@ -170,7 +170,7 @@ public:
 
     // optimize full clearing
     void reset() {
-        nodes.reduceSize(1);
+        nodes.resize(1);
         nodes[0] = {};
         objectNext.clear();
         objectsBoundsArray.clear();
@@ -189,7 +189,7 @@ public:
         }
     }
 
-    void queryEntities(const Hash<int>& nodeIds, Array <ecs::EntityIndex>& outEntityList) {
+    void queryEntities(const Hash<int>& nodeIds, Array <entity_t>& outEntityList) {
         for (auto hashEntry: nodeIds._data) {
             auto& node = nodes[hashEntry.key];
             // add all entities

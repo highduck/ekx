@@ -10,9 +10,9 @@ class RenderSystem2D {
 public:
     static int currentLayerMask;
 
-    static void draw(const ecs::World& w, ecs::EntityIndex e, const WorldTransform2D* transform);
+    static void draw(entity_t e, const WorldTransform2D* transform);
 
-    static void drawStack(const ecs::World& w, ecs::EntityIndex e);
+    static void drawStack(entity_t e);
 };
 
 }

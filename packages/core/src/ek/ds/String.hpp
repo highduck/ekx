@@ -8,6 +8,7 @@
 #include <ek/string.h>
 #include <ek/print.h>
 #include <ek/assert.h>
+#include <ek/core_dbg.h>
 
 namespace ek {
 
@@ -15,12 +16,14 @@ namespace ek {
 // TODO; `resize` should not change capacity and just set \0 in case of smaller size
 class String final {
 public:
-    // DynamicBuffer is just handle, not RAII object
-    char* _buffer = nullptr;
+    char* _buffer;
 
-    constexpr String() noexcept = default;
+    String() noexcept: _buffer{nullptr} {
+        ek_core_dbg_inc(EK_CORE_DBG_STRING);
+    }
 
     String(const char* cstr) noexcept: _buffer{nullptr} {
+        ek_core_dbg_inc(EK_CORE_DBG_STRING);
         if (cstr && *cstr != '\0') {
             const auto sz = strlen(cstr) + 1;
             ek_buf_set_size((void**) &_buffer, 1, sz, sz);
@@ -29,6 +32,7 @@ public:
     }
 
     String(const char* data, uint32_t size) noexcept: _buffer{nullptr} {
+        ek_core_dbg_inc(EK_CORE_DBG_STRING);
         if (data && *data != '\0') {
             const auto sz = size + 1;
             ek_buf_set_size((void**) &_buffer, 1, sz, sz);
@@ -37,52 +41,41 @@ public:
         }
     }
 
-    String(const String& other) noexcept: _buffer{nullptr} {
-        _copyFrom(other._buffer, ek_buf_length(other._buffer));
+    String(const String& m) noexcept: _buffer{nullptr} {
+        ek_core_dbg_inc(EK_CORE_DBG_STRING);
+        arr_init_from((void**) &_buffer, 1, m._buffer, ek_buf_length(m._buffer));
     }
 
-    void _copyFrom(const char* data, uint32_t sz) {
-        if (ek_buf_capacity(_buffer) < sz) {
-            ek_buf_set_capacity((void**) &_buffer, sz, 1);
-        }
-        if (_buffer) {
-            ek_buf_header(_buffer)->length = sz;
-            memcpy(_buffer, data, sz);
-        }
+    String(String&& m) noexcept: _buffer{m._buffer} {
+        ek_core_dbg_inc(EK_CORE_DBG_STRING);
+        m._buffer = nullptr;
     }
 
     void assign(const char* str, uint32_t size) {
-        EK_ASSERT(_buffer != str);
-        _copyFrom(str, size + 1);
+        arr_init_from((void**) &_buffer, 1, str, size + 1);
     }
 
     String& operator=(const char* str) {
-        EK_ASSERT(_buffer != str);
-        _copyFrom(str, strlen(str) + 1);
+        arr_init_from((void**) &_buffer, 1, str, strlen(str) + 1);
         return *this;
     }
 
     String& operator=(const String& obj) {
         if (this != &obj) {
-            _copyFrom(obj._buffer, ek_buf_length(obj._buffer));
+            arr_assign((void**) &_buffer, 1, obj._buffer);
         }
         return *this;
     }
 
-    constexpr String(String&& other) noexcept {
-        _buffer = other._buffer;
-        other._buffer = nullptr;
-    }
-
-    String& operator=(String&& other) noexcept {
+    String& operator=(String&& m) noexcept {
         ek_buf_reset((void**) &_buffer);
-
-        _buffer = other._buffer;
-        other._buffer = nullptr;
+        _buffer = m._buffer;
+        m._buffer = nullptr;
         return *this;
     }
 
     ~String() noexcept {
+        ek_core_dbg_dec(EK_CORE_DBG_STRING);
         ek_buf_reset((void**) &_buffer);
     }
 
@@ -169,6 +162,7 @@ public:
         return _buffer ? hash_fnv64(_buffer, HASH_FNV64_INIT) : 0;
     }
 
+    [[nodiscard]]
     constexpr uint32_t hash32() const noexcept {
         //return _buffer ? hash_murmur2_64(_buffer, ek_buf_length(_buffer), HASH_MURMUR2_64_DEFAULT_SEED) : 0;
         return _buffer ? hash_fnv32(_buffer, HASH_FNV32_INIT) : 0;
@@ -247,10 +241,6 @@ public:
 };
 
 }
-//
-//bool operator==(const ek::String& lhs, const ek::String& rhs) {
-//    return lhs == rhs;
-//}
 
 template<>
 struct std::hash<ek::String> {

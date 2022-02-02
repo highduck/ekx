@@ -7,8 +7,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 
         base/Node.hpp
         base/Node.cpp
-        base/Script.hpp
-        base/Script.cpp
         base/Interactive.hpp
         base/Interactive.cpp
         base/NodeEvents.hpp

@@ -63,6 +63,8 @@ public:
 
     virtual void initialize();
 
+    virtual void terminate();
+
     virtual void preload();
 
     void onFrame();

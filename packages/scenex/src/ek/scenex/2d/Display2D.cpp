@@ -8,10 +8,9 @@
 
 namespace ek {
 
-IDrawable2D::~IDrawable2D() = default;
-
-void Quad2D::draw() {
-    const sprite_t* spr = &REF_RESOLVE(res_sprite, src);
+void quad2d_draw(entity_t e) {
+    auto& d = ecs::EntityApi{e}.get<Quad2D>();
+    const sprite_t* spr = &REF_RESOLVE(res_sprite, d.src);
     if (spr->state & SPRITE_LOADED) {
         const sg_image image = REF_RESOLVE(res_image, spr->image_id);
         if (image.id) {
@@ -20,15 +19,17 @@ void Quad2D::draw() {
     } else {
         canvas_set_empty_image();
     }
-    canvas_quad_color4(rect.x, rect.y, rect.w, rect.h, colors[0], colors[1], colors[2], colors[3]);
+    auto rc = d.rect;
+    auto colors = d.colors;
+    canvas_quad_color4(rc.x, rc.y, rc.w, rc.h, colors[0], colors[1], colors[2], colors[3]);
 }
 
-rect_t Quad2D::getBounds() const {
-    return rect;
+rect_t quad2d_get_bounds(entity_t e) {
+    return ecs::EntityApi{e}.get<Quad2D>().rect;
 }
 
-bool Quad2D::hitTest(vec2_t point) const {
-    return rect_contains(rect, point);
+bool quad2d_hit_test(entity_t e, vec2_t lp) {
+    return rect_contains(ecs::EntityApi{e}.get<Quad2D>().rect, lp);
 }
 
 /** Sprite2D **/
@@ -38,7 +39,8 @@ Sprite2D::Sprite2D(string_hash_t spriteId) :
         src{R_SPRITE(spriteId)} {
 }
 
-void Sprite2D::draw() {
+void sprite2d_draw(entity_t e) {
+    auto src = ecs::EntityApi{e}.get<Sprite2D>().src;
     if (!src) {
         return;
     }
@@ -46,7 +48,8 @@ void Sprite2D::draw() {
     ::ek::draw(sprite);
 }
 
-rect_t Sprite2D::getBounds() const {
+rect_t sprite2d_get_bounds(entity_t e) {
+    auto src = ecs::EntityApi{e}.get<Sprite2D>().src;
     if (src) {
         const sprite_t* sprite = &REF_RESOLVE(res_sprite, src);
         return sprite->rect;
@@ -54,10 +57,11 @@ rect_t Sprite2D::getBounds() const {
     return (rect_t) {};
 }
 
-bool Sprite2D::hitTest(vec2_t point) const {
-    if (rect_contains(getBounds(), point)) {
-        if (hit_pixels && src) {
-            const sprite_t* sprite = &REF_RESOLVE(res_sprite, src);
+bool sprite2d_hit_test(entity_t e, vec2_t point) {
+    if (rect_contains(sprite2d_get_bounds(e), point)) {
+        auto& d = ecs::EntityApi{e}.get<Sprite2D>();
+        if (d.hit_pixels && d.src) {
+            const sprite_t* sprite = &REF_RESOLVE(res_sprite, d.src);
             return ::ek::hit_test(sprite, point);
         }
         return true;
@@ -74,33 +78,36 @@ NinePatch2D::NinePatch2D(string_hash_t spriteId, rect_t aScaleGrid) :
         scale_grid{aScaleGrid} {
 }
 
-void NinePatch2D::draw() {
-    if (!src) {
+void ninepatch2d_draw(entity_t e) {
+    const auto& d = ecs::EntityApi{e}.get<NinePatch2D>();
+    if (!d.src) {
         return;
     }
-    auto* spr = &REF_RESOLVE(res_sprite, src);
+    auto* spr = &REF_RESOLVE(res_sprite, d.src);
     canvas_save_matrix();
-    canvas_scale(1.0f / scale);
+    canvas_scale(1.0f / d.scale);
     // TODO: rotated
-    rect_t target = manual_target;
+    rect_t target = d.manual_target;
     if (rect_is_empty(target)) {
-        target = rect_scale(rect_expand(spr->rect, -1), scale);
+        target = rect_scale(rect_expand(spr->rect, -1), d.scale);
     }
-    ek::draw_grid(spr, scale_grid, target);
+    ek::draw_grid(spr, d.scale_grid, target);
     canvas_restore_matrix();
 }
 
-rect_t NinePatch2D::getBounds() const {
+rect_t ninepatch2d_get_bounds(entity_t e) {
+    auto src = ecs::EntityApi{e}.get<NinePatch2D>().src;
     if (src) {
         return REF_RESOLVE(res_sprite, src).rect;
     }
     return (rect_t) {};
 }
 
-bool NinePatch2D::hitTest(vec2_t point) const {
-    if (rect_contains(getBounds(), point)) {
-        if (hit_pixels && src) {
-            return hit_test(&REF_RESOLVE(res_sprite, src), point);
+bool ninepatch2d_hit_test(entity_t e, vec2_t point) {
+    if (rect_contains(ninepatch2d_get_bounds(e), point)) {
+        const auto& d = ecs::EntityApi{e}.get<NinePatch2D>();
+        if (d.hit_pixels && d.src) {
+            return hit_test(&REF_RESOLVE(res_sprite, d.src), point);
         }
         return true;
     }
@@ -109,14 +116,12 @@ bool NinePatch2D::hitTest(vec2_t point) const {
 
 /** Text2D **/
 
-Text2D::Text2D() : Drawable2D<Text2D>(),
-                   text{},
+Text2D::Text2D() : text{},
                    format{H("mini"), 16.0f} {
 
 }
 
-Text2D::Text2D(String text, TextFormat format) : Drawable2D<Text2D>(),
-                                                 text{std::move(text)},
+Text2D::Text2D(String text, TextFormat format) : text{std::move(text)},
                                                  format{format} {
 }
 
@@ -157,37 +162,38 @@ void adjustFontSize(TextEngine& engine, const char* text, rect_t bounds) {
     engine.format.allowLetterWrap = true;
 }
 
-void Text2D::draw() {
+void text2d_draw(entity_t e) {
+    auto& d = ecs::EntityApi{e}.get<Text2D>();
     auto& textDrawer = get_text_engine()->engine;
     auto& blockInfo = get_text_engine()->textBlockInfo;
-    textDrawer.format = format;
-    textDrawer.maxWidth = format.wordWrap ? rect.w : 0.0f;
-    if (fillColor.a > 0) {
+    textDrawer.format = d.format;
+    textDrawer.maxWidth = d.format.wordWrap ? d.rect.w : 0.0f;
+    if (d.fillColor.a > 0) {
         canvas_set_empty_image();
-        canvas_fill_rect(rect, fillColor);
+        canvas_fill_rect(d.rect, d.fillColor);
     }
-    if (borderColor.a > 0) {
+    if (d.borderColor.a > 0) {
         canvas_set_empty_image();
-        canvas_stroke_rect(rect_expand(rect, 1.0f), borderColor, 1);
+        canvas_stroke_rect(rect_expand(d.rect, 1.0f), d.borderColor, 1);
     }
 
-    const char* str = localized ? localize(text.c_str()) : text.c_str();
+    const char* str = d.localized ? localize(d.text.c_str()) : d.text.c_str();
     if (str == nullptr || *str == '\0') {
         return;
     }
 
-    if (adjustsFontSizeToFitBounds) {
-        adjustFontSize(textDrawer, str, rect);
+    if (d.adjustsFontSizeToFitBounds) {
+        adjustFontSize(textDrawer, str, d.rect);
     }
 
     textDrawer.getTextSize(str, blockInfo);
 
-    const vec2_t position = rect.position + (rect.size - blockInfo.size) * format.alignment;
+    const vec2_t position = d.rect.position + (d.rect.size - blockInfo.size) * d.format.alignment;
     textDrawer.position.x = position.x;
     textDrawer.position.y = position.y + blockInfo.lines[0].ascender;
     textDrawer.drawWithBlockInfo(str, blockInfo);
 
-    if (showTextBounds) {
+    if (d.showTextBounds) {
         rect_t bounds;
         bounds.position = position;
         bounds.size = blockInfo.size;
@@ -195,11 +201,12 @@ void Text2D::draw() {
     }
 }
 
-rect_t Text2D::getBounds() const {
-    if (hitFullBounds) {
-        return rect;
+rect_t text2d_get_bounds(entity_t e) {
+    auto& d = ecs::EntityApi{e}.get<Text2D>();
+    if (d.hitFullBounds) {
+        return d.rect;
     }
-    return getTextBounds();
+    return d.getTextBounds();
 }
 
 rect_t Text2D::getTextBounds() const {
@@ -222,8 +229,8 @@ rect_t Text2D::getTextBounds() const {
     return textBounds;
 }
 
-bool Text2D::hitTest(vec2_t point) const {
-    return rect_contains(getBounds(), point);
+bool text2d_hit_test(entity_t e, vec2_t point) {
+    return rect_contains(text2d_get_bounds(e), point);
 }
 
 rect_t Bounds2D::getWorldRect(mat3x2_t world_matrix) const {
@@ -239,12 +246,13 @@ rect_t Bounds2D::getScreenRect(mat3x2_t viewMatrix, mat3x2_t worldMatrix) const 
 
 //// arc
 
-void Arc2D::draw() {
-    if (!sprite) {
+void arc2d_draw(entity_t e) {
+    auto* d = ecs::C<Arc2D>::get_by_entity(e);
+    if (!d->sprite) {
         return;
     }
 
-    const sprite_t* spr = &REF_RESOLVE(res_sprite, sprite);
+    const sprite_t* spr = &REF_RESOLVE(res_sprite, d->sprite);
     const sg_image image = REF_RESOLVE(res_image, spr->image_id);
     if (!image.id) {
         return;
@@ -255,28 +263,97 @@ void Arc2D::draw() {
     canvas_set_image_rect({RECT_CENTER_X(tex), tex.y, 0.0f, tex.h});
 
     float off = -0.5f * MATH_PI;
-    canvas_line_arc(0, 0, radius, 0 + off, angle + off, line_width, segments, color_inner, color_outer);
+    canvas_line_arc(0, 0, d->radius,
+                    0 + off, d->angle + off,
+                    d->line_width, d->segments,
+                    d->color_inner, d->color_outer);
 }
 
-rect_t Arc2D::getBounds() const {
-    float s = radius + line_width;
+rect_t arc2d_get_bounds(entity_t e) {
+    auto* d = ecs::C<Arc2D>::get_by_entity(e);
+    float s = d->radius + d->line_width;
     return {-s, -s, 2.0f * s, 2.0f * s};
 }
 
-bool Arc2D::hitTest(vec2_t point) const {
+bool arc2d_hit_test(entity_t e, vec2_t point) {
+    auto* d = ecs::C<Arc2D>::get_by_entity(e);
     const float len = length_vec2(point);
-    return len >= radius && len <= (radius + line_width);
+    const float r = d->radius;
+    const float dr = d->line_width;
+    return len >= r && len <= (r + dr);
 }
 
 /** utilities **/
 void set_gradient_quad(ecs::EntityApi e, rect_t rc, color_t top, color_t bottom) {
-    auto q = Pointer<Quad2D>::make();
-    q->rect = rc;
-    q->colors[0] = top;
-    q->colors[1] = top;
-    q->colors[2] = bottom;
-    q->colors[3] = bottom;
+    auto& q = e.get_or_create<Quad2D>();
+    q.rect = rc;
+    q.colors[0] = top;
+    q.colors[1] = top;
+    q.colors[2] = bottom;
+    q.colors[3] = bottom;
 
-    e.get_or_create<Display2D>().drawable = std::move(q);
+    auto& display = e.get_or_create<Display2D>();
+    display.draw = quad2d_draw;
+    display.hit_test = quad2d_hit_test;
+    display.get_bounds = quad2d_get_bounds;
 }
+
+
+Quad2D* quad2d_setup(entity_t e) {
+    auto entity = ecs::EntityApi{e};
+    Display2D& display = entity.get_or_create<Display2D>();
+    Quad2D& drawable = entity.get_or_create<Quad2D>();
+    display.draw = quad2d_draw;
+    display.hit_test = quad2d_hit_test;
+    display.get_bounds = quad2d_get_bounds;
+    return &drawable;
+}
+
+Sprite2D* sprite2d_setup(entity_t e) {
+    auto entity = ecs::EntityApi{e};
+    Display2D& display = entity.get_or_create<Display2D>();
+    Sprite2D& drawable = entity.get_or_create<Sprite2D>();
+    display.draw = sprite2d_draw;
+    display.hit_test = sprite2d_hit_test;
+    display.get_bounds = sprite2d_get_bounds;
+    return &drawable;
+}
+
+NinePatch2D* ninepatch2d_setup(entity_t e) {
+    auto entity = ecs::EntityApi{e};
+    Display2D& display = entity.get_or_create<Display2D>();
+    NinePatch2D& drawable = entity.get_or_create<NinePatch2D>();
+    display.draw = ninepatch2d_draw;
+    display.hit_test = ninepatch2d_hit_test;
+    display.get_bounds = ninepatch2d_get_bounds;
+    return &drawable;
+}
+
+Text2D* text2d_setup(entity_t e) {
+    auto entity = ecs::EntityApi{e};
+    Display2D& display = entity.get_or_create<Display2D>();
+    Text2D& drawable = entity.get_or_create<Text2D>();
+    display.draw = text2d_draw;
+    display.hit_test = text2d_hit_test;
+    display.get_bounds = text2d_get_bounds;
+    return &drawable;
+}
+
+Text2D* text2d_setup_ex(entity_t e, const String& text, TextFormat format) {
+    Text2D* d = text2d_setup(e);
+    d->text = text;
+    d->format = format;
+    return d;
+}
+
+Arc2D* arc2d_setup(entity_t e) {
+    auto entity = ecs::EntityApi{e};
+    Display2D& display = entity.get_or_create<Display2D>();
+    Arc2D& drawable = entity.get_or_create<Arc2D>();
+    display.draw = arc2d_draw;
+    display.hit_test = arc2d_hit_test;
+    display.get_bounds = arc2d_get_bounds;
+    return &drawable;
+}
+
 }

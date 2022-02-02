@@ -40,7 +40,7 @@ Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl* decl) {
 }
 
 void particles_burst(ecs::EntityApi e, int count, vec2_t relativeVelocity) {
-    if(count < 0) {
+    if (count < 0) {
         return;
     }
     const auto& emitter = e.get<ParticleEmitter2D>();
@@ -70,7 +70,7 @@ void particles_burst(ecs::EntityApi e, int count, vec2_t relativeVelocity) {
 }
 
 void update_emitters() {
-    for (auto e : ecs::view<ParticleEmitter2D>()) {
+    for (auto e: ecs::view<ParticleEmitter2D>()) {
         auto& emitter = e.get<ParticleEmitter2D>();
         if (!emitter.enabled || !emitter.particle || !emitter.layer.invalidate()) {
             continue;
@@ -145,28 +145,40 @@ void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const Particle
 }
 
 void update_particles() {
-    for (auto e : ecs::view<ParticleLayer2D>()) {
+    for (auto e: ecs::view<ParticleLayer2D>()) {
         auto& layer = e.get<ParticleLayer2D>();
         auto dt = g_time_layers[layer.timer].dt;
         auto& particles = layer.particles;
         uint32_t i = 0;
-        while(i < particles.size()) {
+        while (i < particles.size()) {
             auto& p = particles[i];
             p.update(dt);
             if (p.is_alive()) {
                 ++i;
             } else {
-                particles.swapRemove(i);
+                particles.swap_remove(i);
             }
         }
     }
+}
+
+ParticleRenderer2D* particle_renderer2d_setup(entity_t e) {
+    Display2D& disp = ecs::EntityApi{e}.get_or_create<Display2D>();
+    ParticleRenderer2D& pr = ecs::EntityApi{e}.get_or_create<ParticleRenderer2D>();
+    pr.target = ecs::EntityRef{e};
+    disp.draw = particle_renderer2d_draw;
+    return &pr;
+}
+
+void particle_renderer2d_draw(entity_t e) {
+    ecs::EntityApi{e}.get<ParticleRenderer2D>().draw();
 }
 
 void ParticleRenderer2D::draw() {
     if (target) {
         auto* layer = target.get().tryGet<ParticleLayer2D>();
         if (layer) {
-            for (auto& p : layer->particles) {
+            for (auto& p: layer->particles) {
                 p.draw();
             }
         }

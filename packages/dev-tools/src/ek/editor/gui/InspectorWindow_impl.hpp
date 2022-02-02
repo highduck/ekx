@@ -5,7 +5,6 @@
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/base/Interactive.hpp>
-#include <ek/scenex/base/Script.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/3d/Transform3D.hpp>
 #include <ek/scenex/3d/Camera3D.hpp>
@@ -64,21 +63,6 @@ inline void guiComponentPanel(ecs::EntityApi entity, const char* name, Func fn) 
     if (entity.has<C>()) {
         auto& data = entity.get<C>();
         guiComponentPanel(name, data, fn);
-    }
-}
-
-template<typename C, typename Func>
-inline void guiDisplayComponent(ecs::EntityApi e, const char* name, Func fn) {
-    if (e.has<Display2D>()) {
-        auto& d = e.get<Display2D>();
-        if (d.is<C>()) {
-            auto data = d.tryGet<C>();
-            if (data) {
-                ImGui::Separator();
-                ImGui::CheckboxFlags("Debug Bounds", &d.flags, 1);
-                guiComponentPanel(name, *data, fn);
-            }
-        }
     }
 }
 
@@ -161,7 +145,6 @@ inline void guiCamera2D(Camera2D& camera) {
 
     ImGui::Checkbox("Draw Pointer", &camera.debugGizmoPointer);
     ImGui::Checkbox("Draw Camera Gizmo", &camera.debugGizmoSelf);
-    ImGui::Checkbox("Draw Script Gizmo", &camera.debugDrawScriptGizmo);
     ImGui::DragFloat("Debug Scale", &camera.debugDrawScale);
 }
 
@@ -213,9 +196,9 @@ inline void guiLight3D(Light3D& light) {
 
 inline void guiBounds2D(Bounds2D& bounds) {
     ImGui::EditRect("Rect", bounds.rect.data);
-    ImGui::Checkbox("Hit Area", &bounds.hitArea);
-    ImGui::Checkbox("Scissors", &bounds.scissors);
-    ImGui::Checkbox("Culling (WIP)", &bounds.culling);
+    ImGui::CheckboxFlags("Hit Area", &bounds.flags, BOUNDS_2D_HIT_AREA);
+    ImGui::CheckboxFlags("Scissors", &bounds.flags, BOUNDS_2D_SCISSORS);
+    ImGui::CheckboxFlags("Cull Box", &bounds.flags, BOUNDS_2D_CULL);
 }
 
 inline void guiInteractive(Interactive& inter) {
@@ -346,7 +329,7 @@ inline void guiParticleLayer2D(ParticleLayer2D& layer) {
 void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
     ImGui::PushID(reinterpret_cast<const void*>(entity.passport));
     ecs::EntityApi e = entity.ent();
-    ImGui::LabelText("Passport", "ID: %d, Version: %d", e.index, ecs::the_world.generation(e.index));
+    ImGui::LabelText("Passport", "idx: # %d, gen: @ %d", e.index, ecx.generations[e.index]);
     if (e.has<Node>()) {
         auto& node = e.get<Node>();
         int flags = node.flags;
@@ -363,7 +346,7 @@ void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
     guiComponentPanel<Camera2D>(e, "Camera2D", guiCamera2D);
     guiComponentPanel<Bounds2D>(e, "Bounds2D", guiBounds2D);
 
-    if (ecs::the_world.hasComponent<Transform3D>()) {
+    if (ecx.hasComponent<Transform3D>()) {
         guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
         guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
         guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);
@@ -378,21 +361,14 @@ void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
     guiComponentPanel<ParticleLayer2D>(e, "ParticleLayer2D", guiParticleLayer2D);
 
     // display2d
-    guiDisplayComponent<Sprite2D>(e, "Sprite2D", editDisplaySprite);
-    guiDisplayComponent<NinePatch2D>(e, "NinePatch2D", editDisplayNinePatch);
-    guiDisplayComponent<Quad2D>(e, "Quad2D", editDisplayRectangle);
-    guiDisplayComponent<Text2D>(e, "Text2D", editDisplayText);
-    guiDisplayComponent<Arc2D>(e, "Arc2D", editDisplayArc);
-    guiDisplayComponent<ParticleRenderer2D>(e, "ParticleRenderer2D", editParticleRenderer2D);
+    guiComponentPanel<Sprite2D>(e, "Sprite2D", editDisplaySprite);
+    guiComponentPanel<NinePatch2D>(e, "NinePatch2D", editDisplayNinePatch);
+    guiComponentPanel<Quad2D>(e, "Quad2D", editDisplayRectangle);
+    guiComponentPanel<Text2D>(e, "Text2D", editDisplayText);
+    guiComponentPanel<Arc2D>(e, "Arc2D", editDisplayArc);
+    guiComponentPanel<ParticleRenderer2D>(e, "ParticleRenderer2D", editParticleRenderer2D);
 
     guiComponentPanel<MovieClip>(e, "Movie Clip", guiMovieClip);
-
-    if (e.has<ScriptHolder>()) {
-        auto& scripts = e.get<ScriptHolder>().list;
-        for (auto& script: scripts) {
-            script->gui_inspector();
-        }
-    }
 
     ImGui::PopID();
 }

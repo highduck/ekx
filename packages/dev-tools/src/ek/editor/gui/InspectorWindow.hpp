@@ -6,7 +6,7 @@ namespace ek {
 
 class InspectorWindow : public EditorWindow {
 public:
-    Array<ecs::EntityRef> list{};
+    PodArray<ecs::EntityRef> list{};
 
     InspectorWindow() {
         name = "InspectorWindow";

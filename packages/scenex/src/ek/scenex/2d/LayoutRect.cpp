@@ -26,7 +26,7 @@ void update_layout(ecs::EntityApi e) {
     auto& transform = e.get<Transform2D>();
     if ((l.fill_x || l.fill_y) && e.has<Display2D>()) {
         auto& display = e.get<Display2D>();
-        auto* quad = display.tryGet<Quad2D>();
+        auto* quad = e.tryGet<Quad2D>();
         if (quad) {
             if (l.fill_x) {
                 quad->rect.x = top_rect.x;
@@ -36,9 +36,8 @@ void update_layout(ecs::EntityApi e) {
                 quad->rect.y = top_rect.y;
                 quad->rect.h = top_rect.h;
             }
-        } else if (display.is<Sprite2D>()) {
-            auto& sprite = display.get<Sprite2D>();
-            auto bounds = sprite.getBounds();
+        } else if (e.has<Sprite2D>()) {
+            auto bounds = sprite2d_get_bounds(e.index);
             if (!rect_is_empty(bounds) && (l.fill_x || l.fill_y)) {
                 auto pos = transform.getPosition();
                 auto scale = transform.getScale();

@@ -11,6 +11,7 @@
 #include <ek/game_services.h>
 #include <ekx/app/localization.h>
 #include "Ads.hpp"
+#include "ek/scenex/base/NodeEvents.hpp"
 
 namespace ek {
 
@@ -53,7 +54,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
         // VERSION
         auto e_version = find(e, H("version"));
         if (e_version) {
-            auto* txt = Display2D::tryGet<Text2D>(e_version);
+            auto* txt = e_version.tryGet<Text2D>();
             if (txt) {
                 txt->text = config.version;
             }
@@ -65,15 +66,16 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
         if (e_pp) {
             auto lbl = find(e_pp, H("label"));
             if (lbl) {
-                auto* txt = Display2D::tryGet<Text2D>(lbl);
+                auto* txt = lbl.tryGet<Text2D>();
                 if (txt) {
                     txt->hitFullBounds = true;
                 }
             }
             e_pp.get_or_create<Interactive>();
-            e_pp.get_or_create<Button>().clicked += [this] {
-                ek_app_open_url(config.privacyPolicyURL.c_str());
-            };
+            e_pp.get_or_create<Button>();
+            e_pp.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& ) {
+                ek_app_open_url(g_app_box->config.privacyPolicyURL.c_str());
+            });
         }
     }
 
@@ -89,18 +91,18 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
                         btn.get<Node>().setVisible(false);
                     }
                 };
-                btn.get<Button>().clicked += [] {
+                btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& ) {
                     g_ads->purchaseRemoveAds();
-                };
+                });
             }
         }
     }
     {
         auto btn = find(e, H("restore_purchases"));
         if (btn) {
-            btn.get<Button>().clicked += [] {
+            btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& ) {
                 billing::getPurchases();
-            };
+            });
         }
     }
 
@@ -109,30 +111,30 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
         {
             auto btn = find(e, H("sound"));
             if (btn) {
-                btn.get<Button>().clicked += [btn] {
-                    set_state_on_off(btn, audio_toggle_pref(AUDIO_PREF_SOUND));
-                };
+                btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& event) {
+                    set_state_on_off(ecs::EntityApi{event.source}, audio_toggle_pref(AUDIO_PREF_SOUND));
+                });
                 set_state_on_off(btn, g_audio.prefs & AUDIO_PREF_SOUND);
             }
         }
         {
             auto btn = find(e, H("music"));
             if (btn) {
-                btn.get<Button>().clicked += [btn] {
-                    set_state_on_off(btn, audio_toggle_pref(AUDIO_PREF_MUSIC));
-                };
+                btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& event) {
+                    set_state_on_off(ecs::EntityApi{event.source}, audio_toggle_pref(AUDIO_PREF_MUSIC));
+                });
                 set_state_on_off(btn, g_audio.prefs & AUDIO_PREF_MUSIC);
             }
         }
         {
             auto btn = find(e, H("vibro"));
             if (btn) {
-                btn.get<Button>().clicked += [btn] {
-                    set_state_on_off(btn, audio_toggle_pref(AUDIO_PREF_VIBRO));
+                btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& event) {
+                    set_state_on_off(ecs::EntityApi{event.source}, audio_toggle_pref(AUDIO_PREF_VIBRO));
                     if (g_audio.prefs & AUDIO_PREF_VIBRO) {
                         vibrate(50);
                     }
-                };
+                });
                 set_state_on_off(btn, g_audio.prefs & AUDIO_PREF_VIBRO);
             }
         }
@@ -170,7 +172,8 @@ void AppBox::rateUs() const {
 void wrap_button(ecs::EntityApi e, string_hash_t tag, const char* link) {
     auto x = find(e, tag);
     if (link && *link) {
-        x.get_or_create<Button>().clicked.add([link] {
+        x.get_or_create<Button>();
+        x.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [link](const NodeEventData& ) {
             ek_app_open_url(link);
         });
     } else {
@@ -192,7 +195,7 @@ void AppBox::initDownloadAppButtons(ecs::EntityApi) {
 void AppBox::initLanguageButton(ecs::EntityApi e) {
     auto btn = find(e, H("language"));
     if (btn) {
-        btn.get<Button>().clicked += [] {
+        btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& ) {
             uint32_t index = s_localization.lang_index;
             uint32_t num = s_localization.lang_num;
             // check if langs are available
@@ -201,25 +204,12 @@ void AppBox::initLanguageButton(ecs::EntityApi e) {
                 const char* lang_name = s_localization.languages[s_localization.lang_index].name.str;
                 ek_ls_set_s("selected_lang", lang_name);
             }
-        };
+        });
     }
 }
 
 void AppBox::showAchievements() {
     ek_achievement_show();
-}
-
-Leaderboard::Leaderboard(const char* id) :
-        id_{id} {
-
-}
-
-void Leaderboard::show() const {
-    ek_leaderboard_show(id_.c_str());
-}
-
-void Leaderboard::submit(int score) const {
-    ek_leaderboard_submit(id_.c_str(), score);
 }
 
 Achievement::Achievement(const char* code, int count) :
@@ -228,7 +218,7 @@ Achievement::Achievement(const char* code, int count) :
 }
 
 void Achievement::run() const {
-    ek_achievement_update(code_.c_str(), count_);
+    ek_achievement_update(code_, count_);
 }
 
 }

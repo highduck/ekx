@@ -34,7 +34,6 @@ struct Camera2D {
     bool debugGizmoHitTarget = false;
     bool debugGizmoPointer = false;
     bool debugGizmoSelf = false;
-    bool debugDrawScriptGizmo = false;
     float debugDrawScale = 1;
 
     mat3x2_t screenToWorldMatrix = mat3x2_identity();
@@ -45,8 +44,6 @@ struct Camera2D {
     static ecs::EntityApi Main;
 public:
     Camera2D() = default;
-
-    explicit Camera2D(ecs::EntityApi root);
 
     [[nodiscard]] mat3x2_t getMatrix(ecs::EntityApi view, float scale, vec2_t screenOffset, vec2_t screenSize) const;
 

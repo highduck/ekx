@@ -7,11 +7,15 @@
 #include <ek/scenex/2d/Camera2D.hpp>
 #include <ek/scenex/2d/RenderSystem2D.hpp>
 #include <ek/scenex/base/Node.hpp>
+#include <ek/scenex/base/Interactive.hpp>
+
+// prev - 0
+// curr - 1
+entity_t* getTargets(uint32_t off) {
+    return g_interaction_system.targetLists[(g_interaction_system.targetListIndex + off) & 1];
+}
 
 namespace ek {
-
-InteractionSystem::InteractionSystem() {
-}
 
 bool dispatch_interactive_event(ecs::EntityApi e, const NodeEventData& data) {
     if (isTouchable(e)) {
@@ -34,45 +38,36 @@ bool dispatch_interactive_event(ecs::EntityApi e, const NodeEventData& data) {
     return false;
 }
 
-void InteractionSystem::process() {
-    auto& prevTargets = getPrevTargets();
-    auto& currTargets = getCurrentTargets();
-
-    currTargets.clear();
-
-    //pointer_global_space = float2::zero;
-    auto cursor = EK_MOUSE_CURSOR_PARENT;
-    bool changed = false;
-    if (mouseActive_) {
-        pointerScreenPosition_ = mousePosition0_;
-        changed = true;
-    } else if (touchID_ != 0) {
-        pointerScreenPosition_ = touchPosition0_;
-        changed = true;
+bool interaction_system_list_contains_target(const entity_t list[32], entity_t e) {
+    for(uint32_t i = 0; i < 32; ++i) {
+        entity_t target = list[i];
+        if(target == e) {
+            return true;
+        }
+        if(!target) {
+            break;
+        }
     }
-
-    if (changed) {
-        cursor = searchInteractiveTargets(currTargets);
-    }
-
-    fireInteraction(PointerEvent::Over, false, true);
-    fireInteraction(PointerEvent::Out, true, true);
-
-    swapTargetLists();
-
-    ek_app_set_mouse_cursor(cursor);
+    return false;
 }
 
-void InteractionSystem::fireInteraction(PointerEvent event, bool prev, bool onlyIfChanged) {
-    auto& targets = prev ? getPrevTargets() : getCurrentTargets();
-    auto& oppositeTargets = prev ? getCurrentTargets() : getPrevTargets();
+void InteractionSystem::fireInteraction(string_hash_t event, bool prev, bool onlyIfChanged) {
+    uint32_t off = prev ? 0 : 1;
+    auto* targets = getTargets(off);
+    auto* oppositeTargets = getTargets(off+1);
 
-    for (auto target : targets) {
-        if (target.isAlive()) {
-            auto* interactive = target.tryGet<Interactive>();
-            if (interactive && !(onlyIfChanged && oppositeTargets.find(target) != nullptr)) {
-                interactive->handle(event);
+    for(uint32_t i = 0; i < 32; ++i) {
+        entity_t target = targets[i];
+        if (check_entity_alive(target)) {
+            // TODO: we actually could check NodeEventHandler and dispatch events, if Interactive component set - we
+            //  just update state
+            auto* interactive = ecs::EntityApi{target}.tryGet<Interactive>();
+            if (interactive && !(onlyIfChanged && interaction_system_list_contains_target(oppositeTargets, target))) {
+                interactive->handle(target, event);
             }
+        }
+        else {
+            break;
         }
     }
 }
@@ -82,20 +77,20 @@ void InteractionSystem::handle_mouse_event(const ek_app_event* ev, vec2_t pos) {
     if (type == EK_APP_EVENT_MOUSE_DOWN) {
         mousePosition0_ = pos;
         pointerDown_ = true;
-        fireInteraction(PointerEvent::Down);
+        fireInteraction(POINTER_EVENT_DOWN);
     } else if (type == EK_APP_EVENT_MOUSE_UP) {
         mousePosition0_ = pos;
         pointerDown_ = false;
-        fireInteraction(PointerEvent::Up);
+        fireInteraction(POINTER_EVENT_UP);
     } else if (type == EK_APP_EVENT_MOUSE_MOVE) {
         mousePosition0_ = pos;
         mouseActive_ = true;
-        process();
+        update_interaction_system();
     } else if (type == EK_APP_EVENT_MOUSE_EXIT) {
         pointerDown_ = false;
         mouseActive_ = false;
         //update();
-        fireInteraction(PointerEvent::Up);
+        fireInteraction(POINTER_EVENT_UP);
     }
 }
 
@@ -108,8 +103,8 @@ void InteractionSystem::handle_touch_event(const ek_app_event* ev, vec2_t pos) {
             touchPosition0_ = pos;
             mouseActive_ = false;
             pointerDown_ = true;
-            process();
-            fireInteraction(PointerEvent::Down);
+            update_interaction_system();
+            fireInteraction(POINTER_EVENT_DOWN);
         }
     }
 
@@ -118,7 +113,7 @@ void InteractionSystem::handle_touch_event(const ek_app_event* ev, vec2_t pos) {
             touchID_ = 0;
             touchPosition0_ = {};
             pointerDown_ = false;
-            fireInteraction(PointerEvent::Up);
+            fireInteraction(POINTER_EVENT_UP);
         } else {
             touchPosition0_ = pos;
         }
@@ -126,15 +121,17 @@ void InteractionSystem::handle_touch_event(const ek_app_event* ev, vec2_t pos) {
 }
 
 void InteractionSystem::sendBackButton() {
-    dispatch_interactive_event(root_, {
-            interactive_event::back_button,
-            root_,
+    ecs::EntityApi r{root_};
+    dispatch_interactive_event(r, {
+            INTERACTIVE_EVENT_BACK_BUTTON,
+            r.index,
             {"game"}
     });
 }
 
 void InteractionSystem::handle_system_pause() {
-    broadcast(root_, interactive_event::system_pause);
+    ecs::EntityApi r{root_};
+    broadcast(r, INTERACTIVE_EVENT_SYSTEM_PAUSE);
 }
 
 ecs::EntityApi InteractionSystem::globalHitTest(vec2_t* worldSpacePointer, ecs::EntityRef* capturedCamera) {
@@ -146,7 +143,7 @@ ecs::EntityApi InteractionSystem::globalHitTest(vec2_t* worldSpacePointer, ecs::
             if (camera && camera->enabled && camera->interactive &&
                     rect_contains(camera->screenRect, pointerScreenPosition_)) {
                 const auto pointerWorldPosition = vec2_transform(pointerScreenPosition_, camera->screenToWorldMatrix);
-                auto target = hitTest2D(ecs::the_world, camera->root.index(), pointerWorldPosition);
+                auto target = hitTest2D(camera->root.index(), pointerWorldPosition);
                 if (target != 0) {
                     *worldSpacePointer = pointerWorldPosition;
                     *capturedCamera = e;
@@ -158,12 +155,13 @@ ecs::EntityApi InteractionSystem::globalHitTest(vec2_t* worldSpacePointer, ecs::
     return nullptr;
 }
 
-ek_mouse_cursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi>& list) {
+ek_mouse_cursor InteractionSystem::searchInteractiveTargets(entity_t list[32]) {
     vec2_t pointer = {};
     ecs::EntityApi it;
     ecs::EntityRef camera;
-    if (dragEntity_.valid()) {
-        it = dragEntity_.ent();
+    ecs::EntityRef drag_entity{dragEntity_};
+    if (drag_entity.valid()) {
+        it = drag_entity.ent();
         auto* interactive = it.tryGet<Interactive>();
         if (interactive && interactive->camera.valid()) {
             camera = interactive->camera;
@@ -172,9 +170,10 @@ ek_mouse_cursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi
     } else {
         it = globalHitTest(&pointer, &camera);
     }
-    hitTarget_ = ecs::EntityRef{it};
+    hitTarget_ = get_entity_passport(it.index);
 
     auto cursor = EK_MOUSE_CURSOR_PARENT;
+    uint32_t len = 0;
     while (it) {
         auto* interactive = it.tryGet<Interactive>();
         if (interactive) {
@@ -183,29 +182,63 @@ ek_mouse_cursor InteractionSystem::searchInteractiveTargets(Array<ecs::EntityApi
             if (cursor == EK_MOUSE_CURSOR_PARENT) {
                 cursor = interactive->cursor;
             }
-            list.push_back(it);
+            EK_ASSERT(len < 32);
+            list[len++] = it.index;
             if (!interactive->bubble) {
                 break;
             }
         }
         it = it.get<Node>().parent;
     }
-
+    EK_ASSERT(len < 32);
+    list[len] = 0;
     return cursor;
 }
 
 void InteractionSystem::drag(ecs::EntityApi entity) {
-    dragEntity_ = ecs::EntityRef{entity};
+    dragEntity_ = get_entity_passport(entity.index);
 }
 
 ecs::EntityApi InteractionSystem::getHitTarget() const {
-    return hitTarget_.valid() ? hitTarget_.ent() : nullptr;
+    return check_entity_passport(hitTarget_) ? ecs::EntityApi{hitTarget_} : nullptr;
 }
 
 }
 
-ek::InteractionSystem* g_interaction_system = nullptr;
+ek::InteractionSystem g_interaction_system;
+
 void init_interaction_system() {
-    EK_ASSERT(!g_interaction_system);
-    g_interaction_system = new ek::InteractionSystem();
+   // g_interaction_system = new ek::InteractionSystem();
 }
+
+void update_interaction_system() {
+    using namespace ek;
+
+    auto* currTargets = getTargets(1);
+    // clear current list
+    currTargets[0] = 0;
+
+    //pointer_global_space = float2::zero;
+    auto cursor = EK_MOUSE_CURSOR_PARENT;
+    bool changed = false;
+    if (g_interaction_system.mouseActive_) {
+        g_interaction_system.pointerScreenPosition_ = g_interaction_system.mousePosition0_;
+        changed = true;
+    } else if (g_interaction_system.touchID_ != 0) {
+        g_interaction_system.pointerScreenPosition_ = g_interaction_system.touchPosition0_;
+        changed = true;
+    }
+
+    if (changed) {
+        cursor = g_interaction_system.searchInteractiveTargets(currTargets);
+    }
+
+    g_interaction_system.fireInteraction(POINTER_EVENT_OVER, false, true);
+    g_interaction_system.fireInteraction(POINTER_EVENT_OUT, true, true);
+
+    // swap target lists
+    g_interaction_system.targetListIndex = (++g_interaction_system.targetListIndex) & 1;
+
+    ek_app_set_mouse_cursor(cursor);
+}
+

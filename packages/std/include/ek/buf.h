@@ -36,6 +36,18 @@ void* ek_buf_remove_(void* ptr, uint32_t i, uint32_t elementSize);
 
 void* ek_buf_pop_(void* ptr, uint32_t elementSize);
 
+// pod array impl
+void arr_init_from(void** arr, uint32_t element_size, const void* src, uint32_t len);
+
+void arr_resize(void** p_arr, uint32_t element_size, uint32_t new_len);
+void arr_grow(void** p_arr, uint32_t capacity, uint32_t element_size);
+void arr_maybe_grow(void** p_arr, uint32_t element_size);
+void* arr_push_mem(void** p_arr, uint32_t element_size, const void* src);
+void arr_assign(void** p_arr, uint32_t element_size, void* src_arr);
+void arr_remove(void* arr, uint32_t element_size, uint32_t at);
+void arr_swap_remove(void* arr, uint32_t element_size, uint32_t at);
+void* arr_search(void* arr, uint32_t element_size, const void* el);
+
 #ifdef __cplusplus
 }
 #endif

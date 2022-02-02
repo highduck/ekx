@@ -1,0 +1,21 @@
+{
+  "name": "@ekx/quickjs",
+  "version": "0.0.1",
+  "scripts": {
+    "recipe:build": "node recipe/package.js",
+    "package:test": "node recipe/test-package.js"
+  },
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "CMakeLists.txt",
+    "src",
+    "ek.js"
+  ],
+  "devDependencies": {
+    "@ekx/cli-utils": "0.0.15"
+  },
+  "dependencies": {}
+}

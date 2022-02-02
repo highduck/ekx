@@ -21,14 +21,6 @@ void start_post_tween(Button& btn) {
     btn.timePost = fmaxf(random_range_f(0.7f, 1.0f), btn.timePost);
 }
 
-void handle_back_button(Button& btn, const NodeEventData& ev) {
-    if (btn.back_button) {
-        btn.clicked.emit();
-        start_post_tween(btn);
-        ev.processed = true;
-    }
-}
-
 void initialize_base_transform(Button& btn, const Transform2D& transform) {
     btn.baseColor = transform.color;
     btn.baseScale = transform.getScale();
@@ -41,50 +33,56 @@ const ButtonSkin& get_skin(const Button& btn) {
 }
 
 void initialize_events(ecs::EntityApi e) {
-    auto& interactive = e.get_or_create<Interactive>();
-    interactive.onEvent += [e](auto event) {
-        auto& btn = e.get<Button>();
+    auto& eh = e.get_or_create<NodeEventHandler>();
+    eh.on(POINTER_EVENT_OVER, [](const NodeEventData& ev) {
+        auto& btn = ecs::EntityApi{ev.source}.get<Button>();
         const auto& skin = get_skin(btn);
-        switch (event) {
-            case PointerEvent::Over:
-                play_button_sound(skin.sfxOver);
-                break;
-            case PointerEvent::Out:
-                if (e.get<Interactive>().pushed) {
-                    start_post_tween(btn);
-                    play_button_sound(skin.sfxCancel);
-                } else {
-                    play_button_sound(skin.sfxOut);
-                }
-                break;
-            case PointerEvent::Down:
-                play_button_sound(skin.sfxDown);
-                break;
-            case PointerEvent::Tap:
-                btn.clicked.emit();
-
-                play_button_sound(skin.sfxClick);
-                start_post_tween(btn);
-
-                // TODO:
-                //auto name = e.get_or_default<NodeName>().name;
-                //if (!name.empty()) {
-                //    analytics::event("click", name.c_str());
-                //}
-                break;
-            default:
-                break;
+        play_button_sound(skin.sfxOver);
+    });
+    eh.on(POINTER_EVENT_OUT, [](const NodeEventData& ev) {
+        auto& btn = ecs::EntityApi{ev.source}.get<Button>();
+        const auto& skin = get_skin(btn);
+        if (ecs::EntityApi{ev.source}.get<Interactive>().pushed) {
+            start_post_tween(btn);
+            play_button_sound(skin.sfxCancel);
+        } else {
+            play_button_sound(skin.sfxOut);
         }
-    };
+    });
+    eh.on(POINTER_EVENT_DOWN, [](const NodeEventData& ev) {
+        auto& btn = ecs::EntityApi{ev.source}.get<Button>();
+        const auto& skin = get_skin(btn);
+        play_button_sound(skin.sfxDown);
+    });
+    eh.on(POINTER_EVENT_TAP, [](const NodeEventData& ev) {
+        auto& btn = ecs::EntityApi{ev.source}.get<Button>();
+        const auto& skin = get_skin(btn);
+        auto* ev_eh = ecs::EntityApi{ev.source}.tryGet<NodeEventHandler>();
+        if (ev_eh) {
+            ev_eh->emit({BUTTON_EVENT_CLICK, ev.source});
+        }
 
-    e.get_or_create<NodeEventHandler>().on(
-            interactive_event::back_button,
-            [e](const NodeEventData& ev) {
-                auto& btn = e.get<Button>();
-                handle_back_button(btn, ev);
+        play_button_sound(skin.sfxClick);
+        start_post_tween(btn);
+
+        // TODO:
+        //auto name = e.get_or_default<NodeName>().name;
+        //if (!name.empty()) {
+        //    analytics::event("click", name.c_str());
+        //}
+    });
+
+    eh.on(INTERACTIVE_EVENT_BACK_BUTTON, [current = e](const NodeEventData& ev) {
+        auto& btn = current.get<Button>();
+        if (btn.back_button) {
+            auto* ev_eh = current.tryGet<NodeEventHandler>();
+            if (ev_eh) {
+                ev_eh->emit({BUTTON_EVENT_CLICK, current.index});
             }
-    );
-
+            start_post_tween(btn);
+            ev.processed = true;
+        }
+    });
 }
 
 void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transform) {

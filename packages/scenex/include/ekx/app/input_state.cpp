@@ -84,7 +84,7 @@ void input_state_process_event(const ek_app_event* event, game_display_info* dis
         case EK_APP_EVENT_TOUCH_END: {
             const vec2_t pos = coord_screen_to_game_display(display_info, {event->touch.x, event->touch.y});
             if (!g_input_state.hovered_by_editor_gui) {
-                g_interaction_system->handle_touch_event(event, pos);
+                g_interaction_system.handle_touch_event(event, pos);
             }
             update_touch(event, get_or_create_touch(event->touch.id), pos);
         }
@@ -96,7 +96,7 @@ void input_state_process_event(const ek_app_event* event, game_display_info* dis
         case EK_APP_EVENT_MOUSE_EXIT: {
             const vec2_t pos = coord_screen_to_game_display(display_info, {event->mouse.x, event->mouse.y});
             if (!g_input_state.hovered_by_editor_gui) {
-                g_interaction_system->handle_mouse_event(event, pos);
+                g_interaction_system.handle_mouse_event(event, pos);
             }
             if (g_input_state.emulateTouch) {
                 emulate_mouse_as_touch(event, get_or_create_touch(1u), pos);
@@ -108,7 +108,7 @@ void input_state_process_event(const ek_app_event* event, game_display_info* dis
         case EK_APP_EVENT_KEY_UP:
         case EK_APP_EVENT_KEY_DOWN:
             if (event->type == EK_APP_EVENT_KEY_DOWN && event->key.code == EK_KEYCODE_ESCAPE) {
-                g_interaction_system->sendBackButton();
+                g_interaction_system.sendBackButton();
             }
             if (event->key.code != EK_KEYCODE_UNKNOWN) {
                 uint8_t state = g_input_state.keys_[(uint32_t)event->key.code];
@@ -127,10 +127,10 @@ void input_state_process_event(const ek_app_event* event, game_display_info* dis
             }
             break;
         case EK_APP_EVENT_BACK_BUTTON:
-            g_interaction_system->sendBackButton();
+            g_interaction_system.sendBackButton();
             break;
         case EK_APP_EVENT_PAUSE:
-            g_interaction_system->handle_system_pause();
+            g_interaction_system.handle_system_pause();
             break;
         default:
             break;

@@ -89,7 +89,7 @@ void Camera2D::render() {
         }
 
         if (camera.root.valid() && camera.root.get().get_or_default<Node>().visible()) {
-            RenderSystem2D::draw(ecs::the_world, camera.root.index(), camera.root.get().tryGet<WorldTransform2D>());
+            RenderSystem2D::draw(camera.root.index(), camera.root.get().tryGet<WorldTransform2D>());
         }
 
 #ifndef NDEBUG
@@ -101,11 +101,6 @@ void Camera2D::render() {
         canvas_end();
         sg_pop_debug_group();
     }
-}
-
-Camera2D::Camera2D(ecs::EntityApi root_) :
-        root{root_} {
-
 }
 
 const Camera2D* Camera2D::getCurrentRenderingCamera() {

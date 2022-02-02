@@ -44,7 +44,7 @@ public:
         inline static bool is_valid(uint32_t it, const table_type& table) {
             // check primary entity vector end
             const ComponentHeader* m = table[0];
-            if (it == m->count()) {
+            if (it == m->handleToEntity.size()) {
                 return true;
             }
             // filter secondary entity vectors
@@ -57,7 +57,7 @@ public:
             return true;
         }
 
-        inline static bool is_valid_fast(EntityIndex idx, const table_type& table) {
+        inline static bool is_valid_fast(entity_t idx, const table_type& table) {
             // filter secondary entity vectors
             const uint32_t cn = components_num;
             for (uint32_t k = 1u; k < cn; ++k) {
@@ -81,23 +81,26 @@ public:
         const table_type& table_;
     };
 
-    explicit ViewForward(World& w) {
+    ViewForward() {
         {
             table_index_type i{};
-            ((access_[i] = table_[i] = w.components[type<Component>()], ++i), ...);
+            ((table_[i] = &C<Component>::header, ++i), ...);
         }
 
         qsort(table_, components_num, sizeof(table_[0]), ComponentHeader::compareBySize);
-
-        for (uint32_t j = 0u; j < components_num; ++j) {
-            ++access_[j]->lockCounter;
+#ifndef NDEBUG
+        {
+            table_index_type i{};
+            ((++C<Component>::header.debug_lock_counter, ++i), ...);
         }
+#endif
     }
 
     ~ViewForward() {
-        for (uint32_t j = 0u; j < components_num; ++j) {
-            --access_[j]->lockCounter;
-        }
+#ifndef NDEBUG
+        table_index_type i{};
+        ((--C<Component>::header.debug_lock_counter, ++i), ...);
+#endif
     }
 
     iterator begin() const {
@@ -105,29 +108,23 @@ public:
     }
 
     iterator end() const {
-        return {table_, table_[0]->count()};
-    }
-
-    template<typename Comp>
-    constexpr inline Comp& unsafe_get(table_index_type i, EntityIndex ei) const {
-        return static_cast<const ComponentStorage <Comp>*>(access_[i]->data)->get(ei);
+        return {table_, table_[0]->handleToEntity.size()};
     }
 
     template<typename Func>
     void each(Func func) const {
-        const ComponentHeader& table_0 = *(table_[0]);
-        const auto size = table_0.count();
+        const ComponentHeader* table_0 = table_[0];
+        const auto size = table_0->handleToEntity.size();
+#pragma nounroll
         for (uint32_t i = 1u; i != size; ++i) {
-            const EntityIndex e = table_0.handleToEntity.get(i);
+            const entity_t e = table_0->handleToEntity.get(i);
             if (iterator::is_valid_fast(e, table_)) {
-                table_index_type k{0u};
-                func(unsafe_get<Component>(k++, e)...);
+                func(C<Component>::get(e)...);
             }
         }
     }
 
 private:
-    table_type access_;
     table_type table_;
 };
 
@@ -138,8 +135,7 @@ public:
 
     class iterator final {
     public:
-        iterator(const ComponentStorage <Component>& m, uint32_t it) noexcept: it_{it},
-                                                                               map_{m} {
+        iterator(uint32_t it) noexcept: it_{it} {
         }
 
         iterator() noexcept = default;
@@ -163,45 +159,41 @@ public:
         }
 
         inline EntityApi operator*() const noexcept {
-            return EntityApi{map_.component.handleToEntity.get(it_)};
-        }
-
-        inline EntityApi operator*() noexcept {
-            return EntityApi{map_.component.handleToEntity.get(it_)};
+            return EntityApi{C<Component>::header.handleToEntity.get(it_)};
         }
 
     private:
         uint32_t it_{};
-        const ComponentStorage <Component>& map_;
     };
 
-    explicit ViewForward(World& w) :
-            map_{*w.getStorage<Component>()} {
-        ++map_.component.lockCounter;
+    ViewForward() {
+#ifndef NDEBUG
+        ++C<Component>::header.debug_lock_counter;
+#endif
     }
 
     ~ViewForward() {
-        --map_.component.lockCounter;
+#ifndef NDEBUG
+        --C<Component>::header.debug_lock_counter;
+#endif
     }
 
     iterator begin() const {
-        return {map_, 1u};
+        return {1u};
     }
 
     iterator end() const {
-        return {map_, map_.component.count()};
+        return {C<Component>::header.handleToEntity.size()};
     }
 
     template<typename Func>
     void each(Func func) const {
-        const auto size = map_.component.count();
+        const auto size = C<Component>::header.count();
+#pragma nounroll
         for (uint32_t i = 1u; i != size; ++i) {
-            func(map_.get_data_by_index(i));
+            func(C<Component>::get_by_handle(i));
         }
     }
-
-private:
-    ComponentStorage <Component>& map_;
 };
 
 }

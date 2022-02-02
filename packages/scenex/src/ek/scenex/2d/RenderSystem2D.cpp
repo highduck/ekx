@@ -10,10 +10,10 @@ namespace ek {
 
 int RenderSystem2D::currentLayerMask = 0xFF;
 
-void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTransform2D* worldTransform) {
-    EK_ASSERT(w.isValid(e));
+void RenderSystem2D::draw(entity_t e, const WorldTransform2D* worldTransform) {
+    EK_ASSERT(check_entity_alive(e));
 
-    auto* bounds = w.tryGet<Bounds2D>(e);
+    auto* bounds = ecx.tryGet<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
         auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, worldTransform->matrix);
@@ -23,26 +23,31 @@ void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTr
                 return;
             }
         }
-        if (bounds->scissors) {
+        if (bounds->flags & BOUNDS_2D_SCISSORS) {
             canvas_push_scissors(rc);
         }
     }
 
     bool programChanged = false;
-    auto* display = w.tryGet<Display2D>(e);
+    auto* display = ecx.tryGet<Display2D>(e);
     if (display) {
-        if (display->program) {
+        if (UNLIKELY(display->program)) {
             programChanged = true;
             canvas_push_program(REF_RESOLVE(res_shader, display->program));
         }
-        if (display->drawable) {
+        if (LIKELY(display->draw)) {
             canvas.matrix[0] = worldTransform->matrix;
             canvas.color[0] = worldTransform->color;
-            display->drawable->draw();
+            display->draw(e);
+        }
+        if(UNLIKELY(display->callback)) {
+            canvas.matrix[0] = worldTransform->matrix;
+            canvas.color[0] = worldTransform->color;
+            display->callback(e);
         }
     }
 
-    auto it = w.get<Node>(e).child_first;
+    auto it = ecx.get<Node>(e).child_first;
     while (it) {
         const auto& child = it.get<Node>();
         if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
@@ -51,13 +56,13 @@ void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTr
                 worldTransform = childWorldTransform;
             }
             if (worldTransform->color.scale.a > 0) {
-                draw(w, it.index, worldTransform);
+                draw(it.index, worldTransform);
             }
         }
         it = child.sibling_next;
     }
 
-    if (bounds && bounds->scissors) {
+    if (bounds && (bounds->flags & BOUNDS_2D_SCISSORS)) {
         canvas_pop_scissors();
     }
     if (programChanged) {
@@ -65,11 +70,10 @@ void RenderSystem2D::draw(const ecs::World& w, ecs::EntityIndex e, const WorldTr
     }
 }
 
+void RenderSystem2D::drawStack(entity_t e) {
+    EK_ASSERT(check_entity_alive(e));
 
-void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
-    EK_ASSERT(w.isValid(e));
-
-    auto* bounds = w.tryGet<Bounds2D>(e);
+    auto* bounds = ecx.tryGet<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
         auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, canvas.matrix[0]);
@@ -79,25 +83,28 @@ void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
                 return;
             }
         }
-        if (bounds->scissors) {
+        if (bounds->flags & BOUNDS_2D_SCISSORS) {
             canvas_push_scissors(rc);
             //draw2d::push_scissors(scissors->world_rect(transform->worldMatrix));
         }
     }
 
     bool programChanged = false;
-    auto* display = w.tryGet<Display2D>(e);
+    auto* display = ecx.tryGet<Display2D>(e);
     if (display) {
         if (display->program) {
             programChanged = true;
             canvas_push_program(REF_RESOLVE(res_shader, display->program));
         }
-        if (display->drawable) {
-            display->drawable->draw();
+        if (display->draw) {
+            display->draw(e);
+        }
+        if (display->callback) {
+            display->callback(e);
         }
     }
 
-    auto it = w.get<Node>(e).child_first;
+    auto it = ecx.get<Node>(e).child_first;
     while (it) {
         const auto& child = it.get<Node>();
         if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
@@ -108,7 +115,7 @@ void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
                 canvas_concat_color(childTransform->color);
             }
             if (canvas.color[0].scale.a != 0) {
-                drawStack(w, it.index);
+                drawStack(it.index);
             }
             if (childTransform) {
                 canvas_restore_transform();
@@ -117,7 +124,7 @@ void RenderSystem2D::drawStack(const ecs::World& w, ecs::EntityIndex e) {
         it = child.sibling_next;
     }
 
-    if (bounds && bounds->scissors) {
+    if (bounds && (bounds->flags & BOUNDS_2D_SCISSORS)) {
         canvas_pop_scissors();
     }
     if (programChanged) {

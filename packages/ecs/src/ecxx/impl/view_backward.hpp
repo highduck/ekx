@@ -16,7 +16,7 @@ public:
 
     class iterator final {
     public:
-        iterator(table_type& table, EntityIndex it) : it_{it},
+        iterator(table_type& table, entity_t it) : it_{it},
                                                       table_{table},
                                                       map_0{table[0]} {
             skips();
@@ -38,7 +38,7 @@ public:
 
         inline void skips() {
             // todo: size recovery (case we remove entities before *it)
-            EK_ASSERT_R2(it_ < map_0->count());
+            EK_ASSERT_R2(it_ < map_0->handleToEntity.size());
 
             while (it_ != 0 && !valid(map_0->handleToEntity.get(it_))) {
                 --it_;
@@ -47,7 +47,7 @@ public:
         }
 
         [[nodiscard]]
-        inline bool valid(EntityIndex e) const {
+        inline bool valid(entity_t e) const {
             for (uint32_t i = 1u; i < components_num; ++i) {
                 if (ek_sparse_array_get(table_[i]->entityToHandle, e) == 0) {
                     return false;
@@ -65,41 +65,37 @@ public:
         }
 
     private:
-        EntityIndex it_;
-        EntityIndex ent_;
+        entity_t it_;
+        entity_t ent_;
         const table_type& table_;
         const ComponentHeader* map_0;
     };
 
-    explicit ViewBackward(World& w) {
-        table_index_type i{};
-        ((access_[i] = table_[i] = w.getComponentHeader(type<Component>()), ++i), ...);
+    ViewBackward() {
+        {
+            table_index_type i{};
+            ((table_[i] = &C<Component>::header, ++i), ...);
+        }
         qsort(table_, components_num, sizeof(table_[0]), ComponentHeader::compareBySize);
     }
 
     iterator begin() {
-        return {table_, static_cast<EntityIndex>(table_[0]->count() - 1)};
+        return {table_, (entity_t)(table_[0]->handleToEntity.size() - 1)};
     }
 
     iterator end() {
         return {table_, 0};
     }
 
-    template<typename Comp>
-    constexpr inline Comp& unsafe_get(table_index_type i, EntityIndex idx) {
-        return static_cast<ComponentStorage <Comp>*>(access_[i]->data)->get(idx);
-    }
-
     template<typename Func>
     void each(Func func) {
+#pragma nounroll
         for (auto e: *this) {
-            table_index_type i{0u};
-            func(unsafe_get<Component>(i++, e.index)...);
+            func(*C<Component>::get_by_entity(e.index)...);
         }
     }
 
 private:
-    table_type access_;
     table_type table_;
 };
 

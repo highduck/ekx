@@ -57,22 +57,21 @@ void Trail2D::update_position(vec2_t newPosition) {
 }
 
 void Trail2D::updateAll() {
-    const auto* w = &ecs::the_world;
-    auto* trails = w->getStorage<Trail2D>();
-    const auto count = trails->component.count();
+    auto* trails = ecs::C<Trail2D>::data.data();
+    const auto count = ecs::C<Trail2D>::data.size();
     for (uint32_t i = 1; i < count; ++i) {
-        auto e = trails->component.handleToEntity.get(i);
-        const auto& m = w->get<WorldTransform2D>(e).matrix;
-        trails->data[i].update(m);
+        auto e = ecs::C<Trail2D>::header.handleToEntity.get(i);
+        const auto& m = ecx.get<WorldTransform2D>(e).matrix;
+        trails[i].update(m);
     }
 }
 
 void TrailRenderer2D::draw() {
-    auto& trail = w->get<Trail2D>(target.index);
+    auto& trail = ecx.get<Trail2D>(target.index);
     auto& nodeArray = trail.nodes.data;
 
     const uint32_t columns = trail.nodes.size();
-    if(columns < 2) {
+    if (columns < 2) {
         return;
     }
     const auto* spr = &REF_RESOLVE(res_sprite, sprite);
@@ -94,7 +93,7 @@ void TrailRenderer2D::draw() {
     auto texCoordV0 = spr->tex.y;
     auto texCoordU1 = RECT_CENTER_X(spr->tex);
     auto texCoordV1 = RECT_B(spr->tex);
-    if(spr->state & SPRITE_ROTATED) {
+    if (spr->state & SPRITE_ROTATED) {
         texCoordU0 = spr->tex.x;
         texCoordV0 = RECT_CENTER_Y(spr->tex);
         texCoordU1 = RECT_R(spr->tex);
@@ -157,4 +156,9 @@ void TrailRenderer2D::draw() {
         }
     }
 }
+
+void trail_renderer2d_draw(entity_t e) {
+    ecs::EntityApi{e}.get<TrailRenderer2D>().draw();
+}
+
 }

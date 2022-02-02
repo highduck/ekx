@@ -8,7 +8,6 @@
 #include <ek/scenex/base/Node.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
-#include <ek/scenex/base/Script.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/3d/Light3D.hpp>
 #include <ek/scenex/2d/MovieClip.hpp>
@@ -28,7 +27,7 @@ public:
 
     ~HierarchyWindow() override = default;
 
-    Array<ecs::EntityRef> selection{};
+    PodArray<ecs::EntityRef> selection{};
     ImGuiTextFilter filter{};
     ecs::EntityRef root{};
     Hash<ecs::EntityRef> openList{};
