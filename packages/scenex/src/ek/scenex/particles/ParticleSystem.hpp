@@ -9,7 +9,7 @@
 namespace ek {
 
 struct ParticleLayer2D {
-    PodArray<Particle> particles;
+    PodArray<Particle> particles;//{64};
     bool keepAlive = false;
     TimeLayer timer;
 };

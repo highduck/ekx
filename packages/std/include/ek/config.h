@@ -1,7 +1,10 @@
 #ifndef EK_CONFIG_H
 #define EK_CONFIG_H
 
-//#define EK_CONFIG_PARANOIA
+#ifndef NDEBUG
+// debug builds full checked, comment if need semi-fast debugging
+#define EK_CONFIG_PARANOIA
+#endif
 
 /// Log trace and debug levels even for Release build
 #ifdef EK_CONFIG_PARANOIA

@@ -10,13 +10,10 @@ class ViewForward {
 public:
     static constexpr auto components_num = sizeof ... (Component);
 
-    using table_index_type = uint32_t;
-    using table_type = ComponentHeader* [components_num];
-
     class iterator final {
     public:
-        iterator(const table_type& table, uint32_t it) noexcept: it_{it},
-                                                                 table_{table} {
+        iterator(const ecx_component_type* const table[components_num], uint32_t it) noexcept: it_{it},
+                                                                                               table_{table} {
             if (!is_valid(it_, table_)) {
                 ++(*this);
             }
@@ -41,14 +38,14 @@ public:
             return it_ != other.it_;
         }
 
-        inline static bool is_valid(uint32_t it, const table_type& table) {
+        inline static bool is_valid(uint32_t it, const ecx_component_type* const * table) {
             // check primary entity vector end
-            const ComponentHeader* m = table[0];
-            if (it == m->handleToEntity.size()) {
+            const ecx_component_type* m = table[0];
+            if (it == m->size) {
                 return true;
             }
             // filter secondary entity vectors
-            const auto entity = m->handleToEntity.get(it);
+            const auto entity = m->handleToEntity[it];
             for (uint32_t k = 1u; k < components_num; ++k) {
                 if (ek_sparse_array_get(table[k]->entityToHandle, entity) == 0) {
                     return false;
@@ -57,7 +54,7 @@ public:
             return true;
         }
 
-        inline static bool is_valid_fast(entity_t idx, const table_type& table) {
+        inline static bool is_valid_fast(entity_t idx, const ecx_component_type** table) {
             // filter secondary entity vectors
             const uint32_t cn = components_num;
             for (uint32_t k = 1u; k < cn; ++k) {
@@ -69,37 +66,37 @@ public:
         }
 
         inline EntityApi operator*() const noexcept {
-            return EntityApi{table_[0]->handleToEntity.get(it_)};
+            return EntityApi{table_[0]->handleToEntity[it_]};
         }
 
         inline EntityApi operator*() noexcept {
-            return EntityApi{table_[0]->handleToEntity.get(it_)};
+            return EntityApi{table_[0]->handleToEntity[it_]};
         }
 
     private:
-        uint32_t it_{};
-        const table_type& table_;
+        uint32_t it_ = 0;
+        const ecx_component_type* const* table_;
     };
 
-    ViewForward() {
+    ViewForward() noexcept {
         {
-            table_index_type i{};
-            ((table_[i] = &C<Component>::header, ++i), ...);
+            uint32_t i = 0;
+            ((table_[i] = C<Component>::header, ++i), ...);
         }
 
-        qsort(table_, components_num, sizeof(table_[0]), ComponentHeader::compareBySize);
+        qsort(table_, components_num, sizeof(table_[0]), ecx_component_type_compare);
 #ifndef NDEBUG
         {
-            table_index_type i{};
-            ((++C<Component>::header.debug_lock_counter, ++i), ...);
+            uint32_t i = 0;
+            ((++C<Component>::header->lock_counter, ++i), ...);
         }
 #endif
     }
 
-    ~ViewForward() {
+    ~ViewForward() noexcept {
 #ifndef NDEBUG
-        table_index_type i{};
-        ((--C<Component>::header.debug_lock_counter, ++i), ...);
+        uint32_t i = 0;
+        ((--C<Component>::header->lock_counter, ++i), ...);
 #endif
     }
 
@@ -108,24 +105,23 @@ public:
     }
 
     iterator end() const {
-        return {table_, table_[0]->handleToEntity.size()};
+        return {table_, table_[0]->size};
     }
 
     template<typename Func>
     void each(Func func) const {
-        const ComponentHeader* table_0 = table_[0];
-        const auto size = table_0->handleToEntity.size();
+        const ecx_component_type* table_0 = table_[0];
+        const uint16_t size = table_0->size;
 #pragma nounroll
-        for (uint32_t i = 1u; i != size; ++i) {
-            const entity_t e = table_0->handleToEntity.get(i);
+        for (uint16_t i = 1u; i != size; ++i) {
+            const entity_t e = table_0->handleToEntity[i];
             if (iterator::is_valid_fast(e, table_)) {
                 func(C<Component>::get(e)...);
             }
         }
     }
 
-private:
-    table_type table_;
+    ecx_component_type* table_[components_num];
 };
 
 template<typename Component>
@@ -159,22 +155,22 @@ public:
         }
 
         inline EntityApi operator*() const noexcept {
-            return EntityApi{C<Component>::header.handleToEntity.get(it_)};
+            return EntityApi{C<Component>::header->handleToEntity[it_]};
         }
 
     private:
         uint32_t it_{};
     };
 
-    ViewForward() {
+    ViewForward() noexcept {
 #ifndef NDEBUG
-        ++C<Component>::header.debug_lock_counter;
+        ++C<Component>::header->lock_counter;
 #endif
     }
 
-    ~ViewForward() {
+    ~ViewForward() noexcept {
 #ifndef NDEBUG
-        --C<Component>::header.debug_lock_counter;
+        --C<Component>::header->lock_counter;
 #endif
     }
 
@@ -183,12 +179,12 @@ public:
     }
 
     iterator end() const {
-        return {C<Component>::header.handleToEntity.size()};
+        return {C<Component>::header->size};
     }
 
     template<typename Func>
     void each(Func func) const {
-        const auto size = C<Component>::header.count();
+        const uint16_t size = C<Component>::header->size;
 #pragma nounroll
         for (uint32_t i = 1u; i != size; ++i) {
             func(C<Component>::get_by_handle(i));

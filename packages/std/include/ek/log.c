@@ -20,10 +20,12 @@ void log_print(log_level_t level, const char* file, int line, const char* fmt, .
     if (g_log.callbacks_num == 0 || (g_log.mask & (1 << level)) == 0) {
         return;
     }
-    char text[1024];
     va_list args;
     va_start(args, fmt);
+
+    char text[1024];
     ek_vsnprintf(text, sizeof(text), fmt, args);
+
     va_end(args);
 
     const log_msg_t msg = {

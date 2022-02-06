@@ -24,18 +24,17 @@ inline auto view_backward() {
     return ViewBackward<Component...>();
 }
 
-template<typename ...Component>
-inline EntityApi create() {
-    return EntityApi{ ecx.create<Component...>() };
-}
+//template<typename ...Component>
+//inline EntityApi create() {
+//    return EntityApi{create<Component...>()};
+//}
 
 template<typename Func>
 inline void each(Func func) {
-    const auto* entities = ecx.indices;
     const auto count = ecx.size;
 
     for (uint32_t i = 1, processed = 1; processed < count; ++i) {
-        const auto index = entities[i];
+        const auto index = ecx_indices[i];
         if (index == i) {
             func(EntityApi{index});
             ++processed;
@@ -45,85 +44,73 @@ inline void each(Func func) {
 
 /** Entity methods impl **/
 
-inline bool EntityApi::isAlive() const {
-    return index && ecx.indices[index] == index;
+inline bool EntityApi::is_alive() const {
+    return index && ecx_indices[index] == index;
 }
-
-//template<typename Component, typename ...Args>
-//inline Component& EntityApi::assign(Args&& ... args) {
-//    EK_ASSERT_R2(isAlive());
-//    return ecx.assign<Component>(index, args...);
-//}
-//
-//template<typename Component, typename ...Args>
-//inline Component& EntityApi::reassign(Args&& ... args) {
-//    EK_ASSERT_R2(isAlive());
-//    return ecx.reassign<Component>(index, args...);
-//}
 
 template<typename Component>
 inline Component& EntityApi::assign() {
-    EK_ASSERT_R2(isAlive());
-    return ecx.assign<Component>(index);
+    EK_ASSERT(is_alive());
+    return ecs::assign<Component>(index);
 }
 
 template<typename Component>
 inline Component& EntityApi::reassign() {
-    EK_ASSERT_R2(isAlive());
-    return ecx.reassign<Component>(index);
+    EK_ASSERT(is_alive());
+    return ecs::reassign<Component>(index);
 }
 
 template<typename Component>
 [[nodiscard]] inline bool EntityApi::has() const {
-    EK_ASSERT_R2(isAlive());
-    return ecx.has<Component>(index);
+    EK_ASSERT(is_alive());
+    return ecs::has<Component>(index);
 }
 
 template<typename Component>
 inline Component& EntityApi::get() const {
-    EK_ASSERT_R2(isAlive());
-    return ecx.get<Component>(index);
+    EK_ASSERT_R2(is_alive());
+    return ecs::get<Component>(index);
 }
 
 template<typename Component>
 inline Component* EntityApi::tryGet() const {
-    EK_ASSERT_R2(isAlive());
-    return ecx.tryGet<Component>(index);
+    EK_ASSERT(is_alive());
+    return ecs::tryGet<Component>(index);
 }
 
 template<typename Component>
 inline Component& EntityApi::get_or_create() const {
-    EK_ASSERT_R2(isAlive());
-    return ecx.getOrCreate<Component>(index);
+    EK_ASSERT(is_alive());
+    return ecs::get_or_create<Component>(index);
 }
 
 template<typename Component>
 inline const Component& EntityApi::get_or_default() const {
-    EK_ASSERT_R2(isAlive());
-    return ecx.getOrDefault<Component>(index);
+    EK_ASSERT(is_alive());
+    return ecs::get_or_default<Component>(index);
 }
 
 template<typename Component>
 inline void EntityApi::remove() {
-    EK_ASSERT_R2(isAlive());
-    return ecx.remove<Component>(index);
+    EK_ASSERT(is_alive());
+    return ecs::remove<Component>(index);
 }
 
 template<typename Component>
 inline bool EntityApi::try_remove() {
-    EK_ASSERT_R2(isAlive());
-    return ecx.tryRemove<Component>(index);
+    EK_ASSERT(is_alive());
+    return ecs::try_remove<Component>(index);
 }
 
 /** Entity methods impl **/
 
 inline EntityRef::EntityRef(EntityApi ent) noexcept:
-        EntityRef{ent.index, ecx.generations[ent.index]} {
+        EntityRef{ent.index, ecx_generations[ent.index]} {
 
 }
 
 inline bool EntityRef::valid() const {
-    return passport && ecx.generations[index()] == version();
+    return check_entity_passport(passport);
 }
 
 [[nodiscard]]
@@ -138,11 +125,11 @@ inline EntityApi EntityRef::get() const {
 }
 
 inline bool EntityRef::invalidate() {
-    if (passport) {
-        if (ecx.generations[index()] == version()) {
+    if (passport.value) {
+        if (ecx_generations[index()] == version()) {
             return true;
         } else {
-            passport = 0;
+            passport.value = 0;
         }
     }
     return false;
@@ -152,10 +139,10 @@ inline bool EntityRef::invalidate() {
 
 #ifndef ECX_COMPONENT
 
-#define ECX_COMPONENT(T) ecx.registerComponent<T>()
-#define ECX_COMPONENT_RESERVE(T, cap) ecx.registerComponent<T>(cap)
+#define ECX_COMPONENT(T) ecs::C<T>::setup(4, #T)
+#define ECX_COMPONENT_RESERVE(T, cap) ecs::C<T>::setup((cap), #T)
 
 #define ECX_COMP_TYPE_SPARSE(T) template<> class ecs::C<T> final : public ecs::SparseComponent<T> {};
-#define ECX_COMP_TYPE_CXX(T) template<> class ecs::C<T> final : public ecs::GenericComponent<T, ek::Array<T>> {};
+#define ECX_COMP_TYPE_CXX(T) template<> class ecs::C<T> final : public ecs::GenericComponent<T, 3> {};
 
-#endif // #ifndef ECX_COMPONENT
+#endif // !ECX_COMPONENT

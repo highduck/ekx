@@ -101,28 +101,27 @@ bool ToolbarButton(const char* label, bool active, const char* tooltip) {
 
 namespace ek {
 
-String getDebugNodePath(ecs::EntityApi e) {
+void getDebugNodePath(entity_t e, char buffer[1024]) {
+    ecs::EntityApi entity{e};
     const char* names[32];
     int depth = 0;
     String result;
-    while (e && depth < 32) {
-        const auto tag = e.get_or_default<Node>().tag;
+    while (entity && depth < 32) {
+        const auto tag = entity.get_or_default<Node>().tag;
         names[depth++] = tag ? hsp_get(tag) : "_";
-        e = e.get<Node>().parent;
+        entity = entity.get<Node>().parent;
     }
-    char buf[1024];
     uint32_t len = 0;
     while(depth-- > 0) {
-        buf[len++] = '/';
+        buffer[len++] = '/';
         const char* str = names[depth];
         uint32_t size = strlen(str);
         if(size > 0) {
-            memcpy(buf + len, str, size);
+            memcpy(buffer + len, str, size);
             len += size;
         }
     }
-    buf[len] = '\0';
-    return String{buf, (uint32_t)len};
+    buffer[len] = '\0';
 }
 
 const char* getTextLayerTypeName(TextLayerType type) {

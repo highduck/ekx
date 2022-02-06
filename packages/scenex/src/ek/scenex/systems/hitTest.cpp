@@ -12,7 +12,7 @@ entity_t hitTest2D(entity_t e, const Node& node, vec2_t parentPosition) {
     }
 
     vec2_t local = parentPosition;
-    const auto* transform = ecx.tryGet<Transform2D>(e);
+    const auto* transform = ecs::tryGet<Transform2D>(e);
     if (transform) {
         const bool ok = vec2_transform_inverse(local, transform->matrix, &local);
         // TODO: unlikely
@@ -22,7 +22,7 @@ entity_t hitTest2D(entity_t e, const Node& node, vec2_t parentPosition) {
         }
     }
 
-    auto* bounds = ecx.tryGet<Bounds2D>(e);
+    auto* bounds = ecs::tryGet<Bounds2D>(e);
     if (bounds && !rect_contains(bounds->rect, local)) {
         return 0;
     }
@@ -37,7 +37,7 @@ entity_t hitTest2D(entity_t e, const Node& node, vec2_t parentPosition) {
         it = childNode.sibling_prev;
     }
 
-    const auto* display = ecx.tryGet<Display2D>(e);
+    const auto* display = ecs::tryGet<Display2D>(e);
     if (display && display->hit_test && display->hit_test(e, local)) {
         return e;
     }
@@ -50,7 +50,7 @@ entity_t hitTest2D(entity_t e, const Node& node, vec2_t parentPosition) {
 }
 
 entity_t hitTest2D(entity_t e, vec2_t parentPosition) {
-    return hitTest2D(e, ecx.get<Node>(e), parentPosition);
+    return hitTest2D(e, ecs::get<Node>(e), parentPosition);
 }
 
 }

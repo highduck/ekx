@@ -26,9 +26,6 @@ struct InteractionSystem {
 
     void drag(ecs::EntityApi entity);
 
-    [[nodiscard]]
-    ecs::EntityApi getHitTarget() const;
-
     void fireInteraction(string_hash_t event, bool prev = true, bool onlyIfChanged = false);
 
     // screen-space pointer position

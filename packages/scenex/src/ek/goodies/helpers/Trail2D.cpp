@@ -57,17 +57,17 @@ void Trail2D::update_position(vec2_t newPosition) {
 }
 
 void Trail2D::updateAll() {
-    auto* trails = ecs::C<Trail2D>::data.data();
-    const auto count = ecs::C<Trail2D>::data.size();
+    auto* trails = (Trail2D*)ecs::C<Trail2D>::header->data[0];
+    const auto count = ecs::C<Trail2D>::header->size;
     for (uint32_t i = 1; i < count; ++i) {
-        auto e = ecs::C<Trail2D>::header.handleToEntity.get(i);
-        const auto& m = ecx.get<WorldTransform2D>(e).matrix;
+        auto e = ecs::C<Trail2D>::header->handleToEntity[i];
+        const auto& m = ecs::get<WorldTransform2D>(e).matrix;
         trails[i].update(m);
     }
 }
 
 void TrailRenderer2D::draw() {
-    auto& trail = ecx.get<Trail2D>(target.index);
+    auto& trail = ecs::get<Trail2D>(target.index);
     auto& nodeArray = trail.nodes.data;
 
     const uint32_t columns = trail.nodes.size();

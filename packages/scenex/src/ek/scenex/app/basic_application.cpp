@@ -1,4 +1,5 @@
 #include "basic_application.hpp"
+#include "RootAppListener.hpp"
 
 #include <ekx/app/input_state.h>
 
@@ -81,11 +82,6 @@ basic_application::basic_application() {
 
 basic_application::~basic_application() {
     terminate();
-
-    ecx_shutdown();
-    canvas_shutdown();
-    auph_shutdown();
-    ek_gfx_shutdown();
 }
 
 void registerSceneXComponents() {

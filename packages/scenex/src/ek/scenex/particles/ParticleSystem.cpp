@@ -16,7 +16,7 @@ ParticleLayer2D& find_particle_layer(ecs::EntityApi e) {
 }
 
 Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl* decl) {
-    auto& p = toLayer.particles.emplace_back();
+    auto& p = toLayer.particles.emplace_back({});
     p.sprite = decl->sprite;
     p.reflector = decl->use_reflector;
     p.acc = decl->acceleration;
@@ -163,9 +163,10 @@ void update_particles() {
 }
 
 ParticleRenderer2D* particle_renderer2d_setup(entity_t e) {
-    Display2D& disp = ecs::EntityApi{e}.get_or_create<Display2D>();
-    ParticleRenderer2D& pr = ecs::EntityApi{e}.get_or_create<ParticleRenderer2D>();
-    pr.target = ecs::EntityRef{e};
+    ecs::EntityApi entity{e};
+    Display2D& disp = entity.get_or_create<Display2D>();
+    ParticleRenderer2D& pr = entity.get_or_create<ParticleRenderer2D>();
+    pr.target = ecs::EntityRef{entity};
     disp.draw = particle_renderer2d_draw;
     return &pr;
 }

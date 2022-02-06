@@ -7,13 +7,14 @@
 namespace ek {
 
 struct Tween {
+    void (*advanced)(entity_t e, float t) = nullptr;
+    int data[4] = {0};
     float delay = 0.0f;
     float time = 0.0f;
-    float duration = 1.0f;
-    Signal<float> advanced;
-    bool auto_destroy = true;
+    float duration = 0.0f;
+    TimeLayer timer = 0;
+    bool keep = false;
     bool destroyEntity = false;
-    TimeLayer timer;
 
     static void updateAll();
 
@@ -26,5 +27,3 @@ struct Tween {
 };
 
 }
-
-ECX_COMP_TYPE_CXX(ek::Tween)

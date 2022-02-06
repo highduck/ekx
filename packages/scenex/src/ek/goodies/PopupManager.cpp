@@ -83,10 +83,10 @@ void on_popup_close_animation(float t, EntityApi e) {
 void init_basic_popup(EntityApi e) {
     auto node_close = find(e, H("btn_close"));
     if (node_close) {
-        auto* btn = node_close.tryGet<Button>();
+        auto* btn = ecs::tryGet<Button>(node_close);
         if(btn) {
             btn->back_button = true;
-            node_close.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [e](const NodeEventData& event) {
+            ecs::get_or_create<NodeEventHandler>(node_close).on(BUTTON_EVENT_CLICK, [e](const NodeEventData& event) {
                 close_popup(e);
             });
         }
@@ -114,11 +114,11 @@ void open_popup(EntityApi e) {
     auto& tween = Tween::reset(e);
     tween.delay = tweenDelay;
     tween.duration = tweenDuration;
-    tween.advanced += [e](float r) {
+    tween.advanced = [](entity_t e, float r) {
         if (r >= 1.0f) {
-            on_popup_opened(e);
+            on_popup_opened(ecs::EntityApi{e});
         }
-        on_popup_open_animation(r, e);
+        on_popup_open_animation(r, ecs::EntityApi{e});
     };
 
     append(g_popup_manager.layer, e);
@@ -141,10 +141,10 @@ void close_popup(EntityApi e) {
     auto& tween = Tween::reset(e);
     tween.delay = tweenDelay;
     tween.duration = tweenDuration;
-    tween.advanced += [e](float t) {
-        on_popup_close_animation(t, e);
+    tween.advanced = [](entity_t e, float t) {
+        on_popup_close_animation(t, ecs::EntityApi{e});
         if (t >= 1.0f) {
-            on_popup_closed(e);
+            on_popup_closed(ecs::EntityApi{e});
         }
     };
 }
@@ -228,8 +228,11 @@ void popup_manager_init() {
 
 void popup_manager_update() {
     using namespace ek;
-    auto dt = g_time_layers[TIME_LAYER_UI].dt;
     auto& p = g_popup_manager;
+    if(UNLIKELY(!p.entity)) {
+        return;
+    }
+    auto dt = g_time_layers[TIME_LAYER_UI].dt;
     bool needFade = !p.active.empty();
     if (p.active.size() == 1 && p.active.back() == p.closingLast) {
         needFade = false;

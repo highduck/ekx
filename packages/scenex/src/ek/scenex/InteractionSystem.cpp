@@ -21,6 +21,7 @@ bool dispatch_interactive_event(ecs::EntityApi e, const NodeEventData& data) {
     if (isTouchable(e)) {
         auto* eh = e.tryGet<NodeEventHandler>();
         if (eh) {
+            data.receiver = e.index;
             eh->emit(data);
             if (data.processed) {
                 return true;
@@ -39,12 +40,12 @@ bool dispatch_interactive_event(ecs::EntityApi e, const NodeEventData& data) {
 }
 
 bool interaction_system_list_contains_target(const entity_t list[32], entity_t e) {
-    for(uint32_t i = 0; i < 32; ++i) {
+    for (uint32_t i = 0; i < 32; ++i) {
         entity_t target = list[i];
-        if(target == e) {
+        if (target == e) {
             return true;
         }
-        if(!target) {
+        if (!target) {
             break;
         }
     }
@@ -54,9 +55,9 @@ bool interaction_system_list_contains_target(const entity_t list[32], entity_t e
 void InteractionSystem::fireInteraction(string_hash_t event, bool prev, bool onlyIfChanged) {
     uint32_t off = prev ? 0 : 1;
     auto* targets = getTargets(off);
-    auto* oppositeTargets = getTargets(off+1);
+    auto* oppositeTargets = getTargets(off + 1);
 
-    for(uint32_t i = 0; i < 32; ++i) {
+    for (uint32_t i = 0; i < 32; ++i) {
         entity_t target = targets[i];
         if (check_entity_alive(target)) {
             // TODO: we actually could check NodeEventHandler and dispatch events, if Interactive component set - we
@@ -65,8 +66,7 @@ void InteractionSystem::fireInteraction(string_hash_t event, bool prev, bool onl
             if (interactive && !(onlyIfChanged && interaction_system_list_contains_target(oppositeTargets, target))) {
                 interactive->handle(target, event);
             }
-        }
-        else {
+        } else {
             break;
         }
     }
@@ -141,7 +141,7 @@ ecs::EntityApi InteractionSystem::globalHitTest(vec2_t* worldSpacePointer, ecs::
         if (e.valid()) {
             auto* camera = e.get().tryGet<Camera2D>();
             if (camera && camera->enabled && camera->interactive &&
-                    rect_contains(camera->screenRect, pointerScreenPosition_)) {
+                rect_contains(camera->screenRect, pointerScreenPosition_)) {
                 const auto pointerWorldPosition = vec2_transform(pointerScreenPosition_, camera->screenToWorldMatrix);
                 auto target = hitTest2D(camera->root.index(), pointerWorldPosition);
                 if (target != 0) {
@@ -199,16 +199,12 @@ void InteractionSystem::drag(ecs::EntityApi entity) {
     dragEntity_ = get_entity_passport(entity.index);
 }
 
-ecs::EntityApi InteractionSystem::getHitTarget() const {
-    return check_entity_passport(hitTarget_) ? ecs::EntityApi{hitTarget_} : nullptr;
-}
-
 }
 
 ek::InteractionSystem g_interaction_system;
 
 void init_interaction_system() {
-   // g_interaction_system = new ek::InteractionSystem();
+    // g_interaction_system = new ek::InteractionSystem();
 }
 
 void update_interaction_system() {

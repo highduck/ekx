@@ -67,13 +67,12 @@ inline void guiComponentPanel(ecs::EntityApi entity, const char* name, Func fn) 
 }
 
 inline void guiMovieClip(MovieClip& mc) {
-    ImGui::LabelText("movie_data_symbol", "%s", hsp_get(mc.movie_data_symbol));
-    const auto* data = mc.get_movie_data();
+    const auto* data = mc.data;
     if (data) {
         ImGui::LabelText("Total Frames", "%u", data->frames);
         ImGui::LabelText("Default FPS", "%f", data->fps);
 
-        ImGui::DragFloat("Time", &mc.time, 1.0f, 0.0f, data->frames);
+        ImGui::DragFloat("Time", &mc.time, 1.0f, 0.0f, (float)data->frames);
         ImGui::DragFloat("FPS", &mc.fps, 1.0f, 0.0f, 100.0f);
         ImGui::Checkbox("Playing", &mc.playing);
     }
@@ -277,7 +276,9 @@ inline void guiTextFormat(TextFormat& format) {
 }
 
 inline void editDisplayText(Text2D& tf) {
-    ImGui::InputTextMultiline("Text", &tf.text);
+    // TODO:
+    //ImGui::InputTextMultiline("Text", &tf.str_buf);
+    ImGui::LabelText("Text", "%s", text2d__c_str(&tf));
     ImGui::EditRect("Bounds", tf.rect.data);
     ImGui::Color32Edit("Border Color", &tf.borderColor);
     ImGui::Color32Edit("Fill Color", &tf.fillColor);
@@ -327,9 +328,9 @@ inline void guiParticleLayer2D(ParticleLayer2D& layer) {
 }
 
 void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
-    ImGui::PushID(reinterpret_cast<const void*>(entity.passport));
+    ImGui::PushID(reinterpret_cast<const void*>(entity.passport.value));
     ecs::EntityApi e = entity.ent();
-    ImGui::LabelText("Passport", "idx: # %d, gen: @ %d", e.index, ecx.generations[e.index]);
+    ImGui::LabelText("Passport", "idx: # %d, gen: @ %d", e.index, ecx_generations[e.index]);
     if (e.has<Node>()) {
         auto& node = e.get<Node>();
         int flags = node.flags;
@@ -346,7 +347,7 @@ void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
     guiComponentPanel<Camera2D>(e, "Camera2D", guiCamera2D);
     guiComponentPanel<Bounds2D>(e, "Bounds2D", guiBounds2D);
 
-    if (ecx.hasComponent<Transform3D>()) {
+    if (ecs::hasComponent<Transform3D>()) {
         guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
         guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
         guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);

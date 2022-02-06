@@ -78,4 +78,16 @@ void log_set_levels(uint16_t mask);
 
 #define EK_PROFILE_SCOPE(label) ((void)0)
 
+#ifndef NDEBUG
+
+inline static void ek_profile_alloc(const char* label, uint32_t size, const char* file, int line) {
+    log_print(LOG_LEVEL_WARN, file, line, "allocate %u (%s)", size, label);
+}
+
+#define EK_PROFILE_ALLOC(label, sz) ek_profile_alloc((label), (sz), EK_CURRENT_FILE, EK_CURRENT_LINE)
+
+#else
+#define EK_PROFILE_ALLOC(label, sz) ((void)0)
+#endif
+
 #endif //EK_LOG_H

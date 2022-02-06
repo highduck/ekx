@@ -13,7 +13,7 @@ int RenderSystem2D::currentLayerMask = 0xFF;
 void RenderSystem2D::draw(entity_t e, const WorldTransform2D* worldTransform) {
     EK_ASSERT(check_entity_alive(e));
 
-    auto* bounds = ecx.tryGet<Bounds2D>(e);
+    auto* bounds = ecs::tryGet<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
         auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, worldTransform->matrix);
@@ -29,7 +29,7 @@ void RenderSystem2D::draw(entity_t e, const WorldTransform2D* worldTransform) {
     }
 
     bool programChanged = false;
-    auto* display = ecx.tryGet<Display2D>(e);
+    auto* display = ecs::tryGet<Display2D>(e);
     if (display) {
         if (UNLIKELY(display->program)) {
             programChanged = true;
@@ -47,7 +47,7 @@ void RenderSystem2D::draw(entity_t e, const WorldTransform2D* worldTransform) {
         }
     }
 
-    auto it = ecx.get<Node>(e).child_first;
+    auto it = ecs::get<Node>(e).child_first;
     while (it) {
         const auto& child = it.get<Node>();
         if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
@@ -73,7 +73,7 @@ void RenderSystem2D::draw(entity_t e, const WorldTransform2D* worldTransform) {
 void RenderSystem2D::drawStack(entity_t e) {
     EK_ASSERT(check_entity_alive(e));
 
-    auto* bounds = ecx.tryGet<Bounds2D>(e);
+    auto* bounds = ecs::tryGet<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
         auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, canvas.matrix[0]);
@@ -90,7 +90,7 @@ void RenderSystem2D::drawStack(entity_t e) {
     }
 
     bool programChanged = false;
-    auto* display = ecx.tryGet<Display2D>(e);
+    auto* display = ecs::tryGet<Display2D>(e);
     if (display) {
         if (display->program) {
             programChanged = true;
@@ -104,7 +104,7 @@ void RenderSystem2D::drawStack(entity_t e) {
         }
     }
 
-    auto it = ecx.get<Node>(e).child_first;
+    auto it = ecs::get<Node>(e).child_first;
     while (it) {
         const auto& child = it.get<Node>();
         if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {

@@ -35,9 +35,12 @@ struct Display2D {
     uint32_t flags = 0;
 
     void (* draw)(entity_t e) = nullptr;
+
     // TODO: rename as post draw
     void (* callback)(entity_t e) = nullptr;
+
     bool (* hit_test)(entity_t e, vec2_t local_pos) = nullptr;
+
     rect_t (* get_bounds)(entity_t e) = nullptr;
 };
 
@@ -71,23 +74,33 @@ public:
 };
 
 void quad2d_draw(entity_t e);
+
 rect_t quad2d_get_bounds(entity_t e);
+
 bool quad2d_hit_test(entity_t e, vec2_t lp);
 
 void sprite2d_draw(entity_t e);
+
 rect_t sprite2d_get_bounds(entity_t e);
+
 bool sprite2d_hit_test(entity_t e, vec2_t lp);
 
 void ninepatch2d_draw(entity_t e);
+
 rect_t ninepatch2d_get_bounds(entity_t e);
+
 bool ninepatch2d_hit_test(entity_t e, vec2_t lp);
 
 void text2d_draw(entity_t e);
+
 rect_t text2d_get_bounds(entity_t e);
+
 bool text2d_hit_test(entity_t e, vec2_t lp);
 
 void arc2d_draw(entity_t e);
+
 rect_t arc2d_get_bounds(entity_t e);
+
 bool arc2d_hit_test(entity_t e, vec2_t lp);
 
 
@@ -116,10 +129,27 @@ public:
     explicit NinePatch2D(string_hash_t spriteId, rect_t aScaleGrid = {});
 };
 
+enum text2d_flags {
+    TEXT2D_C_STR = 0,
+    TEXT2D_INPLACE = 1,
+    TEXT2D_STR_BUF = 2,
+    TEXT2D_STR_MASK = 0x3,
+    TEXT2D_LOCALIZED = 4,
+
+};
+
 // 8 + 136 + 16 + 8 + 4 = 172 bytes
-class Text2D {
-public:
-    String text;
+struct Text2D {
+    // 3 modes for string storage:
+    // 0 - const c-string
+    // 1 - inplace buffer
+    // 2 - dynamic string buffer
+    char buffer[32];
+    String str_buf;
+    const char* c_str;
+
+    uint32_t flags = 0;
+
     TextFormat format;
     rect_t rect = {};
 
@@ -145,6 +175,20 @@ public:
     rect_t getTextBounds() const;
 };
 
+inline const char* text2d__c_str(const Text2D* text2d) {
+    switch(text2d->flags & TEXT2D_STR_MASK) {
+        case TEXT2D_C_STR: return text2d->c_str;
+        case TEXT2D_INPLACE: return text2d->buffer;
+        case TEXT2D_STR_BUF: return text2d->str_buf.c_str();
+    }
+    // non-reachable
+    return "";
+}
+
+inline void text2d__set_str_mode(Text2D* text2d, uint32_t mode) {
+    text2d->flags = ((text2d->flags >> 2u) << 2u) | mode;
+}
+
 // 4 + 4 + 4 + 4 + 4 + 4 + 8 = 32 bytes
 class Arc2D {
 public:
@@ -164,18 +208,64 @@ inline void set_color_quad(ecs::EntityApi e, rect_t rc, color_t color) {
     set_gradient_quad(e, rc, color, color);
 }
 
-inline void setText(ecs::EntityApi e, const String& v) {
-    auto* txt = e.tryGet<Text2D>();
+inline void set_text(entity_t e, const char* cstr) {
+    auto* txt = ecs::tryGet<Text2D>(e);
     if (txt) {
-        txt->text = v;
+        txt->c_str = cstr;
+        text2d__set_str_mode(txt, 0);
+    }
+}
+
+inline void set_text_timer(entity_t e, int millis, uint32_t flags) {
+    auto* txt = ecs::tryGet<Text2D>(e);
+    if (txt) {
+        ek_cstr_format_timer(txt->buffer, sizeof(txt->buffer), millis, flags);
+        text2d__set_str_mode(txt, TEXT2D_INPLACE);
+    }
+}
+
+inline void set_text_dynamic(entity_t e, const String& v) {
+    auto* txt = ecs::tryGet<Text2D>(e);
+    if (txt) {
+        txt->str_buf = v;
+        text2d__set_str_mode(txt, TEXT2D_STR_BUF);
+    }
+}
+
+inline void setTextF(uint32_t e, const char* fmt, ...) {
+    va_list va;
+    va_start(va, fmt);
+
+    auto* txt = ecs::tryGet<Text2D>(e);
+    if (txt) {
+        ek_vsnprintf(txt->buffer, sizeof(txt->buffer), fmt, va);
+        text2d__set_str_mode(txt, TEXT2D_INPLACE);
+    }
+
+    va_end(va);
+}
+
+inline void copy_entity_text(entity_t to, entity_t from) {
+    auto* src = ecs::tryGet<Text2D>(from);
+    auto* dst = ecs::tryGet<Text2D>(to);
+    if (src && dst) {
+        dst->flags = ((dst->flags >> 2u) << 2u) | (src->flags & TEXT2D_STR_MASK);
+        dst->c_str = src->c_str;
+        dst->str_buf = src->str_buf;
+        memcpy(dst->buffer, src->buffer, sizeof(src->buffer));
     }
 }
 
 Quad2D* quad2d_setup(entity_t e);
+
 Sprite2D* sprite2d_setup(entity_t e);
+
 NinePatch2D* ninepatch2d_setup(entity_t e);
+
 Text2D* text2d_setup(entity_t e);
-Text2D* text2d_setup_ex(entity_t e, const String& text, TextFormat format);
+
+Text2D* text2d_setup_ex(entity_t e, TextFormat format);
+
 Arc2D* arc2d_setup(entity_t e);
 
 }

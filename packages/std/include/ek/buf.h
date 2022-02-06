@@ -47,6 +47,16 @@ void arr_assign(void** p_arr, uint32_t element_size, void* src_arr);
 void arr_remove(void* arr, uint32_t element_size, uint32_t at);
 void arr_swap_remove(void* arr, uint32_t element_size, uint32_t at);
 void* arr_search(void* arr, uint32_t element_size, const void* el);
+void arr_pop(void* arr);
+
+/**
+ * internal function ensure we have space for one more element in array
+ * @param p_arr - pointer to buffer
+ * @param element_size - array's element size
+ * @return pointer to slot we can assign new element
+ */
+void* arr_add_(void** p_arr, uint32_t element_size);
+#define arr_push(p_arr, T, el) (*((T*)arr_add_((void**)(p_arr), sizeof(T))) = (el))
 
 #ifdef __cplusplus
 }

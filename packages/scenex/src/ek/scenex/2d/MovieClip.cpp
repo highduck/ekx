@@ -116,7 +116,7 @@ void update_target(float time, EntityApi e, const SGMovieLayerData& layer) {
         } else if (loop == 2) {
             const auto offset = fmin(time, k1.index + k1.duration) - k1.index;
             auto t = k1.firstFrame + offset;
-            const auto* mcData = mc.get_movie_data();
+            const auto* mcData = mc.data;
             if (mcData && t > mcData->frames) {
                 t = mcData->frames;
             }
@@ -128,7 +128,7 @@ void update_target(float time, EntityApi e, const SGMovieLayerData& layer) {
 }
 
 void apply_frame(EntityApi e, MovieClip& mov) {
-    auto* data = mov.get_movie_data();
+    auto* data = mov.data;
     auto time = mov.time;
     if (!data) {
         // no data - exit early
@@ -161,7 +161,7 @@ void goto_and_stop(EntityApi e, float frame) {
 // math is not hard, but code has been stolen from precious web,
 // look for `fl.motion`, BezierEase, BezierSegment, CustomEase
 
-int get_quadratic_roots(float* out_roots, float a, float b, float c) {
+int get_quadratic_roots(float out_roots[2], float a, float b, float c) {
 // make sure we have a quadratic
     if (a == 0.0f) {
         if (b == 0.0f) {
@@ -172,12 +172,11 @@ int get_quadratic_roots(float* out_roots, float a, float b, float c) {
     }
 
     const float q = b * b - 4 * a * c;
-
     if (q > 0.0f) {
-        const float c = sqrt(q) / (2 * a);
+        const float x = sqrtf(q) / (2 * a);
         const float d = -b / (2 * a);
-        out_roots[0] = d - c;
-        out_roots[1] = d + c;
+        out_roots[0] = d - x;
+        out_roots[1] = d + x;
         return 2;
     } else if (q < 0.0f) {
         return 0;
@@ -186,7 +185,7 @@ int get_quadratic_roots(float* out_roots, float a, float b, float c) {
     return 1;
 }
 
-int get_cubic_roots(float* out_roots, float a = 0.0f, float b = 0.0f, float c = 0.0f, float d = 0.0f) {
+int get_cubic_roots(float out_roots[3], float a = 0.0f, float b = 0.0f, float c = 0.0f, float d = 0.0f) {
     // make sure we really have a cubic
     if (a == 0.0f) {
         return get_quadratic_roots(out_roots, b, c, d);
@@ -211,17 +210,17 @@ int get_cubic_roots(float* out_roots, float a = 0.0f, float b = 0.0f, float c = 
         }
 
         // three real roots
-        const float theta = acos(r / sqrt(q_cubed)); // will change because r changes
-        const float q_sqrt = sqrt(q); // won't change
+        const float theta = acosf(r / sqrtf(q_cubed)); // will change because r changes
+        const float q_sqrt = sqrtf(q); // won't change
 
-        out_roots[0] = -2 * q_sqrt * cos(theta / 3.0f) - b / 3.0f;
-        out_roots[1] = -2 * q_sqrt * cos((theta + MATH_TAU) / 3.0f) - b / 3.0f;
-        out_roots[2] = -2 * q_sqrt * cos((theta + 4 * MATH_PI) / 3.0f) - b / 3.0f;
+        out_roots[0] = -2 * q_sqrt * cosf(theta / 3.0f) - b / 3.0f;
+        out_roots[1] = -2 * q_sqrt * cosf((theta + MATH_TAU) / 3.0f) - b / 3.0f;
+        out_roots[2] = -2 * q_sqrt * cosf((theta + 4 * MATH_PI) / 3.0f) - b / 3.0f;
 
         return 3;
     }
     // one real root
-    const float tmp = pow(sqrt(-diff) + abs(r), 1.0f / 3.0f);
+    const float tmp = powf(sqrtf(-diff) + fabsf(r), 1.0f / 3.0f);
     const float r_sign = r > 0.0f ? 1.0f : (r < 0.0f ? -1.0f : 0.0f);
     out_roots[0] = -r_sign * (tmp + q / tmp) - b / 3;
     return 1;
@@ -254,7 +253,7 @@ float get_bezier_y(const vec2_t* curve, float x) {
     };
 
     // x(t) = a*t^3 + b*t^2 + c*t + d
-    float roots[3] = {};
+    float roots[3];
     int roots_count = get_cubic_roots(roots, coeffs[0], coeffs[1], coeffs[2], coeffs[3] - x);
     float time = 0.0f;
     for (int i = 0; i < roots_count; ++i) {

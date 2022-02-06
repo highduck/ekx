@@ -50,7 +50,7 @@ void drawBox(const rect_t rc, const mat3x2_t m, color_t color1, color_t color2,
 }
 
 void debugDrawHitTarget(Camera2D& camera) {
-    auto target = g_interaction_system.getHitTarget();
+    ecs::EntityApi target{resolve_entity_index(g_interaction_system.hitTarget_)};
     if (!target) {
         return;
     }

@@ -3,7 +3,7 @@
 #include <ek/scenex/2d/Sprite.hpp>
 #include <ek/rnd.h>
 #include <ek/rr.h>
-#include <ek/ds/Array.hpp>
+#include <ek/ds/FixedArray.hpp>
 
 namespace ek {
 
@@ -29,7 +29,7 @@ enum class RandColorMode {
 
 class RandColorData {
 public:
-    Array <color_t> colors;
+    FixedArray <color_t, 8> colors;
     RandColorMode mode = RandColorMode::RandElement;
     mutable uint32_t state;
 

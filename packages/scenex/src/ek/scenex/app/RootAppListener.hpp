@@ -1,27 +1,31 @@
 #pragma once
 
-#include <ek/app.h>
-#include <ek/time.h>
-#include <ek/audio.h>
-#include <ek/log.h>
-#include <ek/assert.h>
-#include <sokol_gfx.h>
+#include "basic_application.hpp"
+#include <ek/canvas.h>
 
 namespace ek {
 
-inline void root_app_on_frame() {
+void root_app_on_frame() {
     log_tick();
     ek_timers_update();
 }
 
-inline void root_app_on_event(const ek_app_event ev) {
+void root_app_on_event(const ek_app_event ev) {
     if (ev.type == EK_APP_EVENT_PAUSE) {
         auph_set_pause(AUPH_MIXER, true);
     } else if (ev.type == EK_APP_EVENT_RESUME) {
         auph_set_pause(AUPH_MIXER, false);
     } else if (ev.type == EK_APP_EVENT_CLOSE) {
+        ek_app.on_frame = nullptr;
+        ek_app.on_event = nullptr;
+        if(g_game_app) {
+            delete g_game_app;
+            g_game_app = nullptr;
+        }
+        ecx_shutdown();
+        canvas_shutdown();
         auph_shutdown();
-        sg_shutdown();
+        ek_gfx_shutdown();
     }
 }
 

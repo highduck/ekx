@@ -92,6 +92,7 @@ void process_transform(const Element& el, ExportItem& item) {
 
 // TODO: remove ugly filters
 void process_filters(const Element& el, ExportItem& item) {
+    (void)(item);
     for (auto& filter: el.filters) {
         SGFilter fd;
         fd.type = SGFilterType::None;

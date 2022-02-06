@@ -30,7 +30,7 @@ struct Hash {
     };
 
     PodArray <uint32_t> _hash;
-    Array <Entry> _data;
+    PodArray <Entry> _data;
 
     constexpr Hash() noexcept;
     ~Hash() noexcept {
@@ -83,6 +83,7 @@ struct Hash {
         ek_core_dbg_inc(EK_CORE_DBG_HASH);
     }
 
+//    Hash(const Hash& m) noexcept = delete;
     Hash(const Hash& m) noexcept: _hash{m._hash}, _data{m._data} {
         ek_core_dbg_inc(EK_CORE_DBG_HASH);
     }
@@ -93,6 +94,7 @@ struct Hash {
         return *this;
     }
 
+//    Hash& operator=(const Hash& m) noexcept  = delete;
     Hash& operator=(const Hash& m) noexcept {
         _hash = m._hash;
         _data = m.data;
@@ -288,13 +290,26 @@ void rehash(Hash<T>& h, uint32_t new_size) {
     }
 
     h = std::move(nh);
-//    nh.~Hash();
+//    log_trace("HASH growing to %u", new_size);
+//    log_trace("HASH growing to hash.size = %u", h._hash.size());
+//    log_trace("HASH growing to data.size = %u", h._data.size());
 }
 
 template<typename T>
 bool full(const Hash<T>& h) {
-    const float max_load_factor = 0.7f;
-    return h._data.size() >= h._hash.size() * max_load_factor;
+    const uint32_t hash_size = h._hash.size();
+    const uint32_t data_size_min = (uint32_t)(0.7f * (float)hash_size);
+    const uint32_t data_size = h._data.size();
+    return data_size >= data_size_min;
+//    if(UNLIKELY(data_size >= data_size_min)) {
+//        log_trace("hash_size: %u", hash_size);
+//        log_trace("data_size_min: %u", data_size_min);
+//        log_trace("data_size: %u", data_size);
+//        return true;
+//    }
+//    else {
+//        return false;
+//    }
 }
 
 template<typename T>
@@ -372,7 +387,9 @@ inline void Hash<T>::reserve(uint32_t size) {
 template<typename T>
 void Hash<T>::clear() {
     _data.clear();
-    _hash.clear();
+    for(uint32_t i = 0; i < _hash.size(); ++i) {
+        _hash.buffer[i] = hash_internal::END_OF_LIST;
+    }
 }
 
 template<typename T>

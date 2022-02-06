@@ -59,7 +59,7 @@ void initialize_events(ecs::EntityApi e) {
         const auto& skin = get_skin(btn);
         auto* ev_eh = ecs::EntityApi{ev.source}.tryGet<NodeEventHandler>();
         if (ev_eh) {
-            ev_eh->emit({BUTTON_EVENT_CLICK, ev.source});
+            ev_eh->emit({BUTTON_EVENT_CLICK, ev.source, {nullptr}, ev.source});
         }
 
         play_button_sound(skin.sfxClick);
@@ -72,12 +72,13 @@ void initialize_events(ecs::EntityApi e) {
         //}
     });
 
-    eh.on(INTERACTIVE_EVENT_BACK_BUTTON, [current = e](const NodeEventData& ev) {
-        auto& btn = current.get<Button>();
+    eh.on(INTERACTIVE_EVENT_BACK_BUTTON, [](const NodeEventData& ev) {
+        ecs::EntityApi e{ev.receiver};
+        auto& btn = e.get<Button>();
         if (btn.back_button) {
-            auto* ev_eh = current.tryGet<NodeEventHandler>();
+            auto* ev_eh = e.tryGet<NodeEventHandler>();
             if (ev_eh) {
-                ev_eh->emit({BUTTON_EVENT_CLICK, current.index});
+                ev_eh->emit({BUTTON_EVENT_CLICK, ev.receiver, {nullptr}, ev.receiver});
             }
             start_post_tween(btn);
             ev.processed = true;

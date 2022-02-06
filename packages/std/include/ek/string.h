@@ -50,6 +50,10 @@ int ek_cstr_replace(char* str, char search, char replace);
  */
 bool ek_cstr_equals(const char* a, const char* b, int mode);
 
+enum time_format_flags {
+    TIME_FORMAT_KEEP_HOURS = 1
+};
+
 /**
  *
  * @param buf - destination buffer

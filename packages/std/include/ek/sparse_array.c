@@ -1,5 +1,6 @@
 #include <ek/sparse_array.h>
 #include <ek/assert.h>
+#include <ek/log.h>
 #include <stdlib.h>
 
 typedef struct ek_sparse_array_page {
@@ -18,6 +19,7 @@ ek_sparse_array ek_sparse_array_create(const uint32_t num) {
         invalid_page = (ek_sparse_array_page*) calloc(1, sizeof(ek_sparse_array_page));
     }
     const uint32_t pages_count = ek_sparse_array__get_pages_num(num);
+    EK_PROFILE_ALLOC("sparse array init table", pages_count * sizeof(ek_sparse_array_page*));
     ek_sparse_array_page** pages = (ek_sparse_array_page**) malloc(pages_count * sizeof(ek_sparse_array_page*));
 
     #pragma nounroll
@@ -56,6 +58,7 @@ void ek_sparse_array_insert(ek_sparse_array sa, ek_sparse_array_key key, ek_spar
     if (page != invalid_page) {
         page->data[offset_i] = val;
     } else {
+        EK_PROFILE_ALLOC("sparse array new page", EK_SPARSE_ARRAY_PAGE_SIZE);
         ek_sparse_array_page* new_page = (ek_sparse_array_page*) calloc(1, EK_SPARSE_ARRAY_PAGE_SIZE);
         new_page->data[offset_i] = val;
         pages[page_i] = new_page;

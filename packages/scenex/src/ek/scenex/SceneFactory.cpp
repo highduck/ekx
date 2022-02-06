@@ -66,9 +66,9 @@ const SGNodeData* sg_get(const SGFile* sg, string_hash_t library_name) {
     return nullptr;
 }
 
-void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
+void apply(ecs::EntityApi entity, const SGNodeData* data) {
     if (data->movieTargetId >= 0) {
-        entity.get_or_create<MovieClipTargetIndex>() = {data->movieTargetId};
+        entity.get_or_create<MovieClipTargetIndex>().key = data->movieTargetId;
     }
 
     {
@@ -108,7 +108,10 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
         }
 
         auto* dtext = text2d_setup(entity.index);
-        dtext->text = dynamicText.text;
+
+        dtext->c_str = dynamicText.text.c_str();
+        dtext->flags = ((dtext->flags >> 2) << 2);
+
         dtext->format = format;
         dtext->localized = is_localized(dynamicText.text.c_str());
         dtext->adjustsFontSizeToFitBounds = dtext->localized;
@@ -117,12 +120,7 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
 
     if (!data->movie.empty()) {
         auto& mov = entity.assign<MovieClip>();
-        if (asset) {
-            mov.library_asset = asset;
-            mov.movie_data_symbol = data->libraryName;
-        } else {
-            mov.data = &data->movie[0];
-        }
+        mov.data = &data->movie[0];
         mov.fps = data->movie[0].fps;
     }
 
@@ -131,7 +129,8 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
 
     if (data->sprite && !sprite) {
         if (rect_is_empty(data->scaleGrid)) {
-            sprite = sprite2d_setup(entity.index);new Sprite2D();
+            sprite = sprite2d_setup(entity.index);
+            new Sprite2D();
             sprite->src = R_SPRITE(data->sprite);
         } else {
             ninePatch = ninepatch2d_setup(entity.index);
@@ -171,19 +170,19 @@ void apply(ecs::EntityApi entity, const SGNodeData* data, R(SGFile) asset) {
 //    }
 }
 
-ecs::EntityApi create_and_merge(const SGFile* sg, R(SGFile) asset,
+ecs::EntityApi create_and_merge(const SGFile* sg,
                                 const SGNodeData* data,
                                 const SGNodeData* over = nullptr) {
     auto entity = ecs::create<Node, Transform2D, WorldTransform2D>();
     if (data) {
-        apply(entity, data, asset);
+        apply(entity, data);
     }
     if (over) {
-        apply(entity, over, asset);
+        apply(entity, over);
     }
     if (data) {
         for (const auto& child: data->children) {
-            auto child_entity = create_and_merge(sg, asset, sg_get(sg, child.libraryName), &child);
+            auto child_entity = create_and_merge(sg, sg_get(sg, child.libraryName), &child);
             appendStrict(entity, child_entity);
         }
     }
@@ -210,7 +209,7 @@ ecs::EntityApi sg_create(string_hash_t library, string_hash_t name, ecs::EntityA
         const SGFile* file = &REF_RESOLVE(res_sg, file_ref);
         const SGNodeData* data = sg_get(file, name);
         if (data) {
-            result = create_and_merge(file, file_ref, data);
+            result = create_and_merge(file, data);
             if (result && parent) {
                 appendStrict(parent, result);
             }

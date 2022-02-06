@@ -119,7 +119,8 @@ void ConsoleWindow::onDraw() {
     for (int i = 0; i < 5; ++i) {
         auto& info = infos[i];
         unsigned count = 0;
-        for (auto& msg: messages) {
+        for (int j = (int)messages_cur - (int)MIN(messages_num, 1024); j != messages_cur; ++j) {
+            auto msg = messages[(j < 0 ? (j + 1024) : j) % 1024];
             if (msg.verbosity == info.verbosity) {
                 ++count;
             }
@@ -172,8 +173,9 @@ void ConsoleWindow::onDraw() {
     auto logListSize = ImGui::GetContentRegionAvail();
     logListSize.y -= 30;
     ImGui::BeginChild("log_lines", logListSize);
-    for (auto& msg: messages) {
-        const auto* text = msg.text.data();
+    for (int j = (int)messages_cur - (int)MIN(messages_num, 1024); j != messages_cur; ++j) {
+        auto msg = messages[(j < 0 ? (j + 1024) : j) % 1024];
+        const auto* text = msg.text;
         if (textFilter.IsActive() && !textFilter.PassFilter(text)) {
             continue;
         }
@@ -230,7 +232,7 @@ void ConsoleWindow::onMessageWrite(log_msg_t msg) {
         return;
     }
 
-    auto len = (uint32_t) strnlen(msg.text, 1024);
+    uint32_t len = (uint32_t) strnlen(msg.text, 1024 - 1);
 
     const char* icon = "";
     ImU32 iconColor = 0xFFFFFFFF;
@@ -242,7 +244,7 @@ void ConsoleWindow::onMessageWrite(log_msg_t msg) {
     }
 
     ConsoleMsg cmsg{
-            PodArray<char>(len + 1),
+            {},
             (log_level_t) msg.level,
             msg.file,
             msg.line,
@@ -251,9 +253,11 @@ void ConsoleWindow::onMessageWrite(log_msg_t msg) {
             iconColor
     };
 
-    cmsg.text.resize(len + 1);
-    memcpy(cmsg.text.data(), msg.text, cmsg.text.size());
-    messages.emplace_back(std::move(cmsg));
+    memcpy(cmsg.text, msg.text, len);
+    cmsg.text[len] = 0;
+    messages[messages_cur++] = cmsg;
+    messages_cur %= 1024;
+    ++messages_num;
 
     if (autoScroll) {
         scrollDownRequired = true;
@@ -345,7 +349,8 @@ void ConsoleWindow::execute(const char* cmd) {
 }
 
 void ConsoleWindow::clear() {
-    messages.clear();
+    messages_num = 0;
+    messages_cur = 0;
 }
 
 }

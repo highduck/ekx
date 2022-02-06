@@ -116,13 +116,15 @@ bool ninepatch2d_hit_test(entity_t e, vec2_t point) {
 
 /** Text2D **/
 
-Text2D::Text2D() : text{},
+Text2D::Text2D() : buffer{0},
+                    c_str{nullptr},
                    format{H("mini"), 16.0f} {
 
 }
 
-Text2D::Text2D(String text, TextFormat format) : text{std::move(text)},
+Text2D::Text2D(String text_, TextFormat format) : str_buf{std::move(text_)},
                                                  format{format} {
+    flags = TEXT2D_STR_BUF;
 }
 
 float findTextScale(vec2_t textSize, rect_t rc) {
@@ -177,7 +179,8 @@ void text2d_draw(entity_t e) {
         canvas_stroke_rect(rect_expand(d.rect, 1.0f), d.borderColor, 1);
     }
 
-    const char* str = d.localized ? localize(d.text.c_str()) : d.text.c_str();
+    const char* cstr = text2d__c_str(&d);
+    const char* str = d.localized ? localize(cstr) : cstr;
     if (str == nullptr || *str == '\0') {
         return;
     }
@@ -214,7 +217,8 @@ rect_t Text2D::getTextBounds() const {
     auto& blockInfo = get_text_engine()->textBlockInfo;
     textDrawer.format = format;
 
-    const char* str = localized ? localize(text.c_str()) : text.c_str();
+    const char* cstr = text2d__c_str(this);
+    const char* str = localized ? localize(cstr) : cstr;
 
     if (adjustsFontSizeToFitBounds) {
         adjustFontSize(textDrawer, str, rect);
@@ -339,9 +343,8 @@ Text2D* text2d_setup(entity_t e) {
     return &drawable;
 }
 
-Text2D* text2d_setup_ex(entity_t e, const String& text, TextFormat format) {
+Text2D* text2d_setup_ex(entity_t e, TextFormat format) {
     Text2D* d = text2d_setup(e);
-    d->text = text;
     d->format = format;
     return d;
 }

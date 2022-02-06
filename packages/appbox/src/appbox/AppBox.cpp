@@ -54,19 +54,16 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
         // VERSION
         auto e_version = find(e, H("version"));
         if (e_version) {
-            auto* txt = e_version.tryGet<Text2D>();
-            if (txt) {
-                txt->text = config.version;
-            }
+            setTextF(e_version, "%s #%s", config.version_name, config.version_code);
         }
     }
     {
         // PRIVACY POLICY
-        auto e_pp = find(e, H("privacy_policy"));
+        ecs::EntityApi e_pp = find(e, H("privacy_policy"));
         if (e_pp) {
             auto lbl = find(e_pp, H("label"));
             if (lbl) {
-                auto* txt = lbl.tryGet<Text2D>();
+                auto* txt = ecs::tryGet<Text2D>(lbl);
                 if (txt) {
                     txt->hitFullBounds = true;
                 }
@@ -81,13 +78,13 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
 
     // Purchases
     {
-        auto btn = find(e, H("remove_ads"));
+        ecs::EntityApi btn = find(e, H("remove_ads"));
         if (btn) {
             if (g_ads->removed) {
                 btn.get<Node>().setVisible(false);
             } else {
                 g_ads->onRemoved << [btn] {
-                    if (btn.isAlive()) {
+                    if (btn.is_alive()) {
                         btn.get<Node>().setVisible(false);
                     }
                 };
@@ -98,7 +95,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
         }
     }
     {
-        auto btn = find(e, H("restore_purchases"));
+        ecs::EntityApi btn = find(e, H("restore_purchases"));
         if (btn) {
             btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& ) {
                 billing::getPurchases();
@@ -109,7 +106,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
     // Settings
     {
         {
-            auto btn = find(e, H("sound"));
+            ecs::EntityApi btn = find(e, H("sound"));
             if (btn) {
                 btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& event) {
                     set_state_on_off(ecs::EntityApi{event.source}, audio_toggle_pref(AUDIO_PREF_SOUND));
@@ -118,7 +115,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
             }
         }
         {
-            auto btn = find(e, H("music"));
+            ecs::EntityApi btn = find(e, H("music"));
             if (btn) {
                 btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& event) {
                     set_state_on_off(ecs::EntityApi{event.source}, audio_toggle_pref(AUDIO_PREF_MUSIC));
@@ -127,7 +124,7 @@ void AppBox::initDefaultControls(ecs::EntityApi e) {
             }
         }
         {
-            auto btn = find(e, H("vibro"));
+            ecs::EntityApi btn = find(e, H("vibro"));
             if (btn) {
                 btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& event) {
                     set_state_on_off(ecs::EntityApi{event.source}, audio_toggle_pref(AUDIO_PREF_VIBRO));
@@ -170,7 +167,7 @@ void AppBox::rateUs() const {
 /// download app feature
 
 void wrap_button(ecs::EntityApi e, string_hash_t tag, const char* link) {
-    auto x = find(e, tag);
+    ecs::EntityApi x = find(e, tag);
     if (link && *link) {
         x.get_or_create<Button>();
         x.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [link](const NodeEventData& ) {
@@ -193,7 +190,7 @@ void AppBox::initDownloadAppButtons(ecs::EntityApi) {
 }
 
 void AppBox::initLanguageButton(ecs::EntityApi e) {
-    auto btn = find(e, H("language"));
+    ecs::EntityApi btn = find(e, H("language"));
     if (btn) {
         btn.get_or_create<NodeEventHandler>().on(BUTTON_EVENT_CLICK, [](const NodeEventData& ) {
             uint32_t index = s_localization.lang_index;

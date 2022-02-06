@@ -65,12 +65,15 @@ struct SGEasingData {
     template<typename S>
     void serialize(IO<S>& io) {
         io(attribute, ease, curve);
+#ifndef NDEBUG
+        EK_ASSERT(curve.size() <= 8);
+#endif
     }
 };
 
 struct SGKeyFrameTransform {
     vec2_t position;
-    vec2_t scale = {{1.0f, 1.0f}};
+    vec2_t scale = vec2(1, 1);
     vec2_t skew;
     vec2_t pivot;
     color2f_t color = color2f();
@@ -125,6 +128,14 @@ struct SGMovieFrameData {
     void serialize(IO<S>& io) {
         io(index, duration, motion_type, transform, easing,
            loopMode, firstFrame, rotate, rotateTimes, visible);
+
+#ifndef NDEBUG
+        uint32_t mask = 0;
+        for(auto& ease : easing) {
+            EK_ASSERT((mask & ease.attribute) == 0);
+            mask |= 1 << ease.attribute;
+        }
+#endif
     }
 
     [[nodiscard]]

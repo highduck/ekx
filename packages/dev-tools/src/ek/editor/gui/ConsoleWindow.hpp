@@ -7,7 +7,7 @@
 namespace ek {
 
 struct ConsoleMsg {
-    PodArray<char> text;
+    char text[1024];
     log_level_t verbosity;
     const char* file;
     int line;
@@ -40,7 +40,9 @@ public:
 
     void clear();
 
-    Array<ConsoleMsg> messages;
+    ConsoleMsg messages[1024];
+    uint32_t messages_num = 0;
+    uint32_t messages_cur = 0;
     PodArray<const char*> commands;
     PodArray<const char*> candidates;
     PodArray<char*> history;

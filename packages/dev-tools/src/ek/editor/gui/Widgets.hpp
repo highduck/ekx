@@ -30,6 +30,6 @@ void guiSprite(const sprite_t* sprite);
 
 void guiFont(const Font* font);
 
-String getDebugNodePath(ecs::EntityApi e);
+void getDebugNodePath(entity_t e, char buffer[1024]);
 
 }

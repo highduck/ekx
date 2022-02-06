@@ -14,7 +14,7 @@ struct BubbleText {
 
     static void updateAll();
 
-    static ecs::EntityApi create(string_hash_t fontName, const String& text, vec2_t pos, float delay = 0.0f);
+    static entity_t create(string_hash_t fontName, vec2_t pos, float delay);
 };
 
 }

@@ -1,7 +1,12 @@
 #include "updater.h"
 
+ecx_component_type* updater_comp_type;
+
 void updater_init(void) {
-    add_ecs_erase_callback(updater_remove);
+    updater_comp_type = ecx_new_component((ecx_component_type_decl) {
+            "updater", 1, 0, {0}
+    });
+    updater_comp_type->on_entity_destroy = updater_remove;
 }
 
 void updater_set(entity_t e, updater_callback_t callback) {

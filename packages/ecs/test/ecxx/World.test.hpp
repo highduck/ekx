@@ -175,15 +175,15 @@ TEST_CASE("components, add") {
 
 TEST_CASE("components, remove") {
     ecx_setup();
-    ecx.registerComponent<value_t>();
+    ECX_COMPONENT(value_t);
 
     entity_t e = ecx_create();
 
-    ecx.assign<value_t>(e).value = 1;
-    REQUIRE_EQ(ecx.get<value_t>(e).value, 1);
-    REQUIRE(ecx.has<value_t>(e));
-    ecx.remove<value_t>(e);
-    REQUIRE_FALSE(ecx.has<value_t>(e));
+    ecs::assign<value_t>(e).value = 1;
+    REQUIRE_EQ(ecs::get<value_t>(e).value, 1);
+    REQUIRE(ecs::has<value_t>(e));
+    ecs::remove<value_t>(e);
+    REQUIRE_FALSE(ecs::has<value_t>(e));
     ecx_destroy(e);
 
     ecx_shutdown();
@@ -191,19 +191,19 @@ TEST_CASE("components, remove") {
 
 TEST_CASE("components, abstract_clear") {
     ecx_setup();
-    ecx.registerComponent<value_t>();
-    ecx.registerComponent<position_t>();
+    ECX_COMPONENT(value_t);
+    ECX_COMPONENT(position_t);
 
     entity_t e = ecx_create();
 
-    ecx.assign<value_t>(e).value = 1;
-    ecx.assign<position_t>(e) = {1.0f, 1.0f};
-    REQUIRE(ecx.has<value_t>(e));
-    REQUIRE(ecx.has<position_t>(e));
+    ecs::assign<value_t>(e).value = 1;
+    ecs::assign<position_t>(e) = {1.0f, 1.0f};
+    REQUIRE(ecs::has<value_t>(e));
+    REQUIRE(ecs::has<position_t>(e));
     ecx_destroy(e);
     REQUIRE_FALSE(check_entity_alive(e));
-    REQUIRE_FALSE(ecx.has<value_t>(e));
-    REQUIRE_FALSE(ecx.has<position_t>(e));
+    REQUIRE_FALSE(ecs::has<value_t>(e));
+    REQUIRE_FALSE(ecs::has<position_t>(e));
 
     ecx_shutdown();
 }

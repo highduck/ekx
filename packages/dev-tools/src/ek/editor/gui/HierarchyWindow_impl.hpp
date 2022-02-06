@@ -38,7 +38,7 @@ const char* HierarchyWindow::getEntityIcon(ecs::EntityApi e) {
     // other displays
     if (e.has<Display2D>()) return ICON_FA_PAINT_BRUSH;
 
-    if (ecx.hasComponent<Transform3D>() && e.has<Transform3D>()) return ICON_FA_DICE_D20;
+    if (ecs::hasComponent<Transform3D>() && e.has<Transform3D>()) return ICON_FA_DICE_D20;
     if (e.has<Transform2D>()) return ICON_FA_DICE_D6;
     if (e.has<Node>()) return ICON_FA_BOX;
 
@@ -66,19 +66,20 @@ bool HierarchyWindow::isSelectedInHierarchy(ecs::EntityApi e) {
 }
 
 const void* HierarchyWindow::getEntityID(ecs::EntityApi e) {
-    return reinterpret_cast<const void*>(ecs::EntityRef{e}.passport);
+    return reinterpret_cast<const void*>(get_entity_passport(e.index).value);
 }
 
 bool HierarchyWindow::hasChildren(ecs::EntityApi e) {
     if (e.has<Node>()) {
         auto& node = e.get<Node>();
         auto first = node.child_first;
-        return first != nullptr && first.isAlive();
+        return first != nullptr && first.is_alive();
     }
     return false;
 }
 
 bool HierarchyWindow::hoverIconButton(const char* str_id, const char* icon) {
+    (void)str_id;
     ImGui::TextUnformatted(icon);
     return ImGui::IsItemClicked();
 }
@@ -111,7 +112,7 @@ void HierarchyWindow::drawVisibleTouchControls(Node* node, bool parentedVisible,
 }
 
 void HierarchyWindow::drawEntityInTree(ecs::EntityApi e, bool parentedVisible, bool parentedTouchable) {
-    if (!e.isAlive()) {
+    if (!e.is_alive()) {
         ImGui::Text("INVALID ENTITY");
         return;
     }
@@ -180,7 +181,7 @@ void HierarchyWindow::drawEntityInTree(ecs::EntityApi e, bool parentedVisible, b
 }
 
 void HierarchyWindow::drawEntityFiltered(ecs::EntityApi e, bool parentedVisible, bool parentedTouchable) {
-    if (!e.isAlive()) {
+    if (!e.is_alive()) {
         ImGui::Text("INVALID ENTITY");
         return;
     }
@@ -194,7 +195,7 @@ void HierarchyWindow::drawEntityFiltered(ecs::EntityApi e, bool parentedVisible,
     }
 
     if (name && *name && filter.PassFilter(name)) {
-        ImGui::PushID(static_cast<int>(ecs::EntityRef{e}.passport));
+        ImGui::PushID(static_cast<int>(get_entity_passport(e.index).value));
         ImGui::BeginGroup();
 
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow

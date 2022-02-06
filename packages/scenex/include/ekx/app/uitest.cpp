@@ -42,7 +42,7 @@ void fail() {
 
 void click(const std::vector<std::string>& path) {
     auto e = findByPath(_baseApp->root, path);
-    if (e.isAlive()) {
+    if (e.is_alive()) {
         auto* btn = e.tryGet<Button>();
         if (btn != nullptr) {
             btn->clicked();

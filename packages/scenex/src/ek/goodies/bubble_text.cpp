@@ -54,7 +54,7 @@ void BubbleText::updateAll() {
     }
 }
 
-ecs::EntityApi BubbleText::create(string_hash_t fontName, const String& text, vec2_t pos, float delay) {
+entity_t BubbleText::create(string_hash_t fontName, vec2_t pos, float delay) {
     auto e = createNode2D();
     auto& c = e.assign<BubbleText>();
     c.delay = delay;
@@ -66,7 +66,7 @@ ecs::EntityApi BubbleText::create(string_hash_t fontName, const String& text, ve
     format.setTextColor(COLOR_WHITE);
     format.addShadow(COLOR_BLACK, 4, vec2(0.0f, 1.5f));
 
-    text2d_setup_ex(e.index, text, format);
+    text2d_setup_ex(e, format);
 
     setTouchable(e, false);
     setScale(e, {});

@@ -3,7 +3,7 @@ include(npm.cmake)
 project(ecs)
 
 add_library(${PROJECT_NAME} STATIC
-        src/ecxx/impl/ecxx.cpp
+        src/ecxx/impl/ecx.c
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -16,20 +16,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         )
 
 if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
-    set_source_files_properties(stb/stb_image.cpp PROPERTIES COMPILE_FLAGS -Wno-cast-align) #
-
     set(EK_COMPILE_WARNINGS
             -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnull-dereference -Wpedantic -Wreturn-type
             -Woverloaded-virtual -Wcast-align -Wno-deprecated-declarations -Wstrict-aliasing=2)
-
-    #set(EK_COMPILER_LTO "-flto")
 endif ()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(EK_COMPILE_WARNINGS ${EK_COMPILE_WARNINGS}
             -Wno-dollar-in-identifier-extension -Wno-gnu-anonymous-struct -Wno-nested-anon-types)
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    #set(EK_COMPILER_LTO "")
 endif ()
 
 target_compile_options(${PROJECT_NAME} PRIVATE

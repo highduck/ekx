@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ek/assert.h>
+#include <initializer_list>
 
 namespace ek {
 
@@ -10,8 +11,15 @@ struct FixedArray {
 
     static_assert(MaxCount <= 0x10000);
 
-    unsigned _size = 0;
+    unsigned _size;
     T _data[MaxCount];
+
+    FixedArray() noexcept: _size{0}, _data{} {
+    }
+
+    FixedArray(std::initializer_list<T> list) noexcept: _size{(uint32_t)list.size()} {
+        memcpy(_data, list.begin(), list.size() * sizeof(T));
+    }
 
     constexpr void push_back(T el) {
         EK_ASSERT(_size < MaxCount);

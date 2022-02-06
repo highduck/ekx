@@ -15,7 +15,6 @@
 #include <ek/rnd.h>
 #include <ek/audio.h>
 
-#include <ek/util/Signal.hpp>
 #include <utility>
 #include <ekx/app/profiler.h>
 #include <ekx/app/game_display.h>
@@ -23,7 +22,6 @@
 #include <ek/scenex/text/TextEngine.hpp>
 #include <ek/scenex/asset2/Asset.hpp>
 #include "GameAppDispatcher.hpp"
-#include "RootAppListener.hpp"
 
 namespace ek {
 class basic_application;
@@ -102,6 +100,10 @@ protected:
 void launcher_on_frame();
 
 void setup_resource_managers();
+
+void root_app_on_frame();
+
+void root_app_on_event(const ek_app_event ev);
 
 template<typename T>
 inline void run_app() {

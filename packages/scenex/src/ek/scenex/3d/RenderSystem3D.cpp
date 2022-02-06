@@ -361,7 +361,7 @@ void RenderSystem3D::renderObjects(mat4_t proj, mat4_t view) {
 void RenderSystem3D::prepare() {
     defaultMaterial.set_base_color(RGB(0xFF00FF), 0.2f);
 
-    if (!camera.isAlive() || !scene.isAlive()) {
+    if (!camera.is_alive() || !scene.is_alive()) {
         camera = nullptr;
         scene = nullptr;
     }

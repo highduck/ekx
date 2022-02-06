@@ -207,10 +207,10 @@ Comp* findComponentInParent(ecs::EntityApi e) {
 
 /** search functions **/
 
-ecs::EntityApi find(ecs::EntityApi e, string_hash_t tag);
+entity_t find(entity_t e, string_hash_t tag);
 
-ecs::EntityApi findByPath(ecs::EntityApi e, ...);
+entity_t findByPath(uint32_t e, ...);
 
-PodArray <ecs::EntityApi> findMany(ecs::EntityApi e, ...);
+PodArray <entity_t> findMany(uint32_t e, ...);
 
 }

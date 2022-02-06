@@ -9,7 +9,8 @@
 namespace ek {
 
 struct AppBoxConfig {
-    String version{"1.0.0"};
+    const char* version_name = "1.0.0";
+    const char* version_code = "";
     String privacyPolicyURL{"https://eliasku-games.web.app/privacy-policy/"};
     Ads::Config ads{};
     ek_admob_config admob{nullptr, nullptr, nullptr, EK_ADMOB_CHILD_DIRECTED_UNSPECIFIED};

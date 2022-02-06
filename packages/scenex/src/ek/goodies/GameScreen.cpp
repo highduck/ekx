@@ -45,7 +45,7 @@ void emit_screen_event(entity_t e, string_hash_t type) {
     if(e) {
         auto* eh = ecs::EntityApi{e}.tryGet<NodeEventHandler>();
         if(eh) {
-            eh->emit({type, e});
+            eh->emit({type, e, {nullptr}, e});
         }
     }
 }

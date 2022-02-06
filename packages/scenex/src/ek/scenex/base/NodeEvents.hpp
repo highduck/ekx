@@ -21,8 +21,7 @@ struct NodeEventData {
     string_hash_t type;
     entity_t source;
     EventPayload payload{nullptr};
-    // TODO: make current target for dispatching
-    //mutable entity_t current;
+    mutable entity_t receiver;
     mutable bool processed = false;
 };
 

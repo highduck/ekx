@@ -6,6 +6,7 @@
 
 // for Array
 #include <initializer_list>
+#include <utility>
 
 namespace ek {
 
@@ -146,7 +147,7 @@ public:
     }
 
     void pop_back() {
-        ek_buf_pop_(buffer, sizeof(T));
+        arr_pop(buffer);
     }
 
     bool remove(const T& el) {
@@ -195,7 +196,7 @@ public:
     }
 
     T* find(const T& v) const {
-        return (T*)arr_search(buffer, sizeof(T), &v);
+        return (T*) arr_search(buffer, sizeof(T), &v);
     }
 };
 

@@ -4,7 +4,7 @@
 #include <ekx/app/time_layers.h>
 
 typedef struct destroy_timer_t {
-    uint32_t passport;
+    entity_passport_t passport;
     float delay;
     TimeLayer time_layer;
 } destroy_timer_t;

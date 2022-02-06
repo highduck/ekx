@@ -14,7 +14,7 @@ struct VectorDequeue {
     uint32_t end = 0;
 
     uint32_t first = 0;
-    PodArray<T> data{};
+    PodArray<T> data;//{32};
 
     void move() {
         uint32_t dst = 0;

@@ -2,11 +2,8 @@
 
 #include "ecx.h"
 #include <stddef.h>
-#include <ek/util/Type.hpp>
 
 namespace ecs {
-
-class World;
 
 template<typename ...Component>
 class ViewForward;
@@ -26,8 +23,19 @@ struct EntityApi final {
 
     inline constexpr EntityApi(std::nullptr_t) noexcept: index{0} {}
 
-    inline constexpr explicit EntityApi(entity_t entity_index) noexcept: index{entity_index} {}
-    inline constexpr explicit EntityApi(entity_passport_t passport) noexcept: index{(entity_t)(passport & ECX_INDEX_MASK)} {}
+    inline constexpr EntityApi(entity_t entity_index) noexcept: index{entity_index} {}
+
+    EntityApi(entity_passport_value_t passport_value) = delete;
+    //EntityApi(uint32_t v) = delete;
+    EntityApi(int32_t v) = delete;
+    EntityApi(uint64_t v) = delete;
+    EntityApi(int64_t v) = delete;
+    EntityApi(uintptr_t v) = delete;
+    EntityApi(intptr_t v) = delete;
+    EntityApi(void* v) = delete;
+    EntityApi(char* v) = delete;
+
+    inline constexpr EntityApi(entity_passport_t passport) noexcept: index{resolve_entity_index(passport)} {}
 
     inline constexpr EntityApi(EntityApi&& e) noexcept = default;
 
@@ -62,15 +70,9 @@ struct EntityApi final {
         return index != 0u;
     }
 
-    inline bool isAlive() const;
+    [[nodiscard]] inline bool is_alive() const;
 
     /** components manipulations **/
-
-//    template<typename Component, typename ...Args>
-//    inline Component& assign(Args&& ... args);
-//
-//    template<typename Component, typename ...Args>
-//    inline Component& reassign(Args&& ... args);
 
     template<typename Component>
     inline Component& assign();
@@ -100,6 +102,16 @@ struct EntityApi final {
     inline bool try_remove();
 
     entity_t index;
+
+    inline constexpr operator entity_t() const noexcept {
+        return index;
+    }
+
+    operator entity_passport_value_t () const = delete;
+    operator int32_t () const = delete;
+    //operator uint32_t () const = delete;
+    operator int64_t () const = delete;
+    operator uint64_t () const = delete;
 };
 
 struct EntityRef final {
@@ -109,13 +121,16 @@ struct EntityRef final {
     inline constexpr EntityRef(std::nullptr_t) noexcept: passport{0} {
     }
 
+//    inline constexpr explicit EntityRef(entity_t entity) noexcept:EntityRef{get_entity_passport(entity)}  {
+//    }
+
     inline constexpr explicit EntityRef(entity_passport_t passport_) noexcept: passport{passport_} {
     }
 
     inline explicit EntityRef(EntityApi ent) noexcept;
 
     inline constexpr EntityRef(entity_t entity, entity_gen_t generation) noexcept:
-            passport{static_cast<entity_passport_t>(entity) | (generation << ECX_INDEX_BITS)} {
+            passport{.index=entity, .gen=generation} {
     }
 
     inline constexpr EntityRef(EntityRef&& e) noexcept = default;
@@ -127,7 +142,7 @@ struct EntityRef final {
     inline constexpr EntityRef& operator=(const EntityRef& e) noexcept = default;
 
     inline constexpr EntityRef& operator=(std::nullptr_t) noexcept {
-        passport = 0;
+        passport.value = 0;
         return *this;
     }
 
@@ -135,43 +150,43 @@ struct EntityRef final {
     // TODO: rename index to entity_index,
     [[nodiscard]]
     inline constexpr entity_gen_t version() const noexcept {
-        return (passport >> ECX_INDEX_BITS) & ECX_GENERATION_MASK;
+        return passport.gen;
     }
 
     inline constexpr void version(entity_gen_t generation) noexcept {
-        passport = (passport & ECX_INDEX_MASK) | (generation << ECX_INDEX_BITS);
+        passport.gen = generation;
     }
 
     [[nodiscard]] inline constexpr entity_t index() const noexcept {
-        return passport & ECX_INDEX_MASK;
+        return passport.index;
     }
 
     [[nodiscard]] inline constexpr EntityApi ent() const noexcept {
-        return EntityApi{static_cast<entity_t>(passport & ECX_INDEX_MASK)};
+        return EntityApi{index()};
     }
 
     inline constexpr void index(entity_t entity) noexcept {
-        passport = (passport & ~ECX_INDEX_MASK) | entity;
+        passport.index = entity;
     }
 
     inline bool operator==(EntityRef other) const {
-        return passport == other.passport;
+        return passport.value == other.passport.value;
     }
 
     inline bool operator!=(EntityRef other) const {
-        return passport != other.passport;
+        return passport.value != other.passport.value;
     }
 
     inline bool operator==(std::nullptr_t) const {
-        return passport == 0u;
+        return passport.value == 0u;
     }
 
     inline bool operator!=(std::nullptr_t) const {
-        return passport != 0u;
+        return passport.value != 0u;
     }
 
     inline explicit operator bool() const {
-        return passport != 0u;
+        return passport.value != 0u;
     }
 
     [[nodiscard]]
@@ -191,5 +206,3 @@ struct EntityRef final {
 #pragma pack()
 
 }
-
-extern ecs::World ecx;

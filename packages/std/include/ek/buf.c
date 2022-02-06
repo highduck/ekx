@@ -1,5 +1,6 @@
 #include <ek/buf.h>
 #include <ek/assert.h>
+#include "log.h"
 
 ek_buf_header_t* ek_buf_header(void* ptr) {
     EK_ASSERT_R2(ptr != 0);
@@ -50,7 +51,9 @@ void ek_buf_set_capacity(void** ptr, uint32_t newCapacity, uint32_t elementSize)
     }
 
     // reallocate buffer content with different capacity
-    ek_buf_header_t* hdr = (ek_buf_header_t*) realloc(prevHeader, sizeof(ek_buf_header_t) + newCapacity * elementSize);
+    const uint32_t size = sizeof(ek_buf_header_t) + newCapacity * elementSize;
+    EK_PROFILE_ALLOC("buf realloc", size);
+    ek_buf_header_t* hdr = (ek_buf_header_t*) realloc(prevHeader, size);
     hdr->capacity = newCapacity;
     if (!prevHeader) {
         hdr->length = 0;
@@ -131,9 +134,9 @@ void arr_maybe_grow(void** arr, uint32_t element_size) {
     }
 }
 
-void* arr_push_mem(void** arr, uint32_t element_size, const void* src) {
-    arr_maybe_grow(arr, element_size);
-    void* slot = ek_buf_add_(*arr, element_size);
+void* arr_push_mem(void** p_arr, uint32_t element_size, const void* src) {
+    arr_maybe_grow(p_arr, element_size);
+    void* slot = ek_buf_add_(*p_arr, element_size);
     memcpy(slot, src, element_size);
     return slot;
 }
@@ -194,4 +197,16 @@ void* arr_search(void* arr, uint32_t element_size, const void* el) {
         }
     }
     return NULL;
+}
+
+void arr_pop(void* arr) {
+    EK_ASSERT_R2(arr);
+    ek_buf_header_t* hdr = ek_buf_header(arr);
+    EK_ASSERT_R2(hdr->length);
+    --hdr->length;
+}
+
+void* arr_add_(void** p_arr, uint32_t element_size) {
+    arr_maybe_grow(p_arr, element_size);
+    return ek_buf_add_(*p_arr, element_size);
 }

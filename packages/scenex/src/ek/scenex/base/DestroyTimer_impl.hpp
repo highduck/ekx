@@ -10,7 +10,7 @@ namespace ek {
 
 void destroyDelay(ecs::EntityApi e, float delay, TimeLayer timer) {
     destroy_timer_t t;
-    t.passport = ecs::EntityRef{e}.passport;
+    t.passport = get_entity_passport(e.index);
     t.delay = delay;
     t.time_layer = timer;
     g_destroy_manager.timers.push_back(t);
@@ -27,26 +27,28 @@ void destroyChildrenDelay(ecs::EntityApi e, float delay, TimeLayer timer) {
 }
 }
 
-
 void destroy_manager_update() {
     using namespace ek;
     uint32_t i = 0;
     uint32_t end = g_destroy_manager.timers.size();
     while(i < end) {
-        destroy_timer_t timer = g_destroy_manager.timers[i];
-        ecs::EntityRef ref{timer.passport};
-        if(ref.valid() && timer.delay > 0.0f) {
-            timer.delay -= g_time_layers[timer.time_layer].dt;
+        destroy_timer_t* timer = &g_destroy_manager.timers[i];
+        ecs::EntityRef ref{timer->passport};
+        if(ref.valid() && timer->delay > 0.0f) {
+            timer->delay -= g_time_layers[timer->time_layer].dt;
             ++i;
             continue;
         }
 
-        ecs::EntityApi e = ref.ent();
-        if (e.has<Node>()) {
-            destroyNode(e);
-        } else {
-            ecx_destroy(e.index);
+        if(ref.valid()) {
+            ecs::EntityApi e = ref.ent();
+            if (e.has<Node>()) {
+                destroyNode(e);
+            } else {
+                ecx_destroy(e.index);
+            }
         }
+
         --end;
         if(i < end) {
             g_destroy_manager.timers[i] = g_destroy_manager.timers[end];
@@ -62,7 +64,7 @@ void destroy_manager_update() {
 //        }
 //    }
 //    for (auto e: destroy_queue) {
-//        if (e.isAlive()) {
+//        if (e.is_alive()) {
 //            if (e.has<Node>()) {
 //                destroyNode(e);
 //            } else {

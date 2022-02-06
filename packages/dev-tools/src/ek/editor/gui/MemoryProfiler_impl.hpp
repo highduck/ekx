@@ -207,28 +207,59 @@ void drawECSMemoryStats() {
     ImGui::Text("ECS World Struct Size: %lu", sizeof ecx);
     uint32_t totalUsed = 0;
     uint32_t totalReserved = 0;
-    uint32_t lookupSize = 0 /* TODO */;
-    for (uint32_t i = 0; i < ECX_COMPONENTS_MAX_COUNT; ++i) {
-        auto* header = ecx.components[i];
-        if (header) {
-            const char* name = header->debug_name;
-            auto h2eSizeReserved = header->handleToEntity.capacity() * sizeof(entity_t);
-            auto h2eSizeUsed = header->handleToEntity.size() * sizeof(entity_t);
-            auto dataSizeUsed = header->handleToEntity.size() * header->debug_data_stride;
-            auto dataSizeReserved = dataSizeUsed;
-            totalUsed += lookupSize + h2eSizeUsed + dataSizeUsed;
-            totalReserved += lookupSize + h2eSizeReserved + dataSizeReserved;
-            if (ImGui::TreeNode(header, "#%u. %s | %0.2lf KB",
-                                i, name ? name : "Component",
-                                toKB(h2eSizeReserved + dataSizeReserved))) {
-                ImGui::Text("Handle-2-Entity Array: %u / %u | %0.2lf of %0.2lf KB", header->handleToEntity.size(),
-                            header->handleToEntity.capacity(),
-                            toKB(h2eSizeUsed), toKB(h2eSizeReserved));
-                ImGui::TreePop();
+    uint32_t totalLookup = 0;
+    if (ImGui::BeginTable("components", 6)) {
+        ImGui::TableSetupColumn("#");
+        ImGui::TableSetupColumn("Name");
+        ImGui::TableSetupColumn("Size");
+        ImGui::TableSetupColumn("Capacity");
+        ImGui::TableSetupColumn("Control (KB)");
+        ImGui::TableSetupColumn("DATA (KB)");
+        ImGui::TableHeadersRow();
+
+        for (uint32_t i = 0; i < ecx.components_num; ++i) {
+            auto* header = &ecx_components[i];
+            if (header) {
+                const char* label = header->label;
+                const uint32_t cap = ek_buf_capacity(header->handleToEntity);
+                const uint32_t len = header->size;
+                uint32_t controlSizeReserved = cap * (sizeof(entity_t) + sizeof(ecx_component_list_node));
+                uint32_t controlSizeUsed = len * (sizeof(entity_t) + sizeof(ecx_component_list_node));
+                uint32_t dataSizeReserved = cap * sizeof(ecx_component_list_node);
+                uint32_t dataSizeUsed = 0;
+                for (uint16_t j = 0; j < header->data_num; ++j) {
+                    dataSizeReserved += cap * header->data_stride[j];
+                    dataSizeUsed += len * header->data_stride[j];
+                }
+                uint32_t lookupSize = sizeof(uint16_t) * ECX_ENTITIES_MAX_COUNT;
+                //for(uint32_t j = 0; j < ek_sparse_array_get(header->entityToHandle,))
+                totalLookup += lookupSize;
+
+                totalUsed += lookupSize + controlSizeUsed + dataSizeUsed;
+                totalReserved += lookupSize + controlSizeReserved + dataSizeReserved;
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("%u", i);
+                ImGui::TableSetColumnIndex(1);
+                ImGui::TextUnformatted(label ? label : "?");
+
+                ImGui::TableSetColumnIndex(2);
+                ImGui::Text("%u", len);
+
+                ImGui::TableSetColumnIndex(3);
+                ImGui::Text("%u", cap);
+
+                ImGui::TableSetColumnIndex(4);
+                ImGui::Text("%0.2lf / %0.2lf", toKB(controlSizeUsed), toKB(controlSizeReserved));
+
+                ImGui::TableSetColumnIndex(5);
+                ImGui::Text("%0.2lf / %0.2lf", toKB(dataSizeUsed), toKB(dataSizeReserved));
             }
         }
+        ImGui::EndTable();
     }
-    ImGui::Text("ECXX Lookups: %0.2lf KB", toKB(lookupSize));
+    ImGui::Text("ECXX Lookups: %0.2lf KB", toKB(totalLookup));
     ImGui::Text("ECXX Used: %0.2lf MB", toMB(totalUsed));
     ImGui::Text("ECXX Reserved: %0.2lf MB", toMB(totalReserved));
 }
