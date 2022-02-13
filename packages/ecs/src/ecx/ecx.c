@@ -270,6 +270,7 @@ void foreach_type(ecx_component_type* type, void(* callback)(component_handle_t)
 
 component_handle_t get_component_handle_by_index(const ecx_component_type* type, entity_idx_t entity_idx) {
     EK_ASSERT(type);
+    EK_ASSERT(type->entityToHandle.data && "component type is not initialized");
     return ek_sparse_array_get(type->entityToHandle, entity_idx);
 }
 
@@ -349,14 +350,14 @@ void* add_component(ecx_component_type* type, entity_t entity) {
     return get_component_data(type, handle, 0);
 }
 
-static int _compare_component_type(const void* a, const void* b) {
+static int compare_ecs_types_(const void* a, const void* b) {
     const uint16_t size1 = (*(const ecx_component_type**) a)->size;
     const uint16_t size2 = (*(const ecx_component_type**) b)->size;
     return (int) size1 - (int) size2;
 }
 
 void _sort_component_type_table(ecx_component_type** types_table, uint32_t count) {
-    qsort(types_table, count, sizeof(ecx_component_type*), _compare_component_type);
+    qsort(types_table, count, sizeof(ecx_component_type*), compare_ecs_types_);
 }
 
 #ifdef __cplusplus
