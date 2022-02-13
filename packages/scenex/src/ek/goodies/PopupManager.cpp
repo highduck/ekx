@@ -21,87 +21,85 @@ const float tweenDelay = 0.05f;
 const float tweenDuration = 0.3f;
 const float animationVertDistance = 200.0f;
 
-void on_popup_pause(EntityApi e) {
-    setTouchable(e, false);
+void on_popup_pause(entity_t e) {
+    set_touchable(e, false);
 }
 
-void on_popup_resume(EntityApi e) {
-    setTouchable(e, true);
+void on_popup_resume(entity_t e) {
+    set_touchable(e, true);
 }
 
-void on_popup_opening(EntityApi e) {
-    e.get<Transform2D>().setScale(0);
-    e.get<Node>().setTouchable(false);
-    e.get<Node>().setVisible(true);
+void on_popup_opening(entity_t e) {
+    set_scale(e, vec2(0,0));
+    set_touchable(e, false);
+    set_visible(e, true);
 }
 
-void on_popup_open_animation(float t, EntityApi e) {
+void on_popup_open_animation(float t, entity_t e) {
     t = saturate(t);
-    float scale = ease_back_out(t);
-    float fly = ease_p3_out(t);
-    auto& transform = e.get<Transform2D>();
-    transform.setScale(scale);
-    transform.setY(animationVertDistance * (1.0f - fly));
+    const float scale = ease_back_out(t);
+    const float fly = ease_p3_out(t);
+    set_scale_f(e, scale);
+    set_y(e, animationVertDistance * (1.0f - fly));
 }
 
-void on_popup_opened(EntityApi e) {
-    setTouchable(e, true);
+void on_popup_opened(entity_t e) {
+    set_touchable(e, true);
 }
 
-void on_popup_closing(EntityApi e) {
-    setTouchable(e, false);
+void on_popup_closing(entity_t e) {
+    set_touchable(e, false);
 }
 
-void on_popup_closed(EntityApi e) {
-    EntityApi* it = g_popup_manager.active.find(e);
-    if (it) {
-        g_popup_manager.active.erase_ptr(it);
+void on_popup_closed(entity_t e) {
+    entity_t* ptr = g_popup_manager.active.find(e);
+    if (ptr) {
+        g_popup_manager.active.erase_ptr(ptr);
     }
 
     if (g_popup_manager.active.empty()) {
-        ecs::EntityApi pm = g_popup_manager.entity;
-        setTouchable(pm, false);
-        setVisible(pm, false);
+        entity_t pm = g_popup_manager.entity;
+        set_touchable(pm, false);
+        set_visible(pm, false);
     } else {
-        on_popup_resume(g_popup_manager.active.back());
+        on_popup_resume(entity_t{g_popup_manager.active.back()});
     }
 
-    setVisible(e, false);
+    set_visible(e, false);
     // TODO: flag auto-delete
-    destroyDelay(e);
+    destroy_later(e);
 }
 
-void on_popup_close_animation(float t, EntityApi e) {
+void on_popup_close_animation(float t, entity_t e) {
     t = saturate(1 - t);
-    float scale = ease_back_out(t);
-    float fly = ease_p3_out(t);
-    auto& transform = e.get<Transform2D>();
-    transform.setScale(scale);
-    transform.setY(animationVertDistance * (fly - 1.0f));
+    const float scale = ease_back_out(t);
+    const float fly = ease_p3_out(t);
+    set_scale_f(e, scale);
+    set_y(e, animationVertDistance * (fly - 1.0f));
 }
 
-void init_basic_popup(EntityApi e) {
+void init_basic_popup(entity_t e) {
     auto node_close = find(e, H("btn_close"));
-    if (node_close) {
-        auto* btn = ecs::tryGet<Button>(node_close);
+    if (node_close.id) {
+        auto* btn = ecs::try_get<Button>(node_close);
         if(btn) {
             btn->back_button = true;
-            ecs::get_or_create<NodeEventHandler>(node_close).on(BUTTON_EVENT_CLICK, [e](const NodeEventData& event) {
-                close_popup(e);
+            ecs::add<NodeEventHandler>(node_close).on(BUTTON_EVENT_CLICK, [](const NodeEventData& event) {
+                close_popup(get_parent(event.receiver));
             });
         }
     }
 }
 
-void open_popup(EntityApi e) {
-    g_popup_manager.closingLast = nullptr;
+void open_popup(entity_t e) {
+    g_popup_manager.closing_last = NULL_ENTITY;
 
     // if we have entity in active list - do nothing
     if (g_popup_manager.active.find(e) != nullptr) {
         return;
     }
 
-    if (e.get<Node>().parent == g_popup_manager.layer) {
+    if (ecs::get<Node>(e).parent.id == g_popup_manager.layer.id) {
         return;
     }
 
@@ -116,25 +114,24 @@ void open_popup(EntityApi e) {
     tween.duration = tweenDuration;
     tween.advanced = [](entity_t e, float r) {
         if (r >= 1.0f) {
-            on_popup_opened(ecs::EntityApi{e});
+            on_popup_opened(e);
         }
-        on_popup_open_animation(r, ecs::EntityApi{e});
+        on_popup_open_animation(r, e);
     };
 
     append(g_popup_manager.layer, e);
-    auto& st = g_popup_manager.entity.get<Node>();
-    st.setTouchable(true);
-    st.setVisible(true);
+    set_touchable(g_popup_manager.entity, true);
+    set_visible(g_popup_manager.entity, true);
 }
 
-void close_popup(EntityApi e) {
+void close_popup(entity_t e) {
     // we cannot close entity if it is not active
     if (g_popup_manager.active.find(e) == nullptr) {
         return;
     }
 
-    if (g_popup_manager.active.back() == e) {
-        g_popup_manager.closingLast = e;
+    if (g_popup_manager.active.back().id == e.id) {
+        g_popup_manager.closing_last = e;
     }
     on_popup_closing(e);
 
@@ -142,9 +139,9 @@ void close_popup(EntityApi e) {
     tween.delay = tweenDelay;
     tween.duration = tweenDuration;
     tween.advanced = [](entity_t e, float t) {
-        on_popup_close_animation(t, ecs::EntityApi{e});
+        on_popup_close_animation(t, e);
         if (t >= 1.0f) {
-            on_popup_closed(ecs::EntityApi{e});
+            on_popup_closed(e);
         }
     };
 }
@@ -156,16 +153,16 @@ uint32_t count_active_popups() {
 
 void clear_popups() {
 
-    g_popup_manager.closingLast = nullptr;
+    g_popup_manager.closing_last = NULL_ENTITY;
     g_popup_manager.fade_progress = 0.0f;
-    setAlpha(g_popup_manager.back, 0.0f);
+    set_alpha(g_popup_manager.back, 0);
 
-    destroyChildren(g_popup_manager.layer);
+    destroy_children(g_popup_manager.layer);
     g_popup_manager.active.clear();
 
-    const ecs::EntityApi e = g_popup_manager.entity;
-    setTouchable(e, false);
-    setVisible(e, false);
+    const entity_t e = g_popup_manager.entity;
+    set_touchable(e, false);
+    set_visible(e, false);
 }
 
 void close_all_popups() {
@@ -175,18 +172,18 @@ void close_all_popups() {
     }
 }
 
-ecs::EntityApi createBackQuad() {
+entity_t createBackQuad() {
     auto e = createNode2D(H("back"));
-    auto& display = e.assign<Display2D>();
-    quad2d_setup(e.index)->setColor(COLOR_BLACK);
+    auto& display = ecs::add<Display2D>(e);
+    quad2d_setup(e)->setColor(COLOR_BLACK);
     display.program = R_SHADER_SOLID_COLOR;
-    e.assign<LayoutRect>()
+    ecs::add<LayoutRect>(e)
             .fill(true, true)
             .setInsetsMode(false);
 
     // intercept back-button if popup manager is active
-    e.assign<Interactive>();
-    auto& eh = e.assign<NodeEventHandler>();
+    ecs::add<Interactive>(e);
+    auto& eh = ecs::add<NodeEventHandler>(e);
     eh.on(INTERACTIVE_EVENT_BACK_BUTTON, [](const NodeEventData& ev) {
         ev.processed = true;
     });
@@ -207,6 +204,11 @@ ek::PopupManager g_popup_manager;
 
 void popup_manager_init() {
     using namespace ek;
+
+    g_popup_manager.fade_progress = 0.0f;
+    g_popup_manager.fade_duration = 0.3f;
+    g_popup_manager.fade_alpha = 0.5f;
+
     auto e = createNode2D(H("popups"));
     g_popup_manager.entity = e;
     auto& pm = g_popup_manager;
@@ -214,42 +216,41 @@ void popup_manager_init() {
     append(e, pm.back);
 
     pm.layer = createNode2D(H("layer"));
-    pm.layer.assign<LayoutRect>()
+    ecs::add<LayoutRect>(pm.layer)
             .enableAlignX(0.5f)
             .enableAlignY(0.5f)
             .setInsetsMode(false);
     append(e, pm.layer);
 
     // initially popup manager is deactivated
-    auto& st = e.get<Node>();
-    st.setTouchable(false);
-    st.setVisible(false);
+    set_touchable(e, false);
+    set_visible(e, false);
 }
 
-void popup_manager_update() {
+void update_popup_manager() {
     using namespace ek;
     auto& p = g_popup_manager;
-    if(UNLIKELY(!p.entity)) {
+    if(UNLIKELY(!p.entity.id)) {
         return;
     }
     auto dt = g_time_layers[TIME_LAYER_UI].dt;
-    bool needFade = !p.active.empty();
-    if (p.active.size() == 1 && p.active.back() == p.closingLast) {
-        needFade = false;
+    bool need_fade = !p.active.empty();
+    if (p.active.size() == 1 && p.active.back().id == p.closing_last.id) {
+        need_fade = false;
     }
     p.fade_progress = reach(p.fade_progress,
-                            needFade ? 1.0f : 0.0f,
+                            need_fade ? 1.0f : 0.0f,
                             dt / p.fade_duration);
 
-    setAlpha(p.back, p.fade_alpha * p.fade_progress);
+    set_alpha_f(p.back, p.fade_alpha * p.fade_progress);
 
 //    if (!p.active.empty()) {
 //        auto front = p.active.back();
-//        if (front.has<close_timeout>()) {
-//            auto& t = front.get<close_timeout>();
+//        if (ecs::has<close_timeout>(front)) {
+//            auto& t = ecs::get<close_timeout>(front);
 //            t.time -= dt;
 //            if (t.time <= 0.0f) {
-//                front.remove<close_timeout>();
+//                ecs::remove<close_timeout>(front);
 //                close_popup(front);
 //            }
 //        }

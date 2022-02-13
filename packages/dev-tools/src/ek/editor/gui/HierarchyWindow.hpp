@@ -27,39 +27,37 @@ public:
 
     ~HierarchyWindow() override = default;
 
-    PodArray<ecs::EntityRef> selection{};
+    PodArray<ecs::Entity> selection{};
     ImGuiTextFilter filter{};
-    ecs::EntityRef root{};
-    Hash<ecs::EntityRef> openList{};
-    Hash<ecs::EntityRef> scrollToList{};
+    ecs::Entity root{};
+    Hash<ecs::Entity> openList{};
+    Hash<ecs::Entity> scrollToList{};
 
     void onDraw() override;
 
-    static ecs::EntityApi getSiblingNext(ecs::EntityApi e);
+    static entity_t getSiblingNext(entity_t e);
 
-    const char* getEntityIcon(ecs::EntityApi e);
+    const char* getEntityIcon(entity_t e);
 
-    bool isSelectedInHierarchy(ecs::EntityApi e);
+    bool isSelectedInHierarchy(entity_t e);
 
-    static const void* getEntityID(ecs::EntityApi e);
-
-    static bool hasChildren(ecs::EntityApi e);
+    static bool hasChildren(entity_t e);
 
     static bool hoverIconButton(const char* str_id, const char* icon);
 
     void drawVisibleTouchControls(Node* node, bool parentedVisible, bool parentedTouchable);
 
-    void drawEntityInTree(ecs::EntityApi e, bool parentedVisible, bool parentedTouchable);
+    void drawEntityInTree(entity_t e, bool parentedVisible, bool parentedTouchable);
 
-    void drawEntityFiltered(ecs::EntityApi e, bool parentedVisible, bool parentedTouchable);
+    void drawEntityFiltered(entity_t e, bool parentedVisible, bool parentedTouchable);
 
     void drawFilter();
 
     // remove any invalid refs from selection
     void validateSelection();
 
-    void select(ecs::EntityApi e);
-    void focus(ecs::EntityApi e);
+    void select(entity_t e);
+    void focus(entity_t e);
 };
 
 }

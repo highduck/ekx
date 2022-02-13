@@ -5,7 +5,7 @@
 #include <ek/assert.h>
 #include <ek/ds/String.hpp>
 #include <ek/scenex/text/TextFormat.hpp>
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 #include "Sprite.hpp"
 
 namespace ek {
@@ -45,8 +45,7 @@ struct Display2D {
 };
 
 // 16 + 16 = 32 bytes
-class Quad2D {
-public:
+struct Quad2D {
     R(sprite_t) src = R_SPRITE_EMPTY;
     rect_t rect = rect_01();
     color_t colors[4] = {
@@ -105,8 +104,7 @@ bool arc2d_hit_test(entity_t e, vec2_t lp);
 
 
 // 8 + 1 = 9 bytes
-class Sprite2D {
-public:
+struct Sprite2D {
     R(sprite_t) src = 0;
     bool hit_pixels = true;
 
@@ -116,8 +114,7 @@ public:
 };
 
 // 8 + 16 + 16 + 8 + 1 = 49 bytes
-class NinePatch2D {
-public:
+struct NinePatch2D {
     R(sprite_t) src = 0;
     rect_t scale_grid;
     rect_t manual_target = {};
@@ -190,8 +187,7 @@ inline void text2d__set_str_mode(Text2D* text2d, uint32_t mode) {
 }
 
 // 4 + 4 + 4 + 4 + 4 + 4 + 8 = 32 bytes
-class Arc2D {
-public:
+struct Arc2D {
     float angle = 0.0f;
     float radius = 10.0f;
     float line_width = 10.0f;
@@ -202,14 +198,14 @@ public:
 };
 
 /** utilities **/
-void set_gradient_quad(ecs::EntityApi e, rect_t rc, color_t top, color_t bottom);
+void set_gradient_quad(entity_t e, rect_t rc, color_t top, color_t bottom);
 
-inline void set_color_quad(ecs::EntityApi e, rect_t rc, color_t color) {
+inline void set_color_quad(entity_t e, rect_t rc, color_t color) {
     set_gradient_quad(e, rc, color, color);
 }
 
 inline void set_text(entity_t e, const char* cstr) {
-    auto* txt = ecs::tryGet<Text2D>(e);
+    auto* txt = ecs::try_get<Text2D>(e);
     if (txt) {
         txt->c_str = cstr;
         text2d__set_str_mode(txt, 0);
@@ -217,7 +213,7 @@ inline void set_text(entity_t e, const char* cstr) {
 }
 
 inline void set_text_timer(entity_t e, int millis, uint32_t flags) {
-    auto* txt = ecs::tryGet<Text2D>(e);
+    auto* txt = ecs::try_get<Text2D>(e);
     if (txt) {
         ek_cstr_format_timer(txt->buffer, sizeof(txt->buffer), millis, flags);
         text2d__set_str_mode(txt, TEXT2D_INPLACE);
@@ -225,18 +221,18 @@ inline void set_text_timer(entity_t e, int millis, uint32_t flags) {
 }
 
 inline void set_text_dynamic(entity_t e, const String& v) {
-    auto* txt = ecs::tryGet<Text2D>(e);
+    auto* txt = ecs::try_get<Text2D>(e);
     if (txt) {
         txt->str_buf = v;
         text2d__set_str_mode(txt, TEXT2D_STR_BUF);
     }
 }
 
-inline void setTextF(uint32_t e, const char* fmt, ...) {
+inline void set_text_f(entity_t e, const char* fmt, ...) {
     va_list va;
     va_start(va, fmt);
 
-    auto* txt = ecs::tryGet<Text2D>(e);
+    auto* txt = ecs::try_get<Text2D>(e);
     if (txt) {
         ek_vsnprintf(txt->buffer, sizeof(txt->buffer), fmt, va);
         text2d__set_str_mode(txt, TEXT2D_INPLACE);
@@ -246,8 +242,8 @@ inline void setTextF(uint32_t e, const char* fmt, ...) {
 }
 
 inline void copy_entity_text(entity_t to, entity_t from) {
-    auto* src = ecs::tryGet<Text2D>(from);
-    auto* dst = ecs::tryGet<Text2D>(to);
+    auto* src = ecs::try_get<Text2D>(from);
+    auto* dst = ecs::try_get<Text2D>(to);
     if (src && dst) {
         dst->flags = ((dst->flags >> 2u) << 2u) | (src->flags & TEXT2D_STR_MASK);
         dst->c_str = src->c_str;

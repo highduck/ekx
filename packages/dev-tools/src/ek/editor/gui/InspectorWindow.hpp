@@ -6,7 +6,7 @@ namespace ek {
 
 class InspectorWindow : public EditorWindow {
 public:
-    PodArray<ecs::EntityRef> list{};
+    PodArray<ecs::Entity> list{};
 
     InspectorWindow() {
         name = "InspectorWindow";
@@ -15,7 +15,7 @@ public:
 
     ~InspectorWindow() override = default;
 
-    void gui_inspector(ecs::EntityRef entity);
+    void gui_inspector(ecs::Entity entity);
 
     void onDraw() override;
 };

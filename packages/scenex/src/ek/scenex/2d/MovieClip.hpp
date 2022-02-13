@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecxx/ecxx_fwd.hpp>
+#include <ecx/ecx_fwd.hpp>
 #include <ek/format/SGFile.hpp>
 #include <ek/scenex/SceneFactory.hpp>
 
@@ -35,6 +35,6 @@ struct MovieClipTargetIndex {
     int32_t key = 0;
 };
 
-void goto_and_stop(ecs::EntityApi e, float frame);
+void goto_and_stop(entity_t e, float frame);
 
 }

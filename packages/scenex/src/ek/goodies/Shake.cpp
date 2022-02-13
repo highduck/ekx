@@ -8,7 +8,7 @@ namespace ek {
 //void Shake::updateAll() {
 //
 //    for (auto e: ecs::view_backward<Shake>()) {
-//        auto& state = e.get<Shake>();
+//        auto& state = ecs::get<Shake>(e);
 //        auto dt = g_time_layers[state.timer].dt;
 //        state.time += dt;
 //
@@ -18,16 +18,16 @@ namespace ek {
 //                random_range_f(-1.0f, 1.0f)
 //        );
 //
-//        e.get<Transform2D>().setPosition(offset * r * state.strength);
+//        ecs::get<Transform2D>(e).set_position(offset * r * state.strength);
 //
 //        if (state.time <= 0.0f) {
-//            e.remove<Shake>();
+//            ecs::remove<Shake>(e);
 //        }
 //    }
 //}
 //
-//void Shake::add(ecs::EntityApi e, float time, float strength) {
-//    auto& state = e.get_or_create<Shake>();
+//void Shake::add(ecs::Entity e, float time, float strength) {
+//    auto& state = ecs::add<Shake>(e);
 //    state.time = 0.0f;
 //    state.time_total = time;
 //    state.strength = strength;
@@ -39,7 +39,7 @@ inline vec2_t randomF2(float min, float max) {
 
 void Shaker::updateAll() {
     for (auto e: ecs::view<Shaker>()) {
-        auto& data = e.get<Shaker>();
+        auto& data = ecs::get<Shaker>(e);
         const auto dt = g_time_layers[data.timer].dt;
         data.state = reach(data.state, 0.0f, dt);
         const auto r = integrate_exp(0.9f, dt, 0);
@@ -47,10 +47,10 @@ void Shaker::updateAll() {
         const auto posTarget = randomF2(0.0f, 1.0f) * data.maxOffset * data.state;
         const auto rotTarget = random_range_f(-0.5f, 0.5f) * data.maxRotation * data.state;
         const auto scaleTarget = vec2(1, 1) + randomF2(-0.5f, 0.5f) * data.maxScale * data.state;
-        auto& pos = e.get<Transform2D>();
-        pos.setRotation(lerp_f32(pos.getRotation(), rotTarget, r));
-        pos.setScale(lerp_vec2(pos.getScale(), scaleTarget, r));
-        pos.setPosition(lerp_vec2(pos.getPosition(), posTarget, r));
+        auto& pos = ecs::get<Transform2D>(e);
+        pos.set_rotation(lerp_f32(pos.getRotation(), rotTarget, r));
+        pos.set_scale(lerp_vec2(pos.getScale(), scaleTarget, r));
+        pos.set_position(lerp_vec2(pos.getPosition(), posTarget, r));
     }
 }
 

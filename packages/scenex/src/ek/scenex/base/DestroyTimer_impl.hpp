@@ -6,46 +6,44 @@
 
 destroy_manager_t g_destroy_manager;
 
-namespace ek {
-
-void destroyDelay(ecs::EntityApi e, float delay, TimeLayer timer) {
-    destroy_timer_t t;
-    t.passport = get_entity_passport(e.index);
-    t.delay = delay;
-    t.time_layer = timer;
-    g_destroy_manager.timers.push_back(t);
-    //e.reassign<DestroyTimer>(delay, timer);
-}
-
-void destroyChildrenDelay(ecs::EntityApi e, float delay, TimeLayer timer) {
-    auto it = e.get<Node>().child_first;
-    while (it) {
-        //it.reassign<DestroyTimer>(delay, timer);
-        destroyDelay(it, delay, timer);
-        it = it.get<Node>().sibling_next;
+void destroy_later(entity_t e, float delay, TimeLayer timer) {
+    if(is_entity(e)) {
+        destroy_timer_t t;
+        t.entity = e;
+        t.delay = delay;
+        t.time_layer = timer;
+        g_destroy_manager.timers.push_back(t);
+        //e.reassign<DestroyTimer>(delay, timer);
     }
 }
+
+void destroy_children_later(entity_t e, float delay, TimeLayer timer) {
+    auto it = ek::get_first_child(e);
+    while (it.id) {
+        //it.reassign<DestroyTimer>(delay, timer);
+        destroy_later(it, delay, timer);
+        it = ek::get_next_child(it);
+    }
 }
 
-void destroy_manager_update() {
+void update_destroy_queue() {
     using namespace ek;
     uint32_t i = 0;
     uint32_t end = g_destroy_manager.timers.size();
     while(i < end) {
         destroy_timer_t* timer = &g_destroy_manager.timers[i];
-        ecs::EntityRef ref{timer->passport};
-        if(ref.valid() && timer->delay > 0.0f) {
-            timer->delay -= g_time_layers[timer->time_layer].dt;
-            ++i;
-            continue;
-        }
+        entity_t e = timer->entity;
+        if(is_entity(e)) {
+            if (timer->delay > 0.0f) {
+                timer->delay -= g_time_layers[timer->time_layer].dt;
+                ++i;
+                continue;
+            }
 
-        if(ref.valid()) {
-            ecs::EntityApi e = ref.ent();
-            if (e.has<Node>()) {
-                destroyNode(e);
+            if (ecs::has<Node>(e)) {
+                destroy_node(e);
             } else {
-                ecx_destroy(e.index);
+                destroy_entity(e);
             }
         }
 
@@ -65,8 +63,8 @@ void destroy_manager_update() {
 //    }
 //    for (auto e: destroy_queue) {
 //        if (e.is_alive()) {
-//            if (e.has<Node>()) {
-//                destroyNode(e);
+//            if (ecs::has<Node>(e)) {
+//                destroy_node(e);
 //            } else {
 //                ecs::destroy(e);
 //            }

@@ -2,7 +2,7 @@
 
 #include <utility>
 #include <ek/util/Signal.hpp>
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 #include <ek/ds/String.hpp>
 #include "Node.hpp"
 
@@ -48,32 +48,32 @@ struct NodeEventHandler {
 
 /*** events functions ***/
 
-void dispatch_broadcast(ecs::EntityApi e, const NodeEventData& data);
-void dispatch_bubble(ecs::EntityApi e, const NodeEventData& data);
+void dispatch_broadcast(entity_t e, const NodeEventData& data);
+void dispatch_bubble(entity_t e, const NodeEventData& data);
 
-inline void broadcast(ecs::EntityApi e, string_hash_t event) {
-    dispatch_broadcast(e, {event, e.index, {nullptr}});
+inline void broadcast(entity_t e, string_hash_t event) {
+    dispatch_broadcast(e, {event, e, {nullptr}});
 }
 
-inline void broadcast(ecs::EntityApi e, string_hash_t event, float value) {
-    NodeEventData data{event, e.index};
+inline void broadcast(entity_t e, string_hash_t event, float value) {
+    NodeEventData data{event, e};
     data.payload.f32 = value;
     dispatch_broadcast(e, data);
 }
 
-inline void broadcast(ecs::EntityApi e, string_hash_t event, int value) {
-    NodeEventData data{event, e.index};
+inline void broadcast(entity_t e, string_hash_t event, int value) {
+    NodeEventData data{event, e};
     data.payload.i32 = value;
     dispatch_broadcast(e, data);
 }
 
-inline void broadcast(ecs::EntityApi e, string_hash_t event, const char* payload) {
-    NodeEventData data{event, e.index, {payload}};
+inline void broadcast(entity_t e, string_hash_t event, const char* payload) {
+    NodeEventData data{event, e, {payload}};
     dispatch_broadcast(e, data);
 }
 
-inline void notify_parents(ecs::EntityApi e, string_hash_t event, const char* payload = "") {
-    NodeEventData data{event, e.index, {payload}};
+inline void notify_parents(entity_t e, string_hash_t event, const char* payload = "") {
+    NodeEventData data{event, e, {payload}};
     dispatch_bubble(e, data);
 }
 

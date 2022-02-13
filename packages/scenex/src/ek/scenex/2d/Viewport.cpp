@@ -36,12 +36,12 @@ void doScale(const ViewportScaleInput& input, const ViewportScaleOptions& option
     output.screenRect.size = options.viewport.size * input.fullRect.size;
 }
 
-void updateViewport(ecs::EntityApi e, const ViewportScaleInput& input) {
-    auto& vp = e.get<Viewport>();
+void updateViewport(entity_t e, const ViewportScaleInput& input) {
+    auto& vp = ecs::get<Viewport>(e);
 
     doScale(input, vp.options, vp.output);
 
-    auto& layout = e.get<LayoutRect>();
+    auto& layout = ecs::get<LayoutRect>(e);
     layout.rect = vp.output.fullRect;
     layout.safeRect = vp.output.safeRect;
 }

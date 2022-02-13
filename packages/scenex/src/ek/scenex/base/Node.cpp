@@ -1,47 +1,49 @@
 #include "Node.hpp"
 
+#include <stdarg.h>
+
 namespace ek {
 
-ecs::EntityApi getChildAt(ecs::EntityApi e, int index) {
+entity_t get_child_at(entity_t e, int index) {
     int i = 0;
-    auto it = e.get<Node>().child_first;
-    while (it) {
+    entity_t it = get_first_child(e);
+    while (it.id) {
         if (i == index) {
             return it;
         }
         ++i;
-        it = it.get<Node>().sibling_next;
+        it = get_next_child(it);
     }
-    return nullptr;
+    return NULL_ENTITY;
 }
 
-void destroyChildren(ecs::EntityApi e) {
-    auto* entityNode = e.tryGet<Node>();
-    if (!entityNode) {
+void destroy_children(entity_t e) {
+    Node* node = ecs::try_get<Node>(e);
+    if (!node) {
         return;
     }
-    auto child = entityNode->child_first;
-    while (child) {
-        auto temp = child;
-        auto& childNode = child.get<Node>();
-        child = childNode.sibling_next;
+    entity_t child = node->child_first;
+    while (child.id) {
+        entity_t temp = child;
+        Node& child_node = ecs::get<Node>(child);
+        child = child_node.sibling_next;
 
-        destroyChildren(temp);
+        destroy_children(temp);
 
-        childNode.parent = nullptr;
-        ecx_destroy(temp.index);
+        child_node.parent = NULL_ENTITY;
+        destroy_entity(temp);
     }
-    entityNode->child_first = nullptr;
-    entityNode->child_last = nullptr;
+    node->child_first = NULL_ENTITY;
+    node->child_last = NULL_ENTITY;
 }
 
-bool isDescendant(ecs::EntityApi e, ecs::EntityApi ancestor) {
-    if (!e.has<Node>() || !ancestor.has<Node>()) {
+bool is_descendant(entity_t e, entity_t ancestor) {
+    if (!ecs::has<Node>(e) || !ecs::has<Node>(ancestor)) {
         return false;
     }
 
-    while (e) {
-        e = e.get<Node>().parent;
+    while (e.id) {
+        e = get_parent(e);
         if (e == ancestor) {
             return true;
         }
@@ -50,48 +52,48 @@ bool isDescendant(ecs::EntityApi e, ecs::EntityApi ancestor) {
     return false;
 }
 
-void removeFromParent(ecs::EntityApi e) {
-    auto* entityNode = e.tryGet<Node>();
+void remove_from_parent(entity_t e) {
+    Node* entityNode = ecs::try_get<Node>(e);
     if (!entityNode) {
         return;
     }
 
-    auto par = entityNode->parent;
-    if (!par) {
+    entity_t par = entityNode->parent;
+    if (!par.id) {
         return;
     }
 
-    auto prev = entityNode->sibling_prev;
-    auto next = entityNode->sibling_next;
+    entity_t prev = entityNode->sibling_prev;
+    entity_t next = entityNode->sibling_next;
 
-    if (prev) {
-        prev.get<Node>().sibling_next = next;
+    if (prev.id) {
+        ecs::get<Node>(prev).sibling_next = next;
     } else {
-        par.get<Node>().child_first = next;
+        ecs::get<Node>(par).child_first = next;
     }
 
-    if (next) {
-        next.get<Node>().sibling_prev = prev;
+    if (next.id) {
+        ecs::get<Node>(next).sibling_prev = prev;
     } else {
-        par.get<Node>().child_last = prev;
+        ecs::get<Node>(par).child_last = prev;
     }
 
-    entityNode->parent = nullptr;
-    entityNode->sibling_next = nullptr;
-    entityNode->sibling_prev = nullptr;
+    entityNode->parent = NULL_ENTITY;
+    entityNode->sibling_next = NULL_ENTITY;
+    entityNode->sibling_prev = NULL_ENTITY;
 }
 
-void appendStrict(ecs::EntityApi e, ecs::EntityApi child) {
+void append_strict(entity_t e, entity_t child) {
     EK_ASSERT(e != child);
-    EK_ASSERT(e.has<Node>());
-    EK_ASSERT(child.has<Node>());
-    EK_ASSERT(!child.get<Node>().parent);
+    EK_ASSERT(ecs::has<Node>(e));
+    EK_ASSERT(ecs::has<Node>(child));
+    EK_ASSERT(not get_parent(child).id);
 
-    auto& entity_node = e.get<Node>();
-    auto& child_node = child.get<Node>();
-    auto tail = entity_node.child_last;
-    if (tail) {
-        tail.get<Node>().sibling_next = child;
+    Node& entity_node = ecs::get<Node>(e);
+    Node& child_node = ecs::get<Node>(child);
+    entity_t tail = entity_node.child_last;
+    if (tail.id) {
+        ecs::get<Node>(tail).sibling_next = child;
         child_node.sibling_prev = tail;
         entity_node.child_last = child;
     } else {
@@ -101,27 +103,27 @@ void appendStrict(ecs::EntityApi e, ecs::EntityApi child) {
     child_node.parent = e;
 }
 
-void append(ecs::EntityApi e, ecs::EntityApi child) {
-    e.get_or_create<Node>();
-    if (child.get_or_create<Node>().parent) {
-        removeFromParent(child);
+void append(entity_t e, entity_t child) {
+    ecs::add<Node>(e);
+    if (get_parent(child).id) {
+        remove_from_parent(child);
     }
-    appendStrict(e, child);
+    append_strict(e, child);
 }
 
-void prependStrict(ecs::EntityApi e, ecs::EntityApi child) {
-    EK_ASSERT(e != child);
-    EK_ASSERT(e.has<Node>());
-    EK_ASSERT(child.has<Node>());
-    EK_ASSERT(!child.get<Node>().parent);
+void prepend_strict(entity_t e, entity_t child) {
+    EK_ASSERT(e.id != child.id);
+    EK_ASSERT(ecs::has<Node>(e));
+    EK_ASSERT(ecs::has<Node>(child));
+    EK_ASSERT(!get_parent(child).id);
 
-    auto& entity_node = e.get<Node>();
-    auto& child_node = child.get<Node>();
-    auto head = entity_node.child_first;
+    Node& entity_node = ecs::get<Node>(e);
+    Node& child_node = ecs::get<Node>(child);
+    entity_t head = entity_node.child_first;
 
-    if (head) {
+    if (head.id) {
         child_node.sibling_next = head;
-        head.get<Node>().sibling_prev = child;
+        ecs::get<Node>(head).sibling_prev = child;
         entity_node.child_first = child;
     } else {
         entity_node.child_first = child;
@@ -130,136 +132,136 @@ void prependStrict(ecs::EntityApi e, ecs::EntityApi child) {
     child_node.parent = e;
 }
 
-void prepend(ecs::EntityApi e, ecs::EntityApi child) {
-    e.get_or_create<Node>();
-    if (child.get_or_create<Node>().parent) {
-        removeFromParent(child);
+void prepend(entity_t e, entity_t child) {
+    ecs::add<Node>(e);
+    if (ecs::add<Node>(child).parent.id) {
+        remove_from_parent(child);
     }
-    prependStrict(e, child);
+    prepend_strict(e, child);
 }
 
-void removeChildren(ecs::EntityApi e) {
-    auto* entityNode = e.tryGet<Node>();
-    if (!entityNode) {
+void remove_children(entity_t e) {
+    Node* entity_node = ecs::try_get<Node>(e);
+    if (!entity_node) {
         return;
     }
 
-    auto child = entityNode->child_first;
-    while (child) {
-        auto temp = child;
-        child = child.get<Node>().sibling_next;
-        auto& temp_node = temp.get<Node>();
-        temp_node.parent = nullptr;
-        temp_node.sibling_next = nullptr;
-        temp_node.sibling_prev = nullptr;
+    entity_t child = entity_node->child_first;
+    while (child.id) {
+        Node& child_node = ecs::get<Node>(child);
+        child = child_node.sibling_next;
+        child_node.parent = NULL_ENTITY;
+        child_node.sibling_next = NULL_ENTITY;
+        child_node.sibling_prev = NULL_ENTITY;
     }
-    entityNode->child_first = nullptr;
-    entityNode->child_last = nullptr;
+    entity_node->child_first = NULL_ENTITY;
+    entity_node->child_last = NULL_ENTITY;
 }
 
-void insertAfter(ecs::EntityApi e, ecs::EntityApi childAfter) {
-    auto& entityNode = e.get<Node>();
-    EK_ASSERT(entityNode.parent);
-    auto& childAfterNode = childAfter.get_or_create<Node>();
-    removeFromParent(childAfter);
-    auto next = entityNode.sibling_next;
-    entityNode.sibling_next = childAfter;
-    childAfterNode.sibling_prev = e;
-    if (next) {
-        next.get<Node>().sibling_prev = childAfter;
-        childAfterNode.sibling_next = next;
+void insert_after(entity_t e, entity_t child_after) {
+    Node& entity_node = ecs::get<Node>(e);
+    EK_ASSERT(entity_node.parent.id);
+    Node& child_after_node = ecs::add<Node>(child_after);
+    remove_from_parent(child_after);
+    entity_t next = entity_node.sibling_next;
+    entity_node.sibling_next = child_after;
+    child_after_node.sibling_prev = e;
+    if (next.id) {
+        ecs::get<Node>(next).sibling_prev = child_after;
+        child_after_node.sibling_next = next;
     } else {
-        entityNode.parent.get<Node>().child_last = childAfter;
+        ecs::get<Node>(entity_node.parent).child_last = child_after;
     }
-    childAfterNode.parent = entityNode.parent;
+    child_after_node.parent = entity_node.parent;
 }
 
-void insertBeforeStrict(ecs::EntityApi e, ecs::EntityApi childBefore) {
-    EK_ASSERT(e.has<Node>());
-    EK_ASSERT(childBefore.has<Node>());
-    EK_ASSERT(!childBefore.get<Node>().parent);
-    EK_ASSERT(e.get<Node>().parent);
+void insert_before_strict(entity_t e, entity_t child_before) {
+    EK_ASSERT(ecs::has<Node>(e));
+    EK_ASSERT(ecs::has<Node>(child_before));
+    EK_ASSERT(!ecs::get<Node>(child_before).parent.id);
+    EK_ASSERT(ecs::get<Node>(e).parent.id);
 
-    auto& entityNode = e.get<Node>();
-    auto& childNode = childBefore.get<Node>();
-    auto prev = entityNode.sibling_prev;
-    entityNode.sibling_prev = childBefore;
-    childNode.sibling_next = e;
-    if (prev) {
-        prev.get<Node>().sibling_next = childBefore;
-        childNode.sibling_prev = prev;
+    Node& entity_node = ecs::get<Node>(e);
+    Node& child_node = ecs::get<Node>(child_before);
+    entity_t prev = entity_node.sibling_prev;
+    entity_node.sibling_prev = child_before;
+    child_node.sibling_next = e;
+    if (prev.id) {
+        ecs::get<Node>(prev).sibling_next = child_before;
+        child_node.sibling_prev = prev;
     } else {
-        entityNode.parent.get<Node>().child_first = childBefore;
+        ecs::get<Node>(entity_node.parent).child_first = child_before;
     }
-    childNode.parent = entityNode.parent;
+    child_node.parent = entity_node.parent;
 }
 
-void insertBefore(ecs::EntityApi e, ecs::EntityApi childBefore) {
-    EK_ASSERT(e.get<Node>().parent);
+void insert_before(entity_t e, entity_t child_before) {
+    EK_ASSERT(get_parent(e).id);
 
     // TODO: a lot of places just require assign if not exists
-    if (childBefore.get_or_create<Node>().parent) {
-        removeFromParent(childBefore);
+    if (ecs::add<Node>(child_before).parent.id) {
+        remove_from_parent(child_before);
     }
 
-    insertBeforeStrict(e, childBefore);
+    insert_before_strict(e, child_before);
 }
 
-uint32_t countChildren(ecs::EntityApi e) {
+uint32_t count_children(entity_t e) {
     uint32_t num = 0u;
-    auto* node = e.tryGet<Node>();
+    Node* node = ecs::try_get<Node>(e);
     if (node) {
-        auto child = node->child_first;
-        while (child) {
+        entity_t child = node->child_first;
+        while (child.id) {
             ++num;
-            child = child.get<Node>().sibling_next;
+            child = ecs::get<Node>(child).sibling_next;
         }
     }
     return num;
 }
 
-void destroyNode(ecs::EntityApi e) {
-    removeFromParent(e);
-    destroyChildren(e);
-    ecx_destroy(e.index);
+void destroy_node(entity_t e) {
+    remove_from_parent(e);
+    destroy_children(e);
+    destroy_entity(e);
 }
 
-ecs::EntityApi getRoot(ecs::EntityApi e) {
-    EK_ASSERT(e.has<Node>());
-    while (e && e.get<Node>().parent) {
-        e = e.get<Node>().parent;
+entity_t find_root(entity_t e) {
+    entity_t root = NULL_ENTITY;
+    while (is_entity(e)) {
+        root = e;
+        e = get_parent(e);
     }
-    return e;
+    return root;
 }
 
-int Node::findDepth(ecs::EntityApi e) {
-    int depth = 0;
-    auto it = e.get<Node>().parent;
-    while (it) {
+uint32_t get_node_depth(entity_t e) {
+    uint32_t depth = 0;
+    entity_t it = get_parent(e);
+    while (it.id) {
         ++depth;
-        it = it.get<Node>().parent;
+        it = get_parent(it);
     }
     return depth;
 }
 
-ecs::EntityApi Node::findLowerCommonAncestor(ecs::EntityApi e1, ecs::EntityApi e2) {
-    auto depth1 = Node::findDepth(e1);
-    auto depth2 = Node::findDepth(e2);
-    auto it1 = e1;
-    auto it2 = e2;
+entity_t find_lower_common_ancestor(entity_t e1, entity_t e2) {
+    uint32_t depth1 = get_node_depth(e1);
+    uint32_t depth2 = get_node_depth(e2);
+    entity_t it1 = e1;
+    entity_t it2 = e2;
     while (depth1 > depth2) {
-        it1 = it1.get<Node>().parent;
+        it1 = get_parent(it1);
         --depth1;
     }
     while (depth2 < depth1) {
-        it2 = it2.get<Node>().parent;
+        it2 = get_parent(it2);
         --depth2;
     }
-    while (it1 != it2) {
-        it1 = it1.get<Node>().parent;
-        it2 = it2.get<Node>().parent;
-        if (!it1 || !it2) {
-            return nullptr;
+    while (it1.id != it2.id) {
+        it1 = get_parent(it1);
+        it2 = get_parent(it2);
+        if (!it1.id || !it2.id) {
+            return NULL_ENTITY;
         }
     }
     return it1;
@@ -267,49 +269,82 @@ ecs::EntityApi Node::findLowerCommonAncestor(ecs::EntityApi e1, ecs::EntityApi e
 
 
 entity_t find(entity_t e, string_hash_t tag) {
-    auto it = ecs::get<Node>(e).child_first;
-    while (it) {
-        const auto& n = it.get<Node>();
+    entity_t it = ecs::get<Node>(e).child_first;
+    while (it.id) {
+        const Node& n = ecs::get<Node>(it);
         if (n.tag == tag) {
-            return it.index;
+            return it;
         }
         it = n.sibling_next;
     }
-    return 0;
+    return NULL_ENTITY;
 }
 
-entity_t findByPath(const uint32_t e, ...) {
+entity_t find_by_path(entity_t e, ...) {
     va_list argp;
     va_start(argp, e);
 
-    entity_t it = e;
-    string_hash_t p = va_arg(argp, string_hash_t);
-    while(p != 0) {
-        it = find(it, p);
-        if (!it) {
+    string_hash_t tag = va_arg(argp, string_hash_t);
+    while (tag) {
+        e = find(e, tag);
+        if (!e.id) {
             break;
         }
-        p = va_arg(argp, string_hash_t);
+        tag = va_arg(argp, string_hash_t);
     }
     va_end(argp);
-    return it;
+    return e;
 }
 
-PodArray<entity_t> findMany(const uint32_t e, ...) {
+uint32_t find_many(entity_t* out, const entity_t e, ...) {
     va_list argp;
     va_start(argp, e);
 
-    PodArray<entity_t> entities;
-    string_hash_t p = va_arg(argp, string_hash_t);
-    while(p != 0) {
-        entity_t f = find(e, p);
-        if (f) {
-            entities.push_back(f);
+    uint32_t len = 0;
+    string_hash_t tag = va_arg(argp, string_hash_t);
+    while (tag) {
+        entity_t f = find(e, tag);
+        if (f.id) {
+            out[len++] = f;
         }
-        p = va_arg(argp, string_hash_t);
+        tag = va_arg(argp, string_hash_t);
     }
     va_end(argp);
-    return entities;
+    return len;
+}
+
+entity_t get_parent(entity_t e) {
+    return ecs::get_or_default<Node>(e).parent;
+}
+
+void foreach_child(entity_t e, void(*callback)(entity_t child)) {
+    entity_t it = get_first_child(e);
+    while (it.id) {
+        entity_t temp = it;
+        it = get_next_child(it);
+        callback(temp);
+    }
+}
+
+void foreach_child_reverse(entity_t e, void(*callback)(entity_t child)) {
+    entity_t it = get_last_child(e);
+    while (it.id) {
+        entity_t temp = it;
+        it = get_prev_child(it);
+        callback(temp);
+    }
+}
+
+void* find_component_in_parent(ecx_component_type* type, entity_t e) {
+    entity_t it = e;
+    while (it.id) {
+        void* c = get_component(type, it);
+        if (c) {
+            return c;
+        }
+        it = get_parent(it);
+    }
+    return NULL;
 }
 
 }

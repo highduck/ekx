@@ -4,7 +4,7 @@
 #include <ek/hash.h>
 #include <ek/rr.h>
 #include <ek/format/SGFile.hpp>
-#include <ecxx/ecxx_fwd.hpp>
+#include <ecx/ecx_fwd.hpp>
 
 namespace ek {
 
@@ -13,12 +13,12 @@ void sg_load(SGFile* out, const void* data, uint32_t size);
 [[nodiscard]]
 const SGNodeData* sg_get(const SGFile* sg, string_hash_t libraryName);
 
-ecs::EntityApi sg_create(string_hash_t library, string_hash_t name, ecs::EntityApi parent = nullptr);
+entity_t sg_create(string_hash_t library, string_hash_t name, entity_t parent = NULL_ENTITY);
 
 rect_t sg_get_bounds(string_hash_t library, string_hash_t name);
 
-ecs::EntityApi createNode2D(string_hash_t tag = 0);
-ecs::EntityApi createNode2D(ecs::EntityApi parent, string_hash_t tag = 0, int index = -1);
+entity_t createNode2D(string_hash_t tag = 0);
+entity_t createNode2D(entity_t parent, string_hash_t tag = 0, int index = -1);
 
 }
 

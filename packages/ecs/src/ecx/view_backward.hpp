@@ -1,19 +1,18 @@
 #pragma once
 
 #include "world.hpp"
-#include <ek/ds/FixedArray.hpp>
 #include <cstdlib>
 
 namespace ecs {
 
-template<typename ...Component>
+template<typename ...Cn>
 class ViewBackward {
 public:
-    static constexpr auto components_num = sizeof ... (Component);
+    static constexpr auto components_num = sizeof ... (Cn);
 
     class iterator final {
     public:
-        iterator(const ecx_component_type* const table[components_num], entity_t it) noexcept: it_{it},
+        iterator(const ecx_component_type* const table[components_num], component_handle_t it) noexcept: it_{it},
                                                                                                ent_{0},
                                                                                                table_{table} {
             skips();
@@ -44,65 +43,54 @@ public:
         }
 
         [[nodiscard]]
-        inline bool valid(entity_t e) const {
+        inline bool valid(entity_idx_t entity_idx) const {
             for (uint32_t i = 1u; i < components_num; ++i) {
-                if (ek_sparse_array_get(table_[i]->entityToHandle, e) == 0) {
+                if (get_component_handle_by_index(table_[i], entity_idx) == 0) {
                     return false;
                 }
             }
             return true;
         }
 
-        inline EntityApi operator*() const {
-            return EntityApi{ent_};
+        inline Entity operator*() const {
+            return Entity{entity_at(ent_)};
         }
 
-        inline EntityApi operator*() {
-            return EntityApi{ent_};
+        inline Entity operator*() {
+            return Entity{entity_at(ent_)};
         }
 
     private:
-        entity_t it_;
-        entity_t ent_;
+        component_handle_t it_;
+        entity_idx_t ent_;
         const ecx_component_type* const* table_;
     };
 
     ViewBackward() noexcept {
-        {
-            uint32_t i = 0;
-            ((table_[i] = C<Component>::header, ++i), ...);
-        }
-        qsort(table_, components_num, sizeof(table_[0]), ecx_component_type_compare);
+        uint32_t i = 0;
+        ((table_[i] = type<Cn>(), ++i), ...);
+        _sort_component_type_table(table_, components_num);
     }
 
     iterator begin() const {
-        return {table_, (entity_t) (table_[0]->size - 1)};
+        return {table_, (component_handle_t) (table_[0]->size - 1)};
     }
 
     iterator end() const {
         return {table_, 0};
     }
 
-    template<typename Func>
-    void each(Func func) const {
-#pragma nounroll
-        for (auto e: *this) {
-            func(*C<Component>::get_by_entity(e.index)...);
-        }
-    }
-
-private:
     ecx_component_type* table_[components_num];
 };
 
-template<typename Component>
-class ViewBackward<Component> {
+template<typename C>
+class ViewBackward<C> {
 public:
     static constexpr auto components_num = 1;
 
     class iterator final {
     public:
-        iterator(uint32_t it) noexcept: it_{it} {
+        iterator(component_handle_t it) noexcept: it_{it} {
         }
 
         iterator() noexcept = default;
@@ -125,31 +113,23 @@ public:
             return it_ != other.it_;
         }
 
-        inline EntityApi operator*() const noexcept {
-            return EntityApi{C<Component>::header->handleToEntity[it_]};
+        inline Entity operator*() const noexcept {
+            return Entity{entity_at(type<C>()->handleToEntity[it_])};
         }
 
     private:
-        uint32_t it_ = 0;
+        component_handle_t it_ = 0;
     };
 
     ViewBackward() noexcept = default;
 
     iterator begin() const {
-        const uint32_t sz = C<Component>::header->size;
-        return {sz > 0 ? (sz - 1u) : 0u};
+        const component_handle_t sz = type<C>()->size;
+        return {(component_handle_t)(sz > 0 ? (sz - 1u) : 0u)};
     }
 
     iterator end() const {
         return {0u};
-    }
-
-    template<typename Func>
-    void each(Func func) const {
-#pragma nounroll
-        for (uint32_t i = C<Component>::header->size - 1; i != 0u; --i) {
-            func(C<Component>::get_by_handle(i));
-        }
     }
 };
 

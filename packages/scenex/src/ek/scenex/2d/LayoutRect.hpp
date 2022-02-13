@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 #include "Transform2D.hpp"
 
 namespace ek {
@@ -48,26 +48,26 @@ struct LayoutRect {
         return *this;
     }
 
-    static void hard(ecs::EntityApi e, float x, float y) {
-        if(e) {
-            const auto pos = e.get_or_create<Transform2D>().getPosition();
-            e.get_or_create<LayoutRect>().aligned(
+    static void hard(entity_t e, float x, float y) {
+        if(e.id) {
+            const auto pos = ecs::add<Transform2D>(e).getPosition();
+            ecs::add<LayoutRect>(e).aligned(
                     x, pos.x - (DesignCanvasRect.x + DesignCanvasRect.w * x),
                     y, pos.y - (DesignCanvasRect.y + DesignCanvasRect.h * y)
             );
         }
     }
 
-    static void hardX(ecs::EntityApi e, float x = 0.0f) {
-        const auto pos = e.get_or_create<Transform2D>().getPosition();
-        e.get_or_create<LayoutRect>().enableAlignX(
+    static void hardX(entity_t e, float x = 0.0f) {
+        const auto pos = ecs::add<Transform2D>(e).getPosition();
+        ecs::add<LayoutRect>(e).enableAlignX(
                 x, pos.x - (DesignCanvasRect.x + DesignCanvasRect.w * x)
         );
     }
 
-    static void hardY(ecs::EntityApi e, float y = 0.0f) {
-        const auto pos = e.get_or_create<Transform2D>().getPosition();
-        e.get_or_create<LayoutRect>().enableAlignY(
+    static void hardY(entity_t e, float y = 0.0f) {
+        const auto pos = ecs::add<Transform2D>(e).getPosition();
+        ecs::add<LayoutRect>(e).enableAlignY(
                 y, pos.y - (DesignCanvasRect.y + DesignCanvasRect.h * y)
         );
     }
@@ -79,16 +79,16 @@ struct LayoutRect {
 
 
 
-rect_t find_parent_layout_rect(ecs::EntityApi e, bool safe);
+rect_t find_parent_layout_rect(entity_t e, bool safe);
 
 
 // wrapper
 
 class layout_wrapper {
 public:
-    layout_wrapper(ecs::EntityApi e) :
+    layout_wrapper(entity_t e) :
             e_{e},
-            l_{e.get_or_create<LayoutRect>()} {
+            l_{&ecs::add<LayoutRect>(e)} {
     }
 
     layout_wrapper& aligned(float rel_x = 0.0f, float abs_x = 0.0f, float rel_y = 0.0f, float abs_y = 0.0f) {
@@ -108,27 +108,27 @@ public:
     }
 
     layout_wrapper& horizontal(float multiplier = 0.0f, float offset = 0.0f) {
-        l_.enableAlignX(multiplier, offset);
+        l_->enableAlignX(multiplier, offset);
         return *this;
     }
 
     layout_wrapper& vertical(float multiplier = 0.0f, float offset = 0.0f) {
-        l_.enableAlignY(multiplier, offset);
+        l_->enableAlignY(multiplier, offset);
         return *this;
     }
 
     layout_wrapper& fill(bool horizontal = true, bool vertical = true) {
-        l_.fill(horizontal, vertical);
+        l_->fill(horizontal, vertical);
         return *this;
     }
 
     layout_wrapper& fill_extra(const rect_t rc) {
-        l_.fill_extra = rc;
+        l_->fill_extra = rc;
         return *this;
     }
 
 private:
-    ecs::EntityApi e_;
-    LayoutRect& l_;
+    entity_t e_;
+    LayoutRect* l_;
 };
 }

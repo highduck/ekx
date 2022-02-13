@@ -7,12 +7,12 @@
 
 namespace ek {
 
-ParticleLayer2D& find_particle_layer(ecs::EntityApi e) {
-    auto l = e.get_or_default<ParticleEmitter2D>().layer.ent();
-    if (!l) {
+ParticleLayer2D& find_particle_layer(entity_t e) {
+    auto l = ecs::get_or_default<ParticleEmitter2D>(e).layer;
+    if (!is_entity(l)) {
         l = e;
     }
-    return l.get_or_create<ParticleLayer2D>();
+    return ecs::add<ParticleLayer2D>(l);
 }
 
 Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl* decl) {
@@ -39,15 +39,15 @@ Particle& produce_particle(ParticleLayer2D& toLayer, const ParticleDecl* decl) {
     return p;
 }
 
-void particles_burst(ecs::EntityApi e, int count, vec2_t relativeVelocity) {
+void particles_burst(entity_t e, int count, vec2_t relativeVelocity) {
     if (count < 0) {
         return;
     }
-    const auto& emitter = e.get<ParticleEmitter2D>();
+    const auto& emitter = ecs::get<ParticleEmitter2D>(e);
     const auto& data = emitter.data;
-    auto layerEntity = emitter.layer.get();
-    auto& layer = layerEntity.get<ParticleLayer2D>();
-    const auto position = Transform2D::localToLocal(e, layerEntity, emitter.position);
+    auto layer_entity = emitter.layer;
+    auto& layer = ecs::get<ParticleLayer2D>(layer_entity);
+    const auto position = local_to_local(e, layer_entity, emitter.position);
     float a = data.dir.random();
     auto* decl = &REF_RESOLVE(res_particle, emitter.particle);
     while (count > 0) {
@@ -71,18 +71,18 @@ void particles_burst(ecs::EntityApi e, int count, vec2_t relativeVelocity) {
 
 void update_emitters() {
     for (auto e: ecs::view<ParticleEmitter2D>()) {
-        auto& emitter = e.get<ParticleEmitter2D>();
-        if (!emitter.enabled || !emitter.particle || !emitter.layer.invalidate()) {
+        auto& emitter = ecs::get<ParticleEmitter2D>(e);
+        entity_t emitter_layer = emitter.layer;
+        if (!emitter.enabled || !emitter.particle || !is_entity(emitter_layer)) {
             continue;
         }
         const auto dt = g_time_layers[emitter.timer].dt;
         emitter.time += dt;
         const auto& data = emitter.data;
         if (emitter.time >= data.interval) {
-            auto layerEntity = emitter.layer.get();
-            auto& layer = layerEntity.get<ParticleLayer2D>();
+            auto& layer = ecs::get<ParticleLayer2D>(emitter_layer);
             auto position = data.offset;
-            position = Transform2D::localToLocal(e, layerEntity, position);
+            position = local_to_local(e, emitter_layer, position);
 
             auto* decl = &REF_RESOLVE(res_particle, emitter.particle);
             int count = data.burst;
@@ -111,27 +111,27 @@ void update_emitters() {
     }
 }
 
-Particle* spawn_particle(ecs::EntityApi e, string_hash_t particle_id) {
+Particle* spawn_particle(entity_t e, string_hash_t particle_id) {
     ParticleDecl* decl = &RES_NAME_RESOLVE(res_particle, particle_id);
-    auto& to_layer = e.get_or_create<ParticleLayer2D>();
+    auto& to_layer = ecs::add<ParticleLayer2D>(e);
     return &produce_particle(to_layer, decl);
 }
 
-void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const ParticleDecl* decl, ParticleEmitter2D& emitter,
+void spawnFromEmitter(entity_t src, entity_t toLayer, const ParticleDecl* decl, ParticleEmitter2D& emitter,
                       int count) {
     if (count <= 0) {
         return;
     }
     const auto& data = emitter.data;
     auto a = data.dir.random();
-    auto& layerComp = toLayer.get<ParticleLayer2D>();
+    auto& layerComp = ecs::get<ParticleLayer2D>(toLayer);
     while (count > 0) {
         auto& p = produce_particle(layerComp, decl);
         const vec2_t position = data.offset + data.rect.position + data.rect.size * vec2(random_f(), random_f());
         const vec2_t dir = vec2_cs(a);
         const auto speed = data.speed.random();
         const auto acc = data.acc.random();
-        p.position = Transform2D::localToLocal(src, toLayer, position);
+        p.position = local_to_local(src, toLayer, position);
         p.velocity = dir * speed + emitter.velocity;
         p.acc += dir * acc;
         if (emitter.on_spawn) {
@@ -146,7 +146,7 @@ void spawnFromEmitter(ecs::EntityApi src, ecs::EntityApi toLayer, const Particle
 
 void update_particles() {
     for (auto e: ecs::view<ParticleLayer2D>()) {
-        auto& layer = e.get<ParticleLayer2D>();
+        auto& layer = ecs::get<ParticleLayer2D>(e);
         auto dt = g_time_layers[layer.timer].dt;
         auto& particles = layer.particles;
         uint32_t i = 0;
@@ -163,21 +163,21 @@ void update_particles() {
 }
 
 ParticleRenderer2D* particle_renderer2d_setup(entity_t e) {
-    ecs::EntityApi entity{e};
-    Display2D& disp = entity.get_or_create<Display2D>();
-    ParticleRenderer2D& pr = entity.get_or_create<ParticleRenderer2D>();
-    pr.target = ecs::EntityRef{entity};
+    Display2D& disp = ecs::add<Display2D>(e);
+    ParticleRenderer2D& pr = ecs::add<ParticleRenderer2D>(e);
+    pr.target = e;
     disp.draw = particle_renderer2d_draw;
     return &pr;
 }
 
 void particle_renderer2d_draw(entity_t e) {
-    ecs::EntityApi{e}.get<ParticleRenderer2D>().draw();
+    ecs::get<ParticleRenderer2D>(e).draw();
 }
 
 void ParticleRenderer2D::draw() {
-    if (target) {
-        auto* layer = target.get().tryGet<ParticleLayer2D>();
+    entity_t target_entity = target;
+    if (is_entity(target_entity)) {
+        auto* layer = ecs::try_get<ParticleLayer2D>(target_entity);
         if (layer) {
             for (auto& p: layer->particles) {
                 p.draw();

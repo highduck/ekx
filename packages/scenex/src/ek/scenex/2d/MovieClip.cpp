@@ -5,15 +5,13 @@
 
 namespace ek {
 
-using ecs::EntityApi;
-
 float ease(float x, const SGEasingData& data);
 
-void apply_frame(EntityApi e, MovieClip& mov);
+void apply_frame(entity_t e, MovieClip& mov);
 
 void MovieClip::updateAll() {
     for (auto e : ecs::view<MovieClip>()) {
-        auto& mov = e.get<MovieClip>();
+        auto& mov = ecs::get<MovieClip>(e);
         auto dt = g_time_layers[mov.timer].dt;
         if (mov.playing) {
             mov.time += dt * mov.fps;
@@ -82,22 +80,21 @@ easing_progress_t get_easing_progress(const float t, const Array<SGEasingData>& 
     return progress;
 }
 
-void apply_transform(EntityApi e, const SGKeyFrameTransform& keyframe) {
-    auto& transform = e.get_or_create<Transform2D>();
+void apply_transform(entity_t e, const SGKeyFrameTransform& keyframe) {
+    auto& transform = ecs::add<Transform2D>(e);
     transform.setTransform(keyframe.position, keyframe.scale, keyframe.skew, keyframe.pivot);
     transform.color.scale = color_vec4(keyframe.color.scale);
     transform.color.offset = color_vec4(keyframe.color.offset);
 }
 
-void update_target(float time, EntityApi e, const SGMovieLayerData& layer) {
-    auto& config = e.get_or_create<Node>();
+void update_target(float time, entity_t e, const SGMovieLayerData& layer) {
     const auto ki = findKeyFrame(layer.frames, time);
     if (ki < 0) {
-        config.setVisible(false);
+        set_visible(e, false);
         return;
     }
     const auto& k1 = layer.frames[ki];
-    config.setVisible(k1.visible);
+    set_visible(e, k1.visible);
     if (k1.motion_type == 1 && (ki + 1) < layer.frames.size()) {
         const auto& k2 = layer.frames[ki + 1];
         const float t = k1.getLocalTime(time);
@@ -108,8 +105,8 @@ void update_target(float time, EntityApi e, const SGMovieLayerData& layer) {
         apply_transform(e, k1.transform);
     }
 
-    if (k1.loopMode != 0 && e.has<MovieClip>()) {
-        auto& mc = e.get<MovieClip>();
+    if (k1.loopMode != 0 && ecs::has<MovieClip>(e)) {
+        auto& mc = ecs::get<MovieClip>(e);
         const auto loop = k1.loopMode;
         if (loop == 1) {
             goto_and_stop(e, time - k1.index);
@@ -127,28 +124,29 @@ void update_target(float time, EntityApi e, const SGMovieLayerData& layer) {
     }
 }
 
-void apply_frame(EntityApi e, MovieClip& mov) {
+void apply_frame(entity_t e, MovieClip& mov) {
     auto* data = mov.data;
     auto time = mov.time;
     if (!data) {
         // no data - exit early
         return;
     }
-    auto it = e.get<Node>().child_first;
+    auto it = get_first_child(e);
     const auto totalTargets = static_cast<int>(data->layers.size());
-    while (it != nullptr) {
-        if (it.has<MovieClipTargetIndex>()) {
-            const auto idx = it.get<MovieClipTargetIndex>().key;
+    while (it.id) {
+        MovieClipTargetIndex* ti = ecs::try_get<MovieClipTargetIndex>(it);
+        if (ti) {
+            const auto idx = ti->key;
             if (idx < totalTargets) {
                 update_target(time, it, data->layers[idx]);
             }
         }
-        it = it.get<Node>().sibling_next;
+        it = get_next_child(it);
     }
 }
 
-void goto_and_stop(EntityApi e, float frame) {
-    auto& mov = e.get<MovieClip>();
+void goto_and_stop(entity_t e, float frame) {
+    auto& mov = ecs::get<MovieClip>(e);
     mov.playing = false;
     mov.time = frame;
     mov.trunc_time();

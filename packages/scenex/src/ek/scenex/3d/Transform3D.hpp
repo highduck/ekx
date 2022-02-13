@@ -1,13 +1,7 @@
 #pragma once
 
-#include <ecxx/ecxx_fwd.hpp>
+#include <ecx/ecx_fwd.hpp>
 #include <ek/math.h>
-
-namespace ecs {
-class World;
-}
-
-namespace ek {
 
 struct Transform3D {
     mat4_t local = mat4_identity();
@@ -25,11 +19,9 @@ struct Transform3D {
 //    inline float3 get_euler_angles() const {
 //        euler_angles(rotation);
 //    }
-
-    static void updateAll();
 };
 
+void update_world_transform3d();
 
-
-}
-
+//extern ecx_component_type COMP_Transform3D;
+//Transform3D* get_transform3d(entity_t e);

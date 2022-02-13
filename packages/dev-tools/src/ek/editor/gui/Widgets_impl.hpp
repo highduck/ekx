@@ -102,14 +102,14 @@ bool ToolbarButton(const char* label, bool active, const char* tooltip) {
 namespace ek {
 
 void getDebugNodePath(entity_t e, char buffer[1024]) {
-    ecs::EntityApi entity{e};
+    ecs::Entity entity{e};
     const char* names[32];
     int depth = 0;
     String result;
     while (entity && depth < 32) {
-        const auto tag = entity.get_or_default<Node>().tag;
+        const auto tag = ecs::get_or_default<Node>(entity).tag;
         names[depth++] = tag ? hsp_get(tag) : "_";
-        entity = entity.get<Node>().parent;
+        entity = ecs::get<Node>(entity).parent;
     }
     uint32_t len = 0;
     while(depth-- > 0) {

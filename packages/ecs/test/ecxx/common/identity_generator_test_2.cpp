@@ -1,5 +1,5 @@
 #include <doctest.h>
-#include <ecxx/impl/world.hpp>
+#include <ecx/ecx.hpp>
 #include "identity_generator_shared.hpp"
 
 using namespace ecs;

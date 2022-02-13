@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/ds/String.hpp>
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 #include <ek/admob.h>
 #include <ek/util/Type.hpp>
 #include "Ads.hpp"
@@ -35,15 +35,15 @@ class AppBox {
 public:
     explicit AppBox(AppBoxConfig info);
 
-    void initDefaultControls(ecs::EntityApi e);
+    void initDefaultControls(ecs::Entity e);
 
     void shareWithAppLink(const String& text);
 
     void rateUs() const;
 
-    void initDownloadAppButtons(ecs::EntityApi e);
+    void initDownloadAppButtons(ecs::Entity e);
 
-    void initLanguageButton(ecs::EntityApi e);
+    void initLanguageButton(ecs::Entity e);
 
     void showAchievements();
 

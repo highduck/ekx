@@ -22,7 +22,7 @@ namespace ek {
 void Editor::drawGUI() {
     auto* baseApp = g_game_app;
     if (baseApp) {
-        hierarchy.root = ecs::EntityRef{baseApp->root};
+        hierarchy.root = baseApp->root;
     }
 
     static bool fontIconsWindow = false;

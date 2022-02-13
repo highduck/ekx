@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 #include "Material3D.hpp"
 
 namespace ek {
@@ -29,8 +29,8 @@ public:
     mat4_t cameraProjection = mat4_identity();
     mat4_t cameraView = mat4_identity();
 
-    ecs::EntityApi scene;
-    ecs::EntityApi camera;
+    entity_t scene;
+    entity_t camera;
 };
 
 }

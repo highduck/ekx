@@ -1,5 +1,5 @@
 #include <doctest.h>
-#include <ecxx/impl/world.hpp>
+#include <ecx/world.hpp>
 #include "identity_generator_shared.hpp"
 
 TEST_CASE("identity_generator, test_1") {

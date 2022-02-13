@@ -2,7 +2,7 @@
 
 #include <ek/math.h>
 
-#include <ecxx/ecxx_fwd.hpp>
+#include <ecx/ecx_fwd.hpp>
 #include <ek/gfx.h>
 
 namespace ek {

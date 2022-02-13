@@ -1,6 +1,6 @@
 #include "InteractionSystem.hpp"
 
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 #include <ek/scenex/base/Interactive.hpp>
 #include <ek/scenex/base/NodeEvents.hpp>
 #include <ek/scenex/systems/hitTest.hpp>
@@ -17,19 +17,19 @@ entity_t* getTargets(uint32_t off) {
 
 namespace ek {
 
-bool dispatch_interactive_event(ecs::EntityApi e, const NodeEventData& data) {
-    if (isTouchable(e)) {
-        auto* eh = e.tryGet<NodeEventHandler>();
+bool dispatch_interactive_event(entity_t e, const NodeEventData& data) {
+    if (is_touchable(e)) {
+        auto* eh = ecs::try_get<NodeEventHandler>(e);
         if (eh) {
-            data.receiver = e.index;
+            data.receiver = e;
             eh->emit(data);
             if (data.processed) {
                 return true;
             }
         }
-        auto it = e.get<Node>().child_last;
-        while (it) {
-            auto prev = it.get<Node>().sibling_prev;
+        auto it = get_last_child(e);
+        while (it.id) {
+            auto prev = get_prev_child(it);
             if (dispatch_interactive_event(it, data)) {
                 return true;
             }
@@ -42,10 +42,10 @@ bool dispatch_interactive_event(ecs::EntityApi e, const NodeEventData& data) {
 bool interaction_system_list_contains_target(const entity_t list[32], entity_t e) {
     for (uint32_t i = 0; i < 32; ++i) {
         entity_t target = list[i];
-        if (target == e) {
+        if (target.id == e.id) {
             return true;
         }
-        if (!target) {
+        if (!target.id) {
             break;
         }
     }
@@ -59,10 +59,10 @@ void InteractionSystem::fireInteraction(string_hash_t event, bool prev, bool onl
 
     for (uint32_t i = 0; i < 32; ++i) {
         entity_t target = targets[i];
-        if (check_entity_alive(target)) {
+        if (is_entity(target)) {
             // TODO: we actually could check NodeEventHandler and dispatch events, if Interactive component set - we
             //  just update state
-            auto* interactive = ecs::EntityApi{target}.tryGet<Interactive>();
+            auto* interactive = ecs::try_get<Interactive>(target);
             if (interactive && !(onlyIfChanged && interaction_system_list_contains_target(oppositeTargets, target))) {
                 interactive->handle(target, event);
             }
@@ -121,82 +121,80 @@ void InteractionSystem::handle_touch_event(const ek_app_event* ev, vec2_t pos) {
 }
 
 void InteractionSystem::sendBackButton() {
-    ecs::EntityApi r{root_};
-    dispatch_interactive_event(r, {
+    dispatch_interactive_event(root_, {
             INTERACTIVE_EVENT_BACK_BUTTON,
-            r.index,
+            root_,
             {"game"}
     });
 }
 
 void InteractionSystem::handle_system_pause() {
-    ecs::EntityApi r{root_};
-    broadcast(r, INTERACTIVE_EVENT_SYSTEM_PAUSE);
+    broadcast(root_, INTERACTIVE_EVENT_SYSTEM_PAUSE);
 }
 
-ecs::EntityApi InteractionSystem::globalHitTest(vec2_t* worldSpacePointer, ecs::EntityRef* capturedCamera) {
+entity_t InteractionSystem::globalHitTest(vec2_t* worldSpacePointer, entity_t* capturedCamera) {
     auto& cameras = Camera2D::getCameraQueue();
     for (int i = static_cast<int>(cameras.size()) - 1; i >= 0; --i) {
         auto e = cameras[i];
-        if (e.valid()) {
-            auto* camera = e.get().tryGet<Camera2D>();
+        if (is_entity(e)) {
+            auto* camera = ecs::try_get<Camera2D>(e);
             if (camera && camera->enabled && camera->interactive &&
                 rect_contains(camera->screenRect, pointerScreenPosition_)) {
                 const auto pointerWorldPosition = vec2_transform(pointerScreenPosition_, camera->screenToWorldMatrix);
-                auto target = hitTest2D(camera->root.index(), pointerWorldPosition);
-                if (target != 0) {
+                auto target = hitTest2D(camera->root, pointerWorldPosition);
+                if (target.id) {
                     *worldSpacePointer = pointerWorldPosition;
                     *capturedCamera = e;
-                    return ecs::EntityApi{target};
+                    return target;
                 }
             }
         }
     }
-    return nullptr;
+    return NULL_ENTITY;
 }
 
 ek_mouse_cursor InteractionSystem::searchInteractiveTargets(entity_t list[32]) {
     vec2_t pointer = {};
-    ecs::EntityApi it;
-    ecs::EntityRef camera;
-    ecs::EntityRef drag_entity{dragEntity_};
-    if (drag_entity.valid()) {
-        it = drag_entity.ent();
-        auto* interactive = it.tryGet<Interactive>();
-        if (interactive && interactive->camera.valid()) {
+    entity_t it;
+    entity_t camera;
+    entity_t drag_entity = dragEntity_;
+    if (is_entity(drag_entity)) {
+        it = drag_entity;
+        auto* interactive = ecs::try_get<Interactive>(it);
+        if (interactive && is_entity(interactive->camera)) {
             camera = interactive->camera;
-            pointer = vec2_transform(pointerScreenPosition_, camera.get().get<Camera2D>().screenToWorldMatrix);
+            pointer = vec2_transform(pointerScreenPosition_, ecs::get<Camera2D>(camera).screenToWorldMatrix);
         }
     } else {
         it = globalHitTest(&pointer, &camera);
     }
-    hitTarget_ = get_entity_passport(it.index);
+    hitTarget_ = it;
 
     auto cursor = EK_MOUSE_CURSOR_PARENT;
     uint32_t len = 0;
-    while (it) {
-        auto* interactive = it.tryGet<Interactive>();
+    while (it.id) {
+        auto* interactive = ecs::try_get<Interactive>(it);
         if (interactive) {
             interactive->pointer = pointer;
-            interactive->camera = ecs::EntityRef{camera};
+            interactive->camera = camera;
             if (cursor == EK_MOUSE_CURSOR_PARENT) {
                 cursor = interactive->cursor;
             }
             EK_ASSERT(len < 32);
-            list[len++] = it.index;
+            list[len++] = it;
             if (!interactive->bubble) {
                 break;
             }
         }
-        it = it.get<Node>().parent;
+        it = get_parent(it);
     }
     EK_ASSERT(len < 32);
-    list[len] = 0;
+    list[len] = NULL_ENTITY;
     return cursor;
 }
 
-void InteractionSystem::drag(ecs::EntityApi entity) {
-    dragEntity_ = get_entity_passport(entity.index);
+void InteractionSystem::drag(entity_t entity) {
+    dragEntity_ = entity;
 }
 
 }
@@ -210,9 +208,9 @@ void init_interaction_system() {
 void update_interaction_system() {
     using namespace ek;
 
-    auto* currTargets = getTargets(1);
+    entity_t* currTargets = getTargets(1);
     // clear current list
-    currTargets[0] = 0;
+    currTargets[0] = NULL_ENTITY;
 
     //pointer_global_space = float2::zero;
     auto cursor = EK_MOUSE_CURSOR_PARENT;

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
-#include <ek/ds/Array.hpp>
-#include <ek/ds/String.hpp>
+#include <ecx/ecx.hpp>
+#include <ek/ds/PodArray.hpp>
 #include <ek/util/Signal.hpp>
 #include <ek/math.h>
+#include <ek/hash.h>
 
 namespace ek {
 
@@ -29,8 +29,8 @@ struct ScreenTransitionState {
     bool nextPlayStarted = false;
     bool nextPlayCompleted = false;
 
-    ecs::EntityApi prev;
-    ecs::EntityApi next;
+    ecs::Entity prev;
+    ecs::Entity next;
 
     float duration = 0.65f;
     float delay = 0.15f;
@@ -55,9 +55,9 @@ struct ScreenTransitionState {
 };
 
 struct GameScreenManager {
-    ecs::EntityApi layer;
+    ecs::Entity layer;
 
-    PodArray<ecs::EntityApi> stack;
+    PodArray<ecs::Entity> stack;
 
     ScreenTransitionState transition;
 
@@ -68,7 +68,7 @@ struct GameScreenManager {
     void setScreen(string_hash_t name);
 
     [[nodiscard]]
-    ecs::EntityApi findScreen(string_hash_t name) const;
+    ecs::Entity findScreen(string_hash_t name) const;
 
     void changeScreen(string_hash_t name);
 
@@ -80,7 +80,7 @@ struct GameScreenManager {
 
 };
 
-void init_game_screen(ecs::EntityApi e, string_hash_t name = 0);
+void init_game_screen(ecs::Entity e, string_hash_t name = 0);
 
 }
 

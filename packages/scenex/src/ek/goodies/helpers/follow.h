@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 #include <ek/math.h>
 
 struct target_follow_comp {
@@ -12,7 +12,7 @@ struct target_follow_comp {
 
     vec2_t offset = {};
     vec2_t target = {};
-    ecs::EntityRef target_entity{};
+    ecs::Entity target_entity{};
 
     float k = 0.1f;
     float fixed_frame_rate = 60.0f;
@@ -29,8 +29,5 @@ struct target_follow_comp {
 
 struct mouse_follow_comp {};
 
-ECX_COMP_TYPE_SPARSE(mouse_follow_comp)
-
 void update_target_follow_comps(float dt);
 void update_mouse_follow_comps(void);
-

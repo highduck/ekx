@@ -4,7 +4,7 @@
 namespace ek {
 
 void Interactive::handle(entity_t e, string_hash_t type) {
-    NodeEventHandler* eh = e ? ecs::EntityApi{e}.tryGet<NodeEventHandler>(): nullptr;
+    NodeEventHandler* eh = ecs::try_get<NodeEventHandler>(e);
     bool shouldBeClicked = false;
     if (type == POINTER_EVENT_DOWN) {
         pushed = true;

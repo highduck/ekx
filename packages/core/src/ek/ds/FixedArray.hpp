@@ -17,7 +17,7 @@ struct FixedArray {
     FixedArray() noexcept: _size{0}, _data{} {
     }
 
-    FixedArray(std::initializer_list<T> list) noexcept: _size{(uint32_t)list.size()} {
+    FixedArray(std::initializer_list<T> list) noexcept: _size{(uint32_t) list.size()} {
         memcpy(_data, list.begin(), list.size() * sizeof(T));
     }
 
@@ -32,11 +32,11 @@ struct FixedArray {
     }
 
     constexpr T* begin() const {
-        return (T*)_data;
+        return (T*) _data;
     }
 
     constexpr T* end() const {
-        return (T*)_data + _size;
+        return (T*) _data + _size;
     }
 
     [[nodiscard]]
@@ -57,30 +57,37 @@ struct FixedArray {
         }
     }
 
-    [[nodiscard]]
-    constexpr T* data() const {
-        return (T*)_data;
+    void erase_ptr(T* el) {
+        EK_ASSERT_R2(_size > 0);
+        EK_ASSERT_R2(el);
+        EK_ASSERT_R2(el >= _data);
+        erase_at(el - _data);
     }
 
     [[nodiscard]]
-    constexpr T back() const {
+    constexpr T* data() const {
+        return (T*) _data;
+    }
+
+    [[nodiscard]]
+    constexpr T& back() const {
         EK_ASSERT(_size > 0);
-        return *(_data + _size - 1);
+        return *((T*)_data + _size - 1);
     }
 
     constexpr T& operator[](unsigned i) const {
         EK_ASSERT(i < _size);
-        return (T&)_data[i];
+        return (T&) _data[i];
     }
 
     constexpr void clear() {
         _size = 0;
     }
 
-    const T* find(const T& v) const {
+    T* find(const T& v) const {
         for (uint32_t i = 0; i < _size; ++i) {
             if (_data[i] == v) {
-                return _data + i;
+                return (T*)_data + i;
             }
         }
         return nullptr;

@@ -9,34 +9,32 @@
 
 namespace ek {
 
-void drawEntity(ecs::EntityApi e, const Transform2D* transform);
-
-ecs::EntityApi Camera2D::Main{};
+entity_t Camera2D::Main{};
 
 mat3x2_t
-Camera2D::getMatrix(ecs::EntityApi root_, float scale, vec2_t screenOffset, vec2_t screenSize) const {
+Camera2D::getMatrix(entity_t root_, float scale, vec2_t screenOffset, vec2_t screenSize) const {
     const float inv_scale = 1.0f / (scale * contentScale);
-    mat3x2_t m = root_.get<WorldTransform2D>().matrix;
+    mat3x2_t m = ecs::get<WorldTransform2D>(root_).matrix;
     mat3x2_translate(&m, -relativeOrigin * screenSize);
     mat3x2_scale(&m, vec2(inv_scale, inv_scale));
     mat3x2_translate(&m, -screenOffset);
     return m;
 }
 
-static FixedArray<ecs::EntityRef, Camera2D::MaxCount> activeCameras{};
+static FixedArray<entity_t, Camera2D::MaxCount> activeCameras{};
 static const Camera2D* currentRenderingCamera = nullptr;
 static int currentLayerMask = 0xFF;
 
-FixedArray<ecs::EntityRef, Camera2D::MaxCount>& Camera2D::getCameraQueue() {
+FixedArray<entity_t, Camera2D::MaxCount>& Camera2D::getCameraQueue() {
     return activeCameras;
 }
 
-void Camera2D::updateQueue() {
+void update_camera2d_queue() {
     activeCameras.clear();
 
     for (auto e: ecs::view<Camera2D>()) {
-        auto& camera = e.get<Camera2D>();
-        const auto* vp = camera.viewportNode.get().tryGet<Viewport>();
+        auto& camera = ecs::get<Camera2D>(e);
+        const auto* vp = ecs::try_get<Viewport>(camera.viewportNode);
         if (!camera.enabled || !vp) {
             continue;
         }
@@ -49,32 +47,31 @@ void Camera2D::updateQueue() {
 
         camera.worldToScreenMatrix = camera.screenToWorldMatrix;
         if (mat3x2_inverse(&camera.worldToScreenMatrix)) {
-            activeCameras.push_back(ecs::EntityRef{e});
+            activeCameras.push_back(e);
         } else {
             // please debug camera setup
             EK_ASSERT(false);
         }
     }
-    qsort(activeCameras.data(), activeCameras.size(), sizeof(ecs::EntityRef), [](void const* _a, void const* _b) {
-        auto* a = (ecs::EntityRef*) _a;
-        auto* b = (ecs::EntityRef*) _b;
-        return a->get().get<Camera2D>().order - b->get().get<Camera2D>().order;
+    qsort(activeCameras.data(), activeCameras.size(), sizeof(entity_t), [](void const* _a, void const* _b) {
+        auto* a = (entity_t*) _a;
+        auto* b = (entity_t*) _b;
+        return ecs::get<Camera2D>(*a).order - ecs::get<Camera2D>(*b).order;
     });
 }
 
-void Camera2D::render() {
+void render_camera2d_queue() {
     for (auto e: activeCameras) {
-        if (!e.valid()) {
+        if (!is_entity(e)) {
             continue;
         }
-        auto& camera = e.get().get<Camera2D>();
+        auto& camera = ecs::get<Camera2D>(e);
         if (rect_is_empty(camera.screenRect)) {
             continue;
         }
 
         // set current
         currentRenderingCamera = &camera;
-        currentLayerMask = camera.layerMask;
 
         sg_push_debug_group("Camera");
         canvas_begin_ex(camera.screenRect, camera.worldToScreenMatrix, {0}, {0});
@@ -88,13 +85,14 @@ void Camera2D::render() {
             canvas_restore_program();
         }
 
-        if (camera.root.valid() && camera.root.get().get_or_default<Node>().visible()) {
-            RenderSystem2D::draw(camera.root.index(), camera.root.get().tryGet<WorldTransform2D>());
+        entity_t camera_root = camera.root;
+        if (is_entity(camera_root) && is_visible(camera_root)) {
+            RenderSystem2D::draw(camera_root, ecs::try_get<WorldTransform2D>(camera_root));
         }
 
 #ifndef NDEBUG
         //        draw2d::begin(camera.screenRect, camera.worldToScreenMatrix);
-                drawGizmo(camera);
+        Camera2D::drawGizmo(camera);
         //        sg_apply_viewportf(camera.screenRect.x, camera.screenRect.y, camera.screenRect.width, camera.screenRect.height, true);
 #endif
 

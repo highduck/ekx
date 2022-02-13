@@ -152,8 +152,8 @@ struct ShadowMapRes {
         vec3_t light_position = vec3(0, 0, 1);
         Light3D light_data{};
         for (auto e: ecs::view<Light3D, Transform3D>()) {
-            auto& l = e.get<Light3D>();
-            auto& transform = e.get<Transform3D>();
+            auto& l = ecs::get<Light3D>(e);
+            auto& transform = ecs::get<Transform3D>(e);
             if (l.type == Light3DType::Directional) {
                 light_data = l;
                 light_position = normalize_vec3(mat4_get_position(&transform.world));
@@ -180,8 +180,8 @@ struct ShadowMapRes {
 
         R(StaticMesh) resMesh = 0;
         for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
-            const auto& filter = e.get<MeshRenderer>();
-            if (filter.castShadows && e.get_or_default<Node>().visible()) {
+            const auto& filter = ecs::get<MeshRenderer>(e);
+            if (filter.castShadows && is_visible(e)) {
                 resMesh = R_MESH3D(filter.mesh);
                 auto* mesh = resMesh ? REF_RESOLVE(res_mesh3d, resMesh) : nullptr;
                 if(!mesh) {
@@ -191,7 +191,7 @@ struct ShadowMapRes {
                     bindings.index_buffer = mesh->ib;
                     bindings.vertex_buffers[0] = mesh->vb;
                     sg_apply_bindings(bindings);
-                    mvp = mat4_mul(mat4_mul(projection, view), e.get<Transform3D>().world);
+                    mvp = mat4_mul(mat4_mul(projection, view), ecs::get<Transform3D>(e).world);
                     sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
                     sg_draw(0, mesh->indices_count, 1);
                 }
@@ -322,11 +322,11 @@ void RenderSystem3D::renderObjects(mat4_t proj, mat4_t view) {
     main->bind.fs_images[SLOT_u_image_shadow_map] = shadows->rtColor;
 
     for (auto e: ecs::view<MeshRenderer, Transform3D>()) {
-        const auto& filter = e.get<MeshRenderer>();
+        const auto& filter = ecs::get<MeshRenderer>(e);
         auto* mesh = filter.mesh ? RES_NAME_RESOLVE(res_mesh3d, filter.mesh) : nullptr;
         if(!mesh) mesh = filter.meshPtr;
-        if (mesh && e.get_or_default<Node>().visible()) {
-            mat4_t model = e.get<Transform3D>().world;
+        if (mesh && is_visible(e)) {
+            mat4_t model = ecs::get<Transform3D>(e).world;
 //            mat3_t nm = mat3_transpose(mat3_inverse(mat4_get_mat3(&model)));
 //            mat4_t nm4 = mat4_mat3(nm);
             mat4_t nm4 = mat4_transpose(mat4_inverse(mat4_mat3(mat4_get_mat3(&model))));
@@ -361,17 +361,17 @@ void RenderSystem3D::renderObjects(mat4_t proj, mat4_t view) {
 void RenderSystem3D::prepare() {
     defaultMaterial.set_base_color(RGB(0xFF00FF), 0.2f);
 
-    if (!camera.is_alive() || !scene.is_alive()) {
-        camera = nullptr;
-        scene = nullptr;
+    if (!is_entity(camera) || !is_entity(scene)) {
+        camera = NULL_ENTITY;
+        scene = NULL_ENTITY;
     }
     // get view camera orientation
-    if (!camera || !isVisible(camera)) {
+    if (!is_entity(camera) || !is_visible(camera)) {
         return;
     }
 
-    const auto& cameraData = camera.get<Camera3D>();
-    const auto& cameraTransform = camera.get<Transform3D>();
+    const auto& cameraData = ecs::get<Camera3D>(camera);
+    const auto& cameraTransform = ecs::get<Transform3D>(camera);
 
     vec3_t point_light_pos = vec3(0, 15, 0);
     Light3D point_light{};
@@ -379,8 +379,8 @@ void RenderSystem3D::prepare() {
     vec3_t directional_light_pos = vec3(0, 0, 1);
     Light3D directional_light{};
     for (auto e: ecs::view<Light3D, Transform3D>()) {
-        auto& l = e.get<Light3D>();
-        auto& transform = e.get<Transform3D>();
+        auto& l = ecs::get<Light3D>(e);
+        auto& transform = ecs::get<Transform3D>(e);
         if (l.type == Light3DType::Point) {
             point_light = l;
             point_light_pos = mat4_get_position(&transform.world);
@@ -425,12 +425,12 @@ void RenderSystem3D::prerender() {
 void RenderSystem3D::render(float width, float height) {
     /////
     // get view camera orientation
-    if (!camera || !isVisible(camera)) {
+    if (!is_entity(camera) || !is_visible(camera)) {
         return;
     }
 
-    const auto& cameraData = camera.get<Camera3D>();
-    const auto& cameraTransform = camera.get<Transform3D>();
+    const auto& cameraData = ecs::get<Camera3D>(camera);
+    const auto& cameraTransform = ecs::get<Transform3D>(camera);
 
     const auto wi = static_cast<int>(width);
     const auto hi = static_cast<int>(height);

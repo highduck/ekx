@@ -168,8 +168,8 @@ void SceneWindow::onDraw() {
 
     if (root.valid() && canSelectObjects) {
         const auto wp = view.getMouseWorldPos();
-        auto target = hitTest(root.get(), wp);
-        hoverTarget = ecs::EntityRef{target};
+        auto target = hitTest(root, wp);
+        hoverTarget = target;
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
             g_editor->hierarchy.select(target);
             g_editor->hierarchy.focus(target);
@@ -215,14 +215,14 @@ void drawBox2(rect_t rc, mat3x2_t m, color_t color1, color_t color2,
     }
 }
 
-void SceneWindow::drawSceneNode(ecs::EntityApi e) {
-    if (!e.get<Node>().visible()) {
+void SceneWindow::drawSceneNode(entity_t e) {
+    if (!is_visible(e)) {
         return;
     }
 
-    auto* disp = e.tryGet<Display2D>();
+    auto* disp = ecs::try_get<Display2D>(e);
     if (disp) {
-        auto* transform = e.tryGet<WorldTransform2D>();
+        auto* transform = ecs::try_get<WorldTransform2D>(e);
         if (transform) {
             canvas.matrix[0] = transform->matrix;
             canvas.color[0] = transform->color;
@@ -231,46 +231,42 @@ void SceneWindow::drawSceneNode(ecs::EntityApi e) {
             canvas.color[0] = color2_identity();
         }
         if (disp->draw) {
-            disp->draw(e.index);
+            disp->draw(e);
         }
         if (disp->callback) {
-            disp->callback(e.index);
+            disp->callback(e);
         }
     }
-    auto it = e.get<Node>().child_first;
-    while (it) {
-        drawSceneNode(it);
-        it = it.get<Node>().sibling_next;
-    }
+    foreach_child(e, drawSceneNode);
 }
 
-void SceneWindow::drawSceneNodeBounds(ecs::EntityApi e) {
-    if (!e.get<Node>().visible()) {
+void SceneWindow::drawSceneNodeBounds(entity_t e) {
+    if (!is_visible(e)) {
         return;
     }
 
-    auto* disp = e.tryGet<Display2D>();
+    auto* disp = ecs::try_get<Display2D>(e);
     if (disp) {
         canvas.matrix[0] = mat3x2_identity();
         canvas.color[0] = color2_identity();
 
         mat3x2_t m = view.view2.matrix;
-        auto* transform = e.tryGet<WorldTransform2D>();
+        auto* transform = ecs::try_get<WorldTransform2D>(e);
         if (transform) {
             m = mat3x2_mul(view.view2.matrix, transform->matrix);
         }
-        rect_t b = disp->get_bounds ? disp->get_bounds(e.index) : rect_wh(0,0);
+        rect_t b = disp->get_bounds ? disp->get_bounds(e) : rect_wh(0,0);
         if (g_editor->hierarchy.isSelectedInHierarchy(e)) {
             drawBox2(b, m, COLOR_WHITE, COLOR_BLACK, true, ARGB(0x77FFFFFF));
         }
-        if (hoverTarget.check(e)) {
+        if (hoverTarget.id == e.id) {
             drawBox2(b, m, ARGB(0x77FFFFFF), ARGB(0x77000000), false);
         }
     }
-    auto it = e.get<Node>().child_first;
-    while (it) {
+    auto it = get_first_child(e);
+    while (it.id) {
         drawSceneNodeBounds(it);
-        it = it.get<Node>().sibling_next;
+        it = get_next_child(it);
     }
 }
 
@@ -291,44 +287,44 @@ void SceneWindow::onPreRender() {
 
 void SceneWindow::drawScene() {
     if (!root.valid()) {
-        root = ecs::EntityRef{g_game_app->root};
+        root = g_game_app->root;
     }
 
     canvas_begin_ex({0, 0, display.info.size.x, display.info.size.y}, view.view2.matrix, {0}, {0});
     if (!view.mode2D) {
         canvas.mvp = mat4_mul(view.view3.projectionMatrix, view.view3.viewMatrix);
     }
-    drawSceneNode(root.get());
+    drawSceneNode(root);
     canvas_end();
 
     canvas_begin(display.info.size.x, display.info.size.y);
     if (!view.mode2D) {
         canvas.mvp = mat4_mul(view.view3.projectionMatrix, view.view3.viewMatrix);
     }
-    drawSceneNodeBounds(root.get());
+    drawSceneNodeBounds(root);
     canvas_end();
 }
 
-ecs::EntityApi SceneWindow::hitTest(ecs::EntityApi e, vec2_t worldPos) {
-    const auto& node = e.get<Node>();
-    if (!node.visible() || !node.touchable()) {
+ecs::Entity SceneWindow::hitTest(ecs::Entity e, vec2_t worldPos) {
+    const auto& node = ecs::get<Node>(e);
+    if (node.flags & (NODE_HIDDEN | NODE_UNTOUCHABLE)) {
         return nullptr;
     }
-    auto it = node.child_last;
-    while (it) {
+    auto it = get_last_child(e);
+    while (it.id) {
         auto t = hitTest(it, worldPos);
         if (t) {
             return t;
         }
-        it = it.get<Node>().sibling_prev;
+        it = get_prev_child(it);
     }
-    auto* disp = e.tryGet<Display2D>();
+    auto* disp = ecs::try_get<Display2D>(e);
     if (disp && disp->get_bounds) {
-        auto* wt = e.tryGet<WorldTransform2D>();
+        auto* wt = ecs::try_get<WorldTransform2D>(e);
         if (wt) {
             vec2_t lp;
             if (vec2_transform_inverse(worldPos, wt->matrix, &lp) &&
-                rect_contains(disp->get_bounds(e.index), lp)) {
+                rect_contains(disp->get_bounds(e), lp)) {
                 return e;
             }
         }
@@ -394,8 +390,8 @@ void SceneWindow::drawToolbar() {
 void SceneWindow::manipulateObject2D() {
     auto& selection = g_editor->hierarchy.selection;
     if (selection.size() > 0 && selection[0].valid()) {
-        ecs::EntityApi sel = selection[0].get();
-        auto worldMatrix2D = sel.get<WorldTransform2D>().matrix;
+        ecs::Entity sel = selection[0];
+        auto worldMatrix2D = ecs::get<WorldTransform2D>(sel).matrix;
         mat4_t worldMatrix3D = matrix2Dto3D(worldMatrix2D);
         ImGuizmo::OPERATION op = ImGuizmo::OPERATION::BOUNDS;
         if (currentTool == 2) {
@@ -417,8 +413,8 @@ void SceneWindow::manipulateObject2D() {
                              nullptr,
                              nullptr);
 
-        auto& localTransform = sel.get<Transform2D>();
-        const auto parentWorldMatrix2D = sel.get<Node>().parent.get<WorldTransform2D>().matrix;
+        auto& localTransform = ecs::get<Transform2D>(sel);
+        const auto parentWorldMatrix2D = ecs::get<WorldTransform2D>(get_parent(sel)).matrix;
         const auto parentWorldMatrix3D = matrix2Dto3D(parentWorldMatrix2D);
         const auto inverseParentWorldMatrix3D = mat4_inverse(parentWorldMatrix3D);
         const auto newLocalMatrix3D = mat4_mul(inverseParentWorldMatrix3D, worldMatrix3D);
@@ -429,8 +425,8 @@ void SceneWindow::manipulateObject2D() {
 void SceneWindow::manipulateObject3D() {
     auto& selection = g_editor->hierarchy.selection;
     if (selection.size() > 0 && selection[0].valid()) {
-        ecs::EntityApi sel = selection[0].get();
-        auto worldMatrix2D = sel.get<WorldTransform2D>().matrix;
+        ecs::Entity sel = selection[0];
+        auto worldMatrix2D = ecs::get<WorldTransform2D>(sel).matrix;
         mat4_t worldMatrix3D = matrix2Dto3D(worldMatrix2D);
         ImGuizmo::OPERATION op = ImGuizmo::OPERATION::BOUNDS;
         if (currentTool == 2) {
@@ -452,8 +448,8 @@ void SceneWindow::manipulateObject3D() {
                              nullptr,
                              nullptr);
 
-//        auto& localTransform = sel.get<Transform2D>();
-//        const auto parentWorldMatrix2D = sel.get<Node>().parent.get<WorldTransform2D>().matrix;
+//        auto& localTransform = ecs::get<Transform2D>(sel);
+//        const auto parentWorldMatrix2D = ecs::get<Node>(sel).ecs::get<WorldTransform2D>(parent).matrix;
 //        const auto parentWorldMatrix3D = matrix2Dto3D(parentWorldMatrix2D);
 //        const auto inverseParentWorldMatrix3D = inverse(parentWorldMatrix3D);
 //        const auto newLocalMatrix3D = inverseParentWorldMatrix3D * worldMatrix3D;

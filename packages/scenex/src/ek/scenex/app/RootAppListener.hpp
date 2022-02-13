@@ -19,6 +19,7 @@ void root_app_on_event(const ek_app_event ev) {
         ek_app.on_frame = nullptr;
         ek_app.on_event = nullptr;
         if(g_game_app) {
+            g_game_app->terminate();
             delete g_game_app;
             g_game_app = nullptr;
         }

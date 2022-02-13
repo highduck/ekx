@@ -1,42 +1,30 @@
 #include "updater.h"
 
-ecx_component_type* updater_comp_type;
+ecx_component_type updater_comp_type;
 
 void updater_init(void) {
-    updater_comp_type = ecx_new_component((ecx_component_type_decl) {
-            "updater", 1, 0, {0}
+    init_component_type(&updater_comp_type, (ecx_component_type_decl) {
+            "updater", 8, 1, {sizeof(updater_state)}
     });
-    updater_comp_type->on_entity_destroy = updater_remove;
 }
 
 void updater_set(entity_t e, updater_callback_t callback) {
-    for (uint32_t i = 0; i < updater.num; ++i) {
-        if (updater.data[i].e == e) {
-            updater.data[i].callback = callback;
-            return;
-        }
-    }
-    EK_ASSERT(updater.num < 64);
-    updater.data[updater.num++] = (updater_state) {e, 0, callback};
+    EK_ASSERT(updater_comp_type.index);
+    updater_state* state = add_component(&updater_comp_type, e);
+    state->callback = callback;
+    state->time_layer = 0;
 }
 
 void updater_update() {
-    for (uint32_t i = 0; i < updater.num; ++i) {
-        updater_state s = updater.data[i];
+    for (uint32_t i = 1; i < updater_comp_type.size; ++i) {
+        entity_idx_t ei = updater_comp_type.handleToEntity[i];
+        updater_state s = ((updater_state*) updater_comp_type.data[0])[i];
         if (s.callback) {
-            s.callback(&s);
+            s.callback(entity_at(ei), s.time_layer);
         }
     }
 }
 
 void updater_remove(entity_t e) {
-    for (uint32_t i = 0; i < updater.num; ++i) {
-        if (updater.data[i].e == e) {
-            --updater.num;
-            if (i < updater.num) {
-                updater.data[i] = updater.data[updater.num];
-            }
-            return;
-        }
-    }
+    remove_component(&updater_comp_type, e);
 }

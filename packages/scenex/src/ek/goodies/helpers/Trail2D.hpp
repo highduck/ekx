@@ -1,8 +1,9 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/time.h>
+#include <ek/ds/PodArray.hpp>
 #include <ekx/app/time_layers.h>
 
 namespace ek {
@@ -78,30 +79,26 @@ struct Trail2D {
     float drain_speed = 2.0f;
     float segment_distance_max = 10.0f;
 //    float particles_per_second = 15.0f;
+    float scale = 1.0f;
+    vec2_t lastPosition = {};
+    VectorDequeue<Node> nodes{};
+    bool initialized = false;
 
     //Trail2D(Trail2D&& m) = default;
 
     void update(mat3x2_t m);
 
-    static void updateAll();
-
-private:
-
     void update_position(vec2_t newPosition);
-
-public:
-    float scale = 1.0f;
-    vec2_t lastPosition = {};
-    VectorDequeue<Node> nodes{};
-    bool initialized = false;
 };
+
+void update_trail2d();
 
 class TrailRenderer2D {
 public:
     void draw();
 
 public:
-    ecs::EntityApi target{};
+    ecs::Entity target{};
     // max width
     float width = 20.0f;
     float minWidth = 5.0f;

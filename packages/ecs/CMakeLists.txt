@@ -3,7 +3,7 @@ include(npm.cmake)
 project(ecs)
 
 add_library(${PROJECT_NAME} STATIC
-        src/ecxx/impl/ecx.c
+        src/ecx/ecx.c
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})

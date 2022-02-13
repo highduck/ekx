@@ -8,12 +8,10 @@
 
 namespace ek {
 
-int RenderSystem2D::currentLayerMask = 0xFF;
-
 void RenderSystem2D::draw(entity_t e, const WorldTransform2D* worldTransform) {
-    EK_ASSERT(check_entity_alive(e));
+    EK_ASSERT(is_entity(e));
 
-    auto* bounds = ecs::tryGet<Bounds2D>(e);
+    auto* bounds = ecs::try_get<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
         auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, worldTransform->matrix);
@@ -29,7 +27,7 @@ void RenderSystem2D::draw(entity_t e, const WorldTransform2D* worldTransform) {
     }
 
     bool programChanged = false;
-    auto* display = ecs::tryGet<Display2D>(e);
+    auto* display = ecs::try_get<Display2D>(e);
     if (display) {
         if (UNLIKELY(display->program)) {
             programChanged = true;
@@ -47,16 +45,16 @@ void RenderSystem2D::draw(entity_t e, const WorldTransform2D* worldTransform) {
         }
     }
 
-    auto it = ecs::get<Node>(e).child_first;
-    while (it) {
-        const auto& child = it.get<Node>();
-        if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
-            const auto* childWorldTransform = it.tryGet<WorldTransform2D>();
+    auto it = get_first_child(e);
+    while (it.id) {
+        const auto& child = ecs::get<Node>(it);
+        if (!(child.flags & NODE_HIDDEN)) {
+            const auto* childWorldTransform = ecs::try_get<WorldTransform2D>(it);
             if (childWorldTransform) {
                 worldTransform = childWorldTransform;
             }
             if (worldTransform->color.scale.a > 0) {
-                draw(it.index, worldTransform);
+                draw(it, worldTransform);
             }
         }
         it = child.sibling_next;
@@ -71,9 +69,9 @@ void RenderSystem2D::draw(entity_t e, const WorldTransform2D* worldTransform) {
 }
 
 void RenderSystem2D::drawStack(entity_t e) {
-    EK_ASSERT(check_entity_alive(e));
+    EK_ASSERT(is_entity(e));
 
-    auto* bounds = ecs::tryGet<Bounds2D>(e);
+    auto* bounds = ecs::try_get<Bounds2D>(e);
     if (bounds) {
         const auto* camera = Camera2D::getCurrentRenderingCamera();
         auto rc = bounds->getScreenRect(camera->worldToScreenMatrix, canvas.matrix[0]);
@@ -90,7 +88,7 @@ void RenderSystem2D::drawStack(entity_t e) {
     }
 
     bool programChanged = false;
-    auto* display = ecs::tryGet<Display2D>(e);
+    auto* display = ecs::try_get<Display2D>(e);
     if (display) {
         if (display->program) {
             programChanged = true;
@@ -104,18 +102,18 @@ void RenderSystem2D::drawStack(entity_t e) {
         }
     }
 
-    auto it = ecs::get<Node>(e).child_first;
-    while (it) {
-        const auto& child = it.get<Node>();
-        if (child.visible() && (child.layersMask() & currentLayerMask) != 0) {
-            const auto* childTransform = it.tryGet<Transform2D>();
+    auto it = get_first_child(e);
+    while (it.id) {
+        const auto& child = ecs::get<Node>(it);
+        if (!(child.flags & NODE_HIDDEN)) {
+            const auto* childTransform = ecs::try_get<Transform2D>(it);
             if (childTransform) {
                 canvas_save_transform();
                 canvas_concat_matrix(childTransform->matrix);
                 canvas_concat_color(childTransform->color);
             }
             if (canvas.color[0].scale.a != 0) {
-                drawStack(it.index);
+                drawStack(it);
             }
             if (childTransform) {
                 canvas_restore_transform();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 
 #include <ekx/app/game_display.h>
 #include "Camera3D.hpp"
@@ -28,7 +28,7 @@ void initScene3D() {
 // onPreRender
 void preRenderScene3D() {
     if (g_render_system_3d) {
-        Transform3D::updateAll();
+        update_world_transform3d();
         g_render_system_3d->prepare();
         g_render_system_3d->prerender();
     }

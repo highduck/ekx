@@ -23,48 +23,43 @@ namespace ek {
 
 using namespace ecs;
 
-void scene_pre_update(EntityApi /*root*/, float dt) {
+void scene_pre_update(entity_t root, float dt) {
     update_interaction_system();
 
     update_time_layers(dt);
 
-    audio_update(dt);
+    update_audio_manager();
 
     if (g_game_screen_manager) {
         g_game_screen_manager->update();
     }
 
     LayoutRect::updateAll();
-    Tween::updateAll();
+    update_tweens();
     Shaker::updateAll();
 
     BubbleText::updateAll();
-    popup_manager_update();
-
-    updater_update();
+    update_popup_manager();
 
     Button::updateAll();
     MovieClip::updateAll();
 }
 
-void scene_post_update(ecs::EntityApi root) {
-    destroy_manager_update();
+void scene_post_update(entity_t root) {
+    update_destroy_queue();
 
-    updateWorldTransformAll2(root);
+    update_world_transform_2d(root);
 
-    Trail2D::updateAll();
+    update_trail2d();
     update_emitters();
     update_particles();
-    Camera2D::updateQueue();
+    update_camera2d_queue();
 }
 
-void scene_render(ecs::EntityApi root) {
+void scene_render(entity_t root) {
     update_res_dynamic_atlas();
     update_res_atlas();
-
-    Camera2D::render();
-//    drawScene2D(root);
-    //drawSceneGizmos(root);
+    render_camera2d_queue();
 }
 
 }

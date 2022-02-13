@@ -81,7 +81,6 @@ basic_application::basic_application() {
 }
 
 basic_application::~basic_application() {
-    terminate();
 }
 
 void registerSceneXComponents() {
@@ -127,25 +126,25 @@ void basic_application::initialize() {
     root = createNode2D(H("root"));
 
     const vec2_t baseResolution = vec2(ek_app.config.width, ek_app.config.height);
-    root.assign<Viewport>().options.baseResolution = baseResolution;
+    ecs::add<Viewport>(root).options.baseResolution = baseResolution;
 
-    root.assign<LayoutRect>();
-    root.assign<NodeEventHandler>();
+    ecs::add<LayoutRect>(root);
+    ecs::add<NodeEventHandler>(root);
     Viewport::updateAll(&display.info);
-    scale_factor = root.get<Viewport>().output.scale;
+    scale_factor = ecs::get<Viewport>(root).output.scale;
 
     log_debug("base application: initialize InteractionSystem");
     init_interaction_system();
-    g_interaction_system.root_ = root.index;
+    g_interaction_system.root_ = root;
     log_debug("base application: initialize AudioManager");
     init_audio_manager();
 
     log_debug("base application: initialize Scene");
     auto camera = createNode2D(H("camera"));
-    auto& defaultCamera = camera.assign<Camera2D>();
-    defaultCamera.root = ecs::EntityRef{root};
+    auto& defaultCamera = ecs::add<Camera2D>(camera);
+    defaultCamera.root = root;
     defaultCamera.order = 1;
-    defaultCamera.viewportNode = ecs::EntityRef{root};
+    defaultCamera.viewportNode = root;
     Camera2D::Main = camera;
     append(root, camera);
 
@@ -177,7 +176,7 @@ void basic_application::onFrame() {
     dispatcher.onBeforeFrameBegin();
     game_display_update(&display);
     Viewport::updateAll(&display.info);
-    scale_factor = root.get<Viewport>().output.scale;
+    scale_factor = ecs::get<Viewport>(root).output.scale;
     asset_manager.set_scale_factor(scale_factor);
 
     /** base app BEGIN **/
@@ -282,14 +281,14 @@ void basic_application::preload_root_assets_pack() {
 void basic_application::onEvent(const ek_app_event event) {
     uint64_t timer = ek_ticks(nullptr);
 
+    input_state_process_event(&event, &display.info);
+
+    dispatcher.onEvent(event);
+
     root_app_on_event(event);
     if (event.type == EK_APP_EVENT_RESIZE) {
         game_display_update(&display);
     }
-
-    input_state_process_event(&event, &display.info);
-
-    dispatcher.onEvent(event);
 
     double elapsed = ek_ticks_to_sec(ek_ticks(&timer));
     profiler_add_time(PROFILE_EVENTS, (float) (elapsed * 1000));

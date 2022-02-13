@@ -2,7 +2,7 @@
 
 #include <cstring>
 #include <cstdint>
-#include <ecxx/ecxx_fwd.hpp>
+#include <ecx/ecx_fwd.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/Hash.hpp>
 
@@ -32,7 +32,7 @@ public:
             rows{(bounds_.h + cellSize - 1) / cellSize},
             count{columns * rows} {
         grid = (uint16_t*) calloc(count, sizeof(uint16_t));
-        refs.push_back(0);
+        refs.push_back(NULL_ENTITY);
         next.push_back(0);
     }
 
@@ -120,9 +120,9 @@ public:
                 auto it = grid[index];
                 while (it != 0) {
                     const auto entity = refs[it];
-                    if (!filter.has(entity)) {
+                    if (!filter.has(entity.id)) {
                         query.push_back(entity);
-                        filter.set(entity, entity);
+                        filter.set(entity.id, entity);
                     }
                     it = next[it];
                 }

@@ -1,25 +1,26 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
+#include <ek/ds/FixedArray.hpp>
 
 namespace ek {
 
 struct PopupManager {
-    ecs::EntityApi entity;
-    PodArray<ecs::EntityApi> active;
-    ecs::EntityApi closingLast;
-    float fade_progress = 0.0f;
-    float fade_duration = 0.3f;
-    float fade_alpha = 0.5f;
-    ecs::EntityApi back;
-    ecs::EntityApi layer;
+    entity_t entity;
+    entity_t back;
+    entity_t layer;
+    entity_t closing_last;
+    float fade_progress;
+    float fade_duration;
+    float fade_alpha;
+    FixedArray<entity_t, 8> active;
 };
 
-void init_basic_popup(ecs::EntityApi e);
+void init_basic_popup(entity_t e);
 
-void open_popup(ecs::EntityApi e);
+void open_popup(entity_t e);
 
-void close_popup(ecs::EntityApi e);
+void close_popup(entity_t e);
 
 void clear_popups();
 
@@ -33,4 +34,4 @@ uint32_t count_active_popups();
 
 extern ek::PopupManager g_popup_manager;
 void popup_manager_init();
-void popup_manager_update();
+void update_popup_manager();

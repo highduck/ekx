@@ -33,11 +33,11 @@ void StatsWindow::onDraw() {
     auto entitiesAvailable = ECX_ENTITIES_MAX_COUNT - entitiesCount;
     ImGui::Text("%u entities | %u free", entitiesCount - 1, entitiesAvailable);
 
-    auto hitTarget = resolve_entity_index(g_interaction_system.hitTarget_);
-    if (hitTarget) {
+    auto hitTarget = g_interaction_system.hitTarget_;
+    if (is_entity(hitTarget)) {
         char buffer[1024];
         getDebugNodePath(hitTarget, buffer);
-        ImGui::Text("Hit Target: 0x%08X %s", g_interaction_system.hitTarget_.value, buffer);
+        ImGui::Text("Hit Target: 0x%08X %s", hitTarget.id, buffer);
     }
 
     for (uint32_t i = 0; i < PROFILE_TRACKS_MAX_COUNT; ++i) {

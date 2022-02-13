@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Widgets.hpp"
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 #include <ek/editor/imgui/imgui.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/base/Interactive.hpp>
@@ -25,7 +25,7 @@ inline void select_ref_asset(const char* label, rr_man_t* man, res_id* sid) {
         // TODO:
         for (res_id i = 0; i < man->num; ++i) {
             string_hash_t name_hash = man->names[i];
-            if(name_hash != 0) {
+            if (name_hash != 0) {
                 const char* name = hsp_get(name_hash);
                 if (ImGui::Selectable(name, i == *sid)) {
                     *sid = i;
@@ -36,14 +36,14 @@ inline void select_ref_asset(const char* label, rr_man_t* man, res_id* sid) {
     }
 }
 
-inline void guiEntityRef(const char* label, ecs::EntityRef ref) {
-    if (ref == nullptr) {
+inline void guiEntityRef(const char* label, entity_t e) {
+    if (e.id == 0) {
         ImGui::TextDisabled("%s: null", label);
-    } else if (ref.valid()) {
-        auto tag = ref.get().get_or_default<Node>().tag;
-        ImGui::LabelText(label, "%s [%08X]", hsp_get(tag), tag);
-    } else {
+    } else if (!is_entity(e)) {
         ImGui::TextColored({1, 0, 0, 1}, "%s: invalid", label);
+    } else {
+        auto tag = get_tag(e);
+        ImGui::LabelText(label, "%s [%08X]", hsp_get(tag), tag);
     }
 }
 
@@ -59,9 +59,9 @@ inline void guiComponentPanel(const char* name, C& data, Func fn) {
 }
 
 template<typename C, typename Func>
-inline void guiComponentPanel(ecs::EntityApi entity, const char* name, Func fn) {
-    if (entity.has<C>()) {
-        auto& data = entity.get<C>();
+inline void guiComponentPanel(ecs::Entity entity, const char* name, Func fn) {
+    if (ecs::has<C>(entity)) {
+        auto& data = ecs::get<C>(entity);
         guiComponentPanel(name, data, fn);
     }
 }
@@ -72,7 +72,7 @@ inline void guiMovieClip(MovieClip& mc) {
         ImGui::LabelText("Total Frames", "%u", data->frames);
         ImGui::LabelText("Default FPS", "%f", data->fps);
 
-        ImGui::DragFloat("Time", &mc.time, 1.0f, 0.0f, (float)data->frames);
+        ImGui::DragFloat("Time", &mc.time, 1.0f, 0.0f, (float) data->frames);
         ImGui::DragFloat("FPS", &mc.fps, 1.0f, 0.0f, 100.0f);
         ImGui::Checkbox("Playing", &mc.playing);
     }
@@ -83,10 +83,10 @@ inline void guiTransform2D(Transform2D& transform) {
     auto scale = transform.getScale();
     auto skew = transform.getSkew();
     if (ImGui::DragFloat2("Position", pos.data, 1.0f, 0.0f, 0.0f, "%.1f")) {
-        transform.setPosition(pos);
+        transform.set_position(pos);
     }
     if (ImGui::DragFloat2("Scale", scale.data, 0.1f, 0.0f, 0.0f, "%.2f")) {
-        transform.setScale(scale);
+        transform.set_scale(scale);
     }
     if (ImGui::DragFloat2("Skew", skew.data, 0.1f, 0.0f, 0.0f, "%.2f")) {
         transform.setSkew(skew);
@@ -128,7 +128,6 @@ inline void guiCamera2D(Camera2D& camera) {
     ImGui::Checkbox("interactive", &camera.interactive);
     ImGui::Checkbox("occlusionEnabled", &camera.occlusionEnabled);
     ImGui::DragInt("Order", &camera.order);
-    ImGui::LabelText("Layers", "%x", camera.layerMask);
     guiEntityRef("Root Entity", camera.root);
     ImGui::DragFloat("Content Scale", &camera.contentScale);
     ImGui::Checkbox("Clear Color", &camera.clearColorEnabled);
@@ -327,18 +326,22 @@ inline void guiParticleLayer2D(ParticleLayer2D& layer) {
     ImGui::LabelText("Num Particles", "%u", layer.particles.size());
 }
 
-void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
-    ImGui::PushID(reinterpret_cast<const void*>(entity.passport.value));
-    ecs::EntityApi e = entity.ent();
-    ImGui::LabelText("Passport", "idx: # %d, gen: @ %d", e.index, ecx_generations[e.index]);
-    if (e.has<Node>()) {
-        auto& node = e.get<Node>();
-        int flags = node.flags;
+void InspectorWindow::gui_inspector(ecs::Entity e) {
+    ImGui::PushID(e.id);
+    ImGui::LabelText("ID", "#%02X_%04X", e.gen, e.idx);
+    if (ecs::has<Node>(e)) {
+        auto& node = ecs::get<Node>(e);
         ImGui::LabelText("Tag", "%s [0x%08X]", hsp_get(node.tag), node.tag);
-        ImGui::CheckboxFlags("Visible", &flags, Node::Visible);
-        ImGui::CheckboxFlags("Touchable", &flags, Node::Touchable);
-        ImGui::LabelText("Layers", "0x%02X", node.layersMask());
-        node.flags = flags;
+
+        bool visible = is_visible(e);
+        if(ImGui::Checkbox("Visible", &visible)) {
+            set_visible(e, visible);
+        }
+
+        bool touchable = is_touchable(e);
+        if(ImGui::Checkbox("Touchable", &touchable)) {
+            set_touchable(e, touchable);
+        }
     }
 
     guiComponentPanel<Transform2D>(e, "Transform2D", guiTransform2D);
@@ -347,7 +350,7 @@ void InspectorWindow::gui_inspector(ecs::EntityRef entity) {
     guiComponentPanel<Camera2D>(e, "Camera2D", guiCamera2D);
     guiComponentPanel<Bounds2D>(e, "Bounds2D", guiBounds2D);
 
-    if (ecs::hasComponent<Transform3D>()) {
+    if (ecs::has_type<Transform3D>()) {
         guiComponentPanel<Transform3D>(e, "Transform 3D", guiTransform3D);
         guiComponentPanel<Camera3D>(e, "Camera 3D", guiCamera3D);
         guiComponentPanel<Light3D>(e, "Light 3D", guiLight3D);

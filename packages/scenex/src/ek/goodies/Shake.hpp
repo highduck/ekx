@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 #include <ek/math.h>
 #include <ekx/app/time_layers.h>
 
@@ -13,7 +13,7 @@ namespace ek {
 //    TimeLayer timer;
 //
 //    static void updateAll();
-//    static void add(ecs::EntityApi e, float time = 2.0f, float strength = 16.0f);
+//    static void add(ecs::Entity e, float time = 2.0f, float strength = 16.0f);
 //};
 
 struct Shaker {

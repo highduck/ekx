@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ecxx/ecxx_fwd.hpp>
+#include <ecx/ecx_fwd.hpp>
 
 #ifdef EK_DEV_TOOLS
 
@@ -52,7 +52,7 @@ public:
     GameAppDispatcher dispatcher{};
 
     /////
-    ecs::EntityApi root;
+    entity_t root;
     AssetManager asset_manager;
 
     basic_application();
@@ -103,7 +103,7 @@ void setup_resource_managers();
 
 void root_app_on_frame();
 
-void root_app_on_event(const ek_app_event ev);
+void root_app_on_event(ek_app_event ev);
 
 template<typename T>
 inline void run_app() {

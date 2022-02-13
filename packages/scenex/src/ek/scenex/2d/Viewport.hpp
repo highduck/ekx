@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ek/math.h>
-#include <ecxx/ecxx_fwd.hpp>
+#include <ecx/ecx_fwd.hpp>
 #include <ekx/app/game_display.h>
 
 namespace ek {

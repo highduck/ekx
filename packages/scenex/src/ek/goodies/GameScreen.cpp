@@ -11,13 +11,12 @@
 namespace ek {
 
 /** GameScreen component **/
-void init_game_screen(ecs::EntityApi e, string_hash_t name) {
-    auto& node = e.get<Node>();
+void init_game_screen(ecs::Entity e, string_hash_t name) {
     if(name) {
-        node.tag = name;
+        set_tag(e, name);
     }
-    node.setVisible(false);
-    node.setTouchable(false);
+    set_visible(e, false);
+    set_touchable(e, false);
 }
 
 /** Transition **/
@@ -42,18 +41,16 @@ void ScreenTransitionState::checkStates() {
 }
 
 void emit_screen_event(entity_t e, string_hash_t type) {
-    if(e) {
-        auto* eh = ecs::EntityApi{e}.tryGet<NodeEventHandler>();
-        if(eh) {
-            eh->emit({type, e, {nullptr}, e});
-        }
+    auto* eh = ecs::try_get<NodeEventHandler>(e);
+    if(eh) {
+        eh->emit({type, e, {nullptr}, e});
     }
 }
 
 void ScreenTransitionState::beginPrev() {
     if (prev) {
-        //prev.get<GameScreen>().onExitBegin();
-        emit_screen_event(prev.index, GAME_SCREEN_EVENT_EXIT_BEGIN);
+        //ecs::get<GameScreen>(prev).onExitBegin();
+        emit_screen_event(prev, GAME_SCREEN_EVENT_EXIT_BEGIN);
         //broadcast(screenPrev, GameScreen::ExitBegin);
     }
     prevPlayStarted = true;
@@ -61,10 +58,10 @@ void ScreenTransitionState::beginPrev() {
 
 void ScreenTransitionState::completePrev() {
     if (prev) {
-        prev.get<Node>().setVisible(false);
-        prev.get<Node>().setTouchable(false);
-        //prev.get<GameScreen>().onExit();
-        emit_screen_event(prev.index, GAME_SCREEN_EVENT_EXIT);
+        set_visible(prev, false);
+        set_touchable(prev, false);
+        //ecs::get<GameScreen>(prev).onExit();
+        emit_screen_event(prev, GAME_SCREEN_EVENT_EXIT);
         //broadcast(prev, GameScreen::Exit);
     }
     prev = nullptr;
@@ -74,20 +71,20 @@ void ScreenTransitionState::completePrev() {
 void ScreenTransitionState::beginNext() {
     nextPlayStarted = true;
     if (next) {
-        next.get<Node>().setVisible(true);
-        next.get<Node>().setTouchable(true);
-        //next.get<GameScreen>().onEnterBegin();
-        emit_screen_event(next.index, GAME_SCREEN_EVENT_ENTER_BEGIN);
-        //next.get<GameScreen>().onEvent.emit(GameScreenEvent::EnterBegin);
+        set_visible(next, true);
+        set_touchable(next, true);
+        //ecs::get<GameScreen>(next).onEnterBegin();
+        emit_screen_event(next, GAME_SCREEN_EVENT_ENTER_BEGIN);
+        //ecs::get<GameScreen>(next).onEvent.emit(GameScreenEvent::EnterBegin);
         //broadcast(screenNext, GameScreen::EnterBegin);
     }
 }
 
 void ScreenTransitionState::completeNext() {
     if (next) {
-        emit_screen_event(next.index, GAME_SCREEN_EVENT_ENTER);
-        //next.get<GameScreen>().onEvent.emit(GameScreenEvent::Enter);
-        //next.get<GameScreen>().onEnter();
+        emit_screen_event(next, GAME_SCREEN_EVENT_ENTER);
+        //ecs::get<GameScreen>(next).onEvent.emit(GameScreenEvent::Enter);
+        //ecs::get<GameScreen>(next).onEnter();
         //broadcast(next, GameScreen::Enter);
     }
     next = nullptr;
@@ -113,9 +110,8 @@ void GameScreenManager::setScreen(string_hash_t name) {
 
     // hide all activated screens
     for (auto it: stack) {
-        auto& node = it.get<Node>();
-        node.setVisible(false);
-        node.setTouchable(false);
+        set_visible(it, false);
+        set_touchable(it, false);
     }
 
     stack.clear();
@@ -124,12 +120,11 @@ void GameScreenManager::setScreen(string_hash_t name) {
     if (e) {
         stack.push_back(e);
 
-        auto& node = e.get<Node>();
-        node.setVisible(true);
-        node.setTouchable(true);
+        set_visible(e, true);
+        set_touchable(e, true);
 
         // bring to the top
-        removeFromParent(e);
+        remove_from_parent(e);
         append(layer, e);
 
         // set fully shown transform
@@ -138,9 +133,9 @@ void GameScreenManager::setScreen(string_hash_t name) {
         transition.t = 1.0f;
         applyTransitionEffect();
 
-        //e.get<GameScreen>().onEnterBegin();
-        //e.get<GameScreen>().onEvent.emit(GameScreenEvent::EnterBegin);
-        emit_screen_event(e.index, GAME_SCREEN_EVENT_ENTER_BEGIN);
+        //ecs::get<GameScreen>(e).onEnterBegin();
+        //ecs::get<GameScreen>(e).onEvent.emit(GameScreenEvent::EnterBegin);
+        emit_screen_event(e, GAME_SCREEN_EVENT_ENTER_BEGIN);
 
         //broadcast(layer, GameScreen::EnterBegin);
 
@@ -149,9 +144,9 @@ void GameScreenManager::setScreen(string_hash_t name) {
     }
 }
 
-ecs::EntityApi GameScreenManager::findScreen(string_hash_t name) const {
+ecs::Entity GameScreenManager::findScreen(string_hash_t name) const {
     auto e = find(layer, name);
-    if(!e) {
+    if(!e.id) {
         log_debug("could not find screen %s (%08X)", hsp_get(name), name);
     }
     return e;
@@ -165,7 +160,7 @@ void GameScreenManager::changeScreen(string_hash_t name) {
     transition.active = true;
     transition.delayTimer = transition.delay;
     transition.screenRect = find_parent_layout_rect(layer, false);
-    setTouchable(layer, false);
+    set_touchable(layer, false);
 
     if (!stack.empty()) {
         transition.prev = stack.back();
@@ -180,7 +175,7 @@ void GameScreenManager::changeScreen(string_hash_t name) {
         stack.push_back(transition.next);
 
         // bring to the top
-        removeFromParent(transition.next);
+        remove_from_parent(transition.next);
         append(layer, transition.next);
     }
 
@@ -209,7 +204,7 @@ void GameScreenManager::update() {
 
         if (transition.nextPlayCompleted && transition.prevPlayCompleted) {
             transition.active = false;
-            setTouchable(layer, true);
+            set_touchable(layer, true);
         }
     }
 }
@@ -230,25 +225,25 @@ void GameScreenManager::defaultTransitionEffect(GameScreenManager* gsm) {
 
     if (prev) {
         const auto t = state.getPrevProgress();
-        auto& transform = prev.get<Transform2D>();
+        auto& transform = ecs::get<Transform2D>(prev);
         float r = ease_p2_in(t);
 
         transform.color.scale.a = unorm8_f32_clamped(1.0f - r);
         //transform.color.setAdditive(r * r);
         float s = 1.0f + r * 0.3f;
-        transform.setScale(s);
-        transform.setPosition({}, {}, rect_center(state.screenRect));
+        transform.set_scale(s);
+        transform.set_position({}, {}, rect_center(state.screenRect));
     }
 
     if (next) {
         const auto t = state.getNextProgress();
-        auto& transform = next.get<Transform2D>();
+        auto& transform = ecs::get<Transform2D>(next);
         float r = ease_p2_out(t);
         transform.color.scale.a = unorm8_f32_clamped(r);
         //transform.color.offset.a = unorm8_f32_clamped(((1.0f - r) * (1.0f - r)));
         float s = 1.0f + (1.0f - r) * 0.3f;
-        transform.setScale(s);
-        transform.setPosition({}, {}, rect_center(state.screenRect));
+        transform.set_scale(s);
+        transform.set_position({}, {}, rect_center(state.screenRect));
     }
 }
 }

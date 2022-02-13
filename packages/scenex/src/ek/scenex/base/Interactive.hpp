@@ -3,7 +3,7 @@
 #include <ek/app.h>
 #include <ek/math.h>
 
-#include <ecxx/ecxx_fwd.hpp>
+#include <ecx/ecx_fwd.hpp>
 #include <ek/hash.h>
 
 #define POINTER_EVENT_DOWN H("pointer_down")
@@ -21,7 +21,7 @@ struct Interactive {
     // global world space pointer, because of that maybe we don't dispatch this coordinate into components,
     // just use global pointer from Interaction System
     vec2_t pointer = {};
-    ecs::EntityRef camera{};
+    entity_t camera = NULL_ENTITY;
 
     //bool enabled = true;
     // todo: check bubble was false by default

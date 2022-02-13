@@ -1,14 +1,17 @@
 #pragma once
 
-#include <ecxx/ecxx_fwd.hpp>
+#include <ecx/ecx_fwd.hpp>
+#include <ekx/app/time_layers.h>
 
-struct fireworks_comp {
+struct fireworks_state_t {
+    entity_t layer = NULL_ENTITY;
+    TimeLayer time_layer = TIME_LAYER_ROOT;
     float timer_ = 1.0f;
     bool enabled = false;
 };
 
-void setup_fireworks(ecs::EntityApi e);
+void start_fireworks(entity_t e);
 
-void update_fireworks(float dt);
+void update_fireworks();
 
-void reset_fireworks(ecs::EntityApi e);
+void stop_fireworks();

@@ -32,17 +32,17 @@ const ButtonSkin& get_skin(const Button& btn) {
     return btn.skin ? *btn.skin : basic_skin;
 }
 
-void initialize_events(ecs::EntityApi e) {
-    auto& eh = e.get_or_create<NodeEventHandler>();
+void initialize_events(entity_t e) {
+    auto& eh = ecs::add<NodeEventHandler>(e);
     eh.on(POINTER_EVENT_OVER, [](const NodeEventData& ev) {
-        auto& btn = ecs::EntityApi{ev.source}.get<Button>();
+        auto& btn = ecs::get<Button>(ev.receiver);
         const auto& skin = get_skin(btn);
         play_button_sound(skin.sfxOver);
     });
     eh.on(POINTER_EVENT_OUT, [](const NodeEventData& ev) {
-        auto& btn = ecs::EntityApi{ev.source}.get<Button>();
+        auto& btn = ecs::get<Button>(ev.receiver);
         const auto& skin = get_skin(btn);
-        if (ecs::EntityApi{ev.source}.get<Interactive>().pushed) {
+        if (ecs::get<Interactive>(ev.receiver).pushed) {
             start_post_tween(btn);
             play_button_sound(skin.sfxCancel);
         } else {
@@ -50,14 +50,14 @@ void initialize_events(ecs::EntityApi e) {
         }
     });
     eh.on(POINTER_EVENT_DOWN, [](const NodeEventData& ev) {
-        auto& btn = ecs::EntityApi{ev.source}.get<Button>();
+        auto& btn = ecs::get<Button>(ev.receiver);
         const auto& skin = get_skin(btn);
         play_button_sound(skin.sfxDown);
     });
     eh.on(POINTER_EVENT_TAP, [](const NodeEventData& ev) {
-        auto& btn = ecs::EntityApi{ev.source}.get<Button>();
+        auto& btn = ecs::get<Button>(ev.receiver);
         const auto& skin = get_skin(btn);
-        auto* ev_eh = ecs::EntityApi{ev.source}.tryGet<NodeEventHandler>();
+        auto* ev_eh = ecs::try_get<NodeEventHandler>(ev.receiver);
         if (ev_eh) {
             ev_eh->emit({BUTTON_EVENT_CLICK, ev.source, {nullptr}, ev.source});
         }
@@ -66,17 +66,16 @@ void initialize_events(ecs::EntityApi e) {
         start_post_tween(btn);
 
         // TODO:
-        //auto name = e.get_or_default<NodeName>().name;
+        //auto name = ecs::get_or_default<NodeName>(e).name;
         //if (!name.empty()) {
         //    analytics::event("click", name.c_str());
         //}
     });
 
     eh.on(INTERACTIVE_EVENT_BACK_BUTTON, [](const NodeEventData& ev) {
-        ecs::EntityApi e{ev.receiver};
-        auto& btn = e.get<Button>();
+        auto& btn = ecs::get<Button>(ev.receiver);
         if (btn.back_button) {
-            auto* ev_eh = e.tryGet<NodeEventHandler>();
+            auto* ev_eh = ecs::try_get<NodeEventHandler>(ev.receiver);
             if (ev_eh) {
                 ev_eh->emit({BUTTON_EVENT_CLICK, ev.receiver, {nullptr}, ev.receiver});
             }
@@ -98,7 +97,7 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
     float sx = 1.0f + 0.2f * sinf((1.0f - post) * pi * 5.0f) * post;
     float sy = 1.0f + 0.2f * sinf((1.0f - post) * pi) * cosf((1.0f - post) * pi * 5.0f) * post;
 
-    transform.setScale(btn.baseScale * vec2(sx, sy));
+    transform.set_scale(btn.baseScale * vec2(sx, sy));
 
     const auto color = lerp_color(COLOR_WHITE, ARGB(0xFF888888), push);
     transform.color.scale = mul_color(btn.baseColor.scale, color);
@@ -107,8 +106,9 @@ void apply_skin(const ButtonSkin& skin, const Button& btn, Transform2D& transfor
     transform.color.offset = btn.baseColor.offset + color_4f(h, h, h, 0);
 }
 
-void update_movie_frame(ecs::EntityApi entity, const Interactive& interactive) {
-    if (entity.has<MovieClip>()) {
+void update_movie_frame(entity_t entity, const Interactive& interactive) {
+    MovieClip* mc = ecs::try_get<MovieClip>(entity);
+    if (mc) {
         int frame = 0;
         if (interactive.over || interactive.pushed) {
             frame = 1;
@@ -116,40 +116,43 @@ void update_movie_frame(ecs::EntityApi entity, const Interactive& interactive) {
                 frame = 2;
             }
         }
-        goto_and_stop(entity, static_cast<float>(frame));
+        goto_and_stop(entity, (float)frame);
     }
 }
 
 void Button::updateAll() {
-    for (auto e: ecs::view<Button, Interactive, Transform2D>()) {
-        auto& btn = e.get<Button>();
-        auto& interactive = e.get<Interactive>();
-        auto& transform = e.get<Transform2D>();
-        float dt = g_time_layers[btn.time].dt;
+    foreach_type(ecs::type<Button>(), [](component_handle_t handle) {
+        Button* btn = (Button*) get_component_data(ecs::type<Button>(), handle, 0);
+        entity_t e = get_entity(ecs::type<Button>(), handle);
+        Interactive* interactive = ecs::try_get<Interactive>(e);
+        Transform2D* transform = ecs::try_get<Transform2D>(e);
+        if(interactive && transform) {
+            float dt = g_time_layers[btn->time].dt;
 
-        if (!btn.initialized) {
-            btn.initialized = true;
-            interactive.cursor = EK_MOUSE_CURSOR_BUTTON;
-            initialize_base_transform(btn, transform);
-            initialize_events(e);
+            if (!btn->initialized) {
+                btn->initialized = true;
+                interactive->cursor = EK_MOUSE_CURSOR_BUTTON;
+                initialize_base_transform(*btn, *transform);
+                initialize_events(e);
+            }
+
+            const auto& skin = get_skin(*btn);
+
+            btn->timeOver = reach_delta(btn->timeOver,
+                                       interactive->over ? 1.0f : 0.0f,
+                                       dt * skin.overSpeedForward,
+                                       -dt * skin.overSpeedBackward);
+
+            btn->timePush = reach_delta(btn->timePush,
+                                       interactive->pushed ? 1.0f : 0.0f,
+                                       dt * skin.pushSpeedForward,
+                                       -dt * skin.pushSpeedBackward);
+
+            btn->timePost = reach(btn->timePost, 0.0f, 2.0f * dt);
+
+            apply_skin(skin, *btn, *transform);
+            update_movie_frame(e, *interactive);
         }
-
-        const auto& skin = get_skin(btn);
-
-        btn.timeOver = reach_delta(btn.timeOver,
-                                   interactive.over ? 1.0f : 0.0f,
-                                   dt * skin.overSpeedForward,
-                                   -dt * skin.overSpeedBackward);
-
-        btn.timePush = reach_delta(btn.timePush,
-                                   interactive.pushed ? 1.0f : 0.0f,
-                                   dt * skin.pushSpeedForward,
-                                   -dt * skin.pushSpeedBackward);
-
-        btn.timePost = reach(btn.timePost, 0.0f, 2.0f * dt);
-
-        apply_skin(skin, btn, transform);
-        update_movie_frame(e, interactive);
-    }
+    });
 }
 }

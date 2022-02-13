@@ -3,28 +3,28 @@
 
 namespace ek {
 
-void dispatch_broadcast(ecs::EntityApi e, const NodeEventData& data) {
-    NodeEventHandler* ev = e.tryGet<NodeEventHandler>();
+inline void send_event(entity_t e, const NodeEventData& data) {
+    EK_ASSERT(is_entity(e));
+    auto* ev = ecs::try_get<NodeEventHandler>(e);
     if (ev) {
-        data.receiver = e.index;
+        data.receiver = e;
         ev->emit(data);
-    }
-    auto it = e.get<Node>().child_first;
-    while (it) {
-        dispatch_broadcast(it, data);
-        it = it.get<Node>().sibling_next;
     }
 }
 
-void dispatch_bubble(ecs::EntityApi e, const NodeEventData& data) {
-    auto it = e;
-    while (it && it.is_alive()) {
-        auto* eh = it.tryGet<NodeEventHandler>();
-        if (eh) {
-            data.receiver = it.index;
-            eh->emit(data);
-        }
-        it = it.get<Node>().parent;
+void dispatch_broadcast(entity_t e, const NodeEventData& data) {
+    send_event(e, data);
+    e = get_first_child(e);
+    while (e.id) {
+        dispatch_broadcast(e, data);
+        e = get_next_child(e);
+    }
+}
+
+void dispatch_bubble(entity_t e, const NodeEventData& data) {
+    while (e.id) {
+        send_event(e, data);
+        e = get_parent(e);
     }
 }
 

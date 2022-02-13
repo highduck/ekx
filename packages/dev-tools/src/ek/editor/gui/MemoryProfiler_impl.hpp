@@ -218,14 +218,14 @@ void drawECSMemoryStats() {
         ImGui::TableHeadersRow();
 
         for (uint32_t i = 0; i < ecx.components_num; ++i) {
-            auto* header = &ecx_components[i];
+            auto* header = ecx_components[i];
             if (header) {
                 const char* label = header->label;
                 const uint32_t cap = ek_buf_capacity(header->handleToEntity);
                 const uint32_t len = header->size;
-                uint32_t controlSizeReserved = cap * (sizeof(entity_t) + sizeof(ecx_component_list_node));
-                uint32_t controlSizeUsed = len * (sizeof(entity_t) + sizeof(ecx_component_list_node));
-                uint32_t dataSizeReserved = cap * sizeof(ecx_component_list_node);
+                uint32_t controlSizeReserved = cap * (sizeof(entity_t) + sizeof(component_type_id));
+                uint32_t controlSizeUsed = len * (sizeof(entity_t) + sizeof(component_type_id));
+                uint32_t dataSizeReserved = 0;
                 uint32_t dataSizeUsed = 0;
                 for (uint16_t j = 0; j < header->data_num; ++j) {
                     dataSizeReserved += cap * header->data_stride[j];

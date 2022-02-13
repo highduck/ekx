@@ -14,8 +14,8 @@ void play_music(string_hash_t name) {
                 if (auph_is_buffer_loaded(buffer) && !auph_is_active(g_audio.musicVoice_.id)) {
                     g_audio.musicVoice_ = auph_play_f(buffer,
                                                       g_audio.musicVolume_, 0.0f, g_audio.musicPitch_,
-                                              true, false,
-                                              AUPH_BUS_MUSIC);
+                                                      true, false,
+                                                      AUPH_BUS_MUSIC);
                 }
             }
         }
@@ -49,7 +49,7 @@ void vibrate(int length) {
     }
 }
 
-void audio_update(float) {
+void update_audio_manager() {
     const uint32_t prefs = g_audio.prefs;
     auph_set_gain(AUPH_BUS_MUSIC.id, (prefs & AUDIO_PREF_MUSIC) ? 1.0f : 0.0f);
     auph_set_gain(AUPH_BUS_SOUND.id, (prefs & AUDIO_PREF_SOUND) ? 1.0f : 0.0f);

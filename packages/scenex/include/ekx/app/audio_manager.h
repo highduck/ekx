@@ -28,7 +28,7 @@ void play_sound_at(string_hash_t name, vec2_t position, float vol = 1.0f, float 
 
 void vibrate(int length);
 
-void audio_update(float dt);
+void update_audio_manager();
 
 void audio_disable_all();
 

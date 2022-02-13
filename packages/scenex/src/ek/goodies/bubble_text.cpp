@@ -1,5 +1,6 @@
 #include "bubble_text.hpp"
 
+#include <ek/scenex/base/DestroyTimer.hpp>
 #include <ek/scenex/2d/Transform2D.hpp>
 #include <ek/scenex/2d/Display2D.hpp>
 #include <ek/scenex/base/Node.hpp>
@@ -20,8 +21,8 @@ void BubbleText::updateAll() {
     const float time_max = 2.0f;
     const float delta_y = -100.0f;
 
-    for (auto e: ecs::view_backward<BubbleText>()) {
-        auto& state = e.get<BubbleText>();
+    for (auto e: ecs::view<BubbleText>()) {
+        auto& state = ecs::get<BubbleText>(e);
 
         if (state.delay > 0.0f) {
             state.delay -= dt;
@@ -29,12 +30,6 @@ void BubbleText::updateAll() {
         }
 
         state.time += dt;
-
-        if (state.time >= time_max) {
-            destroyNode(e);
-            continue;
-        }
-
         float r = saturate(state.time / time_max);
         float sc = 1.0f;
         float sct;
@@ -45,18 +40,22 @@ void BubbleText::updateAll() {
             off = state.offset * ease_p3_out(sct);
         }
 
-        auto& transform = e.get<Transform2D>();
-        transform.setScale(sc);
+        auto& transform = ecs::get<Transform2D>(e);
+        transform.set_scale(sc);
         vec2_t fly_pos = vec2(0, delta_y * ease_p3_out(r));
-        transform.setPosition(state.start + off + fly_pos);
+        transform.set_position(state.start + off + fly_pos);
         transform.color.scale.a = unorm8_f32_clamped(1.0f - (r * r * r));
         transform.color.offset.a = unorm8_f32_clamped(r * r * r);
+
+        if (state.time >= time_max) {
+            destroy_later(e);
+        }
     }
 }
 
 entity_t BubbleText::create(string_hash_t fontName, vec2_t pos, float delay) {
     auto e = createNode2D();
-    auto& c = e.assign<BubbleText>();
+    auto& c = ecs::add<BubbleText>(e);
     c.delay = delay;
     c.start = pos;
     float spread = 10.0f;
@@ -68,8 +67,8 @@ entity_t BubbleText::create(string_hash_t fontName, vec2_t pos, float delay) {
 
     text2d_setup_ex(e, format);
 
-    setTouchable(e, false);
-    setScale(e, {});
+    set_touchable(e, false);
+    set_scale(e, vec2(0,0));
     return e;
 }
 

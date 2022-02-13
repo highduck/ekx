@@ -16,37 +16,34 @@
 
 namespace ek {
 
-ecs::EntityApi HierarchyWindow::getSiblingNext(ecs::EntityApi e) {
-    const auto* node = e.tryGet<Node>();
-    return node ? node->sibling_next : nullptr;
+entity_t HierarchyWindow::getSiblingNext(entity_t e) {
+    const auto* node = ecs::try_get<Node>(e);
+    return node ? node->sibling_next : NULL_ENTITY;
 }
 
-const char* HierarchyWindow::getEntityIcon(ecs::EntityApi e) {
-    if (e.has<Camera2D>()) return ICON_FA_VIDEO;
-    if (e.has<Viewport>()) return ICON_FA_TV;
+const char* HierarchyWindow::getEntityIcon(entity_t e) {
+    if (ecs::has<Camera2D>(e)) return ICON_FA_VIDEO;
+    if (ecs::has<Viewport>(e)) return ICON_FA_TV;
+    if (ecs::has<Bounds2D>(e)) return ICON_FA_EXPAND;
+    if (ecs::has<Button>(e)) return ICON_FA_HAND_POINTER;
+    if (ecs::has<Interactive>(e)) return ICON_FA_FINGERPRINT;
+    if (ecs::has<MovieClip>(e)) return ICON_FA_FILM;
+    if (ecs::has<Sprite2D>(e)) return ICON_FA_IMAGE;
+    if (ecs::has<NinePatch2D>(e)) return ICON_FA_COMPRESS;
+    if (ecs::has<Quad2D>(e)) return ICON_FA_VECTOR_SQUARE;
+    if (ecs::has<Text2D>(e)) return ICON_FA_FONT;
+    if (ecs::has<Arc2D>(e)) return ICON_FA_CIRCLE_NOTCH;
+    if (ecs::has<Display2D>(e)) return ICON_FA_PAINT_BRUSH;
+    if (ecs::has<Transform2D>(e)) return ICON_FA_DICE_D6;
+    if (ecs::has<Node>(e)) return ICON_FA_BOX;
 
-    if (e.has<Bounds2D>()) return ICON_FA_EXPAND;
-    if (e.has<Button>()) return ICON_FA_HAND_POINTER;
-    if (e.has<Interactive>()) return ICON_FA_FINGERPRINT;
-    if (e.has<MovieClip>()) return ICON_FA_FILM;
-
-    if (e.has<Sprite2D>()) return ICON_FA_IMAGE;
-    if (e.has<NinePatch2D>()) return ICON_FA_COMPRESS;
-    if (e.has<Quad2D>()) return ICON_FA_VECTOR_SQUARE;
-    if (e.has<Text2D>()) return ICON_FA_FONT;
-    if (e.has<Arc2D>()) return ICON_FA_CIRCLE_NOTCH;
-    // other displays
-    if (e.has<Display2D>()) return ICON_FA_PAINT_BRUSH;
-
-    if (ecs::hasComponent<Transform3D>() && e.has<Transform3D>()) return ICON_FA_DICE_D20;
-    if (e.has<Transform2D>()) return ICON_FA_DICE_D6;
-    if (e.has<Node>()) return ICON_FA_BOX;
+    if (ecs::has_type<Transform3D>() && ecs::has<Transform3D>(e)) return ICON_FA_DICE_D20;
 
     return ICON_FA_BORDER_STYLE;
 }
 
-void getEntityTitle(ecs::EntityApi e, char buffer[64]) {
-    auto tag = e.get<Node>().tag;
+void getEntityTitle(entity_t e, char buffer[64]) {
+    auto tag = get_tag(e);
     if (tag) {
         const char* str = hsp_get(tag);
         if (*str) {
@@ -59,21 +56,17 @@ void getEntityTitle(ecs::EntityApi e, char buffer[64]) {
     }
 }
 
-bool HierarchyWindow::isSelectedInHierarchy(ecs::EntityApi e) {
-    const ecs::EntityRef ref{e};
+bool HierarchyWindow::isSelectedInHierarchy(entity_t e) {
+    const ecs::Entity ref{e};
     auto it = std::find(selection.begin(), selection.end(), ref);
     return it != selection.end();
 }
 
-const void* HierarchyWindow::getEntityID(ecs::EntityApi e) {
-    return reinterpret_cast<const void*>(get_entity_passport(e.index).value);
-}
-
-bool HierarchyWindow::hasChildren(ecs::EntityApi e) {
-    if (e.has<Node>()) {
-        auto& node = e.get<Node>();
-        auto first = node.child_first;
-        return first != nullptr && first.is_alive();
+bool HierarchyWindow::hasChildren(entity_t e) {
+    Node* node = ecs::try_get<Node>(e);
+    if (node) {
+        auto first = node->child_first;
+        return first.id && is_entity(first);
     }
     return false;
 }
@@ -90,34 +83,36 @@ void HierarchyWindow::drawVisibleTouchControls(Node* node, bool parentedVisible,
     }
     ImGui::SameLine(0, 0);
     ImGui::SetCursorPosX(10);
-    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, (parentedVisible || !node->visible()) ? 1.0f : 0.5f);
+    bool is_visible = !(node->flags & NODE_HIDDEN);
+    bool is_touchable = !(node->flags & NODE_UNTOUCHABLE);
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, (parentedVisible || !is_visible) ? 1.0f : 0.5f);
     {
-        const char* icon = node->visible() ? ICON_FA_EYE : ICON_FA_EYE_SLASH;
+        const char* icon = is_visible ? ICON_FA_EYE : ICON_FA_EYE_SLASH;
         if (hoverIconButton("visible", icon)) {
-            node->setVisible(!node->visible());
+            node->flags ^= NODE_HIDDEN;
         }
     }
     ImGui::PopStyleVar();
 
     ImGui::SameLine(0, 0);
     ImGui::SetCursorPosX(30);
-    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, (parentedTouchable || !node->touchable()) ? 1.0f : 0.5f);
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, (parentedTouchable || !is_touchable) ? 1.0f : 0.5f);
     {
-        const char* icon = node->touchable() ? ICON_FA_HAND_POINTER : ICON_FA_STOP;
+        const char* icon = is_touchable ? ICON_FA_HAND_POINTER : ICON_FA_STOP;
         if (hoverIconButton("touchable", icon)) {
-            node->setTouchable(!node->touchable());
+            node->flags ^= NODE_UNTOUCHABLE;
         }
     }
     ImGui::PopStyleVar();
 }
 
-void HierarchyWindow::drawEntityInTree(ecs::EntityApi e, bool parentedVisible, bool parentedTouchable) {
-    if (!e.is_alive()) {
+void HierarchyWindow::drawEntityInTree(entity_t e, bool parentedVisible, bool parentedTouchable) {
+    if (!is_entity(e)) {
         ImGui::Text("INVALID ENTITY");
         return;
     }
 
-    ImGui::PushID(getEntityID(e));
+    ImGui::PushID(e.id);
 //        ImGui::BeginGroup();
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow
@@ -135,32 +130,32 @@ void HierarchyWindow::drawEntityInTree(ecs::EntityApi e, bool parentedVisible, b
 
     auto nodeVisible = parentedVisible;
     auto nodeTouchable = parentedTouchable;
-    auto* node = e.tryGet<Node>();
+    auto* node = ecs::try_get<Node>(e);
     if (node) {
-        nodeVisible = nodeVisible && node->visible();
-        nodeTouchable = nodeTouchable && node->touchable();
+        nodeVisible = nodeVisible && !(node->flags & NODE_HIDDEN);
+        nodeTouchable = nodeTouchable && !(node->flags & NODE_UNTOUCHABLE);
     }
 
     ImGui::PushStyleColor(ImGuiCol_Text, nodeVisible ? 0xFFFFFFFF : 0x77FFFFFF);
-    if (openList.has(e.index)) {
+    if (openList.has(e.id)) {
         ImGui::SetNextItemOpen(true);
     }
-    if (scrollToList.has(e.index)) {
+    if (scrollToList.has(e.id)) {
         ImGui::SetScrollHereY();
-        scrollToList.remove(e.index);
+        scrollToList.remove(e.id);
     }
     char buffer[64];
     getEntityTitle(e, buffer);
     bool opened = ImGui::TreeNodeEx("entity", flags, "%s %s", getEntityIcon(e), buffer);
     if (!opened) {
-        openList.remove(e.index);
+        openList.remove(e.id);
     }
 
     ImGui::PopStyleColor();
 
     if (ImGui::IsItemClicked()) {
         selection.clear();
-        selection.push_back(ecs::EntityRef{e});
+        selection.push_back(e);
     }
 
     drawVisibleTouchControls(node, parentedVisible, parentedTouchable);
@@ -168,7 +163,7 @@ void HierarchyWindow::drawEntityInTree(ecs::EntityApi e, bool parentedVisible, b
     if (opened) {
         if (node) {
             auto it = node->child_first;
-            while (it) {
+            while (it.id) {
                 drawEntityInTree(it, nodeVisible, nodeTouchable);
                 it = getSiblingNext(it);
             }
@@ -180,22 +175,22 @@ void HierarchyWindow::drawEntityInTree(ecs::EntityApi e, bool parentedVisible, b
     ImGui::PopID();
 }
 
-void HierarchyWindow::drawEntityFiltered(ecs::EntityApi e, bool parentedVisible, bool parentedTouchable) {
-    if (!e.is_alive()) {
+void HierarchyWindow::drawEntityFiltered(entity_t e, bool parentedVisible, bool parentedTouchable) {
+    if (!is_entity(e)) {
         ImGui::Text("INVALID ENTITY");
         return;
     }
-    auto* node = e.tryGet<Node>();
-    const char* name = node ? hsp_get(node->tag) : 0;
+    auto* node = ecs::try_get<Node>(e);
+    const char* name = node ? hsp_get(node->tag) : NULL;
     auto nodeVisible = parentedVisible;
     auto nodeTouchable = parentedTouchable;
     if (node) {
-        nodeVisible = nodeVisible && node->visible();
-        nodeTouchable = nodeTouchable && node->touchable();
+        nodeVisible = nodeVisible && !(node->flags & NODE_HIDDEN);
+        nodeTouchable = nodeTouchable && !(node->flags & NODE_UNTOUCHABLE);
     }
 
     if (name && *name && filter.PassFilter(name)) {
-        ImGui::PushID(static_cast<int>(get_entity_passport(e.index).value));
+        ImGui::PushID(e.id);
         ImGui::BeginGroup();
 
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow
@@ -217,7 +212,7 @@ void HierarchyWindow::drawEntityFiltered(ecs::EntityApi e, bool parentedVisible,
 
         if (ImGui::IsItemClicked()) {
             selection.clear();
-            selection.push_back(ecs::EntityRef{e});
+            selection.push_back(e);
         }
 
         drawVisibleTouchControls(node, parentedVisible, parentedTouchable);
@@ -232,7 +227,7 @@ void HierarchyWindow::drawEntityFiltered(ecs::EntityApi e, bool parentedVisible,
 
     if (node) {
         auto it = node->child_first;
-        while (it) {
+        while (it.id) {
             drawEntityFiltered(it, nodeVisible, nodeTouchable);
             it = getSiblingNext(it);
         }
@@ -251,17 +246,17 @@ void HierarchyWindow::drawFilter() {
 
 void HierarchyWindow::onDraw() {
     drawFilter();
-    if (!root.valid()) {
+    if (!is_entity(root)) {
         ImGui::TextColored({1, 0, 0, 1}, "No roots");
     } else {
         ImGui::Indent(40.0f);
         if (filter.IsActive()) {
-            drawEntityFiltered(root.get(), true, true);
+            drawEntityFiltered(root, true, true);
         } else {
-            drawEntityInTree(root.get(), true, true);
+            drawEntityInTree(root, true, true);
         }
 //        for(auto e3d: ecs::view<Transform3D>()) {
-//            if(e3d.get<NodeName>().name == "scene 3d") {
+//            if(ecs::get<NodeName>(e3d).name == "scene 3d") {
 //                drawEntityInTree(e3d, true, true);
 //            }
 //        }
@@ -273,7 +268,7 @@ void HierarchyWindow::onDraw() {
 void HierarchyWindow::validateSelection() {
     unsigned i = 0;
     while (i < selection.size()) {
-        if (selection[i].valid()) {
+        if (is_entity(selection[i])) {
             ++i;
         } else {
             selection.erase_at(i);
@@ -281,23 +276,23 @@ void HierarchyWindow::validateSelection() {
     }
 }
 
-void HierarchyWindow::select(ecs::EntityApi e) {
+void HierarchyWindow::select(entity_t e) {
     selection.clear();
-    if (e) {
-        selection.push_back(ecs::EntityRef{e});
+    if (e.id) {
+        selection.push_back(e);
     }
 }
 
-void HierarchyWindow::focus(ecs::EntityApi e) {
-    if (e) {
+void HierarchyWindow::focus(entity_t e) {
+    if (e.id) {
         // open parents in hierarchy
-        auto parent = e.get<Node>().parent;
-        while (parent) {
-            openList.set(parent.index, ecs::EntityRef{parent});
-            parent = parent.get<Node>().parent;
+        entity_t parent = get_parent(e);
+        while (parent.id) {
+            openList.set(parent.id, parent);
+            parent = get_parent(parent);
         }
 
-        scrollToList.set(e.index, ecs::EntityRef{e});
+        scrollToList.set(e.id, e);
     }
 }
 

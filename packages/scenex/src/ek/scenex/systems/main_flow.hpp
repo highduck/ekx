@@ -1,12 +1,12 @@
 #pragma once
 
-#include <ecxx/ecxx.hpp>
+#include <ecx/ecx.hpp>
 
 namespace ek {
 
-void scene_pre_update(ecs::EntityApi root, float dt);
-void scene_post_update(ecs::EntityApi root);
-void scene_render(ecs::EntityApi root);
+void scene_pre_update(entity_t root, float dt);
+void scene_post_update(entity_t root);
+void scene_render(entity_t root);
 
 }
 
