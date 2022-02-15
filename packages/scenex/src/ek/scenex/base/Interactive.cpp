@@ -1,5 +1,6 @@
 #include "Interactive.hpp"
 #include "NodeEvents.hpp"
+#include "ek/scenex/2d/Button.hpp"
 
 namespace ek {
 
@@ -9,6 +10,7 @@ void Interactive::handle(entity_t e, string_hash_t type) {
     if (type == POINTER_EVENT_DOWN) {
         pushed = true;
         if (eh) eh->emit({type, e, {nullptr}, e});
+        ev_down = true;
     } else if (type == POINTER_EVENT_UP) {
         shouldBeClicked = pushed && over;
         pushed = false;
@@ -16,18 +18,24 @@ void Interactive::handle(entity_t e, string_hash_t type) {
     } else if (type == POINTER_EVENT_OVER) {
         over = true;
         if (eh) eh->emit({type, e, {nullptr}, e});
+
+        ev_over = true;
     } else if (type == POINTER_EVENT_OUT) {
-        // keep order for now, later maybe unified at the end of function
-        if (eh) eh->emit({type, e, {nullptr}, e});
         over = false;
         pushed = false;
+        if (eh) eh->emit({type, e, {nullptr}, e});
+        ev_out = true;
     } else {
         return;
     }
 
-    if (eh && shouldBeClicked) {
-        eh->emit({POINTER_EVENT_TAP, e, {nullptr}, e});
+    if (shouldBeClicked) {
+        ev_tap = true;
+        if(eh) {
+            eh->emit({POINTER_EVENT_TAP, e, {nullptr}, e});
+        }
     }
+
 }
 
 }

@@ -66,23 +66,23 @@ const SGNodeData* sg_get(const SGFile* sg, string_hash_t library_name) {
     return nullptr;
 }
 
-void apply(entity_t entity, const SGNodeData* data) {
+void apply(entity_t e, const SGNodeData* data) {
     if (data->movieTargetId >= 0) {
-        ecs::add<MovieClipTargetIndex>(entity).key = data->movieTargetId;
+        ecs::add<MovieClipTargetIndex>(e).key = data->movieTargetId;
     }
 
     {
-        auto& transform = ecs::get<Transform2D>(entity);
+        auto& transform = ecs::get<Transform2D>(e);
         transform.setMatrix(data->matrix);
         transform.color.scale = color_vec4(data->color.scale);
         transform.color.offset = color_vec4(data->color.offset);
     }
 
-    set_touchable(entity, data->touchable);
-    set_visible(entity, data->visible);
+    set_touchable(e, data->touchable);
+    set_visible(e, data->visible);
     if (data->name) {
         // override
-        set_tag(entity, data->name);
+        set_tag(e, data->name);
     }
 
     if (!data->dynamicText.empty()) {
@@ -104,7 +104,7 @@ void apply(entity_t entity, const SGNodeData* data) {
             format.layers[i].strength = layer.strength;
         }
 
-        auto* dtext = text2d_setup(entity);
+        auto* dtext = text2d_setup(e);
 
         dtext->c_str = dynamicText.text.c_str();
         dtext->flags = ((dtext->flags >> 2) << 2);
@@ -116,21 +116,21 @@ void apply(entity_t entity, const SGNodeData* data) {
     }
 
     if (!data->movie.empty()) {
-        auto& mov = ecs::add<MovieClip>(entity);
+        auto& mov = ecs::add<MovieClip>(e);
         mov.data = &data->movie[0];
         mov.fps = data->movie[0].fps;
     }
 
-    Sprite2D* sprite = ecs::try_get<Sprite2D>(entity);
-    NinePatch2D* ninePatch = ecs::try_get<NinePatch2D>(entity);
+    Sprite2D* sprite = ecs::try_get<Sprite2D>(e);
+    NinePatch2D* ninePatch = ecs::try_get<NinePatch2D>(e);
 
     if (data->sprite && !sprite) {
         if (rect_is_empty(data->scaleGrid)) {
-            sprite = sprite2d_setup(entity);
+            sprite = sprite2d_setup(e);
             new Sprite2D();
             sprite->src = R_SPRITE(data->sprite);
         } else {
-            ninePatch = ninepatch2d_setup(entity);
+            ninePatch = ninepatch2d_setup(e);
             ninePatch->src = R_SPRITE(data->sprite);
             ninePatch->scale_grid = data->scaleGrid;
         }
@@ -141,7 +141,7 @@ void apply(entity_t entity, const SGNodeData* data) {
     }
 
     if (data->scissorsEnabled || data->hitAreaEnabled || data->boundsEnabled) {
-        auto& bounds = ecs::add<Bounds2D>(entity);
+        auto& bounds = ecs::add<Bounds2D>(e);
         bounds.rect = data->boundingRect;
         if (data->scissorsEnabled) {
             bounds.flags |= BOUNDS_2D_SCISSORS;
@@ -155,35 +155,29 @@ void apply(entity_t entity, const SGNodeData* data) {
     }
 
     if (data->button) {
-        ecs::add<Interactive, Button>(entity);
+        ecs::add<Interactive>(e).cursor = EK_MOUSE_CURSOR_BUTTON;
+        ecs::add<Button>(e);
     }
-
-    // TODO: remove ugly filters
-//    if (!data->filters.empty()) {
-//        auto& filters_comp = entity.reassign<UglyFilter2D>();
-//        filters_comp.filters = data->filters;
-//        ecs::replace_or_assign<node_filters_t>(entity);
-//    }
 }
 
 entity_t create_and_merge(const SGFile* sg,
                           const SGNodeData* data,
                           const SGNodeData* over = nullptr) {
-    auto entity = ecs::create<Node, Transform2D, WorldTransform2D>();
+    auto e = ecs::create<Node, Transform2D, WorldTransform2D>();
     if (data) {
-        apply(entity, data);
+        apply(e, data);
     }
     if (over) {
-        apply(entity, over);
+        apply(e, over);
     }
     if (data) {
         for (const auto& child: data->children) {
-            auto child_entity = create_and_merge(sg, sg_get(sg, child.libraryName), &child);
-            append_strict(entity, child_entity);
+            entity_t child_entity = create_and_merge(sg, sg_get(sg, child.libraryName), &child);
+            append_strict(e, child_entity);
         }
     }
 
-    return entity;
+    return e;
 }
 
 void extend_bounds(const SGFile* file, const SGNodeData& data, aabb2_t* boundsBuilder,

@@ -54,6 +54,8 @@ void scene_post_update(entity_t root) {
     update_emitters();
     update_particles();
     update_camera2d_queue();
+
+    complete_frame_interaction_system();
 }
 
 void scene_render(entity_t root) {

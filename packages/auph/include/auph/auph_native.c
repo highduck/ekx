@@ -324,7 +324,70 @@ auph_buffer auph_load(const char* filepath, int flags) {
     return (auph_buffer) {0};
 }
 
+typedef struct user_stream {
+    void* userdata;
+    void* callback;
+    uint64_t cursor;
+    float prev[24];
+} user_stream;
+
+auph_mix_sample* auph_read_user_stream(auph_mix_sample* mix,
+                                      const double begin,
+                                      const double end,
+                                      const double advance,
+                                      const auph_buffer_data_source* dataSource,
+                                      auph_mix_sample volume) {
+    user_stream* stream = (user_stream*) dataSource->stream_data;
+    const int channels = (int) dataSource->channels;
+    static const int BufferFloatsMax = 2048 * 10;
+    float buffer[BufferFloatsMax];
+    ((auph_samples_data*) &dataSource->data)->buffer = buffer;
+
+    if (stream->cursor != (uint64_t) ceil(begin)) {
+        stream->cursor = (uint64_t) ceil(begin);
+    }
+
+    double p = begin;
+    int newFrames = (int) end - (int) p;
+    const int startOffset = (int) p;
+    for (int ch = 0; ch < channels; ++ch) {
+        buffer[ch] = stream->prev[ch];
+    }
+    if (newFrames > BufferFloatsMax / channels - 1) {
+        newFrames = BufferFloatsMax / channels - 1;
+    }
+    void(*user_callback)(void* userdata, float* samples, uint32_t count) = stream->callback;
+    user_callback(stream->userdata, buffer + channels, newFrames);
+    uint64_t framesReady = newFrames;
+
+    if (framesReady > 0) {
+        for (int ch = 0; ch < channels; ++ch) {
+            stream->prev[ch] = buffer[framesReady * channels + ch];
+        }
+        mix = auph_select_source_reader(AUPH_SAMPLE_FORMAT_F32, 2, false)(mix, p - startOffset, end - startOffset, advance, dataSource, volume);
+    }
+    ((auph_samples_data*) &dataSource->data)->buffer = NULL;
+    stream->cursor = (uint64_t) ceil(end);
+    return mix;
+}
+
+
 auph_buffer auph_load_data(const void* data, int size, int flags) {
+    if(size == 0 && (flags & 16)) {
+        const auph_buffer buff = auph_get_next_buffer();
+        if (buff.id) {
+            auph_buffer_obj* buf = auph_get_buffer_obj(buff.id);
+            if (buf) {
+                buf->data.format = AUPH_SAMPLE_FORMAT_F32;
+                buf->data.channels = 2;
+                buf->data.sample_rate = 44100;
+                buf->data.length = 100000;
+                buf->data.stream_data = (void*)data;
+                buf->data.reader = auph_read_user_stream;
+                return buff;
+            }
+        }
+    }
     if (data && size > 4) {
         const auph_buffer buff = auph_get_next_buffer();
         if (buff.id) {

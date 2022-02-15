@@ -23,11 +23,8 @@ struct ButtonSkin {
 };
 
 struct Button {
-    ButtonSkin* skin{nullptr};
+    ButtonSkin* skin = nullptr;
 
-    bool back_button = false;
-
-    bool initialized = false;
     float timeOver = 0.0f;
     float timePush = 0.0f;
     float timePost = 0.0f;
@@ -37,6 +34,10 @@ struct Button {
     color2_t baseColor = color2_identity();
 
     TimeLayer time = TIME_LAYER_UI;
+
+    bool initialized = false;
+//    bool back_button = false;
+    bool pushed = false;
 
     static void updateAll();
 };

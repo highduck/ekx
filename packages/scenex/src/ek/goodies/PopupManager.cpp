@@ -81,12 +81,15 @@ void on_popup_close_animation(float t, entity_t e) {
 void init_basic_popup(entity_t e) {
     auto node_close = find(e, H("btn_close"));
     if (node_close.id) {
-        auto* btn = ecs::try_get<Button>(node_close);
-        if(btn) {
-            btn->back_button = true;
-            ecs::add<NodeEventHandler>(node_close).on(BUTTON_EVENT_CLICK, [](const NodeEventData& event) {
-                close_popup(get_parent(event.receiver));
-            });
+        auto* i = ecs::try_get<Interactive>(node_close);
+        if(i) {
+            i->back_button = true;
+            auto* btn = ecs::try_get<Button>(node_close);
+            if (btn) {
+                ecs::add<NodeEventHandler>(node_close).on(BUTTON_EVENT_CLICK, [](const NodeEventData& event) {
+                    close_popup(get_parent(event.receiver));
+                });
+            }
         }
     }
 }

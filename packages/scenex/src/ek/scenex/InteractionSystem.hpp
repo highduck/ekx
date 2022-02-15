@@ -51,3 +51,4 @@ struct InteractionSystem {
 extern ek::InteractionSystem g_interaction_system;
 void init_interaction_system(void);
 void update_interaction_system(void);
+void complete_frame_interaction_system(void);

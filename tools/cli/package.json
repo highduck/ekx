@@ -30,7 +30,7 @@
     "chalk": "^4.1.2",
     "cmake-build": "0.0.4",
     "glob": "^7.2.0",
-    "http-server": "^14.0.0",
+    "http-server": "^14.1.0",
     "mustache": "^4.2.0",
     "node-emoji": "^1.11.0",
     "plist": "^3.0.4",
@@ -43,11 +43,11 @@
     "@types/glob": "^7.2.0",
     "@types/http-server": "^0.12.1",
     "@types/mustache": "^4.1.2",
-    "@types/node": "^17.0.8",
+    "@types/node": "^17.0.18",
     "@types/plist": "^3.0.2",
     "@types/rimraf": "^3.0.2",
     "@types/xmldoc": "^1.1.6",
     "rimraf": "^3.0.2",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.5"
   }
 }

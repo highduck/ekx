@@ -473,15 +473,15 @@ void canvas_stroke_circle(const vec3_t circle, color_t color, float lineWidth, i
     const float r = circle.z;
 
     const float da = MATH_TAU / (float) segments;
-    float a = 0.0f;
-    vec2_t pen = vec2(x, y - r);
+    float a = da;
+    vec2_t pen = vec2(x + r, y);
     while (a < MATH_TAU) {
         const vec2_t next = vec2(x + r * cosf(a), y + r * sinf(a));
         canvas_line(pen, next, color, lineWidth);
         pen = next;
         a += da;
     }
-    canvas_line(pen, vec2(x, y - r), color, lineWidth);
+    canvas_line(pen, vec2(x + r, y), color, lineWidth);
 }
 
 static float triangle_area(const ek_vertex2d* vertices, const uint16_t* indices, int count) {

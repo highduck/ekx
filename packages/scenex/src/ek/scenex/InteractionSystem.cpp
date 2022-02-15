@@ -39,6 +39,39 @@ bool dispatch_interactive_event(entity_t e, const NodeEventData& data) {
     return false;
 }
 
+bool dispatch_back_event(entity_t e, const NodeEventData& data) {
+    if (is_touchable(e)) {
+        bool processed = false;
+        auto* eh = ecs::try_get<NodeEventHandler>(e);
+        if(eh) {
+            data.receiver = e;
+            eh->emit(data);
+            if (data.processed) {
+                processed = true;
+            }
+        }
+        auto* i = ecs::try_get<Interactive>(e);
+        if (i && i->back_button) {
+            i->ev_tap = true;
+            i->ev_tap_back = true;
+            processed = true;
+        }
+        if(processed) {
+            return true;
+        }
+
+        entity_t it = get_last_child(e);
+        while (it.id) {
+            auto prev = get_prev_child(it);
+            if (dispatch_back_event(it, data)) {
+                return true;
+            }
+            it = prev;
+        }
+    }
+    return false;
+}
+
 bool interaction_system_list_contains_target(const entity_t list[32], entity_t e) {
     for (uint32_t i = 0; i < 32; ++i) {
         entity_t target = list[i];
@@ -121,10 +154,9 @@ void InteractionSystem::handle_touch_event(const ek_app_event* ev, vec2_t pos) {
 }
 
 void InteractionSystem::sendBackButton() {
-    dispatch_interactive_event(root_, {
+    dispatch_back_event(root_, {
             INTERACTIVE_EVENT_BACK_BUTTON,
-            root_,
-            {"game"}
+            root_, {}
     });
 }
 
@@ -203,6 +235,17 @@ ek::InteractionSystem g_interaction_system;
 
 void init_interaction_system() {
     // g_interaction_system = new ek::InteractionSystem();
+}
+
+void complete_frame_interaction_system() {
+    for(auto e : ecs::view<ek::Interactive>()) {
+        auto& i = ecs::get<ek::Interactive>(e);
+        i.ev_out = false;
+        i.ev_over = false;
+        i.ev_down = false;
+        i.ev_tap = false;
+        i.ev_tap_back = false;
+    }
 }
 
 void update_interaction_system() {

@@ -203,7 +203,6 @@ struct SGNodeData {
     rect_t boundingRect;
     rect_t scaleGrid;
     Array<SGNodeData> children;
-    //Array<SGFilter> filters;
     Array<SGDynamicTextData> dynamicText;
     Array<SGMovieData> movie;
     Array<SGFrameLabel> labels;
@@ -231,7 +230,6 @@ struct SGNodeData {
                 color,
 
                 children,
-                //filters,
                 dynamicText,
                 movie,
 

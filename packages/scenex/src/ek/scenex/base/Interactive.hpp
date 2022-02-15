@@ -26,9 +26,16 @@ struct Interactive {
     //bool enabled = true;
     // todo: check bubble was false by default
     bool bubble = true;
+    bool back_button = false;
     // responsive state
     bool over = false;
     bool pushed = false;
+    // events
+    bool ev_over = false;
+    bool ev_tap = false;
+    bool ev_out = false;
+    bool ev_down = false;
+    bool ev_tap_back = false;
 
     void handle(entity_t e, string_hash_t type);
 };
