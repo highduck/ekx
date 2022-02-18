@@ -34,7 +34,7 @@
     "follow-redirects": "^1.14.8",
     "http-server": "^14.1.0",
     "rimraf": "^3.0.2",
-    "rollup": "^2.67.2",
+    "rollup": "^2.67.3",
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.5.5"
   },
