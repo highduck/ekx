@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-replace": "^3.1.0",
-    "follow-redirects": "^1.14.8",
+    "follow-redirects": "^1.14.9",
     "http-server": "^14.1.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.67.2",
