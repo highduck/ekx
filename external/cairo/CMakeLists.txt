@@ -143,7 +143,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_EXTENSIONS NO
         )
 
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    target_compile_definitions(${PROJECT_NAME}
+            PUBLIC CAIRO_WIN32_STATIC_BUILD)
+else()
     target_link_libraries(${PROJECT_NAME} -lpthread)
 endif()
 
