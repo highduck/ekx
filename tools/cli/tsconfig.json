@@ -5,7 +5,9 @@
     "moduleResolution": "Node",
     "outDir": "dist",
     "declaration": true,
-    "declarationDir": "dist"
+    "declarationDir": "dist",
+    "lib": ["ES2020"],
+    "skipLibCheck": true
   },
   "include": [
     "./src/**/*.ts"

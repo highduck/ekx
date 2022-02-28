@@ -73,8 +73,8 @@ entity_t entity_at(entity_idx_t idx);
 
 /**
  * Check if entity alive and valid. For `NULL_ENTITY` (`id` is zero) entity is always invalid.
- * @param entity
- * @return
+ * @param entity to check
+ * @return entity is invalid or NULL
  */
 bool is_entity(entity_t entity);
 
@@ -82,13 +82,13 @@ entity_t create_entity(void);
 
 /**
  * remove all components from entity
- * @param entity
+ * @param entity to remove all compoennts from
  */
 void clear_entity(entity_t entity);
 
 /**
  * destroy entity (remove all components as well)
- * @param entity
+ * @param entity to destroy
  */
 void destroy_entity(entity_t entity);
 
@@ -115,7 +115,7 @@ typedef struct {
 
     void* data[ECX_COMPONENT_DATA_LAYERS_MAX_COUNT]; // 16 .. 24
     component_type_id* component_next; // 24
-    void (* on_shutdown)(); // 28
+    void (* on_shutdown)(void); // 28
     void (* ctor)(component_handle_t handle); // 32
     void (* dtor)(component_handle_t handle); // 36
 
@@ -136,16 +136,16 @@ typedef struct {
 
 /**
  * Removes component from entity, nothing if component is not set
- * @param type
- * @param entity
+ * @param type component type storage
+ * @param entity target to remove component from
  * @return true if component has been removed, false otherwise (not set or entity is invalid in release mode)
  */
 bool remove_component(ecx_component_type* type, entity_t entity);
 
 /**
  *
- * @param type
- * @param entity
+ * @param type component storage
+ * @param entity target
  * @return NULL if component is not set, assert/NULL if invalid entity
  */
 void* get_component(ecx_component_type* type, entity_t entity);

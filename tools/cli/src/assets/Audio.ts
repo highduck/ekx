@@ -1,66 +1,67 @@
 import {Asset} from "./Asset";
 import * as path from "path";
-import {copyFile, makeDirs} from "../utils";
+import {copyFile, makeDirs, removePathExtension} from "../utils";
 import {BytesWriter} from "./helpers/BytesWriter";
-import * as glob from "glob";
-import {XmlElement} from "xmldoc";
 import {H} from "../utility/hash";
+import {hashFile} from "./helpers/hash";
 
-class AudioFile {
+export interface AudioFile {
     filepath: string;
-    streaming: boolean;
+    name?: string; // filepath without extension
+    lazy?: boolean; // true
+    dev?: boolean; // false
+
+    // audio specific
+    streaming?: boolean; // false
 }
 
 export class AudioAsset extends Asset {
     static typeName = "audio";
 
-    list: AudioFile[] = [];
-
-    constructor(filepath: string) {
-        super(filepath, AudioAsset.typeName);
+    constructor(readonly desc: AudioFile) {
+        super(desc, AudioAsset.typeName);
+        const streaming = this.desc.streaming ?? false;
+        const lazy = this.desc.lazy ?? true;
+        this.priority = 100;
+        if (streaming) {
+            this.priority += 1;
+        }
+        if (lazy) {
+            this.priority += 1;
+        }
     }
 
-    checkFilters(filepath: string, filters: string[]) {
-        for (const filter of filters) {
-            if (filepath.indexOf(filter) >= 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    readDeclFromXml(node: XmlElement) {
-        const musicFilters: string[] = [];
-
-        for (const musicNode of node.childrenNamed("music")) {
-            musicFilters.push(musicNode.attr.filter);
-        }
-
-        const files = glob.sync(path.join(this.owner.basePath, this.resourcePath, "*.mp3"));
-        for (const file of files) {
-            this.list.push({
-                filepath: file,
-                streaming: this.checkFilters(file, musicFilters)
-            });
-        }
+    resolveInputs(): number {
+        return hashFile(path.resolve(this.owner.basePath, this.desc.filepath)) ^
+            super.resolveInputs();
     }
 
     async build() {
-        // `name`\ folder for all sounds
-        const outputPath = path.join(this.owner.output, this.name);
-        makeDirs(outputPath);
+        const outputPath = path.join(this.owner.output, this.desc.filepath);
+        const inputPath = path.join(this.owner.basePath, this.desc.filepath);
+        makeDirs(path.dirname(outputPath));
 
-        for (const audio of this.list) {
-            const p = path.join(this.name, path.basename(audio.filepath));
-            copyFile(audio.filepath, path.join(this.owner.output, p));
-            const header = new BytesWriter();
-            header.writeU32(H("audio"));
-            // remove extension for resource name
-            header.writeU32(H(p.substring(0, p.length - 4)));
-            header.writeU32(audio.streaming ? 1 : 0);
-            header.writeString(p);
-            this.owner.writer.writeSection(header);
+        copyFile(inputPath, outputPath);
+        const header = new BytesWriter();
+        const name = this.desc.name ?? removePathExtension(this.desc.filepath);
+        const streaming = this.desc.streaming ?? false;
+        const lazy = this.desc.lazy ?? true;
+        const dev = this.desc.dev ?? false;
+        if (dev && !this.owner.devMode) {
+            return null;
         }
+        this.writer.writeU32(H("audio"));
+        this.writer.writeU32(H(name));
+        let flags = 0;
+        if (streaming) {
+            flags |= 1;
+        }
+        if (lazy) {
+            flags |= 2;
+        }
+        this.writer.writeU32(flags);
+        this.writer.writeString(this.desc.filepath);
+
         return null;
     }
 }

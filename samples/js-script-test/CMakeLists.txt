@@ -4,6 +4,7 @@ project(js-script-test)
 
 add_executable(${PROJECT_NAME}
         src/main.cpp
+        src/js_api.c
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -24,6 +25,7 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::std
         PUBLIC ekx::app
         PUBLIC ekx::quickjs
+        PUBLIC ekx::res
         )
 
 add_definitions("-ffast-math -fno-exceptions -fno-rtti -Wall -Wextra")

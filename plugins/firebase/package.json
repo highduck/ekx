@@ -12,7 +12,8 @@
   "dependencies": {
     "@ekx/app": "0.1.8",
     "cmake-build": "0.0.4",
-    "firebase": "^9.6.6"
+    "firebase": "^9.6.6",
+    "firebaseui": "^6.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.1.3",

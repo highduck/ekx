@@ -1,43 +1,54 @@
-import {Asset} from "./Asset";
+import {Asset, AssetDesc} from "./Asset";
 import {makeDirs} from "../utils";
 import * as path from "path";
 import * as fs from "fs";
 import {bmfontAsync} from "./helpers/bmfont";
-import {BytesWriter} from "./helpers/BytesWriter";
 import {XmlDocument, XmlElement} from "xmldoc";
 import {MultiResAtlasAsset} from "./Atlas";
 import {H} from "../utility/hash";
+import {hashFile} from "./helpers/hash";
+
+export interface BMFontDesc extends AssetDesc {
+    filepath: string;
+    atlas?: string; // main
+    font_size?: number;
+    mirror_case?: boolean; // false
+    code_range?: {from:number, to:number}[];
+    // TODO: change
+    font_xml?: string; //
+    filters_xml?: string; //
+}
 
 export class BitmapFontAsset extends Asset {
     static typeName = "bmfont";
 
-    targetAtlas: string;
-    filters = "";
-    font = "";
-
-    constructor(filepath: string) {
-        super(filepath, BitmapFontAsset.typeName);
+    constructor(readonly desc:BMFontDesc) {
+        super(desc, BitmapFontAsset.typeName);
+        desc.font_xml = desc.font_xml ?? `<font fontSize="${desc.font_size ?? 24}" mirrorCase="${!!desc.mirror_case}">
+        <codeRange from="0x0020" to="0x007F"/>
+    </font>`;
+        desc.filters_xml = `<filters/>`;
     }
 
-    readDeclFromXml(node: XmlElement) {
-        this.targetAtlas = node.attr.atlas ?? "main";
-        this.filters = node.childNamed("filters").toString();
-        this.font = node.childNamed("font").toString();
+    resolveInputs(): number {
+        return hashFile(path.resolve(this.owner.basePath, this.desc.filepath)) ^
+            super.resolveInputs();
     }
 
     async build() {
-        makeDirs(path.join(this.owner.cache, this.name));
-        const outputFont = path.join(this.owner.output, this.name + ".font");
-        const configPath = path.join(this.owner.cache, this.name, "_config.xml");
-        const imagesOutput = path.join(this.owner.cache, this.name, this.targetAtlas);
-        const atlasAsset = this.owner.find(MultiResAtlasAsset.typeName, this.targetAtlas) as MultiResAtlasAsset;
-        const xml = new XmlDocument(`<bmfont path="${path.resolve(this.owner.basePath, this.resourcePath)}" name="${this.name}"
+        const targetAtlas = this.desc.atlas ?? "main";
+        makeDirs(path.join(this.owner.cache, this.desc.name));
+        const outputFont = path.join(this.owner.output, this.desc.name + ".font");
+        const configPath = path.join(this.owner.cache, this.desc.name, "_config.xml");
+        const imagesOutput = path.join(this.owner.cache, this.desc.name, targetAtlas);
+        const atlasAsset = this.owner.find(MultiResAtlasAsset.typeName, targetAtlas) as MultiResAtlasAsset;
+        const xml = new XmlDocument(`<bmfont path="${path.resolve(this.owner.basePath, this.desc.filepath)}" name="${this.desc.name}"
  outputSprites="${imagesOutput}"
   outputFont="${outputFont}">
-${this.filters}
-${this.font}
-<atlas name="${atlasAsset.settings.name}">
-    ${atlasAsset.settings.resolutions.map(r => "<resolution scale=\"" + r.scale + "\"/>").join("\n")}
+${this.desc.filters_xml!}
+${this.desc.font_xml!}
+<atlas name="${atlasAsset.desc.name}">
+    ${atlasAsset.desc.resolutions.map(r => "<resolution scale=\"" + r.scale + "\"/>").join("\n")}
 </atlas>
 </bmfont>`);
         fs.writeFileSync(configPath, xml.toString(), "utf-8");
@@ -48,10 +59,8 @@ ${this.font}
 
         atlasAsset.inputs.push(path.join(imagesOutput, "_images.xml"));
 
-        const header = new BytesWriter();
-        header.writeU32(H(BitmapFontAsset.typeName));
-        header.writeU32(H(this.name));
-        header.writeString(this.name + ".font");
-        this.owner.writer.writeSection(header);
+        this.writer.writeU32(H(BitmapFontAsset.typeName));
+        this.writer.writeU32(H(this.desc.name));
+        this.writer.writeString(this.desc.name + ".font");
     }
 }

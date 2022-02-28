@@ -82,7 +82,6 @@ export class AndroidManifest {
             const application = new XmlDocument(`<application/>`);
             doc.children.push(application);
 
-            application.attr["android:allowNativeHeapPointerTagging"] = "false";
             application.attr["android:name"] = "androidx.multidex.MultiDexApplication";
             application.attr["android:allowBackup"] = "false";
             application.attr["android:icon"] = "@mipmap/ic_launcher";

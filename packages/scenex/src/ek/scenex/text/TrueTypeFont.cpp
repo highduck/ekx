@@ -184,11 +184,15 @@ void TrueTypeFont::loadDeviceFont(const char* fontName) {
     EK_ASSERT(!loaded_);
 
     char fontPath[1024];
-    if (0 == ek_app_font_path(fontPath, sizeof(fontPath), fontName) &&
-        *fontPath) {
+    if (0 == ek_app_font_path(fontPath, sizeof(fontPath), fontName) && *fontPath) {
         ek_local_res_load(fontPath, [](ek_local_res* lr) {
-            TrueTypeFont* this_ = (TrueTypeFont*) lr->userdata;
-            this_->loadFromMemory(lr);
+            if(ek_local_res_success(lr)) {
+                TrueTypeFont *this_ = (TrueTypeFont *) lr->userdata;
+                this_->loadFromMemory(lr);
+            }
+            else {
+                ek_local_res_close(lr);
+            }
         }, this);
     }
 }

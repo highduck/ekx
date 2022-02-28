@@ -22,6 +22,7 @@ export const set = _.set;
 export const get = _.get;
 export const load = _.load;
 export const loadMemory = _.loadMemory;
+export const load_callback = _.load_callback;
 export const unload = _.unload;
 export const stop = _.stop;
 export const vibrate = _.vibrate;

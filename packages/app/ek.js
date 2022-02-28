@@ -10,7 +10,10 @@ function setup(project) {
         cpp_include: "include",
         android: {
             cpp_lib: ["log", "android", "GLESv2"],
-            android_java: "java"
+            android_java: "java",
+            android_dependency: [
+                `implementation 'androidx.appcompat:appcompat:1.4.1'`
+            ]
         },
         macos: {
             xcode_framework: [

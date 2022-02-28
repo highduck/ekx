@@ -1,4 +1,3 @@
-import {terser} from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
 
 function createGlobalPlugins(release) {
@@ -21,7 +20,6 @@ export default [
             format: "iife",
             name: "auph",
             compact: true,
-            plugins: [terser()],
             sourcemap: true
         },
         plugins: createGlobalPlugins(true)

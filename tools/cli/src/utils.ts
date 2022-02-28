@@ -2,8 +2,8 @@ import {spawn, spawnSync, SpawnSyncOptionsWithStringEncoding} from "child_proces
 import * as fs from "fs";
 import * as path from "path";
 import * as glob from 'glob';
-import rimraf = require("rimraf");
 import {logger} from "./logger";
+import rimraf = require("rimraf");
 
 export type UtilityConfig = {
     verbose?: boolean
@@ -153,27 +153,29 @@ export function copyFolderRecursiveSync(source: string, target: string) {
 
     //copy
     if (fs.lstatSync(source).isDirectory()) {
-        fs.readdirSync(source).forEach((file) => {
-            var curSource = path.join(source, file);
+        const list = fs.readdirSync(source);
+        for (let file of list) {
+            const curSource = path.join(source, file);
             if (fs.lstatSync(curSource).isDirectory()) {
                 copyFolderRecursiveSync(curSource, path.join(target, file));
             } else {
                 fs.copyFileSync(curSource, path.join(target, file));
             }
-        });
+        }
     }
 }
 
 export function deleteFolderRecursive(p: string) {
     if (fs.existsSync(p)) {
-        fs.readdirSync(p).forEach((file, index) => {
-            const curPath = p + "/" + file;
+        const list = fs.readdirSync(p);
+        for (let file of list) {
+            const curPath = path.join(p, file);
             if (fs.lstatSync(curPath).isDirectory()) { // recurse
                 deleteFolderRecursive(curPath);
             } else { // delete file
                 fs.unlinkSync(curPath);
             }
-        });
+        }
         fs.rmdirSync(p);
     }
 }
@@ -193,4 +195,12 @@ export function rimrafAsync(pattern: string, options?: rimraf.Options): Promise<
             rimraf(pattern, cb);
         }
     });
+}
+
+export function removePathExtension(p:string):string {
+    const ext = path.extname(p);
+    if(ext.length > 0) {
+        return p.substring(0, p.length - ext.length);
+    }
+    return p;
 }

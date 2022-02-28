@@ -24,15 +24,19 @@
 
 #if defined(__ANDROID__)
 
-void ek_firebase_init(void) {
+bool firebase(firebase_cmd_t cmd) {
+    bool result = false;
     JNIEnv* env = ek_android_jni();
     jclass class_ref = (*env)->FindClass(env, "ek/FirebasePlugin");
-    jmethodID method = (*env)->GetStaticMethodID(env, class_ref, "init", "()V");
-    (*env)->CallStaticVoidMethod(env, class_ref, method);
+    jmethodID method = (*env)->GetStaticMethodID(env, class_ref, "call", "(I)V");
+    (*env)->CallStaticVoidMethod(env, class_ref, method, cmd);
+    // TODO: result from Java
+    result = true;
     (*env)->DeleteLocalRef(env, class_ref);
+    return result;
 }
 
-void ek_firebase_screen(const char* name) {
+void firebase_screen(const char* name) {
     JNIEnv* env = ek_android_jni();
     jclass class_ref = (*env)->FindClass(env, "ek/FirebasePlugin");
     jstring name_ref = (*env)->NewStringUTF(env, name);
@@ -42,7 +46,7 @@ void ek_firebase_screen(const char* name) {
     (*env)->DeleteLocalRef(env, name_ref);
 }
 
-void ek_firebase_event(const char* action, const char* target) {
+void firebase_event(const char* action, const char* target) {
     JNIEnv* env = ek_android_jni();
     jclass class_ref = (*env)->FindClass(env, "ek/FirebasePlugin");
     jstring action_ref = (*env)->NewStringUTF(env, action);
@@ -57,11 +61,15 @@ void ek_firebase_event(const char* action, const char* target) {
 
 #elif (TARGET_OS_IOS || TARGET_OS_TV)
 
-void ek_firebase_init(void) {
-    [FIRApp configure];
+bool firebase(firebase_cmd_t cmd) {
+    if(cmd == FIREBASE_CMD_INIT) {
+        [FIRApp configure];
+        return true;
+    }
+    return false;
 }
 
-void ek_firebase_screen(const char* name) {
+void firebase_screen(const char* name) {
     NSString* nsScreenName = name != nil ? [NSString stringWithUTF8String: name] : @"unknown";
     [FIRAnalytics logEventWithName:kFIREventScreenView
     parameters:@{
@@ -69,7 +77,7 @@ void ek_firebase_screen(const char* name) {
     }];
 }
 
-void ek_firebase_event(const char* action, const char* target) {
+void firebase_event(const char* action, const char* target) {
     NSString* nsAction = action != nil ? [NSString stringWithUTF8String: action] : @"unknown";
     NSString* nsTarget = target != nil ? [NSString stringWithUTF8String: target] : @"unknown";
 
@@ -79,16 +87,35 @@ void ek_firebase_event(const char* action, const char* target) {
     }];
 }
 
-#else
+#elif defined(__EMSCRIPTEN__)
 
-void ek_firebase_init(void) {
+extern bool firebase_js(uint32_t cmd);
+
+bool firebase(firebase_cmd_t cmd) {
+    return firebase_js(cmd);
 }
 
-void ek_firebase_screen(const char* name) {
+void firebase_screen(const char* name) {
     (void) name;
 }
 
-void ek_firebase_event(const char* action, const char* target) {
+void firebase_event(const char* action, const char* target) {
+    (void) action;
+    (void) target;
+}
+
+#else
+
+bool firebase(firebase_cmd_t cmd) {
+    (void)(cmd);
+    return false;
+}
+
+void firebase_screen(const char* name) {
+    (void) name;
+}
+
+void firebase_event(const char* action, const char* target) {
     (void) action;
     (void) target;
 }

@@ -38,7 +38,7 @@ PolyphaseResampler::PolyphaseResampler(const MultiChannelResampler::Builder &bui
 
 void PolyphaseResampler::readFrame(float *frame) {
     // Clear accumulator for mixing.
-    std::fill(mSingleFrame.canvas_begin(), mSingleFrame.end(), 0.0);
+    std::fill(mSingleFrame.begin(), mSingleFrame.end(), 0.0);
 
 //    printf("PolyphaseResampler: mCoefficientCursor = %4d\n", mCoefficientCursor);
     // Multiply input times windowed sinc function.

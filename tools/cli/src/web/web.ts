@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import {copyFileSync} from "fs";
 import * as path from "path";
 import {makeDirs, replaceInFile} from "../utils";
 import {buildAssetPackAsync} from "../assets";
@@ -12,6 +11,7 @@ import * as glob from "glob";
 import {buildWasm} from "./buildWasm";
 import {deployFirebaseHosting} from "./deployFirebaseHosting";
 import {buildAppIconAsync} from "../appicon/appicon";
+import {collectSourceRootsAll} from "../collectSources";
 
 /*** HTML ***/
 export async function export_web(ctx: Project): Promise<void> {
@@ -43,7 +43,8 @@ export async function export_web(ctx: Project): Promise<void> {
                 background_color: ctx.web.background_color,
                 text_color: ctx.web.text_color,
             },
-            bodyCode: `<script>${ctx.web.bodyCode.join("\n")}</script>`,
+            bodyCode: `${ctx.web.bodyHTML.join("\n")}
+<script>${ctx.web.bodyScript.join("\n")}</script>`,
             headCode: ctx.web.headCode.join("\n")
         };
         return Mustache.render(str, renderParameters);
@@ -98,7 +99,7 @@ export async function export_web(ctx: Project): Promise<void> {
         }
     }
 
-    ctx.web.bodyCode.push(render(fs.readFileSync(path.join(ctx.sdk.templates, "web/initModule.js"), "utf8")));
+    ctx.web.bodyScript.push(render(fs.readFileSync(path.join(ctx.sdk.templates, "web/initModule.js"), "utf8")));
 
     const pwa = false;
     if (pwa) {
@@ -106,7 +107,7 @@ export async function export_web(ctx: Project): Promise<void> {
         file("web/pwacompat.min.js", "pwacompat.min.js");
         tpl("web/sw.js", "sw.js");
 
-        ctx.web.bodyCode.push(fs.readFileSync(path.join(ctx.sdk.templates, "web/initPWA.js"), "utf8"));
+        ctx.web.bodyScript.push(fs.readFileSync(path.join(ctx.sdk.templates, "web/initPWA.js"), "utf8"));
 
         const assetDirFiles = glob.sync(path.join(outputDir, "assets/**/*"));
         const assetsList = assetDirFiles.map(p => `"${path.relative(outputDir, p)}"`).join(",\n");
@@ -130,11 +131,20 @@ export async function export_web(ctx: Project): Promise<void> {
         logger.error("build failed", e);
         throw e;
     }
-    copyFileSync(path.join(buildResult.buildDir, ctx.name + ".js"), path.join(outputDir, ctx.name + ".js"));
-    copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm"), path.join(outputDir, ctx.name + ".wasm"));
+    fs.copyFileSync(path.join(buildResult.buildDir, ctx.name + ".js"), path.join(outputDir, ctx.name + ".js"));
+    fs.copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm"), path.join(outputDir, ctx.name + ".wasm"));
     try {
-        copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm.map"), path.join(outputDir, ctx.name + ".wasm.map"));
+        fs.copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm.map"), path.join(outputDir, ctx.name + ".wasm.map"));
     } catch {
+    }
+
+    const js_scripts = collectSourceRootsAll(ctx, "js_script", ["web"], ".");
+    for (const js_script of js_scripts) {
+        fs.copyFileSync(js_script, path.join(outputDir, path.basename(js_script)));
+        replaceInFile(path.join(outputDir, "index.html"), {
+            "</head>": `    <script src="${path.basename(js_script)}"></script>
+</head>`
+        });
     }
 
     try {

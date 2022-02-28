@@ -17,9 +17,9 @@ function setup(project) {
         android: {
             android_java: "java",
             android_dependency: [
-                "implementation 'com.google.android.gms:play-services-base:17.6.0'",
-                "implementation 'com.google.android.gms:play-services-games:21.0.0'",
-                "implementation 'com.google.android.gms:play-services-auth:19.2.0'"
+                "implementation 'com.google.android.gms:play-services-base:18.0.1'",
+                "implementation 'com.google.android.gms:play-services-games:22.0.1'",
+                "implementation 'com.google.android.gms:play-services-auth:20.1.0'"
             ],
             android_manifestApplication: [
                 `<meta-data android:name="com.google.android.gms.games.APP_ID" android:value="@string/gs_app_id" />`,

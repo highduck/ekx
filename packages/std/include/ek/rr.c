@@ -21,12 +21,12 @@ uint16_t rr_verify_id(rr_man_t* man, res_id id) {
 rr_man_t* rr_verify_man(rr_man_t* man) {
     EK_ASSERT_R2(man);
     EK_ASSERT_R2(man->data);
-    EK_ASSERT(((uintptr_t) man->data % 8u) == 0);
+    EK_ASSERT(((uintptr_t) man->data % sizeof(void*)) == 0);
     EK_ASSERT(man->num > 0);
     EK_ASSERT(man->data_size > 0);
     EK_ASSERT((man->data_size % 4u) == 0);
     if (man->names) {
-        EK_ASSERT(((uintptr_t) man->names % 8u) == 0);
+        EK_ASSERT(((uintptr_t) man->names % sizeof(void*)) == 0);
         EK_ASSERT(man->max > 1);
         EK_ASSERT(man->num < man->max);
     }

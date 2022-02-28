@@ -6,6 +6,7 @@ project(local-storage)
 add_library(${PROJECT_NAME} STATIC
         src/local_storage.c
         src/local_storage.m
+        src/nep.c
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -17,6 +18,7 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::app
         PUBLIC ekx::std
         PUBLIC ekx::core
+        PUBLIC ekx::msgpack
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

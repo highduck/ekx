@@ -1,107 +1,88 @@
-import {Asset} from "./Asset";
+import {Asset, AssetDesc} from "./Asset";
 import {compress, WebpConfig} from "./helpers/webp";
 import {logger} from "../logger";
 import * as path from "path";
 import {copyFile, makeDirs} from "../utils";
 import * as fs from "fs";
-import {BytesWriter} from "./helpers/BytesWriter";
-import {XmlElement} from "xmldoc";
 import {H} from "../utility/hash";
+import {hashFile} from "./helpers/hash";
 
-const enum TextureDataType {
-    Normal = 0,
-    CubeMap = 1
+export const enum TextureDataType {
+    Normal = "2d",
+    CubeMap = "cubemap"
+}
+
+export interface TextureImporterDesc extends AssetDesc {
+    name: string;
+    type?: TextureDataType; // Normal
+    images: string[];
+    webp?: WebpConfig;
 }
 
 export class TextureAsset extends Asset {
     static typeName = "texture";
 
-    type = TextureDataType.Normal;
-    images: string[] = [];
-    webpConfig?: WebpConfig = new WebpConfig();
-
-    constructor(filepath: string) {
-        super(filepath, TextureAsset.typeName);
+    constructor(readonly desc: TextureImporterDesc) {
+        super(desc, TextureAsset.typeName);
     }
 
-    readDeclFromXml(node: XmlElement) {
-        const type = node.attr.texture_type ?? "2d";
-        this.type = TextureDataType.Normal;
-        if (type == "2d") {
-            this.type = TextureDataType.Normal;
-        } else if (type == "cubemap") {
-            this.type = TextureDataType.CubeMap;
-        } else {
-            logger.warn(`Unknown texture type "${type}"`);
+    resolveInputs(): number {
+        let hash = super.resolveInputs();
+        for (const imagePath of this.desc.images) {
+            hash ^= hashFile(path.join(this.owner.basePath, imagePath));
         }
-        const webp = node.childNamed("webp");
-        if (webp) {
-            this.webpConfig = new WebpConfig();
-            this.webpConfig.lossless = webp.attr.lossless ? (webp.attr.lossless.toLowerCase() == "true") : false;
-        }
-
-        this.images = [];
-        for (const imageNode of node.childrenNamed("image")) {
-            this.images.push(imageNode.attr.path);
-        }
+        return hash;
     }
 
     async build() {
-        this.readDecl();
-
-        const outputPath = path.join(this.owner.output, this.name);
-        makeDirs(path.dirname(outputPath));
-
         if (this.owner.project.current_target === "ios") {
-            this.webpConfig = undefined;
+            this.desc.webp = undefined;
         }
 
-        for (const imagePath of this.images) {
-            const srcFilePath = this.getRelativePath(imagePath);
+        for (const imagePath of this.desc.images) {
+            const srcFilePath = path.join(this.owner.basePath, imagePath);
             const destFilepath = path.join(this.owner.output, imagePath);
+            makeDirs(path.dirname(destFilepath));
             copyFile(srcFilePath, destFilepath);
         }
-        if (this.webpConfig) {
+        if (this.desc.webp) {
             const promises = [];
-            for (const imagePath of this.images) {
+            for (const imagePath of this.desc.images) {
                 const filepath = path.join(this.owner.output, imagePath);
-                promises.push(compress(filepath, this.webpConfig));
+                promises.push(compress(filepath, this.desc.webp));
             }
             await Promise.all(promises);
             if (this.owner.project.current_target === "android") {
-                for (const imagePath of this.images) {
+                for (const imagePath of this.desc.images) {
                     const filepath = path.join(this.owner.output, imagePath);
                     fs.rmSync(filepath);
                 }
             }
         }
 
-        const header = new BytesWriter();
-        header.writeU32(H(this.typeName));
+        this.writer.writeU32(H(this.typeName));
 
         // res-name
-        header.writeU32(H(this.name));
+        this.writer.writeU32(H(this.desc.name));
 
         // texture data
-        header.writeU32(this.type);
+        this.writer.writeU32(this.desc.type === TextureDataType.Normal ? 0 : 1);
 
         // variants
         let formatMask = 1;
-        if (this.webpConfig) {
+        if (this.desc.webp) {
             if (this.owner.project.current_target === "android") {
                 formatMask = 0;
             }
             formatMask |= 2;
         }
-        header.writeU32(formatMask);
+        this.writer.writeU32(formatMask);
 
-        header.writeU32(this.images.length);
-        for (const image of this.images) {
+        this.writer.writeU32(this.desc.images.length);
+        for (const image of this.desc.images) {
             logger.assert(image.length < 128);
-            header.writeFixedASCII(image, 128);
+            this.writer.writeFixedASCII(image, 128);
         }
-
-        this.owner.writer.writeSection(header);
 
         return null;
     }

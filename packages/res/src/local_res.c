@@ -27,7 +27,7 @@ void ek_local_res_close(ek_local_res* lr) {
 #ifndef __EMSCRIPTEN__
 
 void ek_local_res_load(const char* path, ek_local_res_callback callback, void* userdata) {
-    ek_local_res lr;
+    ek_local_res lr = {0};
     lr.userdata = userdata;
     ek_local_res_get_file_platform(path, &lr);
     callback(&lr);

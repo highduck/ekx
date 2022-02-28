@@ -4,7 +4,7 @@ extern "C" {
 #endif
 
 /** Collision test functions **/
-inline float vec2_sign(const vec2_t p1, const vec2_t p2, const vec2_t p3) {
+inline static float vec2_sign(const vec2_t p1, const vec2_t p2, const vec2_t p3) {
     return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 }
 

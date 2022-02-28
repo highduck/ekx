@@ -50,4 +50,5 @@ module.exports = function (project) {
 
     project.importModule("@ekx/graphics");
     project.importModule("@ekx/quickjs");
+    project.importModule("@ekx/res");
 };

@@ -1,0 +1,22 @@
+{
+  "name": "@ekx/msgpack",
+  "version": "0.0.1",
+  "scripts": {
+    "recipe:build": "node recipe/package.js",
+    "package:test": "node recipe/test-package.js"
+  },
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "CMakeLists.txt",
+    "include"
+  ],
+  "devDependencies": {
+    "@ekx/cli-utils": "0.0.15"
+  },
+  "dependencies": {
+    "@msgpack/msgpack": "^2.7.2"
+  }
+}

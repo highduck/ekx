@@ -2,12 +2,20 @@ import {AuphBuffer, Flag, iMask, Message, Type, u31} from "../protocol/interface
 import {error} from "./debug";
 import {add, len, nextHandle, Obj} from "./common";
 
+export interface CallbackBuffer {
+    b: AudioBuffer;
+}
+
 export type BufferData = string | AudioBuffer | null;
 
 export class BufferObj implements Obj {
     constructor(public h: u31,
                 public s: u31,
-                public b: BufferData) {
+                public b: BufferData,
+                // HEAP pointer to C-callback
+                public _f: u31 = 0,
+                // HEAP pointer to C-userdata
+                public _u: u31 = 0) {
     }
 }
 
@@ -68,6 +76,13 @@ export function _bufferMemory(obj: BufferObj, ctx: AudioContext, data: Uint8Arra
     // if (flags & Flag.Stream) {
     //     obj.s |= Flag.Stream;
     _decodeAudioData(ctx, obj, buffer);
+}
+
+export function _buffer_set_callback(obj: BufferObj, ctx: AudioContext, f: u31, u: u31) {
+    obj.s |= Flag.Active | Flag.Loaded | Flag.Callback;
+    obj.b = new AudioBuffer({length: 8192, sampleRate: 44100, numberOfChannels: 2});
+    obj._f = f;
+    obj._u = u;
 }
 
 export function _bufferLoad(obj: BufferObj, ctx: AudioContext, filepath: string, flags: u31) {

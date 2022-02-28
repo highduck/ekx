@@ -32,6 +32,7 @@ export class VoiceObj implements Obj {
     // Destination-Node: connected destination audio node
     dn: AudioNode | null = null;
 
+    pr: ScriptProcessorNode | null = null;
     _e = () => {
         // maybe check is useful
         //if (this.buffer === e.target || (this.stream && this.stream.el === e.target)) {
@@ -87,6 +88,12 @@ export function _voiceStop(v: VoiceObj) {
         } catch {
         }
         v.sn = null;
+    }
+
+    if(v.pr) {
+        v.pr.disconnect();
+        v.pr.onaudioprocess = null;
+        v.pr = null;
     }
 
     _voiceResetDestination(v);

@@ -1,0 +1,27 @@
+{
+  "name": "@ekx/nep",
+  "version": "0.0.1",
+  "scripts": {
+    "postinstall": "cmake-build || exit 0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@ekx/app": "0.1.8",
+    "@ekx/msgpack": "0.0.1",
+    "cmake-build": "0.0.4",
+    "msgpack-lite": "^0.1.26"
+  },
+  "devDependencies": {
+    "@types/msgpack-lite": "^0.1.8"
+  },
+  "files": [
+    "CMakeLists.txt",
+    "ek.js",
+    "src",
+    "web",
+    "android"
+  ]
+}

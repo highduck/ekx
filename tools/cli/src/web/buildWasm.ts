@@ -109,9 +109,12 @@ function renderCMakeFile(ctx:Project, buildType): string {
 
         // TODO: strange runtime DOM exception error with Release
         STRICT: 1,
-        MINIMAL_RUNTIME: 1,
+
+        // TODO: ABORT is not defined (nbnet)
+        // MINIMAL_RUNTIME: 1,
+
         //MINIMAL_RUNTIME_STREAMING_WASM_COMPILATION: 1,
-        // MODULARIZE: 1,
+        //MODULARIZE: 1,
         SUPPORT_ERRNO: 0,
 
         // STACK_OVERFLOW_CHECK: 2,

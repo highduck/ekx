@@ -140,7 +140,7 @@ void ek_admob_init(ek_admob_config config) {
     GAD_inters = config.inters ? [NSString stringWithUTF8String:config.inters] : nil;
 
     GADMobileAds.sharedInstance.requestConfiguration.testDeviceIdentifiers = @[
-            kGADSimulatorID,
+            GADSimulatorID,
             @"3a65fb92e7f416b7f5c8aeef45f23f8c"
             ];
 
@@ -150,7 +150,7 @@ void ek_admob_init(ek_admob_config config) {
 
         // banner
         // In this case, we instantiate the banner with desired ad size.
-        bannerView = [[GADBannerView alloc] initWithAdSize:kGADAdSizeBanner];
+        bannerView = [[GADBannerView alloc] initWithAdSize:GADAdSizeBanner];
         addBannerViewToView(bannerView);
         bannerView.hidden = YES;
 

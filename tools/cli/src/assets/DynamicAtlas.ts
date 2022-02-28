@@ -1,35 +1,31 @@
-import {Asset} from "./Asset";
+import {Asset, AssetDesc} from "./Asset";
 import {parseBoolean} from "./helpers/parse";
 import {BytesWriter} from "./helpers/BytesWriter";
 import {XmlElement} from "xmldoc";
 import {H} from "../utility/hash";
+import {hashFile} from "./helpers/hash";
+
+export interface DynamicAtlasDesc extends AssetDesc {
+    name: string;
+    alpha_map?:boolean; // false
+    mipmaps?:boolean; // false
+}
 
 export class DynamicAtlasAsset extends Asset {
     static typeName = "dynamic_atlas";
 
-    alphaMap = false;
-    mipmaps = false;
-
-    constructor(filepath: string) {
-        super(filepath, DynamicAtlasAsset.typeName);
-    }
-
-    readDeclFromXml(node: XmlElement) {
-        this.alphaMap = parseBoolean(node.attr.alphaMap);
-        this.mipmaps = parseBoolean(node.attr.mipmaps);
+    constructor(readonly desc:DynamicAtlasDesc) {
+        super(desc, DynamicAtlasAsset.typeName);
     }
 
     async build() {
         let flags = 0;
-        if (this.alphaMap) flags |= 1;
-        if (this.mipmaps) flags |= 2;
+        if (this.desc.alpha_map) flags |= 1;
+        if (this.desc.mipmaps) flags |= 2;
 
-        const writer = new BytesWriter(8);
-        writer.writeU32(H(DynamicAtlasAsset.typeName));
-        writer.writeU32(H(this.name));
-        writer.writeU32(flags);
-
-        this.owner.writer.writeSection(writer);
+        this.writer.writeU32(H(DynamicAtlasAsset.typeName));
+        this.writer.writeU32(H(this.desc.name));
+        this.writer.writeU32(flags);
 
         return null;
     }

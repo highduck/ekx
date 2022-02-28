@@ -35,13 +35,28 @@ function setup(project) {
             if (!project.web.firebaseConfig) {
                 console.error("please set `web.firebaseConfig` !!!");
             }
-            project.web.headCode.push(`<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.2/firebase-analytics.js";
-  var firebaseConfig = ${JSON.stringify(project.web.firebaseConfig)};
-  var app = initializeApp(firebaseConfig);
-  var analytics = getAnalytics(app);
+//             project.web.headCode.push(`<script type="module">
+//   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js";
+//   import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.2/firebase-analytics.js";
+//   var firebaseConfig = ${JSON.stringify(project.web.firebaseConfig)};
+//   var app = initializeApp(firebaseConfig);
+//   var analytics = getAnalytics(app);
+// </script>`);
+            project.web.headCode.push(`<script>
+  window.firebaseConfig = ${JSON.stringify(project.web.firebaseConfig)};
 </script>`);
+
+            // auth ui
+            project.web.headCode.push(`
+<script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-analytics-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.js"></script>
+<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css" />`);
+
+            project.web.bodyHTML.push(`
+            <div id="firebaseui-auth-container" style="z-index: 1;position: absolute;max-width: 380px;left: 50%;max-height: 400px;top: 50%;transform: translate(-50%, -50%);"></div>
+`);
         }
     });
 
@@ -63,20 +78,24 @@ function setup(project) {
             android_gradleApplyPlugin: ['com.google.gms.google-services', 'com.google.firebase.crashlytics'],
             android_gradleConfigRelease: `firebaseCrashlytics {
                 nativeSymbolUploadEnabled true
-                symbolGenerator {
-                    breakpad()
-                }
             }`,
             android_dependency: [
-                `implementation platform('com.google.firebase:firebase-bom:28.4.2')`,
+                `implementation platform('com.google.firebase:firebase-bom:29.1.0')`,
                 `implementation 'com.google.firebase:firebase-crashlytics-ndk'`,
                 `implementation 'com.google.firebase:firebase-analytics'`,
+                `implementation 'com.google.firebase:firebase-auth'`,
+                `implementation 'com.firebaseui:firebase-ui-auth:7.2.0'`,
             ]
         },
         ios: {
             xcode_pod: [
                 "Firebase/Crashlytics",
-                "Firebase/Analytics"
+                "Firebase/Analytics",
+                'FirebaseUI/Auth',
+                //'FirebaseUI/Google',
+                //'FirebaseUI/Facebook',
+                'FirebaseUI/OAuth', // Used for Sign in with Apple, Twitter, etc
+                //'FirebaseUI/Phone',
             ],
             cpp_flags: {
                 files: [
@@ -97,7 +116,8 @@ project.objects[shell.get_id()] = shell
 app_target.add_build_phase(shell)`
         },
         web: {
-         //   js: "web/dist"
+            js: "web/lib",
+            js_script: "web/dist/firebase.js"
         }
     });
 

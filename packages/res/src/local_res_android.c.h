@@ -21,6 +21,8 @@ int ek_local_res_get_file_platform(const char* path, ek_local_res* lr) {
         lr->status = 0;
         return 0;
     }
+    lr->length = 0;
+    lr->buffer = 0;
     lr->status = 1;
     return 1;
 }

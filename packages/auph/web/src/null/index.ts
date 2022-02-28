@@ -14,6 +14,10 @@ export function loadMemory(data: Uint8Array, flags: u31): AuphBuffer {
     return 0;
 }
 
+export function load_callback(p_callback: u31, p_userdata: u31): AuphBuffer {
+    return 0;
+}
+
 export function unload(name: Name): void {
 }
 

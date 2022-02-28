@@ -101,12 +101,14 @@ export class Project {
             image?: string
         },
         headCode: string[],
-        bodyCode: string[],
+        bodyHTML: string[],
+        bodyScript: string[],
     } = {
         background_color: "#222222",
         text_color: "#CCCCCC",
         headCode: [],
-        bodyCode: []
+        bodyHTML: [],
+        bodyScript: [],
     };
 
     addModule(def: ModuleDef) {

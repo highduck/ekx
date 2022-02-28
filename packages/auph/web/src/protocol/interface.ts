@@ -18,6 +18,8 @@ export interface IAuph {
 
     loadMemory(data: Uint8Array, flags: u31): AuphBuffer;
 
+    load_callback(p_callback: u31, p_userdata: u31): AuphBuffer;
+
     unload(name: Name): void;
 
     stop(name: Name): void;
@@ -88,7 +90,9 @@ export const enum Flag {
 
     // Buffer Flags
     Loaded = 2,
-    Stream = 4
+    Stream = 4,
+    //_Reserved = 8,
+    Callback = 16
 }
 
 export const enum Message {

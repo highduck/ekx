@@ -10,7 +10,7 @@ function setup(project) {
         apple: {
             cpp_flags: {
                 files: [
-                    "src/ek/audio/audio_auph_impl.c"
+                    "src/ek_audio_auph.c"
                 ],
                 flags: "-x objective-c"
             },
@@ -18,7 +18,7 @@ function setup(project) {
         android: {
             cpp_flags: {
                 files: [
-                    "src/ek/audio/audio_auph_impl.c"
+                    "src/ek_audio_auph.c"
                 ],
                 flags: "-xc++ -std=c++17"
             },

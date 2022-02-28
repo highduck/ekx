@@ -34,10 +34,10 @@ Asset* unpack_asset(const void* data, uint32_t size);
 
 class AudioAsset : public Asset {
 public:
-    AudioAsset(string_hash_t name, String filepath, uint32_t flags) :
+    AudioAsset(string_hash_t name, String filepath, uint32_t flags_) :
             res{R_AUDIO(name)},
             path_{std::move(filepath)},
-            streaming{flags != 0} {
+            flags{flags_} {
     }
 
     void do_load() override {
@@ -45,13 +45,13 @@ public:
         auph_buffer* buffer = &REF_RESOLVE(res_audio, res);
         // if assertion is triggering - implement cleaning up the slot before loading
         EK_ASSERT(buffer->id == 0);
-        *buffer = auph_load(fullPath_.c_str(), streaming ? AUPH_FLAG_STREAM : 0);
+        *buffer = auph_load(fullPath_.c_str(), (flags & 1) ? AUPH_FLAG_STREAM : 0);
     }
 
     void poll() override {
         auto buffer = REF_RESOLVE(res_audio, res);
         auto failed = !auph_is_active(buffer.id);
-        auto completed = auph_is_buffer_loaded(buffer);
+        auto completed = auph_is_buffer_loaded(buffer) || (flags & 2);
         if (failed || completed) {
             state = AssetState::Ready;
         }
@@ -70,7 +70,7 @@ public:
     R(auph_buffer) res;
     String path_;
     String fullPath_;
-    bool streaming = false;
+    uint32_t flags;
 };
 
 class AtlasAsset : public Asset {

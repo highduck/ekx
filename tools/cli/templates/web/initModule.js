@@ -1,9 +1,8 @@
 
-var Module = {
-    loaders: [],
-    started: false,
-    globalErrorCapture: null
-};
+var Module = Module || {};
+Module.loaders = [];
+Module.started = false;
+Module.globalErrorCapture = null;
 
 function binary(e, i) {
     return new Promise((n, r) => {

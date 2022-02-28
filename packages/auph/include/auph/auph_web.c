@@ -25,6 +25,32 @@ auph_buffer auph_load_data(const void* data, int size, int flags) {
     return (auph_buffer) {r};
 }
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+void* auph_read_to_buffer(void* userdata, auph_buffer_callback callback);
+
+EMSCRIPTEN_KEEPALIVE void* auph_read_to_buffer(void* userdata, auph_buffer_callback callback) {
+    static float s[8192 * 2 * sizeof(float)];
+    static float lr[8192 * 2 * sizeof(float)];
+    callback(userdata, s, 8192);
+    for (uint32_t i = 0; i < 8192; ++i) {
+        lr[i] = s[i * 2];
+        lr[i + 8192] = s[i * 2 + 1];
+    }
+    return lr;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+auph_buffer auph_load_callback(auph_buffer_callback callback, void* userdata) {
+    int r = EM_ASM_INT(return auph.load_callback($0, $1), callback, userdata);
+    return (auph_buffer) {r};
+}
+
 void auph_unload(auph_buffer buffer) {
     EM_ASM(auph.unload($0), buffer.id);
 }

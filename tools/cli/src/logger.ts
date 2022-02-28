@@ -55,4 +55,8 @@ a.error = (message?: any, ...args: any[]) => {
     con.error(message, ...args);
 };
 
+a.assert = (cond?: any, message?: string, ...options: any[]) => {
+    con.assert(cond, message, ...options);
+}
+
 export const logger = a;

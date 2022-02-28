@@ -37,8 +37,16 @@ import {
     u31,
     Unit
 } from "../protocol/interface";
-import {_bufferDestroy, _bufferLoad, _bufferMemory, _getBufferObj, buffers, getNextBufferObj} from "./Buffer";
-import {len, resize, setAudioParamValue} from "./common";
+import {
+    _buffer_set_callback,
+    _bufferDestroy,
+    _bufferLoad,
+    _bufferMemory,
+    _getBufferObj,
+    buffers,
+    getNextBufferObj
+} from "./Buffer";
+import {connectAudioNode, disconnectAudioNode, len, resize, setAudioParamValue} from "./common";
 
 export function setup(): void {
     const ctx = initContext();
@@ -85,12 +93,42 @@ export function loadMemory(data: Uint8Array, flags: u31): AuphBuffer {
     return handle;
 }
 
+export function load_callback(p_callback: u31, p_userdata: u31): AuphBuffer {
+    let handle = getNextBufferObj();
+    if (handle) {
+        const ctx = getAudioContextObject();
+        if (!ctx) {
+            setError(Message.NotInitialized);
+            return 0;
+        }
+        const obj = buffers[handle & iMask]!;
+        _buffer_set_callback(obj, ctx, p_callback, p_userdata);
+    }
+    return handle;
+}
+
 export function unload(name: Name): void {
     const obj = _getBufferObj(name);
     if (obj) {
         stop(name);
         _bufferDestroy(obj);
     }
+}
+
+declare global {
+    // class LibraryManager {
+    //     static library: LibraryManager;
+    // }
+    //
+    // function mergeInto(library: LibraryManager, module: any): void;
+
+    const HEAP32: Int32Array;
+    const HEAPU32: Uint32Array;
+    const HEAPF32: Float32Array;
+
+    // const Module: any;
+
+    function _auph_read_to_buffer(p_userdata: u31, p_callback: u31): u31;
 }
 
 /***
@@ -155,9 +193,46 @@ export function voice(buffer: AuphBuffer,
 
     // TODO: streamed decoding
     //if (bufferObj.s & Flag.Stream) {
-    _voicePrepareBuffer(voiceObj, ctx, bufferObj.b as AudioBuffer);
-    if (flags & Flag.Running) {
-        _voiceStartBuffer(voiceObj);
+    if (bufferObj.s & Flag.Callback) {
+        // const _play_next_chunk = () => {
+        //     _voicePrepareBuffer(voiceObj, ctx, bufferObj.b as AudioBuffer);
+        //     voiceObj.sn!.loop = false;
+        //     const ptr = _auph_read_to_buffer(bufferObj._u, bufferObj._f);
+        //     (bufferObj.b as AudioBuffer).copyToChannel(HEAPF32.subarray(ptr >>> 2, 8192 + (ptr >>> 2)), 0, 0);
+        //     (bufferObj.b as AudioBuffer).copyToChannel(HEAPF32.subarray(8192 + (ptr >>> 2), (2 * 8192) + (ptr >>> 2)), 1, 0);
+        //     voiceObj.sn!.onended = _play_next_chunk;
+        //     voiceObj.sn!.start();
+        // };
+        // _play_next_chunk();
+        //_voicePrepareBuffer(voiceObj, ctx, bufferObj.b as AudioBuffer);
+        if (flags & Flag.Running) {
+            // _voiceStartBuffer(voiceObj);
+            voiceObj._s = 1;
+            //voiceObj.sn!.loop = true;
+            const processor = ctx.createScriptProcessor(8192, 0, 2);
+            processor.onaudioprocess = (ev) => {
+                // The output buffer contains the samples that will be modified and played
+                const outputBuffer = ev.outputBuffer;
+
+                // Loop through the output channels (in this case there is only one)
+                const ptr = _auph_read_to_buffer(bufferObj._u, bufferObj._f);
+                const output0 = outputBuffer.getChannelData(0);
+                const output1 = outputBuffer.getChannelData(1);
+                output0.set(HEAPF32.subarray(ptr >>> 2, 8192 + (ptr >>> 2)));
+                output1.set(HEAPF32.subarray(8192 + (ptr >>> 2), (2 * 8192) + (ptr >>> 2)));
+            };
+            //disconnectAudioNode(voiceObj.sn!, voiceObj.p);
+            // connectAudioNode(voiceObj.sn!, processor);
+            connectAudioNode(processor, voiceObj.p);
+            //voiceObj.sn!.start();
+            voiceObj.pr = processor;
+        }
+    }
+    else {
+        _voicePrepareBuffer(voiceObj, ctx, bufferObj.b as AudioBuffer);
+        if (flags & Flag.Running) {
+            _voiceStartBuffer(voiceObj);
+        }
     }
 
     // maybe we need to set target before `startBuffer()`

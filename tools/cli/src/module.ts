@@ -162,8 +162,8 @@ export interface WasmConfig extends CxxConfig {
     js_pre: UserArray<string>;
 }
 
-type JSName = "js" | "js_pre";
-const js_names: JSName[] = ["js", "js_pre"];
+type JSName = "js" | "js_pre" | "js_script";
+const js_names: JSName[] = ["js", "js_pre", "js_script"];
 
 export type VariableName = "assets" | CppName | AppleName | AndroidName | JSName;
 

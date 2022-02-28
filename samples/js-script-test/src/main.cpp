@@ -6,123 +6,111 @@
 #include <ek/math.h>
 #include <ek/time.h>
 #include <ek/log.h>
+#include "js_api.h"
 
-//#ifdef __EMSCRIPTEN__
-//#include <emscripten.h>
-//
-//void js_on_draw(void) {
-//    EM_ASM({if(this.on_draw) this.on_draw();});
-//}
-//extern "C" {
-//    void canvas_quad_color(float x, float y, float w, float h, color_t color) EMSCRIPTEN_KEEPALIVE;
-//}
-//void js_initialize() {
-//    log_info("js initialized");
-//}
-//
-//#else
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#define JS_API EMSCRIPTEN_KEEPALIVE
+#else
+#define JS_API
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+JS_API void js_canvas_quad_color(float x, float y, float w, float h, uint32_t color) {
+    canvas_quad_color(x, y, w, h, color_u32(color));
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+
+void js_on_draw(void) {
+    EM_ASM({if(this["on_draw"]) this["on_draw"]();});
+}
+
+void js_initialize() {
+    log_info("js initialized");
+}
+
+void load_script(const char* path) {
+    //t.src = AsciiToString($0);
+    EM_ASM({
+        var t = document.createElement("script");
+        t.src = UTF8ToString($0);
+        t.onload = function() {
+//            document.head.removeChild(t);
+        };
+        document.head.appendChild(t);
+    }, path);
+}
+
+#else
 
 #include <quickjs.h>
 #include <quickjs-libc.h>
+#include <ek/local_res.h>
 
-JSRuntime* rt;
-JSContext* ctx;
-
-
-static JSValue js_canvas_quad(JSContext* ctx, JSValueConst this_val,
-                              int argc, JSValueConst* argv) {
-    double x, y, w, h;
-    uint32_t color;
-    JS_ToFloat64(ctx, &x, argv[0]);
-    JS_ToFloat64(ctx, &y, argv[1]);
-    JS_ToFloat64(ctx, &w, argv[2]);
-    JS_ToFloat64(ctx, &h, argv[3]);
-    JS_ToInt32(ctx, (int32_t*) &color, argv[4]);
-    canvas_quad_color((float) x, (float) y, (float) w, (float) h, color_u32(color));
-    return JS_UNDEFINED;
-}
-
+JSRuntime* qjs_rt;
+JSContext* qjs_ctx;
 
 void js_initialize() {
-    rt = JS_NewRuntime();
-    EK_ASSERT(rt);
-    ctx = JS_NewContext(rt);
-    EK_ASSERT(ctx);
+    qjs_rt = JS_NewRuntime();
+    EK_ASSERT(qjs_rt);
+    qjs_ctx = JS_NewContext(qjs_rt);
+    EK_ASSERT(qjs_ctx);
 
-    js_std_init_handlers(rt);
+    js_std_init_handlers(qjs_rt);
 
     /* loader for ES6 modules */
-    JS_SetModuleLoaderFunc(rt, nullptr, js_module_loader, nullptr);
+    JS_SetModuleLoaderFunc(qjs_rt, nullptr, js_module_loader, nullptr);
 
-    js_std_add_helpers(ctx, ek_app.argc - 1, ek_app.argv + 1);
+    js_std_add_helpers(qjs_ctx, ek_app.argc - 1, ek_app.argv + 1);
 /* system modules */
 //    js_init_module_std(ctx, "std");
 //    js_init_module_os(ctx, "os");
-
-    JSValue global_obj;
-    JSValue obj262, obj;
-
-    global_obj = JS_GetGlobalObject(ctx);
-    JSValue ff = JS_GetPropertyStr(ctx, global_obj, "print");
-    log_warn("%d %p", JS_VALUE_GET_TAG(ff), JS_VALUE_GET_PTR(ff));
-    JS_SetPropertyStr(ctx, global_obj, "canvas_quad",
-                      JS_NewCFunction(ctx, js_canvas_quad, "canvas_quad", 1));
-
-
-    const char* str =
-            /*
-            import * as std from 'std';
-            import * as os from 'os';
-            globalThis.std = std;
-            globalThis.os = os;
-            */
-            //            "console.log(' [QUICKJS] => Script loaded. Ok. \n');";
-            "print('Hello');\n print('Hello');\n print('Hello');\n"
-            "for(var n = 1; n <= 5; n++) {\n"
-            //            "   print(` [QUICKJS-TRACE] n = ${n}/5 `);\n"
-            "    console.log(` [QUICKJS-TRACE] n = ${n}/5 `);\n"
-            "}\n"
-            "this.on_draw = ()=>{"
-            "canvas_quad(20, 20, 100, 100, 0x7FFFFFFF);"
-            "print('draw frame');"
-            "};"
-            //            ""
-            "(1 << 5)|0";
-    //JS_EVAL_FLAG_COMPILE_ONLY
-    JSValue val = JS_EvalThis(ctx, global_obj, str, strlen(str), "<eval>", JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_STRICT);
-    if (JS_IsException(val)) {
-        JSValue err_file = JS_GetPropertyStr(ctx, val, "fileName");
-        JSValue err_line = JS_GetPropertyStr(ctx, val, "lineNumber");
-        JSValue err_msg = JS_GetPropertyStr(ctx, val, "message");
-        JSValue err_stack = JS_GetPropertyStr(ctx, val, "stack");
-
-//        JS_ToInt32(ctx, &r_error->line, err_line);
-//        r_error->message = js_to_string(ctx, err_msg);
-//        r_error->file = js_to_string(ctx, err_file);
-//        r_error->stack.push_back(js_to_string(ctx, err_stack));
-//        r_error->column = 0;
-
-        JS_FreeValue(ctx, err_file);
-        JS_FreeValue(ctx, err_line);
-        JS_FreeValue(ctx, err_msg);
-        JS_FreeValue(ctx, err_stack);
-    }
-    log_warn("%d %d", JS_VALUE_GET_TAG(val), JS_VALUE_GET_INT(val));
 }
 
 void js_on_draw() {
-    JSValue global_obj = JS_GetGlobalObject(ctx);
-    JSValue ff = JS_GetPropertyStr(ctx, global_obj, "on_draw");
-    JS_Call(ctx, ff, global_obj, 0, nullptr);
+    JSValue global_obj = JS_GetGlobalObject(qjs_ctx);
+    JSValue ff = JS_GetPropertyStr(qjs_ctx, global_obj, "on_draw");
+    JS_Call(qjs_ctx, ff, global_obj, 0, nullptr);
 }
-//#endif
 
+void load_script(const char* path) {
+    ek_local_res_load(
+            path,
+            [](ek_local_res* lr) {
+                if (ek_local_res_success(lr)) {
+                    JSValue global_obj = JS_GetGlobalObject(qjs_ctx);
+                    char* buffer = (char*) malloc(lr->length + 1);
+                    buffer[lr->length] = 0;
+                    memcpy(buffer, lr->buffer, lr->length);
+                    JSValue val = JS_EvalThis(qjs_ctx, global_obj, buffer, lr->length, "<eval>",
+                                              JS_EVAL_TYPE_GLOBAL | JS_EVAL_FLAG_STRICT);
+                    if (JS_IsException(val)) {
+                        log_warn("load exception: %d %d", JS_VALUE_GET_TAG(val), JS_VALUE_GET_INT(val));
+                    }
+                    free(buffer);
+                }
+                ek_local_res_close(lr);
+            },
+            nullptr
+    );
+}
+
+#endif
 
 void on_ready() {
     ek_gfx_setup(128);
     canvas_setup();
 
-
+    load_script("assets/scripts/main.js");
 }
 
 void on_frame() {
@@ -157,6 +145,7 @@ void ek_app_main() {
     srand(ek_time_seed32() + 1);
 
     js_initialize();
+    js_register();
 
     ek_app.config.title = "js script test";
     ek_app.on_frame = on_frame;

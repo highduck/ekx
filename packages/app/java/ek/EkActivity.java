@@ -18,6 +18,7 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.getkeepsafe.relinker.ReLinker;
 
@@ -26,7 +27,7 @@ import java.util.Locale;
 
 @SuppressLint("Registered")
 @Keep
-public class EkActivity extends Activity {
+public class EkActivity extends AppCompatActivity {
 
     final static String TAG = "ek";
 

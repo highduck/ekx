@@ -2,6 +2,7 @@
 #define AUPH_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 enum {
     AUPH_MASK_INDEX = 0x000000FF,
@@ -90,6 +91,18 @@ void auph_shutdown(void);
 auph_buffer auph_load(const char* filepath, int flags);
 
 auph_buffer auph_load_data(const void* data, int size, int flags);
+
+/** callback buffer impl **/
+typedef void(*auph_buffer_callback)(void* userdata, float* samples, uint32_t count);
+
+typedef struct {
+    void* userdata;
+    void* callback;
+    uint64_t cursor;
+    float prev[10];
+} auph_buffer_callback_stream;
+
+auph_buffer auph_load_callback(auph_buffer_callback callback, void* userdata);
 
 void auph_unload(auph_buffer buffer);
 
