@@ -92,7 +92,9 @@ static void log__default(log_msg_t msg) {
 
 #include <stdio.h>
 #include <time.h>
+#if !defined(_WIN32)
 #include <sys/time.h>
+#endif
 
 #define RESET   "\033[0m"
 //#define BLACK   "\033[30m"      /* Black */
@@ -120,7 +122,7 @@ static void log__default(log_msg_t msg) {
     struct timeval tmnow;
     struct tm* tm;
     gettimeofday(&tmnow, 0);
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32)
     tm = _localtime32(&tmnow.tv_sec);
 #else
     tm = localtime(&tmnow.tv_sec);
