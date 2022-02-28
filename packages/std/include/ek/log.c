@@ -92,9 +92,6 @@ static void log__default(log_msg_t msg) {
 
 #include <stdio.h>
 #include <time.h>
-#if !defined(_WIN32)
-#include <sys/time.h>
-#endif
 
 #define RESET   "\033[0m"
 //#define BLACK   "\033[30m"      /* Black */
@@ -119,16 +116,10 @@ static void log__default(log_msg_t msg) {
     char time[24];
     char usec[8];
 
-    struct timeval tmnow;
-    struct tm* tm;
-    gettimeofday(&tmnow, 0);
-#if defined(_WIN32)
-    tm = _localtime32(&tmnow.tv_sec);
-#else
-    tm = localtime(&tmnow.tv_sec);
-#endif
-    strftime(time, sizeof(time), "%Y-%m-%d %H:%M:%S", tm);
-    const int32_t millis = (int32_t) (tmnow.tv_usec / 1000);
+    struct timespec ts;
+    timespec_get(&ts, TIME_UTC);
+    strftime(time, sizeof time, "%Y-%m-%d %H:%M:%S", gmtime(&ts.tv_sec));
+    const int32_t millis = (int32_t) (ts.tv_nsec / 1000000);
     const uint8_t frame = (uint8_t) (msg.frame & 0xFFu);
     ek_snprintf(usec, sizeof(usec), "%03d+%02hhX", millis, frame);
     static const char* prefixes[] = {
