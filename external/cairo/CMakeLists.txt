@@ -143,6 +143,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_EXTENSIONS NO
         )
 
-target_link_libraries(${PROJECT_NAME} -lpthread)
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    target_link_libraries(${PROJECT_NAME} -lpthread)
+endif()
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})

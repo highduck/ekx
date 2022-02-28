@@ -5,9 +5,19 @@ project(local-storage)
 
 add_library(${PROJECT_NAME} STATIC
         src/local_storage.c
-        src/local_storage.m
         src/nep.c
         )
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+    target_link_options(${PROJECT_NAME}
+            PUBLIC "SHELL:--js-library ${CMAKE_CURRENT_SOURCE_DIR}/src/local_storage.js"
+            )
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "iOS|Darwin")
+    target_sources(${PROJECT_NAME} PRIVATE src/local_storage.m)
+endif()
+
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
