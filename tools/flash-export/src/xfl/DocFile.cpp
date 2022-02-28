@@ -158,8 +158,19 @@ private:
     mz_zip_archive* zip_ = nullptr;
 };
 
+// directory
+#ifndef S_ISDIR
+#define S_ISDIR(m)      (((m) & S_IFMT) == S_IFDIR)
+#endif
+
+// regular file
+#ifndef S_ISREG
+#define S_ISREG(m)      (((m) & S_IFMT) == S_IFREG)
+#endif
+
 bool is_dir(const char* path) {
     struct stat sb{};
+
     return stat(path, &sb) == 0 && S_ISDIR(sb.st_mode);
 }
 
