@@ -33,7 +33,7 @@
     "http-server": "^14.1.0",
     "mustache": "^4.2.0",
     "node-emoji": "^1.11.0",
-    "plist": "^3.0.4",
+    "plist": "^3.0.5",
     "pngquant-bin": "^6.0.0",
     "rimraf": "^3.0.2",
     "xcode": "^3.0.1",
