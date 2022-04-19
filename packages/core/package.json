@@ -1,6 +1,6 @@
 {
   "name": "@ekx/core",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "scripts": {
     "postinstall": "cmake-build || exit 0"
   },
@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/doctest": "0.0.4",
-    "@ekx/std": "0.0.2",
-    "cmake-build": "0.0.4"
+    "@ekx/std": "0.0.3",
+    "cmake-build": "0.0.5"
   }
 }

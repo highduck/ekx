@@ -1,6 +1,29 @@
 # sample-1-app
 
+## 0.0.3
+
+### Patch Changes
+
+- b7fc9336: refactoring
+- Updated dependencies [53b259fe]
+- Updated dependencies [b7fc9336]
+- Updated dependencies [8bd2c87b]
+- Updated dependencies [c2684e0e]
+- Updated dependencies [b7fc9336]
+- Updated dependencies [4349a862]
+- Updated dependencies [4349a862]
+- Updated dependencies [4349a862]
+- Updated dependencies [326e845d]
+- Updated dependencies [bf4d88e8]
+- Updated dependencies [26fa74d6]
+- Updated dependencies [a08fb558]
+  - @ekx/cli@0.1.12
+  - @ekx/app@0.1.9
+  - @ekx/std@0.0.3
+  - cmake-build@0.0.5
+
 ## 0.0.2
+
 ### Patch Changes
 
 - Updated dependencies [e3922169]

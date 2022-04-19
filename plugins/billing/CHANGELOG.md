@@ -1,5 +1,21 @@
 # @ekx/plugin-billing
 
+## 0.0.8
+
+### Patch Changes
+
+- 326e845d: upgrade deps
+- 4349a862: use C timer system for simulator mode
+- Updated dependencies [b7fc9336]
+- Updated dependencies [8bd2c87b]
+- Updated dependencies [c2684e0e]
+- Updated dependencies [326e845d]
+- Updated dependencies [26fa74d6]
+- Updated dependencies [1e2a322a]
+- Updated dependencies [a08fb558]
+  - @ekx/scenex@0.1.9
+  - cmake-build@0.0.5
+
 ## 0.0.7
 
 ### Patch Changes

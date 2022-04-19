@@ -1,5 +1,26 @@
 # @ekx/plugin-admob
 
+## 0.0.8
+
+### Patch Changes
+
+- 4349a862: refactoring to C
+- b7fc9336: refactoring
+- 326e845d: upgrade deps
+- Updated dependencies [b7fc9336]
+- Updated dependencies [9d3648a6]
+- Updated dependencies [8bd2c87b]
+- Updated dependencies [c2684e0e]
+- Updated dependencies [326e845d]
+- Updated dependencies [3b26ce20]
+- Updated dependencies [4349a862]
+- Updated dependencies [26fa74d6]
+- Updated dependencies [1e2a322a]
+- Updated dependencies [a08fb558]
+  - @ekx/scenex@0.1.9
+  - @ekx/plugin-firebase@0.0.3
+  - cmake-build@0.0.5
+
 ## 0.0.7
 
 ### Patch Changes

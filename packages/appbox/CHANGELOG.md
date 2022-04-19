@@ -1,5 +1,27 @@
 # @ekx/appbox
 
+## 0.0.8
+
+### Patch Changes
+
+- 5a94f166: fix language code trimming
+- 4349a862: refactoring
+- Updated dependencies [4349a862]
+- Updated dependencies [b7fc9336]
+- Updated dependencies [8bd2c87b]
+- Updated dependencies [c2684e0e]
+- Updated dependencies [326e845d]
+- Updated dependencies [4349a862]
+- Updated dependencies [26fa74d6]
+- Updated dependencies [1e2a322a]
+- Updated dependencies [a08fb558]
+- Updated dependencies [4349a862]
+  - @ekx/plugin-admob@0.0.8
+  - @ekx/scenex@0.1.9
+  - cmake-build@0.0.5
+  - @ekx/plugin-billing@0.0.8
+  - @ekx/plugin-game-services@0.0.8
+
 ## 0.0.7
 
 ### Patch Changes

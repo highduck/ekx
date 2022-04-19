@@ -1,6 +1,19 @@
 # @ekx/texture-loader
 
+## 0.0.3
+
+### Patch Changes
+
+- 9d3648a6: Bump rollup from 2.61.1 to 2.62.0
+- 326e845d: upgrade deps
+- 3b26ce20: Bump rollup from 2.67.2 to 2.70.1
+- Updated dependencies [b7fc9336]
+- Updated dependencies [4349a862]
+  - @ekx/app@0.1.9
+  - @ekx/core@0.1.9
+
 ## 0.0.2
+
 ### Patch Changes
 
 - 3609031d: refactoring

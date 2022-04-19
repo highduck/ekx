@@ -1,6 +1,6 @@
 {
   "name": "@ekx/graphics",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "scripts": {
     "postinstall": "cmake-build || exit 0",
     "build:shader": "sokol-shdc -i src/ek/canvas.glsl -o src/ek/canvas_shader.h -l glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos --ifdef"
@@ -11,9 +11,9 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/sokol": "0.0.14",
-    "@ekx/core": "0.1.8",
-    "@ekx/app": "0.1.8",
-    "cmake-build": "0.0.4"
+    "@ekx/core": "0.1.9",
+    "@ekx/app": "0.1.9",
+    "cmake-build": "0.0.5"
   },
   "devDependencies": {
     "@ekx/sokol-shdc": "0.0.5"

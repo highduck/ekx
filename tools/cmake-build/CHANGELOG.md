@@ -1,5 +1,15 @@
 # cmake-build
 
+## 0.0.5
+
+### Patch Changes
+
+- 8bd2c87b: Bump @types/node from 16.11.13 to 17.0.2
+- c2684e0e: Bump @types/node from 17.0.2 to 17.0.4
+- 326e845d: upgrade deps
+- 26fa74d6: add compile flags per source file
+- a08fb558: Bump @types/node from 16.11.12 to 16.11.13
+
 ## 0.0.4
 
 ### Patch Changes
