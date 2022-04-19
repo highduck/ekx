@@ -48,14 +48,8 @@ function setup(project) {
 
             // auth ui
             project.web.headCode.push(`
-<script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-analytics-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.6/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.js"></script>
-<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css" />`);
-
-            project.web.bodyHTML.push(`
-            <div id="firebaseui-auth-container" style="z-index: 1;position: absolute;max-width: 380px;left: 50%;max-height: 400px;top: 50%;transform: translate(-50%, -50%);"></div>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
 `);
         }
     });
@@ -80,22 +74,15 @@ function setup(project) {
                 nativeSymbolUploadEnabled true
             }`,
             android_dependency: [
-                `implementation platform('com.google.firebase:firebase-bom:29.1.0')`,
+                `implementation platform('com.google.firebase:firebase-bom:29.3.1')`,
                 `implementation 'com.google.firebase:firebase-crashlytics-ndk'`,
-                `implementation 'com.google.firebase:firebase-analytics'`,
-                `implementation 'com.google.firebase:firebase-auth'`,
-                `implementation 'com.firebaseui:firebase-ui-auth:7.2.0'`,
+                `implementation 'com.google.firebase:firebase-analytics'`
             ]
         },
         ios: {
             xcode_pod: [
                 "Firebase/Crashlytics",
-                "Firebase/Analytics",
-                'FirebaseUI/Auth',
-                //'FirebaseUI/Google',
-                //'FirebaseUI/Facebook',
-                'FirebaseUI/OAuth', // Used for Sign in with Apple, Twitter, etc
-                //'FirebaseUI/Phone',
+                "Firebase/Analytics"
             ],
             cpp_flags: {
                 files: [

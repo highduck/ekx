@@ -84,7 +84,7 @@ def apply_module_settings(decl, group):
 
     if "cpp_define" in decl:
         for define in decl["cpp_define"]:
-            compileDefines.append("-D" + define)
+            compileDefines.append("-D" + define.replace("\"", "\\\""))
 
     if "cpp_flags" in decl:
         for flags in decl["cpp_flags"]:

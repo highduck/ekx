@@ -9,7 +9,7 @@ function setup(project) {
         cpp: "src",
         android: {
             android_java: "java",
-            android_dependency: `implementation 'com.android.billingclient:billing:4.0.0'`
+            android_dependency: `implementation 'com.android.billingclient:billing:4.1.0'`
         },
         ios: {
             xcode_capability: "com.apple.InAppPurchase",
