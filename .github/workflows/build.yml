@@ -64,19 +64,19 @@ jobs:
       - name: Build
         run: yarn run ci:build-native
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: runner.os == 'Linux'
         with:
           name: bin-linux
           path: tools/*/bin/linux
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: runner.os == 'macOS'
         with:
           name: bin-osx
           path: tools/*/bin/osx
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         if: runner.os == 'Windows'
         with:
           name: bin-win32
