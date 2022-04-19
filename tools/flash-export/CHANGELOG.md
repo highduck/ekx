@@ -1,5 +1,20 @@
 ## 0.0.1
 
+## 0.0.8
+
+### Patch Changes
+
+- 4349a862: use `ek_snprintf` wrapper
+- b7fc9336: refactoring
+- Updated dependencies [b7fc9336]
+- Updated dependencies [8bd2c87b]
+- Updated dependencies [c2684e0e]
+- Updated dependencies [326e845d]
+- Updated dependencies [26fa74d6]
+- Updated dependencies [a08fb558]
+  - @ekx/sg-file@0.1.9
+  - cmake-build@0.0.5
+
 ## 0.0.7
 
 ### Patch Changes

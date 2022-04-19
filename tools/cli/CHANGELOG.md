@@ -1,5 +1,34 @@
 ## 0.0.4
 
+## 0.1.12
+
+### Patch Changes
+
+- 53b259fe: android: pass `cpp_flags` to generated AS project
+- b7fc9336: refactoring
+- 8bd2c87b: Bump @types/node from 16.11.13 to 17.0.2
+- c2684e0e: Bump @types/node from 17.0.2 to 17.0.4
+- b7fc9336: generate C-compat `build_info.h` instead of C++ version with namespace and const
+- 326e845d: upgrade deps
+- bf4d88e8: ios: improve generated xcode project structure
+- a08fb558: Bump @types/node from 16.11.12 to 16.11.13
+- Updated dependencies [4349a862]
+- Updated dependencies [4349a862]
+- Updated dependencies [b7fc9336]
+- Updated dependencies [8bd2c87b]
+- Updated dependencies [c2684e0e]
+- Updated dependencies [326e845d]
+- Updated dependencies [26fa74d6]
+- Updated dependencies [1e2a322a]
+- Updated dependencies [a08fb558]
+  - @ekx/flash-export@0.0.8
+  - android-proj-gen@0.0.7
+  - @ekx/scenex@0.1.9
+  - @ekx/bmfont-export@0.0.3
+  - cmake-build@0.0.5
+  - @ekx/obj-export@0.0.3
+  - @ekx/sprite-packer@0.0.3
+
 ## 0.1.11
 
 ### Patch Changes

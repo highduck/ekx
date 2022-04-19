@@ -1,5 +1,18 @@
 # @ekx/imgui
 
+## 0.0.23
+
+### Patch Changes
+
+- 26ae438d: add ImPlot library
+- 26ae438d: add ImGuizmo
+- Updated dependencies [8bd2c87b]
+- Updated dependencies [c2684e0e]
+- Updated dependencies [326e845d]
+- Updated dependencies [26fa74d6]
+- Updated dependencies [a08fb558]
+  - cmake-build@0.0.5
+
 ## 0.0.22
 
 ### Patch Changes

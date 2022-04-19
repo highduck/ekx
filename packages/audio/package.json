@@ -1,6 +1,6 @@
 {
   "name": "@ekx/audio",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "scripts": {
     "postinstall": "cmake-build || exit 0"
   },
@@ -9,9 +9,9 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/auph": "0.1.2",
-    "@ekx/app": "0.1.8",
-    "cmake-build": "0.0.4"
+    "@ekx/auph": "0.1.3",
+    "@ekx/app": "0.1.9",
+    "cmake-build": "0.0.5"
   },
   "files": [
     "CMakeLists.txt",
