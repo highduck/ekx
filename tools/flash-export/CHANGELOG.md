@@ -1,5 +1,11 @@
 ## 0.0.1
 
+## 0.0.9
+
+### Patch Changes
+
+- 27598eb6: Add `bin` folder to package
+
 ## 0.0.8
 
 ### Patch Changes

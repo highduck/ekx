@@ -1,6 +1,6 @@
 {
   "name": "js-script-test",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "scripts": {
     "postinstall": "cmake-build",
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@ekx/graphics": "0.1.9",
-    "@ekx/cli": "0.1.12",
+    "@ekx/cli": "0.1.13",
     "cmake-build": "0.0.5",
     "@ekx/quickjs": "0.0.1",
     "@ekx/res": "0.1.9"

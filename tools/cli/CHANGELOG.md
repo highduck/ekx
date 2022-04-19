@@ -1,5 +1,14 @@
 ## 0.0.4
 
+## 0.1.13
+
+### Patch Changes
+
+- Updated dependencies [27598eb6]
+  - @ekx/bmfont-export@0.0.4
+  - @ekx/flash-export@0.0.9
+  - @ekx/sprite-packer@0.0.4
+
 ## 0.1.12
 
 ### Patch Changes
