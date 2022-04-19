@@ -1,6 +1,6 @@
 {
   "name": "sample-1-app",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "scripts": {
     "postinstall": "cmake-build",
@@ -12,7 +12,7 @@
   "dependencies": {
     "@ekx/app": "0.1.9",
     "@ekx/std": "0.0.3",
-    "@ekx/cli": "0.1.12",
+    "@ekx/cli": "0.1.13",
     "cmake-build": "0.0.5"
   },
   "devDependencies": {

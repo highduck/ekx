@@ -1,6 +1,6 @@
 {
   "name": "@ekx/flash-export",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "scripts": {
     "build:native": "node scripts/build.js",
     "cc:build:native": "USE_CCACHE=1 node scripts/build.js",
