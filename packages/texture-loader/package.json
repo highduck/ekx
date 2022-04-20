@@ -20,9 +20,10 @@
     "typescript": "^4.6.3"
   },
   "files": [
-    "README.md",
-    "platform",
+    "java",
+    "js",
     "src",
+    "include",
     "CMakeLists.txt",
     "ek.js"
   ]

@@ -9,6 +9,12 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "CMakeLists.txt",
+    "ek.js",
+    "src",
+    "include"
+  ],
   "license": "ISC",
   "dependencies": {
     "@ekx/doctest": "0.0.4",

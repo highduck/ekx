@@ -16,5 +16,10 @@
     "@ekx/plugin-billing": "0.0.9",
     "@ekx/plugin-game-services": "0.0.9",
     "cmake-build": "0.0.5"
-  }
+  },
+  "files": [
+    "CMakeLists.txt",
+    "src",
+    "ek.js"
+  ]
 }

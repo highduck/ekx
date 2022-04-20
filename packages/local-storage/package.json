@@ -16,7 +16,7 @@
     "CMakeLists.txt",
     "ek.js",
     "src",
-    "web",
-    "android"
+    "include",
+    "java"
   ]
 }

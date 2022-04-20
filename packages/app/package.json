@@ -7,6 +7,13 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "CMakeLists.txt",
+    "ek.js",
+    "src",
+    "include",
+    "java"
+  ],
   "license": "ISC",
   "dependencies": {
     "@ekx/std": "0.0.3",

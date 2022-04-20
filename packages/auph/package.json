@@ -15,12 +15,8 @@
     "include",
     "android",
     "CMakeLists.txt",
-    "auph-static.cpp",
     "ek.js",
-    "web/dist",
-    "README.md",
-    "REFERENCES.md",
-    "CHANGELOG.md"
+    "web/dist"
   ],
   "publishConfig": {
     "access": "public"

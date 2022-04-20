@@ -12,5 +12,10 @@
     "@ekx/doctest": "0.0.4",
     "@ekx/std": "0.0.3",
     "cmake-build": "0.0.5"
-  }
+  },
+  "files": [
+    "CMakeLists.txt",
+    "src",
+    "ek.js"
+  ]
 }
