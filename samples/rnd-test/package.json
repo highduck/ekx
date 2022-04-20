@@ -1,6 +1,6 @@
 {
   "name": "rnd-test",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "private": true,
   "scripts": {
     "postinstall": "cmake-build",
@@ -10,8 +10,8 @@
     "clean": "rimraf ./build ./export ./.firebase"
   },
   "dependencies": {
-    "@ekx/graphics": "0.1.10",
-    "@ekx/cli": "0.1.14",
+    "@ekx/graphics": "0.1.11",
+    "@ekx/cli": "0.1.15",
     "cmake-build": "0.0.5"
   },
   "devDependencies": {

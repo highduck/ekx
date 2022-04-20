@@ -1,5 +1,21 @@
 # @ekx/scenex
 
+## 0.1.11
+
+### Patch Changes
+
+- cf6702f5: fix package files
+- Updated dependencies [cf6702f5]
+  - @ekx/app@0.1.11
+  - @ekx/core@0.1.10
+  - @ekx/ecs@0.1.10
+  - @ekx/local-storage@0.0.5
+  - @ekx/texture-loader@0.0.5
+  - @ekx/audio@0.1.11
+  - @ekx/graphics@0.1.11
+  - @ekx/res@0.1.11
+  - @ekx/sg-file@0.1.10
+
 ## 0.1.10
 
 ### Patch Changes

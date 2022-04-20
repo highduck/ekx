@@ -1,5 +1,11 @@
 ## 0.0.1
 
+## 0.0.10
+
+### Patch Changes
+
+- @ekx/sg-file@0.1.10
+
 ## 0.0.9
 
 ### Patch Changes

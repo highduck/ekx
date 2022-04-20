@@ -1,5 +1,14 @@
 # js-script-test
 
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies [8e787084]
+  - @ekx/cli@0.1.15
+  - @ekx/graphics@0.1.11
+  - @ekx/res@0.1.11
+
 ## 0.0.5
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @ekx/plugin-game-services
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies [cf6702f5]
+  - @ekx/app@0.1.11
+  - @ekx/core@0.1.10
+
 ## 0.0.9
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@ekx/obj-export",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "scripts": {
     "build:native": "node scripts/build.js",
     "cc:build:native": "USE_CCACHE=1 node scripts/build.js",
@@ -14,8 +14,8 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/core": "0.1.9",
-    "@ekx/sg-file": "0.1.9",
+    "@ekx/core": "0.1.10",
+    "@ekx/sg-file": "0.1.10",
     "cmake-build": "0.0.5"
   }
 }

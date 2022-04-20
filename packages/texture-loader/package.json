@@ -1,14 +1,14 @@
 {
   "name": "@ekx/texture-loader",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "postinstall": "cmake-build || exit 0",
     "watch": "tsc -w -p web/tsconfig.json & rollup -w -c web/rollup.config.js",
     "build": "tsc -p web/tsconfig.json && rollup -c web/rollup.config.js"
   },
   "dependencies": {
-    "@ekx/app": "0.1.10",
-    "@ekx/core": "0.1.9",
+    "@ekx/app": "0.1.11",
+    "@ekx/core": "0.1.10",
     "@ekx/sokol": "0.0.14"
   },
   "devDependencies": {

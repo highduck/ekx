@@ -1,5 +1,13 @@
 # @ekx/local-storage
 
+## 0.0.5
+
+### Patch Changes
+
+- cf6702f5: fix package files
+- Updated dependencies [cf6702f5]
+  - @ekx/app@0.1.11
+
 ## 0.0.4
 
 ### Patch Changes

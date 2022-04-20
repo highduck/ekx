@@ -1,5 +1,17 @@
 ## 0.0.4
 
+## 0.1.15
+
+### Patch Changes
+
+- 8e787084: add exit code on error
+- Updated dependencies [cf6702f5]
+  - @ekx/scenex@0.1.11
+  - @ekx/obj-export@0.0.4
+  - @ekx/bmfont-export@0.0.5
+  - @ekx/sprite-packer@0.0.5
+  - @ekx/flash-export@0.0.10
+
 ## 0.1.14
 
 ### Patch Changes

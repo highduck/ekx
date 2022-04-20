@@ -1,6 +1,6 @@
 {
   "name": "@ekx/std",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "scripts": {
     "postinstall": "cmake-build || exit 0",
     "generate": "node scripts/gen_math.js",

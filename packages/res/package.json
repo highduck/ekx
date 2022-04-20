@@ -1,6 +1,6 @@
 {
   "name": "@ekx/res",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "scripts": {
     "postinstall": "cmake-build || exit 0"
   },
@@ -11,6 +11,6 @@
   "dependencies": {
     "@ekx/doctest": "0.0.4",
     "cmake-build": "0.0.5",
-    "@ekx/app": "0.1.10"
+    "@ekx/app": "0.1.11"
   }
 }

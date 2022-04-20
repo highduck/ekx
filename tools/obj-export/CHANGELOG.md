@@ -1,5 +1,13 @@
 # @ekx/obj-export
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [cf6702f5]
+  - @ekx/core@0.1.10
+  - @ekx/sg-file@0.1.10
+
 ## 0.0.3
 
 ### Patch Changes
