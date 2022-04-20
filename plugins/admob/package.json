@@ -1,6 +1,6 @@
 {
   "name": "@ekx/plugin-admob",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "scripts": {
     "postinstall": "cmake-build || exit 0"
   },
@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/scenex": "0.1.11",
-    "@ekx/plugin-firebase": "0.0.5",
+    "@ekx/plugin-firebase": "0.0.6",
     "cmake-build": "0.0.5"
   },
   "files": [

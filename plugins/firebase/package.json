@@ -1,6 +1,6 @@
 {
   "name": "@ekx/plugin-firebase",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "scripts": {
     "postinstall": "cmake-build || exit 0",
     "build": "rollup -c web/rollup.config.js"

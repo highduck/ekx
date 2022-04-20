@@ -1,5 +1,14 @@
 # @ekx/appbox
 
+## 0.0.11
+
+### Patch Changes
+
+- Updated dependencies [09cbb342]
+  - @ekx/plugin-admob@0.0.11
+  - @ekx/plugin-billing@0.0.11
+  - @ekx/plugin-game-services@0.0.11
+
 ## 0.0.10
 
 ### Patch Changes
