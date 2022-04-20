@@ -1,5 +1,12 @@
 # @ekx/dev-tools
 
+## 0.1.11
+
+### Patch Changes
+
+- Updated dependencies [cf6702f5]
+  - @ekx/scenex@0.1.11
+
 ## 0.1.10
 
 ### Patch Changes

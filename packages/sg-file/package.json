@@ -1,6 +1,6 @@
 {
   "name": "@ekx/sg-file",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "scripts": {
     "postinstall": "cmake-build || exit 0"
   },
@@ -9,7 +9,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/core": "0.1.9",
+    "@ekx/core": "0.1.10",
     "cmake-build": "0.0.5"
   },
   "files": [

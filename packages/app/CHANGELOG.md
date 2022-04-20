@@ -1,5 +1,13 @@
 # @ekx/app
 
+## 0.1.11
+
+### Patch Changes
+
+- cf6702f5: fix package files
+- Updated dependencies [cf6702f5]
+  - @ekx/std@0.0.4
+
 ## 0.1.10
 
 ### Patch Changes

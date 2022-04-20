@@ -1,6 +1,6 @@
 {
   "name": "@ekx/sprite-packer",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "build:native": "node scripts/build.js",
     "cc:build:native": "USE_CCACHE=1 node scripts/build.js",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@ekx/miniz": "0.0.5",
     "@ekx/pugixml": "0.0.7",
-    "@ekx/std": "0.0.3",
+    "@ekx/std": "0.0.4",
     "cmake-build": "0.0.5"
   }
 }

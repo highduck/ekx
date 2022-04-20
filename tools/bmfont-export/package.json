@@ -1,6 +1,6 @@
 {
   "name": "@ekx/bmfont-export",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "build:native": "node scripts/build.js",
     "cc:build:native": "USE_CCACHE=1 node scripts/build.js",
@@ -16,8 +16,8 @@
   "dependencies": {
     "@ekx/freetype": "0.0.11",
     "@ekx/pugixml": "0.0.7",
-    "@ekx/std": "0.0.3",
-    "@ekx/sg-file": "0.1.9",
+    "@ekx/std": "0.0.4",
+    "@ekx/sg-file": "0.1.10",
     "cmake-build": "0.0.5"
   }
 }

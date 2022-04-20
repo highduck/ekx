@@ -1,5 +1,12 @@
 # @ekx/plugin-billing
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies [cf6702f5]
+  - @ekx/scenex@0.1.11
+
 ## 0.0.9
 
 ### Patch Changes

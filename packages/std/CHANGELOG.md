@@ -1,5 +1,11 @@
 # @ekx/std
 
+## 0.0.4
+
+### Patch Changes
+
+- cf6702f5: fix package files
+
 ## 0.0.3
 
 ### Patch Changes

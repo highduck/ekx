@@ -1,5 +1,12 @@
 # @ekx/res
 
+## 0.1.11
+
+### Patch Changes
+
+- Updated dependencies [cf6702f5]
+  - @ekx/app@0.1.11
+
 ## 0.1.10
 
 ### Patch Changes

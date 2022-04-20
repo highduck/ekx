@@ -1,5 +1,14 @@
 # @ekx/texture-loader
 
+## 0.0.5
+
+### Patch Changes
+
+- cf6702f5: fix package files
+- Updated dependencies [cf6702f5]
+  - @ekx/app@0.1.11
+  - @ekx/core@0.1.10
+
 ## 0.0.4
 
 ### Patch Changes

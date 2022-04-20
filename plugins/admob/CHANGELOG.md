@@ -1,5 +1,13 @@
 # @ekx/plugin-admob
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies [cf6702f5]
+  - @ekx/scenex@0.1.11
+  - @ekx/plugin-firebase@0.0.5
+
 ## 0.0.9
 
 ### Patch Changes

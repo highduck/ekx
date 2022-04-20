@@ -1,5 +1,12 @@
 # @ekx/nep
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [cf6702f5]
+  - @ekx/app@0.1.11
+
 ## 0.0.3
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@ekx/dev-tools",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "scripts": {
     "postinstall": "cmake-build || exit 0"
   },
@@ -9,7 +9,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/scenex": "0.1.10",
+    "@ekx/scenex": "0.1.11",
     "cmake-build": "0.0.5",
     "@ekx/imgui": "0.0.23",
     "@ekx/pugixml": "0.0.7",

@@ -1,5 +1,16 @@
 # @ekx/appbox
 
+## 0.0.10
+
+### Patch Changes
+
+- cf6702f5: fix package files
+- Updated dependencies [cf6702f5]
+  - @ekx/scenex@0.1.11
+  - @ekx/plugin-game-services@0.0.10
+  - @ekx/plugin-admob@0.0.10
+  - @ekx/plugin-billing@0.0.10
+
 ## 0.0.9
 
 ### Patch Changes

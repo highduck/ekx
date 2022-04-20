@@ -1,5 +1,12 @@
 # @ekx/sg-file
 
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies [cf6702f5]
+  - @ekx/core@0.1.10
+
 ## 0.1.9
 
 ### Patch Changes

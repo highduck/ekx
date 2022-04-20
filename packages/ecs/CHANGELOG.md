@@ -1,5 +1,13 @@
 # @ekx/ecs
 
+## 0.1.10
+
+### Patch Changes
+
+- cf6702f5: fix package files
+- Updated dependencies [cf6702f5]
+  - @ekx/core@0.1.10
+
 ## 0.1.9
 
 ### Patch Changes
