@@ -12,5 +12,12 @@
     "@ekx/core": "0.1.10",
     "@ekx/app": "0.1.11",
     "cmake-build": "0.0.5"
-  }
+  },
+  "files": [
+    "CMakeLists.txt",
+    "src",
+    "include",
+    "java",
+    "ek.js"
+  ]
 }

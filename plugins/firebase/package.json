@@ -8,6 +8,14 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "CMakeLists.txt",
+    "src",
+    "java",
+    "web/dist",
+    "web/lib",
+    "ek.js"
+  ],
   "license": "ISC",
   "dependencies": {
     "@ekx/app": "0.1.11",

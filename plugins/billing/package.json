@@ -11,5 +11,11 @@
   "dependencies": {
     "@ekx/scenex": "0.1.11",
     "cmake-build": "0.0.5"
-  }
+  },
+  "files": [
+    "CMakeLists.txt",
+    "src",
+    "java",
+    "ek.js"
+  ]
 }

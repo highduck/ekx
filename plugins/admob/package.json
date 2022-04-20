@@ -12,5 +12,12 @@
     "@ekx/scenex": "0.1.11",
     "@ekx/plugin-firebase": "0.0.5",
     "cmake-build": "0.0.5"
-  }
+  },
+  "files": [
+    "CMakeLists.txt",
+    "src",
+    "java",
+    "include",
+    "ek.js"
+  ]
 }
