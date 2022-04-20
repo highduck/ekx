@@ -34,9 +34,7 @@ if (process.argv.indexOf("-V") >= 0) {
 logger.log("process.argv:", process.argv);
 logger.log("process.cwd:", process.cwd());
 
-defaultRun();
-
-function defaultRun() {
+async function defaultRun() {
 
     const project = new Project();
 
@@ -67,5 +65,10 @@ function defaultRun() {
 
     project.loadModule(path.resolve(process.cwd(), "ek.js"));
 
-    project.runBuildSteps().then();
+    await project.runBuildSteps();
 }
+
+defaultRun().catch((e)=>{
+    logger.error(e);
+    process.exit(1);
+});
