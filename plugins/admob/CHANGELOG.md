@@ -1,5 +1,13 @@
 # @ekx/plugin-admob
 
+## 0.0.11
+
+### Patch Changes
+
+- 09cbb342: fix package files
+- Updated dependencies [09cbb342]
+  - @ekx/plugin-firebase@0.0.6
+
 ## 0.0.10
 
 ### Patch Changes

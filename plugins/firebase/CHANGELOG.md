@@ -1,5 +1,11 @@
 # @ekx/plugin-firebase
 
+## 0.0.6
+
+### Patch Changes
+
+- 09cbb342: fix package files
+
 ## 0.0.5
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @ekx/plugin-billing
 
+## 0.0.11
+
+### Patch Changes
+
+- 09cbb342: fix package files
+
 ## 0.0.10
 
 ### Patch Changes
