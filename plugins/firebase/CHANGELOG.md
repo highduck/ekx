@@ -1,5 +1,12 @@
 # @ekx/plugin-firebase
 
+## 0.0.4
+
+### Patch Changes
+
+- Updated dependencies [fd8f9b35]
+  - @ekx/app@0.1.10
+
 ## 0.0.3
 
 ### Patch Changes

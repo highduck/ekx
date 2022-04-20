@@ -1,6 +1,6 @@
 {
   "name": "@ekx/plugin-billing",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "scripts": {
     "postinstall": "cmake-build || exit 0"
   },
@@ -9,7 +9,7 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/scenex": "0.1.9",
+    "@ekx/scenex": "0.1.10",
     "cmake-build": "0.0.5"
   }
 }

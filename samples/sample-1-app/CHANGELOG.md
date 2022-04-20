@@ -1,5 +1,13 @@
 # sample-1-app
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [fd8f9b35]
+  - @ekx/app@0.1.10
+  - @ekx/cli@0.1.14
+
 ## 0.0.4
 
 ### Patch Changes

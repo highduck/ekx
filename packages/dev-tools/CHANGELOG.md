@@ -1,5 +1,11 @@
 # @ekx/dev-tools
 
+## 0.1.10
+
+### Patch Changes
+
+- @ekx/scenex@0.1.10
+
 ## 0.1.9
 
 ### Patch Changes

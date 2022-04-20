@@ -1,5 +1,11 @@
 # android-proj-gen
 
+## 0.0.8
+
+### Patch Changes
+
+- fd8f9b35: remove `undefined` values from gradle properties
+
 ## 0.0.7
 
 ### Patch Changes

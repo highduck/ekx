@@ -1,5 +1,12 @@
 # @ekx/plugin-admob
 
+## 0.0.9
+
+### Patch Changes
+
+- @ekx/scenex@0.1.10
+- @ekx/plugin-firebase@0.0.4
+
 ## 0.0.8
 
 ### Patch Changes
