@@ -1,5 +1,17 @@
 # @ekx/scenex
 
+## 0.1.10
+
+### Patch Changes
+
+- Updated dependencies [fd8f9b35]
+  - @ekx/app@0.1.10
+  - @ekx/local-storage@0.0.4
+  - @ekx/audio@0.1.10
+  - @ekx/graphics@0.1.10
+  - @ekx/res@0.1.10
+  - @ekx/texture-loader@0.0.4
+
 ## 0.1.9
 
 ### Patch Changes

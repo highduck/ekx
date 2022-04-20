@@ -1,5 +1,13 @@
 # @ekx/local-storage
 
+## 0.0.4
+
+### Patch Changes
+
+- fd8f9b35: remove unused deps
+- Updated dependencies [fd8f9b35]
+  - @ekx/app@0.1.10
+
 ## 0.0.3
 
 ### Patch Changes

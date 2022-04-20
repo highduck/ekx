@@ -1,6 +1,6 @@
 {
   "name": "js-script-test",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "scripts": {
     "postinstall": "cmake-build",
@@ -11,11 +11,11 @@
     "gen-api": "node scripts/gen.js"
   },
   "dependencies": {
-    "@ekx/graphics": "0.1.9",
-    "@ekx/cli": "0.1.13",
+    "@ekx/graphics": "0.1.10",
+    "@ekx/cli": "0.1.14",
     "cmake-build": "0.0.5",
     "@ekx/quickjs": "0.0.1",
-    "@ekx/res": "0.1.9"
+    "@ekx/res": "0.1.10"
   },
   "devDependencies": {
     "rimraf": "^3.0.2"

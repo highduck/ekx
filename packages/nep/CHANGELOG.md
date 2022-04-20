@@ -1,5 +1,14 @@
 # @ekx/nep
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [fd8f9b35]
+- Updated dependencies [fd8f9b35]
+  - @ekx/app@0.1.10
+  - @ekx/msgpack@0.0.2
+
 ## 0.0.2
 
 ### Patch Changes

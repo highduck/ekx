@@ -1,5 +1,11 @@
 # @ekx/app
 
+## 0.1.10
+
+### Patch Changes
+
+- fd8f9b35: remove unused deps
+
 ## 0.1.9
 
 ### Patch Changes

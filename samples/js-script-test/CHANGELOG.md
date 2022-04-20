@@ -1,5 +1,13 @@
 # js-script-test
 
+## 0.0.5
+
+### Patch Changes
+
+- @ekx/cli@0.1.14
+- @ekx/graphics@0.1.10
+- @ekx/res@0.1.10
+
 ## 0.0.4
 
 ### Patch Changes

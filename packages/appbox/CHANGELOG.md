@@ -1,5 +1,14 @@
 # @ekx/appbox
 
+## 0.0.9
+
+### Patch Changes
+
+- @ekx/scenex@0.1.10
+- @ekx/plugin-game-services@0.0.9
+- @ekx/plugin-admob@0.0.9
+- @ekx/plugin-billing@0.0.9
+
 ## 0.0.8
 
 ### Patch Changes

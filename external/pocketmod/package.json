@@ -1,6 +1,6 @@
 {
   "name": "@ekx/pocketmod",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "recipe:build": "node recipe/package.js",
     "package:test": "node recipe/test-package.js"
