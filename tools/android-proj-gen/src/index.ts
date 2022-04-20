@@ -253,7 +253,10 @@ class Properties {
     toString(): string {
         let buf = "";
         for (const key of Object.keys(this.dict)) {
-            buf += `${key}=${this.dict[key]}\n`;
+            const val = this.dict[key];
+            if(val !== undefined) {
+                buf += `${key}=${this.dict[key]}\n`;
+            }
         }
         return buf;
     }

@@ -10,9 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/std": "0.0.3",
-    "@ekx/doctest": "0.0.4",
-    "@ekx/sokol": "0.0.14",
-    "@ekx/stb": "0.0.8",
     "cmake-build": "0.0.5"
   }
 }

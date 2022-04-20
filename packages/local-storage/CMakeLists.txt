@@ -5,7 +5,6 @@ project(local-storage)
 
 add_library(${PROJECT_NAME} STATIC
         src/local_storage.c
-        src/nep.c
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
@@ -27,8 +26,6 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::app
         PUBLIC ekx::std
-        PUBLIC ekx::core
-        PUBLIC ekx::msgpack
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

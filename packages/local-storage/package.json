@@ -10,7 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "@ekx/app": "0.1.9",
-    "@ekx/msgpack": "0.0.1",
     "cmake-build": "0.0.5"
   },
   "files": [

@@ -11,7 +11,8 @@
   },
   "files": [
     "CMakeLists.txt",
-    "include"
+    "include",
+    "ek.js"
   ],
   "devDependencies": {
     "@ekx/cli-utils": "0.0.16"
