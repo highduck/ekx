@@ -12,6 +12,7 @@ for(const pattern of rootPkg.workspaces.packages) {
     }
 }
 
+
 const changedPackages = [];
 
 for(const workspace of workspaces) {
