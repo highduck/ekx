@@ -6,7 +6,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdk 30
     buildToolsVersion "30.0.3"
-    ndkVersion "23.0.7599858"
+    ndkVersion "23.1.7779620"
     signingConfigs {
         // SIGNING_CONFIGS
     }

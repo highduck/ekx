@@ -34,6 +34,16 @@ function getEmscriptenSDKPath() {
     }
     return path.join(process.env.HOME, "dev/emsdk");
 }
+function getNDKPath() {
+    const names = ["ANDROID_NDK_LATEST_HOME", "ANDROID_NDK_HOME", "ANDROID_NDK_ROOT"];
+    for (let env of names) {
+        const ndkPath = process.env[env];
+        if (ndkPath && fs.existsSync(ndkPath)) {
+            return ndkPath;
+        }
+    }
+    return path.resolve(process.env.HOME, "Library/Android/sdk/ndk/23.1.7779620");
+}
 function resolveOptions(options) {
     options = options ?? {};
     options.env = options.env ?? {};
@@ -85,7 +95,7 @@ function resolveOptions(options) {
             break;
         case "android":
             if (!options.toolchain) {
-                options.toolchain = path.resolve(process.env.HOME, "Library/Android/sdk/ndk/23.0.7599858/build/cmake/android.toolchain.cmake");
+                options.toolchain = path.join(getNDKPath(), "build/cmake/android.toolchain.cmake");
             }
             options.definitions.ANDROID_ABI = "x86_64";
             options.cc = undefined;

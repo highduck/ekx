@@ -67,7 +67,7 @@ we able to switch platform inside your cmake-compatible IDE (like CLion).
 -DPLATFORM=SIMULATOR64 -DCMAKE_TOOLCHAIN_FILE=./cmake/ios.cmake
 
 # Android
--DANDROID_ABI=x86_64 -DCMAKE_TOOLCHAIN_FILE=/Users/USER/Library/Android/sdk/ndk/23.0.7599858/build/cmake/android.toolchain.cmake
+-DANDROID_ABI=x86_64 -DCMAKE_TOOLCHAIN_FILE=/Users/USER/Library/Android/sdk/ndk/23.1.7779620/build/cmake/android.toolchain.cmake
 
 # Windows from MacOS
 brew install mingw-w64
