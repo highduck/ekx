@@ -1,6 +1,6 @@
 {
   "name": "@ekx/auph",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "browser": "web/dist/emscripten/auph.js",
   "module": "web/dist/module/index.js",
   "types": "web/dist/types/index.d.ts",
@@ -37,8 +37,8 @@
   "dependencies": {
     "@ekx/dr-libs": "0.0.4",
     "@ekx/stb": "0.0.8",
-    "@ekx/std": "0.0.4",
-    "cmake-build": "0.0.5"
+    "@ekx/std": "0.0.5",
+    "cmake-build": "0.0.6"
   },
   "keywords": [
     "auph",

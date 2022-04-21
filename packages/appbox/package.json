@@ -1,6 +1,6 @@
 {
   "name": "@ekx/appbox",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "scripts": {
     "postinstall": "cmake-build || exit 0",
     "build:native": "node build.js",
@@ -11,11 +11,11 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@ekx/scenex": "0.1.11",
-    "@ekx/plugin-admob": "0.0.11",
-    "@ekx/plugin-billing": "0.0.11",
-    "@ekx/plugin-game-services": "0.0.11",
-    "cmake-build": "0.0.5"
+    "@ekx/scenex": "0.1.12",
+    "@ekx/plugin-admob": "0.0.12",
+    "@ekx/plugin-billing": "0.0.12",
+    "@ekx/plugin-game-services": "0.0.12",
+    "cmake-build": "0.0.6"
   },
   "files": [
     "CMakeLists.txt",

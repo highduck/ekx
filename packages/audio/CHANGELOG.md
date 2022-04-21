@@ -1,5 +1,14 @@
 # @ekx/audio
 
+## 0.1.12
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - cmake-build@0.0.6
+  - @ekx/app@0.1.12
+  - @ekx/auph@0.1.5
+
 ## 0.1.11
 
 ### Patch Changes

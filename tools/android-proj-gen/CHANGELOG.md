@@ -1,5 +1,11 @@
 # android-proj-gen
 
+## 0.0.9
+
+### Patch Changes
+
+- 5a1952ec: up ndk version to 23.1.7779620
+
 ## 0.0.8
 
 ### Patch Changes

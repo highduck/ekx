@@ -1,5 +1,13 @@
 ## 0.0.1
 
+## 0.0.11
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - cmake-build@0.0.6
+  - @ekx/sg-file@0.1.11
+
 ## 0.0.10
 
 ### Patch Changes
