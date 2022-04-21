@@ -1,5 +1,21 @@
 # @ekx/scenex
 
+## 0.1.12
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - cmake-build@0.0.6
+  - @ekx/app@0.1.12
+  - @ekx/audio@0.1.12
+  - @ekx/core@0.1.11
+  - @ekx/ecs@0.1.11
+  - @ekx/graphics@0.1.12
+  - @ekx/local-storage@0.0.6
+  - @ekx/res@0.1.12
+  - @ekx/sg-file@0.1.11
+  - @ekx/texture-loader@0.0.6
+
 ## 0.1.11
 
 ### Patch Changes

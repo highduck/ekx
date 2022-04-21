@@ -1,5 +1,14 @@
 # @ekx/bmfont-export
 
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - cmake-build@0.0.6
+  - @ekx/sg-file@0.1.11
+  - @ekx/std@0.0.5
+
 ## 0.0.5
 
 ### Patch Changes

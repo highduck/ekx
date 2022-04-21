@@ -1,5 +1,11 @@
 # cmake-build
 
+## 0.0.6
+
+### Patch Changes
+
+- 5a1952ec: up ndk version to 23.1.7779620
+
 ## 0.0.5
 
 ### Patch Changes

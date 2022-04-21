@@ -1,5 +1,14 @@
 # @ekx/dev-tools
 
+## 0.1.12
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - cmake-build@0.0.6
+  - @ekx/imgui@0.0.24
+  - @ekx/scenex@0.1.12
+
 ## 0.1.11
 
 ### Patch Changes

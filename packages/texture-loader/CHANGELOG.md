@@ -1,5 +1,12 @@
 # @ekx/texture-loader
 
+## 0.0.6
+
+### Patch Changes
+
+- @ekx/app@0.1.12
+- @ekx/core@0.1.11
+
 ## 0.0.5
 
 ### Patch Changes

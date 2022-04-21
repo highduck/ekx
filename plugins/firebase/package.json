@@ -1,6 +1,6 @@
 {
   "name": "@ekx/plugin-firebase",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "scripts": {
     "postinstall": "cmake-build || exit 0",
     "build": "rollup -c web/rollup.config.js"
@@ -18,8 +18,8 @@
   ],
   "license": "ISC",
   "dependencies": {
-    "@ekx/app": "0.1.11",
-    "cmake-build": "0.0.5",
+    "@ekx/app": "0.1.12",
+    "cmake-build": "0.0.6",
     "firebase": "^9.6.11"
   },
   "devDependencies": {

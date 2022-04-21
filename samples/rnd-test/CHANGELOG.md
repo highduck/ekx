@@ -1,5 +1,14 @@
 # rnd-test
 
+## 0.0.7
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - cmake-build@0.0.6
+  - @ekx/cli@0.1.16
+  - @ekx/graphics@0.1.12
+
 ## 0.0.6
 
 ### Patch Changes

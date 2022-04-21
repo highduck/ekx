@@ -1,5 +1,18 @@
 ## 0.0.4
 
+## 0.1.16
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - android-proj-gen@0.0.9
+  - cmake-build@0.0.6
+  - @ekx/scenex@0.1.12
+  - @ekx/bmfont-export@0.0.6
+  - @ekx/flash-export@0.0.11
+  - @ekx/obj-export@0.0.5
+  - @ekx/sprite-packer@0.0.6
+
 ## 0.1.15
 
 ### Patch Changes

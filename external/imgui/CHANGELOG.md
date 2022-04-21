@@ -1,5 +1,12 @@
 # @ekx/imgui
 
+## 0.0.24
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - cmake-build@0.0.6
+
 ## 0.0.23
 
 ### Patch Changes

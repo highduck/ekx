@@ -1,5 +1,16 @@
 # @ekx/appbox
 
+## 0.0.12
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - cmake-build@0.0.6
+  - @ekx/scenex@0.1.12
+  - @ekx/plugin-admob@0.0.12
+  - @ekx/plugin-billing@0.0.12
+  - @ekx/plugin-game-services@0.0.12
+
 ## 0.0.11
 
 ### Patch Changes

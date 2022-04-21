@@ -1,5 +1,13 @@
 # @ekx/ecs
 
+## 0.1.11
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - cmake-build@0.0.6
+  - @ekx/core@0.1.11
+
 ## 0.1.10
 
 ### Patch Changes

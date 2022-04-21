@@ -1,5 +1,14 @@
 # @ekx/plugin-game-services
 
+## 0.0.12
+
+### Patch Changes
+
+- Updated dependencies [5a1952ec]
+  - cmake-build@0.0.6
+  - @ekx/app@0.1.12
+  - @ekx/core@0.1.11
+
 ## 0.0.11
 
 ### Patch Changes
