@@ -17,7 +17,7 @@
     "emscripten-library-generator": "^0.1.8",
     "rollup": "^2.70.2",
     "rollup-plugin-terser": "^7.0.2",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.4"
   },
   "files": [
     "java",
