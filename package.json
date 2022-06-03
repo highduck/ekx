@@ -11,9 +11,11 @@
     "ci:build": "wsrun -m -e -t build",
     "ci:build-native": "wsrun -m -e -t build:native",
     "ci:test-native": "wsrun -m -e -t test:native",
+    "run-test-native": "node run-test-native.js",
     "postinstall": "wsrun -m -e -t postinstall"
   },
   "devDependencies": {
+    "cmake-build": "0.0.6",
     "@changesets/cli": "^2.22.0",
     "wsrun": "^5.2.4"
   },

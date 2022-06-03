@@ -3,6 +3,9 @@ project(ekx)
 #set(EKX_BUILD_DEV_TOOLS ON)
 #set(EKX_BUILD_TESTS ON)
 
+add_subdirectory(packages/std)
+add_subdirectory(packages/core)
+
 if ((NOT EMSCRIPTEN) AND (NOT (${CMAKE_SYSTEM_NAME} MATCHES "iOS")) AND (NOT (${CMAKE_SYSTEM_NAME} MATCHES "Android")))
     #)) AND () AND (${CMAKE_SYSTEM_NAME} NOT MATCHES "Android"))
     add_subdirectory(tools/bmfont-export)
