@@ -27,14 +27,14 @@ a.log = (message?: any, ...args: any[]) => {
         if (message !== undefined && typeof message === "string") {
             message = chalk.white(message);
         }
-        con.log("🔹 " + message, ...args);
+        con.log("🔎 " + message, ...args);
     }
 };
 
 a.info = (message?: any, ...args: any[]) => {
     if (message !== undefined && typeof message === "string") {
-        //message = "ℹ️ " + chalk.whiteBright(message);
-        message = "🔔 " + chalk.whiteBright(message);
+        // 💬 / ℹ / 🔹
+        message = "💬 " + chalk.whiteBright(message);
     }
     con.info(message, ...args);
 };
