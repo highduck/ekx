@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.19)
 project(std-tests)
 
+enable_testing()
+
 add_executable(${PROJECT_NAME}
-        ek_std_test.cpp
+        std_test_main.c
+        bitmap/bitmap_test.c
         math/math_easing_test.c
         math/math_mat_test.c
         math/math_rect_test.c
@@ -16,19 +19,12 @@ add_executable(${PROJECT_NAME}
         hash_test.c
         )
 
-enable_testing()
-
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-        #            LANGUAGE CXX
-        C_STANDARD 11
-        CXX_STANDARD 17
-        )
-
-file(GLOB_RECURSE all_c_test_files ${CMAKE_CURRENT_LIST_DIR}/*.c)
-
-set_source_files_properties(${all_c_test_files} PROPERTIES LANGUAGE CXX)
+set_target_properties(${PROJECT_NAME} PROPERTIES C_STANDARD 11)
+target_compile_definitions(${PROJECT_NAME} PUBLIC UNIT_TESTING)
+#file(GLOB_RECURSE all_c_test_files ${CMAKE_CURRENT_LIST_DIR}/*.c)
+#set_source_files_properties(${all_c_test_files} PROPERTIES LANGUAGE CXX)
 
 target_compile_options(${PROJECT_NAME}
         #            PRIVATE -std=c++17
@@ -50,5 +46,5 @@ target_compile_options(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::std
-        PUBLIC doctest
+        PUBLIC ekx::unit
         )

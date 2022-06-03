@@ -1,4 +1,4 @@
-#include <doctest.h>
+#include <unit.h>
 
 #include <ek/rnd.h>
 #include <ek/time.h>
@@ -7,7 +7,9 @@
 #include <float.h>
 #include <stdio.h>
 
-TEST_SUITE_BEGIN("random");
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 enum {
     SAMPLES = 1000000,
@@ -34,72 +36,66 @@ static void print_stats(const int* buckets) {
 }
 
 
-#ifdef __EMSCRIPTEN__
+SUITE(random) {
 
-#include <emscripten.h>
+    IT("has fine distribution") {
+        ek_time_init();
+        int buckets[BUCKETS];
+        memset(buckets, 0, sizeof(buckets));
 
-#endif
-
-TEST_CASE("distribution") {
-    ek_time_init();
-    int buckets[BUCKETS];
-    memset(buckets, 0, sizeof(buckets));
-
-    uint32_t rnd1 = ek_time_seed32();
-    uint32_t prev = 0;
-    uint32_t repeats = 0;
-    for (int i = 0; i < SAMPLES; ++i) {
-        uint32_t idx = frange(ek_rand1(&rnd1), BUCKETS);
-        if (idx == prev) ++repeats;
-        prev = idx;
-        ++buckets[idx];
+        uint32_t rnd1 = ek_time_seed32();
+        uint32_t prev = 0;
+        uint32_t repeats = 0;
+        for (int i = 0; i < SAMPLES; ++i) {
+            uint32_t idx = frange(ek_rand1(&rnd1), BUCKETS);
+            if (idx == prev) ++repeats;
+            prev = idx;
+            ++buckets[idx];
+        }
+        print_stats(buckets);
+        printf("repeats: %d\n", repeats);
+        memset(buckets, 0, sizeof(buckets));
+        uint64_t rnd2 = ek_time_seed32();
+        prev = 0;
+        repeats = 0;
+        for (int i = 0; i < SAMPLES; ++i) {
+            uint32_t idx = frange(ek_rand2(&rnd2), BUCKETS);
+            if (idx == prev) ++repeats;
+            prev = idx;
+            ++buckets[idx];
+        }
+        print_stats(buckets);
+        printf("repeats: %d\n", repeats);
     }
-    print_stats(buckets);
-    printf("repeats: %d\n", repeats);
-    memset(buckets, 0, sizeof(buckets));
-    uint64_t rnd2 = ek_time_seed32();
-    prev = 0;
-    repeats = 0;
-    for (int i = 0; i < SAMPLES; ++i) {
-        uint32_t idx = frange(ek_rand2(&rnd2), BUCKETS);
-        if (idx == prev) ++repeats;
-        prev = idx;
-        ++buckets[idx];
-    }
-    print_stats(buckets);
-    printf("repeats: %d\n", repeats);
-}
 
-DOCTEST_TEST_CASE("ranges") {
+    IT("gen ranges") {
 
-    const uint32_t N = 5;
+        const uint32_t N = 5;
 
-    for (uint32_t i = 0; i < N; ++i) {
-        int n = random_range_i(-100, 100);
-        CHECK(n >= -100);
-        CHECK(n <= 100);
-        n = random_range_i(100, -100);
-        CHECK(n >= -100);
-        CHECK(n <= 100);
+        for (uint32_t i = 0; i < N; ++i) {
+            int n = random_range_i(-100, 100);
+            CHECK(n >= -100);
+            CHECK(n <= 100);
+            n = random_range_i(100, -100);
+            CHECK(n >= -100);
+            CHECK(n <= 100);
 
-        float f = random_range_f(-100, 100);
-        CHECK(f >= -100.0f);
-        CHECK(f < 100.0f);
+            float f = random_range_f(-100, 100);
+            CHECK(f >= -100.0f);
+            CHECK(f < 100.0f);
 
-        f = random_range_f(100, -100);
-        CHECK(f > -100.0f);
-        CHECK(f <= 100.0f);
+            f = random_range_f(100, -100);
+            CHECK(f > -100.0f);
+            CHECK(f <= 100.0f);
 
-        // always true
-        CHECK(random_chance(1.0f));
-        // always false
-        CHECK_FALSE(random_chance(0.0f));
+            // always true
+            CHECK(random_chance(1.0f));
+            // always false
+            CHECK_FALSE(random_chance(0.0f));
 
-        CHECK_EQ(random_n(1), 0);
+            CHECK_EQ(random_n(1), 0);
 
-        CHECK(random_f() < 1.0f);
+            CHECK(random_f() < 1.0f);
+        }
     }
 }
-
-TEST_SUITE_END();
-

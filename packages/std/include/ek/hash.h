@@ -1,5 +1,5 @@
-#ifndef EK_MURMUR_H
-#define EK_MURMUR_H
+#ifndef EK_HASH_H
+#define EK_HASH_H
 
 #include <ek/pre.h>
 
@@ -67,4 +67,4 @@ string_hash_t hsp_hash_debug(const char* str);
 }
 #endif
 
-#endif // EK_MURMUR_H
+#endif // EK_HASH_H

@@ -10,7 +10,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC src)
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::graphics
-        PUBLIC ekx::audio
         )
 
 add_definitions("-ffast-math -fno-exceptions -fno-rtti -Wall -Wextra")

@@ -1,8 +1,9 @@
-#include <doctest.h>
+#include <unit.h>
 #include <ecx/world.hpp>
 #include "identity_generator_shared.hpp"
 
-TEST_CASE("identity_generator, test_1") {
+SUITE(ecs) {
+    IT("identity_generator, test_1") {
 
 //    using ecs::ComponentTypeIdGenerator;
 //
@@ -20,4 +21,5 @@ TEST_CASE("identity_generator, test_1") {
 //    REQUIRE_EQ((ComponentTypeIdGenerator<ComponentA>::value), idComponentA);
 //    REQUIRE_EQ((ComponentTypeIdGenerator<ComponentB>::value), idComponentB);
 //    REQUIRE_EQ((ComponentTypeIdGenerator<ComponentC>::value), idComponentC);
+    }
 }

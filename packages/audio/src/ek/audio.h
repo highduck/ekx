@@ -11,9 +11,8 @@ extern "C" {
 void audio_setup(void);
 
 struct res_audio {
-    auph_buffer data[64];
     string_hash_t names[64];
-    res_id name_to_id[64];
+    auph_buffer data[64];
     rr_man_t rr;
 };
 

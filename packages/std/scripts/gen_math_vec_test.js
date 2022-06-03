@@ -40,7 +40,7 @@ function generate_vec_test_suite(name, fields, T) {
         let values = [];
         for (let i = 0; i < fields.length; ++i) {
             const field = fields[i];
-            values.push(`   CHECK_NEAR_EQ(r.${field}, ${number_literal(f32_trunc(op(a_values, b_values, i), digits_after_point))});`);
+            values.push(`\t\t\tCHECK_NEAR_EQ(r.${field}, ${number_literal(f32_trunc(op(a_values, b_values, i), digits_after_point))});`);
         }
         return values.join("\n");
     }
@@ -79,13 +79,13 @@ function generate_vec_test_suite(name, fields, T) {
         },
         {
             cop: "scale",
-            c_arg_list: "a, b[0]",
+            c_arg_list: "a, b.x",
             op_type1: name,
             op_type2: "float",
-            op: "*",
-            op_expr: "a * b[0]",
-            op_inv: "*",
-            op_inv_expr: "a[0] * b",
+            //op: "*",
+            op_expr: "a * b.x",
+            // op_inv: "*",
+            op_inv_expr: "a.x * b",
             _eval: (a, b, i) => a[i] * b[0],
             _eval_inv: (a, b, i) => a[0] * b[i],
             binary: true
@@ -108,36 +108,36 @@ function generate_vec_test_suite(name, fields, T) {
         }
         if (cop) {
             simple_tests_code.push(
-                `TEST_CASE("${name}_${cop}") {
-${a()}
-${b()}
-    ${name_t} r = ${cop}_${name}(${arg_list});
+                `\t\tIT("has ${cop}") {
+\t\t\t${a()}
+\t\t\t${b()}
+\t\t\t${name_t} r = ${cop}_${name}(${arg_list});
 ${checks(simple_test._eval)}
-}`);
+\t\t}`);
         }
         if (op) {
-            simple_tests_code.push(`TEST_CASE("${op_type1} ${op_inv} ${op_type2}") {
-${a()}
-${b()}
-    ${name_t} r = ${simple_test.op_expr ?? (simple_test.binary ? "a " + op + " b" : op + "a")};
+            simple_tests_code.push(`\t\tIT("has ${op_type1} ${op_inv} ${op_type2}") {
+\t\t\t${a()}
+\t\t\t${b()}
+\t\t\t${name_t} r = ${simple_test.op_expr ?? (simple_test.binary ? "a " + op + " b" : op + "a")};
 ${checks(simple_test._eval)}
-}`);
+\t\t}`);
         }
         if (op_inv) {
-            simple_tests_code.push(`TEST_CASE("${op_type2} ${op_inv} ${op_type1}") {
-${a()}
-${b()}
-    ${name_t} r = ${simple_test.op_inv_expr ?? "b " + op_inv + " a"};
+            simple_tests_code.push(`\t\tIT("has ${op_type2} ${op_inv} ${op_type1}") {
+\t\t\t${a()}
+\t\t\t${b()}
+\t\t\t${name_t} r = ${simple_test.op_inv_expr ?? "b " + op_inv + " a"};
 ${checks(simple_test._eval_inv)}
-}`);
+\t\t}`);
         }
     }
 
-    return `TEST_SUITE_BEGIN("${name}");
+    return `\tDESCRIBE(${name}) {
 
 ${simple_tests_code.join("\n\n")}
 
-TEST_SUITE_END();
+\t}
 `;
 }
 
@@ -147,6 +147,7 @@ let code = `
 
 #include "math_test_common.h"
 
+SUITE(vec_math) {
 `;
 code += generate_vec_test_suite("vec2", ["x", "y"], "float");
 code += generate_vec_test_suite("vec3", ["x", "y", "z"], "float");
@@ -154,6 +155,8 @@ code += generate_vec_test_suite("vec4", ["x", "y", "z", "w"], "float");
 // code += generate_vec_test_suite("ivec2", ["x", "y"], "int");
 // code += generate_vec_test_suite("ivec3", ["x", "y", "z"], "int");
 // code += generate_vec_test_suite("ivec4", ["x", "y", "z", "w"], "int");
-code += "#endif // MATH_VEC_TEST_H\n";
+code += `}
+#endif // MATH_VEC_TEST_H
+`;
 
-require("fs").writeFileSync("test/math/math_vec_test.h", code);
+require("fs").writeFileSync("test/math/math_vec_test.c", code);

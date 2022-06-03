@@ -7,6 +7,7 @@
 // - https://github.com/felselva/mathc
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <ek/assert.h>
 #include <math.h>
 

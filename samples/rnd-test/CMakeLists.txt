@@ -20,7 +20,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC src)
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::graphics
-        PUBLIC ekx::audio
         PUBLIC ekx::std
         PUBLIC ekx::app
         )

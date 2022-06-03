@@ -91,19 +91,12 @@ ek_shader ek_shader_make(const sg_shader_desc* desc);
 struct res_shader {
     ek_shader data[16];
     string_hash_t names[16];
-    uint16_t name_to_id[16];
     rr_man_t rr;
 };
 
-enum {
-    RES_IMAGE_NAME_MAX_SIZE = 16,
-    RES_IMAGE_MAX_NAMES = 8,
-};
-
 struct res_image {
+    string_hash_t names[16];
     sg_image data[16];
-    string_hash_t names[RES_IMAGE_MAX_NAMES];
-    uint16_t name_to_id[RES_IMAGE_MAX_NAMES];
     rr_man_t rr;
 };
 

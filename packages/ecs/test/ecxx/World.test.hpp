@@ -1,27 +1,28 @@
-#include <doctest.h>
+#include <unit.h>
 
 #include <ecx/ecx.hpp>
 #include "common/components.hpp"
 
 using namespace ecs;
 
-TEST_CASE("world, basic") {
-    // TODO:
-    ecx_setup();
+SUITE(ecs) {
+    IT("world, basic") {
+        // TODO:
+        ecx_setup();
 
-    entity_t e[4] = {0, 1, 2, 3};
-    e[1] = create_entity();
-    REQUIRE_EQ(e[1].id, 1);
-    REQUIRE_EQ(e[2].id, 2);
-    REQUIRE_EQ(e[3].id, 3);
+        entity_t e[4] = {0, 1, 2, 3};
+        e[1] = create_entity();
+        CHECK_EQ(e[1].id, 1);
+        CHECK_EQ(e[2].id, 2);
+        CHECK_EQ(e[3].id, 3);
 
-    ecx_shutdown();
-}
+        ecx_shutdown();
+    }
 
-TEST_CASE("sparse_vector, basic") {
-    ecx_setup();
+    IT("sparse_vector, basic") {
+        ecx_setup();
 
-    // TODO:
+        // TODO:
 //    auto* eth = &w.maps[0];
 //    REQUIRE_EQ(sparse_array_get(eth, 2), 0);
 //    REQUIRE_EQ(sparse_array_get(eth, 3), 0);
@@ -52,11 +53,11 @@ TEST_CASE("sparse_vector, basic") {
 //    REQUIRE_EQ(sparse_array_get(eth, 4), 0);
 //    REQUIRE_EQ(sparse_array_get(eth, 5), 0);
 
-    ecx_shutdown();
-}
+        ecx_shutdown();
+    }
 
 
-TEST_CASE("view, each") {
+    IT("view, each") {
 //    world& w = world::the;
 //    w.create<position_t, motion_t>();
 //    int i = 0;
@@ -66,9 +67,9 @@ TEST_CASE("view, each") {
 //    REQUIRE_EQ(i, 1);
 //
 //    w.clear();
-}
+    }
 
-TEST_CASE("view, locking") {
+    IT("view, locking") {
 //    world& w = world::the;
 //    w.create<position_t, motion_t, value_t>();
 //    w.create<position_t, motion_t, value_t>();
@@ -114,9 +115,9 @@ TEST_CASE("view, locking") {
 //    REQUIRE_EQ(view_count, 5 + 1);
 //
 //    w.clear();
-}
+    }
 
-TEST_CASE("view, min_to_max") {
+    IT("view, min_to_max") {
 //    world& w = world::the;
 //    uint32_t values_count = 0u;
 //    for (uint32_t i = 0; i < 100; ++i) {
@@ -138,10 +139,10 @@ TEST_CASE("view, min_to_max") {
 //
 //    REQUIRE_EQ(view_count, values_count);
 //    w.clear();
-}
+    }
 
 
-TEST_CASE("components, add") {
+    IT("components, add") {
 //        create_entity();
 //        w.registerComponent<value_t>();
 //        w.registerComponent<position_t>();
@@ -170,47 +171,49 @@ TEST_CASE("components, add") {
 //        REQUIRE(w.has<position_t>(e));
 //
 //        w.shutdown();
-}
+    }
 
-TEST_CASE("components, remove") {
-    ecx_setup();
-    ECX_COMPONENT(value_t);
+    IT("components, remove") {
+        ecx_setup();
+        ECX_COMPONENT(value_t);
 
-    entity_t e = create_entity();
+        entity_t e = create_entity();
 
-    ecs::add<value_t>(e).value = 1;
-    REQUIRE_EQ(ecs::get<value_t>(e).value, 1);
-    REQUIRE(ecs::has<value_t>(e));
-    ecs::remove<value_t>(e);
-    REQUIRE_FALSE(ecs::has<value_t>(e));
-    destroy_entity(e);
+        ecs::add<value_t>(e).value = 1;
+        CHECK_EQ(ecs::get<value_t>(e).value, 1);
+        CHECK(ecs::has<value_t>(e));
+        ecs::remove<value_t>(e);
+        CHECK_FALSE(ecs::has<value_t>(e));
+        destroy_entity(e);
 
-    ecx_shutdown();
-}
+        ecx_shutdown();
+    }
 
-TEST_CASE("components, abstract_clear") {
-    ecx_setup();
-    ECX_COMPONENT(value_t);
-    ECX_COMPONENT(position_t);
+    IT("components, abstract_clear") {
+        ecx_setup();
+        ECX_COMPONENT(value_t);
+        ECX_COMPONENT(position_t);
 
-    entity_t e = create_entity();
+        entity_t e = create_entity();
 
-    ecs::add<value_t>(e).value = 1;
-    ecs::add<position_t>(e) = {1.0f, 1.0f};
-    REQUIRE(ecs::has<value_t>(e));
-    REQUIRE(ecs::has<position_t>(e));
-    destroy_entity(e);
-    REQUIRE_FALSE(is_entity(e));
-    REQUIRE_FALSE(ecs::has<value_t>(e));
-    REQUIRE_FALSE(ecs::has<position_t>(e));
+        ecs::add<value_t>(e).value = 1;
+        ecs::add<position_t>(e) = {1.0f, 1.0f};
+        CHECK(ecs::has<value_t>(e));
+        CHECK(ecs::has<position_t>(e));
+        destroy_entity(e);
+        CHECK_FALSE(is_entity(e));
+        // will assert `e` is not valid entity
+        //REQUIRE_FALSE(ecs::has<value_t>(e));
+        //REQUIRE_FALSE(ecs::has<position_t>(e));
 
-    ecx_shutdown();
-}
+        ecx_shutdown();
+    }
 
-constexpr Entity null{};
-constexpr Entity nullRef{};
+    constexpr Entity null{};
+    constexpr Entity nullRef{};
 
-TEST_CASE("entity_value, basic") {
-    REQUIRE_EQ(null.idx, 0u);
-    REQUIRE_EQ(nullRef.gen, 0u);
+    IT("entity_value, basic") {
+        CHECK_EQ(null.idx, 0u);
+        CHECK_EQ(nullRef.gen, 0u);
+    }
 }

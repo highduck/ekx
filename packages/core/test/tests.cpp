@@ -1,6 +1,5 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-//#define DOCTEST_CONFIG_NO_EXCEPTIONS
-#include <doctest.h>
+#define UNIT_MAIN
+#include <unit.h>
 
 #include <ek/serialize/serialize.test.hpp>
 #include "Path.test.hpp"

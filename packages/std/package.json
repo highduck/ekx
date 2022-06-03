@@ -4,7 +4,7 @@
   "scripts": {
     "postinstall": "cmake-build || exit 0",
     "generate": "node scripts/gen_math.js",
-    "_test:native": "node scripts/run-test-native.js"
+    "test:native": "node scripts/run-test-native.js"
   },
   "publishConfig": {
     "access": "public"
@@ -17,9 +17,9 @@
   ],
   "license": "ISC",
   "dependencies": {
-    "@ekx/doctest": "0.0.4",
     "@ekx/sokol": "0.0.14",
     "@ekx/stb": "0.0.8",
+    "@ekx/unit": "0.0.6",
     "cmake-build": "0.0.6"
   }
 }
