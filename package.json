@@ -15,8 +15,8 @@
     "postinstall": "wsrun -m -e -t postinstall"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.23.0",
     "cmake-build": "0.0.6",
-    "@changesets/cli": "^2.22.0",
     "wsrun": "^5.2.4"
   },
   "workspaces": {
