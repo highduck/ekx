@@ -43,7 +43,7 @@ FT_BEGIN_HEADER
    *   objects, as well as caching information like character maps and glyph
    *   images while limiting their maximum memory usage.
    *
-   *   Note that all types and functions canvas_begin with the `FTC_` prefix.
+   *   Note that all types and functions begin with the `FTC_` prefix.
    *
    *   The cache is highly portable and thus doesn't know anything about the
    *   fonts installed on your system, or how to access them.  This implies

@@ -3,7 +3,7 @@ const {downloadFiles} = require('@ekx/cli-utils');
 async function run() {
     console.info("box2d");
     await downloadFiles({
-        srcBaseUrl: "https://github.com/erincatto/box2d/raw/master",
+        srcBaseUrl: "https://github.com/erincatto/box2d/raw/main",
         destPath: ".",
         fileList: [
             // Source files

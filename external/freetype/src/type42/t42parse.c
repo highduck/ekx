@@ -565,7 +565,7 @@
 
     if ( parser->root.cursor >= limit || *parser->root.cursor++ != '[' )
     {
-      FT_ERROR(( "t42_parse_sfnts: can't find canvas_begin of sfnts vector\n" ));
+      FT_ERROR(( "t42_parse_sfnts: can't find begin of sfnts vector\n" ));
       error = FT_THROW( Invalid_File_Format );
       goto Fail;
     }

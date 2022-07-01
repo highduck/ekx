@@ -44,7 +44,6 @@ enum b2JointType
 	e_wheelJoint,
     e_weldJoint,
 	e_frictionJoint,
-	e_ropeJoint,
 	e_motorJoint
 };
 
@@ -138,13 +137,14 @@ public:
 
 	/// Get the user data pointer.
 	b2JointUserData& GetUserData();
+	const b2JointUserData& GetUserData() const;
 
 	/// Short-cut function to determine if either body is enabled.
 	bool IsEnabled() const;
 
 	/// Get collide connected.
 	/// Note: modifying the collide connect flag won't work correctly because
-	/// the flag is only checked when fixture AABBs canvas_begin to overlap.
+	/// the flag is only checked when fixture AABBs begin to overlap.
 	bool GetCollideConnected() const;
 
 	/// Dump this joint to the log file.
@@ -216,6 +216,11 @@ inline const b2Joint* b2Joint::GetNext() const
 }
 
 inline b2JointUserData& b2Joint::GetUserData()
+{
+	return m_userData;
+}
+
+inline const b2JointUserData& b2Joint::GetUserData() const
 {
 	return m_userData;
 }

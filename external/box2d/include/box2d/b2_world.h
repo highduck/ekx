@@ -87,7 +87,7 @@ public:
 	/// @warning This function is locked during callbacks.
 	b2Joint* CreateJoint(const b2JointDef* def);
 
-	/// Destroy a joint. This may cause the connected bodies to canvas_begin colliding.
+	/// Destroy a joint. This may cause the connected bodies to begin colliding.
 	/// @warning This function is locked during callbacks.
 	void DestroyJoint(b2Joint* joint);
 

@@ -132,7 +132,7 @@
  *
  * The PDF backend uses one or more rectangles to define the clickable
  * area of the link.  By default cairo will use the extents of the
- * drawing operations enclosed by the canvas_begin/end link tags to define the
+ * drawing operations enclosed by the begin/end link tags to define the
  * clickable area. In some cases, such as a link split across two
  * lines, the default rectangle is undesirable.
  *
@@ -245,13 +245,13 @@
  * @x: [optional] A float specifying the x coordinate of destination
  *                 position on this page. If not specified the default
  *                 x coordinate is the left side of the extents of the
- *                 operations enclosed by the %CAIRO_TAG_DEST canvas_begin/end tags. If
+ *                 operations enclosed by the %CAIRO_TAG_DEST begin/end tags. If
  *                 no operations are enclosed, the x coordidate is 0.
  *
  * @y: [optional] A float specifying the y coordinate of destination
  *                 position on this page. If not specified the default
  *                 y coordinate is the top of the extents of the
- *                 operations enclosed by the %CAIRO_TAG_DEST canvas_begin/end tags. If
+ *                 operations enclosed by the %CAIRO_TAG_DEST begin/end tags. If
  *                 no operations are enclosed, the y coordidate is 0.
  *
  * @internal: A boolean that if true, the destination name may be

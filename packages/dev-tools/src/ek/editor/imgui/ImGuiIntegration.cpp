@@ -27,12 +27,12 @@ void reset_keys() {
 ImGuiIntegration::ImGuiIntegration() {
     IMGUI_CHECKVERSION();
 
-    sg_imgui_init(&sokol_gfx_gui_state);
+    const sg_imgui_desc_t imgui_desc = {0};
+    sg_imgui_init(&sokol_gfx_gui_state, &imgui_desc);
 
     simgui_desc_t desc{};
     desc.depth_format = SG_PIXELFORMAT_DEPTH_STENCIL;
     desc.sample_count = 0;
-    desc.dpi_scale = dpiScale;
     desc.ini_filename = "imgui.ini";
     desc.no_default_font = true;
     simgui_setup(&desc);
@@ -288,7 +288,12 @@ void ImGuiIntegration::begin_frame(float dt) {
     auto h = (int)ek_app.viewport.height;
     if (w > 0 && h > 0) {
         update_mouse_cursor();
-        simgui_new_frame(w, h, dt);
+        simgui_frame_desc_t desc;
+        desc.width = w;
+        desc.height = h;
+        desc.delta_time = dt;
+        desc.dpi_scale = dpiScale;
+        simgui_new_frame(&desc);
     }
 }
 
