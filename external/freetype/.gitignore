@@ -1,5 +1,6 @@
 node_modules/
 build/
 cmake-*/
-_dist/
+cache/
+tmp/
 npm.cmake

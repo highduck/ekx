@@ -6,7 +6,7 @@ function setup(project) {
     project.addModule({
         name: "dev-fonts",
         path: __dirname,
-        cpp: ["src"]
+        cpp_include: ["include"]
     });
 }
 
