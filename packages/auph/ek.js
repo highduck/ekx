@@ -2,10 +2,9 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export async function setup(project) {
     project.addModule({
         name: "auph",
-        path: __dirname,
         cpp_include: "include",
         android: {
             cpp_include: [
@@ -32,8 +31,6 @@ function setup(project) {
         linux: {}
     });
 
-    project.importModule("@ekx/stb", __dirname);
-    project.importModule("@ekx/dr-libs", __dirname);
+    await project.importModule("@ekx/stb");
+    await project.importModule("@ekx/dr-libs");
 }
-
-module.exports = setup;

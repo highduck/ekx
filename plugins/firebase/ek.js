@@ -1,11 +1,10 @@
-const path = require("path");
-const fs = require("fs");
+import {path, fs} from "ekx/deps.ts";
 
 /**
  *
  * @param {Project} project
  */
-function setup(project) {
+export async function setup(project) {
     project.onProjectGenerated.push(() => {
         if (project.current_target === "android") {
             if (!project.android.googleServicesConfigDir) {
@@ -15,9 +14,9 @@ function setup(project) {
             const configPath = path.join(path.resolve(project.projectPath, project.android.googleServicesConfigDir), configFile);
             try {
                 // CWD is project generated path here
-                fs.copyFileSync(configPath, path.join("app", configFile))
+                Deno.copyFileSync(configPath, path.join("app", configFile))
             } catch (err) {
-                console.error("missing google-service config", configPath);
+                console.error("missing google-service config", configPath, err);
             }
         } else if (project.current_target === "ios") {
             if (!project.ios.googleServicesConfigDir) {
@@ -27,9 +26,9 @@ function setup(project) {
             const configPath = path.join(path.resolve(project.projectPath, project.android.googleServicesConfigDir), configFile);
             try {
                 // CWD is project generated path here
-                fs.copyFileSync(configPath, configFile)
+                Deno.copyFileSync(configPath, configFile)
             } catch (err) {
-                console.error("missing google-service config", configPath);
+                console.error("missing google-service config", configPath, err);
             }
         } else if (project.current_target === "web") {
             if (!project.web.firebaseConfig) {
@@ -56,7 +55,6 @@ function setup(project) {
 
     project.addModule({
         name: "plugin-firebase",
-        path: __dirname,
         cpp: "src",
         android: {
             // TODO: fastlane
@@ -66,15 +64,15 @@ function setup(project) {
             // Import the BoM for the Firebase platform
             // Check Release Notes for updates: https://firebase.google.com/support/release-notes/android
             android_buildScriptDependency: [
-                `classpath 'com.google.gms:google-services:4.3.10'`,
-                `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.8.1'`
+                `classpath 'com.google.gms:google-services:4.3.13'`,
+                `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.1'`
             ],
             android_gradleApplyPlugin: ['com.google.gms.google-services', 'com.google.firebase.crashlytics'],
             android_gradleConfigRelease: `firebaseCrashlytics {
                 nativeSymbolUploadEnabled true
             }`,
             android_dependency: [
-                `implementation platform('com.google.firebase:firebase-bom:29.3.1')`,
+                `implementation platform('com.google.firebase:firebase-bom:30.2.0')`,
                 `implementation 'com.google.firebase:firebase-crashlytics-ndk'`,
                 `implementation 'com.google.firebase:firebase-analytics'`
             ]
@@ -108,7 +106,5 @@ app_target.add_build_phase(shell)`
         }
     });
 
-    project.importModule("@ekx/app", __dirname);
+    await project.importModule("@ekx/app");
 }
-
-module.exports = setup;

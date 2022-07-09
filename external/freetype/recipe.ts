@@ -1,16 +1,13 @@
-import * as path from "https://deno.land/std/path/mod.ts";
-import * as fs from "https://deno.land/std/fs/mod.ts";
-import {downloadAndUnpackArtifact, downloadCheck, untar} from "../scripts/download.ts";
-import {copyFolderRecursive, getModuleDir, rm} from "../scripts/utils.ts";
-import {buildMatrix} from "../scripts/cmake.ts";
+import {path, fs} from "ekx/deps.ts"
+import {downloadCheck, untar} from "ekx/utils/mod.ts"
+import {copyFolderRecursive, getModuleDir, rm} from "ekx/utils/mod.ts"
+import {buildMatrix} from "ekx/cmake/mod.ts"
 
 const __dirname = getModuleDir(import.meta);
 const cacheDir = path.join(__dirname, "cache");
 const tempDir = path.join(__dirname, "tmp");
 
 async function clean() {
-    await rm(tempDir);
-    await rm(path.join(__dirname, "build"));
     await rm(path.join(__dirname, "include"));
     await rm(path.join(__dirname, "src"));
 }
@@ -40,6 +37,7 @@ async function fetch() {
     await removeFilesGlob("src/tools");
     await removeFilesGlob("src/**/*.mk");
     await removeFilesGlob("src/**/README");
+    await rm(tempDir);
 }
 
 async function test() {

@@ -2,8 +2,6 @@
   "name": "@ekx/imgui",
   "version": "0.0.24",
   "scripts": {
-    "recipe:build": "node recipe/package.js",
-    "package:test": "node recipe/test-package.js",
     "postinstall": "cmake-build || exit 0"
   },
   "license": "ISC",
@@ -12,11 +10,9 @@
   },
   "files": [
     "CMakeLists.txt",
-    "src"
+    "src",
+    "ek.js"
   ],
-  "devDependencies": {
-    "@ekx/cli-utils": "0.0.16"
-  },
   "dependencies": {
     "@ekx/freetype": "0.0.11",
     "@ekx/stb": "0.0.8",

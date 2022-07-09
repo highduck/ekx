@@ -2,10 +2,9 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export async function setup(project) {
     project.addModule({
         name: "std",
-        path: __dirname,
         cpp: "src",
         cpp_include: "include",
         web: {
@@ -13,8 +12,6 @@ function setup(project) {
             //cpp_lib: "--import-memory"
         }
     });
-    project.importModule("@ekx/stb", __dirname);
-    project.importModule("@ekx/sokol", __dirname);
+    await project.importModule("@ekx/stb");
+    await project.importModule("@ekx/sokol");
 }
-
-module.exports = setup;

@@ -1,10 +1,6 @@
 {
   "name": "@ekx/box2d",
   "version": "0.0.5",
-  "scripts": {
-    "recipe:build": "node recipe/package.js",
-    "package:test": "node recipe/test-package.js"
-  },
   "license": "ISC",
   "publishConfig": {
     "access": "public"
@@ -14,9 +10,5 @@
     "include",
     "src",
     "ek.js"
-  ],
-  "devDependencies": {
-    "@ekx/cli-utils": "0.0.16"
-  },
-  "dependencies": {}
+  ]
 }

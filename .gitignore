@@ -1,4 +1,5 @@
-./.idea
+.idea/
+.vscode/
 cmake-build-*/
 yarn-error.log
 
@@ -12,3 +13,5 @@ npm.cmake
 generated/
 build/
 export/
+
+RECOVER_*.fla

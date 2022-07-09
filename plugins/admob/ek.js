@@ -2,7 +2,7 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export async function setup(project) {
     if (project.current_target === "android") {
         if (!project.android.admob_app_id) {
             console.error("please set android.admob_app_id !!!");
@@ -11,12 +11,11 @@ function setup(project) {
 
     project.addModule({
         name: "plugin-admob",
-        path: __dirname,
         cpp: "src",
         cpp_include: "include",
         android: {
             android_java: "java",
-            android_dependency: `implementation 'com.google.android.gms:play-services-ads-lite:20.6.0'`,
+            android_dependency: `implementation 'com.google.android.gms:play-services-ads-lite:21.0.0'`,
             android_manifestApplication: [
                 `<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id"/>`,
                 //`<meta-data android:name="com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT" android:value="true"/>`
@@ -85,8 +84,6 @@ function setup(project) {
         }
     });
 
-    project.importModule("@ekx/plugin-firebase", __dirname);
-    project.importModule("@ekx/scenex", __dirname);
+    await project.importModule("@ekx/plugin-firebase");
+    await project.importModule("@ekx/scenex");
 }
-
-module.exports = setup;

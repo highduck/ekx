@@ -1,10 +1,6 @@
 {
   "name": "@ekx/msgpack",
   "version": "0.0.2",
-  "scripts": {
-    "recipe:build": "node recipe/package.js",
-    "package:test": "node recipe/test-package.js"
-  },
   "license": "ISC",
   "publishConfig": {
     "access": "public"
@@ -14,9 +10,6 @@
     "include",
     "ek.js"
   ],
-  "devDependencies": {
-    "@ekx/cli-utils": "0.0.16"
-  },
   "dependencies": {
     "@msgpack/msgpack": "^2.7.2"
   }

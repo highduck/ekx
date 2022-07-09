@@ -1,10 +1,6 @@
 {
   "name": "@ekx/freetype",
   "version": "0.0.11",
-  "scripts": {
-    "recipe:build": "node recipe/package.js",
-    "package:test": "node recipe/test-package.js"
-  },
   "license": "ISC",
   "publishConfig": {
     "access": "public"
@@ -12,11 +8,7 @@
   "files": [
     "CMakeLists.txt",
     "src",
-    "include"
-  ],
-  "devDependencies": {
-    "@ekx/cli-utils": "0.0.16",
-    "rimraf": "^3.0.2"
-  },
-  "dependencies": {}
+    "include",
+    "ek.js"
+  ]
 }

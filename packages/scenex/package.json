@@ -22,7 +22,6 @@
     "@ekx/res": "0.1.12"
   },
   "devDependencies": {
-    "rimraf": "^3.0.2",
     "@ekx/sokol-shdc": "0.0.5"
   },
   "files": [

@@ -1,10 +1,6 @@
 {
   "name": "@ekx/stb",
   "version": "0.0.8",
-  "scripts": {
-    "recipe:build": "node recipe/package.js",
-    "package:test": "node recipe/test-package.js"
-  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -16,9 +12,5 @@
     "CHANGELOG.md",
     "include",
     "ek.js"
-  ],
-  "devDependencies": {
-    "@ekx/cli-utils": "0.0.16"
-  },
-  "dependencies": {}
+  ]
 }

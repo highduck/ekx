@@ -2,10 +2,9 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export async function setup(project) {
     project.addModule({
         name: "graphics",
-        path: __dirname,
         cpp: "src",
         apple: {
             cpp_flags: {
@@ -16,9 +15,7 @@ function setup(project) {
             },
         }
     });
-    project.importModule("@ekx/core", __dirname);
-    project.importModule("@ekx/app", __dirname);
-    project.importModule("@ekx/sokol", __dirname);
+    await project.importModule("@ekx/core");
+    await project.importModule("@ekx/app");
+    await project.importModule("@ekx/sokol");
 }
-
-module.exports = setup;

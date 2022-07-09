@@ -2,14 +2,13 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export function setup(project) {
     project.addModule({
         name: "plugin-billing",
-        path: __dirname,
         cpp: "src",
         android: {
             android_java: "java",
-            android_dependency: `implementation 'com.android.billingclient:billing:4.1.0'`
+            android_dependency: `implementation 'com.android.billingclient:billing:5.0.0'`
         },
         ios: {
             xcode_capability: "com.apple.InAppPurchase",
@@ -23,5 +22,3 @@ function setup(project) {
         }
     });
 }
-
-module.exports = setup;

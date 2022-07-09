@@ -2,13 +2,10 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export async function setup(project) {
     project.addModule({
         name: "ecs",
-        path: __dirname,
         cpp: "src"
     });
-    project.importModule("@ekx/core", __dirname);
+    await project.importModule("@ekx/core");
 }
-
-module.exports = setup;

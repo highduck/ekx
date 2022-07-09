@@ -2,14 +2,11 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+async function setup(project) {
     project.addModule({
         name: "imgui",
-        path: __dirname,
         cpp: ["src"]
     });
-    project.importModule("@ekx/freetype", __dirname);
-    project.importModule("@ekx/stb", __dirname);
+    await project.importModule("@ekx/freetype");
+    await project.importModule("@ekx/stb");
 }
-
-module.exports = setup;

@@ -1,7 +1,6 @@
-import * as path from "https://deno.land/std/path/mod.ts";
-import {downloadFiles} from "../scripts/download.ts";
-import {getModuleDir, rm} from "../scripts/utils.ts";
-import {buildMatrix} from "../scripts/cmake.ts";
+import {path} from "ekx/deps.ts"
+import {downloadFiles, getModuleDir, rm} from "ekx/utils/mod.ts"
+import {buildMatrix} from "ekx/cmake/mod.ts"
 
 const __dirname = getModuleDir(import.meta);
 

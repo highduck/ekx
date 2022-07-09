@@ -1229,7 +1229,7 @@ void Locator_Time(ImPlotTicker& ticker, const ImPlotRange& range, float pixels, 
                 ftd.Time = t1; ftd.Spec = fmt0;
                 ticker.AddTick(t1.ToDouble(), true, 0, true, Formatter_Time, &ftd);
                 // major level 1 tick
-                ftd.Time = t1; ftd.Spec = last_major_offset < 0 == NULL ? fmtf : fmt1;
+                ftd.Time = t1; ftd.Spec = last_major_offset < 0 ? fmtf : fmt1;
                 ImPlotTick& tick_maj = ticker.AddTick(t1.ToDouble(), true, 1, true, Formatter_Time, &ftd);
                 const char* this_major = ticker.GetText(tick_maj);
                 if (last_major_offset >= 0 && TimeLabelSame(ticker.TextBuffer.Buf.Data + last_major_offset, this_major))
@@ -1563,9 +1563,21 @@ static inline double RoundAxisValue(const ImPlotAxis& axis, double value) {
 }
 
 void LabelAxisValue(const ImPlotAxis& axis, double value, char* buff, int size, bool round) {
-    if (round)
-        value = RoundAxisValue(axis, value);
-    axis.Formatter(value, buff, size, axis.FormatterData);
+    ImPlotContext& gp = *GImPlot;
+    // TODO: We shouldn't explicitly check that the axis is Time here. Ideally,
+    // Formatter_Time would handle the formatting for us, but the code below
+    // needs additional arguments which are not currently available in ImPlotFormatter
+    if (axis.Locator == Locator_Time) {
+        ImPlotTimeUnit unit = axis.Vertical
+                            ? GetUnitForRange(axis.Range.Size() / (gp.CurrentPlot->PlotRect.GetHeight() / 100)) // TODO: magic value!
+                            : GetUnitForRange(axis.Range.Size() / (gp.CurrentPlot->PlotRect.GetWidth() / 100)); // TODO: magic value!
+        FormatDateTime(ImPlotTime::FromDouble(value), buff, size, GetDateTimeFmt(TimeFormatMouseCursor, unit));
+    }
+    else {
+        if (round)
+            value = RoundAxisValue(axis, value);
+        axis.Formatter(value, buff, size, axis.FormatterData);
+    }
 }
 
 void UpdateAxisColors(ImPlotAxis& axis) {
@@ -2628,7 +2640,7 @@ void SetupFinish() {
         ImPlotAxis& ax = plot.XAxis(i);
         if (!ax.Enabled)
             continue;
-        if ((ax.Hovered || ax.Held) && !plot.Held)
+        if ((ax.Hovered || ax.Held) && !plot.Held && !ImHasFlag(ax.Flags, ImPlotAxisFlags_NoHighlight))
             DrawList.AddRectFilled(ax.HoverRect.Min, ax.HoverRect.Max, ax.Held ? ax.ColorAct : ax.ColorHov);
         else if (ax.ColorHiLi != IM_COL32_BLACK_TRANS) {
             DrawList.AddRectFilled(ax.HoverRect.Min, ax.HoverRect.Max, ax.ColorHiLi);
@@ -2667,7 +2679,7 @@ void SetupFinish() {
         ImPlotAxis& ax = plot.YAxis(i);
         if (!ax.Enabled)
             continue;
-        if ((ax.Hovered || ax.Held) && !plot.Held)
+        if ((ax.Hovered || ax.Held) && !plot.Held && !ImHasFlag(ax.Flags, ImPlotAxisFlags_NoHighlight))
             DrawList.AddRectFilled(ax.HoverRect.Min, ax.HoverRect.Max, ax.Held ? ax.ColorAct : ax.ColorHov);
         else if (ax.ColorHiLi != IM_COL32_BLACK_TRANS) {
             DrawList.AddRectFilled(ax.HoverRect.Min, ax.HoverRect.Max, ax.ColorHiLi);
@@ -2927,6 +2939,8 @@ void EndPlot() {
         trigger_rect.Expand(-10);
         for (int i = 0; i < IMPLOT_NUM_X_AXES; ++i) {
             ImPlotAxis& x_axis = plot.XAxis(i);
+            if (ImHasFlag(x_axis.Flags, ImPlotAxisFlags_NoSideSwitch))
+                continue;
             if (x_axis.Held && plot.PlotRect.Contains(mouse_pos)) {
                 const bool opp = ImHasFlag(x_axis.Flags, ImPlotAxisFlags_Opposite);
                 if (!opp) {
@@ -2949,6 +2963,8 @@ void EndPlot() {
         }
         for (int i = 0; i < IMPLOT_NUM_Y_AXES; ++i) {
             ImPlotAxis& y_axis = plot.YAxis(i);
+            if (ImHasFlag(y_axis.Flags, ImPlotAxisFlags_NoSideSwitch))
+                continue;
             if (y_axis.Held && plot.PlotRect.Contains(mouse_pos)) {
                 const bool opp = ImHasFlag(y_axis.Flags, ImPlotAxisFlags_Opposite);
                 if (!opp) {

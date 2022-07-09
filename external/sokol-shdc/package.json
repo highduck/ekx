@@ -4,10 +4,6 @@
   "bin": {
     "sokol-shdc": "./sokol-shdc.js"
   },
-  "scripts": {
-    "recipe:build": "node recipe/package.js",
-    "package:test": "node recipe/test-package.js"
-  },
   "license": "ISC",
   "publishConfig": {
     "access": "public"
@@ -15,10 +11,5 @@
   "files": [
     "bin",
     "sokol-shdc.js"
-  ],
-  "devDependencies": {
-    "@ekx/cli-utils": "0.0.16",
-    "cross-spawn": "^7.0.3"
-  },
-  "dependencies": {}
+  ]
 }

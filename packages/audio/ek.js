@@ -2,10 +2,9 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export async function setup(project) {
     project.addModule({
         name: "audio",
-        path: __dirname,
         cpp: "src",
         apple: {
             cpp_flags: {
@@ -24,9 +23,7 @@ function setup(project) {
             },
         }
     });
-    project.importModule("@ekx/auph", __dirname);
-    project.importModule("@ekx/core", __dirname);
-    project.importModule("@ekx/app", __dirname);
+    await project.importModule("@ekx/auph");
+    await project.importModule("@ekx/core");
+    await project.importModule("@ekx/app");
 }
-
-module.exports = setup;

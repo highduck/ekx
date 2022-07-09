@@ -2,13 +2,10 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export async function setup(project) {
     project.addModule({
         name: "physics-arcade",
-        path: __dirname,
         cpp: "src"
     });
-    project.importModule("@ekx/ecs", __dirname);
+    await project.importModule("@ekx/ecs");
 }
-
-module.exports = setup;

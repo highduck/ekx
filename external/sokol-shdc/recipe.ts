@@ -1,7 +1,5 @@
-import * as path from "https://deno.land/std/path/mod.ts";
-import * as fs from "https://deno.land/std/fs/mod.ts";
-import {downloadFiles} from "../scripts/download.ts";
-import {getModuleDir, rm} from "../scripts/utils.ts";
+import {path, fs} from "ekx/deps.ts"
+import {downloadFiles, getModuleDir, rm} from "ekx/utils/mod.ts"
 
 const __dirname = getModuleDir(import.meta);
 

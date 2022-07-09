@@ -35,6 +35,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
       - uses: msys2/setup-msys2@v2
         if: runner.os == 'Windows'
         with:

@@ -12,12 +12,8 @@
   },
   "dependencies": {
     "@ekx/graphics": "0.1.12",
-    "@ekx/cli": "0.1.16",
     "cmake-build": "0.0.6",
     "@ekx/quickjs": "0.0.1",
     "@ekx/res": "0.1.12"
-  },
-  "devDependencies": {
-    "rimraf": "^3.0.2"
   }
 }

@@ -3,19 +3,15 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export async function setup(project) {
     project.addModule({
         name: "appbox",
-        path: __dirname,
         cpp: "src"
     });
 
-    project.importModule("@ekx/scenex", __dirname);
-
-    project.importModule("@ekx/plugin-firebase", __dirname);
-    project.importModule("@ekx/plugin-admob", __dirname);
-    project.importModule("@ekx/plugin-billing", __dirname);
-    project.importModule("@ekx/plugin-game-services", __dirname);
+    await project.importModule("@ekx/scenex");
+    await project.importModule("@ekx/plugin-firebase");
+    await project.importModule("@ekx/plugin-admob");
+    await project.importModule("@ekx/plugin-billing");
+    await project.importModule("@ekx/plugin-game-services");
 }
-
-module.exports = setup;

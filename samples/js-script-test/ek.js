@@ -1,9 +1,8 @@
-const path = require("path");
+import {path} from "ekx/deps.ts";
 
-module.exports = function (project) {
+export async function setup(project) {
     project.addModule({
         name: "js-script-test",
-        path: __dirname,
         cpp: "src",
         // cpp_lib: [
         //     "-sEXPORTED_FUNCTIONS=['_canvas_quad_color','_main']",
@@ -48,7 +47,7 @@ module.exports = function (project) {
         image: "https://play-ilj.web.app/icons/icon192.png"
     };
 
-    project.importModule("@ekx/graphics");
-    project.importModule("@ekx/quickjs");
-    project.importModule("@ekx/res");
-};
+    await project.importModule("@ekx/graphics");
+    await project.importModule("@ekx/quickjs");
+    await project.importModule("@ekx/res");
+}

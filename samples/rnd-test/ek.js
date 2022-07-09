@@ -1,9 +1,8 @@
-const path = require("path");
+import {path} from "ekx/deps.ts";
 
-module.exports = function (project) {
+export async function setup (project) {
     project.addModule({
         name: "rnd-test",
-        path: __dirname,
         cpp: "src"
     });
 
@@ -43,5 +42,5 @@ module.exports = function (project) {
         image: "https://play-ilj.web.app/icons/icon192.png"
     };
 
-    project.importModule("@ekx/graphics");
-};
+    await project.importModule("@ekx/graphics");
+}

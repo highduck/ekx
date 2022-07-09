@@ -2,10 +2,9 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export async function setup(project) {
     project.addModule({
         name: "local-storage",
-        path: __dirname,
         cpp: "src",
         cpp_include: "include",
         android: {
@@ -16,9 +15,7 @@ function setup(project) {
         }
     });
     // for base app platform
-    project.importModule("@ekx/app", __dirname);
+    await project.importModule("@ekx/app");
     // for base64 and others
-    project.importModule("@ekx/std", __dirname);
+    await project.importModule("@ekx/std");
 }
-
-module.exports = setup;

@@ -1,8 +1,7 @@
-import * as path from "https://deno.land/std/path/mod.ts";
-import * as fs from "https://deno.land/std/fs/mod.ts";
-import {downloadCheck, untar} from "../scripts/download.ts";
-import {copyFolderRecursive, getModuleDir, rm} from "../scripts/utils.ts";
-import {buildMatrix} from "../scripts/cmake.ts";
+import {path, fs} from "ekx/deps.ts"
+import {downloadCheck, untar} from "ekx/utils/mod.ts"
+import {copyFolderRecursive, getModuleDir, rm} from "ekx/utils/mod.ts"
+import {buildMatrix} from "ekx/cmake/mod.ts"
 
 const __dirname = getModuleDir(import.meta);
 const cacheDir = path.join(__dirname, "cache");

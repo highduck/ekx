@@ -2,13 +2,12 @@
  *
  * @param {Project} project
  */
-function setup(project) {
+export function setup(project) {
     project.addModule({
         name: "freetype",
-        path: __dirname,
         cpp_include: ["include", "src"],
         // TODO:
-        cppSources: [
+        cpp_sources: [
             "src/base/ftadvanc.c",
             "src/base/ftcalc.c",
             "src/base/ftcolor.c",
@@ -57,5 +56,3 @@ function setup(project) {
         ]
     });
 }
-
-module.exports = setup;
