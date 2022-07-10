@@ -1,8 +1,11 @@
-(function(){'use strict';mergeInto(LibraryManager.library, {
-    firebase_js: function(cmd) {
-        switch(cmd) {
-            case 0: return window["firebase_js"]["init"]();
-        }
-        return false;
+// web/firebase_c.js
+mergeInto(LibraryManager.library, {
+  firebase_js: function(cmd) {
+    switch (cmd) {
+      case 0:
+        return window["firebase_js"]["init"]();
     }
-});})();//# sourceMappingURL=firebase_c.js.map
+    return false;
+  }
+});
+//# sourceMappingURL=firebase_c.js.map

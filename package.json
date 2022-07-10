@@ -18,7 +18,9 @@
     "wsrun": "^5.2.4",
     "@types/xmldoc": "^1.1.6",
     "@types/plist": "^3.0.2",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "esbuild": "^0.14.48",
+    "@types/emscripten": "^1.39.6"
   },
   "dependencies": {
     "xmldoc": "^1.1.4",

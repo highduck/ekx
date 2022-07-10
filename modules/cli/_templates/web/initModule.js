@@ -35,14 +35,22 @@ function script(e) {
     })
 }
 
-Promise.all([binary("{{name}}.js?v={{{version_code}}}", 0), binary("{{name}}.wasm?v={{{version_code}}}", 1)]).then(e => {
-    Module.wasm = e[1];
-    var n = URL.createObjectURL(new Blob([e[0]], {type: "application/javascript"}));
-    script(n).then(() => {
-        URL.revokeObjectURL(n);
+// Promise.all([binary("{{name}}.js?v={{{version_code}}}", 0), binary("{{name}}.wasm?v={{{version_code}}}", 1)]).then(e => {
+//     Module.wasm = e[1];
+//     var n = URL.createObjectURL(new Blob([e[0]], {type: "application/javascript"}));
+//     script(n).then(() => {
+//         URL.revokeObjectURL(n);
+//         Module.started = true;
+//         updateStatus();
+//     })
+// });
+
+binary("{{name}}.wasm?v={{{version_code}}}").then(wasm => {
+    Module.wasm = wasm;
+    return script("{{name}}.js?v={{{version_code}}}").then(_ => {
         Module.started = true;
         updateStatus();
-    })
+    });
 })
 
 function updateStatus() {

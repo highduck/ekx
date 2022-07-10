@@ -6,8 +6,7 @@
   "types": "web/dist/types/index.d.ts",
   "scripts": {
     "postinstall": "cmake-build || exit 0",
-    "watch": "tsc -w -p web/tsconfig.json & rollup -w -c web/rollup.config.js",
-    "build": "tsc -p web/tsconfig.json && rollup -c web/rollup.config.js",
+    "build": "esbuild web/src/webaudio/index.ts --global-name=auph --bundle --sourcemap --target=chrome58,firefox57,safari11,edge16 --define:process.env.NODE_ENV=\\\"production\\\" --outfile=web/dist/emscripten/auph.js",
     "build-cmake": "node scripts/build-cmake",
     "clean": "rimraf ./build ./web/dist"
   },
@@ -24,14 +23,6 @@
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/eliasku/auph.git"
-  },
-  "devDependencies": {
-    "@rollup/plugin-replace": "^4.0.0",
-    "follow-redirects": "^1.15.1",
-    "http-server": "^14.1.1",
-    "rollup": "^2.75.7",
-    "rollup-plugin-terser": "^7.0.2",
-    "typescript": "^4.7.4"
   },
   "dependencies": {
     "@ekx/dr-libs": "0.0.4",

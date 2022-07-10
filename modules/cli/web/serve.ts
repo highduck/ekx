@@ -34,11 +34,12 @@ export async function serve(dir: string) {
             let file;
             try {
                 file = await Deno.open(path.join(dir, filepath), {read: true});
-            } catch {
+            } catch(err) {
+                console.error("Deno.open failed:", err);
                 // If the file cannot be opened, return a "404 Not Found" response
                 const notFoundResponse = new Response("404 Not Found", {status: 404});
                 await requestEvent.respondWith(notFoundResponse);
-                return;
+                continue;
             }
 
             // Build a readable stream so the file doesn't have to be fully loaded into

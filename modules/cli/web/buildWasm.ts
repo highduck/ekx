@@ -5,7 +5,7 @@ import {path} from "../../deps.ts";
 import {isDir, withPath} from "../utils.ts";
 import {Project} from "../project.ts";
 
-function renderCMakeFile(ctx:Project, buildType: string): string {
+function renderCMakeFile(ctx: Project, buildType: string): string {
     const platforms = ["web"];
     const cppSourceFiles = [];
     const cppExtensions = ["hpp", "hxx", "h", "hh", "cpp", "cxx", "c", "cc"];
@@ -141,9 +141,10 @@ function renderCMakeFile(ctx:Project, buildType: string): string {
         ALLOW_UNIMPLEMENTED_SYSCALLS: 0
     };
 
-    if (buildType === "Release") {
-        cmakeTarget.linkOptions.push("--closure 1");
-    }
+    // if (buildType === "Release") {
+    //     cmakeTarget.linkOptions.push("--closure 1");
+    // }
+    cmakeTarget.linkOptions.push("--closure 0");
 
     for (const opt of Object.keys(emOptions)) {
         cmakeTarget.linkOptions.push(`-s${opt}=${emOptions[opt]}`);
@@ -151,7 +152,7 @@ function renderCMakeFile(ctx:Project, buildType: string): string {
     return cmakeLists(cmakeProject);
 }
 
-export async function buildWasm(ctx:Project, buildType) {
+export async function buildWasm(ctx: Project, buildType: string) {
     const platform_proj_name = ctx.name + "-" + ctx.current_target; // "projectName-web"
     const dest_dir = path.resolve(Deno.cwd(), "export");
     const output_path = path.join(dest_dir, platform_proj_name);

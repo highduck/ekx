@@ -36,10 +36,6 @@ export const vIncr = 0x00000100;
 export const iMask = 0x000000FF;
 export const Mixer = 0x00000001;
 
-// used for integer to float params conversion
-export const Unit = 1024;
-export const DefaultBus: AuphBus = BusIndex.Sound | Type.Bus;
-
 export type u31 = number;
 export type f32 = number;
 
@@ -94,6 +90,10 @@ export const enum Flag {
     //_Reserved = 8,
     Callback = 16
 }
+
+// used for integer to float params conversion
+export const Unit = 1024;
+export const DefaultBus: AuphBus = BusIndex.Sound | Type.Bus;
 
 export const enum Message {
     OK = 0,

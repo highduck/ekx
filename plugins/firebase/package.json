@@ -3,7 +3,9 @@
   "version": "0.0.7",
   "scripts": {
     "postinstall": "cmake-build || exit 0",
-    "build": "rollup -c web/rollup.config.js"
+    "build_js_pre": "esbuild web/firebase.js --global-name=firebase_js --bundle --sourcemap --target=chrome58,firefox57,safari11,edge16 --outfile=web/dist/firebase.js",
+    "build_js_lib": "esbuild web/firebase_c.js --bundle --format=esm --sourcemap --target=node14 --outfile=web/lib/firebase_c.js",
+    "build": "yarn run build_js_pre && yarn run build_js_lib"
   },
   "publishConfig": {
     "access": "public"
@@ -21,10 +23,5 @@
     "@ekx/app": "0.1.12",
     "cmake-build": "0.0.6",
     "firebase": "^9.8.4"
-  },
-  "devDependencies": {
-    "@rollup/plugin-node-resolve": "^13.3.0",
-    "rollup": "^2.75.7",
-    "rollup-plugin-terser": "^7.0.2"
   }
 }
