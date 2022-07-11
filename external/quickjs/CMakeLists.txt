@@ -28,10 +28,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -Wstrict-aliasing=2
         )
 
-#target_compile_definitions(${PROJECT_NAME}
-#        PUBLIC PUGIXML_NO_XPATH
-#        PUBLIC PUGIXML_NO_STL
-#        PUBLIC PUGIXML_NO_EXCEPTIONS
-#        )
-
-target_compile_definitions(${PROJECT_NAME} PUBLIC CONFIG_VERSION="1")
+target_compile_definitions(${PROJECT_NAME}
+        PUBLIC CONFIG_VERSION="1"
+        PUBLIC _GNU_SOURCE
+        )
