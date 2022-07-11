@@ -1,0 +1,1 @@
+- `external/*/test/CMakeLists.txt` works as single root project, could be changed to optional compile-check from package's CMake project 

@@ -13,14 +13,21 @@ export interface TTFImporterDesc extends AssetDesc {
 export class TTFAsset extends Asset {
     static typeName = "ttf";
 
-    constructor(readonly desc:TTFImporterDesc) {
+    constructor(readonly desc: TTFImporterDesc) {
         super(desc, TTFAsset.typeName);
         desc.name = desc.name ?? removePathExtension(path.basename(desc.filepath));
     }
 
     resolveInputs(): number {
-        return hashFile(path.resolve(this.owner.basePath, this.desc.filepath)) ^
-            super.resolveInputs();
+        const filepath = path.resolve(this.owner.basePath, this.desc.filepath);
+        try {
+            const hash = hashFile(filepath);
+            return hash ^ super.resolveInputs();
+        }
+        catch(err) {
+            console.warn("file not found:", filepath);
+            throw err;
+        }
     }
 
     build() {

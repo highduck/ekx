@@ -3,17 +3,9 @@
   "version": "0.0.7",
   "private": true,
   "scripts": {
-    "postinstall": "cmake-build",
     "build:web": "ekx web clean --verbose",
     "build:android": "ekx android bundle clean --verbose",
     "build:assets:dev": "ekx assets --dev",
-    "clean": "rimraf ./build ./export ./.firebase",
     "gen-api": "node scripts/gen.js"
-  },
-  "dependencies": {
-    "@ekx/graphics": "0.1.12",
-    "cmake-build": "0.0.6",
-    "@ekx/quickjs": "0.0.1",
-    "@ekx/res": "0.1.12"
   }
 }

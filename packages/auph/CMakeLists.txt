@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.19)
-include(npm.cmake)
-
 project(auph)
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})

@@ -3,7 +3,7 @@ import {getBinaryPath} from "../../utility/bin.ts";
 import {path} from "../../../deps.ts";
 
 export function flashExportAsync(configPath: string): Promise<number> {
-    const bin = getBinaryPath("@ekx/flash-export", "flash-export");
+    const bin = getBinaryPath("@ekx/ekx/tools/flash-export", "flash-export");
     return executeAsync(bin, ["export", configPath]);
 }
 
@@ -29,6 +29,6 @@ export function renderFlashSymbol(fla: string, symbol: string, outputs: RenderFl
         );
         makeDirs(path.dirname(output.outFilePath));
     }
-    const bin = getBinaryPath("@ekx/flash-export", "flash-export");
+    const bin = getBinaryPath("@ekx/ekx/tools/flash-export", "flash-export");
     return executeAsync(bin, cmd);
 }

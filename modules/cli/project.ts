@@ -146,8 +146,10 @@ export class Project {
 
     async importModule(moduleId: string, fromDir?: string) {
         const currentDir = fromDir ?? this.__dirname ?? Deno.cwd();
-        const moduleConfigPath = resolveFrom(currentDir, moduleId + "/ek.js");
-        if (moduleConfigPath != null) {
+        const moduleConfigPath =
+            resolveFrom(currentDir, moduleId + "/ek.ts") ??
+            resolveFrom(currentDir, moduleId + "/ek.js");
+        if (moduleConfigPath) {
             await this.loadModule(moduleConfigPath);
         } else {
             logger.warn(`ek.js module not found for "${moduleId}" from dir "${fromDir}"`);

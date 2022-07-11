@@ -1,21 +1,48 @@
 cmake_minimum_required(VERSION 3.19)
 project(ekx)
-#set(EKX_BUILD_DEV_TOOLS ON)
-#set(EKX_BUILD_TESTS ON)
+
+set(EKX_BUILD_DEV_TOOLS ON)
+set(EKX_BUILD_TESTS ON)
+
+if (EKX_BUILD_TESTS)
+enable_testing()
+endif()
+
+add_library(${PROJECT_NAME} INTERFACE)
+add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+add_subdirectory(external)
+add_subdirectory(../node_modules/@ekx/unit unit)
 
 add_subdirectory(packages/std)
 add_subdirectory(packages/core)
+add_subdirectory(packages/app)
+add_subdirectory(packages/sg-file)
+add_subdirectory(packages/res)
+add_subdirectory(packages/physics-arcade)
+add_subdirectory(packages/local-storage)
+add_subdirectory(packages/ecs)
+add_subdirectory(packages/graphics)
+add_subdirectory(packages/texture-loader)
+add_subdirectory(packages/audio)
+add_subdirectory(packages/auph)
+add_subdirectory(packages/scenex)
+add_subdirectory(packages/appbox)
+
+if (EKX_BUILD_DEV_TOOLS)
+    add_subdirectory(packages/dev-tools)
+endif ()
+
+add_subdirectory(plugins/billing)
+add_subdirectory(plugins/game-services)
+add_subdirectory(plugins/firebase)
+add_subdirectory(plugins/admob)
 
 if ((NOT EMSCRIPTEN) AND (NOT (${CMAKE_SYSTEM_NAME} MATCHES "iOS")) AND (NOT (${CMAKE_SYSTEM_NAME} MATCHES "Android")))
-    #)) AND () AND (${CMAKE_SYSTEM_NAME} NOT MATCHES "Android"))
     add_subdirectory(tools/bmfont-export)
     add_subdirectory(tools/flash-export)
     add_subdirectory(tools/obj-export)
     add_subdirectory(tools/sprite-packer)
-endif ()
-
-if (EKX_BUILD_DEV_TOOLS)
-    add_subdirectory(packages/dev-tools)
 endif ()
 
 add_subdirectory(samples/js-script-test)

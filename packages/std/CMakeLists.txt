@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.19)
-include(npm.cmake)
-
 project(std C)
 
 add_library(${PROJECT_NAME} STATIC
@@ -63,6 +61,6 @@ else ()
 endif ()
 
 #if (EKX_BUILD_TESTS)
-enable_testing()
+    enable_testing()
     add_subdirectory(test)
 #endif ()

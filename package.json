@@ -1,38 +1,31 @@
 {
-  "name": "@ekx/ekx-monorepo",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@ekx/ekx",
+  "version": "0.1.10",
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "ekx": "./cli.js",
+    "sokol-shdc": "./external/sokol-shdc/sokol-shdc.js"
+  },
   "scripts": {
     "release": "changeset publish",
     "version": "changeset version && yarn run update-lock",
     "update-lock": "yarn && git add yarn.lock",
-    "ci:build": "wsrun -m -e -t build",
-    "ci:build-native": "wsrun -m -e -t build:native",
-    "ci:test-native": "wsrun -m -e -t test:native",
-    "run-test-native": "node run-test-native.js",
-    "postinstall": "wsrun -m -e -t postinstall"
+    "ci:build": "deno run -A build.ts",
+    "ci:build-native": "deno run -A build-native.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.23.0",
-    "cmake-build": "0.0.6",
-    "wsrun": "^5.2.4",
     "@types/xmldoc": "^1.1.6",
     "@types/plist": "^3.0.2",
-    "rimraf": "^3.0.2",
     "esbuild": "^0.14.48",
-    "@types/emscripten": "^1.39.6"
+    "@types/emscripten": "^1.39.6",
+    "@ekx/unit": "0.0.6"
   },
   "dependencies": {
     "xmldoc": "^1.1.4",
     "plist": "^3.0.5"
-  },
-  "workspaces": {
-    "packages": [
-      "external/*",
-      "packages/*",
-      "tools/*",
-      "plugins/*",
-      "samples/*"
-    ]
   }
 }

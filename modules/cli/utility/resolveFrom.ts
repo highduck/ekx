@@ -4,7 +4,7 @@ import * as module from "https://deno.land/std/node/module.ts";
 import {logger} from "../logger.ts";
 
 // want to not have any dependencies, so just copy approach from `resolve-from` package
-export function resolveFrom(fromDirectory: string, moduleId: string): string | null {
+export function resolveFrom(fromDirectory: string, moduleId: string): string | undefined {
     try {
         fromDirectory = Deno.realPathSync(fromDirectory);
     } catch (error) {
@@ -12,16 +12,16 @@ export function resolveFrom(fromDirectory: string, moduleId: string): string | n
         if (error.code === 'ENOENT') {
             fromDirectory = path.resolve(fromDirectory);
         } else {
-            return null;
+            return undefined;
         }
     }
 
     try {
         return resolveFileName(fromDirectory, moduleId);
     } catch (error) {
-        logger.warn(`Cannot resolve module '${moduleId}' from '${fromDirectory}'`, error);
+        logger.debug(`Cannot resolve module '${moduleId}' from '${fromDirectory}'`, error);
     }
-    return null;
+    return undefined;
 }
 
 function resolveFileName(fromDirectory: string, moduleId: string): string {

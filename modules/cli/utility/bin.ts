@@ -1,4 +1,4 @@
-import {path, os} from "../../deps.ts";
+import {os, path} from "../../deps.ts";
 import {resolveFrom} from "./resolveFrom.ts";
 import {getModuleDir} from "../../utils/utils.ts";
 
@@ -16,14 +16,13 @@ function getBinaryOS(): string {
 }
 
 export function getBinaryPath(pkg: string, bin: string) {
-    const __dirname = getModuleDir(import.meta);
-    const rr = resolveFrom(__dirname, pkg + "/package.json");
-    if(rr == null) {
-        throw new Error("can't find " + pkg + " " + bin);
-    }
-    const packageDir = path.dirname(rr);
     if (os.platform() === "win32") {
         bin += ".exe";
     }
-    return path.resolve(packageDir, "bin", getBinaryOS(), bin);
+    const pathToBinary = path.join(pkg, "bin", getBinaryOS(), bin);
+    const resolvedBinary = resolveFrom(getModuleDir(import.meta), pathToBinary);
+    if (resolvedBinary == null) {
+        throw new Error("can't resolve " + pathToBinary);
+    }
+    return resolvedBinary;
 }

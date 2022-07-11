@@ -1,0 +1,9 @@
+.changeset/
+.github/
+.vscode/
+build/
+cmake-build-*/
+samples/
+.gitmodules
+
+external/*/cache/

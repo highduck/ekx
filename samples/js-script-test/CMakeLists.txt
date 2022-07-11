@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.19)
-include(npm.cmake)
 project(js-script-test)
 
 add_executable(${PROJECT_NAME}

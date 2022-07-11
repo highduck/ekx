@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.19)
-include(npm.cmake)
 project(plugin-game-services)
 add_library(${PROJECT_NAME} STATIC
         src/ek_game_services.c
