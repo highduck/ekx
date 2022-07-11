@@ -1,6 +1,6 @@
 import {Project} from "../../modules/cli/project.ts";
 
-export async function setup(project:Project) {
+export function setup(project:Project) {
     project.addModule({
         name: "quickjs",
         cpp: "src",

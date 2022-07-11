@@ -28,6 +28,10 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -Wstrict-aliasing=2
         )
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    target_link_libraries(${PROJECT_NAME} PUBLIC dl)
+endif ()
+
 target_compile_definitions(${PROJECT_NAME}
         PUBLIC CONFIG_VERSION="1"
         PUBLIC _GNU_SOURCE

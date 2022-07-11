@@ -7,12 +7,12 @@ export interface CxxConfig {
     /**
      * Adds C++ compile definition (-D compiler option)
      */
-    cpp_define: UserArray<string>;
+    cpp_define?: UserArray<string>;
 
     /**
      * Link C++ libraries
      */
-    cpp_lib: UserArray<string>;
+    cpp_lib?: UserArray<string>;
 
     /**
      * C++ source roots. Adds this directory as headers search path and detect all source files (translation units)
@@ -24,20 +24,20 @@ export interface CxxConfig {
      *
      * NOTE: Xcode generation use only Directory case and add folder to the project automatically adds Compile Sources
      */
-    cpp: UserArray<string>;
+    cpp?: UserArray<string>;
 
     /**
      * Include directory: adds this directory to headers search path (-I compiler option) and allow to use that root
      * for `#include <header>` code
      */
-    cpp_include: UserArray<string>;
+    cpp_include?: UserArray<string>;
 
     /**
      * Configure each C++ translation unit with compile flags explicitly
      * NOTE: currently supported only for XCode targets
      * TODO: files -> flags map pattern, better naming for CppFlags as well
      */
-    cpp_flags: UserArray<CppFlags>;
+    cpp_flags?: UserArray<CppFlags>;
 }
 
 export interface CppFlags {
