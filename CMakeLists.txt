@@ -12,8 +12,8 @@ add_library(${PROJECT_NAME} INTERFACE)
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 add_subdirectory(external)
-add_subdirectory(../node_modules/@ekx/unit unit)
 
+add_subdirectory(packages/unit)
 add_subdirectory(packages/std)
 add_subdirectory(packages/core)
 add_subdirectory(packages/app)
