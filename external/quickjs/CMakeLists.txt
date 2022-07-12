@@ -28,8 +28,11 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -Wstrict-aliasing=2
         )
 
-if(UNIX OR MSYS)
-    find_package(Threads)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    find_package(Threads REQUIRED)
+    target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS} m Threads::Threads)
+elseif(UNIX OR MSYS)
+    find_package(Threads REQUIRED)
     target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS} m Threads::Threads)
 endif()
 
