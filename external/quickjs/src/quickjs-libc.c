@@ -31,7 +31,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/time.h>
 #include <time.h>
 #include <signal.h>
 #include <limits.h>
@@ -46,6 +45,7 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
+#include <sys/time.h>
 
 #if defined(__APPLE__)
 typedef sig_t sighandler_t;
