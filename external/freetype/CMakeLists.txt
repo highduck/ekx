@@ -63,3 +63,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+if (EKX_BUILD_EXTERNAL_TESTS)
+    add_subdirectory(test)
+endif ()

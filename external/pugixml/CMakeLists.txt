@@ -29,3 +29,7 @@ target_compile_definitions(${PROJECT_NAME}
         PUBLIC PUGIXML_NO_XPATH
         PUBLIC PUGIXML_NO_STL
         PUBLIC PUGIXML_NO_EXCEPTIONS)
+
+if (EKX_BUILD_EXTERNAL_TESTS)
+    add_subdirectory(test)
+endif ()

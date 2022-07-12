@@ -42,3 +42,7 @@ target_link_libraries(${PROJECT_NAME}
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+if (EKX_BUILD_EXTERNAL_TESTS)
+    add_subdirectory(test)
+endif ()

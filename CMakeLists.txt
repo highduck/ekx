@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.19)
 project(ekx)
 
-set(EKX_BUILD_DEV_TOOLS ON)
-set(EKX_BUILD_TESTS ON)
+option(EKX_BUILD_DEV_TOOLS "Build dev tools" ON)
+option(EKX_BUILD_TESTS "Build tests" ON)
+option(EKX_BUILD_EXTERNAL_TESTS "Build external modules tests" ON)
+option(EKX_BUILD_COVERAGE "Collect coverage info during test run" OFF)
 
-if (EKX_BUILD_TESTS)
+if (EKX_BUILD_TESTS OR EKX_BUILD_EXTERNAL_TESTS)
 enable_testing()
 endif()
 

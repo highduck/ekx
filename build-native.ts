@@ -7,7 +7,8 @@ await build({
     definitions: {
         EKX_BUILD_DEV_TOOLS: "ON",
         EKX_BUILD_TESTS: "OFF",
-        EKX_BUILD_COVERAGE: "OFF"
+        EKX_BUILD_COVERAGE: "OFF",
+        EKX_BUILD_EXTERNAL_TESTS: "OFF",
     },
 });
 
