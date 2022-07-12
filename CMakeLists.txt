@@ -5,10 +5,11 @@ option(EKX_BUILD_DEV_TOOLS "Build dev tools" ON)
 option(EKX_BUILD_TESTS "Build tests" ON)
 option(EKX_BUILD_EXTERNAL_TESTS "Build external modules tests" ON)
 option(EKX_BUILD_COVERAGE "Collect coverage info during test run" OFF)
+option(EKX_INCLUDE_EXAMPLES "Include example projects" ON)
 
 if (EKX_BUILD_TESTS OR EKX_BUILD_EXTERNAL_TESTS)
-enable_testing()
-endif()
+    enable_testing()
+endif ()
 
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -47,8 +48,9 @@ if ((NOT EMSCRIPTEN) AND (NOT (${CMAKE_SYSTEM_NAME} MATCHES "iOS")) AND (NOT (${
     add_subdirectory(tools/sprite-packer)
 endif ()
 
-add_subdirectory(samples/js-script-test)
-add_subdirectory(samples/rnd-test)
-add_subdirectory(samples/sample-1-app)
-add_subdirectory(samples/sample-2-drawing)
-
+if (EKX_INCLUDE_EXAMPLES)
+    add_subdirectory(samples/js-script-test)
+    add_subdirectory(samples/rnd-test)
+    add_subdirectory(samples/sample-1-app)
+    add_subdirectory(samples/sample-2-drawing)
+endif ()
