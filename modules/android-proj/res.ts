@@ -1,7 +1,5 @@
-import {createRequire} from "https://deno.land/std/node/module.ts";
-
-const require = createRequire(import.meta.url);
-const {XmlDocument} = require("xmldoc");
+import {xmldoc} from "../deps.ts";
+const {XmlDocument} = xmldoc;
 
 export function writeStringsXML(filepath: string, strings: { [key: string]: string }): void {
     const doc = new XmlDocument(`<resources></resources>`);

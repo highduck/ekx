@@ -1,12 +1,10 @@
 import {path, fs} from "ekx/deps.ts"
 import {downloadCheck, untar} from "ekx/utils/mod.ts"
 import {copyFolderRecursive, getModuleDir, rm} from "ekx/utils/mod.ts"
-import {buildMatrix} from "ekx/cmake/mod.ts"
 
 const __dirname = getModuleDir(import.meta);
 const cacheDir = path.join(__dirname, "cache");
 const tempDir = path.join(__dirname, "tmp");
-const buildDir = path.join(__dirname, "build");
 
 async function clean() {
     await rm(path.join(__dirname, "src"));
@@ -87,14 +85,4 @@ async function fetch() {
     await rm(tempDir);
 }
 
-async function test() {
-    await buildMatrix({
-        cmakePath: "test",
-        test: true,
-        workingDir: __dirname
-    });
-
-    await rm(buildDir);
-}
-
-export default {clean, fetch, test};
+export default {clean, fetch};

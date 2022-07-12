@@ -5,10 +5,8 @@ import dev_fonts from "./dev-fonts/recipe.ts";
 import freetype from "./freetype/recipe.ts";
 import stb from "./stb/recipe.ts";
 import sokol from "./sokol/recipe.ts";
-import sokol_shdc from "./sokol-shdc/recipe.ts";
 import quickjs from "./quickjs/recipe.ts";
 import pugixml from "./pugixml/recipe.ts";
-import pocketmod from "./pocketmod/recipe.ts";
 import miniz from "./miniz/recipe.ts";
 import imgui from "./imgui/recipe.ts";
 
@@ -28,10 +26,8 @@ const libs: { [key: string]: Lib } = {
     freetype,
     stb,
     sokol,
-    sokol_shdc,
     quickjs,
     pugixml,
-    pocketmod,
     miniz,
     imgui,
 };

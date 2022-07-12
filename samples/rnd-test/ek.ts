@@ -35,7 +35,7 @@ export async function setup(project: Project) {
         }
     ];
 
-    project.web.firebaseAutoSetup = true;
+    //project.web.firebaseAutoSetup = true;
     project.web.background_color = "black";
     project.web.text_color = "#73b3cb";
     project.web.og = {

@@ -6,11 +6,8 @@ import {MultiResAtlasAsset} from "./Atlas.ts";
 import {H} from "../utility/hash.ts";
 import {logger} from "../logger.ts";
 import {hashFile, hashGlob} from "./helpers/hash.ts";
-
-import {createRequire} from "https://deno.land/std/node/module.ts";
-
-const require = createRequire(import.meta.url);
-const {XmlDocument} = require("xmldoc");
+import {xmldoc} from "../../deps.ts";
+const {XmlDocument} = xmldoc;
 
 export interface FlashDesc extends AssetDesc {
     filepath: string;
@@ -45,7 +42,7 @@ export class FlashAsset extends Asset {
         const imagesOutput = path.join(this.owner.cache, this.desc.name!, targetAtlas);
         const atlasAsset = this.owner.find(MultiResAtlasAsset.typeName, targetAtlas) as MultiResAtlasAsset | undefined;
         if(atlasAsset) {
-            const resolutionNodes = atlasAsset.desc.resolutions.map(r => `<resolution scale="${r.scale}"/>`);
+            const resolutionNodes = atlasAsset.desc.resolutions!.map(r => `<resolution scale="${r.scale}"/>`);
             const xml = new XmlDocument(`<flash path="${path.resolve(this.owner.basePath, this.desc.filepath)}" name="${this.desc.name}"
  output="${sgOutput}" outputImages="${imagesOutput}" >
 <atlas name="${atlasAsset.desc.name}">

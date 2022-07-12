@@ -61,16 +61,16 @@ const cpp_names: CppName[] = [
 
 
 export interface AppleConfig extends CxxConfig {
-    xcode_capability: UserArray<string>;
-    xcode_framework: UserArray<string>;
-    xcode_pod: UserArray<string>;
-    xcode_plist: UserArray<any>;
+    xcode_capability?: UserArray<string>;
+    xcode_framework?: UserArray<string>;
+    xcode_pod?: UserArray<string>;
+    xcode_plist?: UserArray<any>;
     /**
-     * files copied in Project which sould be added to project (path relative to xcode project's root)
+     * files copied in Project which should be added to project (path relative to xcode project's root)
      */
-    xcode_file: UserArray<string>;
+    xcode_file?: UserArray<string>;
 
-    xcode_projectPythonPostScript: UserArray<string>;
+    xcode_projectPythonPostScript?: UserArray<string>;
 }
 
 type AppleName =
@@ -90,44 +90,44 @@ const apple_names: AppleName[] = [
 ];
 
 export interface AndroidConfig extends CxxConfig {
-    android_java: UserArray<string>;
+    android_java?: UserArray<string>;
 
     // LEGACY: option to include some native android services via "android interface declaration language"
-    android_aidl: UserArray<string>;
+    android_aidl?: UserArray<string>;
 
     // app module gradle dependency string
     // TODO: should be more declarative object
-    android_dependency: UserArray<string>;
+    android_dependency?: UserArray<string>;
 
     /**
      * root build.gradle buildScript dependencies
      */
-    android_buildScriptDependency: UserArray<string>;
+    android_buildScriptDependency?: UserArray<string>;
 
     /**
      * Patch :app build.gradle with `apply plugin: '{}'`
      * TODO: rename to android_gradlePlugin
      */
-    android_gradleApplyPlugin: UserArray<string>;
+    android_gradleApplyPlugin?: UserArray<string>;
 
     // add to the root of AndroidManifest.xml
-    android_manifest: UserArray<string>;
+    android_manifest?: UserArray<string>;
 
     /**
      * Add <uses-permission> to the AndroidManifest.xml
      * `<uses-permission android:name="VALUE" />`
      * for example: `android.permission.VIBRATE`
      */
-    android_permission: UserArray<string>;
+    android_permission?: UserArray<string>;
 
     // add to the <application> xml node of AndroidManifest.xml
-    android_manifestApplication: UserArray<string>;
+    android_manifestApplication?: UserArray<string>;
 
     /**
      * Dictionaries to generate the final strings resource xml file:
      * `app/src/main/res/values/strings.xml`
      */
-    android_strings: UserArray<string>;
+    android_strings?: UserArray<string>;
 }
 
 type AndroidName =
@@ -157,9 +157,9 @@ const android_names: AndroidName[] = [
 
 export interface WasmConfig extends CxxConfig {
     // search all `**/*.js` in directories and link them as Emscripten JavaScript library (`--js-library` option)
-    js: UserArray<string>;
+    js?: UserArray<string>;
     // search all `**/*.js` in directories and pre-concatenate them to the compiled JavaScript wrapper (`--pre-js` option)
-    js_pre: UserArray<string>;
+    js_pre?: UserArray<string>;
 }
 
 type JSName = "js" | "js_pre" | "js_script";

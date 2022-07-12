@@ -5,10 +5,8 @@ import {bmfontAsync} from "./helpers/bmfont.ts";
 import {MultiResAtlasAsset} from "./Atlas.ts";
 import {H} from "../utility/hash.ts";
 import {hashFile} from "./helpers/hash.ts";
-import {createRequire} from "https://deno.land/std/node/module.ts";
-
-const require = createRequire(import.meta.url);
-const {XmlDocument} = require("xmldoc");
+import {xmldoc} from "../../deps.ts";
+const {XmlDocument} = xmldoc;
 
 export interface BMFontDesc extends AssetDesc {
     filepath: string;

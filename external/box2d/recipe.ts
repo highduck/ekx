@@ -1,6 +1,5 @@
 import {path} from "ekx/deps.ts"
 import {downloadFiles, getModuleDir, rm} from "ekx/utils/mod.ts"
-import {buildMatrix} from "ekx/cmake/mod.ts"
 
 const __dirname = getModuleDir(import.meta);
 
@@ -115,14 +114,4 @@ async function fetch() {
     });
 }
 
-async function test() {
-    await buildMatrix({
-        cmakePath: "test",
-        test: true,
-        workingDir: __dirname
-    });
-
-    await rm(path.join(__dirname, "build"));
-}
-
-export default {clean, fetch, test};
+export default {clean, fetch};
