@@ -44,7 +44,7 @@ jobs:
         with:
           path-type: inherit
           release: false
-          install: pthreads
+          install: mingw-w64-x86_64-winpthreads-git
 
       - name: Setup OpenGL on Ubuntu
         if: runner.os == 'Linux'
