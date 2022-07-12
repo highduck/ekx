@@ -32,8 +32,13 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(${PROJECT_NAME}
             PUBLIC dl)
     target_link_options(${PROJECT_NAME}
-            PUBLIC -lpthread)
+            PUBLIC -pthread)
 endif ()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    target_link_options(${PROJECT_NAME}
+            PUBLIC -pthread)
+endif()
 
 target_compile_definitions(${PROJECT_NAME}
         PUBLIC CONFIG_VERSION="1"
