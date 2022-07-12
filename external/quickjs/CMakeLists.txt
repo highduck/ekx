@@ -28,7 +28,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -Wstrict-aliasing=2
         )
 
-if(UNIX OR MINGW)
+if(UNIX OR MSYS)
     find_package(Threads)
     target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS} m Threads::Threads)
 endif()
