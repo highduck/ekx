@@ -30,7 +30,8 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 
 if(UNIX OR MSYS)
     find_package(Threads REQUIRED)
-    target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS} m Threads::Threads)
+    target_link_libraries(${PROJECT_NAME}
+            PUBLIC ${CMAKE_DL_LIBS} m Threads::Threads)
 endif()
 
 target_compile_definitions(${PROJECT_NAME}
