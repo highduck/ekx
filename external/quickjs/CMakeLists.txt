@@ -36,6 +36,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    target_compile_options(${PROJECT_NAME}
+            PUBLIC -pthread)
     target_link_options(${PROJECT_NAME}
             PUBLIC -pthread)
 endif()
