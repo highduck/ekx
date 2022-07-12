@@ -16,7 +16,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 target_compile_options(${PROJECT_NAME}
         PRIVATE -g
-#        PRIVATE -flto
+        #        PRIVATE -flto
         PRIVATE -Os
         PRIVATE -Wall
         PRIVATE -Wextra
@@ -26,13 +26,13 @@ target_compile_options(${PROJECT_NAME}
         PRIVATE -fno-exceptions
         PRIVATE -fno-rtti
         PRIVATE -ffast-math
-#        PRIVATE -mstackrealign
-#        PRIVATE -fshort-enums
+        #        PRIVATE -mstackrealign
+        #        PRIVATE -fshort-enums
         )
 
 target_link_options(${PROJECT_NAME}
         PRIVATE -g
-#        PRIVATE -flto
+        #        PRIVATE -flto
         PRIVATE -Os
         PRIVATE -fno-strict-aliasing
         PRIVATE -fno-exceptions
@@ -61,10 +61,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "iOS")
             PRIVATE "-framework MetalKit"
             PRIVATE "-framework QuartzCore"
             )
-#    target_compile_options(${PROJECT_NAME}
-#            PRIVATE -fobjc-arc
-#            PRIVATE -x objective-c++
-#            )
     target_sources(${PROJECT_NAME} PRIVATE
             src/apple/apple.m
             )
@@ -76,10 +72,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             PRIVATE "-framework MetalKit"
             PRIVATE "-framework QuartzCore"
             )
-#    target_compile_options(${PROJECT_NAME}
-#            PRIVATE -fobjc-arc
-#            PRIVATE -x objective-c++
-#            )
     target_sources(${PROJECT_NAME} PRIVATE
             src/apple/apple.m
             )
@@ -88,7 +80,8 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
+    target_link_libraries(${PROJECT_NAME}
+            PUBLIC GL dl m)
 else ()
     error("Platform: UNKNOWN")
 endif ()

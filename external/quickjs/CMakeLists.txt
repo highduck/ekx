@@ -32,7 +32,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(${PROJECT_NAME}
             PUBLIC dl)
     target_link_options(${PROJECT_NAME}
-            PUBLIC -pthread)
+            PUBLIC -lpthread)
 endif ()
 
 target_compile_definitions(${PROJECT_NAME}
