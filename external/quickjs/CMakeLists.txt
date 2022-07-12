@@ -28,18 +28,9 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -Wstrict-aliasing=2
         )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(${PROJECT_NAME}
-            PUBLIC dl)
-    target_link_options(${PROJECT_NAME}
-            PUBLIC -pthread)
-endif ()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    target_compile_options(${PROJECT_NAME}
-            PUBLIC -pthread)
-    target_link_options(${PROJECT_NAME}
-            PUBLIC -pthread)
+if(UNIX OR MINGW)
+    find_package(Threads)
+    target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS} m Threads::Threads)
 endif()
 
 target_compile_definitions(${PROJECT_NAME}
