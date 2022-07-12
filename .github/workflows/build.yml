@@ -44,6 +44,7 @@ jobs:
         with:
           path-type: inherit
           release: false
+          install: pthreads
 
       - name: Setup OpenGL on Ubuntu
         if: runner.os == 'Linux'
