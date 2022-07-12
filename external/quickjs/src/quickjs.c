@@ -28,9 +28,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <assert.h>
-#if !defined(_WIN32)
 #include <sys/time.h>
-#endif
 #include <time.h>
 #include <fenv.h>
 #include <math.h>
@@ -71,7 +69,7 @@
 
 /* define to include Atomics.* operations which depend on the OS
    threads */
-#if !defined(EMSCRIPTEN) && !defined(_WIN32)
+#if !defined(EMSCRIPTEN)
 #define CONFIG_ATOMICS
 #endif
 
