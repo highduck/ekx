@@ -153,6 +153,7 @@ jobs:
         run: |
           yarn --version
           yarn --frozen-lockfile
+          yarn global add @changesets/cli
 
       - name: Build
         run: yarn run ci:build

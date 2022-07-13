@@ -49,7 +49,7 @@ if ((NOT EMSCRIPTEN) AND (NOT (${CMAKE_SYSTEM_NAME} MATCHES "iOS")) AND (NOT (${
 endif ()
 
 if (EKX_INCLUDE_EXAMPLES)
-    add_subdirectory(samples/rnd-test)
-    add_subdirectory(samples/sample-1-app)
-    add_subdirectory(samples/sample-2-drawing)
+    add_subdirectory(examples/rnd-test)
+    add_subdirectory(examples/sample-1-app)
+    add_subdirectory(examples/sample-2-drawing)
 endif ()
