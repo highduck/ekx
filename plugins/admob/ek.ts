@@ -82,6 +82,6 @@ export async function setup(project: Project) {
         }
     });
 
-    await project.importModule("@ekx/ekx/plugins/firebase");
-    await project.importModule("@ekx/ekx/packages/scenex");
+    await project.importModule("../firebase/ek.ts");
+    await project.importModule("../../packages/scenex/ek.ts");
 }

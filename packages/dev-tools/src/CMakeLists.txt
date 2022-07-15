@@ -41,7 +41,6 @@ target_compile_options(${PROJECT_NAME}
         )
 
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC ekx::dev-fonts
         PUBLIC scenex
         PUBLIC imgui
         PUBLIC pugixml

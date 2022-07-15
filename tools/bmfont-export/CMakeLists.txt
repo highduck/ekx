@@ -27,7 +27,7 @@ target_compile_definitions(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
         PUBLIC pugixml
         PUBLIC freetype
-        PUBLIC stb
+        PUBLIC ekx::headers
         PUBLIC ekx::std
         PUBLIC ekx::sg-file
         )

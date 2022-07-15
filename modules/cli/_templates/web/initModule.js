@@ -1,8 +1,9 @@
 
 var Module = Module || {};
-Module.loaders = [];
-Module.started = false;
-Module.globalErrorCapture = null;
+var Module0 = Module0 || {};
+Module0.loaders = [];
+Module0.started = false;
+Module0.globalErrorCapture = null;
 
 function binary(e, i) {
     return new Promise((n, r) => {
@@ -10,13 +11,13 @@ function binary(e, i) {
         t.open("GET", e, !0);
         t.responseType = "arraybuffer";
         t.onload = () => {
-            Module.loaders[i] = 1.0;
+            Module0.loaders[i] = 1.0;
             updateStatus();
             n(t.response);
         };
         t.onprogress = function(pr) {
             if(pr.total > 0) {
-                Module.loaders[i] = pr.loaded / pr.total;
+                Module0.loaders[i] = pr.loaded / pr.total;
                 updateStatus();
             }
         };
@@ -28,6 +29,7 @@ function script(e) {
     return new Promise((n, r) => {
         var t = document.createElement("script");
         t.src = e;
+        t.type = "module";
         t.onload = () => {
             n();
         };
@@ -46,10 +48,14 @@ function script(e) {
 // });
 
 binary("{{name}}.wasm?v={{{version_code}}}").then(wasm => {
-    Module.wasm = wasm;
-    return script("{{name}}.js?v={{{version_code}}}").then(_ => {
-        Module.started = true;
+    Module0.wasm = wasm;
+    return import("./{{name}}.js?v={{{version_code}}}").then(factory => {
         updateStatus();
+        factory.default({wasm: wasm}).then((m)=> {
+            Module = m;
+            Module0.started = true;
+            updateStatus();
+        });
     });
 })
 
@@ -58,19 +64,19 @@ function updateStatus() {
     var game = document.getElementById('gameview');
     var status = document.getElementById('status');
     if(game) {
-        if(Module.globalErrorCapture) {
-            status.innerHTML = Module.globalErrorCapture;
+        if(Module0.globalErrorCapture) {
+            status.innerHTML = Module0.globalErrorCapture;
             spinner.style.display = 'block';
             game.style.display = 'none';
             return;
         }
-        if(Module.started) {
+        if(Module0.started) {
             if (game.style.display !== 'block') {
                 spinner.style.display = 'none';
                 game.style.display = 'block';
             }
         } else {
-            var progress = ((Module.loaders[0]|0) + (Module.loaders[1]|0)) / 2;
+            var progress = ((Module0.loaders[0]|0) + (Module0.loaders[1]|0)) / 2;
             spinner.style.display = 'block';
             game.style.display = 'none';
             status.innerHTML = ((progress * 100) | 0) + "%";
@@ -81,6 +87,6 @@ function updateStatus() {
 function init() {
     updateStatus();
     window.onerror = function (e) {
-        Module.globalErrorCapture = e;
+        Module0.globalErrorCapture = e;
     };
 }

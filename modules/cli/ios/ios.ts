@@ -8,17 +8,12 @@ import {
     replaceInFile,
     writeText
 } from "../utils.ts";
-import {path} from "../../deps.ts";
+import {path, plist} from "../../deps.ts";
 import {buildAssetPackAsync} from "../assets.ts";
 import {Project} from "../project.ts";
 import {collectCppFlags, collectObjects, collectStrings} from "../collectSources.ts";
 import {logger} from "../logger.ts";
 import {buildAppIconAsync} from "../appicon/appicon.ts";
-
-import {createRequire} from "https://deno.land/std/node/module.ts";
-
-const require = createRequire(import.meta.url);
-const plist = require("plist");
 
 const iosPlatforms = ["apple", "ios"];
 
@@ -29,7 +24,7 @@ interface AppStoreCredentials {
     application_specific_password?: string;
 }
 
-function mod_plist(ctx, filepath) {
+function mod_plist(ctx: Project, filepath: string) {
     const dict = plist.parse(readText(filepath));
     dict["CFBundleDisplayName"] = ctx.title;
     dict["CFBundleShortVersionString"] = ctx.version.name();
@@ -129,8 +124,8 @@ export async function export_ios(ctx: Project): Promise<void> {
         }
 
         const xcode_projectPythonPostScript = collectStrings(ctx, "xcode_projectPythonPostScript", iosPlatforms, false);
-        const declaration:any = {modules:[]};
-        for(const module of ctx.modules) {
+        const declaration: any = {modules: []};
+        for (const module of ctx.modules) {
             declaration.modules.push({
                 name: module.name ?? (module.path ? path.basename(module.path) : "global"),
 
@@ -149,7 +144,7 @@ export async function export_ios(ctx: Project): Promise<void> {
                 xcode_file: collectStrings(module, "xcode_file", iosPlatforms, false)
             });
         }
-        declaration.modules.push({name:"embedded", assets: [embeddedAssetsDir]});
+        declaration.modules.push({name: "embedded", assets: [embeddedAssetsDir]});
 
         Deno.writeTextFileSync("ek-ios-build.json", JSON.stringify(declaration));
 
@@ -173,7 +168,7 @@ export async function export_ios(ctx: Project): Promise<void> {
         });
 
         logger.info("Install Pods");
-        if(0 !== await execute("pod", ["install", "--repo-update"])) {
+        if (0 !== await execute("pod", ["install", "--repo-update"])) {
             // maybe no internet connection, so we can't update pods repo
             await execute("pod", ["install"]);
         }

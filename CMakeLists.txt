@@ -50,6 +50,6 @@ endif ()
 
 if (EKX_INCLUDE_EXAMPLES)
     add_subdirectory(examples/rnd-test)
-    add_subdirectory(examples/sample-1-app)
-    add_subdirectory(examples/sample-2-drawing)
+    add_subdirectory(examples/1-app)
+    add_subdirectory(examples/2-drawing)
 endif ()

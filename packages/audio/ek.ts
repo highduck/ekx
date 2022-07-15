@@ -21,7 +21,7 @@ export async function setup(project: Project) {
             },
         }
     });
-    await project.importModule("@ekx/ekx/packages/auph");
-    await project.importModule("@ekx/ekx/packages/core");
-    await project.importModule("@ekx/ekx/packages/app");
+    await project.importModule("../auph/ek.ts");
+    await project.importModule("../core/ek.ts");
+    await project.importModule("../app/ek.ts");
 }

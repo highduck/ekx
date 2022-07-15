@@ -9,5 +9,5 @@ export async function setup(project: Project) {
             js: "src"
         }
     });
-    await project.importModule("@ekx/ekx/packages/app");
+    await project.importModule("../app/ek.ts");
 }

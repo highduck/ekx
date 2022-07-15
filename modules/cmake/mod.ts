@@ -1,4 +1,4 @@
-import {path, fs, os} from "../deps.ts";
+import {path, fs} from "../deps.ts";
 import {rm, getModuleDir} from "../utils/mod.ts";
 
 const __dirname = getModuleDir(import.meta);
@@ -109,7 +109,7 @@ export function resolveOptions(options?: BuildOptions): BuildOptions {
     opts.env = opts.env ?? {};
     opts.debug = opts.debug ?? false;
     opts.buildType = opts.buildType ?? (opts.debug ? "Debug" : "Release");
-    opts.os = opts.os ?? os.platform();
+    opts.os = opts.os ?? Deno.build.os;
     opts.workingDir = opts.workingDir ?? Deno.cwd();
     opts.cmakePath = opts.cmakePath ?? ".";
     opts.buildsFolder = opts.buildsFolder ?? path.resolve(opts.workingDir, "build");
@@ -133,7 +133,7 @@ export function resolveOptions(options?: BuildOptions): BuildOptions {
     }
 
     opts.ccache = opts.ccache ?? !!(Deno.env.get("USE_CCACHE") as string | 0);
-    if (opts.ccache && opts.os !== os.platform()) {
+    if (opts.ccache && opts.os !== Deno.build.os) {
         if (opts.os !== "web") {
             opts.ccache = false;
         }
@@ -173,7 +173,7 @@ export function resolveOptions(options?: BuildOptions): BuildOptions {
             opts.definitions.PLATFORM = "SIMULATOR64";
             break;
         case "windows":
-            if (os.platform() === "darwin") {
+            if (Deno.build.os === "darwin") {
                 if (!opts.toolchain) {
                     opts.toolchain = path.resolve(__dirname, "mingw-w64-x86_64.cmake");
                     console.info(opts.toolchain);
@@ -242,7 +242,7 @@ export async function build_(options: BuildOptions): Promise<void> {
     };
     const buildArgs = ["--build", options.buildDir!];
     if (!options.ninja) {
-        const jobs = 1 + os.cpus().length;
+        const jobs = 1 + navigator.hardwareConcurrency;
         buildArgs.push("--parallel", "" + jobs);
     }
     if (options.target!.length > 0) {
@@ -290,7 +290,7 @@ export async function build(options?: BuildOptions & BuildMatrix): Promise<Build
 
 export async function buildMatrix(options?: BuildOptions & BuildMatrix): Promise<void> {
     const buildTypes = getOptionalMany(options?.buildType, ["Debug", "Release"]);
-    const osList = getOptionalMany(options?.os, [os.platform()]);
+    const osList = getOptionalMany(options?.os, [Deno.build.os]);
     if (options?.parallel) {
         const tasks: Promise<BuildResult>[] = [];
         for (const os of osList) {

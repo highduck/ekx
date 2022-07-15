@@ -29,6 +29,5 @@ export async function setup(project: Project) {
         linux: {}
     });
 
-    await project.importModule("@ekx/ekx/external/stb");
-    await project.importModule("@ekx/ekx/external/dr-libs");
+    await project.importModule("../../external/headers/ek.ts");
 }

@@ -9,11 +9,11 @@ export async function setup(project: Project) {
             android_permission: "android.permission.INTERNET"
         },
     });
-    await project.importModule("@ekx/ekx/packages/sg-file");
-    await project.importModule("@ekx/ekx/packages/graphics");
-    await project.importModule("@ekx/ekx/packages/audio");
-    await project.importModule("@ekx/ekx/packages/local-storage");
-    await project.importModule("@ekx/ekx/packages/texture-loader");
-    await project.importModule("@ekx/ekx/packages/res");
-    await project.importModule("@ekx/ekx/packages/ecs");
+    await project.importModule("../sg-file/ek.ts");
+    await project.importModule("../graphics/ek.ts");
+    await project.importModule("../audio/ek.ts");
+    await project.importModule("../local-storage/ek.ts");
+    await project.importModule("../texture-loader/ek.ts");
+    await project.importModule("../res/ek.ts");
+    await project.importModule("../ecs/ek.ts");
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EditorWindow.hpp"
-#include <IconsFontAwesome5.h>
+#include <fonts/IconsFontAwesome5.h>
 #include <ek/ds/Hash.hpp>
 
 // components

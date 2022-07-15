@@ -1,8 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <imgui.h>
+#include <fonts/IconsFontAwesome5.h>
+#include <fonts/IconsMaterialDesign.h>
+#include <imgui_memory_editor/imgui_memory_editor.h>
 
 int main(int argc, char* argv[]) {
+
+    printf("- Font Awesome 5 Regular: %s\n", FONT_ICON_FILE_NAME_FAR);
+    printf("- Font Awesome 5 Solid: %s\n", FONT_ICON_FILE_NAME_FAS);
+    printf("- Material Icons Regular: %s\n", FONT_ICON_FILE_NAME_MD);
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

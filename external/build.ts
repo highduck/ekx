@@ -1,9 +1,7 @@
 import box2d from "./box2d/recipe.ts";
-import dr_libs from "./dr-libs/recipe.ts";
 import cairo from "./cairo/recipe.ts";
-import dev_fonts from "./dev-fonts/recipe.ts";
 import freetype from "./freetype/recipe.ts";
-import stb from "./stb/recipe.ts";
+import headers from "./headers/recipe.ts";
 import sokol from "./sokol/recipe.ts";
 import quickjs from "./quickjs/recipe.ts";
 import pugixml from "./pugixml/recipe.ts";
@@ -19,16 +17,14 @@ interface Lib {
 }
 
 const libs: { [key: string]: Lib } = {
-    box2d,
-    dr_libs,
-    cairo,
-    dev_fonts,
-    freetype,
-    stb,
-    sokol,
-    quickjs,
-    pugixml,
-    miniz,
+    headers,
+    // box2d,
+    // cairo,
+    // freetype,
+    // sokol,
+    // quickjs,
+    // pugixml,
+    // miniz,
     imgui,
 };
 

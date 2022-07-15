@@ -1,6 +1,6 @@
 import {isDir, isFile, makeDirs} from "../utils.ts";
 import {logger} from "../logger.ts";
-import {path, fs} from "../../deps.ts";
+import {fs, path} from "../../deps.ts";
 import {BytesWriter} from "./helpers/BytesWriter.ts";
 import {Project} from "../project.ts";
 import {H} from "../utility/hash.ts";
@@ -82,17 +82,20 @@ export class AssetBuilderContext {
     }
 
     async populate() {
-        try {
+        let total = 0;
+        if (isDir(this.basePath)) {
             const bp = Deno.realPathSync(this.basePath);
             const scripts = fs.expandGlobSync(path.join(bp, "**/assets.js"));
             for (const script of scripts) {
                 const ctx = await import(script.path);
                 if (ctx.on_populate) {
                     ctx.on_populate(this);
+                    ++total;
                 }
             }
-        } catch (err) {
-            logger.warn(`Asset scripts not found (${this.basePath}) ⬇ \n`, err);
+        }
+        if (total === 0) {
+            logger.warn(`Asset scripts not found (${this.basePath}) ⬇ \n`);
         }
     }
 
@@ -137,8 +140,7 @@ export class AssetBuilderContext {
                 logger.info("Assets are not changed! Keep previous result");
                 return;
             }
-        }
-        else {
+        } else {
             logger.log("Previous assets hash file not found, rebuild assets");
         }
 

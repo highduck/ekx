@@ -38,5 +38,5 @@ export async function setup(project: Project) {
         }
     });
 
-    await project.importModule("@ekx/ekx/packages/app");
+    await project.importModule("../../packages/app/ek.ts");
 }

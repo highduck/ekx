@@ -1,7 +1,7 @@
 #pragma once
 
-#include <IconsMaterialDesign.h>
-#include <IconsFontAwesome5.h>
+#include <fonts/IconsMaterialDesign.h>
+#include <fonts/IconsFontAwesome5.h>
 
 namespace ek {
 

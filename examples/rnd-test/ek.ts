@@ -1,4 +1,4 @@
-import {path} from "ekx/deps.ts";
+import {path} from "../../modules/deps.ts";
 import {Project} from "../../modules/cli/project.ts";
 
 export async function setup(project: Project) {
@@ -43,5 +43,5 @@ export async function setup(project: Project) {
         image: "https://play-ilj.web.app/icons/icon192.png"
     };
 
-    await project.importModule("@ekx/ekx/packages/graphics");
+    await project.importModule("@ekx/ekx/packages/graphics/ek.ts");
 }

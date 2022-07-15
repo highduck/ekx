@@ -5,5 +5,5 @@ export async function setup(project: Project) {
         name: "physics-arcade",
         cpp: "src"
     });
-    await project.importModule("@ekx/ekx/packages/ecs");
+    await project.importModule("../ecs/ek.ts");
 }

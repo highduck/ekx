@@ -110,11 +110,15 @@ function renderCMakeFile(ctx: Project, buildType: string): string {
         // TODO: strange runtime DOM exception error with Release
         STRICT: 1,
 
-        // TODO: ABORT is not defined (nbnet)
-        // MINIMAL_RUNTIME: 1,
-
         //MINIMAL_RUNTIME_STREAMING_WASM_COMPILATION: 1,
-        //MODULARIZE: 1,
+        // { try ES6
+        // TODO: ABORT is not defined (nbnet) for MINIMAL_RUNTIME
+        MINIMAL_RUNTIME: 1,
+        MODULARIZE: 1,
+        EXPORT_ES6: 1,
+        //EXPORT_NAME: "createModule",
+        // }
+
         SUPPORT_ERRNO: 0,
 
         // STACK_OVERFLOW_CHECK: 2,
@@ -162,10 +166,6 @@ export async function buildWasm(ctx: Project, buildType: string) {
     }
 
     const cmakeFile = withPath(output_path, () => renderCMakeFile(ctx, buildType));
-
-    // if you need to look into generated html by Emscripten
-    // cmakeFile += "\n\n" + `set(CMAKE_EXECUTABLE_SUFFIX ".html")`
-
     await Deno.writeTextFile(path.join(output_path, "CMakeLists.txt"), cmakeFile);
 
     return await buildCMake({

@@ -13,7 +13,7 @@ export async function setup(project: Project) {
             js_pre: "js/pre"
         }
     });
-    await project.importModule("@ekx/ekx/packages/core");
-    await project.importModule("@ekx/ekx/packages/app");
-    await project.importModule("@ekx/ekx/external/sokol");
+    await project.importModule("../core/ek.ts");
+    await project.importModule("../app/ek.ts");
+    await project.importModule("../../external/sokol/ek.ts");
 }

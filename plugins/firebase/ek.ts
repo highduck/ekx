@@ -103,5 +103,5 @@ app_target.add_build_phase(shell)`
         }
     });
 
-    await project.importModule("@ekx/ekx/packages/app");
+    await project.importModule("../../packages/app/ek.ts");
 }

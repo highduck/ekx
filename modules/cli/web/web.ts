@@ -10,6 +10,7 @@ import {buildWasm} from "./buildWasm.ts";
 import {deployFirebaseHosting} from "./deployFirebaseHosting.ts";
 import {buildAppIconAsync} from "../appicon/appicon.ts";
 import {collectSourceRootsAll} from "../collectSources.ts";
+import * as esbuild from "https://deno.land/x/esbuild/mod.js";
 
 /*** HTML ***/
 export async function export_web(ctx: Project): Promise<void> {
@@ -48,12 +49,12 @@ export async function export_web(ctx: Project): Promise<void> {
         return Mustache.render(str, renderParameters);
     }
 
-    function tpl(from:string, to:string) {
+    function tpl(from: string, to: string) {
         const tplContent = Deno.readTextFileSync(path.join(ctx.sdk.templates, from));
         Deno.writeTextFileSync(path.join(outputDir, to), render(tplContent));
     }
 
-    function file(from:string, to:string) {
+    function file(from: string, to: string) {
         Deno.copyFileSync(
             path.join(ctx.sdk.templates, from),
             path.join(outputDir, to)
@@ -108,7 +109,7 @@ export async function export_web(ctx: Project): Promise<void> {
         ctx.web.bodyScript.push(Deno.readTextFileSync(path.join(ctx.sdk.templates, "web/initPWA.js")));
 
         const assetFiles: string[] = [];
-        for(const entry of fs.expandGlobSync(path.join(outputDir, "assets/**/*"))) {
+        for (const entry of fs.expandGlobSync(path.join(outputDir, "assets/**/*"))) {
             assetFiles.push(`"${path.relative(outputDir, entry.path)}"`);
         }
         const assetsList = assetFiles.join(",\n");
@@ -138,6 +139,19 @@ export async function export_web(ctx: Project): Promise<void> {
         Deno.copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm.map"), path.join(outputDir, ctx.name + ".wasm.map"));
     } catch {
         // ignore
+    }
+
+    if (ctx.args.indexOf("--debug") < 0) {
+        await esbuild.build({
+            entryPoints: [path.join(outputDir, ctx.name + ".js")],
+            target: ["chrome58", "firefox57", "safari11", "edge16"],
+            platform: "browser",
+            format: "esm",
+            minify: true,
+            bundle: true,
+            outfile: path.join(outputDir, ctx.name + ".js"),
+            allowOverwrite: true
+        });
     }
 
     const js_scripts = collectSourceRootsAll(ctx, "js_script", ["web"], ".");

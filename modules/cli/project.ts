@@ -1,4 +1,4 @@
-import {path} from "../deps.ts";
+import {path, fs} from "../deps.ts";
 import {BumpVersionFlag, SemVer} from "./version.ts";
 import {resolveFrom} from "./utility/resolveFrom.ts";
 import {ModuleDef, validateModuleDef} from "./module.ts";
@@ -122,6 +122,10 @@ export class Project {
     }
 
     async loadModule(configPath: string) {
+        if(!fs.existsSync(configPath)) {
+            console.error("File not found:", configPath);
+        }
+        configPath = Deno.realPathSync(configPath);
         if (this.projects[configPath]) {
             return;
         }
@@ -130,29 +134,30 @@ export class Project {
             const module = await import(configPath);
             const configurator = module.setup;
             if (configurator) {
+                const prev = this.__dirname;
                 this.__dirname = path.dirname(configPath);
-                const task = configurator(this) ?? true;
-                if (task instanceof Promise) {
-                    this.projects[configPath] = await task ?? true;
-                } else {
-                    this.projects[configPath] = task;
+                {
+                    const task = configurator(this) ?? true;
+                    if (task instanceof Promise) {
+                        this.projects[configPath] = await task ?? true;
+                    } else {
+                        this.projects[configPath] = task;
+                    }
                 }
+                this.__dirname = prev;
             }
         } catch (err) {
-            logger.error("Module is not resolved", configPath);
-            logger.error(err);
+            logger.error("Error: Module configuration", configPath, err);
         }
     }
 
     async importModule(moduleId: string, fromDir?: string) {
         const currentDir = fromDir ?? this.__dirname ?? Deno.cwd();
-        const moduleConfigPath =
-            resolveFrom(currentDir, moduleId + "/ek.ts") ??
-            resolveFrom(currentDir, moduleId + "/ek.js");
+        const moduleConfigPath = resolveFrom(currentDir, moduleId);
         if (moduleConfigPath) {
             await this.loadModule(moduleConfigPath);
         } else {
-            logger.warn(`ek.js module not found for "${moduleId}" from dir "${fromDir}"`);
+            throw Error(`Error: Module "${moduleId}" is not resolved from location "${currentDir}"`);
         }
     }
 

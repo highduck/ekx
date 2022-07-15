@@ -1,10 +1,12 @@
-import {path} from "ekx/deps.ts"
-import {downloadFiles, getModuleDir, rm} from "ekx/utils/mod.ts"
+import {path} from "../../modules/deps.ts"
+import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.ts"
 
 const __dirname = getModuleDir(import.meta);
 
 async function clean() {
     await rm(path.join(__dirname, "src"));
+    await rm(path.join(__dirname, "ttf"));
+    await rm(path.join(__dirname, "include"));
 }
 
 async function fetch() {
@@ -69,6 +71,70 @@ async function fetch() {
             "ImSequencer.cpp",
             "ImSequencer.h",
             "ImZoomSlider.h",
+        ]
+    });
+
+    await downloadFiles({
+        srcBaseUrl: `https://github.com/ocornut/imgui_club/raw/master`,
+        destPath: path.join(__dirname, "src"),
+        fileList: [
+            "imgui_memory_editor/imgui_memory_editor.h",
+        ]
+    });
+
+    await download_fonts();
+    await download_font_headers();
+}
+
+function download_fonts(): Promise<void> {
+    const destPath = path.join(__dirname, "ttf");
+    return Promise.all([
+        downloadFiles({
+            srcBaseUrl: `https://github.com/ocornut/imgui/raw/docking`,
+            destPath,
+            fileMap: {
+                "misc/fonts/Cousine-Regular.ttf": "Cousine-Regular.ttf"
+            }
+        }),
+        downloadFiles({
+            srcBaseUrl: `https://github.com/FortAwesome/Font-Awesome/raw/master/webfonts`,
+            destPath,
+            fileList: [
+                "fa-regular-400.ttf",
+                "fa-solid-900.ttf"
+            ]
+        }),
+        downloadFiles({
+            srcBaseUrl: `https://github.com/google/material-design-icons/raw/master/font`,
+            destPath,
+            fileList: [
+                "MaterialIcons-Regular.ttf"
+            ]
+        }),
+        downloadFiles({
+            srcBaseUrl: `https://github.com/tomochain/tomomaster/raw/master/app/assets/fonts/SFPro`,
+            destPath,
+            fileList: [
+                "sf-pro-text-regular.ttf",
+            ]
+        }),
+        downloadFiles({
+            srcBaseUrl: `https://fontsfree.net/wp-content/fonts/basic/sans-serif`,
+            destPath,
+            fileMap: {
+                "FontsFree-Net-SFMono-Regular.ttf": "sf-mono-text-regular.ttf"
+            }
+        }),
+    ]).then(() => undefined);
+}
+
+async function download_font_headers() {
+    await downloadFiles({
+        srcBaseUrl: `https://github.com/juliettef/IconFontCppHeaders/raw/main`,
+        destPath: path.join(__dirname, "src/fonts"),
+        fileList: [
+            "IconsFontAwesome5.h",
+            "IconsMaterialDesign.h"
         ]
     });
 }

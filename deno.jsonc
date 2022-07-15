@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "external-build": "DENO_TLS_CA_STORE=system deno run --allow-run --allow-env --allow-read=. --allow-write=. --allow-net ./external/build.ts",
+    "external-build": "DENO_TLS_CA_STORE=system deno run -A ./external/build.ts",
     "cli-install": "deno install -f -A -n ekx ./modules/cli/main.ts"
   },
   "compilerOptions": {

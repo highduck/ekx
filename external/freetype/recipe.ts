@@ -1,6 +1,5 @@
-import {path, fs} from "ekx/deps.ts"
-import {downloadCheck, untar} from "ekx/utils/mod.ts"
-import {copyFolderRecursive, getModuleDir, rm} from "ekx/utils/mod.ts"
+import {path, fs} from "../../modules/deps.ts"
+import {downloadCheck, untar, copyFolderRecursive, getModuleDir, rm} from "../../modules/utils/mod.ts"
 
 const __dirname = getModuleDir(import.meta);
 const cacheDir = path.join(__dirname, "cache");

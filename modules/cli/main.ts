@@ -61,11 +61,13 @@ async function defaultRun() {
 
     addExportBuildStep(project);
 
-    await project.loadModule(path.resolve(Deno.cwd(), "ek.js"));
+    await project.loadModule(path.resolve(Deno.cwd(), "ek.ts"));
     await project.runBuildSteps();
 }
 
 defaultRun().catch((e)=>{
     logger.error(e);
     Deno.exit(1);
+}).then(()=>{
+    Deno.exit(0);
 });

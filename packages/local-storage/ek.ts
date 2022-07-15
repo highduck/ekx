@@ -13,7 +13,7 @@ export async function setup(project: Project) {
         }
     });
     // for base app platform
-    await project.importModule("@ekx/ekx/packages/app");
+    await project.importModule("../app/ek.ts");
     // for base64 and others
-    await project.importModule("@ekx/ekx/packages/std");
+    await project.importModule("../std/ek.ts");
 }

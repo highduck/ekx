@@ -1,5 +1,5 @@
-import {path} from "ekx/deps.ts"
-import {downloadFiles, getModuleDir, rm} from "ekx/utils/mod.ts"
+import {path} from "../../modules/deps.ts"
+import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.ts"
 
 const __dirname = getModuleDir(import.meta);
 

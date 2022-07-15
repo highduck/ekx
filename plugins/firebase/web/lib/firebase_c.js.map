@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../firebase_c.js"],
-  "sourcesContent": ["mergeInto(LibraryManager.library, {\n    firebase_js: function(cmd) {\n        switch(cmd) {\n            case 0: return window[\"firebase_js\"][\"init\"]();\n        }\n        return false;\n    }\n});"],
-  "mappings": ";AAAA,UAAU,eAAe,SAAS;AAAA,EAC9B,aAAa,SAAS,KAAK;AACvB,YAAO;AAAA,WACE;AAAG,eAAO,OAAO,eAAe,QAAQ;AAAA;AAEjD,WAAO;AAAA,EACX;AACJ,CAAC;",
-  "names": []
-}

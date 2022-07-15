@@ -37,7 +37,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         )
 
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC stb
+        PUBLIC ekx::headers
         PUBLIC freetype
         )
 

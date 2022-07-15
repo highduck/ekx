@@ -1,5 +1,5 @@
-import {path, fs} from "ekx/deps.ts"
-import {downloadFiles, getModuleDir, rm} from "ekx/utils/mod.ts"
+import {path, fs} from "../../modules/deps.ts"
+import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.ts"
 
 const __dirname = getModuleDir(import.meta);
 
@@ -57,7 +57,7 @@ async function test() {
         cmd: [
             "node", path.join(__dirname, "sokol-shdc.js"),
             "-i", path.join(__dirname, "test/simple2d.glsl"),
-            "-o", path.join(__dirname, "build/test-shader/simple2d_shader.h"),
+            "-o", path.join(testDir, "simple2d_shader.h"),
             "-l", "glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos",
         ],
         stdout: "inherit",
