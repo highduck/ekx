@@ -41,6 +41,8 @@ target_link_libraries(${PROJECT_NAME}
         PUBLIC freetype
         )
 
+target_link_libraries(${PROJECT_NAME} PUBLIC m)
+
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 if (EKX_BUILD_EXTERNAL_TESTS)
