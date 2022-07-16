@@ -1,7 +1,11 @@
 #pragma once
 
 #include "ecx.h"
-#include <stddef.h>
+#include <cstddef>
+
+constexpr bool operator==(struct entity_t a, struct entity_t b) { return a.id == b.id; }
+
+constexpr bool operator!=(struct entity_t a, struct entity_t b) { return a.id != b.id; }
 
 namespace ecs {
 
@@ -78,11 +82,14 @@ struct Entity final : public entity_t {
     template<typename Component>
     bool remove() const;
 
-    operator entity_id_t () const = delete;
-    operator int32_t () const = delete;
+    operator entity_id_t() const = delete;
+
+    operator int32_t() const = delete;
+
     //operator uint32_t () const = delete;
-    operator int64_t () const = delete;
-    operator uint64_t () const = delete;
+    operator int64_t() const = delete;
+
+    operator uint64_t() const = delete;
 };
 
 //#pragma pack()

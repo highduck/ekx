@@ -47,11 +47,6 @@ typedef struct entity_t {
 
 #define NULL_ENTITY ((struct entity_t){0})
 
-#ifdef __cplusplus
-constexpr bool operator==(struct entity_t a, struct entity_t b) { return a.id == b.id; }
-constexpr bool operator!=(struct entity_t a, struct entity_t b) { return a.id != b.id; }
-#endif
-
 /**
  * Constructs entity structure by known numerical ID
  * @param id
