@@ -139,7 +139,9 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_compile_definitions(${PROJECT_NAME}
             PUBLIC CAIRO_WIN32_STATIC_BUILD)
 else()
-    target_link_libraries(${PROJECT_NAME} -pthread)
+    find_package(Threads REQUIRED)
+    target_link_libraries(${PROJECT_NAME}
+            PUBLIC m Threads::Threads)
 endif()
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
