@@ -70,8 +70,11 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile
 
-      - name: Build
-        run: yarn run ci:build-native
+      - name: Build JS
+        run: deno run -A build.ts
+
+      - name: Build Native
+        run: deno run -A build-native.ts
 
       - uses: actions/upload-artifact@v3
         if: runner.os == 'Linux'
@@ -90,23 +93,6 @@ jobs:
         with:
           name: bin-win32
           path: tools/*/bin/win32
-
-  build-js:
-    name: Build JS
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-
-      - name: Install dependencies
-        run: yarn --frozen-lockfile
-
-      - name: Build
-        run: yarn run ci:build
 
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
