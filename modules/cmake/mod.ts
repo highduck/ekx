@@ -1,5 +1,5 @@
-import {path, fs} from "../deps.ts";
-import {rm, getModuleDir} from "../utils/mod.ts";
+import {fs, path} from "../deps.ts";
+import {getModuleDir, rm} from "../utils/mod.ts";
 
 const __dirname = getModuleDir(import.meta);
 
@@ -144,53 +144,55 @@ export function resolveOptions(options?: BuildOptions): BuildOptions {
         opts.cxx = "ccache";
     }
 
-    switch (opts.os) {
-        case "web": {
-            if (!opts.toolchain) {
-                const sdk = getEmscriptenSDKPath();
-                opts.toolchain = path.resolve(sdk, "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake");
-            }
-            const nodePath = Deno.env.get("NODE");
-            if (!opts.env["EM_NODE_JS"] && nodePath) {
-                opts.env["EM_NODE_JS"] = nodePath;
-            }
-            //options.cc = undefined;
-            //options.cxx = undefined;
-        }
-            break;
-        case "android":
-            if (!opts.toolchain) {
-                opts.toolchain = path.join(getNDKPath(), "build/cmake/android.toolchain.cmake");
-            }
-            opts.definitions.ANDROID_ABI = "x86_64";
-            opts.cc = undefined;
-            opts.cxx = undefined;
-            break;
-        case "ios":
-            if (!opts.toolchain) {
-                opts.toolchain = path.resolve(__dirname, "ios.cmake");
-            }
-            opts.definitions.PLATFORM = "SIMULATOR64";
-            break;
-        case "windows":
-            if (Deno.build.os === "darwin") {
+    if (opts.os !== Deno.build.os) {
+        switch (opts.os) {
+            case "web": {
                 if (!opts.toolchain) {
-                    opts.toolchain = path.resolve(__dirname, "mingw-w64-x86_64.cmake");
-                    console.info(opts.toolchain);
+                    const sdk = getEmscriptenSDKPath();
+                    opts.toolchain = path.resolve(sdk, "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake");
                 }
+                const nodePath = Deno.env.get("NODE");
+                if (!opts.env["EM_NODE_JS"] && nodePath) {
+                    opts.env["EM_NODE_JS"] = nodePath;
+                }
+                //options.cc = undefined;
+                //options.cxx = undefined;
+            }
+                break;
+            case "android":
+                if (!opts.toolchain) {
+                    opts.toolchain = path.join(getNDKPath(), "build/cmake/android.toolchain.cmake");
+                }
+                opts.definitions.ANDROID_ABI = "x86_64";
                 opts.cc = undefined;
                 opts.cxx = undefined;
-            } else {
-                throw new Error("not supported");
-            }
-            break;
+                break;
+            case "ios":
+                if (!opts.toolchain) {
+                    opts.toolchain = path.resolve(__dirname, "ios.cmake");
+                }
+                opts.definitions.PLATFORM = "SIMULATOR64";
+                break;
+            case "windows":
+                if (Deno.build.os === "darwin") {
+                    if (!opts.toolchain) {
+                        opts.toolchain = path.resolve(__dirname, "mingw-w64-x86_64.cmake");
+                        console.info(opts.toolchain);
+                    }
+                    opts.cc = undefined;
+                    opts.cxx = undefined;
+                } else {
+                    throw new Error("not supported");
+                }
+                break;
+        }
     }
 
     return opts;
 }
 
 export async function clean(options: BuildOptions): Promise<void> {
-    if(options.buildDir) {
+    if (options.buildDir) {
         console.info("Clean build directory:", options.buildDir);
         await rm(options.buildDir);
     }
@@ -198,7 +200,7 @@ export async function clean(options: BuildOptions): Promise<void> {
 
 export async function configure(options: BuildOptions): Promise<void> {
     console.info("Configure");
-    if(options.cmakePath == null || options.buildDir == null) {
+    if (options.cmakePath == null || options.buildDir == null) {
         throw new Error("Bad arguments: cmakePath or buildDir");
     }
     const args = [
@@ -219,7 +221,7 @@ export async function configure(options: BuildOptions): Promise<void> {
         args.push(`-DCMAKE_TOOLCHAIN_FILE=${options.toolchain}`);
     }
     args.push(`-DCMAKE_BUILD_TYPE=${options.buildType}`);
-    if(options.definitions) {
+    if (options.definitions) {
         for (const key of Object.keys(options.definitions)) {
             args.push(`-D${key}=${options.definitions[key]}`);
         }
