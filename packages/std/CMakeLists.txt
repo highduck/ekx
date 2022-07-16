@@ -52,9 +52,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
             PUBLIC log
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    find_package(Threads REQUIRED)
     target_link_libraries(${PROJECT_NAME}
-            PUBLIC m c
-            )
+            PUBLIC m Threads::Threads)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(${PROJECT_NAME}
             PUBLIC m
