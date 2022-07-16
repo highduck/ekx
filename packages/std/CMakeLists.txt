@@ -52,6 +52,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
             PUBLIC log
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    target_link_libraries(${PROJECT_NAME}
+            PUBLIC m rt
+            )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(${PROJECT_NAME}
             PUBLIC m
