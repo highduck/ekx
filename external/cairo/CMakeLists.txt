@@ -134,6 +134,9 @@ add_library(${PROJECT_NAME} STATIC
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES C_STANDARD 99)
+target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wno-int-to-pointer-cast
+        )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_compile_definitions(${PROJECT_NAME}

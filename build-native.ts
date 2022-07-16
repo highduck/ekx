@@ -4,6 +4,7 @@ import {build} from "./modules/cmake/mod.ts";
 await build({
     test: true,
     debug: false,
+    os: "windows",
     definitions: {
         EKX_BUILD_DEV_TOOLS: "ON",
         EKX_BUILD_TESTS: "ON",

@@ -29,8 +29,6 @@ target_compile_options(${PROJECT_NAME}
         #PUBLIC -flto
         PUBLIC -O0
         PUBLIC -fno-strict-aliasing
-        PUBLIC -fno-exceptions
-        PUBLIC -fno-rtti
         PUBLIC -ffast-math
         PUBLIC -Wstrict-aliasing=2
         )

@@ -17,8 +17,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES C_STANDARD 11)
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-        -fno-exceptions
-        -fno-rtti
         -fno-strict-aliasing
         -Wstrict-aliasing=2
         )
