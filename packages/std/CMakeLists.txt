@@ -53,7 +53,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(${PROJECT_NAME}
-            PUBLIC m rt
+            PUBLIC m c
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(${PROJECT_NAME}
@@ -63,7 +63,7 @@ else ()
     error("Platform: UNKNOWN")
 endif ()
 
-#if (EKX_BUILD_TESTS)
+if (EKX_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
-#endif ()
+endif ()
