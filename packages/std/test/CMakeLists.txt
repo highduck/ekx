@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
 project(std-tests C)
 
-enable_testing()
-
 add_executable(${PROJECT_NAME}
         std_test_main.c
         bitmap/bitmap_test.c
@@ -20,6 +18,7 @@ add_executable(${PROJECT_NAME}
         )
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${NODE_JS_EXECUTABLE} $<TARGET_FILE:${PROJECT_NAME}>)
+test_code_coverage(${PROJECT_NAME})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES C_STANDARD 11)
 target_compile_definitions(${PROJECT_NAME} PUBLIC UNIT_TESTING)

@@ -7,8 +7,8 @@ add_executable(${PROJECT_NAME}
         ecxx/common/identity_generator_test_2.cpp
         )
 
-enable_testing()
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+test_code_coverage(${PROJECT_NAME})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17

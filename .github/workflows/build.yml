@@ -74,7 +74,7 @@ jobs:
         run: deno run -A build.ts
 
       - name: Build Native
-        run: deno run -A build-native.ts
+        run: deno run -A native-build.ts
 
       - uses: actions/upload-artifact@v3
         if: runner.os == 'Linux'
@@ -93,6 +93,9 @@ jobs:
         with:
           name: bin-win32
           path: tools/*/bin/win32
+
+      - name: Coverage Native
+        run: deno run -A native-coverage.ts
 
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
@@ -141,8 +144,8 @@ jobs:
           yarn --frozen-lockfile
           yarn global add @changesets/cli
 
-      - name: Build
-        run: yarn run ci:build
+      - name: Build JS
+        run: deno run -A build.ts
 
       - name: Create Release Pull Request or Publish to NPM
         id: changesets

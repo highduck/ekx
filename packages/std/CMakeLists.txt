@@ -7,6 +7,7 @@ add_library(${PROJECT_NAME} STATIC
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+target_code_coverage(${PROJECT_NAME} PUBLIC)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
@@ -64,6 +65,5 @@ else ()
 endif ()
 
 if (EKX_BUILD_TESTS)
-    enable_testing()
     add_subdirectory(test)
 endif ()

@@ -14,7 +14,8 @@
     "version": "changeset version && yarn run update-lock",
     "update-lock": "yarn && git add yarn.lock",
     "ci:build": "deno run -A build.ts",
-    "ci:build-native": "deno run -A build-native.ts"
+    "ci:native-build": "deno run -A native-build.ts",
+    "ci:native-coverage": "deno run -A native-coverage.ts"
   },
   "devDependencies": {
     "@types/emscripten": "^1.39.6"
