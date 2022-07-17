@@ -50,13 +50,6 @@ jobs:
             mingw-w64-clang-x86_64-clang
             mingw-w64-clang-x86_64-gcc
 
-      # llvm-profdata / llvm-cov
-      - name: Install LLVM and Clang (Linux)
-        uses: KyleMayes/install-llvm-action@v1
-        if: runner.os == 'Linux'
-        with:
-          version: "10.0"
-
       - name: Setup OpenGL (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -100,6 +93,13 @@ jobs:
         with:
           name: bin-win32
           path: tools/*/bin/win32
+
+      # llvm-profdata / llvm-cov
+      - name: Install LLVM and Clang (Linux)
+        uses: KyleMayes/install-llvm-action@v1
+        if: runner.os == 'Linux'
+        with:
+          version: "10.0"
 
       - name: Coverage Native
         run: deno run -A native-coverage.ts
