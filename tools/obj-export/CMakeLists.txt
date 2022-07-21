@@ -21,8 +21,6 @@ target_link_libraries(${PROJECT_NAME}
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(OBJ_EXPORT_OS_PREFIX osx)
-
     if (CMAKE_BUILD_TYPE MATCHES Debug)
         set(EKC_COMPILE_FLAGS "-O2 -g -fno-exceptions -fno-rtti")
         set(EKC_LINK_FLAGS "-O2 -g")
@@ -39,9 +37,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(${PROJECT_NAME}
             PRIVATE shlwapi
             )
-    set(OBJ_EXPORT_OS_PREFIX win32)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(OBJ_EXPORT_OS_PREFIX linux)
     if (CMAKE_BUILD_TYPE MATCHES Debug)
     else ()
         target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
@@ -49,7 +45,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif ()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/${OBJ_EXPORT_OS_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../bin"
         RUNTIME_OUTPUT_NAME "${PROJECT_NAME}"
         RUNTIME_OUTPUT_NAME_DEBUG "${PROJECT_NAME}-debug"
         )

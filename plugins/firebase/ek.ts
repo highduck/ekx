@@ -5,7 +5,7 @@ export async function setup(project: Project) {
     project.onProjectGenerated.push(() => {
         if (project.current_target === "android") {
             if (!project.android.googleServicesConfigDir) {
-                console.error("please set `android.googleServicesConfigDir` !!!");
+                throw new Error("please set `android.googleServicesConfigDir` !!!");
             }
             const configFile = "google-services.json";
             const configPath = path.join(path.resolve(project.projectPath, project.android.googleServicesConfigDir), configFile);
@@ -17,10 +17,10 @@ export async function setup(project: Project) {
             }
         } else if (project.current_target === "ios") {
             if (!project.ios.googleServicesConfigDir) {
-                console.error("please set `ios.googleServicesConfigDir` !!!");
+                throw new Error("please set `ios.googleServicesConfigDir` !!!");
             }
             const configFile = "GoogleService-Info.plist";
-            const configPath = path.join(path.resolve(project.projectPath, project.android.googleServicesConfigDir), configFile);
+            const configPath = path.join(path.resolve(project.projectPath, project.ios.googleServicesConfigDir), configFile);
             try {
                 // CWD is project generated path here
                 Deno.copyFileSync(configPath, configFile)

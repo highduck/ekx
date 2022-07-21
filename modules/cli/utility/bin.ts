@@ -1,28 +1,17 @@
-import {path} from "../../deps.ts";
-import {resolveFrom} from "./resolveFrom.ts";
+import {fs, path} from "../../deps.ts";
 import {getModuleDir} from "../../utils/utils.ts";
 
-function getBinaryOS(): string {
-    const platform = Deno.build.os;
-    switch (platform) {
-        case "darwin":
-            return "osx";
-        case "linux":
-            return "linux";
-        case "windows":
-            return "win32";
-    }
-    throw new Error(`error: platform ${platform} is not supported`);
-}
-
-export function getBinaryPath(pkg: string, bin: string) {
+export function getToolsBinPath(bin: string): string {
     if (Deno.build.os === "windows") {
         bin += ".exe";
     }
-    const pathToBinary = path.join(pkg, "bin", getBinaryOS(), bin);
-    const resolvedBinary = resolveFrom(getModuleDir(import.meta), pathToBinary);
-    if (resolvedBinary == null) {
-        throw new Error("can't resolve " + pathToBinary);
+    return path.resolve(getModuleDir(import.meta), "../../../tools/bin/" + bin);
+}
+
+export function resolveToolsBinPath(bin: string): string {
+    const result = getToolsBinPath(bin);
+    if (!fs.existsSync(result)) {
+        throw new Error("Not found: tools binary @ " + result);
     }
-    return resolvedBinary;
+    return result;
 }

@@ -67,9 +67,6 @@ jobs:
         with:
           key: ${{ runner.os }}
 
-      - name: Install dependencies
-        run: yarn --frozen-lockfile
-
       - name: Build JS
         run: deno run -A build.ts
 
@@ -77,22 +74,17 @@ jobs:
         run: deno run -A native-build.ts
 
       - uses: actions/upload-artifact@v3
-        if: runner.os == 'Linux'
         with:
-          name: bin-linux
-          path: tools/*/bin/linux
-
-      - uses: actions/upload-artifact@v3
-        if: runner.os == 'macOS'
-        with:
-          name: bin-osx
-          path: tools/*/bin/osx
-
-      - uses: actions/upload-artifact@v3
-        if: runner.os == 'Windows'
-        with:
-          name: bin-win32
-          path: tools/*/bin/win32
+          name: ${{ runner.os }}
+          path: |
+            tools/bin/
+            external/
+            modules/
+            packages/
+            plugins/
+            import_map.json
+            deno.jsonc
+            CMakeLists.txt
 
       # llvm-profdata / llvm-cov
       - name: Install LLVM and Clang (Linux)
@@ -117,42 +109,13 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: bin-osx
-          path: tools
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: bin-linux
-          path: tools
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: bin-win32
-          path: tools
-
-      - name: Setup execute permission
-        run: |
-          chmod +x tools/bmfont-export/bin/osx/bmfont-export
-          chmod +x tools/bmfont-export/bin/linux/bmfont-export
-          chmod +x tools/bmfont-export/bin/win32/bmfont-export.exe
-          chmod +x tools/flash-export/bin/osx/flash-export
-          chmod +x tools/flash-export/bin/linux/flash-export
-          chmod +x tools/flash-export/bin/win32/flash-export.exe
-          chmod +x tools/obj-export/bin/osx/obj-export
-          chmod +x tools/obj-export/bin/linux/obj-export
-          chmod +x tools/obj-export/bin/win32/obj-export.exe
-          chmod +x tools/sprite-packer/bin/osx/sprite-packer
-          chmod +x tools/sprite-packer/bin/linux/sprite-packer
-          chmod +x tools/sprite-packer/bin/win32/sprite-packer.exe
+          name: ${{ runner.os }}
 
       - name: Intall Dependencies
         run: |
           yarn --version
           yarn --frozen-lockfile
           yarn global add @changesets/cli
-
-      - name: Build JS
-        run: deno run -A build.ts
 
       - name: Create Release Pull Request or Publish to NPM
         id: changesets

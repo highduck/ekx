@@ -5,9 +5,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "bin": {
-    "ekx": "./cli.js"
-  },
   "scripts": {
     "release": "changeset publish",
     "version": "changeset version && yarn run update-lock",

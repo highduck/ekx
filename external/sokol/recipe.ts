@@ -1,6 +1,7 @@
-import {path, fs} from "../../modules/deps.ts"
-import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.ts"
+import {fs, path} from "../../modules/deps.ts"
+import {download, downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.ts"
 import {shdc} from "../../modules/sokol-shdc.ts";
+import {getToolsBinPath} from "../../modules/cli/utility/bin.ts";
 
 const __dirname = getModuleDir(import.meta);
 
@@ -31,19 +32,15 @@ async function fetch() {
     });
 
     // download shdc tool
-    await downloadFiles({
-        srcBaseUrl: "https://github.com/floooh/sokol-tools-bin/raw/master",
-        destPath: __dirname,
-        fileList: [
-            "bin/linux/sokol-shdc",
-            "bin/osx/sokol-shdc",
-            "bin/win32/sokol-shdc.exe",
-        ]
-    });
-
-    Deno.chmodSync(path.join(__dirname, "bin/linux/sokol-shdc"), 0o755);
-    Deno.chmodSync(path.join(__dirname, "bin/osx/sokol-shdc"), 0o755);
-    Deno.chmodSync(path.join(__dirname, "bin/win32/sokol-shdc.exe"), 0o755);
+    const exeURL = {
+        linux: "bin/linux/sokol-shdc",
+        darwin: "bin/osx/sokol-shdc",
+        windows: "bin/win32/sokol-shdc.exe",
+    }[Deno.build.os];
+    const exePath = getToolsBinPath("sokol-shdc");
+    fs.ensureDirSync(path.dirname(exePath));
+    await download("https://github.com/floooh/sokol-tools-bin/raw/master/" + exeURL, exePath);
+    Deno.chmodSync(exePath, 0o755);
 }
 
 async function test() {

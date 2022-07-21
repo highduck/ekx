@@ -110,6 +110,8 @@ export interface AndroidConfig extends CxxConfig {
      */
     android_gradleApplyPlugin?: UserArray<string>;
 
+    android_gradleConfigRelease?: UserArray<string>;
+
     // add to the root of AndroidManifest.xml
     android_manifest?: UserArray<string>;
 
@@ -160,6 +162,7 @@ export interface WasmConfig extends CxxConfig {
     js?: UserArray<string>;
     // search all `**/*.js` in directories and pre-concatenate them to the compiled JavaScript wrapper (`--pre-js` option)
     js_pre?: UserArray<string>;
+    js_script?: UserArray<string>;
 }
 
 type JSName = "js" | "js_pre" | "js_script";

@@ -41,8 +41,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(SPRITE_PACKER_OS_PREFIX osx)
-
     if (CMAKE_BUILD_TYPE MATCHES Debug)
         #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -g")
     else ()
@@ -57,9 +55,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(${PROJECT_NAME}
             PRIVATE shlwapi
             )
-    set(SPRITE_PACKER_OS_PREFIX win32)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(SPRITE_PACKER_OS_PREFIX linux)
     target_link_libraries(${PROJECT_NAME}
             PUBLIC pthread)
     if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -69,7 +65,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif ()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/${SPRITE_PACKER_OS_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../bin"
         RUNTIME_OUTPUT_NAME "sprite-packer"
         RUNTIME_OUTPUT_NAME_DEBUG "sprite-packer-debug"
         )
