@@ -18,13 +18,13 @@ interface Lib {
 
 const libs: { [key: string]: Lib } = {
     headers,
-    // box2d,
-    // cairo,
-    // freetype,
-    // sokol,
-    // quickjs,
-    // pugixml,
-    // miniz,
+    box2d,
+    cairo,
+    freetype,
+    sokol,
+    quickjs,
+    pugixml,
+    miniz,
     imgui,
 };
 

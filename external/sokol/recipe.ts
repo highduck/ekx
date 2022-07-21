@@ -1,5 +1,6 @@
 import {path, fs} from "../../modules/deps.ts"
 import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.ts"
+import {shdc} from "../../modules/sokol-shdc.ts";
 
 const __dirname = getModuleDir(import.meta);
 
@@ -53,20 +54,14 @@ async function test() {
         throw new Error("fail to create output directory");
     }
 
-    const r = await Deno.run({
-        cmd: [
-            "node", path.join(__dirname, "sokol-shdc.js"),
-            "-i", path.join(__dirname, "test/simple2d.glsl"),
-            "-o", path.join(testDir, "simple2d_shader.h"),
-            "-l", "glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos",
-        ],
-        stdout: "inherit",
-        stderr: "inherit"
-    }).status();
+    const r = await shdc({
+        input: "test/simple2d.glsl",
+        output: path.join(testDir, "simple2d_shader.h"),
+        cwd: __dirname
+    });
 
-    if (!r.success) {
-        console.warn("sokol-shdc status code:", r.code);
-        //process.exit(1);
+    if (!r) {
+        console.warn("sokol-shdc is failed");
     }
 
     if (!fs.existsSync(path.join(testDir, "simple2d_shader.h"))) {
