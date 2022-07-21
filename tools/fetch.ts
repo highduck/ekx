@@ -12,7 +12,9 @@ async function fetch_shdc() {
     const exePath = getToolsBinPath("sokol-shdc");
     fs.ensureDirSync(path.dirname(exePath));
     await download("https://github.com/floooh/sokol-tools-bin/raw/master/" + exeURL, exePath);
-    Deno.chmodSync(exePath, 0o755);
+    if (Deno.build.os !== "windows") {
+        Deno.chmodSync(exePath, 0o755);
+    }
 }
 
 await fetch_shdc();
