@@ -67,6 +67,11 @@ jobs:
         with:
           key: ${{ runner.os }}
 
+      - name: Fetch and test external tools
+        run: |
+          deno run -A ./tools/fetch.ts
+          deno run -A ./tools/test.ts 
+
       - name: Build JS
         run: deno run -A build.ts
 

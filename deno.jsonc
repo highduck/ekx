@@ -1,5 +1,7 @@
 {
   "tasks": {
+    "tools-fetch": "DENO_TLS_CA_STORE=system deno run -A ./tools/fetch.ts",
+    "tools-test": "deno run -A ./tools/test.ts",
     "external-build": "DENO_TLS_CA_STORE=system deno run -A ./external/build.ts",
     "cli-install": "deno install -f -A -n ekx ./modules/cli/main.ts"
   },
