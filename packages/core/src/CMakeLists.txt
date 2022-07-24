@@ -12,7 +12,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/util/Signal.hpp
         ek/util/StringUtil.hpp
-        ek/util/Path.hpp
 
         ek/util/StaticStorage.hpp
 

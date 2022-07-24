@@ -4,7 +4,7 @@
 #include <ek/serialize/streams.hpp>
 #include <ek/ds/Array.hpp>
 #include <ek/ds/PodArray.hpp>
-#include <ek/util/Path.hpp>
+#include <ek/ds/String.hpp>
 
 namespace ek {
 
@@ -88,7 +88,6 @@ public:
     [[nodiscard]] float getProgress() const override;
 
     String name_;
-    String fullPath_;
     PodArray<Asset*> assets;
     unsigned assetsLoaded = 0;
     bool assetListLoaded = false;

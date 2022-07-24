@@ -4,7 +4,7 @@
 #include <ek/log.h>
 
 #include <ek/serialize/serialize.hpp>
-#include <ek/util/Path.hpp>
+#include <ek/ds/String.hpp>
 #include <ek/ds/PodArray.hpp>
 #include <ek/local_res.h>
 #include <ek/gfx.h>
@@ -160,7 +160,11 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
 void Atlas::load(const char* path, float scaleFactor) {
     char meta_file_path[1024];
     ek_snprintf(meta_file_path, sizeof meta_file_path, "%s@%dx.atlas", path, get_scale_num(scaleFactor));
-    base_path = Path::directory(path);
+
+    char dir_buf[1024];
+    ek_path_dirname(dir_buf, sizeof dir_buf, path);
+    base_path = dir_buf;
+
     ek_local_res_load(
             meta_file_path,
             [](ek_local_res* lr) {

@@ -5,10 +5,7 @@ add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} INTERFACE include)
 
-target_link_libraries(${PROJECT_NAME}
-        INTERFACE dr-libs
-        INTERFACE stb
-        )
+target_link_libraries(${PROJECT_NAME} INTERFACE ekx::headers)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     target_link_libraries(${PROJECT_NAME}
