@@ -35,6 +35,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - uses: msys2/setup-msys2@v2
         if: runner.os == 'Windows'
         with:
