@@ -31,7 +31,6 @@
     SOKOL_FONTSTASH_API_DECL    - public function declaration prefix (default: extern)
     SOKOL_API_DECL      - same as SOKOL_FONTSTASH_API_DECL
     SOKOL_API_IMPL      - public function implementation prefix (default: -)
-    SOKOL_LOG(msg)      - your own logging function (default: puts(msg))
     SOKOL_UNREACHABLE() - a guard macro for unreachable code (default: assert(false))
 
     Include the following headers before including sokol_fontstash.h:
@@ -266,20 +265,12 @@ SOKOL_FONTSTASH_API_DECL uint32_t sfons_rgba(uint8_t r, uint8_t g, uint8_t b, ui
 #endif
 #ifndef SOKOL_DEBUG
     #ifndef NDEBUG
-        #define SOKOL_DEBUG (1)
+        #define SOKOL_DEBUG
     #endif
 #endif
 #ifndef SOKOL_ASSERT
     #include <assert.h>
     #define SOKOL_ASSERT(c) assert(c)
-#endif
-#ifndef SOKOL_LOG
-    #ifdef SOKOL_DEBUG
-        #include <stdio.h>
-        #define SOKOL_LOG(s) { SOKOL_ASSERT(s); puts(s); }
-    #else
-        #define SOKOL_LOG(s)
-    #endif
 #endif
 #ifndef SOKOL_UNREACHABLE
     #define SOKOL_UNREACHABLE SOKOL_ASSERT(false)
@@ -1861,16 +1852,6 @@ static sfons_desc_t _sfons_desc_defaults(const sfons_desc_t* desc) {
     return res;
 }
 
-// NOTE clang analyzer will report a potential memory leak for the call
-// to _sfons_malloc_clear in the sfons_create() function, this is a false positive
-// (the freeing happens in sfons_destroy()). The following macro
-// silences the false positive when compilation happens with the analyzer active
-#if __clang_analyzer__
-#define _SFONS_CLANG_ANALYZER_SILENCE_POTENTIAL_LEAK_FALSE_POSITIVE(a,x) _sfons_free(a,x)
-#else
-#define _SFONS_CLANG_ANALYZER_SILENCE_POTENTIAL_LEAK_FALSE_POSITIVE(a,x)
-#endif
-
 SOKOL_API_IMPL FONScontext* sfons_create(const sfons_desc_t* desc) {
     SOKOL_ASSERT(desc);
     SOKOL_ASSERT((desc->allocator.alloc && desc->allocator.free) || (!desc->allocator.alloc && !desc->allocator.free));
@@ -1887,9 +1868,7 @@ SOKOL_API_IMPL FONScontext* sfons_create(const sfons_desc_t* desc) {
     params.renderDraw = _sfons_render_draw;
     params.renderDelete = _sfons_render_delete;
     params.userPtr = sfons;
-    FONScontext* ctx = fonsCreateInternal(&params);
-    _SFONS_CLANG_ANALYZER_SILENCE_POTENTIAL_LEAK_FALSE_POSITIVE(&desc->allocator, sfons);
-    return ctx;
+    return fonsCreateInternal(&params);
 }
 
 SOKOL_API_IMPL void sfons_destroy(FONScontext* ctx) {

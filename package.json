@@ -16,7 +16,10 @@
     "update-lock": "yarn && git add yarn.lock",
     "ci:build": "ts-node --esm --swc build.ts",
     "ci:native-build": "ts-node --esm --swc native-build.ts",
-    "ci:native-coverage": "ts-node --esm --swc native-coverage.ts"
+    "ci:native-coverage": "ts-node --esm --swc native-coverage.ts",
+    "build-external": "cd external && ts-node --esm --swc build.ts",
+    "fetch-tools": "cd tools && ts-node --esm --swc fetch.ts",
+    "test-tools": "cd tools && ts-node --esm --swc test.ts"
   },
   "dependencies": {
     "colors": "^1.4.0",
