@@ -35,10 +35,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-
       - uses: msys2/setup-msys2@v2
         if: runner.os == 'Windows'
         with:
@@ -67,16 +63,21 @@ jobs:
         with:
           key: ${{ runner.os }}
 
+      - name: Install NPM dependencies
+        run: |
+          yarn --version
+          yarn --frozen-lockfile
+
       - name: Fetch and test external tools
         run: |
-          deno run -A ./tools/fetch.ts
-          deno run -A ./tools/test.ts 
+          yarn run fetch-tools
+          yarn run test-tools 
 
       - name: Build JS
-        run: deno run -A build.ts
+        run: yarn run ci:build
 
       - name: Build Native
-        run: deno run -A native-build.ts
+        run: yarn run ci:native-build
 
       - uses: actions/upload-artifact@v3
         with:
@@ -87,8 +88,7 @@ jobs:
             modules/
             packages/
             plugins/
-            import_map.json
-            deno.jsonc
+            package.json
             CMakeLists.txt
 
       # llvm-profdata / llvm-cov
@@ -99,7 +99,7 @@ jobs:
           version: "10.0"
 
       - name: Coverage Native
-        run: deno run -A native-coverage.ts
+        run: yarn run ci:native-coverage
 
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
@@ -116,7 +116,7 @@ jobs:
         with:
           name: ${{ runner.os }}
 
-      - name: Intall Dependencies
+      - name: Install NPM dependencies
         run: |
           yarn --version
           yarn --frozen-lockfile
