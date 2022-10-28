@@ -1,16 +1,18 @@
-import {fs, path} from "../../deps.ts";
-import {makeDirs, replaceInFile} from "../utils.ts";
-import {buildAssetPackAsync} from "../assets.ts";
-import * as Mustache from "https://deno.land/x/mustache_ts/mustache.ts";
-import {Project} from "../project.ts";
-import {BuildResult} from "../../cmake/mod.ts";
-import {serve} from "./serve.ts";
-import {logger} from "../logger.ts";
-import {buildWasm} from "./buildWasm.ts";
-import {deployFirebaseHosting} from "./deployFirebaseHosting.ts";
-import {buildAppIconAsync} from "../appicon/appicon.ts";
-import {collectSourceRootsAll} from "../collectSources.ts";
-import * as esbuild from "https://deno.land/x/esbuild/mod.js";
+import * as fs from "fs";
+import * as path from "path";
+import Mustache from "mustache";
+import * as esbuild from "esbuild";
+import {makeDirs, replaceInFile} from "../utils.js";
+import {buildAssetPackAsync} from "../assets.js";
+import {Project} from "../project.js";
+import {BuildResult} from "../../cmake/mod.js";
+import {serve} from "./serve.js";
+import {logger} from "../logger.js";
+import {buildWasm} from "./buildWasm.js";
+import {deployFirebaseHosting} from "./deployFirebaseHosting.js";
+import {buildAppIconAsync} from "../appicon/appicon.js";
+import {collectSourceRootsAll} from "../collectSources.js";
+import {expandGlobSync, readTextFileSync, writeTextFileSync} from "../../utils/utils.js";
 
 /*** HTML ***/
 export async function export_web(ctx: Project): Promise<void> {
@@ -50,12 +52,12 @@ export async function export_web(ctx: Project): Promise<void> {
     }
 
     function tpl(from: string, to: string) {
-        const tplContent = Deno.readTextFileSync(path.join(ctx.sdk.templates, from));
-        Deno.writeTextFileSync(path.join(outputDir, to), render(tplContent));
+        const tplContent = readTextFileSync(path.join(ctx.sdk.templates, from));
+        writeTextFileSync(path.join(outputDir, to), render(tplContent));
     }
 
     function file(from: string, to: string) {
-        Deno.copyFileSync(
+        fs.copyFileSync(
             path.join(ctx.sdk.templates, from),
             path.join(outputDir, to)
         );
@@ -65,7 +67,7 @@ export async function export_web(ctx: Project): Promise<void> {
     const buildTask = buildWasm(ctx, buildType);
     const assetsTask = buildAssetPackAsync(ctx, path.join(outputDir, "assets"));
 
-    const webManifest = JSON.parse(Deno.readTextFileSync(path.join(ctx.sdk.templates, "web/manifest.json")));
+    const webManifest = JSON.parse(readTextFileSync(path.join(ctx.sdk.templates, "web/manifest.json")));
     webManifest.name = ctx.title ?? ctx.name;
     webManifest.short_name = ctx.title ?? ctx.name;
     webManifest.description = ctx.desc;
@@ -76,7 +78,7 @@ export async function export_web(ctx: Project): Promise<void> {
         webManifest.related_applications = ctx.web.applications;
     }
 
-    Deno.writeTextFileSync(path.join(outputDir, "manifest.json"), JSON.stringify(webManifest));
+    writeTextFileSync(path.join(outputDir, "manifest.json"), JSON.stringify(webManifest));
     const iconsTask = buildAppIconAsync({
         output: outputDir,
         webManifestIcons: webManifest.icons,
@@ -98,7 +100,7 @@ export async function export_web(ctx: Project): Promise<void> {
         }
     }
 
-    ctx.web.bodyScript.push(render(Deno.readTextFileSync(path.join(ctx.sdk.templates, "web/initModule.js"))));
+    ctx.web.bodyScript.push(render(readTextFileSync(path.join(ctx.sdk.templates, "web/initModule.js"))));
 
     const pwa = false;
     if (pwa) {
@@ -106,10 +108,10 @@ export async function export_web(ctx: Project): Promise<void> {
         file("web/pwacompat.min.js", "pwacompat.min.js");
         tpl("web/sw.js", "sw.js");
 
-        ctx.web.bodyScript.push(Deno.readTextFileSync(path.join(ctx.sdk.templates, "web/initPWA.js")));
+        ctx.web.bodyScript.push(readTextFileSync(path.join(ctx.sdk.templates, "web/initPWA.js")));
 
         const assetFiles: string[] = [];
-        for (const entry of fs.expandGlobSync(path.join(outputDir, "assets/**/*"))) {
+        for (const entry of expandGlobSync(path.join(outputDir, "assets/**/*"))) {
             assetFiles.push(`"${path.relative(outputDir, entry.path)}"`);
         }
         const assetsList = assetFiles.join(",\n");
@@ -133,10 +135,10 @@ export async function export_web(ctx: Project): Promise<void> {
         logger.error("build failed", e);
         throw e;
     }
-    Deno.copyFileSync(path.join(buildResult.buildDir, ctx.name + ".js"), path.join(outputDir, ctx.name + ".js"));
-    Deno.copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm"), path.join(outputDir, ctx.name + ".wasm"));
+    fs.copyFileSync(path.join(buildResult.buildDir, ctx.name + ".js"), path.join(outputDir, ctx.name + ".js"));
+    fs.copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm"), path.join(outputDir, ctx.name + ".wasm"));
     try {
-        Deno.copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm.map"), path.join(outputDir, ctx.name + ".wasm.map"));
+        fs.copyFileSync(path.join(buildResult.buildDir, ctx.name + ".wasm.map"), path.join(outputDir, ctx.name + ".wasm.map"));
     } catch {
         // ignore
     }
@@ -156,7 +158,7 @@ export async function export_web(ctx: Project): Promise<void> {
 
     const js_scripts = collectSourceRootsAll(ctx, "js_script", ["web"], ".");
     for (const js_script of js_scripts) {
-        Deno.copyFileSync(js_script, path.join(outputDir, path.basename(js_script)));
+        fs.copyFileSync(js_script, path.join(outputDir, path.basename(js_script)));
         replaceInFile(path.join(outputDir, "index.html"), {
             "</head>": `    <script src="${path.basename(js_script)}"></script>
 </head>`

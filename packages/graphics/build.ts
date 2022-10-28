@@ -1,5 +1,5 @@
-import {getModuleDir} from "../../modules/utils/utils.ts";
-import {shdc} from "../../modules/sokol-shdc.ts";
+import {getModuleDir} from "../../modules/utils/utils.js";
+import {shdc} from "../../modules/sokol-shdc.js";
 
 await shdc({
     input: "src/ek/canvas.glsl",

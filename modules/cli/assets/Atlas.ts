@@ -1,9 +1,11 @@
-import {compress, WebpConfig} from "./helpers/webp.ts";
-import {Asset, AssetDesc} from "./Asset.ts";
-import {makeDirs} from "../utils.ts";
-import {path, fs} from "../../deps.ts";
-import {spritePackerAsync} from "./helpers/spritePacker.ts";
-import {H} from "../utility/hash.ts";
+import * as fs from "fs";
+import * as path from "path";
+import {compress, WebpConfig} from "./helpers/webp.js";
+import {Asset, AssetDesc} from "./Asset.js";
+import {makeDirs} from "../utils.js";
+import {spritePackerAsync} from "./helpers/spritePacker.js";
+import {H} from "../utility/hash.js";
+import {expandGlobSync, writeTextFileSync} from "../../utils/utils.js";
 
 export interface MultiResAtlasImporterDesc extends AssetDesc {
     name: string; // required!
@@ -43,7 +45,7 @@ export class MultiResAtlasAsset extends Asset {
     ${resolutionNodes.join("\n")}
     ${inputNodes.join("\n")}
 </atlas>`;
-        Deno.writeTextFileSync(configPath, xml);
+        writeTextFileSync(configPath, xml);
         await spritePackerAsync(configPath);
 
         if (this.owner.project.current_target === "ios") {
@@ -51,7 +53,7 @@ export class MultiResAtlasAsset extends Asset {
         }
 
         if (this.desc.webp) {
-            const files = fs.expandGlobSync(path.join(this.owner.output, `**/${this.desc.name}*.png`));
+            const files = expandGlobSync(path.join(this.owner.output, `**/${this.desc.name}*.png`));
             const promises = [];
             for (const file of files) {
                 promises.push(compress(file.path, this.desc.webp));
@@ -60,7 +62,7 @@ export class MultiResAtlasAsset extends Asset {
 
             if (this.owner.project.current_target === "android") {
                 for (const file of files) {
-                    Deno.removeSync(file.path);
+                    fs.rmSync(file.path);
                 }
             }
         }

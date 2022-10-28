@@ -1,19 +1,19 @@
 import {
-    copyFile,
     copyFolderRecursiveSync,
     deleteFolderRecursive,
     execute,
     isDir,
-    readText,
-    replaceInFile,
-    writeText
-} from "../utils.ts";
-import {path, plist} from "../../deps.ts";
-import {buildAssetPackAsync} from "../assets.ts";
-import {Project} from "../project.ts";
-import {collectCppFlags, collectObjects, collectStrings} from "../collectSources.ts";
-import {logger} from "../logger.ts";
-import {buildAppIconAsync} from "../appicon/appicon.ts";
+    replaceInFile
+} from "../utils.js";
+import * as plist from "plist";
+import * as path from "path";
+import * as fs from "fs";
+import {buildAssetPackAsync} from "../assets.js";
+import {Project} from "../project.js";
+import {collectCppFlags, collectObjects, collectStrings} from "../collectSources.js";
+import {logger} from "../logger.js";
+import {buildAppIconAsync} from "../appicon/appicon.js";
+import {readTextFileSync, withPathAsync, writeTextFileSync} from "../../utils/utils.js";
 
 const iosPlatforms = ["apple", "ios"];
 
@@ -25,7 +25,7 @@ interface AppStoreCredentials {
 }
 
 function mod_plist(ctx: Project, filepath: string) {
-    const dict = plist.parse(readText(filepath));
+    const dict:any = plist.parse(readTextFileSync(filepath));
     dict["CFBundleDisplayName"] = ctx.title;
     dict["CFBundleShortVersionString"] = ctx.version.name();
     dict["CFBundleVersion"] = "" + ctx.version.buildNumber();
@@ -59,7 +59,7 @@ function mod_plist(ctx: Project, filepath: string) {
             dict[k] = v;
         }
     }
-    writeText(filepath, plist.build(dict));
+    writeTextFileSync(filepath, plist.build(dict));
 }
 
 export async function export_ios(ctx: Project): Promise<void> {
@@ -69,12 +69,12 @@ export async function export_ios(ctx: Project): Promise<void> {
     // setup automation
     let credentials: AppStoreCredentials = {};
     try {
-        credentials = JSON.parse(Deno.readTextFileSync(ctx.ios.appStoreCredentials!));
+        credentials = JSON.parse(readTextFileSync(ctx.ios.appStoreCredentials!));
     } catch {
         // ignore
     }
 
-    const iconsContents = JSON.parse(readText(path.join(ctx.sdk.templates, "template-ios/src/Assets.xcassets/AppIcon.appiconset/Contents.json")));
+    const iconsContents = JSON.parse(readTextFileSync(path.join(ctx.sdk.templates, "template-ios/src/Assets.xcassets/AppIcon.appiconset/Contents.json")));
     await Promise.all([
         buildAssetPackAsync(ctx),
         buildAppIconAsync({
@@ -87,7 +87,7 @@ export async function export_ios(ctx: Project): Promise<void> {
 
     const platform_target = ctx.current_target; // "ios"
     const platform_proj_name = ctx.name + "-" + platform_target;
-    const dest_dir = path.resolve(Deno.cwd(), "export");
+    const dest_dir = path.resolve(process.cwd(), "export");
     const dest_path = path.join(dest_dir, platform_proj_name);
 
     if (isDir(dest_path)) {
@@ -99,9 +99,7 @@ export async function export_ios(ctx: Project): Promise<void> {
     copyFolderRecursiveSync(path.join(ctx.sdk.templates, "template-ios"), dest_path);
 
     const base_path = "../..";
-    const cwd = Deno.cwd();
-    Deno.chdir(dest_path);
-    {
+    await withPathAsync(dest_path, async ()=>{
         const embeddedAssetsDir = "assets";
         copyFolderRecursiveSync(path.join(base_path, ctx.getAssetsOutput()), embeddedAssetsDir);
         copyFolderRecursiveSync(path.join(base_path, "export/ios/AppIcon.appiconset"),
@@ -110,11 +108,11 @@ export async function export_ios(ctx: Project): Promise<void> {
         const src_launch_logo_path = path.join(base_path, "export/ios/AppIcon.appiconset");
         const dest_launch_logo_path = "src/Assets.xcassets/LaunchLogo.imageset";
         // launch logo
-        copyFile(path.join(src_launch_logo_path, "iphone_40.png"),
+        fs.copyFileSync(path.join(src_launch_logo_path, "iphone_40.png"),
             path.join(dest_launch_logo_path, "iphone_40.png"));
-        copyFile(path.join(src_launch_logo_path, "iphone_80.png"),
+        fs.copyFileSync(path.join(src_launch_logo_path, "iphone_80.png"),
             path.join(dest_launch_logo_path, "iphone_80.png"));
-        copyFile(path.join(src_launch_logo_path, "iphone_120.png"),
+        fs.copyFileSync(path.join(src_launch_logo_path, "iphone_120.png"),
             path.join(dest_launch_logo_path, "iphone_120.png"));
 
         mod_plist(ctx, "src/Info.plist");
@@ -146,7 +144,7 @@ export async function export_ios(ctx: Project): Promise<void> {
         }
         declaration.modules.push({name: "embedded", assets: [embeddedAssetsDir]});
 
-        Deno.writeTextFileSync("ek-ios-build.json", JSON.stringify(declaration));
+        writeTextFileSync("ek-ios-build.json", JSON.stringify(declaration));
 
         /// PRE MOD PROJECT
         //xcode_patch(ctx, platform_proj_name);
@@ -180,8 +178,7 @@ export async function export_ios(ctx: Project): Promise<void> {
 
         await execute("python3", ["xcode-project-ios-post.py",
             platform_proj_name, ctx.ios.application_id!]);
-    }
-    Deno.chdir(cwd);
+    });
 
     if (ctx.options.openProject) {
         const workspace_path = path.join(dest_path, "app-ios.xcworkspace");

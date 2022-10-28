@@ -1,6 +1,6 @@
-import {executeAsync, makeDirs} from "../../utils.ts";
-import {resolveToolsBinPath} from "../../utility/bin.ts";
-import {path} from "../../../deps.ts";
+import * as path from "path";
+import {executeAsync, makeDirs} from "../../utils.js";
+import {resolveToolsBinPath} from "../../utility/bin.js";
 
 export function flashExportAsync(configPath: string): Promise<number> {
     const bin = resolveToolsBinPath("flash-export");

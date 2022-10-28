@@ -1,6 +1,7 @@
-import {shdc} from "../modules/sokol-shdc.ts";
-import {getModuleDir, rm} from "../modules/utils/utils.ts";
-import {fs, path} from "../modules/deps.ts";
+import * as fs from "fs";
+import * as path from "path";
+import {shdc} from "../modules/sokol-shdc.js";
+import {getModuleDir, rm} from "../modules/utils/utils.js";
 
 const __dirname = getModuleDir(import.meta);
 

@@ -1,20 +1,20 @@
-import {Asset, AssetDesc} from "./Asset.ts";
-import {H} from "../utility/hash.ts";
+import {Asset, AssetDesc} from "./Asset.js";
+import {H} from "../utility/hash.js";
 
 export interface DynamicAtlasDesc extends AssetDesc {
     name: string;
-    alpha_map?:boolean; // false
-    mipmaps?:boolean; // false
+    alpha_map?: boolean; // false
+    mipmaps?: boolean; // false
 }
 
 export class DynamicAtlasAsset extends Asset {
     static typeName = "dynamic_atlas";
 
-    constructor(readonly desc:DynamicAtlasDesc) {
+    constructor(readonly desc: DynamicAtlasDesc) {
         super(desc, DynamicAtlasAsset.typeName);
     }
 
-    build() {
+    build(): null {
         let flags = 0;
         if (this.desc.alpha_map) flags |= 1;
         if (this.desc.mipmaps) flags |= 2;

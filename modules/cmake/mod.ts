@@ -1,5 +1,7 @@
-import {fs, path} from "../deps.ts";
-import {getModuleDir, rm} from "../utils/mod.ts";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
+import {ensureDirSync, getModuleDir, rm, run} from "../utils/mod.js";
 
 const __dirname = getModuleDir(import.meta);
 
@@ -7,6 +9,16 @@ export interface BuildMatrix {
     os?: string | string[];
     buildType?: string | string[];
     parallel?: boolean;
+}
+
+type OSName = "windows" | "linux" | "macos" | "ios" | "android" | "web";
+const getOsName = (val:string = os.platform()):OSName => {
+    switch(val) {
+        case "darwin": return "macos";
+        case "linux": return "linux";
+        case "win32": return "windows";
+    }
+    return val as OSName;
 }
 
 export interface BuildOptions {
@@ -20,7 +32,7 @@ export interface BuildOptions {
     buildDir?: string;
 
     // target build operating system
-    os?: string;
+    os?: OSName | "ios" | "android" | "web";
 
     compiler?: "clang";
     // by default detect from USE_CCACHE env variable (value should be non-empty, non-zero)
@@ -67,16 +79,14 @@ export interface ExecuteOptions {
 }
 
 export async function executeAsync(bin: string, args: string[], options: ExecuteOptions): Promise<number> {
-    const child = Deno.run({
+    const result = await run({
         cmd: [bin].concat(args),
-        env: options.env ?? Deno.env.toObject(),
+        env: options.env ?? process.env,
         cwd: options.workingDir,
-        stdout: options.verbose ? "inherit" : "null",
-        stderr: options.verbose ? "inherit" : "null"
+        stdio: options.verbose ? "inherit" : "ignore"
     });
-    const result = await child.status();
     if (!result.success) {
-        throw new Error(`Run failed with exit code: ${result.code}, signal: ${result.signal}`);
+        throw new Error(`Run failed with exit code: ${result.code}`);
     }
     return 0;
 }
@@ -86,22 +96,22 @@ function getBuildDirName(platform: string, buildType: string): string {
 }
 
 function getEmscriptenSDKPath(): string {
-    const v = Deno.env.get("EMSDK");
+    const v = process.env.EMSDK;
     if (v) {
         return v;
     }
-    return path.join(Deno.env.get("HOME") ?? "~", "dev/emsdk");
+    return path.join(process.env.HOME ?? "~", "dev/emsdk");
 }
 
 function getNDKPath(): string {
     const names = ["ANDROID_NDK_LATEST_HOME", "ANDROID_NDK_HOME", "ANDROID_NDK_ROOT"];
     for (const env of names) {
-        const ndkPath = Deno.env.get(env);
+        const ndkPath = process.env[env];
         if (ndkPath && fs.existsSync(ndkPath)) {
             return ndkPath;
         }
     }
-    return path.resolve(Deno.env.get("HOME") ?? "~", "Library/Android/sdk/ndk/23.1.7779620");
+    return path.resolve(process.env.HOME ?? "~", "Library/Android/sdk/ndk/23.1.7779620");
 }
 
 export function resolveOptions(options?: BuildOptions): BuildOptions {
@@ -109,8 +119,8 @@ export function resolveOptions(options?: BuildOptions): BuildOptions {
     opts.env = opts.env ?? {};
     opts.debug = opts.debug ?? false;
     opts.buildType = opts.buildType ?? (opts.debug ? "Debug" : "Release");
-    opts.os = opts.os ?? Deno.build.os;
-    opts.workingDir = opts.workingDir ?? Deno.cwd();
+    opts.os = getOsName(opts.os);
+    opts.workingDir = opts.workingDir ?? process.cwd();
     opts.cmakePath = opts.cmakePath ?? ".";
     opts.buildsFolder = opts.buildsFolder ?? path.resolve(opts.workingDir, "build");
     opts.buildDir = opts.buildDir ?? path.resolve(opts.buildsFolder, getBuildDirName(opts.os!, opts.buildType));
@@ -123,8 +133,8 @@ export function resolveOptions(options?: BuildOptions): BuildOptions {
     opts.test = opts.test ?? false;
     opts.target = getOptionalMany(opts.target, []);
 
-    opts.cc = opts.cc ?? Deno.env.get("CC");
-    opts.cxx = opts.cxx ?? Deno.env.get("CXX");
+    opts.cc = opts.cc ?? process.env.CC;
+    opts.cxx = opts.cxx ?? process.env.CXX;
 
     opts.compiler = opts.compiler ?? "clang";
     if (opts.compiler === "clang") {
@@ -132,8 +142,8 @@ export function resolveOptions(options?: BuildOptions): BuildOptions {
         if (!opts.cxx) opts.cxx = "clang++";
     }
 
-    opts.ccache = opts.ccache ?? !!(Deno.env.get("USE_CCACHE") as string | 0);
-    if (opts.ccache && opts.os !== Deno.build.os) {
+    opts.ccache = opts.ccache ?? !!(process.env.USE_CCACHE as string | 0);
+    if (opts.ccache && opts.os !== getOsName()) {
         if (opts.os !== "web") {
             opts.ccache = false;
         }
@@ -144,16 +154,16 @@ export function resolveOptions(options?: BuildOptions): BuildOptions {
         opts.cxx = "ccache";
     }
 
-    if (opts.os !== Deno.build.os) {
+    if (opts.os !== getOsName()) {
         switch (opts.os) {
             case "web": {
                 if (!opts.toolchain) {
                     const sdk = getEmscriptenSDKPath();
                     opts.toolchain = path.resolve(sdk, "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake");
                 }
-                const nodePath = Deno.env.get("NODE");
-                if (!opts.env["EM_NODE_JS"] && nodePath) {
-                    opts.env["EM_NODE_JS"] = nodePath;
+                const nodePath = process.env.NODE;
+                if (!process.env.EM_NODE_JS && nodePath) {
+                    process.env.EM_NODE_JS = nodePath;
                 }
                 //options.cc = undefined;
                 //options.cxx = undefined;
@@ -174,7 +184,7 @@ export function resolveOptions(options?: BuildOptions): BuildOptions {
                 opts.definitions.PLATFORM = "SIMULATOR64";
                 break;
             case "windows":
-                if (Deno.build.os === "darwin") {
+                if (os.platform() === "darwin") {
                     if (!opts.toolchain) {
                         opts.toolchain = path.resolve(__dirname, "mingw-w64-x86_64.cmake");
                         console.info(opts.toolchain);
@@ -230,7 +240,7 @@ export async function configure(options: BuildOptions): Promise<void> {
     const executionOptions = {
         verbose: true,
         workingDir: options.workingDir,
-        env: Object.assign({}, Deno.env.toObject(), options.env)
+        env: Object.assign({}, process.env, options.env)
     };
     await executeAsync("cmake", args, executionOptions);
 }
@@ -240,11 +250,11 @@ export async function build_(options: BuildOptions): Promise<void> {
     const executionOptions = {
         verbose: true,
         workingDir: options.workingDir,
-        env: Object.assign({}, Deno.env.toObject(), options.env)
+        env: Object.assign({}, process.env, options.env)
     };
     const buildArgs = ["--build", options.buildDir!];
     if (!options.ninja) {
-        const jobs = 1 + navigator.hardwareConcurrency;
+        const jobs = 1 + os.cpus().length;
         buildArgs.push("--parallel", "" + jobs);
     }
     if (options.target!.length > 0) {
@@ -261,7 +271,7 @@ export async function test_(options: BuildOptions): Promise<void> {
     const executionOptions = {
         verbose: true,
         workingDir: path.resolve(options.workingDir!, options.buildDir!),
-        env: Object.assign({}, Deno.env.toObject(), options.env, {CTEST_OUTPUT_ON_FAILURE: "TRUE"})
+        env: Object.assign({}, process.env, options.env, {CTEST_OUTPUT_ON_FAILURE: "TRUE"})
     };
 
     if (options.ninja) {
@@ -276,6 +286,7 @@ export async function build(options?: BuildOptions & BuildMatrix): Promise<Build
     if (options.clean) {
         await clean(options);
     }
+    ensureDirSync(options.buildDir);
     if (options.configure) {
         await configure(options);
     }
@@ -292,7 +303,7 @@ export async function build(options?: BuildOptions & BuildMatrix): Promise<Build
 
 export async function buildMatrix(options?: BuildOptions & BuildMatrix): Promise<void> {
     const buildTypes = getOptionalMany(options?.buildType, ["Debug", "Release"]);
-    const osList = getOptionalMany(options?.os, [Deno.build.os]);
+    const osList = getOptionalMany(options?.os, [getOsName()]);
     if (options?.parallel) {
         const tasks: Promise<BuildResult>[] = [];
         for (const os of osList) {

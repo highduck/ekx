@@ -1,4 +1,4 @@
-import {colors} from "../deps.ts";
+import colors from "colors";
 
 const con = console;
 
@@ -18,7 +18,7 @@ a.debug = (message?: any, ...args: any[]) => {
 a.log = (message?: any, ...args: any[]) => {
     if (a._diag) {
         if (message !== undefined && typeof message === "string") {
-            message = colors.white(message);
+            message = colors.white.dim(message);
         }
         con.log("🔎 " + message, ...args);
     }
@@ -27,14 +27,14 @@ a.log = (message?: any, ...args: any[]) => {
 a.info = (message?: any, ...args: any[]) => {
     if (message !== undefined && typeof message === "string") {
         // 💬 / ℹ / 🔹
-        message = "💬 " + colors.brightWhite(message);
+        message = "💬 " + colors.white(message);
     }
     con.info(message, ...args);
 };
 
 a.warn = (message?: any, ...args: any[]) => {
     if (message !== undefined && typeof message === "string") {
-        message = "🔶 " + colors.brightYellow(message);
+        message = "🔶 " + colors.yellow(message);
     }
     con.warn(message, ...args);
 };

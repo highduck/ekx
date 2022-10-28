@@ -1,5 +1,6 @@
-import * as path from "https://deno.land/std/path/mod.ts";
-import {Project} from "../../modules/cli/project.ts";
+import * as path from "path";
+import {copyFileSync} from "fs";
+import {Project} from "../../modules/cli/project.js";
 
 export async function setup(project: Project) {
     project.onProjectGenerated.push(() => {
@@ -11,7 +12,7 @@ export async function setup(project: Project) {
             const configPath = path.join(path.resolve(project.projectPath, project.android.googleServicesConfigDir), configFile);
             try {
                 // CWD is project generated path here
-                Deno.copyFileSync(configPath, path.join("app", configFile))
+                copyFileSync(configPath, path.join("app", configFile))
             } catch (err) {
                 console.error("missing google-service config", configPath, err);
             }
@@ -23,7 +24,7 @@ export async function setup(project: Project) {
             const configPath = path.join(path.resolve(project.projectPath, project.ios.googleServicesConfigDir), configFile);
             try {
                 // CWD is project generated path here
-                Deno.copyFileSync(configPath, configFile)
+                copyFileSync(configPath, configFile)
             } catch (err) {
                 console.error("missing google-service config", configPath, err);
             }

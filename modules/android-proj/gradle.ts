@@ -1,3 +1,5 @@
+import {writeTextFileSync} from "../utils/utils.js";
+
 export type DependencyType = "classpath" | "implementation" | "compile";
 
 export class GradlePrinter {
@@ -296,7 +298,7 @@ export class GradlePrinter {
     }
 
     save(filepath: string) {
-        Deno.writeTextFileSync(filepath, this._buf);
+        writeTextFileSync(filepath, this._buf);
     }
 }
 

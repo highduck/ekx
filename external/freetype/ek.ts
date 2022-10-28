@@ -1,4 +1,4 @@
-import {Project} from "../../modules/cli/project.ts";
+import {Project} from "../../modules/cli/project.js";
 
 export function setup(project:Project) {
     project.addModule({

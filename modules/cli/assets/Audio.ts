@@ -1,8 +1,9 @@
-import {Asset} from "./Asset.ts";
-import {path} from "../../deps.ts";
-import {copyFile, makeDirs, removePathExtension} from "../utils.ts";
-import {H} from "../utility/hash.ts";
-import {hashFile} from "./helpers/hash.ts";
+import * as path from "path";
+import * as fs from "fs";
+import {Asset} from "./Asset.js";
+import {makeDirs, removePathExtension} from "../utils.js";
+import {H} from "../utility/hash.js";
+import {hashFile} from "./helpers/hash.js";
 
 export interface AudioFile {
     filepath: string;
@@ -35,12 +36,12 @@ export class AudioAsset extends Asset {
             super.resolveInputs();
     }
 
-    build() {
+    build(): null {
         const outputPath = path.join(this.owner.output, this.desc.filepath);
         const inputPath = path.join(this.owner.basePath, this.desc.filepath);
         makeDirs(path.dirname(outputPath));
 
-        copyFile(inputPath, outputPath);
+        fs.copyFileSync(inputPath, outputPath);
         const name = this.desc.name ?? removePathExtension(this.desc.filepath);
         const streaming = this.desc.streaming ?? false;
         const lazy = this.desc.lazy ?? true;

@@ -1,5 +1,5 @@
-import {path} from "../../modules/deps.ts"
-import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.ts"
+import * as path from "path"
+import {downloadFiles, getModuleDir, readTextFileSync, rm, writeTextFileSync} from "../../modules/utils/mod.js"
 
 const __dirname = getModuleDir(import.meta);
 
@@ -39,8 +39,8 @@ async function fetch() {
 #define IMGUI_STB_TRUETYPE_FILENAME  <stb/stb_truetype.h>
 #define IMGUI_STB_RECT_PACK_FILENAME  <stb/stb_rect_pack.h>
 
-` + await Deno.readTextFile(path.join(__dirname, "src/imconfig.h"));
-    await Deno.writeTextFile(path.join(__dirname, "src/imconfig.h"), imgui_config);
+` + readTextFileSync(path.join(__dirname, "src/imconfig.h"));
+    writeTextFileSync(path.join(__dirname, "src/imconfig.h"), imgui_config);
 
     const implot_branch = "master";
     await downloadFiles({

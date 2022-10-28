@@ -1,5 +1,5 @@
-import {xmldoc} from "../deps.ts";
-const {XmlDocument} = xmldoc;
+import {XmlDocument} from "xmldoc";
+import {writeTextFileSync} from "../utils/utils.js";
 
 export interface UsesFeature {
     key: string;
@@ -118,6 +118,6 @@ export class AndroidManifest {
             html: false
         });
 
-        Deno.writeTextFileSync(filepath, text);
+        writeTextFileSync(filepath, text);
     }
 }

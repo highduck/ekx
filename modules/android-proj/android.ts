@@ -1,19 +1,19 @@
-import {path} from "../deps.ts"
-import {logger} from "../cli/logger.ts";
+import * as path from "path"
+import * as os from "os"
+import {logger} from "../cli/logger.js";
+import {run} from "../utils/utils.js";
 
 export function getAndroidSdkRoot(): string | null {
-    return Deno.env.get("ANDROID_SDK_ROOT") ?? path.join(Deno.env.get("HOME") ?? "~", 'Library/Android/sdk');
+    return process.env.ANDROID_SDK_ROOT ?? path.join(process.env.HOME ?? "~", 'Library/Android/sdk');
 }
 
 export async function getJavaHome(version: string | number): Promise<string> {
-    const process = Deno.run({cmd: ["/usr/libexec/java_home", "-v", version.toString()], stdout: "piped"});
-    const output = await process.output();
-    process.close();
-    return new TextDecoder().decode(output);
+    const result = await run({cmd: ["/usr/libexec/java_home", "-v", version.toString()], io: true});
+    return result.data;
 }
 
 function getAndroidStudioPath(): string {
-    switch (Deno.build.os) {
+    switch (os.platform()) {
         case "darwin":
             return "/Applications/Android Studio.app";
     }
@@ -21,9 +21,9 @@ function getAndroidStudioPath(): string {
 }
 
 export function openAndroidStudioProject(projectPath: string): void {
-    switch (Deno.build.os) {
+    switch (os.platform()) {
         case "darwin":
-            Deno.run({cmd: ["open", "-a", getAndroidStudioPath(), projectPath]}).status().catch((err) => logger.error(err));
+            run({cmd: ["open", "-a", getAndroidStudioPath(), projectPath]}).catch((err) => logger.error(err));
             break;
         default:
             console.error("Not supported");

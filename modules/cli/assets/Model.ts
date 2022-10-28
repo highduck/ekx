@@ -1,9 +1,9 @@
-import {Asset, AssetDesc} from "./Asset.ts";
-import {path} from "../../deps.ts";
-import {makeDirs, removePathExtension} from "../utils.ts";
-import {objExportAsync} from "./helpers/objExport.ts";
-import {H} from "../utility/hash.ts";
-import {hashFile} from "./helpers/hash.ts";
+import * as path from "path";
+import {Asset, AssetDesc} from "./Asset.js";
+import {makeDirs, removePathExtension} from "../utils.js";
+import {objExportAsync} from "./helpers/objExport.js";
+import {H} from "../utility/hash.js";
+import {hashFile} from "./helpers/hash.js";
 
 export interface ObjImporterDesc extends AssetDesc {
     filepath: string;

@@ -1,7 +1,5 @@
-import {isDir, makeDirs} from "./utils.ts";
-import {Project} from "./project.ts";
-import {AssetBuilder} from "./assets/AssetBuilder.ts";
-import {logger} from "./logger.ts";
+import {Project} from "./project.js";
+import {AssetBuilder} from "./assets/AssetBuilder.js";
 
 // asset pack name
 export async function buildAssetPackAsync(ctx: Project, output?: string, devMode?: boolean) {

@@ -1,10 +1,11 @@
-import {executeAsync} from "../utils.ts";
-import {fs} from "../../deps.ts";
-import {logger} from "../logger.ts";
+import * as fs from "fs";
+import {executeAsync} from "../utils.js";
+import {logger} from "../logger.js";
+import {expandGlobSync} from "../../utils/utils.js";
 
 export function fixMP3(pattern: string) {
     const tasks: Promise<number>[] = [];
-    const files = fs.expandGlobSync(pattern);
+    const files = expandGlobSync(pattern);
     logger.info(pattern);
     for (const file of files) {
         const filepath = file.path;
@@ -17,8 +18,8 @@ export function fixMP3(pattern: string) {
                 filepath.substring(0, filepath.length - 4) + "_.mp3"
             ]).then((_) => {
                 const f = filepath.substring(0, filepath.length - 4) + "_.mp3"
-                Deno.removeSync(filepath);
-                Deno.renameSync(f, filepath);
+                fs.rmSync(filepath);
+                fs.renameSync(f, filepath);
                 return _;
             })
         );

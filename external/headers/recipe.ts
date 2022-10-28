@@ -1,5 +1,5 @@
-import {path} from "../../modules/deps.ts"
-import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.ts"
+import * as path from "path";
+import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.js";
 
 const __dirname = getModuleDir(import.meta);
 

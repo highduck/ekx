@@ -1,6 +1,8 @@
-import {H} from "../../utility/hash.ts";
-import {path, fs} from "../../../deps.ts";
-import {isFile} from "../../utils.ts";
+import * as path from "path";
+import * as fs from "fs";
+import {H} from "../../utility/hash.js";
+import {isFile} from "../../utils.js";
+import {expandGlobSync} from "../../../utils/utils.js";
 
 // if you modify seed value, you should also modify it in `@ekx/std` package: `ek/hash.h`
 const seed = 0x811C9DC5;
@@ -20,13 +22,13 @@ export function hashBytes(bytes: Uint8Array): number {
 }
 
 export function hashFile(filepath: string): number {
-    return hashBytes(Deno.readFileSync(filepath));
+    return hashBytes(fs.readFileSync(filepath));
 }
 
 export function hashGlob(pattern: string): number {
     let hash = 0;
     const files:string[] = [];
-    for(const file of fs.expandGlobSync(pattern)) {
+    for(const file of expandGlobSync(pattern)) {
         files.push(file.path);
     }
     files.sort();

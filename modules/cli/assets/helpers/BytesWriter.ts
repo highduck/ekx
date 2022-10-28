@@ -1,3 +1,5 @@
+import * as fs from "fs";
+
 const conversionBuffer = new ArrayBuffer(8);
 const conversionU8 = new Uint8Array(conversionBuffer);
 const conversionU32 = new Uint32Array(conversionBuffer);
@@ -46,7 +48,7 @@ export class BytesWriter {
     }
 
     save(filepath: string) {
-        Deno.writeFileSync(filepath, new Uint8Array(this.bytes.buffer.slice(0, this.size)));
+        fs.writeFileSync(filepath, new Uint8Array(this.bytes.buffer.slice(0, this.size)));
     }
 
     writeString(s: string) {

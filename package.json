@@ -2,6 +2,11 @@
   "name": "@ekx/ekx",
   "version": "0.1.10",
   "license": "ISC",
+  "type": "module",
+  "main": "modules/cli/main.ts",
+  "bin": {
+    "ekx": "./modules/cli/main.ts"
+  },
   "publishConfig": {
     "access": "public"
   },
@@ -9,8 +14,24 @@
     "release": "changeset publish",
     "version": "changeset version && yarn run update-lock",
     "update-lock": "yarn && git add yarn.lock",
-    "ci:build": "deno run -A build.ts",
-    "ci:native-build": "deno run -A native-build.ts",
-    "ci:native-coverage": "deno run -A native-coverage.ts"
+    "ci:build": "ts-node --esm --swc build.ts",
+    "ci:native-build": "ts-node --esm --swc native-build.ts",
+    "ci:native-coverage": "ts-node --esm --swc native-coverage.ts"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "plist": "^3.0.6",
+    "@types/plist": "^3.0.2",
+    "xmldoc": "^1.2.0",
+    "@types/xmldoc": "^1.1.6",
+    "esbuild": "^0.15.0",
+    "ts-node": "^10.9.1",
+    "@types/node": "^18.11.7",
+    "@swc/core": "^1.3.11",
+    "typescript": "^4.8.4",
+    "mustache": "^4.2.0",
+    "@types/mustache": "^4.2.1",
+    "glob": "^8.0.3",
+    "@types/glob": "^8.0.0"
   }
 }

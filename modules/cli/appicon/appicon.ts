@@ -1,8 +1,9 @@
-import {path} from "../../deps.ts";
-import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/helpers/flashExport.ts";
-import {logger} from "../logger.ts";
-import {isDir, makeDirs} from "../utils.ts";
-import {getModuleDir} from "../../utils/utils.ts";
+import * as path from "path";
+import * as fs from "fs";
+import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/helpers/flashExport.js";
+import {logger} from "../logger.js";
+import {isDir, makeDirs} from "../utils.js";
+import {getModuleDir, writeTextFileSync} from "../../utils/utils.js";
 
 export interface WebManifestIcon {
     src: string; // icons/icon36.png
@@ -74,7 +75,7 @@ function exportWebIcons(flashPath: string, iconSymbol: string, webManifestIcons:
 
 function exportAndroidIcons(flashPath: string, iconSymbol: string, output: string) {
     const filename = "ic_launcher.png";
-    const resolutionMap = {
+    const resolutionMap:Record<string, number> = {
         "ldpi": 36,
         "mdpi": 48,
         "hdpi": 72,
@@ -107,7 +108,7 @@ function exportIOSIcons(flashPath: string, iconSymbol: string, appIconContents: 
     const appIconFolder = path.join(output, "AppIcon.appiconset");
 
     if (isDir(output)) {
-        Deno.removeSync(output, {recursive: true});
+        fs.rmSync(output, {recursive: true});
     }
     makeDirs(appIconFolder);
 
@@ -134,7 +135,7 @@ function exportIOSIcons(flashPath: string, iconSymbol: string, appIconContents: 
         });
     }
     appIconContents.images = images;
-    Deno.writeTextFileSync(path.join(appIconFolder, "Contents.json"), JSON.stringify(appIconContents));
+    writeTextFileSync(path.join(appIconFolder, "Contents.json"), JSON.stringify(appIconContents));
 
     return renderFlashSymbol(flashPath, iconSymbol, outputs);
 }

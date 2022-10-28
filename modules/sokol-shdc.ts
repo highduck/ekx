@@ -1,4 +1,5 @@
-import {resolveToolsBinPath} from "./cli/utility/bin.ts";
+import {resolveToolsBinPath} from "./cli/utility/bin.js";
+import {run} from "./utils/utils.js";
 
 export interface ShdcOptions {
     input: string;
@@ -7,16 +8,14 @@ export interface ShdcOptions {
 }
 
 export async function shdc(options: ShdcOptions) {
-    const exe = resolveToolsBinPath("sokol-shdc");
-    const cmd = [exe, "-i", options.input, "-o", options.output,
-        "-l", "glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos",
-        "--ifdef"];
-    const process = Deno.run({
-        cmd,
-        cwd: options.cwd ?? Deno.cwd(),
-        stdout: "inherit",
-        stderr: "inherit"
+    const res = await run({
+        cmd: [
+            resolveToolsBinPath("sokol-shdc"),
+            "-i", options.input, "-o", options.output,
+            "-l", "glsl330:glsl300es:glsl100:hlsl5:metal_ios:metal_sim:metal_macos",
+            "--ifdef"
+        ],
+        cwd: options.cwd,
     });
-    const status = await process.status();
-    return status.success;
+    return res.success;
 }

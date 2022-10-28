@@ -1,6 +1,6 @@
-import {path} from "../../../deps.ts";
-import {executeAsync} from "../../utils.ts";
-import {logger} from "../../logger.ts";
+import * as path from "path";
+import {executeAsync} from "../../utils.js";
+import {logger} from "../../logger.js";
 
 export interface WebpConfig {
     lossless?: boolean;// = true;

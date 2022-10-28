@@ -1,5 +1,6 @@
-import {path, fs} from "../../modules/deps.ts"
-import {downloadCheck, untar, copyFolderRecursive, getModuleDir, rm} from "../../modules/utils/mod.ts"
+import * as fs from "fs";
+import * as path from "path";
+import {copyFolderRecursive, downloadCheck, expandGlobSync, getModuleDir, rm, untar} from "../../modules/utils/mod.js";
 
 const __dirname = getModuleDir(import.meta);
 const cacheDir = path.join(__dirname, "cache");
@@ -11,8 +12,8 @@ async function clean() {
 }
 
 async function removeFilesGlob(glob: string) {
-    for await (const file of fs.expandGlob(glob, {root: __dirname})) {
-        await Deno.remove(file.path, {recursive: true});
+    for (const file of expandGlobSync(glob, {root: __dirname})) {
+        await rm(file.path);
     }
 }
 
@@ -30,8 +31,8 @@ async function fetch() {
     await downloadFreetype();
     await copyFolderRecursive(path.join(tempDir, "include"), path.join(__dirname, "include"));
     await copyFolderRecursive(path.join(tempDir, "src"), path.join(__dirname, "src"));
-    await Deno.copyFile(path.join(__dirname, "recipe/ftoption.h"), path.join(__dirname, "include/freetype/config/ftoption.h"));
-    await Deno.copyFile(path.join(__dirname, "recipe/ft2build.h"), path.join(__dirname, "include/ft2build.h"));
+    await fs.promises.copyFile(path.join(__dirname, "recipe/ftoption.h"), path.join(__dirname, "include/freetype/config/ftoption.h"));
+    await fs.promises.copyFile(path.join(__dirname, "recipe/ft2build.h"), path.join(__dirname, "include/ft2build.h"));
     await removeFilesGlob("src/tools");
     await removeFilesGlob("src/**/*.mk");
     await removeFilesGlob("src/**/README");

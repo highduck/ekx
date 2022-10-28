@@ -1,12 +1,11 @@
-import {searchFiles} from "./utils.ts";
-import {Project} from "./project.ts";
-import {ModuleDef, UserArray, VariableName} from "./module.ts";
-import {path} from "../deps.ts";
+import * as path from "path";
+import {searchFiles} from "./utils.js";
+import {Project} from "./project.js";
+import {ModuleDef, UserArray, VariableName} from "./module.js";
 
 export function collectSourceFiles(searchPath: string, extensions: string[], outList: string[] = []) {
-    for (const ext of extensions) {
-        searchFiles("**/*." + ext, searchPath, outList);
-    }
+    const pattern = `**/*.+(${extensions.join("|")})`;
+    searchFiles(pattern, searchPath, outList);
     return outList;
 }
 
@@ -43,7 +42,7 @@ export function collectCppFlags(ctx: ModuleDefSource, platforms: string[]): any[
         }
         if (data.path) {
             for (const r of result) {
-                r.files = r.files.map((f:string) => path.resolve(data.path!, f));
+                r.files = r.files.map((f: string) => path.resolve(data.path!, f));
             }
         }
         all = all.concat(result);

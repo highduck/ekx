@@ -1,16 +1,18 @@
-import {Asset, AssetBuilderContext} from "./Asset.ts";
-import {Project} from "../project.ts";
-import {fs, path} from "../../deps.ts";
-import {AudioAsset, AudioFile} from "./Audio.ts";
-import {StaticFileDescription, StaticFileImporter} from "./StaticFileImporter.ts";
-import {DynamicAtlasAsset, DynamicAtlasDesc} from "./DynamicAtlas.ts";
-import {TTFAsset, TTFImporterDesc} from "./TTF.ts";
-import {TextureAsset, TextureImporterDesc} from "./Texture.ts";
-import {ModelAsset, ObjImporterDesc} from "./Model.ts";
-import {MultiResAtlasAsset, MultiResAtlasImporterDesc} from "./Atlas.ts";
-import {BitmapFontAsset, BMFontDesc} from "./BitmapFont.ts";
-import {FlashAsset, FlashDesc} from "./Flash.ts";
-import {TranslationsAsset, TranslationsDesc} from "./Translations.ts";
+import * as fs from "fs";
+import * as path from "path";
+import {Project} from "../project.js";
+import {Asset, AssetBuilderContext} from "./Asset.js";
+import {AudioAsset, AudioFile} from "./Audio.js";
+import {StaticFileDescription, StaticFileImporter} from "./StaticFileImporter.js";
+import {DynamicAtlasAsset, DynamicAtlasDesc} from "./DynamicAtlas.js";
+import {TTFAsset, TTFImporterDesc} from "./TTF.js";
+import {TextureAsset, TextureImporterDesc} from "./Texture.js";
+import {ModelAsset, ObjImporterDesc} from "./Model.js";
+import {MultiResAtlasAsset, MultiResAtlasImporterDesc} from "./Atlas.js";
+import {BitmapFontAsset, BMFontDesc} from "./BitmapFont.js";
+import {FlashAsset, FlashDesc} from "./Flash.js";
+import {TranslationsAsset, TranslationsDesc} from "./Translations.js";
+import {expandGlobSync} from "../../utils/utils.js";
 
 export class AssetBuilder extends AssetBuilderContext {
 
@@ -23,8 +25,8 @@ export class AssetBuilder extends AssetBuilderContext {
     }
 
     glob(pattern: string): string[] {
-        const bp = Deno.realPathSync(this.basePath);
-        const files = fs.expandGlobSync(path.join(bp, pattern));
+        const bp = fs.realpathSync(this.basePath);
+        const files = expandGlobSync(path.join(bp, pattern));
         const result: string[] = [];
         for (const file of files) {
             result.push(path.relative(bp, file.path));

@@ -1,12 +1,13 @@
-import {BaseModuleConfig, BuildTop, GradlePrinter} from "./gradle.ts";
-import {path} from "../deps.ts";
-import {getAndroidSdkRoot, getJavaHome} from "./android.ts";
-import {AndroidManifest} from "./androidManifest.ts";
-import {writeColorsXML, writeStringsXML} from "./res.ts";
-import {getModuleDir} from "../utils/utils.ts";
-import {logger} from "../cli/logger.ts";
+import * as path from "path";
+import * as fs from "fs";
+import {BaseModuleConfig, BuildTop, GradlePrinter} from "./gradle.js";
+import {getAndroidSdkRoot, getJavaHome} from "./android.js";
+import {AndroidManifest} from "./androidManifest.js";
+import {writeColorsXML, writeStringsXML} from "./res.js";
+import {getModuleDir, writeTextFileSync} from "../utils/utils.js";
+import {logger} from "../cli/logger.js";
 
-export {openAndroidStudioProject} from "./android.ts";
+export {openAndroidStudioProject} from "./android.js";
 
 const __dirname = getModuleDir(import.meta);
 
@@ -56,14 +57,14 @@ export class AndroidProjGen {
 
     save(dir: string) {
         try {
-            Deno.removeSync(dir, {recursive: true});
+            fs.rmSync(dir, {recursive: true});
         } catch {
             // ignore
         }
         try {
-            Deno.mkdirSync(dir, {recursive: true});
-            Deno.mkdirSync(path.join(dir, "app"));
-            Deno.mkdirSync(path.join(dir, ".idea"));
+            fs.mkdirSync(dir, {recursive: true});
+            fs.mkdirSync(path.join(dir, "app"));
+            fs.mkdirSync(path.join(dir, ".idea"));
         } catch {
             // ignore
         }
@@ -81,13 +82,13 @@ export class AndroidProjGen {
             "app/proguard-rules.pro"
         ];
         for (const file of filesToCopy) {
-            Deno.copyFileSync(path.join(srcDir, file), path.join(dir, file));
+            fs.copyFileSync(path.join(srcDir, file), path.join(dir, file));
         }
-        Deno.copyFileSync(path.join(srcDir, "_idea/gradle.xml"), path.join(dir, ".idea/gradle.xml"));
+        fs.copyFileSync(path.join(srcDir, "_idea/gradle.xml"), path.join(dir, ".idea/gradle.xml"));
 
         if (this.fastlane) {
             try {
-                Deno.mkdirSync(path.join(dir, "fastlane"));
+                fs.mkdirSync(path.join(dir, "fastlane"));
             } catch {
                 // ignore
             }
@@ -97,13 +98,13 @@ export class AndroidProjGen {
                 "fastlane/Fastfile"
             ];
             for (const file of filesToCopy) {
-                Deno.copyFileSync(path.join(srcDir, file), path.join(dir, file));
+                fs.copyFileSync(path.join(srcDir, file), path.join(dir, file));
             }
         }
 
         if (this.wrapper) {
             try {
-                Deno.mkdirSync(path.join(dir, "gradle/wrapper"), {recursive: true});
+                fs.mkdirSync(path.join(dir, "gradle/wrapper"), {recursive: true});
             } catch {
                 // ignore
             }
@@ -114,7 +115,7 @@ export class AndroidProjGen {
                 "gradle/wrapper/gradle-wrapper.properties",
             ];
             for (const file of filesToCopy) {
-                Deno.copyFileSync(path.join(srcDir, file), path.join(dir, file));
+                fs.copyFileSync(path.join(srcDir, file), path.join(dir, file));
             }
         }
 
@@ -147,7 +148,7 @@ export class AndroidProjGen {
 
         {
             try {
-                Deno.mkdirSync(path.join(dir, "app/src/main/res/values"), {recursive: true});
+                fs.mkdirSync(path.join(dir, "app/src/main/res/values"), {recursive: true});
             } catch {
                 // ignore
             }
@@ -161,7 +162,7 @@ export class AndroidProjGen {
                 "app/src/main/res/values/styles.xml"
             ];
             for (const file of filesToCopy) {
-                Deno.copyFileSync(path.join(srcDir, file), path.join(dir, file));
+                fs.copyFileSync(path.join(srcDir, file), path.join(dir, file));
             }
             const p = new GradlePrinter();
             p.printBaseModuleBody(this.app);
@@ -277,7 +278,7 @@ class Properties {
     }
 
     save(filepath: string) {
-        Deno.writeTextFileSync(filepath, this.toString());
+        writeTextFileSync(filepath, this.toString());
     }
 }
 

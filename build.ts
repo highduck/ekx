@@ -1,7 +1,6 @@
-import "./packages/texture-loader/build.ts";
-import "./packages/auph/build.ts";
-import "./packages/graphics/build.ts";
+import "./packages/texture-loader/build.js";
+import "./packages/auph/build.js";
+import "./packages/graphics/build.js";
+import "./plugins/firebase/build.js";
 
-import "./plugins/firebase/build.ts";
-
-Deno.exit(0);
+process.exit(0);

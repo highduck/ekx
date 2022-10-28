@@ -1,14 +1,15 @@
-import {logger} from "../logger.ts";
-import {fs} from "../../deps.ts";
-import {executeAsync} from "../utils.ts";
-import {Project} from "../project.ts";
+import * as fs from "fs";
+import {logger} from "../logger.js";
+import {executeAsync} from "../utils.js";
+import {Project} from "../project.js";
+import {readTextFileSync} from "../../utils/utils.js";
 
 function getToken(project: Project): string|undefined {
     let token = process.env.FIREBASE_TOKEN;
     if (!token && project.web.firebaseToken) {
         try {
             if (fs.existsSync(project.web.firebaseToken)) {
-                token = Deno.readTextFileSync(project.web.firebaseToken);
+                token = readTextFileSync(project.web.firebaseToken);
             } else {
                 logger.error(`Firebase Token file path not found`);
             }

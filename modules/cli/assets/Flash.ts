@@ -1,13 +1,13 @@
-import {Asset, AssetDesc} from "./Asset.ts";
-import {isDir, isFile, makeDirs, removePathExtension} from "../utils.ts";
-import {path} from "../../deps.ts";
-import {flashExportAsync} from "./helpers/flashExport.ts";
-import {MultiResAtlasAsset} from "./Atlas.ts";
-import {H} from "../utility/hash.ts";
-import {logger} from "../logger.ts";
-import {hashFile, hashGlob} from "./helpers/hash.ts";
-import {xmldoc} from "../../deps.ts";
-const {XmlDocument} = xmldoc;
+import * as path from "path";
+import {XmlDocument} from "xmldoc";
+import {Asset, AssetDesc} from "./Asset.js";
+import {isDir, isFile, makeDirs, removePathExtension} from "../utils.js";
+import {flashExportAsync} from "./helpers/flashExport.js";
+import {MultiResAtlasAsset} from "./Atlas.js";
+import {H} from "../utility/hash.js";
+import {logger} from "../logger.js";
+import {hashFile, hashGlob} from "./helpers/hash.js";
+import {writeTextFileSync} from "../../utils/utils.js";
 
 export interface FlashDesc extends AssetDesc {
     filepath: string;
@@ -49,7 +49,7 @@ export class FlashAsset extends Asset {
     ${resolutionNodes.join("\n")}
 </atlas>
 </flash>`);
-            Deno.writeTextFileSync(configPath, xml.toString());
+            writeTextFileSync(configPath, xml.toString());
             makeDirs(imagesOutput);
             await flashExportAsync(configPath);
             atlasAsset.inputs.push(path.join(imagesOutput, "_images.xml"));

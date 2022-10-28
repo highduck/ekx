@@ -1,28 +1,20 @@
-import {
-    copyFile,
-    deleteFolderRecursive,
-    execute,
-    isDir,
-    isFile,
-    makeDirs,
-    replaceAll,
-    replaceInFile,
-    writeText
-} from "../utils.ts";
-import {path} from "../../deps.ts";
-import {buildAssetPackAsync} from "../assets.ts";
+import * as path from "path";
+import * as fs from "fs";
+import {deleteFolderRecursive, execute, isDir, isFile, makeDirs, replaceAll, replaceInFile,} from "../utils.js";
+import {buildAssetPackAsync} from "../assets.js";
 import {
     collectCppFlags,
     collectObjects,
     collectSourceFiles,
     collectSourceRootsAll,
     collectStrings
-} from "../collectSources.ts";
-import {Project} from "../project.ts";
-import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../../cmake/generate.ts";
-import {logger} from "../logger.ts";
-import {AndroidProjGen, openAndroidStudioProject} from "../../android-proj/index.ts";
-import {buildAppIconAsync} from "../appicon/appicon.ts";
+} from "../collectSources.js";
+import {Project} from "../project.js";
+import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../../cmake/generate.js";
+import {logger} from "../logger.js";
+import {AndroidProjGen, openAndroidStudioProject} from "../../android-proj/index.js";
+import {buildAppIconAsync} from "../appicon/appicon.js";
+import {readTextFileSync, run, withPath, writeTextFileSync} from "../../utils/utils.js";
 
 const platforms = ["android"];
 
@@ -35,18 +27,17 @@ async function gradle(dir: string, ...args: string[]) {
     //     //JAVA_HOME
     // });
 
-    await Deno.run({
+    await run({
         cmd: ["./gradlew", ...args],
-        stdout: "inherit",
-        stderr: "inherit",
+        stdio: "inherit",
         cwd: dir
-    }).status();
+    });
 }
 
 const baseActivityClassName = "ek.EkActivity";
 const activityClassName = "MainActivity";
 
-function createMainClass(javaPackage, appModulePath) {
+function createMainClass(javaPackage: string, appModulePath: string) {
     const javaPackagePath = replaceAll(javaPackage, ".", "/");
     let file = `package ${javaPackage};
 
@@ -62,7 +53,7 @@ public class ${activityClassName} extends ${baseActivityClassName} {
 
     const classFilePath = path.join(appModulePath, "src/main/java", javaPackagePath, `${activityClassName}.java`);
     makeDirs(path.dirname(classFilePath));
-    writeText(classFilePath, file);
+    writeTextFileSync(classFilePath, file);
 }
 
 function getAndroidScreenOrientation(orientation: string): string {
@@ -97,7 +88,7 @@ function setupAndroidManifest(ctx: Project, proj: AndroidProjGen) {
     ];
 }
 
-function setupStringsXML(ctx, proj) {
+function setupStringsXML(ctx: Project, proj: AndroidProjGen) {
     const android_strings = collectObjects(ctx, "android_strings", platforms);
     for (const strings of android_strings) {
         for (const key of Object.keys(strings)) {
@@ -109,17 +100,14 @@ function setupStringsXML(ctx, proj) {
 }
 
 function globSourceFiles(ctx: Project, cmakeDir: string) {
-    const cppSources = [];
-    const cppExtensions = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
-
-    const cwd = Deno.cwd();
-    Deno.chdir(cmakeDir);
-    const cppRoots = collectSourceRootsAll(ctx, "cpp", platforms, ".");
-    for (const cppRoot of cppRoots) {
-        collectSourceFiles(cppRoot, cppExtensions, cppSources);
-    }
-    Deno.chdir(cwd);
-
+    const cppSources: string[] = [];
+    const cppExtensions: string[] = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
+    withPath(cmakeDir, () => {
+        const cppRoots = collectSourceRootsAll(ctx, "cpp", platforms, ".");
+        for (const cppRoot of cppRoots) {
+            collectSourceFiles(cppRoot, cppExtensions, cppSources);
+        }
+    });
     return cppSources;
 }
 
@@ -192,7 +180,7 @@ function createCMakeLists(dir: string, ctx: Project) {
     // cmakeTarget.compileOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
     // cmakeTarget.linkOptions.push("$<$<NOT:$<CONFIG:Debug>>:-Oz>");
 
-    Deno.writeTextFileSync(path.join(dir, "CMakeLists.txt"), cmakeLists(cmakeProject));
+    writeTextFileSync(path.join(dir, "CMakeLists.txt"), cmakeLists(cmakeProject));
 }
 
 /**
@@ -221,7 +209,7 @@ export async function export_android(ctx: Project): Promise<void> {
 
 
     const platform_proj_name = ctx.name + "-" + ctx.current_target;
-    const dest_dir = path.resolve(Deno.cwd(), "export");
+    const dest_dir = path.resolve(process.cwd(), "export");
     const projectPath = path.join(dest_dir, platform_proj_name);
     const appModulePath = path.join(projectPath, "app");
     const embeddedAssets = path.join(appModulePath, "src/main/assets");
@@ -276,7 +264,7 @@ export async function export_android(ctx: Project): Promise<void> {
 
 
         if (signingConfigsPath) {
-            const signingConfigsJson = Deno.readTextFileSync(signingConfigsPath);
+            const signingConfigsJson = readTextFileSync(signingConfigsPath);
             let signingConfigs = JSON.parse(signingConfigsJson) as { [name: string]: any };
             for (const name of Object.keys(signingConfigs)) {
                 const config = signingConfigs[name];
@@ -313,8 +301,8 @@ export async function export_android(ctx: Project): Promise<void> {
     // Splash screen
     {
         makeDirs(path.join(appModulePath, "src/main/res/drawable"));
-        copyFile(path.resolve(ctx.sdk.templates, "android-splash/launch_splash.xml"), path.join(appModulePath, "src/main/res/drawable/launch_splash.xml"));
-        copyFile(path.resolve(ctx.sdk.templates, "android-splash/splash.png"), path.join(appModulePath, "src/main/res/drawable/splash.png"));
+        fs.copyFileSync(path.resolve(ctx.sdk.templates, "android-splash/launch_splash.xml"), path.join(appModulePath, "src/main/res/drawable/launch_splash.xml"));
+        fs.copyFileSync(path.resolve(ctx.sdk.templates, "android-splash/splash.png"), path.join(appModulePath, "src/main/res/drawable/splash.png"));
     }
 
     logger.info("Export assets");
@@ -331,22 +319,19 @@ export async function export_android(ctx: Project): Promise<void> {
     ]);
 
     logger.info("Do project post-setup..");
-    {
-        // evaluate post-scripts in with current working dir
-        const cwd = Deno.cwd();
-        Deno.chdir(projectPath);
+    // evaluate post-scripts in with current working dir
+    withPath(projectPath, () => {
         for (const fn of ctx.onProjectGenerated) {
             fn();
         }
-        Deno.chdir(cwd);
-    }
+    });
 
     // TODO: `build` instead of bundle
     if (ctx.args.indexOf("bundle") >= 0) {
         await gradle(projectPath, 'bundleRelease');
         const aabPath = path.join(projectPath, 'app/build/outputs/bundle/release/app-release.aab');
         if (isFile(aabPath)) {
-            copyFile(path.join(projectPath, 'app/build/outputs/bundle/release/app-release.aab'),
+            fs.copyFileSync(path.join(projectPath, 'app/build/outputs/bundle/release/app-release.aab'),
                 path.join(dest_dir, `${ctx.name}_${ctx.version.toString()}.aab`));
         }
     }

@@ -1,9 +1,11 @@
-import {isDir, isFile, makeDirs} from "../utils.ts";
-import {logger} from "../logger.ts";
-import {fs, path} from "../../deps.ts";
-import {BytesWriter} from "./helpers/BytesWriter.ts";
-import {Project} from "../project.ts";
-import {H} from "../utility/hash.ts";
+import * as fs from "fs";
+import * as path from "path";
+import {isDir, isFile, makeDirs} from "../utils.js";
+import {logger} from "../logger.js";
+import {BytesWriter} from "./helpers/BytesWriter.js";
+import {Project} from "../project.js";
+import {H} from "../utility/hash.js";
+import {expandGlobSync, readTextFileSync, writeTextFileSync} from "../../utils/utils.js";
 
 export interface AssetDesc {
     name?: string; //
@@ -84,8 +86,8 @@ export class AssetBuilderContext {
     async populate() {
         let total = 0;
         if (isDir(this.basePath)) {
-            const bp = Deno.realPathSync(this.basePath);
-            const scripts = fs.expandGlobSync(path.join(bp, "**/assets.js"));
+            const bp = fs.realpathSync(this.basePath);
+            const scripts = expandGlobSync(path.join(bp, "**/assets.js"));
             for (const script of scripts) {
                 const ctx = await import(script.path);
                 if (ctx.on_populate) {
@@ -116,7 +118,7 @@ export class AssetBuilderContext {
 
     cleanOutput() {
         if (isDir(this.output)) {
-            Deno.removeSync(this.output, {recursive: true});
+            fs.rmSync(this.output, {recursive: true});
         }
         makeDirs(this.output);
     }
@@ -134,7 +136,7 @@ export class AssetBuilderContext {
         const inputsHashString = (inputsHash >>> 0).toString(16);
 
         if (isFile(inputsHashFilepath)) {
-            const hash = Deno.readTextFileSync(inputsHashFilepath);
+            const hash = readTextFileSync(inputsHashFilepath);
             logger.log("Previous assets hash:", hash);
             if (hash === inputsHashString) {
                 logger.info("Assets are not changed! Keep previous result");
@@ -148,7 +150,7 @@ export class AssetBuilderContext {
 
         await this.build();
 
-        Deno.writeTextFileSync(inputsHashFilepath, inputsHashString);
+        writeTextFileSync(inputsHashFilepath, inputsHashString);
     }
 
     async build() {

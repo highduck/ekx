@@ -1,6 +1,7 @@
-import {Project} from "../project.ts";
-import {path, fs} from "../../deps.ts";
-import {executeAsync} from "../utils.ts";
+import * as path from "path";
+import * as fs from "fs";
+import {Project} from "../project.js";
+import {executeAsync} from "../utils.js";
 
 async function updateGS(ctx: Project, configDir: string, name: string, platform: string) {
     if (!configDir) {
@@ -12,8 +13,8 @@ async function updateGS(ctx: Project, configDir: string, name: string, platform:
 
     await executeAsync("firebase", ["apps:sdkconfig", "-o", fileNew, platform]);
     if (fs.existsSync(fileNew)) {
-        Deno.removeSync(file);
-        Deno.renameSync(fileNew, file)
+        fs.rmSync(file);
+        fs.renameSync(fileNew, file)
     }
 }
 

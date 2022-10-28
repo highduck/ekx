@@ -159,7 +159,7 @@ void load_atlas_meta(Atlas* atlas, ek_local_res* lr) {
 
 void Atlas::load(const char* path, float scaleFactor) {
     char meta_file_path[1024];
-    ek_snprintf(meta_file_path, sizeof meta_file_path, "%s@%dx.atlas", path, get_scale_num(scaleFactor));
+    ek_snprintf(meta_file_path, sizeof meta_file_path, "%s%dx.atlas", path, get_scale_num(scaleFactor));
 
     char dir_buf[1024];
     ek_path_dirname(dir_buf, sizeof dir_buf, path);

@@ -1,8 +1,10 @@
-import {fs, path} from "../../deps.ts";
-import {getModuleDir} from "../../utils/utils.ts";
+import * as fs from "fs";
+import * as path from "path";
+import * as os from "os";
+import {getModuleDir} from "../../utils/utils.js";
 
 export function getToolsBinPath(bin: string): string {
-    if (Deno.build.os === "windows") {
+    if (os.platform() === "win32") {
         bin += ".exe";
     }
     return path.resolve(getModuleDir(import.meta), "../../../tools/bin/" + bin);

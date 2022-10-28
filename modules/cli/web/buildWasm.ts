@@ -1,13 +1,15 @@
-import {collectCppFlags, collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources.ts";
-import {build as buildCMake} from "../../cmake/mod.ts";
-import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../../cmake/generate.ts";
-import {path} from "../../deps.ts";
-import {isDir, withPath} from "../utils.ts";
-import {Project} from "../project.ts";
+import {collectCppFlags, collectSourceFiles, collectSourceRootsAll, collectStrings} from "../collectSources.js";
+import {build as buildCMake} from "../../cmake/mod.js";
+import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../../cmake/generate.js";
+import {isDir} from "../utils.js";
+import {Project} from "../project.js";
+import {withPath, writeTextFileSync} from "../../utils/utils.js";
+import * as path from "path";
+import * as fs from "fs";
 
 function renderCMakeFile(ctx: Project, buildType: string): string {
     const platforms = ["web"];
-    const cppSourceFiles = [];
+    const cppSourceFiles:string[] = [];
     const cppExtensions = ["hpp", "hxx", "h", "hh", "cpp", "cxx", "c", "cc"];
     const cppSourceRoots = collectSourceRootsAll(ctx, "cpp", platforms, ".");
     for (const cppSourceRoot of cppSourceRoots) {
@@ -17,13 +19,13 @@ function renderCMakeFile(ctx: Project, buildType: string): string {
 
     const jsExtensions = ["js"];
 
-    const jsLibraryFiles = [];
+    const jsLibraryFiles:string[] = [];
     const js = collectSourceRootsAll(ctx, "js", platforms, ".");
     for (const jsLibraryRoot of js) {
         collectSourceFiles(jsLibraryRoot, jsExtensions, jsLibraryFiles);
     }
 
-    const jsPreFiles = [];
+    const jsPreFiles:string[] = [];
     const js_pre = collectSourceRootsAll(ctx, "js_pre", platforms, ".");
     for (const jsPreRoot of js_pre) {
         collectSourceFiles(jsPreRoot, jsExtensions, jsPreFiles);
@@ -158,15 +160,15 @@ function renderCMakeFile(ctx: Project, buildType: string): string {
 
 export async function buildWasm(ctx: Project, buildType: string) {
     const platform_proj_name = ctx.name + "-" + ctx.current_target; // "projectName-web"
-    const dest_dir = path.resolve(Deno.cwd(), "export");
+    const dest_dir = path.resolve(process.cwd(), "export");
     const output_path = path.join(dest_dir, platform_proj_name);
 
     if (!isDir(output_path)) {
-        await Deno.mkdir(output_path, {recursive: true});
+        fs.mkdirSync(output_path, {recursive: true});
     }
 
     const cmakeFile = withPath(output_path, () => renderCMakeFile(ctx, buildType));
-    await Deno.writeTextFile(path.join(output_path, "CMakeLists.txt"), cmakeFile);
+    writeTextFileSync(path.join(output_path, "CMakeLists.txt"), cmakeFile);
 
     return await buildCMake({
         os: "web",

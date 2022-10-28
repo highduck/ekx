@@ -1,7 +1,8 @@
-import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "./flashExport.ts";
-import {path} from "../../../deps.ts";
-import {isDir} from "../../utils.ts";
-import {Project} from "../../project.ts";
+import * as path from "path";
+import * as fs from "fs";
+import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "./flashExport.js";
+import {isDir} from "../../utils.js";
+import {Project} from "../../project.js";
 
 function getIconOutputs(outPrefix: string, sizes: number[]) {
     const originalSize = 64.0;
@@ -68,7 +69,7 @@ async function market(fla: string = "assets/res", out: string) {
 
 export async function buildMarketingAssets(ctx: Project, output: string):Promise<number> {
     if (isDir(output)) {
-        Deno.removeSync(output, {recursive: true});
+        fs.rmSync(output, {recursive: true});
     }
     const marketAsset = ctx.market_asset ? ctx.market_asset : "assets/res";
     await market(marketAsset, output);

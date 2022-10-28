@@ -1,6 +1,6 @@
-import {getModuleDir} from "../../modules/utils/utils.ts";
-import {path} from "../../modules/deps.ts";
-import * as esbuild from "https://deno.land/x/esbuild/mod.js";
+import {getModuleDir} from "../../modules/utils/utils.js";
+import * as path from "path";
+import * as esbuild from "esbuild";
 
 const __dirname = getModuleDir(import.meta);
 

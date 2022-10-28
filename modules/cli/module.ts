@@ -1,5 +1,5 @@
-import {logger} from "./logger.ts";
-import {path} from "../deps.ts";
+import {logger} from "./logger.js";
+import * as path from "path";
 
 export type UserArray<T> = undefined | T | T[];
 

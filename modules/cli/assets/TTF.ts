@@ -1,8 +1,9 @@
-import {Asset, AssetDesc} from "./Asset.ts";
-import {path} from "../../deps.ts";
-import {copyFile, makeDirs, removePathExtension} from "../utils.ts";
-import {H} from "../utility/hash.ts";
-import {hashFile} from "./helpers/hash.ts";
+import * as path from "path";
+import * as fs from "fs";
+import {Asset, AssetDesc} from "./Asset.js";
+import {makeDirs, removePathExtension} from "../utils.js";
+import {H} from "../utility/hash.js";
+import {hashFile} from "./helpers/hash.js";
 
 export interface TTFImporterDesc extends AssetDesc {
     filepath: string;
@@ -23,17 +24,16 @@ export class TTFAsset extends Asset {
         try {
             const hash = hashFile(filepath);
             return hash ^ super.resolveInputs();
-        }
-        catch(err) {
+        } catch (err) {
             console.warn("file not found:", filepath);
             throw err;
         }
     }
 
-    build() {
+    build(): null {
         const outputPath = path.join(this.owner.output, this.desc.name + ".ttf");
         makeDirs(path.dirname(outputPath));
-        copyFile(path.resolve(this.owner.basePath, this.desc.filepath), outputPath);
+        fs.copyFileSync(path.resolve(this.owner.basePath, this.desc.filepath), outputPath);
 
         this.writer.writeU32(H(this.typeName));
         this.writer.writeU32(H(this.desc.name!));

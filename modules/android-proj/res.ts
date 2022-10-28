@@ -1,5 +1,5 @@
-import {xmldoc} from "../deps.ts";
-const {XmlDocument} = xmldoc;
+import {XmlDocument} from "xmldoc";
+import {writeTextFileSync} from "../utils/utils.js";
 
 export function writeStringsXML(filepath: string, strings: { [key: string]: string }): void {
     const doc = new XmlDocument(`<resources></resources>`);
@@ -9,7 +9,7 @@ export function writeStringsXML(filepath: string, strings: { [key: string]: stri
             `<string name="${key}" translatable="false">${val}</string>`
         ));
     }
-    Deno.writeTextFileSync(filepath, doc.toString());
+    writeTextFileSync(filepath, doc.toString());
 }
 
 export function writeColorsXML(filepath: string, colors:{[key:string]:string}): void {
@@ -20,5 +20,5 @@ export function writeColorsXML(filepath: string, colors:{[key:string]:string}): 
             `<color name="${key}">${val}</color>`
         ));
     }
-    Deno.writeTextFileSync(filepath, doc.toString());
+    writeTextFileSync(filepath, doc.toString());
 }

@@ -23,14 +23,14 @@ void formatAtlasFileName(char* buffer, int bufferSize, const char* name, float s
         ek_snprintf(pageSuffix, 8, "_%d", pageIndex);
     }
     const char* scaleSuffix = "";
-    if (scale <= 1) scaleSuffix = "@1x";
-    else if (scale <= 2) scaleSuffix = "@2x";
-    else if (scale <= 3) scaleSuffix = "@3x";
-    else if (scale <= 4) scaleSuffix = "@4x";
+    if (scale <= 1) scaleSuffix = "1x";
+    else if (scale <= 2) scaleSuffix = "2x";
+    else if (scale <= 3) scaleSuffix = "3x";
+    else if (scale <= 4) scaleSuffix = "4x";
     else {
         log_warn("atlas more than 4x scale-factor! %d %%\n", (int) (100 * scale));
         // to support bigger density
-        scaleSuffix = "@4x";
+        scaleSuffix = "4x";
     }
     ek_snprintf(buffer, bufferSize, "%s%s%s.%s", name, pageSuffix, scaleSuffix, ext);
 }

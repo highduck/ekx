@@ -1,4 +1,4 @@
-import {BytesWriter} from "./BytesWriter.ts";
+import {BytesWriter} from "./BytesWriter.js";
 
 export class StringTable {
     strings: string[] = [""];

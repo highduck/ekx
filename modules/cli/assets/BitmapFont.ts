@@ -1,12 +1,12 @@
-import {Asset, AssetDesc} from "./Asset.ts";
-import {makeDirs} from "../utils.ts";
-import {path} from "../../deps.ts";
-import {bmfontAsync} from "./helpers/bmfont.ts";
-import {MultiResAtlasAsset} from "./Atlas.ts";
-import {H} from "../utility/hash.ts";
-import {hashFile} from "./helpers/hash.ts";
-import {xmldoc} from "../../deps.ts";
-const {XmlDocument} = xmldoc;
+import * as path from "path";
+import {XmlDocument} from "xmldoc";
+import {Asset, AssetDesc} from "./Asset.js";
+import {makeDirs} from "../utils.js";
+import {bmfontAsync} from "./helpers/bmfont.js";
+import {MultiResAtlasAsset} from "./Atlas.js";
+import {H} from "../utility/hash.js";
+import {hashFile} from "./helpers/hash.js";
+import {writeTextFileSync} from "../../utils/utils.js";
 
 export interface BMFontDesc extends AssetDesc {
     filepath: string;
@@ -51,7 +51,7 @@ ${this.desc.font_xml!}
     ${atlasAsset.desc.resolutions!.map(r => "<resolution scale=\"" + r.scale + "\"/>").join("\n")}
 </atlas>
 </bmfont>`);
-        Deno.writeTextFileSync(configPath, xml.toString());
+        writeTextFileSync(configPath, xml.toString());
 
         // prepare required folder for images collection
         makeDirs(imagesOutput);

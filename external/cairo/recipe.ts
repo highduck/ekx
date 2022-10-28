@@ -1,5 +1,14 @@
-import {path, fs} from "../../modules/deps.ts"
-import {downloadCheck, untar, copyFolderRecursive, getModuleDir, rm} from "../../modules/utils/mod.ts"
+import * as path from "path";
+import {
+    copyFolderRecursive,
+    downloadCheck,
+    expandGlobSync,
+    getModuleDir,
+    readTextFileSync,
+    rm,
+    untar,
+    writeTextFileSync
+} from "../../modules/utils/mod.js";
 
 const __dirname = getModuleDir(import.meta);
 const cacheDir = path.join(__dirname, "cache");
@@ -28,8 +37,8 @@ async function downloadPixMan() {
 }
 
 async function removeFilesGlob(glob: string) {
-    for await (const file of fs.expandGlob(glob, {root: __dirname})) {
-        await Deno.remove(file.path);
+    for (const file of expandGlobSync(glob, {root: __dirname})) {
+        await rm(file.path);
     }
 }
 
@@ -37,7 +46,7 @@ async function fetch() {
     await Promise.all([downloadCairo(), downloadPixMan()]);
 
     console.log("patch files");
-    await Deno.writeTextFile(path.join(tempDir, "cairo/src/cairo-features.h"), `#ifndef CAIRO_FEATURES_H
+    writeTextFileSync(path.join(tempDir, "cairo/src/cairo-features.h"), `#ifndef CAIRO_FEATURES_H
 #define CAIRO_FEATURES_H
 
 #define HAVE_STDINT_H 1
@@ -56,7 +65,7 @@ async function fetch() {
 #endif //CAIRO_FEATURES_H
 `);
 
-    await Deno.writeTextFile(path.join(tempDir, "pixman/pixman/pixman-config.h"), `#ifndef PIXMAN_CONFIG_H
+    writeTextFileSync(path.join(tempDir, "pixman/pixman/pixman-config.h"), `#ifndef PIXMAN_CONFIG_H
 #define PIXMAN_CONFIG_H
 
 #define PACKAGE
@@ -65,8 +74,8 @@ async function fetch() {
 #endif //PIXMAN_CONFIG_H
 `);
 
-    await Deno.writeTextFile(path.join(tempDir, "pixman/pixman/pixman-private.h"),
-        '#include <pixman-config.h>\n' + await Deno.readTextFile(path.join(tempDir, "pixman/pixman/pixman-private.h"))
+    writeTextFileSync(path.join(tempDir, "pixman/pixman/pixman-private.h"),
+        '#include <pixman-config.h>\n' + readTextFileSync(path.join(tempDir, "pixman/pixman/pixman-private.h"))
     );
 
     console.log("copy to src");

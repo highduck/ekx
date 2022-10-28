@@ -1,10 +1,11 @@
-import {Asset, AssetDesc} from "./Asset.ts";
-import {compress, WebpConfig} from "./helpers/webp.ts";
-import {logger} from "../logger.ts";
-import {path} from "../../deps.ts";
-import {copyFile, makeDirs} from "../utils.ts";
-import {H} from "../utility/hash.ts";
-import {hashFile} from "./helpers/hash.ts";
+import * as path from "path";
+import * as fs from "fs";
+import {Asset, AssetDesc} from "./Asset.js";
+import {compress, WebpConfig} from "./helpers/webp.js";
+import {logger} from "../logger.js";
+import {makeDirs} from "../utils.js";
+import {H} from "../utility/hash.js";
+import {hashFile} from "./helpers/hash.js";
 
 export const enum TextureDataType {
     Normal = "2d",
@@ -42,7 +43,7 @@ export class TextureAsset extends Asset {
             const srcFilePath = path.join(this.owner.basePath, imagePath);
             const destFilepath = path.join(this.owner.output, imagePath);
             makeDirs(path.dirname(destFilepath));
-            copyFile(srcFilePath, destFilepath);
+            fs.copyFileSync(srcFilePath, destFilepath);
         }
         if (this.desc.webp) {
             const promises = [];
@@ -54,7 +55,7 @@ export class TextureAsset extends Asset {
             if (this.owner.project.current_target === "android") {
                 for (const imagePath of this.desc.images) {
                     const filepath = path.join(this.owner.output, imagePath);
-                    Deno.removeSync(filepath);
+                    fs.rmSync(filepath);
                 }
             }
         }

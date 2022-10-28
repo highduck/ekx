@@ -1,2 +1,2 @@
-export * from "./download.ts"
-export * from "./utils.ts"
+export * from "./download.js";
+export * from "./utils.js";

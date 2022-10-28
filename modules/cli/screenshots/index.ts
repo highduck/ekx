@@ -1,8 +1,9 @@
-import {Project} from "../project.ts";
-import {path} from "../../deps.ts";
-import {executeAsync, makeDirs} from "../utils.ts";
-import {buildAssetPackAsync} from "../assets.ts";
-import {build as buildCMake} from "../../cmake/mod.ts";
+import * as path from "path";
+import * as fs from "fs";
+import {Project} from "../project.js";
+import {executeAsync, makeDirs} from "../utils.js";
+import {buildAssetPackAsync} from "../assets.js";
+import {build as buildCMake} from "../../cmake/mod.js";
 
 const exportDir = "export/uitest";
 
@@ -64,7 +65,7 @@ function doScreenshots(ctx: Project): Promise<any> {
     const bin = path.join(exportDir, ctx.name);
     const jobs = [];
     const screenshotsDir = path.join(exportDir, "screenshots");
-    Deno.removeSync(screenshotsDir, {recursive: true});
+    fs.rmSync(screenshotsDir, {recursive: true});
 
     for (const sim of Object.keys(displays)) {
         const display = displays[sim];
@@ -84,7 +85,7 @@ function doScreenshots(ctx: Project): Promise<any> {
                 "--window", windowSettings.join(",")
             ];
             const job = executeAsync(path.resolve(bin), args, {
-                workingDir: path.join(Deno.cwd(), exportDir),
+                workingDir: path.join(process.cwd(), exportDir),
                 verbose: true
             });
             jobs.push(job);

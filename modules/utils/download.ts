@@ -1,5 +1,7 @@
-import {fs, path} from "../deps.ts"
-import {Sha1} from "https://deno.land/std/hash/sha1.ts"
+import * as fs from "fs";
+import * as path from "path";
+import * as crypto from "crypto";
+import {ensureDirSync, run} from "./utils.js";
 
 export interface DownloadInfo {
     url: string | URL;
@@ -11,12 +13,12 @@ export interface DownloadInfo {
 export async function download(url: string | URL, filepath: string, options?: RequestInit): Promise<DownloadInfo> {
     const response = await fetch(url, options);
     if (response.status !== 200) {
-        throw new Deno.errors.Http(`status ${response.status}-'${response.statusText}' received instead of 200`);
+        throw new Error(`status ${response.status}-'${response.statusText}' received instead of 200`);
     }
     const buffer = await response.arrayBuffer();
     const bytes = new Uint8Array(buffer);
-    fs.ensureDirSync(path.dirname(filepath));
-    Deno.writeFileSync(filepath, bytes);
+    ensureDirSync(path.dirname(filepath));
+    fs.writeFileSync(filepath, bytes);
     return {url, filepath, size: buffer.byteLength};
 }
 
@@ -30,7 +32,7 @@ export interface DownloadOptions {
 
 export function downloadFiles(props: DownloadOptions) {
     const srcBaseUrl = props.srcBaseUrl;
-    const destPath = props.destPath ?? Deno.cwd();
+    const destPath = props.destPath ?? process.cwd();
     const fileMap = props.fileMap ?? {};
     const fileList = props.fileList ?? [];
 
@@ -56,8 +58,8 @@ export async function downloadCheck(url: string, destDir: string, sha1: string) 
     const name = path.basename(url);
     const archivePath = path.join(destDir, name);
     if (fs.existsSync(archivePath)) {
-        const file = Deno.readFileSync(archivePath);
-        const sha1sum = new Sha1().update(file).hex();
+        const file = fs.readFileSync(archivePath);
+        const sha1sum = crypto.createHash("sha1").update(file).digest("hex");
         console.log(`Found file ${path.basename(archivePath)}, SHA1: ${sha1sum}`);
         if (sha1sum === sha1) {
             console.info("Check SHA1 verified, skip downloading", name);
@@ -72,9 +74,9 @@ export async function untar(archivePath:string, dest:string, options?:{strip?:nu
     if(options && options.strip != null) {
         args.push(`--strip-components=${options.strip}`);
     }
-    fs.ensureDirSync(dest);
+    ensureDirSync(dest);
     try {
-        const status = await Deno.run({cmd:["tar", "-x", "-f", archivePath, ...args, "-C", dest]}).status();
+        const status = await run({cmd:["tar", "-x", "-f", archivePath, ...args, "-C", dest]});
         if(!status.success) {
             console.error("untar failed, exit code:", status.code);
         }
@@ -90,5 +92,5 @@ export async function downloadAndUnpackArtifact(url: string, destDir: string, op
     const archivePath = path.join(destDir, name);
     await download(url, archivePath);
     await untar(archivePath, destDir, options);
-    await Deno.remove(archivePath);
+    fs.rmSync(archivePath, {recursive: true});
 }

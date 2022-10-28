@@ -1,8 +1,9 @@
-import {Asset, AssetDesc} from "./Asset.ts";
-import {fs, path} from "../../deps.ts";
-import {executeAsync, makeDirs} from "../utils.ts";
-import {H} from "../utility/hash.ts";
-import {hashFile, hashGlob} from "./helpers/hash.ts";
+import * as path from "path";
+import {Asset, AssetDesc} from "./Asset.js";
+import {executeAsync, makeDirs} from "../utils.js";
+import {H} from "../utility/hash.js";
+import {hashGlob} from "./helpers/hash.js";
+import {expandGlobSync} from "../../utils/utils.js";
 
 export interface TranslationsDesc extends AssetDesc {
     filepath: string
@@ -24,7 +25,7 @@ export class TranslationsAsset extends Asset {
     }
 
     async build() {
-        const files = fs.expandGlobSync(path.join(this.owner.basePath, this.desc.filepath, "*.po"));
+        const files = expandGlobSync(path.join(this.owner.basePath, this.desc.filepath, "*.po"));
         for (const file of files) {
             this.languages.set(path.basename(file.path, ".po"), path.join(this.owner.basePath, this.desc.filepath, path.basename(file.path)));
         }

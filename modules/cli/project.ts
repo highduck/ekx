@@ -1,10 +1,11 @@
-import {path, fs} from "../deps.ts";
-import {BumpVersionFlag, SemVer} from "./version.ts";
-import {resolveFrom} from "./utility/resolveFrom.ts";
-import {ModuleDef, validateModuleDef} from "./module.ts";
-import {logger} from "./logger.ts";
-import {makeDirs} from "./utils.ts";
-import {getModuleDir} from "../utils/utils.ts";
+import * as fs from "fs";
+import * as path from "path";
+import {BumpVersionFlag, SemVer} from "./version.js";
+import {resolveFrom} from "./utility/resolveFrom.js";
+import {ModuleDef, validateModuleDef} from "./module.js";
+import {logger} from "./logger.js";
+import {makeDirs} from "./utils.js";
+import {getModuleDir, readTextFileSync, writeTextFileSync} from "../utils/utils.js";
 
 const __dirname = getModuleDir(import.meta);
 
@@ -17,7 +18,7 @@ type RegisteredProject = any;
 export class Project {
     readonly sdk = new ProjectSDK();
     // current project's path, default is cwd()
-    projectPath: string = Deno.cwd();
+    projectPath: string = process.cwd();
     projectPkg: any = undefined;
 
     // code-name for project, initially initialized from project's package.json,
@@ -27,8 +28,8 @@ export class Project {
     // loaded from project's path package.json
     version: SemVer;
 
-    current_target: string = Deno.args[0];
-    args: string[] = Deno.args.concat();
+    current_target: string = process.argv[2];
+    args: string[] = process.argv.slice(2);
 
     // options evaluated from arguments
     options: {
@@ -125,7 +126,7 @@ export class Project {
         if(!fs.existsSync(configPath)) {
             console.error("File not found:", configPath);
         }
-        configPath = Deno.realPathSync(configPath);
+        configPath = fs.realpathSync(configPath);
         if (this.projects[configPath]) {
             return;
         }
@@ -152,7 +153,7 @@ export class Project {
     }
 
     async importModule(moduleId: string, fromDir?: string) {
-        const currentDir = fromDir ?? this.__dirname ?? Deno.cwd();
+        const currentDir = fromDir ?? this.__dirname ?? process.cwd();
         const moduleConfigPath = resolveFrom(currentDir, moduleId);
         if (moduleConfigPath) {
             await this.loadModule(moduleConfigPath);
@@ -172,7 +173,7 @@ export class Project {
 
     constructor() {
         try {
-            this.projectPkg = JSON.parse(Deno.readTextFileSync(path.join(this.projectPath, "package.json")));
+            this.projectPkg = JSON.parse(readTextFileSync(path.join(this.projectPath, "package.json")));
         } catch {
             logger.warn("Unable to read project's package.json file");
             this.projectPkg = {};
@@ -239,7 +240,7 @@ export class Project {
 `;
         const filepath = path.join(this.projectPath, headerFile);
         makeDirs(path.dirname(filepath));
-        Deno.writeTextFileSync(filepath, content);
+        writeTextFileSync(filepath, content);
     }
 
     __dirname = "";

@@ -1,4 +1,5 @@
-import {path} from "../deps.ts";
+import * as path from "path";
+import {readTextFileSync, writeTextFileSync} from "../utils/utils.js";
 
 export const enum BumpVersionFlag {
     Major = 1,
@@ -106,7 +107,7 @@ export class SemVer {
 
 export function bumpProjectVersion(p: string, bumpMask = BumpVersionFlag.BuildNumber):SemVer {
     const pkgFilePath = path.join(p, "package.json");
-    let pkg = Deno.readTextFileSync(pkgFilePath);
+    let pkg = readTextFileSync(pkgFilePath);
     const reVersion = /"version"\s*:\s*"([^"]*)"/g
     const versionMatch = reVersion.exec(pkg);
     if (versionMatch == null) {
@@ -116,7 +117,7 @@ export function bumpProjectVersion(p: string, bumpMask = BumpVersionFlag.BuildNu
     ver.bump(bumpMask);
     // rewrite version config header
     pkg = pkg.replace(versionMatch[0], `"version": "${ver.toString()}"`);
-    Deno.writeTextFileSync(pkgFilePath, pkg);
+    writeTextFileSync(pkgFilePath, pkg);
 
     return ver;
 }
