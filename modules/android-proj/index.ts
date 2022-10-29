@@ -195,8 +195,8 @@ export function generateNativeApp(): BaseModuleConfig {
             "com.android.application"
         ],
         android: {
-            compileSdk: 31,
-            buildToolsVersion: "30.0.3",
+            compileSdk: 33,
+            buildToolsVersion: "33.0.0",
             ndkVersion: "23.1.7779620",
             signingConfigs: {},
             defaultConfig: {
@@ -204,7 +204,7 @@ export function generateNativeApp(): BaseModuleConfig {
                 versionCode: 1,
                 versionName: "1.0",
                 minSdk: 19,
-                targetSdk: 31,
+                targetSdk: 33,
                 multiDexEnabled: true,
                 testInstrumentationRunner: "androidx.test.runner.AndroidJUnitRunner",
                 externalNativeBuild: {
