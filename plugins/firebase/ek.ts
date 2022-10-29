@@ -62,8 +62,8 @@ export async function setup(project: Project) {
             // Import the BoM for the Firebase platform
             // Check Release Notes for updates: https://firebase.google.com/support/release-notes/android
             android_buildScriptDependency: [
-                `classpath 'com.google.gms:google-services:4.3.13'`,
-                `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.1'`
+                `classpath 'com.google.gms:google-services:4.3.14'`,
+                `classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.2'`
             ],
             android_gradleApplyPlugin: ['com.google.gms.google-services', 'com.google.firebase.crashlytics'],
             android_gradleConfigRelease: `firebaseCrashlytics {

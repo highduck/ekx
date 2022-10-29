@@ -8,8 +8,8 @@ export function getAndroidSdkRoot(): string | null {
 }
 
 export async function getJavaHome(version: string | number): Promise<string> {
-    const result = await run({cmd: ["/usr/libexec/java_home", "-v", version.toString()], io: true});
-    return result.data;
+    const result = await run({cmd: ["/usr/libexec/java_home", "-v", version.toString()], stdio: "pipe", io: true});
+    return result.data ?? "";
 }
 
 function getAndroidStudioPath(): string {

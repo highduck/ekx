@@ -10,7 +10,6 @@ export interface UsesFeature {
 export class AndroidManifest {
 
     // root
-    package = "";
     features: UsesFeature[] = [];
     permissions: string[] = [];
 
@@ -55,7 +54,7 @@ export class AndroidManifest {
 
     save(filepath: string) {
         // <?xml version="1.0" encoding="utf-8"?>
-        const doc = new XmlDocument(`<manifest package="${this.package}"></manifest>`);
+        const doc = new XmlDocument(`<manifest></manifest>`);
         doc.attr["xmlns:android"] = "http://schemas.android.com/apk/res/android";
         doc.attr["xmlns:tools"] = "http://schemas.android.com/tools";
 

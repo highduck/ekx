@@ -260,6 +260,9 @@ export class GradlePrinter {
                 }
                 this.printSourceSets(android.sourceSets);
                 this.printBundleConfig(android.bundle);
+                if (android.namespace_) {
+                    this.writeln(`namespace '${android.namespace_}'`);
+                }
             });
         }
     }
@@ -405,6 +408,7 @@ export interface AndroidConfig {
     sourceSets?: SourceSets;
     compileJavaVersion?: string;
     bundle?: BundleConfig;
+    namespace_?: string;
 }
 
 interface SigningConfig {

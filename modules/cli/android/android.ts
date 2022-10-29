@@ -68,7 +68,6 @@ function getAndroidScreenOrientation(orientation: string): string {
 }
 
 function setupAndroidManifest(ctx: Project, proj: AndroidProjGen) {
-    proj.androidManifest.package = ctx.android.package_id;
     proj.androidManifest.activityName = ctx.android.package_id + "." + activityClassName;
     proj.androidManifest._root.push(...collectStrings(ctx, "android_manifest", ["android"], false));
     proj.androidManifest.permissions.push(...collectStrings(ctx, "android_permission", ["android"], false));
@@ -260,8 +259,8 @@ export async function export_android(ctx: Project): Promise<void> {
         proj.top.buildscript.dependencies.push(...android_buildScriptDependency);
         proj.app.dependencies.push(...android_dependency);
 
-        proj.app.android.buildTypes.release._extraCode = android_gradleConfigRelease;
-
+        proj.app.android!.buildTypes.release._extraCode = android_gradleConfigRelease;
+        proj.app.android!.namespace_ = ctx.android.package_id;
 
         if (signingConfigsPath) {
             const signingConfigsJson = readTextFileSync(signingConfigsPath);

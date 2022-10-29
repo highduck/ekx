@@ -144,8 +144,8 @@ if caps:
     project.objects[project.rootObject].attributes.TargetAttributes[project_target.get_id()][
         'SystemCapabilities'] = sys_caps
 
-#project.add_other_ldflags("$(inherited)")
-#project.add_library_search_paths("$(inherited)")
+project.add_other_ldflags("$(inherited)")
+project.add_library_search_paths("$(inherited)")
 
 project.add_other_cflags(compileDefines)
 

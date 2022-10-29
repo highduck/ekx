@@ -18,7 +18,7 @@ export type ExecuteOptions = {
 
 export async function executeAsync(bin: string, args: string[], options?: ExecuteOptions): Promise<number> {
     const cmd = [bin].concat(args);
-    const env = process.env;
+    const env: Record<string, string | undefined> = process.env;
     const cwd = options?.workingDir ?? process.cwd();
     logger.log("run:", cmd.join(" "));
     const stdio = (options?.verbose ?? UtilityConfig.verbose) ? "inherit" : "ignore";
@@ -38,7 +38,7 @@ export async function execute(cmd: string, args: string[], workingDir?: string, 
     const wd = workingDir ?? process.cwd();
     logger.debug(" | cwd:", wd);
 
-    const options:any = {
+    const options: any = {
         cmd: [cmd].concat(args),
         stdio: 'inherit',
         env: Object.assign({}, process.env)

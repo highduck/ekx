@@ -7,7 +7,7 @@ import G from "glob";
 /**
  * Remove directory, ignores errors
  */
-export const rm = (filepath: string) => fs.promises.rm(filepath, {recursive: true}).catch(()=>undefined);
+export const rm = (filepath: string) => fs.promises.rm(filepath, {recursive: true}).catch(() => undefined);
 
 /**
  * Resolve `__dirname` like filepath for current module
@@ -57,24 +57,27 @@ export async function copyFolderRecursive(source: string, target: string) {
     }
 }
 
-export const run = async (opts: { cmd: string[], cwd?: string, env?: Record<string, string>, stdio?: "inherit" | "ignore", io?: boolean }): Promise<{ success: boolean, code: number, data?: string, error?: string }> => {
+export const run = async (opts: { cmd: string[], cwd?: string, env?: Record<string, string | undefined>, stdio?: "inherit" | "ignore" | "pipe", io?: boolean }): Promise<{ success: boolean, code: number, data?: string, error?: string }> => {
     const [exe, ...args] = opts.cmd;
     const child = spawn(exe, args, {
         cwd: opts.cwd,
         env: opts.env,
         stdio: opts.stdio ?? "inherit",
     });
-    let data: string | undefined, error: string | undefined;
+    let data: string | undefined;
+    let error: string | undefined;
     if (opts.io) {
         data = "";
-        for await (const chunk of child.stdout) {
-            //          console.log('stdout chunk: ' + chunk);
-            data += chunk;
+        if (child.stdout) {
+            for await (const chunk of child.stdout) {
+                data += chunk;
+            }
         }
         error = "";
-        for await (const chunk of child.stderr) {
-//            console.error('stderr chunk: ' + chunk);
-            error += chunk;
+        if (child.stderr) {
+            for await (const chunk of child.stderr) {
+                error += chunk;
+            }
         }
     }
     const code: number = await new Promise((resolve) => {
@@ -96,8 +99,8 @@ export const readTextFileSync = (filepath: URL | string): string => {
 }
 
 export const expandGlobSync = (pattern: string, options?: { root?: string }): { path: string }[] => {
-    let opts:any = undefined;//{root: process.cwd(), cwd: process.cwd(), absolute: true};
-    if(options && options.root) {
+    let opts: any = undefined;//{root: process.cwd(), cwd: process.cwd(), absolute: true};
+    if (options && options.root) {
         opts = {};
         opts.cwd = options.root;
         opts.root = options.root;
@@ -105,5 +108,5 @@ export const expandGlobSync = (pattern: string, options?: { root?: string }): { 
     }
     const g = new G.GlobSync(pattern, opts);
     // console.info(g.found);
-    return g.found.map(s=>({path:s}));
+    return g.found.map(s => ({path: s}));
 }

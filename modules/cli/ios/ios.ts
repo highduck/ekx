@@ -5,7 +5,7 @@ import {
     isDir,
     replaceInFile
 } from "../utils.js";
-import * as plist from "plist";
+import plist from "plist";
 import * as path from "path";
 import * as fs from "fs";
 import {buildAssetPackAsync} from "../assets.js";

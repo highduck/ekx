@@ -9,7 +9,7 @@ export async function setup(project: Project) {
             cpp_lib: ["log", "android", "GLESv2"],
             android_java: "java",
             android_dependency: [
-                `implementation 'androidx.appcompat:appcompat:1.4.2'`
+                `implementation 'androidx.appcompat:appcompat:1.5.1'`
             ]
         },
         macos: {
