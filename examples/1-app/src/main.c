@@ -53,7 +53,7 @@ static void on_event(const ek_app_event ev) {
                 }
             }
             else if(ev.key.code == EK_KEYCODE_D) {
-                ek_app_open_url("https://github.com/eliasku/ek");
+                ek_app_open_url("https://github.com/highduck/ekx");
             }
             else if(ev.key.code == EK_KEYCODE_ESCAPE) {
                 static int exit_counter = 0;

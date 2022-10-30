@@ -1,5 +1,5 @@
-import {path} from "../../modules/deps.ts";
-import {Project} from "../../modules/cli/project.ts";
+import * as path from "path";
+import {Project} from "../../modules/cli/project.js";
 
 export async function setup(project: Project) {
     project.addModule({

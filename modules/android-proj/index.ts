@@ -19,7 +19,7 @@ export class AndroidProjGen {
     androidManifest = new AndroidManifest();
 
     // "app/src/main/res/values/strings.xml"
-    strings: { [key: string]: string } = {
+    strings: Record<string, string|undefined> = {
         // app title
         app_name: "My App",
         // applicationId

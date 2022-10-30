@@ -129,7 +129,7 @@ export interface AndroidConfig extends CxxConfig {
      * Dictionaries to generate the final strings resource xml file:
      * `app/src/main/res/values/strings.xml`
      */
-    android_strings?: UserArray<string>;
+    android_strings?: UserArray<Record<string, string|undefined>>;
 }
 
 type AndroidName =

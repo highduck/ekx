@@ -6,7 +6,7 @@ import re
 #from sys import print
 
 # PBXPROJ: https://github.com/kronenthaler/mod-pbxproj/wiki
-from pbxproj import XcodeProject, PBXGenericObject
+from pbxproj import XcodeProject, PBXGenericObject, XCBuildConfigurationFlags
 from pbxproj.pbxextensions import FileOptions
 
 config_file = open("ek-ios-build.json", "r")
@@ -146,7 +146,9 @@ if caps:
 
 project.add_other_ldflags("$(inherited)")
 project.add_library_search_paths("$(inherited)")
-
 project.add_other_cflags(compileDefines)
+
+# after ios 12.2.0
+project.add_search_paths(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS, "/usr/lib/swift")
 
 project.save()

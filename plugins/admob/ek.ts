@@ -1,4 +1,4 @@
-import {Project} from "../../modules/cli/project.ts";
+import {Project} from "../../modules/cli/project.js";
 
 export async function setup(project: Project) {
     if (project.current_target === "android") {
