@@ -57,13 +57,13 @@ jobs:
           sudo apt-get install libglu1-mesa-dev mesa-common-dev xorg-dev libasound-dev
 
       - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
+        uses: eliasku/gha-setup-ninja@master
 
       - name: Install CCache
         uses: eliasku/install-ccache-action@master
 
       - name: Setup CCache
-        uses: eliasku/ccache-action@master
+        uses: eliasku/ccache-action@main
         with:
           key: ${{ runner.os }}
 
