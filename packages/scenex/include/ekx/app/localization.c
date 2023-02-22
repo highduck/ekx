@@ -89,7 +89,7 @@ const char* localize(const char* str) {
 bool set_language(lang_name_t name) {
     localization_t l = s_localization;
     for (int i = 0; i < l.lang_num; ++i) {
-        if (memcmp(l.languages[i].name.str, name.str, sizeof(lang_name_t)) == 0) {
+        if (memcmp(l.languages[i].name.str, name.str, LANG_CODE_CMP_LENGTH) == 0) {
             return set_language_index(i);
         }
     }

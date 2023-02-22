@@ -2,7 +2,7 @@
 
 #include "ImGuiIntegration.hpp"
 #include <ek/app.h>
-#include <IconsFontAwesome5.h>
+#include <fonts/IconsFontAwesome5.h>
 
 #include <ek/gfx.h>
 

@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.19)
-include(npm.cmake)
 project(scenex)
 
 add_library(${PROJECT_NAME} STATIC "")
 
 add_library(ekx::scenex ALIAS scenex)
-add_library(ekx::ekx ALIAS scenex)
 
 option(EK_UITEST "Enable features for UI testing" OFF)
 

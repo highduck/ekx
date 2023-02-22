@@ -2,20 +2,7 @@
 
 Auph is simple audio library for games. This package contains draft implementation for WebAudio.
 
-### Web Example
+## esbuild
 
-Load library:
-```html
-<script src="https://eliasku.github.io/auph/auph.js" type="text/javascript"></script>
-```
-
-Write some JavaScript
-```javascript
-auph.setup();
-auph.resume();
-var data = auph.load("https://eliasku.github.io/auph/assets/wav/HiHat_Closed.wav", 0);
-setInterval(()=>{
-    auph.play(data);
-}, 200);
-```
-
+- build emscripten lib javascript file in esm format, node target
+- build preamble lib in iife format, right now keep es6 target (es2015)

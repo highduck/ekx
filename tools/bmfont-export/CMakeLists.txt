@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.19)
-include(npm.cmake)
 project(bmfont-export)
 
 add_executable(${PROJECT_NAME}
@@ -28,7 +27,7 @@ target_compile_definitions(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
         PUBLIC pugixml
         PUBLIC freetype
-        PUBLIC stb
+        PUBLIC ekx::headers
         PUBLIC ekx::std
         PUBLIC ekx::sg-file
         )
@@ -42,8 +41,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(BMFONT_OS_PREFIX osx)
-
     if (CMAKE_BUILD_TYPE MATCHES Debug)
     else ()
         set(EKC_COMPILE_FLAGS "-Oz -flto -DNDEBUG -fno-exceptions -fno-rtti")
@@ -57,9 +54,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(${PROJECT_NAME}
             PRIVATE shlwapi
             )
-    set(BMFONT_OS_PREFIX win32)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(BMFONT_OS_PREFIX linux)
     if (CMAKE_BUILD_TYPE MATCHES Debug)
     else ()
         target_compile_options(${PROJECT_NAME} PRIVATE -Oz)
@@ -67,7 +62,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif ()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/${BMFONT_OS_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../bin"
         RUNTIME_OUTPUT_NAME "bmfont-export"
         RUNTIME_OUTPUT_NAME_DEBUG "bmfont-export-debug"
         )

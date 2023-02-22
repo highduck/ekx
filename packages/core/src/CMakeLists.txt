@@ -12,7 +12,6 @@ add_library(${PROJECT_NAME} STATIC
 
         ek/util/Signal.hpp
         ek/util/StringUtil.hpp
-        ek/util/Path.hpp
 
         ek/util/StaticStorage.hpp
 
@@ -22,7 +21,7 @@ add_library(${PROJECT_NAME} STATIC
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
+target_code_coverage(${PROJECT_NAME} PUBLIC)
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -54,6 +53,6 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC ekx::std
-        PUBLIC stb
+        PUBLIC ekx::headers
         PUBLIC sokol
         )

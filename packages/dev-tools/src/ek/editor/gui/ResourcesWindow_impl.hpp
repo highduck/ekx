@@ -70,9 +70,9 @@ void draw_atlas_info(void* asset) {
         const sg_image page = REF_RESOLVE(res_image, p_atlas->pages[i]);
         if (page.id) {
             ImGui::Text("Page #%d", i);
-            const auto info = sg_query_image_info(page);
-            const auto width = pageScale * (float) info.width;
-            const auto height = pageScale * (float) info.height;
+            const sg_image_desc info = sg_query_image_desc(page);
+            const float width = pageScale * (float) info.width;
+            const float height = pageScale * (float) info.height;
             ImGui::Image((void*) (uintptr_t) page.id, ImVec2{width, height});
         } else {
             ImGui::TextDisabled("Page #%d", i);
@@ -110,9 +110,9 @@ void draw_dynamic_atlas_info(void* asset) {
         const sg_image page = p_atlas->get_page_image(i);
         if (page.id) {
             ImGui::Text("Page #%d", i);
-            const auto info = sg_query_image_info(page);
-            const auto width = pageScale * (float) info.width;
-            const auto height = pageScale * (float) info.height;
+            const sg_image_desc info = sg_query_image_desc(page);
+            const float width = pageScale * (float) info.width;
+            const float height = pageScale * (float) info.height;
             ImGui::Image((void*) (uintptr_t) page.id, ImVec2{width, height});
         } else {
             ImGui::TextDisabled("Page #%d", i);

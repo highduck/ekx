@@ -48,7 +48,7 @@ static WCHAR* mz_utf8z_to_widechar(const char* str)
 {
   int reqChars = MultiByteToWideChar(CP_UTF8, 0, str, -1, NULL, 0);
   WCHAR* wStr = (WCHAR*)malloc(reqChars * sizeof(WCHAR));
-  MultiByteToWideChar(CP_UTF8, 0, str, -1, wStr, sizeof(WCHAR) * reqChars);
+  MultiByteToWideChar(CP_UTF8, 0, str, -1, wStr, reqChars);
   return wStr;
 }
 
@@ -96,6 +96,7 @@ static int mz_stat64(const char *path, struct __stat64 *buffer)
 #define MZ_FFLUSH fflush
 #define MZ_FREOPEN mz_freopen
 #define MZ_DELETE_FILE remove
+
 #elif defined(__MINGW32__) || defined(__WATCOMC__)
 #ifndef MINIZ_NO_TIME
 #include <sys/utime.h>
@@ -111,6 +112,7 @@ static int mz_stat64(const char *path, struct __stat64 *buffer)
 #define MZ_FFLUSH fflush
 #define MZ_FREOPEN(f, m, s) freopen(f, m, s)
 #define MZ_DELETE_FILE remove
+
 #elif defined(__TINYC__)
 #ifndef MINIZ_NO_TIME
 #include <sys/utime.h>
@@ -126,6 +128,7 @@ static int mz_stat64(const char *path, struct __stat64 *buffer)
 #define MZ_FFLUSH fflush
 #define MZ_FREOPEN(f, m, s) freopen(f, m, s)
 #define MZ_DELETE_FILE remove
+
 #elif defined(__USE_LARGEFILE64) /* gcc, clang */
 #ifndef MINIZ_NO_TIME
 #include <utime.h>
@@ -141,7 +144,8 @@ static int mz_stat64(const char *path, struct __stat64 *buffer)
 #define MZ_FFLUSH fflush
 #define MZ_FREOPEN(p, m, s) freopen64(p, m, s)
 #define MZ_DELETE_FILE remove
-#elif defined(__APPLE__)
+
+#elif defined(__APPLE__) || defined(__FreeBSD__)
 #ifndef MINIZ_NO_TIME
 #include <utime.h>
 #endif
@@ -729,7 +733,7 @@ static mz_bool mz_zip_reader_read_central_dir(mz_zip_archive *pZip, mz_uint flag
     if (((num_this_disk | cdir_disk_index) != 0) && ((num_this_disk != 1) || (cdir_disk_index != 1)))
         return mz_zip_set_error(pZip, MZ_ZIP_UNSUPPORTED_MULTIDISK);
 
-    if (cdir_size < pZip->m_total_files * MZ_ZIP_CENTRAL_DIR_HEADER_SIZE)
+    if (cdir_size < (mz_uint64)pZip->m_total_files * MZ_ZIP_CENTRAL_DIR_HEADER_SIZE)
         return mz_zip_set_error(pZip, MZ_ZIP_INVALID_HEADER_OR_CORRUPTED);
 
     if ((cdir_ofs + (mz_uint64)cdir_size) > pZip->m_archive_size)
@@ -4706,7 +4710,7 @@ const char *mz_zip_get_error_string(mz_zip_error mz_err)
         case MZ_ZIP_VALIDATION_FAILED:
             return "validation failed";
         case MZ_ZIP_WRITE_CALLBACK_FAILED:
-            return "write calledback failed";
+            return "write callback failed";
 	case MZ_ZIP_TOTAL_ERRORS:
             return "total errors";
         default:

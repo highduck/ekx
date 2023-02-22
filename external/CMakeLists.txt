@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.19)
+
+add_subdirectory(headers)
+add_subdirectory(box2d)
+add_subdirectory(cairo)
+add_subdirectory(freetype)
+add_subdirectory(miniz)
+add_subdirectory(msgpack)
+add_subdirectory(pugixml)
+add_subdirectory(quickjs)
+add_subdirectory(sokol)
+add_subdirectory(imgui)

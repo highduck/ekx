@@ -50,14 +50,14 @@ public:
     }
 
     const File* open(const char* relPath) const override {
-        String childPath{path_.c_str()};
-        Path::appendJoin(childPath, relPath);
-        // TODO: remmmmove std::string everywhere...
-        std::string childPath_{childPath.c_str()};
+        char child_path[1024];
+        ek_path_join(child_path, sizeof child_path, path_.c_str(), relPath);
+        // TODO: remove std::string everywhere...
+        std::string childPath_{child_path};
         auto& children = root_->children_;
         auto it = children.find(childPath_);
         if (it == children.end()) {
-            children[childPath_] = create(childPath_.c_str(), root_);
+            children[childPath_] = create(child_path, root_);
         }
         return children[childPath_];
     }

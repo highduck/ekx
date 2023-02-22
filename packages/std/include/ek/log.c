@@ -117,7 +117,11 @@ static void log__default(log_msg_t msg) {
     char usec[8];
 
     struct timespec ts;
+#if defined(__MINGW32__)
+    clock_gettime(CLOCK_REALTIME, &ts);
+#else // _WIN32
     timespec_get(&ts, TIME_UTC);
+#endif // !_WIN32
     strftime(time, sizeof time, "%Y-%m-%d %H:%M:%S", gmtime(&ts.tv_sec));
     const int32_t millis = (int32_t) (ts.tv_nsec / 1000000);
     const uint8_t frame = (uint8_t) (msg.frame & 0xFFu);

@@ -35,13 +35,22 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - uses: msys2/setup-msys2@v2
         if: runner.os == 'Windows'
         with:
           path-type: inherit
+          msystem: clang64
           release: false
+          install: >-
+            mingw-w64-clang-x86_64-winpthreads-git
+            mingw-w64-clang-x86_64-clang
+            mingw-w64-clang-x86_64-gcc
 
-      - name: Setup OpenGL on Ubuntu
+      - name: Setup OpenGL (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
@@ -58,42 +67,45 @@ jobs:
         with:
           key: ${{ runner.os }}
 
-      - name: Install dependencies
-        run: yarn --frozen-lockfile
+      - name: Install NPM dependencies
+        run: |
+          yarn --version
+          yarn --frozen-lockfile
 
-      - name: Build
-        run: yarn run ci:build-native
+      - name: Fetch and test external tools
+        run: |
+          yarn run fetch-tools
+          yarn run test-tools 
+
+      - name: Build JS
+        run: yarn run ci:build
+
+      - name: Build Native
+        run: yarn run ci:native-build
 
       - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}
+          path: |
+            tools/bin/
+            external/
+            modules/
+            packages/
+            plugins/
+            package.json
+            CMakeLists.txt
+
+      # llvm-profdata / llvm-cov
+      - name: Install LLVM and Clang (Linux)
+        uses: KyleMayes/install-llvm-action@v1
         if: runner.os == 'Linux'
         with:
-          name: bin-linux
-          path: tools/*/bin/linux
+          version: "15"
+          ubuntu-version: "18.04"
+          env: true
 
-      - uses: actions/upload-artifact@v3
-        if: runner.os == 'macOS'
-        with:
-          name: bin-osx
-          path: tools/*/bin/osx
-
-      - uses: actions/upload-artifact@v3
-        if: runner.os == 'Windows'
-        with:
-          name: bin-win32
-          path: tools/*/bin/win32
-
-  build-js:
-    name: Build JS
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: yarn --frozen-lockfile
-
-      - name: Build
-        run: yarn run ci:build
+      - name: Coverage Native
+        run: yarn run ci:native-coverage
 
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
@@ -108,41 +120,13 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: bin-osx
-          path: tools
+          name: ${{ runner.os }}
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: bin-linux
-          path: tools
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: bin-win32
-          path: tools
-
-      - name: Setup execute permission
-        run: |
-          chmod +x tools/bmfont-export/bin/osx/bmfont-export
-          chmod +x tools/bmfont-export/bin/linux/bmfont-export
-          chmod +x tools/bmfont-export/bin/win32/bmfont-export.exe
-          chmod +x tools/flash-export/bin/osx/flash-export
-          chmod +x tools/flash-export/bin/linux/flash-export
-          chmod +x tools/flash-export/bin/win32/flash-export.exe
-          chmod +x tools/obj-export/bin/osx/obj-export
-          chmod +x tools/obj-export/bin/linux/obj-export
-          chmod +x tools/obj-export/bin/win32/obj-export.exe
-          chmod +x tools/sprite-packer/bin/osx/sprite-packer
-          chmod +x tools/sprite-packer/bin/linux/sprite-packer
-          chmod +x tools/sprite-packer/bin/win32/sprite-packer.exe
-
-      - name: Intall Dependencies
+      - name: Install NPM dependencies
         run: |
           yarn --version
           yarn --frozen-lockfile
-
-      - name: Build
-        run: yarn run ci:build
+          yarn global add @changesets/cli
 
       - name: Create Release Pull Request or Publish to NPM
         id: changesets

@@ -1,0 +1,45 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdk 30
+    buildToolsVersion "30.0.3"
+    ndkVersion "23.1.7779620"
+    signingConfigs {
+        // SIGNING_CONFIGS
+    }
+    defaultConfig {
+        applicationId "com.eliasku.template_android" // AUTO
+        versionCode 1 // AUTO
+        versionName "1.0" // AUTO
+        minSdkVersion 16
+        targetSdkVersion 30
+        multiDexEnabled true
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            multiDexKeepProguard file('multidex-config.pro')
+        }
+    }
+    sourceSets {
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    bundle {
+        language {
+            enableSplit = false
+        }
+        density {
+            enableSplit = false
+        }
+        abi {
+            enableSplit = true
+        }
+    }
+}
+
+dependencies {
+}

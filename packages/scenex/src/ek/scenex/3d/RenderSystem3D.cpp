@@ -138,7 +138,7 @@ struct ShadowMapRes {
     }
 
     void begin() {
-        auto info = sg_query_image_info(rt);
+        const sg_image_desc info = sg_query_image_desc(rt);
         auto w = info.width;
         auto h = info.height;
         sg_begin_pass(pass, clear);

@@ -38,6 +38,8 @@ void io_write_f32(io_t* io, float v);
 // ( chars size | ...size bytes string chars | '\0' )
 void io_write_string(io_t* io, const char* str, int32_t size);
 
+#define IO_WRITE(io, value) io_push((io), &(value), sizeof(value))
+
 #ifdef __cplusplus
 };
 #endif

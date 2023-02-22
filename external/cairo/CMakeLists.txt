@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-project(cairo)
+project(cairo C)
 
 add_library(${PROJECT_NAME} STATIC
         src/cairo.c
@@ -129,25 +129,26 @@ add_library(${PROJECT_NAME} STATIC
         src/pixman-timer.c
         src/pixman-trap.c
         src/pixman-utils.c
-
         )
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-        src
-        )
+target_include_directories(${PROJECT_NAME} PUBLIC src)
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-        C_STANDARD 99
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO
+set_target_properties(${PROJECT_NAME} PROPERTIES C_STANDARD 99)
+target_compile_options(${PROJECT_NAME} PRIVATE
+        -Wno-int-to-pointer-cast
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_compile_definitions(${PROJECT_NAME}
             PUBLIC CAIRO_WIN32_STATIC_BUILD)
 else()
-    target_link_libraries(${PROJECT_NAME} -lpthread)
+    find_package(Threads REQUIRED)
+    target_link_libraries(${PROJECT_NAME}
+            PUBLIC m Threads::Threads)
 endif()
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+if (EKX_BUILD_EXTERNAL_TESTS)
+    add_subdirectory(test)
+endif ()

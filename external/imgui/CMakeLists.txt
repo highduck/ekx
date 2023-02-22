@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.19)
-include(npm.cmake)
 project(imgui)
 
 add_library(${PROJECT_NAME} STATIC
@@ -38,8 +37,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         )
 
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC stb
+        PUBLIC ekx::headers
         PUBLIC freetype
         )
 
+target_link_libraries(${PROJECT_NAME} PUBLIC m)
+
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+if (EKX_BUILD_EXTERNAL_TESTS)
+    add_subdirectory(test)
+endif ()

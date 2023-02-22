@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.19)
-include(npm.cmake)
-
 project(std C)
 
 add_library(${PROJECT_NAME} STATIC
@@ -9,6 +7,7 @@ add_library(${PROJECT_NAME} STATIC
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+target_code_coverage(${PROJECT_NAME} PUBLIC)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
@@ -42,7 +41,7 @@ target_link_options(${PROJECT_NAME}
         )
 
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC stb
+        PUBLIC ekx::headers
         PUBLIC sokol
         )
 
@@ -54,6 +53,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Android")
             PUBLIC log
             )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    find_package(Threads REQUIRED)
+    target_link_libraries(${PROJECT_NAME}
+            PUBLIC m Threads::Threads)
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(${PROJECT_NAME}
             PUBLIC m
@@ -62,7 +64,6 @@ else ()
     error("Platform: UNKNOWN")
 endif ()
 
-#if (EKX_BUILD_TESTS)
-enable_testing()
+if (EKX_BUILD_TESTS)
     add_subdirectory(test)
-#endif ()
+endif ()

@@ -13,6 +13,7 @@ extern "C" {
 // - https://github.com/elnormous/ouzel/tree/master/engine/localization
 // - https://github.com/j-jorge/libintl-lite
 
+#define LANG_CODE_CMP_LENGTH (2)
 #define LANG_CODE_MAX_LENGTH (8)
 #define LANG_MAX_COUNT (16)
 

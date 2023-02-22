@@ -23,14 +23,14 @@ void formatAtlasFileName(char* buffer, int bufferSize, const char* name, float s
         ek_snprintf(pageSuffix, 8, "_%d", pageIndex);
     }
     const char* scaleSuffix = "";
-    if (scale <= 1) scaleSuffix = "@1x";
-    else if (scale <= 2) scaleSuffix = "@2x";
-    else if (scale <= 3) scaleSuffix = "@3x";
-    else if (scale <= 4) scaleSuffix = "@4x";
+    if (scale <= 1) scaleSuffix = "1x";
+    else if (scale <= 2) scaleSuffix = "2x";
+    else if (scale <= 3) scaleSuffix = "3x";
+    else if (scale <= 4) scaleSuffix = "4x";
     else {
         log_warn("atlas more than 4x scale-factor! %d %%\n", (int) (100 * scale));
         // to support bigger density
-        scaleSuffix = "@4x";
+        scaleSuffix = "4x";
     }
     ek_snprintf(buffer, bufferSize, "%s%s%s.%s", name, pageSuffix, scaleSuffix, ext);
 }
@@ -45,16 +45,18 @@ void save_atlas_resolution(AtlasData& resolution, const char* outputPath, const 
     for (auto& page: resolution.pages) {
         EK_ASSERT(page.bitmap.pixels != nullptr);
         formatAtlasFileName(imagePath, 1024, name, resolution.resolution_scale, page_index, "png");
-        io_write_u16(&io, page.w);
-        io_write_u16(&io, page.h);
+        IO_WRITE(&io, page.w);
+        IO_WRITE(&io, page.h);
         io_write_string(&io, imagePath, (int) strnlen(imagePath, 1024));
         io_write_u32(&io, page.sprites.size());
         for (auto& spr: page.sprites) {
-            io_write_u32(&io, H(spr.name.c_str()));
+            string_hash_t sprite_name = H(spr.name.c_str());
             // keep only rotation flag in output
-            io_write_u32(&io, spr.flags & 1);
-            io_push(&io, &spr.rc, sizeof(spr.rc));
-            io_push(&io, &spr.uv, sizeof(spr.uv));
+            uint32_t sprite_flags = spr.flags & 1;
+            IO_WRITE(&io, sprite_name);
+            IO_WRITE(&io, sprite_flags);
+            IO_WRITE(&io, spr.rc);
+            IO_WRITE(&io, spr.uv);
         }
 
         char absImagePath[1024];

@@ -4,7 +4,7 @@ import {unlock} from "./Unlock";
 
 let ctx: AudioContext | undefined | null;
 export let emptyAudioBuffer!: AudioBuffer;
-const defaultSampleRate = 22050;
+export const defaultSampleRate = 22050;
 
 export function getContext(): AudioContext | null | undefined {
     if (ctx && ctx.state !== "closed") {
@@ -47,8 +47,8 @@ export function audioContextPause(ctx: AudioContext) {
 }
 
 function newAudioContext(options?: AudioContextOptions): AudioContext | null | undefined {
-    const scope: any = window;
-    const audioContext: any = scope.AudioContext || scope.webkitAudioContext;
+    const w: any = window;
+    const audioContext: any = w["AudioContext"] || w["webkitAudioContext"];
 
     // TODO: set sample rate could lead to wrong playback on safari mobile (maybe it should be recreated after unlock?)
     //try {
@@ -56,7 +56,6 @@ function newAudioContext(options?: AudioContextOptions): AudioContext | null | u
     //} catch (err) {
     //    error(Message.WebAudio_TryDefaultOptions, err);
     //}
-
     try {
         return new audioContext();
     } catch (err) {

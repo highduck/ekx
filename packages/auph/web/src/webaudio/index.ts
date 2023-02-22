@@ -1,7 +1,7 @@
 import {
     audioContextPause,
     audioContextResume,
-    closeContext,
+    closeContext, defaultSampleRate,
     getAudioContextObject,
     getContext,
     getContextState,
@@ -341,12 +341,10 @@ export function get(name: Name, param: u31): u31 {
 
     if (name === Mixer) {
         const ctx = getAudioContextObject();
-        if (ctx) {
-            if (param === Param.State) {
-                result = getContextState(ctx);
-            } else if (param === Param.SampleRate) {
-                result = ctx.sampleRate | 0;
-            }
+        if (param === Param.State) {
+            result = ctx ? getContextState(ctx) : 0;
+        } else if (param === Param.SampleRate) {
+            result = ctx ? (ctx.sampleRate | 0) : defaultSampleRate;
         }
         return result;
     }
@@ -427,6 +425,7 @@ export function vibrate(durationMillis: u31): u31 {
             return navigator.vibrate(durationMillis) ? 0 : 1;
         }
     } catch {
+        // ignore
     }
     return 1;
 }

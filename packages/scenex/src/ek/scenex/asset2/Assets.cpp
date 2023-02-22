@@ -1,6 +1,6 @@
 #include "Asset_impl.hpp"
 
-#include <ek/util/Path.hpp>
+#include <ek/ds/String.hpp>
 #include <ek/log.h>
 #include <ek/assert.h>
 #include <ek/time.h>
@@ -41,11 +41,13 @@ public:
     }
 
     void do_load() override {
-        fullPath_ = manager_->base_path / path_;
         auph_buffer* buffer = &REF_RESOLVE(res_audio, res);
         // if assertion is triggering - implement cleaning up the slot before loading
         EK_ASSERT(buffer->id == 0);
-        *buffer = auph_load(fullPath_.c_str(), (flags & 1) ? AUPH_FLAG_STREAM : 0);
+
+        char full_path[1024];
+        ek_path_join(full_path, sizeof full_path, manager_->base_path.c_str(), path_.c_str());
+        *buffer = auph_load(full_path, (flags & 1) ? AUPH_FLAG_STREAM : 0);
     }
 
     void poll() override {
@@ -69,7 +71,6 @@ public:
 
     R(auph_buffer) res;
     String path_;
-    String fullPath_;
     uint32_t flags;
 };
 
@@ -92,14 +93,15 @@ public:
                 *p_atlas = nullptr;
             }
 
-            fullPath_ = manager_->base_path / name;
-
             *p_atlas = new Atlas;
             // do not switch to loading state, because after first load system does not poll pack's Asset objects
             state = AssetState::Loading;
 
             (*p_atlas)->formatMask = formatMask;
-            (*p_atlas)->load(fullPath_.c_str(), manager_->scale_factor);
+
+            char full_path[1024];
+            ek_path_join(full_path, sizeof full_path, manager_->base_path.c_str(), name.c_str());
+            (*p_atlas)->load(full_path, manager_->scale_factor);
         }
     }
 
@@ -152,7 +154,6 @@ public:
     R(atlas_ptr) res;
     String name;
     uint8_t loaded_scale_ = 0;
-    String fullPath_;
     uint32_t formatMask = 1;
 };
 
@@ -198,8 +199,9 @@ public:
     }
 
     void do_load() override {
-        fullPath_ = manager_->base_path / path_;
-        ek_local_res_load(fullPath_.c_str(),
+        char full_path[1024];
+        ek_path_join(full_path, sizeof full_path, manager_->base_path.c_str(), path_.c_str());
+        ek_local_res_load(full_path,
                           [](ek_local_res* lr) {
                               SceneAsset* this_ = (SceneAsset*) lr->userdata;
                               if (ek_local_res_success(lr)) {
@@ -220,7 +222,6 @@ public:
 
     R(SGFile) res;
     String path_;
-    String fullPath_;
 };
 
 class BitmapFontAsset : public Asset {
@@ -231,9 +232,10 @@ public:
     }
 
     void do_load() override {
-        fullPath_ = manager_->base_path / path_;
+        char full_path[1024];
+        ek_path_join(full_path, sizeof full_path, manager_->base_path.c_str(), path_.c_str());
         ek_local_res_load(
-                fullPath_.c_str(),
+                full_path,
                 [](ek_local_res* lr) {
                     BitmapFontAsset* this_ = (BitmapFontAsset*) lr->userdata;
                     if (ek_local_res_success(lr)) {
@@ -268,7 +270,6 @@ public:
     ek_local_res lr;
     R(Font) res;
     String path_;
-    String fullPath_;
 
 };
 
@@ -356,11 +357,12 @@ public:
 
     void do_load() override {
         loaded = 0;
+        char lang_path[1024];
         for (int i = 0; i < total; ++i) {
             auto* loader = &loaders_[i];
-            auto langPath = (manager_->base_path / name_ / loader->lang.str) + ".mo";
+            ek_snprintf(lang_path, sizeof lang_path, "%s/%s/%s.mo", manager_->base_path.c_str(), name_.c_str(), loader->lang.str);
             ek_local_res_load(
-                    langPath.c_str(),
+                    lang_path,
                     [](ek_local_res* lr) {
                         lang_loader* loader_ = (lang_loader*) lr->userdata;
                         StringsAsset* asset = loader_->asset;
@@ -405,9 +407,10 @@ public:
     }
 
     void do_load() override {
-        fullPath_ = manager_->base_path / name_ + ".model";
+        char full_path[1024];
+        ek_snprintf(full_path, sizeof full_path, "%s/%s.model", manager_->base_path.c_str(), name_.c_str());
         ek_local_res_load(
-                fullPath_.c_str(),
+                full_path,
                 [](ek_local_res* lr) {
                     ModelAsset* this_ = (ModelAsset*) lr->userdata;
                     if (ek_local_res_success(lr)) {
@@ -418,7 +421,7 @@ public:
                         RES_NAME_RESOLVE(res_mesh3d, H(this_->name_.c_str())) = new StaticMesh(model);
                         ek_local_res_close(lr);
                     } else {
-                        log_error("MODEL resource not found: %s", this_->fullPath_.c_str());
+                        log_error("MODEL resource not found: %s", this_->name_.c_str());
                         this_->error = 1;
                     }
                     this_->state = AssetState::Ready;
@@ -436,7 +439,6 @@ public:
     }
 
     String name_;
-    String fullPath_;
 };
 
 bool isTimeBudgetAllowStartNextJob(uint64_t since) {
@@ -454,9 +456,10 @@ public:
     }
 
     void do_load() override {
-        fullPath_ = manager_->base_path / path_;
+        char full_path[1024];
+        ek_path_join(full_path, sizeof full_path, manager_->base_path.c_str(), path_.c_str());
         ek_local_res_load(
-                fullPath_.c_str(),
+                full_path,
                 [](ek_local_res* lr) {
                     TrueTypeFontAsset* this_ = (TrueTypeFontAsset*) lr->userdata;
 
@@ -491,7 +494,6 @@ public:
     R(Font) res;
     float baseFontSize_;
     String path_;
-    String fullPath_;
     string_hash_t glyphCache_;
 };
 
@@ -569,9 +571,10 @@ PackAsset::PackAsset(String name) :
 void PackAsset::do_load() {
     assetListLoaded = false;
     assetsLoaded = 0;
-    fullPath_ = manager_->base_path / name_;
+    char full_path[1024];
+    ek_path_join(full_path, sizeof full_path, manager_->base_path.c_str(), name_.c_str());
     ek_local_res_load(
-            fullPath_.c_str(),
+            full_path,
             [](ek_local_res* lr) {
                 PackAsset* this_ = (PackAsset*) lr->userdata;
                 if (ek_local_res_success(lr)) {

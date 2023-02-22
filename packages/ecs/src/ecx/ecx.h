@@ -2,16 +2,11 @@
 #define ECX_H
 
 #include <ek/sparse_array.h>
-
-#ifdef __cplusplus
-
-#include <cstdint>
-#include <cstdbool>
-
-extern "C" {
-#else
 #include <stdint.h>
 #include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 void ecx_setup(void);
@@ -50,12 +45,7 @@ typedef struct entity_t {
     };
 } entity_t;
 
-#define NULL_ENTITY ((entity_t){0})
-
-#ifdef __cplusplus
-constexpr bool operator==(entity_t a, entity_t b) { return a.id == b.id; }
-constexpr bool operator!=(entity_t a, entity_t b) { return a.id != b.id; }
-#endif
+#define NULL_ENTITY ((struct entity_t){0})
 
 /**
  * Constructs entity structure by known numerical ID

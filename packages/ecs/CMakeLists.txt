@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.19)
-include(npm.cmake)
 project(ecs)
 
 add_library(${PROJECT_NAME} STATIC
@@ -7,7 +6,7 @@ add_library(${PROJECT_NAME} STATIC
         )
 
 add_library(ekx::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
-
+target_code_coverage(${PROJECT_NAME} PUBLIC)
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

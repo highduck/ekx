@@ -125,7 +125,7 @@ void game_display_update_simulated(game_display* display) {
     int color_img_width = 0;
     int color_img_height = 0;
     if (display->color.id) {
-        const sg_image_info color_image_info = sg_query_image_info(display->color);
+        const sg_image_desc color_image_info = sg_query_image_desc(display->color);
         color_img_width = color_image_info.width;
         color_img_height = color_image_info.height;
     }

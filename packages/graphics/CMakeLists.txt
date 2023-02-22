@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.19)
-include(npm.cmake)
-
 project(graphics)
 
 add_library(${PROJECT_NAME} STATIC

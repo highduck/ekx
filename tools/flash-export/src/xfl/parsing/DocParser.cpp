@@ -140,9 +140,10 @@ void DocParser::load() {
         Element bi;
         parse(item, bi);
 
-        String path{"bin"};
-        Path::appendJoin(path, bi.bitmapDataHRef.c_str());
-        auto* file = root->open(path.c_str());
+        char path[1024]{};
+        ek_path_join(path, sizeof path, "bin", bi.bitmapDataHRef.c_str());
+
+        auto* file = root->open(path);
         const auto& content = file->content();
         bi.bitmap.reset(BitmapData::parse(content.c_str(), content.size()));
         doc.library.emplace_back(std::move(bi));
@@ -153,9 +154,9 @@ void DocParser::load() {
     }
 
     for (const auto& item: node.child("symbols").children("Include")) {
-        String path{"LIBRARY"};
-        Path::appendJoin(path, item.attribute("href").value());
-        auto library_doc = load_xml(*root, path.c_str());
+        char path[1024];
+        ek_path_join(path, sizeof path, "LIBRARY", item.attribute("href").value());
+        auto library_doc = load_xml(*root, path);
         auto symbol = read<Element>(library_doc->child("DOMSymbolItem"));
         doc.library.emplace_back(std::move(symbol));
     }

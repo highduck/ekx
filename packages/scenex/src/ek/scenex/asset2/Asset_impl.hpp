@@ -4,7 +4,6 @@
 
 #include <ek/log.h>
 #include <ek/assert.h>
-#include <ek/util/Path.hpp>
 #include <ek/math.h>
 
 namespace ek {
