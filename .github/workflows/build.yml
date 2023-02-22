@@ -39,6 +39,11 @@ jobs:
         with:
           node-version: 18
 
+      - name: Versions
+        run: |
+          node --version
+          yarn --version
+
       - uses: msys2/setup-msys2@v2
         if: runner.os == 'Windows'
         with:
@@ -68,9 +73,7 @@ jobs:
           key: ${{ runner.os }}
 
       - name: Install NPM dependencies
-        run: |
-          yarn --version
-          yarn --frozen-lockfile
+        run: yarn --frozen-lockfile
 
       - name: Test external tools
         run: yarn run test-tools
@@ -104,10 +107,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install NPM dependencies
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Versions
         run: |
+          node --version
           yarn --version
-          yarn --frozen-lockfile
+
+      - name: Install NPM dependencies
+        run: yarn --frozen-lockfile
 
       # JS bundles are shared for all host-platforms
       - name: Build JS

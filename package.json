@@ -38,5 +38,14 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "yarn": "^1.22.17"
   }
 }
