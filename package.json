@@ -29,7 +29,7 @@
     "@types/plist": "^3.0.2",
     "@types/xmldoc": "^1.1.6",
     "colors": "^1.4.0",
-    "esbuild": "^0.15.0",
+    "esbuild": "^0.17.10",
     "glob": "^8.0.3",
     "mustache": "^4.2.0",
     "plist": "^3.0.6",

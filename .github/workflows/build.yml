@@ -101,6 +101,7 @@ jobs:
         if: runner.os == 'Linux'
         with:
           version: "10.0"
+          env: true
 
       - name: Coverage Native
         run: yarn run ci:native-coverage

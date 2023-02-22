@@ -149,6 +149,6 @@ project.add_library_search_paths("$(inherited)")
 project.add_other_cflags(compileDefines)
 
 # after ios 12.2.0
-project.add_search_paths(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS, "/usr/lib/swift")
+project.add_search_paths(XCBuildConfigurationFlags.LD_RUNPATH_SEARCH_PATHS, "/usr/lib/swift", False)
 
 project.save()
