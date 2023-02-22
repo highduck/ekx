@@ -134,7 +134,7 @@ void SceneWindow::onDraw() {
     if (display.color.id && displaySize.x > 0 && displaySize.y > 0) {
         auto texId = (void*) static_cast<uintptr_t>(display.color.id);
 
-        const auto info = sg_query_image_info(display.color);
+        const sg_image_desc info = sg_query_image_desc(display.color);
         const float texCoordX1 = display.info.size.x / (float) info.width;
         const float texCoordY1 = display.info.size.y / (float) info.height;
 

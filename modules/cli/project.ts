@@ -191,7 +191,7 @@ export class Project {
             this.options.clean = true;
         }
 
-        if (this.args.indexOf("-o") >= 0) {
+        if (this.args.indexOf("-o") >= 0 || this.args.indexOf("--open") >= 0) {
             this.options.openProject = true;
         } else if (this.args.indexOf("do-not-open") < 0) {
             this.options.openProject = false;

@@ -75,7 +75,7 @@ async function fetch() {
     });
 
     await downloadFiles({
-        srcBaseUrl: `https://github.com/ocornut/imgui_club/raw/master`,
+        srcBaseUrl: `https://github.com/ocornut/imgui_club/raw/main`,
         destPath: path.join(__dirname, "src"),
         fileList: [
             "imgui_memory_editor/imgui_memory_editor.h",

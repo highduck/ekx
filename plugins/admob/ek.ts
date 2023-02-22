@@ -13,7 +13,7 @@ export async function setup(project: Project) {
         cpp_include: "include",
         android: {
             android_java: "java",
-            android_dependency: `implementation 'com.google.android.gms:play-services-ads-lite:21.3.0'`,
+            android_dependency: `implementation 'com.google.android.gms:play-services-ads-lite:21.5.0'`,
             android_manifestApplication: [
                 `<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="@string/admob_app_id"/>`,
                 //`<meta-data android:name="com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT" android:value="true"/>`

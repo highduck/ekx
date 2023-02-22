@@ -6,7 +6,7 @@ export function setup(project: Project) {
         cpp: "src",
         android: {
             android_java: "java",
-            android_dependency: `implementation 'com.android.billingclient:billing:5.0.0'`
+            android_dependency: `implementation 'com.android.billingclient:billing:5.1.0'`
         },
         ios: {
             xcode_capability: "com.apple.InAppPurchase",

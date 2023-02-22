@@ -61,7 +61,7 @@ bool ek_gfx_read_pixels(sg_image image, void* pixels) {
 // get the texture from the sokol internals here...
     _sg_image_t* img = _sg_lookup_image(&_sg.pools, image.id);
     __unsafe_unretained id<MTLTexture> tex = _sg_mtl_id(img->mtl.tex[img->cmn.active_slot]);
-    sg_image_info info = sg_query_image_info(image);
+    sg_image_desc info = sg_query_image_desc(image);
     const int width = info.width;
     const int height = info.height;
     id < MTLTexture > temp_texture = 0;

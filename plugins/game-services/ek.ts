@@ -14,9 +14,9 @@ export async function setup(project: Project) {
         android: {
             android_java: "java",
             android_dependency: [
-                "implementation 'com.google.android.gms:play-services-base:18.1.0'",
+                "implementation 'com.google.android.gms:play-services-base:18.2.0'",
                 "implementation 'com.google.android.gms:play-services-games:23.1.0'",
-                "implementation 'com.google.android.gms:play-services-auth:20.3.0'"
+                "implementation 'com.google.android.gms:play-services-auth:20.4.1'"
             ],
             android_manifestApplication: [
                 `<meta-data android:name="com.google.android.gms.games.APP_ID" android:value="@string/gs_app_id" />`,

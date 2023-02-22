@@ -180,7 +180,7 @@ export function generateTopModule(): BuildTop {
             dependencies: [{
                 type: "classpath",
                 name: "com.android.tools.build:gradle",
-                version: "7.3.1"
+                version: "7.4.1"
             }]
         },
         allprojects: {
