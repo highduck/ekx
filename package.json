@@ -33,7 +33,7 @@
     "mustache": "^4.2.0",
     "plist": "^3.0.6",
     "ts-node": "^10.9.1",
-    "typescript": "^4.8.4",
+    "typescript": "^4.9.5",
     "xmldoc": "^1.2.0"
   },
   "devDependencies": {
