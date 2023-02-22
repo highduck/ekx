@@ -55,6 +55,11 @@ typedef union color2f_t {
     };
 } color2f_t;
 
+// fix `wingdi.h` conflict
+#ifdef RGB
+#undef RGB
+#endif
+
 #ifdef __cplusplus
 #define ARGB(x) (color_t{{(uint8_t)(((x) >> 16u) & 0xFFu),(uint8_t)(((x) >> 8u) & 0xFFu),(uint8_t)((x) & 0xFFu),(uint8_t)((x) >> 24u)}})
 #define RGB(x) (color_t{{(uint8_t)(((x) >> 16u) & 0xFFu),(uint8_t)(((x) >> 8u) & 0xFFu),(uint8_t)((x) & 0xFFu),0xFFu}})
@@ -62,6 +67,7 @@ typedef union color2f_t {
 #define ARGB(x) ((color_t){{(uint8_t)(((x) >> 16u) & 0xFFu),(uint8_t)(((x) >> 8u) & 0xFFu),(uint8_t)((x) & 0xFFu),(uint8_t)((x) >> 24u)}})
 #define RGB(x) ((color_t){{(uint8_t)(((x) >> 16u) & 0xFFu),(uint8_t)(((x) >> 8u) & 0xFFu),(uint8_t)((x) & 0xFFu),0xFFu}})
 #endif
+
 #define COLOR_WHITE ARGB(0xFFFFFFFF)
 #define COLOR_BLACK ARGB(0xFF000000)
 #define COLOR_ZERO ARGB(0x00000000)
