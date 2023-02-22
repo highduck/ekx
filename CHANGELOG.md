@@ -1,5 +1,12 @@
 # @ekx/ekx
 
+## 0.1.12
+
+### Patch Changes
+
+- 9da1aafb: fix running under node_modules
+- 9da1aafb: fix texture-loader missing js build
+
 ## 0.1.11
 
 ### Patch Changes
