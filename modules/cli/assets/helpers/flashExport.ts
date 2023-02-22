@@ -1,10 +1,10 @@
 import * as path from "path";
 import {executeAsync, makeDirs} from "../../utils.js";
-import {resolveToolsBinPath} from "../../utility/bin.js";
+import {getOrBuildToolBinary} from "../../utility/bin.js";
 
-export function flashExportAsync(configPath: string): Promise<number> {
-    const bin = resolveToolsBinPath("flash-export");
-    return executeAsync(bin, ["export", configPath]);
+export async function flashExportAsync(configPath: string): Promise<number> {
+    const bin = await getOrBuildToolBinary("flash-export");
+    return await executeAsync(bin, ["export", configPath]);
 }
 
 export interface RenderFlashSymbolOutputOptions {
@@ -16,7 +16,7 @@ export interface RenderFlashSymbolOutputOptions {
     outFilePath: string;
 }
 
-export function renderFlashSymbol(fla: string, symbol: string, outputs: RenderFlashSymbolOutputOptions[]) {
+export async function renderFlashSymbol(fla: string, symbol: string, outputs: RenderFlashSymbolOutputOptions[]) {
     const cmd = ["render", fla, symbol];
     for (const output of outputs) {
         cmd.push(
@@ -29,6 +29,6 @@ export function renderFlashSymbol(fla: string, symbol: string, outputs: RenderFl
         );
         makeDirs(path.dirname(output.outFilePath));
     }
-    const bin = resolveToolsBinPath("flash-export");
-    return executeAsync(bin, cmd);
+    const bin = await getOrBuildToolBinary("flash-export");
+    return await executeAsync(bin, cmd);
 }

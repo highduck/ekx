@@ -1,9 +1,11 @@
+.idea/
 .changeset/
 .github/
 .vscode/
 build/
 cmake-build-*/
-samples/
+examples/
 .gitmodules
 
 external/*/cache/
+tools/bin/

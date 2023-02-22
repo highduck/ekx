@@ -1,7 +1,7 @@
 import {executeAsync} from "../../utils.js";
-import {resolveToolsBinPath} from "../../utility/bin.js";
+import {getOrBuildToolBinary} from "../../utility/bin.js";
 
-export function bmfontAsync(configPath: string): Promise<number> {
-    const bin = resolveToolsBinPath("bmfont-export");
-    return executeAsync(bin, [configPath]);
+export async function bmfontAsync(configPath: string): Promise<number> {
+    const bin = await getOrBuildToolBinary("bmfont-export");
+    return await executeAsync(bin, [configPath]);
 }

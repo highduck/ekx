@@ -1,7 +1,7 @@
 import {executeAsync} from "../../utils.js";
-import {resolveToolsBinPath} from "../../utility/bin.js";
+import {getOrBuildToolBinary} from "../../utility/bin.js";
 
-export function objExportAsync(input: string, output: string): Promise<number> {
-    const bin = resolveToolsBinPath("obj-export");
-    return executeAsync(bin, [input, output]);
+export async function objExportAsync(input: string, output: string): Promise<number> {
+    const bin = await getOrBuildToolBinary("obj-export");
+    return await executeAsync(bin, [input, output]);
 }

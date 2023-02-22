@@ -72,28 +72,14 @@ jobs:
           yarn --version
           yarn --frozen-lockfile
 
-      - name: Fetch and test external tools
-        run: |
-          yarn run fetch-tools
-          yarn run test-tools 
+      - name: Test external tools
+        run: yarn run test-tools
 
       - name: Build JS
         run: yarn run ci:build
 
       - name: Build Native
         run: yarn run ci:native-build
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ${{ runner.os }}
-          path: |
-            tools/bin/
-            external/
-            modules/
-            packages/
-            plugins/
-            package.json
-            CMakeLists.txt
 
       # llvm-profdata / llvm-cov
       - name: Install LLVM and Clang (Linux)
@@ -118,14 +104,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: ${{ runner.os }}
-
       - name: Install NPM dependencies
         run: |
           yarn --version
           yarn --frozen-lockfile
+
+      # JS bundles are shared for all host-platforms
+      - name: Build JS
+        run: yarn run ci:build
 
       - name: Create Release Pull Request or Publish to NPM
         id: changesets

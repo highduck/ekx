@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
 import {ensureDirSync, run} from "./utils.js";
-
 export interface DownloadInfo {
     url: string | URL;
     size: number;
