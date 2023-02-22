@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node --esm --swc
+#!/usr/bin/env ts-node --esm --swc --skipIgnore
 
 // entry point for command line tool
 

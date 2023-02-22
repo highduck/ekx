@@ -130,8 +130,8 @@ export class Project {
         if (this.projects[configPath]) {
             return;
         }
+        logger.log(`Loading module from "${configPath}"`);
         try {
-            logger.log(`Loading module from "${configPath}"`);
             const module = await import(configPath);
             const configurator = module.setup;
             if (configurator) {
