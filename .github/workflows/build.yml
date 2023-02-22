@@ -39,11 +39,6 @@ jobs:
         with:
           node-version: 18
 
-      - name: Versions
-        run: |
-          node --version
-          yarn --version
-
       - uses: msys2/setup-msys2@v2
         if: runner.os == 'Windows'
         with:
@@ -71,6 +66,12 @@ jobs:
         uses: eliasku/ccache-action@main
         with:
           key: ${{ runner.os }}
+
+      - name: Versions
+        run: |
+          node --version
+          yarn --version
+          npm --version
 
       - name: Install NPM dependencies
         run: yarn --frozen-lockfile
@@ -115,6 +116,7 @@ jobs:
         run: |
           node --version
           yarn --version
+          npm --version
 
       - name: Install NPM dependencies
         run: yarn --frozen-lockfile
