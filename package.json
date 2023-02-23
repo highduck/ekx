@@ -1,6 +1,6 @@
 {
   "name": "@ekx/ekx",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "ISC",
   "type": "module",
   "main": "modules/cli/main.ts",
