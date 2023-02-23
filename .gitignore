@@ -1,7 +1,6 @@
 .idea/
 .vscode/
 cmake-build-*/
-yarn-error.log
 
 # npm dependencies
 node_modules/

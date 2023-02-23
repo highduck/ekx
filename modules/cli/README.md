@@ -1,19 +1,10 @@
 # Command-line manager tool 
 
-## Build and Set
-
-```
-yarn
-yarn run build
-yarn link -g
-```
-
 ### iOS
 
 ```
 pip3 install pbxproj
 ```
-
 
 ## Script
 

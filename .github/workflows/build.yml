@@ -71,20 +71,19 @@ jobs:
       - name: Versions
         run: |
           node --version
-          yarn --version
           npm --version
 
       - name: Install NPM dependencies
-        run: yarn --frozen-lockfile
+        run: npm ci
 
       - name: Test external utilities
-        run: yarn run test-external-utils
+        run: npm run test-external-utils
 
       - name: Build JS
-        run: yarn run build
+        run: npm run build
 
       - name: Build Native
-        run: yarn run build-native
+        run: npm run build-native
 
       # llvm-profdata / llvm-cov
       - name: Setup LLVM and Clang (Linux only)
@@ -96,7 +95,7 @@ jobs:
           env: true
 
       - name: Coverage Native
-        run: yarn run build-native-coverage
+        run: npm run build-native-coverage
 
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
@@ -117,19 +116,18 @@ jobs:
       - name: Versions
         run: |
           node --version
-          yarn --version
           npm --version
 
       - name: Install NPM dependencies
-        run: yarn --frozen-lockfile
+        run: npm ci
 
       - name: Create Release Pull Request or Publish to NPM
         id: changesets
         uses: changesets/action@v1
         with:
           # This expects you to have a script called release which does a build for your packages and calls changeset publish
-          publish: yarn run release
-          version: yarn run version
+          publish: npm run release
+          version: npm run version
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

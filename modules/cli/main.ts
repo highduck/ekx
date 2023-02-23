@@ -1,4 +1,4 @@
-#!/usr/bin/env -S node -r "ts-node/register"
+#!/usr/bin/env npx ts-node --esm --swc --skipIgnore
 
 // entry point for command line tool
 import * as path from "path";

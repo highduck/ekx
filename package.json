@@ -17,9 +17,9 @@
     "build-external": "ts-node --esm --swc ci/build-external.ts",
     "test-external-utils": "ts-node --esm --swc ci/shdc-test/test.ts",
     "clean": "ts-node --esm --swc ci/clean.ts",
-    "update-lock": "yarn && git add yarn.lock",
-    "release": "yarn run build && changeset publish",
-    "version": "changeset version && yarn run update-lock"
+    "update-lock": "rm package-lock.json && npm i && git add package-lock.json",
+    "release": "npm run build && changeset publish",
+    "version": "changeset version && npm run update-lock"
   },
   "dependencies": {
     "@swc/core": "^1.3.36",
@@ -47,7 +47,7 @@
   ],
   "engines": {
     "node": ">=18.0.0",
-    "yarn": "^1.22.17"
+    "npm": ">=8.0.0"
   },
   "files": [
     "tsconfig.json",
