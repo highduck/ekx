@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.9
+
+### Patch Changes
+
+- 06759d28: fix cli shebang
+
 ## 1.0.8
 
 ### Patch Changes
