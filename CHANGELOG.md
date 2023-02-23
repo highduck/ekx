@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.5
+
+### Patch Changes
+
+- 3ccc04be: simplify binary builds with cache folder
+
 ## 1.0.4
 
 ### Patch Changes
