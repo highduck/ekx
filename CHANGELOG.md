@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.12
+
+### Patch Changes
+
+- 881aa70f: fix shebang
+
 ## 1.0.11
 
 ### Patch Changes
