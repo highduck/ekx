@@ -12,3 +12,14 @@ build/
 export/
 
 RECOVER_*.fla
+
+# packages ignores
+packages/auph/web/dist/
+
+packages/texture-loader/js/
+
+plugins/firebase/web/dist/
+plugins/firebase/web/lib/
+
+tools/bin/
+

@@ -1,5 +1,6 @@
 {
   "name": "@ekx/ekx",
+  "description": "Toy game engine",
   "version": "1.0.3",
   "license": "ISC",
   "type": "module",
@@ -16,6 +17,8 @@
     "build-native-coverage": "ts-node --esm --swc ci/build-native-coverage.ts",
     "build-external": "ts-node --esm --swc ci/build-external.ts",
     "test-external-utils": "ts-node --esm --swc ci/shdc-test/test.ts",
+    "clean": "ts-node --esm --swc ci/clean.ts",
+    "try-pack": "yarn run clean && yarn run build && npm pack",
     "update-lock": "yarn && git add yarn.lock",
     "release": "yarn run build && changeset publish",
     "version": "changeset version && yarn run update-lock"
@@ -55,14 +58,14 @@
     "CHANGELOG.md",
     "tools",
     "packages",
-    "packages/auph/web/dist/",
-    "packages/texture-loader/js/",
+    "packages/auph/web/dist/*",
+    "packages/texture-loader/js/*",
     "modules",
     "modules/android-proj/_project/.gitignore",
     "modules/android-proj/_project/app/.gitignore",
     "plugins",
-    "plugins/firebase/web/dist/",
-    "plugins/firebase/web/lib/",
+    "plugins/firebase/web/dist/*",
+    "plugins/firebase/web/lib/*",
     "external"
   ]
 }
