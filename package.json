@@ -11,12 +11,12 @@
     "access": "public"
   },
   "scripts": {
-    "release": "changeset publish",
+    "release": "yarn run build && changeset publish",
     "version": "changeset version && yarn run update-lock",
     "update-lock": "yarn && git add yarn.lock",
-    "ci:build": "ts-node --esm --swc build.ts",
-    "ci:native-build": "ts-node --esm --swc native-build.ts",
-    "ci:native-coverage": "ts-node --esm --swc native-coverage.ts",
+    "build": "ts-node --esm --swc build.ts",
+    "build-native": "ts-node --esm --swc native-build.ts",
+    "build-native-coverage": "ts-node --esm --swc native-coverage.ts",
     "build-external": "cd external && ts-node --esm --swc build.ts",
     "test-tools": "cd tools && ts-node --esm --swc test.ts"
   },
@@ -47,5 +47,25 @@
   "engines": {
     "node": ">=18.0.0",
     "yarn": "^1.22.17"
-  }
+  },
+  "files": [
+    "tsconfig.json",
+    "logo.png",
+    "CMakeLists.txt",
+    "CHANGELOG.md",
+    "tools/bmfont-export",
+    "tools/flash-export",
+    "tools/obj-export",
+    "tools/sprite-packer",
+    "packages",
+    "packages/auph/web/dist",
+    "packages/texture-loader/js",
+    "modules",
+    "modules/android-proj/_project/.gitignore",
+    "modules/android-proj/_project/app/.gitignore",
+    "plugins",
+    "plugins/firebase/web/dist",
+    "plugins/firebase/web/lib",
+    "external"
+  ]
 }

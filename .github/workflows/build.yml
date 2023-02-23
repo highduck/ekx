@@ -80,13 +80,13 @@ jobs:
         run: yarn run test-tools
 
       - name: Build JS
-        run: yarn run ci:build
+        run: yarn run build
 
       - name: Build Native
-        run: yarn run ci:native-build
+        run: yarn run build-native
 
       # llvm-profdata / llvm-cov
-      - name: Install LLVM and Clang (Linux)
+      - name: Setup LLVM and Clang (Linux only)
         uses: KyleMayes/install-llvm-action@v1
         if: runner.os == 'Linux'
         with:
@@ -95,7 +95,7 @@ jobs:
           env: true
 
       - name: Coverage Native
-        run: yarn run ci:native-coverage
+        run: yarn run build-native-coverage
 
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
@@ -120,10 +120,6 @@ jobs:
 
       - name: Install NPM dependencies
         run: yarn --frozen-lockfile
-
-      # JS bundles are shared for all host-platforms
-      - name: Build JS
-        run: yarn run ci:build
 
       - name: Create Release Pull Request or Publish to NPM
         id: changesets
