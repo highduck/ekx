@@ -17,6 +17,9 @@
     "transpileOnly": true,
     "skipIgnore": true,
     "esm": true,
-    "swc": true
+    "swc": true,
+    "compilerOptions": {
+      "moduleResolution": "Node"
+    }
   }
 }
