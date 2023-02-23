@@ -15,7 +15,7 @@
     "build-native": "ts-node --esm --swc ci/build-native.ts",
     "build-native-coverage": "ts-node --esm --swc ci/build-native-coverage.ts",
     "build-external": "ts-node --esm --swc ci/build-external.ts",
-    "test-utilities": "ts-node --esm --swc ci/shdc-test/test.ts",
+    "test-external-utils": "ts-node --esm --swc ci/shdc-test/test.ts",
     "update-lock": "yarn && git add yarn.lock",
     "release": "yarn run build && changeset publish",
     "version": "changeset version && yarn run update-lock"

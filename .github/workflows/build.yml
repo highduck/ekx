@@ -76,8 +76,8 @@ jobs:
       - name: Install NPM dependencies
         run: yarn --frozen-lockfile
 
-      - name: Test external tools
-        run: yarn run test-tools
+      - name: Test external utilities
+        run: yarn run test-external-utils
 
       - name: Build JS
         run: yarn run build
