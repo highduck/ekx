@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.3
+
+### Patch Changes
+
+- 22f79628: try fix missing files
+
 ## 1.0.2
 
 ### Patch Changes
