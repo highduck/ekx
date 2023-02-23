@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.2
+
+### Patch Changes
+
+- 4fafee6e: add check build js files (package issue)
+
 ## 1.0.0
 
 ### Major Changes
