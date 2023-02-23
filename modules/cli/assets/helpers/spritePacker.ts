@@ -1,7 +1,7 @@
 import {executeAsync} from "../../utils.js";
-import {getOrBuildToolBinary} from "../../utility/bin.js";
+import {getOrBuildUtility} from "../../utility/bin.js";
 
 export async function spritePackerAsync(configPath: string): Promise<number> {
-    const bin = await getOrBuildToolBinary("sprite-packer");
+    const bin = await getOrBuildUtility("sprite-packer");
     return await executeAsync(bin, [configPath]);
 }

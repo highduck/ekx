@@ -10,6 +10,7 @@ node_modules/
 generated/
 build/
 export/
+cache/
 
 RECOVER_*.fla
 

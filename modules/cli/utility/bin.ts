@@ -5,23 +5,23 @@ import {getModuleDir} from "../../utils/utils.js";
 import {build} from "../../cmake/mod.js";
 import {logger} from "../logger.js";
 
-export function getToolsBinPath(bin: string): string {
+export function getCachedBinPath(bin: string): string {
     if (os.platform() === "win32") {
         bin += ".exe";
     }
-    return path.resolve(getModuleDir(import.meta), "../../../tools/bin/" + bin);
+    return path.resolve(getModuleDir(import.meta), "../../../cache/bin/" + bin);
 }
 
-export const tryResolveToolBinary = async (bin: string, resolveBinary: (bin: string, filepath: string) => Promise<any>): Promise<string> => {
-    let filepath = getToolsBinPath(bin);
+export const tryResolveCachedBin = async (bin: string, resolveBinary: (bin: string, filepath: string) => Promise<any>): Promise<string> => {
+    let filepath = getCachedBinPath(bin);
     if (!existsSync(filepath)) {
         await resolveBinary(bin, filepath);
     }
     return filepath;
 }
 
-export const getOrBuildToolBinary = async (bin: string): Promise<string> => {
-    return await tryResolveToolBinary(bin, async () => {
+export const getOrBuildUtility = async (bin: string): Promise<string> => {
+    return await tryResolveCachedBin(bin, async () => {
         logger.info("Miss " + bin + ", building...");
         await build({
             definitions: {
@@ -37,14 +37,6 @@ export const getOrBuildToolBinary = async (bin: string): Promise<string> => {
             target: bin,
             workingDir: path.resolve(getModuleDir(import.meta), "../../.."),
         });
-        logger.info("EKX tools built");
+        logger.info(bin + " built");
     });
 };
-
-export function resolveToolsBinPath(bin: string): string {
-    const result = getToolsBinPath(bin);
-    if (!existsSync(result)) {
-        throw new Error("Not found: tools binary @ " + result);
-    }
-    return result;
-}

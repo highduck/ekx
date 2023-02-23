@@ -72,11 +72,6 @@ export class AndroidProjGen {
         //fs.cpSync(path.resolve(__dirname, "_project"), dir, {recursive: true});
         const srcDir = path.resolve(__dirname, "_project");
         const filesToCopy = [
-            // top
-            ".gitignore",
-
-            /// app
-            "app/.gitignore",
             "app/build.gradle",
             "app/multidex-config.pro",
             "app/proguard-rules.pro"
@@ -84,6 +79,8 @@ export class AndroidProjGen {
         for (const file of filesToCopy) {
             fs.copyFileSync(path.join(srcDir, file), path.join(dir, file));
         }
+        fs.copyFileSync(path.join(srcDir, "_gitignore"), path.join(dir, ".gitignore"));
+        fs.copyFileSync(path.join(srcDir, "app/_gitignore"), path.join(dir, "app/.gitignore"));
         fs.copyFileSync(path.join(srcDir, "_idea/gradle.xml"), path.join(dir, ".idea/gradle.xml"));
 
         if (this.fastlane) {

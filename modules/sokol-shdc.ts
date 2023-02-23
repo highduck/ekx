@@ -1,4 +1,4 @@
-import {tryResolveToolBinary} from "./cli/utility/bin.js";
+import {tryResolveCachedBin} from "./cli/utility/bin.js";
 import {ensureDirSync, run} from "./utils/utils.js";
 import * as path from "path";
 import * as os from "os";
@@ -13,7 +13,7 @@ export interface ShdcOptions {
 }
 
 export const getOrFetchSHDC = async (): Promise<string> => {
-    return await tryResolveToolBinary("sokol-shdc", async (bin, exePath) => {
+    return await tryResolveCachedBin("sokol-shdc", async (bin, exePath) => {
         logger.info("Miss " + bin);
         logger.info("Download sokol-shdc...");
         const platform = os.platform();

@@ -62,7 +62,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif ()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../bin"
+        RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../../cache/bin"
         RUNTIME_OUTPUT_NAME "bmfont-export"
         RUNTIME_OUTPUT_NAME_DEBUG "bmfont-export-debug"
         )

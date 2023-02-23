@@ -1,9 +1,9 @@
 import * as path from "path";
 import {executeAsync, makeDirs} from "../../utils.js";
-import {getOrBuildToolBinary} from "../../utility/bin.js";
+import {getOrBuildUtility} from "../../utility/bin.js";
 
 export async function flashExportAsync(configPath: string): Promise<number> {
-    const bin = await getOrBuildToolBinary("flash-export");
+    const bin = await getOrBuildUtility("flash-export");
     return await executeAsync(bin, ["export", configPath]);
 }
 
@@ -29,6 +29,6 @@ export async function renderFlashSymbol(fla: string, symbol: string, outputs: Re
         );
         makeDirs(path.dirname(output.outFilePath));
     }
-    const bin = await getOrBuildToolBinary("flash-export");
+    const bin = await getOrBuildUtility("flash-export");
     return await executeAsync(bin, cmd);
 }
