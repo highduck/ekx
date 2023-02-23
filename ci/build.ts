@@ -8,6 +8,7 @@ import {existsSync} from "fs";
 
 const filesToVerify = [
     "packages/texture-loader/js/lib/lib-texture-loader.js",
+    "packages/texture-loader/js/pre/texture-loader.js",
     "packages/auph/web/dist/emscripten/auph.js",
     "packages/auph/web/dist/emscripten/auph.js.map",
 ];
@@ -15,7 +16,7 @@ const filesToVerify = [
 let missFiles = 0;
 for (const file of filesToVerify) {
     if (existsSync(file)) {
-        console.info("✅ file is in place")
+        console.info("✅ file is in place", file)
     }
     else {
         console.warn("🤷 file is missing", file);
@@ -23,4 +24,4 @@ for (const file of filesToVerify) {
     }
 }
 
-process.exit(missFiles ? 1 : 0);
+process.exit(missFiles > 0 ? 1 : 0);

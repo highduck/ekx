@@ -55,14 +55,14 @@
     "CHANGELOG.md",
     "tools",
     "packages",
-    "packages/auph/web/dist",
-    "packages/texture-loader/js",
+    "packages/auph/web/dist/",
+    "packages/texture-loader/js/",
     "modules",
     "modules/android-proj/_project/.gitignore",
     "modules/android-proj/_project/app/.gitignore",
     "plugins",
-    "plugins/firebase/web/dist",
-    "plugins/firebase/web/lib",
+    "plugins/firebase/web/dist/",
+    "plugins/firebase/web/lib/",
     "external"
   ]
 }
