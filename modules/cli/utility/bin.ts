@@ -30,23 +30,26 @@ export const tryResolveCachedBin = async (bin: string, resolveBinary: (bin: stri
     return filepath;
 }
 
+let sdkBuildQueue: Promise<unknown> = Promise.resolve();
 export const getOrBuildUtility = async (bin: string): Promise<string> => {
-    return await tryResolveCachedBin(bin, async () => {
-        logger.info("Miss " + bin + ", building...");
-        await build({
-            definitions: {
-                EKX_BUILD_DEV_TOOLS: "ON",
-                EKX_BUILD_TESTS: "OFF",
-                EKX_BUILD_COVERAGE: "OFF",
-                EKX_BUILD_EXTERNAL_TESTS: "OFF",
-                EKX_INCLUDE_EXAMPLES: "OFF",
-                EKX_INCLUDE_PLUGINS: "OFF",
-            },
-            test: false,
-            debug: false,
-            target: bin,
-            workingDir: path.resolve(getModuleDir(import.meta), "../../.."),
-        });
-        logger.info(bin + " built");
-    });
+    return await tryResolveCachedBin(bin, () =>
+        sdkBuildQueue = sdkBuildQueue.then(async () => {
+            logger.info("Miss " + bin + ", building...");
+            await build({
+                definitions: {
+                    EKX_BUILD_DEV_TOOLS: "ON",
+                    EKX_BUILD_TESTS: "OFF",
+                    EKX_BUILD_COVERAGE: "OFF",
+                    EKX_BUILD_EXTERNAL_TESTS: "OFF",
+                    EKX_INCLUDE_EXAMPLES: "OFF",
+                    EKX_INCLUDE_PLUGINS: "OFF",
+                },
+                test: false,
+                debug: false,
+                target: bin,
+                workingDir: path.resolve(getModuleDir(import.meta), "../../.."),
+            });
+            logger.info(bin + " built");
+        })
+    );
 };
