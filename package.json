@@ -17,7 +17,6 @@
     "build-external": "ts-node --esm --swc ci/build-external.ts",
     "test-external-utils": "ts-node --esm --swc ci/shdc-test/test.ts",
     "clean": "ts-node --esm --swc ci/clean.ts",
-    "try-pack": "yarn run clean && yarn run build && npm pack",
     "update-lock": "yarn && git add yarn.lock",
     "release": "yarn run build && changeset publish",
     "version": "changeset version && yarn run update-lock"

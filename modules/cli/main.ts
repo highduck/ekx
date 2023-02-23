@@ -10,6 +10,7 @@ import {bumpProjectVersion} from "./version.js";
 import {UtilityConfig} from "./utils.js";
 import {fixMP3} from "./utility/fix-mp3.js";
 import {logger} from "./logger.js";
+import {init} from "../cmake/npm.js";
 
 logger.info("📺 EKX 📺");
 
@@ -35,6 +36,20 @@ if (process.argv.indexOf("-V") >= 0) {
 logger.log("process.argv0:", process.argv0);
 logger.log("process.argv:", process.argv);
 logger.log("process.cwd:", process.cwd());
+
+if (process.argv.indexOf("cmake") >= 0) {
+    UtilityConfig.verbose = true;
+    logger._diag = true;
+    try {
+        init();
+        process.exit(0);
+    }
+    catch(e) {
+        logger.error("Error", e);
+        process.exit(1);
+    }
+}
+
 
 async function defaultRun() {
 
