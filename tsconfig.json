@@ -8,13 +8,14 @@
     "preserveConstEnums": false,
     "sourceMap": false,
     "outDir": "build/ts",
-    "lib": ["ESNext", "DOM"]
+    "lib": [
+      "ESNext",
+      "DOM"
+    ]
   },
-//  "include": ["./**/*.ts"],
-//  "exclude": ["node_modules"]
   "ts-node": {
-    "files": true,
     "transpileOnly": true,
+    "skipIgnore": true,
     "esm": true,
     "swc": true
   }

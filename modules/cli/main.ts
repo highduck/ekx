@@ -1,7 +1,6 @@
-#!/usr/bin/env ts-node --esm --swc --skipIgnore
+#!/usr/bin/env -S node -r "ts-node/register"
 
 // entry point for command line tool
-
 import * as path from "path";
 import * as fs from "fs";
 import {addExportBuildStep} from "./exporters.js";
