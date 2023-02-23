@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.8
+
+### Patch Changes
+
+- 0656f06e: fix multiple build on demand from root cmake file
+
 ## 1.0.7
 
 ### Patch Changes
