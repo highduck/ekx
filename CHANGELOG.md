@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.4
+
+### Patch Changes
+
+- c7e4bf3c: sub-gitignore to root
+
 ## 1.0.3
 
 ### Patch Changes
