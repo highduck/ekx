@@ -1,12 +1,12 @@
-import box2d from "./box2d/recipe.js";
-import cairo from "./cairo/recipe.js";
-import freetype from "./freetype/recipe.js";
-import headers from "./headers/recipe.js";
-import sokol from "./sokol/recipe.js";
-import quickjs from "./quickjs/recipe.js";
-import pugixml from "./pugixml/recipe.js";
-import miniz from "./miniz/recipe.js";
-import imgui from "./imgui/recipe.js";
+import box2d from "../external/box2d/recipe.js";
+import cairo from "../external/cairo/recipe.js";
+import freetype from "../external/freetype/recipe.js";
+import headers from "../external/headers/recipe.js";
+import sokol from "../external/sokol/recipe.js";
+import quickjs from "../external/quickjs/recipe.js";
+import pugixml from "../external/pugixml/recipe.js";
+import miniz from "../external/miniz/recipe.js";
+import imgui from "../external/imgui/recipe.js";
 
 type LibFn = undefined | (() => (undefined | void | Promise<void>));
 

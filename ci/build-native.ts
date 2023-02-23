@@ -1,4 +1,4 @@
-import {build} from "./modules/cmake/mod.js";
+import {build} from "../modules/cmake/mod.js";
 
 // build main packages, plugins and tools
 await build({

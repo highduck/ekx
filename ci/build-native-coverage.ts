@@ -1,4 +1,4 @@
-import {build} from "./modules/cmake/mod.js";
+import {build} from "../modules/cmake/mod.js";
 
 await build({
     definitions: {
