@@ -12,10 +12,20 @@ export function getCachedBinPath(bin: string): string {
     return path.resolve(getModuleDir(import.meta), "../../../cache/bin/" + bin);
 }
 
+const resolvePromises: Record<string, Promise<void>> = {};
+
 export const tryResolveCachedBin = async (bin: string, resolveBinary: (bin: string, filepath: string) => Promise<any>): Promise<string> => {
     let filepath = getCachedBinPath(bin);
     if (!existsSync(filepath)) {
-        await resolveBinary(bin, filepath);
+        const lastPromise = resolvePromises[bin];
+        if (lastPromise) {
+            await lastPromise;
+        } else {
+            const newPromise = resolveBinary(bin, filepath);
+            resolvePromises[bin] = newPromise;
+            await newPromise;
+            resolvePromises[bin] = undefined;
+        }
     }
     return filepath;
 }
