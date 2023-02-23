@@ -1,5 +1,12 @@
 # @ekx/ekx
 
+## 1.0.10
+
+### Patch Changes
+
+- e8bc6aeb: migrate to npm
+- e8bc6aeb: use npx in shebang
+
 ## 1.0.9
 
 ### Patch Changes
