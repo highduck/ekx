@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.0
+
+### Major Changes
+
+- 1be45677: fix missing files from package
+
 ## 0.1.13
 
 ### Patch Changes
