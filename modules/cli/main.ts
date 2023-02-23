@@ -1,4 +1,4 @@
-#!/usr/bin/env npx ts-node --esm --swc --skipIgnore
+#!/usr/bin/env npx ts-node
 
 // entry point for command line tool
 import * as path from "path";

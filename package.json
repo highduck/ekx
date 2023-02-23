@@ -11,12 +11,12 @@
     "access": "public"
   },
   "scripts": {
-    "build": "ts-node --esm --swc ci/build.ts",
-    "build-native": "ts-node --esm --swc ci/build-native.ts",
-    "build-native-coverage": "ts-node --esm --swc ci/build-native-coverage.ts",
-    "build-external": "ts-node --esm --swc ci/build-external.ts",
-    "test-external-utils": "ts-node --esm --swc ci/shdc-test/test.ts",
-    "clean": "ts-node --esm --swc ci/clean.ts",
+    "build": "ts-node ci/build.ts",
+    "build-native": "ts-node ci/build-native.ts",
+    "build-native-coverage": "ts-node ci/build-native-coverage.ts",
+    "build-external": "ts-node ci/build-external.ts",
+    "test-external-utils": "ts-node ci/shdc-test/test.ts",
+    "clean": "ts-node ci/clean.ts",
     "update-lock": "rm package-lock.json && npm i && git add package-lock.json",
     "release": "npm run build && changeset publish",
     "version": "changeset version && npm run update-lock"
