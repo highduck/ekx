@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.7
+
+### Patch Changes
+
+- a46f5fae: fix parallel resolve cached bin
+
 ## 1.0.6
 
 ### Patch Changes
