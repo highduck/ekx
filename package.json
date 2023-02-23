@@ -17,7 +17,7 @@
     "build-external": "ts-node ci/build-external.ts",
     "test-external-utils": "ts-node ci/shdc-test/test.ts",
     "clean": "ts-node ci/clean.ts",
-    "update-lock": "rm package-lock.json && npm i && git add package-lock.json",
+    "update-lock": "rm -r node_modules && rm package-lock.json && npm i && git add package-lock.json",
     "release": "npm run build && changeset publish",
     "version": "changeset version && npm run update-lock"
   },
