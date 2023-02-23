@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.6
+
+### Patch Changes
+
+- d7ce070b: include cmake-build (ekx cmake)
+
 ## 1.0.5
 
 ### Patch Changes
