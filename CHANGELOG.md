@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.11
+
+### Patch Changes
+
+- fa6fb47e: fix update lock with removing node_modules
+
 ## 1.0.10
 
 ### Patch Changes
