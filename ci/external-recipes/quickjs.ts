@@ -1,16 +1,18 @@
 import * as path from "path";
-import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.js";
+import {rm} from "../../modules/utils/utils.js";
+import {downloadFiles} from "../../modules/utils/download.js";
+import {resolveEkxPath} from "../../modules/utils/cacheDir.js";
 
-const __dirname = getModuleDir(import.meta);
+const destPath = resolveEkxPath("external/quickjs");
 
 async function clean() {
-    await rm(path.join(__dirname, "src"));
+    await rm(path.join(destPath, "src"));
 }
 
 async function fetch() {
     await downloadFiles({
         srcBaseUrl: "https://github.com/bellard/quickjs/raw/master",
-        destPath: path.join(__dirname, "src"),
+        destPath: path.join(destPath, "src"),
         fileList: [
             "cutils.c",
             "cutils.h",

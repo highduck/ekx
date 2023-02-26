@@ -16,6 +16,7 @@
     "build-native-coverage": "ts-node ci/build-native-coverage.ts",
     "build-external": "ts-node ci/build-external.ts",
     "test-external-utils": "ts-node ci/shdc-test/test.ts",
+    "typecheck": "tsc -p tsconfig-tsc.json",
     "clean": "ts-node ci/clean.ts",
     "update-lock": "rm -r node_modules && rm package-lock.json && npm i && git add package-lock.json",
     "release": "npm run build && changeset publish",

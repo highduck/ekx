@@ -4,10 +4,12 @@
     "target": "ESNext",
     "moduleResolution": "NodeNext",
     "noImplicitAny": true,
+    "strictNullChecks": true,
     "removeComments": false,
     "preserveConstEnums": false,
     "sourceMap": false,
-    "outDir": "build/ts",
+    "outDir": "cache/builds/ts",
+    "noEmit": true,
     "lib": [
       "ESNext",
       "DOM"

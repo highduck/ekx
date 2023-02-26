@@ -1,0 +1,5 @@
+- [ ] move `build` folder to `cache/builds` and rework sdk build flow
+- [ ] rename `modules` to `lib` since it's root and main utility to build stuff
+- [ ] move `external/*/cache` to `cache/downloads/*` and provide management utility
+- [ ] rename `@ekx/ekx` to `ekx` and restart from `0.0.1` version
+- [ ] reset project's history and move to the personal repository, archive and deprecate `highduck/ekx` to keep history

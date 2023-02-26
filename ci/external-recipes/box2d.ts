@@ -1,17 +1,19 @@
 import * as path from "path";
-import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.js";
+import {rm} from "../../modules/utils/utils.js";
+import {downloadFiles} from "../../modules/utils/download.js";
+import {resolveEkxPath} from "../../modules/utils/cacheDir.js";
 
-const __dirname = getModuleDir(import.meta);
+const destPath = resolveEkxPath("external/box2d");
 
 async function clean() {
-    await rm(path.join(__dirname, "include"));
-    await rm(path.join(__dirname, "src"));
+    await rm(path.join(destPath, "include"));
+    await rm(path.join(destPath, "src"));
 }
 
 async function fetch() {
     await downloadFiles({
         srcBaseUrl: "https://github.com/erincatto/box2d/raw/main",
-        destPath: __dirname,
+        destPath: destPath,
         fileList: [
             // Source files
             "src/collision/b2_broad_phase.cpp",

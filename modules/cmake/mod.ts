@@ -1,10 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import {ensureDirSync, getModuleDir, rm, run} from "../utils/mod.js";
+import {ensureDirSync, getModuleDir, rm, run} from "../utils/utils.js";
 
 const __dirname = getModuleDir(import.meta);
-
 export interface BuildMatrix {
     os?: string | string[];
     buildType?: string | string[];
@@ -12,11 +11,14 @@ export interface BuildMatrix {
 }
 
 type OSName = "windows" | "linux" | "macos" | "ios" | "android" | "web";
-const getOsName = (val:string = os.platform()):OSName => {
-    switch(val) {
-        case "darwin": return "macos";
-        case "linux": return "linux";
-        case "win32": return "windows";
+const getOsName = (val: string = os.platform()): OSName => {
+    switch (val) {
+        case "darwin":
+            return "macos";
+        case "linux":
+            return "linux";
+        case "win32":
+            return "windows";
     }
     return val as OSName;
 }
@@ -114,7 +116,7 @@ function getNDKPath(): string {
     return path.resolve(process.env.HOME ?? "~", "Library/Android/sdk/ndk/23.1.7779620");
 }
 
-export function resolveOptions(options?: BuildOptions): BuildOptions {
+export function resolveOptions(options?: BuildOptions): Required<BuildOptions> {
     const opts = options ?? {};
     opts.env = opts.env ?? {};
     opts.debug = opts.debug ?? false;
@@ -198,17 +200,17 @@ export function resolveOptions(options?: BuildOptions): BuildOptions {
         }
     }
 
-    return opts;
+    return opts as Required<BuildOptions>;
 }
 
-export async function clean(options: BuildOptions): Promise<void> {
+export async function clean(options: Required<BuildOptions>): Promise<void> {
     if (options.buildDir) {
         console.info("Clean build directory:", options.buildDir);
         await rm(options.buildDir);
     }
 }
 
-export async function configure(options: BuildOptions): Promise<void> {
+export async function configure(options: Required<BuildOptions>): Promise<void> {
     console.info("Configure");
     if (options.cmakePath == null || options.buildDir == null) {
         throw new Error("Bad arguments: cmakePath or buildDir");
@@ -245,7 +247,7 @@ export async function configure(options: BuildOptions): Promise<void> {
     await executeAsync("cmake", args, executionOptions);
 }
 
-export async function build_(options: BuildOptions): Promise<void> {
+export async function build_(options: Required<BuildOptions>): Promise<void> {
     console.info("Build");
     const executionOptions = {
         verbose: true,
@@ -266,7 +268,7 @@ export async function build_(options: BuildOptions): Promise<void> {
     await executeAsync("cmake", buildArgs, executionOptions);
 }
 
-export async function test_(options: BuildOptions): Promise<void> {
+export async function test_(options: Required<BuildOptions>): Promise<void> {
     console.info("Test");
     const executionOptions = {
         verbose: true,
@@ -282,22 +284,22 @@ export async function test_(options: BuildOptions): Promise<void> {
 }
 
 export async function build(options?: BuildOptions & BuildMatrix): Promise<BuildResult> {
-    options = resolveOptions(options);
-    if (options.clean) {
-        await clean(options);
+    const opts = resolveOptions(options);
+    if (opts.clean) {
+        await clean(opts);
     }
-    ensureDirSync(options.buildDir);
-    if (options.configure) {
-        await configure(options);
+    ensureDirSync(opts.buildDir);
+    if (opts.configure) {
+        await configure(opts);
     }
-    if (options.build) {
-        await build_(options);
+    if (opts.build) {
+        await build_(opts);
     }
-    if (options.test) {
-        await test_(options);
+    if (opts.test) {
+        await test_(opts);
     }
     return {
-        buildDir: path.resolve(options.workingDir!, options.buildDir!)
+        buildDir: path.resolve(opts.workingDir!, opts.buildDir!)
     };
 }
 
@@ -333,7 +335,7 @@ function getOptionalMany(v: string | string[] | null | undefined, defaultValue: 
     if (v) {
         if (typeof v === "string") {
             return [v];
-        } else if (v instanceof Array) {
+        } else {
             return v;
         }
     }

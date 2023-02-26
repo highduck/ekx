@@ -10,6 +10,7 @@ import {UtilityConfig} from "./utils.js";
 import {fixMP3} from "./utility/fix-mp3.js";
 import {logger} from "./logger.js";
 import {init} from "../cmake/npm.js";
+import {updateLockFiles} from "../repos-management/update-lock.js";
 
 logger.info("📺 EKX 📺");
 
@@ -49,6 +50,10 @@ if (process.argv.indexOf("cmake") >= 0) {
     }
 }
 
+if(process.argv.indexOf("update-lock") >= 0) {
+    await updateLockFiles();
+    process.exit(0);
+}
 
 async function defaultRun() {
 

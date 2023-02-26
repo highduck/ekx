@@ -1,4 +1,7 @@
 import {rm} from "../modules/utils/utils.js";
+import {UtilityConfig} from "../modules/cli/index.js";
+
+UtilityConfig.verbose = true;
 
 await rm("plugins/firebase/web/dist");
 await rm("plugins/firebase/web/lib");

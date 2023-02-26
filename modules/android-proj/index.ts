@@ -19,7 +19,7 @@ export class AndroidProjGen {
     androidManifest = new AndroidManifest();
 
     // "app/src/main/res/values/strings.xml"
-    strings: Record<string, string|undefined> = {
+    strings: Record<string, string | undefined> = {
         // app title
         app_name: "My App",
         // applicationId
@@ -42,8 +42,7 @@ export class AndroidProjGen {
     async prepare() {
         try {
             this.gradleProperties.dict["org.gradle.java.home"] = await getJavaHome(11);
-        }
-        catch {
+        } catch {
             logger.warn("cannot resolve java path");
         }
     }
@@ -251,7 +250,8 @@ export function generateNativeApp(): BaseModuleConfig {
             {type: "implementation", name: "androidx.annotation:annotation", version: "1.5.0"},
             {type: "implementation", name: "androidx.multidex:multidex", version: "2.0.1"},
             {type: "implementation", name: "com.getkeepsafe.relinker:relinker", version: "1.4.4"}
-        ]
+        ],
+        repositories: [],
     };
 }
 

@@ -1,12 +1,15 @@
-import box2d from "../external/box2d/recipe.js";
-import cairo from "../external/cairo/recipe.js";
-import freetype from "../external/freetype/recipe.js";
-import headers from "../external/headers/recipe.js";
-import sokol from "../external/sokol/recipe.js";
-import quickjs from "../external/quickjs/recipe.js";
-import pugixml from "../external/pugixml/recipe.js";
-import miniz from "../external/miniz/recipe.js";
-import imgui from "../external/imgui/recipe.js";
+import box2d from "./external-recipes/box2d.js";
+import cairo from "./external-recipes/cairo.js";
+import freetype from "./external-recipes/freetype/freetype.js";
+import headers from "./external-recipes/headers.js";
+import sokol from "./external-recipes/sokol.js";
+import quickjs from "./external-recipes/quickjs.js";
+import pugixml from "./external-recipes/pugixml.js";
+import miniz from "./external-recipes/miniz.js";
+import imgui from "./external-recipes/imgui.js";
+import {logger, UtilityConfig} from "../modules/cli/index.js";
+
+UtilityConfig.verbose = true;
 
 type LibFn = undefined | (() => (undefined | void | Promise<void>));
 
@@ -38,11 +41,11 @@ async function runSerialTasks(task: string) {
                     const promise = taskFn();
                     if (promise instanceof Promise) {
                         await promise.catch(e => {
-                            console.error(`${task} failed for ${name}:`, e);
+                            logger.error(`${task} failed for ${name}:`, e);
                         });
                     }
                 } catch (e) {
-                    console.error(e);
+                    logger.error(e);
                 }
             }
         }
@@ -60,11 +63,11 @@ function runParallelTasks(task: string) {
                     const promise = taskFn();
                     if (promise instanceof Promise) {
                         tasks.push(promise.catch(e => {
-                            console.error(`${task} failed for ${name}:`, e);
+                            logger.error(`${task} failed for ${name}:`, e);
                         }));
                     }
                 } catch (e) {
-                    console.error(e);
+                    logger.error(e);
                 }
             }
         }

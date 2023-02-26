@@ -9,7 +9,7 @@ export function resolveFrom(fromDirectory: string, moduleId: string): string | u
         fromDirectory = fs.realpathSync(fromDirectory);
     } catch (error) {
         logger.error(error);
-        if (error.code === 'ENOENT') {
+        if (error instanceof Error && (error as any).code === 'ENOENT') {
             fromDirectory = path.resolve(fromDirectory);
         } else {
             return undefined;

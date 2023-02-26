@@ -1,43 +1,43 @@
 import * as path from "path";
 import {
     copyFolderRecursive,
-    downloadCheck,
     expandGlobSync,
-    getModuleDir,
     readTextFileSync,
     rm,
-    untar,
     writeTextFileSync
-} from "../../modules/utils/mod.js";
+} from "../../modules/utils/utils.js";
+import {downloadCheck, untar} from "../../modules/utils/download.js";
+import {resolveCachePath, resolveEkxPath} from "../../modules/utils/cacheDir.js";
+import {logger} from "../../modules/cli/index.js";
 
-const __dirname = getModuleDir(import.meta);
-const cacheDir = path.join(__dirname, "cache");
-const tempDir = path.join(__dirname, "tmp");
+const destDir = resolveEkxPath("external/cairo");
+const cacheDir = resolveCachePath("external/cairo/artifacts");
+const tempDir = resolveCachePath("external/cairo/sources");
 
 async function clean() {
-    await rm(path.join(__dirname, "src"));
+    await rm(path.join(destDir, "src"));
 }
 
 async function downloadCairo() {
     const url = "https://www.cairographics.org/snapshots/cairo-1.17.4.tar.xz";
     const sha1 = "68712ae1039b114347be3b7200bc1c901d47a636";
-    console.log("download cairo");
+    logger.log("download cairo");
     await downloadCheck(url, cacheDir, sha1);
-    console.log("unpack cairo");
+    logger.log("unpack cairo");
     await untar(path.join(cacheDir, path.basename(url)), path.join(tempDir, "cairo"), {strip: 1});
 }
 
 async function downloadPixMan() {
     const url = "https://www.cairographics.org/snapshots/pixman-0.33.6.tar.gz";
     const sha1 = "f174d00517e7e1d81c90c65efc20dd876877d904";
-    console.log("download pixman");
+    logger.log("download pixman");
     await downloadCheck(url, cacheDir, sha1);
-    console.log("unpack pixman");
+    logger.log("unpack pixman");
     await untar(path.join(cacheDir, path.basename(url)), path.join(tempDir, "pixman"), {strip: 1});
 }
 
 async function removeFilesGlob(glob: string) {
-    for (const file of expandGlobSync(glob, {root: __dirname})) {
+    for (const file of expandGlobSync(glob, {root: destDir})) {
         await rm(file.path);
     }
 }
@@ -45,7 +45,7 @@ async function removeFilesGlob(glob: string) {
 async function fetch() {
     await Promise.all([downloadCairo(), downloadPixMan()]);
 
-    console.log("patch files");
+    logger.log("patch files");
     writeTextFileSync(path.join(tempDir, "cairo/src/cairo-features.h"), `#ifndef CAIRO_FEATURES_H
 #define CAIRO_FEATURES_H
 
@@ -78,11 +78,11 @@ async function fetch() {
         '#include <pixman-config.h>\n' + readTextFileSync(path.join(tempDir, "pixman/pixman/pixman-private.h"))
     );
 
-    console.log("copy to src");
-    await copyFolderRecursive(path.join(tempDir, "cairo/src"), path.join(__dirname, "src"));
-    await copyFolderRecursive(path.join(tempDir, "pixman/pixman"), path.join(__dirname, "src"));
+    logger.log("copy to src");
+    await copyFolderRecursive(path.join(tempDir, "cairo/src"), path.join(destDir, "src"));
+    await copyFolderRecursive(path.join(tempDir, "pixman/pixman"), path.join(destDir, "src"));
 
-    console.log("cleanup src");
+    logger.log("cleanup src");
     await removeFilesGlob("src/**/*.in");
     await removeFilesGlob("src/**/*.sh");
     await removeFilesGlob("src/**/*.awk");

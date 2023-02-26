@@ -1,19 +1,21 @@
 import * as path from "path"
-import {downloadFiles, getModuleDir, readTextFileSync, rm, writeTextFileSync} from "../../modules/utils/mod.js"
+import {readTextFileSync, rm, writeTextFileSync} from "../../modules/utils/utils.js"
+import {downloadFiles} from "../../modules/utils/download.js"
+import {resolveEkxPath} from "../../modules/utils/cacheDir.js";
 
-const __dirname = getModuleDir(import.meta);
+const destPath = resolveEkxPath("external/imgui");
 
 async function clean() {
-    await rm(path.join(__dirname, "src"));
-    await rm(path.join(__dirname, "ttf"));
-    await rm(path.join(__dirname, "include"));
+    await rm(path.join(destPath, "src"));
+    await rm(path.join(destPath, "ttf"));
+    await rm(path.join(destPath, "include"));
 }
 
 async function fetch() {
     const imgui_branch = "docking";
     await downloadFiles({
         srcBaseUrl: `https://github.com/ocornut/imgui/raw/${imgui_branch}`,
-        destPath: path.join(__dirname, "src"),
+        destPath: path.join(destPath, "src"),
         fileList: [
             "imconfig.h",
             "imgui_demo.cpp",
@@ -39,13 +41,13 @@ async function fetch() {
 #define IMGUI_STB_TRUETYPE_FILENAME  <stb/stb_truetype.h>
 #define IMGUI_STB_RECT_PACK_FILENAME  <stb/stb_rect_pack.h>
 
-` + readTextFileSync(path.join(__dirname, "src/imconfig.h"));
-    writeTextFileSync(path.join(__dirname, "src/imconfig.h"), imgui_config);
+` + readTextFileSync(path.join(destPath, "src/imconfig.h"));
+    writeTextFileSync(path.join(destPath, "src/imconfig.h"), imgui_config);
 
     const implot_branch = "master";
     await downloadFiles({
         srcBaseUrl: `https://github.com/epezent/implot/raw/${implot_branch}`,
-        destPath: path.join(__dirname, "src"),
+        destPath: path.join(destPath, "src"),
         fileList: [
             "implot.cpp",
             "implot.h",
@@ -58,7 +60,7 @@ async function fetch() {
     const imguizmo_branch = "master";
     await downloadFiles({
         srcBaseUrl: `https://github.com/CedricGuillemet/ImGuizmo/raw/${imguizmo_branch}`,
-        destPath: path.join(__dirname, "src/ImGuizmo"),
+        destPath: path.join(destPath, "src/ImGuizmo"),
         fileList: [
             "GraphEditor.cpp",
             "GraphEditor.h",
@@ -76,7 +78,7 @@ async function fetch() {
 
     await downloadFiles({
         srcBaseUrl: `https://github.com/ocornut/imgui_club/raw/main`,
-        destPath: path.join(__dirname, "src"),
+        destPath: path.join(destPath, "src"),
         fileList: [
             "imgui_memory_editor/imgui_memory_editor.h",
         ]
@@ -87,18 +89,18 @@ async function fetch() {
 }
 
 function download_fonts(): Promise<void> {
-    const destPath = path.join(__dirname, "ttf");
+    const destPath_ = path.join(destPath, "ttf");
     return Promise.all([
         downloadFiles({
             srcBaseUrl: `https://github.com/ocornut/imgui/raw/docking`,
-            destPath,
+            destPath: destPath_,
             fileMap: {
                 "misc/fonts/Cousine-Regular.ttf": "Cousine-Regular.ttf"
             }
         }),
         downloadFiles({
             srcBaseUrl: `https://github.com/FortAwesome/Font-Awesome/raw/master/webfonts`,
-            destPath,
+            destPath: destPath_,
             fileList: [
                 "fa-regular-400.ttf",
                 "fa-solid-900.ttf"
@@ -106,21 +108,21 @@ function download_fonts(): Promise<void> {
         }),
         downloadFiles({
             srcBaseUrl: `https://github.com/google/material-design-icons/raw/master/font`,
-            destPath,
+            destPath: destPath_,
             fileList: [
                 "MaterialIcons-Regular.ttf"
             ]
         }),
         downloadFiles({
             srcBaseUrl: `https://github.com/tomochain/tomomaster/raw/master/app/assets/fonts/SFPro`,
-            destPath,
+            destPath: destPath_,
             fileList: [
                 "sf-pro-text-regular.ttf",
             ]
         }),
         downloadFiles({
             srcBaseUrl: `https://fontsfree.net/wp-content/fonts/basic/sans-serif`,
-            destPath,
+            destPath: destPath_,
             fileMap: {
                 "FontsFree-Net-SFMono-Regular.ttf": "sf-mono-text-regular.ttf"
             }
@@ -131,7 +133,7 @@ function download_fonts(): Promise<void> {
 async function download_font_headers() {
     await downloadFiles({
         srcBaseUrl: `https://github.com/juliettef/IconFontCppHeaders/raw/main`,
-        destPath: path.join(__dirname, "src/fonts"),
+        destPath: path.join(destPath, "src/fonts"),
         fileList: [
             "IconsFontAwesome5.h",
             "IconsMaterialDesign.h"

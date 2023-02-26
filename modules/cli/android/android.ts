@@ -247,20 +247,21 @@ export async function export_android(ctx: Project): Promise<void> {
         android_java.push("src/main/java");
         assets.push(embeddedAssets);
 
-        proj.app.android.sourceSets.main.java.srcDirs = android_java;
-        proj.app.android.sourceSets.main.aidl.srcDirs = android_aidl;
-        proj.app.android.sourceSets.main.assets.srcDirs = assets;
+        const appAndroid = proj.app.android!;
+        appAndroid.sourceSets!.main.java.srcDirs = android_java;
+        appAndroid.sourceSets!.main.aidl.srcDirs = android_aidl;
+        appAndroid.sourceSets!.main.assets.srcDirs = assets;
 
-        proj.app.android.defaultConfig.versionCode = ctx.version.buildNumber();
-        proj.app.android.defaultConfig.versionName = ctx.version.name();
-        proj.app.android.defaultConfig.applicationId = ctx.android.application_id;
-        proj.app.plugins.push(...android_gradleApplyPlugin);
+        appAndroid.defaultConfig.versionCode = ctx.version.buildNumber();
+        appAndroid.defaultConfig.versionName = ctx.version.name();
+        appAndroid.defaultConfig.applicationId = ctx.android.application_id;
+        proj.app.plugins!.push(...android_gradleApplyPlugin);
 
-        proj.top.buildscript.dependencies.push(...android_buildScriptDependency);
-        proj.app.dependencies.push(...android_dependency);
+        proj.top.buildscript!.dependencies!.push(...android_buildScriptDependency);
+        proj.app.dependencies!.push(...android_dependency);
 
-        proj.app.android!.buildTypes.release._extraCode = android_gradleConfigRelease;
-        proj.app.android!.namespace_ = ctx.android.package_id;
+        appAndroid.buildTypes.release._extraCode = android_gradleConfigRelease;
+        appAndroid.namespace_ = ctx.android.package_id;
 
         if (signingConfigsPath) {
             const signingConfigsJson = readTextFileSync(signingConfigsPath);
@@ -273,9 +274,9 @@ export async function export_android(ctx: Project): Promise<void> {
                     config.storeFile = path.relative(appModulePath, path.resolve(path.dirname(signingConfigsPath), config.storeFile));
                 }
             }
-            proj.app.android.signingConfigs = signingConfigs;
+            appAndroid.signingConfigs = signingConfigs;
             if (signingConfigs.release) {
-                proj.app.android.buildTypes.release.signingConfig = "release";
+                appAndroid.buildTypes.release.signingConfig = "release";
             }
         } else {
             logger.warn("Android signing configs file not found");

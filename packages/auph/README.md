@@ -1,17 +1,10 @@
 # 🔊 auph 🎧
 
-[![Build](https://github.com/eliasku/auph/actions/workflows/build.yml/badge.svg)](https://github.com/eliasku/auph/actions/workflows/build.yml)
-[![Version](https://img.shields.io/npm/v/auph)](https://www.npmjs.com/package/auph)
-[![Downloads](https://img.shields.io/npm/dw/auph)](https://www.npmjs.com/package/auph)
-
-Trivial audio mixer API for native and web targets. [Online Demo](https://eliasku.github.io/auph/)
-
 > ⚠️ Work in progress!
 > API is constantly changing.
 > The native playback at the moment sounds bad, has not been tested, and has not been fully tested on mobile projects.
 
 - [Auph JavaScript](./web/README.md)
-- [Auph For NodeJS](./nodejs/README.md)
 - [Auph C/C++](./NATIVE.md)
 
 ## Core Concepts
@@ -49,65 +42,3 @@ It's recommended to re-encode all foreign MP3 audio files to fix `Safari` issues
 ```shell
 ffmpeg -i broken.mp3 -c:a copy -c:v copy fixed.mp3
 ```
-
-## Building
-
-#### Install build requirements first
-
-- [NodeJS](https://nodejs.org/en/download/)
-- [Yarn](https://classic.yarnpkg.com/en/docs/install)
-
-#### Install and Build
-
-```shell
-# install dependencies
-yarn
-
-# build js libraries for browser, nodejs and emscripten
-yarn build
-```
-
-## Demo projects
-
-#### Browser demo
-
-```shell
-yarn build-demo
-yarn start-demo
-```
-
-#### NodeJS demo
-
-```shell
-cd demo
-node node.js
-```
-
-#### C++ console demo with cmake
-```shell
-cd demo/cpp
-
-# configure and build cmake project
-cmake -B build .
-cmake --build build
-
-# run: current working directory is important to load shared assets correctly
-cd build
-./auph-console-test
-
-```
-
-#### iOS Xcode / Android projects
-
-```shell
-# install dependencies is required
-yarn
-
-# open Xcode project
-open demo/xcode/auph-ios.xcodeproj
-
-# open Android Studio project ("studio" is command-line shell for Android Studio)
-studio demo/android
-```
-
-> Search path to dependencies is hardcoded in project settings, so you need `node_modules` folder in the repository root, if you working in monorepo workspaces you need to `no-hoist` them

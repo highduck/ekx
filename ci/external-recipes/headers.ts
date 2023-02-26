@@ -1,10 +1,12 @@
 import * as path from "path";
-import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.js";
+import {rm} from "../../modules/utils/utils.js";
+import {downloadFiles} from "../../modules/utils/download.js";
+import {resolveEkxPath} from "../../modules/utils/cacheDir.js";
 
-const __dirname = getModuleDir(import.meta);
+const destPath = resolveEkxPath("external/headers");
 
 async function clean() {
-    await rm(path.join(__dirname, "include"));
+    await rm(path.join(destPath, "include"));
 }
 
 function fetch() {
@@ -20,7 +22,7 @@ async function download_stb() {
     const repoUrl = `https://github.com/nothings/stb/raw/${branch}`;
     await downloadFiles({
         srcBaseUrl: repoUrl,
-        destPath: path.join(__dirname, "include/stb"),
+        destPath: path.join(destPath, "include/stb"),
         fileList: [
             "stb_c_lexer.h",
             "stb_connected_components.h",
@@ -51,7 +53,7 @@ async function download_dr() {
     const repoUrl = `https://github.com/mackron/dr_libs/raw/${branch}`;
     await downloadFiles({
         srcBaseUrl: repoUrl,
-        destPath: path.join(__dirname, "include/dr"),
+        destPath: path.join(destPath, "include/dr"),
         fileList: [
             "dr_flac.h",
             "dr_mp3.h",
@@ -65,7 +67,7 @@ async function download_pocketmod() {
     const repoUrl = `https://github.com/rombankzero/pocketmod/raw/${branch}`;
     await downloadFiles({
         srcBaseUrl: repoUrl,
-        destPath: path.join(__dirname, "include/pocketmod"),
+        destPath: path.join(destPath, "include/pocketmod"),
         fileList: [
             "pocketmod.h"
         ]

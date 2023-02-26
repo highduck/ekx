@@ -5,11 +5,11 @@ import {getModuleDir} from "../utils/utils.js";
 import {logger} from "../cli/logger.js";
 
 // want to not have any dependencies, so just copy approach from `resolve-from` package
-export function resolveFrom(fromDirectory: string, moduleId: string): string {
+export const resolveFrom = (fromDirectory: string, moduleId: string): string | null => {
     try {
         fromDirectory = fs.realpathSync(fromDirectory);
     } catch (error) {
-        if (error.code === 'ENOENT') {
+        if (error instanceof Error && (error as any).code === 'ENOENT') {
             fromDirectory = path.resolve(fromDirectory);
         } else {
             return null;
@@ -28,28 +28,27 @@ export function resolveFrom(fromDirectory: string, moduleId: string): string {
     } catch (error) {
         return null;
     }
-}
+};
 
-export function convertPackageName(name: string): string {
+export const convertPackageName = (name: string): string => {
     if (name.length > 0 && name[0] === "@" && name.indexOf("/") > 0) {
         const parts = name.split("/");
-        const scope = parts[0].substr(1);
+        const scope = parts[0].substring(1);
         return scope + "::" + parts[1];
     }
     return name;
-}
+};
 
-export function dependencyBlock(name: string, dep: string, rel: string, dir: string): string {
-    return `# ${dep} => ${name}
+export const dependencyBlock = (name: string, dep: string, rel: string, dir: string): string =>
+    `# ${dep} => ${name}
 if(NOT TARGET ${name})
     add_subdirectory(${rel} ${dir})
     message(STATUS "Add NPM module '${dep}' target '${name}' from directory: ${rel}")
 else()
     message(STATUS "Skip NPM module '${dep}'. Target '${name}' already defined")
-endif()`
-}
+endif()`;
 
-export function collectDependencies(dependencies:{[key:string]:string}|undefined, output:string[]):void {
+export const collectDependencies = (dependencies: { [key: string]: string } | undefined, output: string[]): void => {
     if (!dependencies) {
         return;
     }
@@ -67,17 +66,17 @@ export function collectDependencies(dependencies:{[key:string]:string}|undefined
             output.push(dependencyBlock(name, dep, rel, dir));
         }
     }
-}
+};
 
 export interface Pkg {
-    name:string;
-    version:string;
-    dependencies?:{[key:string]:string},
-    devDependencies?:{[key:string]:string},
-    peerDependencies?:{[key:string]:string}
+    name: string;
+    version: string;
+    dependencies?: { [key: string]: string },
+    devDependencies?: { [key: string]: string },
+    peerDependencies?: { [key: string]: string }
 }
 
-export function readPkg(dir:string):null|Pkg {
+export const readPkg = (dir?: string): null | Pkg => {
     // read current package.json
     let pkg = null;
     let p = "package.json";
@@ -91,7 +90,7 @@ export function readPkg(dir:string):null|Pkg {
         logger.error("error reading 'package.json' from ", p);
     }
     return pkg;
-}
+};
 
 const __dirname = getModuleDir(import.meta);
 

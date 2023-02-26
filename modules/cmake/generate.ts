@@ -20,7 +20,7 @@ export interface CMakeGenerateProject {
     compileDefinitions: string[];
 }
 
-export function cmakeLists(project: CMakeGenerateProject): string {
+export const cmakeLists = (project: CMakeGenerateProject): string => {
     const lines: string[] = [];
     if (project.cmakeVersion) {
         lines.push(`cmake_minimum_required(VERSION ${project.cmakeVersion})`);
@@ -110,4 +110,4 @@ export function cmakeLists(project: CMakeGenerateProject): string {
     }
 
     return lines.join("\n");
-}
+};

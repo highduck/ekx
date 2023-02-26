@@ -1,16 +1,18 @@
 import * as path from "path";
-import {downloadFiles, getModuleDir, rm} from "../../modules/utils/mod.js";
+import {rm} from "../../modules/utils/utils.js";
+import {downloadFiles} from "../../modules/utils/download.js";
+import {resolveEkxPath} from "../../modules/utils/cacheDir.js";
 
-const __dirname = getModuleDir(import.meta);
+const destPath = resolveEkxPath("external/sokol");
 
 async function clean() {
-    await rm(path.join(__dirname, "include"));
+    await rm(path.join(destPath, "include"));
 }
 
 async function fetch() {
     await downloadFiles({
         srcBaseUrl: "https://github.com/floooh/sokol/raw/master",
-        destPath: path.join(__dirname, "include"),
+        destPath: path.join(destPath, "include"),
         fileList: [
             "sokol_app.h",
             "sokol_args.h",

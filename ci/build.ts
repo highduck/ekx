@@ -1,10 +1,14 @@
+// check files are really exists
+import {existsSync} from "fs";
+import {logger, UtilityConfig} from "../modules/cli/index.js";
+
+UtilityConfig.verbose = true;
+
+// run build files
 import "../packages/texture-loader/build.js";
 import "../packages/auph/build.js";
 import "../packages/graphics/build.js";
 import "../plugins/firebase/build.js";
-
-// check files are really exists
-import {existsSync} from "fs";
 
 const filesToVerify = [
     "packages/texture-loader/js/lib/lib-texture-loader.js",
@@ -16,10 +20,10 @@ const filesToVerify = [
 let missFiles = 0;
 for (const file of filesToVerify) {
     if (existsSync(file)) {
-        console.info("✅ file is in place", file)
+        logger.info("✅ file is in place", file)
     }
     else {
-        console.warn("🤷 file is missing", file);
+        logger.warn("🤷 file is missing", file);
         ++missFiles;
     }
 }

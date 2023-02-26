@@ -2,6 +2,9 @@ import {join} from "path";
 import {existsSync} from "fs";
 import {shdc} from "../../modules/sokol-shdc.js";
 import {getModuleDir, rm} from "../../modules/utils/utils.js";
+import {UtilityConfig} from "../../modules/cli/index.js";
+
+UtilityConfig.verbose = true;
 
 const __dirname = getModuleDir(import.meta);
 

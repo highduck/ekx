@@ -4,27 +4,30 @@ import {existsSync} from "fs";
 import {getModuleDir} from "../../utils/utils.js";
 import {build} from "../../cmake/mod.js";
 import {logger} from "../logger.js";
+import {resolveCachePath} from "../../utils/cacheDir.js";
+
+const __dirname = getModuleDir(import.meta);
 
 export function getCachedBinPath(bin: string): string {
     if (os.platform() === "win32") {
         bin += ".exe";
     }
-    return path.resolve(getModuleDir(import.meta), "../../../cache/bin/" + bin);
+    return resolveCachePath("bin/" + bin);
 }
 
-const resolveTasks: Record<string, Promise<void>> = {};
+const resolveTasks = new Map<string, Promise<void>>();
 
 export const tryResolveCachedBin = async (bin: string, resolveBinary: (bin: string, filepath: string) => Promise<any>): Promise<string> => {
     let filepath = getCachedBinPath(bin);
     if (!existsSync(filepath)) {
-        const resolveTask = resolveTasks[bin];
+        const resolveTask = resolveTasks.get(bin);
         if (resolveTask) {
             await resolveTask;
         } else {
             const task = resolveBinary(bin, filepath);
-            resolveTasks[bin] = task;
+            resolveTasks.set(bin, task);
             await task;
-            resolveTasks[bin] = undefined;
+            resolveTasks.delete(bin);
         }
     }
     return filepath;
@@ -47,7 +50,10 @@ export const getOrBuildUtility = async (bin: string): Promise<string> => {
                 test: false,
                 debug: false,
                 target: bin,
-                workingDir: path.resolve(getModuleDir(import.meta), "../../.."),
+                // set main EKX root dir for `CMakeFiles.txt`
+                workingDir: path.resolve(__dirname, "../../.."),
+                // place build files in central cache folder
+                buildsFolder: resolveCachePath("builds/tools"),
             });
             logger.info(bin + " built");
         })

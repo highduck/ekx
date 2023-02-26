@@ -1,8 +1,8 @@
   {
   "compilerOptions": {
-    "module": "esnext",
-    "target": "es5",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Node",
     "sourceMap": true,
     "strict": true,
     "outDir": "./dist/module",

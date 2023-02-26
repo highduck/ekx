@@ -1,4 +1,7 @@
 import {build} from "../modules/cmake/mod.js";
+import {UtilityConfig} from "../modules/cli/index.js";
+
+UtilityConfig.verbose = true;
 
 // build main packages, plugins and tools
 await build({
