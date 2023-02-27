@@ -1,12 +1,8 @@
-import * as path from "path";
 import * as os from "os";
 import {existsSync} from "fs";
-import {getModuleDir} from "../../utils/utils.js";
 import {build} from "../../cmake/mod.js";
 import {logger} from "../logger.js";
-import {resolveCachePath} from "../../utils/cacheDir.js";
-
-const __dirname = getModuleDir(import.meta);
+import {resolveCachePath, resolveEkxPath} from "../../utils/dirs.js";
 
 export function getCachedBinPath(bin: string): string {
     if (os.platform() === "win32") {
@@ -51,7 +47,7 @@ export const getOrBuildUtility = async (bin: string): Promise<string> => {
                 debug: false,
                 target: bin,
                 // set main EKX root dir for `CMakeFiles.txt`
-                workingDir: path.resolve(__dirname, "../../.."),
+                workingDir: resolveEkxPath(),
                 // place build files in central cache folder
                 buildsFolder: resolveCachePath("builds/tools"),
             });

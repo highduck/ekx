@@ -1,7 +1,7 @@
 import * as path from "path";
 import {rm} from "../../modules/utils/utils.js";
 import {downloadFiles} from "../../modules/utils/download.js";
-import {resolveEkxPath} from "../../modules/utils/cacheDir.js";
+import {resolveEkxPath} from "../../modules/utils/dirs.js";
 
 const destPath = resolveEkxPath("external/pugixml");
 

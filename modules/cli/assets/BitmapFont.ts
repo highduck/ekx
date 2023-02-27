@@ -1,19 +1,18 @@
 import * as path from "path";
 import {XmlDocument} from "xmldoc";
 import {Asset, AssetDesc} from "./Asset.js";
-import {makeDirs} from "../utils.js";
 import {bmfontAsync} from "./helpers/bmfont.js";
 import {MultiResAtlasAsset} from "./Atlas.js";
 import {H} from "../utility/hash.js";
 import {hashFile} from "./helpers/hash.js";
-import {writeTextFileSync} from "../../utils/utils.js";
+import {ensureDirSync, writeTextFileSync} from "../../utils/utils.js";
 
 export interface BMFontDesc extends AssetDesc {
     filepath: string;
     atlas?: string; // main
     font_size?: number;
     mirror_case?: boolean; // false
-    code_range?: {from:number, to:number}[];
+    code_range?: { from: number, to: number }[];
     // TODO: change
     font_xml?: string; //
     filters_xml?: string; //
@@ -22,7 +21,7 @@ export interface BMFontDesc extends AssetDesc {
 export class BitmapFontAsset extends Asset {
     static typeName = "bmfont";
 
-    constructor(readonly desc:BMFontDesc) {
+    constructor(readonly desc: BMFontDesc) {
         super(desc, BitmapFontAsset.typeName);
         desc.font_xml = desc.font_xml ?? `<font fontSize="${desc.font_size ?? 24}" mirrorCase="${!!desc.mirror_case}">
         <codeRange from="0x0020" to="0x007F"/>
@@ -37,7 +36,7 @@ export class BitmapFontAsset extends Asset {
 
     async build() {
         const targetAtlas = this.desc.atlas ?? "main";
-        makeDirs(path.join(this.owner.cache, this.desc.name!));
+        ensureDirSync(path.join(this.owner.cache, this.desc.name!));
         const outputFont = path.join(this.owner.output, this.desc.name + ".font");
         const configPath = path.join(this.owner.cache, this.desc.name!, "_config.xml");
         const imagesOutput = path.join(this.owner.cache, this.desc.name!, targetAtlas);
@@ -54,7 +53,7 @@ ${this.desc.font_xml!}
         writeTextFileSync(configPath, xml.toString());
 
         // prepare required folder for images collection
-        makeDirs(imagesOutput);
+        ensureDirSync(imagesOutput);
         await bmfontAsync(configPath);
 
         atlasAsset.inputs.push(path.join(imagesOutput, "_images.xml"));

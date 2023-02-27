@@ -2,10 +2,9 @@ import * as path from "path";
 import * as fs from "fs";
 import {Asset, AssetDesc} from "./Asset.js";
 import {compress, WebpConfig} from "./helpers/webp.js";
-import {logger} from "../logger.js";
-import {makeDirs} from "../utils.js";
 import {H} from "../utility/hash.js";
 import {hashFile} from "./helpers/hash.js";
+import {ensureDirSync} from "../../utils/utils.js";
 
 export const enum TextureDataType {
     Normal = "2d",
@@ -42,7 +41,7 @@ export class TextureAsset extends Asset {
         for (const imagePath of this.desc.images) {
             const srcFilePath = path.join(this.owner.basePath, imagePath);
             const destFilepath = path.join(this.owner.output, imagePath);
-            makeDirs(path.dirname(destFilepath));
+            ensureDirSync(path.dirname(destFilepath));
             fs.copyFileSync(srcFilePath, destFilepath);
         }
         if (this.desc.webp) {
@@ -77,11 +76,6 @@ export class TextureAsset extends Asset {
             formatMask |= 2;
         }
         this.writer.writeU32(formatMask);
-
-        this.writer.writeU32(this.desc.images.length);
-        for (const image of this.desc.images) {
-            logger.assert(image.length < 128);
-            this.writer.writeFixedASCII(image, 128);
-        }
+        this.writer.writeFixedASCIIArray(this.desc.images, 128);
     }
 }

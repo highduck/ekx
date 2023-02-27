@@ -1,9 +1,10 @@
 import * as path from "path";
 import * as fs from "fs";
 import {Project} from "../project.js";
-import {executeAsync, makeDirs} from "../utils.js";
+import {executeAsync} from "../utils.js";
 import {buildAssetPackAsync} from "../assets.js";
 import {build as buildCMake} from "../../cmake/mod.js";
+import {ensureDirSync} from "../../utils/utils.js";
 
 const exportDir = "export/uitest";
 
@@ -56,7 +57,7 @@ async function build() {
     await buildCMake({
         workingDir: path.join(exportDir, "build"),
         definitions: {
-            EK_UITEST:"ON"
+            EK_UITEST: "ON"
         }
     });
 }
@@ -72,7 +73,7 @@ function doScreenshots(ctx: Project): Promise<any> {
         for (const lang of ["en", "ru"]) {
             const screenshotOutput = path.join("screenshots", sim, lang);
             const outputDir = path.join(screenshotsDir, sim, lang);
-            makeDirs(outputDir);
+            ensureDirSync(outputDir);
 
             const windowSettings = [0, 0, 200, 200];
             windowSettings[0] = 200 + 200 * (jobs.length % 5);

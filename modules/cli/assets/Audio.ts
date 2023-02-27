@@ -1,9 +1,10 @@
 import * as path from "path";
 import * as fs from "fs";
 import {Asset} from "./Asset.js";
-import {makeDirs, removePathExtension} from "../utils.js";
+import {removePathExtension} from "../utils.js";
 import {H} from "../utility/hash.js";
 import {hashFile} from "./helpers/hash.js";
+import {ensureDirSync} from "../../utils/utils.js";
 
 export interface AudioFile {
     filepath: string;
@@ -39,7 +40,7 @@ export class AudioAsset extends Asset {
     build(): null {
         const outputPath = path.join(this.owner.output, this.desc.filepath);
         const inputPath = path.join(this.owner.basePath, this.desc.filepath);
-        makeDirs(path.dirname(outputPath));
+        ensureDirSync(path.dirname(outputPath));
 
         fs.copyFileSync(inputPath, outputPath);
         const name = this.desc.name ?? removePathExtension(this.desc.filepath);

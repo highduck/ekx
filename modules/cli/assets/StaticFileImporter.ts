@@ -1,8 +1,8 @@
 import * as path from "path";
 import * as fs from "fs";
 import {Asset} from "./Asset.js";
-import {makeDirs} from "../utils.js";
 import {hashFile} from "./helpers/hash.js";
+import {ensureDirSync} from "../../utils/utils.js";
 
 export class StaticFileDescription {
     filepath = "";
@@ -23,7 +23,7 @@ export class StaticFileImporter extends Asset {
     build(): null {
         const inputPath = path.join(this.owner.basePath, this.desc.filepath);
         const outputPath = path.join(this.owner.output, this.desc.filepath);
-        makeDirs(path.dirname(outputPath));
+        ensureDirSync(path.dirname(outputPath));
         fs.copyFileSync(inputPath, outputPath);
         return null;
     }

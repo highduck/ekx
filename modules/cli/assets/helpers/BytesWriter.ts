@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import {logger} from "../../logger.js";
 
 const conversionBuffer = new ArrayBuffer(8);
 const conversionU8 = new Uint8Array(conversionBuffer);
@@ -69,6 +70,14 @@ export class BytesWriter {
         }
     }
 
+    writeFixedASCIIArray(strings: string[], cap: number) {
+        this.writeU32(strings.length);
+        for(const str of strings) {
+            logger.assert(str.length < cap);
+            this.writeFixedASCII(str, cap);
+        }
+    }
+
     writeUtf8(s: string, destOffset: number): number {
         let i = 0;
         let p = destOffset;
@@ -129,4 +138,5 @@ export class BytesWriter {
         conversionF32[0] = v;
         this.writeBytes(conversionU8, 4);
     }
+
 }

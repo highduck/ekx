@@ -1,6 +1,7 @@
 import * as path from "path";
-import {executeAsync, makeDirs} from "../../utils.js";
+import {executeAsync} from "../../utils.js";
 import {getOrBuildUtility} from "../../utility/bin.js";
+import {ensureDirSync} from "../../../utils/utils.js";
 
 export async function flashExportAsync(configPath: string): Promise<number> {
     const bin = await getOrBuildUtility("flash-export");
@@ -27,7 +28,7 @@ export async function renderFlashSymbol(fla: string, symbol: string, outputs: Re
             "" + (output.trim as any | 0),
             output.outFilePath
         );
-        makeDirs(path.dirname(output.outFilePath));
+        ensureDirSync(path.dirname(output.outFilePath));
     }
     const bin = await getOrBuildUtility("flash-export");
     return await executeAsync(bin, cmd);

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import Mustache from "mustache";
 import * as esbuild from "esbuild";
-import {makeDirs, replaceInFile} from "../utils.js";
+import {replaceInFile} from "../utils.js";
 import {buildAssetPackAsync} from "../assets.js";
 import {Project} from "../project.js";
 import {BuildResult} from "../../cmake/mod.js";
@@ -12,7 +12,7 @@ import {buildWasm} from "./buildWasm.js";
 import {deployFirebaseHosting} from "./deployFirebaseHosting.js";
 import {buildAppIconAsync} from "../appicon/appicon.js";
 import {collectSourceRootsAll} from "../collectSources.js";
-import {expandGlobSync, readTextFileSync, writeTextFileSync} from "../../utils/utils.js";
+import {ensureDirSync, expandGlobSync, readTextFileSync, writeTextFileSync} from "../../utils/utils.js";
 
 /*** HTML ***/
 export async function export_web(ctx: Project): Promise<void> {
@@ -30,7 +30,7 @@ export async function export_web(ctx: Project): Promise<void> {
         }
     }
     const outputDir = path.join(ctx.projectPath, "export/web");
-    makeDirs(outputDir);
+    ensureDirSync(outputDir);
 
     function render(str: string): string {
         const renderParameters = {

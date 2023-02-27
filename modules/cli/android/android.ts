@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as fs from "fs";
-import {deleteFolderRecursive, execute, isDir, isFile, makeDirs, replaceAll, replaceInFile,} from "../utils.js";
+import {deleteFolderRecursive, execute, isDir, isFile, replaceAll, replaceInFile,} from "../utils.js";
 import {buildAssetPackAsync} from "../assets.js";
 import {
     collectCppFlags,
@@ -14,7 +14,7 @@ import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../../cmake
 import {logger} from "../logger.js";
 import {AndroidProjGen, openAndroidStudioProject} from "../../android-proj/index.js";
 import {buildAppIconAsync} from "../appicon/appicon.js";
-import {readTextFileSync, run, withPath, writeTextFileSync} from "../../utils/utils.js";
+import {ensureDirSync, readTextFileSync, run, withPath, writeTextFileSync} from "../../utils/utils.js";
 
 const platforms = ["android"];
 
@@ -52,7 +52,7 @@ public class ${activityClassName} extends ${baseActivityClassName} {
 }`;
 
     const classFilePath = path.join(appModulePath, "src/main/java", javaPackagePath, `${activityClassName}.java`);
-    makeDirs(path.dirname(classFilePath));
+    ensureDirSync(path.dirname(classFilePath));
     writeTextFileSync(classFilePath, file);
 }
 
@@ -229,7 +229,7 @@ export async function export_android(ctx: Project): Promise<void> {
         serviceAccountKey = path.resolve(ctx.projectPath, serviceAccountKey);
     }
 
-    makeDirs(projectPath);
+    ensureDirSync(projectPath);
 
     {
         const proj = new AndroidProjGen();
@@ -300,7 +300,7 @@ export async function export_android(ctx: Project): Promise<void> {
 
     // Splash screen
     {
-        makeDirs(path.join(appModulePath, "src/main/res/drawable"));
+        ensureDirSync(path.join(appModulePath, "src/main/res/drawable"));
         fs.copyFileSync(path.resolve(ctx.sdk.templates, "android-splash/launch_splash.xml"), path.join(appModulePath, "src/main/res/drawable/launch_splash.xml"));
         fs.copyFileSync(path.resolve(ctx.sdk.templates, "android-splash/splash.png"), path.join(appModulePath, "src/main/res/drawable/splash.png"));
     }

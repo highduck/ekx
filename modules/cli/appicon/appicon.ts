@@ -2,8 +2,8 @@ import * as path from "path";
 import * as fs from "fs";
 import {renderFlashSymbol, RenderFlashSymbolOutputOptions} from "../assets/helpers/flashExport.js";
 import {logger} from "../logger.js";
-import {isDir, makeDirs} from "../utils.js";
-import {getModuleDir, writeTextFileSync} from "../../utils/utils.js";
+import {isDir} from "../utils.js";
+import {ensureDirSync, getModuleDir, writeTextFileSync} from "../../utils/utils.js";
 
 export interface WebManifestIcon {
     src: string; // icons/icon36.png
@@ -67,7 +67,7 @@ function exportWebIcons(flashPath: string, iconSymbol: string, webManifestIcons:
         });
 
         // unsure all dirs will be available before running native rasterizer utility
-        makeDirs(path.dirname(outputPath));
+        ensureDirSync(path.dirname(outputPath));
     }
 
     return renderFlashSymbol(flashPath, iconSymbol, outputs);
@@ -75,7 +75,7 @@ function exportWebIcons(flashPath: string, iconSymbol: string, webManifestIcons:
 
 function exportAndroidIcons(flashPath: string, iconSymbol: string, output: string) {
     const filename = "ic_launcher.png";
-    const resolutionMap:Record<string, number> = {
+    const resolutionMap: Record<string, number> = {
         "ldpi": 36,
         "mdpi": 48,
         "hdpi": 72,
@@ -99,7 +99,7 @@ function exportAndroidIcons(flashPath: string, iconSymbol: string, output: strin
         });
 
         // unsure all dirs will be available before running native rasterizer utility
-        makeDirs(path.dirname(outputPath));
+        ensureDirSync(path.dirname(outputPath));
     }
     return renderFlashSymbol(flashPath, iconSymbol, outputs);
 }
@@ -110,7 +110,7 @@ function exportIOSIcons(flashPath: string, iconSymbol: string, appIconContents: 
     if (isDir(output)) {
         fs.rmSync(output, {recursive: true});
     }
-    makeDirs(appIconFolder);
+    ensureDirSync(appIconFolder);
 
     const images = [];
     const originalSize = 64.0;

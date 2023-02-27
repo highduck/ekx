@@ -1,10 +1,11 @@
 import * as path from "path";
 import * as fs from "fs";
 import {Asset, AssetDesc} from "./Asset.js";
-import {makeDirs, removePathExtension} from "../utils.js";
+import {removePathExtension} from "../utils.js";
 import {H} from "../utility/hash.js";
 import {hashFile} from "./helpers/hash.js";
 import {logger} from "../logger.js";
+import {ensureDirSync} from "../../utils/utils.js";
 
 export interface TTFImporterDesc extends AssetDesc {
     filepath: string;
@@ -33,7 +34,7 @@ export class TTFAsset extends Asset {
 
     build(): null {
         const outputPath = path.join(this.owner.output, this.desc.name + ".ttf");
-        makeDirs(path.dirname(outputPath));
+        ensureDirSync(path.dirname(outputPath));
         fs.copyFileSync(path.resolve(this.owner.basePath, this.desc.filepath), outputPath);
 
         this.writer.writeU32(H(this.typeName));

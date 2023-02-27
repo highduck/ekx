@@ -57,7 +57,7 @@ export function downloadFiles(props: DownloadOptions) {
 export async function downloadCheck(url: string, destDir: string, sha1: string) {
     const name = path.basename(url);
     const archivePath = path.join(destDir, name);
-    if (fs.existsSync(archivePath)) {
+    if (fs.existsSync(archivePath) && sha1) {
         const file = fs.readFileSync(archivePath);
         const sha1sum = crypto.createHash("sha1").update(file).digest("hex");
         logger.log(`Found file ${path.basename(archivePath)}, SHA1: ${sha1sum}`);

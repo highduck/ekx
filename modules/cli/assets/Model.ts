@@ -1,9 +1,10 @@
 import * as path from "path";
 import {Asset, AssetDesc} from "./Asset.js";
-import {makeDirs, removePathExtension} from "../utils.js";
+import {removePathExtension} from "../utils.js";
 import {objExportAsync} from "./helpers/objExport.js";
 import {H} from "../utility/hash.js";
 import {hashFile} from "./helpers/hash.js";
+import {ensureDirSync} from "../../utils/utils.js";
 
 export interface ObjImporterDesc extends AssetDesc {
     filepath: string;
@@ -26,7 +27,7 @@ export class ModelAsset extends Asset {
         const outputPath = path.join(this.owner.output, this.desc.name + ".model");
         const inputPath = path.join(this.owner.basePath, this.desc.filepath);
 
-        makeDirs(path.dirname(outputPath));
+        ensureDirSync(path.dirname(outputPath));
 
         await objExportAsync(inputPath, outputPath);
 

@@ -29,6 +29,8 @@
     "@types/node": "^18.14.1",
     "@types/plist": "^3.0.2",
     "@types/xmldoc": "^1.1.6",
+    "@types/gettext-parser": "^4.0.2",
+    "gettext-parser": "^6.0.0",
     "colors": "^1.4.0",
     "esbuild": "^0.17.10",
     "glob": "^8.1.0",

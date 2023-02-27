@@ -103,13 +103,6 @@ export function replaceInFile(filepath: string, dict: { [key: string]: string })
     writeTextFileSync(filepath, text);
 }
 
-export function makeDirs(p: string) {
-    ensureDirSync(p);
-    // if (!isDir(p)) {
-    //     Deno.mkdirSync(p, {recursive: true});
-    // }
-}
-
 export function searchFiles(pattern: string, search_path: string, out_files_list: string[]) {
     // const fromm = path.resolve(search_path);
     const from = fs.realpathSync(search_path);
@@ -121,7 +114,7 @@ export function searchFiles(pattern: string, search_path: string, out_files_list
 }
 
 export function copyFolderRecursiveSync(source: string, target: string) {
-    makeDirs(target);
+    ensureDirSync(target);
 
     //copy
     if (fs.lstatSync(source).isDirectory()) {

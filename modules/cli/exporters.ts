@@ -13,7 +13,9 @@ const exporters = {
     android: export_android,
     ios: export_ios,
     market: (project: Project) => buildMarketingAssets(project, "export/market"),
-    assets: (project: Project) => buildAssetPackAsync(project, "build/assets", true),
+    assets: (project: Project) => buildAssetPackAsync(project, "build/assets",
+        process.argv.indexOf("--dev") >= 0,
+        process.argv.indexOf("--clean") >= 0),
     screenshots,
     updateGoogleServicesConfig,
     dev: buildDev

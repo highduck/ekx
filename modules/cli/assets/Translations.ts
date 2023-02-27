@@ -1,9 +1,9 @@
 import * as path from "path";
 import {Asset, AssetDesc} from "./Asset.js";
-import {executeAsync, makeDirs} from "../utils.js";
 import {H} from "../utility/hash.js";
 import {hashGlob} from "./helpers/hash.js";
-import {expandGlobSync} from "../../utils/utils.js";
+import {ensureDirSync, expandGlobSync} from "../../utils/utils.js";
+import {msgfmt} from "./helpers/msgfmt.js";
 
 export interface TranslationsDesc extends AssetDesc {
     filepath: string
@@ -15,7 +15,7 @@ export class TranslationsAsset extends Asset {
     readonly languages = new Map<string, string>();
     readonly convertedData = new Map<string, ArrayBuffer>();
 
-    constructor(readonly desc:TranslationsDesc) {
+    constructor(readonly desc: TranslationsDesc) {
         super(desc, TranslationsAsset.typeName);
         desc.name = desc.name ?? path.basename(desc.filepath);
     }
@@ -31,20 +31,16 @@ export class TranslationsAsset extends Asset {
         }
 
         const outputPath = path.join(this.owner.output, this.desc.name!);
-        makeDirs(outputPath);
+        ensureDirSync(outputPath);
 
         const langs: string[] = [];
-        for (const lang of this.languages.keys()) {
+        for (const [lang, filepath] of this.languages) {
             langs.push(lang);
-            // TODO: `brew install gettext`
-            await executeAsync("msgfmt", ["--output-file=" + path.join(outputPath, lang) + ".mo", this.languages.get(lang)!]);
+            await msgfmt(filepath, path.join(outputPath, lang) + ".mo");
         }
 
         this.writer.writeU32(H("strings"));
         this.writer.writeString(this.desc.name!);
-        this.writer.writeU32(langs.length);
-        for (let i = 0; i < langs.length; ++i) {
-            this.writer.writeFixedASCII(langs[i], 8);
-        }
+        this.writer.writeFixedASCIIArray(langs, 8);
     }
 }

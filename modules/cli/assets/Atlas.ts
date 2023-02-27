@@ -2,10 +2,9 @@ import * as fs from "fs";
 import * as path from "path";
 import {compress, WebpConfig} from "./helpers/webp.js";
 import {Asset, AssetDesc} from "./Asset.js";
-import {makeDirs} from "../utils.js";
 import {spritePackerAsync} from "./helpers/spritePacker.js";
 import {H} from "../utility/hash.js";
-import {expandGlobSync, writeTextFileSync} from "../../utils/utils.js";
+import {ensureDirSync, expandGlobSync, writeTextFileSync} from "../../utils/utils.js";
 
 export interface MultiResAtlasImporterDesc extends AssetDesc {
     name: string; // required!
@@ -29,7 +28,7 @@ export class MultiResAtlasAsset extends Asset {
     }
 
     async postBuild() {
-        makeDirs(path.join(this.owner.cache, this.desc.name));
+        ensureDirSync(path.join(this.owner.cache, this.desc.name));
         const configPath = path.join(this.owner.cache, this.desc.name, "_config.xml");
 
         const resolutionNodes = [];

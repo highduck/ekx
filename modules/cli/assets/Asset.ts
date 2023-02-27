@@ -1,11 +1,11 @@
 import * as fs from "fs";
 import * as path from "path";
-import {isDir, isFile, makeDirs} from "../utils.js";
+import {isDir, isFile} from "../utils.js";
 import {logger} from "../logger.js";
 import {BytesWriter} from "./helpers/BytesWriter.js";
 import {Project} from "../project.js";
 import {H} from "../utility/hash.js";
-import {expandGlobSync, readTextFileSync, writeTextFileSync} from "../../utils/utils.js";
+import {ensureDirSync, expandGlobSync, readTextFileSync, writeTextFileSync} from "../../utils/utils.js";
 
 export interface AssetDesc {
     name?: string; //
@@ -120,7 +120,7 @@ export class AssetBuilderContext {
         if (isDir(this.output)) {
             fs.rmSync(this.output, {recursive: true});
         }
-        makeDirs(this.output);
+        ensureDirSync(this.output);
     }
 
     async buildIfChanged() {
@@ -154,8 +154,7 @@ export class AssetBuilderContext {
     }
 
     async build() {
-
-        makeDirs(this.output);
+        ensureDirSync(this.output);
 
         // then all queued assets should pass 3 steps: before build, build, after build
         await this.runPhase(this.assetsToBuild, "preBuild");

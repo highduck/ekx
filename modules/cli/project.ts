@@ -4,8 +4,7 @@ import {BumpVersionFlag, SemVer} from "./version.js";
 import {resolveFrom} from "./utility/resolveFrom.js";
 import {ModuleDef, validateModuleDef} from "./module.js";
 import {logger} from "./logger.js";
-import {makeDirs} from "./utils.js";
-import {getModuleDir, readTextFileSync, writeTextFileSync} from "../utils/utils.js";
+import {ensureDirSync, getModuleDir, readTextFileSync, writeTextFileSync} from "../utils/utils.js";
 
 const __dirname = getModuleDir(import.meta);
 
@@ -239,7 +238,7 @@ export class Project {
 #endif // APP_BUILD_INFO_H
 `;
         const filepath = path.join(this.projectPath, headerFile);
-        makeDirs(path.dirname(filepath));
+        ensureDirSync(path.dirname(filepath));
         writeTextFileSync(filepath, content);
     }
 
