@@ -1,5 +1,6 @@
 import {getModuleDir} from "../../modules/utils/utils.js";
 import {shdc} from "../../modules/sokol-shdc.js";
+import {logger} from "../../modules/cli/logger.js";
 
 await shdc({
     input: "src/ek/canvas.glsl",
@@ -7,4 +8,4 @@ await shdc({
     cwd: getModuleDir(import.meta)
 });
 
-console.info("graphics build completed");
+logger.info("graphics build completed");

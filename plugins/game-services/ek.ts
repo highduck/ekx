@@ -1,9 +1,10 @@
 import {Project} from "../../modules/cli/project.js";
+import {logger} from "../../modules/cli/logger.js";
 
 export async function setup(project: Project) {
     if (project.current_target === "android") {
         if (!project.android.game_services_id) {
-            console.error("please set android.game_services_id !!!");
+            logger.error("please set android.game_services_id !!!");
         }
     }
 

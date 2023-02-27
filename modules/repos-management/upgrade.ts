@@ -2,7 +2,7 @@
 
 import {spawnSync} from "child_process";
 import {collectPackages, upgradePackages} from "./ws.js";
-import {logger} from "../cli/index.js";
+import {logger} from "../cli/logger.js";
 
 upgradePackages(collectPackages("."));
 

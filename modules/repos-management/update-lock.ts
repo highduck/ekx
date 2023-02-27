@@ -1,4 +1,4 @@
-import {logger} from "../cli/index.js";
+import {logger} from "../cli/logger.js";
 import {collectRoots, resetWorkspace} from "./ws.js";
 import * as fs from "fs";
 import {spawnSync} from "child_process";

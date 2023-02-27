@@ -4,6 +4,7 @@ import {Asset, AssetDesc} from "./Asset.js";
 import {makeDirs, removePathExtension} from "../utils.js";
 import {H} from "../utility/hash.js";
 import {hashFile} from "./helpers/hash.js";
+import {logger} from "../logger.js";
 
 export interface TTFImporterDesc extends AssetDesc {
     filepath: string;
@@ -25,7 +26,7 @@ export class TTFAsset extends Asset {
             const hash = hashFile(filepath);
             return hash ^ super.resolveInputs();
         } catch (err) {
-            console.warn("file not found:", filepath);
+            logger.warn("file not found:", filepath);
             throw err;
         }
     }

@@ -26,7 +26,7 @@ export function openAndroidStudioProject(projectPath: string): void {
             run({cmd: ["open", "-a", getAndroidStudioPath(), projectPath]}).catch((err) => logger.error(err));
             break;
         default:
-            console.error("Not supported");
+            logger.error("Not supported");
             break;
     }
 }

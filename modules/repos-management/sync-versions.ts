@@ -7,7 +7,7 @@ import * as fs from "fs";
 import * as path from "path";
 import {collectPackages} from "./ws.js";
 import {spawnSync} from "child_process";
-import {logger} from "../cli/index.js";
+import {logger} from "../cli/logger.js";
 
 const packages = collectPackages(".");
 const map:Record<string, string> = {};

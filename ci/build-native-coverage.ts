@@ -1,5 +1,5 @@
 import {build} from "../modules/cmake/mod.js";
-import {UtilityConfig} from "../modules/cli/index.js";
+import {UtilityConfig} from "../modules/cli/utils.js";
 
 UtilityConfig.verbose = true;
 

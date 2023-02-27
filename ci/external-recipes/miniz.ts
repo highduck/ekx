@@ -2,7 +2,7 @@ import * as path from "path";
 import {readTextFileSync, rm, writeTextFileSync} from "../../modules/utils/utils.js";
 import {downloadFiles} from "../../modules/utils/download.js";
 import {resolveEkxPath} from "../../modules/utils/cacheDir.js";
-import {logger} from "../../modules/cli/index.js";
+import {logger} from "../../modules/cli/logger.js";
 
 const destPath = resolveEkxPath("external/miniz");
 

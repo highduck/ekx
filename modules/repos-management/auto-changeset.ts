@@ -4,7 +4,7 @@ import {spawnSync} from 'child_process';
 import {readFileSync, writeFileSync} from 'fs';
 import * as path from 'path';
 import * as glob from 'glob';
-import {logger} from "../cli/index.js";
+import {logger} from "../cli/logger.js";
 
 const rootPkgText = readFileSync('package.json', 'utf8');
 const rootPkg = JSON.parse(rootPkgText);

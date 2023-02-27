@@ -2,14 +2,14 @@ import * as fs from "fs";
 import * as path from "path";
 import {spawnSync} from "child_process";
 import * as glob from "glob";
-import {logger} from "../cli/index.js";
+import {logger} from "../cli/logger.js";
 
-export function readPkg(dir:string) {
+export function readPkg(dir: string) {
     const data = fs.readFileSync(path.join(dir, "package.json"), "utf8");
     return JSON.parse(data);
 }
 
-export function getWorkspaces(pkg:any, dir:string) {
+export function getWorkspaces(pkg: any, dir: string) {
     const result = {
         patterns: [] as string[],
         workspaces: [] as string[],
@@ -28,15 +28,15 @@ export function getWorkspaces(pkg:any, dir:string) {
     return result;
 }
 
-export function readWorkspaces(dir:string) {
+export function readWorkspaces(dir: string) {
     const pkg = readPkg(dir);
     return getWorkspaces(pkg, dir);
 }
 
 // UPGRADE functions
 
-function getAllLocalPackageVersions(packages:{pkg:any, dir: string}[]) {
-    const map:Record<string, string> = {};
+function getAllLocalPackageVersions(packages: { pkg: any, dir: string }[]) {
+    const map: Record<string, string> = {};
     // detect local packages versions
     for (const pack of packages) {
         if (!pack.pkg.private && pack.pkg.version !== "0.0.0") {
@@ -46,7 +46,7 @@ function getAllLocalPackageVersions(packages:{pkg:any, dir: string}[]) {
     return map;
 }
 
-function upgradePackage(localVersions:Record<string, string>, deps:Record<string, string>, kind:'dev'|any, cwd:string, ...customFlags:string[]) {
+function upgradePackage(localVersions: Record<string, string>, deps: Record<string, string>, kind: 'dev' | any, cwd: string, ...customFlags: string[]) {
     if (!deps) {
         return;
     }
@@ -84,7 +84,7 @@ function upgradePackage(localVersions:Record<string, string>, deps:Record<string
 }
 
 // you need detach super workspace before ru
-export function upgradePackages(packages:{pkg:any, dir: string}[]) {
+export function upgradePackages(packages: { pkg: any, dir: string }[]) {
     const localMap = getAllLocalPackageVersions(packages);
     for (const pack of packages) {
         upgradePackage(localMap, pack.pkg.dependencies, "prod", pack.dir); //"--ignore-workspace-root-check"
@@ -92,7 +92,7 @@ export function upgradePackages(packages:{pkg:any, dir: string}[]) {
     }
 }
 
-export const resetWorkspace = (dir:string) => {
+export const resetWorkspace = (dir: string) => {
     try {
         fs.rmSync(path.join(dir, "node_modules"), {recursive: true});
         logger.info("removed node_modules");
@@ -105,8 +105,8 @@ export const resetWorkspace = (dir:string) => {
     }
 }
 
-export function collectPackages(dir:string) {
-    const packages:any[] = [];
+export function collectPackages(dir: string) {
+    const packages: any[] = [];
     const pkg = readPkg(dir);
     if (pkg) {
         packages.push({
@@ -130,8 +130,8 @@ export function collectPackages(dir:string) {
     return packages;
 }
 
-export function collectRoots(dir:string) {
-    const roots:{pkg:any, dir: string}[] = [];
+export function collectRoots(dir: string) {
+    const roots: { pkg: any, dir: string }[] = [];
     const pkg = readPkg(dir);
     if (pkg) {
         roots.push({

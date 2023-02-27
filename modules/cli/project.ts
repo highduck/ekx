@@ -124,7 +124,7 @@ export class Project {
 
     async loadModule(configPath: string) {
         if(!fs.existsSync(configPath)) {
-            console.error("File not found:", configPath);
+            logger.error("File not found:", configPath);
         }
         configPath = fs.realpathSync(configPath);
         if (this.projects[configPath]) {
@@ -138,7 +138,7 @@ export class Project {
                 const prev = this.__dirname;
                 this.__dirname = path.dirname(configPath);
                 {
-                    const task = configurator(this) ?? true;
+                    const task:Promise<any>|any = configurator(this) ?? true;
                     if (task instanceof Promise) {
                         this.projects[configPath] = await task ?? true;
                     } else {

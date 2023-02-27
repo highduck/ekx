@@ -107,6 +107,6 @@ export const expandGlobSync = (pattern: string, options?: { root?: string }): { 
         opts.absolute = true;
     }
     const g = new G.GlobSync(pattern, opts);
-    // console.info(g.found);
+    // logger.info(g.found);
     return g.found.map(s => ({path: s}));
 }

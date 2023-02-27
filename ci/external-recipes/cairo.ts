@@ -8,7 +8,7 @@ import {
 } from "../../modules/utils/utils.js";
 import {downloadCheck, untar} from "../../modules/utils/download.js";
 import {resolveCachePath, resolveEkxPath} from "../../modules/utils/cacheDir.js";
-import {logger} from "../../modules/cli/index.js";
+import {logger} from "../../modules/cli/logger.js";
 
 const destDir = resolveEkxPath("external/cairo");
 const cacheDir = resolveCachePath("external/cairo/artifacts");

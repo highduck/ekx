@@ -1,4 +1,4 @@
-import {executeAsync} from "../cli/index.js";
+import {executeAsync} from "../cli/utils.js";
 
 // TODO: use provided options
 const OLD_EMAIL = "ilyak@playtika.com";

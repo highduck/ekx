@@ -27,7 +27,7 @@ export function resolveFrom(fromDirectory: string, moduleId: string): string | u
 function resolveFileName(fromDirectory: string, moduleId: string): string {
     // const require = import.createRequire(fromDirectory);
     // const Module = require("module");
-    // console.info(Object.keys(req));
+    // logger.info(Object.keys(req));
     // req.resolve("package.json");
     const fromFile = path.join(fromDirectory, 'noop.js');
     return (Module as any)._resolveFilename(moduleId, {

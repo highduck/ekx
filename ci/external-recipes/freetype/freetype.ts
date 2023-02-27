@@ -3,7 +3,7 @@ import * as path from "path";
 import {resolveCachePath, resolveEkxPath} from "../../../modules/utils/cacheDir.js";
 import {copyFolderRecursive, expandGlobSync, getModuleDir, rm} from "../../../modules/utils/utils.js";
 import {downloadCheck, untar} from "../../../modules/utils/download.js";
-import {logger} from "../../../modules/cli/index.js";
+import {logger} from "../../../modules/cli/logger.js";
 
 const destDir = resolveEkxPath("external/freetype");
 const patchDir = path.join(getModuleDir(import.meta), "recipe");

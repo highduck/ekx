@@ -1,6 +1,7 @@
 import {getModuleDir} from "../../modules/utils/utils.js";
 import * as path from "path";
 import * as esbuild from "esbuild";
+import {logger} from "../../modules/cli/logger.js";
 
 const __dirname = getModuleDir(import.meta);
 
@@ -11,7 +12,7 @@ await esbuild.build({
     bundle: true,
     sourcemap: true,
     outfile: path.join(__dirname, "js/pre/texture-loader.js")
-}).catch(err=> console.error(err));
+}).catch(err=> logger.error(err));
 
 await esbuild.build({
     entryPoints: [path.resolve(__dirname, "web/src/lib.ts")],
@@ -20,6 +21,6 @@ await esbuild.build({
     sourcemap: true,
     target: "node14",
     outfile: path.join(__dirname, "js/lib/lib-texture-loader.js")
-}).catch(err=> console.error(err));
+}).catch(err=> logger.error(err));
 
-console.info("texture-loader build completed");
+logger.info("texture-loader build completed");

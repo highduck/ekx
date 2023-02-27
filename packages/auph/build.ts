@@ -1,6 +1,7 @@
 import {getModuleDir} from "../../modules/utils/utils.js";
 import * as path from "path";
 import * as esbuild from "esbuild";
+import {logger} from "../../modules/cli/logger.js";
 
 const __dirname = getModuleDir(import.meta);
 
@@ -14,6 +15,6 @@ await esbuild.build({
     define: {
         "process.env.NODE_ENV":'"production"'
     }
-}).catch(err => console.error(err));
+}).catch(err => logger.error(err));
 
-console.info("auph build completed");
+logger.info("auph build completed");

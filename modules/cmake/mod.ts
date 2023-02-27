@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import {ensureDirSync, getModuleDir, rm, run} from "../utils/utils.js";
+import {logger} from "../cli/logger.js";
 
 const __dirname = getModuleDir(import.meta);
 export interface BuildMatrix {
@@ -189,7 +190,7 @@ export function resolveOptions(options?: BuildOptions): Required<BuildOptions> {
                 if (os.platform() === "darwin") {
                     if (!opts.toolchain) {
                         opts.toolchain = path.resolve(__dirname, "mingw-w64-x86_64.cmake");
-                        console.info(opts.toolchain);
+                        logger.info(opts.toolchain);
                     }
                     opts.cc = undefined;
                     opts.cxx = undefined;
@@ -205,13 +206,13 @@ export function resolveOptions(options?: BuildOptions): Required<BuildOptions> {
 
 export async function clean(options: Required<BuildOptions>): Promise<void> {
     if (options.buildDir) {
-        console.info("Clean build directory:", options.buildDir);
+        logger.info("Clean build directory:", options.buildDir);
         await rm(options.buildDir);
     }
 }
 
 export async function configure(options: Required<BuildOptions>): Promise<void> {
-    console.info("Configure");
+    logger.info("Configure");
     if (options.cmakePath == null || options.buildDir == null) {
         throw new Error("Bad arguments: cmakePath or buildDir");
     }
@@ -248,7 +249,7 @@ export async function configure(options: Required<BuildOptions>): Promise<void> 
 }
 
 export async function build_(options: Required<BuildOptions>): Promise<void> {
-    console.info("Build");
+    logger.info("Build");
     const executionOptions = {
         verbose: true,
         workingDir: options.workingDir,
@@ -269,7 +270,7 @@ export async function build_(options: Required<BuildOptions>): Promise<void> {
 }
 
 export async function test_(options: Required<BuildOptions>): Promise<void> {
-    console.info("Test");
+    logger.info("Test");
     const executionOptions = {
         verbose: true,
         workingDir: path.resolve(options.workingDir!, options.buildDir!),

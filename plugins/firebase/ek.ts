@@ -1,6 +1,7 @@
 import * as path from "path";
 import {copyFileSync} from "fs";
 import {Project} from "../../modules/cli/project.js";
+import {logger} from "../../modules/cli/logger.js";
 
 export async function setup(project: Project) {
     project.onProjectGenerated.push(() => {
@@ -14,7 +15,7 @@ export async function setup(project: Project) {
                 // CWD is project generated path here
                 copyFileSync(configPath, path.join("app", configFile))
             } catch (err) {
-                console.error("missing google-service config", configPath, err);
+                logger.error("missing google-service config", configPath, err);
             }
         } else if (project.current_target === "ios") {
             if (!project.ios.googleServicesConfigDir) {
@@ -26,11 +27,11 @@ export async function setup(project: Project) {
                 // CWD is project generated path here
                 copyFileSync(configPath, configFile)
             } catch (err) {
-                console.error("missing google-service config", configPath, err);
+                logger.error("missing google-service config", configPath, err);
             }
         } else if (project.current_target === "web") {
             if (!project.web.firebaseConfig) {
-                console.error("please set `web.firebaseConfig` !!!");
+                logger.error("please set `web.firebaseConfig` !!!");
             }
 //             project.web.headCode.push(`<script type="module">
 //   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js";

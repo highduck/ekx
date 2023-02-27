@@ -1,7 +1,7 @@
 #!/usr/bin/env -S npx ts-node
 
 import {executeAsync, UtilityConfig} from "../cli/utils.js";
-import {logger} from "../cli/index.js";
+import {logger} from "../cli/logger.js";
 
 UtilityConfig.verbose = true;
 

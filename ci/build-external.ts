@@ -7,7 +7,8 @@ import quickjs from "./external-recipes/quickjs.js";
 import pugixml from "./external-recipes/pugixml.js";
 import miniz from "./external-recipes/miniz.js";
 import imgui from "./external-recipes/imgui.js";
-import {logger, UtilityConfig} from "../modules/cli/index.js";
+import {logger} from "../modules/cli/logger.js";
+import {UtilityConfig} from "../modules/cli/utils.js";
 
 UtilityConfig.verbose = true;
 
