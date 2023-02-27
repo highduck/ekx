@@ -1,5 +1,12 @@
 # @ekx/ekx
 
+## 1.0.13
+
+### Patch Changes
+
+- 0a805664: require npm@9 because of lockfile version
+- 4715f698: change directory structure
+
 ## 1.0.12
 
 ### Patch Changes
