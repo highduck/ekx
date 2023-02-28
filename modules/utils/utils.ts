@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import {fileURLToPath} from 'url';
 import {spawn} from "child_process";
-import G from "glob";
+import {GlobOptions, globSync} from "glob";
 
 /**
  * Remove directory, ignores errors
@@ -99,14 +99,15 @@ export const readTextFileSync = (filepath: URL | string): string => {
 }
 
 export const expandGlobSync = (pattern: string, options?: { root?: string }): { path: string }[] => {
-    let opts: any = undefined;//{root: process.cwd(), cwd: process.cwd(), absolute: true};
+    let opts: GlobOptions = {
+        withFileTypes: false,
+    };
     if (options && options.root) {
-        opts = {};
         opts.cwd = options.root;
-        opts.root = options.root;
+        // opts.root = options.root;
         opts.absolute = true;
     }
-    const g = new G.GlobSync(pattern, opts);
-    // logger.info(g.found);
-    return g.found.map(s => ({path: s}));
+    const found = globSync(pattern, opts!);
+    // logger.info(found);
+    return found.map(s => ({path: s.toString()}));
 }
