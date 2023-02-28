@@ -6,6 +6,7 @@ import {tryResolveCachedBin} from "../../utility/bin.js";
 import {download, untar} from "../../../utils/download.js";
 import {resolveCachePath} from "../../../utils/dirs.js";
 import {copyFileSync} from "fs";
+import {ensureDirSync} from "../../../utils/utils.js";
 
 export interface WebpConfig {
     lossless?: boolean;// = true;
@@ -45,8 +46,11 @@ const downloadCWebP = async (exeFilePath: string) => {
     const url = getWebPUrl();
     const sourcesPath = resolveCachePath("external/webp/sources");
     const info = await download(url, resolveCachePath("external/webp/artifacts", path.basename(url)));
-    await untar(info.filepath, resolveCachePath("external/webp/sources"), {strip: 1});
+    await untar(info.filepath, sourcesPath, {strip: 1});
+
+    // copy extracted binary to expected bin place
     const binPath = path.join(sourcesPath, "bin", path.basename(exeFilePath));
+    ensureDirSync(path.dirname(exeFilePath));
     copyFileSync(binPath, exeFilePath);
 };
 
