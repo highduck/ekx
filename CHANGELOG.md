@@ -1,5 +1,13 @@
 # @ekx/ekx
 
+## 1.0.14
+
+### Patch Changes
+
+- 0183e803: logging in CLI and scripts
+- 0869cc24: download `cwebp` utility on demand
+- 0869cc24: remove `msgfmt` utility requirement
+
 ## 1.0.13
 
 ### Patch Changes
