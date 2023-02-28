@@ -1,5 +1,12 @@
 # @ekx/ekx
 
+## 1.0.16
+
+### Patch Changes
+
+- ed07519d: update cairo 1.17.8
+- 2a0ff8c6: fix downloading cwebp
+
 ## 1.0.15
 
 ### Patch Changes
