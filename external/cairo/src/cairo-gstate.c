@@ -470,7 +470,10 @@ _cairo_gstate_get_fill_rule (cairo_gstate_t *gstate)
 cairo_status_t
 _cairo_gstate_set_line_width (cairo_gstate_t *gstate, double width)
 {
-    gstate->stroke_style.line_width = width;
+    if (gstate->stroke_style.is_hairline)
+	gstate->stroke_style.pre_hairline_line_width = width;
+	else
+	gstate->stroke_style.line_width = width;
 
     return CAIRO_STATUS_SUCCESS;
 }
@@ -479,6 +482,29 @@ double
 _cairo_gstate_get_line_width (cairo_gstate_t *gstate)
 {
     return gstate->stroke_style.line_width;
+}
+
+cairo_status_t
+_cairo_gstate_set_hairline (cairo_gstate_t *gstate, cairo_bool_t set_hairline)
+{
+    if (gstate->stroke_style.is_hairline != set_hairline) {
+        gstate->stroke_style.is_hairline = set_hairline;
+
+        if (set_hairline) {
+            gstate->stroke_style.pre_hairline_line_width = gstate->stroke_style.line_width;
+            gstate->stroke_style.line_width = 0.0;
+        } else {
+            gstate->stroke_style.line_width = gstate->stroke_style.pre_hairline_line_width;
+        }
+    }
+
+    return CAIRO_STATUS_SUCCESS;
+}
+
+cairo_bool_t
+_cairo_gstate_get_hairline (cairo_gstate_t *gstate)
+{
+    return gstate->stroke_style.is_hairline;
 }
 
 cairo_status_t
@@ -937,9 +963,22 @@ _cairo_gstate_copy_transformed_pattern (cairo_gstate_t  *gstate,
 					const cairo_pattern_t *original,
 					const cairo_matrix_t  *ctm_inverse)
 {
+    /*
+     * What calculations below do can be described in pseudo-code (so using nonexistent fields) as (using column vectors):
+     * pattern->matrix = surface->device_transform *
+     * 			 pattern->matrix *
+     * 			 ctm_inverse *
+     * 			 gstate->target->device_transform_inverse
+     *
+     * The inverse of which is:
+     * pattern->matrix_inverse = gstate->target->device_transform *
+     * 				 ctm *
+     * 				 pattern->matrix_inverse *
+     * 				 surface->device_transform_inverse
+     */
+
     _cairo_gstate_copy_pattern (pattern, original);
 
-    /* apply device_transform first so that it is transformed by ctm_inverse */
     if (original->type == CAIRO_PATTERN_TYPE_SURFACE) {
 	cairo_surface_pattern_t *surface_pattern;
 	cairo_surface_t *surface;
@@ -1106,7 +1145,7 @@ _cairo_gstate_mask (cairo_gstate_t  *gstate,
     }
     _cairo_gstate_copy_transformed_mask (gstate, &mask_pattern.base, mask);
 
-    if (source->type == CAIRO_PATTERN_TYPE_SOLID &&
+    if (source->type == CAIRO_PATTERN_TYPE_SOLID && !source->is_foreground_marker &&
 	mask_pattern.base.type == CAIRO_PATTERN_TYPE_SOLID &&
 	_cairo_operator_bounded_by_source (op))
     {
@@ -1159,7 +1198,7 @@ _cairo_gstate_stroke (cairo_gstate_t *gstate, cairo_path_fixed_t *path)
     if (gstate->op == CAIRO_OPERATOR_DEST)
 	return CAIRO_STATUS_SUCCESS;
 
-    if (gstate->stroke_style.line_width <= 0.0)
+    if (gstate->stroke_style.line_width <= 0.0 && !gstate->stroke_style.is_hairline)
 	return CAIRO_STATUS_SUCCESS;
 
     if (_cairo_clip_is_all_clipped (gstate->clip))
@@ -1644,44 +1683,10 @@ cairo_status_t
 _cairo_gstate_tag_begin (cairo_gstate_t *gstate,
 			 const char *tag_name, const char *attributes)
 {
-    cairo_pattern_union_t source_pattern;
-    cairo_stroke_style_t style;
-    double dash[2];
-    cairo_status_t status;
-    cairo_matrix_t aggregate_transform;
-    cairo_matrix_t aggregate_transform_inverse;
-
-    status = _cairo_gstate_get_pattern_status (gstate->source);
-    if (unlikely (status))
-	return status;
-
-    cairo_matrix_multiply (&aggregate_transform,
-                           &gstate->ctm,
-                           &gstate->target->device_transform);
-    cairo_matrix_multiply (&aggregate_transform_inverse,
-                           &gstate->target->device_transform_inverse,
-                           &gstate->ctm_inverse);
-
-    memcpy (&style, &gstate->stroke_style, sizeof (gstate->stroke_style));
-    if (_cairo_stroke_style_dash_can_approximate (&gstate->stroke_style, &aggregate_transform, gstate->tolerance)) {
-        style.dash = dash;
-        _cairo_stroke_style_dash_approximate (&gstate->stroke_style, &gstate->ctm, gstate->tolerance,
-					      &style.dash_offset,
-					      style.dash,
-					      &style.num_dashes);
-    }
-
-    _cairo_gstate_copy_transformed_source (gstate, &source_pattern.base);
-
     return _cairo_surface_tag (gstate->target,
 			       TRUE, /* begin */
 			       tag_name,
-			       attributes ? attributes : "",
-			       &source_pattern.base,
-			       &style,
-			       &aggregate_transform,
-			       &aggregate_transform_inverse,
-			       gstate->clip);
+			       attributes ? attributes : "");
 }
 
 cairo_status_t
@@ -1691,12 +1696,7 @@ _cairo_gstate_tag_end (cairo_gstate_t *gstate,
     return _cairo_surface_tag (gstate->target,
 			       FALSE, /* begin */
 			       tag_name,
-			       NULL, /* attributes */
-			       NULL, /* source */
-			       NULL, /* stroke_style */
-			       NULL, /* ctm */
-			       NULL, /* ctm_inverse*/
-			       NULL); /* clip */
+			       NULL); /* attributes */
 }
 
 static void
@@ -1753,6 +1753,7 @@ _cairo_gstate_set_font_options (cairo_gstate_t             *gstate,
 
     _cairo_gstate_unset_scaled_font (gstate);
 
+    _cairo_font_options_fini (&gstate->font_options);
     _cairo_font_options_init_copy (&gstate->font_options, options);
 }
 
@@ -1760,7 +1761,8 @@ void
 _cairo_gstate_get_font_options (cairo_gstate_t       *gstate,
 				cairo_font_options_t *options)
 {
-    *options = gstate->font_options;
+    _cairo_font_options_fini (options);
+    _cairo_font_options_init_copy (options, &gstate->font_options);
 }
 
 cairo_status_t

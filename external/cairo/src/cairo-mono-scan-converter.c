@@ -403,7 +403,6 @@ _mono_scan_converter_init(struct mono_scan_converter *c,
 	c->spans = _cairo_malloc_ab (max_num_spans,
 				     sizeof (cairo_half_open_span_t));
 	if (unlikely (c->spans == NULL)) {
-	    polygon_fini (c->polygon);
 	    return _cairo_error (CAIRO_STATUS_NO_MEMORY);
 	}
     } else

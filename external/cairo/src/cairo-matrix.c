@@ -304,6 +304,7 @@ cairo_matrix_rotate (cairo_matrix_t *matrix, double radians)
 
     cairo_matrix_multiply (matrix, &tmp, matrix);
 }
+slim_hidden_def (cairo_matrix_rotate);
 
 /**
  * cairo_matrix_multiply:

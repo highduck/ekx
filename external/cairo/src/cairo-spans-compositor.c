@@ -612,7 +612,7 @@ composite_aligned_boxes (const cairo_spans_compositor_t		*compositor,
 
 	recording_clip = _cairo_clip_from_boxes (boxes);
 	status = _cairo_recording_surface_replay_with_clip (unwrap_source (source),
-							    m, dst, recording_clip);
+							    m, dst, recording_clip, FALSE);
 	_cairo_clip_destroy (recording_clip);
 
 	return status;
@@ -1041,6 +1041,7 @@ _cairo_spans_compositor_stroke (const cairo_compositor_t	*_compositor,
 
     if (status == CAIRO_INT_STATUS_UNSUPPORTED) {
 	cairo_polygon_t polygon;
+	cairo_box_t limits;
 	cairo_fill_rule_t fill_rule = CAIRO_FILL_RULE_WINDING;
 
 	if (! _cairo_rectangle_contains_rectangle (&extents->unbounded,
@@ -1049,7 +1050,6 @@ _cairo_spans_compositor_stroke (const cairo_compositor_t	*_compositor,
 	    if (extents->clip->num_boxes == 1) {
 		_cairo_polygon_init (&polygon, extents->clip->boxes, 1);
 	    } else {
-		cairo_box_t limits;
 		_cairo_box_from_rectangle (&limits, &extents->unbounded);
 		_cairo_polygon_init (&polygon, &limits, 1);
 	    }
@@ -1128,6 +1128,7 @@ _cairo_spans_compositor_fill (const cairo_compositor_t		*_compositor,
     }
     if (status == CAIRO_INT_STATUS_UNSUPPORTED) {
 	cairo_polygon_t polygon;
+	cairo_box_t limits;
 
 	TRACE((stderr, "%s - polygon\n", __FUNCTION__));
 
@@ -1138,7 +1139,6 @@ _cairo_spans_compositor_fill (const cairo_compositor_t		*_compositor,
 	    if (extents->clip->num_boxes == 1) {
 		_cairo_polygon_init (&polygon, extents->clip->boxes, 1);
 	    } else {
-		cairo_box_t limits;
 		_cairo_box_from_rectangle (&limits, &extents->unbounded);
 		_cairo_polygon_init (&polygon, &limits, 1);
 	    }

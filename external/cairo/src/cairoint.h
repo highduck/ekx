@@ -46,9 +46,7 @@
 #ifndef _CAIROINT_H_
 #define _CAIROINT_H_
 
-#if HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #ifdef _MSC_VER
 #define cairo_public __declspec(dllexport)
@@ -256,7 +254,7 @@ static inline uint16_t get_unaligned_be16 (const unsigned char *p)
 
 static inline uint32_t get_unaligned_be32 (const unsigned char *p)
 {
-    return p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3];
+    return (uint32_t)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3];
 }
 
 static inline void put_unaligned_be16 (uint16_t v, unsigned char *p)
@@ -273,27 +271,7 @@ static inline void put_unaligned_be32 (uint32_t v, unsigned char *p)
     p[3] = v & 0xff;
 }
 
-/* The glibc versions of ispace() and isdigit() are slow in UTF-8 locales.
- */
-
-static inline int cairo_const
-_cairo_isspace (int c)
-{
-    return (c == 0x20 || (c >= 0x09 && c <= 0x0d));
-}
-
-static inline int cairo_const
-_cairo_isdigit (int c)
-{
-    return (c >= '0' && c <= '9');
-}
-
-static inline int cairo_const
-_cairo_isalpha (int c)
-{
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-}
-
+#include "cairo-ctype-inline.h"
 #include "cairo-types-private.h"
 #include "cairo-cache-private.h"
 #include "cairo-reference-count-private.h"
@@ -347,10 +325,10 @@ static inline cairo_bool_t
 _cairo_rectangle_intersects (const cairo_rectangle_int_t *dst,
 			     const cairo_rectangle_int_t *src)
 {
-    return !(src->x >= dst->x + (int) dst->width ||
-	     src->x + (int) src->width <= dst->x ||
-	     src->y >= dst->y + (int) dst->height ||
-	     src->y + (int) src->height <= dst->y);
+    return !(src->x >= dst->x + dst->width  ||
+	     src->x + src->width <= dst->x  ||
+	     src->y >= dst->y + dst->height ||
+	     src->y + src->height <= dst->y);
 }
 
 static inline cairo_bool_t
@@ -358,9 +336,9 @@ _cairo_rectangle_contains_rectangle (const cairo_rectangle_int_t *a,
 				     const cairo_rectangle_int_t *b)
 {
     return (a->x <= b->x &&
-	    a->x + (int) a->width >= b->x + (int) b->width &&
+	    a->x + a->width >= b->x + b->width &&
 	    a->y <= b->y &&
-	    a->y + (int) a->height >= b->y + (int) b->height);
+	    a->y + a->height >= b->y + b->height);
 }
 
 cairo_private void
@@ -420,16 +398,16 @@ _cairo_user_data_array_foreach (cairo_user_data_array_t     *array,
 
 #define _CAIRO_HASH_INIT_VALUE 5381
 
-cairo_private unsigned long
+cairo_private uintptr_t
 _cairo_hash_string (const char *c);
 
-cairo_private unsigned long
-_cairo_hash_bytes (unsigned long hash,
+cairo_private uintptr_t
+_cairo_hash_bytes (uintptr_t hash,
 		   const void *bytes,
 		   unsigned int length);
 
 /* We use bits 24-27 to store phases for subpixel positions */
-#define _cairo_scaled_glyph_index(g) ((g)->hash_entry.hash & 0xffffff)
+#define _cairo_scaled_glyph_index(g) ((unsigned long)((g)->hash_entry.hash & 0xffffff))
 #define _cairo_scaled_glyph_xphase(g) (int)(((g)->hash_entry.hash >> 24) & 3)
 #define _cairo_scaled_glyph_yphase(g) (int)(((g)->hash_entry.hash >> 26) & 3)
 #define _cairo_scaled_glyph_set_index(g, i)  ((g)->hash_entry.hash = (i))
@@ -456,11 +434,6 @@ _cairo_ft_font_reset_static_data (void);
 
 cairo_private void
 _cairo_win32_font_reset_static_data (void);
-
-#if CAIRO_HAS_COGL_SURFACE
-void
-_cairo_cogl_context_reset_static_data (void);
-#endif
 
 /* the font backend interface */
 
@@ -515,10 +488,24 @@ struct _cairo_scaled_font_backend {
     void
     (*fini)		(void			*scaled_font);
 
+    /*
+     * Get the requested glyph info.
+     * @scaled_font: a #cairo_scaled_font_t
+     * @scaled_glyph: a #cairo_scaled_glyph_t the glyph
+     * @info: a #cairo_scaled_glyph_info_t which information to retrieve
+     *  %CAIRO_SCALED_GLYPH_INFO_METRICS - glyph metrics and bounding box
+     *  %CAIRO_SCALED_GLYPH_INFO_SURFACE - surface holding glyph image
+     *  %CAIRO_SCALED_GLYPH_INFO_PATH - path holding glyph outline in device space
+     *  %CAIRO_SCALED_GLYPH_INFO_RECORDING_SURFACE - surface holding recording of glyph
+     *  %CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE - surface holding color glyph image
+     * @foreground_color - foreground color to use when rendering color fonts. Use NULL
+     * if not requesting CAIRO_SCALED_GLYPH_INFO_COLOR_SURFACE or foreground color is unknown.
+     */
     cairo_warn cairo_int_status_t
     (*scaled_glyph_init)	(void			     *scaled_font,
 				 cairo_scaled_glyph_t	     *scaled_glyph,
-				 cairo_scaled_glyph_info_t    info);
+				 cairo_scaled_glyph_info_t    info,
+                                 const cairo_color_t         *foreground_color);
 
     /* A backend only needs to implement this or ucs4_to_index(), not
      * both. This allows the backend to do something more sophisticated
@@ -536,6 +523,11 @@ struct _cairo_scaled_font_backend {
 		       int		          *num_clusters,
 		       cairo_text_cluster_flags_t *cluster_flags);
 
+    /* Get the glyph index for the given unicode code point.
+     * @scaled_font: a #cairo_scaled_font_t
+     * @ucs4: unicode code point
+     * Returns glyph index or 0 if not found.
+     */
     unsigned long
     (*ucs4_to_index)		(void			     *scaled_font,
 				 uint32_t		      ucs4);
@@ -574,6 +566,9 @@ struct _cairo_scaled_font_backend {
 
     /* Determine if this scaled font differs from the outlines in the font tables.
      * eg synthesized bold/italic or a non default variant of a variable font.
+     * @scaled_font: font
+     * @is_sythetic: returns TRUE if scaled font is synthetic
+     * Returns cairo status
      */
     cairo_warn cairo_int_status_t
     (*is_synthetic)(void                       *scaled_font,
@@ -590,7 +585,6 @@ struct _cairo_scaled_font_backend {
      * @glyph_array_index: (index into glyph_names) the glyph name corresponding
      *  to the glyph_index
      */
-
     cairo_warn cairo_int_status_t
     (*index_to_glyph_name)(void                 *scaled_font,
 			   char                **glyph_names,
@@ -618,6 +612,10 @@ struct _cairo_scaled_font_backend {
                            unsigned char        *buffer,
                            unsigned long        *length);
 
+    /* Check if font has any color glyphs.
+     * @scaled_font: font
+     * Returns TRUE if font contains any color glyphs
+     */
     cairo_bool_t
     (*has_color_glyphs)   (void                 *scaled_font);
 };
@@ -664,6 +662,12 @@ extern const cairo_private struct _cairo_font_face_backend _cairo_win32_font_fac
 
 #endif
 
+#if CAIRO_HAS_DWRITE_FONT
+
+extern const cairo_private struct _cairo_font_face_backend _cairo_dwrite_font_face_backend;
+
+#endif
+
 #if CAIRO_HAS_QUARTZ_FONT
 
 extern const cairo_private struct _cairo_font_face_backend _cairo_quartz_font_face_backend;
@@ -692,11 +696,17 @@ struct _cairo_surface_attributes {
 #define CAIRO_FONT_WEIGHT_DEFAULT  CAIRO_FONT_WEIGHT_NORMAL
 
 #define CAIRO_WIN32_FONT_FAMILY_DEFAULT "Arial"
+#define CAIRO_DWRITE_FONT_FAMILY_DEFAULT "Arial"
 #define CAIRO_QUARTZ_FONT_FAMILY_DEFAULT  "Helvetica"
 #define CAIRO_FT_FONT_FAMILY_DEFAULT     ""
 #define CAIRO_USER_FONT_FAMILY_DEFAULT     "@cairo:"
 
-#if   CAIRO_HAS_WIN32_FONT
+#if   CAIRO_HAS_DWRITE_FONT
+
+#define CAIRO_FONT_FAMILY_DEFAULT CAIRO_DWRITE_FONT_FAMILY_DEFAULT
+#define CAIRO_FONT_FACE_BACKEND_DEFAULT &_cairo_dwrite_font_face_backend
+
+#elif CAIRO_HAS_WIN32_FONT
 
 #define CAIRO_FONT_FAMILY_DEFAULT CAIRO_WIN32_FONT_FAMILY_DEFAULT
 #define CAIRO_FONT_FACE_BACKEND_DEFAULT &_cairo_win32_font_face_backend
@@ -932,6 +942,13 @@ _cairo_get_locale_decimal_point (void);
 
 cairo_private double
 _cairo_strtod (const char *nptr, char **endptr);
+
+#ifdef HAVE_STRNDUP
+#define _cairo_strndup strndup
+#else
+cairo_private char *
+_cairo_strndup (const char *s, size_t n);
+#endif
 
 /* cairo-path-fixed.c */
 cairo_private cairo_path_fixed_t *
@@ -1275,17 +1292,20 @@ _cairo_scaled_glyph_set_path (cairo_scaled_glyph_t *scaled_glyph,
 cairo_private void
 _cairo_scaled_glyph_set_recording_surface (cairo_scaled_glyph_t *scaled_glyph,
                                            cairo_scaled_font_t *scaled_font,
-                                           cairo_surface_t *recording_surface);
+                                           cairo_surface_t *recording_surface,
+					   const cairo_color_t *foreground_color);
 
 cairo_private void
 _cairo_scaled_glyph_set_color_surface (cairo_scaled_glyph_t *scaled_glyph,
 		                       cairo_scaled_font_t *scaled_font,
-		                       cairo_image_surface_t *surface);
+		                       cairo_image_surface_t *surface,
+                                       const cairo_color_t *foreground_color);
 
 cairo_private cairo_int_status_t
 _cairo_scaled_glyph_lookup (cairo_scaled_font_t *scaled_font,
 			    unsigned long index,
 			    cairo_scaled_glyph_info_t info,
+                            const cairo_color_t   *foreground_color,
 			    cairo_scaled_glyph_t **scaled_glyph_ret);
 
 cairo_private double
@@ -1461,12 +1481,7 @@ cairo_private cairo_status_t
 _cairo_surface_tag (cairo_surface_t	        *surface,
 		    cairo_bool_t                 begin,
 		    const char                  *tag_name,
-		    const char                  *attributes,
-		    const cairo_pattern_t	*source,
-		    const cairo_stroke_style_t	*stroke_style,
-		    const cairo_matrix_t	*ctm,
-		    const cairo_matrix_t	*ctm_inverse,
-		    const cairo_clip_t	        *clip);
+		    const char                  *attributes);
 
 cairo_private cairo_status_t
 _cairo_surface_acquire_source_image (cairo_surface_t         *surface,
@@ -1841,6 +1856,12 @@ _cairo_debug_print_matrix (FILE *file, const cairo_matrix_t *matrix);
 cairo_private void
 _cairo_debug_print_rect (FILE *file, const cairo_rectangle_int_t *rect);
 
+cairo_private const char *
+_cairo_debug_operator_to_string (cairo_operator_t op);
+
+cairo_private const char *
+_cairo_debug_status_to_string (cairo_int_status_t status);
+
 cairo_private cairo_status_t
 _cairo_bentley_ottmann_tessellate_rectilinear_polygon (cairo_traps_t	 *traps,
 						       const cairo_polygon_t *polygon,
@@ -1880,13 +1901,6 @@ _cairo_trapezoid_array_translate_and_scale (cairo_trapezoid_t *offset_traps,
 					    double tx, double ty,
 					    double sx, double sy);
 
-#if CAIRO_HAS_DRM_SURFACE
-
-cairo_private void
-_cairo_drm_device_reset_static_data (void);
-
-#endif
-
 cairo_private void
 _cairo_clip_reset_static_data (void);
 
@@ -1913,7 +1927,7 @@ cairo_private int
 _cairo_ucs4_to_utf16 (uint32_t    unicode,
 		      uint16_t   *utf16);
 
-#if CAIRO_HAS_WIN32_FONT || CAIRO_HAS_QUARTZ_FONT || CAIRO_HAS_PDF_OPERATORS
+#if _WIN32 || CAIRO_HAS_WIN32_FONT || CAIRO_HAS_QUARTZ_FONT || CAIRO_HAS_PDF_OPERATORS
 # define CAIRO_HAS_UTF8_TO_UTF16 1
 #endif
 #if CAIRO_HAS_UTF8_TO_UTF16
@@ -1939,17 +1953,26 @@ cairo_private cairo_status_t
 _cairo_fopen (const char *filename, const char *mode, FILE **file_out);
 
 /* Avoid unnecessary PLT entries.  */
+slim_hidden_proto (cairo_append_path);
+slim_hidden_proto (cairo_arc);
+slim_hidden_proto (cairo_arc_negative);
+slim_hidden_proto (cairo_clip);
+slim_hidden_proto (cairo_clip_extents);
 slim_hidden_proto (cairo_clip_preserve);
 slim_hidden_proto (cairo_close_path);
+slim_hidden_proto (cairo_copy_path);
 slim_hidden_proto (cairo_create);
 slim_hidden_proto (cairo_curve_to);
 slim_hidden_proto (cairo_destroy);
+slim_hidden_proto (cairo_device_to_user);
+slim_hidden_proto (cairo_fill);
 slim_hidden_proto (cairo_fill_preserve);
 slim_hidden_proto (cairo_font_face_destroy);
 slim_hidden_proto (cairo_font_face_get_user_data);
 slim_hidden_proto_no_warn (cairo_font_face_reference);
 slim_hidden_proto (cairo_font_face_set_user_data);
 slim_hidden_proto (cairo_font_options_equal);
+slim_hidden_proto (cairo_font_options_get_custom_palette_color);
 slim_hidden_proto (cairo_font_options_hash);
 slim_hidden_proto (cairo_font_options_merge);
 slim_hidden_proto (cairo_font_options_set_antialias);
@@ -1959,13 +1982,17 @@ slim_hidden_proto (cairo_font_options_set_subpixel_order);
 slim_hidden_proto (cairo_font_options_status);
 slim_hidden_proto (cairo_format_stride_for_width);
 slim_hidden_proto (cairo_get_current_point);
+slim_hidden_proto (cairo_get_hairline);
 slim_hidden_proto (cairo_get_line_width);
 slim_hidden_proto (cairo_get_matrix);
 slim_hidden_proto (cairo_get_scaled_font);
+slim_hidden_proto (cairo_get_source);
 slim_hidden_proto (cairo_get_target);
 slim_hidden_proto (cairo_get_tolerance);
 slim_hidden_proto (cairo_glyph_allocate);
 slim_hidden_proto (cairo_glyph_free);
+slim_hidden_proto (cairo_has_current_point);
+slim_hidden_proto (cairo_identity_matrix);
 slim_hidden_proto (cairo_image_surface_create);
 slim_hidden_proto (cairo_image_surface_create_for_data);
 slim_hidden_proto (cairo_image_surface_get_data);
@@ -1982,20 +2009,14 @@ slim_hidden_proto (cairo_matrix_init_scale);
 slim_hidden_proto (cairo_matrix_init_translate);
 slim_hidden_proto (cairo_matrix_invert);
 slim_hidden_proto (cairo_matrix_multiply);
+slim_hidden_proto (cairo_matrix_rotate);
 slim_hidden_proto (cairo_matrix_scale);
 slim_hidden_proto (cairo_matrix_transform_distance);
 slim_hidden_proto (cairo_matrix_transform_point);
 slim_hidden_proto (cairo_matrix_translate);
-slim_hidden_proto (cairo_move_to);
-slim_hidden_proto (cairo_new_path);
-slim_hidden_proto (cairo_paint);
-slim_hidden_proto (cairo_pattern_add_color_stop_rgba);
-slim_hidden_proto (cairo_pattern_create_for_surface);
-slim_hidden_proto (cairo_pattern_create_rgb);
-slim_hidden_proto (cairo_pattern_create_rgba);
-slim_hidden_proto (cairo_pattern_destroy);
-slim_hidden_proto (cairo_pattern_get_extend);
+slim_hidden_proto (cairo_mesh_pattern_begin_patch);
 slim_hidden_proto (cairo_mesh_pattern_curve_to);
+slim_hidden_proto (cairo_mesh_pattern_end_patch);
 slim_hidden_proto (cairo_mesh_pattern_get_control_point);
 slim_hidden_proto (cairo_mesh_pattern_get_corner_color_rgba);
 slim_hidden_proto (cairo_mesh_pattern_get_patch_count);
@@ -2003,14 +2024,58 @@ slim_hidden_proto (cairo_mesh_pattern_get_path);
 slim_hidden_proto (cairo_mesh_pattern_line_to);
 slim_hidden_proto (cairo_mesh_pattern_move_to);
 slim_hidden_proto (cairo_mesh_pattern_set_corner_color_rgba);
+slim_hidden_proto (cairo_move_to);
+slim_hidden_proto (cairo_new_path);
+slim_hidden_proto (cairo_paint);
+slim_hidden_proto (cairo_paint_with_alpha);
+slim_hidden_proto_no_warn (cairo_path_destroy);
+slim_hidden_proto (cairo_pattern_add_color_stop_rgba);
+slim_hidden_proto (cairo_pattern_create_for_surface);
+slim_hidden_proto (cairo_pattern_create_linear);
+slim_hidden_proto (cairo_pattern_create_mesh);
+slim_hidden_proto (cairo_pattern_create_radial);
+slim_hidden_proto (cairo_pattern_create_rgb);
+slim_hidden_proto (cairo_pattern_create_rgba);
+slim_hidden_proto (cairo_pattern_destroy);
+slim_hidden_proto (cairo_pattern_get_extend);
+slim_hidden_proto (cairo_pattern_get_rgba);
+slim_hidden_proto (cairo_pattern_get_type);
 slim_hidden_proto_no_warn (cairo_pattern_reference);
+slim_hidden_proto (cairo_pattern_set_extend);
 slim_hidden_proto (cairo_pattern_set_matrix);
 slim_hidden_proto (cairo_pop_group);
+slim_hidden_proto (cairo_pop_group_to_source);
+slim_hidden_proto (cairo_push_group);
 slim_hidden_proto (cairo_push_group_with_content);
-slim_hidden_proto_no_warn (cairo_path_destroy);
 slim_hidden_proto (cairo_recording_surface_create);
+slim_hidden_proto (cairo_recording_surface_ink_extents);
+slim_hidden_proto (cairo_rectangle);
+slim_hidden_proto (cairo_region_contains_point);
+slim_hidden_proto (cairo_region_contains_rectangle);
+slim_hidden_proto (cairo_region_copy);
+slim_hidden_proto (cairo_region_create);
+slim_hidden_proto (cairo_region_create_rectangle);
+slim_hidden_proto (cairo_region_create_rectangles);
+slim_hidden_proto (cairo_region_destroy);
+slim_hidden_proto (cairo_region_equal);
+slim_hidden_proto (cairo_region_get_extents);
+slim_hidden_proto (cairo_region_get_rectangle);
+slim_hidden_proto (cairo_region_intersect);
+slim_hidden_proto (cairo_region_intersect_rectangle);
+slim_hidden_proto (cairo_region_is_empty);
+slim_hidden_proto (cairo_region_num_rectangles);
+slim_hidden_proto (cairo_region_reference);
+slim_hidden_proto (cairo_region_status);
+slim_hidden_proto (cairo_region_subtract);
+slim_hidden_proto (cairo_region_subtract_rectangle);
+slim_hidden_proto (cairo_region_translate);
+slim_hidden_proto (cairo_region_union);
+slim_hidden_proto (cairo_region_union_rectangle);
+slim_hidden_proto (cairo_region_xor);
+slim_hidden_proto (cairo_region_xor_rectangle);
 slim_hidden_proto (cairo_rel_line_to);
 slim_hidden_proto (cairo_restore);
+slim_hidden_proto (cairo_rotate);
 slim_hidden_proto (cairo_save);
 slim_hidden_proto (cairo_scale);
 slim_hidden_proto (cairo_scaled_font_create);
@@ -2020,22 +2085,27 @@ slim_hidden_proto (cairo_scaled_font_get_ctm);
 slim_hidden_proto (cairo_scaled_font_get_font_face);
 slim_hidden_proto (cairo_scaled_font_get_font_matrix);
 slim_hidden_proto (cairo_scaled_font_get_font_options);
+slim_hidden_proto (cairo_scaled_font_get_user_data);
 slim_hidden_proto (cairo_scaled_font_glyph_extents);
 slim_hidden_proto_no_warn (cairo_scaled_font_reference);
-slim_hidden_proto (cairo_scaled_font_status);
-slim_hidden_proto (cairo_scaled_font_get_user_data);
 slim_hidden_proto (cairo_scaled_font_set_user_data);
+slim_hidden_proto (cairo_scaled_font_status);
 slim_hidden_proto (cairo_scaled_font_text_to_glyphs);
+slim_hidden_proto (cairo_set_dash);
+slim_hidden_proto (cairo_set_fill_rule);
 slim_hidden_proto (cairo_set_font_matrix);
 slim_hidden_proto (cairo_set_font_options);
 slim_hidden_proto (cairo_set_font_size);
+slim_hidden_proto (cairo_set_hairline);
 slim_hidden_proto (cairo_set_line_cap);
 slim_hidden_proto (cairo_set_line_join);
 slim_hidden_proto (cairo_set_line_width);
 slim_hidden_proto (cairo_set_matrix);
+slim_hidden_proto (cairo_set_miter_limit);
 slim_hidden_proto (cairo_set_operator);
 slim_hidden_proto (cairo_set_source);
 slim_hidden_proto (cairo_set_source_rgb);
+slim_hidden_proto (cairo_set_source_rgba);
 slim_hidden_proto (cairo_set_source_surface);
 slim_hidden_proto (cairo_set_tolerance);
 slim_hidden_proto (cairo_status);
@@ -2066,47 +2136,24 @@ slim_hidden_proto (cairo_text_cluster_free);
 slim_hidden_proto (cairo_toy_font_face_create);
 slim_hidden_proto (cairo_toy_font_face_get_slant);
 slim_hidden_proto (cairo_toy_font_face_get_weight);
-slim_hidden_proto (cairo_translate);
 slim_hidden_proto (cairo_transform);
+slim_hidden_proto (cairo_translate);
 slim_hidden_proto (cairo_user_font_face_create);
 slim_hidden_proto (cairo_user_font_face_set_init_func);
+slim_hidden_proto (cairo_user_font_face_set_render_color_glyph_func);
 slim_hidden_proto (cairo_user_font_face_set_render_glyph_func);
 slim_hidden_proto (cairo_user_font_face_set_unicode_to_glyph_func);
-slim_hidden_proto (cairo_device_to_user);
 slim_hidden_proto (cairo_user_to_device);
 slim_hidden_proto (cairo_user_to_device_distance);
 slim_hidden_proto (cairo_version_string);
-slim_hidden_proto (cairo_region_create);
-slim_hidden_proto (cairo_region_create_rectangle);
-slim_hidden_proto (cairo_region_create_rectangles);
-slim_hidden_proto (cairo_region_copy);
-slim_hidden_proto (cairo_region_reference);
-slim_hidden_proto (cairo_region_destroy);
-slim_hidden_proto (cairo_region_equal);
-slim_hidden_proto (cairo_region_status);
-slim_hidden_proto (cairo_region_get_extents);
-slim_hidden_proto (cairo_region_num_rectangles);
-slim_hidden_proto (cairo_region_get_rectangle);
-slim_hidden_proto (cairo_region_is_empty);
-slim_hidden_proto (cairo_region_contains_rectangle);
-slim_hidden_proto (cairo_region_contains_point);
-slim_hidden_proto (cairo_region_translate);
-slim_hidden_proto (cairo_region_subtract);
-slim_hidden_proto (cairo_region_subtract_rectangle);
-slim_hidden_proto (cairo_region_intersect);
-slim_hidden_proto (cairo_region_intersect_rectangle);
-slim_hidden_proto (cairo_region_union);
-slim_hidden_proto (cairo_region_union_rectangle);
-slim_hidden_proto (cairo_region_xor);
-slim_hidden_proto (cairo_region_xor_rectangle);
 
 #if CAIRO_HAS_PNG_FUNCTIONS
 
+slim_hidden_proto (cairo_image_surface_create_from_png_stream);
 slim_hidden_proto (cairo_surface_write_to_png_stream);
 
 #endif
 
-CAIRO_END_DECLS
 
 #include "cairo-mutex-private.h"
 #include "cairo-fixed-private.h"
@@ -2148,5 +2195,7 @@ _cairo_debug_print_clip (FILE *stream, const cairo_clip_t *clip);
 #define TRACE(x)
 #define TRACE_(x)
 #endif
+
+CAIRO_END_DECLS
 
 #endif

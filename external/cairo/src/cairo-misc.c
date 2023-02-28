@@ -38,8 +38,6 @@
  *      Adrian Johnson <ajohnson@redneon.com>
  */
 
-#define _GNU_SOURCE 1	/* strtod_l() */
-
 #include "cairoint.h"
 #include "cairo-error-private.h"
 
@@ -176,6 +174,10 @@ cairo_status_to_string (cairo_status_t status)
 	return "error occurred in the Windows Graphics Device Interface";
     case CAIRO_STATUS_TAG_ERROR:
 	return "invalid tag name, attributes, or nesting";
+    case CAIRO_STATUS_DWRITE_ERROR:
+	return "Window Direct Write error";
+    case CAIRO_STATUS_SVG_FONT_ERROR:
+	return "error occured while rendering an OpenType-SVG font";
     default:
     case CAIRO_STATUS_LAST_STATUS:
 	return "<unknown error status>";
@@ -404,10 +406,10 @@ _cairo_operator_bounded_by_mask (cairo_operator_t op)
     case CAIRO_OPERATOR_DEST_IN:
     case CAIRO_OPERATOR_DEST_ATOP:
 	return FALSE;
+    default:
+	ASSERT_NOT_REACHED;
+	return FALSE; /* squelch warning */
     }
-
-    ASSERT_NOT_REACHED;
-    return FALSE;
 }
 
 /**
@@ -459,18 +461,16 @@ _cairo_operator_bounded_by_source (cairo_operator_t op)
     case CAIRO_OPERATOR_DEST_IN:
     case CAIRO_OPERATOR_DEST_ATOP:
 	return FALSE;
+    default:
+	ASSERT_NOT_REACHED;
+	return FALSE; /* squelch warning */
     }
-
-    ASSERT_NOT_REACHED;
-    return FALSE;
 }
 
 uint32_t
 _cairo_operator_bounded_by_either (cairo_operator_t op)
 {
     switch (op) {
-    default:
-	ASSERT_NOT_REACHED;
     case CAIRO_OPERATOR_OVER:
     case CAIRO_OPERATOR_ATOP:
     case CAIRO_OPERATOR_DEST:
@@ -503,6 +503,9 @@ _cairo_operator_bounded_by_either (cairo_operator_t op)
     case CAIRO_OPERATOR_DEST_IN:
     case CAIRO_OPERATOR_DEST_ATOP:
 	return 0;
+    default:
+	ASSERT_NOT_REACHED;
+	return FALSE; /* squelch warning */
     }
 
 }
@@ -866,6 +869,8 @@ _cairo_strtod (const char *nptr, char **endptr)
 	    bufptr += decimal_point_len;
 	    delta -= decimal_point_len - 1;
 	    have_dp = TRUE;
+	} else if (bufptr == buf && (*p == '-' || *p == '+')) {
+	    *bufptr++ = *p;
 	} else {
 	    break;
 	}
@@ -882,6 +887,33 @@ _cairo_strtod (const char *nptr, char **endptr)
     }
 
     return value;
+}
+#endif
+
+#ifndef HAVE_STRNDUP
+char *
+_cairo_strndup (const char *s, size_t n)
+{
+    const char *end;
+    size_t len;
+    char *sdup;
+
+    if (s == NULL)
+	return NULL;
+
+    end = memchr (s, 0, n);
+    if (end)
+	len = end - s;
+    else
+	len = n;
+
+    sdup = (char *) _cairo_malloc (len + 1);
+    if (sdup != NULL) {
+	memcpy (sdup, s, len);
+	sdup[len] = '\0';
+    }
+
+    return sdup;
 }
 #endif
 
@@ -945,15 +977,6 @@ _cairo_fopen (const char *filename, const char *mode, FILE **file_out)
 }
 
 #ifdef _WIN32
-
-#define WIN32_LEAN_AND_MEAN
-/* We require Windows 2000 features such as ETO_PDY */
-#if !defined(WINVER) || (WINVER < 0x0500)
-# define WINVER 0x0500
-#endif
-#if !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0500)
-# define _WIN32_WINNT 0x0500
-#endif
 
 #include <windows.h>
 #include <io.h>

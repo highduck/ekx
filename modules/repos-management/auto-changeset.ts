@@ -3,14 +3,14 @@
 import {spawnSync} from 'child_process';
 import {readFileSync, writeFileSync} from 'fs';
 import * as path from 'path';
-import * as glob from 'glob';
+import {globSync} from 'glob';
 import {logger} from "../cli/logger.js";
 
 const rootPkgText = readFileSync('package.json', 'utf8');
 const rootPkg = JSON.parse(rootPkgText);
 const workspaces = [];
 for (const pattern of rootPkg.workspaces.packages) {
-    for (const p of glob.sync(path.join(pattern, "package.json"))) {
+    for (const p of globSync(path.join(pattern, "package.json"))) {
         workspaces.push(p);
     }
 }

@@ -1,3 +1,4 @@
+/* -*- Mode: c; tab-width: 8; c-basic-offset: 4; indent-tabs-mode: t; -*- */
 /*
  * Copyright © 2006 Keith Packard
  * Copyright © 2007 Adrian Johnson
@@ -58,6 +59,10 @@ typedef struct {
     cairo_region_t supported_region;
     cairo_region_t fallback_region;
     cairo_box_t page_bbox;
+
+    cairo_bool_t create_region_ids;
+    unsigned source_region_id;
+    unsigned mask_region_id;
 
     cairo_bool_t has_ctm;
     cairo_matrix_t ctm;
@@ -257,7 +262,8 @@ _add_operation (cairo_analysis_surface_t *surface,
 static cairo_int_status_t
 _analyze_recording_surface_pattern (cairo_analysis_surface_t *surface,
 				    const cairo_pattern_t    *pattern,
-				    cairo_rectangle_int_t    *extents)
+				    cairo_rectangle_int_t    *extents,
+				    unsigned int             *regions_id)
 {
     const cairo_surface_pattern_t *surface_pattern;
     cairo_analysis_surface_t *tmp;
@@ -280,7 +286,7 @@ _analyze_recording_surface_pattern (cairo_analysis_surface_t *surface,
     }
 
     tmp = (cairo_analysis_surface_t *)
-	_cairo_analysis_surface_create (surface->target);
+	_cairo_analysis_surface_create (surface->target, surface->create_region_ids);
     if (unlikely (tmp->base.status)) {
 	status =tmp->base.status;
 	goto cleanup1;
@@ -295,13 +301,29 @@ _analyze_recording_surface_pattern (cairo_analysis_surface_t *surface,
 
     source = _cairo_surface_get_source (source, NULL);
     surface_is_unbounded = (pattern->extend == CAIRO_EXTEND_REPEAT
-				     || pattern->extend == CAIRO_EXTEND_REFLECT);
-    status = _cairo_recording_surface_replay_and_create_regions (source,
-								 &pattern->matrix,
-								 &tmp->base,
-								 surface_is_unbounded);
-    if (unlikely (status))
-	goto cleanup2;
+			    || pattern->extend == CAIRO_EXTEND_REFLECT);
+
+    if (surface->create_region_ids) {
+	status = _cairo_recording_surface_region_array_attach (source, regions_id);
+	if (unlikely (status))
+	    goto cleanup2;
+
+	status = _cairo_recording_surface_replay_and_create_regions (source,
+								     *regions_id,
+								     &pattern->matrix,
+								     &tmp->base,
+								     surface_is_unbounded);
+	if (unlikely (status))
+	    goto cleanup2;
+    } else {
+	status = _cairo_recording_surface_replay_with_clip (source,
+							    &pattern->matrix,
+							    &tmp->base,
+							    NULL, /* target clip */
+							    surface_is_unbounded);
+	if (unlikely (status))
+	    goto cleanup2;
+    }
 
     /* black background or mime data fills entire extents */
     if (!(source->content & CAIRO_CONTENT_ALPHA) || _cairo_surface_has_mime_image (source)) {
@@ -412,6 +434,8 @@ _cairo_analysis_surface_paint (void			*abstract_surface,
     cairo_int_status_t	     backend_status;
     cairo_rectangle_int_t  extents;
 
+    surface->source_region_id = 0;
+    surface->mask_region_id = 0;
     if (surface->target->backend->paint == NULL) {
 	backend_status = CAIRO_INT_STATUS_UNSUPPORTED;
     } else {
@@ -427,7 +451,10 @@ _cairo_analysis_surface_paint (void			*abstract_surface,
 					       &extents);
     if (backend_status == CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN) {
 	cairo_rectangle_int_t rec_extents;
-	backend_status = _analyze_recording_surface_pattern (surface, source, &rec_extents);
+	backend_status = _analyze_recording_surface_pattern (surface,
+							     source,
+							     &rec_extents,
+							     &surface->source_region_id);
 	_cairo_rectangle_intersect (&extents, &rec_extents);
     }
 
@@ -445,6 +472,8 @@ _cairo_analysis_surface_mask (void			*abstract_surface,
     cairo_int_status_t	      backend_status;
     cairo_rectangle_int_t   extents;
 
+    surface->source_region_id = 0;
+    surface->mask_region_id = 0;
     if (surface->target->backend->mask == NULL) {
 	backend_status = CAIRO_INT_STATUS_UNSUPPORTED;
     } else {
@@ -468,7 +497,10 @@ _cairo_analysis_surface_mask (void			*abstract_surface,
 	    src_surface = _cairo_surface_get_source (src_surface, NULL);
 	    if (_cairo_surface_is_recording (src_surface)) {
 		backend_source_status =
-		    _analyze_recording_surface_pattern (surface, source, &rec_extents);
+		    _analyze_recording_surface_pattern (surface,
+							source,
+							&rec_extents,
+							&surface->source_region_id);
 		if (_cairo_int_status_is_error (backend_source_status))
 		    return backend_source_status;
 
@@ -481,7 +513,10 @@ _cairo_analysis_surface_mask (void			*abstract_surface,
 	    mask_surface = _cairo_surface_get_source (mask_surface, NULL);
 	    if (_cairo_surface_is_recording (mask_surface)) {
 		backend_mask_status =
-		    _analyze_recording_surface_pattern (surface, mask, &rec_extents);
+		    _analyze_recording_surface_pattern (surface,
+							mask,
+							&rec_extents,
+							&surface->mask_region_id);
 		if (_cairo_int_status_is_error (backend_mask_status))
 		    return backend_mask_status;
 
@@ -520,6 +555,8 @@ _cairo_analysis_surface_stroke (void			   *abstract_surface,
     cairo_int_status_t	     backend_status;
     cairo_rectangle_int_t    extents;
 
+    surface->source_region_id = 0;
+    surface->mask_region_id = 0;
     if (surface->target->backend->stroke == NULL) {
 	backend_status = CAIRO_INT_STATUS_UNSUPPORTED;
     } else {
@@ -538,7 +575,10 @@ _cairo_analysis_surface_stroke (void			   *abstract_surface,
 					       &extents);
     if (backend_status == CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN) {
 	cairo_rectangle_int_t rec_extents;
-	backend_status = _analyze_recording_surface_pattern (surface, source, &rec_extents);
+	backend_status = _analyze_recording_surface_pattern (surface,
+							     source,
+							     &rec_extents,
+							     &surface->source_region_id);
 	_cairo_rectangle_intersect (&extents, &rec_extents);
     }
 
@@ -590,7 +630,10 @@ _cairo_analysis_surface_fill (void			*abstract_surface,
 					       &extents);
     if (backend_status == CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN) {
 	cairo_rectangle_int_t rec_extents;
-	backend_status = _analyze_recording_surface_pattern (surface, source, &rec_extents);
+	backend_status = _analyze_recording_surface_pattern (surface,
+							     source,
+							     &rec_extents,
+							     &surface->source_region_id);
 	_cairo_rectangle_intersect (&extents, &rec_extents);
     }
 
@@ -618,6 +661,9 @@ _cairo_analysis_surface_show_glyphs (void		  *abstract_surface,
     cairo_analysis_surface_t *surface = abstract_surface;
     cairo_int_status_t	     status, backend_status;
     cairo_rectangle_int_t    extents, glyph_extents;
+
+    surface->source_region_id = 0;
+    surface->mask_region_id = 0;
 
     /* Adapted from _cairo_surface_show_glyphs */
     if (surface->target->backend->show_glyphs != NULL) {
@@ -654,7 +700,10 @@ _cairo_analysis_surface_show_glyphs (void		  *abstract_surface,
 					       &extents);
     if (backend_status == CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN) {
 	cairo_rectangle_int_t rec_extents;
-	backend_status = _analyze_recording_surface_pattern (surface, source, &rec_extents);
+	backend_status = _analyze_recording_surface_pattern (surface,
+							     source,
+							     &rec_extents,
+							     &surface->source_region_id);
 	_cairo_rectangle_intersect (&extents, &rec_extents);
     }
 
@@ -699,6 +748,9 @@ _cairo_analysis_surface_show_text_glyphs (void			    *abstract_surface,
     cairo_int_status_t	     status, backend_status;
     cairo_rectangle_int_t    extents, glyph_extents;
 
+    surface->source_region_id = 0;
+    surface->mask_region_id = 0;
+
     /* Adapted from _cairo_surface_show_glyphs */
     backend_status = CAIRO_INT_STATUS_UNSUPPORTED;
     if (surface->target->backend->show_text_glyphs != NULL) {
@@ -732,7 +784,10 @@ _cairo_analysis_surface_show_text_glyphs (void			    *abstract_surface,
 					       &extents);
     if (backend_status == CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN) {
 	cairo_rectangle_int_t rec_extents;
-	backend_status = _analyze_recording_surface_pattern (surface, source, &rec_extents);
+	_analyze_recording_surface_pattern (surface,
+					    source,
+					    &rec_extents,
+					    &surface->source_region_id);
 	_cairo_rectangle_intersect (&extents, &rec_extents);
     }
 
@@ -755,28 +810,20 @@ static cairo_int_status_t
 _cairo_analysis_surface_tag (void	                *abstract_surface,
 			     cairo_bool_t                begin,
 			     const char                 *tag_name,
-			     const char                 *attributes,
-			     const cairo_pattern_t	*source,
-			     const cairo_stroke_style_t	*stroke_style,
-			     const cairo_matrix_t	*ctm,
-			     const cairo_matrix_t	*ctm_inverse,
-			     const cairo_clip_t	        *clip)
+			     const char                 *attributes)
 {
     cairo_analysis_surface_t *surface = abstract_surface;
     cairo_int_status_t	     backend_status;
 
+    surface->source_region_id = 0;
+    surface->mask_region_id = 0;
     backend_status = CAIRO_INT_STATUS_SUCCESS;
     if (surface->target->backend->tag != NULL) {
 	backend_status =
 	    surface->target->backend->tag (surface->target,
 					   begin,
 					   tag_name,
-					   attributes,
-					   source,
-					   stroke_style,
-					   ctm,
-					   ctm_inverse,
-					   clip);
+					   attributes);
         if (backend_status == CAIRO_INT_STATUS_SUCCESS)
             surface->has_supported = TRUE;
     }
@@ -822,7 +869,8 @@ static const cairo_surface_backend_t cairo_analysis_surface_backend = {
 };
 
 cairo_surface_t *
-_cairo_analysis_surface_create (cairo_surface_t		*target)
+_cairo_analysis_surface_create (cairo_surface_t		*target,
+				cairo_bool_t             create_region_ids)
 {
     cairo_analysis_surface_t *surface;
     cairo_status_t status;
@@ -850,6 +898,10 @@ _cairo_analysis_surface_create (cairo_surface_t		*target)
     surface->first_op  = TRUE;
     surface->has_supported = FALSE;
     surface->has_unsupported = FALSE;
+
+    surface->create_region_ids = create_region_ids;
+    surface->source_region_id = 0;
+    surface->mask_region_id = 0;
 
     _cairo_region_init (&surface->supported_region);
     _cairo_region_init (&surface->fallback_region);
@@ -928,6 +980,23 @@ _cairo_analysis_surface_get_bounding_box (cairo_surface_t *abstract_surface,
     *bbox = surface->page_bbox;
 }
 
+unsigned int
+_cairo_analysis_surface_get_source_region_id (cairo_surface_t *abstract_surface)
+{
+    cairo_analysis_surface_t	*surface = (cairo_analysis_surface_t *) abstract_surface;
+
+    return surface->source_region_id;
+}
+
+unsigned int
+_cairo_analysis_surface_get_mask_region_id (cairo_surface_t *abstract_surface)
+{
+    cairo_analysis_surface_t	*surface = (cairo_analysis_surface_t *) abstract_surface;
+
+    return surface->mask_region_id;
+}
+
+
 /* null surface type: a surface that does nothing (has no side effects, yay!) */
 
 static cairo_int_status_t
@@ -936,6 +1005,12 @@ _paint_return_success (void			*surface,
 		       const cairo_pattern_t	*source,
 		       const cairo_clip_t	*clip)
 {
+    if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
     return CAIRO_INT_STATUS_SUCCESS;
 }
 
@@ -946,6 +1021,18 @@ _mask_return_success (void			*surface,
 		      const cairo_pattern_t	*mask,
 		      const cairo_clip_t	*clip)
 {
+    if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
+    if (mask->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) mask;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
     return CAIRO_INT_STATUS_SUCCESS;
 }
 
@@ -961,6 +1048,12 @@ _stroke_return_success (void				*surface,
 			cairo_antialias_t		 antialias,
 			const cairo_clip_t		*clip)
 {
+    if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
     return CAIRO_INT_STATUS_SUCCESS;
 }
 
@@ -974,6 +1067,12 @@ _fill_return_success (void			*surface,
 		      cairo_antialias_t		 antialias,
 		      const cairo_clip_t	*clip)
 {
+    if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
     return CAIRO_INT_STATUS_SUCCESS;
 }
 
@@ -986,6 +1085,12 @@ _show_glyphs_return_success (void			*surface,
 			     cairo_scaled_font_t	*scaled_font,
 			     const cairo_clip_t		*clip)
 {
+    if (source->type == CAIRO_PATTERN_TYPE_SURFACE) {
+        cairo_surface_pattern_t *surface_pattern = (cairo_surface_pattern_t *) source;
+        if (surface_pattern->surface->type == CAIRO_SURFACE_TYPE_RECORDING)
+            return CAIRO_INT_STATUS_ANALYZE_RECORDING_SURFACE_PATTERN;
+    }
+
     return CAIRO_INT_STATUS_SUCCESS;
 }
 

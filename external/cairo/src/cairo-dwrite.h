@@ -1,6 +1,6 @@
 /* cairo - a vector graphics library with display and print output
  *
- * Copyright © 2005 Red Hat, Inc
+ * Copyright © 2023 Adrian Johnson
  *
  * This library is free software; you can redistribute it and/or
  * modify it either under the terms of the GNU Lesser General Public
@@ -27,22 +27,46 @@
  *
  * The Original Code is the cairo graphics library.
  *
- * The Initial Developer of the Original Code is Red Hat, Inc.
- *
  * Contributor(s):
- *	Carl Worth <cworth@cworth.org>
+ *	Adrian Johnson <ajohnson@redneon.com>
  */
 
-#ifndef TEST_PAGINATED_SURFACE_H
-#define TEST_PAGINATED_SURFACE_H
+#ifndef _CAIRO_DWRITE_H_
+#define _CAIRO_DWRITE_H_
 
 #include "cairo.h"
 
+#if CAIRO_HAS_DWRITE_FONT
+
+#ifdef __cplusplus
+
+#include <dwrite.h>
+
 CAIRO_BEGIN_DECLS
 
-cairo_surface_t *
-_cairo_test_paginated_surface_create (cairo_surface_t *target);
+cairo_public cairo_font_face_t *
+cairo_dwrite_font_face_create_for_dwrite_fontface (IDWriteFontFace *dwrite_font_face);
+
+cairo_public IDWriteRenderingParams *
+cairo_dwrite_font_face_get_rendering_params (cairo_font_face_t *font_face);
+
+cairo_public void
+cairo_dwrite_font_face_set_rendering_params (cairo_font_face_t *font_face, IDWriteRenderingParams *param);
+
+cairo_public DWRITE_MEASURING_MODE
+cairo_dwrite_font_face_get_measuring_mode (cairo_font_face_t *font_face);
+
+cairo_public void
+cairo_dwrite_font_face_set_measuring_mode (cairo_font_face_t *font_face, DWRITE_MEASURING_MODE mode);
 
 CAIRO_END_DECLS
 
-#endif /* TEST_PAGINATED_SURFACE_H */
+#else  /* __cplusplus */
+#error DWrite font backend requires C++
+#endif /* __cplusplus */
+
+#else  /* CAIRO_HAS_DWRITE_FONT */
+# error Cairo was not compiled with support for DWrite font backend
+#endif /* CAIRO_HAS_DWRITE_FONT */
+
+#endif /* _CAIRO_DWRITE_H_ */

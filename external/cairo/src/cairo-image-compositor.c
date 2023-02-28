@@ -130,7 +130,7 @@ static inline uint32_t
 color_to_uint32 (const cairo_color_t *color)
 {
     return
-        (color->alpha_short >> 8 << 24) |
+        ((uint32_t)color->alpha_short >> 8 << 24) |
         (color->red_short >> 8 << 16)   |
         (color->green_short & 0xff00)   |
         (color->blue_short >> 8);
@@ -891,14 +891,14 @@ composite_glyphs (void				*_dst,
     for (i = 0; i < info->num_glyphs; i++) {
 	unsigned long index = info->glyphs[i].index;
 	const void *glyph;
-        int xphase, yphase;
+        unsigned long xphase, yphase;
 
         xphase = PHASE(info->glyphs[i].x);
         yphase = PHASE(info->glyphs[i].y);
 
 	index = index | (xphase << 24) | (yphase << 26);
 
-	glyph = pixman_glyph_cache_lookup (glyph_cache, info->font, (void *)index);
+	glyph = pixman_glyph_cache_lookup (glyph_cache, info->font, (void *)(uintptr_t)index);
 	if (!glyph) {
 	    cairo_scaled_glyph_t *scaled_glyph;
 	    cairo_image_surface_t *glyph_surface;
@@ -909,6 +909,7 @@ composite_glyphs (void				*_dst,
 	    CAIRO_MUTEX_UNLOCK (_cairo_glyph_cache_mutex);
 	    status = _cairo_scaled_glyph_lookup (info->font, index,
 						 CAIRO_SCALED_GLYPH_INFO_SURFACE,
+						 NULL, /* foreground color */
 						 &scaled_glyph);
 	    CAIRO_MUTEX_LOCK (_cairo_glyph_cache_mutex);
 
@@ -916,7 +917,7 @@ composite_glyphs (void				*_dst,
 		goto out_thaw;
 
 	    glyph_surface = scaled_glyph->surface;
-	    glyph = pixman_glyph_cache_insert (glyph_cache, info->font, (void *)index,
+	    glyph = pixman_glyph_cache_insert (glyph_cache, info->font, (void *)(uintptr_t)index,
 					       glyph_surface->base.device_transform.x0,
 					       glyph_surface->base.device_transform.y0,
 					       glyph_surface->pixman_image);
@@ -997,6 +998,7 @@ composite_one_glyph (void				*_dst,
     status = _cairo_scaled_glyph_lookup (info->font,
 					 info->glyphs[0].index,
 					 CAIRO_SCALED_GLYPH_INFO_SURFACE,
+					 NULL, /* foreground color */
 					 &scaled_glyph);
 
     if (unlikely (status))
@@ -1059,6 +1061,7 @@ composite_glyphs_via_mask (void				*_dst,
     status = _cairo_scaled_glyph_lookup (info->font,
 					 info->glyphs[0].index,
 					 CAIRO_SCALED_GLYPH_INFO_SURFACE,
+					 NULL, /* foreground color */
 					 &scaled_glyph);
     if (unlikely (status)) {
 	pixman_image_unref (white);
@@ -1105,6 +1108,7 @@ composite_glyphs_via_mask (void				*_dst,
 	{
 	    status = _cairo_scaled_glyph_lookup (info->font, glyph_index,
 						 CAIRO_SCALED_GLYPH_INFO_SURFACE,
+						 NULL, /* foreground color */
 						 &scaled_glyph);
 
 	    if (unlikely (status)) {
@@ -1231,6 +1235,7 @@ composite_glyphs (void				*_dst,
 	{
 	    status = _cairo_scaled_glyph_lookup (info->font, glyph_index,
 						 CAIRO_SCALED_GLYPH_INFO_SURFACE,
+						 NULL, /* foreground color */
 						 &scaled_glyph);
 
 	    if (unlikely (status))
@@ -2610,14 +2615,14 @@ _inplace_src_spans (void *abstract_renderer, int y, int h,
 		    unsigned num_spans)
 {
     cairo_image_span_renderer_t *r = abstract_renderer;
-    uint8_t *m;
+    uint8_t *m, *base = (uint8_t*)pixman_image_get_data(r->mask);
     int x0;
 
     if (num_spans == 0)
 	return CAIRO_STATUS_SUCCESS;
 
     x0 = spans[0].x;
-    m = r->_buf;
+    m = base;
     do {
 	int len = spans[1].x - spans[0].x;
 	if (len >= r->u.composite.run_length && spans[0].coverage == 0xff) {
@@ -2655,7 +2660,7 @@ _inplace_src_spans (void *abstract_renderer, int y, int h,
 				      spans[0].x, y,
 				      spans[1].x - spans[0].x, h);
 
-	    m = r->_buf;
+	    m = base;
 	    x0 = spans[1].x;
 	} else if (spans[0].coverage == 0x0) {
 	    if (spans[0].x != x0) {
@@ -2684,7 +2689,7 @@ _inplace_src_spans (void *abstract_renderer, int y, int h,
 #endif
 	    }
 
-	    m = r->_buf;
+	    m = base;
 	    x0 = spans[1].x;
 	} else {
 	    *m++ = spans[0].coverage;

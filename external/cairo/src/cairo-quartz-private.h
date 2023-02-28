@@ -55,7 +55,7 @@ typedef enum {
     DO_DIRECT,
     DO_SHADING,
     DO_IMAGE,
-    DO_TILED_IMAGE
+    DO_LAYER
 } cairo_quartz_action_t;
 
 /* define CTFontRef for pre-10.5 SDKs */
@@ -67,12 +67,14 @@ typedef struct cairo_quartz_surface {
     CGContextRef cgContext;
     CGAffineTransform cgContextBaseCTM;
 
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 10600
     void *imageData;
-    cairo_surface_t *imageSurfaceEquiv;
+#endif
 
     cairo_surface_clipper_t clipper;
     cairo_rectangle_int_t extents;
     cairo_rectangle_int_t virtual_extents;
+    CGLayerRef cgLayer;
 } cairo_quartz_surface_t;
 
 typedef struct cairo_quartz_image_surface {
@@ -103,6 +105,12 @@ CairoQuartzCreateCGImage (cairo_format_t format,
 
 cairo_private CGFontRef
 _cairo_quartz_scaled_font_get_cg_font_ref (cairo_scaled_font_t *sfont);
+cairo_private CTFontRef
+_cairo_quartz_scaled_font_get_ct_font (cairo_scaled_font_t *sfont);
+cairo_private cairo_font_face_t*
+_cairo_quartz_font_face_create_for_ctfont (CTFontRef ctFont);
+cairo_private void
+_cairo_quartz_set_antialiasing (CGContextRef context, cairo_antialias_t antialias);
 
 #else
 

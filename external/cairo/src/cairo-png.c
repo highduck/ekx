@@ -407,6 +407,14 @@ write_png (cairo_surface_t	*surface,
      */
     png_write_info (png, info);
 
+#ifndef WORDS_BIGENDIAN
+    /* libpng treats 16-bit data as big-endian by default. Swapping the
+     * byte-order on little endian ensures the native-endian data can be
+     * provided to png_write_image. This does not affect 8-bit data.
+     */
+    png_set_swap (png);
+#endif
+
     if (png_color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
 	if (clone->format != CAIRO_FORMAT_RGBA128F)
 	    png_set_write_user_transform_fn (png, unpremultiply_data);
@@ -595,7 +603,7 @@ premultiply_data (png_structp   png,
 		green = multiply_alpha (alpha, green);
 		blue  = multiply_alpha (alpha, blue);
 	    }
-	    p = (alpha << 24) | (red << 16) | (green << 8) | (blue << 0);
+	    p = ((uint32_t)alpha << 24) | (red << 16) | (green << 8) | (blue << 0);
 	}
 	memcpy (base, &p, sizeof (uint32_t));
     }
@@ -614,7 +622,7 @@ convert_bytes_to_data (png_structp png, png_row_infop row_info, png_bytep data)
 	uint8_t  blue  = base[2];
 	uint32_t pixel;
 
-	pixel = (0xff << 24) | (red << 16) | (green << 8) | (blue << 0);
+	pixel = (0xffu << 24) | (red << 16) | (green << 8) | (blue << 0);
 	memcpy (base, &pixel, sizeof (uint32_t));
     }
 }
@@ -701,6 +709,14 @@ read_png (struct png_read_closure_t *png_closure)
 #endif
 
     png_read_info (png, info);
+
+#ifndef WORDS_BIGENDIAN
+    /* libpng treats 16-bit data as big-endian by default. Swapping the
+     * byte-order on little endian ensures the native-endian data can be
+     * provided to png_read_image. This does not affect 8-bit data.
+     */
+    png_set_swap (png);
+#endif
 
     png_get_IHDR (png, info,
                   &png_width, &png_height, &depth,
@@ -971,3 +987,4 @@ cairo_image_surface_create_from_png_stream (cairo_read_func_t	read_func,
 
     return read_png (&png_closure);
 }
+slim_hidden_def (cairo_image_surface_create_from_png_stream);

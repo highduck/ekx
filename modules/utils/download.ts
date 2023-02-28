@@ -3,6 +3,7 @@ import * as path from "path";
 import * as crypto from "crypto";
 import {ensureDirSync, run} from "./utils.js";
 import {logger} from "../cli/logger.js";
+
 export interface DownloadInfo {
     url: string | URL;
     size: number;
@@ -54,15 +55,15 @@ export function downloadFiles(props: DownloadOptions) {
     return Promise.all(tasks);
 }
 
-export async function downloadCheck(url: string, destDir: string, sha1: string) {
+export async function downloadCheck(url: string, destDir: string, hash: string, algo: string = "sha1") {
     const name = path.basename(url);
     const archivePath = path.join(destDir, name);
-    if (fs.existsSync(archivePath) && sha1) {
+    if (fs.existsSync(archivePath) && hash) {
         const file = fs.readFileSync(archivePath);
-        const sha1sum = crypto.createHash("sha1").update(file).digest("hex");
-        logger.log(`Found file ${path.basename(archivePath)}, SHA1: ${sha1sum}`);
-        if (sha1sum === sha1) {
-            logger.info("Check SHA1 verified, skip downloading", name);
+        const digest = crypto.createHash(algo).update(file).digest("hex");
+        logger.log(`Found file ${path.basename(archivePath)}, ${algo.toUpperCase()}: ${digest}`);
+        if (digest === hash) {
+            logger.info("Checksum verified, skip downloading", name);
             return;
         }
     }
@@ -85,12 +86,4 @@ export async function untar(archivePath:string, dest:string, options?:{strip?:nu
         logger.error("untar failed", e);
         throw e;
     }
-}
-
-export async function downloadAndUnpackArtifact(url: string, destDir: string, options?:{strip?:number}) {
-    const name = path.basename(url);
-    const archivePath = path.join(destDir, name);
-    await download(url, archivePath);
-    await untar(archivePath, destDir, options);
-    fs.rmSync(archivePath, {recursive: true});
 }

@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import {spawnSync} from "child_process";
-import * as glob from "glob";
+import {globSync} from "glob";
 import {logger} from "../cli/logger.js";
 
 export function readPkg(dir: string) {
@@ -18,7 +18,7 @@ export function getWorkspaces(pkg: any, dir: string) {
     if (pkg && pkg.workspaces && pkg.workspaces.packages && pkg.private) {
         for (const pattern of pkg.workspaces.packages) {
             result.patterns.push(path.join(dir, pattern));
-            const packages = glob.sync(path.join(dir, pattern, "package.json"));
+            const packages = globSync(path.join(dir, pattern, "package.json"));
             for (const workspace of packages) {
                 result.workspaces.push(path.dirname(workspace));
             }

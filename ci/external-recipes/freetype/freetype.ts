@@ -2,8 +2,9 @@ import * as fs from "fs";
 import * as path from "path";
 import {resolveCachePath, resolveEkxPath} from "../../../modules/utils/dirs.js";
 import {copyFolderRecursive, expandGlobSync, getModuleDir, rm} from "../../../modules/utils/utils.js";
-import {downloadCheck, untar} from "../../../modules/utils/download.js";
+import {downloadCheck} from "../../../modules/utils/download.js";
 import {logger} from "../../../modules/cli/logger.js";
+import decompress from "decompress";
 
 const destDir = resolveEkxPath("external/freetype");
 const patchDir = path.join(getModuleDir(import.meta), "recipe");
@@ -28,7 +29,10 @@ async function downloadFreetype() {
     logger.log("download freetype");
     await downloadCheck(url, cacheDir, sha1);
     logger.log("unpack freetype");
-    await untar(path.join(cacheDir, path.basename(url)), tempDir, {strip: 1});
+    await decompress(path.join(cacheDir, path.basename(url)), tempDir, {
+        strip: 1
+    });
+    //await untar(path.join(cacheDir, path.basename(url)), tempDir, {strip: 1});
 }
 
 async function fetch() {
