@@ -122,6 +122,7 @@ export class Project {
     }
 
     async loadModule(configPath: string) {
+        logger.debug(`Loading module "${configPath}"`);
         if(!fs.existsSync(configPath)) {
             logger.error("File not found:", configPath);
         }

@@ -1,6 +1,8 @@
-#!/usr/bin/env -S npx ts-node
+#!/usr/bin/env -S npm exec --prefix ../.. -- ts-node
 
 // entry point for command line tool
+// NOTE: `--prefix ../..` is required to work in `cwd`
+
 import * as path from "path";
 import * as fs from "fs";
 import {addExportBuildStep} from "./exporters.js";
