@@ -1,5 +1,11 @@
 # @ekx/ekx
 
+## 1.0.15
+
+### Patch Changes
+
+- 77d8a808: fix glob usage
+
 ## 1.0.14
 
 ### Patch Changes
