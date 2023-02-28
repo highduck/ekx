@@ -11,10 +11,12 @@ import {bumpProjectVersion} from "./version.js";
 import {UtilityConfig} from "./utils.js";
 import {fixMP3} from "./utility/fix-mp3.js";
 import {logger} from "./logger.js";
-import {init} from "../cmake/npm.js";
+import {init, readPkg} from "../cmake/npm.js";
 import {updateLockFiles} from "../repos-management/update-lock.js";
+import {getModuleDir} from "../utils/utils.js";
 
-logger.info("📺 EKX 📺");
+const selfPkg = readPkg(path.resolve(getModuleDir(import.meta), "../.."));
+logger.info(`EKX @ ${selfPkg.version}`);
 
 if (process.argv.indexOf("help") >= 0) {
     logger.info("--verbose | -v : enable verbose mode");
