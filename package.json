@@ -33,7 +33,7 @@
     "gettext-parser": "^6.0.0",
     "colors": "^1.4.0",
     "esbuild": "^0.17.10",
-    "glob": "^8.1.0",
+    "glob": "^9.0.1",
     "mustache": "^4.2.0",
     "plist": "^3.0.6",
     "ts-node": "^10.9.1",
