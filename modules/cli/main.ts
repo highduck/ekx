@@ -16,7 +16,7 @@ import {updateLockFiles} from "../repos-management/update-lock.js";
 import {getModuleDir} from "../utils/utils.js";
 
 const selfPkg = readPkg(path.resolve(getModuleDir(import.meta), "../.."));
-logger.info(`EKX @ ${selfPkg.version}`);
+logger.info(`EKX @ ${selfPkg?.version}`);
 
 if (process.argv.indexOf("help") >= 0) {
     logger.info("--verbose | -v : enable verbose mode");
