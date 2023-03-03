@@ -1,5 +1,16 @@
 # @ekx/ekx
 
+## 1.0.17
+
+### Patch Changes
+
+- 54bd19ab: admob ios SkAdNetwork update
+- c1e34ff2: support ts extension for assets declaration
+- 66217501: add version to cli output header
+- e80a0d98: merge sprite-packer, obj-export, bmfont-export to ekc C utility
+- c1e34ff2: rewrite bmfont, sprite-packer, obj-export utilities to pure C
+- a73acc5b: freetype 2.13
+
 ## 1.0.16
 
 ### Patch Changes
