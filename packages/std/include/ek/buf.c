@@ -2,7 +2,12 @@
 #include <ek/assert.h>
 #include "log.h"
 
-ek_buf_header_t* ek_buf_header(void* ptr) {
+void* _check_ptr_alignment(void* ptr, uint32_t width) {
+    EK_ASSERT(((uintptr_t) ptr % width) == 0);
+    return ptr;
+}
+
+ek_buf_header_t* ek_buf_header(const void* ptr) {
     EK_ASSERT_R2(ptr != 0);
     return ((ek_buf_header_t*) ptr) - 1;
 }

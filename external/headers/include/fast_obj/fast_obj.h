@@ -129,13 +129,18 @@ typedef struct
     unsigned int*               face_materials;
 
     /* Index data: one element for each face vertex */
+    unsigned int                index_count;
     fastObjIndex*               indices;
 
     /* Materials */
     unsigned int                material_count;
     fastObjMaterial*            materials;
 
-    /* Mesh groups */
+    /* Mesh objects ('o' tag in .obj file) */
+    unsigned int                object_count;
+    fastObjGroup*               objects;
+
+    /* Mesh groups ('g' tag in .obj file) */
     unsigned int                group_count;
     fastObjGroup*               groups;
 
@@ -153,9 +158,9 @@ typedef struct
 extern "C" {
 #endif
 
-    fastObjMesh*                    fast_obj_read(const char* path);
-    fastObjMesh*                    fast_obj_read_with_callbacks(const char* path, const fastObjCallbacks* callbacks, void* user_data);
-    void                            fast_obj_destroy(fastObjMesh* mesh);
+fastObjMesh*                    fast_obj_read(const char* path);
+fastObjMesh*                    fast_obj_read_with_callbacks(const char* path, const fastObjCallbacks* callbacks, void* user_data);
+void                            fast_obj_destroy(fastObjMesh* mesh);
 
 #ifdef __cplusplus
 }
@@ -197,7 +202,8 @@ typedef struct
     /* Final mesh */
     fastObjMesh*                mesh;
 
-    /* Current group */
+    /* Current object/group */
+    fastObjGroup                object;
     fastObjGroup                group;
 
     /* Current material index */
@@ -214,17 +220,17 @@ typedef struct
 
 static const
 double POWER_10_POS[MAX_POWER] =
-        {
-        1.0e0,  1.0e1,  1.0e2,  1.0e3,  1.0e4,  1.0e5,  1.0e6,  1.0e7,  1.0e8,  1.0e9,
-        1.0e10, 1.0e11, 1.0e12, 1.0e13, 1.0e14, 1.0e15, 1.0e16, 1.0e17, 1.0e18, 1.0e19,
-        };
+{
+    1.0e0,  1.0e1,  1.0e2,  1.0e3,  1.0e4,  1.0e5,  1.0e6,  1.0e7,  1.0e8,  1.0e9,
+    1.0e10, 1.0e11, 1.0e12, 1.0e13, 1.0e14, 1.0e15, 1.0e16, 1.0e17, 1.0e18, 1.0e19,
+};
 
 static const
 double POWER_10_NEG[MAX_POWER] =
-        {
-        1.0e0,   1.0e-1,  1.0e-2,  1.0e-3,  1.0e-4,  1.0e-5,  1.0e-6,  1.0e-7,  1.0e-8,  1.0e-9,
-        1.0e-10, 1.0e-11, 1.0e-12, 1.0e-13, 1.0e-14, 1.0e-15, 1.0e-16, 1.0e-17, 1.0e-18, 1.0e-19,
-        };
+{
+    1.0e0,   1.0e-1,  1.0e-2,  1.0e-3,  1.0e-4,  1.0e-5,  1.0e-6,  1.0e-7,  1.0e-8,  1.0e-9,
+    1.0e-10, 1.0e-11, 1.0e-12, 1.0e-13, 1.0e-14, 1.0e-15, 1.0e-16, 1.0e-17, 1.0e-18, 1.0e-19,
+};
 
 
 static void* memory_realloc(void* ptr, size_t bytes)
@@ -289,9 +295,9 @@ void* file_open(const char* path, void* user_data)
 static
 void file_close(void* file, void* user_data)
 {
-    FILE* f;
+	FILE* f;
     (void)(user_data);
-
+    
     f = (FILE*)(file);
     fclose(f);
 }
@@ -300,9 +306,9 @@ void file_close(void* file, void* user_data)
 static
 size_t file_read(void* file, void* dst, size_t bytes, void* user_data)
 {
-    FILE* f;
+	FILE* f;
     (void)(user_data);
-
+    
     f = (FILE*)(file);
     return fread(dst, 1, bytes, f);
 }
@@ -315,7 +321,7 @@ unsigned long file_size(void* file, void* user_data)
     long p;
     long n;
     (void)(user_data);
-
+	
     f = (FILE*)(file);
 
     p = ftell(f);
@@ -335,7 +341,7 @@ char* string_copy(const char* s, const char* e)
 {
     size_t n;
     char*  p;
-
+        
     n = (size_t)(e - s);
     p = (char*)(memory_realloc(0, n + 1));
     if (p)
@@ -361,7 +367,7 @@ char* string_concat(const char* a, const char* s, const char* e)
     size_t an;
     size_t sn;
     char*  p;
-
+        
     an = a ? strlen(a) : 0;
     sn = (size_t)(e - s);
     p = (char*)(memory_realloc(0, an + sn + 1));
@@ -453,6 +459,44 @@ const char* skip_line(const char* ptr)
 
 
 static
+fastObjGroup object_default(void)
+{
+    fastObjGroup object;
+
+    object.name         = 0;
+    object.face_count   = 0;
+    object.face_offset  = 0;
+    object.index_offset = 0;
+
+    return object;
+}
+
+
+static
+void object_clean(fastObjGroup* object)
+{
+    memory_dealloc(object->name);
+}
+
+
+static
+void flush_object(fastObjData* data)
+{
+    /* Add object if not empty */
+    if (data->object.face_count > 0)
+        array_push(data->mesh->objects, data->object);
+    else
+        object_clean(&data->object);
+
+    /* Reset for more data */
+    data->object = object_default();
+    data->object.face_offset  = array_size(data->mesh->face_vertices);
+    data->object.index_offset = array_size(data->mesh->indices);
+}
+
+
+
+static
 fastObjGroup group_default(void)
 {
     fastObjGroup group;
@@ -474,7 +518,7 @@ void group_clean(fastObjGroup* group)
 
 
 static
-void flush_output(fastObjData* data)
+void flush_group(fastObjData* data)
 {
     /* Add group if not empty */
     if (data->group.face_count > 0)
@@ -484,7 +528,7 @@ void flush_output(fastObjData* data)
 
     /* Reset for more data */
     data->group = group_default();
-    data->group.face_offset = array_size(data->mesh->face_vertices);
+    data->group.face_offset  = array_size(data->mesh->face_vertices);
     data->group.index_offset = array_size(data->mesh->indices);
 }
 
@@ -531,19 +575,19 @@ const char* parse_float(const char* ptr, float* val)
 
     switch (*ptr)
     {
-        case '+':
-            sign = 1.0;
-            ptr++;
-            break;
+    case '+':
+        sign = 1.0;
+        ptr++;
+        break;
 
-            case '-':
-                sign = -1.0;
-                ptr++;
-                break;
+    case '-':
+        sign = -1.0;
+        ptr++;
+        break;
 
-                default:
-                    sign = 1.0;
-                    break;
+    default:
+        sign = 1.0;
+        break;
     }
 
 
@@ -571,19 +615,19 @@ const char* parse_float(const char* ptr, float* val)
 
         switch (*ptr)
         {
-            case '+':
-                powers = POWER_10_POS;
-                ptr++;
-                break;
+        case '+':
+            powers = POWER_10_POS;
+            ptr++;
+            break;
 
-                case '-':
-                    powers = POWER_10_NEG;
-                    ptr++;
-                    break;
+        case '-':
+            powers = POWER_10_NEG;
+            ptr++;
+            break;
 
-                    default:
-                        powers = POWER_10_POS;
-                        break;
+        default:
+            powers = POWER_10_POS;
+            break;
         }
 
         eval = 0;
@@ -712,6 +756,29 @@ const char* parse_face(fastObjData* data, const char* ptr)
     array_push(data->mesh->face_materials, data->material);
 
     data->group.face_count++;
+    data->object.face_count++;
+
+    return ptr;
+}
+
+
+static
+const char* parse_object(fastObjData* data, const char* ptr)
+{
+    const char* s;
+    const char* e;
+
+
+    ptr = skip_whitespace(ptr);
+
+    s = ptr;
+    while (!is_end_of_name(*ptr))
+        ptr++;
+
+    e = ptr;
+
+    flush_object(data);
+    data->object.name = string_copy(s, e);
 
     return ptr;
 }
@@ -732,7 +799,7 @@ const char* parse_group(fastObjData* data, const char* ptr)
 
     e = ptr;
 
-    flush_output(data);
+    flush_group(data);
     data->group.name = string_copy(s, e);
 
     return ptr;
@@ -958,146 +1025,146 @@ int read_mtllib(fastObjData* data, void* file, const fastObjCallbacks* callbacks
 
         switch (*p)
         {
-            case 'n':
-                p++;
-                if (p[0] == 'e' &&
+        case 'n':
+            p++;
+            if (p[0] == 'e' &&
                 p[1] == 'w' &&
                 p[2] == 'm' &&
                 p[3] == 't' &&
                 p[4] == 'l' &&
                 is_whitespace(p[5]))
+            {
+                /* Push previous material (if there is one) */
+                if (mtl.name)
                 {
-                    /* Push previous material (if there is one) */
-                    if (mtl.name)
-                    {
-                        array_push(data->mesh->materials, mtl);
-                        mtl = mtl_default();
-                    }
-
-
-                    /* Read name */
-                    p += 5;
-
-                    while (is_whitespace(*p))
-                        p++;
-
-                    s = p;
-                    while (!is_end_of_name(*p))
-                        p++;
-
-                    mtl.name = string_copy(s, p);
+                    array_push(data->mesh->materials, mtl);
+                    mtl = mtl_default();
                 }
-                break;
 
-                case 'K':
-                    if (p[1] == 'a')
-                        p = read_mtl_triple(p + 2, mtl.Ka);
-                    else if (p[1] == 'd')
-                        p = read_mtl_triple(p + 2, mtl.Kd);
-                    else if (p[1] == 's')
-                        p = read_mtl_triple(p + 2, mtl.Ks);
-                    else if (p[1] == 'e')
-                        p = read_mtl_triple(p + 2, mtl.Ke);
-                    else if (p[1] == 't')
-                        p = read_mtl_triple(p + 2, mtl.Kt);
-                    break;
 
-                    case 'N':
-                        if (p[1] == 's')
-                            p = read_mtl_single(p + 2, &mtl.Ns);
-                        else if (p[1] == 'i')
-                            p = read_mtl_single(p + 2, &mtl.Ni);
-                        break;
+                /* Read name */
+                p += 5;
 
-                        case 'T':
-                            if (p[1] == 'r')
-                            {
-                                float Tr;
-                                p = read_mtl_single(p + 2, &Tr);
-                                if (!found_d)
-                                {
-                                    /* Ignore Tr if we've already read d */
-                                    mtl.d = 1.0f - Tr;
-                                }
-                            }
-                            else if (p[1] == 'f')
-                                p = read_mtl_triple(p + 2, mtl.Tf);
-                            break;
+                while (is_whitespace(*p))
+                    p++;
 
-                            case 'd':
-                                if (is_whitespace(p[1]))
-                                {
-                                    p = read_mtl_single(p + 1, &mtl.d);
-                                    found_d = 1;
-                                }
-                                break;
+                s = p;
+                while (!is_end_of_name(*p))
+                    p++;
 
-                                case 'i':
-                                    p++;
-                                    if (p[0] == 'l' &&
-                                    p[1] == 'l' &&
-                                    p[2] == 'u' &&
-                                    p[3] == 'm' &&
-                                    is_whitespace(p[4]))
-                                    {
-                                        p = read_mtl_int(p + 4, &mtl.illum);
-                                    }
-                                    break;
+                mtl.name = string_copy(s, p);
+            }
+            break;
 
-                                    case 'm':
-                                        p++;
-                                        if (p[0] == 'a' &&
-                                        p[1] == 'p' &&
-                                        p[2] == '_')
-                                        {
-                                            p += 3;
-                                            if (*p == 'K')
-                                            {
-                                                p++;
-                                                if (is_whitespace(p[1]))
-                                                {
-                                                    if (*p == 'a')
-                                                        p = read_map(data, p + 1, &mtl.map_Ka);
-                                                    else if (*p == 'd')
-                                                        p = read_map(data, p + 1, &mtl.map_Kd);
-                                                    else if (*p == 's')
-                                                        p = read_map(data, p + 1, &mtl.map_Ks);
-                                                    else if (*p == 'e')
-                                                        p = read_map(data, p + 1, &mtl.map_Ke);
-                                                    else if (*p == 't')
-                                                        p = read_map(data, p + 1, &mtl.map_Kt);
-                                                }
-                                            }
-                                            else if (*p == 'N')
-                                            {
-                                                p++;
-                                                if (is_whitespace(p[1]))
-                                                {
-                                                    if (*p == 's')
-                                                        p = read_map(data, p + 1, &mtl.map_Ns);
-                                                    else if (*p == 'i')
-                                                        p = read_map(data, p + 1, &mtl.map_Ni);
-                                                }
-                                            }
-                                            else if (*p == 'd')
-                                            {
-                                                p++;
-                                                if (is_whitespace(*p))
-                                                    p = read_map(data, p, &mtl.map_d);
-                                            }
-                                            else if ((p[0] == 'b' || p[0] == 'B') &&
-                                            p[1] == 'u' &&
-                                            p[2] == 'm' &&
-                                            p[3] == 'p' &&
-                                            is_whitespace(p[4]))
-                                            {
-                                                p = read_map(data, p + 4, &mtl.map_bump);
-                                            }
-                                        }
-                                        break;
+        case 'K':
+            if (p[1] == 'a')
+                p = read_mtl_triple(p + 2, mtl.Ka);
+            else if (p[1] == 'd')
+                p = read_mtl_triple(p + 2, mtl.Kd);
+            else if (p[1] == 's')
+                p = read_mtl_triple(p + 2, mtl.Ks);
+            else if (p[1] == 'e')
+                p = read_mtl_triple(p + 2, mtl.Ke);
+            else if (p[1] == 't')
+                p = read_mtl_triple(p + 2, mtl.Kt);
+            break;
 
-                                        case '#':
-                                            break;
+        case 'N':
+            if (p[1] == 's')
+                p = read_mtl_single(p + 2, &mtl.Ns);
+            else if (p[1] == 'i')
+                p = read_mtl_single(p + 2, &mtl.Ni);
+            break;
+
+        case 'T':
+            if (p[1] == 'r')
+            {
+                float Tr;
+                p = read_mtl_single(p + 2, &Tr);
+                if (!found_d)
+                {
+                    /* Ignore Tr if we've already read d */
+                    mtl.d = 1.0f - Tr;
+                }
+            }
+            else if (p[1] == 'f')
+                p = read_mtl_triple(p + 2, mtl.Tf);
+            break;
+
+        case 'd':
+            if (is_whitespace(p[1]))
+            {
+                p = read_mtl_single(p + 1, &mtl.d);
+                found_d = 1;
+            }
+            break;
+
+        case 'i':
+            p++;
+            if (p[0] == 'l' &&
+                p[1] == 'l' &&
+                p[2] == 'u' &&
+                p[3] == 'm' &&
+                is_whitespace(p[4]))
+            {
+                p = read_mtl_int(p + 4, &mtl.illum);
+            }
+            break;
+
+        case 'm':
+            p++;
+            if (p[0] == 'a' &&
+                p[1] == 'p' &&
+                p[2] == '_')
+            {
+                p += 3;
+                if (*p == 'K')
+                {
+                    p++;
+                    if (is_whitespace(p[1]))
+                    {
+                        if (*p == 'a')
+                            p = read_map(data, p + 1, &mtl.map_Ka);
+                        else if (*p == 'd')
+                            p = read_map(data, p + 1, &mtl.map_Kd);
+                        else if (*p == 's')
+                            p = read_map(data, p + 1, &mtl.map_Ks);
+                        else if (*p == 'e')
+                            p = read_map(data, p + 1, &mtl.map_Ke);
+                        else if (*p == 't')
+                            p = read_map(data, p + 1, &mtl.map_Kt);
+                    }
+                }
+                else if (*p == 'N')
+                {
+                    p++;
+                    if (is_whitespace(p[1]))
+                    {
+                        if (*p == 's')
+                            p = read_map(data, p + 1, &mtl.map_Ns);
+                        else if (*p == 'i')
+                            p = read_map(data, p + 1, &mtl.map_Ni);
+                    }
+                }
+                else if (*p == 'd')
+                {
+                    p++;
+                    if (is_whitespace(*p))
+                        p = read_map(data, p, &mtl.map_d);
+                }
+                else if ((p[0] == 'b' || p[0] == 'B') &&
+                         p[1] == 'u' &&
+                         p[2] == 'm' &&
+                         p[3] == 'p' &&
+                         is_whitespace(p[4]))
+                {
+                    p = read_map(data, p + 4, &mtl.map_bump);
+                }
+            }
+            break;
+
+        case '#':
+            break;
         }
 
         p = skip_line(p);
@@ -1153,8 +1220,8 @@ static
 void parse_buffer(fastObjData* data, const char* ptr, const char* end, const fastObjCallbacks* callbacks, void* user_data)
 {
     const char* p;
-
-
+    
+    
     p = ptr;
     while (p != end)
     {
@@ -1162,83 +1229,98 @@ void parse_buffer(fastObjData* data, const char* ptr, const char* end, const fas
 
         switch (*p)
         {
-            case 'v':
-                p++;
+        case 'v':
+            p++;
 
-                switch (*p++)
-                {
-                    case ' ':
-                        case '\t':
-                            p = parse_vertex(data, p);
-                            break;
-
-                            case 't':
-                                p = parse_texcoord(data, p);
-                                break;
-
-                                case 'n':
-                                    p = parse_normal(data, p);
-                                    break;
-
-                                    default:
-                                        p--; /* roll p++ back in case *p was a newline */
-                }
+            switch (*p++)
+            {
+            case ' ':
+            case '\t':
+                p = parse_vertex(data, p);
                 break;
 
-                case 'f':
-                    p++;
+            case 't':
+                p = parse_texcoord(data, p);
+                break;
 
-                    switch (*p++)
-                    {
-                        case ' ':
-                            case '\t':
-                                p = parse_face(data, p);
-                                break;
+            case 'n':
+                p = parse_normal(data, p);
+                break;
 
-                                default:
-                                    p--; /* roll p++ back in case *p was a newline */
-                    }
-                    break;
+            default:
+                p--; /* roll p++ back in case *p was a newline */
+            }
+            break;
 
-                    case 'g':
-                        p++;
+        case 'f':
+            p++;
 
-                        switch (*p++)
-                        {
-                            case ' ':
-                                case '\t':
-                                    p = parse_group(data, p);
-                                    break;
+            switch (*p++)
+            {
+            case ' ':
+            case '\t':
+                p = parse_face(data, p);
+                break;
 
-                                    default:
-                                        p--; /* roll p++ back in case *p was a newline */
-                        }
-                        break;
+            default:
+                p--; /* roll p++ back in case *p was a newline */
+            }
+            break;
 
-                        case 'm':
-                            p++;
-                            if (p[0] == 't' &&
-                            p[1] == 'l' &&
-                            p[2] == 'l' &&
-                            p[3] == 'i' &&
-                            p[4] == 'b' &&
-                            is_whitespace(p[5]))
-                                p = parse_mtllib(data, p + 5, callbacks, user_data);
-                            break;
+        case 'o':
+            p++;
 
-                            case 'u':
-                                p++;
-                                if (p[0] == 's' &&
-                                p[1] == 'e' &&
-                                p[2] == 'm' &&
-                                p[3] == 't' &&
-                                p[4] == 'l' &&
-                                is_whitespace(p[5]))
-                                    p = parse_usemtl(data, p + 5);
-                                break;
+            switch (*p++)
+            {
+            case ' ':
+            case '\t':
+                p = parse_object(data, p);
+                break;
 
-                                case '#':
-                                    break;
+            default:
+                p--; /* roll p++ back in case *p was a newline */
+            }
+            break;
+
+        case 'g':
+            p++;
+
+            switch (*p++)
+            {
+            case ' ':
+            case '\t':
+                p = parse_group(data, p);
+                break;
+
+            default:
+                p--; /* roll p++ back in case *p was a newline */
+            }
+            break;
+
+        case 'm':
+            p++;
+            if (p[0] == 't' &&
+                p[1] == 'l' &&
+                p[2] == 'l' &&
+                p[3] == 'i' &&
+                p[4] == 'b' &&
+                is_whitespace(p[5]))
+                p = parse_mtllib(data, p + 5, callbacks, user_data);
+            break;
+
+        case 'u':
+            p++;
+            if (p[0] == 's' &&
+                p[1] == 'e' &&
+                p[2] == 'm' &&
+                p[3] == 't' &&
+                p[4] == 'l' &&
+                is_whitespace(p[5]))
+                p = parse_usemtl(data, p + 5);
+            break;
+
+        case '#':
+            break;
         }
 
         p = skip_line(p);
@@ -1253,6 +1335,9 @@ void fast_obj_destroy(fastObjMesh* m)
     unsigned int ii;
 
 
+    for (ii = 0; ii < array_size(m->objects); ii++)
+        object_clean(&m->objects[ii]);
+
     for (ii = 0; ii < array_size(m->groups); ii++)
         group_clean(&m->groups[ii]);
 
@@ -1265,6 +1350,7 @@ void fast_obj_destroy(fastObjMesh* m)
     array_clean(m->face_vertices);
     array_clean(m->face_materials);
     array_clean(m->indices);
+    array_clean(m->objects);
     array_clean(m->groups);
     array_clean(m->materials);
 
@@ -1319,6 +1405,7 @@ fastObjMesh* fast_obj_read_with_callbacks(const char* path, const fastObjCallbac
     m->face_materials = 0;
     m->indices        = 0;
     m->materials      = 0;
+    m->objects        = 0;
     m->groups         = 0;
 
 
@@ -1337,6 +1424,7 @@ fastObjMesh* fast_obj_read_with_callbacks(const char* path, const fastObjCallbac
 
     /* Data needed during parsing */
     data.mesh     = m;
+    data.object   = object_default();
     data.group    = group_default();
     data.material = 0;
     data.line     = 1;
@@ -1410,15 +1498,20 @@ fastObjMesh* fast_obj_read_with_callbacks(const char* path, const fastObjCallbac
     }
 
 
-    /* Flush final group */
-    flush_output(&data);
+    /* Flush final object/group */
+    flush_object(&data);
+    object_clean(&data.object);
+
+    flush_group(&data);
     group_clean(&data.group);
 
     m->position_count = array_size(m->positions) / 3;
     m->texcoord_count = array_size(m->texcoords) / 2;
     m->normal_count   = array_size(m->normals) / 3;
     m->face_count     = array_size(m->face_vertices);
+    m->index_count    = array_size(m->indices);
     m->material_count = array_size(m->materials);
+    m->object_count   = array_size(m->objects);
     m->group_count    = array_size(m->groups);
 
 

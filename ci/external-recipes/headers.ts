@@ -13,7 +13,8 @@ function fetch() {
     return Promise.all([
         download_stb(),
         download_dr(),
-        download_pocketmod()
+        download_pocketmod(),
+        download_fast_obj(),
     ]).then(_ => undefined);
 }
 
@@ -70,6 +71,18 @@ async function download_pocketmod() {
         destPath: path.join(destPath, "include/pocketmod"),
         fileList: [
             "pocketmod.h"
+        ]
+    });
+}
+
+async function download_fast_obj() {
+    const branch = "master";
+    const repoUrl = `https://github.com/thisistherk/fast_obj/raw/${branch}`;
+    await downloadFiles({
+        srcBaseUrl: repoUrl,
+        destPath: path.join(destPath, "include/fast_obj"),
+        fileList: [
+            "fast_obj.h"
         ]
     });
 }

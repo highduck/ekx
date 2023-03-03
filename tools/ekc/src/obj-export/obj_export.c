@@ -1,6 +1,6 @@
 #define FAST_OBJ_IMPLEMENTATION
+#include <fast_obj/fast_obj.h>
 
-#include "fast_obj.h"
 #include <ek/log.h>
 #include <ek/math.h>
 
@@ -20,7 +20,7 @@ int convertObjModel(const char* input, const char* output) {
 
     unsigned int verticesCount = 0;
     unsigned int indicesCount = 0;
-    for (int i = 0; i < mesh->face_count; ++i) {
+    for (uint32_t i = 0; i < mesh->face_count; ++i) {
         unsigned int faceVerticesCount = mesh->face_vertices[i];
         verticesCount += faceVerticesCount;
         indicesCount += faceVerticesCount;
@@ -32,10 +32,10 @@ int convertObjModel(const char* input, const char* output) {
         vertex3d_t* pVertex = vertices;
         uint16_t* pIndex = indices;
 
-        int vi = 0;
-        for (int i = 0; i < mesh->face_count; ++i) {
+        uint32_t vi = 0;
+        for (uint32_t i = 0; i < mesh->face_count; ++i) {
             const uint32_t faceVerticesCount = mesh->face_vertices[i];
-            for (int j = 0; j < faceVerticesCount; ++j) {
+            for (uint32_t j = 0; j < faceVerticesCount; ++j) {
                 const fastObjIndex face = mesh->indices[vi];
                 const float* p = mesh->positions + face.p * 3;
                 const float* n = mesh->normals + face.n * 3;

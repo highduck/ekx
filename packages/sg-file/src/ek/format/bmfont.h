@@ -3,6 +3,11 @@
 
 #include <ek/math.h>
 #include <ek/hash.h>
+#include <ek/buf.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
     rect_t box;
@@ -35,8 +40,12 @@ typedef struct {
 inline static void bmfont_file_map(const void* data, bmfont_file* out) {
     bmfont_header* hdr = (bmfont_header*) data;
     out->header = hdr;
-    out->codepoints = (uint32_t*) ((uint8_t*) data + hdr->codepoints_data_offset);
-    out->glyphs = (bmfont_glyph*) ((uint8_t*) data + hdr->glyphs_data_offset);
+    out->codepoints = cast_ptr_aligned(uint32_t, (uint8_t*) data + hdr->codepoints_data_offset);
+    out->glyphs = cast_ptr_aligned(bmfont_glyph, (uint8_t*) data + hdr->glyphs_data_offset);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // EK_FORMAT_BMFONT_H

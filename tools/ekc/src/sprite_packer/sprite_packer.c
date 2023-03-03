@@ -1,10 +1,6 @@
 #include "export_atlas.c.h"
+#include <ek/buf.h>
 #include <ek/log.h>
-
-uint32_t* cast_align_4(void* p) {
-    EK_ASSERT(((uintptr_t) p % 4u) == 0);
-    return (uint32_t*) p;
-}
 
 bitmap_t load_bitmap32(const char* filepath) {
     bitmap_t result = {0};
@@ -21,10 +17,8 @@ bitmap_t load_bitmap32(const char* filepath) {
     fclose(stream);
     if (success && size < 0x10000000u) {
         int channels = 0;
-        result.pixels = (color_t*) cast_align_4(
-                stbi_load_from_memory(buf, (int) size, &result.w, &result.h, &channels,
-                                      STBI_rgb_alpha)
-        );
+        result.pixels = cast_ptr_aligned(color_t, stbi_load_from_memory(buf, (int) size, &result.w, &result.h, &channels,
+                                      STBI_rgb_alpha));
     }
     free(buf);
     return result;

@@ -66,6 +66,9 @@ export async function downloadCheck(url: string, destDir: string, hash?: string,
             logger.info("Checksum verified, skip downloading", name);
             return;
         }
+        else {
+            logger.info(`Download ${name} checksum mismatch. Expected: ${hash} , got: ${digest}`);
+        }
     }
     await download(url, archivePath);
 }

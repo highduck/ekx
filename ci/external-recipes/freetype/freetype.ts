@@ -25,9 +25,9 @@ async function removeFilesGlob(glob: string) {
 async function downloadFreetype() {
     const artifact = "freetype-2.13.0.tar.gz";
     const url = `https://download.savannah.gnu.org/releases/freetype/${artifact}`;
-    // const sha1 = "e9272ae073e35bb65aa39d55e49a309313f007a7";
+    const sha1 = "7dc6db508780d87d40e47d6feb763c7805910dfe";
     logger.log("download freetype");
-    await downloadCheck(url, cacheDir);
+    await downloadCheck(url, cacheDir, sha1);
     logger.log("unpack freetype");
     await decompress(path.join(cacheDir, path.basename(url)), tempDir, {
         strip: 1
@@ -39,6 +39,7 @@ async function fetch() {
     await copyFolderRecursive(path.join(tempDir, "include"), path.join(destDir, "include"));
     await copyFolderRecursive(path.join(tempDir, "src"), path.join(destDir, "src"));
     await fs.promises.copyFile(path.join(patchDir, "ftoption.h"), path.join(destDir, "include/freetype/config/ftoption.h"));
+    await fs.promises.copyFile(path.join(patchDir, "ftmodule.h"), path.join(destDir, "include/freetype/config/ftmodule.h"));
     await fs.promises.copyFile(path.join(patchDir, "ft2build.h"), path.join(destDir, "include/ft2build.h"));
     await removeFilesGlob("src/tools");
     await removeFilesGlob("src/**/*.mk");

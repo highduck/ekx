@@ -14,7 +14,7 @@ typedef struct ek_buf_header_t {
     uint32_t length;
 } ek_buf_header_t;
 
-ek_buf_header_t* ek_buf_header(void* ptr);
+ek_buf_header_t* ek_buf_header(const void* ptr);
 
 uint32_t ek_buf_capacity(const void* ptr);
 
@@ -40,13 +40,21 @@ void* ek_buf_pop_(void* ptr, uint32_t elementSize);
 void arr_init_from(void** arr, uint32_t element_size, const void* src, uint32_t len);
 
 void arr_resize(void** p_arr, uint32_t element_size, uint32_t new_len);
+
 void arr_grow(void** p_arr, uint32_t capacity, uint32_t element_size);
+
 void arr_maybe_grow(void** p_arr, uint32_t element_size);
+
 void* arr_push_mem(void** p_arr, uint32_t element_size, const void* src);
+
 void arr_assign(void** p_arr, uint32_t element_size, void* src_arr);
+
 void arr_remove(void* arr, uint32_t element_size, uint32_t at);
+
 void arr_swap_remove(void* arr, uint32_t element_size, uint32_t at);
+
 void* arr_search(void* arr, uint32_t element_size, const void* el);
+
 void arr_pop(void* arr);
 
 /**
@@ -56,7 +64,12 @@ void arr_pop(void* arr);
  * @return pointer to slot we can assign new element
  */
 void* arr_add_(void** p_arr, uint32_t element_size);
+
 #define arr_push(p_arr, T, el) (*((T*)arr_add_((void**)(p_arr), sizeof(T))) = (el))
+
+void* _check_ptr_alignment(void* ptr, uint32_t width);
+
+#define cast_ptr_aligned(T, ptr) ((T*)_check_ptr_alignment(ptr, sizeof(T)))
 
 #ifdef __cplusplus
 }
