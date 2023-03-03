@@ -6,11 +6,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-//
-//typedef struct {
-////    Resolution resolutions[8];
-//    uint32_t resolutionsNum = 0;
-//} image_set_t;
 
 typedef struct {
     uint32_t a;
@@ -23,7 +18,6 @@ typedef enum {
     BITMAP_FILTER_GLOW = 2,
     BITMAP_FILTER_SHADOW = 3
 } bitmap_filter_type;
-
 
 typedef struct {
     bitmap_filter_type type;

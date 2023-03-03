@@ -4,7 +4,7 @@
  *
  *   The FreeType glyph rasterizer (body).
  *
- * Copyright (C) 1996-2021 by
+ * Copyright (C) 1996-2023 by
  * David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  * This file is part of the FreeType project, and may only be used,
@@ -2095,8 +2095,8 @@
    *   Removes an old profile from a linked list.
    */
   static void
-  DelOld( PProfileList  list,
-          PProfile      profile )
+  DelOld( PProfileList    list,
+          const PProfile  profile )
   {
     PProfile  *old, current;
 
@@ -2206,8 +2206,7 @@
                                 PProfile    left,
                                 PProfile    right )
   {
-    Long   e1, e2;
-    Byte*  target;
+    Long  e1, e2;
 
     Int  dropOutControl = left->flags & 7;
 
@@ -2220,8 +2219,8 @@
     /* represent multiples of 1/(1<<12) = 1/4096                    */
     FT_TRACE7(( "  y=%d x=[% .12f;% .12f]",
                 y,
-                x1 / (double)ras.precision,
-                x2 / (double)ras.precision ));
+                (double)x1 / (double)ras.precision,
+                (double)x2 / (double)ras.precision ));
 
     /* Drop-out control */
 
@@ -2240,6 +2239,8 @@
 
     if ( e2 >= 0 && e1 < ras.bWidth )
     {
+      Byte*  target;
+
       Int   c1, c2;
       Byte  f1, f2;
 
@@ -2268,7 +2269,7 @@
         /* This is due to the fact that, in the vast majority of cases,  */
         /* the span length in bytes is relatively small.                 */
         while ( --c2 > 0 )
-          *(++target) = 0xFF;
+          *( ++target ) = 0xFF;
 
         target[1] |= f2;
       }
@@ -2293,8 +2294,8 @@
 
     FT_TRACE7(( "  y=%d x=[% .12f;% .12f]",
                 y,
-                x1 / (double)ras.precision,
-                x2 / (double)ras.precision ));
+                (double)x1 / (double)ras.precision,
+                (double)x2 / (double)ras.precision ));
 
     /* Drop-out control */
 
@@ -2476,8 +2477,8 @@
 
     FT_TRACE7(( "  x=%d y=[% .12f;% .12f]",
                 y,
-                x1 / (double)ras.precision,
-                x2 / (double)ras.precision ));
+                (double)x1 / (double)ras.precision,
+                (double)x2 / (double)ras.precision ));
 
     /* We should not need this procedure but the vertical sweep   */
     /* mishandles horizontal lines through pixel centers.  So we  */
@@ -2547,8 +2548,8 @@
 
     FT_TRACE7(( "  x=%d y=[% .12f;% .12f]",
                 y,
-                x1 / (double)ras.precision,
-                x2 / (double)ras.precision ));
+                (double)x1 / (double)ras.precision,
+                (double)x2 / (double)ras.precision ));
 
     /* During the horizontal sweep, we only take care of drop-outs */
 
@@ -2949,11 +2950,11 @@
   FT_Outline_Get_CBox( const FT_Outline*  outline,
                        FT_BBox           *acbox )
   {
-    Long  xMin, yMin, xMax, yMax;
-
-
     if ( outline && acbox )
     {
+      Long  xMin, yMin, xMax, yMax;
+
+
       if ( outline->n_points == 0 )
       {
         xMin = 0;
@@ -3132,13 +3133,6 @@
   }
 
 
-  static void
-  ft_black_init( black_PRaster  raster )
-  {
-    FT_UNUSED( raster );
-  }
-
-
   /**** RASTER OBJECT CREATION: In standalone mode, we simply use *****/
   /****                         a static object.                  *****/
 
@@ -3156,7 +3150,6 @@
 
      *araster = (FT_Raster)&the_raster;
      FT_ZERO( &the_raster );
-     ft_black_init( &the_raster );
 
      return 0;
   }
@@ -3181,14 +3174,10 @@
     black_PRaster  raster = NULL;
 
 
-    *araster = 0;
     if ( !FT_NEW( raster ) )
-    {
       raster->memory = memory;
-      ft_black_init( raster );
 
-      *araster = raster;
-    }
+    *araster = raster;
 
     return error;
   }

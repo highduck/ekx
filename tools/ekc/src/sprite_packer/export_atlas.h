@@ -1,7 +1,12 @@
-#pragma once
+#ifndef SPRITE_PACKER_ATLAS_H
+#define SPRITE_PACKER_ATLAS_H
 
 #include "sprpk_image.h"
 #include <ek/hash.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
     float scale;
@@ -67,6 +72,13 @@ typedef struct atlas_res_t {
 //    }
 //}
 
-void packAndSaveMultiThreaded(atlas_res_t* resolutions, uint32_t resolutions_num, const char* atlas_name, const char* output_path);
+void packAndSaveMultiThreaded(atlas_res_t* resolutions, uint32_t resolutions_num, const char* atlas_name,
+                              const char* output_path);
 
 int exportAtlas(const char* filepath);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // SPRITE_PACKER_ATLAS_H

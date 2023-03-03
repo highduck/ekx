@@ -28,17 +28,17 @@ add_library(${PROJECT_NAME} STATIC
         src/base/ftsynth.c
 
         src/autofit/autofit.c
-        src/bdf/bdf.c
-        src/bzip2/ftbzip2.c
-        src/cache/ftcache.c
+#        src/bdf/bdf.c
+#        src/bzip2/ftbzip2.c
+#        src/cache/ftcache.c
         src/cff/cff.c
         src/cid/type1cid.c
-        src/gzip/ftgzip.c
-        src/lzw/ftlzw.c
+#        src/gzip/ftgzip.c
+#        src/lzw/ftlzw.c
         src/pcf/pcf.c
         src/pfr/pfr.c
         src/psaux/psaux.c
-        src/pshinter/pshinter.c
+#        src/pshinter/pshinter.c
         src/psnames/psnames.c
         src/raster/raster.c
         src/sfnt/sfnt.c
@@ -46,9 +46,9 @@ add_library(${PROJECT_NAME} STATIC
         src/truetype/truetype.c
         src/type1/type1.c
         src/type42/type42.c
-        src/winfonts/winfnt.c
+#        src/winfonts/winfnt.c
 
-        src/sdf/sdf.c
+#        src/sdf/sdf.c
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC include)

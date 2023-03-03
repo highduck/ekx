@@ -55,7 +55,7 @@ export function downloadFiles(props: DownloadOptions) {
     return Promise.all(tasks);
 }
 
-export async function downloadCheck(url: string, destDir: string, hash: string, algo: string = "sha1") {
+export async function downloadCheck(url: string, destDir: string, hash?: string, algo: string = "sha1") {
     const name = path.basename(url);
     const archivePath = path.join(destDir, name);
     if (fs.existsSync(archivePath) && hash) {

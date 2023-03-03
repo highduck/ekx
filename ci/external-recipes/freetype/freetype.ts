@@ -23,16 +23,15 @@ async function removeFilesGlob(glob: string) {
 }
 
 async function downloadFreetype() {
-    const artifact = "freetype-2.11.0.tar.gz";
+    const artifact = "freetype-2.13.0.tar.gz";
     const url = `https://download.savannah.gnu.org/releases/freetype/${artifact}`;
-    const sha1 = "e9272ae073e35bb65aa39d55e49a309313f007a7";
+    // const sha1 = "e9272ae073e35bb65aa39d55e49a309313f007a7";
     logger.log("download freetype");
-    await downloadCheck(url, cacheDir, sha1);
+    await downloadCheck(url, cacheDir);
     logger.log("unpack freetype");
     await decompress(path.join(cacheDir, path.basename(url)), tempDir, {
         strip: 1
     });
-    //await untar(path.join(cacheDir, path.basename(url)), tempDir, {strip: 1});
 }
 
 async function fetch() {

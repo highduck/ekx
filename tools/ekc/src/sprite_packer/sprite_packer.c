@@ -1,4 +1,4 @@
-#include "AtlasPack.h"
+#include "export_atlas.c.h"
 #include <ek/log.h>
 
 uint32_t* cast_align_4(void* p) {

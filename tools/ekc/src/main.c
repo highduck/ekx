@@ -1,5 +1,5 @@
 #include "ek/log.h"
-#include "sprite_packer/Atlas.h"
+#include "sprite_packer/export_atlas.h"
 #include "bmfont_export/bmfont_export.h"
 #include "obj-export/obj_export.h"
 

@@ -2,7 +2,7 @@
 
 #include <ek/io.h>
 
-#include "Atlas.h"
+#include "export_atlas.h"
 #include "binpack.h"
 #include "sprpk_image.h"
 #include <ek/log.h>
