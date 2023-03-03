@@ -5,11 +5,11 @@
 #include <ek/ds/Array.hpp>
 #include <ek/bitmap.h>
 
-namespace ek {
+//namespace {
 
 struct SpriteData {
 
-    String name;
+    ek::String name;
 
     // physical rect
     rect_t rc = {};
@@ -29,19 +29,20 @@ struct SpriteData {
 struct Resolution {
     int index = 0;
     float scale = 1.0f;
-    Array<SpriteData> sprites;
+    ek::Array<SpriteData> sprites;
 };
 
 struct ImageSet {
-    String name;
-    Array<Resolution> resolutions;
+    ek::String name;
+    ek::Array<Resolution> resolutions;
 };
 
 // TODO: move to ek/bitmap.h
 void ek_bitmap_save_png(const bitmap_t* bitmap, const char* path, bool alpha);
+
 // TODO: move to ek/bitmap.h
 void ek_bitmap_save_jpg(const bitmap_t* bitmap, const char* path, bool alpha);
 
-void save(ImageSet& bitmaps, const char* output);
+void save(ImageSet* bitmaps, const char* output);
 
-}
+//}

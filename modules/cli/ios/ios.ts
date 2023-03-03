@@ -13,7 +13,7 @@ import {Project} from "../project.js";
 import {collectCppFlags, collectObjects, collectStrings} from "../collectSources.js";
 import {logger} from "../logger.js";
 import {buildAppIconAsync} from "../appicon/appicon.js";
-import {readTextFileSync, withPathAsync, writeTextFileSync} from "../../utils/utils.js";
+import {readTextFileSync, callInDir, writeTextFileSync} from "../../utils/utils.js";
 
 const iosPlatforms = ["apple", "ios"];
 
@@ -99,7 +99,7 @@ export async function export_ios(ctx: Project): Promise<void> {
     copyFolderRecursiveSync(path.join(ctx.sdk.templates, "template-ios"), dest_path);
 
     const base_path = "../..";
-    await withPathAsync(dest_path, async ()=>{
+    await callInDir(dest_path, async ()=>{
         const embeddedAssetsDir = "assets";
         copyFolderRecursiveSync(path.join(base_path, ctx.getAssetsOutput()), embeddedAssetsDir);
         copyFolderRecursiveSync(path.join(base_path, "export/ios/AppIcon.appiconset"),

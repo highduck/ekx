@@ -3,7 +3,7 @@ import {build as buildCMake} from "../../cmake/mod.js";
 import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../../cmake/generate.js";
 import {isDir} from "../utils.js";
 import {Project} from "../project.js";
-import {withPath, writeTextFileSync} from "../../utils/utils.js";
+import {callInDirSync, writeTextFileSync} from "../../utils/utils.js";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -167,7 +167,7 @@ export async function buildWasm(ctx: Project, buildType: string) {
         fs.mkdirSync(output_path, {recursive: true});
     }
 
-    const cmakeFile = withPath(output_path, () => renderCMakeFile(ctx, buildType));
+    const cmakeFile = callInDirSync(output_path, () => renderCMakeFile(ctx, buildType));
     writeTextFileSync(path.join(output_path, "CMakeLists.txt"), cmakeFile);
 
     return await buildCMake({

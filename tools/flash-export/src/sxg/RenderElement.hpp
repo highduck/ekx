@@ -1,8 +1,6 @@
 #pragma once
 
-namespace ek {
 struct SpriteData;
-}
 
 namespace ek::xfl {
 

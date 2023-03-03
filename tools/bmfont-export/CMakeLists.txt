@@ -3,7 +3,8 @@ project(bmfont-export)
 
 add_executable(${PROJECT_NAME}
         # Common general builders:
-        src/bmfont_export.cpp
+        src/bmfont_export_main.c
+        src/bmfont_export/bmfont_export.c
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
@@ -19,24 +20,14 @@ if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
             )
 endif ()
 
-target_compile_definitions(${PROJECT_NAME}
-        PUBLIC PUGIXML_NO_XPATH
-        PUBLIC PUGIXML_NO_STL
-        PUBLIC PUGIXML_NO_EXCEPTIONS)
-
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC pugixml
         PUBLIC freetype
-        PUBLIC ekx::headers
         PUBLIC ekx::std
         PUBLIC ekx::sg-file
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO
         )
 
 

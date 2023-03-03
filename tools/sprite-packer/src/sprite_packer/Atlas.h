@@ -1,33 +1,13 @@
 #pragma once
 
-#include "common.h"
 #include "sprpk_image.h"
+#include <ek/hash.h>
 
-namespace sprite_packer {
-
-struct ResolutionConfig {
-    float scale = 1.0f;
-    int maxWidth = 2048;
-    int maxHeight = 2048;
-};
-
-struct AtlasConfig {
-
-
-    std::string name;
-    std::vector<ResolutionConfig> resolutions;
-
-    void readFromXML(const pugi::xml_node& node) {
-        name = node.attribute("name").as_string();
-        for (auto& resolution_node: node.children("resolution")) {
-            ResolutionConfig res{};
-            res.scale = resolution_node.attribute("scale").as_float(res.scale);
-            res.maxWidth = resolution_node.attribute("max_width").as_int(res.maxWidth);
-            res.maxHeight = resolution_node.attribute("max_height").as_int(res.maxHeight);
-            resolutions.push_back(res);
-        }
-    }
-};
+typedef struct {
+    float scale;
+    uint16_t max_width;
+    uint16_t max_height;
+} resolution_config_t;
 
 typedef enum sprite_flag_t {
     SPRITE_FLAG_ROTATED = 1u,
@@ -35,9 +15,9 @@ typedef enum sprite_flag_t {
     SPRITE_FLAG_TRIM = 4u
 } sprite_flag_t;
 
-struct SpriteData {
+typedef struct sprite_data_t {
 
-    std::string name;
+    string_hash_t name;
 
     // physical rect
     rect_t rc;
@@ -46,84 +26,44 @@ struct SpriteData {
     rect_t uv;
 
     // flags in atlas image
-    uint8_t flags = 0u;
+    uint8_t flags;
 
     // rect in source image
     irect_t source;
 
-    uint8_t padding = 1;
+    uint8_t padding;
 
     // reference image;
-    bitmap_t bitmap = {0, 0, nullptr};
-};
+    bitmap_t bitmap;
+} sprite_data_t;
 
-struct PageData {
+typedef struct atlas_page_t {
     uint16_t w;
     uint16_t h;
-    std::vector<SpriteData> sprites;
-    std::string image_path;
+    sprite_data_t* sprites;
+    uint32_t sprites_num;
     bitmap_t bitmap;
+} atlas_page_t;
 
-//    template<typename S>
-//    void serialize(IO <S>& io) {
-//        io(size, image_path, sprites);
-//    }
-};
+typedef struct atlas_res_t {
+    // input
+    resolution_config_t resolution;
+    sprite_data_t* sprites;
+    uint32_t sprites_num;
 
-struct AtlasData {
-    float resolution_scale = 1.0f;
-    int resolution_index = 0;
-    int maxWidth = 2048;
-    int maxHeight = 2048;
-    std::vector<SpriteData> sprites;
-    std::vector<PageData> pages;
+    // output
+    atlas_page_t pages[32];
+    uint32_t pages_num;
+} atlas_res_t;
 
-    AtlasData() = default;
-
-    AtlasData(const ResolutionConfig& resolution, int index) : resolution_scale{resolution.scale},
-                                                               resolution_index{index},
-                                                               maxWidth{resolution.maxWidth},
-                                                               maxHeight{resolution.maxHeight} {
-
-    }
-
-//    template<typename S>
-//    void serialize(IO <S>& io) {
-//        io(pages);
-//    }
-};
-
-struct Atlas {
-    std::string name;
-    std::vector<AtlasData> resolutions;
-
-    Atlas() {
-        resolutions.resize(4);
-        for (size_t i = 0; i < resolutions.size(); ++i) {
-            resolutions[i].resolution_index = i;
-            resolutions[i].resolution_scale = float(i);
+void free_atlas_resolutions(atlas_res_t* resolutions, uint32_t n) {
+    for (uint32_t i = 0; i < n; ++i) {
+        for (uint32_t j = 0; j < resolutions[i].pages_num; ++j) {
+            bitmap_free(&resolutions[i].pages[j].bitmap);
+            free(resolutions[i].pages[j].sprites);
         }
+        resolutions[i].pages_num = 0;
     }
-
-    explicit Atlas(const AtlasConfig& config) {
-        int i = 0;
-        resolutions.reserve(config.resolutions.size());
-        for (const auto& resolution: config.resolutions) {
-            resolutions.emplace_back(resolution, i);
-            ++i;
-        }
-        name = config.name;
-    }
-
-    ~Atlas() {
-        for (auto& res: resolutions) {
-            for (auto& page: res.pages) {
-                bitmap_free(&page.bitmap);
-            }
-        }
-    }
-
-    void packAndSaveMultiThreaded(const char* outputPath);
-};
-
 }
+
+void packAndSaveMultiThreaded(atlas_res_t* resolutions, uint32_t resolutions_num, const char* atlas_name, const char* output_path);

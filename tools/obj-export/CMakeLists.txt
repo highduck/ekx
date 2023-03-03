@@ -2,14 +2,11 @@ cmake_minimum_required(VERSION 3.19)
 project(obj-export)
 
 add_executable(${PROJECT_NAME}
-        src/obj_export.cpp
+        src/obj_export.c
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO
         )
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -17,7 +14,7 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
 endif ()
 
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC ekx::sg-file
+        PUBLIC ekx::std
         )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

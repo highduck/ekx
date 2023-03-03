@@ -1,5 +1,4 @@
 #include "ImageSet.hpp"
-#include <pugixml.hpp>
 #include <ek/assert.h>
 
 #include <miniz.h>
@@ -9,8 +8,7 @@
 
 #define STBIW_ASSERT(e)   EK_ASSERT(e)
 
-namespace {
-inline unsigned char* iwcompress(unsigned char* data, int data_len, int* out_len, int quality) {
+unsigned char* iwcompress(unsigned char* data, int data_len, int* out_len, int quality) {
     // uber compression
     quality = 10;
     mz_ulong buflen = mz_compressBound(data_len);
@@ -22,9 +20,8 @@ inline unsigned char* iwcompress(unsigned char* data, int data_len, int* out_len
     *out_len = (int) buflen;
     return buf;
 }
-}
 
-#define STBIW_ZLIB_COMPRESS(a, b, c, d)  ::iwcompress(a,b,c,d)
+#define STBIW_ZLIB_COMPRESS(a, b, c, d)  iwcompress(a,b,c,d)
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-compare"
@@ -36,8 +33,6 @@ inline unsigned char* iwcompress(unsigned char* data, int data_len, int* out_len
 #pragma clang diagnostic pop
 
 #endif
-
-namespace ek {
 
 /*** Save Image ***/
 
@@ -126,55 +121,37 @@ void ek_bitmap_save_jpg(const bitmap_t* bitmap, const char* path, bool alpha) {
     }
 }
 
-//
-//void undoPremultiplyAlpha(image_t& bitmap) {
-//    auto* it = (abgr32_t*) bitmap.data();
-//    const auto* end = it + bitmap.width() * bitmap.height();
-//
-//    while (it < end) {
-//        const uint8_t a = it->a;
-//        if (a && (a ^ 0xFF)) {
-//            const uint8_t half = a / 2;
-//            it->r = std::min(255, (it->r * 0xFF + half) / a);
-//            it->g = std::min(255, (it->g * 0xFF + half) / a);
-//            it->b = std::min(255, (it->b * 0xFF + half) / a);
-//        }
-//        ++it;
-//    }
-//}
-
-void save(ImageSet& images, const char* output) {
-    pugi::xml_document doc{};
-    auto nodeAtlas = doc.append_child("images");
-    int idx = 0;
+void save(ImageSet* images, const char* output) {
     char path[1024];
+    snprintf(path, sizeof path, "%s/images.txt", output);
+    FILE* f = fopen(path, "wb");
+    int idx = 0;
 
-    for (auto& resolution: images.resolutions) {
-        auto nodeResolution = nodeAtlas.append_child("resolution");
+    for (Resolution& resolution: images->resolutions) {
+        uint32_t numImages = 0;
         for (auto& image: resolution.sprites) {
             if (image.bitmap.pixels) {
-                auto* bitmap = &image.bitmap;
-                // require RGBA non-premultiplied alpha
-                bitmap_unpremultiply(bitmap);
-
-                auto nodeSprite = nodeResolution.append_child("image");
-//                snprintf(path, 1024, "%s/%d.png", output, idx++);
-//                stbi_write_png(path, (int) bitmap.width(), (int) bitmap.height(), 4, bitmap.data(), (int)bitmap.width() * 4);
-                snprintf(path, 1024, "%s/%d.bmp", output, idx++);
-                stbi_write_bmp(path, (int) bitmap->w, (int) bitmap->h, 4, bitmap->pixels);
-
-                nodeSprite.append_attribute("path").set_value(path);
-                nodeSprite.append_attribute("name").set_value(image.name.c_str());
-                nodeSprite.append_attribute("x").set_value(image.rc.x);
-                nodeSprite.append_attribute("y").set_value(image.rc.y);
-                nodeSprite.append_attribute("w").set_value(image.rc.w);
-                nodeSprite.append_attribute("h").set_value(image.rc.h);
-                nodeSprite.append_attribute("p").set_value(image.padding);
+                ++numImages;
+            }
+        }
+        fprintf(f, "%u\n", numImages);
+        for (auto& image: resolution.sprites) {
+            if (image.bitmap.pixels) {
+                snprintf(path, sizeof path, "%s/%d.bmp", output, idx++);
+                const char* imagePath = path;
+                fprintf(f, "%s\n%s\n%f %f %f %f %u %u\n",
+                        image.name.c_str(),
+                        imagePath,
+                        image.rc.x, image.rc.y, image.rc.w, image.rc.h,
+                        image.padding, 0);
+                {
+                    bitmap_t bitmap = image.bitmap;
+                    // require RGBA non-premultiplied alpha
+                    bitmap_unpremultiply(&bitmap);
+                    stbi_write_bmp(imagePath, bitmap.w, bitmap.h, 4, bitmap.pixels);
+                }
             }
         }
     }
-    snprintf(path, 1024, "%s/_images.xml", output);
-    doc.save_file(path);
-}
-
+    fclose(f);
 }

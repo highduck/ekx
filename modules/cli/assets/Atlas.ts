@@ -29,23 +29,29 @@ export class MultiResAtlasAsset extends Asset {
 
     async postBuild() {
         ensureDirSync(path.join(this.owner.cache, this.desc.name));
-        const configPath = path.join(this.owner.cache, this.desc.name, "_config.xml");
+        const argsPath = path.join(this.owner.cache, this.desc.name, "args.txt");
 
         const resolutionNodes = [];
         for (const r of this.desc.resolutions!) {
-            resolutionNodes.push(`<resolution scale="${r.scale}" maxWidth="${r.maxWidth ?? 2048}" maxHeight="${r.maxHeight ?? 2048}"/>`);
+            resolutionNodes.push(`${r.scale} ${r.maxWidth ?? 2048} ${r.maxHeight ?? 2048}`);
         }
-        const inputNodes = [];
-        for (const i of this.inputs) {
-            inputNodes.push(`<images path="${i}"/>`);
-        }
-        // path="${path.resolve(this.owner.basePath, this.resourcePath)}"
-        const xml = `<atlas name="${this.desc.name}" output="${this.owner.output}">
-    ${resolutionNodes.join("\n")}
-    ${inputNodes.join("\n")}
-</atlas>`;
-        writeTextFileSync(configPath, xml);
-        await spritePackerAsync(configPath);
+// output_path
+// atlas_name
+// %u(num_resolutions)
+// %f %u %u
+// ..
+// %u(num_inputs)
+// input_path
+// ...
+        const args = `${this.owner.output}
+${this.desc.name}
+${resolutionNodes.length}
+${resolutionNodes.join("\n")}
+${this.inputs.length}
+${this.inputs.join("\n")}
+`;
+        writeTextFileSync(argsPath, args);
+        await spritePackerAsync(argsPath);
 
         if (this.owner.project.current_target === "ios") {
             this.desc.webp = undefined;

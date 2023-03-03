@@ -87,7 +87,7 @@ export class AssetBuilderContext {
         let total = 0;
         if (isDir(this.basePath)) {
             const bp = fs.realpathSync(this.basePath);
-            const scripts = expandGlobSync(path.join(bp, "**/assets.js"));
+            const scripts = expandGlobSync(path.join(bp, "**/assets.{js,ts}"));
             for (const script of scripts) {
                 const ctx = await import(script.path);
                 if (ctx.on_populate) {

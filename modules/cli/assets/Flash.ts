@@ -51,7 +51,7 @@ export class FlashAsset extends Asset {
             writeTextFileSync(configPath, xml.toString());
             ensureDirSync(imagesOutput);
             await flashExportAsync(configPath);
-            atlasAsset.inputs.push(path.join(imagesOutput, "_images.xml"));
+            atlasAsset.inputs.push(path.join(imagesOutput, "images.txt"));
 
             // header for .sg file
             this.writer.writeU32(H("scene"));

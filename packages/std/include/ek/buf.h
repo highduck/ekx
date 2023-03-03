@@ -16,13 +16,13 @@ typedef struct ek_buf_header_t {
 
 ek_buf_header_t* ek_buf_header(void* ptr);
 
-uint32_t ek_buf_capacity(void* ptr);
+uint32_t ek_buf_capacity(const void* ptr);
 
-uint32_t ek_buf_length(void* ptr);
+uint32_t ek_buf_length(const void* ptr);
 
-bool ek_buf_full(void* ptr);
+bool ek_buf_full(const void* ptr);
 
-bool ek_buf_empty(void* ptr);
+bool ek_buf_empty(const void* ptr);
 
 void ek_buf_reset(void** ptr);
 

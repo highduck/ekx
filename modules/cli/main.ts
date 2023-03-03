@@ -13,7 +13,8 @@ import {fixMP3} from "./utility/fix-mp3.js";
 import {logger} from "./logger.js";
 import {init, readPkg} from "../cmake/npm.js";
 import {updateLockFiles} from "../repos-management/update-lock.js";
-import {getModuleDir} from "../utils/utils.js";
+import {getModuleDir, rm} from "../utils/utils.js";
+import {resolveEkxPath} from "../utils/dirs.js";
 
 const selfPkg = readPkg(path.resolve(getModuleDir(import.meta), "../.."));
 logger.info(`EKX @ ${selfPkg?.version}`);
@@ -53,6 +54,20 @@ if (process.argv.indexOf("cmake") >= 0) {
         process.exit(1);
     }
 }
+
+if (process.argv.indexOf("reset-sdk") >= 0) {
+    UtilityConfig.verbose = true;
+    logger._diag = true;
+    try {
+        await rm(resolveEkxPath("cache"))
+        process.exit(0);
+    }
+    catch(e) {
+        logger.error("Error", e);
+        process.exit(1);
+    }
+}
+
 
 if(process.argv.indexOf("update-lock") >= 0) {
     await updateLockFiles();

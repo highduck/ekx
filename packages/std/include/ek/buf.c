@@ -7,17 +7,17 @@ ek_buf_header_t* ek_buf_header(void* ptr) {
     return ((ek_buf_header_t*) ptr) - 1;
 }
 
-uint32_t ek_buf_capacity(void* ptr) {
+uint32_t ek_buf_capacity(const void* ptr) {
     // TODO: add test for empty array
     return ptr ? ek_buf_header(ptr)->capacity : 0;
 }
 
-uint32_t ek_buf_length(void* ptr) {
+uint32_t ek_buf_length(const void* ptr) {
     // TODO: add test for empty array
     return ptr ? ek_buf_header(ptr)->length : 0;
 }
 
-bool ek_buf_full(void* ptr) {
+bool ek_buf_full(const void* ptr) {
     // TODO: add test for empty array
     if (ptr) {
         const ek_buf_header_t* hdr = ek_buf_header(ptr);
@@ -26,7 +26,7 @@ bool ek_buf_full(void* ptr) {
     return true;
 }
 
-bool ek_buf_empty(void* ptr) {
+bool ek_buf_empty(const void* ptr) {
     return !ptr || !ek_buf_length(ptr);
 }
 

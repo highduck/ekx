@@ -91,11 +91,7 @@ async function fetch() {
     await copyFolderRecursive(path.join(tempDir, "pixman/pixman"), path.join(destDir, "src"));
 
     logger.log("cleanup src");
-    await removeFilesGlob("src/**/*.in");
-    await removeFilesGlob("src/**/*.mapfile");
-    await removeFilesGlob("src/**/*.sh");
-    await removeFilesGlob("src/**/*.awk");
-    await removeFilesGlob("src/**/*.build");
+    await removeFilesGlob("src/**/*.{in,mapfile,sh,awk,build}");
     await removeFilesGlob("src/**/Makefile*");
     await removeFilesGlob("src/**/README");
     await removeFilesGlob("src/test-*");

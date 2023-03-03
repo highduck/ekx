@@ -14,7 +14,7 @@ import {CMakeGenerateProject, CMakeGenerateTarget, cmakeLists} from "../../cmake
 import {logger} from "../logger.js";
 import {AndroidProjGen, openAndroidStudioProject} from "../../android-proj/index.js";
 import {buildAppIconAsync} from "../appicon/appicon.js";
-import {ensureDirSync, readTextFileSync, run, withPath, writeTextFileSync} from "../../utils/utils.js";
+import {ensureDirSync, readTextFileSync, run, callInDirSync, writeTextFileSync} from "../../utils/utils.js";
 
 const platforms = ["android"];
 
@@ -101,7 +101,7 @@ function setupStringsXML(ctx: Project, proj: AndroidProjGen) {
 function globSourceFiles(ctx: Project, cmakeDir: string) {
     const cppSources: string[] = [];
     const cppExtensions: string[] = ["hpp", "hxx", "h", "cpp", "cxx", "c"];
-    withPath(cmakeDir, () => {
+    callInDirSync(cmakeDir, () => {
         const cppRoots = collectSourceRootsAll(ctx, "cpp", platforms, ".");
         for (const cppRoot of cppRoots) {
             collectSourceFiles(cppRoot, cppExtensions, cppSources);
@@ -320,7 +320,7 @@ export async function export_android(ctx: Project): Promise<void> {
 
     logger.info("Do project post-setup..");
     // evaluate post-scripts in with current working dir
-    withPath(projectPath, () => {
+    callInDirSync(projectPath, () => {
         for (const fn of ctx.onProjectGenerated) {
             fn();
         }

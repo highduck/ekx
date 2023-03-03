@@ -24,20 +24,24 @@ export const ensureDirSync = (dirname: string) => {
     }
 }
 
-export function withPath<T>(dir: string, cb: () => T): T {
+export function callInDirSync<T>(dir: string, cb: () => T): T {
     const p = process.cwd();
     process.chdir(dir);
-    const result = cb();
-    process.chdir(p);
-    return result;
+    try {
+        return cb();
+    } finally {
+        process.chdir(p);
+    }
 }
 
-export async function withPathAsync<T>(dir: string, cb: () => Promise<T>): Promise<T> {
+export async function callInDir<T>(dir: string, cb: () => Promise<T>): Promise<T> {
     const p = process.cwd();
     process.chdir(dir);
-    const result = await cb();
-    process.chdir(p);
-    return result;
+    try {
+        return await cb();
+    } finally {
+        process.chdir(p);
+    }
 }
 
 export async function copyFolderRecursive(source: string, target: string) {

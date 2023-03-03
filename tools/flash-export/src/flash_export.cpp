@@ -49,7 +49,7 @@ void exportFlash(const char* xmlPath) {
     fwrite(out.data(), out.size(), 1, f);
     fclose(f);
 
-    save(imageSet, outputImages);
+    save(&imageSet, outputImages);
 }
 
 
@@ -92,6 +92,7 @@ int main(int argc, char** argv) {
     if (argc < 2) {
         return 1;
     }
+    log_init();
 
     if (strcmp("render", argv[1]) == 0) {
         ek::runFlashFilePrerender(argc - 2, argv + 2);

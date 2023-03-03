@@ -3,8 +3,8 @@ project(sprite-packer)
 
 add_executable(${PROJECT_NAME}
         src/sprite_packer/sprpk_image.c
-        src/sprite_packer.cpp
         src/sprite_packer/binpack.c
+        src/sprite_packer.c
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
@@ -20,23 +20,13 @@ if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
             )
 endif ()
 
-target_compile_definitions(${PROJECT_NAME}
-        PUBLIC PUGIXML_NO_XPATH
-        PUBLIC PUGIXML_NO_STL
-        PUBLIC PUGIXML_NO_EXCEPTIONS
-        )
-
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC pugixml
         PUBLIC miniz
         PUBLIC ekx::std
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         C_STANDARD 11
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS YES
         )
 
 

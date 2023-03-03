@@ -4,7 +4,7 @@ import {Project} from "./project.js";
 import {ModuleDef, UserArray, VariableName} from "./module.js";
 
 export function collectSourceFiles(searchPath: string, extensions: string[], outList: string[] = []) {
-    const pattern = `**/*.+(${extensions.join("|")})`;
+    const pattern = `**/*.@(${extensions.join("|")})`;
     searchFiles(pattern, searchPath, outList);
     return outList;
 }
