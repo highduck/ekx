@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import {logger} from "../logger.js";
-import {executeAsync} from "../utils.js";
+import {execute} from "../utils.js";
 import {Project} from "../project.js";
 import {readTextFileSync} from "../../utils/utils.js";
 
@@ -31,7 +31,7 @@ export async function deployFirebaseHosting(project: Project) {
         logger.warn("No Firebase Token. Trying deploy with local firebase auth");
     }
 
-    await executeAsync("firebase", [
+    await execute("firebase", [
         "deploy",
         "--only", "hosting",
         ...args

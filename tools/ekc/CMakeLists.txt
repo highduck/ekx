@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 3.19)
-project(sprite-packer)
+project(ekc)
 
 add_executable(${PROJECT_NAME}
+        src/main.c
         src/sprite_packer/sprpk_image.c
         src/sprite_packer/binpack.c
-        src/sprite_packer.c
+        src/sprite_packer/sprite_packer.c
+        src/bmfont_export/bmfont_export.c
+        src/obj-export/obj_export.c
         )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
@@ -22,7 +25,9 @@ endif ()
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC miniz
+        PUBLIC freetype
         PUBLIC ekx::std
+        PUBLIC ekx::sg-file
         )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -56,6 +61,6 @@ endif ()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/../../cache/bin"
-        RUNTIME_OUTPUT_NAME "sprite-packer"
-        RUNTIME_OUTPUT_NAME_DEBUG "sprite-packer-debug"
+        RUNTIME_OUTPUT_NAME "ekc"
+        RUNTIME_OUTPUT_NAME_DEBUG "ekc-debug"
         )

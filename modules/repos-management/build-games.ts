@@ -1,6 +1,6 @@
 #!/usr/bin/env -S npx ts-node
 
-import {executeAsync, UtilityConfig} from "../cli/utils.js";
+import {execute, UtilityConfig} from "../cli/utils.js";
 import {logger} from "../cli/logger.js";
 
 UtilityConfig.verbose = true;
@@ -9,7 +9,7 @@ UtilityConfig.verbose = true;
 // ekx android clean --bump patch --deploy internal -v
 const release = async (workingDir: string) => {
     logger.info("Build WEB and bump patch version");
-    await executeAsync("ekx", ["web", "clean", "--bump", "patch", "--deploy", "internal", "-v"], {workingDir});
+    await execute("ekx", ["web", "clean", "--bump", "patch", "--deploy", "internal", "-v"], {workingDir});
     // just build
     // await executeAsync("ekx", ["web", "clean", "-v"], {workingDir});
     // logger.info("Build ANDROID");

@@ -77,22 +77,3 @@ int convertObjModel(const char* input, const char* output) {
     fast_obj_destroy(mesh);
     return 1;
 }
-
-int main(int argc, char** argv) {
-    log_init();
-    if (argc < 2) {
-        return 1;
-    }
-    const char* command = argv[1];
-    log_info("run command %s", command);
-    if (!strcmp("obj", command)) {
-        if (argc < 4) {
-            return 1;
-        }
-        const char* input = argv[2];
-        const char* output = argv[3];
-        convertObjModel(input, output);
-    }
-
-    return 0;
-}

@@ -1,7 +1,7 @@
 import * as path from "path";
 import {Asset, AssetDesc} from "./Asset.js";
 import {removePathExtension} from "../utils.js";
-import {objExportAsync} from "./helpers/objExport.js";
+import {objExport} from "./helpers/objExport.js";
 import {H} from "../utility/hash.js";
 import {hashFile} from "./helpers/hash.js";
 import {ensureDirSync} from "../../utils/utils.js";
@@ -29,7 +29,7 @@ export class ModelAsset extends Asset {
 
         ensureDirSync(path.dirname(outputPath));
 
-        await objExportAsync(inputPath, outputPath);
+        await objExport(inputPath, outputPath);
 
         this.writer.writeU32(H(ModelAsset.typeName));
         this.writer.writeString(this.desc.name!);

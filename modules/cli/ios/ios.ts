@@ -1,7 +1,7 @@
 import {
     copyFolderRecursiveSync,
     deleteFolderRecursive,
-    execute,
+    execute2,
     isDir,
     replaceInFile
 } from "../utils.js";
@@ -148,7 +148,7 @@ export async function export_ios(ctx: Project): Promise<void> {
 
         /// PRE MOD PROJECT
         //xcode_patch(ctx, platform_proj_name);
-        await execute("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id!]);
+        await execute2("python3", ["xcode-project-ios.py", platform_proj_name, ctx.ios.application_id!]);
 
         logger.info("Prepare PodFile");
         const pods = collectStrings(ctx, "xcode_pod", iosPlatforms, false)
@@ -166,9 +166,9 @@ export async function export_ios(ctx: Project): Promise<void> {
         });
 
         logger.info("Install Pods");
-        if (0 !== await execute("pod", ["install", "--repo-update"])) {
+        if (0 !== await execute2("pod", ["install", "--repo-update"])) {
             // maybe no internet connection, so we can't update pods repo
-            await execute("pod", ["install"]);
+            await execute2("pod", ["install"]);
         }
 
         // POST MOD PROJECT
@@ -176,13 +176,13 @@ export async function export_ios(ctx: Project): Promise<void> {
             "# XCODE_POST_PROJECT": xcode_projectPythonPostScript.join("\n")
         });
 
-        await execute("python3", ["xcode-project-ios-post.py",
+        await execute2("python3", ["xcode-project-ios-post.py",
             platform_proj_name, ctx.ios.application_id!]);
     });
 
     if (ctx.options.openProject) {
         const workspace_path = path.join(dest_path, "app-ios.xcworkspace");
-        await execute("open", [workspace_path]);
+        await execute2("open", [workspace_path]);
         // execute("xcodebuild", [
         //     "-workspace", workspace_path,
         //     "-scheme", platform_proj_name,
@@ -191,7 +191,7 @@ export async function export_ios(ctx: Project): Promise<void> {
     }
 
     if (ctx.options.deploy != null) {
-        await execute("fastlane", [ctx.options.deploy], dest_path, {
+        await execute2("fastlane", [ctx.options.deploy], dest_path, {
             FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: credentials.application_specific_password!
         });
     }

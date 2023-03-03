@@ -56,14 +56,17 @@ typedef struct atlas_res_t {
     uint32_t pages_num;
 } atlas_res_t;
 
-void free_atlas_resolutions(atlas_res_t* resolutions, uint32_t n) {
-    for (uint32_t i = 0; i < n; ++i) {
-        for (uint32_t j = 0; j < resolutions[i].pages_num; ++j) {
-            bitmap_free(&resolutions[i].pages[j].bitmap);
-            free(resolutions[i].pages[j].sprites);
-        }
-        resolutions[i].pages_num = 0;
-    }
-}
+// TODO:
+//void free_atlas_resolutions(atlas_res_t* resolutions, uint32_t n) {
+//    for (uint32_t i = 0; i < n; ++i) {
+//        for (uint32_t j = 0; j < resolutions[i].pages_num; ++j) {
+//            bitmap_free(&resolutions[i].pages[j].bitmap);
+//            free(resolutions[i].pages[j].sprites);
+//        }
+//        resolutions[i].pages_num = 0;
+//    }
+//}
 
 void packAndSaveMultiThreaded(atlas_res_t* resolutions, uint32_t resolutions_num, const char* atlas_name, const char* output_path);
+
+int exportAtlas(const char* filepath);

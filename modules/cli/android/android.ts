@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as fs from "fs";
-import {deleteFolderRecursive, execute, isDir, isFile, replaceAll, replaceInFile,} from "../utils.js";
+import {deleteFolderRecursive, execute2, isDir, isFile, replaceAll, replaceInFile,} from "../utils.js";
 import {buildAssetPackAsync} from "../assets.js";
 import {
     collectCppFlags,
@@ -342,6 +342,6 @@ export async function export_android(ctx: Project): Promise<void> {
     }
 
     if (ctx.options.deploy != null) {
-        await execute("fastlane", [ctx.options.deploy], projectPath);
+        await execute2("fastlane", [ctx.options.deploy], projectPath);
     }
 }

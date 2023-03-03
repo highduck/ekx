@@ -16,7 +16,7 @@ export type ExecuteOptions = {
     verbose?: boolean
 };
 
-export async function executeAsync(bin: string, args: string[], options?: ExecuteOptions): Promise<number> {
+export async function execute(bin: string, args: string[], options?: ExecuteOptions): Promise<number> {
     const cmd = [bin].concat(args);
     const env: Record<string, string | undefined> = process.env;
     const cwd = options?.workingDir ?? process.cwd();
@@ -32,7 +32,7 @@ export async function executeAsync(bin: string, args: string[], options?: Execut
     throw new Error('Run failed! status code: ' + status.code);
 }
 
-export async function execute(cmd: string, args: string[], workingDir?: string, additionalEnvParams?: { [key: string]: string }): Promise<number> {
+export async function execute2(cmd: string, args: string[], workingDir?: string, additionalEnvParams?: { [key: string]: string }): Promise<number> {
     const time = Date.now();
     logger.debug(">>", [cmd].concat(args).join(" "));
     const wd = workingDir ?? process.cwd();

@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import {Project} from "../project.js";
-import {executeAsync} from "../utils.js";
+import {execute} from "../utils.js";
 
 async function updateGS(ctx: Project, configDir: string, name: string, platform: string) {
     if (!configDir) {
@@ -11,7 +11,7 @@ async function updateGS(ctx: Project, configDir: string, name: string, platform:
     const fileNew = path.join(baseDir, "new_" + name);
     const file = path.join(baseDir, name);
 
-    await executeAsync("firebase", ["apps:sdkconfig", "-o", fileNew, platform]);
+    await execute("firebase", ["apps:sdkconfig", "-o", fileNew, platform]);
     if (fs.existsSync(fileNew)) {
         fs.rmSync(file);
         fs.renameSync(fileNew, file)

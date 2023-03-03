@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import {Project} from "../project.js";
-import {executeAsync} from "../utils.js";
+import {execute} from "../utils.js";
 import {buildAssetPackAsync} from "../assets.js";
 import {build as buildCMake} from "../../cmake/mod.js";
 import {ensureDirSync} from "../../utils/utils.js";
@@ -85,7 +85,7 @@ function doScreenshots(ctx: Project): Promise<any> {
                 "--display", display.size.concat(display.insets).concat([display.relative ? 1 : 0]).join(","),
                 "--window", windowSettings.join(",")
             ];
-            const job = executeAsync(path.resolve(bin), args, {
+            const job = execute(path.resolve(bin), args, {
                 workingDir: path.join(process.cwd(), exportDir),
                 verbose: true
             });

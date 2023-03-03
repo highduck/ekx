@@ -86,7 +86,6 @@ void* packAtlasThread(void* data) {
     pack_thread_args* args = (pack_thread_args*) data;
     atlas_res_t* resolution = args->atlas_res;
     const char* name = args->atlas_name;
-    const char* output_path = args->output_path;
     resolution->pages_num = pack_sprites(resolution->sprites, resolution->sprites_num,
                                          resolution->resolution.max_width, resolution->resolution.max_height,
                                          resolution->pages, 32);
@@ -98,6 +97,8 @@ void* packAtlasThread(void* data) {
     } else {
         log_warn("  - %s - no pages!", name);
     };
+
+    return NULL;
 }
 
 

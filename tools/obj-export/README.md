@@ -1,1 +1,0 @@
-# OBJ file export

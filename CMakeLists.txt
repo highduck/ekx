@@ -50,10 +50,8 @@ if (EKX_INCLUDE_PLUGINS)
 endif ()
 
 if ((NOT EMSCRIPTEN) AND (NOT (${CMAKE_SYSTEM_NAME} MATCHES "iOS")) AND (NOT (${CMAKE_SYSTEM_NAME} MATCHES "Android")))
-    add_subdirectory(tools/bmfont-export)
+    add_subdirectory(tools/ekc)
     add_subdirectory(tools/flash-export)
-    add_subdirectory(tools/obj-export)
-    add_subdirectory(tools/sprite-packer)
 endif ()
 
 if (EKX_INCLUDE_EXAMPLES)

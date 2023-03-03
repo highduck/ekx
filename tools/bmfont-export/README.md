@@ -1,3 +1,0 @@
-# bmfont export
-
- 

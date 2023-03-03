@@ -1,4 +1,4 @@
-#include "sprite_packer/AtlasPack.h"
+#include "AtlasPack.h"
 #include <ek/log.h>
 
 uint32_t* cast_align_4(void* p) {
@@ -109,7 +109,7 @@ int exportAtlas(const char* filepath) {
                     if (sprite.bitmap.pixels) {
                         int w = sprite.bitmap.w;
                         int h = sprite.bitmap.h;
-                        sprite.source = (irect_t) {0, 0, w, h};
+                        sprite.source = (irect_t) {{0, 0, w, h}};
                         res->sprites[res->sprites_num++] = sprite;
                     } else {
                         EK_ASSERT(!"failed to load bitmap");
@@ -128,19 +128,3 @@ int exportAtlas(const char* filepath) {
     return 0;
 }
 
-int main(int argc, char** argv) {
-    log_init();
-    if (argc < 2) {
-        return 1;
-    }
-    const char* command = argv[1];
-    log_info("run command %s", command);
-    if(!strcmp("sprite-packer", command)) {
-        if (argc < 3) {
-            return 1;
-        }
-        const char* configPath = argv[2];
-        return exportAtlas(configPath);
-    }
-    return 0;
-}

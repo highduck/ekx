@@ -1,7 +1,7 @@
 import * as path from "path";
 import {XmlDocument} from "xmldoc";
 import {Asset, AssetDesc} from "./Asset.js";
-import {bmfontAsync} from "./helpers/bmfont.js";
+import {bmfont} from "./helpers/bmfont.js";
 import {MultiResAtlasAsset} from "./Atlas.js";
 import {H} from "../utility/hash.js";
 import {hashFile} from "./helpers/hash.js";
@@ -70,7 +70,7 @@ ${resolutions.map(r=> ""+r.scale).join("\n")}
 
         // prepare required folder for images collection
         ensureDirSync(imagesOutput);
-        await bmfontAsync(configPath);
+        await bmfont(configPath);
 
         atlasAsset.inputs.push(path.join(imagesOutput, "images.txt"));
 

@@ -2,7 +2,7 @@ import * as path from "path";
 import {XmlDocument} from "xmldoc";
 import {Asset, AssetDesc} from "./Asset.js";
 import {isDir, isFile, removePathExtension} from "../utils.js";
-import {flashExportAsync} from "./helpers/flashExport.js";
+import {flashExport} from "./helpers/flashExport.js";
 import {MultiResAtlasAsset} from "./Atlas.js";
 import {H} from "../utility/hash.js";
 import {logger} from "../logger.js";
@@ -50,7 +50,7 @@ export class FlashAsset extends Asset {
 </flash>`);
             writeTextFileSync(configPath, xml.toString());
             ensureDirSync(imagesOutput);
-            await flashExportAsync(configPath);
+            await flashExport(configPath);
             atlasAsset.inputs.push(path.join(imagesOutput, "images.txt"));
 
             // header for .sg file

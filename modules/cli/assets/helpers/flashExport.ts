@@ -1,11 +1,11 @@
 import * as path from "path";
-import {executeAsync} from "../../utils.js";
+import {execute} from "../../utils.js";
 import {getOrBuildUtility} from "../../utility/bin.js";
 import {ensureDirSync} from "../../../utils/utils.js";
 
-export async function flashExportAsync(configPath: string): Promise<number> {
+export async function flashExport(configPath: string): Promise<number> {
     const bin = await getOrBuildUtility("flash-export");
-    return await executeAsync(bin, ["export", configPath]);
+    return await execute(bin, ["export", configPath]);
 }
 
 export interface RenderFlashSymbolOutputOptions {
@@ -31,5 +31,5 @@ export async function renderFlashSymbol(fla: string, symbol: string, outputs: Re
         ensureDirSync(path.dirname(output.outFilePath));
     }
     const bin = await getOrBuildUtility("flash-export");
-    return await executeAsync(bin, cmd);
+    return await execute(bin, cmd);
 }

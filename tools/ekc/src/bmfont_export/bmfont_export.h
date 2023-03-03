@@ -125,6 +125,10 @@ void apply_bitmap_filters(const bitmap_filter_t* filters, uint32_t n, float scal
                           bitmap_t* bitmap);
 
 void save_font_bitmaps(const char* font_name, const image_set_t* images, const char* output);
+
+
+int export_bitmap_font(const char* config_path);
+
 #ifdef __cplusplus
 }
 #endif

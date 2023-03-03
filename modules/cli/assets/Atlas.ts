@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import {compress, WebpConfig} from "./helpers/webp.js";
 import {Asset, AssetDesc} from "./Asset.js";
-import {spritePackerAsync} from "./helpers/spritePacker.js";
+import {spritePacker} from "./helpers/spritePacker.js";
 import {H} from "../utility/hash.js";
 import {ensureDirSync, expandGlobSync, writeTextFileSync} from "../../utils/utils.js";
 
@@ -51,7 +51,7 @@ ${this.inputs.length}
 ${this.inputs.join("\n")}
 `;
         writeTextFileSync(argsPath, args);
-        await spritePackerAsync(argsPath);
+        await spritePacker(argsPath);
 
         if (this.owner.project.current_target === "ios") {
             this.desc.webp = undefined;

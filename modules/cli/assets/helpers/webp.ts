@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as os from "os";
-import {executeAsync} from "../../utils.js";
+import {execute} from "../../utils.js";
 import {logger} from "../../logger.js";
 import {tryResolveCachedBin} from "../../utility/bin.js";
 import {download} from "../../../utils/download.js";
@@ -77,7 +77,7 @@ export async function compress(filepath: string, config?: WebpConfig) {
             }
         }
         logger.info([...options, filepath, "-o", dest].join(" "));
-        await executeAsync(cwebp, [...options, filepath, "-o", dest], {verbose: false});
+        await execute(cwebp, [...options, filepath, "-o", dest], {verbose: false});
     } catch {
         // ignore
     }

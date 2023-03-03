@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import {executeAsync} from "../utils.js";
+import {execute} from "../utils.js";
 import {logger} from "../logger.js";
 import {expandGlobSync} from "../../utils/utils.js";
 
@@ -11,7 +11,7 @@ export function fixMP3(pattern: string) {
         const filepath = file.path;
         logger.info(filepath);
         tasks.push(
-            executeAsync("ffmpeg", [
+            execute("ffmpeg", [
                 "-i", filepath,
                 "-c:a", "copy",
                 "-c:v", "copy",
