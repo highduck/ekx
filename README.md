@@ -1,3 +1,6 @@
+[!!! EKX IS MOVED !!!](https://github.com/eliasku/ekx)
+>> This repository is archived for history
+
 ## Toy game engine
 
 <p align="center">
