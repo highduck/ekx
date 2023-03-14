@@ -34,7 +34,7 @@
     "decompress": "^4.2.1",
     "esbuild": "^0.17.10",
     "gettext-parser": "^6.0.0",
-    "glob": "^9.2.1",
+    "glob": "^9.3.0",
     "mustache": "^4.2.0",
     "plist": "^3.0.6",
     "ts-node": "^10.9.1",
